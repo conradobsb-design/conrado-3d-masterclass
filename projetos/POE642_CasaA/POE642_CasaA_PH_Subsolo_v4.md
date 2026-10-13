@@ -41,7 +41,7 @@ Transforme a planta numa planta humanizada de apresentação do **subsolo**, ric
 - mesmo enquadramento e mesma escala;
 - cada parede, vidro, porta, escada, linha, equipamento e louça exatamente onde está, com o mesmo tamanho e a mesma forma.
 
-Muda o acabamento: os pisos, a água e os equipamentos ficam reais e sofisticados, numa paleta quente e calma, com o mesmo acabamento da planta do Térreo.
+Muda o acabamento: os pisos e os equipamentos ficam reais e sofisticados, numa paleta quente e calma, com o mesmo acabamento da planta do Térreo.
 
 **O QUE APARECE COM COR CHEIA E O QUE FICA ESMAECIDO**
 - **Cor cheia:** os ambientes do subsolo dentro das paredes pretas, o pátio de acesso à academia e a escada que desce do deck até o pátio.
@@ -114,7 +114,7 @@ Todo piso se lê como pedra, madeira ou revestimento real fotografado de cima: v
 ```
 One input image: the basement floor plan to edit. It defines the geometry and layout, and you follow it exactly.
 
-Edit this plan into a rich, photorealistic humanized presentation plan (planta humanizada) of the basement of a luxury residence. This is an edit of the plan, not a new drawing: keep the same framing and scale, and every wall, glass line, door, stair, line, piece of equipment and sanitary fixture exactly where it is, at the same size and shape. What changes is the finish: floors, water and equipment become real and high-end, in a warm, calm palette that matches the ground-floor plan.
+Edit this plan into a rich, photorealistic humanized presentation plan (planta humanizada) of the basement of a luxury residence. This is an edit of the plan, not a new drawing: keep the same framing and scale, and every wall, glass line, door, stair, line, piece of equipment and sanitary fixture exactly where it is, at the same size and shape. What changes is the finish: floors and equipment become real and high-end, in a warm, calm palette that matches the ground-floor plan.
 
 FULL COLOUR AND FADED CONTEXT
 Rendered in full colour: the basement rooms inside the black walls, the patio that gives access to the gym and the stair coming down from the wooden deck to that patio. Everything else — already drawn pale in the plan — is a faded context: the pool and the ofurô (hot tub), the ground-floor wooden deck, the staggered steps, the pool deck paving, the dashed outlines and the terrain lines. Keep it exactly as drawn, as a light, desaturated, low-contrast ghost about 50% lighter than the basement, with only a faint hint of its materials (pale wood, pale cream stone, a very light aqua tint in the pool and the ofurô), no strong texture, no vegetation and no shadows, so the basement rooms stand out. Outside the drawing stays clean white paper.
