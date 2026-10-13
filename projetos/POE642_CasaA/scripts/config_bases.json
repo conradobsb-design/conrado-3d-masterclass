@@ -1,0 +1,48 @@
+{
+  "_sobre": "Parâmetros do gerar_bases.py. Zonas em coordenadas de uma visualização de 1800 px de largura da base final: [x0, y0, x1, y1].",
+  "layer_parede": "ARQ_PAREDE",
+  "cinza_parede": 0.357,
+  "tolerancia_cor": 0.012,
+  "recorte": [0.035, 0.095, 0.975, 0.955],
+  "largura_px": 6000,
+  "largura_visualizacao": 1800,
+  "saida_16x9": true,
+  "layers_ocultas": [],
+  "vidro": {
+    "espessura_max_pt": 4.0,
+    "comprimento_min_pt": 12.0,
+    "razao_min": 4.0,
+    "tolerancia_arco_pt": 1.5,
+    "tolerancia_raio": 0.3,
+    "largura_min_px": 6,
+    "contorno_px": 2
+  },
+  "pavimentos": {
+    "Terreo": {
+      "pagina": 0,
+      "rotacao": 0,
+      "faixas_y_excluidas": [[null, 100], [1030, null]],
+      "zonas_excluidas": {
+        "bancada gourmet": [655, 680, 822, 782],
+        "ilha da cozinha": [900, 678, 978, 702],
+        "folha da porta principal": [1092, 362, 1192, 378],
+        "gradil esquerdo do corredor de servico": [772, 885, 792, 1040],
+        "gradil direito do corredor de servico": [888, 885, 906, 1040]
+      }
+    },
+    "1Pavimento": {
+      "_pendente": "Zonas ainda não medidas: rodar com --debug e anotar aqui os falsos vidros (bancadas, guarda-corpos, folhas de porta).",
+      "pagina": 0,
+      "rotacao": 0,
+      "faixas_y_excluidas": [[null, 100], [1030, null]],
+      "zonas_excluidas": {}
+    },
+    "Subsolo": {
+      "_pendente": "Zonas ainda não medidas: rodar com --debug e anotar aqui os falsos vidros.",
+      "pagina": 0,
+      "rotacao": 0,
+      "faixas_y_excluidas": [[null, 100], [1030, null]],
+      "zonas_excluidas": {}
+    }
+  }
+}
