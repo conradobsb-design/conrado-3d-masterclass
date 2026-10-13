@@ -202,6 +202,40 @@ def ocultar_layers(doc, nomes):
     return desligadas
 
 
+def ocultar_em_zonas(doc, page, raster, img, regras, cfg):
+    """Passo 3c: desliga layers só dentro de retângulos da visualização de 1800 px.
+
+    No Subsolo, as projeções (DOC_LINHAS E PROJEÇÕES) dentro do depósito e junto à parede
+    da academia viraram sauna e banco no render. Os X do elevador e dos shafts estão na
+    mesma layer e precisam ficar, por isso a layer só some nessas zonas.
+    """
+    arr = np.array(img)
+    w, h = raster.tamanho
+    largura_final = w if raster.rotacao in (0, 180) else h
+    esc = largura_final / cfg["largura_visualizacao"]
+    resumo = []
+    for nome, caixas in regras.items():
+        nums = [c["number"] for c in doc.layer_ui_configs()
+                if nome in (c["text"], c["text"].split("|")[-1], c["text"].split("$")[-1])]
+        if not nums:
+            resumo.append(f"{nome}: layer não encontrada")
+            continue
+        for n in nums:
+            doc.set_layer_ui_config(n, 2)
+        sem = np.array(raster.render(page))
+        for n in nums:
+            doc.set_layer_ui_config(n, 0)
+        mask = np.zeros(raster.rotacionar_arr(arr[..., 0]).shape, bool)
+        for x0, y0, x1, y1 in caixas:
+            mask[int(y0 * esc):int(np.ceil(y1 * esc)), int(x0 * esc):int(np.ceil(x1 * esc))] = True
+        # as zonas são medidas na base final; volta para a orientação de antes da rotação
+        if raster.rotacao:
+            mask = np.rot90(mask, k=raster.rotacao // 90)
+        arr[mask] = sem[mask]
+        resumo.append(f"{nome}: {len(caixas)} zona(s)")
+    return Image.fromarray(arr), resumo
+
+
 def classificar(page, raster, cfg, zonas, faixas_y):
     """Passos 3-4: separa paredes, vidros e descartes a partir da layer de parede."""
     layer = cfg["layer_parede"]
@@ -581,6 +615,9 @@ def main(argv=None):
     if pav.get("reforcar_linhas"):
         print(f"    linhas reforçadas: {' | '.join(reforcar_linhas(page, raster, pav['reforcar_linhas']))}")
     img = raster.render(page)
+    if pav.get("ocultar_layers_zonas"):
+        img, resumo = ocultar_em_zonas(doc, page, raster, img, pav["ocultar_layers_zonas"], cfg)
+        print(f"    layers desligadas por zona: {' | '.join(resumo)}")
 
     largura_min_pt = cfg["vidro"]["largura_min_px"] / raster.zoom
     mask_vidro = np.zeros(raster.tamanho[::-1], bool)
