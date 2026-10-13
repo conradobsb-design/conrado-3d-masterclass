@@ -319,6 +319,27 @@ def pintar_paredes_no_pdf(page, paredes):
         sh.commit(overlay=True)
 
 
+def reforcar_linhas(page, raster, regras):
+    """Passo 3b: redesenha os traços de uma layer mais grossos e escuros.
+
+    Projeções finas do CAD (ex.: pergolado em 0,21 pt cinza) somem na base de 6000 px
+    e o motor não as enxerga. Ponta reta (lineCap 0) para o tracejado manter os vãos.
+    """
+    desenhos = page.get_drawings()
+    resumo = []
+    for regra in regras:
+        sel = [d for d in desenhos if d["type"] in ("s", "fs") and na_layer(d, regra["layer"])]
+        cor = tuple(int(c) / 255 for c in hex_rgb(regra["cor"]))
+        largura = regra["largura_px"] / raster.zoom
+        for d in sel:
+            sh = page.new_shape()
+            replay(sh, d)
+            sh.finish(color=cor, fill=None, width=largura, lineCap=0, closePath=False)
+            sh.commit(overlay=True)
+        resumo.append(f"{regra['nome']}: {len(sel)} traços")
+    return resumo
+
+
 def compor_vidro(img, mask_vidro, contorno_px):
     """Passo 5: vidro cinza neutro com contorno preto por dilatação."""
     arr = np.array(img)
@@ -517,6 +538,8 @@ def main(argv=None):
     print(f"[4] descartados: {dict(motivos) or 'nenhum'}")
 
     pintar_paredes_no_pdf(page, res["paredes"])
+    if pav.get("reforcar_linhas"):
+        print(f"    linhas reforçadas: {' | '.join(reforcar_linhas(page, raster, pav['reforcar_linhas']))}")
     img = raster.render(page)
 
     largura_min_pt = cfg["vidro"]["largura_min_px"] / raster.zoom

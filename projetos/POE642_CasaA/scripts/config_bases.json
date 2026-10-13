@@ -78,6 +78,14 @@
           "pintar": "#2B2B2B"
         }
       },
+      "reforcar_linhas": [
+        {
+          "nome": "pergolado (projeção tracejada)",
+          "layer": "ARQ_PERGOLADO",
+          "cor": "#4D4D4D",
+          "largura_px": 3
+        }
+      ],
       "legenda": {
         "_sobre": "Deixa cada material numa cor única da legenda do prompt (travertino #DCD9CA, granito #BFA79F, madeira #AE8863, Bege Bahia #E8E8E8, piscina #DFF6FE, pedra portuguesa #B98A55).",
         "tolerancia_px": 10,
@@ -167,7 +175,15 @@
           null
         ]
       ],
-      "zonas_excluidas": {}
+      "zonas_excluidas": {},
+      "reforcar_linhas": [
+        {
+          "nome": "pergolado (projeção tracejada)",
+          "layer": "ARQ_PERGOLADO",
+          "cor": "#4D4D4D",
+          "largura_px": 3
+        }
+      ]
     },
     "Subsolo": {
       "_pendente": "Zonas ainda não medidas: rodar com --debug e anotar aqui os falsos vidros.",
