@@ -65,7 +65,7 @@ Todo piso se lê como pedra, madeira ou revestimento real fotografado de cima: v
 - **Área de madeira com linhas de régua** (academia): piso de madeira natural quente #A8784F.
   - réguas seguindo exatamente as linhas desenhadas, com veio reto aparente, emendas desencontradas e leve variação de tom;
   - acabamento fosco-acetinado.
-- **Piscina e ofurô azul-claro:** água turquesa clara, límpida e luminosa #7CC8D4 sobre revestimento claro Barlavento, com ondulações sutis. São os únicos elementos de fora do subsolo com a cor cheia.
+- **Piscina e ofurô azul-claro:** água turquesa clara, límpida e luminosa #7CC8D4 sobre revestimento claro Barlavento, com ondulações sutis. Ficam com a cor cheia, como o subsolo.
 
 **ACADEMIA, SAUNA E BANHOS**
 - **Academia:** os equipamentos ficam exatamente como desenhados, na mesma posição, tamanho e orientação, em preto, grafite e metal escovado:
@@ -121,7 +121,7 @@ Every floor reads as real stone, wood or tile photographed from above: visible v
 - Light grey #E8E8E8 areas (circulation and storage room, and the stair down from the deck): Bege Bahia marble #D8CDB4 — warm cream-beige stone with soft cloudy tones and fine speckles; matte; slabs about 60 × 60 cm with 3 mm joints. The inner lines in the storage room stay as low shelving along the walls, as drawn. The stair at the top-left of the patio comes down from the faded wooden deck: its top step meets the deck on the left, and it descends step by step toward the right, landing on the patio that gives access to the gym.
 - Grey-green #B7CFC9 area (service bathroom): the same Barlavento tile that lines the pool — small light aqua-grey tiles with fine joints, matte and dry; a tiled floor, not water.
 - Wood area with plank lines (gym): warm natural wood floor #A8784F — boards running exactly along the drawn lines, visible straight grain, staggered joints, slight tone variation; matte-satin finish.
-- Pale blue pool and ofurô: clear, bright light-turquoise water #7CC8D4 over light Barlavento tiles, with subtle surface ripples; the only elements outside the basement in full colour.
+- Pale blue pool and ofurô: clear, bright light-turquoise water #7CC8D4 over light Barlavento tiles, with subtle surface ripples; rendered in full colour.
 
 GYM, SAUNA AND BATHROOMS
 - Gym: the equipment exactly as drawn — the two treadmills, the two small machines and the weight bench with its barbell — same position, size and orientation, in black, graphite and brushed metal. The long thin element along the bottom wall stays as drawn.
