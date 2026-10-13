@@ -444,6 +444,23 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
     return Image.fromarray(arr.astype(np.uint8)), resumo
 
 
+def esmaecer(img, regra, cfg):
+    """Passo 7: clareia tudo fora dos retângulos 'manter_bbox_vis' (entorno esmaecido).
+
+    clarear = 0 não muda nada; 1 vira branco. Ex.: no Subsolo, o que é do Térreo
+    (deck, escadas, deck da piscina) e o pátio ficam claros; o subsolo, a piscina e o
+    ofurô ficam com a cor cheia.
+    """
+    arr = np.array(img).astype(float)
+    esc = img.width / cfg["largura_visualizacao"]
+    manter = np.zeros(arr.shape[:2], bool)
+    for x0, y0, x1, y1 in regra["manter_bbox_vis"]:
+        manter[int(y0 * esc):int(np.ceil(y1 * esc)), int(x0 * esc):int(np.ceil(x1 * esc))] = True
+    fora = ~manter
+    arr[fora] += (255 - arr[fora]) * regra.get("clarear", 0.5)
+    return Image.fromarray(arr.round().astype(np.uint8)), int(fora.sum())
+
+
 def em_16x9(img):
     """Centraliza a base numa tela branca 16:9, para o motor não precisar reenquadrar
     (a base sai ~1,545:1 e a saída do Higgsfield é 16:9)."""
@@ -591,6 +608,9 @@ def main(argv=None):
     if pav.get("legenda"):
         final, resumo = aplicar_legenda(final, page, raster, pav["legenda"], cfg)
         print(f"[6] legenda de cores: {' | '.join(resumo)}")
+    if pav.get("esmaecer"):
+        final, n_px = esmaecer(final, pav["esmaecer"], cfg)
+        print(f"[7] entorno esmaecido: {n_px} px clareados")
     final.save(f"{prefixo}_v3_vidros_neutros.png")
     print(f"[5] {prefixo}_v3_vidros_neutros.png  ({final.size[0]}x{final.size[1]})")
 

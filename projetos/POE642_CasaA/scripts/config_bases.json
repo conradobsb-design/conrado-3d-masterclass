@@ -209,7 +209,6 @@
       ]
     },
     "Subsolo": {
-      "_pendente": "Zonas ainda não medidas: rodar com --debug e anotar aqui os falsos vidros.",
       "pagina": 0,
       "rotacao": 0,
       "faixas_y_excluidas": [
@@ -222,7 +221,152 @@
           null
         ]
       ],
-      "zonas_excluidas": {}
+      "zonas_excluidas": {
+        "folha da porta do banho de serviço": [
+          484,
+          555,
+          506,
+          563
+        ],
+        "folha da porta da circulação para o depósito": [
+          590,
+          548,
+          619,
+          556
+        ]
+      },
+      "legenda": {
+        "_sobre": "Cores da legenda do prompt do Subsolo: travertino #DCD9CA (hall, sauna, banhos fem. e masc. e o pátio de acesso à academia), Bege Bahia #E8E8E8 (circulação, depósito e a escada que desce do deck), Barlavento #B7CFC9 (banho de serviço), madeira da academia como no PDF, piscina e ofurô como no PDF.",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "circulação e depósito → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.878,
+              0.878,
+              0.878
+            ],
+            "cor_render": "#DFDFDF",
+            "bbox_vis": [
+              700,
+              500,
+              900,
+              540
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "banho de serviço → Barlavento",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.878,
+              0.878,
+              0.878
+            ],
+            "cor_render": "#C7DFE6",
+            "bbox_vis": [
+              470,
+              505,
+              500,
+              535
+            ],
+            "para": "#B7CFC9"
+          },
+          {
+            "nome": "pátio de acesso à academia → travertino",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              505,
+              700,
+              535,
+              750
+            ],
+            "para": "#DCD9CA"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ]
+        ],
+        "hachuras": [
+          {
+            "nome": "escada que desce do deck para o pátio → Bege Bahia",
+            "bbox_vis": [
+              351,
+              568,
+              452,
+              612
+            ],
+            "vao_vis": 12,
+            "linhas": "verticais",
+            "limiar_linha": 230,
+            "para": "#E8E8E8"
+          }
+        ]
+      },
+      "esmaecer": {
+        "_sobre": "Fica com a cor cheia o subsolo (os três blocos com paredes), o pátio de acesso à academia, a escada que desce do deck até ele, a piscina e o ofurô. O resto (deck de madeira, degraus escalonados, deck da piscina, terreno) clareia.",
+        "clarear": 0.55,
+        "manter_bbox_vis": [
+          [
+            451,
+            464,
+            884,
+            574
+          ],
+          [
+            586,
+            567,
+            884,
+            821
+          ],
+          [
+            507,
+            808,
+            884,
+            890
+          ],
+          [
+            875,
+            565,
+            1161,
+            662
+          ],
+          [
+            454.9,
+            274.3,
+            583.7,
+            564.2
+          ],
+          [
+            358.3,
+            467.7,
+            448.3,
+            564.2
+          ],
+          [
+            349,
+            566,
+            454,
+            614
+          ],
+          [
+            446,
+            562,
+            592,
+            888
+          ]
+        ]
+      }
     }
   },
   "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede."
