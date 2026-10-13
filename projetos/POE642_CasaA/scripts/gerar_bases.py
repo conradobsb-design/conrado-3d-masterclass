@@ -386,9 +386,32 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
             resumo.append(f"{regra['nome']}: nenhum polígono")
             continue
         mask = raster.rotacionar_arr(raster.mascara(sel, "fill"))
-        m = mask & (np.abs(arr - hex_rgb(regra["cor_render"])).max(axis=-1) <= tol)
-        arr[m] = hex_rgb(regra["para"])
-        resumo.append(f"{regra['nome']}: {int(m.sum())} px")
+        if regra.get("proteger_layers"):
+            # o que estas layers desenham dentro do polígono não muda (paredes, vidros, bordas, degraus);
+            # traço com folga para cobrir o vidro alargado e o contorno preto do passo 5
+            area = pymupdf.Rect(sel[0]["rect"])
+            for d in sel[1:]:
+                area |= d["rect"]
+            prot = [d for d in desenhos if d["rect"].intersects(area)
+                    and any(na_layer(d, nome) for nome in regra["proteger_layers"])]
+            folga_pt = (cfg["vidro"]["largura_min_px"] + 2 * cfg["vidro"]["contorno_px"]) / raster.zoom
+            mp = raster.mascara([d for d in prot if d.get("fill") is not None], "fill") \
+                | raster.mascara([d for d in prot if d["type"] in ("s", "fs")], "stroke", folga_pt)
+            mask &= ~raster.rotacionar_arr(mp)
+        if regra.get("modo") == "neutros":
+            # área sem preenchimento colorido: branco vira 'para' e os símbolos cinza (ex.: o
+            # pontilhado de jardim) viram 'cor_linha'; cores com matiz (degraus, madeira) ficam
+            neutro = (arr.max(axis=-1) - arr.min(axis=-1)) <= 8
+            claro = arr.min(axis=-1)
+            m = mask & neutro & (claro >= 235)
+            arr[m] = hex_rgb(regra["para"])
+            ms = mask & neutro & (claro >= regra.get("limiar_simbolo", 150)) & (claro < 235)
+            arr[ms] = hex_rgb(regra.get("cor_linha", regra["para"]))
+            m |= ms
+        else:
+            m = mask & (np.abs(arr - hex_rgb(regra["cor_render"])).max(axis=-1) <= tol)
+            arr[m] = hex_rgb(regra["para"])
+        resumo.append(f"{regra['nome']}: {len(sel)} polígono(s), {int(m.sum())} px")
 
     for de, para in legenda.get("trocas_cor", []):
         m = np.abs(arr - hex_rgb(de)).max(axis=-1) <= tol

@@ -87,7 +87,7 @@
         }
       ],
       "legenda": {
-        "_sobre": "Deixa cada material numa cor única da legenda do prompt (travertino #DCD9CA, granito #BFA79F, madeira #AE8863, Bege Bahia #E8E8E8, piscina #DFF6FE, pedra portuguesa #B98A55).",
+        "_sobre": "Deixa cada material numa cor única da legenda do prompt (travertino #DCD9CA, granito #BFA79F, madeira #AE8863, Bege Bahia #E8E8E8, piscina #DFF6FE, pedra portuguesa #B98A55, jardim #6E9150).",
         "tolerancia_px": 10,
         "poligonos": [
           {
@@ -106,6 +106,29 @@
               1050
             ],
             "para": "#B98A55"
+          },
+          {
+            "nome": "jardim da escada principal → verde",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "bbox_vis": [
+              1120,
+              500,
+              1190,
+              580
+            ],
+            "modo": "neutros",
+            "proteger_layers": [
+              "ARQ_PAREDE",
+              "ARQ_ELEMENTOS FIXOS",
+              "ARQ_ESCADAS E RAMPAS"
+            ],
+            "para": "#6E9150",
+            "cor_linha": "#557A3D"
           }
         ],
         "trocas_cor": [
