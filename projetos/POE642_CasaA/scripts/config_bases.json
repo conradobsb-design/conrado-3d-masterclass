@@ -2,9 +2,14 @@
   "_sobre": "Parâmetros do gerar_bases.py. Zonas em coordenadas de uma visualização de 1800 px de largura da base final: [x0, y0, x1, y1].",
   "layer_parede": "ARQ_PAREDE",
   "cinza_parede": 0.357,
-  "cinza_parede_qualquer_layer": true,
+  "cinza_parede_qualquer_layer": false,
   "tolerancia_cor": 0.012,
-  "recorte": [0.035, 0.095, 0.975, 0.955],
+  "recorte": [
+    0.035,
+    0.095,
+    0.975,
+    0.955
+  ],
   "largura_px": 6000,
   "largura_visualizacao": 1800,
   "saida_16x9": true,
@@ -22,28 +27,164 @@
     "Terreo": {
       "pagina": 0,
       "rotacao": 0,
-      "faixas_y_excluidas": [[null, 100], [1030, null]],
+      "faixas_y_excluidas": [
+        [
+          null,
+          100
+        ],
+        [
+          1030,
+          null
+        ]
+      ],
       "zonas_excluidas": {
-        "bancada gourmet": [655, 680, 822, 782],
-        "ilha da cozinha": [900, 678, 978, 702],
-        "folha da porta principal": [1092, 362, 1192, 378],
-        "gradil esquerdo do corredor de servico": [772, 885, 792, 1040],
-        "gradil direito do corredor de servico": [888, 885, 906, 1040]
+        "bancada gourmet": [
+          655,
+          680,
+          822,
+          782
+        ],
+        "ilha da cozinha": [
+          900,
+          678,
+          978,
+          702
+        ],
+        "folha da porta principal": [
+          1092,
+          362,
+          1192,
+          378
+        ],
+        "gradil esquerdo do corredor de servico": [
+          772,
+          885,
+          792,
+          1040
+        ],
+        "gradil direito do corredor de servico": [
+          888,
+          885,
+          906,
+          1040
+        ],
+        "brises da varanda gourmet": {
+          "bbox": [
+            498,
+            645,
+            548,
+            875
+          ],
+          "pintar": "#2B2B2B"
+        }
+      },
+      "legenda": {
+        "_sobre": "Deixa cada material numa cor única da legenda do prompt (travertino #DCD9CA, granito #BFA79F, madeira #AE8863, Bege Bahia #E8E8E8, piscina #DFF6FE, pedra portuguesa #B98A55).",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "acesso de veículos e corredor de serviço → pedra portuguesa",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              775,
+              700,
+              1720,
+              1050
+            ],
+            "para": "#B98A55"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ],
+          [
+            "#E4E4E4",
+            "#E8E8E8"
+          ]
+        ],
+        "hachuras": [
+          {
+            "nome": "deck de madeira (parte de cima)",
+            "bbox_vis": [
+              254,
+              270,
+              452,
+              570
+            ],
+            "vao_vis": 5,
+            "limiar_linha": 230,
+            "para": "#AE8863",
+            "cor_linha": "#8C6A4A"
+          },
+          {
+            "nome": "deck de madeira (faixa de baixo, sem a escada)",
+            "bbox_vis": [
+              254,
+              560,
+              351,
+              612
+            ],
+            "vao_vis": 5,
+            "limiar_linha": 230,
+            "para": "#AE8863",
+            "cor_linha": "#8C6A4A"
+          },
+          {
+            "nome": "escada abaixo do deck do spa → Bege Bahia",
+            "bbox_vis": [
+              351,
+              568,
+              452,
+              612
+            ],
+            "vao_vis": 12,
+            "linhas": "verticais",
+            "limiar_linha": 230,
+            "para": "#E8E8E8"
+          }
+        ]
       }
     },
     "1Pavimento": {
       "_pendente": "Zonas ainda não medidas: rodar com --debug e anotar aqui os falsos vidros (bancadas, guarda-corpos, folhas de porta).",
       "pagina": 0,
       "rotacao": 0,
-      "faixas_y_excluidas": [[null, 100], [1030, null]],
+      "faixas_y_excluidas": [
+        [
+          null,
+          100
+        ],
+        [
+          1030,
+          null
+        ]
+      ],
       "zonas_excluidas": {}
     },
     "Subsolo": {
       "_pendente": "Zonas ainda não medidas: rodar com --debug e anotar aqui os falsos vidros.",
       "pagina": 0,
       "rotacao": 0,
-      "faixas_y_excluidas": [[null, 100], [1030, null]],
+      "faixas_y_excluidas": [
+        [
+          null,
+          100
+        ],
+        [
+          1030,
+          null
+        ]
+      ],
       "zonas_excluidas": {}
     }
-  }
+  },
+  "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede."
 }

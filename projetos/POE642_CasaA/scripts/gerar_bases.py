@@ -328,6 +328,78 @@ def compor_vidro(img, mask_vidro, contorno_px):
     return Image.fromarray(arr)
 
 
+def hex_rgb(h):
+    h = h.lstrip("#")
+    return np.array([int(h[i:i + 2], 16) for i in (0, 2, 4)])
+
+
+def aplicar_legenda(img, page, raster, legenda, cfg):
+    """Passo 6: deixa cada material numa cor única da legenda do prompt.
+
+    - poligonos: preenchimentos do PDF (por layer e cor) que precisam de outra cor
+      — ex.: acesso de veículos no mesmo cinza do deck;
+    - trocas_cor: troca global de uma cor renderizada por outra;
+    - hachuras: áreas sem preenchimento, só hachura sobre branco (deck de madeira),
+      dentro de um retângulo da visualização de 1800 px.
+    Só pixels com a cor de origem mudam: linhas, móveis e símbolos ficam intactos.
+    """
+    arr = np.array(img).astype(int)
+    tol = legenda.get("tolerancia_px", 10)
+    esc = img.width / cfg["largura_visualizacao"]
+    desenhos = page.get_drawings()
+    resumo = []
+
+    for regra in legenda.get("poligonos", []):
+        alvo = tuple(regra["preenchimento_pdf"])
+        sel = [d for d in desenhos
+               if cor_igual(d.get("fill"), alvo, cfg["tolerancia_cor"]) and na_layer(d, regra["layer"])]
+        if "bbox_vis" in regra:
+            x0, y0, x1, y1 = regra["bbox_vis"]
+
+            def dentro(d):
+                c = pymupdf.Point((d["rect"].x0 + d["rect"].x1) / 2, (d["rect"].y0 + d["rect"].y1) / 2)
+                x, y = raster.rotacionar_px(*raster.para_px(c))
+                return x0 <= x / esc <= x1 and y0 <= y / esc <= y1
+            sel = [d for d in sel if dentro(d)]
+        if not sel:
+            resumo.append(f"{regra['nome']}: nenhum polígono")
+            continue
+        mask = raster.rotacionar_arr(raster.mascara(sel, "fill"))
+        m = mask & (np.abs(arr - hex_rgb(regra["cor_render"])).max(axis=-1) <= tol)
+        arr[m] = hex_rgb(regra["para"])
+        resumo.append(f"{regra['nome']}: {int(m.sum())} px")
+
+    for de, para in legenda.get("trocas_cor", []):
+        m = np.abs(arr - hex_rgb(de)).max(axis=-1) <= tol
+        arr[m] = hex_rgb(para)
+        resumo.append(f"{de}→{para}: {int(m.sum())} px")
+
+    # a detecção usa sempre o desenho original: retângulos vizinhos não podem enxergar
+    # a pintura um do outro (isso deixava uma faixa branca na emenda)
+    original = arr.copy()
+    for h in legenda.get("hachuras", []):
+        x0, y0, x1, y1 = (int(round(v * esc)) for v in h["bbox_vis"])
+        orig = original[y0:y1, x0:x1]
+        sub = arr[y0:y1, x0:x1]
+        neutro = (orig.max(axis=-1) - orig.min(axis=-1)) <= 6
+        linhas = neutro & (orig.min(axis=-1) < h.get("limiar_linha", 230))
+        vao = max(3, int(round(h["vao_vis"] * esc)))
+        # hachura horizontal (deck) fecha na vertical; linhas verticais (degraus) fecham na horizontal
+        kernel = np.ones((1, vao)) if h.get("linhas") == "verticais" else np.ones((vao, 1))
+        # margem replicada para o fechamento não corroer as bordas do retângulo
+        pad = vao + 2
+        regiao = ndimage.binary_closing(np.pad(linhas, pad, mode="edge"), structure=kernel)[pad:-pad, pad:-pad]
+        regiao = ndimage.binary_fill_holes(regiao)
+        regiao = ndimage.binary_opening(regiao, structure=np.ones((3, 3)))
+        m = regiao & (orig.min(axis=-1) >= 235)
+        sub[m] = hex_rgb(h["para"])
+        if h.get("cor_linha"):
+            sub[regiao & linhas] = hex_rgb(h["cor_linha"])
+        resumo.append(f"{h['nome']}: {int(m.sum())} px")
+
+    return Image.fromarray(arr.astype(np.uint8)), resumo
+
+
 def em_16x9(img):
     """Centraliza a base numa tela branca 16:9, para o motor não precisar reenquadrar
     (a base sai ~1,545:1 e a saída do Higgsfield é 16:9)."""
@@ -403,7 +475,11 @@ def main(argv=None):
     pav = cfg["pavimentos"][args.pavimento]
     pagina = args.pagina if args.pagina is not None else pav.get("pagina", 0)
     rotacao = args.rotacao if args.rotacao is not None else pav.get("rotacao", 0)
-    zonas = pav.get("zonas_excluidas", {})
+    # zona = [x0, y0, x1, y1] (só sai da detecção de vidro) ou {"bbox": [...], "pintar": "#hex"}
+    # (sai do vidro e é pintada nessa cor — ex.: lâminas de brise em alumínio escuro)
+    zonas_cfg = pav.get("zonas_excluidas", {})
+    zonas = {n: (v["bbox"] if isinstance(v, dict) else v) for n, v in zonas_cfg.items()}
+    cores_zona = {n: v["pintar"] for n, v in zonas_cfg.items() if isinstance(v, dict) and v.get("pintar")}
     faixas_y = pav.get("faixas_y_excluidas", [])
 
     doc = pymupdf.open(args.pdf)
@@ -454,7 +530,21 @@ def main(argv=None):
 
     # 5. vidro neutro
     final = compor_vidro(img, mask_vidro, cfg["vidro"]["contorno_px"])
+
+    pintados = [(d, cores_zona[m]) for d, m, _ in res["descartes"] if m in cores_zona]
+    if pintados:
+        arr = np.array(final)
+        for cor in sorted({c for _, c in pintados}):
+            ds = [d for d, c in pintados if c == cor]
+            mk = raster.mascara(ds, "fill") | raster.mascara(ds, "stroke", largura_min_pt)
+            arr[mk & ~res["mask_parede"]] = hex_rgb(cor)
+        final = Image.fromarray(arr)
+        print(f"    pintados por zona: {dict(Counter(c for _, c in pintados))}")
+
     final = raster.rotacionar_img(final)
+    if pav.get("legenda"):
+        final, resumo = aplicar_legenda(final, page, raster, pav["legenda"], cfg)
+        print(f"[6] legenda de cores: {' | '.join(resumo)}")
     final.save(f"{prefixo}_v3_vidros_neutros.png")
     print(f"[5] {prefixo}_v3_vidros_neutros.png  ({final.size[0]}x{final.size[1]})")
 
