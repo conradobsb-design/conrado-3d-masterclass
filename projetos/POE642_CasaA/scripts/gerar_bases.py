@@ -216,7 +216,10 @@ def classificar(page, raster, cfg, zonas, faixas_y):
     if not da_layer:
         return None
 
-    paredes = [d for d in da_layer if cor_igual(d.get("fill"), cinza, tol)]
+    # o cinza de parede também aparece fora da ARQ_PAREDE (ex.: parede de cima do estar no Térreo);
+    # deixar esse cinza na base faz o motor ler a parede como faixa de vidro
+    origem = desenhos if cfg.get("cinza_parede_qualquer_layer", True) else da_layer
+    paredes = [d for d in origem if cor_igual(d.get("fill"), cinza, tol)]
     mask_parede = raster.mascara(paredes, "fill") if paredes else np.zeros(raster.tamanho[::-1], bool)
     mask_parede_teste = ndimage.binary_dilation(mask_parede, iterations=1)
 

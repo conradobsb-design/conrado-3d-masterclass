@@ -2,6 +2,7 @@
   "_sobre": "Parâmetros do gerar_bases.py. Zonas em coordenadas de uma visualização de 1800 px de largura da base final: [x0, y0, x1, y1].",
   "layer_parede": "ARQ_PAREDE",
   "cinza_parede": 0.357,
+  "cinza_parede_qualquer_layer": true,
   "tolerancia_cor": 0.012,
   "recorte": [0.035, 0.095, 0.975, 0.955],
   "largura_px": 6000,
