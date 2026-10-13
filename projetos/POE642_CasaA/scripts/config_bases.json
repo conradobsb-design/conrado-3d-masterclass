@@ -236,7 +236,7 @@
         ]
       },
       "legenda": {
-        "_sobre": "Cores da legenda do prompt do Subsolo: travertino #DCD9CA (hall, sauna, banhos fem. e masc. e o pátio de acesso à academia), Bege Bahia #E8E8E8 (circulação, depósito e a escada que desce do deck), Barlavento #B7CFC9 (banho de serviço), madeira da academia como no PDF, piscina e ofurô como no PDF.",
+        "_sobre": "Cores da legenda do prompt do Subsolo: travertino #DCD9CA (hall, sauna, banhos fem. e masc. e o pátio de acesso à academia), Bege Bahia #E8E8E8 (circulação, depósito e a escada que desce do deck), Barlavento #B7CFC9 (banho de serviço), madeira da academia como no PDF (piscina e ofurô ficam esmaecidos pelo passo 7).",
         "tolerancia_px": 10,
         "poligonos": [
           {
@@ -314,12 +314,12 @@
         ]
       },
       "esmaecer": {
-        "_sobre": "Fica com a cor cheia o subsolo (os três blocos com paredes), o pátio de acesso à academia, a escada que desce do deck até ele, a piscina e o ofurô. O resto (deck de madeira, degraus escalonados, deck da piscina, terreno) clareia.",
+        "_sobre": "Fica com a cor cheia o subsolo (os três blocos com paredes), o pátio de acesso à academia e a escada que desce do deck até ele. O resto (piscina, ofurô, deck de madeira, degraus escalonados, deck da piscina, terreno) clareia.",
         "clarear": 0.55,
         "manter_bbox_vis": [
           [
-            451,
-            464,
+            454,
+            466.5,
             884,
             574
           ],
@@ -340,18 +340,6 @@
             565,
             1161,
             662
-          ],
-          [
-            454.9,
-            274.3,
-            583.7,
-            564.2
-          ],
-          [
-            358.3,
-            467.7,
-            448.3,
-            564.2
           ],
           [
             349,
