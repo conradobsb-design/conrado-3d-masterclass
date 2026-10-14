@@ -475,6 +475,18 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
             sub[regiao & linhas] = hex_rgb(h["cor_linha"])
         resumo.append(f"{h['nome']}: {int(m.sum())} px")
 
+    # retângulo exato pintado por inteiro, com só as linhas de uma layer por cima
+    # (ex.: escada do Subsolo, onde a hachura do deck invade os últimos degraus)
+    for r in legenda.get("retangulos", []):
+        x0, y0, x1, y1 = (int(round(v * esc)) for v in r["bbox_vis"])
+        arr[y0:y1, x0:x1] = hex_rgb(r["para"])
+        if r.get("linhas_layer"):
+            ds = [d for d in desenhos if na_layer(d, r["linhas_layer"]) and d["type"] in ("s", "fs")]
+            mk = raster.rotacionar_arr(raster.mascara(ds, "stroke", r.get("largura_linha_px", 2) / raster.zoom))
+            bloco = arr[y0:y1, x0:x1]
+            bloco[mk[y0:y1, x0:x1]] = hex_rgb(r.get("cor_linha", "#111111"))
+        resumo.append(f"{r['nome']}: {(x1 - x0) * (y1 - y0)} px")
+
     return Image.fromarray(arr.astype(np.uint8)), resumo
 
 
