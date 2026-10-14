@@ -203,7 +203,8 @@ python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render 
     - no BH sauna: soleira da porta no travertino do piso, rebaixo da bancada com a mesma textura do tampo (copiada dele) e sem os traços pretos, sem a linha preta que passava na frente da pia e piso uniforme em volta da bacia.
   - **Decisões do usuário:** a pedra grande fica lisa, sem paginação; a garagem fica sem carros.
   - `_camada.png` tem só as alterações dos acabamentos, para o Photoshop.
-- **Prancha:** `entrega/POE642_CasaB_PH_Subsolo_entrega.png`, com os rodapés da Casa B (Térreo e Subsolo) em `entrega/`.
+- **Prancha:** `entrega/POE642_CasaB_PH_Subsolo_entrega.png`, em 3840 px (`entrega.largura_prancha` na config; a imagem final da Casa B tem 6905 px), com os rodapés da Casa B (Térreo e Subsolo) em `entrega/`.
+- **PDF para o cliente:** `entrega/POE642_CasaB_Plantas_Humanizadas.pdf`, por enquanto só com o Subsolo. Quando o Térreo ficar pronto, voltar `entrega.pdf.ordem` para `["Subsolo", "Terreo"]`, ajustar o título e gerar de novo.
   - Áreas, do quadro do cliente: Térreo 638,70 m², Subsolo 79,05 m², total 717,75 m². A Casa B tem só esses dois pavimentos.
   - **Confirmados pelo usuário:** endereço e unidade (ML 10 – Conjunto 02, Lotes 17, Unidade B) e o norte, o mesmo da Casa A (a folha da Casa B não tem norte).
   - O quadro é a folha inteira do cliente, então a casa fica pequena no canto. Quando chegar o Térreo, definir um recorte comum aos dois pavimentos.

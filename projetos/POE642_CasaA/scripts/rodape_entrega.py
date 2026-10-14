@@ -172,11 +172,13 @@ def main():
     ap.add_argument("--saida", type=Path, default=None, help="padrão: a pasta_entrega da config")
     ap.add_argument("--render", action="append", default=[], metavar="PAVIMENTO=ARQUIVO",
                     help="monta a prancha render + rodapé (pode repetir)")
-    ap.add_argument("--largura", type=int, default=2000, help="largura das pranchas em px (a mesma nas três)")
+    ap.add_argument("--largura", type=int, default=None,
+                    help="largura das pranchas em px, a mesma em todos os pavimentos (padrão: entrega.largura_prancha, ou 2000)")
     args = ap.parse_args()
     ent = json.loads(args.config.read_text())["entrega"]
     raiz = args.config.resolve().parent
     args.saida = args.saida or raiz / ent["pasta_entrega"]
+    args.largura = args.largura or ent.get("largura_prancha", 2000)
     args.saida.mkdir(parents=True, exist_ok=True)
     feitos = {}
     for chave in ent["pavimentos"]:
