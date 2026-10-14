@@ -681,6 +681,47 @@
             "corrigir_tom": false,
             "borda_px": 0,
             "_nota": "Contorno da bancada da base, de 1 px, que sobrava ao lado da bancada do render e subia em direção à porta."
+          },
+          {
+            "nome": "rebaixo da bancada do BH sauna, igual ao tampo",
+            "bbox_vis": [
+              588.9,
+              362.3,
+              597.45,
+              380.0
+            ],
+            "fonte_vis": [
+              588.9,
+              329.0,
+              597.45,
+              339.0
+            ],
+            "so_onde_alvo_branco": true,
+            "lum_fonte_min": 0,
+            "borda_px": 0,
+            "_nota": "Mesmas colunas do tampo da bancada do render, acima da cuba (referência do usuário), repetidas em espelho; só o branco muda."
+          }
+        ],
+        "preencher_colunas": [
+          {
+            "nome": "piso em volta da bacia do BH sauna",
+            "bbox_vis": [
+              580.4,
+              389.93,
+              597.2,
+              403.13
+            ],
+            "grao_desloc_vis": [
+              -17,
+              0
+            ],
+            "grao": 0.6,
+            "preservar_branco": {
+              "lum_min": 232,
+              "fechar_px": 3,
+              "dilatar_px": 2
+            },
+            "_nota": "O recorte da bacia trouxe o piso do render, mais frio e liso (px 2387-2442 x 1300-1343). Cada coluna liga o travertino de cima ao de baixo; fica só a louça."
           }
         ],
         "parede": [
@@ -693,6 +734,16 @@
               404.2
             ],
             "linha_limpa_vis": 408.0
+          },
+          {
+            "nome": "face da parede ao lado da bacia do BH sauna",
+            "bbox_vis": [
+              597.2,
+              389.5,
+              599.0,
+              403.4
+            ],
+            "linha_limpa_vis": 406.0
           }
         ],
         "arestas_banco": [
@@ -724,18 +775,6 @@
             "cor": "#E9E5DE",
             "so_onde_clara": 235,
             "_nota": "Mesmo quartzo claro do 'pintar' do elementos_do_render, que deixou de fora o retângulo da cuba."
-          },
-          {
-            "nome": "rebaixo da bancada do BH sauna, no tom da bancada",
-            "bbox_vis": [
-              588.9,
-              362.3,
-              597.45,
-              380.0
-            ],
-            "cor": "#D1C1B5",
-            "so_onde_clara": 235,
-            "_nota": "Tom mediano do tampo da bancada do render (acima da cuba)."
           }
         ],
         "cubas": [

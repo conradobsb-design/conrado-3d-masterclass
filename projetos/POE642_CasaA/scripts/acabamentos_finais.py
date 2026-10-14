@@ -8,7 +8,8 @@ nas posições exatas do PDF:
 
 1. 'clonar' apaga um símbolo copiando o mesmo piso de um trecho limpo ao lado (carimbo com
    borda suave e ajuste do tom médio pelo anel em volta).
-2. 'parede' refaz um trecho de parede repetindo uma linha limpa da mesma parede.
+2. 'preencher_colunas' refaz um piso de veios verticais em volta de uma louça, coluna a
+   coluna; 'parede' refaz um trecho de parede repetindo uma linha limpa da mesma parede.
 3. 'arestas_banco' troca a linha dupla entre dois degraus de um banco por uma aresta fina,
    no mesmo traço da aresta da frente.
 4. 'pintar' completa uma bancada branca com a cor da bancada; 'cubas' desenha uma cuba
@@ -33,6 +34,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from scipy import ndimage
 
 BASE_SEM_MARGEM = 6001
 SS = 8                                   # superamostragem dos desenhos
@@ -128,13 +130,29 @@ def lum(img):
     return img.mean(axis=-1)
 
 
+def ladrilhar(bloco, alto, largo):
+    """Repete o bloco em espelho (sem emenda dura) até cobrir alto x largo."""
+    linhas = np.concatenate([bloco, bloco[::-1]] * (alto // (2 * bloco.shape[0]) + 1), axis=0)[:alto]
+    return np.concatenate([linhas, linhas[:, ::-1]] * (largo // (2 * bloco.shape[1]) + 1), axis=1)[:, :largo]
+
+
 def clonar(out, f, op):
-    """Carimbo: copia o piso deslocado sobre o símbolo, com borda suave e o tom médio ajustado."""
+    """Carimbo: copia o piso deslocado sobre o símbolo, com borda suave e o tom médio ajustado.
+
+    Com 'fonte_vis', a fonte é esse retângulo, repetido em espelho até o tamanho do alvo (ex.:
+    o tampo da bancada copiado para o rebaixo). Com 'preservar_branco', o objeto branco que
+    está no alvo (ex.: a louça) fica, e só o resto do retângulo vira piso.
+    """
     x0, y0, x1, y1 = f.ret(op["bbox_vis"])
-    dx, dy = int(round(op["desloc_vis"][0] * f.k)), int(round(op["desloc_vis"][1] * f.k))
     alvo = out[y0:y1, x0:x1].copy()
-    fonte = out[y0 + dy:y1 + dy, x0 + dx:x1 + dx].copy()
-    if op.get("corrigir_tom", True):
+    if "fonte_vis" in op:
+        fx0, fy0, fx1, fy1 = f.ret(op["fonte_vis"])
+        fonte = ladrilhar(out[fy0:fy1, fx0:fx1].copy(), y1 - y0, x1 - x0)
+        dx, dy = fx0 - x0, fy0 - y0
+    else:
+        dx, dy = int(round(op["desloc_vis"][0] * f.k)), int(round(op["desloc_vis"][1] * f.k))
+        fonte = out[y0 + dy:y1 + dy, x0 + dx:x1 + dx].copy()
+    if op.get("corrigir_tom", True) and "fonte_vis" not in op:
         # anel em volta do retângulo, sem parede e sem símbolo (só o piso claro)
         a = 6
         anel_alvo = out[y0 - a:y1 + a, x0 - a:x1 + a].reshape(-1, 3)
@@ -154,8 +172,43 @@ def clonar(out, f, op):
         m[lum(fonte) < op.get("lum_fonte_min", 110)] = 0   # não leva parede da fonte para o alvo
     if op.get("so_onde_alvo_branco"):
         m[alvo.min(axis=2) < 235] = 0                     # só o branco (ex.: soleira), mantém os traços
+    if "preservar_branco" in op:
+        pb = op["preservar_branco"]
+        obj = alvo.min(axis=2) >= pb.get("lum_min", 232)
+        obj = ndimage.binary_closing(obj, iterations=pb.get("fechar_px", 3))
+        obj = ndimage.binary_fill_holes(obj)
+        obj = ndimage.binary_dilation(obj, iterations=pb.get("dilatar_px", 2))
+        m[obj] = 0
     out[y0:y1, x0:x1] = alvo * (1 - m[..., None]) + fonte * m[..., None]
     print(f"    {op['nome']}: {x1 - x0}x{y1 - y0} px, deslocamento ({dx}, {dy}) px")
+
+
+def preencher_colunas(out, f, op):
+    """Refaz um piso de veios verticais coluna a coluna, entre a linha de cima e a de baixo.
+
+    Cada coluna vai do tom logo acima do retângulo ao tom logo abaixo, então os veios do
+    travertino atravessam o remendo sem emenda. O grão vem de um trecho limpo do mesmo piso.
+    Com 'preservar_branco', a louça que está no retângulo fica.
+    """
+    x0, y0, x1, y1 = f.ret(op["bbox_vis"])
+    n = op.get("linhas_ref", 3)
+    cima = np.median(out[y0 - n:y0, x0:x1], axis=0)
+    baixo = np.median(out[y1:y1 + n, x0:x1], axis=0)
+    t = ((np.arange(y1 - y0) + 0.5) / (y1 - y0))[:, None, None]
+    fonte = cima[None] * (1 - t) + baixo[None] * t
+    dx, dy = int(round(op["grao_desloc_vis"][0] * f.k)), int(round(op["grao_desloc_vis"][1] * f.k))
+    trecho = out[y0 + dy:y1 + dy, x0 + dx:x1 + dx]
+    fonte += (trecho - cv2.GaussianBlur(trecho, (0, 0), 2.0)) * op.get("grao", 0.6)
+    alvo = out[y0:y1, x0:x1].copy()
+    m = np.ones((y1 - y0, x1 - x0), bool)
+    if "preservar_branco" in op:
+        pb = op["preservar_branco"]
+        obj = alvo.min(axis=2) >= pb.get("lum_min", 232)
+        obj = ndimage.binary_closing(obj, iterations=pb.get("fechar_px", 3))
+        obj = ndimage.binary_fill_holes(obj)
+        m &= ~ndimage.binary_dilation(obj, iterations=pb.get("dilatar_px", 2))
+    out[y0:y1, x0:x1][m] = fonte[m]
+    print(f"    {op['nome']}: {int(m.sum())} px de piso refeitos")
 
 
 def parede(out, f, op):
@@ -299,6 +352,8 @@ def main():
     print("[1] apagando símbolos do PDF")
     for o in op.get("clonar", []):
         clonar(out, f, o)
+    for o in op.get("preencher_colunas", []):
+        preencher_colunas(out, f, o)
     for o in op.get("parede", []):
         parede(out, f, o)
     print("[2] arestas de banco")
