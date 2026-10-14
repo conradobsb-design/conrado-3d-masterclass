@@ -106,6 +106,27 @@
             "para": "#4F7A3A",
             "_nota": "Definido pelo usuário: a faixa branca entre as bordas da floreira (ARQ_PAISAGISMO) é floreira."
           }
+        ],
+        "setas": [
+          {
+            "nome": "degraus largos: descem para o pátio",
+            "pontos_vis": [
+              [
+                170.0,
+                546.0
+              ],
+              [
+                170.0,
+                392.0
+              ]
+            ],
+            "cor": "#5E5A52",
+            "largura_vis": 0.6,
+            "ponta_vis": 7.0,
+            "abertura_graus": 28,
+            "circulo_vis": 1.6,
+            "_nota": "Definido pelo usuário: os degraus largos da esquerda descem para cima, do caminho para o pátio. O PDF não tem seta nesses degraus e o render leu a descida ao contrário. A escada curta numerada fica como no PDF."
+          }
         ]
       },
       "esmaecer": {

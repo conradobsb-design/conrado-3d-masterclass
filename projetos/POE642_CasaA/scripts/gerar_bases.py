@@ -422,7 +422,8 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
     - trocas_cor: troca global de uma cor renderizada por outra;
     - hachuras: áreas sem preenchimento, só hachura sobre branco (deck de madeira),
       dentro de um retângulo da visualização de 1800 px;
-    - gramados: o branco do entorno que chega à borda do lote vira grama.
+    - gramados: o branco do entorno que chega à borda do lote vira grama;
+    - setas: linha de caminhamento com seta (sentido de descida), em vis.
     Só pixels com a cor de origem mudam: linhas, móveis e símbolos ficam intactos.
     """
     arr = np.array(img).astype(int)
@@ -564,6 +565,28 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
         if s.get("cor_linha"):
             arr[linhas] = hex_rgb(s["cor_linha"])
         resumo.append(f"{s['nome']}: {int(m.sum())} px")
+
+    # linha de caminhamento com seta, quando o PDF não traz ou traz no sentido errado (ex.: na Casa C,
+    # os degraus largos descem para o pátio): pontos em vis, a seta no último ponto, círculo no primeiro
+    if legenda.get("setas"):
+        im = Image.fromarray(arr.astype(np.uint8))
+        d = ImageDraw.Draw(im)
+        for st in legenda["setas"]:
+            pts = [(x * esc, y * esc) for x, y in st["pontos_vis"]]
+            cor = tuple(int(v) for v in hex_rgb(st.get("cor", "#5E5A52")))
+            lw = max(1, round(st.get("largura_vis", 0.6) * esc))
+            d.line(pts, fill=cor, width=lw)
+            (xa, ya), (xb, yb) = pts[-2], pts[-1]
+            ang = math.atan2(yb - ya, xb - xa)
+            tam = st.get("ponta_vis", 7.0) * esc
+            for lado in (-1, 1):
+                a2 = ang + math.pi - lado * math.radians(st.get("abertura_graus", 28))
+                d.line([(xb, yb), (xb + tam * math.cos(a2), yb + tam * math.sin(a2))], fill=cor, width=lw)
+            r0 = st.get("circulo_vis", 1.6) * esc
+            x0_, y0_ = pts[0]
+            d.ellipse((x0_ - r0, y0_ - r0, x0_ + r0, y0_ + r0), outline=cor, width=lw)
+            resumo.append(f"{st['nome']}: seta com {len(pts)} pontos")
+        arr = np.array(im).astype(int)
 
     # gramado: o branco que chega até a borda do lote (o entorno), sem o branco fechado dentro da casa
     for g in legenda.get("gramados", []):
