@@ -648,6 +648,39 @@
               0
             ],
             "lum_fonte_min": 60
+          },
+          {
+            "nome": "soleira da porta do BH sauna, no travertino do piso",
+            "bbox_vis": [
+              529.95,
+              331.55,
+              536.1,
+              356.45
+            ],
+            "desloc_vis": [
+              34,
+              0
+            ],
+            "corrigir_tom": false,
+            "so_onde_alvo_branco": true,
+            "borda_px": 0,
+            "_nota": "Só o branco entre os batentes; os traços das bordas e os batentes ficam."
+          },
+          {
+            "nome": "linha preta na frente da bancada do BH sauna",
+            "bbox_vis": [
+              579.5,
+              334.85,
+              579.8,
+              362.6
+            ],
+            "desloc_vis": [
+              -1.0,
+              0
+            ],
+            "corrigir_tom": false,
+            "borda_px": 0,
+            "_nota": "Contorno da bancada da base, de 1 px, que sobrava ao lado da bancada do render e subia em direção à porta."
           }
         ],
         "parede": [
@@ -691,6 +724,18 @@
             "cor": "#E9E5DE",
             "so_onde_clara": 235,
             "_nota": "Mesmo quartzo claro do 'pintar' do elementos_do_render, que deixou de fora o retângulo da cuba."
+          },
+          {
+            "nome": "rebaixo da bancada do BH sauna, no tom da bancada",
+            "bbox_vis": [
+              588.9,
+              362.3,
+              597.45,
+              380.0
+            ],
+            "cor": "#D1C1B5",
+            "so_onde_clara": 235,
+            "_nota": "Tom mediano do tampo da bancada do render (acima da cuba)."
           }
         ],
         "cubas": [

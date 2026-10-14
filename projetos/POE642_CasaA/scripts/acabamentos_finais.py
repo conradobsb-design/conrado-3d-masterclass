@@ -152,6 +152,8 @@ def clonar(out, f, op):
         m = np.clip(m * op.get("ganho", 1.6), 0, 1)   # ganho 1: degradê largo, para pisos com réguas
     if op.get("so_onde_fonte_clara", True):
         m[lum(fonte) < op.get("lum_fonte_min", 110)] = 0   # não leva parede da fonte para o alvo
+    if op.get("so_onde_alvo_branco"):
+        m[alvo.min(axis=2) < 235] = 0                     # só o branco (ex.: soleira), mantém os traços
     out[y0:y1, x0:x1] = alvo * (1 - m[..., None]) + fonte * m[..., None]
     print(f"    {op['nome']}: {x1 - x0}x{y1 - y0} px, deslocamento ({dx}, {dy}) px")
 
