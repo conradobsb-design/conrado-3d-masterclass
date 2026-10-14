@@ -4,9 +4,10 @@
 1. Escada em U: o motor errou a linha de descida (as pontas viraram arcos de porta) e o
    número de degraus. As linhas do render saem por inpaint, e entram as linhas da base:
    degraus, linha de descida, círculo de partida e seta. A textura de travertino fica.
-2. Escada caracol: na parte branca (os 3/4 do piso de baixo) entram as linhas da base,
-   ou seja, os degraus, o arco central e as marcas. Entram também as bordas da abertura
-   em volta.
+2. Saleta da caracol: a abertura em L em volta da escada é vão e fica branca, com o desenho
+   do PDF: degraus que descem (contínuos e tracejados), arco central, marcas e as linhas duplas
+   que dividem o vão do piso. O quarto creme e o piso em volta ficam do render.
+   Na bancada da entrada da suíte master entra a cuba redonda com torneira da base.
 3. Entorno: tudo fora do 1º pavimento (fora dos retângulos 'manter_bbox_vis' do
    esmaecer) passa a ser a base, esmaecida. Isso inclui as pedras de acesso ao hall
    externo, o pergolado tracejado, a piscina, o deck e os contornos.
@@ -49,6 +50,8 @@ def main():
     ap.add_argument("base", type=Path)
     ap.add_argument("--saida", type=Path, default=Path("."))
     ap.add_argument("--config", type=Path, default=AQUI / "config_bases.json")
+    ap.add_argument("--base-sem-texto", type=Path, default=AQUI.parent / "bases" / "POE642_CasaA_BASE_1Pavimento_semtexto.png",
+                    help="base sem texto do gerar_bases.py (desenho do PDF sem legenda nem esmaecimento)")
     args = ap.parse_args()
 
     r = cv2.imread(str(args.render))
@@ -70,7 +73,6 @@ def main():
     def vis_px(x, y):
         return (T @ np.array([x * k + margem, y * k, 1]))[:2]
 
-    esc = np.sqrt(abs(np.linalg.det(T[:2, :2]))) * k     # px do render por unidade da prévia
     out = r.copy()
     alterado = np.zeros((H, W), bool)
 
@@ -110,29 +112,65 @@ def main():
     print(f"    {int(linhas_r.sum())} px de linha do render apagados")
 
     # 3. escada caracol --------------------------------------------------------------
-    print("[3] escada caracol: linhas da base na parte branca")
-    circ = pav["esmaecer"]["clarear_circulos"][0]
-    cx, cy = vis_px(*circ["centro_vis"])
-    raio = 30.0 * esc
-    yy, xx = np.ogrid[:H, :W]
-    disco = (xx - cx) ** 2 + (yy - cy) ** 2 <= (raio - 1.2) ** 2
-    quarto = (xx >= cx) & (yy <= cy)
-    tres_quartos = disco & ~quarto
-    out[tres_quartos] = bw[tres_quartos]
-    alterado |= tres_quartos
-    # bordas da abertura em volta (as linhas da base mais escuras que o piso)
-    ax0, ay0 = vis_px(896.7, 808.2)
-    ax1, ay1 = vis_px(966.5, 877.6)
-    aberta = np.zeros((H, W), bool)
-    aberta[int(ay0):int(np.ceil(ay1)), int(ax0):int(np.ceil(ax1))] = True
-    aberta &= ~((xx - cx) ** 2 + (yy - cy) ** 2 <= (raio + 1.5) ** 2)
-    piso_b = 232.0
-    lb = lum(bw)
-    alfa = np.clip((piso_b - lb) / (piso_b - 120) * 1.5, 0, 1) * aberta
-    neutro = (bw.max(axis=2).astype(int) - bw.min(axis=2)) < 12
-    alfa *= neutro
-    out = (out.astype(np.float32) * (1 - alfa[..., None]) + np.array([120, 118, 116], np.float32) * alfa[..., None]).astype(np.uint8)
-    alterado |= alfa > 0.05
+    # a saleta segue o desenho do PDF: a abertura em L em volta da caracol é vão e fica branca,
+    # com os degraus que descem (contínuos no quarto de cima à esquerda, tracejados embaixo),
+    # o arco central, as marcas e as linhas duplas que dividem o vão do piso. O desenho vem da
+    # base sem texto (sem legenda nem esmaecimento); o quarto creme e o piso em volta ficam do render.
+    print("[3] saleta: vão em L branco com os degraus e as bordas do PDF")
+    st = cv2.imread(str(args.base_sem_texto))
+    pad = (base.shape[1] - st.shape[1]) // 2
+    st = cv2.copyMakeBorder(st, 0, base.shape[0] - st.shape[0], pad, base.shape[1] - st.shape[1] - pad,
+                            cv2.BORDER_CONSTANT, value=(255, 255, 255))
+    ls = lum(st)
+    linha_st = ((ls < 200) & ((st.max(axis=2).astype(int) - st.min(axis=2)) < 30)).astype(np.float32)
+    linha_st = cv2.resize(linha_st, (base_red.shape[1], base_red.shape[0]), interpolation=cv2.INTER_AREA)
+    cob = cv2.warpAffine(linha_st, A_b[:2], (W, H), flags=cv2.INTER_LINEAR)
+    vao = np.zeros((H, W), np.uint8)
+    # medidas na prévia de 1800 px: lado esquerdo do L e o braço de baixo, até as linhas duplas
+    for vx0, vy0, vx1, vy1 in [(896.7, 808.2, 932.0, 877.6), (930.6, 846.0, 967.5, 877.6)]:
+        q = np.array([vis_px(vx0, vy0), vis_px(vx1, vy0), vis_px(vx1, vy1), vis_px(vx0, vy1)])
+        cv2.fillConvexPoly(vao, np.round(q).astype(np.int32), 1)
+    # teto baixo de opacidade: o contorno duplo do círculo não engrossa e todas as linhas ficam
+    # com o mesmo peso, como no PDF
+    alfa = (np.clip(cob * 1.6, 0, 0.65) * vao)[..., None]
+    branco = np.array([250, 250, 250], np.float32)
+    cor = np.array([92, 92, 92], np.float32)
+    desenho = branco * (1 - alfa) + cor * alfa
+    out = np.where(vao[..., None].astype(bool), desenho, out).astype(np.uint8)
+    alterado |= vao.astype(bool)
+
+    # 3b. cuba da bancada na entrada da suíte master -----------------------------------
+    # o motor desenhou a bancada lisa; na base ela tem uma cuba redonda com a torneira saindo
+    # da parede de baixo. Medidas na base sem texto (px reais): centro, raio e base da torneira.
+    print("[3b] cuba redonda na bancada da entrada da suíte master")
+    def st_px(x, y):
+        return (T @ np.array([x + pad, y, 1]))[:2]
+    ccx, ccy = st_px(3022.0, 2348.4)
+    tx, ty = st_px(3021.0, 2373.0)
+    rr = 18.5 * np.sqrt(abs(np.linalg.det(T[:2, :2])))
+    ss = 8
+    n = int(np.ceil(rr * 2 + 12))
+    ox, oy = int(np.floor(ccx - n / 2)), int(np.floor(ccy - n / 2))
+    big = np.zeros((n * ss, n * ss, 4), np.float32)
+    c = (int(round((ccx - ox) * ss)), int(round((ccy - oy) * ss)))
+    R = int(round(rr * ss))
+    cv2.circle(big, c, R, (238, 239, 240, 1.0), -1, cv2.LINE_AA)                        # borda da louça
+    cv2.circle(big, c, int(R * 0.80), (250, 250, 250, 1.0), -1, cv2.LINE_AA)            # bacia
+    cv2.circle(big, c, R, (168, 170, 172, 1.0), max(1, int(round(0.5 * ss))), cv2.LINE_AA)  # contorno fino
+    cv2.circle(big, c, int(R * 0.80), (205, 207, 209, 1.0), max(1, int(round(0.35 * ss))), cv2.LINE_AA)
+    cv2.circle(big, c, max(2, int(round(0.7 * ss))), (150, 152, 155, 1.0), -1, cv2.LINE_AA)  # ralo
+    t0 = (int(round((tx - ox) * ss)), int(round((ty - oy) * ss)))
+    t1 = (c[0], int(round(c[1] + R * 0.15)))
+    cv2.line(big, t0, t1, (140, 143, 147, 1.0), max(2, int(round(0.9 * ss))), cv2.LINE_AA)     # bica cromada
+    cv2.line(big, t0, t1, (205, 208, 212, 1.0), max(1, int(round(0.3 * ss))), cv2.LINE_AA)     # brilho da bica
+    cv2.rectangle(big, (t0[0] - int(1.2 * ss), t0[1] - int(0.6 * ss)), (t0[0] + int(1.2 * ss), t0[1] + int(0.8 * ss)),
+                  (125, 128, 132, 1.0), -1)                                                       # corpo da torneira
+    peq = cv2.resize(big, (n, n), interpolation=cv2.INTER_AREA)
+    a = peq[..., 3:4]
+    reg = out[oy:oy + n, ox:ox + n].astype(np.float32)
+    out[oy:oy + n, ox:ox + n] = (reg * (1 - a) + peq[..., :3] * a).astype(np.uint8)
+    alterado[oy:oy + n, ox:ox + n] |= a[..., 0] > 0.02
+    print(f"    centro ({ccx:.1f}, {ccy:.1f}), diâmetro {2 * rr:.1f} px")
 
     # 4. entorno = base --------------------------------------------------------------
     print("[4] entorno: base esmaecida fora do 1º pavimento")
