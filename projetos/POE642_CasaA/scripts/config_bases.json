@@ -424,7 +424,9 @@
               847.2
             ],
             "raio_vis": 31.5,
-            "exceto_quadrante": "sup_dir"
+            "exceto_quadrante": "sup_dir",
+            "clarear": 0.8,
+            "_clarear": "O trecho da caracol que é do piso de baixo clareia 80% (mais que o entorno), para ler como branco: no render da v5 o motor coloriu esses 3/4 e deixou branco o quarto deste piso."
           }
         ]
       }

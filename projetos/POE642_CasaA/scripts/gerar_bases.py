@@ -538,15 +538,23 @@ def esmaecer(img, regra, cfg):
     for x0, y0, x1, y1 in regra["manter_bbox_vis"]:
         manter[int(y0 * esc):int(np.ceil(y1 * esc)), int(x0 * esc):int(np.ceil(x1 * esc))] = True
     fora = ~manter
+    clarear = regra.get("clarear", 0.5)
     # círculos que clareiam mesmo dentro das áreas mantidas, menos um quarto
-    # (ex.: escada caracol do 1º Pavimento, onde só o trecho deste piso fica cheio)
+    # (ex.: escada caracol do 1º Pavimento, onde só o trecho deste piso fica cheio);
+    # cada círculo pode ter o próprio 'clarear'
+    discos = []
     for c in regra.get("clarear_circulos", []):
         disco = quarto_de_circulo(arr.shape[:2], c["centro_vis"], c["raio_vis"], None, esc)
         if c.get("exceto_quadrante"):
             disco &= ~quarto_de_circulo(arr.shape[:2], c["centro_vis"], c["raio_vis"], c["exceto_quadrante"], esc)
-        fora |= disco
-    arr[fora] += (255 - arr[fora]) * regra.get("clarear", 0.5)
-    return Image.fromarray(arr.round().astype(np.uint8)), int(fora.sum())
+        discos.append((disco, c.get("clarear", clarear)))
+        fora &= ~disco
+    arr[fora] += (255 - arr[fora]) * clarear
+    total = int(fora.sum())
+    for disco, k in discos:
+        arr[disco] += (255 - arr[disco]) * k
+        total += int(disco.sum())
+    return Image.fromarray(arr.round().astype(np.uint8)), total
 
 
 def em_16x9(img):
