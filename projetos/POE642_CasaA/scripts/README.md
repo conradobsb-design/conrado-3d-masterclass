@@ -154,7 +154,7 @@ No Térreo da Casa B, a imagem final é o próprio render, retocado sem IA:
 - o transbordo de água que o motor inventou à esquerda da piscina e dos decks vira gramado;
 - o vão abaixo da escada de cima vira área verde;
 - o símbolo de planta do hall vira uma touceira do próprio render;
-- as cubas do lavatório gourmet viram louça branca com torneira cromada.
+- a bancada do lavatório gourmet fica no quartzo das bancadas da cozinha, e as cubas viram louça branca com torneira cromada.
 
 ```bash
 python retoque_terreo_casab.py ../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_v4_render.webp --saida ../../POE642_CasaB/renders --nome POE642_CasaB_PH_Terreo_v4_retocado

@@ -7,8 +7,9 @@
 2. Área verde: o vão branco abaixo da escada de cima, ao lado do deck, vira gramado.
 3. Planta do hall: o símbolo em traço junto à porta vira uma planta de verdade, recortada de
    uma touceira do próprio render (a da direita no jardim de 4,62 m², sobre terra, que se recorta limpa) e reduzida ao tamanho do símbolo.
-4. Lavatório gourmet: as duas cubas em traço viram cubas brancas de louça, com bacia, válvula
-   e torneira cromada do lado da parede.
+4. Lavatório gourmet: a bancada, que o motor deixou branca e cinza, fica no mesmo quartzo
+   das bancadas da cozinha (trecho da ilha repetido em espelho); por cima, as duas cubas em
+   traço viram cubas brancas de louça, com bacia, válvula e torneira cromada do lado da parede.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -30,6 +31,8 @@ AREA_VERDE = {"ret": (350, 356, 394, 400), "fonte": (170, 600)}
 # planta do hall: símbolo a apagar, centro e diâmetro; touceira de origem
 PLANTA = {"simbolo": (1283, 488, 1310, 519), "centro": (1296, 503), "diametro": 30,
           "fonte": (1276, 606, 1338, 670)}
+# bancada do lavatório gourmet (entre as paredes, até a parede de baixo) e trecho limpo da ilha
+BANCADA = {"ret": (636, 840, 741, 855), "fonte": (858, 726, 872, 758)}
 # cubas do lavatório gourmet (contorno externo do símbolo)
 CUBAS = [(663, 832, 684, 850), (695, 832, 716, 850)]
 
@@ -109,6 +112,17 @@ def planta(img):
     return img
 
 
+def bancada(img):
+    x0, y0, x1, y1 = BANCADA["ret"]
+    fx0, fy0, fx1, fy1 = BANCADA["fonte"]
+    t = img[fy0:fy1, fx0:fx1]
+    linhas = np.concatenate([t, t[::-1]] * ((y1 - y0) // (2 * t.shape[0]) + 1), axis=0)[:y1 - y0]
+    tex = np.concatenate([linhas, linhas[:, ::-1]] * ((x1 - x0) // (2 * t.shape[1]) + 1), axis=1)[:, :x1 - x0]
+    img[y0:y1, x0:x1] = tex
+    print(f"    bancada do lavatório gourmet: {(x1 - x0) * (y1 - y0)} px no quartzo da cozinha")
+    return img
+
+
 def cuba(img, ret):
     x0, y0, x1, y1 = ret
     w, h = x1 - x0, y1 - y0
@@ -177,7 +191,8 @@ def main():
     img = area_verde(img)
     print("[3] planta do hall")
     img = planta(img)
-    print("[4] cubas do lavatório gourmet")
+    print("[4] bancada e cubas do lavatório gourmet")
+    img = bancada(img)
     for r in CUBAS:
         img = cuba(img, r)
     args.saida.mkdir(parents=True, exist_ok=True)
