@@ -11,7 +11,7 @@ _14/10/2026. Edição sobre o render aprovado da v6. Motor: Nano Banana Pro, 2K,
    - o fundo continua branco puro.
 
 **Atenção:** o Nano Banana Pro não aceita máscara e redesenha a imagem inteira, por isso confira a imagem toda antes de aprovar.
-- **Se outra coisa mudar:** faça o banco no Photoshop com a *Ferramenta Remover*, sobre o trecho vertical. Para o tom, use *Camera Raw*: Sombras +, Pretos + e Exposição levemente +.
+- **Se outra coisa mudar:** apague o bloco no Photoshop com a *Ferramenta Remover* e deixe o travertino em volta preencher o lugar. Para o tom, use *Camera Raw*: Sombras +, Pretos + e Exposição levemente +.
 
 ## Versão de validação (PT, só para leitura)
 
