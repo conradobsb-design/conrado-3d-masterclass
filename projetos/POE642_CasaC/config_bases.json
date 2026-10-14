@@ -330,6 +330,27 @@
         "ARQ_TERRENO PLANEJADO"
       ],
       "_layers_ocultas": "Curvas de nível saem, como no Subsolo e nas Casas A e B: fundo todo branco.",
+      "zonas_excluidas": {
+        "deck e banco em L: paredes estruturais da layer de parede": [
+          205,
+          575,
+          470,
+          690
+        ],
+        "prainha, spa, degraus e borda: paredes estruturais da layer de parede": [
+          206,
+          690,
+          470,
+          801
+        ],
+        "piscina comprida, sem o vidro da borda infinita à esquerda": [
+          215.5,
+          801,
+          470,
+          895
+        ]
+      },
+      "_zonas_excluidas": "Definido pelo usuário: na piscina só existem a borda de travertino, os degraus e o vidro da borda infinita. As paredes estruturais da piscina, do deck e dos degraus estão na layer ARQ_PAREDE com preenchimento branco (no PDF ficam sob a água e o travertino) e viravam faixas de vidro em volta de tudo. Fica como vidro só a linha dupla do lado esquerdo da piscina comprida (x 211,7–214,9), a borda infinita.",
       "legenda": {
         "_sobre": "Casa C · Térreo (materiais definidos pelo usuário em 14/10/26). Travertino #DCD9CA: todo o oliva #BAB596 (áreas sociais, varandas, BH master 1, lavabos e a borda das piscinas). Vinílico da Casa A #C8A27C: o laranja #CC9966 (suítes, quartos, closets e escritório). Granito Marrom Tabaco #5A4232: o malva #BFA79F (cozinha, serviço, área de serviço descoberta, quarto e BH externos e a faixa da bancada gourmet), menos a garagem. Pedra portuguesa caramelo #B98A55: garagem e acesso de carros (sem os hexágonos), com os 3 carros. Bege Bahia #E8E8E8: o cinza #E4E4E4 dos banhos (BH 1, BH 2, BH 3 e BH master 2) e da área externa (degraus largos e caminho à esquerda, pisantes) e a escada externa ao lado do deck. Deck de madeira #AE8863 com réguas #8A6A4C: a faixa listrada entre a escada e a piscina. Piscina, prainha e spa #DFF6FE. Gramado #6E9150: o entorno do lote. Floreira #4F7A3A: jardim 1 e os dois jardins de inverno. Banco em L junto ao deck em bronze #7A5A3C, como o da Casa B.",
         "tolerancia_px": 10,
