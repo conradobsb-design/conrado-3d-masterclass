@@ -1,0 +1,306 @@
+{
+  "_sobre": "Configuração das bases da Casa C (POE 642). Usa o mesmo gerar_bases.py da Casa A (projetos/POE642_CasaA/scripts), com --config apontando para este arquivo. Mesma folha (3370 x 2384 pt), mesmo recorte e mesmo enquadramento das Casas A e B.",
+  "layer_parede": "ARQ_PAREDE",
+  "cinza_parede": 0.357,
+  "cinza_parede_qualquer_layer": false,
+  "tolerancia_cor": 0.012,
+  "recorte": [
+    0.035,
+    0.095,
+    0.975,
+    0.955
+  ],
+  "largura_px": 6000,
+  "largura_visualizacao": 1800,
+  "saida_16x9": true,
+  "layers_ocultas": [],
+  "vidro": {
+    "espessura_max_pt": 4.0,
+    "comprimento_min_pt": 12.0,
+    "razao_min": 4.0,
+    "tolerancia_arco_pt": 1.5,
+    "tolerancia_raio": 0.3,
+    "largura_min_px": 6,
+    "contorno_px": 2
+  },
+  "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede.",
+  "prefixo": "POE642_CasaC",
+  "pavimentos": {
+    "Subsolo": {
+      "pagina": 0,
+      "rotacao": 0,
+      "layers_ocultas": [
+        "ARQ_TERRENO PLANEJADO"
+      ],
+      "_layers_ocultas": "Curvas de nível saem, como nas Casas A e B: fundo todo branco.",
+      "legenda": {
+        "_sobre": "Casa C · Subsolo (materiais definidos pelo usuário em 14/10/26). Vinílico da Casa A #C8A27C: academia (laranja #CC9966). Travertino #DCD9CA: varanda do subsolo, sauna, ducha e BH da academia (oliva #BAB596); banco da sauna em travertino mais escuro. Bege Bahia #E8E8E8: depósito (#E0E0E0) e toda a área externa cinza (#E4E4E4: pátio ao lado da varanda, faixa de degraus largos e caminho que desce). Esmaecida: só a escada numerada (degraus 11 a 21) abaixo da sauna. Floreira #4F7A3A: a faixa ao lado da sauna. Bancada com cuba no BH e chuveiros de teto nos dois quadradinhos ficam como desenhados (o prompt descreve).",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "área externa (pátio, degraus largos e caminho) → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "depósito → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.878,
+              0.878,
+              0.878
+            ],
+            "cor_render": "#E0E0E0",
+            "para": "#E8E8E8"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#CC9966",
+            "#C8A27C"
+          ],
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ]
+        ],
+        "retangulos": [
+          {
+            "nome": "banco da sauna, degrau da frente em L → travertino",
+            "bbox_vis": [
+              245.2,
+              434.3,
+              303.2,
+              501.8
+            ],
+            "so_branco": true,
+            "para": "#CAC6AE"
+          },
+          {
+            "nome": "banco da sauna, assento junto à parede → travertino mais escuro",
+            "bbox_vis": [
+              245.2,
+              501.8,
+              303.2,
+              518.4
+            ],
+            "so_branco": true,
+            "para": "#C1BDA1",
+            "_nota": "Como o banco da sauna da Casa B (aprovado): dois tons de travertino."
+          },
+          {
+            "nome": "floreira do lado de fora da parede esquerda da sauna → plantas",
+            "bbox_vis": [
+              226.3,
+              401.2,
+              235.2,
+              524.4
+            ],
+            "so_branco": true,
+            "para": "#4F7A3A",
+            "_nota": "Definido pelo usuário: a faixa branca entre as bordas da floreira (ARQ_PAISAGISMO) é floreira."
+          }
+        ]
+      },
+      "esmaecer": {
+        "_sobre": "Definido pelo usuário: só a escada numerada (degraus 11 a 21, abaixo da sauna) fica esmaecida; o resto tem a cor cheia. Os retângulos de 'manter' cobrem a folha toda, menos a escada.",
+        "clarear": 0.55,
+        "manter_bbox_vis": [
+          [
+            0,
+            0,
+            1800,
+            527.6
+          ],
+          [
+            0,
+            577.0,
+            1800,
+            1200
+          ],
+          [
+            0,
+            527.6,
+            237.0,
+            577.0
+          ],
+          [
+            346.0,
+            527.6,
+            1800,
+            577.0
+          ]
+        ]
+      },
+      "texturas": {
+        "_sobre": "Prévia de texturas: os mesmos materiais aprovados das Casas A e B.",
+        "tolerancia": 4,
+        "_tolerancia": "4: as cores da legenda são exatas, e com 12 o vidro #D6D6D3 entraria no travertino #DCD9CA.",
+        "materiais": [
+          {
+            "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+            "cores": [
+              "#E8E8E8"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                "bbox": [
+                  [
+                    1350,
+                    582,
+                    1452,
+                    848
+                  ],
+                  [
+                    648,
+                    636,
+                    698,
+                    848
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "travertino (hall do Subsolo da Casa A)",
+            "cores": [
+              "#DCD9CA"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    582,
+                    580,
+                    686,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "banco da sauna em travertino: degrau da frente, um tom mais escuro",
+            "cores": [
+              "#CAC6AE"
+            ],
+            "bbox_vis": [
+              245.2,
+              434.3,
+              303.2,
+              501.8
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    582,
+                    580,
+                    686,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true,
+            "escurecer": 0.93
+          },
+          {
+            "nome": "banco da sauna em travertino: assento junto à parede, mais escuro",
+            "cores": [
+              "#C1BDA1"
+            ],
+            "bbox_vis": [
+              245.2,
+              501.8,
+              303.2,
+              518.4
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    582,
+                    580,
+                    686,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true,
+            "escurecer": 0.88
+          },
+          {
+            "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+            "cores": [
+              "#C8A27C"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                "bbox": [
+                  [
+                    858,
+                    638,
+                    972,
+                    684
+                  ],
+                  [
+                    922,
+                    719,
+                    978,
+                    826
+                  ],
+                  [
+                    1012,
+                    212,
+                    1060,
+                    268
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "floreira ao lado da sauna (touceiras tropicais do Térreo da Casa A)",
+            "cores": [
+              "#4F7A3A"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    120,
+                    95,
+                    290,
+                    230
+                  ],
+                  [
+                    1428,
+                    500,
+                    1515,
+                    710
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

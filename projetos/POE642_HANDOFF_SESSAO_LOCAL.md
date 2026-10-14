@@ -82,6 +82,7 @@ O `scripts/README.md` documenta cada opção do `config_bases.json` e todos os s
      - `642-_SUBSOLO_CASA_A_1.pdf`;
      - `642-_1__PAVIMENTO_CASA_A_1.pdf`.
    - **Casa B:** `642 - SUBSOLO - CASA B.pdf` e `642 - TÉRREO - CASA B.pdf`.
+   - **Casa C:** `642 - SUBSOLO - CASA C.pdf`.
    - **Referência (Drive do cliente):** pasta `10UABd77xZ9V2R3G85xkOdnvg1kCgrsMj`, com `642-ARQ-EX-001-…-LAYOUT-R01.pdf` (folha de layout, de onde vieram o norte e o carimbo), 002, 005, 006 e 021. Esses PDFs **não** têm a layer `ARQ_PAREDE`, por isso não servem para gerar base.
 5. **Conferir:** rode os scripts de dentro de `projetos/POE642_CasaA/scripts/`, porque os caminhos são relativos a essa pasta.
 
@@ -239,6 +240,28 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 2. **Opcional, mais nitidez nos objetos:** passar o render num upscaler de IA (Higgsfield `upscale_image`) antes do `elementos_do_render.py`. Isso gasta créditos, então só com autorização.
 
 ---
+
+## 6b. Casa C — em andamento
+
+**Subsolo (definido pelo usuário em 14/10/26):**
+- **Vinílico da Casa A:** academia (laranja #CC9966).
+- **Travertino:** varanda do subsolo, sauna, ducha e BH da academia (oliva #BAB596); banco da sauna em dois tons mais escuros, como na Casa B.
+- **Bege Bahia:** depósito (#E0E0E0) e toda a área externa cinza (#E4E4E4): pátio, faixa de degraus largos e caminho.
+- **Floreira:** a faixa do lado de fora da parede esquerda da sauna.
+- **BH da academia:** bancada com cuba na parede da direita; os dois quadradinhos (ducha e box) são chuveiros de teto.
+- **Esmaecida:** só a escada numerada (degraus 11 a 21), abaixo da sauna.
+
+**Estado:**
+- **Config:** `POE642_CasaC/config_bases.json` (prefixo `POE642_CasaC`).
+- **Bases:** v1 (cores do PDF), v2 (legenda) e v3_texturas, em `POE642_CasaC/bases/`.
+- **Prompt:** `POE642_CasaC/POE642_CasaC_PH_Subsolo_v1.md`.
+- **Próximos passos:** render do motor, imagem final, rodapé (chave `entrega` na config: pedir ao usuário as áreas da Casa C, a unidade e se o endereço segue o padrão das outras casas) e PDF.
+
+```bash
+cd projetos/POE642_CasaA/scripts
+python gerar_bases.py Subsolo "../../_pdfs_cliente/642 - SUBSOLO - CASA C.pdf" --config ../../POE642_CasaC/config_bases.json --saida ../../POE642_CasaC/bases
+python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Subsolo_v2.png --config ../../POE642_CasaC/config_bases.json --saida ../../POE642_CasaC/bases --nome POE642_CasaC_BASE_Subsolo_v3_texturas
+```
 
 ## 7. Avisos
 
