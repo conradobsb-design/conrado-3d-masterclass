@@ -329,7 +329,396 @@
       "layers_ocultas": [
         "ARQ_TERRENO PLANEJADO"
       ],
-      "_layers_ocultas": "Curvas de nível saem, como no Subsolo e nas Casas A e B: fundo todo branco."
+      "_layers_ocultas": "Curvas de nível saem, como no Subsolo e nas Casas A e B: fundo todo branco.",
+      "legenda": {
+        "_sobre": "Casa C · Térreo (materiais definidos pelo usuário em 14/10/26). Travertino #DCD9CA: todo o oliva #BAB596 (áreas sociais, varandas, BH master 1, lavabos e a borda das piscinas). Vinílico da Casa A #C8A27C: o laranja #CC9966 (suítes, quartos, closets e escritório). Granito Marrom Tabaco #5A4232: o malva #BFA79F (cozinha, serviço, área de serviço descoberta, quarto e BH externos e a faixa da bancada gourmet), menos a garagem. Pedra portuguesa caramelo #B98A55: garagem e acesso de carros (sem os hexágonos), com os 3 carros. Bege Bahia #E8E8E8: o cinza #E4E4E4 dos banhos (BH 1, BH 2, BH 3 e BH master 2) e da área externa (degraus largos e caminho à esquerda, pisantes) e a escada externa ao lado do deck. Deck de madeira #AE8863 com réguas #8A6A4C: a faixa listrada entre a escada e a piscina. Piscina, prainha e spa #DFF6FE. Gramado #6E9150: o entorno do lote. Floreira #4F7A3A: jardim 1 e os dois jardins de inverno. Banco em L junto ao deck em bronze #7A5A3C, como o da Casa B.",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "acesso de carros → pedra portuguesa caramelo (sem os hexágonos)",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              1530,
+              100,
+              1552,
+              120
+            ],
+            "para": "#B98A55",
+            "cor_linha": "#B98A55"
+          },
+          {
+            "nome": "garagem → pedra portuguesa caramelo (os carros ficam)",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.749,
+              0.655,
+              0.624
+            ],
+            "cor_render": "#BFA79F",
+            "bbox_vis": [
+              1470,
+              330,
+              1490,
+              350
+            ],
+            "para": "#B98A55",
+            "_nota": "Só o polígono da garagem (com a faixa até a porta da casa); o quarto e o BH externos são polígonos à parte e ficam no granito. Sem cor_linha, para os carros não sumirem."
+          },
+          {
+            "nome": "faixa listrada entre a escada e a piscina → deck de madeira",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              330,
+              600,
+              355,
+              625
+            ],
+            "para": "#AE8863",
+            "cor_linha": "#8A6A4C"
+          },
+          {
+            "nome": "banhos e área externa (degraus largos, caminho, pisantes) → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "para": "#E8E8E8"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ],
+          [
+            "#BFA79F",
+            "#5A4232"
+          ],
+          [
+            "#CC9966",
+            "#C8A27C"
+          ],
+          [
+            "#7FDFFF",
+            "#DFF6FE"
+          ]
+        ],
+        "retangulos": [
+          {
+            "nome": "escada externa ao lado do deck → Bege Bahia",
+            "bbox_vis": [
+              239.5,
+              528.0,
+              336.0,
+              576.0
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8",
+            "_nota": "Os degraus brancos do PDF; ficam as linhas dos degraus e a linha de caminhamento."
+          },
+          {
+            "nome": "banco em L junto ao deck, braço de cima → bronze",
+            "bbox_vis": [
+              206.5,
+              579.5,
+              332.5,
+              590.0
+            ],
+            "so_branco": true,
+            "para": "#7A5A3C"
+          },
+          {
+            "nome": "banco em L junto ao deck, braço da esquerda → bronze",
+            "bbox_vis": [
+              206.5,
+              579.5,
+              216.0,
+              692.5
+            ],
+            "so_branco": true,
+            "para": "#7A5A3C",
+            "_nota": "Como na Casa B (definido pelo usuário lá): a peça branca em L é um banco em tom bronze. Fica a borda dupla desenhada."
+          },
+          {
+            "nome": "jardim de inverno → floreira com plantas tropicais",
+            "bbox_vis": [
+              821.7,
+              503.7,
+              955.8,
+              641.5
+            ],
+            "so_branco": true,
+            "para": "#4F7A3A",
+            "cor_linha": "#4F7A3A",
+            "_nota": "O X tracejado some na floreira."
+          },
+          {
+            "nome": "jardim de inverno 2 → floreira",
+            "bbox_vis": [
+              884.7,
+              444.0,
+              955.5,
+              494.5
+            ],
+            "so_branco": true,
+            "para": "#4F7A3A",
+            "cor_linha": "#4F7A3A"
+          },
+          {
+            "nome": "jardim 1 → floreira",
+            "bbox_vis": [
+              470.4,
+              452.4,
+              527.2,
+              526.9
+            ],
+            "so_branco": true,
+            "para": "#4F7A3A",
+            "cor_linha": "#4F7A3A"
+          }
+        ],
+        "gramados": [
+          {
+            "nome": "entorno do lote → grama",
+            "bbox_vis": [
+              25,
+              34,
+              1758,
+              989
+            ],
+            "para": "#6E9150"
+          }
+        ]
+      },
+      "texturas": {
+        "_sobre": "Prévia de texturas do Térreo: os mesmos materiais aprovados das Casas A e B (bbox em px de um render de 2000 px). Sem esmaecer, vale a planta inteira.",
+        "tolerancia": 4,
+        "_tolerancia": "4, e não 12 como no Subsolo: as cores da legenda são exatas, e com 12 o vidro #D6D6D3 entraria no travertino #DCD9CA. As escadas #DDDACB entram no travertino.",
+        "materiais": [
+          {
+            "nome": "granito Marrom Tabaco (piso da cozinha do Térreo da Casa A)",
+            "cores": [
+              "#5A4232"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    997,
+                    603,
+                    1124,
+                    633
+                  ],
+                  [
+                    998,
+                    690,
+                    1108,
+                    718
+                  ]
+                ]
+              }
+            ],
+            "_fonte": "Só o piso: o trecho de baixo parava em y 732 e pegava o topo dos armários (faixa clara perto da ilha)."
+          },
+          {
+            "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+            "cores": [
+              "#E8E8E8"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                "bbox": [
+                  [
+                    1350,
+                    582,
+                    1452,
+                    848
+                  ],
+                  [
+                    648,
+                    636,
+                    698,
+                    848
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "travertino (hall do Subsolo da Casa A)",
+            "cores": [
+              "#DCD9CA"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    582,
+                    580,
+                    686,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+            "cores": [
+              "#C8A27C"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                "bbox": [
+                  [
+                    858,
+                    638,
+                    972,
+                    684
+                  ],
+                  [
+                    922,
+                    719,
+                    978,
+                    826
+                  ],
+                  [
+                    1012,
+                    212,
+                    1060,
+                    268
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "deck de madeira (deck do Térreo da Casa A), os três decks",
+            "cores": [
+              "#AE8863",
+              "#8A6A4C"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    383,
+                    308,
+                    462,
+                    575
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "pedra portuguesa caramelo (acesso de veículos do Térreo da Casa A)",
+            "cores": [
+              "#B98A55"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    1210,
+                    870,
+                    1640,
+                    1000
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "gramado (Térreo da Casa A)",
+            "cores": [
+              "#6E9150"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    1530,
+                    460,
+                    1700,
+                    690
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "piscina (água sobre pastilha, Térreo da Casa A)",
+            "cores": [
+              "#DFF6FE"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    582,
+                    285,
+                    678,
+                    440
+                  ]
+                ]
+              }
+            ],
+            "_fonte": "Só a água, sem as bordas: de x 684 em diante a amostra escurece (borda e sombra da parede) e deixava uma faixa escura na piscina."
+          },
+          {
+            "nome": "floreira do jardim de inverno (touceiras tropicais do Térreo da Casa A)",
+            "cores": [
+              "#4F7A3A"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    120,
+                    95,
+                    290,
+                    230
+                  ],
+                  [
+                    1428,
+                    500,
+                    1515,
+                    710
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
     }
   },
   "entrega": {
