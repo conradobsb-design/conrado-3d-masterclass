@@ -109,6 +109,23 @@ As três pranchas têm o mesmo tamanho e a planta no mesmo pixel, para que, vist
 python rodape_entrega.py --saida ../entrega --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_bege.png --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final2.png --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final.png
 ```
 
+## Prévia de texturas: `texturizar_base.py`
+
+Troca as cores chapadas da legenda pelas texturas aprovadas nos renders da Casa A, para o motor ver na base o aspecto de cada piso.
+
+Cada material está na chave `texturas` do pavimento, com:
+- as cores da legenda que ele substitui;
+- os trechos de origem, em px de um render de 2000 px;
+- opcionalmente, um `bbox_vis` para limitar a área e um `escurecer`. No banco da sauna, por exemplo, o tom fica um pouco mais escuro para continuar se lendo como banco.
+
+Só mudam os pixels da cor da legenda, e só dentro das áreas com cor cheia (`esmaecer.manter_bbox_vis`). Linhas, paredes, vidros, portas, móveis e o entorno esmaecido ficam como estão. A textura é tecida por image quilting na escala do render e depois ampliada para a base.
+
+```bash
+python texturizar_base.py Subsolo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Subsolo_v2.png --config ../../POE642_CasaB/config_bases.json --saida ../../POE642_CasaB/bases --nome POE642_CasaB_BASE_Subsolo_v3_texturas
+```
+
+Nos `retangulos` com `linhas_layer`, `sem_linhas_bbox_vis` lista as áreas cujos traços não voltam. Na Casa B, isso tira a ponta de seta e o círculo que contradiziam o sentido da descida.
+
 ## Casa B
 
 O mesmo `gerar_bases.py` gera as bases da Casa B, com a config `projetos/POE642_CasaB/config_bases.json`. O nome dos arquivos de saída vem da chave `prefixo` da config (`POE642_CasaB`).

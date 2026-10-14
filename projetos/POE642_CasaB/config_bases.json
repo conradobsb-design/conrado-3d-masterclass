@@ -105,7 +105,8 @@
               "#E4E4E4"
             ],
             "para": "#AE8863",
-            "cor_linha": "#8A6A4C"
+            "cor_linha": "#8A6A4C",
+            "_ordem": "vem antes da escada; o meio círculo que sobra na ducha vira linha marrom e some na prévia de texturas"
           },
           {
             "nome": "escada que desce até a ducha → travertino",
@@ -117,7 +118,22 @@
             ],
             "para": "#DCD9CA",
             "linhas_layer": "ARQ_ESCADAS E RAMPAS",
-            "cor_linha": "#8F8574"
+            "cor_linha": "#8F8574",
+            "sem_linhas_bbox_vis": [
+              [
+                226.8,
+                343.5,
+                231.0,
+                351.0
+              ],
+              [
+                273.6,
+                345.3,
+                277.5,
+                349.1
+              ]
+            ],
+            "_sem_linhas_bbox_vis": "A seta só aponta para baixo, da pedra grande para a ducha (os degraus vão de 6 a 1 nesse sentido): saem a ponta de seta da esquerda e o círculo da ponta da direita."
           },
           {
             "nome": "pedra grande de acesso à escada → travertino",
@@ -159,6 +175,170 @@
             227.5,
             476.5
           ]
+        ]
+      },
+      "texturas": {
+        "_sobre": "Prévia de texturas: cada cor da legenda vira a textura do mesmo material num render aprovado da Casa A (bbox em px de um render de 2000 px).",
+        "tolerancia": 12,
+        "materiais": [
+          {
+            "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+            "cores": [
+              "#E8E8E8"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                "bbox": [
+                  [
+                    1350,
+                    582,
+                    1452,
+                    848
+                  ],
+                  [
+                    648,
+                    636,
+                    698,
+                    848
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "travertino (hall do Subsolo da Casa A)",
+            "cores": [
+              "#DCD9CA"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    580,
+                    552,
+                    688,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "banco da sauna em travertino: degrau da frente, um tom mais escuro",
+            "cores": [
+              "#CAC6AE"
+            ],
+            "bbox_vis": [
+              386.7,
+              378,
+              481.7,
+              397
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    580,
+                    552,
+                    688,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true,
+            "escurecer": 0.93
+          },
+          {
+            "nome": "banco da sauna em travertino: assento junto à parede, mais escuro",
+            "cores": [
+              "#C1BDA1"
+            ],
+            "bbox_vis": [
+              386.7,
+              397,
+              481.7,
+              412.4
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    580,
+                    552,
+                    688,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true,
+            "escurecer": 0.88
+          },
+          {
+            "nome": "vinílico (madeira da academia do Subsolo da Casa A)",
+            "cores": [
+              "#C8A27C"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    702,
+                    548,
+                    960,
+                    603
+                  ],
+                  [
+                    702,
+                    742,
+                    930,
+                    778
+                  ],
+                  [
+                    825,
+                    603,
+                    868,
+                    740
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "deck de madeira da ducha (deck do Térreo da Casa A)",
+            "cores": [
+              "#AE8863",
+              "#8A6A4C"
+            ],
+            "bbox_vis": [
+              275.5,
+              322.2,
+              380.2,
+              418.9
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    383,
+                    308,
+                    462,
+                    575
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          }
         ]
       }
     }

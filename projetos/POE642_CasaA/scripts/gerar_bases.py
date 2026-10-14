@@ -534,6 +534,16 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
         arr[y0:y1, x0:x1] = hex_rgb(r["para"])
         if r.get("linhas_layer"):
             ds = [d for d in desenhos if na_layer(d, r["linhas_layer"]) and d["type"] in ("s", "fs")]
+            if r.get("sem_linhas_bbox_vis"):
+                # traços que não voltam (ex.: na Casa B, a ponta de seta e o círculo da linha de
+                # caminhamento que contradizem o sentido da descida)
+                def no_corte(d):
+                    a = raster.rotacionar_px(*raster.para_px(d["rect"].tl))
+                    b = raster.rotacionar_px(*raster.para_px(d["rect"].br))
+                    xs, ys = sorted((a[0] / esc, b[0] / esc)), sorted((a[1] / esc, b[1] / esc))
+                    return any(bx0 <= xs[0] and xs[1] <= bx1 and by0 <= ys[0] and ys[1] <= by1
+                               for bx0, by0, bx1, by1 in r["sem_linhas_bbox_vis"])
+                ds = [d for d in ds if not no_corte(d)]
             mk = raster.rotacionar_arr(raster.mascara(ds, "stroke", r.get("largura_linha_px", 2) / raster.zoom))
             bloco = arr[y0:y1, x0:x1]
             bloco[mk[y0:y1, x0:x1]] = hex_rgb(r.get("cor_linha", "#111111"))
