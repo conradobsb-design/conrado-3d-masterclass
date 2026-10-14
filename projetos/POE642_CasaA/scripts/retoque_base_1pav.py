@@ -8,6 +8,7 @@
    do PDF: degraus que descem (contínuos e tracejados), arco central, marcas e as linhas duplas
    que dividem o vão do piso. O quarto creme e o piso em volta ficam do render.
    Na bancada da entrada da suíte master entra a cuba redonda com torneira da base.
+   Os vãos de pé-direito duplo deixam o cinza-escuro e ficam brancos, com o X tracejado do PDF.
 3. Entorno: tudo fora do 1º pavimento (fora dos retângulos 'manter_bbox_vis' do
    esmaecer) passa a ser a base, esmaecida. Isso inclui as pedras de acesso ao hall
    externo, o pergolado tracejado, a piscina, o deck e os contornos.
@@ -171,6 +172,33 @@ def main():
     out[oy:oy + n, ox:ox + n] = (reg * (1 - a) + peq[..., :3] * a).astype(np.uint8)
     alterado[oy:oy + n, ox:ox + n] |= a[..., 0] > 0.02
     print(f"    centro ({ccx:.1f}, {ccy:.1f}), diâmetro {2 * rr:.1f} px")
+
+    # 3c. vãos de pé-direito duplo em branco ------------------------------------------
+    # o cinza-escuro dos vãos (os dois quadrados grandes, as faixas em volta da escada em U e o
+    # vão entre os lances) vira branco, com o X tracejado e as linhas do PDF por cima
+    print("[3c] vãos em branco, com o X tracejado do PDF")
+    lr = lum(out)
+    croma = out.max(axis=2).astype(int) - out.min(axis=2)
+    vaos = np.zeros((H, W), np.uint8)
+    for regra in pav["legenda"]["retangulos"]:
+        if regra.get("para", "").upper() != "#4A4A4A":
+            continue
+        bx0, by0, bx1, by1 = regra["bbox_vis"]
+        q = np.round(np.array([vis_px(bx0, by0), vis_px(bx1, by0), vis_px(bx1, by1), vis_px(bx0, by1)])).astype(np.int32)
+        dentro = np.zeros((H, W), np.uint8)
+        cv2.fillConvexPoly(dentro, q, 1)
+        escuro = ((lr >= 58) & (lr <= 110) & (croma <= 14) & dentro.astype(bool)).astype(np.uint8)
+        # o X claro e as emendas finas ficam dentro do vão
+        escuro = cv2.morphologyEx(escuro, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5)))
+        # a borda serrilhada entre o cinza-escuro e o vizinho (travertino, parede) entra no vão:
+        # o contorno limpo volta pelas linhas do PDF
+        borda = cv2.dilate(escuro, np.ones((3, 3), np.uint8)).astype(bool) & (lr >= 45) & (lr < 175) & (croma < 20)
+        vaos |= (escuro.astype(bool) | borda).astype(np.uint8) & dentro
+    alfa_v = (np.clip(cob * 1.6, 0, 0.65) * vaos)[..., None]
+    desenho = np.array([250, 250, 250], np.float32) * (1 - alfa_v) + np.array([92, 92, 92], np.float32) * alfa_v
+    out = np.where(vaos[..., None].astype(bool), desenho, out).astype(np.uint8)
+    alterado |= vaos.astype(bool)
+    print(f"    {int(vaos.sum())} px de vão")
 
     # 4. entorno = base --------------------------------------------------------------
     print("[4] entorno: base esmaecida fora do 1º pavimento")
