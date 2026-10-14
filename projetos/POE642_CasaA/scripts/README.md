@@ -174,7 +174,7 @@ No Subsolo da Casa C, a imagem final também é o próprio render, retocado sem 
   - As áreas vêm da base chapada (cor #E8E8E8), alinhada ao render por SIFT.
   - As pintinhas e os veios do mármore do render saem.
   - Os contornos, a porta do depósito e as plantas da floreira ficam.
-- **Degraus largos:** cada aresta é redesenhada com o perfil do render espelhado (sombra do lado do pátio, filete de luz do outro).
+- **Degraus largos:** cada aresta é redesenhada com o perfil do render espelhado (sombra do lado do pátio, filete de luz do outro). Como no PDF, são 9 arestas: a de cima entra com o perfil médio das outras, e as 2 de baixo viram em L junto ao começo do caminho.
 - **Banco da sauna:** o banco em U de madeira do render vira o banco da base, em travertino em L e em dois níveis, nos tons do banco aprovado da Casa B.
   - O travertino é o do piso da sauna no render, com os veios verticais continuados em espelho.
   - As arestas são finas, sem sombra.

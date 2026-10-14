@@ -261,7 +261,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 - **Render (prompt v3):** `renders/POE642_CasaC_PH_Subsolo_v3_render.webp`. Planta em L, mesma escala da base (afim 1,0008 x 1,0095).
 - **Imagem final = o render v3, retocado:** `renders/POE642_CasaC_PH_Subsolo_v3_retocado.png` (+ `_camada.png`), pelo `retoque_subsolo_casac_v3.py`.
   - **Bege Bahia:** o motor clareou o mármore (cerca de 235/224/212 contra 226/211/200). Pátio, degraus largos, caminho e depósito recebem o Bege Bahia aprovado (varandas do 1º Pavimento da Casa A, tecido por quilting na escala do render). Contornos, a porta do depósito e as plantas ficam como estão.
-  - **Degraus largos:** as 8 arestas do render são redesenhadas com o perfil espelhado; a sombra fica do lado do pátio.
+  - **Degraus largos:** as arestas do render são redesenhadas com o perfil espelhado; a sombra fica do lado do pátio.
+    - **Degraus em L (pedido do usuário):** como no PDF, são 9 arestas. A de cima, que o motor não fez, entra com o perfil médio das outras. As 2 de baixo viram em L e descem até o fim do pátio: uma na coluna 231, a outra na 246, emendando no contorno do caminho.
   - **Banco da sauna (pedido do usuário):** o motor fez um banco em U de madeira; fica o da base, em travertino em L e em dois níveis, nos tons do banco aprovado da Casa B.
     - Degrau da frente em L: 0,91 do piso. Assento junto à parede de baixo: 0,867 do piso.
     - O travertino é o do próprio piso da sauna, com os veios verticais continuados; onde era o braço esquerdo do U, volta a ser piso.
@@ -271,7 +272,6 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
     - Na ducha, sai a placa grande fora do centro, com haste até a parede.
     - No box, sai o metal na parede da esquerda.
 - **Diferenças do render v3 para a base, não pedidas (ficam como estão até o usuário pedir):**
-  - os degraus largos têm 8 arestas retas, sem a de cima e sem a volta em L junto ao caminho;
   - a linha de caminhamento com a seta não aparece.
 - **Próximos passos:** rodapé (chave `entrega` na config: pedir ao usuário as áreas da Casa C, a unidade e se o endereço segue o padrão das outras casas) e PDF.
 

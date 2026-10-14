@@ -13,6 +13,8 @@
    - Cada aresta é redesenhada sobre o Bege Bahia novo, na mesma posição e com o mesmo traço.
    - O perfil da aresta (linha, sombra e filete de luz) é espelhado em torno da linha: a sombra
      passa para cima e o filete de luz para baixo.
+   - Como no PDF, são 9 arestas: a de cima, que o motor não fez, entra com o perfil médio das
+     outras; as 2 de baixo viram em L e descem junto ao começo do caminho até o fim do pátio.
    A escada curta numerada (esmaecida) não muda.
 3. Banco da sauna: o motor fez um banco em U de madeira. Fica o banco da base (pedido do
    usuário): travertino em L, em dois níveis, como o banco aprovado da Casa B.
@@ -51,7 +53,12 @@ BASE_TEXTURAS = RAIZ / "POE642_CasaC/bases/POE642_CasaC_BASE_Subsolo_v3_texturas
 COR_BEGE_BAHIA = 232                                    # #E8E8E8 na base chapada
 FONTE_BEGE_BAHIA = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
                     [(1350, 582, 1452, 848), (648, 636, 698, 848)])
-DEGRAUS = {"x": (191, 336), "y": (386, 520)}            # degraus largos, até a floreira
+DEGRAUS = {"x": (191, 336), "y": (372, 520)}            # degraus largos, até a floreira
+# como no PDF: 9 arestas; as 7 de cima são retas e as 2 de baixo viram em L, descendo junto ao
+# começo do caminho até o fim do pátio. O motor fez 8 retas (faltou a de cima, sem os L).
+DEGRAU_TOPO = 381                                       # a aresta de cima, que faltou
+DEGRAUS_L = [{"y": 491, "x": 231}, {"y": 507, "x": 246}]  # aresta (y) que vira em L na coluna x
+FIM_L = 567                                             # última linha do pátio (o contorno fica)
 PLANTAS = (300, 360, 400, 530)                          # onde ficam as plantas da floreira
 PEDRA_L = (205, 246)                                    # luminância da pedra lisa no render
 PINTA_MAX = 20                                          # px: mancha escura menor que isso é do mármore
@@ -148,13 +155,28 @@ def relevo_degraus(L, livre):
             grupos[-1].append(y)
         else:
             grupos.append([y])
+    arestas = []
     for g in grupos:
         c = y0 + g[int(np.argmin(m[g]))]                   # a linha mais escura da aresta
         liso = np.nanmedian(m[c - y0 - 7:c - y0 - 2])      # piso liso logo acima (sem sombra)
-        perfil = np.clip(m[c - y0 - JANELA:c - y0 + JANELA + 1] / liso, 0.45, 1.06)
+        arestas.append((c, np.clip(m[c - y0 - JANELA:c - y0 + JANELA + 1] / liso, 0.45, 1.06)))
+    medio = np.mean([pf for _, pf in arestas], axis=0)
+    if all(abs(c - DEGRAU_TOPO) > 4 for c, _ in arestas):
+        arestas.insert(0, (DEGRAU_TOPO, medio))
+    n_l = 0
+    for c, perfil in arestas:
+        xi = x0
+        for dl in DEGRAUS_L:
+            if abs(c - dl["y"]) <= 3:
+                xi = dl["x"]
+                n_l += 1
+                # o L: a aresta desce na coluna x até o fim do pátio, com a sombra do lado de fora
+                # (à esquerda, o nível mais baixo), como a de cima de cada aresta reta
+                for d in range(-JANELA, JANELA + 1):
+                    K[c - 1:FIM_L + 1, xi + d] *= perfil[JANELA - d]
         for d in range(-JANELA, JANELA + 1):                # linha c+d recebe o que estava em c-d
-            K[c + d, x0:x1] *= perfil[JANELA - d]
-    print(f"    degraus largos: {len(grupos)} arestas com a sombra virada para o pátio")
+            K[c + d, xi:x1] *= perfil[JANELA - d]
+    print(f"    degraus largos: {len(arestas)} arestas com a sombra virada para o pátio, {n_l} em L")
     return K
 
 
