@@ -890,7 +890,7 @@
       ],
       "_layers_ocultas": "Curvas de nível saem, como no Subsolo.",
       "legenda": {
-        "_sobre": "Casa B · Térreo. Travertino #DCD9CA: todo o oliva #BAB596 do PDF (áreas sociais, varanda, banhos, halls, jardim de inverno, faixa externa e pedras de acesso), as escadas #DDDACB, a borda das piscinas, a pedra grande e as pedras escalonadas. Granito Marrom Tabaco #5A4232: todo o malva #BFA79F, como na Casa A (cozinha, faixa da bancada gourmet, louceiro, despensa, serviço, área de serviço descoberta e bloco do motorista). Vinílico #C8A27C: o laranja #CC9966 (suítes, sala íntima, closet master e circulação íntima), o mesmo da Casa A. Deck de madeira #AE8863 com réguas #8A6A4C: os três decks listrados. Pedra portuguesa caramelo #B98A55: garagem e acesso de carros, sem os hexágonos. Piscina #DFF6FE. Gramado #6E9150: o entorno do lote e o jardim de 4,62 m². Pilares #FF7FC0 viram parede. Floreira #4F7A3A: o jardim de inverno (plantas tropicais). Banco em L do deck grande em bronze #7A5A3C. Borda infinita: a faixa entre o deck e o braço de cima da piscina sai como calha com água #C9EAF5.",
+        "_sobre": "Casa B · Térreo. Travertino #DCD9CA: todo o oliva #BAB596 do PDF (áreas sociais, varanda, banhos, halls, jardim de inverno, faixa externa e pedras de acesso), as escadas #DDDACB, a borda das piscinas, a pedra grande e as pedras escalonadas. Granito Marrom Tabaco #5A4232: todo o malva #BFA79F, como na Casa A (cozinha, faixa da bancada gourmet, louceiro, despensa, serviço, área de serviço descoberta e bloco do motorista). Vinílico #C8A27C: o laranja #CC9966 (suítes, sala íntima, closet master e circulação íntima), o mesmo da Casa A. Deck de madeira #AE8863 com réguas #8A6A4C: os três decks listrados. Pedra portuguesa caramelo #B98A55: garagem e acesso de carros, sem os hexágonos. Piscina #DFF6FE. Gramado #6E9150: o entorno do lote e o jardim de 4,62 m². Pilares #FF7FC0 viram parede. Floreira #4F7A3A: o jardim de inverno (plantas tropicais). Banco em L do deck grande em bronze #7A5A3C. Borda infinita: a faixa entre o deck e o braço de cima da piscina é a mesma água da piscina, sem calha.",
         "tolerancia_px": 10,
         "poligonos": [
           {
@@ -1007,7 +1007,7 @@
         ],
         "retangulos": [
           {
-            "nome": "borda infinita do braço de cima da piscina, junto ao deck → calha com água",
+            "nome": "borda infinita do braço de cima da piscina, junto ao deck → água até a borda",
             "bbox_vis": [
               267.8,
               490.2,
@@ -1015,8 +1015,8 @@
               589.9
             ],
             "so_branco": true,
-            "para": "#C9EAF5",
-            "_nota": "Definido pelo usuário: a faixa branca de 30 cm entre a linha do deck e a da água (sem a borda cinza do PDF) é a borda infinita. Sai como água um tom mais escuro (a calha de transbordo); a linha da água fica como o lábio da borda."
+            "para": "#DFF6FE",
+            "_nota": "Definido pelo usuário: o braço de cima da piscina tem borda infinita junto ao deck (a faixa branca de 30 cm do PDF, sem borda cinza). Não há transbordo nem calha: a faixa é a mesma água da piscina até a linha do deck."
           },
           {
             "nome": "jardim de 4,62 m² junto à entrada da garagem → grama",
@@ -1243,26 +1243,6 @@
               }
             ],
             "_fonte": "Só a água, sem as bordas: de x 684 em diante a amostra escurece (borda e sombra da parede) e deixava uma faixa escura na piscina."
-          },
-          {
-            "nome": "calha da borda infinita (a mesma água, um tom mais escuro)",
-            "cores": [
-              "#C9EAF5"
-            ],
-            "fontes": [
-              {
-                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
-                "bbox": [
-                  [
-                    582,
-                    285,
-                    678,
-                    440
-                  ]
-                ]
-              }
-            ],
-            "escurecer": 0.86
           },
           {
             "nome": "floreira do jardim de inverno (touceiras tropicais do Térreo da Casa A)",
