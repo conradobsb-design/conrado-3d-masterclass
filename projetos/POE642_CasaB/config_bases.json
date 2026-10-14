@@ -34,7 +34,7 @@
       ],
       "_layers_ocultas": "Curvas de nível e linha do lote saem, como na Casa A: fundo todo branco.",
       "legenda": {
-        "_sobre": "Casa B · Subsolo. Bege Bahia #E8E8E8: todo o malva #BFA79F do PDF (garagem, circulação até a sauna, BH de serviço e o piso do chuveiro dele). Vinílico #C8A27C: academia. Deck de madeira #AE8863 com réguas #8A6A4C: ducha. Travertino #DCD9CA: todo o resto (depósito, sauna, banco, BH sauna, a pedra grande de acesso à escada e a escada que desce até a ducha, com as bordas dos degraus em #8F8574).",
+        "_sobre": "Casa B · Subsolo. Bege Bahia #E8E8E8: todo o malva #BFA79F do PDF (garagem, circulação até a sauna, BH de serviço e o piso do chuveiro dele). Vinílico #C8A27C: academia (prévia com o piso das suítes do 1º Pavimento da Casa A). Deck de madeira #AE8863 com réguas #8A6A4C: ducha. Travertino #DCD9CA: todo o resto (depósito, sauna, banco, BH sauna, a pedra grande de acesso à escada e a escada que desce até a ducha, com as bordas dos degraus em #8F8574).",
         "tolerancia_px": 10,
         "poligonos": [
           {
@@ -281,31 +281,31 @@
             "escurecer": 0.88
           },
           {
-            "nome": "vinílico (madeira da academia do Subsolo da Casa A)",
+            "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
             "cores": [
               "#C8A27C"
             ],
             "fontes": [
               {
-                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
                 "bbox": [
                   [
-                    702,
-                    548,
-                    960,
-                    603
+                    858,
+                    638,
+                    972,
+                    684
                   ],
                   [
-                    702,
-                    742,
-                    930,
-                    778
+                    922,
+                    719,
+                    978,
+                    826
                   ],
                   [
-                    825,
-                    603,
-                    868,
-                    740
+                    1012,
+                    212,
+                    1060,
+                    268
                   ]
                 ]
               }
