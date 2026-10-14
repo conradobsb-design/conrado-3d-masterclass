@@ -81,7 +81,7 @@ O `scripts/README.md` documenta cada opção do `config_bases.json` e todos os s
      - Térreo: o PDF com a layer `ARQ_PAREDE`, que foi enviado direto na conversa;
      - `642-_SUBSOLO_CASA_A_1.pdf`;
      - `642-_1__PAVIMENTO_CASA_A_1.pdf`.
-   - **Casa B:** `642 - SUBSOLO - CASA B.pdf`.
+   - **Casa B:** `642 - SUBSOLO - CASA B.pdf` e `642 - TÉRREO - CASA B.pdf`.
    - **Referência (Drive do cliente):** pasta `10UABd77xZ9V2R3G85xkOdnvg1kCgrsMj`, com `642-ARQ-EX-001-…-LAYOUT-R01.pdf` (folha de layout, de onde vieram o norte e o carimbo), 002, 005, 006 e 021. Esses PDFs **não** têm a layer `ARQ_PAREDE`, por isso não servem para gerar base.
 5. **Conferir:** rode os scripts de dentro de `projetos/POE642_CasaA/scripts/`, porque os caminhos são relativos a essa pasta.
 
@@ -122,6 +122,10 @@ python elementos_do_render.py Subsolo ../../POE642_CasaB/renders/POE642_CasaB_PH
 python acabamentos_finais.py Subsolo ../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_elementos.png --config ../../POE642_CasaB/config_bases.json --saida ../../POE642_CasaB/renders --nome POE642_CasaB_PH_Subsolo_final
 # 5. rodapés e prancha
 python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final.png
+
+# Térreo da Casa B: base (renomeie a saída para ..._Terreo_v2) e prévia de texturas
+python gerar_bases.py Terreo "../../_pdfs_cliente/642 - TÉRREO - CASA B.pdf" --config ../../POE642_CasaB/config_bases.json --saida ../../POE642_CasaB/bases
+python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terreo_v2.png --config ../../POE642_CasaB/config_bases.json --saida ../../POE642_CasaB/bases --nome POE642_CasaB_BASE_Terreo_v3_texturas
 ```
 
 **Coordenadas:** todos os retângulos das configs (`*_vis`) estão na prévia de 1800 px da base sem margem. A conversão é `vis = (pdf − recorte) × 1800 / (0,94 × largura da folha)`. Na base 16:9 de 6905 px, isso dá `px = vis × 6001/1800 + 452`.
@@ -209,13 +213,27 @@ python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render 
   - **Confirmados pelo usuário:** endereço e unidade (ML 10 – Conjunto 02, Lotes 17, Unidade B) e o norte, o mesmo da Casa A (a folha da Casa B não tem norte).
   - O quadro é a folha inteira do cliente, então a casa fica pequena no canto. Quando chegar o Térreo, definir um recorte comum aos dois pavimentos.
 
+**Térreo (materiais definidos pelo usuário em 14/10/26):**
+- **Vinílico da Casa A:** o laranja #CC9966 (suítes, sala íntima, closet master e circulação íntima).
+- **Pedra portuguesa caramelo, igual à da Casa A:** garagem e acesso de carros (no PDF, cinza com hexágonos; os hexágonos saem).
+- **Garagem:** com os 3 carros do PDF.
+- **Entorno:** grama e paisagismo dentro do lote, entre os dois muros (o `gramados` do `gerar_bases.py` pinta o branco que chega à borda do lote).
+- **Pelas regras do Subsolo:** oliva = travertino; malva = Bege Bahia; decks listrados = madeira; borda das piscinas e pedras cinza = travertino.
+
+**Estado do Térreo:**
+- **Bases:** v1 (cores do PDF), v2 (legenda) e v3_texturas (prévia), em `POE642_CasaB/bases/`.
+- **Prompt:** `POE642_CasaB_PH_Terreo_v1.md` (PT + EN, com escala).
+- **Perguntas em aberto ao usuário:**
+  - a peça branca em L que contorna o deck grande de baixo (floreira? banco?);
+  - se o jardim de inverno (piso oliva, travertino, com o X tracejado da abertura) leva plantas.
+- **Depois do render:** `elementos_do_render.py` (móveis, carros, louças e as touceiras de plantas) e `acabamentos_finais.py`, como no Subsolo.
+
 **Próximos passos:**
 1. **Revisão do cliente:** o usuário confere o Subsolo final.
-2. **Térreo da Casa B:** aguarda o PDF. A Casa B não tem 1º Pavimento. Para o Térreo:
-   - criar o pavimento em `POE642_CasaB/config_bases.json`;
-   - perguntar ao usuário os materiais de cada cor da legenda;
-   - gerar a base, a prévia de texturas, o prompt v1 (PT + EN, com escala), o render e a imagem final pelo `elementos_do_render.py` e o `acabamentos_finais.py`;
-   - preencher `entrega.pavimentos.Terreo.base` na config, montar a prancha e gerar o PDF da Casa B (`pdf_entrega.py --config ../../POE642_CasaB/config_bases.json`).
+2. **Térreo da Casa B:** o usuário roda o prompt v1 no motor e manda o render. A Casa B não tem 1º Pavimento.
+   - imagem final pelo `elementos_do_render.py` e pelo `acabamentos_finais.py`;
+   - preencher `entrega.pavimentos.Terreo.base` na config (`POE642_CasaB_BASE_Terreo_v3_texturas_16x9.png`), voltar `entrega.pdf.ordem` para `["Subsolo", "Terreo"]` e o título do PDF;
+   - definir um recorte comum aos dois pavimentos (o quadro hoje é a folha inteira) e refazer as pranchas e o PDF.
 3. **Opcional, mais nitidez nos objetos:** passar o render num upscaler de IA (Higgsfield `upscale_image`) antes do `elementos_do_render.py`. Isso gasta créditos, então só com autorização.
 
 ---

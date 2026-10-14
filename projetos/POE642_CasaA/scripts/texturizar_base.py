@@ -111,8 +111,9 @@ def main():
     # px da base por px do render aprovado: a folha inteira tem 2000 px no render e 6905 px na base 16:9
     fator = LARGURA_16x9 / LARGURA_RENDER * W / BASE_SEM_MARGEM
 
-    permitido = np.zeros((H, W), bool)
-    for x0, y0, x1, y1 in pav["esmaecer"]["manter_bbox_vis"]:
+    # sem entorno esmaecido (ex.: o Térreo), a planta inteira tem cor cheia
+    permitido = np.zeros((H, W), bool) if "esmaecer" in pav else np.ones((H, W), bool)
+    for x0, y0, x1, y1 in pav.get("esmaecer", {}).get("manter_bbox_vis", []):
         permitido[int(y0 * vis):int(np.ceil(y1 * vis)), int(x0 * vis):int(np.ceil(x1 * vis))] = True
 
     out = base.astype(np.float32)

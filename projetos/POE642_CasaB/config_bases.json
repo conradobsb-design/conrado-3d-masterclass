@@ -881,6 +881,332 @@
           }
         ]
       }
+    },
+    "Terreo": {
+      "pagina": 0,
+      "rotacao": 0,
+      "layers_ocultas": [
+        "ARQ_TERRENO PLANEJADO"
+      ],
+      "_layers_ocultas": "Curvas de nível saem, como no Subsolo.",
+      "legenda": {
+        "_sobre": "Casa B · Térreo. Travertino #DCD9CA: todo o oliva #BAB596 do PDF (áreas sociais, varanda, banhos, halls, jardim de inverno, faixa externa e pedras de acesso), as escadas #DDDACB, a borda das piscinas, a pedra grande e as pedras escalonadas. Bege Bahia #E8E8E8: todo o malva #BFA79F (cozinha, serviço, bloco do motorista e área de serviço descoberta). Vinílico #C8A27C: o laranja #CC9966 (suítes, sala íntima, closet master e circulação íntima), o mesmo da Casa A. Deck de madeira #AE8863 com réguas #8A6A4C: os três decks listrados. Pedra portuguesa caramelo #B98A55: garagem e acesso de carros, sem os hexágonos. Piscina #DFF6FE. Gramado #6E9150: o entorno do lote e o jardim de 4,62 m². Pilares #FF7FC0 viram parede.",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "garagem e acesso de carros → pedra portuguesa caramelo (sem os hexágonos)",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              1018,
+              695,
+              1760,
+              1000
+            ],
+            "para": "#B98A55",
+            "cor_linha": "#B98A55",
+            "proteger_layers": [
+              "ARQ_LAYOUT HUMANIZAÇÃO",
+              "ARQ_PAREDE",
+              "EST_PILAR",
+              "ARQ_ELEMENTOS FIXOS"
+            ]
+          },
+          {
+            "nome": "deck sobre a ducha → madeira",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              320,
+              365,
+              336,
+              377
+            ],
+            "para": "#AE8863",
+            "cor_linha": "#8A6A4C"
+          },
+          {
+            "nome": "deck à esquerda da piscina → madeira",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              260,
+              497,
+              276,
+              511
+            ],
+            "para": "#AE8863",
+            "cor_linha": "#8A6A4C"
+          },
+          {
+            "nome": "deck de baixo (43,95 m²) → madeira",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              318,
+              824,
+              333,
+              838
+            ],
+            "para": "#AE8863",
+            "cor_linha": "#8A6A4C"
+          },
+          {
+            "nome": "borda das piscinas, pedra grande e pedras escalonadas → travertino",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "para": "#DCD9CA"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ],
+          [
+            "#BFA79F",
+            "#E8E8E8"
+          ],
+          [
+            "#CC9966",
+            "#C8A27C"
+          ],
+          [
+            "#7FDFFF",
+            "#DFF6FE"
+          ],
+          [
+            "#FF7FC0",
+            "#111111"
+          ]
+        ],
+        "retangulos": [
+          {
+            "nome": "borda da piscina entre o deck e a piscina (branca no PDF) → travertino",
+            "bbox_vis": [
+              267.8,
+              490.2,
+              277.0,
+              589.9
+            ],
+            "so_branco": true,
+            "para": "#DCD9CA",
+            "_nota": "Faixa de 30 cm entre a linha do deck e a da água, a mesma largura do resto da borda, sem preenchimento no PDF."
+          },
+          {
+            "nome": "jardim de 4,62 m² junto à entrada da garagem → grama",
+            "bbox_vis": [
+              1131.5,
+              645.5,
+              1233.5,
+              689.5
+            ],
+            "so_branco": true,
+            "para": "#6E9150"
+          }
+        ],
+        "gramados": [
+          {
+            "nome": "entorno do lote → grama",
+            "bbox_vis": [
+              26,
+              55,
+              1757,
+              1013
+            ],
+            "para": "#6E9150"
+          }
+        ],
+        "_escadas": "As escadas #DDDACB ficam como estão: a 1 ponto do travertino #DCD9CA, a prévia de texturas já as lê como travertino. Uma troca #DDDACB→#DCD9CA com a tolerância 10 pegava também os vidros #D6D6D3."
+      },
+      "texturas": {
+        "_sobre": "Prévia de texturas do Térreo: cada cor da legenda vira a textura do mesmo material num render aprovado da Casa A (bbox em px de um render de 2000 px). Sem esmaecer, vale a planta inteira.",
+        "tolerancia": 4,
+        "_tolerancia": "4, e não 12 como no Subsolo: as cores da legenda são exatas, e com 12 o vidro #D6D6D3 entraria no travertino #DCD9CA. As escadas #DDDACB entram no travertino.",
+        "materiais": [
+          {
+            "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+            "cores": [
+              "#E8E8E8"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                "bbox": [
+                  [
+                    1350,
+                    582,
+                    1452,
+                    848
+                  ],
+                  [
+                    648,
+                    636,
+                    698,
+                    848
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "travertino (hall do Subsolo da Casa A)",
+            "cores": [
+              "#DCD9CA"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    582,
+                    580,
+                    686,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+            "cores": [
+              "#C8A27C"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                "bbox": [
+                  [
+                    858,
+                    638,
+                    972,
+                    684
+                  ],
+                  [
+                    922,
+                    719,
+                    978,
+                    826
+                  ],
+                  [
+                    1012,
+                    212,
+                    1060,
+                    268
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "deck de madeira (deck do Térreo da Casa A), os três decks",
+            "cores": [
+              "#AE8863",
+              "#8A6A4C"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    383,
+                    308,
+                    462,
+                    575
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "pedra portuguesa caramelo (acesso de veículos do Térreo da Casa A)",
+            "cores": [
+              "#B98A55"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    1210,
+                    870,
+                    1640,
+                    1000
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "gramado (Térreo da Casa A)",
+            "cores": [
+              "#6E9150"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    1530,
+                    460,
+                    1700,
+                    690
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "piscina (água sobre pastilha, Térreo da Casa A)",
+            "cores": [
+              "#DFF6FE"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    582,
+                    285,
+                    678,
+                    440
+                  ]
+                ]
+              }
+            ],
+            "_fonte": "Só a água, sem as bordas: de x 684 em diante a amostra escurece (borda e sombra da parede) e deixava uma faixa escura na piscina."
+          }
+        ]
+      }
     }
   },
   "entrega": {

@@ -421,7 +421,8 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
       — ex.: acesso de veículos no mesmo cinza do deck;
     - trocas_cor: troca global de uma cor renderizada por outra;
     - hachuras: áreas sem preenchimento, só hachura sobre branco (deck de madeira),
-      dentro de um retângulo da visualização de 1800 px.
+      dentro de um retângulo da visualização de 1800 px;
+    - gramados: o branco do entorno que chega à borda do lote vira grama.
     Só pixels com a cor de origem mudam: linhas, móveis e símbolos ficam intactos.
     """
     arr = np.array(img).astype(int)
@@ -470,6 +471,12 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
             m |= ms
         else:
             m = mask & (np.abs(arr - hex_rgb(regra["cor_render"])).max(axis=-1) <= tol)
+            if regra.get("cor_linha"):
+                # as linhas cinza dentro do polígono (ex.: réguas do deck, hexágonos do acesso de carros)
+                # também mudam; com 'cor_linha' igual a 'para', elas somem no material
+                neutro = (arr.max(axis=-1) - arr.min(axis=-1)) <= 8
+                ml = mask & ~m & neutro & (arr.min(axis=-1) >= 60) & (arr.min(axis=-1) < 235)
+                arr[ml] = hex_rgb(regra["cor_linha"])
             arr[m] = hex_rgb(regra["para"])
         resumo.append(f"{regra['nome']}: {len(sel)} polígono(s), {int(m.sum())} px")
 
@@ -557,6 +564,20 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
         if s.get("cor_linha"):
             arr[linhas] = hex_rgb(s["cor_linha"])
         resumo.append(f"{s['nome']}: {int(m.sum())} px")
+
+    # gramado: o branco que chega até a borda do lote (o entorno), sem o branco fechado dentro da casa
+    for g in legenda.get("gramados", []):
+        x0, y0, x1, y1 = (int(round(v * esc)) for v in g["bbox_vis"])
+        sub = arr[y0:y1, x0:x1]
+        neutro = (sub.max(axis=-1) - sub.min(axis=-1)) <= 8
+        branco = neutro & (sub.min(axis=-1) >= 235)
+        lab, _ = ndimage.label(branco)
+        borda = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))
+        m = np.isin(lab, borda[borda > 0])
+        # o halo claro das linhas que cruzam o gramado (antisserrilhado) também vira grama
+        halo = ndimage.binary_dilation(m, iterations=2) & ~m & neutro & (sub.min(axis=-1) >= 200)
+        sub[m | halo] = hex_rgb(g["para"])
+        resumo.append(f"{g['nome']}: {int((m | halo).sum())} px")
 
     return Image.fromarray(arr.astype(np.uint8)), resumo
 
