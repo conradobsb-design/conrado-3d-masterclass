@@ -276,7 +276,20 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 - **Entrega do Subsolo (14/10/26):** prancha `entrega/POE642_CasaC_PH_Subsolo_entrega.png` (3840 x 2600) e PDF para o cliente `entrega/POE642_CasaC_Plantas_Humanizadas.pdf` (A3, só o Subsolo, a pedido do usuário; o Térreo entra quando for feito).
   - **Rodapé (chave `entrega` da config):** áreas do quadro do usuário: Térreo 798,89 m², Subsolo 113,81 m², total 912,70 m².
   - **Confirmados pelo usuário:** endereço "ML 10 – Conjunto 02, Lotes 17, Unidade C", unidade C e o norte da Casa A.
-- **Próximos passos:** Térreo da Casa C (base, prompt, render e retoque); depois, pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
+
+**Térreo (PDF `642 - TÉRREO - CASA C.pdf`, recebido em 14/10/26; materiais definidos pelo usuário no mesmo dia):**
+- **Travertino:** todo o oliva (áreas sociais, circulações, halls, varandas, BH master 1, lavabos e borda das piscinas).
+- **Vinílico da Casa A:** o laranja (suíte master, quartos, closets e escritório).
+- **Granito Marrom Tabaco:** o malva (cozinha, louceiro, serviço, área de serviço descoberta, quarto e BH externos e a faixa da bancada gourmet), menos a garagem.
+- **Pedra portuguesa caramelo, sem os hexágonos:** garagem (com os 3 carros) e acesso de carros.
+- **Bege Bahia:** o cinza dos banhos (BH 1, 2, 3 e BH master 2) e da área externa (pátio, degraus largos, caminho, pisantes) e a escada estreita ao lado do deck.
+- **Deck de madeira:** a faixa listrada entre a escada e a piscina.
+- **Grama:** o entorno. **Floreiras:** jardim 1 e os dois jardins de inverno. **Banco em L junto ao deck:** bronze, como na Casa B (por analogia; confirmar com o usuário).
+- **Degraus largos:** numerados no PDF de 1 (junto ao pátio) a 10 (junto ao caminho), seguindo na escada estreita de 11 a 21 até o deck; descem para cima, rumo ao pátio. A base traz a linha de caminhamento com a seta para cima (`setas`, como no Subsolo).
+- **Bases:** v1 (cores do PDF), v2 (legenda) e v3_texturas, em `POE642_CasaC/bases/`.
+  - Nas texturas, a amostra da pedra portuguesa e a da floreira foram estreitadas: a da Casa B pegava gramado (manchas verdes no acesso) e fundo branco (faixas brancas no jardim de inverno).
+- **Prompt:** `POE642_CasaC/POE642_CasaC_PH_Terreo_v1.md`, com a escala na abertura e a posição do lote medida na base (x ~8%–91%, y ~2,5%–85%).
+- **Próximos passos:** render do Térreo, retoque, e depois pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
 
 ```bash
 cd projetos/POE642_CasaA/scripts

@@ -666,13 +666,14 @@
                 "bbox": [
                   [
                     1210,
-                    870,
-                    1640,
-                    1000
+                    892,
+                    1595,
+                    990
                   ]
                 ]
               }
-            ]
+            ],
+            "_fonte": "Só o mosaico: a amostra da Casa B (1210-1640 x 870-1000) pegava o gramado no alto à direita e no canto de baixo, que virava manchas verdes no acesso e entre os carros."
           },
           {
             "nome": "gramado (Térreo da Casa A)",
@@ -723,20 +724,21 @@
                 "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
                 "bbox": [
                   [
-                    120,
+                    148,
                     95,
                     290,
                     230
                   ],
                   [
-                    1428,
+                    1433,
                     500,
                     1515,
-                    710
+                    705
                   ]
                 ]
               }
-            ]
+            ],
+            "_fonte": "Só as plantas: o primeiro trecho começava em x 120 e pegava o fundo branco à esquerda da floreira da Casa A, que virava faixas brancas no jardim de inverno."
           }
         ]
       }
