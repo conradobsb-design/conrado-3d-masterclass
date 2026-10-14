@@ -89,6 +89,18 @@ A base é reduzida com média (`INTER_AREA`) antes da afim. O `warpAffine` não 
 python retoque_base_1pav.py ../renders/POE642_CasaA_PH_1Pavimento_v7_final.png ../bases/POE642_CasaA_BASE_1Pavimento_v3_16x9.png --saida ../renders
 ```
 
+## Pranchas de entrega: `rodape_entrega.py`
+
+Gera o rodapé de cada pavimento, em 3840 × 440 px, e monta as pranchas: render em cima e rodapé embaixo, na mesma largura.
+
+As três pranchas têm o mesmo tamanho e a planta no mesmo pixel, para que, vistas em sequência, uma fique exatamente dentro da outra:
+- **Base comum:** as três bases saem do mesmo enquadramento da folha do cliente. A piscina, por exemplo, cai no mesmo pixel nas três.
+- **Alinhamento:** cada render é alinhado à base do seu pavimento, por SIFT e transformação afim, e levado ao quadro 16:9 dessa base.
+
+```bash
+python rodape_entrega.py --saida ../entrega --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_bege.png --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final2.png
+```
+
 ## Limitações conhecidas
 
 - Os PDFs da Casa A que estão no Drive (001 Layout, 004, 005, 006, 021) **não têm** a layer `ARQ_PAREDE` nem o cinza 0.357. O PDF que gerou as bases atuais foi enviado direto na conversa e precisa ser trazido para cá. Sem ele, o script gera só a base sem texto e avisa que a v3 não foi gerada.

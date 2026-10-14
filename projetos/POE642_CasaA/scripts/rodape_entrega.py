@@ -4,14 +4,21 @@
 Segue o carimbo da folha de layout do cliente (642-ARQ-EX-001): norte, título "LAYOUT – …",
 quadro de áreas, dados do projeto, assinatura do render (New Air) e marca do cliente. Não leva cotas.
 
+As pranchas têm todas o mesmo tamanho e a planta no mesmo lugar: cada render é alinhado
+(SIFT + afim) à base do seu pavimento, e as três bases saem do mesmo enquadramento da folha
+do cliente (a piscina cai no mesmo pixel nas três). Assim, vistas em sequência, uma planta
+fica exatamente "dentro" da outra.
+
 Uso:
   python rodape_entrega.py --saida ../entrega                    # só os três rodapés (3840 px)
-  python rodape_entrega.py --saida ../entrega --render 1Pavimento=../renders/x.png
-      # também a prancha: render + rodapé na largura do render
+  python rodape_entrega.py --saida ../entrega --render Terreo=../renders/t.png --render 1Pavimento=../renders/p.png
+      # também as pranchas: render alinhado ao quadro comum + rodapé
 """
 import argparse
 from pathlib import Path
 
+import cv2
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 AQUI = Path(__file__).resolve().parent
@@ -142,11 +149,39 @@ def rodape(chave):
     return im.convert("RGB")
 
 
+BASES = {"Terreo": "POE642_CasaA_BASE_Terreo_v6_16x9.png",
+         "1Pavimento": "POE642_CasaA_BASE_1Pavimento_v3_16x9.png",
+         "Subsolo": "POE642_CasaA_BASE_Subsolo_v4_16x9.png"}
+
+
+def no_quadro_comum(render, chave, largura):
+    """Leva o render para o quadro da base 16:9 (o mesmo nos três pavimentos), na largura dada."""
+    base = cv2.imread(str(AQUI.parent / "bases" / BASES[chave]))
+    r = cv2.cvtColor(np.asarray(render), cv2.COLOR_RGB2BGR)
+    if r.shape[1] != largura:
+        r = cv2.resize(r, (largura, round(r.shape[0] * largura / r.shape[1])), interpolation=cv2.INTER_AREA)
+    altura = round(base.shape[0] * largura / base.shape[1])
+    base_red = cv2.resize(base, (largura, altura), interpolation=cv2.INTER_AREA)
+    sift = cv2.SIFT_create(12000)
+    k1, d1 = sift.detectAndCompute(cv2.cvtColor(base_red, cv2.COLOR_BGR2GRAY), None)
+    k2, d2 = sift.detectAndCompute(cv2.cvtColor(r, cv2.COLOR_BGR2GRAY), None)
+    bons = [a for a, b in cv2.BFMatcher().knnMatch(d1, d2, k=2) if a.distance < 0.75 * b.distance]
+    src = np.float32([k1[m.queryIdx].pt for m in bons])
+    dst = np.float32([k2[m.trainIdx].pt for m in bons])
+    A, inl = cv2.estimateAffine2D(src, dst, ransacReprojThreshold=2.5)   # base -> render
+    res = np.linalg.norm(src @ A[:, :2].T + A[:, 2] - dst, axis=1)[inl.ravel() == 1]
+    print(f"    {chave}: {int(inl.sum())} pontos, erro mediano {np.median(res):.2f} px")
+    al = cv2.warpAffine(r, cv2.invertAffineTransform(A), (largura, altura),
+                        flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
+    return Image.fromarray(cv2.cvtColor(al, cv2.COLOR_BGR2RGB))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--saida", type=Path, default=AQUI.parent / "entrega")
     ap.add_argument("--render", action="append", default=[], metavar="PAVIMENTO=ARQUIVO",
                     help="monta a prancha render + rodapé (pode repetir)")
+    ap.add_argument("--largura", type=int, default=2000, help="largura das pranchas em px (a mesma nas três)")
     args = ap.parse_args()
     args.saida.mkdir(parents=True, exist_ok=True)
     feitos = {}
@@ -158,7 +193,7 @@ def main():
         print(caminho, r.size)
     for item in args.render:
         chave, arq = item.split("=", 1)
-        render = Image.open(arq).convert("RGB")
+        render = no_quadro_comum(Image.open(arq).convert("RGB"), chave, args.largura)
         rod = feitos[chave].resize((render.width, round(ALTURA * render.width / LARGURA)), Image.LANCZOS)
         prancha = Image.new("RGB", (render.width, render.height + rod.height), BRANCO)
         prancha.paste(render, (0, 0))
