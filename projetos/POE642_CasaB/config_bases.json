@@ -1285,7 +1285,7 @@
       "Terreo": {
         "titulo": "TÉRREO",
         "linha_area": 0,
-        "base": null
+        "base": "POE642_CasaB_BASE_Terreo_v3_texturas_16x9.png"
       },
       "Subsolo": {
         "titulo": "SUBSOLO",
@@ -1328,10 +1328,10 @@
     "pdf": {
       "nome": "POE642_CasaB_Plantas_Humanizadas.pdf",
       "ordem": [
-        "Subsolo"
+        "Subsolo",
+        "Terreo"
       ],
-      "_nota": "Por enquanto só o Subsolo. Quando o Térreo ficar pronto: ordem ['Subsolo', 'Terreo'] e título '(Subsolo e Térreo)'.",
-      "titulo": "Casa B – Planta Humanizada (Subsolo)",
+      "titulo": "Casa B – Plantas Humanizadas (Subsolo e Térreo)",
       "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade B",
       "palavras": "planta humanizada, layout, Casa B"
     }

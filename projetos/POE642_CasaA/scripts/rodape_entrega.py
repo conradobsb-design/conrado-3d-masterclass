@@ -149,7 +149,9 @@ def no_quadro_comum(render, base_png, chave, largura):
     base = cv2.imread(str(base_png))
     r = cv2.cvtColor(np.asarray(render), cv2.COLOR_RGB2BGR)
     if r.shape[1] != largura:
-        r = cv2.resize(r, (largura, round(r.shape[0] * largura / r.shape[1])), interpolation=cv2.INTER_AREA)
+        # reduzir com INTER_AREA; ampliar (ex.: render 2K numa prancha de 3840 px) com Lanczos
+        interp = cv2.INTER_AREA if r.shape[1] > largura else cv2.INTER_LANCZOS4
+        r = cv2.resize(r, (largura, round(r.shape[0] * largura / r.shape[1])), interpolation=interp)
     altura = round(base.shape[0] * largura / base.shape[1])
     base_red = cv2.resize(base, (largura, altura), interpolation=cv2.INTER_AREA)
     sift = cv2.SIFT_create(12000)

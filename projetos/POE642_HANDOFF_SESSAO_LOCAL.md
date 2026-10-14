@@ -208,7 +208,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
   - **Decisões do usuário:** a pedra grande fica lisa, sem paginação; a garagem fica sem carros.
   - `_camada.png` tem só as alterações dos acabamentos, para o Photoshop.
 - **Prancha:** `entrega/POE642_CasaB_PH_Subsolo_entrega.png`, em 3840 px (`entrega.largura_prancha` na config; a imagem final da Casa B tem 6905 px), com os rodapés da Casa B (Térreo e Subsolo) em `entrega/`.
-- **PDF para o cliente:** `entrega/POE642_CasaB_Plantas_Humanizadas.pdf`, por enquanto só com o Subsolo. Quando o Térreo ficar pronto, voltar `entrega.pdf.ordem` para `["Subsolo", "Terreo"]`, ajustar o título e gerar de novo.
+- **PDF para o cliente:** `entrega/POE642_CasaB_Plantas_Humanizadas.pdf`, com as duas pranchas (Subsolo e Térreo), em A3 de largura.
+- **Pranchas:** `entrega/POE642_CasaB_PH_Subsolo_entrega.png` e `..._Terreo_entrega.png`, em 3840 × 2600 px, no mesmo quadro da folha do cliente (o elevador do Subsolo cai sobre o do Térreo). O Térreo vem do render 2K ampliado com Lanczos.
   - Áreas, do quadro do cliente: Térreo 638,70 m², Subsolo 79,05 m², total 717,75 m². A Casa B tem só esses dois pavimentos.
   - **Confirmados pelo usuário:** endereço e unidade (ML 10 – Conjunto 02, Lotes 17, Unidade B) e o norte, o mesmo da Casa A (a folha da Casa B não tem norte).
   - O quadro é a folha inteira do cliente, então a casa fica pequena no canto. Quando chegar o Térreo, definir um recorte comum aos dois pavimentos.
@@ -233,12 +234,9 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 - **Depois do render:** `elementos_do_render.py` (móveis, carros, louças e as touceiras de plantas) e `acabamentos_finais.py`, como no Subsolo.
 
 **Próximos passos:**
-1. **Revisão do cliente:** o usuário confere o Subsolo final.
-2. **Térreo da Casa B:** o usuário roda o prompt v1 no motor e manda o render. A Casa B não tem 1º Pavimento.
-   - imagem final pelo `elementos_do_render.py` e pelo `acabamentos_finais.py`;
-   - preencher `entrega.pavimentos.Terreo.base` na config (`POE642_CasaB_BASE_Terreo_v3_texturas_16x9.png`), voltar `entrega.pdf.ordem` para `["Subsolo", "Terreo"]` e o título do PDF;
-   - definir um recorte comum aos dois pavimentos (o quadro hoje é a folha inteira) e refazer as pranchas e o PDF.
-3. **Opcional, mais nitidez nos objetos:** passar o render num upscaler de IA (Higgsfield `upscale_image`) antes do `elementos_do_render.py`. Isso gasta créditos, então só com autorização.
+1. **Casa B entregue** (Subsolo e Térreo, pranchas e PDF). Falta só a resposta do usuário sobre a peça branca comprida abaixo do lavatório gourmet, do lado de fora; com ela, retocar a imagem final do Térreo e refazer a prancha e o PDF:
+   `python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final.png --render Terreo=../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_v4_retocado.png && python pdf_entrega.py --config ../../POE642_CasaB/config_bases.json`
+2. **Opcional, mais nitidez nos objetos:** passar o render num upscaler de IA (Higgsfield `upscale_image`) antes do `elementos_do_render.py`. Isso gasta créditos, então só com autorização.
 
 ---
 
