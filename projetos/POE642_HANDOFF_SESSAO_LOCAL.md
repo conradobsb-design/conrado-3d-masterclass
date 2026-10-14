@@ -203,18 +203,17 @@ python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render 
   - `_camada.png` tem só as alterações dos acabamentos, para o Photoshop.
 - **Prancha:** `entrega/POE642_CasaB_PH_Subsolo_entrega.png`, com os rodapés da Casa B (Térreo e Subsolo) em `entrega/`.
   - Áreas, do quadro do cliente: Térreo 638,70 m², Subsolo 79,05 m², total 717,75 m². A Casa B tem só esses dois pavimentos.
-  - **A confirmar com o usuário:** o endereço e a unidade (supostos a partir da Casa A: Lotes 17, Unidade B) e o norte (a folha da Casa B não tem; está o mesmo da Casa A).
+  - **Confirmados pelo usuário:** endereço e unidade (ML 10 – Conjunto 02, Lotes 17, Unidade B) e o norte, o mesmo da Casa A (a folha da Casa B não tem norte).
   - O quadro é a folha inteira do cliente, então a casa fica pequena no canto. Quando chegar o Térreo, definir um recorte comum aos dois pavimentos.
 
 **Próximos passos:**
 1. **Revisão do cliente:** o usuário confere o Subsolo final.
-2. **Confirmações do rodapé da Casa B:** endereço, unidade e norte (ver acima).
-3. **Térreo da Casa B:** aguarda o PDF. A Casa B não tem 1º Pavimento. Para o Térreo:
+2. **Térreo da Casa B:** aguarda o PDF. A Casa B não tem 1º Pavimento. Para o Térreo:
    - criar o pavimento em `POE642_CasaB/config_bases.json`;
    - perguntar ao usuário os materiais de cada cor da legenda;
    - gerar a base, a prévia de texturas, o prompt v1 (PT + EN, com escala), o render e a imagem final pelo `elementos_do_render.py` e o `acabamentos_finais.py`;
    - preencher `entrega.pavimentos.Terreo.base` na config, montar a prancha e gerar o PDF da Casa B (`pdf_entrega.py --config ../../POE642_CasaB/config_bases.json`).
-4. **Opcional, mais nitidez nos objetos:** passar o render num upscaler de IA (Higgsfield `upscale_image`) antes do `elementos_do_render.py`. Isso gasta créditos, então só com autorização.
+3. **Opcional, mais nitidez nos objetos:** passar o render num upscaler de IA (Higgsfield `upscale_image`) antes do `elementos_do_render.py`. Isso gasta créditos, então só com autorização.
 
 ---
 

@@ -766,7 +766,7 @@
   },
   "entrega": {
     "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
-    "_pendente": "Endereço e unidade supostos a partir da Casa A (Unidade B); o norte é o mesmo da Casa A (a folha do Subsolo da Casa B não tem norte). Confirmar com o usuário.",
+    "_confirmado": "Endereço (Lotes 17, Unidade B), unidade e norte (o mesmo da Casa A) confirmados pelo usuário em 14/10/26.",
     "casa": "CASA B",
     "prefixo": "POE642_CasaB",
     "pasta_bases": "bases",
