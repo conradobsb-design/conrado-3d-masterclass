@@ -323,5 +323,63 @@
         ]
       }
     }
+  },
+  "entrega": {
+    "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
+    "_areas": "Quadro de áreas enviado pelo usuário em 14/10/26 (Térreo 798,89 m², Subsolo 113,81 m², total 912,7 m²).",
+    "_confirmado": "Endereço (Lotes 17, Unidade C), unidade C e norte (o mesmo da Casa A) confirmados pelo usuário em 14/10/26.",
+    "casa": "CASA C",
+    "prefixo": "POE642_CasaC",
+    "pasta_bases": "bases",
+    "pasta_entrega": "entrega",
+    "largura_prancha": 3840,
+    "pavimentos": {
+      "Subsolo": {
+        "titulo": "SUBSOLO",
+        "linha_area": 1,
+        "base": "POE642_CasaC_BASE_Subsolo_v3_texturas_16x9.png"
+      }
+    },
+    "areas": [
+      [
+        "TÉRREO",
+        "798,89 m²"
+      ],
+      [
+        "SUBSOLO",
+        "113,81 m²"
+      ],
+      [
+        "TOTAL",
+        "912,70 m²"
+      ]
+    ],
+    "projeto": [
+      [
+        "CLIENTE",
+        "PAULO OCTÁVIO"
+      ],
+      [
+        "ENDEREÇO",
+        "ML 10 – CONJUNTO 02, LOTES 17, UNIDADE C"
+      ],
+      [
+        "PROJETO",
+        "CASA C · UNIDADE AUTÔNOMA \"C\""
+      ],
+      [
+        "DATA INICIAL",
+        "14/10/26"
+      ]
+    ],
+    "pdf": {
+      "nome": "POE642_CasaC_Plantas_Humanizadas.pdf",
+      "ordem": [
+        "Subsolo"
+      ],
+      "titulo": "Casa C – Plantas Humanizadas (Subsolo)",
+      "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade C",
+      "palavras": "planta humanizada, layout, Casa C"
+    }
   }
 }

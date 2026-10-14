@@ -273,7 +273,10 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
     - No box, sai o metal na parede da esquerda.
 - **Diferenças do render v3 para a base, não pedidas (ficam como estão até o usuário pedir):**
   - a linha de caminhamento com a seta não aparece.
-- **Próximos passos:** rodapé (chave `entrega` na config: pedir ao usuário as áreas da Casa C, a unidade e se o endereço segue o padrão das outras casas) e PDF.
+- **Entrega do Subsolo (14/10/26):** prancha `entrega/POE642_CasaC_PH_Subsolo_entrega.png` (3840 x 2600) e PDF para o cliente `entrega/POE642_CasaC_Plantas_Humanizadas.pdf` (A3, só o Subsolo, a pedido do usuário; o Térreo entra quando for feito).
+  - **Rodapé (chave `entrega` da config):** áreas do quadro do usuário: Térreo 798,89 m², Subsolo 113,81 m², total 912,70 m².
+  - **Confirmados pelo usuário:** endereço "ML 10 – Conjunto 02, Lotes 17, Unidade C", unidade C e o norte da Casa A.
+- **Próximos passos:** Térreo da Casa C (base, prompt, render e retoque); depois, pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
 
 ```bash
 cd projetos/POE642_CasaA/scripts
