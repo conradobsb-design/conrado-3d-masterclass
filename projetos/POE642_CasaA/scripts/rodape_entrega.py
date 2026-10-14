@@ -2,7 +2,7 @@
 """Rodapé de entrega das plantas humanizadas da Casa A (POE 642), um por pavimento.
 
 Segue o carimbo da folha de layout do cliente (642-ARQ-EX-001): norte, título "LAYOUT – …",
-quadro de áreas, dados do projeto, autoria e marca do cliente. Não leva cotas.
+quadro de áreas, dados do projeto, assinatura do render (New Air) e marca do cliente. Não leva cotas.
 
 Uso:
   python rodape_entrega.py --saida ../entrega                    # só os três rodapés (3840 px)
@@ -30,7 +30,7 @@ PROJETO = [
     ("PROJETO", "CASA A · UNIDADE AUTÔNOMA \"A\""),
     ("DATA INICIAL", "18/05/2023"),
 ]
-EQUIPE = "RUAN BRAGA E MARCELA CAMPEDELLI"
+ASSINATURA = ["RENDER 3D", "PROJETOS COM IA", "CONRADO CORTEZ"]
 
 LARGURA, ALTURA = 3840, 440
 TINTA = (38, 38, 38)
@@ -91,7 +91,7 @@ def rodape(chave):
         f_t = fonte("Regular", f_t.size - 2)
     texto(d, (x0, topo + 95), titulo, f_t, TINTA, 0.06)
     texto(d, (x0, topo + 165), "PLANTA HUMANIZADA", fonte("Medium", 32), CINZA, 0.22)
-    texto(d, (x0, topo + 215), "BASE: PLANTA BAIXA 1:100", fonte("Regular", 27), CINZA, 0.12)
+    texto(d, (x0, topo + 215), "BASE: PLANTA BAIXA", fonte("Regular", 27), CINZA, 0.12)
     texto(d, (x0, topo + 257), "IMAGEM ILUSTRATIVA · SEM COTAS E SEM ESCALA", fonte("Regular", 22), CINZA, 0.10)
 
     # 2. quadro de áreas
@@ -121,15 +121,17 @@ def rodape(chave):
         texto(d, (px0 + 270, y), valor, f_v, TINTA, 0.05)
         y += 54
 
-    # 4. autoria
-    dx0, dx1 = divisorias[2] + 60, divisorias[3] - 60
-    colar(im, Image.open(ASSETS / "logo_denise_zuba.png").convert("RGBA"), dx0, topo + 20, largura=dx1 - dx0)
-    texto(d, (dx0, topo + 205), "AUTORIA DO PROJETO", fonte("Medium", 22), CINZA, 0.2)
-    texto(d, (dx0, topo + 243), "ARQUITETOS ASSISTENTES", fonte("Regular", 20), CINZA, 0.16)
-    f_e = fonte("Medium", 23)
-    while largura_txt(EQUIPE, f_e, 0.05) > dx1 - dx0:
-        f_e = fonte("Medium", f_e.size - 1)
-    texto(d, (dx0, topo + 278), EQUIPE, f_e, TINTA, 0.05)
+    # 4. assinatura do render: logo da New Air e, embaixo, as três linhas, centralizados no bloco
+    dx0, dx1 = divisorias[2], divisorias[3]
+    meio = (dx0 + dx1) / 2
+    logo_na = Image.open(ASSETS / "logo_new_air.png").convert("RGBA")
+    h_na = 150
+    w_na = round(logo_na.width * h_na / logo_na.height)
+    colar(im, logo_na, meio - w_na / 2, topo + 8, altura=h_na)
+    marinho = (20, 37, 60)                               # o azul da marca
+    texto(d, (meio, topo + 205), ASSINATURA[0], fonte("Medium", 24), CINZA, 0.22, ancora="ms")
+    texto(d, (meio, topo + 243), ASSINATURA[1], fonte("Medium", 24), CINZA, 0.22, ancora="ms")
+    texto(d, (meio, topo + 288), ASSINATURA[2], fonte("SemiBold", 30), marinho, 0.12, ancora="ms")
 
     # 5. cliente
     lx0, lx1 = divisorias[3] + 70, LARGURA - 80
