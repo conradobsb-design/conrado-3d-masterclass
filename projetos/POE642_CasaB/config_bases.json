@@ -32,7 +32,135 @@
       "layers_ocultas": [
         "ARQ_TERRENO PLANEJADO"
       ],
-      "_layers_ocultas": "Curvas de nível e linha do lote saem, como na Casa A: fundo todo branco."
+      "_layers_ocultas": "Curvas de nível e linha do lote saem, como na Casa A: fundo todo branco.",
+      "legenda": {
+        "_sobre": "Casa B · Subsolo. Bege Bahia #E8E8E8: todo o malva #BFA79F do PDF (garagem, circulação até a sauna, BH de serviço e o piso do chuveiro dele). Vinílico #C8A27C: academia. Deck de madeira #AE8863 com réguas #8A6A4C: ducha. Travertino #DCD9CA: todo o resto (depósito, sauna, banco, BH sauna, a pedra grande de acesso à escada e a escada que desce até a ducha, com as bordas dos degraus em #8F8574).",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "depósito → travertino",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.878,
+              0.878,
+              0.878
+            ],
+            "cor_render": "#E0E0E0",
+            "bbox_vis": [
+              700,
+              190,
+              840,
+              270
+            ],
+            "para": "#DCD9CA"
+          },
+          {
+            "nome": "academia → vinílico (réguas preservadas)",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "bbox_vis": [
+              700,
+              300,
+              760,
+              360
+            ],
+            "modo": "neutros",
+            "para": "#C8A27C",
+            "cor_linha": "#A88560",
+            "proteger_layers": [
+              "ARQ_PAREDE",
+              "ARQ_LAYOUT HUMANIZAÇÃO",
+              "DOC_LINHAS E PROJEÇÕES",
+              "ARQ_LOUÇAS E METAIS",
+              "ARQ_REVESTIMENTOS",
+              "INS_INSTALAÇÕES HIDRÁULICAS",
+              "ARQ_BANCADAS"
+            ]
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BFA79F",
+            "#E8E8E8"
+          ],
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ]
+        ],
+        "retangulos": [
+          {
+            "nome": "ducha → deck de madeira",
+            "bbox_vis": [
+              275.5,
+              322.2,
+              380.2,
+              418.9
+            ],
+            "so_cores": [
+              "#E4E4E4"
+            ],
+            "para": "#AE8863",
+            "cor_linha": "#8A6A4C"
+          },
+          {
+            "nome": "escada que desce até a ducha → travertino",
+            "bbox_vis": [
+              226.3,
+              322.2,
+              275.5,
+              372.2
+            ],
+            "para": "#DCD9CA",
+            "linhas_layer": "ARQ_ESCADAS E RAMPAS",
+            "cor_linha": "#8F8574"
+          },
+          {
+            "nome": "pedra grande de acesso à escada → travertino",
+            "bbox_vis": [
+              75.8,
+              322.2,
+              227.2,
+              476.2
+            ],
+            "para": "#DCD9CA"
+          }
+        ]
+      },
+      "esmaecer": {
+        "_sobre": "Ficam com a cor cheia o subsolo (com o muro que sobe), a ducha, a escada que desce até ela e a pedra grande de acesso à escada. O resto do Térreo (placas, deck, a outra escada, linhas do lote) clareia.",
+        "clarear": 0.55,
+        "manter_bbox_vis": [
+          [
+            346,
+            56,
+            856,
+            418.6
+          ],
+          [
+            275,
+            322,
+            381,
+            419
+          ],
+          [
+            226,
+            322,
+            276,
+            373
+          ],
+          [
+            75.5,
+            322,
+            227.5,
+            476.5
+          ]
+        ]
+      }
     }
   }
 }

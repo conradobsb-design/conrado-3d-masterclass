@@ -505,6 +505,20 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
     # (ex.: escada do Subsolo, onde a hachura do deck invade os últimos degraus)
     for r in legenda.get("retangulos", []):
         x0, y0, x1, y1 = (int(round(v * esc)) for v in r["bbox_vis"])
+        if r.get("so_cores"):
+            # só as cores listadas viram 'para' (ex.: na Casa B, o malva da garagem, que no PDF está
+            # no mesmo polígono da circulação); com 'cor_linha', as linhas cinza do retângulo também mudam
+            bloco = arr[y0:y1, x0:x1]
+            orig = bloco.copy()
+            alvo = np.zeros(orig.shape[:2], bool)
+            for cor in r["so_cores"]:
+                alvo |= np.abs(orig - hex_rgb(cor)).max(axis=-1) <= tol
+            bloco[alvo] = hex_rgb(r["para"])
+            if r.get("cor_linha"):
+                neutro = (orig.max(axis=-1) - orig.min(axis=-1)) <= 8
+                bloco[neutro & ~alvo & (orig.min(axis=-1) >= 60) & (orig.min(axis=-1) < 235)] = hex_rgb(r["cor_linha"])
+            resumo.append(f"{r['nome']}: {int(alvo.sum())} px")
+            continue
         if r.get("so_branco"):
             # só o branco vira 'para' e as linhas cinza viram 'cor_linha' (ex.: vazios do
             # 1º Pavimento em cinza-escuro com o X tracejado claro); paredes pretas ficam
