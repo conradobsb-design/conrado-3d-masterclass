@@ -322,6 +322,14 @@
           }
         ]
       }
+    },
+    "Terreo": {
+      "pagina": 0,
+      "rotacao": 0,
+      "layers_ocultas": [
+        "ARQ_TERRENO PLANEJADO"
+      ],
+      "_layers_ocultas": "Curvas de nível saem, como no Subsolo e nas Casas A e B: fundo todo branco."
     }
   },
   "entrega": {
