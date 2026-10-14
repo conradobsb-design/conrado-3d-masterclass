@@ -697,5 +697,76 @@
       }
     }
   },
-  "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede."
+  "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede.",
+  "entrega": {
+    "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
+    "casa": "CASA A",
+    "prefixo": "POE642_CasaA",
+    "pasta_bases": "../bases",
+    "pasta_entrega": "../entrega",
+    "pavimentos": {
+      "Subsolo": {
+        "titulo": "SUBSOLO",
+        "linha_area": 0,
+        "base": "POE642_CasaA_BASE_Subsolo_v4_16x9.png"
+      },
+      "Terreo": {
+        "titulo": "TÉRREO",
+        "linha_area": 1,
+        "base": "POE642_CasaA_BASE_Terreo_v6_16x9.png"
+      },
+      "1Pavimento": {
+        "titulo": "1º PAVIMENTO",
+        "linha_area": 2,
+        "base": "POE642_CasaA_BASE_1Pavimento_v3_16x9.png"
+      }
+    },
+    "areas": [
+      [
+        "SUBSOLO",
+        "160,40 m²"
+      ],
+      [
+        "TÉRREO",
+        "427,40 m²"
+      ],
+      [
+        "1º PAVIMENTO",
+        "263,25 m²"
+      ],
+      [
+        "TOTAL",
+        "851,05 m²"
+      ]
+    ],
+    "projeto": [
+      [
+        "CLIENTE",
+        "PAULO OCTÁVIO"
+      ],
+      [
+        "ENDEREÇO",
+        "ML 10 – CONJUNTO 02, LOTES 17, UNIDADE A"
+      ],
+      [
+        "PROJETO",
+        "CASA A · UNIDADE AUTÔNOMA \"A\""
+      ],
+      [
+        "DATA INICIAL",
+        "14/10/26"
+      ]
+    ],
+    "pdf": {
+      "nome": "POE642_CasaA_Plantas_Humanizadas.pdf",
+      "ordem": [
+        "Subsolo",
+        "Terreo",
+        "1Pavimento"
+      ],
+      "titulo": "Casa A – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)",
+      "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade A",
+      "palavras": "planta humanizada, layout, Casa A"
+    }
+  }
 }

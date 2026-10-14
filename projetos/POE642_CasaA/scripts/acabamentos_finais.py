@@ -9,11 +9,13 @@ nas posições exatas do PDF:
 1. 'clonar' apaga um símbolo copiando o mesmo piso de um trecho limpo ao lado (carimbo com
    borda suave e ajuste do tom médio pelo anel em volta).
 2. 'parede' refaz um trecho de parede repetindo uma linha limpa da mesma parede.
-3. 'juntas' pagina uma pedra em placas (ex.: 60 x 120 cm), com juntas finas e uma leve
-   variação de tom por placa, como nos travertinos da Casa A.
-4. 'arestas_banco' troca a linha dupla entre dois degraus de um banco por uma aresta fina,
+3. 'arestas_banco' troca a linha dupla entre dois degraus de um banco por uma aresta fina,
    no mesmo traço da aresta da frente.
-5. 'pintar' completa uma bancada branca com a cor da bancada; 'cubas' desenha uma cuba branca com torneira e válvula cromadas sobre o símbolo do PDF.
+4. 'pintar' completa uma bancada branca com a cor da bancada; 'cubas' desenha uma cuba
+   branca com torneira e válvula cromadas sobre o símbolo do PDF.
+5. 'armarios' troca o retângulo branco com diagonal tracejada (armário no PDF) pelo tampo
+   do armário visto de cima, na cor da marcenaria dos closets da Casa A, com o contorno na
+   face que dá para o ambiente.
 6. 'chuveiros' desenha chuveiro de parede (canopla, braço e ducha redonda) e registro,
    cromados, na parede e na posição do símbolo do PDF.
 
@@ -141,13 +143,15 @@ def clonar(out, f, op):
         dentro[a:-a, a:-a] = True
         ok = (~dentro.ravel()) & (lum(anel_alvo) > 120) & (lum(anel_fonte) > 120) & (lum(anel_alvo) < 250)
         fonte += np.median(anel_alvo[ok], axis=0) - np.median(anel_fonte[ok], axis=0)
+    # borda suave só nos lados do retângulo; a parede da fonte sai com corte seco
     m = np.ones((y1 - y0, x1 - x0), np.float32)
-    if op.get("so_onde_fonte_clara", True):
-        m[lum(fonte) < 110] = 0              # não leva parede da fonte para o alvo
     suave = op.get("borda_px", 1.0)
     if suave:
-        m = cv2.GaussianBlur(np.pad(m, 3, constant_values=0), (0, 0), suave)[3:-3, 3:-3]
-        m = np.clip(m * 1.6, 0, 1)
+        pad = int(3 * suave) + 1
+        m = cv2.GaussianBlur(np.pad(m, pad, constant_values=0), (0, 0), suave)[pad:-pad, pad:-pad]
+        m = np.clip(m * op.get("ganho", 1.6), 0, 1)   # ganho 1: degradê largo, para pisos com réguas
+    if op.get("so_onde_fonte_clara", True):
+        m[lum(fonte) < op.get("lum_fonte_min", 110)] = 0   # não leva parede da fonte para o alvo
     out[y0:y1, x0:x1] = alvo * (1 - m[..., None]) + fonte * m[..., None]
     print(f"    {op['nome']}: {x1 - x0}x{y1 - y0} px, deslocamento ({dx}, {dy}) px")
 
@@ -166,47 +170,6 @@ def parede(out, f, op):
         m = lum(perfil) < op.get("lum_max", 90)
         out[y0:y1, x0:x1][m, :] = perfil[m][:, None]
     print(f"    {op['nome']}: {int(m.sum())} {'colunas' if 'linha_limpa_vis' in op else 'linhas'} de parede")
-
-
-def juntas(out, f, op):
-    """Paginação em placas: juntas finas mais escuras e um leve tom por placa."""
-    bx0, by0, bx1, by1 = op["bbox_vis"]
-    mw, mh = op["modulo_vis"]
-    x0, y0, x1, y1 = f.ret(op["bbox_vis"])
-    bloco = out[y0:y1, x0:x1]
-    L = lum(bloco)
-    pedra = (L > op.get("lum_min", 150)) & (L < op.get("lum_max", 247))
-    pedra = cv2.erode(pedra.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
-
-    # linhas de junta em vis, a partir do canto escolhido (as placas inteiras ficam desse lado)
-    if op.get("origem", "direita") == "direita":
-        xs = [bx1 - i * mw for i in range(1, int((bx1 - bx0) / mw) + 1) if bx1 - i * mw > bx0 + 1]
-    else:
-        xs = [bx0 + i * mw for i in range(1, int((bx1 - bx0) / mw) + 1) if bx0 + i * mw < bx1 - 1]
-    ys = [by0 + j * mh for j in range(1, int((by1 - by0) / mh) + 1) if by0 + j * mh < by1 - 1]
-
-    gx = np.arange(x0, x1, dtype=np.float32)
-    gy = np.arange(y0, y1, dtype=np.float32)
-    meia = op.get("largura_px", 2.6) / 2
-    dist = np.full((y1 - y0, x1 - x0), np.inf, np.float32)
-    for xv in xs:
-        dist = np.minimum(dist, np.abs(gx - f.x(xv))[None, :])
-    for yv in ys:
-        dist = np.minimum(dist, np.abs(gy - f.y(yv))[:, None])
-    junta = np.clip(1.0 - (dist - meia + 0.5), 0, 1)   # 1 dentro da junta, borda de 1 px
-
-    # tom por placa
-    rng = np.random.default_rng(op.get("semente", 642))
-    cx = np.searchsorted(sorted(f.x(v) for v in xs), gx)
-    cy = np.searchsorted([f.y(v) for v in ys], gy)
-    tons = 1 + rng.uniform(-op.get("variacao", 0.025), op.get("variacao", 0.025), (len(ys) + 1, len(xs) + 1))
-    tom = tons[cy[:, None], cx[None, :]]
-    tom = cv2.GaussianBlur(tom.astype(np.float32), (0, 0), 1.2)
-
-    fator = tom * (1 - junta * (1 - op.get("escurecer", 0.86)))
-    m = pedra.astype(np.float32)
-    bloco[:] = bloco * (1 - m[..., None]) + bloco * fator[..., None] * m[..., None]
-    print(f"    {op['nome']}: {len(xs) + 1} x {len(ys) + 1} placas de {mw / 32.21 * 100:.0f} x {mh / 32.21 * 100:.0f} cm")
 
 
 def aresta_banco(out, f, op):
@@ -231,6 +194,20 @@ def pintar(out, f, op):
     ruido = np.random.default_rng(7).normal(0, 2.0, m.shape)[..., None]
     bloco[m] = (np.array(hex_bgr(op["cor"]), np.float32) + ruido)[m]
     print(f"    {op['nome']}: {int(m.sum())} px")
+
+
+def armario(out, f, op):
+    """Tampo do armário: cor chapada com pontilhado sutil e contorno nas faces livres."""
+    x0, y0, x1, y1 = f.ret(op["bbox_vis"])
+    bloco = out[y0:y1, x0:x1]
+    ruido = np.random.default_rng(11).normal(0, 1.5, bloco.shape[:2])[..., None]
+    bloco[:] = np.array(hex_bgr(op["cor"]), np.float32) + ruido
+    contorno = np.array(hex_bgr(op["contorno"]), np.float32)
+    lado = {"esquerda": (slice(None), slice(0, 2)), "direita": (slice(None), slice(-2, None)),
+            "cima": (slice(0, 2), slice(None)), "baixo": (slice(-2, None), slice(None))}
+    for face in op.get("faces_livres", []):
+        bloco[lado[face]] = contorno
+    print(f"    {op['nome']}: {x1 - x0}x{y1 - y0} px, contorno em {', '.join(op.get('faces_livres', []))}")
 
 
 def cuba(out, f, op):
@@ -322,17 +299,17 @@ def main():
         clonar(out, f, o)
     for o in op.get("parede", []):
         parede(out, f, o)
-    print("[2] paginação das pedras")
-    for o in op.get("juntas", []):
-        juntas(out, f, o)
-    print("[3] arestas de banco")
+    print("[2] arestas de banco")
     for o in op.get("arestas_banco", []):
         aresta_banco(out, f, o)
-    print("[4] bancadas e cubas")
+    print("[3] bancadas e cubas")
     for o in op.get("pintar", []):
         pintar(out, f, o)
     for o in op.get("cubas", []):
         cuba(out, f, o)
+    print("[4] armários")
+    for o in op.get("armarios", []):
+        armario(out, f, o)
     print("[5] chuveiros e registros")
     for o in op.get("chuveiros", []):
         chuveiro(out, f, o)

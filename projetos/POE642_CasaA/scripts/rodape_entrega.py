@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
-"""Rodapé de entrega das plantas humanizadas da Casa A (POE 642), um por pavimento.
+"""Rodapé de entrega das plantas humanizadas (POE 642), um por pavimento, para cada casa.
 
 Segue o carimbo da folha de layout do cliente (642-ARQ-EX-001): norte, título "LAYOUT – …",
 quadro de áreas, dados do projeto, assinatura do render (New Air) e marca do cliente. Não leva cotas.
 
 As pranchas têm todas o mesmo tamanho e a planta no mesmo lugar: cada render é alinhado
-(SIFT + afim) à base do seu pavimento, e as três bases saem do mesmo enquadramento da folha
-do cliente (a piscina cai no mesmo pixel nas três). Assim, vistas em sequência, uma planta
-fica exatamente "dentro" da outra.
+(SIFT + afim) à base do seu pavimento, e as bases saem do mesmo enquadramento da folha
+do cliente (na Casa A, a piscina cai no mesmo pixel nas três). Assim, vistas em sequência,
+uma planta fica exatamente "dentro" da outra.
+
+Os dados de cada casa (pavimentos, áreas, projeto, bases) ficam na chave 'entrega' da
+config_bases.json da casa; sem --config, vale a da Casa A.
 
 Uso:
-  python rodape_entrega.py --saida ../entrega                    # só os três rodapés (3840 px)
-  python rodape_entrega.py --saida ../entrega --render Terreo=../renders/t.png --render 1Pavimento=../renders/p.png
+  python rodape_entrega.py                                       # só os rodapés da Casa A (3840 px)
+  python rodape_entrega.py --render Terreo=../renders/t.png --render 1Pavimento=../renders/p.png
       # também as pranchas: render alinhado ao quadro comum + rodapé
+  python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render Subsolo=../../POE642_CasaB/renders/s.png
 """
 import argparse
+import json
 from pathlib import Path
 
 import cv2
@@ -25,18 +30,7 @@ AQUI = Path(__file__).resolve().parent
 ASSETS = AQUI.parent / "entrega" / "assets"
 FONTES = ASSETS / "fontes"   # Inter (licença SIL OFL), junto do projeto para rodar em qualquer máquina
 
-PAVIMENTOS = {
-    "Subsolo": {"titulo": "SUBSOLO", "linha_area": 0},
-    "Terreo": {"titulo": "TÉRREO", "linha_area": 1},
-    "1Pavimento": {"titulo": "1º PAVIMENTO", "linha_area": 2},
-}
-AREAS = [("SUBSOLO", "160,40 m²"), ("TÉRREO", "427,40 m²"), ("1º PAVIMENTO", "263,25 m²"), ("TOTAL", "851,05 m²")]
-PROJETO = [
-    ("CLIENTE", "PAULO OCTÁVIO"),
-    ("ENDEREÇO", "ML 10 – CONJUNTO 02, LOTES 17, UNIDADE A"),
-    ("PROJETO", "CASA A · UNIDADE AUTÔNOMA \"A\""),
-    ("DATA INICIAL", "14/10/26"),
-]
+CONFIG_PADRAO = AQUI / "config_bases.json"      # Casa A
 ASSINATURA = ["RENDER 3D", "PROJETOS COM IA", "CONRADO CORTEZ"]
 
 LARGURA, ALTURA = 3840, 440
@@ -79,8 +73,8 @@ def colar(base, img, x, y, altura=None, largura=None):
     return img.size
 
 
-def rodape(chave):
-    pav = PAVIMENTOS[chave]
+def rodape(ent, chave):
+    pav = ent["pavimentos"][chave]
     im = Image.new("RGBA", (LARGURA, ALTURA), BRANCO + (255,))
     d = ImageDraw.Draw(im)
     d.rectangle((0, 0, LARGURA, 7), fill=TINTA)                       # filete forte do carimbo
@@ -105,8 +99,9 @@ def rodape(chave):
     ax0, ax1 = divisorias[0] + 70, divisorias[1] - 70
     texto(d, (ax0, topo + 18), "ÁREAS", fonte("Medium", 26), CINZA, 0.25)
     linha_h, y = 58, topo + 48
-    for i, (nome, valor) in enumerate(AREAS):
-        total = i == len(AREAS) - 1
+    areas = ent["areas"]
+    for i, (nome, valor) in enumerate(areas):
+        total = i == len(areas) - 1
         if i == pav["linha_area"]:
             d.rectangle((ax0 - 18, y, ax1 + 18, y + linha_h - 6), fill=DESTAQUE)
         if total:
@@ -120,10 +115,10 @@ def rodape(chave):
     # 3. dados do projeto
     px0 = divisorias[1] + 70
     f_c = fonte("Regular", 56)
-    texto(d, (px0, topo + 62), f"CASA A – {pav['titulo']}", f_c, TINTA, 0.06)
+    texto(d, (px0, topo + 62), f"{ent['casa']} – {pav['titulo']}", f_c, TINTA, 0.06)
     f_l, f_v = fonte("Regular", 25), fonte("Medium", 29)
     y = topo + 130
-    for rotulo, valor in PROJETO:
+    for rotulo, valor in ent["projeto"]:
         texto(d, (px0, y), rotulo, f_l, CINZA, 0.16)
         texto(d, (px0 + 270, y), valor, f_v, TINTA, 0.05)
         y += 54
@@ -149,14 +144,9 @@ def rodape(chave):
     return im.convert("RGB")
 
 
-BASES = {"Terreo": "POE642_CasaA_BASE_Terreo_v6_16x9.png",
-         "1Pavimento": "POE642_CasaA_BASE_1Pavimento_v3_16x9.png",
-         "Subsolo": "POE642_CasaA_BASE_Subsolo_v4_16x9.png"}
-
-
-def no_quadro_comum(render, chave, largura):
-    """Leva o render para o quadro da base 16:9 (o mesmo nos três pavimentos), na largura dada."""
-    base = cv2.imread(str(AQUI.parent / "bases" / BASES[chave]))
+def no_quadro_comum(render, base_png, chave, largura):
+    """Leva o render para o quadro da base 16:9 (o mesmo em todos os pavimentos), na largura dada."""
+    base = cv2.imread(str(base_png))
     r = cv2.cvtColor(np.asarray(render), cv2.COLOR_RGB2BGR)
     if r.shape[1] != largura:
         r = cv2.resize(r, (largura, round(r.shape[0] * largura / r.shape[1])), interpolation=cv2.INTER_AREA)
@@ -178,27 +168,32 @@ def no_quadro_comum(render, chave, largura):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--saida", type=Path, default=AQUI.parent / "entrega")
+    ap.add_argument("--config", type=Path, default=CONFIG_PADRAO, help="config da casa (chave 'entrega')")
+    ap.add_argument("--saida", type=Path, default=None, help="padrão: a pasta_entrega da config")
     ap.add_argument("--render", action="append", default=[], metavar="PAVIMENTO=ARQUIVO",
                     help="monta a prancha render + rodapé (pode repetir)")
     ap.add_argument("--largura", type=int, default=2000, help="largura das pranchas em px (a mesma nas três)")
     args = ap.parse_args()
+    ent = json.loads(args.config.read_text())["entrega"]
+    raiz = args.config.resolve().parent
+    args.saida = args.saida or raiz / ent["pasta_entrega"]
     args.saida.mkdir(parents=True, exist_ok=True)
     feitos = {}
-    for chave in PAVIMENTOS:
-        r = rodape(chave)
-        caminho = args.saida / f"POE642_CasaA_rodape_{chave}.png"
+    for chave in ent["pavimentos"]:
+        r = rodape(ent, chave)
+        caminho = args.saida / f"{ent['prefixo']}_rodape_{chave}.png"
         r.save(caminho)
         feitos[chave] = r
         print(caminho, r.size)
     for item in args.render:
         chave, arq = item.split("=", 1)
-        render = no_quadro_comum(Image.open(arq).convert("RGB"), chave, args.largura)
+        base_png = raiz / ent["pasta_bases"] / ent["pavimentos"][chave]["base"]
+        render = no_quadro_comum(Image.open(arq).convert("RGB"), base_png, chave, args.largura)
         rod = feitos[chave].resize((render.width, round(ALTURA * render.width / LARGURA)), Image.LANCZOS)
         prancha = Image.new("RGB", (render.width, render.height + rod.height), BRANCO)
         prancha.paste(render, (0, 0))
         prancha.paste(rod, (0, render.height))
-        caminho = args.saida / f"POE642_CasaA_PH_{chave}_entrega.png"
+        caminho = args.saida / f"{ent['prefixo']}_PH_{chave}_entrega.png"
         prancha.save(caminho)
         print(caminho, prancha.size)
 

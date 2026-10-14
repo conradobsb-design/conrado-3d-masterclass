@@ -617,6 +617,37 @@
               20,
               0
             ]
+          },
+          {
+            "nome": "peça branca comprida da academia (erro do PDF), completada com o vinílico",
+            "bbox_vis": [
+              613.0,
+              396.0,
+              689.1,
+              414.5
+            ],
+            "desloc_vis": [
+              78,
+              0
+            ],
+            "lum_fonte_min": 60,
+            "_nota": "Deslocamento na horizontal: as réguas do vinílico correm em x, então as fiadas continuam alinhadas.",
+            "borda_px": 3.0,
+            "ganho": 1.0
+          },
+          {
+            "nome": "marquinhas brancas do PDF no vinílico, no canto do armário",
+            "bbox_vis": [
+              773.27,
+              347.35,
+              774.75,
+              351.25
+            ],
+            "desloc_vis": [
+              -6,
+              0
+            ],
+            "lum_fonte_min": 60
           }
         ],
         "parede": [
@@ -629,27 +660,6 @@
               404.2
             ],
             "linha_limpa_vis": 408.0
-          }
-        ],
-        "juntas": [
-          {
-            "nome": "pedra grande em travertino",
-            "bbox_vis": [
-              75.8,
-              322.2,
-              227.2,
-              476.2
-            ],
-            "modulo_vis": [
-              19.326,
-              38.652
-            ],
-            "origem": "direita",
-            "largura_px": 2.6,
-            "escurecer": 0.88,
-            "variacao": 0.025,
-            "semente": 642,
-            "_nota": "Placas de 60 x 120 cm com o lado maior no sentido dos veios; as placas inteiras ficam do lado da escada da ducha e o recorte de 50 cm fica na borda esquerda."
           }
         ],
         "arestas_banco": [
@@ -714,6 +724,23 @@
             }
           }
         ],
+        "armarios": [
+          {
+            "nome": "armário ao lado do elevador",
+            "bbox_vis": [
+              774.9,
+              287.15,
+              794.3,
+              351.25
+            ],
+            "cor": "#CEB8A4",
+            "contorno": "#846E5A",
+            "faces_livres": [
+              "esquerda"
+            ],
+            "_nota": "No PDF é o retângulo branco com diagonal tracejada. Cor e contorno dos closets da Casa A (1º Pavimento); a frente dá para a academia."
+          }
+        ],
         "chuveiros": [
           {
             "nome": "BH de serviço",
@@ -735,6 +762,68 @@
           }
         ]
       }
+    }
+  },
+  "entrega": {
+    "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
+    "_pendente": "Endereço e unidade supostos a partir da Casa A (Unidade B); o norte é o mesmo da Casa A (a folha do Subsolo da Casa B não tem norte). Confirmar com o usuário.",
+    "casa": "CASA B",
+    "prefixo": "POE642_CasaB",
+    "pasta_bases": "bases",
+    "pasta_entrega": "entrega",
+    "pavimentos": {
+      "Terreo": {
+        "titulo": "TÉRREO",
+        "linha_area": 0,
+        "base": null
+      },
+      "Subsolo": {
+        "titulo": "SUBSOLO",
+        "linha_area": 1,
+        "base": "POE642_CasaB_BASE_Subsolo_v3_texturas_16x9.png"
+      }
+    },
+    "areas": [
+      [
+        "TÉRREO",
+        "638,70 m²"
+      ],
+      [
+        "SUBSOLO",
+        "79,05 m²"
+      ],
+      [
+        "TOTAL",
+        "717,75 m²"
+      ]
+    ],
+    "projeto": [
+      [
+        "CLIENTE",
+        "PAULO OCTÁVIO"
+      ],
+      [
+        "ENDEREÇO",
+        "ML 10 – CONJUNTO 02, LOTES 17, UNIDADE B"
+      ],
+      [
+        "PROJETO",
+        "CASA B · UNIDADE AUTÔNOMA \"B\""
+      ],
+      [
+        "DATA INICIAL",
+        "14/10/26"
+      ]
+    ],
+    "pdf": {
+      "nome": "POE642_CasaB_Plantas_Humanizadas.pdf",
+      "ordem": [
+        "Subsolo",
+        "Terreo"
+      ],
+      "titulo": "Casa B – Plantas Humanizadas (Subsolo e Térreo)",
+      "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade B",
+      "palavras": "planta humanizada, layout, Casa B"
     }
   }
 }

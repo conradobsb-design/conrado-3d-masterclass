@@ -101,12 +101,19 @@ Aplica direto no render aprovado da v6 o ajuste que estava pendente:
 
 Gera o rodapé de cada pavimento, em 3840 × 440 px, e monta as pranchas: render em cima e rodapé embaixo, na mesma largura.
 
+Os dados de cada casa ficam na chave `entrega` da config dela: pavimentos (título, linha destacada no quadro de áreas e base 16:9), áreas, dados do projeto, pastas e o PDF. Sem `--config`, vale a da Casa A (`config_bases.json` desta pasta). O `pdf_entrega.py` lê a mesma chave.
+
 As três pranchas têm o mesmo tamanho e a planta no mesmo pixel, para que, vistas em sequência, uma fique exatamente dentro da outra:
 - **Base comum:** as três bases saem do mesmo enquadramento da folha do cliente. A piscina, por exemplo, cai no mesmo pixel nas três.
 - **Alinhamento:** cada render é alinhado à base do seu pavimento, por SIFT e transformação afim, e levado ao quadro 16:9 dessa base.
 
 ```bash
-python rodape_entrega.py --saida ../entrega --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_bege.png --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final2.png --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final.png
+python rodape_entrega.py --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_bege.png --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final2.png --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final.png
+python pdf_entrega.py
+
+# Casa B
+python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final.png
+python pdf_entrega.py --config ../../POE642_CasaB/config_bases.json      # quando houver as pranchas da ordem
 ```
 
 ## Prévia de texturas: `texturizar_base.py`
@@ -147,10 +154,10 @@ Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam
 
 - **`clonar`:** apaga um símbolo com o mesmo piso de um trecho limpo ao lado (carimbo com o tom médio ajustado).
 - **`parede`:** refaz um trecho de parede repetindo uma linha limpa da mesma parede.
-- **`juntas`:** pagina uma pedra em placas (na Casa B, 60 × 120 cm, com o lado maior no sentido dos veios), com juntas finas e uma leve variação de tom por placa.
 - **`arestas_banco`:** troca a linha dupla entre dois degraus por uma aresta de 1 px, no traço da aresta da frente.
 - **`pintar`:** completa uma bancada branca com a cor da bancada.
 - **`cubas`:** desenha cuba branca com torneira e válvula cromadas.
+- **`armarios`:** troca o retângulo branco com diagonal tracejada (armário no PDF) pelo tampo do armário, na cor da marcenaria dos closets da Casa A, com contorno na face livre.
 - **`chuveiros`:** desenha chuveiro de parede (canopla, braço e ducha redonda de 20 cm) e registro, cromados.
 
 Os desenhos são feitos em 8x e reduzidos. Saem o PNG final, a prévia em JPG e um PNG transparente só com as alterações (`_camada.png`), para usar como camada no Photoshop. A config está na chave `acabamentos` do pavimento.
