@@ -236,8 +236,13 @@ def ocultar_em_zonas(doc, page, raster, img, regras, cfg):
     return Image.fromarray(arr), resumo
 
 
-def classificar(page, raster, cfg, zonas, faixas_y):
-    """Passos 3-4: separa paredes, vidros e descartes a partir da layer de parede."""
+def classificar(page, raster, cfg, zonas, faixas_y, eixo_janela_max_pt=None):
+    """Passos 3-4: separa paredes, vidros e descartes a partir da layer de parede.
+
+    eixo_janela_max_pt: descarta o traço curto que atravessa uma janelinha de banho (o eixo do
+    bloco do CAD). Como vidro, ele vira um '+' na parede, e o motor desenha ali um registro ou
+    um chuveiro de parede.
+    """
     layer = cfg["layer_parede"]
     tol = cfg["tolerancia_cor"]
     cinza = (cfg["cinza_parede"],) * 3
@@ -279,6 +284,26 @@ def classificar(page, raster, cfg, zonas, faixas_y):
         xi, yi = int(round(x)), int(round(y))
         h, w = mask_parede_teste.shape
         return 0 <= xi < w and 0 <= yi < h and bool(mask_parede_teste[yi, xi])
+
+    # vãos de janela: caixas brancas finas da layer de parede
+    caixas_janela = []
+    if eixo_janela_max_pt:
+        for d in da_layer:
+            r = d["rect"]
+            if cor_igual(d.get("fill"), (1.0, 1.0, 1.0), tol) and min(r.width, r.height) <= 2 * v["espessura_max_pt"] \
+                    and max(r.width, r.height) >= v["comprimento_min_pt"] * 0.8:
+                caixas_janela.append(r)
+
+    def eixo_de_janela(p1, p2, comp):
+        if not eixo_janela_max_pt or comp > eixo_janela_max_pt:
+            return False
+        meio = pymupdf.Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
+        horizontal = abs(p2.y - p1.y) < abs(p2.x - p1.x)
+        for r in caixas_janela:
+            # o eixo cruza a caixa pelo lado curto: caixa em pé com traço deitado, ou o contrário
+            if (pymupdf.Rect(r) + (-0.6, -0.6, 0.6, 0.6)).contains(meio) and (r.height > r.width) == horizontal:
+                return True
+        return False
 
     def em_zona_excluida(ponto):
         x, y = raster.rotacionar_px(*raster.para_px(ponto))
@@ -329,6 +354,7 @@ def classificar(page, raster, cfg, zonas, faixas_y):
                 meio = pymupdf.Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2)
                 seg = {"items": [item], "width": d.get("width") or 0, "rect": pymupdf.Rect(p1, p2).normalize()}
                 motivo = ("porta" if perto_de_arco(seg["rect"], comp)
+                          else "eixo de janela" if eixo_de_janela(p1, p2, comp)
                           else "parede" if sobre_parede(meio)
                           else em_zona_excluida(meio))
                 (descartes if motivo else vidros_traco).append((seg, motivo, meio))
@@ -576,7 +602,8 @@ def salvar_debug(img_final, raster, res, zonas, faixas_y, cfg, caminho):
     esc = largura / img_final.width
     prev = img_final.convert("RGB").resize((largura, round(img_final.height * esc)), Image.LANCZOS)
     dr = ImageDraw.Draw(prev)
-    cores = {"porta": (255, 140, 0), "parede": (0, 120, 255), "muros": (160, 0, 160)}
+    cores = {"porta": (255, 140, 0), "parede": (0, 120, 255), "muros": (160, 0, 160),
+             "eixo de janela": (0, 170, 80)}
     for nome, (x0, y0, x1, y1) in zonas.items():
         dr.rectangle((x0, y0, x1, y1), outline=(220, 0, 220), width=2)
         dr.text((x0 + 3, y0 + 2), nome, fill=(220, 0, 220))
@@ -663,7 +690,7 @@ def main(argv=None):
     print(f"[2] {prefixo}.png  ({raster.rotacionar_img(base).size[0]}x{raster.rotacionar_img(base).size[1]})")
 
     # 3-4. parede x vidro
-    res = classificar(page, raster, cfg, zonas, faixas_y)
+    res = classificar(page, raster, cfg, zonas, faixas_y, pav.get("eixo_janela_max_pt"))
     if res is None:
         print(f"[3] ATENÇÃO: nenhuma geometria na layer '{cfg['layer_parede']}'. "
               f"Rode com --listar-layers para ver as layers deste PDF; a base v3 não foi gerada.")

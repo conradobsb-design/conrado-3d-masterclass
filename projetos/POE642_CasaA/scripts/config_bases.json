@@ -202,6 +202,8 @@
         ]
       ],
       "zonas_excluidas": {},
+      "eixo_janela_max_pt": 20,
+      "_eixo_janela_max_pt": "Nas janelinhas dos banhos, o traço de eixo (ARQ_PAREDE, ~14 pt) atravessa a caixa da janela. Como vidro, ele virava um '+' na parede, e o motor desenhava ali um registro ou um chuveiro de parede (render da v6: banho 3, banho master e banho de serviço).",
       "reforcar_linhas": [
         {
           "nome": "pergolado (projeção tracejada)",
@@ -354,6 +356,100 @@
             ],
             "so_branco": true,
             "para": "#4A4A4A"
+          },
+          {
+            "nome": "saleta da caracol: abertura branca em volta do círculo → Bege Bahia (lado esquerdo)",
+            "bbox_vis": [
+              896.7,
+              808.2,
+              930.6,
+              877.6
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "saleta da caracol: abertura branca em volta do círculo → Bege Bahia (embaixo à direita)",
+            "bbox_vis": [
+              930.6,
+              847.4,
+              964.8,
+              877.6
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "varanda da suíte 1 sem as linhas tracejadas do Térreo",
+            "bbox_vis": [
+              1245.8,
+              598.9,
+              1357.0,
+              883.8
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8",
+            "cor_linha": "#E8E8E8"
+          },
+          {
+            "nome": "chuveiro de teto do banho 3: borda",
+            "bbox_vis": [
+              1053.96,
+              227.64,
+              1063.62,
+              237.3
+            ],
+            "para": "#8C8C8C"
+          },
+          {
+            "nome": "chuveiro de teto do banho 3: placa",
+            "bbox_vis": [
+              1054.89,
+              228.57,
+              1062.69,
+              236.37
+            ],
+            "para": "#C4C4C4"
+          },
+          {
+            "nome": "chuveiro de teto do banho master (esquerda): borda",
+            "bbox_vis": [
+              627.37,
+              857.35,
+              637.03,
+              867.01
+            ],
+            "para": "#8C8C8C"
+          },
+          {
+            "nome": "chuveiro de teto do banho master (esquerda): placa",
+            "bbox_vis": [
+              628.3,
+              858.28,
+              636.1,
+              866.08
+            ],
+            "para": "#C4C4C4"
+          },
+          {
+            "nome": "chuveiro de teto do banho master (direita): borda",
+            "bbox_vis": [
+              666.02,
+              857.35,
+              675.68,
+              867.01
+            ],
+            "para": "#8C8C8C"
+          },
+          {
+            "nome": "chuveiro de teto do banho master (direita): placa",
+            "bbox_vis": [
+              666.95,
+              858.28,
+              674.75,
+              866.08
+            ],
+            "para": "#C4C4C4"
           }
         ],
         "setores": [
@@ -368,7 +464,8 @@
             "para": "#D8CDB4",
             "cor_linha": "#8F8574"
           }
-        ]
+        ],
+        "_retangulos_v3": "Base v3: (1) a abertura branca em volta da caracol vira piso Bege Bahia, e só os 3/4 do círculo ficam brancos; no render da v6 o motor deixou branca a saleta inteira e o quarto de serviço. (2) Na varanda da suíte 1, as duas linhas tracejadas do Térreo saem; no render da v6 elas dividiram a varanda numa faixa de pedra e um resto cinza. (3) Os três chuveiros de teto viram placas quadradas de 30 cm, cinza-aço com borda escura, no mesmo centro do símbolo do PDF (20 cm); no render da v6 eles saíram redondos e com braço, como chuveiro de parede."
       },
       "esmaecer": {
         "_sobre": "Fica com a cor cheia só o 1º Pavimento (blocos com paredes, varandas, vazios e hall da escada). O entorno do Térreo (piscina, ofurô, deck, degraus, deck da piscina, placas de pedestres, pergolado) clareia.",
