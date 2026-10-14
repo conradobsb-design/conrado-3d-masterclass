@@ -683,23 +683,38 @@
             "_nota": "Contorno da bancada da base, de 1 px, que sobrava ao lado da bancada do render e subia em direção à porta."
           },
           {
-            "nome": "rebaixo da bancada do BH sauna, igual ao tampo",
+            "nome": "rebaixo da bancada do BH sauna, igual ao tampo e sem os traços",
             "bbox_vis": [
-              588.9,
-              362.3,
+              585.75,
+              360.83,
               597.45,
-              380.0
+              380.75
             ],
             "fonte_vis": [
-              588.9,
+              585.75,
               329.0,
               597.45,
               339.0
             ],
-            "so_onde_alvo_branco": true,
             "lum_fonte_min": 0,
             "borda_px": 0,
-            "_nota": "Mesmas colunas do tampo da bancada do render, acima da cuba (referência do usuário), repetidas em espelho; só o branco muda."
+            "_nota": "Retângulo inteiro (branco, linha dupla vertical, linha de baixo e a linha entre tampo e rebaixo) com a textura do tampo, nas mesmas colunas, repetida em espelho."
+          },
+          {
+            "nome": "resto da linha de baixo da bancada do BH sauna, no piso",
+            "bbox_vis": [
+              579.4,
+              360.83,
+              585.75,
+              362.7
+            ],
+            "desloc_vis": [
+              0,
+              3
+            ],
+            "corrigir_tom": false,
+            "borda_px": 0,
+            "_nota": "Trecho da linha (com o tracinho do canto) entre a frente da bancada e o rebaixo; os veios verticais continuam com o deslocamento vertical."
           }
         ],
         "preencher_colunas": [
