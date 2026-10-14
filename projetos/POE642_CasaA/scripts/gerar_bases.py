@@ -479,6 +479,18 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
     # (ex.: escada do Subsolo, onde a hachura do deck invade os últimos degraus)
     for r in legenda.get("retangulos", []):
         x0, y0, x1, y1 = (int(round(v * esc)) for v in r["bbox_vis"])
+        if r.get("so_branco"):
+            # só o branco vira 'para' e as linhas cinza viram 'cor_linha' (ex.: vazios do
+            # 1º Pavimento em cinza-escuro com o X tracejado claro); paredes pretas ficam
+            bloco = arr[y0:y1, x0:x1]
+            orig = bloco.copy()
+            neutro = (orig.max(axis=-1) - orig.min(axis=-1)) <= 8
+            branco = neutro & (orig.min(axis=-1) >= 235)
+            bloco[branco] = hex_rgb(r["para"])
+            if r.get("cor_linha"):
+                bloco[neutro & (orig.min(axis=-1) >= 60) & (orig.min(axis=-1) < 235)] = hex_rgb(r["cor_linha"])
+            resumo.append(f"{r['nome']}: {int(branco.sum())} px")
+            continue
         arr[y0:y1, x0:x1] = hex_rgb(r["para"])
         if r.get("linhas_layer"):
             ds = [d for d in desenhos if na_layer(d, r["linhas_layer"]) and d["type"] in ("s", "fs")]
@@ -487,7 +499,30 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
             bloco[mk[y0:y1, x0:x1]] = hex_rgb(r.get("cor_linha", "#111111"))
         resumo.append(f"{r['nome']}: {(x1 - x0) * (y1 - y0)} px")
 
+    # um quarto de círculo (ex.: o trecho da escada caracol que chega a este piso)
+    for s in legenda.get("setores", []):
+        m = quarto_de_circulo(arr.shape[:2], s["centro_vis"], s["raio_vis"], s["quadrante"], esc)
+        linhas = m & (arr.min(axis=-1) < 200)
+        arr[m & ~linhas] = hex_rgb(s["para"])
+        if s.get("cor_linha"):
+            arr[linhas] = hex_rgb(s["cor_linha"])
+        resumo.append(f"{s['nome']}: {int(m.sum())} px")
+
     return Image.fromarray(arr.astype(np.uint8)), resumo
+
+
+def quarto_de_circulo(forma, centro_vis, raio_vis, quadrante, esc):
+    """Máscara de um quarto de disco; quadrante = sup_dir, sup_esq, inf_dir ou inf_esq
+    (na imagem, 'sup' é para cima). Sem quadrante, o disco inteiro."""
+    h, w = forma
+    cx, cy, r = centro_vis[0] * esc, centro_vis[1] * esc, raio_vis * esc
+    yy, xx = np.ogrid[:h, :w]
+    disco = (xx - cx) ** 2 + (yy - cy) ** 2 <= r ** 2
+    if quadrante is None:
+        return disco
+    lado_x = (xx >= cx) if quadrante.endswith("dir") else (xx <= cx)
+    lado_y = (yy <= cy) if quadrante.startswith("sup") else (yy >= cy)
+    return disco & lado_x & lado_y
 
 
 def esmaecer(img, regra, cfg):
@@ -503,6 +538,13 @@ def esmaecer(img, regra, cfg):
     for x0, y0, x1, y1 in regra["manter_bbox_vis"]:
         manter[int(y0 * esc):int(np.ceil(y1 * esc)), int(x0 * esc):int(np.ceil(x1 * esc))] = True
     fora = ~manter
+    # círculos que clareiam mesmo dentro das áreas mantidas, menos um quarto
+    # (ex.: escada caracol do 1º Pavimento, onde só o trecho deste piso fica cheio)
+    for c in regra.get("clarear_circulos", []):
+        disco = quarto_de_circulo(arr.shape[:2], c["centro_vis"], c["raio_vis"], None, esc)
+        if c.get("exceto_quadrante"):
+            disco &= ~quarto_de_circulo(arr.shape[:2], c["centro_vis"], c["raio_vis"], c["exceto_quadrante"], esc)
+        fora |= disco
     arr[fora] += (255 - arr[fora]) * regra.get("clarear", 0.5)
     return Image.fromarray(arr.round().astype(np.uint8)), int(fora.sum())
 

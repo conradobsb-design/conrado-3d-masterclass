@@ -185,9 +185,12 @@
       }
     },
     "1Pavimento": {
-      "_pendente": "Zonas ainda não medidas: rodar com --debug e anotar aqui os falsos vidros (bancadas, guarda-corpos, folhas de porta).",
       "pagina": 0,
       "rotacao": 0,
+      "layers_ocultas": [
+        "ARQ_TERRENO PLANEJADO"
+      ],
+      "_layers_ocultas": "Curvas de nível e linha do lote saem, como no Subsolo: fundo todo branco.",
       "faixas_y_excluidas": [
         [
           null,
@@ -206,7 +209,225 @@
           "cor": "#4D4D4D",
           "largura_px": 3
         }
-      ]
+      ],
+      "legenda": {
+        "_sobre": "Cores da legenda do prompt do 1º Pavimento: travertino #DCD9CA (circulação, sala íntima, banhos e a escada em U), madeira #A8784F (suítes e closets; o #CC9966 do PDF puxava para o laranja), Bege Bahia #E8E8E8 (varandas e bloco de serviço: quarto de serviço, banho de serviço e saleta da escada caracol), armários #CBB89E (painéis brancos com diagonal), vazios #4A4A4A com o X claro. Escada caracol: só o quarto que chega a este piso em Bege Bahia #D8CDB4; o resto do círculo esmaece.",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "bloco de serviço → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.878,
+              0.878,
+              0.878
+            ],
+            "cor_render": "#DFDFDF",
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "varanda da suíte 3 → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              770.1,
+              243.4,
+              790.1,
+              263.4
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "varanda da suíte 2 → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              694.5,
+              552.6,
+              714.5,
+              572.6
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "varanda da suíte master → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              544.7,
+              758.8,
+              564.7,
+              778.8
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "varanda da suíte 1 → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              1185.7,
+              731.4,
+              1205.7,
+              751.4
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "armários (painéis brancos com diagonal) → areia",
+            "layer": "DOC_LINHAS E PROJEÇÕES",
+            "preenchimento_pdf": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "cor_render": "#FFFFFF",
+            "para": "#CBB89E"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ],
+          [
+            "#CC9966",
+            "#A8784F"
+          ],
+          [
+            "#DDDACB",
+            "#DCD9CA"
+          ]
+        ],
+        "retangulos": [
+          {
+            "nome": "vazio de pé-direito duplo (esquerda)",
+            "bbox_vis": [
+              678,
+              329,
+              872,
+              475
+            ],
+            "so_branco": true,
+            "para": "#4A4A4A",
+            "cor_linha": "#BDBDBD"
+          },
+          {
+            "nome": "vazio de pé-direito duplo (direita)",
+            "bbox_vis": [
+              882,
+              329,
+              1029,
+              475
+            ],
+            "so_branco": true,
+            "para": "#4A4A4A",
+            "cor_linha": "#BDBDBD"
+          },
+          {
+            "nome": "vazios em volta da escada (jardim do Térreo embaixo)",
+            "bbox_vis": [
+              1080,
+              481,
+              1231,
+              597
+            ],
+            "so_branco": true,
+            "para": "#4A4A4A"
+          }
+        ],
+        "setores": [
+          {
+            "nome": "trecho da escada caracol que chega a este piso → Bege Bahia",
+            "centro_vis": [
+              930.7,
+              847.2
+            ],
+            "raio_vis": 31.5,
+            "quadrante": "sup_dir",
+            "para": "#D8CDB4",
+            "cor_linha": "#8F8574"
+          }
+        ]
+      },
+      "esmaecer": {
+        "_sobre": "Fica com a cor cheia só o 1º Pavimento (blocos com paredes, varandas, vazios e hall da escada). O entorno do Térreo (piscina, ofurô, deck, degraus, deck da piscina, placas de pedestres, pergolado) clareia.",
+        "clarear": 0.55,
+        "manter_bbox_vis": [
+          [
+            678,
+            175,
+            1138,
+            331
+          ],
+          [
+            678,
+            328,
+            1083,
+            600
+          ],
+          [
+            1076,
+            474,
+            1240,
+            600
+          ],
+          [
+            1228,
+            474,
+            1364,
+            494
+          ],
+          [
+            678,
+            470,
+            1240,
+            889
+          ],
+          [
+            519,
+            648,
+            681,
+            889
+          ],
+          [
+            1236,
+            594,
+            1363,
+            889
+          ]
+        ],
+        "clarear_circulos": [
+          {
+            "centro_vis": [
+              930.7,
+              847.2
+            ],
+            "raio_vis": 31.5,
+            "exceto_quadrante": "sup_dir"
+          }
+        ]
+      }
     },
     "Subsolo": {
       "pagina": 0,
