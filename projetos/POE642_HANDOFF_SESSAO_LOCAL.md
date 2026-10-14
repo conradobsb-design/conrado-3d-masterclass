@@ -288,7 +288,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 - **Degraus largos:** numerados no PDF de 1 (junto ao pátio) a 10 (junto ao caminho), seguindo na escada estreita de 11 a 21 até o deck; descem para cima, rumo ao pátio. A base traz a linha de caminhamento com a seta para cima (`setas`, como no Subsolo).
 - **Bases:** v1 (cores do PDF), v2 (legenda) e v3_texturas, em `POE642_CasaC/bases/`.
   - Nas texturas, a amostra da pedra portuguesa e a da floreira foram estreitadas: a da Casa B pegava gramado (manchas verdes no acesso) e fundo branco (faixas brancas no jardim de inverno).
-- **Prompt:** `POE642_CasaC/POE642_CasaC_PH_Terreo_v1.md`, com a escala na abertura e a posição do lote medida na base (x ~8%–91%, y ~2,5%–85%).
+- **Piscina sem bordas a mais (pedido do usuário):** as paredes estruturais da piscina, da prainha, do spa, dos degraus e do deck estão na layer ARQ_PAREDE com preenchimento branco e viravam faixas de vidro em volta de tudo. Elas saíram da detecção de vidro (`zonas_excluidas`). Ficam só a borda de travertino, os dois degraus (linhas finas na prainha) e o vidro da borda infinita (linha dupla no lado esquerdo da piscina comprida).
+- **Prompt:** `POE642_CasaC/POE642_CasaC_PH_Terreo_v2.md` é o atual (a v1 tinha a piscina com as faixas). Escala na abertura e posição do lote medida na base (x ~8%–91%, y ~2,5%–85%).
 - **Próximos passos:** render do Térreo, retoque, e depois pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
 
 ```bash
