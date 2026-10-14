@@ -223,7 +223,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 
 **Estado do Térreo:**
 - **Bases:** v1 (cores do PDF), v2 (legenda) e v3_texturas (prévia), em `POE642_CasaB/bases/`.
-- **Prompt:** `POE642_CasaB_PH_Terreo_v3.md` (PT + EN, com escala) é o atual; a v3 trocou o Bege Bahia pelo granito marrom nas áreas em malva.
+- **Prompt:** `POE642_CasaB_PH_Terreo_v4.md` (PT + EN, com escala) é o atual. A v3 trocou o Bege Bahia pelo granito marrom nas áreas em malva; a v4 pôs a borda infinita.
+- **Borda infinita:** o lado esquerdo do braço de cima da piscina, junto ao deck em L (a faixa branca de 30 cm sem borda cinza no PDF). Sai como calha com água #C9EAF5, um tom mais escura; não é borda de travertino.
 - **Respostas do usuário (v2):** a peça em L do deck grande é um banco em tom bronze (#7A5A3C na base); o jardim de inverno é jardim com floreira (#4F7A3A na base, textura das touceiras tropicais do Térreo da Casa A), com o X tracejado da abertura por cima.
 - **Depois do render:** `elementos_do_render.py` (móveis, carros, louças e as touceiras de plantas) e `acabamentos_finais.py`, como no Subsolo.
 
