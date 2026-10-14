@@ -1,0 +1,38 @@
+{
+  "_sobre": "Configuração das bases da Casa B (POE 642). Usa o mesmo gerar_bases.py da Casa A (projetos/POE642_CasaA/scripts), com --config apontando para este arquivo. Mesma folha (3370 x 2384 pt), mesmo recorte e mesmo enquadramento da Casa A.",
+  "layer_parede": "ARQ_PAREDE",
+  "cinza_parede": 0.357,
+  "cinza_parede_qualquer_layer": false,
+  "tolerancia_cor": 0.012,
+  "recorte": [
+    0.035,
+    0.095,
+    0.975,
+    0.955
+  ],
+  "largura_px": 6000,
+  "largura_visualizacao": 1800,
+  "saida_16x9": true,
+  "layers_ocultas": [],
+  "vidro": {
+    "espessura_max_pt": 4.0,
+    "comprimento_min_pt": 12.0,
+    "razao_min": 4.0,
+    "tolerancia_arco_pt": 1.5,
+    "tolerancia_raio": 0.3,
+    "largura_min_px": 6,
+    "contorno_px": 2
+  },
+  "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede.",
+  "prefixo": "POE642_CasaB",
+  "pavimentos": {
+    "Subsolo": {
+      "pagina": 0,
+      "rotacao": 0,
+      "layers_ocultas": [
+        "ARQ_TERRENO PLANEJADO"
+      ],
+      "_layers_ocultas": "Curvas de nível e linha do lote saem, como na Casa A: fundo todo branco."
+    }
+  }
+}

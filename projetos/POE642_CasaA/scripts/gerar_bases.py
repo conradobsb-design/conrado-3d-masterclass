@@ -674,7 +674,7 @@ def main(argv=None):
         return 0
 
     args.saida.mkdir(parents=True, exist_ok=True)
-    prefixo = args.saida / f"POE642_CasaA_BASE_{args.pavimento}"
+    prefixo = args.saida / f"{cfg.get('prefixo', 'POE642_CasaA')}_BASE_{args.pavimento}"
 
     # 1. texto (real, por redação) + layers desligadas (texto vetorizado do CAD)
     n_txt = remover_texto(page)
