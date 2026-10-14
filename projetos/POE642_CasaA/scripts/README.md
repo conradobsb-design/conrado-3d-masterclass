@@ -89,6 +89,13 @@ A base é reduzida com média (`INTER_AREA`) antes da afim. O `warpAffine` não 
 python retoque_base_1pav.py ../renders/POE642_CasaA_PH_1Pavimento_v7_final.png ../bases/POE642_CasaA_BASE_1Pavimento_v3_16x9.png --saida ../renders
 ```
 
+## Retoque do Subsolo: `retoque_subsolo.py`
+
+Aplica direto no render aprovado da v6 o ajuste que estava pendente:
+1. **Sauna:** o bloco claro no canto, junto ao vidro, vira piso de travertino, copiado das mesmas linhas logo à direita. Fica só o banco horizontal.
+2. **Tom:** a imagem fica mais clara e com menos sombra. É uma curva de meios-tons no L do Lab; o preto e o branco não mudam.
+3. **Fundo:** o quase-branco vira branco puro.
+
 ## Pranchas de entrega: `rodape_entrega.py`
 
 Gera o rodapé de cada pavimento, em 3840 × 440 px, e monta as pranchas: render em cima e rodapé embaixo, na mesma largura.
@@ -98,7 +105,7 @@ As três pranchas têm o mesmo tamanho e a planta no mesmo pixel, para que, vist
 - **Alinhamento:** cada render é alinhado à base do seu pavimento, por SIFT e transformação afim, e levado ao quadro 16:9 dessa base.
 
 ```bash
-python rodape_entrega.py --saida ../entrega --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_bege.png --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final2.png
+python rodape_entrega.py --saida ../entrega --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_bege.png --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final2.png --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final.png
 ```
 
 ## Limitações conhecidas
