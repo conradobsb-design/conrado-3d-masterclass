@@ -280,8 +280,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 **Térreo (PDF `642 - TÉRREO - CASA C.pdf`, recebido em 14/10/26; materiais definidos pelo usuário no mesmo dia):**
 - **Travertino:** todo o oliva (áreas sociais, circulações, halls, varandas, BH master 1, lavabos e borda das piscinas).
 - **Vinílico da Casa A:** o laranja (suíte master, quartos, closets e escritório).
-- **Granito Marrom Tabaco:** o malva (cozinha, louceiro, serviço, área de serviço descoberta, quarto e BH externos e a faixa da bancada gourmet), menos a garagem.
-- **Pedra portuguesa caramelo, sem os hexágonos:** garagem (com os 3 carros) e acesso de carros.
+- **Granito Marrom Tabaco:** todo o malva (cozinha, louceiro, serviço, área de serviço descoberta, quarto e BH externos, a faixa da bancada gourmet e a garagem, com os 3 carros). A garagem começou em pedra portuguesa e passou para o granito a pedido do usuário.
+- **Pedra portuguesa caramelo, sem os hexágonos:** só o acesso de carros.
 - **Bege Bahia:** o cinza dos banhos (BH 1, 2, 3 e BH master 2) e da área externa (pátio, degraus largos, caminho, pisantes) e a escada estreita ao lado do deck.
 - **Deck de madeira:** a faixa listrada entre a escada e a piscina.
 - **Grama:** o entorno. **Floreiras:** jardim 1 e os dois jardins de inverno. **Banco em L junto ao deck:** bronze, como na Casa B (por analogia; confirmar com o usuário).
@@ -289,7 +289,7 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 - **Bases:** v1 (cores do PDF), v2 (legenda) e v3_texturas, em `POE642_CasaC/bases/`.
   - Nas texturas, a amostra da pedra portuguesa e a da floreira foram estreitadas: a da Casa B pegava gramado (manchas verdes no acesso) e fundo branco (faixas brancas no jardim de inverno).
 - **Piscina sem bordas a mais (pedido do usuário):** as paredes estruturais da piscina, da prainha, do spa, dos degraus e do deck estão na layer ARQ_PAREDE com preenchimento branco e viravam faixas de vidro em volta de tudo. Elas saíram da detecção de vidro (`zonas_excluidas`). Ficam só a borda de travertino, os dois degraus (linhas finas na prainha) e o vidro da borda infinita (linha dupla no lado esquerdo da piscina comprida).
-- **Prompt:** `POE642_CasaC/POE642_CasaC_PH_Terreo_v2.md` é o atual (a v1 tinha a piscina com as faixas). Escala na abertura e posição do lote medida na base (x ~8%–91%, y ~2,5%–85%).
+- **Prompt:** `POE642_CasaC/POE642_CasaC_PH_Terreo_v3.md` é o atual (v2: piscina sem as faixas; v3: garagem em granito). Escala na abertura e posição do lote medida na base (x ~8%–91%, y ~2,5%–85%).
 - **Próximos passos:** render do Térreo, retoque, e depois pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
 
 ```bash
