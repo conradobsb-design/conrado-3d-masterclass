@@ -23,7 +23,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 AQUI = Path(__file__).resolve().parent
 ASSETS = AQUI.parent / "entrega" / "assets"
-FONTES = Path("/usr/share/fonts/opentype/inter")
+FONTES = ASSETS / "fontes"   # Inter (licença SIL OFL), junto do projeto para rodar em qualquer máquina
 
 PAVIMENTOS = {
     "Subsolo": {"titulo": "SUBSOLO", "linha_area": 0},
