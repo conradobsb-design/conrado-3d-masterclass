@@ -715,6 +715,26 @@
             "corrigir_tom": false,
             "borda_px": 0,
             "_nota": "Trecho da linha (com o tracinho do canto) entre a frente da bancada e o rebaixo; os veios verticais continuam com o deslocamento vertical."
+          },
+          {
+            "nome": "soleira do elevador, no tom da soleira da sauna",
+            "bbox_vis": [
+              811.8,
+              349.2,
+              834.3,
+              355.85
+            ],
+            "fonte_vis": [
+              482.2,
+              334.0,
+              486.0,
+              354.0
+            ],
+            "girar_fonte": 90,
+            "so_onde_alvo_branco": true,
+            "lum_fonte_min": 0,
+            "borda_px": 0,
+            "_nota": "A soleira da porta da sauna (vertical) girada para a horizontal e repetida em espelho; só o branco muda, os traços das bordas ficam."
           }
         ],
         "preencher_colunas": [

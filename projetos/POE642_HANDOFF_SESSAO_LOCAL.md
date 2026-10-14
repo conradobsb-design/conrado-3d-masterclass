@@ -198,6 +198,7 @@ python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render 
     - cuba branca com torneira no BH de serviço;
     - aresta fina no degrau do banco da sauna;
     - armário ao lado do elevador, no tom da marcenaria dos closets da Casa A;
+    - soleira do elevador no mesmo tom neutro da soleira da porta da sauna (copiada dela, girada);
     - a peça branca comprida da academia, que era erro do PDF, virou piso vinílico.
     - no BH sauna: soleira da porta no travertino do piso, rebaixo da bancada com a mesma textura do tampo (copiada dele) e sem os traços pretos, sem a linha preta que passava na frente da pia e piso uniforme em volta da bacia.
   - **Decisões do usuário:** a pedra grande fica lisa, sem paginação; a garagem fica sem carros.

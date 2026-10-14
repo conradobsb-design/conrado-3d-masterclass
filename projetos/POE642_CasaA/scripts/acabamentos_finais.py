@@ -140,14 +140,18 @@ def clonar(out, f, op):
     """Carimbo: copia o piso deslocado sobre o símbolo, com borda suave e o tom médio ajustado.
 
     Com 'fonte_vis', a fonte é esse retângulo, repetido em espelho até o tamanho do alvo (ex.:
-    o tampo da bancada copiado para o rebaixo). Com 'preservar_branco', o objeto branco que
+    o tampo da bancada copiado para o rebaixo); 'girar_fonte' gira a fonte antes (ex.: uma
+    soleira vertical copiada para uma horizontal). Com 'preservar_branco', o objeto branco que
     está no alvo (ex.: a louça) fica, e só o resto do retângulo vira piso.
     """
     x0, y0, x1, y1 = f.ret(op["bbox_vis"])
     alvo = out[y0:y1, x0:x1].copy()
     if "fonte_vis" in op:
         fx0, fy0, fx1, fy1 = f.ret(op["fonte_vis"])
-        fonte = ladrilhar(out[fy0:fy1, fx0:fx1].copy(), y1 - y0, x1 - x0)
+        bloco = out[fy0:fy1, fx0:fx1].copy()
+        if op.get("girar_fonte"):
+            bloco = np.ascontiguousarray(np.rot90(bloco, -op["girar_fonte"] // 90))   # sentido horário
+        fonte = ladrilhar(bloco, y1 - y0, x1 - x0)
         dx, dy = fx0 - x0, fy0 - y0
     else:
         dx, dy = int(round(op["desloc_vis"][0] * f.k)), int(round(op["desloc_vis"][1] * f.k))
