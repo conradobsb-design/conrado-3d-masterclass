@@ -587,7 +587,153 @@
             ]
           }
         ],
-        "_cuba_bh_servico": "A cuba do BH de serviço fica a da base: no render ela saiu escura e borrada nesta escala."
+        "_cuba_bh_servico": "A cuba do BH de serviço fica a da base; o acabamento_finais.py desenha por cima uma cuba branca com torneira cromada."
+      },
+      "acabamentos": {
+        "_nota": "Rodar depois do elementos_do_render.py. Troca os símbolos do PDF que ficaram na imagem final por objetos vistos de cima.",
+        "clonar": [
+          {
+            "nome": "símbolo do chuveiro do BH de serviço (braço e quadrado)",
+            "bbox_vis": [
+              663.2,
+              219.8,
+              679.75,
+              228.2
+            ],
+            "desloc_vis": [
+              -16,
+              0
+            ]
+          },
+          {
+            "nome": "símbolo do chuveiro do BH sauna (registro em cruz, braço e quadrado)",
+            "bbox_vis": [
+              486.85,
+              388.6,
+              503.0,
+              404.2
+            ],
+            "desloc_vis": [
+              20,
+              0
+            ]
+          }
+        ],
+        "parede": [
+          {
+            "nome": "parede da sauna sob o registro em cruz",
+            "bbox_vis": [
+              481.0,
+              388.6,
+              487.0,
+              404.2
+            ],
+            "linha_limpa_vis": 408.0
+          }
+        ],
+        "juntas": [
+          {
+            "nome": "pedra grande em travertino",
+            "bbox_vis": [
+              75.8,
+              322.2,
+              227.2,
+              476.2
+            ],
+            "modulo_vis": [
+              19.326,
+              38.652
+            ],
+            "origem": "direita",
+            "largura_px": 2.6,
+            "escurecer": 0.88,
+            "variacao": 0.025,
+            "semente": 642,
+            "_nota": "Placas de 60 x 120 cm com o lado maior no sentido dos veios; as placas inteiras ficam do lado da escada da ducha e o recorte de 50 cm fica na borda esquerda."
+          }
+        ],
+        "arestas_banco": [
+          {
+            "nome": "degrau do banco da sauna",
+            "x_vis": [
+              386.5,
+              483.2
+            ],
+            "faixa_vis": [
+              395.3,
+              398.4
+            ],
+            "aresta_vis": 397.15,
+            "desloc_vis": 3.0,
+            "cor": "#7B796C",
+            "_nota": "A linha dupla do PDF parecia um cano indo até o registro do chuveiro; fica uma aresta de 1 px, como a da frente do banco (y 380)."
+          }
+        ],
+        "pintar": [
+          {
+            "nome": "bancada do BH de serviço em volta da cuba",
+            "bbox_vis": [
+              602.6,
+              186.0,
+              615.4,
+              202.0
+            ],
+            "cor": "#E9E5DE",
+            "so_onde_clara": 235,
+            "_nota": "Mesmo quartzo claro do 'pintar' do elementos_do_render, que deixou de fora o retângulo da cuba."
+          }
+        ],
+        "cubas": [
+          {
+            "nome": "cuba do BH de serviço",
+            "aro_vis": [
+              604.55,
+              187.3,
+              617.8,
+              200.95
+            ],
+            "raio_aro_vis": 1.6,
+            "bacia_vis": [
+              607.9,
+              188.75,
+              616.55,
+              199.5
+            ],
+            "raio_bacia_vis": 2.6,
+            "valvula_vis": [
+              612.0,
+              194.12
+            ],
+            "torneira": {
+              "base_vis": [
+                606.05,
+                194.12
+              ],
+              "bica_ate_x_vis": 609.7,
+              "alavanca_ate_x_vis": 604.95
+            }
+          }
+        ],
+        "chuveiros": [
+          {
+            "nome": "BH de serviço",
+            "parede_x_vis": 679.8,
+            "y_vis": 224.0,
+            "sentido": "esquerda",
+            "cabeca_x_vis": 667.4,
+            "diametro_vis": 6.44,
+            "registro_dy_vis": 6.5
+          },
+          {
+            "nome": "BH sauna",
+            "parede_x_vis": 486.8,
+            "y_vis": 396.5,
+            "sentido": "direita",
+            "cabeca_x_vis": 498.9,
+            "diametro_vis": 6.44,
+            "registro_dy_vis": 7.0
+          }
+        ]
       }
     }
   }

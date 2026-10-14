@@ -97,6 +97,7 @@ Todos ficam em `projetos/POE642_CasaA/scripts/` e servem à Casa A e à Casa B. 
 | 1b. Texturas | `texturizar_base.py` | Troca as cores da legenda pelas texturas aprovadas da Casa A, para a base já mostrar os pisos ao motor. |
 | 2. Render | (motor) | Prompt `.md` + base `_16x9`. |
 | 4. Retoques | `elementos_do_render.py` | Faz da base a imagem final, trazendo do render só os objetos fotorrealistas. Onde não há objeto, fica a base. |
+| 4. Retoques | `acabamentos_finais.py` | Troca os símbolos do PDF que sobraram (chuveiros, cuba, linha do banco) por objetos vistos de cima e pagina as pedras. |
 | 4. Retoques | `retoque_chuveiros_1pav.py`, `retoque_base_1pav.py`, `retoque_bege_bahia_terreo.py`, `retoque_subsolo.py` | Retoques pontuais da Casa A, feitos sem IA. |
 | 5. Entrega | `rodape_entrega.py` | Monta o rodapé no padrão do carimbo e as pranchas, com o render alinhado ao quadro comum. |
 | 5. Entrega | `pdf_entrega.py` | Junta as pranchas num PDF para o cliente. |
@@ -115,8 +116,10 @@ python gerar_bases.py Subsolo "../../_pdfs_cliente/642 - SUBSOLO - CASA B.pdf" -
 #    (renomeie a saída ..._v3_vidros_neutros(.png|_16x9.png) para ..._v2(.png|_16x9.png))
 # 1b. prévia de texturas
 python texturizar_base.py Subsolo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Subsolo_v2.png --config ../../POE642_CasaB/config_bases.json --saida ../../POE642_CasaB/bases --nome POE642_CasaB_BASE_Subsolo_v3_texturas
-# 4. imagem final em alta (base + objetos do render)
-python elementos_do_render.py Subsolo ../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_v2_render.webp ../../POE642_CasaB/bases/POE642_CasaB_BASE_Subsolo_v3_texturas_16x9.png --config ../../POE642_CasaB/config_bases.json --saida ../../POE642_CasaB/renders --nome POE642_CasaB_PH_Subsolo_final
+# 4. imagem em alta (base + objetos do render)
+python elementos_do_render.py Subsolo ../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_v2_render.webp ../../POE642_CasaB/bases/POE642_CasaB_BASE_Subsolo_v3_texturas_16x9.png --config ../../POE642_CasaB/config_bases.json --saida ../../POE642_CasaB/renders --nome POE642_CasaB_PH_Subsolo_elementos
+# 4b. acabamentos finais (chuveiros, cuba, aresta do banco, juntas da pedra)
+python acabamentos_finais.py Subsolo ../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_elementos.png --config ../../POE642_CasaB/config_bases.json --saida ../../POE642_CasaB/renders --nome POE642_CasaB_PH_Subsolo_final
 ```
 
 **Coordenadas:** todos os retângulos das configs (`*_vis`) estão na prévia de 1800 px da base sem margem. A conversão é `vis = (pdf − recorte) × 1800 / (0,94 × largura da folha)`. Na base 16:9 de 6905 px, isso dá `px = vis × 6001/1800 + 452`.
@@ -186,7 +189,10 @@ python elementos_do_render.py Subsolo ../../POE642_CasaB/renders/POE642_CasaB_PH
 - **Bases:** v1 (cores do PDF), v2 (legenda) e v3_texturas (prévia dos materiais), em `POE642_CasaB/bases/`.
 - **Prompt:** a v2 é a atual e já tem o item de escala.
 - **Render do motor:** `renders/POE642_CasaB_PH_Subsolo_v2_render.webp`. O motor mudou o layout da academia, fez um banco em L na sauna, mexeu nas paredes da circulação e do chuveiro, pintou o entorno e apagou os arcos das portas.
-- **Imagem final:** `renders/POE642_CasaB_PH_Subsolo_final.png`, com 6905 × 3884 px. É a base com os objetos do render: esteiras, bicicletas, supino, bacias, bancada do BH sauna e cabine do elevador.
+- **Imagem final:** `renders/POE642_CasaB_PH_Subsolo_final.png`, com 6905 × 3884 px.
+  - É a base com os objetos do render: esteiras, bicicletas, supino, bacias, bancada do BH sauna e cabine do elevador (etapa intermediária: `_elementos.png`).
+  - Depois vêm os acabamentos: chuveiros e registros cromados de parede no BH de serviço e no BH sauna, cuba branca com torneira no BH de serviço, aresta fina no degrau do banco da sauna e pedra grande paginada em 60 × 120 cm.
+  - `_camada.png` tem só as alterações dos acabamentos, para o Photoshop.
 
 **Próximos passos:**
 1. **Revisão do cliente:** o usuário confere o Subsolo final.
@@ -197,7 +203,11 @@ python elementos_do_render.py Subsolo ../../POE642_CasaB/renders/POE642_CasaB_PH
    - criar o pavimento em `POE642_CasaB/config_bases.json`;
    - perguntar ao usuário os materiais de cada cor da legenda;
    - gerar a base, a prévia de texturas, o prompt v1 (PT + EN, com escala), o render e a imagem final pelo `elementos_do_render.py`.
-4. **Peça branca da academia:** perguntar o que é o retângulo branco comprido junto à parede de baixo. Hoje fica como desenhado.
+4. **Perguntas em aberto ao usuário (itens 5 a 8 da revisão):**
+   - a peça branca comprida da academia, junto à parede de baixo (hoje fica como desenhada);
+   - a faixa branca com diagonal tracejada ao lado do elevador;
+   - se entram carros na garagem;
+   - os dados do rodapé da Casa B (áreas, unidade, endereço).
 5. **Opcional, mais nitidez nos objetos:** passar o render num upscaler de IA (Higgsfield `upscale_image`) antes do `elementos_do_render.py`. Isso gasta créditos, então só com autorização.
 
 ---
