@@ -160,6 +160,26 @@ No Térreo da Casa B, a imagem final é o próprio render, retocado sem IA:
 python retoque_terreo_casab.py ../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_v4_render.webp --saida ../../POE642_CasaB/renders --nome POE642_CasaB_PH_Terreo_v4_retocado
 ```
 
+## Retoques do Subsolo da Casa C: `retoque_subsolo_casac.py` e `retoque_subsolo_casac_v3.py`
+
+No Subsolo da Casa C, a imagem final também é o próprio render, retocado sem IA.
+
+**`retoque_subsolo_casac.py`** (render do prompt v1):
+- tira a marca vermelha do usuário;
+- vira a sombra dos degraus largos para o lado do pátio, porque eles descem para cima.
+
+**`retoque_subsolo_casac_v3.py`** (render do prompt v3):
+- **Bege Bahia:** pátio, degraus largos, caminho e depósito voltam ao Bege Bahia aprovado.
+  - A textura é das varandas do 1º Pavimento da Casa A, tecida por quilting na escala do render.
+  - As áreas vêm da base chapada (cor #E8E8E8), alinhada ao render por SIFT.
+  - As pintinhas e os veios do mármore do render saem.
+  - Os contornos, a porta do depósito e as plantas da floreira ficam.
+- **Degraus largos:** cada aresta é redesenhada com o perfil do render espelhado (sombra do lado do pátio, filete de luz do outro).
+
+```bash
+python retoque_subsolo_casac_v3.py ../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_v3_render.webp --saida ../../POE642_CasaC/renders --nome POE642_CasaC_PH_Subsolo_v3_retocado
+```
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:

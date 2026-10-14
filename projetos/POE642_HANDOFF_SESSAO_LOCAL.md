@@ -257,7 +257,15 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 - **Prompt:** `POE642_CasaC/POE642_CasaC_PH_Subsolo_v3.md` é o atual; a v2 diz que os degraus largos descem para o pátio e a v3 põe a escala logo na abertura, com a posição da planta medida na base (x ~9,5%–49%, y ~11%–77%).
 - **Base corrigida:** a legenda tem `setas` (recurso novo do `gerar_bases.py`), que desenha a linha de caminhamento dos degraus largos com a seta para cima, rumo ao pátio.
 - **Render (prompt v1):** `renders/POE642_CasaC_PH_Subsolo_v1_render_marcado.webp` (com a seta vermelha do usuário; o render limpo não chegou como arquivo).
-- **Imagem final = o render, retocado:** `renders/POE642_CasaC_PH_Subsolo_v1_retocado.png`, pelo `retoque_subsolo_casac.py`: tira a marca vermelha e inverte o sentido de descida dos **degraus largos da esquerda** (descem para cima, rumo ao pátio; a sombra de cada aresta passa para o lado de cima). A escada curta numerada não muda (pedido do usuário).
+- **Primeiro retoque (render do prompt v1):** `renders/POE642_CasaC_PH_Subsolo_v1_retocado.png`, pelo `retoque_subsolo_casac.py`: tira a marca vermelha e inverte o sentido de descida dos **degraus largos da esquerda** (descem para cima, rumo ao pátio; a sombra de cada aresta passa para o lado de cima). A escada curta numerada não muda (pedido do usuário).
+- **Render (prompt v3):** `renders/POE642_CasaC_PH_Subsolo_v3_render.webp`. Planta em L, mesma escala da base (afim 1,0008 x 1,0095).
+- **Imagem final = o render v3, retocado:** `renders/POE642_CasaC_PH_Subsolo_v3_retocado.png` (+ `_camada.png`), pelo `retoque_subsolo_casac_v3.py`.
+  - **Bege Bahia:** o motor clareou o mármore (cerca de 235/224/212 contra 226/211/200). Pátio, degraus largos, caminho e depósito recebem o Bege Bahia aprovado (varandas do 1º Pavimento da Casa A, tecido por quilting na escala do render). Contornos, a porta do depósito e as plantas ficam como estão.
+  - **Degraus largos:** as 8 arestas do render são redesenhadas com o perfil espelhado; a sombra fica do lado do pátio.
+- **Diferenças do render v3 para a base, não pedidas (ficam como estão até o usuário pedir):**
+  - o banco da sauna saiu em madeira, em U;
+  - os degraus largos têm 8 arestas retas, sem a de cima e sem a volta em L junto ao caminho;
+  - a linha de caminhamento com a seta não aparece.
 - **Próximos passos:** rodapé (chave `entrega` na config: pedir ao usuário as áreas da Casa C, a unidade e se o endereço segue o padrão das outras casas) e PDF.
 
 ```bash
