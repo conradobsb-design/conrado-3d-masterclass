@@ -503,6 +503,27 @@
             ],
             "para": "#6E9150"
           }
+        ],
+        "setas": [
+          {
+            "nome": "degraus largos: descem para o pátio",
+            "pontos_vis": [
+              [
+                170.0,
+                546.0
+              ],
+              [
+                170.0,
+                392.0
+              ]
+            ],
+            "cor": "#5E5A52",
+            "largura_vis": 0.6,
+            "ponta_vis": 7.0,
+            "abertura_graus": 28,
+            "circulo_vis": 1.6,
+            "_nota": "Como no Subsolo (definido pelo usuário): os degraus largos descem para cima, do caminho para o pátio. No PDF do Térreo os degraus são numerados de 1 (junto ao pátio) a 10 (junto ao caminho) e seguem na escada estreita de 11 a 21 até o deck."
+          }
         ]
       },
       "texturas": {
