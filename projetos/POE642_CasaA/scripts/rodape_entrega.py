@@ -28,7 +28,7 @@ PROJETO = [
     ("CLIENTE", "PAULO OCTÁVIO"),
     ("ENDEREÇO", "ML 10 – CONJUNTO 02, LOTES 17, UNIDADE A"),
     ("PROJETO", "CASA A · UNIDADE AUTÔNOMA \"A\""),
-    ("DATA INICIAL", "18/05/2023"),
+    ("DATA INICIAL", "14/10/26"),
 ]
 ASSINATURA = ["RENDER 3D", "PROJETOS COM IA", "CONRADO CORTEZ"]
 
@@ -92,7 +92,7 @@ def rodape(chave):
     texto(d, (x0, topo + 95), titulo, f_t, TINTA, 0.06)
     texto(d, (x0, topo + 165), "PLANTA HUMANIZADA", fonte("Medium", 32), CINZA, 0.22)
     texto(d, (x0, topo + 215), "BASE: PLANTA BAIXA", fonte("Regular", 27), CINZA, 0.12)
-    texto(d, (x0, topo + 257), "IMAGEM ILUSTRATIVA · SEM COTAS E SEM ESCALA", fonte("Regular", 22), CINZA, 0.10)
+    texto(d, (x0, topo + 257), "IMAGEM ILUSTRATIVA", fonte("Regular", 22), CINZA, 0.10)
 
     # 2. quadro de áreas
     ax0, ax1 = divisorias[0] + 70, divisorias[1] - 70
