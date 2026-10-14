@@ -340,6 +340,253 @@
             "so_espelho_vertical": true
           }
         ]
+      },
+      "elementos_do_render": {
+        "_sobre": "Render v2 do Subsolo (motor, 2K) levado para a base v3 com texturas, em 6905 px. Do render vêm só os objetos fotorrealistas, nas posições da base (layout do PDF). Onde o render não tem elemento para trocar, fica a base: chuveiros, a peça branca da academia, a faixa com diagonal ao lado do elevador, as paredes, os vidros, as portas, as escadas e o entorno esmaecido.",
+        "apagar": [
+          {
+            "nome": "aparelhos da academia em traço",
+            "bbox_vis": [
+              [
+                690.8,
+                244.2,
+                745.4,
+                269.7
+              ],
+              [
+                691.1,
+                275.4,
+                745.7,
+                300.9
+              ],
+              [
+                630.2,
+                249.6,
+                660.5,
+                263.7
+              ],
+              [
+                630.2,
+                286.2,
+                660.5,
+                300.0
+              ],
+              [
+                636.8,
+                324.8,
+                683.0,
+                383.0
+              ]
+            ],
+            "piso_vis": [
+              690,
+              305,
+              770,
+              395
+            ]
+          },
+          {
+            "nome": "bacia do BH de serviço em traço",
+            "bbox_vis": [
+              [
+                601.5,
+                217.3,
+                621.1,
+                231.2
+              ]
+            ],
+            "piso_vis": [
+              622,
+              203,
+              639,
+              237
+            ]
+          },
+          {
+            "nome": "bacia do BH sauna em traço",
+            "bbox_vis": [
+              [
+                580.4,
+                389.9,
+                598.4,
+                403.1
+              ]
+            ],
+            "piso_vis": [
+              545,
+              338,
+              577,
+              388
+            ]
+          }
+        ],
+        "pintar": [
+          {
+            "nome": "bancada do BH de serviço (em volta da cuba, que fica a da base)",
+            "bbox_vis": [
+              600.5,
+              177.3,
+              615.8,
+              186.6
+            ],
+            "cor": "#E9E5DE"
+          },
+          {
+            "nome": "bancada do BH de serviço (em volta da cuba, que fica a da base)",
+            "bbox_vis": [
+              600.5,
+              201.5,
+              615.8,
+              211.8
+            ],
+            "cor": "#E9E5DE"
+          },
+          {
+            "nome": "bancada do BH de serviço (em volta da cuba, que fica a da base)",
+            "bbox_vis": [
+              600.5,
+              186.6,
+              603.4,
+              201.5
+            ],
+            "cor": "#E9E5DE"
+          }
+        ],
+        "objetos": [
+          {
+            "nome": "esteiras (giradas: o console fica à esquerda, como na base)",
+            "de_vis": [
+              691.1,
+              243.0,
+              716.0,
+              301.1
+            ],
+            "mascara": "neutro",
+            "girar": 90,
+            "para_vis": [
+              [
+                692.0,
+                245.4,
+                744.2,
+                268.5
+              ],
+              [
+                692.3,
+                276.6,
+                744.5,
+                299.7
+              ]
+            ]
+          },
+          {
+            "nome": "bicicletas",
+            "de_vis": [
+              622.4,
+              254.4,
+              641.6,
+              296.4
+            ],
+            "mascara": "neutro",
+            "girar": 90,
+            "para_vis": [
+              [
+                631.4,
+                250.8,
+                659.3,
+                262.5
+              ],
+              [
+                631.4,
+                287.4,
+                659.3,
+                298.8
+              ]
+            ]
+          },
+          {
+            "nome": "banco de supino com barra",
+            "de_vis": [
+              633.8,
+              323.9,
+              683.6,
+              380.3
+            ],
+            "mascara": "neutro",
+            "para_vis": [
+              [
+                638.0,
+                326.0,
+                681.8,
+                381.8
+              ]
+            ]
+          },
+          {
+            "nome": "bacia do BH de serviço",
+            "de_vis": [
+              600.5,
+              216.5,
+              623.5,
+              231.5
+            ],
+            "mascara": "claro",
+            "para_vis": [
+              [
+                602.3,
+                218.1,
+                620.3,
+                230.4
+              ]
+            ]
+          },
+          {
+            "nome": "bacia do BH sauna",
+            "de_vis": [
+              570.5,
+              388.0,
+              597.3,
+              404.0
+            ],
+            "mascara": "claro",
+            "para_vis": [
+              [
+                581.0,
+                390.5,
+                597.8,
+                402.5
+              ]
+            ]
+          },
+          {
+            "nome": "bancada com cuba do BH sauna",
+            "de_vis": [
+              579.8,
+              327.3,
+              597.6,
+              360.8
+            ],
+            "para_vis": [
+              [
+                579.8,
+                327.3,
+                597.6,
+                360.8
+              ]
+            ]
+          }
+        ],
+        "copiar": [
+          {
+            "nome": "cabine do elevador",
+            "bbox_vis": [
+              794,
+              303,
+              849,
+              351
+            ]
+          }
+        ],
+        "_cuba_bh_servico": "A cuba do BH de serviço fica a da base: no render ela saiu escura e borrada nesta escala."
       }
     }
   }
