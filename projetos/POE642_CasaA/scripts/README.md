@@ -175,6 +175,9 @@ No Subsolo da Casa C, a imagem final também é o próprio render, retocado sem 
   - As pintinhas e os veios do mármore do render saem.
   - Os contornos, a porta do depósito e as plantas da floreira ficam.
 - **Degraus largos:** cada aresta é redesenhada com o perfil do render espelhado (sombra do lado do pátio, filete de luz do outro).
+- **Banco da sauna:** o banco em U de madeira do render vira o banco da base, em travertino em L e em dois níveis, nos tons do banco aprovado da Casa B.
+  - O travertino é o do piso da sauna no render, com os veios verticais continuados em espelho.
+  - As arestas são finas, sem sombra.
 
 ```bash
 python retoque_subsolo_casac_v3.py ../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_v3_render.webp --saida ../../POE642_CasaC/renders --nome POE642_CasaC_PH_Subsolo_v3_retocado

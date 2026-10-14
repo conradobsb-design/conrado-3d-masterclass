@@ -14,6 +14,13 @@
    - O perfil da aresta (linha, sombra e filete de luz) é espelhado em torno da linha: a sombra
      passa para cima e o filete de luz para baixo.
    A escada curta numerada (esmaecida) não muda.
+3. Banco da sauna: o motor fez um banco em U de madeira. Fica o banco da base (pedido do
+   usuário): travertino em L, em dois níveis, como o banco aprovado da Casa B.
+   - Degrau da frente em L (braço junto à parede da direita e faixa ao longo do banco), um tom
+     mais escuro que o piso; assento junto à parede de baixo, mais escuro ainda.
+   - O travertino é o do próprio piso da sauna no render: cada coluna continua os veios
+     verticais, em espelho; onde era o braço esquerdo do U, volta a ser piso.
+   - Arestas finas no tom da aresta do banco da Casa B, sem sombra.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -44,6 +51,22 @@ PEDRA_L = (205, 246)                                    # luminância da pedra l
 PINTA_MAX = 20                                          # px: mancha escura menor que isso é do mármore
 LINHA_DIF = 10                                          # quanto a linha é mais escura que a pedra em volta
 JANELA = 8                                              # px de cada lado da aresta no espelho
+# banco da sauna (geometria da base alinhada ao render): degrau da frente em L (braço junto à
+# parede da direita e faixa ao longo do banco) e assento junto à parede de baixo
+BANCO = {
+    "x": (369, 423),            # colunas entre as paredes (inclusive)
+    "y_ini": 416,               # acima disso nada muda
+    "parede_x": 368,            # coluna de borda da parede da esquerda (antisserrilhada)
+    "parede_y": 497,            # linha de borda da parede de baixo (antisserrilhada)
+    "assento_y": 482.5,         # aresta entre o degrau e o assento
+    "degrau_y": 468.5,          # aresta da frente do degrau
+    "braco_x": 408.5,           # aresta do braço do L
+    "braco_topo": 417.5,        # aresta de cima do braço do L
+}
+TOM_DEGRAU = 0.91               # como o banco aprovado da Casa B (degrau / piso)
+TOM_ASSENTO = 0.867             # (assento / piso)
+COR_ARESTA = (108, 121, 123)    # BGR de #7B796C, a aresta do banco da Casa B
+LARG_ARESTA = 0.5               # px no render
 
 
 def alinhar(render):
@@ -116,6 +139,70 @@ def relevo_degraus(L, livre):
     return K
 
 
+def banco_sauna(out, orig):
+    """Troca o banco em U de madeira do render pelo banco da base: travertino em L, dois tons."""
+    b = BANCO
+    xa, xb = b["x"]
+    y0, y1 = b["y_ini"], b["parede_y"]
+    a = orig.astype(np.float32)
+    L = a.mean(axis=2)
+    # piso: cada coluna continua para baixo os veios (verticais) do próprio travertino do render,
+    # em espelho, a partir do trecho limpo acima da madeira
+    F = a[y0:y1].copy()
+    # madeira: mais saturada que o travertino (R-B acima de 33) ou bem mais escura; o começo da
+    # madeira vale também para as 2 colunas de cada lado (a borda do U tem sombra sem a cor da madeira)
+    madeira = (a[y0:y1, :, 2] - a[y0:y1, :, 0] > 33) | (L[y0:y1] < 175)
+    tem = madeira.any(axis=0)
+    comeco = np.where(tem, y0 + madeira.argmax(axis=0), y1)
+    comeco = ndimage.minimum_filter1d(comeco, 5)
+    for x in range(xa, xb + 1):
+        ini = 412 if x == xb else 388                     # na última coluna, só junto à parede
+        fim = min(comeco[x] - 2, y1)
+        seg = a[ini:fim, x]
+        n = len(seg)
+        for y in range(max(fim, y0), y1):
+            k = (y - fim) % (2 * n)
+            F[y - y0, x] = seg[n - 1 - k] if k < n else seg[k - n]
+    novo = F[:, xa:xb + 1]
+    ys = np.arange(y0, y1)[:, None] + 0.5
+    xs = np.arange(xa, xb + 1)[None, :] + 0.5
+    assento = ys > b["assento_y"]
+    degrau = ~assento & ((ys > b["degrau_y"]) | ((xs > b["braco_x"]) & (ys > b["braco_topo"])))
+    novo = novo * np.where(assento, TOM_ASSENTO, np.where(degrau, TOM_DEGRAU, 1.0))[..., None]
+    out[y0:y1, xa:xb + 1] = novo
+
+    # arestas de 0,5 px, desenhadas a 8x
+    ss = 8
+    gx0, gy0 = xa - 1, y0
+    h, w = y1 - y0 + 1, xb - xa + 3
+    tela = np.zeros((h * ss, w * ss), np.uint8)
+    lw = max(1, round(LARG_ARESTA * ss))
+
+    def linha(p, q):
+        cv2.line(tela, (round((p[0] - gx0) * ss), round((p[1] - gy0) * ss)),
+                 (round((q[0] - gx0) * ss), round((q[1] - gy0) * ss)), 255, lw)
+
+    fim_x = xb + 1
+    linha((xa - 1, b["assento_y"]), (fim_x, b["assento_y"]))
+    linha((xa - 1, b["degrau_y"]), (b["braco_x"], b["degrau_y"]))
+    linha((b["braco_x"], b["braco_topo"]), (b["braco_x"], b["degrau_y"]))
+    linha((b["braco_x"], b["braco_topo"]), (fim_x, b["braco_topo"]))
+    al = cv2.resize(tela.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    reg = out[gy0:gy0 + h, gx0:gx0 + w]
+    out[gy0:gy0 + h, gx0:gx0 + w] = np.where(al > 0, reg * (1 - al) + np.float32(COR_ARESTA) * al, reg)
+
+    # bordas antisserrilhadas das paredes: a parte do pixel que era madeira passa a ser travertino
+    parede = np.float32([4, 4, 4])
+    for borda, vizinho in (((slice(y0, y1), b["parede_x"]), (slice(y0, y1), xa)),
+                           ((b["parede_y"], slice(xa, xb + 1)), (b["parede_y"] - 1, slice(xa, xb + 1)))):
+        antes, depois = a[vizinho], out[vizinho]
+        mudou = np.abs(depois - antes).max(axis=-1) > 0
+        wf = np.clip((a[borda].mean(-1) - 4) / np.maximum(antes.mean(-1) - 4, 1), 0, 1)[..., None]
+        out[borda] = np.where(mudou[..., None], parede + wf * (depois - parede), out[borda])
+    print(f"    banco da sauna: degrau em L e assento em travertino, {int(degrau.sum() + assento.sum())} px")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -168,13 +255,16 @@ def main():
     w = np.where(L < ls, np.clip((L - 110) / (ls - 110), 0, 1), np.clip((255 - L) / (255 - ls), 0, 1))
     w[~anel] = 0
     out += (T - tom_render) * w[..., None] * (T.sum(axis=2) > 0)[..., None]
+
+    print("[5] banco da sauna")
+    out = banco_sauna(out, orig)
     out = np.clip(out, 0, 255).astype(np.uint8)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[5] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[6] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
