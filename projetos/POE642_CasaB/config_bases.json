@@ -216,9 +216,9 @@
                 "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
                 "bbox": [
                   [
+                    582,
                     580,
-                    552,
-                    688,
+                    686,
                     775
                   ]
                 ]
@@ -242,9 +242,9 @@
                 "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
                 "bbox": [
                   [
+                    582,
                     580,
-                    552,
-                    688,
+                    686,
                     775
                   ]
                 ]
@@ -269,9 +269,9 @@
                 "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
                 "bbox": [
                   [
+                    582,
                     580,
-                    552,
-                    688,
+                    686,
                     775
                   ]
                 ]
@@ -339,7 +339,8 @@
             ],
             "so_espelho_vertical": true
           }
-        ]
+        ],
+        "_fonte_travertino": "Trecho do hall do Subsolo da Casa A sem a faixa de cima (y < 580), que tinha a sombra da parede e deixava uma mancha escura na pedra grande."
       },
       "elementos_do_render": {
         "_sobre": "Render v2 do Subsolo (motor, 2K) levado para a base v3 com texturas, em 6905 px. Do render vêm só os objetos fotorrealistas, nas posições da base (layout do PDF). Onde o render não tem elemento para trocar, fica a base: chuveiros, a peça branca da academia, a faixa com diagonal ao lado do elevador, as paredes, os vidros, as portas, as escadas e o entorno esmaecido.",
