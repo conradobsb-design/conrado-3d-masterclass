@@ -890,7 +890,7 @@
       ],
       "_layers_ocultas": "Curvas de nível saem, como no Subsolo.",
       "legenda": {
-        "_sobre": "Casa B · Térreo. Travertino #DCD9CA: todo o oliva #BAB596 do PDF (áreas sociais, varanda, banhos, halls, jardim de inverno, faixa externa e pedras de acesso), as escadas #DDDACB, a borda das piscinas, a pedra grande e as pedras escalonadas. Bege Bahia #E8E8E8: todo o malva #BFA79F (cozinha, serviço, bloco do motorista e área de serviço descoberta). Vinílico #C8A27C: o laranja #CC9966 (suítes, sala íntima, closet master e circulação íntima), o mesmo da Casa A. Deck de madeira #AE8863 com réguas #8A6A4C: os três decks listrados. Pedra portuguesa caramelo #B98A55: garagem e acesso de carros, sem os hexágonos. Piscina #DFF6FE. Gramado #6E9150: o entorno do lote e o jardim de 4,62 m². Pilares #FF7FC0 viram parede.",
+        "_sobre": "Casa B · Térreo. Travertino #DCD9CA: todo o oliva #BAB596 do PDF (áreas sociais, varanda, banhos, halls, jardim de inverno, faixa externa e pedras de acesso), as escadas #DDDACB, a borda das piscinas, a pedra grande e as pedras escalonadas. Bege Bahia #E8E8E8: todo o malva #BFA79F (cozinha, serviço, bloco do motorista e área de serviço descoberta). Vinílico #C8A27C: o laranja #CC9966 (suítes, sala íntima, closet master e circulação íntima), o mesmo da Casa A. Deck de madeira #AE8863 com réguas #8A6A4C: os três decks listrados. Pedra portuguesa caramelo #B98A55: garagem e acesso de carros, sem os hexágonos. Piscina #DFF6FE. Gramado #6E9150: o entorno do lote e o jardim de 4,62 m². Pilares #FF7FC0 viram parede. Floreira #4F7A3A: o jardim de inverno (plantas tropicais). Banco em L do deck grande em bronze #7A5A3C.",
         "tolerancia_px": 10,
         "poligonos": [
           {
@@ -1028,6 +1028,43 @@
             ],
             "so_branco": true,
             "para": "#6E9150"
+          },
+          {
+            "nome": "jardim de inverno → floreira com plantas tropicais",
+            "bbox_vis": [
+              964.6,
+              401.0,
+              1072.2,
+              503.0
+            ],
+            "so_cores": [
+              "#DCD9CA"
+            ],
+            "para": "#4F7A3A",
+            "_nota": "Definido pelo usuário: jardim com floreira. Só o travertino entre as paredes e o vidro muda; o X tracejado da abertura fica."
+          },
+          {
+            "nome": "banco em L do deck grande, perna vertical → bronze",
+            "bbox_vis": [
+              198.0,
+              745.4,
+              220.8,
+              919.8
+            ],
+            "so_branco": true,
+            "para": "#7A5A3C"
+          },
+          {
+            "nome": "banco em L do deck grande, perna de baixo → bronze",
+            "bbox_vis": [
+              198.0,
+              897.0,
+              346.4,
+              919.8
+            ],
+            "so_branco": true,
+            "para": "#7A5A3C",
+            "_nota": "Definido pelo usuário: a peça branca em L é um banco em tom bronze. Fica a borda dupla desenhada."
           }
         ],
         "gramados": [
@@ -1204,6 +1241,31 @@
               }
             ],
             "_fonte": "Só a água, sem as bordas: de x 684 em diante a amostra escurece (borda e sombra da parede) e deixava uma faixa escura na piscina."
+          },
+          {
+            "nome": "floreira do jardim de inverno (touceiras tropicais do Térreo da Casa A)",
+            "cores": [
+              "#4F7A3A"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    120,
+                    95,
+                    290,
+                    230
+                  ],
+                  [
+                    1428,
+                    500,
+                    1515,
+                    710
+                  ]
+                ]
+              }
+            ]
           }
         ]
       }

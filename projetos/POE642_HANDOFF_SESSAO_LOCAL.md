@@ -222,10 +222,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 
 **Estado do Térreo:**
 - **Bases:** v1 (cores do PDF), v2 (legenda) e v3_texturas (prévia), em `POE642_CasaB/bases/`.
-- **Prompt:** `POE642_CasaB_PH_Terreo_v1.md` (PT + EN, com escala).
-- **Perguntas em aberto ao usuário:**
-  - a peça branca em L que contorna o deck grande de baixo (floreira? banco?);
-  - se o jardim de inverno (piso oliva, travertino, com o X tracejado da abertura) leva plantas.
+- **Prompt:** `POE642_CasaB_PH_Terreo_v2.md` (PT + EN, com escala) é o atual.
+- **Respostas do usuário (v2):** a peça em L do deck grande é um banco em tom bronze (#7A5A3C na base); o jardim de inverno é jardim com floreira (#4F7A3A na base, textura das touceiras tropicais do Térreo da Casa A), com o X tracejado da abertura por cima.
 - **Depois do render:** `elementos_do_render.py` (móveis, carros, louças e as touceiras de plantas) e `acabamentos_finais.py`, como no Subsolo.
 
 **Próximos passos:**
