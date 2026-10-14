@@ -266,6 +266,10 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
     - Degrau da frente em L: 0,91 do piso. Assento junto à parede de baixo: 0,867 do piso.
     - O travertino é o do próprio piso da sauna, com os veios verticais continuados; onde era o braço esquerdo do U, volta a ser piso.
     - Arestas de 0,5 px em #7B796C.
+  - **Porta do elevador (pedido do usuário):** a porta de abrir (arco e folha) que o motor pôs no acesso ao elevador sai; vira o vinílico da academia ao lado. O vão, o batente e a soleira ficam.
+  - **Chuveiros de teto (pedido do usuário):** na ducha e no box do BH, cada um no centro do quadradinho da base, com a placa quadrada aprovada na Casa A (banho 3 do 1º Pavimento).
+    - Na ducha, sai a placa grande fora do centro, com haste até a parede.
+    - No box, sai o metal na parede da esquerda.
 - **Diferenças do render v3 para a base, não pedidas (ficam como estão até o usuário pedir):**
   - os degraus largos têm 8 arestas retas, sem a de cima e sem a volta em L junto ao caminho;
   - a linha de caminhamento com a seta não aparece.

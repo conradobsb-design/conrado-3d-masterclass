@@ -21,6 +21,12 @@
    - O travertino é o do próprio piso da sauna no render: cada coluna continua os veios
      verticais, em espelho; onde era o braço esquerdo do U, volta a ser piso.
    - Arestas finas no tom da aresta do banco da Casa B, sem sombra.
+4. Porta do elevador: o motor pôs uma porta de abrir (arco e folha) no acesso ao elevador. Sai
+   (pedido do usuário); o arco e a folha viram o vinílico da academia ao lado, nas mesmas linhas.
+   O vão, o batente e a soleira ficam.
+5. Chuveiros de teto (pedido do usuário): na ducha e no box do BH, cada um no quadradinho da
+   base, com a placa quadrada aprovada na Casa A. O que o motor desenhou sai antes: a placa
+   grande fora do centro, com haste, na ducha; o metal na parede da esquerda, no box.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -67,6 +73,19 @@ TOM_DEGRAU = 0.91               # como o banco aprovado da Casa B (degrau / piso
 TOM_ASSENTO = 0.867             # (assento / piso)
 COR_ARESTA = (108, 121, 123)    # BGR de #7B796C, a aresta do banco da Casa B
 LARG_ARESTA = 0.5               # px no render
+# porta de abrir que o motor pôs no acesso ao elevador (arco e folha, no vinílico da academia):
+# retângulo até o batente (exclusivo à direita e embaixo) e o vinílico limpo à esquerda, nas
+# mesmas linhas (as réguas são horizontais)
+PORTA_ELEVADOR = {"ret": (885, 429, 918, 467), "desloc_x": -36, "esfumar": 3}
+# chuveiros de teto: a placa quadrada aprovada na Casa A (banho 3 do 1º Pavimento, 11 x 11 px,
+# a mesma escala), no centro do quadradinho da base. Antes, sai o que o motor desenhou: na ducha
+# uma placa de uns 55 x 70 cm fora do centro, com haste até a parede; no box do BH um metal na
+# parede da esquerda. O piso volta continuando os veios verticais de cima, em espelho.
+CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
+CHUVEIROS = [
+    {"nome": "ducha", "centro": (445.4, 439.5), "apagar": (436, 433, 457, 458), "limpo_y0": 413},
+    {"nome": "box do BH", "centro": (445.4, 480.7), "apagar": (428, 476, 437, 486), "limpo_y0": 464},
+]
 
 
 def alinhar(render):
@@ -203,6 +222,47 @@ def banco_sauna(out, orig):
     return out
 
 
+def porta_elevador(out):
+    """Tira a porta de abrir do acesso ao elevador: arco e folha viram o vinílico ao lado."""
+    x0, y0, x1, y1 = PORTA_ELEVADOR["ret"]
+    dx = PORTA_ELEVADOR["desloc_x"]
+    e = PORTA_ELEVADOR["esfumar"]
+    alvo = out[y0:y1, x0:x1]
+    fonte = out[y0:y1, x0 + dx:x1 + dx]
+    # tom: o vinílico logo em volta do retângulo contra o mesmo em volta da fonte
+    anel = np.ones((y1 - y0 + 2 * e, x1 - x0 + e), bool)
+    anel[e:-e, e:] = False
+    viz_alvo = out[y0 - e:y1 + e, x0 - e:x1][anel]
+    viz_fonte = out[y0 - e:y1 + e, x0 - e + dx:x1 + dx][anel]
+    fonte = fonte + (np.median(viz_alvo, axis=0) - np.median(viz_fonte, axis=0))
+    # esfuma à esquerda, em cima e embaixo; à direita encosta no batente, que fica
+    ay = np.minimum(np.arange(y1 - y0) + 1, np.arange(y1 - y0)[::-1] + 1) / e
+    ax = (np.arange(x1 - x0) + 1) / e
+    al = np.clip(np.minimum(ay[:, None], ax[None, :]), 0, 1)[..., None]
+    out[y0:y1, x0:x1] = alvo * (1 - al) + fonte * al
+    print(f"    porta do elevador: {(x1 - x0) * (y1 - y0)} px no vinílico da academia")
+    return out
+
+
+def chuveiros_teto(out):
+    """Chuveiros de teto da ducha e do box do BH, cada um no quadradinho da base."""
+    img = cv2.imread(str(CHUVEIRO_TETO[0])).astype(np.float32)
+    hx0, hy0, hx1, hy1 = CHUVEIRO_TETO[1]
+    cab = img[hy0:hy1, hx0:hx1]
+    for c in CHUVEIROS:
+        x0, y0, x1, y1 = c["apagar"]
+        seg = out[c["limpo_y0"]:y0, x0:x1].copy()
+        n = len(seg)
+        for y in range(y0, y1):
+            k = (y - y0) % (2 * n)
+            out[y, x0:x1] = seg[n - 1 - k] if k < n else seg[k - n]
+        cx, cy = c["centro"]
+        px, py = round(cx - (hx1 - hx0 - 1) / 2), round(cy - (hy1 - hy0 - 1) / 2)
+        out[py:py + cab.shape[0], px:px + cab.shape[1]] = cab
+        print(f"    {c['nome']}: chuveiro de teto em ({cx}, {cy})")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -258,13 +318,19 @@ def main():
 
     print("[5] banco da sauna")
     out = banco_sauna(out, orig)
+
+    print("[6] porta do elevador")
+    out = porta_elevador(out)
+
+    print("[7] chuveiros de teto")
+    out = chuveiros_teto(out)
     out = np.clip(out, 0, 255).astype(np.uint8)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[6] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[8] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
