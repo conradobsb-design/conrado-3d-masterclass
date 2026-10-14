@@ -57,7 +57,7 @@ Transforme a planta numa planta humanizada de apresentação do **térreo** de u
 - cada parede, vidro, porta, escada, linha, móvel, louça, carro e a piscina exatamente onde estão, com o mesmo tamanho e a mesma forma;
 - nada é acrescentado: nenhum ambiente, parede, porta, escada, móvel, carro ou objeto novo.
 
-Os pisos, o gramado e a água já aparecem na planta com o material final. Cada um mantém o material, a cor e a direção das réguas e dos veios, e só ganha acabamento fotorrealista, com juntas reais e brilho sutil.
+Os pisos, o gramado, a floreira e a água já aparecem na planta com o material final. Cada um mantém o material, a cor e a direção das réguas e dos veios, e só ganha acabamento fotorrealista, com juntas reais e brilho sutil.
 
 **ESCALA E ENQUADRAMENTO:** mantenha a escala existente.
 - A planta fica exatamente na mesma posição e com o mesmo tamanho na imagem, com a mesma margem branca em volta.
@@ -202,7 +202,7 @@ Os pisos, o gramado e a água já aparecem na planta com o material final. Cada 
 ```
 One input image: the ground-floor plan to edit. It defines the geometry, the layout and the materials, and you follow it exactly.
 
-Edit this plan into a rich, photorealistic humanized presentation plan (planta humanizada) of the ground floor of a luxury residence. This is an edit of the plan, not a new drawing: keep the same framing and scale, the same lot outline, and every wall, glass line, door, stair, line, furniture piece, sanitary fixture, car and the pool exactly where they are, at the same size and shape. Nothing is added: no new room, wall, door, stair, furniture, car or object. The floors, the lawn and the water already show their final materials in the plan: keep each one's material, colour and plank or vein direction exactly as it is, and only refine it into a photorealistic surface with real joints and a subtle sheen.
+Edit this plan into a rich, photorealistic humanized presentation plan (planta humanizada) of the ground floor of a luxury residence. This is an edit of the plan, not a new drawing: keep the same framing and scale, the same lot outline, and every wall, glass line, door, stair, line, furniture piece, sanitary fixture, car and the pool exactly where they are, at the same size and shape. Nothing is added: no new room, wall, door, stair, furniture, car or object. The floors, the lawn, the planter and the water already show their final materials in the plan: keep each one's material, colour and plank or vein direction exactly as it is, and only refine it into a photorealistic surface with real joints and a subtle sheen.
 
 SCALE AND FRAMING
 Keep the existing scale. The plan stays exactly where it is in the image and at exactly the same size, with the same white margin around it: do not zoom in, crop, re-centre, enlarge, shrink or rotate anything. Wall thickness, the size of every room, furniture piece, fixture and car, and the width of the floor planks and slabs all stay at the drawn scale.
