@@ -317,6 +317,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **Arranjo do escritório (item 16):** `arranjo` cola (`colar_disco`) o centro de uma estrelítzia do jardim do render no círculo do PDF, com sombra curta.
 - **Louceiro (item 17):** `veio_louceiro`, o `veios_dce` da Casa D: o veio (luminância sobre ela desfocada) do tampo da mesa de jantar, girado, realçado e repetido em espelho, sobre o tom desfocado da peça.
 - **Escada (item 18):** `escada` refaz o travertino da escada (mesmas colunas, sem linhas) e aplica, com 8 amostras por px, o tom de cada piso do PDF (mais escuro embaixo) e a sombra curta de cada espelho no piso de baixo.
+- **Jardim de inverno (item 19):** `jardim_flores` devolve as folhas do render original numa faixa irregular fora da floreira (lados e baixo; nunca em cima), com degradê nas pontas e sombra curta, e cola as flores (recorte laranja das estrelítzias, com o matiz girado para outras cores).
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado

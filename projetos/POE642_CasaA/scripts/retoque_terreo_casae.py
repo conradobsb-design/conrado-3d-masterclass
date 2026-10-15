@@ -78,6 +78,11 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     19 pisos do PDF (9,33 px) clareiam para cima (a escada sobe da direita para a esquerda: o de baixo,
     à direita, é o mais escuro) e cada espelho joga uma sombra curta no piso de baixo, à direita dele,
     inclusive o primeiro, no piso da sala.
+19. Jardim de inverno (pedido do usuário): as plantas saem levemente da floreira, sem exagero: nunca
+    por cima da escada (a borda de cima fica), um pouco para os lados (até ~3 px) e um pouco mais para
+    baixo (até ~6 px), com a borda das folhas irregular; as folhas voltam do render original, por
+    cima do traço da floreira, com uma sombra curta desenhada no travertino. Entram poucas flores tropicais coloridas (as estrelítzias
+    do jardim do render, laranja, e as mesmas em vermelho, rosa e amarelo), espalhadas.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -931,6 +936,96 @@ def escada(out):
     return out
 
 
+# jardim de inverno (item 19, pedido do usuário): quanto as folhas podem sair da floreira (px, com
+# uma borda irregular entre o mínimo e o máximo) e as flores (o centro da estrelítzia no render, o
+# raio do recorte, onde entra na floreira e o tom: o laranja do render ou girado para outra cor)
+JARDIM_FORA = {
+    "lados": (1.5, 3.5), "baixo": (3.0, 6.5), "semente": 642,
+    "flores": {"fonte": [((1671, 540), 9), ((1773, 605), 9), ((1582, 905), 9), ((1440, 722), 8)],
+               "pos": [((1002, 557), 0, None), ((1046, 571), 1, "vermelho"), ((1089, 554), 2, None),
+                       ((1121, 572), 3, "rosa"), ((1143, 556), 0, "amarelo")],
+               "giro_matiz": {"vermelho": -9, "rosa": -20, "amarelo": 9}, "escala": 0.85},
+}
+
+
+def jardim_flores(out, orig):
+    q = JARDIM_FORA
+    j = JARDIM
+    fx0, fy0, fx1, fy1 = j["floreira"]
+    wx0, wy0, wx1, wy1 = j["janela"]
+    reg = orig[wy0:wy1, wx0:wx1].astype(np.float32)
+    lum = reg.mean(axis=2)
+    ri = reg.astype(int)
+    planta = (ri[..., 1] > ri[..., 2] + j["verde"]) | (lum < j["escuro"])
+    dentro = np.zeros(lum.shape, bool)
+    dentro[fy0 - wy0:fy1 - wy0, fx0 - wx0:fx1 - wx0] = True
+    n, lab = cv2.connectedComponents(planta.astype(np.uint8))
+    ligada = np.isin(lab, np.unique(lab[dentro & planta])) & (lab > 0)
+    r0, r1 = j["ref_trav"]
+    ref = np.median(orig[r0:r1, wx0:wx1].astype(np.float32).mean(axis=2), axis=0)[None, :]
+    k = 2 * j["alcance_sombra"] + 1
+    perto = cv2.dilate(ligada.astype(np.uint8), np.ones((k, k), np.uint8)) > 0
+    folha = cv2.dilate(ligada.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    sombra = perto & (lum < ref - j["sombra"]) & ~folha
+    # quanto pode sair: borda irregular (ruído suave) entre o mínimo e o máximo de cada lado
+    rng = np.random.default_rng(q["semente"])
+    h, w = lum.shape
+    ys, xs = np.mgrid[wy0:wy1, wx0:wx1].astype(np.float32) + 0.5
+
+    def ruido(n_, a, b):
+        v = cv2.GaussianBlur(rng.normal(0, 1, (1, n_)).astype(np.float32), (0, 0), 4.0)[0]
+        v = (v - v.min()) / max(float(np.ptp(v)), 1e-6)
+        return a + (b - a) * v
+
+    baixo = ruido(w, *q["baixo"])[None, :]
+    esq = ruido(h, *q["lados"])[:, None]
+    dir_ = ruido(h, *q["lados"])[:, None]
+    # folga de cada px até o limite (o menor dos três lados); as pontas somem num degradê de 2 px, em
+    # vez de um corte seco (que lia como papel rasgado)
+    folga = np.minimum(np.minimum(fy1 + baixo - ys, xs - (fx0 - esq)), fx1 + dir_ - xs)
+    pode = (ys >= fy0 + 1.5) & (folga > 0)
+    miolo = (ys > fy0 + 1.5) & (ys < fy1 - 1.5) & (xs > fx0 + 1.5) & (xs < fx1 - 1.5)
+    faixa = pode & ~miolo
+    suave = np.clip(folga / 2.0, 0, 1)
+    # só as folhas voltam (a sombra antiga do render, larga, borrava a borda); a sombra é desenhada:
+    # curta, embaixo e à esquerda das folhas que saem, só no travertino
+    fora = faixa & ligada & ~(dentro & ~faixa)            # só px de folha (sem o halo claro do render)
+    a = fora.astype(np.float32)
+    a = np.maximum(cv2.GaussianBlur(a, (0, 0), 0.5), a) * faixa * suave
+    cur = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    tudo = np.maximum(dentro.astype(np.float32), a)
+    M = np.float32([[1, 0, -1.5], [0, 1, 1.5]])
+    sb = cv2.GaussianBlur(cv2.warpAffine(tudo, M, (w, h)), (0, 0), 1.0) * (1 - tudo) * (ys > fy0 + 2)
+    cur *= (1 - 0.35 * sb)[..., None]
+    a = a[..., None]
+    out[wy0:wy1, wx0:wx1] = np.clip(cur * (1 - a) + reg * a, 0, 255).astype(np.uint8)
+    # flores: o laranja da estrelítzia (pétalas e bico), recortado com borda suave e girado de matiz
+    fq = q["flores"]
+    forma = out.shape[:2]
+    for (px, py), i, cor in fq["pos"]:
+        (sx, sy), sr = fq["fonte"][i]
+        rec = orig[sy - sr:sy + sr + 1, sx - sr:sx + sr + 1]
+        hsv = cv2.cvtColor(rec, cv2.COLOR_BGR2HSV).astype(np.float32)
+        b_, g_, r_ = [rec[..., c].astype(np.float32) for c in range(3)]
+        flor = np.clip((r_ - g_ - 35) / 30, 0, 1) * np.clip((r_ - 120) / 40, 0, 1)
+        flor = cv2.GaussianBlur(flor, (0, 0), 0.5)
+        if cor:
+            hsv[..., 0] = (hsv[..., 0] + fq["giro_matiz"][cor]) % 180
+            if cor == "rosa":
+                hsv[..., 1] *= 0.8
+        img = cv2.cvtColor(np.clip(hsv, 0, 255).astype(np.uint8), cv2.COLOR_HSV2BGR).astype(np.float32)
+        s = fq["escala"]
+        lado = rec.shape[0]
+        M = cv2.getAffineTransform(np.float32([(0, 0), (lado, 0), (0, lado)]),
+                                   np.float32([(px - lado * s / 2, py - lado * s / 2), (px + lado * s / 2, py - lado * s / 2),
+                                               (px - lado * s / 2, py + lado * s / 2)]))
+        im = cv2.warpAffine(img, M, forma[::-1], flags=cv2.INTER_AREA)
+        al = cv2.warpAffine(flor, M, forma[::-1], flags=cv2.INTER_AREA)[..., None]
+        out[:] = np.clip(out * (1 - al) + im * al, 0, 255).astype(np.uint8)
+    print(f"    jardim de inverno: folhas um pouco para fora (sem a escada) e {len(fq['pos'])} flores tropicais")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -975,6 +1070,8 @@ def main():
     out = veio_louceiro(out, orig)
     print("[18] escada: sombreamento de subida, sem linhas")
     out = escada(out)
+    print("[19] jardim de inverno: um pouco para fora, com flores")
+    out = jardim_flores(out, orig)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
