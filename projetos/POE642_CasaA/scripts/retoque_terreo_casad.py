@@ -142,6 +142,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    entram, com a geometria do PDF: a divisória do box em cinza claro (com contorno e as duas folhas de
    correr) e o chuveiro como os do banho master (ducha quadrada com a placa da Casa A, braço cromado até
    a parede de baixo e canopla, com sombra curta).
+32. Bancada da pia da gourmet (pedido do usuário): a área molhada (retângulo da layer ARQ_BANCADAS em
+   volta da cuba) em traço cinza fino nos lados livres, como na cozinha; e o suporte de utensílios
+   decorativo do PDF (ARQ_LAYOUT HUMANIZAÇÃO): o vaso redondo em cerâmica grafite, com borda e sombra
+   curta, e a folhagem da planta do vaso do hall do próprio render, reduzida à folhagem do PDF.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -573,6 +577,21 @@ BANHO_GOURMET = {
     "ducha": (735.6, 224.6, 741.8, 230.7), "braco": (738.7, 227.7, 239.3), "larg_braco": 0.8,
     "canopla": (737.8, 238.6, 739.6, 239.6),
     "sombra": {"desloc": (-1.0, 1.0), "sigma": 0.8, "forca": 0.3},
+}
+
+# bancada da pia da gourmet (pedido do usuário): a área molhada (retângulo da layer ARQ_BANCADAS em
+# volta da cuba) em traço cinza fino nos lados livres (esquerda e embaixo), como na cozinha; e o
+# suporte de utensílios decorativo do PDF (ARQ_LAYOUT HUMANIZAÇÃO: o vaso redondo com a folhagem
+# caindo para a frente): o vaso em cerâmica grafite, com borda e sombra curta, e a folhagem da planta
+# do próprio render (a do vaso do hall), reduzida à folhagem do PDF, com sombra curta
+GOURMET_PIA = {
+    "area_molhada": [(788.9, 244.9), (788.9, 267.7), (850.4, 267.7)],
+    "vaso": ((777.5, 252.6), 5.6),
+    "ceramica": (84, 88, 92), "borda": (128, 132, 136), "fundo": (58, 61, 64),
+    "planta_fonte": ((1233, 591, 1264, 619), (1248.5, 605.0)),
+    "planta": ((777.4, 257.2), 0.66),
+    "janela": (765, 243, 790, 268),
+    "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.35},
 }
 
 
@@ -1043,18 +1062,19 @@ def piso_sob_armario(out, chapada):
     return out
 
 
-def area_molhada(out):
+def area_molhada(out, pontos=None):
     q = AREA_MOLHADA
-    xs, ys = [x for x, _ in q["pontos"]], [y for _, y in q["pontos"]]
+    pontos = pontos or q["pontos"]
+    xs, ys = [x for x, _ in pontos], [y for _, y in pontos]
     jx0, jy0, jx1, jy1 = int(min(xs)) - 2, int(min(ys)) - 1, int(max(xs)) + 3, int(max(ys)) + 3
     h, w = jy1 - jy0, jx1 - jx0
     f = np.zeros((h * SS, w * SS), np.uint8)
-    pts = np.array([[int(round((x - jx0) * SS)), int(round((y - jy0) * SS))] for x, y in q["pontos"]], np.int32)
+    pts = np.array([[int(round((x - jx0) * SS)), int(round((y - jy0) * SS))] for x, y in pontos], np.int32)
     cv2.polylines(f, [pts], False, 255, max(1, int(round(q["larg_traco"] * SS))))
     a = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None] * q["forca_traco"]
     reg = out[jy0:jy1, jx0:jx1].astype(np.float32)
     out[jy0:jy1, jx0:jx1] = np.clip(reg * (1 - a) + np.array(q["traco"], np.float32) * a, 0, 255).astype(np.uint8)
-    print("    área molhada da bancada da pia demarcada (lados livres: esquerda e embaixo)")
+    print("    área molhada demarcada (lados livres: esquerda e embaixo)")
     return out
 
 
@@ -1838,6 +1858,53 @@ def banho_gourmet(out):
     return out
 
 
+def gourmet_pia(out, orig):
+    q = GOURMET_PIA
+    out = area_molhada(out, q["area_molhada"])
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+
+    def px(v, o):
+        return int(round((v - o) * SS))
+
+    (cx, cy), r = q["vaso"]
+    disco = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.circle(disco, (px(cx, wx0), px(cy, wy0)), px(r, 0), 255, -1)
+    s = q["sombra"]
+    M = np.float32([[1, 0, s["desloc"][0] * SS], [0, 1, s["desloc"][1] * SS]])
+    sb = cv2.GaussianBlur(cv2.warpAffine(disco.astype(np.float32), M, (w * SS, h * SS)), (0, 0), s["sigma"] * SS) / 255
+    reg *= (1 - s["forca"] * cv2.resize(sb, (w, h), interpolation=cv2.INTER_AREA))[..., None]
+    cor = np.zeros((h * SS, w * SS, 3), np.float32)
+    cor[:] = q["ceramica"]
+    cv2.circle(cor, (px(cx, wx0), px(cy, wy0)), px(r - 1.1, 0), q["fundo"], -1)
+    anel = np.zeros_like(disco)
+    cv2.circle(anel, (px(cx, wx0), px(cy, wy0)), px(r - 0.45, 0), 255, max(1, px(0.5, 0)))
+    cor[anel > 0] = q["borda"]
+    a = cv2.resize(disco.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    c = cv2.resize(cor * (disco[..., None] / 255), (w, h), interpolation=cv2.INTER_AREA) / np.maximum(a, 1e-6)[..., None]
+    reg = reg * (1 - a[..., None]) + c * a[..., None]
+
+    # folhagem: a planta do render (só os px verdes), com a sombra curta dela
+    (fx0, fy0, fx1, fy1), (pcx, pcy) = q["planta_fonte"]
+    spr = orig[fy0:fy1, fx0:fx1].astype(np.float32)
+    verde = np.clip((spr[..., 1] - spr[..., 2] + 4) / 10, 0, 1)
+    (dx, dy), esc = q["planta"]
+    M = np.float32([[esc, 0, dx - wx0 - (pcx - fx0) * esc], [0, esc, dy - wy0 - (pcy - fy0) * esc]])
+    pre = spr * verde[..., None]
+    spr_w = cv2.warpAffine(pre, M, (w, h), flags=cv2.INTER_AREA, borderValue=0)
+    al = cv2.warpAffine(verde, M, (w, h), flags=cv2.INTER_AREA, borderValue=0)
+    spr_w = spr_w / np.maximum(al, 1e-6)[..., None]
+    Ms = np.float32([[1, 0, s["desloc"][0]], [0, 1, s["desloc"][1]]])
+    sombra = cv2.GaussianBlur(cv2.warpAffine(al, Ms, (w, h)), (0, 0), s["sigma"])
+    reg *= (1 - s["forca"] * sombra)[..., None]
+    al = al[..., None]
+    reg = reg * (1 - al) + spr_w * al
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    bancada da pia da gourmet: área molhada e o suporte de utensílios decorativo do PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1912,6 +1979,8 @@ def main():
     out = elevador(out)
     print("[28] banho gourmet: box e chuveiro")
     out = banho_gourmet(out)
+    print("[29] bancada da pia da gourmet: área molhada e suporte decorativo")
+    out = gourmet_pia(out, orig)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

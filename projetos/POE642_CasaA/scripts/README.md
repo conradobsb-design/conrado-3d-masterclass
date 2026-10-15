@@ -260,6 +260,7 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **Elevador (erro 23):** a cabine da Casa B girada (porta à direita), ocupando a caixa inteira com 1 a 2 px de folga.
 - **Degrau da prainha:** as mesmas linhas 36 px à esquerda (3 placas), vezes o fator por coluna da sombra da borda medido acima.
 - **Louceiro, despensa e banho gourmet:** `sem_prateleiras` (granito por `textura` com a sombra das paredes por distância, folha da porta protegida) e `banho_gourmet` (divisória do box em 8x, chuveiro como em `chuveiros_bhm`).
+- **Bancada da gourmet:** `area_molhada` aceita os pontos; `gourmet_pia` desenha o vaso em 8x e cola a folhagem do vaso do hall (só os px verdes, pré-multiplicados) com sombra curta.
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado
