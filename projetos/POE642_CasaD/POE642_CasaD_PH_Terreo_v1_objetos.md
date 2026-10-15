@@ -1,5 +1,7 @@
 # POE 642 · Casa D · Térreo — objetos pessoais e decorativos (Higgsfield)
 
+> **Descartado (15/10/26):** o usuário testou e o resultado não ficou a contento; os objetos não entram na entrega.
+
 **Motor:** Nano Banana Pro, 2K, 16:9.
 **Imagem de entrada (única):** `renders/POE642_CasaD_PH_Terreo_v1_retocado.png` (o render retocado atual).
 **Mapa dos lugares:** `renders/POE642_CasaD_PH_Terreo_v1_objetos_alvos.jpg` (só para conferência; não entra no motor).
