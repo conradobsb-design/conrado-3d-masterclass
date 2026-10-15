@@ -1,480 +1,616 @@
 {
-  "_sobre": "Configuração das bases da Casa D (POE 642). Usa o mesmo gerar_bases.py da Casa A (projetos/POE642_CasaA/scripts), com --config apontando para este arquivo. Mesma folha (3370 x 2384 pt), mesmo recorte e mesmo enquadramento das Casas A, B e C.",
-  "layer_parede": "ARQ_PAREDE",
-  "cinza_parede": 0.357,
-  "cinza_parede_qualquer_layer": false,
-  "tolerancia_cor": 0.012,
-  "recorte": [
-    0.035,
-    0.095,
-    0.975,
-    0.955
-  ],
-  "largura_px": 6000,
-  "largura_visualizacao": 1800,
-  "saida_16x9": true,
-  "layers_ocultas": [],
-  "vidro": {
-    "espessura_max_pt": 4.0,
-    "comprimento_min_pt": 12.0,
-    "razao_min": 4.0,
-    "tolerancia_arco_pt": 1.5,
-    "tolerancia_raio": 0.3,
-    "largura_min_px": 6,
-    "contorno_px": 2
-  },
-  "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede.",
-  "prefixo": "POE642_CasaD",
-  "pavimentos": {
-    "Terreo": {
-      "pagina": 0,
-      "rotacao": 0,
-      "layers_ocultas": [
-        "ARQ_TERRENO PLANEJADO"
+ "_sobre": "Configuração das bases da Casa D (POE 642). Usa o mesmo gerar_bases.py da Casa A (projetos/POE642_CasaA/scripts), com --config apontando para este arquivo. Mesma folha (3370 x 2384 pt), mesmo recorte e mesmo enquadramento das Casas A, B e C.",
+ "layer_parede": "ARQ_PAREDE",
+ "cinza_parede": 0.357,
+ "cinza_parede_qualquer_layer": false,
+ "tolerancia_cor": 0.012,
+ "recorte": [
+  0.035,
+  0.095,
+  0.975,
+  0.955
+ ],
+ "largura_px": 6000,
+ "largura_visualizacao": 1800,
+ "saida_16x9": true,
+ "layers_ocultas": [],
+ "vidro": {
+  "espessura_max_pt": 4.0,
+  "comprimento_min_pt": 12.0,
+  "razao_min": 4.0,
+  "tolerancia_arco_pt": 1.5,
+  "tolerancia_raio": 0.3,
+  "largura_min_px": 6,
+  "contorno_px": 2
+ },
+ "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede.",
+ "prefixo": "POE642_CasaD",
+ "pavimentos": {
+  "Terreo": {
+   "pagina": 0,
+   "rotacao": 0,
+   "layers_ocultas": [
+    "ARQ_TERRENO PLANEJADO"
+   ],
+   "_layers_ocultas": "Curvas de nível saem, como nas Casas A, B e C: fundo todo branco.",
+   "zonas_excluidas": {
+    "piscina, prainha e spa: só as bordas desenhadas, sem faixas de vidro": [
+     342.9,
+     258.9,
+     563.4,
+     538.5
+    ]
+   },
+   "_zonas_excluidas": "Como na Casa C: as paredes da piscina na layer de parede não viram vidro em volta da água.",
+   "legenda": {
+    "_sobre": "Casa D · Térreo (materiais definidos pelo usuário em 15/10/26, como na Casa C). Travertino #DCD9CA: o oliva #BAB596 (living, jantar, hall de entrada, adega e lavabo). Vinílico #C8A27C: o laranja #CC9966 (suítes, sala íntima, circulações e quarto de serviço). Granito Marrom Tabaco #5A4232: o terracota #995F4C (cozinha, gourmet, banho gourmet, despensa, louceiro, serviço, área descoberta, garagem e o acesso de veículos, que o usuário pediu igual à garagem). Bege Bahia #E8E8E8: o cinza #E4E4E4 (varanda gourmet, área da piscina, escadas e deck lateral), os banhos (brancos com hachura no PDF: banho master, banhos 1, 2 e 3 e WC DCE), a escada branca junto às suítes e os pisantes. Piscina, prainha e spa #DFF6FE. Gramado #6E9150: o entorno do lote. Floreira #4F7A3A: os dois jardins.",
+    "tolerancia_px": 10,
+    "poligonos": [
+     {
+      "nome": "área externa cinza (varanda gourmet, piscina, escadas, deck lateral) → Bege Bahia",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.894,
+       0.894,
+       0.894
       ],
-      "_layers_ocultas": "Curvas de nível saem, como nas Casas A, B e C: fundo todo branco.",
-      "zonas_excluidas": {
-        "piscina, prainha e spa: só as bordas desenhadas, sem faixas de vidro": [
-          342.9,
-          258.9,
-          563.4,
-          538.5
-        ]
-      },
-      "_zonas_excluidas": "Como na Casa C: as paredes da piscina na layer de parede não viram vidro em volta da água.",
-      "legenda": {
-        "_sobre": "Casa D · Térreo (materiais definidos pelo usuário em 15/10/26, como na Casa C). Travertino #DCD9CA: o oliva #BAB596 (living, jantar, hall de entrada, adega e lavabo). Vinílico #C8A27C: o laranja #CC9966 (suítes, sala íntima, circulações e quarto de serviço). Granito Marrom Tabaco #5A4232: o terracota #995F4C (cozinha, gourmet, banho gourmet, despensa, louceiro, serviço, área descoberta, garagem e o acesso de veículos, que o usuário pediu igual à garagem). Bege Bahia #E8E8E8: o cinza #E4E4E4 (varanda gourmet, área da piscina, escadas e deck lateral), os banhos (brancos com hachura no PDF: banho master, banhos 1, 2 e 3 e WC DCE), a escada branca junto às suítes e os pisantes. Piscina, prainha e spa #DFF6FE. Gramado #6E9150: o entorno do lote. Floreira #4F7A3A: os dois jardins.",
-        "tolerancia_px": 10,
-        "poligonos": [
-          {
-            "nome": "área externa cinza (varanda gourmet, piscina, escadas, deck lateral) → Bege Bahia",
-            "layer": "ARQ_CONTRAPISO",
-            "preenchimento_pdf": [
-              0.894,
-              0.894,
-              0.894
-            ],
-            "cor_render": "#E4E4E4",
-            "para": "#E8E8E8"
-          }
-        ],
-        "trocas_cor": [
-          [
-            "#BAB596",
-            "#DCD9CA"
-          ],
-          [
-            "#995F4C",
-            "#5A4232"
-          ],
-          [
-            "#CC9966",
-            "#C8A27C"
-          ],
-          [
-            "#7FDFFF",
-            "#DFF6FE"
-          ]
-        ],
-        "retangulos": [
-          {
-            "nome": "banho master → Bege Bahia",
-            "bbox_vis": [
-              278.7,
-              840.9,
-              379.1,
-              940.3
-            ],
-            "so_branco": true,
-            "para": "#E8E8E8",
-            "proteger_layers": [
-              "ARQ_LOUÇAS E METAIS",
-              "ARQ_BANCADAS",
-              "ARQ_MOBILIÁRIO",
-              "ARQ_ELEMENTOS FIXOS",
-              "ARQ_PAREDE",
-              "INS_INSTALAÇÕES HIDRÁULICAS"
-            ],
-            "apagar_linhas_layer": "ARQ_CONTRAPISO"
-          },
-          {
-            "nome": "banho 1 → Bege Bahia",
-            "bbox_vis": [
-              447.5,
-              825.4,
-              514.8,
-              940.3
-            ],
-            "so_branco": true,
-            "para": "#E8E8E8",
-            "proteger_layers": [
-              "ARQ_LOUÇAS E METAIS",
-              "ARQ_BANCADAS",
-              "ARQ_MOBILIÁRIO",
-              "ARQ_ELEMENTOS FIXOS",
-              "ARQ_PAREDE",
-              "INS_INSTALAÇÕES HIDRÁULICAS"
-            ],
-            "apagar_linhas_layer": "ARQ_CONTRAPISO"
-          },
-          {
-            "nome": "banhos 2 e 3 → Bege Bahia",
-            "bbox_vis": [
-              964.2,
-              828.5,
-              1093.7,
-              940.3
-            ],
-            "so_branco": true,
-            "para": "#E8E8E8",
-            "proteger_layers": [
-              "ARQ_LOUÇAS E METAIS",
-              "ARQ_BANCADAS",
-              "ARQ_MOBILIÁRIO",
-              "ARQ_ELEMENTOS FIXOS",
-              "ARQ_PAREDE",
-              "INS_INSTALAÇÕES HIDRÁULICAS"
-            ],
-            "apagar_linhas_layer": "ARQ_CONTRAPISO"
-          },
-          {
-            "nome": "WC DCE → Bege Bahia",
-            "bbox_vis": [
-              1146.5,
-              279.6,
-              1202.4,
-              364.5
-            ],
-            "so_branco": true,
-            "para": "#E8E8E8",
-            "proteger_layers": [
-              "ARQ_LOUÇAS E METAIS",
-              "ARQ_BANCADAS",
-              "ARQ_MOBILIÁRIO",
-              "ARQ_ELEMENTOS FIXOS",
-              "ARQ_PAREDE",
-              "INS_INSTALAÇÕES HIDRÁULICAS"
-            ],
-            "apagar_linhas_layer": "ARQ_CONTRAPISO"
-          },
-          {
-            "nome": "escada branca junto às suítes → Bege Bahia",
-            "bbox_vis": [
-              318.0,
-              675.2,
-              482.7,
-              714.5
-            ],
-            "so_branco": true,
-            "para": "#E8E8E8",
-            "_nota": "Ficam as linhas dos degraus."
-          },
-          {
-            "nome": "jardim abaixo da sala íntima → floreira",
-            "bbox_vis": [
-              651.5,
-              911.3,
-              832.7,
-              947.6
-            ],
-            "so_branco": true,
-            "para": "#4F7A3A",
-            "cor_linha": "#4F7A3A"
-          },
-          {
-            "nome": "jardim junto ao lavabo → floreira",
-            "bbox_vis": [
-              1257.3,
-              650.3,
-              1322.5,
-              714.5
-            ],
-            "so_branco": true,
-            "para": "#4F7A3A",
-            "cor_linha": "#4F7A3A",
-            "_nota": "O X tracejado some na floreira."
-          }
-        ],
-        "gramados": [
-          {
-            "nome": "entorno do lote → grama",
-            "bbox_vis": [
-              61.2,
-              78.7,
-              1681.9,
-              1038.7
-            ],
-            "para": "#6E9150"
-          }
-        ],
-        "fechados_apos_gramado": [
-          {
-            "nome": "pisantes acima da cozinha → Bege Bahia",
-            "bbox_vis": [
-              780.9,
-              91.1,
-              1098.8,
-              196.8
-            ],
-            "para": "#E8E8E8",
-            "_nota": "O primeiro, junto à varanda, desce até a parede (y 185 na prévia)."
-          },
-          {
-            "nome": "pisantes na frente do hall → Bege Bahia",
-            "bbox_vis": [
-              1274.9,
-              503.3,
-              1661.1,
-              642.1
-            ],
-            "para": "#E8E8E8"
-          },
-          {
-            "nome": "faixa com X entre a garagem e os pisantes → grama",
-            "bbox_vis": [
-              1279.0,
-              430.8,
-              1575.2,
-              490.9
-            ],
-            "para": "#6E9150",
-            "_nota": "Branco do PDF sem piso, sob a projeção (os X ficam): os triângulos que o X fecha também viram grama."
-          }
-        ]
-      },
-      "texturas": {
-        "_sobre": "Prévia de texturas do Térreo da Casa D: os mesmos materiais aprovados nas Casas A, B e C (bbox em px de um render de 2000 px).",
-        "tolerancia": 4,
-        "_tolerancia": "4, e não 12 como no Subsolo: as cores da legenda são exatas, e com 12 o vidro #D6D6D3 entraria no travertino #DCD9CA. As escadas #DDDACB entram no travertino.",
-        "materiais": [
-          {
-            "nome": "granito Marrom Tabaco (piso da cozinha do Térreo da Casa A)",
-            "cores": [
-              "#5A4232"
-            ],
-            "fontes": [
-              {
-                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
-                "bbox": [
-                  [
-                    997,
-                    603,
-                    1124,
-                    633
-                  ],
-                  [
-                    998,
-                    690,
-                    1108,
-                    718
-                  ]
-                ]
-              }
-            ],
-            "_fonte": "Só o piso: o trecho de baixo parava em y 732 e pegava o topo dos armários (faixa clara perto da ilha)."
-          },
-          {
-            "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
-            "cores": [
-              "#E8E8E8"
-            ],
-            "fontes": [
-              {
-                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
-                "bbox": [
-                  [
-                    1350,
-                    582,
-                    1452,
-                    848
-                  ],
-                  [
-                    648,
-                    636,
-                    698,
-                    848
-                  ]
-                ]
-              }
-            ]
-          },
-          {
-            "nome": "travertino (hall do Subsolo da Casa A)",
-            "cores": [
-              "#DCD9CA"
-            ],
-            "fontes": [
-              {
-                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
-                "bbox": [
-                  [
-                    582,
-                    580,
-                    686,
-                    775
-                  ]
-                ]
-              }
-            ],
-            "so_espelho_vertical": true
-          },
-          {
-            "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
-            "cores": [
-              "#C8A27C"
-            ],
-            "fontes": [
-              {
-                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
-                "bbox": [
-                  [
-                    858,
-                    638,
-                    972,
-                    684
-                  ],
-                  [
-                    922,
-                    719,
-                    978,
-                    826
-                  ],
-                  [
-                    1012,
-                    212,
-                    1060,
-                    268
-                  ]
-                ]
-              }
-            ],
-            "so_espelho_vertical": true
-          },
-          {
-            "nome": "gramado (Térreo da Casa A)",
-            "cores": [
-              "#6E9150"
-            ],
-            "fontes": [
-              {
-                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
-                "bbox": [
-                  [
-                    1530,
-                    460,
-                    1700,
-                    690
-                  ]
-                ]
-              }
-            ]
-          },
-          {
-            "nome": "piscina (água sobre pastilha, Térreo da Casa A)",
-            "cores": [
-              "#DFF6FE"
-            ],
-            "fontes": [
-              {
-                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
-                "bbox": [
-                  [
-                    582,
-                    285,
-                    678,
-                    440
-                  ]
-                ]
-              }
-            ],
-            "_fonte": "Só a água, sem as bordas: de x 684 em diante a amostra escurece (borda e sombra da parede) e deixava uma faixa escura na piscina."
-          },
-          {
-            "nome": "floreira do jardim de inverno (touceiras tropicais do Térreo da Casa A)",
-            "cores": [
-              "#4F7A3A"
-            ],
-            "fontes": [
-              {
-                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
-                "bbox": [
-                  [
-                    148,
-                    95,
-                    290,
-                    230
-                  ],
-                  [
-                    1433,
-                    500,
-                    1515,
-                    705
-                  ]
-                ]
-              }
-            ],
-            "_fonte": "Só as plantas: o primeiro trecho começava em x 120 e pegava o fundo branco à esquerda da floreira da Casa A, que virava faixas brancas no jardim de inverno."
-          }
-        ]
-      }
-    },
-    "Subsolo": {
-      "pagina": 0,
-      "rotacao": 0,
-      "layers_ocultas": [
-        "ARQ_TERRENO PLANEJADO"
-      ],
-      "_layers_ocultas": "Curvas de nível saem, como nas Casas A, B e C: fundo todo branco."
-    }
-  },
-  "entrega": {
-    "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
-    "_areas": "Área do Térreo não informada pelo usuário em 15/10/26: o quadro mostra 'NÃO INFORMADO' (a soma dos ambientes do PDF não é a área do quadro).",
-    "_confirmado": "Endereço (Lotes 17, Unidade D) confirmado pelo usuário em 15/10/26; norte o mesmo das Casas A, B e C.",
-    "casa": "CASA D",
-    "prefixo": "POE642_CasaD",
-    "pasta_bases": "bases",
-    "pasta_entrega": "entrega",
-    "largura_prancha": 3840,
-    "pavimentos": {
-      "Terreo": {
-        "titulo": "TÉRREO",
-        "linha_area": 0,
-        "base": "POE642_CasaD_BASE_Terreo_v3_texturas_16x9.png"
-      }
-    },
-    "areas": [
-      [
-        "TÉRREO",
-        "NÃO INFORMADO"
-      ]
+      "cor_render": "#E4E4E4",
+      "para": "#E8E8E8"
+     }
     ],
-    "projeto": [
-      [
-        "CLIENTE",
-        "PAULO OCTÁVIO"
-      ],
-      [
-        "ENDEREÇO",
-        "ML 10 – CONJUNTO 02, LOTES 17, UNIDADE D"
-      ],
-      [
-        "PROJETO",
-        "CASA D · UNIDADE AUTÔNOMA \"D\""
-      ],
-      [
-        "DATA INICIAL",
-        "15/10/26"
-      ]
+    "trocas_cor": [
+     [
+      "#BAB596",
+      "#DCD9CA"
+     ],
+     [
+      "#995F4C",
+      "#5A4232"
+     ],
+     [
+      "#CC9966",
+      "#C8A27C"
+     ],
+     [
+      "#7FDFFF",
+      "#DFF6FE"
+     ]
     ],
-    "pdf": {
-      "nome": "POE642_CasaD_Plantas_Humanizadas.pdf",
-      "ordem": [
-        "Terreo"
+    "retangulos": [
+     {
+      "nome": "banho master → Bege Bahia",
+      "bbox_vis": [
+       278.7,
+       840.9,
+       379.1,
+       940.3
       ],
-      "titulo": "Casa D – Plantas Humanizadas (Térreo)",
-      "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade D",
-      "palavras": "planta humanizada, layout, Casa D"
-    }
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_MOBILIÁRIO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+     },
+     {
+      "nome": "banho 1 → Bege Bahia",
+      "bbox_vis": [
+       447.5,
+       825.4,
+       514.8,
+       940.3
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_MOBILIÁRIO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+     },
+     {
+      "nome": "banhos 2 e 3 → Bege Bahia",
+      "bbox_vis": [
+       964.2,
+       828.5,
+       1093.7,
+       940.3
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_MOBILIÁRIO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+     },
+     {
+      "nome": "WC DCE → Bege Bahia",
+      "bbox_vis": [
+       1146.5,
+       279.6,
+       1202.4,
+       364.5
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_MOBILIÁRIO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+     },
+     {
+      "nome": "escada branca junto às suítes → Bege Bahia",
+      "bbox_vis": [
+       318.0,
+       675.2,
+       482.7,
+       714.5
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "_nota": "Ficam as linhas dos degraus."
+     },
+     {
+      "nome": "jardim abaixo da sala íntima → floreira",
+      "bbox_vis": [
+       651.5,
+       911.3,
+       832.7,
+       947.6
+      ],
+      "so_branco": true,
+      "para": "#4F7A3A",
+      "cor_linha": "#4F7A3A"
+     },
+     {
+      "nome": "jardim junto ao lavabo → floreira",
+      "bbox_vis": [
+       1257.3,
+       650.3,
+       1322.5,
+       714.5
+      ],
+      "so_branco": true,
+      "para": "#4F7A3A",
+      "cor_linha": "#4F7A3A",
+      "_nota": "O X tracejado some na floreira."
+     }
+    ],
+    "gramados": [
+     {
+      "nome": "entorno do lote → grama",
+      "bbox_vis": [
+       61.2,
+       78.7,
+       1681.9,
+       1038.7
+      ],
+      "para": "#6E9150"
+     }
+    ],
+    "fechados_apos_gramado": [
+     {
+      "nome": "pisantes acima da cozinha → Bege Bahia",
+      "bbox_vis": [
+       780.9,
+       91.1,
+       1098.8,
+       196.8
+      ],
+      "para": "#E8E8E8",
+      "_nota": "O primeiro, junto à varanda, desce até a parede (y 185 na prévia)."
+     },
+     {
+      "nome": "pisantes na frente do hall → Bege Bahia",
+      "bbox_vis": [
+       1274.9,
+       503.3,
+       1661.1,
+       642.1
+      ],
+      "para": "#E8E8E8"
+     },
+     {
+      "nome": "faixa com X entre a garagem e os pisantes → grama",
+      "bbox_vis": [
+       1279.0,
+       430.8,
+       1575.2,
+       490.9
+      ],
+      "para": "#6E9150",
+      "_nota": "Branco do PDF sem piso, sob a projeção (os X ficam): os triângulos que o X fecha também viram grama."
+     }
+    ]
+   },
+   "texturas": {
+    "_sobre": "Prévia de texturas do Térreo da Casa D: os mesmos materiais aprovados nas Casas A, B e C (bbox em px de um render de 2000 px).",
+    "tolerancia": 4,
+    "_tolerancia": "4, e não 12 como no Subsolo: as cores da legenda são exatas, e com 12 o vidro #D6D6D3 entraria no travertino #DCD9CA. As escadas #DDDACB entram no travertino.",
+    "materiais": [
+     {
+      "nome": "granito Marrom Tabaco (piso da cozinha do Térreo da Casa A)",
+      "cores": [
+       "#5A4232"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          997,
+          603,
+          1124,
+          633
+         ],
+         [
+          998,
+          690,
+          1108,
+          718
+         ]
+        ]
+       }
+      ],
+      "_fonte": "Só o piso: o trecho de baixo parava em y 732 e pegava o topo dos armários (faixa clara perto da ilha)."
+     },
+     {
+      "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+      "cores": [
+       "#E8E8E8"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          1350,
+          582,
+          1452,
+          848
+         ],
+         [
+          648,
+          636,
+          698,
+          848
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "travertino (hall do Subsolo da Casa A)",
+      "cores": [
+       "#DCD9CA"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+        "bbox": [
+         [
+          582,
+          580,
+          686,
+          775
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+      "cores": [
+       "#C8A27C"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          858,
+          638,
+          972,
+          684
+         ],
+         [
+          922,
+          719,
+          978,
+          826
+         ],
+         [
+          1012,
+          212,
+          1060,
+          268
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "gramado (Térreo da Casa A)",
+      "cores": [
+       "#6E9150"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          1530,
+          460,
+          1700,
+          690
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "piscina (água sobre pastilha, Térreo da Casa A)",
+      "cores": [
+       "#DFF6FE"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          582,
+          285,
+          678,
+          440
+         ]
+        ]
+       }
+      ],
+      "_fonte": "Só a água, sem as bordas: de x 684 em diante a amostra escurece (borda e sombra da parede) e deixava uma faixa escura na piscina."
+     },
+     {
+      "nome": "floreira do jardim de inverno (touceiras tropicais do Térreo da Casa A)",
+      "cores": [
+       "#4F7A3A"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          148,
+          95,
+          290,
+          230
+         ],
+         [
+          1433,
+          500,
+          1515,
+          705
+         ]
+        ]
+       }
+      ],
+      "_fonte": "Só as plantas: o primeiro trecho começava em x 120 e pegava o fundo branco à esquerda da floreira da Casa A, que virava faixas brancas no jardim de inverno."
+     }
+    ]
+   }
+  },
+  "Subsolo": {
+   "pagina": 0,
+   "rotacao": 0,
+   "layers_ocultas": [
+    "ARQ_TERRENO PLANEJADO"
+   ],
+   "_layers_ocultas": "Curvas de nível saem, como nas Casas A, B e C: fundo todo branco.",
+   "legenda": {
+    "_sobre": "Casa D · Subsolo (materiais definidos pelo usuário em 15/10/26). Granito Marrom Tabaco #5A4232: o terracota #995F4C (DCE 1, WC DCE e depósito/casa de máquinas), como as áreas de serviço do Térreo. Vinílico #C8A27C: o laranja #CC9966 (academia), como na Casa C. Bege Bahia #E8E8E8: os brancos (sauna, ducha, vestiário com WC e chuveiro, circulação, escada) e o pátio externo em L à esquerda (contorno ARQ_CONTRAPISO sem preenchimento). Banco da sauna em dois tons de Bege Bahia mais escuros, como os bancos aprovados das Casas B e C. Elevador fica branco, como no Térreo.",
+    "tolerancia_px": 10,
+    "trocas_cor": [
+     [
+      "#995F4C",
+      "#5A4232"
+     ],
+     [
+      "#CC9966",
+      "#C8A27C"
+     ]
+    ],
+    "retangulos": [
+     {
+      "nome": "banco da sauna, degrau da frente → Bege Bahia mais escuro",
+      "bbox_vis": [
+       284.6,
+       897.6,
+       375.0,
+       917.2
+      ],
+      "so_branco": true,
+      "para": "#DCDCDC",
+      "_nota": "Como na Casa C: dois tons da pedra do piso para o banco continuar se lendo como banco."
+     },
+     {
+      "nome": "banco da sauna, assento junto à parede → Bege Bahia ainda mais escuro",
+      "bbox_vis": [
+       284.6,
+       917.4,
+       375.0,
+       936.3
+      ],
+      "so_branco": true,
+      "para": "#D0D0D0"
+     },
+     {
+      "nome": "sauna, ducha e vestiário (com WC e chuveiro) → Bege Bahia",
+      "bbox_vis": [
+       274.0,
+       858.0,
+       560.0,
+       941.0
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_MOBILIÁRIO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "_nota": "Louças, bancada, portas e registros ficam brancos."
+     },
+     {
+      "nome": "circulação entre o DCE e a escada → Bege Bahia",
+      "bbox_vis": [
+       317.6,
+       625.0,
+       452.0,
+       670.6
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_MOBILIÁRIO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ]
+     },
+     {
+      "nome": "escada → Bege Bahia",
+      "bbox_vis": [
+       317.6,
+       670.6,
+       486.0,
+       717.4
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "_nota": "Ficam as linhas dos degraus."
+     },
+     {
+      "nome": "pátio externo, faixa ao lado do DCE e da escada → Bege Bahia",
+      "bbox_vis": [
+       275.9,
+       537.9,
+       317.6,
+       717.3
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8"
+     },
+     {
+      "nome": "pátio externo, à esquerda da academia e da sauna → Bege Bahia",
+      "bbox_vis": [
+       164.6,
+       648.0,
+       273.9,
+       942.7
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "_nota": "Até a linha fina do contorno; a parede tracejada de fora (ARQ_PAREDE) fica como no PDF."
+     },
+     {
+      "nome": "pátio externo, emenda entre as duas faixas → Bege Bahia",
+      "bbox_vis": [
+       273.5,
+       647.9,
+       276.2,
+       717.3
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "_nota": "O contorno do pátio muda de x 275,7 para x 273,9 nesta altura; sem isto sobrava uma fresta branca."
+     },
+     {
+      "nome": "divisória do box do WC DCE → cinza cheio",
+      "bbox_vis": [
+       322.6,
+       566.8,
+       360.8,
+       569.1
+      ],
+      "para": "#5B5B5B",
+      "_nota": "No PDF é uma faixa em ARQ_REVESTIMENTOS que saía tracejada e avermelhada sobre o terracota; no Térreo o cinza é a divisória do box."
+     }
+    ]
+   }
   }
+ },
+ "entrega": {
+  "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
+  "_areas": "Área do Térreo não informada pelo usuário em 15/10/26: o quadro mostra 'NÃO INFORMADO' (a soma dos ambientes do PDF não é a área do quadro).",
+  "_confirmado": "Endereço (Lotes 17, Unidade D) confirmado pelo usuário em 15/10/26; norte o mesmo das Casas A, B e C.",
+  "casa": "CASA D",
+  "prefixo": "POE642_CasaD",
+  "pasta_bases": "bases",
+  "pasta_entrega": "entrega",
+  "largura_prancha": 3840,
+  "pavimentos": {
+   "Terreo": {
+    "titulo": "TÉRREO",
+    "linha_area": 0,
+    "base": "POE642_CasaD_BASE_Terreo_v3_texturas_16x9.png"
+   }
+  },
+  "areas": [
+   [
+    "TÉRREO",
+    "NÃO INFORMADO"
+   ]
+  ],
+  "projeto": [
+   [
+    "CLIENTE",
+    "PAULO OCTÁVIO"
+   ],
+   [
+    "ENDEREÇO",
+    "ML 10 – CONJUNTO 02, LOTES 17, UNIDADE D"
+   ],
+   [
+    "PROJETO",
+    "CASA D · UNIDADE AUTÔNOMA \"D\""
+   ],
+   [
+    "DATA INICIAL",
+    "15/10/26"
+   ]
+  ],
+  "pdf": {
+   "nome": "POE642_CasaD_Plantas_Humanizadas.pdf",
+   "ordem": [
+    "Terreo"
+   ],
+   "titulo": "Casa D – Plantas Humanizadas (Térreo)",
+   "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade D",
+   "palavras": "planta humanizada, layout, Casa D"
+  }
+ }
 }
