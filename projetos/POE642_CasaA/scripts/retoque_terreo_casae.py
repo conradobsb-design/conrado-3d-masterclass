@@ -91,6 +91,11 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     descida da direita para a esquerda. Como a interna (item 18), com o lado de baixo à esquerda: o
     travertino refeito sem as linhas, os 17 pisos do PDF escurecendo para a esquerda e a sombra curta de
     cada espelho no piso de baixo, à esquerda dele, inclusive o último, no deck.
+22. Vaso do banho gourmet (pedido do usuário: com tampo): o motor deixou o símbolo do CAD (caixa com
+    parafusos e a bacia pontilhada). Ele sai (granito tecido) e o vaso é desenhado em 8 x no polígono
+    do PDF, como os do Subsolo da Casa D, na escala deste render: louça com volume, contorno fino,
+    sombra curta no piso e o tampo fechado, da linha da dobradiça (junto à caixa, na parede de cima)
+    à frente, recuado da borda, com volume, contorno e sombra leve.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -112,6 +117,7 @@ sys.path.insert(0, str(AQUI))
 from retoque_terreo_casad import desenhar_chuveiro, interpolar, textura  # noqa: E402
 from retoque_subsolo_casad import apagar_largo  # noqa: E402
 from retoque_terreo_casac import CROMO, CROMO_CLARO, CROMO_ESCURO  # noqa: E402
+from retoque_terreo_casab import LOUCA, LOUCA_CONTORNO  # noqa: E402
 
 SS = 8                             # superamostragem dos traços desenhados
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png"
@@ -1084,6 +1090,93 @@ def sem_tapete(out, A):
     return out
 
 
+# vaso com tampo (item 22): a caixa do polígono do PDF no quadro do render e o lado da parede (onde
+# fica a caixa acoplada); os números são os do Subsolo da Casa D divididos pela razão das escalas
+# (~2,7: aquele render aproximou a planta)
+VASOS = [{"nome": "banho gourmet", "caixa": (607.5, 256.1, 618.5, 272.1), "parede": "cima"}]
+VASO = {"dobradica": 4.0, "recuo": 0.5, "cor_tampo": (250, 250, 249),
+        "sombra": (0.7, 0.7, 0.9, 0.3), "sombra_tampo": (0.25, 0.3, 0.4, 0.18),
+        "volume": (0.88, 2.0), "volume_tampo": (0.9, 2.4), "contorno": 0.45, "contorno_tampo": 0.35,
+        "limpar": 2, "fontes_granito": [(700, 160, 900, 200)]}
+
+
+def vasos(out, A):
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+    q = VASO
+    for v in VASOS:
+        cx0, cy0, cx1, cy1 = v["caixa"]
+        corpo = next(d for d in pg.get_drawings() if d.get("layer") == "ARQ_LOUÇAS E METAIS" and d["type"] == "f"
+                     and max(abs(a - b) for a, b in zip(caixa_render(d, p2r), v["caixa"])) < 1.0)
+        wx0, wy0, wx1, wy1 = int(cx0) - 6, int(cy0) - 6, int(np.ceil(cx1)) + 7, int(np.ceil(cy1)) + 7
+        h, w = wy1 - wy0, wx1 - wx0
+        # o símbolo do motor sai: os px claros na caixa (com folga) viram granito tecido
+        e = q["limpar"]
+        reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+        caixa = np.zeros((h, w), bool)
+        caixa[int(cy0) - wy0 - e:int(np.ceil(cy1)) - wy0 + e, int(cx0) - wx0 - e:int(np.ceil(cx1)) - wx0 + e] = True
+        claro = caixa & (cv2.dilate((reg.mean(axis=2) > 110).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
+        out = apagar_largo(out, (wx0, wy0, wx1, wy1), claro, q["fontes_granito"], sigma=2.0, borda=0.0,
+                           lum_min=40, lum_max=110, escuros=True)
+        pts = []
+        for it in corpo["items"]:
+            for pt in it[1:]:
+                if hasattr(pt, "x"):
+                    x, y = p2r(pt.x, pt.y)
+                    pts.append([round((x - wx0) * SS), round((y - wy0) * SS)])
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.fillPoly(m, [cv2.convexHull(np.int32(pts))], 255)
+        reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+
+        def reduzir(mm):
+            return cv2.resize(mm.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+
+        def pintar(mm, cor):
+            nonlocal reg
+            a = reduzir(mm / 255.0 if mm.dtype == np.uint8 else mm)[..., None]
+            reg = reg * (1 - a) + np.asarray(cor, np.float32) * a
+
+        def anel(mm, larg):
+            k = max(1, int(round(larg * SS)))
+            return mm & ~cv2.erode(mm, np.ones((k, k), np.uint8))
+
+        sdx, sdy, ssig, sforca = q["sombra"]
+        sh = cv2.warpAffine(m.astype(np.float32) / 255, np.float32([[1, 0, sdx * SS], [0, 1, sdy * SS]]), (w * SS, h * SS))
+        reg *= (1 - sforca * reduzir(cv2.GaussianBlur(sh, (0, 0), ssig * SS)) * (1 - reduzir(m / 255.0)))[..., None]
+        dist = cv2.distanceTransform(m, cv2.DIST_L2, 5) / SS
+        borda, alcance = q["volume"]
+        tom = borda + (1 - borda) * np.clip(dist / alcance, 0, 1)
+        cor_ss = np.asarray(LOUCA, np.float32)[None, None, :] * tom[..., None] * (m / 255.0)[..., None]
+        pintar(m, (0, 0, 0))
+        reg += cv2.resize(cor_ss, (w, h), interpolation=cv2.INTER_AREA)
+        pintar(anel(m, q["contorno"]), LOUCA_CONTORNO)
+        # tampo fechado: o corpo recuado, da linha da dobradiça à frente
+        tampo = cv2.erode(m, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (int(2 * q["recuo"] * SS) + 1,) * 2))
+        ys = wy0 + (np.arange(h * SS) + 0.5) / SS
+        xs = wx0 + (np.arange(w * SS) + 0.5) / SS
+        lado = v["parede"]
+        if lado == "cima":
+            tampo[ys < cy0 + q["dobradica"], :] = 0
+        elif lado == "baixo":
+            tampo[ys > cy1 - q["dobradica"], :] = 0
+        elif lado == "esquerda":
+            tampo[:, xs < cx0 + q["dobradica"]] = 0
+        else:
+            tampo[:, xs > cx1 - q["dobradica"]] = 0
+        tampo = cv2.morphologyEx(tampo, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (SS + 1,) * 2))
+        tdx, tdy, tsig, tforca = q["sombra_tampo"]
+        st = cv2.warpAffine(tampo.astype(np.float32) / 255, np.float32([[1, 0, tdx * SS], [0, 1, tdy * SS]]), (w * SS, h * SS))
+        reg *= (1 - tforca * reduzir(cv2.GaussianBlur(st, (0, 0), tsig * SS)) * (1 - reduzir(tampo / 255.0)))[..., None]
+        dt = cv2.distanceTransform(tampo, cv2.DIST_L2, 5) / SS
+        borda, alcance = q["volume_tampo"]
+        tom = borda + (1 - borda) * np.clip(dt / alcance, 0, 1)
+        cor_t = np.asarray(q["cor_tampo"], np.float32)[None, None, :] * tom[..., None] * (tampo / 255.0)[..., None]
+        reg = reg * (1 - reduzir(tampo / 255.0)[..., None]) + cv2.resize(cor_t, (w, h), interpolation=cv2.INTER_AREA)
+        pintar(anel(tampo, q["contorno_tampo"]), LOUCA_CONTORNO)
+        out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+        print(f"    vaso do {v['nome']}: símbolo do CAD fora; louça com volume e tampo fechado")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1131,6 +1224,8 @@ def main():
     print("[18, 21] escadas: só sombreamento, sem linhas")
     for q in ESCADAS:
         out = escada(out, q)
+    print("[22] vaso do banho gourmet com tampo")
+    out = vasos(out, A)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
