@@ -169,6 +169,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
 38. Veios do mobiliário do DCE (pedido do usuário: a marcenaria ficou lisa): o veio vem do tampo da
    escrivaninha do escritório na segunda imagem (o de veio mais marcado), girado para correr no
    comprimento de cada peça e um pouco realçado; o tom e a borda de cada peça ficam.
+39. Pisantes de cima em Bege Bahia (pedido do usuário: as pedras ficaram lisas): cada pedra recebe a pedra
+   do deck da piscina do próprio render (Bege Bahia com veio diagonal suave), tecida (image quilting), no
+   tom da pedra puxado para o do deck e com a luz dela (sombra do muro); a borda fica. A fileira junto à
+   garagem já tinha os veios e fica como está.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -669,6 +673,17 @@ VEIOS_DCE = {
     "fonte": (1232, 808, 1254, 865),                     # na segunda imagem alinhada
     "pecas": [("armário de baixo", (1296, 331, 1326, 348), "x"), ("criado-mudo", (1323, 272, 1334, 285), "y")],
     "realce": 1.6, "sigma": 3.0, "lim": (0.85, 1.15), "borda": 1,
+}
+
+# pisantes em Bege Bahia (pedido do usuário: as pedras de cima ficaram lisas). Cada pedra recebe a pedra do
+# deck da piscina do próprio render (Bege Bahia com os veios suaves), tecida (image quilting), no tom
+# da pedra e com a luz dela (borda, sombra do muro); a borda de 1 px fica
+PISANTES = {
+    "pedras": [(892, 92, 931, 170), (935, 95, 975, 151), (979, 96, 1019, 151), (1023, 95, 1062, 151),
+               (1066, 96, 1105, 151), (1110, 96, 1149, 151), (1153, 94, 1188, 151)],   # a fileira de cima
+    # (a fileira junto à garagem já tem os veios do motor e fica)
+    "fonte": [(565, 190, 698, 255)],                      # deck limpo acima da piscina (veio diagonal)
+    "sigma_luz": 4.0, "borda": 1,
 }
 
 
@@ -2235,6 +2250,25 @@ def veios_dce(out, f2):
     return out
 
 
+def pisantes(out):
+    q = PISANTES
+    e = q["borda"]
+    cor_fonte = np.median(np.concatenate([out[b:d, a:c].reshape(-1, 3) for a, b, c, d in q["fonte"]]).astype(np.float32), axis=0)
+    for x0, y0, x1, y1 in q["pedras"]:
+        x0, y0, x1, y1 = x0 + e, y0 + e, x1 - e, y1 - e
+        h, w = y1 - y0, x1 - x0
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        tom = np.median(reg.reshape(-1, 3), axis=0)
+        Y = reg.mean(axis=2)
+        luz = cv2.GaussianBlur(Y, (0, 0), q["sigma_luz"], borderType=cv2.BORDER_REFLECT) / Y.mean()
+        tex = textura(out, q["fonte"], h, w, p=32)
+        # o veio da fonte sobre o tom da pedra, puxado para o Bege Bahia do deck
+        alvo = 0.5 * tom + 0.5 * cor_fonte
+        out[y0:y1, x0:x1] = np.clip(tex * alvo * luz[..., None], 0, 255).astype(np.uint8)
+    print(f"    {len(q['pedras'])} pisantes com o Bege Bahia do deck (veios suaves)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -2318,6 +2352,8 @@ def main():
     out = chuveiros_23(out)
     print("[32] veios do mobiliário do DCE")
     out = veios_dce(out, f2)
+    print("[33] Bege Bahia dos pisantes")
+    out = pisantes(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

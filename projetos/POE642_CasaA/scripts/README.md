@@ -267,6 +267,7 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **Chuveiros dos banhos 2 e 3:** `desenhar_chuveiro` (ducha, braço, canopla e sombra, como em `chuveiros_bhm`); `apagar` ganhou `lum_min` para a parede não escurecer a luz.
 - **Armários em L:** `armarios_L` (polígono do PDF por `mascara_pdf`, areia com o veio emprestado, contorno nas faces livres).
 - **Veios do DCE:** `veios_dce` (luminância da fonte sobre ela mesma desfocada, realçada, girada no comprimento da peça, vezes o tom desfocado da peça).
+- **Pisantes:** `pisantes` (quilting do deck limpo, no tom da pedra e com a luz desfocada dela).
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado
