@@ -108,7 +108,7 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    passando para o lado de fora até o arco. A folha é estendida com o próprio trecho dela (mesmas
    linhas) até o fim do PDF, e a ponta recebe o arremate da ponta de dentro, em espelho.
 22. Arcos das portas sobre o granito: no granito marrom o arco escuro do motor não aparece. Os arcos
-   das portas (curvas da layer ARQ_PAREDE) que caem sobre o granito são redesenhados em branco,
+   das portas (curvas da layer ARQ_PAREDE) que caem sobre o granito são redesenhados em cinza claro,
    com a geometria do PDF levada ao render, só onde o piso é granito (cor exata da base chapada).
 
 As coordenadas estão em px do render (2000 x 1116).
@@ -366,7 +366,7 @@ PIVOTANTE = {"linhas": (670, 674), "fonte_x": 1370, "de": 1406, "ate": 1434, "po
 # arcos das portas sobre o granito: cor do granito na base chapada (BGR de #5A4232), parte mínima
 # do arco sobre o granito, cor e largura do traço
 ARCOS_GRANITO = {"granito": (50, 66, 90), "tol": 12, "fracao": 0.3, "min_px": 8,
-                 "cor": (238, 238, 236), "larg": 0.8}
+                 "cor": (160, 161, 160), "larg": 0.45}   # cinza e fino: aparece no granito, discreto
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
 CROMO_CLARO = (238, 240, 242)
@@ -1135,7 +1135,7 @@ def arcos_no_granito(out, A, chapada):
         reg = out[y0:y1, x0:x1].astype(np.float32)
         out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + np.array(q["cor"], np.float32) * a, 0, 255).astype(np.uint8)
         n += 1
-    print(f"    {n} arcos de porta sobre o granito em branco")
+    print(f"    {n} arcos de porta sobre o granito em cinza")
     return out
 
 
