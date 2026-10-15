@@ -42,6 +42,11 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    borda misturada), uma curva de tom leva a luminância do prata à da tinta, mantendo a ordem do
    render (vidros mais escuros que a lataria, reflexos); a cor entra só nos tons médios e claros e
    as lanternas ficam.
+8. Erros 1 e 2 da lista (lote): no PDF o lado esquerdo do lote é só a linha tracejada; o motor fez
+   um muro preto. A grama vai até a linha (as colunas do muro vêm das de logo à direita) e fora do
+   lote volta a ser a base (fundo branco e linha tracejada). As plantas dos cantos de cima e de baixo
+   à esquerda, que passavam da linha e dos muros, terminam no lote; os trechos de muro cobertos pelas
+   folhas são refeitos com o perfil de uma coluna limpa do próprio muro.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -187,6 +192,18 @@ CARROS = {
     "quente": 16, "lum_min": 90.0, "claro": 125.0, "fecho": 9, "reflexo": 0.6, "cor_lum": (70.0, 140.0),
     "lanterna": (40, 120),                      # R - B e R mínimos: lanternas e faróis âmbar ficam
 }
+# lote (erros 1 e 2): no PDF o lado esquerdo do lote é só a linha tracejada; o motor fez um muro
+# preto (x 188-195). A grama vai até a linha (as colunas vêm das de logo à direita) e fora do lote
+# volta a ser a base (fundo branco e linha tracejada). As plantas dos cantos de cima e de baixo à
+# esquerda, que passavam da linha e dos muros, terminam no lote: os muros cobertos pelas folhas são
+# refeitos com o perfil de uma coluna limpa do próprio muro
+LOTE = {
+    "x_grama": 190, "faixa_muro": (190, 196), "desloc": 8,
+    "muro_cima": (66, 75), "coluna_cima": 480,
+    "muro_baixo": (1000, 1007), "coluna_baixo": 560,
+    "x_cantos": 470, "y": (0, 1050),
+}
+
 
 def alinhar_base(render):
     """Base 16:9 reduzida e levada ao render por SIFT + afim; também a base chapada (v2)."""
@@ -598,6 +615,25 @@ def carros(out):
     return out
 
 
+def lote(out, base):
+    q = LOTE
+    (c0, c1), (b0, b1) = q["muro_cima"], q["muro_baixo"]
+    xg, xc = q["x_grama"], q["x_cantos"]
+    f0, f1 = q["faixa_muro"]
+    d = q["desloc"]
+    out[c1:b0, f0:f1] = out[c1:b0, f0 + d:f1 + d]                 # muro preto -> grama de logo à direita
+    out[c0:c1, xg - 2:xc] = out[c0:c1, q["coluna_cima"]][:, None]   # muro de cima sem as folhas
+    out[b0:b1, xg - 2:xc] = out[b0:b1, q["coluna_baixo"]][:, None]  # muro de baixo sem as folhas
+    y0, y1 = q["y"]
+    fora = np.zeros(out.shape[:2], bool)
+    fora[y0:y1, :xg] = True
+    fora[y0:c0, :xc] = True
+    fora[b1:y1, :xc] = True
+    out[fora] = base[fora]
+    print(f"    muro da esquerda fora (grama até a linha tracejada); fora do lote: base ({int(fora.sum())} px)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -623,6 +659,10 @@ def main():
     out = porta_gas(out)
     print("[7] carros em tons diferentes")
     out = carros(out)
+
+    print("[8] erros 1 e 2: muro inventado à esquerda e plantas fora do lote")
+    base, _, _ = alinhar_base(orig)
+    out = lote(out, base)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

@@ -373,4 +373,4 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   5. eletrodomésticos da cozinha (os dois volumes ao lado do armário do canto) em inox, com o sombreado do render.
   6. porta de correr do abrigo de gás: a soleira larga do motor sai e entram as duas folhas do PDF, em dois planos.
   7. carros em tons diferentes: grafite (esquerda), branco perolado (meio) e azul-marinho (direita), por curva de tom na silhueta, com vidros, reflexos e lanternas do render.
-
+  8. erros 1 e 2 da lista: o muro preto da esquerda vira grama até a linha tracejada; fora do lote volta a base; os muros de cima e de baixo, cobertos pelas plantas dos cantos, são refeitos com uma coluna limpa.
