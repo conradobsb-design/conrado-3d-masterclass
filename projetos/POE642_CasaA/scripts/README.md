@@ -362,12 +362,13 @@ As pranchas do Térreo e os PDFs das quatro casas foram refeitos com essas image
 
 Refaz a água da piscina e do spa da Casa D a partir do render retocado (pedido do usuário depois do Barlavento v1):
 - **Borda e dreno** (render de referência do usuário): a água vai até o contorno do projeto, com a sombra curta da borda. Em volta do conjunto piscina + spa, uma capa de pedra da largura da faixa entre os dois (`capa`), e na borda de fora dela o dreno em duas linhas finas paralelas (`dreno`: afastamento e largura de cada uma), só no contorno de fora do conjunto, com cantos em esquadro (distância de tabuleiro).
+- **Borda alta:** a capa fica acima da água. A sombra dela na água é a máscara do que não é água varrida na direção do sol (`sol`, `sombra`: força, comprimento e penumbra), limpa e uniforme; mais a linha do desnível junto à água (`desnivel`) e a quina da capa iluminada (`nariz`).
 - **Degraus em níveis:** as áreas da água vêm da base chapada alinhada (componentes entre as linhas do projeto). Cada uma tem uma profundidade (`D["areas"]`), e a cor da água muda com ela por absorção (`absorcao`, BGR por m; o tom aprovado vale no fundo, `prof_ref`). O degrau é a troca de tom, com uma luz fina na quina de cima (`quina`) e uma sombra curta ao pé (`pe`).
 - A pedra, a refração, as cáusticas e o brilho são as funções do `piscinas_barlavento.py` (`pedra_ondulada`, `causticas`, `brilho_diagonal`).
 
 ```bash
 # da pasta projetos/
-python3 POE642_CasaA/scripts/piscina_dreno_casad.py      # -> POE642_CasaD/renders/..._Terreo_v1_retocado_barlavento_v3.png
+python3 POE642_CasaA/scripts/piscina_dreno_casad.py      # -> POE642_CasaD/renders/..._Terreo_v1_retocado_barlavento_v4.png
 ```
 
 ## Acabamentos finais: `acabamentos_finais.py`

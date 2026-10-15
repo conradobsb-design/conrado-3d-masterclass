@@ -8,9 +8,12 @@ piscina" e, com um render de referência da borda: "são duas linhas de borda". 
 degraus pareciam um rasgo (um furo) no fundo.
 
 Parte do render retocado (sem o Barlavento) e refaz a água inteira:
-- **borda**: a água vai até o contorno do projeto (cobre o traço escuro do render), com a sombra
-  curta aprovada da pedra sobre a água; em volta do conjunto (piscina e spa), uma capa de pedra da
-  largura da faixa entre os dois (~26 cm), um pouco mais clara que o piso;
+- **borda alta** ("preciso que a borda rente a água seja mais alta que a água"): em volta do conjunto
+  (piscina e spa), uma capa de pedra da largura da faixa entre os dois (~26 cm), um pouco mais clara
+  que o piso, acima da água (~12 cm). Ela projeta na água uma sombra limpa e uniforme do lado da luz
+  (no render, as sombras caem para baixo à esquerda: a sombra fica junto às bordas de cima e da
+  direita e à esquerda da faixa entre a piscina e o spa); em volta toda, a linha fina do desnível
+  junto à água; a quina da capa junto à água é iluminada;
 - **dreno**: na borda de fora da capa, duas linhas finas paralelas contínuas (as bordas do canal,
   ~8 cm entre elas), só no contorno de fora do conjunto. A faixa entre a piscina e o spa é capa, sem
   dreno. Cantos em esquadro;
@@ -27,7 +30,7 @@ As áreas vêm da base chapada (componentes da água, as linhas do projeto divid
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/piscina_dreno_casad.py
   # e a prancha: de POE642_CasaA/scripts/, rodape_entrega.py --config ../../POE642_CasaD/config_bases.json
-  #   --render Terreo=../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v3.png
+  #   --render Terreo=../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v4.png
 """
 import argparse
 import sys
@@ -46,7 +49,7 @@ CASA = AQUI.parent.parent / "POE642_CasaD"
 
 D = {
     "entrada": CASA / "renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
-    "saida": CASA / "renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v3.png",
+    "saida": CASA / "renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v4.png",
     "base": CASA / "bases/POE642_CasaD_BASE_Terreo_v3_texturas_16x9.png",
     "chapada": CASA / "bases/POE642_CasaD_BASE_Terreo_v2_16x9.png",
     "ss": 8,
@@ -64,7 +67,14 @@ D = {
     "quina": (0.07, 0.6),       # luz na quina de cima do degrau
     # px do render (~3,2 cm por px)
     "expande": 0.8,             # a água cobre o traço escuro do render na borda
-    "lamina": Q["borda"],       # sombra curta da borda de pedra sobre a água (a mesma aprovada)
+    # borda alta: a capa de pedra fica acima da água (~12 cm). Ela projeta sombra na água do lado da
+    # luz (no render, a luz vem de cima à direita e as sombras caem para baixo à esquerda, como a das
+    # espreguiçadeiras), uma sombra limpa e uniforme, sem manchas; em volta toda, a linha fina do
+    # desnível junto à água; na capa, a quina de cima iluminada
+    "sol": (-1.0, 1.0),         # para onde caem as sombras (x, y)
+    "sombra": (0.28, 3.2, 0.45),  # força, comprimento (px) e penumbra (px) da sombra da borda
+    "desnivel": (0.20, 0.55),   # linha do desnível na água junto à borda: força e decaimento (px)
+    "nariz": (1.07, 0.8),       # quina da capa junto à água: clareia e largura (px)
     # borda de pedra (capa) em volta do conjunto, da largura da faixa entre a piscina e o spa
     # (~8 px, ~26 cm), e o dreno na borda de fora dela: duas linhas finas paralelas, as bordas do
     # canal (render de referência do usuário). Só por fora do conjunto (piscina e spa); a faixa entre
@@ -72,7 +82,7 @@ D = {
     "fecha": 8,                 # fecha a faixa entre a piscina e o spa (10 px) no contorno do conjunto
     "dreno": [(8.0, 0.55), (10.4, 0.55)],   # cada linha: afastamento da água e largura, px
     "dreno_cor": 0.64,          # as linhas: a pedra do piso escurecida
-    "capa": 1.015,              # a capa um pouco mais clara que o piso
+    "capa": 1.03,               # a capa um pouco mais clara que o piso
 }
 
 
@@ -162,8 +172,20 @@ def desenhar(img, r8, prof, caixa, q=D):
         if fundas.any():
             dd = dist_eixos(~fundas)[0] / ss
             luz[zona] = (fq * np.exp(-np.maximum(dd - 0.5, 0) / dq))[zona]
-    fl, dl = q["lamina"]
-    lamina = fl * np.exp(-d / dl)
+    # a sombra da borda alta: tudo o que não é água está acima dela; varre a máscara na direção do sol
+    alto = (~agua).astype(np.float32)
+    vx, vy = q["sol"]
+    nv = float(np.hypot(vx, vy))
+    fs, comp, pen = q["sombra"]
+    proj = np.zeros_like(alto)
+    for t in range(int(comp * ss) + 1):
+        ox, oy = int(round(vx / nv * t)), int(round(vy / nv * t))
+        proj = np.maximum(proj, np.roll(np.roll(alto, oy, axis=0), ox, axis=1))
+    proj = cv2.GaussianBlur(proj, (0, 0), pen * ss)
+    fd, dd_ = q["desnivel"]
+    lamina = 1 - (1 - fs * proj) * (1 - fd * np.exp(-d / dd_))
+    fn, ln_ = q["nariz"]
+    nariz = capa & (dist_eixos(~agua)[0] / ss <= ln_)
     # reduzir
     Ra, Rd, Rc = reduz(agua, ss), reduz(dreno, ss), reduz(capa, ss)
     pa = np.maximum(Ra, 1e-6)
@@ -181,6 +203,7 @@ def desenhar(img, r8, prof, caixa, q=D):
     cor = np.exp(-absorcao[None, None, :] * (P - q["prof_ref"])[..., None])
     caust = causticas(reg.mean(axis=2), m_old.astype(np.float32))
     caust *= np.clip(Ra * 2 - 1, 0, 1)
+    caust *= 1 - 0.6 * Lm                                               # na sombra da borda, menos reflexo
     caust *= np.clip(1 - 0.3 * (P - q["prof_ref"]), 0.8, 1.4)            # mais nítidas no raso
     fator = (1 - S) * (1 + L) * (1 - Lm) * brilho_diagonal(h, w)
     agua_cor = pedra * cor * fator[..., None] + caust[..., None] * np.float32([1.0, 1.0, 0.92])
@@ -191,7 +214,8 @@ def desenhar(img, r8, prof, caixa, q=D):
     base = reg.copy()
     resto = lim_old & (Ra < 0.5)
     base[resto] = piso
-    base *= (1 + (q["capa"] - 1) * Rc)[..., None]
+    Rn = reduz(nariz, ss)
+    base *= (1 + (q["capa"] - 1) * Rc + (fn - 1) * Rn)[..., None]
     mix = base * (1 - Ra[..., None]) + agua_cor * Ra[..., None]
     mix = mix * (1 - Rd[..., None]) + (piso * q["dreno_cor"]) * Rd[..., None]
     out = img.copy()
