@@ -37,6 +37,11 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    dela viram o piso do abrigo (as de baixo, em espelho) e entra a porta do PDF (ARQ_PAREDE): duas
    folhas em planos diferentes na espessura da parede (a da esquerda por fora, a da direita por
    dentro), com montantes e batentes, em 8x, e a sombra curta da folha de dentro.
+7. Carros: o motor fez os três em prata; cada um ganha um tom (pedido do usuário): grafite, branco
+   perolado e azul-marinho. Na silhueta de cada carro (o que não é o granito quente do piso, mais a
+   borda misturada), uma curva de tom leva a luminância do prata à da tinta, mantendo a ordem do
+   render (vidros mais escuros que a lataria, reflexos); a cor entra só nos tons médios e claros e
+   as lanternas ficam.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -170,6 +175,18 @@ PORTA_GAS = {
     "sombra": (0.80, 0.90, 0.96),                # linhas logo abaixo da folha de dentro
 }
 
+# carros da garagem: o motor fez os três em prata. Cada um ganha um tom (pedido do usuário). Na
+# silhueta do carro (o que não é o granito quente do piso), uma curva de tom leva a luminância do
+# prata à da tinta, mantendo a ordem do render (vidros mais escuros que a lataria, reflexos); a cor
+# entra só nos tons médios e claros (o vidro escuro fica neutro)
+CARROS = {
+    # (nome, caixa, curva: ("escurecer", base, faixa, expoente) ou ("clarear", ini, fim, força), cor BGR)
+    "carros": [("esquerda", (1388, 246, 1458, 398), ("escurecer", 26.0, 74.0, 1.6), (1.02, 1.0, 0.98)),   # grafite
+               ("meio", (1475, 243, 1542, 391), ("clarear", 130.0, 195.0, 0.55), (0.99, 1.0, 1.01)),     # branco perolado
+               ("direita", (1557, 236, 1633, 407), ("escurecer", 18.0, 52.0, 1.4), (1.34, 0.96, 0.74))],  # azul-marinho
+    "quente": 16, "lum_min": 90.0, "claro": 125.0, "fecho": 9, "reflexo": 0.6, "cor_lum": (70.0, 140.0),
+    "lanterna": (40, 120),                      # R - B e R mínimos: lanternas e faróis âmbar ficam
+}
 
 def alinhar_base(render):
     """Base 16:9 reduzida e levada ao render por SIFT + afim; também a base chapada (v2)."""
@@ -549,6 +566,38 @@ def porta_gas(out):
     return out
 
 
+def carros(out):
+    q = CARROS
+    for nome, (x0, y0, x1, y1), curva, cor in q["carros"]:
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        Y = reg.mean(axis=2)
+        frio = np.abs(reg[..., 2] - reg[..., 0]) < q["quente"]          # o granito é quente (R > B)
+        sil = ((frio & (Y > q["lum_min"])) | (Y > q["claro"])).astype(np.uint8)   # o granito nunca é tão claro
+        sil = cv2.morphologyEx(sil, cv2.MORPH_CLOSE, np.ones((q["fecho"], q["fecho"]), np.uint8))
+        cont, _ = cv2.findContours(sil, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        sil = np.zeros_like(sil)
+        cv2.drawContours(sil, [max(cont, key=cv2.contourArea)], -1, 1, -1)
+        sil = cv2.dilate(sil, np.ones((3, 3), np.uint8))         # a borda misturada com o piso também
+        lanterna = (reg[..., 2] - reg[..., 0] > q["lanterna"][0]) & (reg[..., 2] > q["lanterna"][1])
+        a = cv2.GaussianBlur((sil * ~lanterna).astype(np.float32), (0, 0), 0.6)[..., None]
+        topo = np.percentile(Y[sil > 0], 97)
+        if curva[0] == "escurecer":
+            _, base, faixa, ex = curva
+            Yn = base + faixa * np.clip(Y / topo, 0, 1) ** ex
+            Yn += q["reflexo"] * np.clip(Y - topo, 0, None)
+        else:
+            _, ini_, fim_, forca = curva
+            s = np.clip((Y - ini_) / (fim_ - ini_), 0, 1)
+            Yn = Y + forca * s * s * (3 - 2 * s) * (250 - Y)
+        lo, hi = q["cor_lum"]
+        sc = np.clip((Y - lo) / (hi - lo), 0, 1)[..., None]
+        unid = np.array(cor, np.float32)[None, None]
+        novo = Yn[..., None] * (1 + sc * (unid - 1))
+        out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + novo * a, 0, 255).astype(np.uint8)
+        print(f"    carro da {nome}: curva {curva[0]}, cor {cor}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -572,6 +621,8 @@ def main():
     out = inox(out)
     print("[6] porta de correr do abrigo de gás")
     out = porta_gas(out)
+    print("[7] carros em tons diferentes")
+    out = carros(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
