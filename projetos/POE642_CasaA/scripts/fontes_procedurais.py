@@ -6,7 +6,12 @@ trechos de renders que o texturizar_base.py usa; ele tece e amplia para a base.
 
 - pedra portuguesa caramelo (Casa E, acesso de veículos): pedrinhas de ~6,5 cm em tons de caramelo,
   ocre e creme, com juntas finas de areia; desenhadas em 4 x (diagrama de Voronoi) e reduzidas;
-- bronze fosco (Casa E, bancos): bronze escuro com escovado fino e manchas suaves.
+- bronze fosco (Casa E, bancos): bronze escuro com escovado fino e manchas suaves;
+- Barlavento (Portobello, linha que reproduz a pedra hijau, peças de 14,5 x 14,5 cm; Casa E,
+  piscinas, pedido do usuário): `barlavento` devolve a textura relativa (média 1) de uma área já
+  no tamanho do render: peças de tons verde-acinzentados e azulados alternados (variação sutil), grão
+  fino dentro de cada peça e juntas finas um pouco mais escuras, sem manchas; o retoque multiplica
+  pela cor da água e pela luz.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/fontes_procedurais.py POE642_CasaE/bases/fontes
@@ -61,6 +66,35 @@ def bronze_fosco(lado=240, semente=642):
     manchas = cv2.GaussianBlur(rng.normal(0, 1, (lado, lado)).astype(np.float32), (0, 0), 18)
     f = 1 + 0.015 * escovado / (escovado.std() + 1e-6) + 0.035 * manchas / (manchas.std() + 1e-6)
     return np.clip(base[None, None, :] * f[..., None], 0, 255).astype(np.uint8)
+
+
+def barlavento(alto, largo, cm_por_px=CM_POR_PX, peca_cm=14.5, ss=8, semente=642):
+    """Textura relativa (BGR, média 1) do Barlavento Caribbean visto sob a água, no tamanho alto x
+    largo (px do render): grade de peças de peca_cm, cada uma num tom da pedra hijau (verde-acinzentado
+    a azulado), com o grão fino da pedra e as juntas finas um pouco mais escuras."""
+    rng = np.random.default_rng(semente)
+    lado = peca_cm / cm_por_px * ss                       # px (em ss) por peça
+    H, W = alto * ss, largo * ss
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    i, j = (yy // lado).astype(np.int32), (xx // lado).astype(np.int32)
+    ni, nj = int(i.max()) + 1, int(j.max()) + 1
+    # tons da hijau (BGR, relativos): verde-acinzentado, verde, azulado e um mais claro
+    paleta = np.array([[1.00, 1.00, 1.00], [0.98, 1.005, 0.985], [1.02, 0.995, 0.96], [1.015, 1.02, 1.02],
+                       [0.985, 0.985, 1.005]], np.float32)
+    pesos = np.array([0.34, 0.24, 0.2, 0.12, 0.1])
+    tom = paleta[rng.choice(len(paleta), size=(ni, nj), p=pesos)] * rng.uniform(0.975, 1.025, (ni, nj, 1)).astype(np.float32)
+    img = tom[i, j]
+    # mesclado da pedra: só o grão fino dentro da peça (sem manchas grandes nem pintas escuras: o
+    # usuário achou que davam aspecto de sujo)
+    for sigma, amp in ((0.18 * lado, 0.02), (0.06 * lado, 0.02)):
+        r = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), sigma)
+        img *= (1 + amp * r / max(float(r.std()), 1e-6))[..., None]
+    # juntas: 6% da peça em cada borda
+    fy, fx = (yy % lado) / lado, (xx % lado) / lado
+    junta = (np.minimum(np.minimum(fy, 1 - fy), np.minimum(fx, 1 - fx)) < 0.06)
+    img[junta] *= 0.94
+    img = cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
+    return img / img.reshape(-1, 3).mean(axis=0)
 
 
 def em_2000(img):

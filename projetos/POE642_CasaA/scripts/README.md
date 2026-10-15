@@ -331,6 +331,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **Vidros da piscina (item 31):** `vidros_piscina` desenha as duas folhas do PDF como os vidros finos da Casa D (vidro, linha central, contorno).
 - **Paisagismo (item 32):** `paisagismo`, o da Casa D: um trecho de touceira do render, recortado pela densidade da folhagem, com borda ondulada nos lados cortados, só sobre a grama.
 - **Banco da varanda (item 34):** `banco_varanda` apaga o encosto do motor (`apagar_largo`, Bege Bahia) e cola a madeira da mesa de jantar no retângulo do PDF, em ripas, com contorno e sombra curta.
+- **Barlavento nas piscinas (item 35):** `piscinas` troca a água (mancha da base chapada) pela pedra do `fontes_procedurais.barlavento` (peças de 14,5 cm, ondulada por `remap` com deslocamento suave), com a cor da água, luz chapada (sombra curta só nas bordas e no degrau da prainha), as cáusticas do render suavizadas e um brilho difuso.
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado

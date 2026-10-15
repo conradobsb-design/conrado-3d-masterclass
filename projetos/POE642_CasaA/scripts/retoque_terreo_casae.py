@@ -146,6 +146,15 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     que o motor pôs embaixo do banco sai (Bege Bahia tecido da varanda, com a sombra dele); o banco, no
     retângulo do PDF, vira um tampo de madeira (a da mesa de jantar do render, com o veio no comprido)
     em ripas, com juntas finas, contorno fino e sombra curta, sem as almofadas.
+35. Piscinas (pedido do usuário, com a legenda do cliente): revestimento Barlavento (Portobello, a pedra
+    hijau, peças de 14,5 x 14,5 cm, tom Caribbean). A água turquesa saturada do motor, com a rede de
+    reflexos brancos marcada, vira a pedra das peças (gerada por código: tons verde-acinzentados e
+    azulados alternados, grão fino, juntas finas) sob uma água verde-azulada clara, com a luz chapada
+    (sem as manchas escuras de sombra, que davam aspecto de sujo: pedido do usuário), só uma sombra
+    curta e leve junto às bordas e o degrau da prainha marcado de leve. Efeitos da água (pedido do
+    usuário: sem eles parecia vazia): a grade das peças ondulada pela refração, a rede de cáusticas
+    do próprio render mais suave (só clareia) e um brilho difuso na diagonal. Na piscina, na prainha e
+    no spa (a mancha da água na base chapada); o degrau do spa é desenhado depois (item 30).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -169,6 +178,7 @@ from retoque_terreo_casad import desenhar_chuveiro, interpolar, textura  # noqa:
 from retoque_subsolo_casad import apagar_largo  # noqa: E402
 from retoque_terreo_casac import CROMO, CROMO_CLARO, CROMO_ESCURO  # noqa: E402
 from retoque_terreo_casab import LOUCA, LOUCA_CONTORNO  # noqa: E402
+from fontes_procedurais import barlavento  # noqa: E402
 
 SS = 8                             # superamostragem dos traços desenhados
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png"
@@ -1671,6 +1681,72 @@ def banco_varanda(out, orig):
     return out
 
 
+# Barlavento nas piscinas (item 35): a água na base chapada (#DFF6FE), a janela das piscinas, a cor da
+# água sobre a pedra (BGR) e quanto do reflexo do motor fica
+PISCINAS = {"janela": (330, 460, 625, 685), "agua_base": (254, 246, 223), "tol": 10, "area_min": 200,
+            "cor": (214, 222, 172), "semente": 642,
+            # luz chapada (sem as manchas escuras do motor, pedido do usuário); só uma sombra curta e
+            # leve junto às bordas, para ler a profundidade
+            "borda": (0.12, 1.6),
+            # degrau entre a piscina e a prainha (ARQ_CONTRAPISO, x = 510,4): a mesma sombra curta do
+            # lado fundo (à esquerda) e um fio de luz na quina
+            "degraus": [(510.4, 480.1, 572.9)], "quina": 0.05,
+            # efeitos da água (pedido do usuário: sem eles parecia vazia): a grade das peças ondulada
+            # pela refração (deslocamento suave, em px), a rede de cáusticas do próprio render, mais
+            # suave (só clareia) e um brilho difuso na diagonal da superfície
+            "ondas": (1.0, 5.0), "causticas": 1.2, "suave_causticas": 0.6, "brilho": 0.04}
+
+
+def piscinas(out, A):
+    q = PISCINAS
+    wx0, wy0, wx1, wy1 = q["janela"]
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    ch = chapada[wy0:wy1, wx0:wx1].astype(np.int32)
+    agua = (np.abs(ch - np.array(q["agua_base"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(agua)
+    agua = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_min"]])
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    ciano = (reg[..., 0] - reg[..., 2] > 20) & (reg[..., 1] - reg[..., 2] > 20)
+    perto = cv2.dilate(agua.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    m = agua | (perto & ciano)                       # as linhas finas do PDF dentro da água entram
+    Y = reg.mean(axis=2)
+    w = m.astype(np.float32)
+
+    def media(s):
+        return cv2.GaussianBlur(Y * w, (0, 0), s) / np.maximum(cv2.GaussianBlur(w, (0, 0), s), 1e-3)
+
+    forca, dec = q["borda"]
+    dist = cv2.distanceTransform(m.astype(np.uint8), cv2.DIST_L2, 3)
+    luz = 1 - forca * np.exp(-np.maximum(dist - 0.5, 0) / dec)
+    yy, xx = np.mgrid[wy0:wy1, wx0:wx1].astype(np.float32) + 0.5
+    for xd, ya, yb in q["degraus"]:
+        faixa = (yy >= ya) & (yy <= yb)
+        d = xd - xx
+        luz *= np.where(faixa & (d > 0), 1 - forca * np.exp(-d / dec), 1.0)
+        luz *= np.where(faixa & (d <= 0) & (d > -1.0), 1 + q["quina"], 1.0)
+    h, wd = Y.shape
+    pedra = barlavento(h + 8, wd + 8, semente=q["semente"]) * np.float32(q["cor"])
+    # refração: a grade vista através da água ondula (deslocamento suave e pequeno)
+    rng = np.random.default_rng(q["semente"])
+    amp, sig = q["ondas"]
+    dx, dy = (cv2.GaussianBlur(rng.normal(0, 1, (h, wd)).astype(np.float32), (0, 0), sig) for _ in range(2))
+    dx, dy = dx * amp / max(float(dx.std()), 1e-6), dy * amp / max(float(dy.std()), 1e-6)
+    gy, gx = np.mgrid[0:h, 0:wd].astype(np.float32)
+    pedra = cv2.remap(pedra, gx + 4 + dx, gy + 4 + dy, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
+    # cáusticas: a rede de luz do render (só o que é mais claro que a média local), suavizada
+    caust = cv2.GaussianBlur(np.clip(Y - media(4.0), 0, None), (0, 0), q["suave_causticas"]) * q["causticas"]
+    # brilho difuso: mais claro no canto de cima à esquerda, caindo na diagonal
+    diag = ((gx / max(wd - 1, 1)) + (gy / max(h - 1, 1))) / 2
+    brilho = 1 + q["brilho"] * (1 - diag)
+    novo = pedra * (luz * brilho)[..., None] + caust[..., None] * np.float32([1.0, 1.0, 0.92])
+    a = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.5)
+    a = np.maximum(a, m)[..., None]
+    out[wy0:wy1, wx0:wx1] = np.clip(reg * (1 - a) + novo * a, 0, 255).astype(np.uint8)
+    print(f"    piscinas: Barlavento Caribbean em {int(m.sum())} px de água")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1734,6 +1810,8 @@ def main():
     out = servico_bancada(out, orig)
     print("[29] cozinha: inox ao centro, armários nas laterais")
     out = cozinha(out)
+    print("[35] piscinas: revestimento Barlavento")
+    out = piscinas(out, A)
     print("[30] spa: degrau interno")
     out = degrau_spa(out)
     print("[31] piscina: duas folhas de vidro")
