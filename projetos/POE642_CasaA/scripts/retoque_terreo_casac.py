@@ -56,6 +56,10 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    PDF (layer ARQ_BANCADAS, levada ao render pela mesma cadeia da base): a folha de vidro aberta
    junto à parede de cima e o arco do giro até o batente de baixo, no traço das portas do render.
    O arco passa por baixo do chuveiro de teto (que fica por cima).
+12. Escada estreita abaixo do box: no PDF são 10 degraus (do 11 ao 20, subindo para a direita);
+   o motor fez 6. As 5 arestas internas do motor saem (as colunas viram o piso limpo do degrau ao
+   lado) e entram 9, repartidas por igual entre a primeira e a última aresta do render, com o
+   perfil de sombra das arestas do próprio render, um pouco mais estreito para o degrau menor.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -209,6 +213,15 @@ PORTA_BOX = {
     "chuveiro": (437, 479, 448, 490),
     "vidro": (211, 214, 214), "contorno": (85, 92, 98),
     "arco": (110, 126, 144), "larg_arco": 0.8, "larg_contorno": 0.35,
+}
+# escada estreita (degraus 11 a 20 do PDF): linhas dos degraus (com a sombra da parede em cima e a
+# aresta de baixo), bordas das arestas (x onde volta o claro), perfil da sombra à esquerda da aresta
+ESCADA = {
+    "x": (358, 456), "y": (506, 554),
+    "bordas_velhas": [379, 394, 409, 425, 440],
+    "borda_ini": 363.5, "borda_fim": 454.0, "degraus": 10,
+    "perfil": ([-0.7, 0.0, 0.7, 1.4, 2.1, 2.8], [0.97, 0.52, 0.77, 0.85, 0.95, 1.0]),
+    "limpar": (5, 6),                            # colunas [borda-5, borda+1) <- as 6 px à direita
 }
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
@@ -602,6 +615,29 @@ def porta_box(out):
     return out
 
 
+def escada(out):
+    e = ESCADA
+    y0, y1 = e["y"]
+    a = out.copy()
+    antes, desloc = e["limpar"]
+    for b in e["bordas_velhas"]:
+        out[y0:y1, b - antes:b + 1] = a[y0:y1, b - antes + desloc:b + 1 + desloc]
+    x0, x1 = e["x"]
+    n = e["degraus"]
+    passo = (e["borda_fim"] - e["borda_ini"]) / n
+    bordas = [e["borda_ini"] + k * passo for k in range(1, n)]
+    xs = np.arange(x0, x1)[:, None] + (np.arange(SS) + 0.5)[None, :] / SS
+    fator = np.ones(xs.shape)
+    d_ref, f_ref = e["perfil"]
+    for b in bordas:
+        fator *= np.interp(b - xs, d_ref, f_ref, left=1.0, right=1.0)
+    rel = fator.mean(axis=1)
+    reg = out[y0:y1, x0:x1].astype(np.float32) * rel[None, :, None].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    escada estreita: {n} degraus (arestas a cada {passo:.2f} px)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -635,12 +671,14 @@ def main():
     out = cooktops(out)
     print("[11] porta do box do BH master 2")
     out = porta_box(out)
+    print("[12] degraus da escada estreita")
+    out = escada(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[12] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[13] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
