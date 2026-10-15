@@ -14,6 +14,9 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    próprios vidros. Ficam só dentro das floreiras (geometria medida no render). Os vidros e a
    parede de baixo do elevador são refeitos com o perfil de um trecho limpo do mesmo elemento; as
    faixas de piso com folha ou sombra são trocadas pelo piso limpo logo ao lado, com emenda suave.
+   As portas de correr de vidro (folhas em dois planos dos lados, embaixo e em cima do jardim 2)
+   vêm da base alinhada, que coincide com o render nos montantes; entre as folhas, piso do lado de
+   fora e floreira do lado de dentro.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -30,6 +33,8 @@ AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
 
 BASE = RAIZ / "POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v3_texturas_16x9.png"
+BASE_CHAPADA = RAIZ / "POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v2_16x9.png"   # cores exatas da legenda
+VIDRO = (211, 214, 214)                                  # BGR de #D6D6D3
 # lote no render: linha tracejada da esquerda e muros de cima e de baixo
 LOTE = {"x_esq": 155, "muro_cima": (24, 32), "muro_baixo": (952, 958)}
 # trecho com folhas por cima dos muros (x) e coluna limpa de onde o muro é copiado
@@ -53,6 +58,14 @@ JARDINS = {
         ("interior do elevador, embaixo", (936, 455, 978, 475), (0, -20)),
     ],
     "emenda": 3,
+    # portas de vidro: faixa, deslocamento para dentro (floreira), eixo e limite da floreira
+    # (do lado de dentro do limite é floreira; do lado de fora, piso)
+    "portas": [
+        ("esquerda", (914, 482, 927, 618), (13, 0), "x", 924),
+        ("direita", (1048, 482, 1063, 618), (-15, 0), "x", 1054),
+        ("embaixo", (919, 609, 1060, 624), (0, -15), "y", 614),
+        ("em cima do jardim 2", (984, 416, 1057, 428), (0, 12), "y", 424),
+    ],
 }
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
@@ -76,7 +89,7 @@ def chuveiros_teto(out):
 
 
 def alinhar_base(render):
-    """Base 16:9 reduzida e levada ao render por SIFT + afim."""
+    """Base 16:9 reduzida e levada ao render por SIFT + afim; também a base chapada (v2)."""
     base = cv2.resize(cv2.imread(str(BASE)), render.shape[1::-1], interpolation=cv2.INTER_AREA)
     sift = cv2.SIFT_create(10000)
     k1, d1 = sift.detectAndCompute(cv2.cvtColor(base, cv2.COLOR_BGR2GRAY), None)
@@ -85,7 +98,9 @@ def alinhar_base(render):
     A, inl = cv2.estimateAffine2D(np.float32([k1[a.queryIdx].pt for a in pares]),
                                   np.float32([k2[a.trainIdx].pt for a in pares]), ransacReprojThreshold=2.0)
     print(f"    base alinhada: {int(inl.sum())} pontos, escala {A[0, 0]:.4f} x {A[1, 1]:.4f}")
-    return cv2.warpAffine(base, A, render.shape[1::-1], flags=cv2.INTER_LINEAR, borderValue=(255, 255, 255))
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), render.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    return (cv2.warpAffine(base, A, render.shape[1::-1], flags=cv2.INTER_LINEAR, borderValue=(255, 255, 255)),
+            cv2.warpAffine(chapada, A, render.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255)))
 
 
 def fora_do_lote(out, base):
@@ -140,6 +155,30 @@ def jardins_de_inverno(out):
     return out
 
 
+def portas_de_vidro(out, base, chapada):
+    """Folhas de vidro da base sobre as faixas dos jardins; o resto da faixa é piso ou floreira."""
+    a = out.copy()
+    c = chapada.astype(np.int32)
+    # vidro e montantes: a cor exata do vidro da legenda e o preto (contorno e montantes) da base chapada
+    cinza = np.abs(c - np.array(VIDRO)).max(axis=2) <= 8
+    preto = c.max(axis=2) < 60
+    vidro = cinza | preto
+    n = 0
+    for nome, (x0, y0, x1, y1), (dx, dy), eixo, lim in JARDINS["portas"]:
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                if vidro[y, x]:
+                    out[y, x] = base[y, x]
+                    n += 1
+                    continue
+                pos = x if eixo == "x" else y
+                passo = dx if eixo == "x" else dy
+                dentro = (pos >= lim) if passo > 0 else (pos <= lim)
+                out[y, x] = a[y + dy, x + dx] if dentro else a[y - dy, x - dx]
+    print(f"    portas de vidro da base: {n} px")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -152,9 +191,11 @@ def main():
     print("[1] chuveiros de teto")
     out = chuveiros_teto(out)
     print("[2] plantas fora do lote")
-    out = fora_do_lote(out, alinhar_base(orig))
+    base, chapada = alinhar_base(orig)
+    out = fora_do_lote(out, base)
     print("[3] jardins de inverno")
     out = jardins_de_inverno(out)
+    out = portas_de_vidro(out, base, chapada)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

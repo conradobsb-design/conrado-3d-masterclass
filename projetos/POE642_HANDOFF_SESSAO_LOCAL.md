@@ -294,7 +294,7 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 - **Retoque, erro por erro (pedido do usuário):** `renders/POE642_CasaC_PH_Terreo_v3_retocado.png`, pelo `retoque_terreo_casac.py`.
   1. **Chuveiros de teto:** os boxes do BH master 1, BH 3, BH 2, BH 1 e BH master 2 estavam vazios. Cada um recebeu a placa aprovada da Casa A, no centro do símbolo do PDF. Feito.
   2. **Plantas fora do lote:** a faixa de palmeiras passava da linha tracejada em todo o lado esquerdo e dos muros nos cantos. Fora do lote volta a ser a base (fundo branco e linha tracejada) e os trechos de muro cobertos são refeitos com o muro do próprio render. Feito.
-  3. **Jardins de inverno:** as plantas passavam dos vidros, sobre o piso, a caixa do elevador e os próprios vidros. Ficam só dentro das floreiras; vidros e parede do elevador refeitos com o perfil de um trecho limpo; o piso em volta trocado pelo piso limpo ao lado, com emenda suave. Feito.
+  3. **Jardins de inverno:** as plantas passavam dos vidros, sobre o piso, a caixa do elevador e os próprios vidros. Ficam só dentro das floreiras; a parede do elevador é refeita com o perfil de um trecho limpo; o piso em volta é trocado pelo piso limpo ao lado, com emenda suave. As portas de correr de vidro (folhas em dois planos: 2 à esquerda, 2 à direita, 3 embaixo e 2 em cima do jardim 2, com os montantes) vêm da base alinhada, que coincide com o render nos montantes. Na primeira versão o vidro saiu num perfil uniforme e as portas sumiram; o usuário notou e elas voltaram. Feito.
   4. **Erros levantados e ainda abertos:**
      - cozinha: bancadas e ilha em granito escuro (na base são claras), uma cuba só na bancada de cima (são duas);
      - quarto externo: a cama virou dois eletrodomésticos;
