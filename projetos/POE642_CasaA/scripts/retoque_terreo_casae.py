@@ -69,6 +69,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     HUMANIZAÇÃO); o motor fez uma bola verde. Entra o arranjo com a estrelítzia do próprio jardim do
     render (folhas em leque e as flores laranja, as mesmas do paisagismo), reduzida ao círculo do
     PDF, com borda suave e sombra curta.
+17. Louceiro (pedido do usuário): veios aparentes de marcenaria. O motor deixou a madeira lisa; o veio
+    vem do tampo da mesa de jantar do próprio render (veio no comprido), girado para correr no
+    comprimento do louceiro e realçado, como no mobiliário do DCE da Casa D; o tom e as bordas ficam.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -859,6 +862,33 @@ def colar_disco(out, img, centro, r, alfa):
     return out
 
 
+# veio do louceiro (item 17): a madeira lisa do louceiro no quadro do render e o tampo da mesa de
+# jantar (veio vertical, sem cadeiras), como os veios do DCE da Casa D
+VEIO_LOUCEIRO = {"peca": (984, 471, 1147, 490), "fonte": (885, 505, 914, 589),
+                 "realce": 2.2, "sigma": 3.0, "lim": (0.85, 1.15), "borda": 1}
+
+
+def veio_louceiro(out, orig):
+    q = VEIO_LOUCEIRO
+    a, b, c, d = q["fonte"]
+    Y = orig[b:d, a:c].astype(np.float32).mean(axis=2)
+    v = Y / np.maximum(cv2.GaussianBlur(Y, (0, 0), q["sigma"], borderType=cv2.BORDER_REFLECT), 1)
+    v = np.clip(1 + q["realce"] * (v - 1), *q["lim"])
+    g = cv2.rotate(v, cv2.ROTATE_90_CLOCKWISE)                       # veio no comprimento (em x)
+    x0, y0, x1, y1 = q["peca"]
+    h, w = y1 - y0, x1 - x0
+    g = np.concatenate([g, g[::-1]] * (h // (2 * g.shape[0]) + 1), axis=0)[:h]
+    g = np.concatenate([g, g[:, ::-1]] * (w // (2 * g.shape[1]) + 1), axis=1)[:, :w]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    base = cv2.GaussianBlur(reg, (0, 0), 1.2)
+    e = q["borda"]
+    novo = reg.copy()
+    novo[e:-e, e:-e] = (base * g[..., None])[e:-e, e:-e]
+    out[y0:y1, x0:x1] = np.clip(novo, 0, 255).astype(np.uint8)
+    print(f"    louceiro: veio da mesa de jantar, realce {q['realce']}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -899,6 +929,8 @@ def main():
     out = lavabo(out)
     print("[16] escritório: arranjo de flores")
     out = arranjo(out, orig)
+    print("[17] louceiro: veio de marcenaria")
+    out = veio_louceiro(out, orig)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
