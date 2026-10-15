@@ -56,6 +56,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     claros de 2 a 16 px que o motor salpicou no Marrom Tabaco saem onde se destacam (30 ou mais acima
     do granito em volta); ficam os mais fracos e o grão fino. Cada um vira o granito de um trecho
     vizinho sem ponto, colado com borda suave.
+14. Pilar à direita do lavabo (pedido do usuário): o retângulo cinza da ARQ_ELEMENTOS FIXOS, que o
+    motor fez como uma peça cinza-taupe com folhas por cima, é um pilar: fica no preto das paredes,
+    na geometria do PDF (alto, cobre as folhas).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -730,6 +733,23 @@ def pontos_granito(out, orig, A):
     return out
 
 
+# pilar à direita do lavabo (item 14, pedido do usuário): o retângulo cinza da ARQ_ELEMENTOS FIXOS
+# no quadro do render; o preto é o da parede do lavabo logo à esquerda
+PILAR = {"ret": (1296.0, 667.6, 1373.8, 687.8), "parede": (1291, 660, 1295, 683)}
+
+
+def pilar(out):
+    q = PILAR
+    a, b, c, d = q["parede"]
+    viz = out[b:d, a:c].reshape(-1, 3)
+    preto = np.median(viz[viz.astype(np.float32).mean(axis=1) < 40], axis=0).astype(np.float32)
+    x0, y0, x1, y1 = q["ret"]
+    al = poligono_aa(out.shape[:2], [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])[..., None]
+    out[:] = np.clip(out * (1 - al) + preto * al, 0, 255).astype(np.uint8)
+    print(f"    pilar: ({x0}, {y0}) - ({x1}, {y1}) no preto das paredes {preto.astype(int).tolist()}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -764,6 +784,8 @@ def main():
     out = arcos_granito(out, A)
     print("[13] pontos claros do granito")
     out = pontos_granito(out, orig, A)
+    print("[14] pilar à direita do lavabo")
+    out = pilar(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

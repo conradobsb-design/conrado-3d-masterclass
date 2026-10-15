@@ -312,6 +312,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **WC DCE 1 (item 11):** `wc_dce` tira o vaso a mais (`apagar_largo`, luz só do piso limpo) e desenha o chuveiro do PDF com o `desenhar_chuveiro` do Térreo da Casa D.
 - **Arcos no granito (item 12):** `arcos_granito`, o do Subsolo da Casa D na escala do Térreo: o arco escuro sai (granito tecido) e entra a curva do PDF em cinza fino, só onde a base chapada é granito.
 - **Pontos do granito (item 13):** `pontos_granito` acha os pontinhos claros compactos no render original (contra a mediana de 11 px) e troca os fortes por um trecho vizinho de granito sem ponto.
+- **Pilar (item 14):** `pilar` pinta o retângulo do PDF no preto da parede vizinha (borda antisserrilhada).
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado
