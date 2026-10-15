@@ -127,6 +127,9 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    esquerda (em cima e embaixo) e 1 de trabalho à direita (no meio). Saem a do meio à esquerda e as de
    cima e de baixo à direita, com a sombra: as réguas do vinílico são horizontais, então cada trecho
    vira as mesmas linhas de um trecho limpo do próprio escritório ao lado (colunas em espelho).
+28. Erro 23 da lista (elevador): o motor fez a caixa num piso cinza claro manchado (e a segunda imagem,
+   um lavabo). Como na Casa C: caixa branca e a cabine do Subsolo da Casa B aprovado, girada para a
+   porta ficar à direita (no PDF, a porta dá para a circulação), levada à cabine do PDF.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -147,7 +150,7 @@ RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
 from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO, SS  # noqa: E402
 from retoque_terreo_casac import COZINHA as COZINHA_C  # noqa: E402
-from retoque_terreo_casac import ARCOS_GRANITO, BANCOS as BANCOS_C  # noqa: E402
+from retoque_terreo_casac import ARCOS_GRANITO, BANCOS as BANCOS_C, ELEVADOR as ELEVADOR_C  # noqa: E402
 from retoque_terreo_casab import cuba  # noqa: E402
 from texturizar_base import quilting  # noqa: E402
 
@@ -513,6 +516,17 @@ BANCOS_D = {
 CADEIRAS_ESCRITORIO = {
     "apagar": [((1209, 828, 1231, 846), (1190, 1206)), ((1256, 810, 1274, 829), (1274, 1283)),
                ((1256, 845, 1274, 868), (1274, 1283))],
+}
+
+# elevador (erro 23): o motor fez a caixa num piso cinza claro manchado (e a segunda imagem, um
+# lavabo). Como na Casa C (pedido do usuário lá): caixa branca e a cabine do Subsolo da Casa B
+# aprovado, girada para a porta ficar à direita (no PDF, a porta dá para a circulação), levada à
+# cabine do PDF (INS_INSTALAÇÕES HIDRÁULICAS)
+ELEVADOR_D = {
+    "interior": (699, 639, 748, 688),
+    "cabine": (710, 645, 746, 683),
+    "branco": (255, 255, 255),
+    "fonte": ELEVADOR_C["fonte"],
 }
 
 
@@ -1672,6 +1686,18 @@ def cadeiras_escritorio(out):
     return out
 
 
+def elevador(out):
+    q = ELEVADOR_D
+    x0, y0, x1, y1 = q["interior"]
+    out[y0:y1, x0:x1] = q["branco"]
+    arq, (fx0, fy0, fx1, fy1) = q["fonte"]
+    cabine = cv2.rotate(cv2.imread(str(arq))[fy0:fy1, fx0:fx1], cv2.ROTATE_90_COUNTERCLOCKWISE)   # porta à direita
+    cx0, cy0, cx1, cy1 = q["cabine"]
+    out[cy0:cy1, cx0:cx1] = cv2.resize(cabine, (cx1 - cx0, cy1 - cy0), interpolation=cv2.INTER_AREA)
+    print(f"    elevador: caixa branca e a cabine do Subsolo da Casa B ({cx1 - cx0}x{cy1 - cy0} px)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1740,6 +1766,8 @@ def main():
     out = bancos_camas(out)
     print("[26] erro 22: cadeiras da escrivaninha do escritório")
     out = cadeiras_escritorio(out)
+    print("[27] erro 23: elevador")
+    out = elevador(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
