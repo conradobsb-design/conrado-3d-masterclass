@@ -63,6 +63,8 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    o motor fez 6. As 5 arestas internas do motor saem (as colunas viram o piso limpo do degrau ao
    lado) e entram 9, repartidas por igual entre a primeira e a última aresta do render, com o
    perfil de sombra das arestas do próprio render, um pouco mais estreito para o degrau menor.
+13. Elevador: o motor fez a caixa no travertino do hall. Ela fica branca, com o contorno fino e
+   cinza da cabine na posição do PDF, como o elevador do Subsolo da Casa C aprovado.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -228,6 +230,13 @@ ESCADA = {
     "borda_ini": 363.5, "borda_fim": 454.0, "degraus": 10,
     "perfil": ([-0.7, 0.0, 0.7, 1.4, 2.1, 2.8], [0.97, 0.52, 0.77, 0.85, 0.95, 1.0]),
     "limpar": (5, 6),                            # colunas [borda-5, borda+1) <- as 6 px à direita
+}
+# elevador: interior da caixa (entre as paredes; a borda antisserrilhada da parede fica) e a
+# cabine do PDF, no traço da cabine do Subsolo da Casa C
+ELEVADOR = {
+    "interior": (925, 426, 978, 475),
+    "cabine": (926.5, 428.5, 968.1, 471.9),
+    "branco": (255, 255, 255), "linha": (170, 170, 170), "larg": 0.7,
 }
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
@@ -663,6 +672,23 @@ def escada(out):
     return out
 
 
+def elevador(out):
+    q = ELEVADOR
+    x0, y0, x1, y1 = q["interior"]
+    h, w = y1 - y0, x1 - x0
+    reg = np.empty((h, w, 3), np.float32)
+    reg[:] = q["branco"]
+    cx0, cy0, cx1, cy1 = q["cabine"]
+    f = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(f, (int(round((cx0 - x0) * SS)), int(round((cy0 - y0) * SS))),
+                  (int(round((cx1 - x0) * SS)), int(round((cy1 - y0) * SS))), 255, max(1, int(round(q["larg"] * SS))))
+    a = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    reg = reg * (1 - a) + np.array(q["linha"], np.float32) * a
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    elevador: caixa branca com a cabine do PDF ({w}x{h} px)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -698,12 +724,14 @@ def main():
     out = porta_box(out, A)
     print("[12] degraus da escada estreita")
     out = escada(out)
+    print("[13] elevador")
+    out = elevador(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[13] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[14] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":

@@ -304,8 +304,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
   10. **Cooktops (pedido do usuário):** o motor fez os dois com 6 bocas; no PDF os dois têm 5. Na gourmet saiu a boca do meio de cima (2 em cima e 3 embaixo). O da ilha da cozinha é o mesmo desenho girado (3 bocas na coluna da esquerda e 2 na da direita) e virou o cooktop da gourmet corrigido, girado 90° e levado à caixa do da ilha. Feito.
   11. **Box do BH master 2:** a porta de giro voltou como no PDF (layer ARQ_BANCADAS): folha de vidro aberta junto à parede de cima e o arco do giro até o batente de baixo, no traço das portas do render; o chuveiro de teto fica por cima do arco. O vão ao lado do chuveiro (retângulo de ~32 x 98 cm com dois X tracejados, layer DOC_LINHAS E PROJEÇÕES) ficou tracejado sobre o piso, como no PDF, por escolha do usuário (os X vêm do PDF levado ao render; o lado livre ganhou contorno tracejado). Feito.
   12. **Escada estreita abaixo do box (pedido do usuário):** no PDF são 10 degraus (11 a 20, subindo para a direita); o motor fez 6. As arestas internas do motor saíram e entraram 9, repartidas por igual entre a primeira e a última aresta do render, com o perfil de sombra das arestas do próprio render. Feito.
-  13. **Erros levantados e ainda abertos:**
-     - elevador: a cabine (branca, com o contorno) virou piso.
+  13. **Elevador:** a caixa tinha saído no travertino do hall. Fica branca, com o contorno fino e cinza da cabine na posição do PDF, como o elevador do Subsolo da Casa C aprovado. Feito.
+  - Todos os erros da lista estão feitos. Observação ainda não pedida: dentro do box do BH master 2 o piso saiu em dois tons (metade lisa, metade pontilhada).
 - **Depois do retoque:** pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
 
 ```bash
