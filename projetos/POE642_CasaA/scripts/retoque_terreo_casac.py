@@ -98,6 +98,12 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    sombra entra só como escurecimento (sem levar o tom do piso do escritório para o tapete). A
    frente da cadeira fica por baixo da escrivaninha (pedido do usuário): onde é tampo, fica o
    tampo; na faixa da sombra da escrivaninha, a cadeira recebe a mesma sombra.
+20. BH master 1: o motor fez duas cubas soltas com a torneira na lateral (do lado da parede). No
+   PDF é uma cuba esculpida longa: duas bacias com a torneira nas pontas (em cima e embaixo) e um
+   trecho liso no meio. As cubas do motor saem (a bancada lisa entre elas é repetida em espelho)
+   e entra a cuba do PDF, em louça branca, com as bacias no desenho das cubas da cozinha. No BH
+   master 2 a cuba está certa, mas a torneira saiu na lateral; no PDF ela fica no meio da borda de
+   cima: a cuba é redesenhada no mesmo lugar, com a torneira em cima.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -116,7 +122,7 @@ import pymupdf
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
-from retoque_terreo_casab import cuba  # noqa: E402
+from retoque_terreo_casab import LOUCA, LOUCA_CONTORNO, cuba  # noqa: E402
 from texturizar_base import quilting  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v3_texturas_16x9.png"
@@ -338,6 +344,15 @@ CADEIRAS = {
     "lugares": [("Quarto 1", (1106.3, 313.8), None, ("x", 1111, 1106)),
                 ("quarto das duas camas", (706.7, 274.5), "horario", ("y", 279, 276)),
                 ("suíte do canto", (621.5, 338.6), None, ("x", 626, 621))],
+}
+# BH master 1: trecho da bancada com as cubas do motor (<- linhas lisas entre elas, em espelho) e
+# a cuba esculpida do PDF: bloco de louça, bacia de cima (torneira em cima) e de baixo (embaixo)
+CUBA_BHM1 = {
+    "bancada": (392, 221, 408, 286), "lisa": (247, 260),
+    "bloco": (393, 225, 407, 280),
+    "bacia_cima": (393, 225, 407, 244), "bacia_baixo": (393, 261, 407, 280),
+    # BH master 2: trecho da cuba do motor (<- bancada lisa de baixo, em espelho) e a cuba do PDF
+    "bhm2_bancada": (337, 455, 354, 478), "bhm2_lisa": (479, 494), "bhm2_cuba": (338, 457, 352, 475),
 }
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
@@ -1012,6 +1027,39 @@ def cadeiras(out):
     return out
 
 
+def cuba_bhm1(out):
+    q = CUBA_BHM1
+    x0, y0, x1, y1 = q["bancada"]
+    r0, r1 = q["lisa"]
+    t = out[r0:r1, x0:x1].copy()
+    out[y0:y1, x0:x1] = np.concatenate([t, t[::-1]] * ((y1 - y0) // (2 * t.shape[0]) + 1), axis=0)[:y1 - y0]
+    bx0, by0, bx1, by1 = q["bloco"]
+    h, w = by1 - by0, bx1 - bx0
+    f = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(f, (0, 0), (w * SS - 1, h * SS - 1), 255, -1)
+    miolo = cv2.erode(f, np.ones((5, 5), np.uint8))
+    a_f = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    a_m = cv2.resize(miolo.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    reg = out[by0:by1, bx0:bx1].astype(np.float32)
+    reg = reg * (1 - a_f) + np.array(LOUCA_CONTORNO, np.float32) * a_f
+    reg = reg * (1 - a_m) + np.array(LOUCA, np.float32) * a_m
+    out[by0:by1, bx0:bx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    cx0, cy0, cx1, cy1 = q["bacia_cima"]                       # torneira em cima: desenho virado
+    reg = np.ascontiguousarray(out[cy0:cy1, cx0:cx1][::-1])
+    out[cy0:cy1, cx0:cx1] = cuba(reg, (0, 0, cx1 - cx0, cy1 - cy0))[::-1]
+    out = cuba(out, q["bacia_baixo"])                          # torneira embaixo
+    print("    BH master 1: cuba esculpida do PDF, com as torneiras nas pontas")
+    x0, y0, x1, y1 = q["bhm2_bancada"]
+    r0, r1 = q["bhm2_lisa"]
+    t = out[r0:r1, x0:x1].copy()
+    out[y0:y1, x0:x1] = np.concatenate([t, t[::-1]] * ((y1 - y0) // (2 * t.shape[0]) + 1), axis=0)[:y1 - y0]
+    cx0, cy0, cx1, cy1 = q["bhm2_cuba"]
+    reg = np.ascontiguousarray(out[cy0:cy1, cx0:cx1][::-1])
+    out[cy0:cy1, cx0:cx1] = cuba(reg, (0, 0, cx1 - cx0, cy1 - cy0))[::-1]
+    print("    BH master 2: cuba com a torneira em cima, como no PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1061,12 +1109,14 @@ def main():
     out = janela_escritorio(out)
     print("[19] cadeiras das escrivaninhas")
     out = cadeiras(out)
+    print("[20] cuba do BH master 1")
+    out = cuba_bhm1(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[20] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[21] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
