@@ -27,6 +27,9 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
    chuveiro, com o braço saindo da parede de baixo; a parede volta ao preto.
 9. Box do vestiário: o mesmo, com o braço saindo da parede da direita; o toco da cruz que passou
    para o vinílico da academia sai.
+10. Vestiário: a cuba da bancada saiu só com o contorno cinza; vira uma cuba branca de verdade (aba,
+    bacia com a borda mais escura indo ao fundo claro, válvula cromada), com a torneira cromada
+    saindo da faixa junto à parede, na geometria do PDF (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_subsolo_casad.py POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_render.webp \
@@ -46,6 +49,7 @@ RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
 
 from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO, SS  # noqa: E402
+from retoque_terreo_casab import LOUCA, LOUCA_CONTORNO, BACIA_BORDA, BACIA_FUNDO  # noqa: E402
 from retoque_terreo_casad import interpolar, textura  # noqa: E402
 from texturizar_base import quilting  # noqa: E402
 
@@ -181,6 +185,17 @@ CHUVEIRO_BOX = {
     "braco": (1290.1, 1028.8, 1322.0, 1030.9),
     "canopla": (1320.3, 1027.1, 1322.3, 1032.5),
     "janela": (1272, 1014, 1330, 1046),
+}
+
+CUBA_VEST = {
+    "bacia": (1080.5, 989.6, 1106.8, 1044.6),   # a cuba retangular; à esquerda, a faixa da torneira
+    "raio": 3.5, "aba": 2.6, "fundo": 5.0,       # canto, largura da aba e da borda da bacia até o fundo
+    "valvula": (1093.65, 1017.1, 2.0),
+    # torneira: sobre a bancada clara o cromado some (como no lavatório do Térreo): contorno escuro e
+    # sombra curta (dx, dy, sigma, força)
+    "base": ((1076.0, 1017.65), 2.6), "bica": (1076.0, 1089.5, 1017.65), "larg_bica": 2.6,
+    "escuro": (92, 96, 100), "sombra": (1.6, 1.6, 2.0, 0.35),
+    "janela": (1062, 982, 1114, 1052),
 }
 
 
@@ -382,6 +397,72 @@ def sauna(out):
     return out
 
 
+def cuba_vestiario(out):
+    q = CUBA_VEST
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+
+    def px(v, o=0.0):
+        return int(round((v - o) * SS))
+
+    def pintar(mascara, cor, forca=1.0):
+        nonlocal reg
+        a = cv2.resize(mascara.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None] * forca
+        reg = reg * (1 - a) + np.array(cor, np.float32) * a
+
+    def ret_arred(b, raio):
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        bx0, by0, bx1, by1 = px(b[0], wx0), px(b[1], wy0), px(b[2], wx0), px(b[3], wy0)
+        rr = min(px(raio), (bx1 - bx0) // 2, (by1 - by0) // 2)
+        cv2.rectangle(m, (bx0 + rr, by0), (bx1 - rr, by1), 255, -1)
+        cv2.rectangle(m, (bx0, by0 + rr), (bx1, by1 - rr), 255, -1)
+        for cx, cy in ((bx0 + rr, by0 + rr), (bx1 - rr, by0 + rr), (bx0 + rr, by1 - rr), (bx1 - rr, by1 - rr)):
+            cv2.circle(m, (cx, cy), rr, 255, -1)
+        return m
+
+    def circulo(cx, cy, r):
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.circle(m, (px(cx, wx0), px(cy, wy0)), max(1, px(r)), 255, -1)
+        return m
+
+    bx0, by0, bx1, by1 = q["bacia"]
+    pintar(ret_arred(q["bacia"], q["raio"]), LOUCA_CONTORNO)
+    pintar(ret_arred((bx0 + 0.9, by0 + 0.9, bx1 - 0.9, by1 - 0.9), q["raio"] - 0.9), LOUCA)
+    passos = 8
+    for i in range(passos):                       # bacia: a borda mais escura indo ao fundo claro
+        k = i / (passos - 1)
+        cor = tuple(BACIA_BORDA[c] * (1 - k) + BACIA_FUNDO[c] * k for c in range(3))
+        ins = q["aba"] + k * q["fundo"]
+        pintar(ret_arred((bx0 + ins, by0 + ins, bx1 - ins, by1 - ins), max(1.0, q["raio"] - k * 2)), cor)
+    vx, vy, vr = q["valvula"]
+    pintar(circulo(vx, vy, vr), CROMO_ESCURO)
+    pintar(circulo(vx, vy, vr * 0.7), CROMO_CLARO)
+    tx0, tx1, ty = q["bica"]
+    (ox, oy), r = q["base"]
+    sdx, sdy, ssig, sforca = q["sombra"]
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.line(m, (px(tx0 + sdx, wx0), px(ty + sdy, wy0)), (px(tx1 + sdx, wx0), px(ty + sdy, wy0)), 255, px(q["larg_bica"]))
+    cv2.circle(m, (px(ox + sdx, wx0), px(oy + sdy, wy0)), px(r), 255, -1)
+    sb = cv2.resize(cv2.GaussianBlur(m.astype(np.float32), (0, 0), ssig * SS) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    reg *= (1 - sforca * sb)[..., None]
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.line(m, (px(tx0, wx0), px(ty, wy0)), (px(tx1, wx0), px(ty, wy0)), 255, px(q["larg_bica"]))
+    pintar(m, q["escuro"])
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.line(m, (px(tx0, wx0), px(ty, wy0)), (px(tx1 - 0.6, wx0), px(ty, wy0)), 255, px(q["larg_bica"] - 1.0))
+    pintar(m, CROMO)
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.line(m, (px(tx0, wx0), px(ty - 0.4, wy0)), (px(tx1 - 0.8, wx0), px(ty - 0.4, wy0)), 255, max(1, px(0.5)))
+    pintar(m, CROMO_CLARO)
+    pintar(circulo(ox, oy, r), q["escuro"])
+    pintar(circulo(ox, oy, r - 0.6), CROMO)
+    pintar(circulo(ox - 0.4, oy - 0.4, r * 0.45), CROMO_CLARO)
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    vestiário: cuba branca com válvula e torneira cromada, na geometria do PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -407,6 +488,8 @@ def main():
     out = trocar_chuveiro(out, CHUVEIRO_DUCHA)
     print("[9] box do vestiário: chuveiro")
     out = trocar_chuveiro(out, CHUVEIRO_BOX)
+    print("[10] vestiário: cuba da bancada")
+    out = cuba_vestiario(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
