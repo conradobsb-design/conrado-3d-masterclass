@@ -104,6 +104,9 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    e entra a cuba do PDF, em louça branca, com as bacias no desenho das cubas da cozinha. No BH
    master 2 a cuba está certa, mas a torneira saiu na lateral; no PDF ela fica no meio da borda de
    cima: a cuba é redesenhada no mesmo lugar, com a torneira em cima.
+21. Porta pivotante principal: o motor cortou a folha na soleira; no PDF ela vai de ponta a ponta,
+   passando para o lado de fora até o arco. A folha é estendida com o próprio trecho dela (mesmas
+   linhas) até o fim do PDF, e a ponta recebe o arremate da ponta de dentro, em espelho.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -354,6 +357,9 @@ CUBA_BHM1 = {
     # BH master 2: trecho da cuba do motor (<- bancada lisa de baixo, em espelho) e a cuba do PDF
     "bhm2_bancada": (337, 455, 354, 478), "bhm2_lisa": (479, 494), "bhm2_cuba": (338, 457, 352, 475),
 }
+# porta pivotante principal: linhas da folha, trecho da folha copiado, onde começa a parte que
+# faltou, fim no PDF e a ponta de dentro (arremate)
+PIVOTANTE = {"linhas": (670, 674), "fonte_x": 1370, "de": 1406, "ate": 1434, "ponta": (1340, 1342)}
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
 CROMO_CLARO = (238, 240, 242)
@@ -1060,6 +1066,17 @@ def cuba_bhm1(out):
     return out
 
 
+def pivotante(out):
+    q = PIVOTANTE
+    y0, y1 = q["linhas"]
+    de, ate, fx = q["de"], q["ate"], q["fonte_x"]
+    out[y0:y1, de:ate] = out[y0:y1, fx:fx + ate - de]
+    p0, p1 = q["ponta"]
+    out[y0:y1, ate - (p1 - p0):ate] = out[y0:y1, p0:p1][:, ::-1]
+    print(f"    porta pivotante: folha estendida até o fim do PDF (x {ate})")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1111,12 +1128,14 @@ def main():
     out = cadeiras(out)
     print("[20] cuba do BH master 1")
     out = cuba_bhm1(out)
+    print("[21] porta pivotante principal")
+    out = pivotante(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[21] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[22] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
