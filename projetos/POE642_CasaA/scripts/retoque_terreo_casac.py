@@ -80,6 +80,10 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    antes e ao lado fica uma mesa redonda. O aparador é encurtado (a ponta da direita, com a borda e
    a sombra, vem para o fim do PDF), o resto volta a ser travertino (veios de baixo, em espelho) e
    entra a mesa redonda do PDF, no tampo de madeira do próprio aparador, com contorno e sombra.
+17. Lavabo ao lado da adega: o motor fez duas cubas; no PDF a de cima é só bancada. O miolo da
+   de cima vira a bancada lisa do trecho de baixo (mesmas colunas, com a borda da direita); a borda
+   de cima da bancada e a cuba de baixo ficam. Adega: o móvel comprido de madeira junto à parede
+   da direita não existe no PDF e vira o piso da adega (as colunas limpas, em espelho).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -289,6 +293,14 @@ APARADOR = {
     "madeira": (1215, 624, 1260, 632),
     "contorno": (80, 99, 118),
     "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.4},
+}
+# lavabo ao lado da adega: miolo da cuba a mais (linhas, colunas) e o trecho liso da bancada de
+# baixo; adega: o móvel (com a sombra e as bordas antisserrilhadas) e as colunas de piso limpo
+LAVABO_ADEGA = {
+    "cuba_a_mais": (1233, 532, 1251, 559),
+    "bancada_lisa": (595, 613),
+    "movel": (1205, 480, 1227, 616),
+    "piso_adega": (1190, 1205),
 }
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
@@ -859,6 +871,21 @@ def aparador_hall(out):
     return out
 
 
+def lavabo_adega(out):
+    q = LAVABO_ADEGA
+    a = out.copy()
+    x0, y0, x1, y1 = q["cuba_a_mais"]
+    r0, r1 = q["bancada_lisa"]
+    t = a[r0:r1, x0:x1]
+    out[y0:y1, x0:x1] = np.concatenate([t, t[::-1]] * ((y1 - y0) // (2 * t.shape[0]) + 1), axis=0)[:y1 - y0]
+    x0, y0, x1, y1 = q["movel"]
+    c0, c1 = q["piso_adega"]
+    t = a[y0:y1, c0:c1]
+    out[y0:y1, x0:x1] = np.concatenate([t, t[:, ::-1]] * ((x1 - x0) // (2 * t.shape[1]) + 1), axis=1)[:, :x1 - x0]
+    print("    lavabo: a cuba a mais vira bancada; adega: o móvel sai")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -902,12 +929,14 @@ def main():
     out = degraus_largos(out)
     print("[16] aparador do hall")
     out = aparador_hall(out)
+    print("[17] lavabo e adega")
+    out = lavabo_adega(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[17] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[18] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
