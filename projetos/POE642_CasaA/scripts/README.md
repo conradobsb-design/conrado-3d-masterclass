@@ -322,6 +322,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **Vaso com tampo (item 22):** `vasos`, o do Subsolo da Casa D com a parede em qualquer lado e os números na escala deste render; antes, o símbolo do motor vira granito tecido.
 - **Bancada do banho gourmet (item 23):** `bancada_gourmet` desenha a bancada do PDF no granito (contorno cinza fino, tampo um pouco mais claro, sombra curta), a cuba esculpida (`cuba_esculpida`, comum com o lavabo) e a torneira cromada.
 - **Porta do hall externo (item 24):** `porta_hall` desenha a folha pequena (retângulo do PDF, nos tons da folha grande do render) e o arco dela (a curva da ARQ_PAREDE).
+- **Brises do escritório (item 25):** `brises` cola um trecho da madeira da mesa de jantar em cada retângulo do PDF (`colar`), num tom sorteado, com contorno e sombra curta.
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado

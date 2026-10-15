@@ -105,6 +105,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     folhas: a grande (que o render fez, com o arco para baixo) e a pequena, à direita, que abre para
     cima; a folha pequena entra na espessura do PDF, no desenho da grande (traço escuro em cima, traço
     médio embaixo, miolo claro), com o encontro das duas marcado, e o arco dela no traço fino dos arcos.
+25. Brises da janela do escritório (pedido do usuário: em tons de madeira, do lado de fora): os 8
+    retângulos da ARQ_ELEMENTOS FIXOS junto à janela, que o motor apagou na grama, entram como réguas
+    de madeira (o veio da mesa de jantar do render, no comprido de cada régua), cada uma num tom um
+    pouco diferente, com contorno fino e sombra curta na grama.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1268,6 +1272,42 @@ def porta_hall(out, A):
     return out
 
 
+# brises do escritório (item 25): a coluna dos retângulos da ARQ_ELEMENTOS FIXOS fora da janela e a
+# madeira da mesa de jantar do render (veio vertical; nas réguas, deitado)
+BRISES = {"janela": (1292, 500, 1308, 600), "fonte": (885, 505, 914, 589),
+          "tons": (0.8, 1.0), "semente": 7, "contorno": (38, 52, 70), "larg_contorno": 0.4,   # BGR, marrom escuro
+          "sombra": {"desloc": (-1.2, 1.2), "sigma": 0.8, "forca": 0.4}}
+
+
+def brises(out, orig, A):
+    q = BRISES
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+    wx0, wy0, wx1, wy1 = q["janela"]
+    rets = sorted({tuple(round(v, 2) for v in caixa_render(d, p2r)) for d in pg.get_drawings()
+                   if d.get("layer") == "ARQ_ELEMENTOS FIXOS" and d["type"] == "f"
+                   and wx0 <= caixa_render(d, p2r)[0] and caixa_render(d, p2r)[2] <= wx1
+                   and wy0 <= caixa_render(d, p2r)[1] and caixa_render(d, p2r)[3] <= wy1}, key=lambda r: r[1])
+    a, b, c, d = q["fonte"]
+    madeira = cv2.rotate(orig[b:d, a:c], cv2.ROTATE_90_CLOCKWISE)        # veio deitado
+    rng = np.random.default_rng(q["semente"])
+    forma = out.shape[:2]
+    s = q["sombra"]
+    for i, (x0, y0, x1, y1) in enumerate(rets):
+        cantos = np.float32([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+        sombra = cv2.GaussianBlur(poligono_aa(forma, cantos + np.float32(s["desloc"])), (0, 0), s["sigma"])
+        out[:] = np.clip(out * (1 - s["forca"] * sombra)[..., None], 0, 255).astype(np.uint8)
+        # um trecho diferente da madeira para cada régua, no tamanho dela (8 x mais px que a régua)
+        hh, ww = int(np.ceil((y1 - y0) * 3)), int(np.ceil((x1 - x0) * 3))
+        oy = int(rng.integers(0, madeira.shape[0] - hh))
+        ox = int(rng.integers(0, madeira.shape[1] - ww))
+        peca = madeira[oy:oy + hh, ox:ox + ww].astype(np.float32) * rng.uniform(*q["tons"])
+        out = colar(out, np.clip(peca, 0, 255).astype(np.uint8), (x0, y0, x1, y1))
+        a_ = linha_aa(forma, cantos, q["larg_contorno"], fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - a_) + np.float32(q["contorno"]) * a_, 0, 255).astype(np.uint8)
+    print(f"    escritório: {len(rets)} brises de madeira do PDF fora da janela")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1321,6 +1361,8 @@ def main():
     out = bancada_gourmet(out)
     print("[24] porta do hall externo: extensão e arco")
     out = porta_hall(out, A)
+    print("[25] brises de madeira na janela do escritório")
+    out = brises(out, orig, A)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
