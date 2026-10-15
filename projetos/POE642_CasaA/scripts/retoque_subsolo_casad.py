@@ -329,7 +329,8 @@ for _nome, (_x0, _x1), (_jx0, _jx1), _paredes, _caix, _vidro, _yc, _faces in [
     VIDROS_FIXOS.append({
         "nome": _nome, "janela": (_jx0, 238, _jx1, 268),
         "restaurar": [((_jx0, 230, _jx1, 247), (int(_x0), 242, int(round(_x1)), 247), "granito", (45, 110)),
-                      ((_jx0, 258, _jx1, 274), (int(_x0), 258, int(round(_x1)), 263), "bege", (150, 240))],
+                      # até a linha 265: a borda de baixo da cápsula vai até 263; a luz só do piso limpo
+                      ((_jx0, 256, _jx1, 276), (int(_x0) - 1, 259, int(round(_x1)) + 1, 266), "bege", (200, 240))],
         "bege": (_x0, 246.3, _x1, 259.0), "luz": (_jx0 + 10, 264, _jx1 - 10, 272),
         "paredes": _paredes, "caixilhos": _caix, "vidro": _vidro,
         "centro": ((_vidro[0], _yc), (_vidro[2], _yc)), "faces": _faces})
