@@ -162,6 +162,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    O texto sai (o piso limpo dos próprios banhos, na luz do entorno sem a parede) e entram os chuveiros
    do PDF, como os do banho master: a ducha quadrada, o braço cromado até a parede do meio e a canopla,
    com sombra curta.
+37. Armários do louceiro e da despensa (pedido do usuário): o L branco da layer DOC_LINHAS E PROJEÇÕES
+   são os armários (eu os tinha tirado por engano no item 30). Voltam no polígono do PDF, como os outros
+   armários até o teto: tom areia, veio vertical do armário do render, sem sombra de móvel baixo e com
+   contorno fino nas faces livres.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -645,6 +649,14 @@ CHUVEIROS_23 = {
                   {"nome": "banho 3", "ducha": (1135.0, 884.5, 1141.2, 890.6), "braco": (1126.3, 1138.1, 887.6),
                    "canopla": (1126.1, 886.6, 1127.0, 888.5)}],
     "janela": (1100, 878, 1148, 896),
+}
+
+# armários em L do louceiro e da despensa (pedido do usuário): o L branco da layer DOC_LINHAS E
+# PROJEÇÕES são os armários. Entram no polígono do PDF, como os outros armários até o teto: tom areia,
+# veio vertical do armário do render, sem sombra de móvel baixo, contorno fino nas faces livres
+ARMARIOS_L = {
+    "caixas": [("louceiro", (1094.4, 189.9, 1137.9, 250.5)), ("despensa", (1094.3, 290.9, 1137.7, 348.4))],
+    "janela": (1090, 186, 1142, 352),
 }
 
 
@@ -2158,6 +2170,38 @@ def chuveiros_23(out):
     return out
 
 
+def armarios_L(out, orig, chapada, A):
+    q = ARMARIOS_L
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+    _, p2r = pdf_cadeia(A, out.shape)
+
+    def caixa(d, alvo, tol=1.0):
+        (rx0, ry0), (rx1, ry1) = p2r(d["rect"].x0, d["rect"].y0), p2r(d["rect"].x1, d["rect"].y1)
+        return max(abs(rx0 - alvo[0]), abs(ry0 - alvo[1]), abs(rx1 - alvo[2]), abs(ry1 - alvo[3])) <= tol
+
+    m = mascara_pdf(q["janela"], A, out.shape, lambda d: d.get("fill") == (1.0, 1.0, 1.0) and
+                    d.get("layer") == "DOC_LINHAS E PROJEÇÕES" and any(caixa(d, c) for _, c in q["caixas"]))
+    m *= ~parede_grossa(chapada)[wy0:wy1, wx0:wx1]
+    img = cv2.imread(str(ARMARIO["fonte_areia"][0]))
+    fx0, fy0, fx1, fy1 = ARMARIO["fonte_areia"][1]
+    areia = img[fy0:fy1, fx0:fx1].reshape(-1, 3).astype(np.float32).mean(axis=0)
+    vx0, vy0, vx1, vy1 = ARMARIO["veio_emprestado"]
+    Y = orig[vy0:vy1, vx0:vx1].astype(np.float32).mean(axis=2)
+    v = np.clip(Y / np.maximum(cv2.GaussianBlur(Y, (0, 0), ARMARIO["sigma_veio"], borderType=cv2.BORDER_REFLECT), 1),
+                *ARMARIO["veio_lim"])
+    v = np.concatenate([v, v[::-1]] * (h // (2 * v.shape[0]) + 1), axis=0)[:h]
+    v = np.concatenate([v, v[:, ::-1]] * (w // (2 * v.shape[1]) + 1), axis=1)[:, :w]
+    tampo = areia[None, None] * v[..., None]
+    borda = np.clip(m - cv2.erode(m, np.ones((3, 3), np.uint8)), 0, 1)       # face livre: contorno fino
+    livre = ~(cv2.dilate(parede_grossa(chapada)[wy0:wy1, wx0:wx1].astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
+    tampo *= (1 - (1 - ARMARIO["contorno"]) * borda * livre)[..., None]
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    out[wy0:wy1, wx0:wx1] = np.clip(reg * (1 - m[..., None]) + tampo * m[..., None], 0, 255).astype(np.uint8)
+    print("    louceiro e despensa: armários em L do PDF (areia, veio, sem sombra)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -2198,6 +2242,7 @@ def main():
     out = projecao_garagem(out, A)
     print("[12a] louceiro e despensa sem as prateleiras do motor")
     out = sem_prateleiras(out, chapada)
+    out = armarios_L(out, orig, chapada, A)
     print("[12] erro 6: arcos das portas sobre o granito")
     out = arcos_no_granito(out, A, chapada)
     print("[13] erro 7: vaso inventado e X da área descoberta")

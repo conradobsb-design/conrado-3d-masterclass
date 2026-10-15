@@ -265,6 +265,7 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **Inox:** `inox` trata uma lista de caixas (cozinha e área de serviço).
 - **Bancada da sala íntima:** `minibar` (quartzo por `textura` com o perfil de luz por coluna; cuba, torneira e frigobar desenhados em 8x; área molhada por `area_molhada`).
 - **Chuveiros dos banhos 2 e 3:** `desenhar_chuveiro` (ducha, braço, canopla e sombra, como em `chuveiros_bhm`); `apagar` ganhou `lum_min` para a parede não escurecer a luz.
+- **Armários em L:** `armarios_L` (polígono do PDF por `mascara_pdf`, areia com o veio emprestado, contorno nas faces livres).
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado
