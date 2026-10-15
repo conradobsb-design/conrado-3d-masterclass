@@ -176,6 +176,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
 40. Torneiras das cubas da cozinha (pedido do usuário): o motor fez as cubas sem torneira. Entram as do
    PDF (canopla e alavanca na parede, bica até o meio da cuba e a válvula), em cromado, no eixo de cada
    cuba do render.
+41. Degrau interno do spa (pedido do usuário): no PDF o spa tem dois contornos internos (o degrau, em
+   volta, e o fundo); o render só tinha o do fundo. Entra o contorno de fora do degrau (4 px para fora
+   do fundo, como no PDF), com o perfil de luz das arestas do próprio render (sombra larga em cima e à
+   direita, traço fino à esquerda e embaixo), mais suave.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -700,6 +704,18 @@ TORNEIRAS_COZINHA = {
                   {"canopla": (1025.1, 191.6, 1026.8, 193.2), "alavanca": (1027.0, 191.9, 1027.9, 192.9),
                    "bica": (1025.95, 192.3, 197.9), "valvula": (1025.95, 198.45)}],
     "janela": (1000, 188, 1034, 204),
+}
+
+# degrau interno do spa (pedido do usuário): no PDF o spa tem dois contornos internos (o degrau, em
+# volta, e o fundo); o render só tem o do fundo. Entra o contorno de fora do degrau (ARQ_PAREDE, 4 px
+# para fora do fundo) com o perfil de luz das arestas do próprio render (medido na aresta do fundo,
+# lado a lado: a sombra larga em cima e à direita, o traço fino à esquerda e embaixo), mais suave
+SPA = {
+    "fora": (592, 434, 647, 489),          # contorno de fora do degrau (px inteiros do PDF)
+    # fator por lado, a partir da aresta para dentro do degrau
+    "perfis": {"cima": [0.93, 0.74, 0.65, 0.72], "baixo": [0.88, 0.95], "esquerda": [0.92, 0.88],
+               "direita": [0.69, 0.72, 0.76, 0.83, 0.90]},
+    "forca": 0.75,
 }
 
 
@@ -2328,6 +2344,25 @@ def torneiras_cozinha(out):
     return out
 
 
+def degrau_spa(out):
+    q = SPA
+    x0, y0, x1, y1 = q["fora"]
+    k = q["forca"]
+    F = np.ones((y1 - y0 + 1, x1 - x0 + 1), np.float32)
+    for d, f in enumerate(q["perfis"]["cima"]):
+        F[d, :] = np.minimum(F[d, :], 1 - k * (1 - f))
+    for d, f in enumerate(q["perfis"]["baixo"]):
+        F[-1 - d, :] = np.minimum(F[-1 - d, :], 1 - k * (1 - f))
+    for d, f in enumerate(q["perfis"]["esquerda"]):
+        F[:, d] = np.minimum(F[:, d], 1 - k * (1 - f))
+    for d, f in enumerate(q["perfis"]["direita"]):
+        F[:, -1 - d] = np.minimum(F[:, -1 - d], 1 - k * (1 - f))
+    reg = out[y0:y1 + 1, x0:x1 + 1].astype(np.float32)
+    out[y0:y1 + 1, x0:x1 + 1] = np.clip(reg * F[..., None], 0, 255).astype(np.uint8)
+    print("    spa: o contorno do degrau interno, com o perfil das arestas do render")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -2415,6 +2450,8 @@ def main():
     out = pisantes(out)
     print("[34] torneiras das cubas da cozinha")
     out = torneiras_cozinha(out)
+    print("[35] degrau interno do spa")
+    out = degrau_spa(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
