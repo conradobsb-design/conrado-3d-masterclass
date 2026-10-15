@@ -256,6 +256,7 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **Piscina (erros 18 e 19):** água da segunda imagem onde qualquer das duas tem água (B - R > 30), fechada e com emenda gaussiana; a borda é a do render.
 - **Escada da suíte master (erro 20):** `colar_retangulo` (retângulo da segunda imagem, tom ajustado num anel em volta, emenda gaussiana, paredes protegidas).
 - **Bancos ao pé das camas (erro 21):** `bancos_camas` da Casa C (o vão de tapete do lado do pé), com os bancos da Casa B.
+- **Cadeiras do escritório (erro 22):** cada cadeira a mais vira as mesmas linhas de piso limpo ao lado (réguas horizontais), colunas repetidas em espelho.
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado

@@ -123,6 +123,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    bancos do PDF. As camas voltam ao comprimento do PDF (a ponta, com a borda e a sombra, vem para o pé
    do PDF; o vão vira o tapete) e entram os bancos de duas almofadas do Térreo da Casa B, como na
    Casa C (mesmo código), no retângulo do PDF, com a sombra deles.
+27. Erro 22 da lista (escrivaninha do escritório): o motor fez 6 cadeiras; no PDF são 2 de visita à
+   esquerda (em cima e embaixo) e 1 de trabalho à direita (no meio). Saem a do meio à esquerda e as de
+   cima e de baixo à direita, com a sombra: as réguas do vinílico são horizontais, então cada trecho
+   vira as mesmas linhas de um trecho limpo do próprio escritório ao lado (colunas em espelho).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -499,6 +503,16 @@ BANCOS_D = {
     "modelos": BANCOS_C["modelos"],
     "lugares": [("suíte 1", "casal", (674.6, 802.3, 687.0, 852.0), False),
                 ("suíte 2", "casal", (1002.5, 802.3, 1014.8, 852.0), False)],
+}
+
+# escrivaninha do escritório (erro 22): o motor fez 6 cadeiras (3 de cada lado); no PDF são 2 de
+# visita à esquerda (em cima e embaixo) e 1 de trabalho à direita (no meio). Saem a do meio à
+# esquerda e as de cima e de baixo à direita, com a sombra: as réguas do vinílico são horizontais,
+# então cada trecho vira as mesmas linhas de um trecho limpo do próprio escritório ao lado (colunas
+# repetidas em espelho; a luz do piso é a mesma nas mesmas linhas, sem ajuste de tom)
+CADEIRAS_ESCRITORIO = {
+    "apagar": [((1209, 828, 1231, 846), (1190, 1206)), ((1256, 810, 1274, 829), (1274, 1283)),
+               ((1256, 845, 1274, 868), (1274, 1283))],
 }
 
 
@@ -1648,6 +1662,16 @@ def bancos_camas(out):
     return out
 
 
+def cadeiras_escritorio(out):
+    q = CADEIRAS_ESCRITORIO
+    for (x0, y0, x1, y1), (s0, s1) in q["apagar"]:
+        cols = np.arange(x1 - x0) % (2 * (s1 - s0))
+        cols = s0 + np.where(cols < s1 - s0, cols, 2 * (s1 - s0) - 1 - cols)
+        out[y0:y1, x0:x1] = out[y0:y1][:, cols]
+    print("    escritório: 3 cadeiras a mais fora (ficam as 2 de visita e a de trabalho do PDF)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1714,6 +1738,8 @@ def main():
     out = escada_master(out, f2, chapada)
     print("[25] erro 21: bancos ao pé das camas das suítes 1 e 2")
     out = bancos_camas(out)
+    print("[26] erro 22: cadeiras da escrivaninha do escritório")
+    out = cadeiras_escritorio(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
