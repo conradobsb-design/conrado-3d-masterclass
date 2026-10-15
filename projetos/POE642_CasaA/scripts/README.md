@@ -328,6 +328,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **Área de serviço (item 28):** `servico_bancada` dá veio ao armário do PDF e troca a bancada pelo quartzo tecido do tanque, com contorno fino.
 - **Cozinha (item 29):** `cozinha` cola as metades do inox da Casa D nos quadrados do PDF e a madeira do louceiro nos armários dos lados (`colar`), com contorno fino.
 - **Spa (item 30):** `degrau_spa`, o da Casa D com subpixel: o contorno de fora do degrau escurece por lado com o perfil das arestas do fundo.
+- **Vidros da piscina (item 31):** `vidros_piscina` desenha as duas folhas do PDF como os vidros finos da Casa D (vidro, linha central, contorno).
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado

@@ -132,6 +132,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     contorno de fora do degrau (ARQ_PAREDE, 4,3 px para fora do fundo), como na Casa D: com o perfil de
     luz das arestas do próprio render (medido na aresta do fundo, lado a lado: sombra larga em cima e
     à direita, traço fino à esquerda e embaixo), um pouco mais suave.
+31. Piscina, lado esquerdo (pedido do usuário): são duas folhas de vidro. As duas faixas brancas que
+    o motor fez ficam como as folhas do PDF (ARQ_PAREDE, 2,8 px cada, com o vão de água entre elas),
+    no desenho dos vidros finos da Casa D: vidro claro com a linha central fina e o contorno fino.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1555,6 +1558,29 @@ def degrau_spa(out):
     return out
 
 
+# vidros da piscina (item 31): as duas folhas do PDF no quadro do render e as cores dos vidros finos
+# do Subsolo da Casa D (vidro, linha central, contorno)
+VIDROS_PISCINA = {"folhas": [(342.4, 480.1, 345.2, 572.9), (359.5, 480.1, 362.3, 572.9)],
+                  "vidro": (222, 218, 210), "linha": (150, 152, 155), "larg_linha": 0.45,
+                  "contorno": (70, 72, 74), "larg_contorno": 0.5, "alfa_vidro": 0.85}
+
+
+def vidros_piscina(out):
+    q = VIDROS_PISCINA
+    forma = out.shape[:2]
+    for x0, y0, x1, y1 in q["folhas"]:
+        cantos = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+        a = poligono_aa(forma, cantos)[..., None] * q["alfa_vidro"]
+        out[:] = np.clip(out * (1 - a) + np.float32(q["vidro"]) * a, 0, 255).astype(np.uint8)
+        xc = (x0 + x1) / 2
+        a = linha_aa(forma, [(xc, y0), (xc, y1)], q["larg_linha"])[..., None]
+        out[:] = np.clip(out * (1 - a) + np.float32(q["linha"]) * a, 0, 255).astype(np.uint8)
+        a = linha_aa(forma, cantos, q["larg_contorno"], fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - a) + np.float32(q["contorno"]) * a, 0, 255).astype(np.uint8)
+    print(f"    piscina: {len(q['folhas'])} folhas de vidro do PDF no lado esquerdo")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1620,6 +1646,8 @@ def main():
     out = cozinha(out)
     print("[30] spa: degrau interno")
     out = degrau_spa(out)
+    print("[31] piscina: duas folhas de vidro")
+    out = vidros_piscina(out)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
