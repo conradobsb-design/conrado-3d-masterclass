@@ -246,6 +246,7 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **Arcos sobre o granito (erro 6):** `arcos_no_granito` da Casa C, com a cadeia da Casa D.
 - **Área descoberta (erro 7):** `apagar` (textura tecida normalizada vezes o campo de luz interpolado do entorno por convolução normalizada) tira o vaso; o X vem de `linhas_pdf`, mascarado pelo granito da base chapada (`granito_chapada`), que vale também na sombra funda.
 - **Tanques (erro 8):** `apagar` tira a cuba do motor; o recorte dos tanques da Casa B é girado 90° e colado sem os px escuros (a parede de lá).
+- **DCE (erro 9):** sombra da marcenaria tirada pelo campo de luz (blur anisotrópico, normalizado) sobre o nível do piso aceso por linha; piso por `textura`; cama (cobertor encurtado, girada) e criado-mudo do render da Casa C, com sombra curta à esquerda e embaixo.
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado

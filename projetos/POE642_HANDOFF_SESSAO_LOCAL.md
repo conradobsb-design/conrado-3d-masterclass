@@ -380,3 +380,4 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   12. erro 6 da lista: arcos das portas sobre o granito em cinza e traço fino, como na Casa C (banho gourmet, louceiro, despensa, serviço → garagem e porta dupla da área descoberta).
   13. erro 7 da lista: o vaso inventado na área descoberta sai (granito na luz do entorno) e entra o X tracejado do PDF, em cinza fino.
   14. erro 8 da lista: a cuba única do serviço vira os dois tanques da Casa B, girados (torneira do lado da parede).
+  15. erro 9 da lista: no DCE, a marcenaria em L vira piso (sem a sombra alta) e entram a cama de solteiro e o criado-mudo da Casa C, nas caixas do PDF.

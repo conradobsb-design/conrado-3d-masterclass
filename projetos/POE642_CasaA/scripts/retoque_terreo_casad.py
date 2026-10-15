@@ -71,6 +71,11 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
 14. Erro 8 da lista (tanques): o motor fez uma cuba só; no PDF são dois tanques. A cuba do motor sai
    (bancada tecida dos trechos limpos, na luz dos dois lados) e entram os dois tanques aprovados da
    Casa B (os mesmos da Casa C), girados para a torneira ficar do lado da parede, na mesma escala.
+15. Erro 9 da lista (DCE): o motor fez uma marcenaria em L no lugar da cama de solteiro e do
+   criado-mudo do PDF. A sombra alta que ela jogava no piso sai (campo de luz suave do piso dividido
+   pelo nível do piso aceso de cada linha; o arco da porta fica); o L vira vinílico tecido do próprio
+   quarto e entram a cama de solteiro e o criado-mudo do quarto externo da Casa C (do render dela), a
+   cama girada para a cabeceira ficar na parede de cima, nas caixas do PDF, com sombra curta.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -285,6 +290,25 @@ TANQUES = {
     "fonte_bancada": [(1195, 191, 1214, 208), (1243, 191, 1262, 208)],
     "fonte_tanques": (RAIZ / "POE642_CasaB/renders/POE642_CasaB_PH_Terreo_v4_retocado.png", (1147, 763, 1165, 804)),
     "em": (1197, 191),
+}
+
+# quarto de serviço (DCE, erro 9): o motor fez uma marcenaria em L no lugar da cama de solteiro e do
+# criado-mudo. A sombra alta que a marcenaria jogava no piso sai (campo de luz suave do piso,
+# dividido pelo nível do piso aceso de cada linha); o L vira piso (vinílico tecido do próprio quarto)
+# e entram a cama de solteiro e o criado-mudo usados no quarto externo da Casa C (do render dela),
+# a cama girada para a cabeceira ficar na parede de cima, nas caixas do PDF, com sombra curta
+DCE = {
+    "piso": (1294, 268, 1338, 330),           # piso do quarto com a sombra da marcenaria
+    "piso_aceso_x": (1297, 1307),             # colunas do piso aceso (referência de cada linha)
+    "sombra_x0": 1310,                        # a correção vale daqui para a direita
+    "L": [(1326, 330, 1369, 348), (1337, 268, 1369, 330)],     # marcenaria do motor -> piso
+    "fonte_piso": [(1296, 297, 1322, 329)],
+    "cama": (1338, 271, 1369, 334),
+    "criado": (1323, 272, 1334, 285),
+    "fonte": RAIZ / "POE642_CasaC/renders/POE642_CasaC_PH_Terreo_v3_render.webp",
+    "fonte_cama": (753, 189, 825, 222), "cortar_cobertor": (796, 807),
+    "fonte_criado": (733, 178, 747, 195),
+    "sombra": (0.84, 0.93),                   # 2 px à esquerda e embaixo de cada peça
 }
 
 
@@ -989,6 +1013,47 @@ def tanques(out):
     return out
 
 
+def dce(out, chapada):
+    q = DCE
+    x0, y0, x1, y1 = q["piso"]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    Y = reg.mean(axis=2)
+    piso = ~parede_grossa(chapada)[y0:y1, x0:x1] & (Y > 25)
+    w = piso.astype(np.float32)
+    campo = cv2.GaussianBlur(Y * w, (0, 0), sigmaX=1.5, sigmaY=5) / np.maximum(cv2.GaussianBlur(w, (0, 0), sigmaX=1.5, sigmaY=5), 1e-3)
+    a, b = q["piso_aceso_x"]
+    aceso = np.median(Y[:, a - x0:b - x0], axis=1)
+    aceso = cv2.GaussianBlur(aceso[:, None], (1, 0), sigmaX=0.1, sigmaY=4).ravel()
+    f = np.clip(campo / aceso[:, None], 0.2, 1.0)
+    f[:, :q["sombra_x0"] - x0] = 1.0
+    reg[piso] /= f[piso][:, None]
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+
+    ref = np.median(out[300:328, 1300:1336].reshape(-1, 3).astype(np.float32), axis=0)   # piso já corrigido
+    for lx0, ly0, lx1, ly1 in q["L"]:
+        tex = textura(out, q["fonte_piso"], ly1 - ly0, lx1 - lx0, p=12)
+        alvo = out[ly0:ly1, lx0:lx1]
+        m = ~parede_grossa(chapada)[ly0:ly1, lx0:lx1]
+        alvo[m] = np.clip(tex * ref, 0, 255).astype(np.uint8)[m]
+
+    img = cv2.imread(str(q["fonte"]))
+    fx0, fy0, fx1, fy1 = q["fonte_cama"]
+    c0, c1 = q["cortar_cobertor"]
+    cama = np.concatenate([img[fy0:fy1, fx0:c0], img[fy0:fy1, c1:fx1]], axis=1)
+    cama = cv2.rotate(cama, cv2.ROTATE_90_CLOCKWISE)                 # cabeceira (à esquerda) em cima
+    for (bx0, by0, bx1, by1), peca in ((q["cama"], cama), (q["criado"], None)):
+        if peca is None:
+            sx0, sy0, sx1, sy1 = q["fonte_criado"]
+            peca = img[sy0:sy1, sx0:sx1]
+        out[by0:by1, bx0:bx1] = cv2.resize(peca, (bx1 - bx0, by1 - by0), interpolation=cv2.INTER_AREA)
+        for k, s in enumerate(q["sombra"]):                         # sombra curta: esquerda e embaixo
+            out[by0 + 2:by1 + 1, bx0 - 1 - k] = np.clip(out[by0 + 2:by1 + 1, bx0 - 1 - k] * s, 0, 255).astype(np.uint8)
+            if by1 + k < 348:
+                out[by1 + k, bx0 - 1:bx1 - 1] = np.clip(out[by1 + k, bx0 - 1:bx1 - 1] * s, 0, 255).astype(np.uint8)
+    print("    DCE: marcenaria do motor vira piso; cama de solteiro e criado-mudo do PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1031,6 +1096,8 @@ def main():
     out = area_descoberta(out, A, chapada)
     print("[14] erro 8: dois tanques")
     out = tanques(out)
+    print("[15] erro 9: cama e criado-mudo do DCE")
+    out = dce(out, chapada)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
