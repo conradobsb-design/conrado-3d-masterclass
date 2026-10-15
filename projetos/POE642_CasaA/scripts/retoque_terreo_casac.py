@@ -17,6 +17,14 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    As portas de correr de vidro (folhas em dois planos dos lados, embaixo e em cima do jardim 2)
    vêm da base alinhada, que coincide com o render nos montantes; entre as folhas, piso do lado de
    fora e floreira do lado de dentro.
+4. Cozinha: o motor fez as bancadas e a ilha no granito do piso, com uma cuba só. Bancadas e ilha
+   ficam no quartzo claro da bancada gourmet do próprio render (image quilting), com o cooktop e as
+   banquetas como estão; os dois armários altos (retângulo com diagonal no PDF: o de baixo à
+   esquerda e o junto à geladeira) viram o tampo do armário em marcenaria areia, tecida do painel
+   do quarto, com contorno nas faces livres e sem a diagonal, como os armários das Casas A e B;
+   entre a geladeira e o armário volta o vão de piso do PDF; as duas
+   cubas do PDF são desenhadas como as do lavatório gourmet da Casa B, com a torneira do lado da
+   parede.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -24,6 +32,7 @@ Uso:
   python retoque_terreo_casac.py RENDER.webp --saida PASTA --nome NOME
 """
 import argparse
+import sys
 from pathlib import Path
 
 import cv2
@@ -31,6 +40,9 @@ import numpy as np
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
+sys.path.insert(0, str(AQUI))
+from retoque_terreo_casab import cuba  # noqa: E402
+from texturizar_base import quilting  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v3_texturas_16x9.png"
 BASE_CHAPADA = RAIZ / "POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v2_16x9.png"   # cores exatas da legenda
@@ -66,6 +78,26 @@ JARDINS = {
         ("embaixo", (919, 609, 1060, 624), (0, -15), "y", 614),
         ("em cima do jardim 2", (984, 416, 1057, 428), (0, 12), "y", 424),
     ],
+}
+# cozinha (geometria medida no render, conferida com o PDF levado ao render)
+COZINHA = {
+    # bancada de cima (das cubas), bancada da esquerda, ilha e bancada de baixo à direita
+    "quartzo": [(1131, 131, 1283, 150), (1131, 150, 1147, 238), (1176, 188, 1213, 286),
+                (1265, 281, 1283, 340)],
+    "cooktop": (1192, 207, 1212, 239),          # fica, com o contorno escuro em volta
+    # armários altos (o de baixo à esquerda e o junto à geladeira) e as faces livres (as que não
+    # encostam em parede), onde vai o contorno
+    "armarios": [((1131, 238, 1147, 323), ("cima", "direita")),
+                 ((1265, 257, 1283, 281), ("cima", "esquerda", "baixo"))],
+    # vão de piso entre a geladeira e o armário (no render era bancada): piso de 22 px à esquerda,
+    # com a sombra junto ao armário igual à da bancada (fator por linha, até o armário), só da
+    # coluna da sombra lateral da bancada para a direita
+    "vao": ((1258, 251, 1283, 257), -22, (0.70, 0.59, 0.51), 1262),
+    "cubas": [(1177, 135, 1197, 149), (1202, 135, 1222, 149)],
+    # quartzo limpo da bancada gourmet (os dois lados do cooktop e o braço da esquerda)
+    "fonte_quartzo": [(646, 566, 714, 596), (752, 566, 812, 596), (647, 507, 666, 560)],
+    "fonte_areia": (690, 281, 744, 290),         # painel laqueado do quarto (liso)
+    "contorno": 0.75,                            # face livre do armário (1 px)
 }
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
@@ -179,6 +211,54 @@ def portas_de_vidro(out, base, chapada):
     return out
 
 
+def cozinha(out):
+    c = COZINHA
+    fontes = []
+    for x0, y0, x1, y1 in c["fonte_quartzo"]:
+        t = out[y0:y1, x0:x1].astype(np.float32)
+        fontes += [np.ascontiguousarray(v) for v in (t, t[:, ::-1], t[::-1, :], t[::-1, ::-1])]
+    bx0, by0 = min(r[0] for r in c["quartzo"]), min(r[1] for r in c["quartzo"])
+    bx1, by1 = max(r[2] for r in c["quartzo"]), max(r[3] for r in c["quartzo"])
+    tex = quilting(fontes, by1 - by0, bx1 - bx0, p=16, sobra=4, candidatos=600)
+    m = np.zeros((by1 - by0, bx1 - bx0), bool)
+    for x0, y0, x1, y1 in c["quartzo"]:
+        m[y0 - by0:y1 - by0, x0 - bx0:x1 - bx0] = True
+    cx0, cy0, cx1, cy1 = c["cooktop"]
+    m[cy0 - by0:cy1 - by0, cx0 - bx0:cx1 - bx0] = False
+    reg = out[by0:by1, bx0:bx1]
+    reg[m] = np.clip(tex[m], 0, 255).astype(np.uint8)
+    print(f"    quartzo: {int(m.sum())} px de bancada e ilha")
+
+    (x0, y0, x1, y1), dx, sombra, xs = c["vao"]
+    out[y0:y1, x0:x1] = out[y0:y1, x0 + dx:x1 + dx]
+    for i, f in enumerate(sombra):
+        y = y1 - len(sombra) + i
+        out[y, xs:x1] = np.clip(out[y, xs:x1].astype(np.float32) * f, 0, 255).astype(np.uint8)
+    print(f"    vão de piso entre a geladeira e o armário: {(x1 - x0) * (y1 - y0)} px")
+
+    fx0, fy0, fx1, fy1 = c["fonte_areia"]
+    t = out[fy0:fy1, fx0:fx1]
+    lado = {"esquerda": (slice(None), 0), "direita": (slice(None), -1), "cima": (0, slice(None)),
+            "baixo": (-1, slice(None))}
+    for (x0, y0, x1, y1), faces in c["armarios"]:
+        h, w = y1 - y0, x1 - x0
+        lin = np.concatenate([t, t[::-1]] * (h // (2 * t.shape[0]) + 1), axis=0)[:h]
+        reg = np.concatenate([lin, lin[:, ::-1]] * (w // (2 * t.shape[1]) + 1), axis=1)[:, :w].astype(np.float32)
+        borda = np.zeros((h, w), bool)
+        for face in faces:
+            borda[lado[face]] = True
+        reg[borda] *= c["contorno"]
+        out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+        print(f"    armário alto {w}x{h} px, contorno em {', '.join(faces)}")
+
+    for x0, y0, x1, y1 in c["cubas"]:                      # torneira do lado da parede (em cima)
+        reg = np.ascontiguousarray(out[y0:y1, x0:x1][::-1])
+        reg = cuba(reg, (0, 0, x1 - x0, y1 - y0))
+        out[y0:y1, x0:x1] = reg[::-1]
+    print(f"    {len(c['cubas'])} cubas")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -196,12 +276,14 @@ def main():
     print("[3] jardins de inverno")
     out = jardins_de_inverno(out)
     out = portas_de_vidro(out, base, chapada)
+    print("[4] cozinha")
+    out = cozinha(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[4] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[5] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
