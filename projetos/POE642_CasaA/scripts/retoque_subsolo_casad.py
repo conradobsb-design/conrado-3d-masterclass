@@ -48,6 +48,11 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
     (dois trilhos), que o render fez como cápsulas cinza de ~10 px, são refeitas na espessura do PDF
     (3,4 px): vidro claro com a linha central fina, montantes de alumínio nas pontas e contorno fino;
     o vão (a faixa branca entre as folhas e o vinílico) vira soleira de Bege Bahia, como o pátio.
+18. Vidro da sauna e janela alta da academia (pedido do usuário: finos como as portas): as barras
+    grossas do render saem; o vidro fixo é refeito na espessura do PDF (vidro claro, linha central,
+    caixilhos de alumínio nas pontas e contorno fino), o peitoril e a soleira em Bege Bahia, os
+    retornos da parede em preto e as faces da parede em traço fino e claro, como no PDF; na janela, a
+    faixa de vinílico que a barra cobria volta.
 12. Pátio: a parede tracejada dupla de fora (à esquerda, embaixo e no alto), que o motor apagou ou
     cortou, volta: os traços do PDF (ARQ_PAREDE, fora da planta) desenhados no quadro comum.
 
@@ -273,6 +278,26 @@ PORTAS_VIDRO = {
     "vidro": (222, 218, 210), "aluminio": (150, 153, 156), "linha": (150, 152, 155),
     "contorno": (70, 72, 74), "larg_contorno": 0.5, "larg_linha": 0.45,
 }
+
+# vidros fixos (px do render, do PDF, layer ARQ_PAREDE): vidro, linha central, caixilhos, retornos de
+# parede, faces da parede e o que volta a ser piso (Bege Bahia; na janela, também o vinílico)
+VIDROS_FIXOS = [
+    {"nome": "janela alta da academia", "janela": (600, 490, 698, 524),
+     "bege": (604.9, 491.5, 694.2, 516.4), "luz": (612, 470, 690, 489),
+     "vinil": (606, 517, 693, 522), "fontes_vinil": [(615, 530, 690, 560)],
+     "paredes": [(604.9, 499.5, 607.5, 505.4), (604.9, 509.7, 607.5, 516.4),
+                 (691.6, 499.6, 694.2, 505.5), (691.6, 509.7, 694.2, 516.4)],
+     "caixilhos": [(604.9, 505.4, 608.7, 509.7), (690.3, 505.5, 694.2, 509.7)],
+     "vidro": (608.7, 505.4, 690.3, 509.7), "centro": ((608.7, 507.6), (690.3, 507.6)),
+     "faces": [((607.5, 499.5), (691.6, 499.5)), ((607.5, 516.4), (691.6, 516.4))]},
+    {"nome": "vidro da sauna", "janela": (574, 884, 599, 1078),
+     "bege": (576.0, 887.9, 597.0, 1073.6), "luz": (556, 900, 575, 1060),
+     "paredes": [(587.1, 887.9, 593.9, 890.4), (587.1, 1071.1, 593.9, 1073.6)],
+     "caixilhos": [(582.9, 887.9, 587.1, 890.9), (582.9, 1070.7, 587.1, 1073.6)],
+     "vidro": (582.9, 890.9, 587.1, 1070.7), "centro": ((585.0, 890.9), (585.0, 1070.7)),
+     "faces": [((581.2, 887.9), (581.2, 1073.6)), ((593.9, 890.4), (593.9, 1071.1))]},
+]
+FACE = {"cor": (120, 122, 124), "larg": 0.45}
 
 
 def apagar_largo(out, ret, mascara, fontes, sigma=4.0, borda=0.8, lum_min=None, lum_max=None, escuros=False):
@@ -762,6 +787,64 @@ def portas_vidro(out):
     return out
 
 
+def vidros_fixos(out):
+    pv = PORTAS_VIDRO
+    for q in VIDROS_FIXOS:
+        if q.get("vinil"):
+            vx0, vy0, vx1, vy1 = q["vinil"]
+            m = np.zeros((vy1 - vy0 + 16, vx1 - vx0 + 16), bool)
+            m[8:-8, 8:-8] = True
+            out = apagar_largo(out, (vx0 - 8, vy0 - 8, vx1 + 8, vy1 + 8), m, q["fontes_vinil"], sigma=2.0, borda=0.0,
+                               lum_min=80, lum_max=200, escuros=True)
+        x0, y0, x1, y1 = q["janela"]
+        h, w = y1 - y0, x1 - x0
+        lx0, ly0, lx1, ly1 = q["luz"]
+        p = out[ly0:ly1, lx0:lx1].reshape(-1, 3).astype(np.float32)
+        luz = np.median(p[p.mean(axis=1) > 170], axis=0)
+        viz = out[y0:y1, x0:x1].reshape(-1, 3)
+        preto = np.median(viz[viz.astype(np.float32).mean(axis=1) <= 5], axis=0)
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        bege = textura(out, SAUNA["fontes"], h, w, p=12) * luz[None, None, :]
+
+        def ss(v, o):
+            return round((v - o) * SS)
+
+        def mret(r, esp=-1):
+            m = np.zeros((h * SS, w * SS), np.uint8)
+            cv2.rectangle(m, (ss(r[0], x0), ss(r[1], y0)), (ss(r[2], x0), ss(r[3], y0)), 255, esp)
+            return m
+
+        def mlin(a, b, larg):
+            m = np.zeros((h * SS, w * SS), np.uint8)
+            cv2.line(m, (ss(a[0], x0), ss(a[1], y0)), (ss(b[0], x0), ss(b[1], y0)), 255, max(1, round(larg * SS)))
+            return m
+
+        def red(m):
+            return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+
+        def pintar(m, cor):
+            nonlocal reg
+            a = red(m)
+            reg = reg * (1 - a) + np.asarray(cor, np.float32) * a
+
+        a = red(mret(q["bege"]))
+        reg = reg * (1 - a) + bege * a                               # peitoril / soleira e o piso em volta
+        for r in q["paredes"]:
+            pintar(mret(r), preto)
+        for a_, b_ in q["faces"]:
+            pintar(mlin(a_, b_, FACE["larg"]), FACE["cor"])
+        for r in q["caixilhos"]:
+            pintar(mret(r), pv["aluminio"])
+        pintar(mret(q["vidro"]), pv["vidro"])
+        pintar(mlin(*q["centro"], pv["larg_linha"]), pv["linha"])
+        borda = max(1, round(pv["larg_contorno"] * SS))
+        for r in q["caixilhos"] + [q["vidro"]]:
+            pintar(mret(r, borda), pv["contorno"])
+        out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+        print(f"    {q['nome']}: vidro fino na espessura do PDF")
+    return out
+
+
 def no_quadro(out, A):
     """O render retocado vai para o quadro comum (a base 16:9 na largura das pranchas) pelo inverso da
     cadeia base -> render (a base reduzida ao tamanho do render, não uniforme, e o afim A), com 2 x
@@ -861,6 +944,8 @@ def main():
     out = vasos(out, alinhar_base(orig))
     print("[17] portas de vidro de acesso à academia")
     out = portas_vidro(out)
+    print("[18] vidro da sauna e janela alta da academia")
+    out = vidros_fixos(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
