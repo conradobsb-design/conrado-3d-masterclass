@@ -76,6 +76,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    pelo nível do piso aceso de cada linha; o arco da porta fica); o L vira vinílico tecido do próprio
    quarto e entram a cama de solteiro e o criado-mudo do quarto externo da Casa C (do render dela), a
    cama girada para a cabeceira ficar na parede de cima, nas caixas do PDF, com sombra curta.
+16. Erros 10 e 11 da lista (cooktops): no PDF os dois têm 5 bocas, 2 em cima (nos cantos) e 3
+   embaixo; a ilha da cozinha ficou sem cooktop e o da gourmet saiu com 4 bocas nos cantos e uma no
+   meio. Os dois viram o cooktop da gourmet da Casa C já corrigido (2 em cima e 3 embaixo), levado à
+   caixa do PDF; o da gourmet do motor sai antes (quartzo tecido da própria bancada, na luz dela).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -309,6 +313,17 @@ DCE = {
     "fonte_cama": (753, 189, 825, 222), "cortar_cobertor": (796, 807),
     "fonte_criado": (733, 178, 747, 195),
     "sombra": (0.84, 0.93),                   # 2 px à esquerda e embaixo de cada peça
+}
+
+# cooktops (erros 10 e 11): no PDF os dois têm 5 bocas, 2 em cima (nos cantos) e 3 embaixo. A ilha
+# da cozinha ficou sem cooktop e o da gourmet saiu com 4 bocas nos cantos e uma no meio. Os dois
+# viram o cooktop da gourmet da Casa C já corrigido (exatamente 2 em cima e 3 embaixo), levado à
+# caixa do PDF; o da gourmet do motor sai antes (quartzo tecido da própria bancada)
+COOKTOPS_D = {
+    "fonte": (RAIZ / "POE642_CasaC/renders/POE642_CasaC_PH_Terreo_v3_retocado.png", (718, 565, 747, 583)),
+    "gourmet_motor": (795, 317, 828, 338),
+    "fonte_quartzo": [(762, 320, 792, 348), (832, 320, 862, 348)],
+    "caixas": [("ilha da cozinha", (1010, 249, 1038, 264)), ("gourmet", (798, 318, 825, 334))],
 }
 
 
@@ -1054,6 +1069,23 @@ def dce(out, chapada):
     return out
 
 
+def cooktops(out):
+    q = COOKTOPS_D
+    x0, y0, x1, y1 = q["gourmet_motor"]
+    pad = 10
+    ret = (x0 - pad, y0, x1 + pad, y1 + pad)          # em cima já é a borda da bancada: a luz vem só dela
+    m = np.zeros((ret[3] - ret[1], ret[2] - ret[0]), bool)
+    m[:y1 - y0, pad:pad + x1 - x0] = True
+    out = apagar(out, ret, m, q["fonte_quartzo"], sigma=6.0, borda=0)
+    img = cv2.imread(str(q["fonte"][0]))
+    a, b, c, d = q["fonte"][1]
+    s = img[b:d, a:c]
+    for nome, (cx0, cy0, cx1, cy1) in q["caixas"]:
+        out[cy0:cy1, cx0:cx1] = cv2.resize(s, (cx1 - cx0, cy1 - cy0), interpolation=cv2.INTER_AREA)
+        print(f"    cooktop da {nome}: 5 bocas (2 em cima, 3 embaixo) em {cx1 - cx0}x{cy1 - cy0} px")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1098,6 +1130,8 @@ def main():
     out = tanques(out)
     print("[15] erro 9: cama e criado-mudo do DCE")
     out = dce(out, chapada)
+    print("[16] erros 10 e 11: cooktops da ilha e da gourmet")
+    out = cooktops(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
