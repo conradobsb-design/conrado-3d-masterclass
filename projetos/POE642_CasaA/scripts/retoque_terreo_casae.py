@@ -36,6 +36,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
    tanque duplo), que o motor juntou num bloco de madeira, voltam como as máquinas em inox do Térreo
    da Casa D aprovado (cada uma, a metade do par de lá, no quadrado do PDF), com sombra curta; o resto
    do bloco vira o granito tecido do piso.
+9. Área de serviço descoberta: o X tracejado do PDF (layer DOC_LINHAS E PROJEÇÕES: as duas
+   diagonais e a linha de baixo), que o motor apagou, volta como a projeção sobre a garagem e a área
+   descoberta da Casa D: cinza e traço fino, só sobre o granito.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -477,6 +480,44 @@ def maquinas(out):
     return out
 
 
+# X tracejado da área de serviço descoberta (item 9): os traços da DOC_LINHAS E PROJEÇÕES na janela,
+# no estilo da projeção da garagem da Casa D (cinza claro, traço fino, só sobre o granito)
+X_DESCOBERTA = {
+    "janela": (1012, 216, 1160, 284), "layer": "DOC_LINHAS E PROJEÇÕES",
+    "cor": (160, 161, 160), "larg": 0.45, "forca": 0.7,
+    "granito_lum": (35.0, 115.0),
+}
+
+
+def x_descoberta(out, A):
+    q = X_DESCOBERTA
+    x0, y0, x1, y1 = q["janela"]
+    h, w = y1 - y0, x1 - x0
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+    pts = []
+    for d in pg.get_drawings():
+        if d.get("layer") != q["layer"] or d["type"] != "s":
+            continue
+        for it in d["items"]:
+            if it[0] == "l":
+                a, b = p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)
+                if all(x0 <= u <= x1 and y0 <= v <= y1 for u, v in (a, b)):
+                    pts.append((a, b))
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    for a, b in pts:
+        cv2.line(m, [int(round((a[0] - x0) * SS)), int(round((a[1] - y0) * SS))],
+                 [int(round((b[0] - x0) * SS)), int(round((b[1] - y0) * SS))], 255,
+                 max(1, int(round(q["larg"] * SS))), cv2.LINE_AA)
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    Y = reg.mean(axis=2)
+    lo, hi = q["granito_lum"]
+    gran = ((Y > lo) & (Y < hi) & (reg[..., 2] > reg[..., 0])).astype(np.float32)
+    a = (cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * gran * q["forca"])[..., None]
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + np.float32(q["cor"]) * a, 0, 255).astype(np.uint8)
+    print(f"    área de serviço descoberta: X tracejado do PDF ({len(pts)} traços)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -501,6 +542,8 @@ def main():
     out = vaso_cpd(out)
     print("[8] área de serviço: as duas máquinas")
     out = maquinas(out)
+    print("[9] área de serviço descoberta: X tracejado")
+    out = x_descoberta(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
