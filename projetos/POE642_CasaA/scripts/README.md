@@ -271,6 +271,7 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **Torneiras da cozinha:** `torneiras_cozinha` (canopla, alavanca, bica e válvula em 8x).
 - **Degrau do spa:** `degrau_spa` (fator por lado medido na aresta do fundo, aplicado ao contorno de fora).
 - **Paisagismo:** `paisagismo` (trecho da touceira espelhado, máscara pela densidade da folhagem, contorno ondulado nos lados cortados, só sobre a grama).
+- **Torneira lateral e chuveiro do WC DCE:** `lavatorio_gourmet` (base, bica, sombra e contorno da cuba em 8x) e `chuveiro_dce` (`apagar` + `desenhar_chuveiro`).
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado

@@ -184,6 +184,11 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    touceiras dos cantos do lote do próprio render, cada um espelhado para a borda densa (a que encostava
    no limite do lote) ficar junto ao deck. O contorno segue a densidade da folhagem; nos lados em que o
    trecho corta a touceira, o contorno é ondulado e suave; só a grama é coberta (as pedras ficam).
+43. Lavatório junto ao banho gourmet (pedido do usuário): a torneira lateral do PDF (base redonda à
+   esquerda da cuba e a bica entrando nela) entra em cromado, com contorno mais escuro e sombra curta
+   para aparecer sobre a bancada branca; o contorno da cuba ganha um traço cinza fino.
+44. WC DCE (pergunta do usuário): o disco branco do motor é o chuveiro do PDF (ducha quadrada com braço
+   até a parede da direita). O disco sai e entra o chuveiro no padrão dos outros.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -734,6 +739,29 @@ PAISAGISMO = {
                   ((197, 918, 339, 1000), True, (256, 542), ("esquerda", "cima"))],
     "limiar": 2.2, "sigma_densidade": 4.0, "densidade": 0.3,
     "onda": (9.0, 9.0), "suave": 5.0, "semente": 7,
+}
+
+# lavatório junto ao banho gourmet (pedido do usuário): a torneira lateral do PDF (ARQ_LOUÇAS E
+# METAIS: base redonda à esquerda da cuba e a bica entrando nela) faltava. Entra em cromado, em 8x; o
+# contorno da cuba (ARQ_BANCADAS), que o render deixou apagado, ganha um traço cinza fino discreto
+LAVATORIO_GOURMET = {
+    # sobre a bancada branca o cromado claro some: contorno mais escuro e sombra curta, como as
+    # torneiras dos renders aprovados
+    "base": ((826.25, 232.45), 1.1), "bica": (826.6, 831.0, 232.45), "larg_bica": 1.1,
+    "escuro": (92, 96, 100), "sombra": (0.6, 0.6, 0.8, 0.35),
+    "cuba": (828.1, 226.0, 850.1, 238.7), "traco": (140, 142, 144), "larg_traco": 0.4, "forca_traco": 0.6,
+    "janela": (822, 223, 854, 242),
+}
+
+# chuveiro do WC DCE (pergunta do usuário): é o chuveiro do PDF (ducha quadrada com braço até a parede
+# da direita); o motor fez um disco branco. O disco sai (o piso do próprio WC, na luz do entorno) e
+# entra o chuveiro no padrão dos outros (ducha, braço cromado e canopla, com sombra curta)
+CHUVEIRO_DCE = {
+    "apagar": (1276, 331, 1287, 342),
+    "fonte_piso": [(1246, 324, 1270, 345)],
+    "chuveiro": {"nome": "WC DCE", "ducha": (1275.1, 331.1, 1281.2, 337.2), "braco": (1278.2, 1289.6, 334.15),
+                 "canopla": (1288.9, 333.2, 1290.1, 335.1)},
+    "janela": (1270, 326, 1291, 345),
 }
 
 
@@ -2418,6 +2446,63 @@ def paisagismo(out, orig):
     return out
 
 
+def lavatorio_gourmet(out):
+    q = LAVATORIO_GOURMET
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+
+    def px(v, o=0.0):
+        return int(round((v - o) * SS))
+
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+
+    def pintar(mascara, cor, forca=1.0):
+        nonlocal reg
+        a = cv2.resize(mascara.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None] * forca
+        reg = reg * (1 - a) + np.array(cor, np.float32) * a
+
+    cx0, cy0, cx1, cy1 = q["cuba"]
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(m, (px(cx0, wx0), px(cy0, wy0)), (px(cx1, wx0), px(cy1, wy0)), 255, max(1, px(q["larg_traco"])))
+    pintar(m, q["traco"], q["forca_traco"])
+    bx0, bx1, by = q["bica"]
+    (ox, oy), r = q["base"]
+    sdx, sdy, ssig, sforca = q["sombra"]
+    m = np.zeros_like(m)
+    cv2.line(m, (px(bx0 + sdx, wx0), px(by + sdy, wy0)), (px(bx1 + sdx, wx0), px(by + sdy, wy0)), 255, px(q["larg_bica"]))
+    cv2.circle(m, (px(ox + sdx, wx0), px(oy + sdy, wy0)), px(r), 255, -1)
+    sb = cv2.resize(cv2.GaussianBlur(m.astype(np.float32), (0, 0), ssig * SS) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    reg *= (1 - sforca * sb)[..., None]
+    m = np.zeros_like(m)
+    cv2.line(m, (px(bx0, wx0), px(by, wy0)), (px(bx1, wx0), px(by, wy0)), 255, px(q["larg_bica"]))
+    pintar(m, q["escuro"])
+    m = np.zeros_like(m)
+    cv2.line(m, (px(bx0, wx0), px(by - 0.15, wy0)), (px(bx1, wx0), px(by - 0.15, wy0)), 255, max(1, px(0.35)))
+    pintar(m, CROMO_CLARO)
+    m = np.zeros_like(m)
+    cv2.circle(m, (px(ox, wx0), px(oy, wy0)), px(r), 255, -1)
+    pintar(m, q["escuro"])
+    m = np.zeros_like(m)
+    cv2.circle(m, (px(ox, wx0), px(oy, wy0)), px(r - 0.35), 255, -1)
+    pintar(m, CROMO)
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    lavatório junto ao banho gourmet: torneira lateral do PDF")
+    return out
+
+
+def chuveiro_dce(out):
+    q = CHUVEIRO_DCE
+    x0, y0, x1, y1 = q["apagar"]
+    pad = 4
+    ret = (x0 - pad, y0 - pad, x1, y1 + pad)
+    m = np.zeros((ret[3] - ret[1], ret[2] - ret[0]), bool)
+    m[pad:-pad, pad:] = True
+    out = apagar(out, ret, m, q["fonte_piso"], sigma=4.0, borda=0.8, lum_min=110)
+    out = desenhar_chuveiro(out, q["janela"], q["chuveiro"])
+    print("    WC DCE: disco do motor fora; chuveiro do PDF (ducha, braço e canopla)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -2509,6 +2594,10 @@ def main():
     out = degrau_spa(out)
     print("[36] paisagismo junto à escada da piscina")
     out = paisagismo(out, orig)
+    print("[37] torneira lateral do lavatório junto ao banho gourmet")
+    out = lavatorio_gourmet(out)
+    print("[38] chuveiro do WC DCE")
+    out = chuveiro_dce(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

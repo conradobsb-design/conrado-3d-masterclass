@@ -408,3 +408,5 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   40. torneiras do PDF nas duas cubas da cozinha (cromado, no eixo de cada cuba).
   41. spa com o segundo contorno interno (o degrau em volta do fundo), no perfil das arestas do render.
   42. paisagismo: canteiros com as touceiras do render nos dois gramados junto à escada da piscina (acima e abaixo dela).
+  43. lavatório junto ao banho gourmet: torneira lateral do PDF, legível sobre a bancada branca, e o contorno da cuba.
+  44. WC DCE: o disco branco do motor vira o chuveiro do PDF (ducha, braço e canopla).
