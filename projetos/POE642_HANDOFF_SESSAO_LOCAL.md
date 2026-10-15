@@ -405,3 +405,4 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   37. louceiro e despensa: os armários em L do PDF voltam (areia, com veio, sem sombra de móvel baixo).
   38. veios de madeira no armário e no criado-mudo do DCE (veio da escrivaninha da segunda imagem).
   39. pisantes de cima com o Bege Bahia do deck (veios suaves); a fileira junto à garagem já tinha veios.
+  40. torneiras do PDF nas duas cubas da cozinha (cromado, no eixo de cada cuba).

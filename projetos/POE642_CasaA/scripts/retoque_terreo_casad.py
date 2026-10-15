@@ -173,6 +173,9 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    do deck da piscina do próprio render (Bege Bahia com veio diagonal suave), tecida (image quilting), no
    tom da pedra puxado para o do deck e com a luz dela (sombra do muro); a borda fica. A fileira junto à
    garagem já tinha os veios e fica como está.
+40. Torneiras das cubas da cozinha (pedido do usuário): o motor fez as cubas sem torneira. Entram as do
+   PDF (canopla e alavanca na parede, bica até o meio da cuba e a válvula), em cromado, no eixo de cada
+   cuba do render.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -684,6 +687,19 @@ PISANTES = {
     # (a fileira junto à garagem já tem os veios do motor e fica)
     "fonte": [(565, 190, 698, 255)],                      # deck limpo acima da piscina (veio diagonal)
     "sigma_luz": 4.0, "borda": 1,
+}
+
+# torneiras das cubas da cozinha (pedido do usuário): o motor fez as cubas sem a torneira (só um traço
+# na da esquerda). Entram as do PDF (ARQ_LOUÇAS E METAIS): canopla e alavanca na parede, bica até o
+# meio da cuba e a válvula, em cromado, em 8x
+TORNEIRAS_COZINHA = {
+    # no eixo de cada cuba do render (o motor as fez um pouco mais estreitas que as do PDF), com a
+    # geometria da torneira do PDF
+    "torneiras": [{"canopla": (1008.2, 191.6, 1009.9, 193.2), "alavanca": (1010.1, 191.9, 1011.0, 192.9),
+                   "bica": (1009.05, 192.3, 197.9), "valvula": (1009.05, 198.45)},
+                  {"canopla": (1025.1, 191.6, 1026.8, 193.2), "alavanca": (1027.0, 191.9, 1027.9, 192.9),
+                   "bica": (1025.95, 192.3, 197.9), "valvula": (1025.95, 198.45)}],
+    "janela": (1000, 188, 1034, 204),
 }
 
 
@@ -2269,6 +2285,49 @@ def pisantes(out):
     return out
 
 
+def torneiras_cozinha(out):
+    q = TORNEIRAS_COZINHA
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+
+    def px(v, o=0.0):
+        return int(round((v - o) * SS))
+
+    cor = np.zeros((h * SS, w * SS, 3), np.float32)
+    alfa = np.zeros((h * SS, w * SS), np.float32)
+
+    def pinta(f, c):
+        cor[f > 0] = c
+        alfa[f > 0] = 1
+
+    for t_ in q["torneiras"]:
+        vx, vy = t_["valvula"]
+        f = np.zeros(alfa.shape, np.uint8)
+        cv2.circle(f, (px(vx, wx0), px(vy, wy0)), px(0.9), 255, -1)
+        pinta(f, CROMO_ESCURO)
+        f = np.zeros(alfa.shape, np.uint8)
+        cv2.circle(f, (px(vx, wx0), px(vy, wy0)), px(0.5), 255, -1)
+        pinta(f, CROMO_CLARO)
+        bx, by0, by1 = t_["bica"]
+        f = np.zeros(alfa.shape, np.uint8)
+        cv2.line(f, (px(bx, wx0), px(by0, wy0)), (px(bx, wx0), px(by1, wy0)), 255, px(0.75))
+        pinta(f, CROMO_ESCURO)
+        f = np.zeros(alfa.shape, np.uint8)
+        cv2.line(f, (px(bx - 0.1, wx0), px(by0, wy0)), (px(bx - 0.1, wx0), px(by1, wy0)), 255, px(0.35))
+        pinta(f, CROMO_CLARO)
+        for k in ("canopla", "alavanca"):
+            x0, y0, x1, y1 = t_[k]
+            f = np.zeros(alfa.shape, np.uint8)
+            cv2.rectangle(f, (px(x0, wx0), px(y0, wy0)), (px(x1, wx0), px(y1, wy0)), 255, -1)
+            pinta(f, CROMO)
+    a = cv2.resize(alfa, (w, h), interpolation=cv2.INTER_AREA)
+    c = cv2.resize(cor * alfa[..., None], (w, h), interpolation=cv2.INTER_AREA) / np.maximum(a, 1e-6)[..., None]
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    out[wy0:wy1, wx0:wx1] = np.clip(reg * (1 - a[..., None]) + c * a[..., None], 0, 255).astype(np.uint8)
+    print("    cozinha: torneiras do PDF nas duas cubas")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -2354,6 +2413,8 @@ def main():
     out = veios_dce(out, f2)
     print("[33] Bege Bahia dos pisantes")
     out = pisantes(out)
+    print("[34] torneiras das cubas da cozinha")
+    out = torneiras_cozinha(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

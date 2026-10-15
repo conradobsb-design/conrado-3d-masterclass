@@ -268,6 +268,7 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **Armários em L:** `armarios_L` (polígono do PDF por `mascara_pdf`, areia com o veio emprestado, contorno nas faces livres).
 - **Veios do DCE:** `veios_dce` (luminância da fonte sobre ela mesma desfocada, realçada, girada no comprimento da peça, vezes o tom desfocado da peça).
 - **Pisantes:** `pisantes` (quilting do deck limpo, no tom da pedra e com a luz desfocada dela).
+- **Torneiras da cozinha:** `torneiras_cozinha` (canopla, alavanca, bica e válvula em 8x).
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado
