@@ -310,6 +310,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **X da área descoberta (item 9):** `x_descoberta` desenha em 8 x os traços da DOC_LINHAS E PROJEÇÕES na janela, em cinza e traço fino, só onde o render é granito (escuro e quente).
 - **DCE (item 10):** `dce` tira as peças do motor (`apagar_largo`, granito do quarto) e cola, por afim subpixel (`colar`), a cama, o criado-mudo e o armário do DCE do Térreo retocado da Casa D nos retângulos do PDF (cama e criado-mudo com `sombra_curta`).
 - **WC DCE 1 (item 11):** `wc_dce` tira o vaso a mais (`apagar_largo`, luz só do piso limpo) e desenha o chuveiro do PDF com o `desenhar_chuveiro` do Térreo da Casa D.
+- **Arcos no granito (item 12):** `arcos_granito`, o do Subsolo da Casa D na escala do Térreo: o arco escuro sai (granito tecido) e entra a curva do PDF em cinza fino, só onde a base chapada é granito.
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado

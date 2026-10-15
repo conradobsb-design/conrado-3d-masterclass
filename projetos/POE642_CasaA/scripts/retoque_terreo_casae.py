@@ -49,6 +49,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     tecido do próprio WC, na luz do piso em volta; a linha do box fica) e entra o chuveiro do PDF como
     o do WC DCE da Casa D (ducha quadrada com a placa da Casa A, braço cromado até a parede da direita
     e canopla, com sombra curta).
+12. Arcos das portas sobre o granito (pedido do usuário): como nas Casas C e D, em cinza e traço fino.
+    O motor quase não os fez (só o do DCE, apagado e escuro); o arco escuro que houver sai (granito
+    tecido, só no granito da base chapada) e entra o arco cinza fino das curvas do PDF (ARQ_PAREDE).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -613,6 +616,63 @@ def wc_dce(out):
     return out
 
 
+# arcos das portas sobre o granito (item 12, pedido do usuário): o padrão das Casas C e D (cinza
+# (160, 161, 160) e traço de 0,45 px na escala do Térreo), só onde a base chapada é granito
+ARCOS = {"granito": (50, 66, 90), "tol": 12, "fracao": 0.3, "min_px": 8,
+         "cor": (160, 161, 160), "larg": 0.45, "faixa": 1.5, "escuro": 55,
+         "fontes_granito": [(700, 160, 900, 200), (1300, 160, 1450, 200)]}
+
+
+def arcos_granito(out, A):
+    """Arcos das portas (curvas da ARQ_PAREDE) sobre o granito: o arco escuro do render sai (px
+    escuros numa faixa em volta da curva do PDF, só no granito da base chapada) e entra o cinza fino."""
+    q = ARCOS
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    gran = (np.abs(chapada.astype(np.int32) - np.array(q["granito"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    gran = cv2.morphologyEx(gran, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))   # fecha os traços finos
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+    n = 0
+    for d in pg.get_drawings():
+        if d.get("layer") != "ARQ_PAREDE" or not any(it[0] == "c" for it in d["items"]):
+            continue
+        x0, y0, x1, y1 = caixa_render(d, p2r)
+        x0, y0, x1, y1 = int(x0) - 4, int(y0) - 4, int(np.ceil(x1)) + 5, int(np.ceil(y1)) + 5
+        if max(x1 - x0, y1 - y0) < q["min_px"] or x0 < 0 or y0 < 0 or x1 > out.shape[1] or y1 > out.shape[0]:
+            continue
+        g = gran[y0:y1, x0:x1].astype(bool)
+        if g.mean() < q["fracao"]:
+            continue
+        h, w = y1 - y0, x1 - x0
+        curvas = []
+        for it in d["items"]:
+            if it[0] == "c":
+                pp = np.array([p2r(v.x, v.y) for v in it[1:5]])
+                tt = np.linspace(0, 1, 80)[:, None]
+                curvas.append((1 - tt) ** 3 * pp[0] + 3 * (1 - tt) ** 2 * tt * pp[1] + 3 * (1 - tt) * tt ** 2 * pp[2]
+                              + tt ** 3 * pp[3])
+
+        def traco(larg):
+            f = np.zeros((h * SS, w * SS), np.uint8)
+            for c in curvas:
+                cv2.polylines(f, [np.round((c - [x0, y0]) * SS).astype(np.int32)], False, 255,
+                              max(1, int(round(larg * SS))), cv2.LINE_AA)
+            return cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+        lum = out[y0:y1, x0:x1].astype(np.float32).mean(axis=2)
+        m = (traco(2 * q["faixa"]) > 0.05) & g & (lum < q["escuro"])
+        if m.any():
+            m = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & g
+            out = apagar_largo(out, (x0, y0, x1, y1), m, q["fontes_granito"], sigma=2.0, borda=0.0,
+                               lum_min=45, lum_max=130, escuros=True)
+        a = (traco(q["larg"]) * g)[..., None]
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + np.array(q["cor"], np.float32) * a, 0, 255).astype(np.uint8)
+        n += 1
+    print(f"    {n} arcos de porta sobre o granito em cinza fino")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -643,6 +703,8 @@ def main():
     out = dce(out)
     print("[11] WC DCE 1: vaso a mais no lugar do chuveiro")
     out = wc_dce(out)
+    print("[12] arcos das portas sobre o granito")
+    out = arcos_granito(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
