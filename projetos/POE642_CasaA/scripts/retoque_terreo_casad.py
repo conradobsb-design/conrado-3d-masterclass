@@ -116,6 +116,9 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    prainha e do spa vem da segunda imagem (degrau do spa nos quatro lados, degrau estreito em água
    clara, prainha com o piso em grade e os degraus de canto), onde qualquer das duas imagens tem água,
    com emenda curta; a borda de pedra fica a do render.
+25. Erro 20 da lista (escada junto à suíte master): o motor fez 11 degraus; no PDF são 16. A escada vem
+   da segunda imagem (16 degraus), no retângulo dela, com o tom ajustado ao piso em volta (razão das
+   medianas num anel) e emenda curta; a parede de baixo fica a do render.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -474,6 +477,11 @@ PLANTAS_MESAS = {
 # clara, prainha com o piso em grade e os degraus de canto): onde qualquer das duas imagens tem água,
 # com emenda curta; a borda de pedra fica a do render
 PISCINA = {"janela": (470, 255, 665, 505), "agua": 30, "emenda": 1.0}
+
+# escada junto à suíte master (erro 20): o motor fez 11 degraus; no PDF são 16. A escada vem da
+# segunda imagem (16 degraus), no retângulo dela, com o tom ajustado ao piso do render em volta e
+# emenda curta; a parede de baixo fica a do render
+ESCADA_MASTER = {"ret": (434, 644, 600, 686), "anel": 5, "emenda": 1.0}
 
 
 def alinhar_base(render):
@@ -1552,6 +1560,32 @@ def piscina(out, f2, orig):
     return out
 
 
+def colar_retangulo(out, f2, ret, anel, emenda, proteger=None):
+    """Cola um retângulo da segunda imagem, com o tom (por canal) ajustado pela razão das medianas
+    num anel em volta (o mesmo piso nas duas imagens) e emenda gaussiana; proteger (máscara) fica."""
+    x0, y0, x1, y1 = ret
+    X0, Y0, X1, Y1 = x0 - anel, y0 - anel, x1 + anel, y1 + anel
+    fonte = f2[Y0:Y1, X0:X1].astype(np.float32)
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    m = np.zeros(reg.shape[:2], np.float32)
+    m[anel:-anel, anel:-anel] = 1
+    borda = (m == 0) & (reg.mean(axis=2) > 120) & (fonte.mean(axis=2) > 120)
+    if borda.sum() > 20:
+        fonte *= (np.median(reg[borda], axis=0) / np.median(fonte[borda], axis=0))[None, None]
+    a = cv2.GaussianBlur(m, (0, 0), emenda)
+    if proteger is not None:
+        a *= ~proteger[Y0:Y1, X0:X1]
+    out[Y0:Y1, X0:X1] = np.clip(reg * (1 - a[..., None]) + fonte * a[..., None], 0, 255).astype(np.uint8)
+    return out
+
+
+def escada_master(out, f2, chapada):
+    q = ESCADA_MASTER
+    out = colar_retangulo(out, f2, q["ret"], q["anel"], q["emenda"], proteger=parede_grossa(chapada))
+    print("    escada junto à suíte master: os 16 degraus da segunda imagem")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1614,6 +1648,8 @@ def main():
     out = plantas_mesas(out, f2)
     print("[23] erros 18 e 19: spa e degrau entre a piscina e a prainha")
     out = piscina(out, f2, orig)
+    print("[24] erro 20: escada junto à suíte master")
+    out = escada_master(out, f2, chapada)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
