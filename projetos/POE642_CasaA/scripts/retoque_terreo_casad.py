@@ -84,6 +84,14 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    como as outras bancadas. Quartzo tecido da bancada do cooktop, na cor dela, com o perfil de luz por
    linha do trecho limpo (sombra da parede e borda da frente) e, junto à geladeira, a luz 2D da
    própria bancada (a sombra dela); a cuba fica.
+18. Erro 13 da lista (adega): o motor fez um lavabo (bancada com cuba, vaso e caixa acoplada); no PDF a
+   adega é vazia. O interior vira travertino tecido do piso limpo da própria adega, na cor dele, com a
+   sombra suave da parede de cima.
+19. Erro 14 da lista (lavabo): sem o vaso e sem a bancada com cuba; a bancada do PDF (junto à parede da
+   direita) tinha virado jardim, porque a base a pintou de floreira. Entra a bancada em quartzo, com a
+   cuba de louça (torneira na parede de cima, como no PDF), contorno na face livre e sombra curta no
+   piso; o vidro do jardim passa para depois da bancada (o perfil do vidro do render). O vaso é o
+   suspenso branco do lavabo da Casa C, no retângulo do PDF, com a parede à esquerda.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -105,6 +113,7 @@ sys.path.insert(0, str(AQUI))
 from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO, SS  # noqa: E402
 from retoque_terreo_casac import COZINHA as COZINHA_C  # noqa: E402
 from retoque_terreo_casac import ARCOS_GRANITO  # noqa: E402
+from retoque_terreo_casab import cuba  # noqa: E402
 from texturizar_base import quilting  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaD/bases/POE642_CasaD_BASE_Terreo_v3_texturas_16x9.png"
@@ -343,6 +352,31 @@ BANCADA_GOURMET = {
     # esquerda; só junto à geladeira (a partir de x 822, com transição até 832) vale a luz 2D do
     # bloco da direita (a sombra da geladeira)
     "ref_dir": (824, 258, 836, 266), "geladeira": (822, 832),
+}
+
+# adega (erro 13): o motor fez um lavabo (bancada com cuba, vaso e caixa acoplada); no PDF a adega é
+# vazia. O interior vira travertino tecido do hall, na cor do piso limpo da própria adega, com a
+# sombra suave da parede de cima
+ADEGA = {
+    "interior": (1230, 414, 1305, 467),
+    "fonte_travertino": [(1236, 442, 1272, 465)],
+    "cor_ref": (1236, 445, 1272, 463),
+    "sombra_cima": (0.22, 3.0),
+}
+# lavabo (erro 14): o motor não fez o vaso nem a bancada com cuba; a bancada do PDF (junto à parede
+# da direita) virou jardim, porque a base a pintou de floreira. A bancada entra em quartzo (como as
+# outras), com a cuba de louça (torneira na parede de cima, como no PDF), contorno na face livre e
+# sombra curta no piso; o vidro do jardim passa para depois da bancada (o perfil do vidro do
+# render). O vaso é o suspenso branco do lavabo da Casa C, no retângulo do PDF (parede à esquerda)
+LAVABO = {
+    "bancada": (1342, 627, 1358, 689),
+    "vidro": ((1342, 1345), 1358),
+    "cuba": (1345, 630, 1356, 649),
+    "fonte_quartzo": [(762, 320, 792, 348), (832, 320, 862, 348)],
+    "contorno": 0.78, "sombra_piso": (0.86, 0.94),
+    "vaso_fonte": RAIZ / "POE642_CasaC/renders/POE642_CasaC_PH_Terreo_v3_retocado.png",
+    "vaso": (1233, 507, 1253, 523), "corpo": (1233.0, 508.5, 1251.5, 521.0), "piso": 215.0,
+    "vaso_destino": (1281.9, 669.6, 1297.9, 680.5),
 }
 
 
@@ -1133,6 +1167,64 @@ def bancada_gourmet(out):
     return out
 
 
+def adega(out):
+    q = ADEGA
+    x0, y0, x1, y1 = q["interior"]
+    h, w = y1 - y0, x1 - x0
+    rx0, ry0, rx1, ry1 = q["cor_ref"]
+    cor = np.median(out[ry0:ry1, rx0:rx1].reshape(-1, 3).astype(np.float32), axis=0)
+    tex = textura(out, q["fonte_travertino"], h, w)
+    forca, dist = q["sombra_cima"]
+    f = 1 - forca * np.exp(-np.arange(h, dtype=np.float32) / dist)
+    out[y0:y1, x0:x1] = np.clip(tex * cor * f[:, None, None], 0, 255).astype(np.uint8)
+    print("    adega: lavabo inventado fora (travertino)")
+    return out
+
+
+def colar_vaso(out, q):
+    """Vaso suspenso da Casa C (parede à esquerda na fonte), levado ao retângulo do PDF."""
+    img = cv2.imread(str(q["vaso_fonte"]))
+    fx0, fy0, fx1, fy1 = q["vaso"]
+    spr = img[fy0:fy1, fx0:fx1].astype(np.float32)
+    alfa = np.clip((np.abs(spr.mean(axis=2) - q["piso"]) - 6) / 14, 0, 1)
+    bx0, by0, bx1, by1 = q["corpo"]
+    bx0, bx1, by0, by1 = bx0 - fx0, bx1 - fx0, by0 - fy0, by1 - fy0
+    dx0, dy0, dx1, dy1 = q["vaso_destino"]
+    sx, sy = (dx1 - dx0) / (bx1 - bx0), (dy1 - dy0) / (by1 - by0)
+    jx0, jy0 = int(np.floor(dx0 - bx0 * sx)) - 1, int(np.floor(dy0 - by0 * sy)) - 1
+    jw, jh = int(np.ceil(spr.shape[1] * sx)) + 3, int(np.ceil(spr.shape[0] * sy)) + 3
+    M = np.float32([[sx, 0, dx0 - bx0 * sx - jx0], [0, sy, dy0 - by0 * sy - jy0]])
+    spr_w = cv2.warpAffine(spr, M, (jw, jh), flags=cv2.INTER_AREA, borderMode=cv2.BORDER_REPLICATE)
+    al = cv2.warpAffine(alfa, M, (jw, jh), flags=cv2.INTER_LINEAR, borderValue=0)[..., None]
+    reg = out[jy0:jy0 + jh, jx0:jx0 + jw].astype(np.float32)
+    out[jy0:jy0 + jh, jx0:jx0 + jw] = np.clip(reg * (1 - al) + spr_w * al, 0, 255).astype(np.uint8)
+    return out
+
+
+def lavabo(out):
+    q = LAVABO
+    (v0, v1), vx = q["vidro"]
+    x0, y0, x1, y1 = q["bancada"]
+    vidro = out[y0:y1, v0:v1].copy()
+    h, w = y1 - y0, x1 - x0
+    cor = np.median(np.concatenate([out[b:d, a:c].reshape(-1, 3) for a, b, c, d in q["fonte_quartzo"]]).astype(np.float32),
+                    axis=0)
+    reg = textura(out, q["fonte_quartzo"], h, w) * cor
+    reg[:, 0] *= q["contorno"]                                       # face livre (à esquerda)
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    out[y0:y1, vx:vx + (v1 - v0)] = vidro                            # vidro do jardim depois da bancada
+    for k, s in enumerate(q["sombra_piso"]):                         # sombra curta no piso, à esquerda
+        c = x0 - 1 - k
+        out[y0 + 2:y1, c] = np.clip(out[y0 + 2:y1, c] * s, 0, 255).astype(np.uint8)
+    cx0, cy0, cx1, cy1 = q["cuba"]
+    r = np.ascontiguousarray(out[cy0:cy1, cx0:cx1][::-1])
+    r = cuba(r, (0, 0, cx1 - cx0, cy1 - cy0))
+    out[cy0:cy1, cx0:cx1] = r[::-1]                                  # torneira em cima (na parede)
+    out = colar_vaso(out, q)
+    print("    lavabo: bancada com cuba junto à parede da direita e vaso suspenso, como no PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1181,6 +1273,10 @@ def main():
     out = cooktops(out)
     print("[17] erro 12: bancada da pia da gourmet em quartzo")
     out = bancada_gourmet(out)
+    print("[18] erro 13: adega vazia")
+    out = adega(out)
+    print("[19] erro 14: vaso e bancada com cuba do lavabo")
+    out = lavabo(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

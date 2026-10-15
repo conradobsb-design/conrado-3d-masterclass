@@ -249,6 +249,7 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **DCE (erro 9):** sombra da marcenaria tirada pelo campo de luz (blur anisotrópico, normalizado) sobre o nível do piso aceso por linha; piso por `textura`; cama (cobertor encurtado, girada) e criado-mudo do render da Casa C, com sombra curta à esquerda e embaixo.
 - **Cooktops (erros 10 e 11):** o cooktop corrigido da Casa C, reduzido à caixa do PDF; o da gourmet do motor sai por `apagar` com a luz só da bancada.
 - **Bancada da gourmet (erro 12):** quartzo por `textura` na cor da bancada do cooktop, vezes o perfil de luz por linha (e a luz 2D junto à geladeira); na caixa da cuba, só os px de madeira mudam.
+- **Adega e lavabo (erros 13 e 14):** adega em travertino por `textura` com a sombra da parede de cima; no lavabo, bancada por `textura` com contorno e sombra, cuba da Casa B (`cuba`, virada para a torneira ficar em cima), o vidro do render deslocado para depois da bancada e o vaso da Casa C por `colar_vaso`.
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado

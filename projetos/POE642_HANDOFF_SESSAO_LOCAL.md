@@ -383,3 +383,5 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   15. erro 9 da lista: no DCE, a marcenaria em L vira piso (sem a sombra alta) e entram a cama de solteiro e o criado-mudo da Casa C, nas caixas do PDF.
   16. erros 10 e 11 da lista: cooktop de 5 bocas (2 em cima, 3 embaixo) na ilha da cozinha e na gourmet, com o cooktop corrigido da Casa C, nas caixas do PDF.
   17. erro 12 da lista: a bancada da pia da gourmet, em madeira, vira quartzo com a luz da própria bancada; a cuba fica.
+  18. erro 13 da lista: a adega volta a ser vazia (travertino), sem o lavabo inventado.
+  19. erro 14 da lista: lavabo com a bancada de quartzo e cuba junto à parede da direita (onde a base tinha pintado jardim) e o vaso suspenso da Casa C.
