@@ -53,6 +53,10 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
     caixilhos de alumínio nas pontas e contorno fino), o peitoril e a soleira em Bege Bahia, os
     retornos da parede em preto e as faces da parede em traço fino e claro, como no PDF; na janela, a
     faixa de vinílico que a barra cobria volta.
+19. Entrada do elevador (pedido do usuário): as duas folhas da porta, recolhidas no poço, que o render
+    fez como cápsulas cinza de ~8 px, ficam finas, na espessura do PDF (4,2 px), em inox com contorno
+    fino; a soleira, branca chapada, vira a de entrada de elevador: inox escovado no sentido da porta,
+    com os dois frisos-guia, entre os batentes de alumínio.
 12. Pátio: a parede tracejada dupla de fora (à esquerda, embaixo e no alto), que o motor apagou ou
     cortou, volta: os traços do PDF (ARQ_PAREDE, fora da planta) desenhados no quadro comum.
 
@@ -298,6 +302,17 @@ VIDROS_FIXOS = [
      "faces": [((581.2, 887.9), (581.2, 1073.6)), ((593.9, 890.4), (593.9, 1071.1))]},
 ]
 FACE = {"cor": (120, 122, 124), "larg": 0.45}
+
+ELEVADOR_ENTRADA = {
+    "janela": (1536, 364, 1566, 499),
+    "capsulas": [(1541, 367, 1550, 406), (1541, 456, 1550, 497)],   # o que sai (vira o cinza do poço)
+    "poco": (1538, 410, 1545, 455),        # o cinza do poço, entre as folhas
+    "folhas": [(1545.9, 373.2, 1550.1, 402.7), (1545.9, 461.8, 1550.1, 491.4)],
+    "soleira": (1550.6, 404.8, 1563.3, 459.7),
+    "batentes": [(1550.6, 402.7, 1563.3, 404.8), (1550.6, 459.7, 1563.3, 461.8)],
+    "frisos": (1554.0, 1559.6), "larg_friso": 0.8,
+    "inox": (190, 192, 195), "inox_folha": (200, 202, 205), "friso": (112, 115, 118), "brilho": (222, 224, 226),
+}
 
 
 def apagar_largo(out, ret, mascara, fontes, sigma=4.0, borda=0.8, lum_min=None, lum_max=None, escuros=False):
@@ -845,6 +860,62 @@ def vidros_fixos(out):
     return out
 
 
+def elevador_entrada(out):
+    q = ELEVADOR_ENTRADA
+    pv = PORTAS_VIDRO
+    x0, y0, x1, y1 = q["janela"]
+    h, w = y1 - y0, x1 - x0
+    px0, py0, px1, py1 = q["poco"]
+    poco = np.median(out[py0:py1, px0:px1].reshape(-1, 3), axis=0)
+    for cx0, cy0, cx1, cy1 in q["capsulas"]:
+        out[cy0:cy1, cx0:cx1] = poco
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+
+    def mret(r, esp=-1):
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.rectangle(m, (round((r[0] - x0) * SS), round((r[1] - y0) * SS)),
+                      (round((r[2] - x0) * SS), round((r[3] - y0) * SS)), 255, esp)
+        return m
+
+    def red(m):
+        return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+
+    def pintar(m, cor):
+        nonlocal reg
+        a = red(m)
+        reg = reg * (1 - a) + np.asarray(cor, np.float32) * a
+
+    borda = max(1, round(pv["larg_contorno"] * SS))
+    for r in q["folhas"]:
+        pintar(mret(r), q["inox_folha"])
+        pintar(mret(r, borda), pv["contorno"])
+    # soleira: inox escovado no sentido da porta (ao longo de y), com os dois frisos-guia
+    sx0, sy0, sx1, sy1 = q["soleira"]
+    rng = np.random.default_rng(642)
+    esc = rng.normal(0, 1, (h * SS, w * SS)).astype(np.float32)
+    esc = cv2.GaussianBlur(esc, (0, 0), sigmaX=0.6 * SS, sigmaY=6 * SS)
+    esc = esc / (esc.std() + 1e-6) * 4.0
+    cor = np.asarray(q["inox"], np.float32)[None, None, :] + esc[..., None]
+    a = red(mret(q["soleira"]))
+    reg = reg * (1 - a) + cv2.resize(cor, (w, h), interpolation=cv2.INTER_AREA) * a
+    for fx in q["frisos"]:
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.line(m, (round((fx - x0) * SS), round((sy0 - y0) * SS)), (round((fx - x0) * SS), round((sy1 - y0) * SS)),
+                 255, max(1, round(q["larg_friso"] * SS)))
+        pintar(m, q["friso"])
+        m = np.zeros_like(m)
+        cv2.line(m, (round((fx + 0.8 - x0) * SS), round((sy0 - y0) * SS)), (round((fx + 0.8 - x0) * SS), round((sy1 - y0) * SS)),
+                 255, max(1, round(0.4 * SS)))
+        pintar(m, q["brilho"])
+    pintar(mret(q["soleira"], borda), pv["contorno"])
+    for r in q["batentes"]:
+        pintar(mret(r), pv["aluminio"])
+        pintar(mret(r, borda), pv["contorno"])
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    elevador: folhas finas em inox; soleira de inox escovado com frisos, entre batentes de alumínio")
+    return out
+
+
 def no_quadro(out, A):
     """O render retocado vai para o quadro comum (a base 16:9 na largura das pranchas) pelo inverso da
     cadeia base -> render (a base reduzida ao tamanho do render, não uniforme, e o afim A), com 2 x
@@ -946,6 +1017,8 @@ def main():
     out = portas_vidro(out)
     print("[18] vidro da sauna e janela alta da academia")
     out = vidros_fixos(out)
+    print("[19] entrada do elevador")
+    out = elevador_entrada(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
