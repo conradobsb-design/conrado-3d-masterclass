@@ -72,6 +72,12 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
 17. Louceiro (pedido do usuário): veios aparentes de marcenaria. O motor deixou a madeira lisa; o veio
     vem do tampo da mesa de jantar do próprio render (veio no comprido), girado para correr no
     comprimento do louceiro e realçado, como no mobiliário do DCE da Casa D; o tom e as bordas ficam.
+18. Escada interna (pedido do usuário): só sombreamento que denota a subida, da direita para a
+    esquerda, sem linhas. O travertino da escada é refeito sem os tracejados dos degraus, a linha de
+    corte e a diagonal (as mesmas colunas do travertino limpo abaixo da floreira, veios verticais); os
+    19 pisos do PDF (9,33 px) clareiam para cima (a escada sobe da direita para a esquerda: o de baixo,
+    à direita, é o mais escuro) e cada espelho joga uma sombra curta no piso de baixo, à direita dele,
+    inclusive o primeiro, no piso da sala.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -889,6 +895,42 @@ def veio_louceiro(out, orig):
     return out
 
 
+# escada interna (item 18, pedido do usuário): os degraus do PDF (ARQ_ESCADAS E RAMPAS) no quadro do
+# render; sobe da direita (piso mais baixo) para a esquerda
+ESCADA = {
+    "x": (976.4, 1154.6), "n": 19, "linhas": (497, 543),
+    "fonte": 600,                              # 1ª linha do travertino limpo abaixo da floreira
+    "escurece": 0.10,                          # o piso de baixo (à direita) fica 10% mais escuro
+    "sombra": (0.18, 2.0),                     # força e decaimento (px) da sombra de cada espelho
+    "fim_sombra": 1163,                        # a sombra do 1º espelho no piso da sala vai até aqui
+}
+
+
+def escada(out):
+    q = ESCADA
+    xa, xb = q["x"]
+    y0, y1 = q["linhas"]
+    xi0, xi1 = int(np.floor(xa)), int(np.ceil(xb))
+    f0 = q["fonte"]
+    out[y0:y1, xi0:xi1] = out[f0:f0 + (y1 - y0), xi0:xi1]
+    passo = (xb - xa) / q["n"]
+    forca, dec = q["sombra"]
+    xs = np.arange(xi0, q["fim_sombra"], dtype=np.float32)
+    sub = (xs[:, None] + (np.arange(8, dtype=np.float32)[None, :] + 0.5) / 8)       # 8 amostras por px
+    k = np.floor((sub - xa) / passo)
+    na_escada = (sub >= xa) & (sub < xb)
+    f = np.where(na_escada, 1 - q["escurece"] * np.clip(k, 0, q["n"] - 1) / (q["n"] - 1), 1.0)
+    # sombra de cada espelho no piso de baixo, à direita dele (o 1º, em xb, cai no piso da sala)
+    borda = xa + np.clip(np.floor((sub - xa) / passo), 0, q["n"]) * passo
+    dist = sub - borda
+    tem = (sub > xa + passo) | (sub >= xb)
+    f *= np.where(tem & (sub < q["fim_sombra"]), 1 - forca * np.exp(-dist / dec), 1.0)
+    f = f.mean(axis=1)
+    out[y0:y1, xi0:q["fim_sombra"]] = np.clip(out[y0:y1, xi0:q["fim_sombra"]] * f[None, :, None], 0, 255).astype(np.uint8)
+    print(f"    escada: {q['n']} pisos de {passo:.2f} px, sem linhas; sobe da direita para a esquerda")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -931,6 +973,8 @@ def main():
     out = arranjo(out, orig)
     print("[17] louceiro: veio de marcenaria")
     out = veio_louceiro(out, orig)
+    print("[18] escada: sombreamento de subida, sem linhas")
+    out = escada(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
