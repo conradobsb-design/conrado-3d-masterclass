@@ -48,6 +48,10 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    Elas saem com a sombra. O piso volta continuando os veios verticais de baixo, em espelho, e a
    sombra da bancada (3 linhas abaixo da borda) é refeita com o perfil medido nos trechos limpos
    da mesma borda, dos dois lados. Emenda suave dos lados.
+10. Cooktops: o motor fez os dois com 6 bocas; no PDF os dois têm 5. Na gourmet sai a boca do
+   meio de cima (fica o tampo do próprio cooktop). O da ilha da cozinha é o mesmo desenho girado
+   (3 bocas na coluna da esquerda, 2 na da direita): vira o cooktop da gourmet já corrigido,
+   girado 90° e levado à caixa do da ilha.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -185,6 +189,12 @@ BANQUETAS = {
     "colunas_limpas": [(648, 664), (788, 806)],
     "piso_ref": (606, 613),          # linhas de piso limpo nas colunas limpas (referência do tom)
     "emenda": 3,
+}
+# cooktops: caixa com o contorno (exclusivo à direita e embaixo) e a boca que sobra na gourmet
+COOKTOPS = {
+    "gourmet": (718, 565, 747, 583),
+    "boca_a_mais": (727, 566, 736, 573),        # a do meio de cima, entre os divisores
+    "ilha": (1192, 207, 1212, 239),
 }
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
@@ -531,6 +541,21 @@ def banquetas(out):
     return out
 
 
+def cooktops(out):
+    c = COOKTOPS
+    x0, y0, x1, y1 = c["gourmet"]
+    dentro = out[y0 + 1:y1 - 1, x0 + 1:x1 - 1].reshape(-1, 3).astype(np.float32)
+    tampo = np.median(dentro[dentro.mean(axis=1) > 195], axis=0)       # tampo claro entre as grelhas
+    bx0, by0, bx1, by1 = c["boca_a_mais"]
+    ruido = np.random.default_rng(5).normal(0, 1.5, (by1 - by0, bx1 - bx0, 1))
+    out[by0:by1, bx0:bx1] = np.clip(tampo + ruido, 0, 255).astype(np.uint8)
+    girado = cv2.rotate(out[y0:y1, x0:x1], cv2.ROTATE_90_CLOCKWISE)    # fila de cima vira a coluna da direita
+    ix0, iy0, ix1, iy1 = c["ilha"]
+    out[iy0:iy1, ix0:ix1] = cv2.resize(girado, (ix1 - ix0, iy1 - iy0), interpolation=cv2.INTER_CUBIC)
+    print("    cooktops com 5 bocas, como no PDF (gourmet e ilha)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -560,12 +585,14 @@ def main():
     out = estar(out, A)
     print("[9] banquetas a mais na gourmet")
     out = banquetas(out)
+    print("[10] cooktops")
+    out = cooktops(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[10] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[11] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":

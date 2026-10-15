@@ -301,7 +301,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
   7. **Estar:** as duas poltronas a mais acima do tapete saem, com a sombra. O piso volta continuando os veios verticais de cima, em espelho; a borda de cima do tapete vem do trecho limpo da mesma borda; o tapete logo abaixo vem das linhas limpas de baixo. Feito.
   8. **Estar conforme o PDF (pedido do usuário):** o aparador comprido que o motor inventou abaixo do sofá saiu (vira travertino); a mesa de centro, feita numa peça só, virou as duas do PDF (contornos nas linhas 726–744 e 747–766 do render); as mesas laterais quadradas viraram as orgânicas do PDF (par de seixos, o menor atrás), com a forma tirada do PDF levado ao render pela mesma cadeia da base (`pdf_no_render`), no tampo de madeira da mesa de centro. O piso que volta é tecido do travertino limpo do estar. Feito.
   9. **Gourmet:** as cinco banquetas embaixo da bancada do cooktop saem (no PDF não há nenhuma). O piso volta continuando os veios de baixo, em espelho, e a sombra da bancada é refeita com o perfil dos trechos limpos da mesma borda. Feito.
-  10. **Erros levantados e ainda abertos:**
+  10. **Cooktops (pedido do usuário):** o motor fez os dois com 6 bocas; no PDF os dois têm 5. Na gourmet saiu a boca do meio de cima (2 em cima e 3 embaixo). O da ilha da cozinha é o mesmo desenho girado (3 bocas na coluna da esquerda e 2 na da direita) e virou o cooktop da gourmet corrigido, girado 90° e levado à caixa do da ilha. Feito.
+  11. **Erros levantados e ainda abertos:**
      - BH master 2: o box perdeu a porta de giro;
      - elevador: a cabine (branca, com o contorno) virou piso.
 - **Depois do retoque:** pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
