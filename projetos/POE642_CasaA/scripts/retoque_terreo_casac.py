@@ -34,6 +34,10 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
 6. Tanques da área de serviço: a bancada tinha saído no granito do piso, com os tanques escuros.
    A bancada fica no mesmo quartzo da cozinha e os dois tanques são os aprovados da Casa B (louça
    branca, torneira do lado da parede), na mesma escala, nas posições da base alinhada.
+7. Estar: o motor pôs duas poltronas a mais acima do tapete (no PDF só há as duas da esquerda).
+   Elas saem com a sombra. O piso volta continuando os veios verticais de cima, em espelho; a
+   borda de cima do tapete vem do trecho limpo da mesma borda à direita; o tapete logo abaixo vem
+   das linhas limpas de baixo, nas mesmas colunas. Emenda suave dos lados.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -128,6 +132,15 @@ SERVICO = {
     "bancada": (1384, 177, 1406, 253),
     "fonte_tanques": (RAIZ / "POE642_CasaB/renders/POE642_CasaB_PH_Terreo_v4_retocado.png", (1147, 763, 1165, 804)),
     "tanques_em": (1387, 182),
+}
+# estar: as duas poltronas a mais (com a sombra), a borda de cima do tapete e as fontes limpas
+POLTRONAS = {
+    "ret": (922, 669, 1005, 707),
+    "piso_ate": 695,                    # acima: piso em espelho a partir da linha 669
+    "borda_ate": 699,                   # 695-698: borda do tapete, do trecho limpo à direita
+    "fonte_borda_x": (1008, 1050),
+    "tapete_dy": 10,                    # 699-706: tapete das linhas de baixo, mesmas colunas
+    "emenda": 3,
 }
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
@@ -324,6 +337,28 @@ def tanques(out):
     return out
 
 
+def poltronas_estar(out):
+    q = POLTRONAS
+    x0, y0, x1, y1 = q["ret"]
+    a = out.astype(np.float32)
+    novo = a[y0:y1, x0:x1].copy()
+    yp, yb, w = q["piso_ate"], q["borda_ate"], x1 - x0
+    novo[:yp - y0] = a[y0 - 1:y0 - 1 - (yp - y0):-1, x0:x1]          # veios de cima, em espelho
+    fx0, fx1 = q["fonte_borda_x"]
+    t = a[yp:yb, fx0:fx1]
+    novo[yp - y0:yb - y0] = np.concatenate([t, t[:, ::-1]] * (w // (2 * t.shape[1]) + 1), axis=1)[:, :w]
+    dy = q["tapete_dy"]
+    novo[yb - y0:] = a[yb + dy:y1 + dy, x0:x1]
+    e = q["emenda"]
+    al = np.ones(w, np.float32)
+    al[:e] = (np.arange(e) + 1) / (e + 1)
+    al[-e:] = (np.arange(e)[::-1] + 1) / (e + 1)
+    reg = a[y0:y1, x0:x1]
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - al[None, :, None]) + novo * al[None, :, None], 0, 255).astype(np.uint8)
+    print(f"    duas poltronas a mais: {w}x{y1 - y0} px refeitos (piso e borda do tapete)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -347,12 +382,14 @@ def main():
     out = quarto_externo(out)
     print("[6] tanques da área de serviço")
     out = tanques(out)
+    print("[7] poltronas a mais no estar")
+    out = poltronas_estar(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[7] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[8] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":

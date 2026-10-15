@@ -298,8 +298,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
   4. **Cozinha:** bancadas e ilha tinham saído no granito do piso, com uma cuba só. Bancadas e ilha ficam no quartzo claro da bancada gourmet do próprio render (image quilting), com o cooktop (contorno escuro, como o traço grosso do PDF) e as 4 banquetas como estavam. Os dois armários altos do PDF (retângulo com diagonal: o de baixo na bancada da esquerda e o junto à geladeira) viram tampo de marcenaria areia, com contorno nas faces livres e sem a diagonal, como nas Casas A e B. Entre a geladeira e esse armário volta o vão de piso do PDF. As duas cubas do PDF são desenhadas como as do lavatório gourmet da Casa B, com a torneira do lado da parede. A geladeira de inox fica. Feito.
   5. **Quarto externo:** a cama de solteiro do PDF tinha virado dois eletrodomésticos e o criado-mudo, uma caixa branca. A cama vem de uma das camas de solteiro do quarto 2 do próprio render, virada para a cabeceira ficar na parede da direita (como no PDF), encurtada no cobertor e na largura do PDF; o criado-mudo vem do da suíte. Feito.
   6. **Tanques da área de serviço (pedido do usuário, fora da lista):** a bancada tinha saído no granito do piso, com os tanques escuros. A bancada fica no quartzo da cozinha e os dois tanques são os aprovados da Casa B (louça branca, torneira do lado da parede), na mesma escala, nas posições da base. Feito.
-  7. **Erros levantados e ainda abertos:**
-     - estar: duas poltronas a mais no alto do tapete;
+  7. **Estar:** as duas poltronas a mais acima do tapete saem, com a sombra. O piso volta continuando os veios verticais de cima, em espelho; a borda de cima do tapete vem do trecho limpo da mesma borda; o tapete logo abaixo vem das linhas limpas de baixo. Feito.
+  8. **Erros levantados e ainda abertos:**
      - gourmet: cinco banquetas a mais na bancada de baixo;
      - BH master 2: o box perdeu a porta de giro;
      - elevador: a cabine (branca, com o contorno) virou piso.
