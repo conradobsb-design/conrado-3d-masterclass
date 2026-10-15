@@ -135,6 +135,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
 31. Piscina, lado esquerdo (pedido do usuário): são duas folhas de vidro. As duas faixas brancas que
     o motor fez ficam como as folhas do PDF (ARQ_PAREDE, 2,8 px cada, com o vão de água entre elas),
     no desenho dos vidros finos da Casa D: vidro claro com a linha central fina e o contorno fino.
+32. Paisagismo logo abaixo das escadas (pedido do usuário): o bolsão de grama entre as pedras, os
+    degraus e o banco de bronze ganha um canteiro, como os da Casa D: um trecho das costelas-de-adão do
+    próprio render (o canto do lote), espelhado, com o contorno orgânico onde o trecho corta a touceira,
+    só sobre a grama (as pedras e o banco ficam), emendando nas plantas que já existem embaixo.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1581,6 +1585,53 @@ def vidros_piscina(out):
     return out
 
 
+# paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
+# canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
+PAISAGISMO = {
+    "grama_ref": (420, 868, 480, 922),
+    "canteiros": [((142, 668, 237, 745), True, (300, 786), ("cima", "direita", "esquerda"))],   # sem a pedra (x >= 240)
+    "limiar": 2.2, "sigma_densidade": 4.0, "densidade": 0.3,
+    "onda": (6.0, 8.0), "suave": 4.0, "semente": 11,
+}
+
+
+def paisagismo(out):
+    q = PAISAGISMO
+    fonte = out.copy()
+    lab = cv2.cvtColor(fonte, cv2.COLOR_BGR2LAB).astype(np.float32)
+    gx0, gy0, gx1, gy1 = q["grama_ref"]
+    g = lab[gy0:gy1, gx0:gx1].reshape(-1, 3)
+    mu, sd = g.mean(axis=0), np.maximum(g.std(axis=0), 1)
+    z = np.sqrt((((cv2.GaussianBlur(lab, (0, 0), 1.0) - mu) / sd) ** 2).sum(axis=2))
+    grama = cv2.GaussianBlur((z < 3.5).astype(np.float32), (0, 0), 0.6)
+    rng = np.random.default_rng(q["semente"])
+    for (x0, y0, x1, y1), espelhar, (dx, dy), cortes in q["canteiros"]:
+        spr = fonte[y0:y1, x0:x1].astype(np.float32)
+        dens = cv2.GaussianBlur((z[y0:y1, x0:x1] > q["limiar"]).astype(np.float32), (0, 0), q["sigma_densidade"])
+        m = (dens > q["densidade"]).astype(np.uint8)
+        cont, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        m = np.zeros_like(m)
+        cv2.drawContours(m, cont, -1, 1, -1)
+        a = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 1.5)
+        if espelhar:
+            spr, a = spr[:, ::-1], a[:, ::-1]
+        h, w = a.shape
+        amp, esc = q["onda"]
+        for lado in cortes:
+            n = w if lado in ("cima", "baixo") else h
+            onda = cv2.GaussianBlur(rng.normal(0, 1, (1, n + 40)).astype(np.float32), (0, 0), esc)[0, 20:20 + n]
+            onda = amp * (1 + onda / max(float(np.abs(onda).max()), 1e-6))
+            yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+            dist = {"cima": yy, "baixo": h - 1 - yy, "esquerda": xx, "direita": w - 1 - xx}[lado]
+            off = onda[None, :] if lado in ("cima", "baixo") else onda[:, None]
+            a = a * np.clip((dist - off) / q["suave"], 0, 1)
+        a = a * grama[dy:dy + h, dx:dx + w]
+        reg = out[dy:dy + h, dx:dx + w].astype(np.float32)
+        out[dy:dy + h, dx:dx + w] = np.clip(reg * (1 - a[..., None]) + spr * a[..., None], 0, 255).astype(np.uint8)
+        print(f"    canteiro em ({dx}, {dy}), {w}x{h} px, da touceira em ({x0}, {y0})")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1648,6 +1699,8 @@ def main():
     out = degrau_spa(out)
     print("[31] piscina: duas folhas de vidro")
     out = vidros_piscina(out)
+    print("[32] paisagismo abaixo das escadas")
+    out = paisagismo(out)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
