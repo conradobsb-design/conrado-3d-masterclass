@@ -16,6 +16,9 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
 4. WC DCE: o símbolo do CAD (quadrado, braço e o toco na parede) vira o chuveiro do Térreo: ducha
    quadrada (a placa aprovada da Casa A), braço cromado até a parede da esquerda e canopla, na
    geometria do PDF.
+5. DCE 1: o armário até o teto (o da linha diagonal) saiu quase branco; vira a madeira areia dos
+   armários até o teto do Térreo, com o veio no comprido, sem a diagonal e sem sombra. A mancha
+   clara do piso junto ao criado-mudo sai, como as do depósito.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_subsolo_casad.py POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_render.webp \
@@ -36,6 +39,7 @@ sys.path.insert(0, str(AQUI))
 
 from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO, SS  # noqa: E402
 from retoque_terreo_casad import interpolar, textura  # noqa: E402
+from texturizar_base import quilting  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaD/bases/POE642_CasaD_BASE_Subsolo_v3_texturas_16x9.png"
 BASE_CHAPADA = RAIZ / "POE642_CasaD/bases/POE642_CasaD_BASE_Subsolo_v2_16x9.png"   # cores exatas da legenda
@@ -113,6 +117,19 @@ CHUVEIRO_WC = {
     "braco": (709.6, 78.1, 741.8, 80.2),                  # do centro da ducha à face da parede
     "canopla": (709.6, 76.4, 711.4, 81.9),
     "janela": (698, 62, 760, 98),
+}
+
+# armário até o teto do DCE 1: a madeira areia dos armários do Térreo retocado (aprovado), ampliada
+# na razão entre as escalas dos dois renders, que é o mesmo aspecto que ela tem na prancha
+TERREO_RETOCADO = RAIZ / "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png"
+ARMARIO_DCE = {
+    "ret": (824, 45, 925, 90),             # o miolo; os contornos escuros da direita e de baixo ficam
+    # (trecho do Térreo, giro em graus): o da direita da suíte 2 (veio em pé, girado) e o do DCE
+    "fontes": [((1128, 740, 1143, 797), 90), ((1297, 332, 1324, 346), 0)],
+    "escala": 2.73,
+    "mancha": (921, 192, 9, 8),            # mancha clara no granito, acima do criado-mudo
+    "janela_mancha": (906, 178, 945, 204),
+    "fontes_piso": [(840, 110, 900, 180), (840, 200, 880, 240)],
 }
 
 
@@ -255,6 +272,29 @@ def trocar_chuveiro(out, q):
     return out
 
 
+def armario_dce(out):
+    q = ARMARIO_DCE
+    img = cv2.imread(str(TERREO_RETOCADO))
+    fontes = []
+    for (x0, y0, x1, y1), giro in q["fontes"]:
+        t = img[y0:y1, x0:x1]
+        if giro:
+            t = np.rot90(t)
+        t = cv2.resize(t, None, fx=q["escala"], fy=q["escala"], interpolation=cv2.INTER_CUBIC).astype(np.float32)
+        fontes += [np.ascontiguousarray(v) for v in (t, t[:, ::-1], t[::-1, :], t[::-1, ::-1])]
+    x0, y0, x1, y1 = q["ret"]
+    tex = quilting(fontes, y1 - y0, x1 - x0, p=24, sobra=8, candidatos=600)[:y1 - y0, :x1 - x0]
+    out[y0:y1, x0:x1] = np.clip(tex, 0, 255).astype(np.uint8)
+    jx0, jy0, jx1, jy1 = q["janela_mancha"]
+    mx, my, mw, mh = q["mancha"]
+    m = np.zeros((jy1 - jy0, jx1 - jx0), np.uint8)
+    cv2.ellipse(m, (mx + mw // 2 - jx0, my + mh // 2 - jy0), (mw // 2 + 3, mh // 2 + 3), 0, 0, 360, 1, -1)
+    out = apagar_largo(out, q["janela_mancha"], m.astype(bool), q["fontes_piso"], sigma=2.0, borda=0.6,
+                       lum_min=45, lum_max=110)
+    print("    armário até o teto do DCE 1 em madeira areia, sem a diagonal; mancha do piso fora")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -272,6 +312,8 @@ def main():
     out = piso_box_wc(out)
     print("[4] WC DCE: chuveiro")
     out = trocar_chuveiro(out, CHUVEIRO_WC)
+    print("[5] DCE 1: armário até o teto")
+    out = armario_dce(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
