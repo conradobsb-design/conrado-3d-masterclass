@@ -65,6 +65,9 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    layer ARQ_PAREDE) que caem sobre o granito são redesenhados em cinza e traço fino, só onde o piso é
    granito: banho gourmet, louceiro, despensa, serviço para a garagem e a porta dupla da área
    descoberta.
+13. Erro 7 da lista (área descoberta): o motor pôs um vaso sanitário junto à parede da direita e não
+   fez o X tracejado do PDF. O vaso sai (granito tecido, na luz do entorno: `apagar`) e o X da layer
+   DOC_LINHAS E PROJEÇÕES entra em cinza e traço fino, só sobre o granito da base chapada.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -262,6 +265,15 @@ PROJECAO_GARAGEM = {
     "granito_lum": (35.0, 115.0),
 }
 
+# área descoberta (erro 7): o motor pôs um vaso sanitário (com a sombra) junto à parede da direita e
+# não fez o X tracejado do PDF. O vaso sai (granito tecido, na luz do entorno) e o X entra em cinza
+# e traço fino, só sobre o granito
+AREA_DESCOBERTA = {
+    "vaso": (1211, 293, 1240, 317),
+    "fonte_granito": [(1160, 322, 1200, 346), (1440, 96, 1640, 180)],
+    "janela_x": (1150, 288, 1250, 350),
+}
+
 
 def alinhar_base(render):
     """Base 16:9 reduzida e levada ao render por SIFT + afim; também a base chapada (v2)."""
@@ -394,6 +406,33 @@ def linhas_pdf(out, A, janela, q, mascara=None):
     reg = out[y0:y1, x0:x1].astype(np.float32)
     out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + np.array(q["cor"], np.float32) * a[..., None],
                                 0, 255).astype(np.uint8)
+    return out
+
+
+def textura(out, fontes, alto, largo, p=16):
+    """Textura tecida (image quilting) de trechos limpos do render, normalizada (média 1 por canal)."""
+    f = []
+    for x0, y0, x1, y1 in fontes:
+        g = out[y0:y1, x0:x1].astype(np.float32)
+        g = g / g.reshape(-1, 3).mean(axis=0)
+        f += [np.ascontiguousarray(v) for v in (g, g[:, ::-1], g[::-1, :], g[::-1, ::-1])]
+    return quilting(f, alto, largo, p=p, sobra=max(3, p // 3), candidatos=600)[:alto, :largo]
+
+
+def apagar(out, ret, mascara, fontes, sigma=5.0, borda=1.0):
+    """Tira um objeto: os px da máscara viram a textura das fontes na luz do entorno (o campo de
+    luz, por canal, é interpolado dos px de fora da máscara por convolução normalizada)."""
+    x0, y0, x1, y1 = ret
+    h, w = y1 - y0, x1 - x0
+    m = cv2.GaussianBlur(mascara.astype(np.float32), (0, 0), borda) if borda else mascara.astype(np.float32)
+    m = np.maximum(m, mascara.astype(np.float32))
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    fora = (1 - mascara.astype(np.float32))[..., None]
+    num = cv2.GaussianBlur(reg * fora, (0, 0), sigma)
+    den = cv2.GaussianBlur(np.repeat(fora, 3, axis=2), (0, 0), sigma)
+    luz = num / np.maximum(den, 1e-3)
+    tex = textura(out, fontes, h, w)
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - m[..., None]) + tex * luz * m[..., None], 0, 255).astype(np.uint8)
     return out
 
 
@@ -839,13 +878,18 @@ def acesso(out):
     return out
 
 
-def projecao_garagem(out, A):
-    q = PROJECAO_GARAGEM
-    x0, y0, x1, y1 = q["janela"]
+def projecao_granito(out, janela):
+    """Máscara (0/1) do granito do render na janela: escuro e quente (sem parede preta, sem madeira)."""
+    x0, y0, x1, y1 = janela
     reg = out[y0:y1, x0:x1].astype(np.float32)
     Y = reg.mean(axis=2)
-    lo, hi = q["granito_lum"]
-    gran = ((Y > lo) & (Y < hi) & (reg[..., 2] > reg[..., 0])).astype(np.float32)
+    lo, hi = PROJECAO_GARAGEM["granito_lum"]
+    return ((Y > lo) & (Y < hi) & (reg[..., 2] > reg[..., 0])).astype(np.float32)
+
+
+def projecao_garagem(out, A):
+    q = PROJECAO_GARAGEM
+    gran = projecao_granito(out, q["janela"])
     out = linhas_pdf(out, A, q["janela"], q["linhas"], mascara=gran)
     print("    projeção tracejada com X sobre a entrada da garagem")
     return out
@@ -889,6 +933,30 @@ def arcos_no_granito(out, A, chapada):
     return out
 
 
+def granito_chapada(chapada, janela):
+    """Máscara (0/1) do granito pela base chapada (cor exata), fechada nos traços finos; vale também
+    onde o render pôs sombra funda no granito."""
+    x0, y0, x1, y1 = janela
+    q = ARCOS_GRANITO
+    g = (np.abs(chapada.astype(np.int32) - np.array(q["granito"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    g = cv2.morphologyEx(g, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    return g[y0:y1, x0:x1].astype(np.float32)
+
+
+def area_descoberta(out, A, chapada):
+    q = AREA_DESCOBERTA
+    x0, y0, x1, y1 = q["vaso"]
+    pad = 10
+    ret = (x0 - pad, y0 - pad, x1, y1 + pad)
+    m = np.zeros((ret[3] - ret[1], ret[2] - ret[0]), bool)
+    m[pad:pad + y1 - y0, pad:pad + x1 - x0] = True
+    out = apagar(out, ret, m, q["fonte_granito"], sigma=4.0)
+    gran = granito_chapada(chapada, q["janela_x"])
+    out = linhas_pdf(out, A, q["janela_x"], PROJECAO_GARAGEM["linhas"] | {"curtos": {}}, mascara=gran)
+    print("    área descoberta: vaso inventado fora; X tracejado do PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -927,6 +995,8 @@ def main():
     out = projecao_garagem(out, A)
     print("[12] erro 6: arcos das portas sobre o granito")
     out = arcos_no_granito(out, A, chapada)
+    print("[13] erro 7: vaso inventado e X da área descoberta")
+    out = area_descoberta(out, A, chapada)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
