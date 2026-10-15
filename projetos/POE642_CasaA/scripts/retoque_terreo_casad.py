@@ -146,6 +146,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    volta da cuba) em traço cinza fino nos lados livres, como na cozinha; e o suporte de utensílios
    decorativo do PDF (ARQ_LAYOUT HUMANIZAÇÃO): o vaso redondo em cerâmica grafite, com borda e sombra
    curta, e a folhagem da planta do vaso do hall do próprio render, reduzida à folhagem do PDF.
+33. Tapete da mesa redonda (pedido do usuário): o da segunda imagem é redondo; no PDF é orgânico
+   (polígono branco da layer ARQ_CONTRAPISO). O tapete toma a forma do PDF: o que sai vira travertino
+   (veios verticais da faixa limpa de baixo, na luz do travertino em volta), com as poltronas e as
+   mesinhas protegidas e uma borda fina por fora.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -463,6 +467,11 @@ MESA_REDONDA = {
     "mesinhas": [((1108.1, 423.9), 5.1), ((1165.05, 476.35), 5.1)],
     "contorno": (80, 99, 118), "larg_contorno": 0.5,
     "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.4},
+    # tapete orgânico do PDF (pedido do usuário): polígono branco da layer ARQ_CONTRAPISO
+    "tapete_pdf": (1103.1, 387.2, 1201.6, 482.0),
+    "fonte_tapete": [(1138, 383, 1166, 396), (1189, 420, 1204, 446), (1100, 420, 1104, 446)],
+    "fonte_travertino": (1100, 496, 1195, 540),
+    "borda_tapete": 0.95,
 }
 # segunda imagem do motor (trazida pelo usuário, mesmo prompt): elementos prontos são tirados dela
 # (pedido do usuário: usar elementos dela em vez de criar), levada ao render por SIFT + afim
@@ -1606,6 +1615,7 @@ def mesa_redonda(out, f2, orig):
         al = (am * ~poltrona)[..., None]
         reg = reg * (1 - al) + cc * al
     out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    out = tapete_organico(out, orig)
     print("    mesa redonda, tapete e poltronas da segunda imagem; planta fora do tampo; as duas mesinhas do PDF")
     return out
 
@@ -1902,6 +1912,62 @@ def gourmet_pia(out, orig):
     reg = reg * (1 - al) + spr_w * al
     out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
     print("    bancada da pia da gourmet: área molhada e o suporte de utensílios decorativo do PDF")
+    return out
+
+
+def tapete_organico(out, orig):
+    """O tapete (redondo na segunda imagem) toma a forma orgânica do PDF: o que sai vira travertino
+    (veios verticais da faixa limpa de baixo, na luz do travertino em volta), o que entra vira tapete
+    tecido do próprio tapete; poltronas e mesinhas ficam; borda fina por fora."""
+    q = MESA_REDONDA
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+    A = alinhar_base(orig)[2]
+    _, p2r = pdf_cadeia(A, out.shape)
+
+    def caixa(d, alvo, tol=1.0):
+        (rx0, ry0), (rx1, ry1) = p2r(d["rect"].x0, d["rect"].y0), p2r(d["rect"].x1, d["rect"].y1)
+        return max(abs(rx0 - alvo[0]), abs(ry0 - alvo[1]), abs(rx1 - alvo[2]), abs(ry1 - alvo[3])) <= tol
+
+    branco = (1.0, 1.0, 1.0)
+    novo = mascara_pdf(q["janela"], A, out.shape, lambda d: d.get("fill") == branco and
+                       d.get("layer") == "ARQ_CONTRAPISO" and caixa(d, q["tapete_pdf"]))
+    pecas = mascara_pdf(q["janela"], A, out.shape, lambda d: d.get("fill") == branco and
+                        d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO" and any(caixa(d, c) for c in q["poltronas"]))
+    yy, xx = np.mgrid[wy0:wy1, wx0:wx1].astype(np.float32) + 0.5
+    for (cx, cy), r in q["mesinhas"]:
+        pecas = np.maximum(pecas, ((xx - cx) ** 2 + (yy - cy) ** 2 <= (r + 1) ** 2).astype(np.float32))
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    # as poltronas do render passam um pouco do PDF: 2 px de margem, só nos px claros
+    pecas = (cv2.dilate((pecas > 0.3).astype(np.uint8), np.ones((5, 5), np.uint8)) > 0) & (reg.mean(axis=2) > 175) | (pecas > 0.3)
+    (cx, cy), r = q["tapete"]
+    velho = ((xx - cx) ** 2 + (yy - cy) ** 2 <= (r + 1) ** 2)
+    a_novo = np.clip(novo, 0, 1)
+    sai = velho & (a_novo < 0.5) & ~pecas
+    entra = ~velho & (a_novo > 0.0) & ~pecas
+
+    fx0, fy0, fx1, fy1 = q["fonte_travertino"]
+    faixa = orig[fy0:fy1, wx0:wx1].astype(np.float32)
+    n = fy1 - fy0
+    idx = np.arange(h) % (2 * n)
+    idx = np.where(idx < n, idx, 2 * n - 1 - idx)
+    trav = faixa[idx]
+    Y = reg.mean(axis=2)
+    limpo = ~velho & ~pecas & (a_novo < 0.01) & (Y > 150) & ((xx - cx) ** 2 + (yy - cy) ** 2 < (r + 8) ** 2)
+    luz = interpolar(cv2.GaussianBlur(Y, (0, 0), 1.0) / np.maximum(cv2.GaussianBlur(trav.mean(axis=2), (0, 0), 1.0), 1),
+                     limpo, 1.5)
+    trav = trav * luz[..., None]
+    cor = np.median(np.concatenate([out[b:d, a:c].reshape(-1, 3) for a, b, c, d in q["fonte_tapete"]]).astype(np.float32), axis=0)
+    tap = textura(out, q["fonte_tapete"], h, w, p=8) * cor
+
+    a_sai = np.clip(1 - a_novo, 0, 1) * cv2.dilate(velho.astype(np.uint8), np.ones((3, 3), np.uint8)) * ~pecas
+    reg = reg * (1 - a_sai[..., None]) + trav * a_sai[..., None]
+    a_ent = (a_novo * entra)[..., None]
+    reg = reg * (1 - a_ent) + tap * a_ent
+    borda = np.clip(cv2.dilate(a_novo, np.ones((3, 3), np.uint8)) - a_novo, 0, 1) * ~pecas
+    reg *= (1 - (1 - q["borda_tapete"]) * borda)[..., None]
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    tapete no contorno orgânico do PDF ({int(sai.sum())} px saem, {int(entra.sum())} px entram)")
     return out
 
 
