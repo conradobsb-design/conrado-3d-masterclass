@@ -534,6 +534,28 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
             orig = bloco.copy()
             neutro = (orig.max(axis=-1) - orig.min(axis=-1)) <= 8
             branco = neutro & (orig.min(axis=-1) >= 235)
+            if r.get("proteger_layers") or r.get("apagar_linhas_layer"):
+                # piso branco com louças e bancadas brancas por cima (ex.: banhos da Casa D, sem
+                # polígono de piso no PDF): o que estas layers desenham não muda; os traços da
+                # hachura do piso (apagar_linhas_layer) somem no material
+                def no_ret(d):
+                    a = raster.rotacionar_px(*raster.para_px(d["rect"].tl))
+                    b = raster.rotacionar_px(*raster.para_px(d["rect"].br))
+                    return min(a[0], b[0]) < x1 and max(a[0], b[0]) > x0 and min(a[1], b[1]) < y1 and max(a[1], b[1]) > y0
+                perto = [d for d in desenhos if no_ret(d)]
+                if r.get("proteger_layers"):
+                    # só o miolo branco das peças (o contorno delas já é cinza e não muda)
+                    prot = [d for d in perto if any(na_layer(d, n) for n in r["proteger_layers"])]
+                    mp = raster.mascara([d for d in prot if d.get("fill") is not None], "fill")
+                    mp = ndimage.binary_dilation(raster.rotacionar_arr(mp)[y0:y1, x0:x1], iterations=1)
+                    branco &= ~mp
+                else:
+                    mp = np.zeros(branco.shape, bool)
+                if r.get("apagar_linhas_layer"):
+                    hach = [d for d in perto if na_layer(d, r["apagar_linhas_layer"]) and d["type"] in ("s", "fs")]
+                    mh = raster.rotacionar_arr(raster.mascara(hach, "stroke", 2.5 / raster.zoom))[y0:y1, x0:x1]
+                    mh = ndimage.binary_dilation(mh, iterations=1) & ~mp & neutro & (orig.min(axis=-1) >= 60)
+                    branco |= mh
             bloco[branco] = hex_rgb(r["para"])
             if r.get("cor_linha"):
                 bloco[neutro & (orig.min(axis=-1) >= 60) & (orig.min(axis=-1) < 235)] = hex_rgb(r["cor_linha"])
@@ -601,6 +623,16 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
         halo = ndimage.binary_dilation(m, iterations=2) & ~m & neutro & (sub.min(axis=-1) >= 200)
         sub[m | halo] = hex_rgb(g["para"])
         resumo.append(f"{g['nome']}: {int((m | halo).sum())} px")
+
+    # depois do gramado: o branco que sobrou fechado em contornos, dentro de um retângulo (ex.: os
+    # pisantes soltos da Casa D, desenhados só com o contorno; o branco entre eles já virou grama)
+    for f in legenda.get("fechados_apos_gramado", []):
+        x0, y0, x1, y1 = (int(round(v * esc)) for v in f["bbox_vis"])
+        sub = arr[y0:y1, x0:x1]
+        neutro = (sub.max(axis=-1) - sub.min(axis=-1)) <= 8
+        m = neutro & (sub.min(axis=-1) >= 235)
+        sub[m] = hex_rgb(f["para"])
+        resumo.append(f"{f['nome']}: {int(m.sum())} px")
 
     return Image.fromarray(arr.astype(np.uint8)), resumo
 

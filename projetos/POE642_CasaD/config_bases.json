@@ -32,7 +32,216 @@
       "layers_ocultas": [
         "ARQ_TERRENO PLANEJADO"
       ],
-      "_layers_ocultas": "Curvas de nível saem, como nas Casas A, B e C: fundo todo branco."
+      "_layers_ocultas": "Curvas de nível saem, como nas Casas A, B e C: fundo todo branco.",
+      "zonas_excluidas": {
+        "piscina, prainha e spa: só as bordas desenhadas, sem faixas de vidro": [
+          342.9,
+          258.9,
+          563.4,
+          538.5
+        ]
+      },
+      "_zonas_excluidas": "Como na Casa C: as paredes da piscina na layer de parede não viram vidro em volta da água.",
+      "legenda": {
+        "_sobre": "Casa D · Térreo (materiais definidos pelo usuário em 15/10/26, como na Casa C). Travertino #DCD9CA: o oliva #BAB596 (living, jantar, hall de entrada, adega e lavabo). Vinílico #C8A27C: o laranja #CC9966 (suítes, sala íntima, circulações e quarto de serviço). Granito Marrom Tabaco #5A4232: o terracota #995F4C (cozinha, gourmet, banho gourmet, despensa, louceiro, serviço, área descoberta, garagem e o acesso de veículos, que o usuário pediu igual à garagem). Bege Bahia #E8E8E8: o cinza #E4E4E4 (varanda gourmet, área da piscina, escadas e deck lateral), os banhos (brancos com hachura no PDF: banho master, banhos 1, 2 e 3 e WC DCE), a escada branca junto às suítes e os pisantes. Piscina, prainha e spa #DFF6FE. Gramado #6E9150: o entorno do lote. Floreira #4F7A3A: os dois jardins.",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "área externa cinza (varanda gourmet, piscina, escadas, deck lateral) → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "para": "#E8E8E8"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ],
+          [
+            "#995F4C",
+            "#5A4232"
+          ],
+          [
+            "#CC9966",
+            "#C8A27C"
+          ],
+          [
+            "#7FDFFF",
+            "#DFF6FE"
+          ]
+        ],
+        "retangulos": [
+          {
+            "nome": "banho master → Bege Bahia",
+            "bbox_vis": [
+              278.7,
+              840.9,
+              379.1,
+              940.3
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8",
+            "proteger_layers": [
+              "ARQ_LOUÇAS E METAIS",
+              "ARQ_BANCADAS",
+              "ARQ_MOBILIÁRIO",
+              "ARQ_ELEMENTOS FIXOS",
+              "ARQ_PAREDE",
+              "INS_INSTALAÇÕES HIDRÁULICAS"
+            ],
+            "apagar_linhas_layer": "ARQ_CONTRAPISO"
+          },
+          {
+            "nome": "banho 1 → Bege Bahia",
+            "bbox_vis": [
+              447.5,
+              825.4,
+              514.8,
+              940.3
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8",
+            "proteger_layers": [
+              "ARQ_LOUÇAS E METAIS",
+              "ARQ_BANCADAS",
+              "ARQ_MOBILIÁRIO",
+              "ARQ_ELEMENTOS FIXOS",
+              "ARQ_PAREDE",
+              "INS_INSTALAÇÕES HIDRÁULICAS"
+            ],
+            "apagar_linhas_layer": "ARQ_CONTRAPISO"
+          },
+          {
+            "nome": "banhos 2 e 3 → Bege Bahia",
+            "bbox_vis": [
+              964.2,
+              828.5,
+              1093.7,
+              940.3
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8",
+            "proteger_layers": [
+              "ARQ_LOUÇAS E METAIS",
+              "ARQ_BANCADAS",
+              "ARQ_MOBILIÁRIO",
+              "ARQ_ELEMENTOS FIXOS",
+              "ARQ_PAREDE",
+              "INS_INSTALAÇÕES HIDRÁULICAS"
+            ],
+            "apagar_linhas_layer": "ARQ_CONTRAPISO"
+          },
+          {
+            "nome": "WC DCE → Bege Bahia",
+            "bbox_vis": [
+              1146.5,
+              279.6,
+              1202.4,
+              364.5
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8",
+            "proteger_layers": [
+              "ARQ_LOUÇAS E METAIS",
+              "ARQ_BANCADAS",
+              "ARQ_MOBILIÁRIO",
+              "ARQ_ELEMENTOS FIXOS",
+              "ARQ_PAREDE",
+              "INS_INSTALAÇÕES HIDRÁULICAS"
+            ],
+            "apagar_linhas_layer": "ARQ_CONTRAPISO"
+          },
+          {
+            "nome": "escada branca junto às suítes → Bege Bahia",
+            "bbox_vis": [
+              318.0,
+              675.2,
+              482.7,
+              714.5
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8",
+            "_nota": "Ficam as linhas dos degraus."
+          },
+          {
+            "nome": "jardim abaixo da sala íntima → floreira",
+            "bbox_vis": [
+              651.5,
+              911.3,
+              832.7,
+              947.6
+            ],
+            "so_branco": true,
+            "para": "#4F7A3A",
+            "cor_linha": "#4F7A3A"
+          },
+          {
+            "nome": "jardim junto ao lavabo → floreira",
+            "bbox_vis": [
+              1257.3,
+              650.3,
+              1322.5,
+              714.5
+            ],
+            "so_branco": true,
+            "para": "#4F7A3A",
+            "cor_linha": "#4F7A3A",
+            "_nota": "O X tracejado some na floreira."
+          }
+        ],
+        "gramados": [
+          {
+            "nome": "entorno do lote → grama",
+            "bbox_vis": [
+              61.2,
+              78.7,
+              1681.9,
+              1038.7
+            ],
+            "para": "#6E9150"
+          }
+        ],
+        "fechados_apos_gramado": [
+          {
+            "nome": "pisantes acima da cozinha → Bege Bahia",
+            "bbox_vis": [
+              780.9,
+              91.1,
+              1098.8,
+              196.8
+            ],
+            "para": "#E8E8E8",
+            "_nota": "O primeiro, junto à varanda, desce até a parede (y 185 na prévia)."
+          },
+          {
+            "nome": "pisantes na frente do hall → Bege Bahia",
+            "bbox_vis": [
+              1274.9,
+              503.3,
+              1661.1,
+              642.1
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "faixa com X entre a garagem e os pisantes → grama",
+            "bbox_vis": [
+              1279.0,
+              430.8,
+              1575.2,
+              490.9
+            ],
+            "para": "#6E9150",
+            "_nota": "Branco do PDF sem piso, sob a projeção (os X ficam): os triângulos que o X fecha também viram grama."
+          }
+        ]
+      }
     }
   }
 }
