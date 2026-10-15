@@ -411,3 +411,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   43. lavatório junto ao banho gourmet: torneira lateral do PDF, legível sobre a bancada branca, e o contorno da cuba.
   44. WC DCE: o disco branco do motor vira o chuveiro do PDF (ducha, braço e canopla).
 - **Entrega (após a aprovação da imagem final pelo usuário, 15/10/26):** chave `entrega` em `POE642_CasaD/config_bases.json` (só o Térreo; endereço ML 10 – Conjunto 02, Lotes 17, Unidade D, confirmado; área do Térreo não informada pelo usuário: o quadro mostra "NÃO INFORMADO"; com uma linha só, o `rodape_entrega.py` não desenha a linha de total). Prancha `entrega/POE642_CasaD_PH_Terreo_entrega.png` (3840 × 2600 px, mesmo quadro das outras casas; render alinhado com 70 pontos, erro mediano 0,93 px) e `entrega/POE642_CasaD_Plantas_Humanizadas.pdf` (1 página A3, 10,8 MB). Os objetos pessoais e decorativos (prompt `POE642_CasaD_PH_Terreo_v1_objetos.md`) não entram: o usuário testou no Higgsfield e o resultado não ficou a contento (15/10/26). A entrega fica como está.
+
+## Casa D · Subsolo
+
+- **PDF:** `_pdfs_cliente/642 - SUBSOLO - CASA D.pdf` (recebido em 15/10/26; mesma folha e enquadramento). Pavimento `Subsolo` na `POE642_CasaD/config_bases.json` (curvas de nível ocultas).
+- **Ambientes:** DCE 1 (6 m²), WC DCE (2,88 m², com chuveiro), depósito/casa de máquinas (20,02 m²), academia (72,23 m²), vestiário (6,41 m²), sauna (6,55 m²), ducha, elevador, escada (17 degraus, sobe) e a circulação. Cores do PDF: terracota #995F4C (DCE 1, WC DCE e depósito) e laranja #CC9966 (academia); sauna, ducha, vestiário, circulação e escada sem preenchimento (brancos). À esquerda da academia (janelas), uma área externa sem preenchimento.
+- **Base v1** (cores do PDF): `bases/POE642_CasaD_BASE_Subsolo_v1(_16x9)` e a prévia `_16x9_preview.jpg`. Próximo passo: materiais com o usuário.
+
