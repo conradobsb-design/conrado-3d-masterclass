@@ -241,7 +241,8 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **Porta do abrigo de gás:** a soleira do motor vira o piso do abrigo (espelho) e as duas folhas de correr do PDF são desenhadas em 8x (folha, montantes, contorno e batentes), com sombra curta.
 - **Carros:** curva de tom por carro na silhueta (não-granito: frio ou claro, fechada e preenchida, com a borda), escurecendo ou clareando a luminância do prata; a cor entra só nos tons médios e claros; lanternas (R bem maior que B) ficam.
 - **Lote (erros 1 e 2):** o muro inventado vira grama (colunas de logo à direita); fora do lote, a base alinhada; os muros cobertos por folhas, com o perfil de uma coluna limpa.
-- **Faixa com X (erro 3):** grama por quilting (`grama`), sombra dos muros por fator, e as linhas do PDF por `linhas_pdf` (`pdf_no_render` da Casa D, que desliga as layers ocultas da base; máscara de linhas engrossada e reduzida, em cor clara).
+- **Faixa com X (erro 3):** grama por quilting (`grama`), sombra dos muros por fator, e as linhas do PDF por `linhas_pdf`: os traços vêm de `get_drawings` por layer (o MuPDF não desliga as layers deste PDF no raster), sem as curvas de nível, desenhados em 8x e reduzidos, em cor clara.
+- **Acesso e projeção da garagem (erros 4 e 5):** o cinza vira granito por quilting, normalizado e multiplicado pelo perfil por linha do granito ao lado; a projeção vem de `linhas_pdf` (X da DOC_LINHAS e só os traços curtos de tracejado das layers de parede), mascarada pelo granito do render.
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado

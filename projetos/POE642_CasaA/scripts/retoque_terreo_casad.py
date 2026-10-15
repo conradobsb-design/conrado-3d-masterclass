@@ -54,6 +54,13 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    esconde) entram em cinza claro, engrossadas para o traço fino do render. O muro de cima (e a grade
    à direita), onde as pontas das folhas passavam, vira a mediana de cada linha; a folha que caía no
    travertino do hall sai por inpainting.
+10. Erro 4 da lista (ponta do acesso de veículos): o motor fez o trecho junto ao limite direito em
+   piso cinza; é o mesmo granito da garagem (pedido do usuário). Granito tecido (image quilting) do
+   acesso limpo, com o perfil de luz de cada linha (a sombra do muro de cima) do granito logo à
+   esquerda, por canal.
+11. Erro 5 da lista (projeção sobre a entrada da garagem): os retângulos com X (DOC_LINHAS E
+   PROJEÇÕES) e o contorno tracejado (os traços curtos das layers de parede e de elementos fixos),
+   levados ao render, em cinza e traço fino, como os arcos sobre o granito, só sobre o granito.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -226,7 +233,28 @@ FAIXA_X = {
     # sombra: (onde começa, até onde, força) a partir do muro de cima (por trecho de x) e da direita
     "sombra_cima": [((1364, 1597), 12, 0.45), ((1597, 1648), 8, 0.25)],
     "sombra_dir": (1648, 9, 0.40),
-    "linhas": {"limiar": 170, "larg": 4, "cor": (205, 210, 205), "forca": 0.5},
+    "linhas": {"larg": 4, "cor": (205, 210, 205), "forca": 0.5,
+               "excluir": ["ARQ_CONTRAPISO", "ARQ_ELEMENTOS FIXOS"]},
+}
+
+# ponta do acesso de veículos (erro 4): o motor fez o trecho junto ao limite direito em cinza; no
+# PDF (e a pedido do usuário) é o mesmo granito da garagem. Granito tecido (image quilting) do
+# acesso limpo, com o perfil de luz de cada linha (a sombra do muro de cima) do granito logo à
+# esquerda, por canal
+ACESSO = {
+    "ret": (1656, 89, 1757, 235),
+    "fonte": [(1440, 96, 1640, 180)],
+    "perfil_x": (1600, 1650),
+}
+# projeção sobre a entrada da garagem (erro 5): os retângulos com X e o contorno tracejado da layer
+# DOC_LINHAS E PROJEÇÕES, levados ao render, em cinza e traço fino (como os arcos sobre o granito),
+# só sobre o granito
+PROJECAO_GARAGEM = {
+    "janela": (1338, 175, 1668, 238),
+    # os X (DOC_LINHAS) e o contorno tracejado (os traços curtos das layers de parede e elementos fixos)
+    "linhas": {"larg": 3.6, "cor": (160, 161, 160), "forca": 0.7, "layers": ["DOC_LINHAS E PROJEÇÕES"],
+               "curtos": {"ARQ_PAREDE": 4.5, "ARQ_ELEMENTOS FIXOS": 4.5}},
+    "granito_lum": (35.0, 115.0),
 }
 
 
@@ -267,11 +295,9 @@ def pdf_cadeia(A, forma_render):
 
 def pdf_no_render(janela, A, forma_render):
     """Trecho do PDF rasterizado e levado ao render pela mesma cadeia da base, em SS vezes a
-    resolução (cinza, 255 = papel), sem as layers que a base esconde (as curvas de nível)."""
+    resolução (cinza, 255 = papel)."""
     cfg = json.loads(CONFIG.read_text())
     doc = pymupdf.open(PDF)
-    ocultas = set(cfg["pavimentos"]["Terreo"]["layers_ocultas"])
-    doc.set_layer(-1, off=[x for x, o in doc.get_ocgs().items() if o["name"] in ocultas])
     pg = doc[cfg["pavimentos"]["Terreo"]["pagina"]]
     fx0, fy0, fx1, fy1 = cfg["recorte"]
     clip = pymupdf.Rect(pg.rect.width * fx0, pg.rect.height * fy0, pg.rect.width * fx1, pg.rect.height * fy1)
@@ -314,12 +340,49 @@ def grama(out, fontes, alto, largo):
 
 
 def linhas_pdf(out, A, janela, q, mascara=None):
-    """Linhas do PDF na janela, engrossadas para o traço fino do render, em cor clara."""
+    """Traços do PDF (vetor, por layer) na janela, levados ao render pela cadeia da base e
+    desenhados em SS vezes a resolução, no traço fino do render, em cor clara. O MuPDF não desliga
+    as layers deste PDF no raster, então os traços vêm de get_drawings: q["layers"] (só essas) ou
+    q["excluir"] (todas menos essas), e q["curtos"] (layer: comprimento máximo em px), só os traços
+    curtos de tracejado dessas layers; as curvas de nível (ocultas na base) nunca entram."""
     x0, y0, x1, y1 = janela
     h, w = y1 - y0, x1 - x0
-    pdf = pdf_no_render(janela, A, out.shape)
-    m = (pdf < q["limiar"]).astype(np.uint8) * 255
-    m = cv2.dilate(m, np.ones((q["larg"], q["larg"]), np.uint8))
+    pg, p2r = pdf_cadeia(A, out.shape)
+    ocultas = set(json.loads(CONFIG.read_text())["pavimentos"]["Terreo"]["layers_ocultas"])
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    larg = max(1, int(round(q["larg"])))
+
+    def pt(v):
+        x, y = p2r(v.x, v.y)
+        return [int(round((x - x0) * SS)), int(round((y - y0) * SS))]
+
+    for d in pg.get_drawings():
+        layer = d.get("layer") or ""
+        if layer in ocultas or d.get("color") is None:
+            continue
+        curto = q.get("curtos", {}).get(layer)
+        if "layers" in q and layer not in q["layers"] and curto is None:
+            continue
+        if layer in q.get("excluir", ()):
+            continue
+        (rx0, ry0), (rx1, ry1) = p2r(d["rect"].x0, d["rect"].y0), p2r(d["rect"].x1, d["rect"].y1)
+        if rx1 < x0 - 1 or rx0 > x1 + 1 or ry1 < y0 - 1 or ry0 > y1 + 1:
+            continue
+        for it in d["items"]:
+            if curto is not None and (it[0] != "l" or np.hypot(*np.subtract(p2r(it[1].x, it[1].y),
+                                                                            p2r(it[2].x, it[2].y))) > curto):
+                continue                                   # dessas layers, só os traços de tracejado
+            if it[0] == "l":
+                cv2.line(m, pt(it[1]), pt(it[2]), 255, larg, cv2.LINE_AA)
+            elif it[0] == "c":
+                tt = np.linspace(0, 1, 24)[:, None]
+                c = [np.array(pt(v), np.float32) for v in it[1:5]]
+                curva = (1 - tt) ** 3 * c[0] + 3 * (1 - tt) ** 2 * tt * c[1] + 3 * (1 - tt) * tt ** 2 * c[2] + tt ** 3 * c[3]
+                cv2.polylines(m, [np.round(curva).astype(np.int32)], False, 255, larg, cv2.LINE_AA)
+            elif it[0] == "re":
+                r = it[1]
+                cv2.polylines(m, [np.array([pt(r.tl), pt(r.tr), pt(r.br), pt(r.bl)], np.int32)], True, 255, larg,
+                              cv2.LINE_AA)
     a = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * q["forca"]
     if mascara is not None:
         a *= mascara
@@ -752,6 +815,37 @@ def faixa_x(out, A):
     return out
 
 
+def acesso(out):
+    q = ACESSO
+    x0, y0, x1, y1 = q["ret"]
+    h, w = y1 - y0, x1 - x0
+    f = []
+    for a, b, c, d in q["fonte"]:
+        g = out[b:d, a:c].astype(np.float32)
+        f += [np.ascontiguousarray(v) for v in (g, g[:, ::-1], g[::-1, :], g[::-1, ::-1])]
+    tex = quilting(f, h, w, p=16, sobra=5, candidatos=600)[:h, :w]
+    tex = tex / tex.reshape(-1, 3).mean(axis=0)
+    px0, px1 = q["perfil_x"]
+    perfil = out[y0:y1, px0:px1].astype(np.float32).mean(axis=1)
+    perfil = np.stack([np.convolve(np.pad(perfil[:, c], 2, mode="edge"), np.ones(5) / 5, "valid") for c in range(3)],
+                      axis=1)
+    out[y0:y1, x0:x1] = np.clip(tex * perfil[:, None, :], 0, 255).astype(np.uint8)
+    print(f"    ponta do acesso: {w}x{h} px de granito no lugar do cinza")
+    return out
+
+
+def projecao_garagem(out, A):
+    q = PROJECAO_GARAGEM
+    x0, y0, x1, y1 = q["janela"]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    Y = reg.mean(axis=2)
+    lo, hi = q["granito_lum"]
+    gran = ((Y > lo) & (Y < hi) & (reg[..., 2] > reg[..., 0])).astype(np.float32)
+    out = linhas_pdf(out, A, q["janela"], q["linhas"], mascara=gran)
+    print("    projeção tracejada com X sobre a entrada da garagem")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -784,6 +878,10 @@ def main():
     print("[9] erro 3: faixa com X à direita do hall")
     _, _, A = alinhar_base(orig)
     out = faixa_x(out, A)
+    print("[10] erro 4: ponta do acesso de veículos em granito")
+    out = acesso(out)
+    print("[11] erro 5: projeção com X sobre a entrada da garagem")
+    out = projecao_garagem(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
