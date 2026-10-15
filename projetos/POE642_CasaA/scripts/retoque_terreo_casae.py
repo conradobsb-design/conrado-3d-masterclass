@@ -24,6 +24,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
    do PDF: o que sai vira travertino (as mesmas colunas da faixa limpa acima do tapete, pois os veios
    correm na vertical, na luz do travertino em volta e com a sombra dos móveis), o que entra vira
    tapete tecido do próprio tapete; sofá, poltronas, mesas e aparador ficam; borda fina por fora.
+5. Varanda: as quatro barras a 45° à esquerda das poltronas (ARQ_ELEMENTOS FIXOS), que o motor
+   apagou, voltam na geometria do PDF (cada uma, o retângulo girado da mancha do PDF), no cinza em que
+   aparecem na base, com volume leve, contorno fino e sombra curta no piso.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -318,6 +321,67 @@ def tapete(out, A):
     return out
 
 
+# barras a 45° da varanda (item 5): os quadradinhos brancos da ARQ_ELEMENTOS FIXOS nesta janela
+BARRAS = {
+    "janela": (618, 643, 658, 770),
+    "cor": (148, 150, 153), "volume": 0.06,        # cinza da base; mais claro na face de cima
+    "contorno": (70, 72, 74), "larg_contorno": 0.5, "traco_pdf": 0.6,
+    "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.35},
+}
+
+
+def poligono_aa(forma, pts):
+    """Máscara (0 a 1) de um polígono preenchido, desenhado em SS x e reduzido."""
+    h, w = forma
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.fillPoly(m, [np.int32(np.round(np.float64(pts) * SS))], 255, cv2.LINE_AA)
+    return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+
+def barras(out, A):
+    q = BARRAS
+    wx0, wy0, wx1, wy1 = q["janela"]
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+
+    def dentro(d):
+        x0, y0, x1, y1 = caixa_render(d, p2r)
+        return wx0 < x0 and x1 < wx1 and wy0 < y0 and y1 < wy1
+
+    m = mascara_pdf(q["janela"], A, out.shape, lambda d: d.get("layer") == "ARQ_ELEMENTOS FIXOS" and
+                    d["type"] == "f" and d.get("fill") == (1.0, 1.0, 1.0) and dentro(d))
+    n, lab = cv2.connectedComponents((m > 0.5).astype(np.uint8))
+    forma = out.shape[:2]
+    s = q["sombra"]
+    # cada barra: o retângulo girado da mancha; a largura vem da área (o retângulo dos centros dos px
+    # fica fino demais), mais o traço do contorno do PDF (0,57 pt), e é a mediana das quatro
+    rets = []
+    for i in range(1, n):
+        ys, xs = np.nonzero(lab == i)
+        (cx, cy), (a, b), ang = cv2.minAreaRect(np.float32(np.c_[xs + wx0 + 0.5, ys + wy0 + 0.5]))
+        comp = max(a, b) + 1
+        rets.append(((cx, cy), comp, float(m[lab == i].sum()) / comp + q["traco_pdf"], ang, a >= b))
+    larg = float(np.median([r[2] for r in rets]))
+    for i, ((cx, cy), comp, _, ang, deitado) in enumerate(rets, 1):
+        a, b = (comp, larg) if deitado else (larg, comp)
+        cantos = cv2.boxPoints(((cx, cy), (a, b), ang))
+        # sombra curta no piso (só escurece)
+        sombra = cv2.GaussianBlur(poligono_aa(forma, cantos + np.float32(s["desloc"])), (0, 0), s["sigma"])
+        out[:] = np.clip(out * (1 - s["forca"] * sombra)[..., None], 0, 255).astype(np.uint8)
+        # a barra: cinza com a face de cima um pouco mais clara (gradiente na largura)
+        al = poligono_aa(forma, cantos)
+        yy, xx = np.mgrid[0:forma[0], 0:forma[1]].astype(np.float32) + 0.5
+        u = np.float32([np.cos(np.radians(ang)), np.sin(np.radians(ang))])
+        lado = u if a < b else np.float32([-u[1], u[0]])      # direção da largura
+        t = np.clip(((xx - cx) * lado[0] + (yy - cy) * lado[1]) / max(min(a, b) / 2, 0.5), -1, 1)
+        t *= -np.sign(lado[1] + 1e-6)                           # +1 na face de cima
+        cor = np.float32(q["cor"])[None, None, :] * (1 + q["volume"] * t)[..., None]
+        out[:] = np.clip(out * (1 - al[..., None]) + cor * al[..., None], 0, 255).astype(np.uint8)
+        c = linha_aa(forma, cantos, q["larg_contorno"], fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - c) + np.float32(q["contorno"]) * c, 0, 255).astype(np.uint8)
+        print(f"    barra {i}: centro ({cx:.1f}, {cy:.1f}), {max(a, b):.1f} x {min(a, b):.1f} px, {ang:.0f}°")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -334,6 +398,8 @@ def main():
     out = jardim_interno(out)
     print("[4] tapete do estar da varanda no contorno orgânico do PDF")
     out = tapete(out, A)
+    print("[5] varanda: as quatro barras a 45° do PDF")
+    out = barras(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
