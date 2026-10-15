@@ -65,6 +65,11 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    perfil de sombra das arestas do próprio render, um pouco mais estreito para o degrau menor.
 13. Elevador: o motor fez a caixa no travertino do hall. Ela fica branca, com o contorno fino e
    cinza da cabine na posição do PDF, como o elevador do Subsolo da Casa C aprovado.
+14. Chuveiro externo (no pisante junto ao muro de baixo): o motor fez uma cruz escura, que ainda
+   atravessava o muro. A cruz sai (a barra deitada vira a pedra de cima do mesmo pisante; a em pé
+   vira as colunas limpas ao lado, que já têm a pedra, a borda, a grama e o muro). Entra o
+   chuveiro do PDF (ARQ_LOUÇAS E METAIS): a ducha quadrada de ~19 cm, na placa aprovada da Casa A
+   reduzida, o braço cromado até o muro e a canopla.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -238,6 +243,20 @@ ELEVADOR = {
     "cabine": (926.5, 428.5, 968.1, 471.9),
     "branco": (255, 255, 255), "linha": (170, 170, 170), "larg": 0.7,
 }
+# chuveiro externo: a cruz do motor (barra deitada e em pé, com a borda antisserrilhada), as
+# fontes limpas, e a geometria do PDF (ducha, braço e canopla, em px do render)
+CHUVEIRO_EXT = {
+    "barra_deitada": ((608, 941, 628, 945), -14),          # <- linhas de cima, mesmas colunas
+    "barra_em_pe": ((616, 934, 621, 961), -6),             # <- colunas à esquerda, mesmas linhas
+    "ducha": (615.03, 937.25, 621.17, 943.39),
+    "braco": (618.1, 941.0, 952.0), "larg_braco": 0.8,
+    "canopla": (617.0, 951.4, 619.2, 952.5),
+    "janela": (612, 934, 625, 955),
+    "sombra": {"desloc": (-1.0, 1.0), "sigma": 0.8, "forca": 0.3},
+}
+CROMO_ESCURO = (130, 134, 138)
+CROMO = (196, 199, 202)
+CROMO_CLARO = (238, 240, 242)
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
     "BH master 1": (411.2, 187.9),
@@ -689,6 +708,60 @@ def elevador(out):
     return out
 
 
+def chuveiro_externo(out):
+    q = CHUVEIRO_EXT
+    for (x0, y0, x1, y1), d in (q["barra_deitada"],):
+        out[y0:y1, x0:x1] = out[y0 + d:y1 + d, x0:x1]
+    (x0, y0, x1, y1), d = q["barra_em_pe"]
+    out[y0:y1, x0:x1] = out[y0:y1, x0 + d:x1 + d]
+
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+
+    def px(v, o=0.0):
+        return int(round((v - o) * SS))
+
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+
+    def pintar(mascara, cor):
+        nonlocal reg
+        a = cv2.resize(mascara.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        reg = reg * (1 - a) + np.array(cor, np.float32) * a
+
+    dx0, dy0, dx1, dy1 = q["ducha"]
+    ducha = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(ducha, (px(dx0, wx0), px(dy0, wy0)), (px(dx1, wx0), px(dy1, wy0)), 255, -1)
+    s = q["sombra"]
+    M = np.float32([[1, 0, s["desloc"][0] * SS], [0, 1, s["desloc"][1] * SS]])
+    sombra = cv2.GaussianBlur(cv2.warpAffine(ducha.astype(np.float32), M, (w * SS, h * SS)), (0, 0), s["sigma"] * SS) / 255
+    reg *= (1 - s["forca"] * cv2.resize(sombra, (w, h), interpolation=cv2.INTER_AREA))[..., None]
+
+    bx, by0, by1 = q["braco"]
+    braco = np.zeros_like(ducha)
+    cv2.line(braco, (px(bx, wx0), px(by0, wy0)), (px(bx, wx0), px(by1, wy0)), 255, px(q["larg_braco"]))
+    brilho = np.zeros_like(ducha)
+    cv2.line(brilho, (px(bx, wx0), px(by0, wy0)), (px(bx, wx0), px(by1, wy0)), 255, max(1, px(0.3)))
+    pintar(braco, CROMO_ESCURO)
+    pintar(brilho, CROMO_CLARO)
+    cx0, cy0, cx1, cy1 = q["canopla"]
+    canopla = np.zeros_like(ducha)
+    cv2.rectangle(canopla, (px(cx0, wx0), px(cy0, wy0)), (px(cx1, wx0), px(cy1, wy0)), 255, -1)
+    pintar(canopla, CROMO)
+
+    img = cv2.imread(str(CHUVEIRO_TETO[0]))
+    hx0, hy0, hx1, hy1 = CHUVEIRO_TETO[1]
+    placa = cv2.resize(img[hy0:hy1, hx0:hx1], (px(dx1 - dx0), px(dy1 - dy0)), interpolation=cv2.INTER_CUBIC)
+    cor = np.zeros((h * SS, w * SS, 3), np.uint8)
+    cor[px(dy0, wy0):px(dy0, wy0) + placa.shape[0], px(dx0, wx0):px(dx0, wx0) + placa.shape[1]] = placa
+    a = cv2.resize(ducha.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    c = cv2.resize(cor.astype(np.float32) * (ducha[..., None] / 255), (w, h), interpolation=cv2.INTER_AREA)
+    c = c / np.maximum(a, 1e-6)
+    reg = reg * (1 - a) + c * a
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    chuveiro externo: cruz do motor fora; ducha, braço e canopla do PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -726,12 +799,14 @@ def main():
     out = escada(out)
     print("[13] elevador")
     out = elevador(out)
+    print("[14] chuveiro externo")
+    out = chuveiro_externo(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[14] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[15] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
