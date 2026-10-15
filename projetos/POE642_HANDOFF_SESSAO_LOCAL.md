@@ -507,3 +507,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 - **Aprovado pelo usuário (15/10/26):** `renders/POE642_CasaE_PH_Terreo_v1_retocado.png` (itens 1 a 34); depois da aprovação, o item 35 (Barlavento nas piscinas) e a prancha e o PDF refeitos com ele.
 - **Entrega (15/10/26, depois da aprovação):** chave `entrega` na `POE642_CasaE/config_bases.json`, por decisão do usuário: endereço ML 10 – Conjunto 02, Lotes 17, Unidade E (projeto CASA E · UNIDADE AUTÔNOMA "E"), norte o mesmo das outras casas, quadro de áreas com Térreo "NÃO INFORMADO" e sem total. Só o Térreo (o PDF do Subsolo não veio; se vier, entra como na Casa D). Prancha `entrega/POE642_CasaE_PH_Terreo_entrega.png` (3840 × 2600 px; o retocado realinhado à base com 132 pontos, erro mediano 0,77 px), rodapé `entrega/POE642_CasaE_rodape_Terreo.png` e `entrega/POE642_CasaE_Plantas_Humanizadas.pdf` (1 página A3, 12,5 MB).
 
+## Casa E · 1º Pavimento
+
+- **PDF:** `_pdfs_cliente/642 - 1º PAVIMENTO - CASA E.pdf` (recebido em 15/10/26; mesma folha 3370 × 2384 pt e mesmo enquadramento). Pavimento `1Pavimento` na `POE642_CasaE/config_bases.json` (curvas de nível ocultas).
+- **Ambientes (textos do PDF):** sala íntima (44,94 m²), circulação (19,3 m²), copinha (3,85 m²), suíte master (28,89 m²) com closet master (10,56 m²) e banho master (19,72 m², banheira), rouparia (3,6 m²), elevador; suítes 1 e 2 (17 m² cada) com closets (3,78 m²), banhos (5,94 m²) e varandinhas (5,2 m²); suítes 3 e 4 (19,98 m²) com closets (3,15 m²) e banhos (4,95 e 4,92 m²); varanda grande à esquerda (65,75 m²); escada de 20 degraus; o vazio do hall de entrada embaixo à direita (X tracejado).
+- **Cores do PDF:** laranja #CC9966 (suítes, sala íntima, circulação, closet master, rouparia), cinza #E4E4E4 (as três varandas); banhos brancos com hachura fina; closets das suítes 1 a 4, copinha, escada e elevador brancos.
+- **Base v1** (cores do PDF): `bases/POE642_CasaE_BASE_1Pavimento_v1(_16x9)` e a prévia `_16x9_preview.jpg`.
+
