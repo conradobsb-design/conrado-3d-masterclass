@@ -426,4 +426,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - os três chuveiros (WC DCE, ducha da antessala e box do vestiário) são duchas num braço que sai da parede, como no Térreo;
   - o armário do DCE 1 vai até o teto;
   - o elevador ocupa quase toda a caixa.
+- **Render v1:** `renders/POE642_CasaD_PH_Subsolo_v1_render.webp` (2000 x 1116). O motor manteve o layout, mas aproximou a planta (~2,73 x a base reduzida a 2000 px); o alinhamento render→base deu 68 pontos e erro mediano de 0,74 px. O elevador do Subsolo cai a 1 px do elevador do Térreo na base de 6000 px: as duas folhas têm o mesmo enquadramento. Mapa dos erros: `renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg`. Decisões do usuário: banco da sauna em Bege Bahia; juntas gigantes do depósito removidas; a imagem final na escala e na posição do Térreo.
+- **Retoque** (`POE642_CasaA/scripts/retoque_subsolo_casad.py`, sem IA; saída `renders/POE642_CasaD_PH_Subsolo_v1_retocado.png`, `_camada.png` e `_previa.jpg`):
+  1. depósito: a faixa areia do motor junto à parede da esquerda (armário que não existe no PDF) virou granito (textura tecida do próprio piso, luz do entorno em várias escalas).
 
