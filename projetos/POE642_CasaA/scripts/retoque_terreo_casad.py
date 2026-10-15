@@ -107,6 +107,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    interpolada, com o veio da madeira do render) e entram as duas mesinhas do PDF, com contorno e
    sombra curta, por baixo das poltronas. O tapete da segunda imagem é redondo (no PDF, orgânico, no
    mesmo contorno externo).
+23. Erro 17 da lista (plantas sobre as mesas): nas duas mesas da varanda gourmet e na escrivaninha do
+   escritório, o tampo vem da segunda imagem (sem planta), com o tom ajustado ao tampo do render; na
+   mesa de jantar (a segunda imagem também tem planta), cada coluna do tampo liga a madeira de cima à
+   de baixo da planta (o veio é vertical).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -447,6 +451,17 @@ def alinhar_fonte2(render):
                                   np.float32([k2[a.trainIdx].pt for a in pares]), ransacReprojThreshold=1.5)
     print(f"    segunda imagem alinhada: {int(inl.sum())} pontos, escala {M[0, 0]:.4f} x {M[1, 1]:.4f}")
     return cv2.warpAffine(f2, M, render.shape[1::-1], flags=cv2.INTER_LINEAR, borderValue=(255, 255, 255))
+
+# plantas sobre as mesas (erro 17): o motor pôs plantas nas mesas da varanda gourmet, na de jantar e
+# na escrivaninha do escritório; no PDF não há. Nas mesas da gourmet e na escrivaninha, o tampo vem da
+# segunda imagem (sem planta), com o tom ajustado ao tampo do render; na de jantar (a segunda imagem
+# também tem planta), cada coluna do tampo liga a madeira de cima à de baixo da planta (o veio é
+# vertical)
+PLANTAS_MESAS = {
+    "discos_fonte2": [((779.75, 431.55), 24.3), ((873.1, 431.55), 24.3)],
+    "retangulos_fonte2": [(1231, 806, 1255, 867)],
+    "jantar": (998, 397, 1035, 490),
+}
 
 
 def alinhar_base(render):
@@ -1475,6 +1490,42 @@ def armarios_fonte2(out, f2, chapada):
     return out
 
 
+def plantas_mesas(out, f2):
+    q = PLANTAS_MESAS
+    yy, xx = np.mgrid[0:out.shape[0], 0:out.shape[1]]
+    pecas = []
+    for (cx, cy), r in q["discos_fonte2"]:
+        x0, y0, x1, y1 = int(cx - r - 2), int(cy - r - 2), int(cx + r + 3), int(cy + r + 3)
+        d = np.sqrt((xx[y0:y1, x0:x1] + 0.5 - cx) ** 2 + (yy[y0:y1, x0:x1] + 0.5 - cy) ** 2)
+        pecas.append(((x0, y0, x1, y1), np.clip(r - d + 0.5, 0, 1)))
+    for x0, y0, x1, y1 in q["retangulos_fonte2"]:
+        a = np.zeros((y1 - y0 + 2, x1 - x0 + 2), np.float32)
+        a[1:-1, 1:-1] = 1
+        pecas.append(((x0 - 1, y0 - 1, x1 + 1, y1 + 1), a))
+    for (x0, y0, x1, y1), a in pecas:
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        fonte = f2[y0:y1, x0:x1].astype(np.float32)
+        madeira = (a > 0.99) & (reg[..., 1] < reg[..., 2])                # sem a planta (verde)
+        fonte *= (np.median(reg[madeira], axis=0) / np.median(fonte[a > 0.99], axis=0))[None, None]
+        out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + fonte * a[..., None], 0, 255).astype(np.uint8)
+    x0, y0, x1, y1 = q["jantar"]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    Y = reg.mean(axis=2)
+    verde = reg[..., 1] > reg[..., 2] + 2
+    planta = cv2.dilate((verde | (Y < 0.85 * np.median(Y))).astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    planta[:2], planta[-2:], planta[:, :2], planta[:, -2:] = False, False, False, False
+    for c in range(reg.shape[1]):
+        ys = np.nonzero(planta[:, c])[0]
+        if len(ys) == 0:
+            continue
+        a, b = ys.min() - 1, ys.max() + 1
+        tt = ((np.arange(a + 1, b) - a) / (b - a))[:, None]
+        reg[a + 1:b, c] = reg[a, c] * (1 - tt) + reg[b, c] * tt
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    plantas fora: mesas da gourmet e escrivaninha (tampos da segunda imagem) e mesa de jantar")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1533,6 +1584,8 @@ def main():
     out = banco_estar(out)
     print("[21] erros 16 e 17: mesa redonda, tapete e mesinhas")
     out = mesa_redonda(out, f2, orig)
+    print("[22] erro 17: plantas sobre as mesas")
+    out = plantas_mesas(out, f2)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
