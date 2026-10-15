@@ -113,6 +113,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     do render), o granito volta no lugar dele e da sombra (tecido do próprio granito, na luz em volta)
     e o carro volta com um deslocamento e um giro leves, diferentes para cada um, com a sombra curta
     desenhada de novo.
+27. Adega (pedido do usuário): prateleira de vinhos em U, não um armário em U. No polígono do PDF
+    (ARQ_LAYOUT HUMANIZAÇÃO), a madeira lisa do motor ganha o veio (o da mesa de jantar, no comprido de
+    cada braço) e as garrafas deitadas em fileiras, com o gargalo para a parede de cada braço: vidro
+    verde-escuro, âmbar e vinho alternados, com o brilho no comprido e sombra curta na madeira.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1357,6 +1361,84 @@ def carros(out):
     return out
 
 
+# adega (item 27): o U do PDF no quadro do render (de fora, e o vão de dentro) e as garrafas: passo,
+# comprimento do corpo e do gargalo, larguras (px) e as cores do vidro (BGR)
+ADEGA = {"fora": (1084.6, 388.1, 1154.6, 422.1), "dentro": (1097.0, 400.6, 1142.1, 422.1),
+         "fonte_veio": (885, 505, 914, 589), "realce": 1.8,
+         "passo": 2.6, "corpo": 6.6, "gargalo": 2.6, "larg": 1.9, "larg_gargalo": 0.8, "folga": 1.0,
+         "vidros": [(26, 40, 28), (20, 32, 48), (30, 24, 46), (24, 34, 26), (22, 30, 40)], "brilho": 0.45,
+         "sombra": {"desloc": (-0.5, 0.6), "sigma": 0.5, "forca": 0.35}, "semente": 3}
+
+
+def adega(out, orig):
+    q = ADEGA
+    forma = out.shape[:2]
+    fx0, fy0, fx1, fy1 = q["fora"]
+    dx0, dy0, dx1, dy1 = q["dentro"]
+    wx0, wy0, wx1, wy1 = int(fx0) - 2, int(fy0) - 2, int(np.ceil(fx1)) + 3, int(np.ceil(fy1)) + 3
+    h, w = wy1 - wy0, wx1 - wx0
+    U = poligono_aa(forma, [(fx0, fy0), (fx1, fy0), (fx1, fy1), (dx1, fy1), (dx1, dy0), (dx0, dy0), (dx0, fy1),
+                            (fx0, fy1)])[wy0:wy1, wx0:wx1]
+    # veio: no comprido de cada braço (deitado em cima, em pé nos lados)
+    a, b, c, d = q["fonte_veio"]
+    Y = orig[b:d, a:c].astype(np.float32).mean(axis=2)
+    v = np.clip(1 + q["realce"] * (Y / np.maximum(cv2.GaussianBlur(Y, (0, 0), 3.0), 1) - 1), 0.85, 1.15)
+
+    def ladrilho(g, hh, ww):
+        g = np.concatenate([g, g[::-1]] * (hh // (2 * g.shape[0]) + 1), axis=0)[:hh]
+        return np.concatenate([g, g[:, ::-1]] * (ww // (2 * g.shape[1]) + 1), axis=1)[:, :ww]
+
+    veio_pe = ladrilho(v, h, w)
+    veio_deitado = ladrilho(cv2.rotate(v, cv2.ROTATE_90_CLOCKWISE), h, w)
+    yy = wy0 + np.arange(h)[:, None] + 0.5 + np.zeros((1, w))
+    g = np.where(yy < dy0, veio_deitado, veio_pe)
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    base = cv2.GaussianBlur(reg, (0, 0), 1.2)
+    reg = reg * (1 - U[..., None]) + base * g[..., None] * U[..., None]
+    # garrafas: (início no gargalo, junto à parede) -> (fundo, para o vão), em 8 x
+    garrafas = []
+    p_, cp, gl, f = q["passo"], q["corpo"], q["gargalo"], q["folga"]
+    x = fx0 + f + p_ / 2
+    while x < fx1 - f:                                    # braço de cima: parede em cima
+        garrafas.append(((x, fy0 + 0.3), (0, 1)))
+        x += p_
+    y = dy0 + f + p_ / 2
+    while y < fy1 - f:                                    # braços dos lados: parede do lado de fora
+        garrafas.append(((fx0 + 0.3, y), (1, 0)))
+        if y < q["fora"][3] - 1.4 - f:
+            garrafas.append(((fx1 - 0.3, y), (-1, 0)))
+        y += p_
+    rng = np.random.default_rng(q["semente"])
+    s = q["sombra"]
+    for (px, py), (ux, uy) in garrafas:
+        cor = np.float32(q["vidros"][int(rng.integers(len(q["vidros"])))])
+        nx, ny = -uy, ux
+        pts_g = [(px, py), (px + ux * gl, py + uy * gl)]
+        pts_c = [(px + ux * (gl + 0.6), py + uy * (gl + 0.6)), (px + ux * (gl + cp), py + uy * (gl + cp))]
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        for pts, larg in ((pts_g, q["larg_gargalo"]), (pts_c, q["larg"])):
+            pp = np.int32(np.round((np.float32(pts) - [wx0, wy0]) * SS))
+            cv2.line(m, tuple(pp[0]), tuple(pp[1]), 255, max(1, int(round(larg * SS))), cv2.LINE_AA)
+        # ombro: liga gargalo e corpo
+        pp = np.int32(np.round((np.float32([pts_g[1], pts_c[0]]) - [wx0, wy0]) * SS))
+        cv2.line(m, tuple(pp[0]), tuple(pp[1]), 255, max(1, int(round((q["larg"] + q["larg_gargalo"]) / 2 * SS))), cv2.LINE_AA)
+        al = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * U
+        sh = cv2.GaussianBlur(cv2.warpAffine(al, np.float32([[1, 0, s["desloc"][0]], [0, 1, s["desloc"][1]]]), (w, h)),
+                              (0, 0), s["sigma"]) * (1 - al)
+        reg *= (1 - s["forca"] * sh)[..., None]
+        reg = reg * (1 - al[..., None]) + cor * al[..., None]
+        # brilho no comprido, deslocado para o lado da luz (em cima/direita)
+        bm = np.zeros((h * SS, w * SS), np.uint8)
+        off = 0.35 * (nx if nx != 0 else 0), 0.35 * (ny if ny != 0 else 0)
+        pb = np.int32(np.round((np.float32(pts_c) + [abs(off[0]), -abs(off[1])] - [wx0, wy0]) * SS))
+        cv2.line(bm, tuple(pb[0]), tuple(pb[1]), 255, max(1, int(round(0.3 * SS))), cv2.LINE_AA)
+        ab = cv2.resize(bm.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None] * q["brilho"] * U[..., None]
+        reg = reg * (1 - ab) + (cor * 0.4 + 255 * 0.6) * ab
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    adega: prateleira em U com veio e {len(garrafas)} garrafas deitadas")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1414,6 +1496,8 @@ def main():
     out = brises(out, orig, A)
     print("[26] carros levemente desalinhados")
     out = carros(out)
+    print("[27] adega: prateleira de vinhos em U")
+    out = adega(out, orig)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
