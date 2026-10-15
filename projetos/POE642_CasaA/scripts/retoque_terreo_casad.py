@@ -152,6 +152,12 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    mesinhas protegidas e uma borda fina por fora.
 34. Máquinas da área de serviço (pedido do usuário): no PDF não têm diagonal (são eletrodomésticos);
    ficam em inox, como os da cozinha (o sombreado do render, só o tom muda).
+35. Bancada da sala íntima (pedido do usuário): no PDF, junto à parede da direita, a bancada tem uma
+   cuba redonda com a torneira na parede, a área molhada e um frigobar embaixo; o motor fez só a
+   madeira, com uma torneira solta. O trecho da bancada vira quartzo (como as outras bancadas com cuba),
+   com o perfil de luz da madeira junto à parede; entram a cuba de louça, a torneira cromada, a área
+   molhada em traço cinza fino nos lados livres e o frigobar em inox, com contorno e o vão da porta. O
+   trecho de cima (armário) fica em madeira.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -173,7 +179,7 @@ sys.path.insert(0, str(AQUI))
 from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO, SS  # noqa: E402
 from retoque_terreo_casac import COZINHA as COZINHA_C  # noqa: E402
 from retoque_terreo_casac import ARCOS_GRANITO, BANCOS as BANCOS_C, ELEVADOR as ELEVADOR_C  # noqa: E402
-from retoque_terreo_casab import cuba  # noqa: E402
+from retoque_terreo_casab import cuba, LOUCA, LOUCA_CONTORNO, BACIA_BORDA, BACIA_FUNDO  # noqa: E402
 from texturizar_base import quilting  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaD/bases/POE642_CasaD_BASE_Terreo_v3_texturas_16x9.png"
@@ -604,6 +610,23 @@ GOURMET_PIA = {
     "planta": ((777.4, 257.2), 0.66),
     "janela": (765, 243, 790, 268),
     "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.35},
+}
+
+# bancada da sala íntima (pedido do usuário): no PDF, junto à parede da direita, a bancada tem uma
+# cuba redonda com a torneira na parede, a área molhada em volta e um frigobar embaixo (ARQ_BANCADAS,
+# ARQ_LOUÇAS E METAIS, ARQ_LAYOUT HUMANIZAÇÃO); o motor fez só a madeira, com uma torneira solta. O
+# trecho da bancada vira quartzo (como as outras bancadas com cuba), na luz da madeira do render;
+# entram a cuba de louça, a torneira cromada, a área molhada em traço cinza fino nos lados livres e
+# o frigobar em inox, com contorno e o vão da porta. O trecho de cima (armário) fica em madeira
+MINIBAR = {
+    "bancada": (917, 805, 935, 871),
+    "fonte_quartzo": [(762, 320, 792, 348), (832, 320, 862, 348)],
+    "cuba": ((925.1, 816.65), 5.3),
+    "torneira": ((932.6, 816.6), (927.0, 816.6)),
+    "area_molhada": [(916.9, 805.2), (916.9, 827.0), (934.3, 827.0)],
+    "frigobar": (917.7, 851.4, 934.3, 870.0),
+    "inox": (186, 184, 181), "contorno": (112, 116, 120),
+    "janela": (912, 800, 940, 875),
 }
 
 
@@ -1974,6 +1997,84 @@ def tapete_organico(out, orig):
     return out
 
 
+def minibar(out, chapada):
+    q = MINIBAR
+    x0, y0, x1, y1 = q["bancada"]
+    h, w = y1 - y0, x1 - x0
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    Y = reg.mean(axis=2)
+    madeira = Y > 120
+    # luz: só o perfil por coluna da madeira limpa (a sombra junto à parede), sem a torneira do motor
+    lim = Y[25:43]
+    luz = np.clip(np.median(lim, axis=0) / np.median(lim), 0.8, 1.05)[None, :].repeat(h, axis=0)
+    cor = np.median(np.concatenate([out[b:d, a:c].reshape(-1, 3) for a, b, c, d in q["fonte_quartzo"]]).astype(np.float32), axis=0)
+    tex = textura(out, q["fonte_quartzo"], h, w) * cor * luz[..., None]
+    m = madeira | ~parede_grossa(chapada)[y0:y1, x0:x1] & (Y > 60)
+    reg[m] = tex[m]
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    out = area_molhada(out, q["area_molhada"])
+
+    wx0, wy0, wx1, wy1 = q["janela"]
+    hh, ww = wy1 - wy0, wx1 - wx0
+
+    def px(v, o=0.0):
+        return int(round((v - o) * SS))
+
+    cor_ss = np.zeros((hh * SS, ww * SS, 3), np.float32)
+    alfa = np.zeros((hh * SS, ww * SS), np.float32)
+
+    def circ(cx, cy, r, c):
+        f = np.zeros(alfa.shape, np.uint8)
+        cv2.circle(f, (px(cx, wx0), px(cy, wy0)), max(1, px(r)), 255, -1)
+        cor_ss[f > 0] = c
+        alfa[f > 0] = 1
+
+    def ret(b, c, larg=-1):
+        f = np.zeros(alfa.shape, np.uint8)
+        cv2.rectangle(f, (px(b[0], wx0), px(b[1], wy0)), (px(b[2], wx0), px(b[3], wy0)), 255, larg)
+        cor_ss[f > 0] = c
+        alfa[f > 0] = 1
+
+    def linha(p0, p1, larg, c):
+        f = np.zeros(alfa.shape, np.uint8)
+        cv2.line(f, (px(p0[0], wx0), px(p0[1], wy0)), (px(p1[0], wx0), px(p1[1], wy0)), 255, max(1, px(larg)))
+        cor_ss[f > 0] = c
+        alfa[f > 0] = 1
+
+    # frigobar em inox: escovado vertical, contorno e o vão da porta
+    fx0, fy0, fx1, fy1 = q["frigobar"]
+    ret(q["frigobar"], q["inox"])
+    rng = np.random.default_rng(642)
+    riscos = cv2.GaussianBlur(rng.normal(0, 1, (1, ww * SS)).astype(np.float32), (0, 0), 0.7 * SS)
+    riscos = 1 + 0.03 * riscos / riscos.std()
+    gy = np.linspace(1.03, 0.95, hh * SS)[:, None]
+    dentro = alfa > 0
+    cor_ss[dentro] *= (riscos * gy)[dentro][:, None]
+    ret(q["frigobar"], q["contorno"], max(1, px(0.35)))
+    linha((fx0 + 0.6, fy1 - 2.2), (fx1 - 0.6, fy1 - 2.2), 0.3, q["contorno"])
+    # cuba redonda de louça, torneira na parede
+    (cx, cy), r = q["cuba"]
+    circ(cx, cy, r, LOUCA_CONTORNO)
+    circ(cx, cy, r - 0.45, LOUCA)
+    for i in range(6):
+        tt = i / 5
+        c = tuple(BACIA_BORDA[k] * (1 - tt) + BACIA_FUNDO[k] * tt for k in range(3))
+        circ(cx, cy, r - 1.4 - tt * 1.6, c)
+    circ(cx, cy, 0.75, CROMO_ESCURO)
+    circ(cx, cy, 0.5, CROMO_CLARO)
+    (tx0, ty0), (tx1, ty1) = q["torneira"]
+    circ(tx0, ty0, 1.0, CROMO_ESCURO)
+    circ(tx0, ty0, 0.75, CROMO)
+    linha((tx0, ty0), (tx1, ty1), 0.9, CROMO_ESCURO)
+    linha((tx0, ty0 - 0.1), (tx1, ty1 - 0.1), 0.45, CROMO_CLARO)
+    a = cv2.resize(alfa, (ww, hh), interpolation=cv2.INTER_AREA)
+    c = cv2.resize(cor_ss * alfa[..., None], (ww, hh), interpolation=cv2.INTER_AREA) / np.maximum(a, 1e-6)[..., None]
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    out[wy0:wy1, wx0:wx1] = np.clip(reg * (1 - a[..., None]) + c * a[..., None], 0, 255).astype(np.uint8)
+    print("    bancada da sala íntima: quartzo, cuba redonda com torneira, área molhada e frigobar em inox")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -2050,6 +2151,8 @@ def main():
     out = banho_gourmet(out)
     print("[29] bancada da pia da gourmet: área molhada e suporte decorativo")
     out = gourmet_pia(out, orig)
+    print("[30] bancada da sala íntima: cuba, área molhada e frigobar")
+    out = minibar(out, chapada)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
