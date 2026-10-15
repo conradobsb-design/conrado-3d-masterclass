@@ -68,6 +68,9 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
 13. Erro 7 da lista (área descoberta): o motor pôs um vaso sanitário junto à parede da direita e não
    fez o X tracejado do PDF. O vaso sai (granito tecido, na luz do entorno: `apagar`) e o X da layer
    DOC_LINHAS E PROJEÇÕES entra em cinza e traço fino, só sobre o granito da base chapada.
+14. Erro 8 da lista (tanques): o motor fez uma cuba só; no PDF são dois tanques. A cuba do motor sai
+   (bancada tecida dos trechos limpos, na luz dos dois lados) e entram os dois tanques aprovados da
+   Casa B (os mesmos da Casa C), girados para a torneira ficar do lado da parede, na mesma escala.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -272,6 +275,16 @@ AREA_DESCOBERTA = {
     "vaso": (1211, 293, 1240, 317),
     "fonte_granito": [(1160, 322, 1200, 346), (1440, 96, 1640, 180)],
     "janela_x": (1150, 288, 1250, 350),
+}
+
+# tanques (erro 8): o motor fez uma cuba só; no PDF são dois tanques. A cuba do motor sai (bancada
+# tecida dos trechos limpos, na luz do entorno) e entram os dois tanques aprovados da Casa B (os
+# mesmos usados na Casa C), girados para a torneira ficar do lado da parede (em cima), na mesma escala
+TANQUES = {
+    "cuba_motor": (1216, 190, 1241, 210),
+    "fonte_bancada": [(1195, 191, 1214, 208), (1243, 191, 1262, 208)],
+    "fonte_tanques": (RAIZ / "POE642_CasaB/renders/POE642_CasaB_PH_Terreo_v4_retocado.png", (1147, 763, 1165, 804)),
+    "em": (1197, 191),
 }
 
 
@@ -957,6 +970,25 @@ def area_descoberta(out, A, chapada):
     return out
 
 
+def tanques(out):
+    q = TANQUES
+    x0, y0, x1, y1 = q["cuba_motor"]
+    pad = 14                                            # luz da bancada dos dois lados
+    ret = (x0 - pad, y0, x1 + pad, y1)
+    m = np.zeros((y1 - y0, x1 - x0 + 2 * pad), bool)
+    m[:, pad:pad + x1 - x0] = True
+    out = apagar(out, ret, m, q["fonte_bancada"], sigma=9.0, borda=0)
+    img = cv2.imread(str(q["fonte_tanques"][0]))
+    a, b, c, d = q["fonte_tanques"][1]
+    s = cv2.rotate(img[b:d, a:c], cv2.ROTATE_90_COUNTERCLOCKWISE)        # torneira (à direita) para cima
+    tx, ty = q["em"]
+    claro = s.mean(axis=2) >= 90                        # sem os px da parede da Casa B nas pontas
+    alvo = out[ty:ty + s.shape[0], tx:tx + s.shape[1]]
+    alvo[claro] = s[claro]
+    print(f"    tanques: cuba do motor fora; os dois tanques da Casa B ({s.shape[1]}x{s.shape[0]} px) em ({tx}, {ty})")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -997,6 +1029,8 @@ def main():
     out = arcos_no_granito(out, A, chapada)
     print("[13] erro 7: vaso inventado e X da área descoberta")
     out = area_descoberta(out, A, chapada)
+    print("[14] erro 8: dois tanques")
+    out = tanques(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
