@@ -306,6 +306,7 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
   12. **Escada estreita abaixo do box (pedido do usuário):** no PDF são 10 degraus (11 a 20, subindo para a direita); o motor fez 6. As arestas internas do motor saíram e entraram 9, repartidas por igual entre a primeira e a última aresta do render, com o perfil de sombra das arestas do próprio render. Feito.
   13. **Elevador:** a caixa tinha saído no travertino do hall. A caixa fica branca e a cabine, no tom da cabine do Subsolo da Casa B (pedido do usuário): é a própria cabine de lá, sem a soleira, girada para a porta ficar à esquerda e levada à cabine do PDF (quase a mesma escala). Feito.
   14. **Chuveiro externo (pedido do usuário):** no pisante junto ao muro de baixo, o motor fez uma cruz escura que ainda atravessava o muro. A cruz saiu e entrou o chuveiro do PDF: ducha quadrada de ~19 cm (a placa aprovada da Casa A, reduzida), braço cromado até o muro e canopla. Feito.
+  15. **Degraus largos (pedido do usuário):** a seta da base saiu e a sombra de cada aresta, que o motor pôs do lado de baixo (lia como subida), passou para o lado de cima, com o perfil da mesma escada no Subsolo aprovado; as duas arestas em L ficam com a sombra à esquerda (o nível mais baixo). Feito.
   - Todos os erros da lista estão feitos. Observação ainda não pedida: dentro do box do BH master 2 o piso saiu em dois tons (metade lisa, metade pontilhada).
 - **Depois do retoque:** pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
 

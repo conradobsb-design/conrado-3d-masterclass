@@ -71,6 +71,11 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    vira as colunas limpas ao lado, que já têm a pedra, a borda, a grama e o muro). Entra o
    chuveiro do PDF (ARQ_LOUÇAS E METAIS): a ducha quadrada de ~19 cm, na placa aprovada da Casa A
    reduzida, o braço cromado até o muro e a canopla.
+15. Degraus largos (descem para o pátio, para cima na imagem): a seta da base sai (as colunas
+   viram as limpas ao lado) e a sombra de cada aresta, que o motor pôs do lado de baixo (lia como
+   subida), passa para o lado de cima, com o perfil da mesma escada no Subsolo da Casa C aprovado:
+   tira-se o perfil do motor (medido em cada aresta) e aplica-se o do Subsolo. As duas arestas em
+   L também: a sombra fica do lado de fora (à esquerda, o nível mais baixo).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -256,6 +261,19 @@ CHUVEIRO_EXT = {
     "canopla": (617.0, 951.4, 619.2, 952.5),
     "janela": (612, 934, 625, 955),
     "sombra": {"desloc": (-1.0, 1.0), "sigma": 0.8, "forca": 0.3},
+}
+# degraus largos: seta da base (com o deslocamento das colunas limpas), faixa das arestas retas,
+# colunas de medida (sem a seta e sem os L), arestas que viram em L e o fim dos L; perfis da mesma
+# escada no Subsolo da Casa C aprovado (fator sobre o piso liso, d = linha - aresta e coluna - aresta)
+DEGRAUS_LARGOS = {
+    "seta": ((289, 366, 301, 531), -12),
+    "x": (190, 331), "y": (366, 520),
+    "medida_x": (262, 318),
+    "L": [{"y": 490, "x": 231}, {"y": 506, "x": 246}],
+    "fim_L": 566,
+    "perfil": {"d": list(range(-10, 7)),
+               "f": [1.0, 1.0, 0.99, 0.99, 0.98, 0.96, 0.92, 0.87, 0.80, 0.71, 0.61, 0.99, 1.0, 1.0, 1.0, 1.0, 1.0]},
+    "perfil_L": {"d": list(range(-7, 2)), "f": [1.0, 0.99, 0.95, 0.91, 0.84, 0.76, 0.64, 0.61, 1.0]},
 }
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
@@ -761,6 +779,36 @@ def chuveiro_externo(out):
     return out
 
 
+def degraus_largos(out):
+    q = DEGRAUS_LARGOS
+    (sx0, sy0, sx1, sy1), d = q["seta"]
+    out[sy0:sy1, sx0:sx1] = out[sy0:sy1, sx0 + d:sx1 + d]
+    L = out.astype(np.float32).mean(axis=2)
+    K = np.ones(L.shape, np.float32)
+    mx0, mx1 = q["medida_x"]
+    y0, y1 = q["y"]
+    m = np.median(L[y0:y1, mx0:mx1], axis=1)
+    arestas = [y0 + i for i in range(1, len(m) - 1) if m[i] < 170 and m[i] <= m[i - 1] and m[i] <= m[i + 1]]
+    ds, fs = q["perfil"]["d"], np.array(q["perfil"]["f"], np.float32)
+    for c in arestas:
+        liso = np.median(L[c - 7:c - 3, mx0:mx1])
+        motor = np.clip([np.median(L[c + k, mx0:mx1]) / liso for k in ds], 0.3, 1.1)
+        xi = q["x"][0]
+        for dl in q["L"]:
+            if abs(c - dl["y"]) <= 2:
+                xi = dl["x"]
+        K[c + ds[0]:c + ds[-1] + 1, xi:q["x"][1]] *= (fs / motor)[:, None]
+    dv, fv = q["perfil_L"]["d"], np.array(q["perfil_L"]["f"], np.float32)
+    for dl in q["L"]:
+        xc, ya, yb = dl["x"], dl["y"] - 1, q["fim_L"]
+        liso = np.median(L[ya + 8:yb - 4, xc - 12:xc - 8])
+        motor = np.clip([np.median(L[ya + 8:yb - 4, xc + k]) / liso for k in dv], 0.3, 1.1)
+        K[ya:yb, xc + dv[0]:xc + dv[-1] + 1] *= (fv / motor)[None, :]
+    out[:] = np.clip(out.astype(np.float32) * K[..., None], 0, 255).astype(np.uint8)
+    print(f"    degraus largos: seta fora; {len(arestas)} arestas e {len(q['L'])} L com a sombra para o pátio")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -800,12 +848,14 @@ def main():
     out = elevador(out)
     print("[14] chuveiro externo")
     out = chuveiro_externo(out)
+    print("[15] degraus largos")
+    out = degraus_largos(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[15] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[16] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
