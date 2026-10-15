@@ -47,6 +47,13 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    lote volta a ser a base (fundo branco e linha tracejada). As plantas dos cantos de cima e de baixo
    à esquerda, que passavam da linha e dos muros, terminam no lote; os trechos de muro cobertos pelas
    folhas são refeitos com o perfil de uma coluna limpa do próprio muro.
+9. Erro 3 da lista (faixa com X à direita do hall): no PDF é gramado com os retângulos com X da
+   projeção da laje e as duas linhas tracejadas embaixo; o motor fez um canteiro de plantas. A faixa
+   vira grama tecida (image quilting) do gramado limpo à direita da garagem, com a sombra do muro de
+   cima e do muro da direita; as linhas do PDF (levado ao render, sem as curvas de nível, que a base
+   esconde) entram em cinza claro, engrossadas para o traço fino do render. O muro de cima (e a grade
+   à direita), onde as pontas das folhas passavam, vira a mediana de cada linha; a folha que caía no
+   travertino do hall sai por inpainting.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -204,6 +211,24 @@ LOTE = {
     "x_cantos": 470, "y": (0, 1050),
 }
 
+# faixa com X à direita do hall (erro 3): no PDF é gramado, com os retângulos com X (projeção da
+# laje, linhas finas) e as duas linhas tracejadas embaixo; o motor fez um canteiro de plantas. A
+# faixa vira grama tecida (image quilting) do gramado limpo à direita da garagem, com a sombra do
+# muro de cima e do muro da direita, e as linhas do PDF (levado ao render) entram em cinza claro
+FAIXA_X = {
+    "ret": (1364, 415, 1648, 487),
+    # muro de cima (e a grade à direita) com as pontas das folhas: cada linha vira a mediana dela
+    "muro": [((1364, 1597), (409, 415)), ((1597, 1648), (409, 415))],
+    # folha sobre o travertino do hall, à esquerda: os px verdes (G > R) e o contorno escuro dela
+    # (abaixo do arco da porta, que fica) saem por inpainting
+    "hall": (1350, 430, 1364, 476), "contorno_folha": (1356, 445, 1364, 472), "escuro": 175,
+    "fonte_grama": [(1680, 300, 1750, 470)],
+    # sombra: (onde começa, até onde, força) a partir do muro de cima (por trecho de x) e da direita
+    "sombra_cima": [((1364, 1597), 12, 0.45), ((1597, 1648), 8, 0.25)],
+    "sombra_dir": (1648, 9, 0.40),
+    "linhas": {"limiar": 170, "larg": 4, "cor": (205, 210, 205), "forca": 0.5},
+}
+
 
 def alinhar_base(render):
     """Base 16:9 reduzida e levada ao render por SIFT + afim; também a base chapada (v2)."""
@@ -238,6 +263,70 @@ def pdf_cadeia(A, forma_render):
         return A[0, 0] * bx + A[0, 1] * by + A[0, 2], A[1, 0] * bx + A[1, 1] * by + A[1, 2]
 
     return pg, p2r
+
+
+def pdf_no_render(janela, A, forma_render):
+    """Trecho do PDF rasterizado e levado ao render pela mesma cadeia da base, em SS vezes a
+    resolução (cinza, 255 = papel), sem as layers que a base esconde (as curvas de nível)."""
+    cfg = json.loads(CONFIG.read_text())
+    doc = pymupdf.open(PDF)
+    ocultas = set(cfg["pavimentos"]["Terreo"]["layers_ocultas"])
+    doc.set_layer(-1, off=[x for x, o in doc.get_ocgs().items() if o["name"] in ocultas])
+    pg = doc[cfg["pavimentos"]["Terreo"]["pagina"]]
+    fx0, fy0, fx1, fy1 = cfg["recorte"]
+    clip = pymupdf.Rect(pg.rect.width * fx0, pg.rect.height * fy0, pg.rect.width * fx1, pg.rect.height * fy1)
+    zoom = cfg["largura_px"] / clip.width
+    hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    ht, wt = cv2.imread(str(BASE_CHAPADA), cv2.IMREAD_GRAYSCALE).shape
+    sx, sy = forma_render[1] / wt, forma_render[0] / ht
+
+    def p2r(x, y):
+        bx, by = ((x - clip.x0) * zoom + (wt - wb) // 2) * sx, ((y - clip.y0) * zoom + (ht - hb) // 2) * sy
+        return A[0, 0] * bx + A[0, 1] * by + A[0, 2], A[1, 0] * bx + A[1, 1] * by + A[1, 2]
+
+    Ai = np.linalg.inv(np.vstack([A, [0, 0, 1]]))
+
+    def r2p(x, y):
+        bx, by, _ = Ai @ [x, y, 1]
+        return (bx / sx - (wt - wb) // 2) / zoom + clip.x0, (by / sy - (ht - hb) // 2) / zoom + clip.y0
+
+    x0, y0, x1, y1 = janela
+    a, b = r2p(x0 - 2, y0 - 2), r2p(x1 + 2, y1 + 2)
+    ret = pymupdf.Rect(a[0], a[1], b[0], b[1])
+    zp = 60
+    pix = pg.get_pixmap(clip=ret, matrix=pymupdf.Matrix(zp, zp), alpha=False, colorspace=pymupdf.csGRAY)
+    img = np.frombuffer(pix.samples, np.uint8).reshape(pix.height, pix.width)
+    src = [(0, 0), (pix.width, 0), (0, pix.height)]
+    dst = [((p2r(ret.x0 + u / zp, ret.y0 + v / zp)[0] - x0) * SS, (p2r(ret.x0 + u / zp, ret.y0 + v / zp)[1] - y0) * SS)
+           for u, v in src]
+    M = cv2.getAffineTransform(np.float32(src), np.float32(dst))
+    return cv2.warpAffine(np.ascontiguousarray(img), M, ((x1 - x0) * SS, (y1 - y0) * SS), flags=cv2.INTER_AREA,
+                          borderValue=255)
+
+
+def grama(out, fontes, alto, largo):
+    """Grama tecida (image quilting) de trechos limpos do gramado do render."""
+    f = []
+    for x0, y0, x1, y1 in fontes:
+        g = out[y0:y1, x0:x1].astype(np.float32)
+        f += [np.ascontiguousarray(v) for v in (g, g[:, ::-1], g[::-1, :], g[::-1, ::-1])]
+    return quilting(f, alto, largo, p=16, sobra=5, candidatos=600)[:alto, :largo]
+
+
+def linhas_pdf(out, A, janela, q, mascara=None):
+    """Linhas do PDF na janela, engrossadas para o traço fino do render, em cor clara."""
+    x0, y0, x1, y1 = janela
+    h, w = y1 - y0, x1 - x0
+    pdf = pdf_no_render(janela, A, out.shape)
+    m = (pdf < q["limiar"]).astype(np.uint8) * 255
+    m = cv2.dilate(m, np.ones((q["larg"], q["larg"]), np.uint8))
+    a = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * q["forca"]
+    if mascara is not None:
+        a *= mascara
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + np.array(q["cor"], np.float32) * a[..., None],
+                                0, 255).astype(np.uint8)
+    return out
 
 
 def pivotante(out):
@@ -634,6 +723,35 @@ def lote(out, base):
     return out
 
 
+def faixa_x(out, A):
+    q = FAIXA_X
+    for (a, b), (c, d) in q["muro"]:
+        out[c:d, a:b] = np.median(out[c:d, a:b], axis=1).astype(np.uint8)[:, None]
+    hx0, hy0, hx1, hy1 = q["hall"]
+    reg = out[hy0 - 4:hy1 + 4, hx0 - 4:hx1]
+    verde = (reg[..., 1].astype(int) - reg[..., 2] > 8).astype(np.uint8)
+    verde[:4], verde[-4:], verde[:, :4] = 0, 0, 0
+    cx0, cy0, cx1, cy1 = q["contorno_folha"]
+    sub = reg[cy0 - hy0 + 4:cy1 - hy0 + 4, cx0 - hx0 + 4:cx1 - hx0 + 4]
+    verde[cy0 - hy0 + 4:cy1 - hy0 + 4, cx0 - hx0 + 4:cx1 - hx0 + 4] |= (sub.mean(axis=2) < q["escuro"]).astype(np.uint8)
+    verde = cv2.dilate(verde, np.ones((3, 3), np.uint8))
+    out[hy0 - 4:hy1 + 4, hx0 - 4:hx1] = cv2.inpaint(np.ascontiguousarray(reg), verde, 3, cv2.INPAINT_TELEA)
+    x0, y0, x1, y1 = q["ret"]
+    h, w = y1 - y0, x1 - x0
+    g = grama(out, q["fonte_grama"], h, w)
+    f = np.ones((h, w), np.float32)
+    for (a, b), n, forca in q["sombra_cima"]:
+        for d in range(n):
+            f[d, a - x0:b - x0] = np.minimum(f[d, a - x0:b - x0], 1 - forca * (1 - d / n) ** 1.5)
+    xd, n, forca = q["sombra_dir"]
+    for d in range(n):
+        f[:, xd - x0 - 1 - d] = np.minimum(f[:, xd - x0 - 1 - d], 1 - forca * (1 - d / n) ** 1.5)
+    out[y0:y1, x0:x1] = np.clip(g * f[..., None], 0, 255).astype(np.uint8)
+    out = linhas_pdf(out, A, q["ret"], q["linhas"])
+    print(f"    faixa com X: canteiro do motor vira grama ({w}x{h} px) com as linhas do PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -663,6 +781,9 @@ def main():
     print("[8] erros 1 e 2: muro inventado à esquerda e plantas fora do lote")
     base, _, _ = alinhar_base(orig)
     out = lote(out, base)
+    print("[9] erro 3: faixa com X à direita do hall")
+    _, _, A = alinhar_base(orig)
+    out = faixa_x(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
