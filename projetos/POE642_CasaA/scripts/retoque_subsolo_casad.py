@@ -370,6 +370,7 @@ ELEVADOR_ENTRADA = {
 AREA_VERDE = {
     "ret_vis": (132.2, 648.0, 644.5, 949.3),   # dentro do tracejado de dentro (vis de 1800 px)
     "esquerda_ate_vis": 166.0,                 # a faixa da esquerda (até o pátio, com folga)
+    "baixo_de_vis": 940.0,                     # e a faixa de baixo (o recorte branco junto ao elevador fica fora)
     "desloc": -66,                             # px do quadro: o jardim do Térreo logo à esquerda
     "grama": [(370, 1160, 490, 1500)],         # grama limpa do Térreo no quadro de 3840
     "branco": 235,                             # só o fundo claro vira jardim
@@ -1111,6 +1112,11 @@ def area_verde(final):
     planta = ndimage.binary_fill_holes(np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > 5000]))
     reg = final[y0:y1, x0:x1]
     m = ~planta[y0:y1, x0:x1] & (reg.min(axis=2) >= q["branco"])
+    yb = int(round(quadro(0, q["baixo_de_vis"])[1]))
+    so_faixas = np.zeros(m.shape, bool)
+    so_faixas[:, :xe - x0] = True
+    so_faixas[yb - y0:, :] = True
+    m &= so_faixas
     jardim = np.zeros_like(reg, dtype=np.float32)
     d = q["desloc"]
     jardim[:, :xe - x0] = terreo[y0:y1, x0 + d:xe + d]
