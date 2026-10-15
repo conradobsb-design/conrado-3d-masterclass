@@ -24,7 +24,8 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    do quarto, com contorno nas faces livres e sem a diagonal, como os armários das Casas A e B;
    entre a geladeira e o armário volta o vão de piso do PDF; as duas
    cubas do PDF são desenhadas como as do lavatório gourmet da Casa B, com a torneira do lado da
-   parede.
+   parede. A área molhada da bancada das cubas (retângulo da layer ARQ_BANCADAS) é demarcada com
+   um traço cinza fino nos lados livres (esquerda, direita e embaixo).
 5. Quarto externo: o motor trocou a cama de solteiro do PDF por dois eletrodomésticos e o
    criado-mudo por uma caixa branca. A cama vem de uma das camas de solteiro do próprio render
    (quarto 2), virada para a cabeceira ficar na parede da direita como no PDF, encurtada no
@@ -86,6 +87,17 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    da direita não existe no PDF e vira o piso da adega (as colunas limpas, em espelho). O móvel do
    topo do lavabo (malva no PDF, que o motor pintou no granito do piso) vira marcenaria areia,
    como os armários da cozinha, com o contorno na face livre (embaixo).
+18. Escritório: no vão da parede de cima é uma janela, não a porta de correr que o motor fez. A
+   folha de correr sai (a borda de baixo da parede e o piso de madeira vêm do trecho da mesma
+   parede à esquerda) e o vão recebe a janela das próprias janelas da parede da esquerda do
+   escritório, girada (o lado de fora para cima), com dois panos e o montante no meio.
+19. Cadeiras das escrivaninhas: o PDF tem cadeira na escrivaninha do Quarto 1, do quarto das duas
+   camas e da suíte do canto; o motor fez as escrivaninhas sem elas. Entra a cadeira do próprio
+   render (a de visitante do escritório, recortada por máscara sobre o piso), um pouco maior como a
+   do PDF, girada para a escrivaninha e centrada no símbolo do PDF. A cadeira entra por cor; a
+   sombra entra só como escurecimento (sem levar o tom do piso do escritório para o tapete). A
+   frente da cadeira fica por baixo da escrivaninha (pedido do usuário): onde é tampo, fica o
+   tampo; na faixa da sombra da escrivaninha, a cadeira recebe a mesma sombra.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -164,6 +176,9 @@ COZINHA = {
     "fonte_quartzo": [(646, 566, 714, 596), (752, 566, 812, 596), (647, 507, 666, 560)],
     "fonte_areia": (690, 281, 744, 290),         # painel laqueado do quarto (liso)
     "contorno": 0.75,                            # face livre do armário (1 px)
+    # área molhada da bancada das cubas (PDF, ARQ_BANCADAS): lados livres em traço cinza fino
+    "area_molhada": (1146.75, 130.4, 1255.23, 148.17), "traco": (120, 128, 138), "larg_traco": 0.6,
+    "forca_traco": 0.7,
 }
 # quarto externo (geometria da base chapada alinhada; paredes conferidas no render)
 QUARTO_EXTERNO = {
@@ -304,6 +319,25 @@ LAVABO_ADEGA = {
     "movel": (1205, 480, 1227, 616),
     "piso_adega": (1190, 1205),
     "movel_lavabo": ((1233, 482, 1284, 500), ("baixo",)),     # entre as paredes, até a borda de baixo
+}
+# escritório: faixa da folha de correr sob a parede de cima (<- mesma faixa mais à esquerda), vão
+# da janela na espessura da parede e a fonte: um pano limpo e o montante da janela da parede da
+# esquerda (colunas da espessura da parede, de fora para dentro)
+JANELA_ESCRITORIO = {
+    "faixa_folha": ((1396, 481, 1459, 486), -50),
+    "vao": (1413, 475, 1459, 481),
+    "pano": (517, 545), "montante": (546, 549), "colunas": (1333, 1339),
+}
+# cadeiras das escrivaninhas: a cadeira de visitante do escritório (de frente para a direita), o
+# centro dela, a escala para o tamanho da cadeira do PDF e, para cada escrivaninha, o centro do
+# símbolo do PDF e o giro (0: de frente para a direita; "horario": de frente para baixo)
+CADEIRAS = {
+    "fonte": (1368, 543, 1391, 567), "centro_fonte": (1384.0, 554.0), "escala": 1.2,
+    "piso_ref": (1366, 538, 1377, 545),
+    # escrivaninha: eixo, onde começa o tampo e a faixa da sombra dela no piso (antes do tampo)
+    "lugares": [("Quarto 1", (1106.3, 313.8), None, ("x", 1111, 1106)),
+                ("quarto das duas camas", (706.7, 274.5), "horario", ("y", 279, 276)),
+                ("suíte do canto", (621.5, 338.6), None, ("x", 626, 621))],
 }
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
@@ -508,6 +542,18 @@ def cozinha(out):
         reg = cuba(reg, (0, 0, x1 - x0, y1 - y0))
         out[y0:y1, x0:x1] = reg[::-1]
     print(f"    {len(c['cubas'])} cubas")
+
+    ax0, ay0, ax1, ay1 = c["area_molhada"]
+    jx0, jy0, jx1, jy1 = int(ax0) - 2, int(ay0) - 1, int(ax1) + 3, int(ay1) + 3
+    h, w = jy1 - jy0, jx1 - jx0
+    f = np.zeros((h * SS, w * SS), np.uint8)
+    pts = [(ax0, ay0), (ax0, ay1), (ax1, ay1), (ax1, ay0)]
+    pts = np.array([[int(round((x - jx0) * SS)), int(round((y - jy0) * SS))] for x, y in pts], np.int32)
+    cv2.polylines(f, [pts], False, 255, max(1, int(round(c["larg_traco"] * SS))))
+    a = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None] * c["forca_traco"]
+    reg = out[jy0:jy1, jx0:jx1].astype(np.float32)
+    out[jy0:jy1, jx0:jx1] = np.clip(reg * (1 - a) + np.array(c["traco"], np.float32) * a, 0, 255).astype(np.uint8)
+    print("    área molhada da bancada das cubas demarcada")
     return out
 
 
@@ -900,6 +946,72 @@ def lavabo_adega(out):
     return out
 
 
+def janela_escritorio(out):
+    q = JANELA_ESCRITORIO
+    a = out.copy()
+    (x0, y0, x1, y1), d = q["faixa_folha"]
+    out[y0:y1, x0:x1] = a[y0:y1, x0 + d:x1 + d]
+    c0, c1 = q["colunas"]
+    pano = cv2.rotate(a[q["pano"][0]:q["pano"][1], c0:c1], cv2.ROTATE_90_CLOCKWISE)[::-1]
+    montante = cv2.rotate(a[q["montante"][0]:q["montante"][1], c0:c1], cv2.ROTATE_90_CLOCKWISE)[::-1]
+    vx0, vy0, vx1, vy1 = q["vao"]
+    w = vx1 - vx0
+    esq = (w - montante.shape[1]) // 2
+    dir_ = w - montante.shape[1] - esq
+    janela = np.concatenate([pano[:, :esq], montante, pano[:, ::-1][:, :dir_]], axis=1)
+    out[vy0:vy1, vx0:vx1] = cv2.resize(janela, (w, vy1 - vy0), interpolation=cv2.INTER_AREA)
+    print("    escritório: janela no vão de cima, no lugar da porta de correr")
+    return out
+
+
+def cadeiras(out):
+    q = CADEIRAS
+    a = out.copy()
+    fx0, fy0, fx1, fy1 = q["fonte"]
+    sprite = a[fy0:fy1, fx0:fx1].astype(np.float32)
+    rx0, ry0, rx1, ry1 = q["piso_ref"]
+    piso = np.median(a[ry0:ry1, rx0:rx1].reshape(-1, 3).astype(np.float32), axis=0)
+    lum, lum_piso = sprite.mean(axis=2), float(piso.mean())
+    alfa = np.clip((lum - lum_piso - 10) / 20, 0, 1)                   # a cadeira (clara)
+    sombra = np.clip((lum_piso - lum - 6) / 14, 0, 1) * (1 - lum / lum_piso)   # escurecimento
+    sombra[:, -2:][lum[:, -2:] < 120] = 0                               # borda da mesa de origem
+    alfa = np.dstack([alfa, sombra])
+    cx, cy = q["centro_fonte"][0] - fx0, q["centro_fonte"][1] - fy0
+    e = q["escala"]
+    for nome, (tx, ty), giro, (eixo, tampo, faixa) in q["lugares"]:
+        sp, al, ccx, ccy = sprite, alfa, cx, cy
+        if giro == "horario":                                      # de frente para baixo
+            sp, al = cv2.rotate(sp, cv2.ROTATE_90_CLOCKWISE), cv2.rotate(al, cv2.ROTATE_90_CLOCKWISE)
+            ccx, ccy = sprite.shape[0] - 1 - cy, cx
+        h, w = sp.shape[:2]
+        x0, y0 = int(np.floor(tx - ccx * e)) - 1, int(np.floor(ty - ccy * e)) - 1
+        W, H = int(np.ceil(w * e)) + 3, int(np.ceil(h * e)) + 3
+        M = np.float32([[e, 0, tx - ccx * e - x0], [0, e, ty - ccy * e - y0]])
+        spw = cv2.warpAffine(sp, M, (W, H), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
+        alw = cv2.warpAffine(al, M, (W, H), flags=cv2.INTER_LINEAR, borderValue=0)
+        orig = a[y0:y0 + H, x0:x0 + W].astype(np.float32)
+        pos = (np.arange(W) + x0)[None, :] if eixo == "x" else (np.arange(H) + y0)[:, None]
+        alw[np.broadcast_to(pos >= tampo, alw.shape[:2])] = 0          # o tampo fica por cima
+        a_c, a_s = alw[..., :1], alw[..., 1:]
+        reg = orig * (1 - a_s)
+        reg = reg * (1 - a_c) + spw * a_c
+        # na faixa da sombra da escrivaninha, a cadeira recebe a mesma sombra (razão sobre o piso)
+        lum = orig.mean(axis=2)
+        if eixo == "x":
+            piso_f = np.median(lum[:, faixa - 6 - x0:faixa - 1 - x0])
+            for k in range(faixa, tampo):
+                razao = min(1.0, float(np.median(lum[:, k - x0])) / piso_f)
+                reg[:, k - x0] = orig[:, k - x0] * (1 - a_c[:, k - x0]) + reg[:, k - x0] * razao * a_c[:, k - x0]
+        else:
+            piso_f = np.median(lum[faixa - 6 - y0:faixa - 1 - y0, :])
+            for k in range(faixa, tampo):
+                razao = min(1.0, float(np.median(lum[k - y0, :])) / piso_f)
+                reg[k - y0] = orig[k - y0] * (1 - a_c[k - y0]) + reg[k - y0] * razao * a_c[k - y0]
+        out[y0:y0 + H, x0:x0 + W] = np.clip(reg, 0, 255).astype(np.uint8)
+        print(f"    cadeira da escrivaninha ({nome}) em ({tx}, {ty})")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -945,12 +1057,16 @@ def main():
     out = aparador_hall(out)
     print("[17] lavabo e adega")
     out = lavabo_adega(out)
+    print("[18] janela do escritório")
+    out = janela_escritorio(out)
+    print("[19] cadeiras das escrivaninhas")
+    out = cadeiras(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[18] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[20] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
