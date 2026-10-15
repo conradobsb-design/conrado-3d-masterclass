@@ -19,22 +19,37 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
    voltam a escada (os degraus tracejados, da mesma coluna logo acima, e a linha diagonal, que segue
    até a floreira) e o travertino (da mesma coluna, mais abaixo: os veios correm na vertical), e a
    borda da floreira entra em traço fino.
+4. Tapete do estar da varanda: o motor fez um tapete redondo; no PDF ele é orgânico (polígono branco
+   da layer ARQ_MOBILIÁRIO), com um recorte em volta da ponta esquerda do sofá. O tapete toma a forma
+   do PDF: o que sai vira travertino (as mesmas colunas da faixa limpa acima do tapete, pois os veios
+   correm na vertical, na luz do travertino em volta e com a sombra dos móveis), o que entra vira
+   tapete tecido do próprio tapete; sofá, poltronas, mesas e aparador ficam; borda fina por fora.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
       --saida POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado
 """
 import argparse
+import json
+import sys
 from pathlib import Path
 
 import cv2
 import numpy as np
+import pymupdf
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
+sys.path.insert(0, str(AQUI))
+
+from retoque_terreo_casad import interpolar, textura  # noqa: E402
 
 SS = 8                             # superamostragem dos traços desenhados
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png"
+BASE_CHAPADA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v2_16x9.png"   # cores exatas da legenda
+BASE_SEM_TELA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v2.png"          # antes da tela 16:9
+PDF = RAIZ / "_pdfs_cliente/642 - TÉRREO - CASA E.pdf"
+CONFIG = RAIZ / "POE642_CasaE/config_bases.json"
 
 
 def alinhar_base(render):
@@ -50,6 +65,71 @@ def alinhar_base(render):
     al = cv2.warpAffine(base, A, render.shape[1::-1], flags=cv2.INTER_CUBIC,
                         borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
     return A, al
+
+
+def pdf_cadeia(A, forma_render):
+    """Página do PDF e as conversões PDF -> render e render -> PDF pela mesma cadeia da base (recorte,
+    largura da base, tela 16:9, redução ao tamanho do render e o afim A)."""
+    cfg = json.loads(CONFIG.read_text())
+    pg = pymupdf.open(PDF)[cfg["pavimentos"]["Terreo"]["pagina"]]
+    fx0, fy0, fx1, fy1 = cfg["recorte"]
+    clip = pymupdf.Rect(pg.rect.width * fx0, pg.rect.height * fy0, pg.rect.width * fx1, pg.rect.height * fy1)
+    zoom = cfg["largura_px"] / clip.width
+    hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    ht, wt = cv2.imread(str(BASE_CHAPADA), cv2.IMREAD_GRAYSCALE).shape
+    sx, sy = forma_render[1] / wt, forma_render[0] / ht
+    Ai = np.linalg.inv(np.vstack([A, [0, 0, 1]]))
+
+    def p2r(x, y):
+        bx, by = ((x - clip.x0) * zoom + (wt - wb) // 2) * sx, ((y - clip.y0) * zoom + (ht - hb) // 2) * sy
+        return A[0, 0] * bx + A[0, 1] * by + A[0, 2], A[1, 0] * bx + A[1, 1] * by + A[1, 2]
+
+    def r2p(x, y):
+        bx, by, _ = Ai @ [x, y, 1]
+        return (bx / sx - (wt - wb) // 2) / zoom + clip.x0, (by / sy - (ht - hb) // 2) / zoom + clip.y0
+
+    return pg, p2r, r2p
+
+
+def caixa_render(d, p2r):
+    """Caixa (x0, y0, x1, y1) de um desenho do PDF no quadro do render."""
+    (x0, y0), (x1, y1) = p2r(d["rect"].x0, d["rect"].y0), p2r(d["rect"].x1, d["rect"].y1)
+    return x0, y0, x1, y1
+
+
+def mascara_pdf(janela, A, forma_render, filtro):
+    """Máscara (0..1, no quadro do render) dos desenhos do PDF escolhidos por filtro(d), preenchidos,
+    levados ao render pela mesma cadeia da base. Os desenhos são refeitos numa página nova (o MuPDF
+    não desliga as layers deste PDF no raster) e rasterizados em alta resolução."""
+    pg, p2r, r2p = pdf_cadeia(A, forma_render)
+    nova = pymupdf.open()
+    pn = nova.new_page(width=pg.rect.width, height=pg.rect.height)
+    sh = pn.new_shape()
+    for d in pg.get_drawings():
+        if not filtro(d):
+            continue
+        for it in d["items"]:
+            if it[0] == "l":
+                sh.draw_line(it[1], it[2])
+            elif it[0] == "c":
+                sh.draw_bezier(it[1], it[2], it[3], it[4])
+            elif it[0] == "re":
+                sh.draw_rect(it[1])
+            elif it[0] == "qu":
+                sh.draw_quad(it[1])
+        sh.finish(fill=(0, 0, 0), color=None, closePath=d.get("closePath", True), even_odd=d.get("even_odd", False))
+    sh.commit()
+    x0, y0, x1, y1 = janela
+    a, b = r2p(x0 - 2, y0 - 2), r2p(x1 + 2, y1 + 2)
+    ret = pymupdf.Rect(a[0], a[1], b[0], b[1])
+    zp = 60
+    pix = pn.get_pixmap(clip=ret, matrix=pymupdf.Matrix(zp, zp), alpha=False, colorspace=pymupdf.csGRAY)
+    img = 255 - np.frombuffer(pix.samples, np.uint8).reshape(pix.height, pix.width)
+    src = [(0, 0), (pix.width, 0), (0, pix.height)]
+    dst = [(p2r(ret.x0 + u / zp, ret.y0 + v / zp)[0] - x0, p2r(ret.x0 + u / zp, ret.y0 + v / zp)[1] - y0) for u, v in src]
+    M = cv2.getAffineTransform(np.float32(src), np.float32(dst))
+    return cv2.warpAffine(np.ascontiguousarray(img).astype(np.float32) / 255, M, (x1 - x0, y1 - y0),
+                          flags=cv2.INTER_AREA, borderValue=0)
 
 
 # lote no quadro do render: o gramado vai de x = 141 a 1798; o muro de cima ocupa as linhas 0 a 5
@@ -174,6 +254,70 @@ def jardim_interno(out):
     return out
 
 
+# tapete do estar da varanda (item 4): o redondo do render é uma elipse; o do PDF, o polígono branco
+# da ARQ_MOBILIÁRIO com esta caixa no quadro do render
+TAPETE = {
+    "janela": (826, 652, 986, 806),
+    "pdf": (839.7, 668.0, 965.6, 796.9),
+    "velho": ((904.5, 732.0), (60.5, 65.0)),
+    "fonte_tapete": [(915, 677, 937, 695), (930, 738, 950, 748), (940, 700, 952, 725)],
+    "fonte_travertino": (622, 664),          # linhas limpas acima do tapete (as mesmas colunas)
+    # móveis: os polígonos brancos do PDF em volta (sofá, poltronas, mesas, aparador, mesinhas e
+    # vasos), com 2 px de folga, e os traços escuros do render junto deles
+    "camadas_moveis": ("ARQ_MOBILIÁRIO", "ARQ_LAYOUT HUMANIZAÇÃO", "DOC_TEXTOS"), "escuro": 150,
+    "borda": 0.95,
+}
+
+
+def tapete(out, A):
+    q = TAPETE
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+    novo = mascara_pdf(q["janela"], A, out.shape, lambda d: d.get("fill") == (1.0, 1.0, 1.0) and
+                       d.get("layer") == "ARQ_MOBILIÁRIO" and
+                       max(abs(u - v) for u, v in zip(caixa_render(d, p2r), q["pdf"])) <= 1.5)
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    Y = cv2.GaussianBlur(reg.mean(axis=2), (0, 0), 0.8)
+    yy, xx = np.mgrid[wy0:wy1, wx0:wx1].astype(np.float32) + 0.5
+    (cx, cy), (ax, ay) = q["velho"]
+    velho = ((xx - cx) / ax) ** 2 + ((yy - cy) / ay) ** 2 <= 1.0
+    def movel(d):
+        c = caixa_render(d, p2r)
+        return (d.get("fill") == (1.0, 1.0, 1.0) and d.get("layer") in q["camadas_moveis"] and
+                max(abs(u - v) for u, v in zip(c, q["pdf"])) > 1.5 and
+                c[2] > wx0 and c[0] < wx1 and c[3] > wy0 and c[1] < wy1)
+
+    pecas = cv2.dilate((mascara_pdf(q["janela"], A, out.shape, movel) > 0.3).astype(np.uint8), np.ones((5, 5), np.uint8))
+    pecas = (pecas > 0) | (cv2.dilate(pecas, np.ones((5, 5), np.uint8)) > 0) & (Y < q["escuro"])
+    sai = velho & (novo < 0.5) & ~pecas
+    entra = ~velho & (novo > 0.0) & ~pecas
+    # travertino: as mesmas colunas da faixa limpa acima, repetida em espelho na vertical, na luz do
+    # travertino em volta; a sombra dos móveis no tapete passa para o travertino (só escurece)
+    f0, f1 = q["fonte_travertino"]
+    faixa = out[f0:f1, wx0:wx1].astype(np.float32)
+    n = f1 - f0
+    idx = np.arange(h) % (2 * n)
+    trav = faixa[np.where(idx < n, idx, 2 * n - 1 - idx)]
+    limpo = ~velho & ~pecas & (novo < 0.01) & (Y > 195)
+    luz = interpolar(cv2.GaussianBlur(Y, (0, 0), 1.0) / np.maximum(cv2.GaussianBlur(trav.mean(axis=2), (0, 0), 1.0), 1),
+                     limpo, 2.0)
+    tap_med = np.median(Y[velho & ~pecas & (novo > 0.5)])
+    sombra = np.clip(cv2.GaussianBlur(Y, (0, 0), 1.5) / tap_med, 0.7, 1.0)
+    trav = trav * (luz * sombra)[..., None]
+    cor = np.median(np.concatenate([out[b:d, a:c].reshape(-1, 3) for a, b, c, d in q["fonte_tapete"]]).astype(np.float32), axis=0)
+    tap = textura(out, q["fonte_tapete"], h, w, p=8) * cor
+    a_sai = (np.clip(1 - novo, 0, 1) * (cv2.dilate(sai.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0) * ~pecas)[..., None]
+    reg = reg * (1 - a_sai) + trav * a_sai
+    a_ent = (novo * entra)[..., None]
+    reg = reg * (1 - a_ent) + tap * a_ent
+    borda = np.clip(cv2.dilate(novo, np.ones((3, 3), np.uint8)) - novo, 0, 1) * ~pecas
+    reg *= (1 - (1 - q["borda"]) * borda)[..., None]
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    tapete no contorno orgânico do PDF ({int(sai.sum())} px saem, {int(entra.sum())} px entram)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -188,6 +332,8 @@ def main():
     out = lote(out, base)
     print("[3] jardim interno: plantas só na floreira")
     out = jardim_interno(out)
+    print("[4] tapete do estar da varanda no contorno orgânico do PDF")
+    out = tapete(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
