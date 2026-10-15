@@ -122,6 +122,11 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     HUMANIZAÇÃO) fica em marcenaria areia com o veio (como o louceiro); à direita, a bancada
     (ARQ_BANCADAS) vira o quartzo do tanque (tecido dos trechos limpos da bancada dele, no tom dela),
     com a luz do próprio trecho; contorno fino nas duas peças e entre elas.
+29. Cozinha, fileira junto à parede de baixo (pedido do usuário): ao centro, dois eletrodomésticos (ou
+    a geladeira) em inox; nas laterais, armários. Os dois quadrados do centro (ARQ_LAYOUT HUMANIZAÇÃO)
+    recebem os eletrodomésticos em inox da cozinha aprovada da Casa D (cada um, uma metade do par de
+    lá); os dois trechos dos lados viram armários em marcenaria areia com o veio do louceiro (sem
+    sombra de móvel baixo); contorno fino em todas as peças.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1484,6 +1489,39 @@ def servico_bancada(out, orig):
     return out
 
 
+# fileira de baixo da cozinha (item 29): os eletrodomésticos (os quadrados do PDF) e as metades do par
+# em inox da cozinha retocada da Casa D; os armários (os trechos dos lados) e o louceiro como fonte
+COZINHA = {"inox": [(879.5, 392.8, 904.4, 417.6), (906.3, 392.8, 931.2, 417.6)],
+           "fonte_inox": (RAIZ / "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
+                          [(972, 319, 996, 345), (998, 319, 1022, 345)]),
+           "armarios": [(829.7, 394.3, 876.3, 419.2), (932.3, 394.3, 975.1, 419.2)],
+           "fonte_armario": (990, 473, 1140, 489),
+           "contorno": (70, 72, 74), "larg_contorno": 0.4,
+           "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.3}}
+
+
+def cozinha(out):
+    q = COZINHA
+    forma = out.shape[:2]
+    a, b, c, d = q["fonte_armario"]
+    madeira = out[b:d, a:c].copy()
+    for i, (x0, y0, x1, y1) in enumerate(q["armarios"]):
+        ww = int(round((x1 - x0) * 1.0))
+        o_ = 0 if i == 0 else madeira.shape[1] - ww
+        out = colar(out, madeira[:, o_:o_ + ww], (x0, y0, x1, y1))
+    arq, fontes = q["fonte_inox"]
+    casad = cv2.imread(str(arq))
+    s = q["sombra"]
+    for (x0, y0, x1, y1), (fx0, fy0, fx1, fy1) in zip(q["inox"], fontes):
+        out = sombra_curta(out, (x0, y0, x1, y1), s)
+        out = colar(out, casad[fy0:fy1, fx0:fx1], (x0, y0, x1, y1))
+    for x0, y0, x1, y1 in q["armarios"] + q["inox"]:
+        a_ = linha_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], q["larg_contorno"], fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - a_) + np.float32(q["contorno"]) * a_, 0, 255).astype(np.uint8)
+    print("    cozinha: eletrodomésticos em inox ao centro e armários nas laterais")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1545,6 +1583,8 @@ def main():
     out = adega(out, orig)
     print("[28] área de serviço: armário e bancada para roupas")
     out = servico_bancada(out, orig)
+    print("[29] cozinha: inox ao centro, armários nas laterais")
+    out = cozinha(out)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
