@@ -31,6 +31,12 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
     bacia com a borda mais escura indo ao fundo claro, válvula cromada), com a torneira cromada
     saindo da faixa junto à parede, na geometria do PDF (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS).
 11. Esteiras: os letreiros que o motor escreveu nas lonas saem (sem texto na planta); fica a lona.
+12. Pátio: a parede tracejada dupla de fora (à esquerda, embaixo e no alto), que o motor apagou ou
+    cortou, volta: os traços do PDF (ARQ_PAREDE, fora da planta) desenhados no quadro comum.
+
+Escala (pedido do usuário): a imagem final sai no quadro comum das bases (3840 x 2160, a folha 16:9
+inteira, o mesmo das pranchas), com a planta exatamente sob a do Térreo; fora da planta, o fundo é
+branco puro. Saídas: _retocado (quadro do render) e _final (quadro comum).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_subsolo_casad.py POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_render.webp \
@@ -204,6 +210,13 @@ LETREIROS = {
     "lonas": [((1138, 780, 1183, 822), (1142, 788, 1153, 813)), ((1223, 777, 1268, 820), (1227, 785, 1238, 810))],
     "fontes": [(1150, 812, 1175, 836), (1238, 812, 1262, 836)],
     "lum": (60, 100),                      # a luz vem só da lona (sem os trilhos nem as letras)
+}
+
+QUADRO = {"largura": 3840, "altura": 2160, "ss": 2}
+TRACEJADO = {
+    "largura": 1.1, "cor": (62, 64, 66),   # o traço do tracejado que o motor manteve, na escala final
+    # fora da planta (vis de 1800 px): à esquerda do pátio, abaixo dele e a faixa de cima do pátio
+    "fora": lambda x, y: x < 160 or y > 944 or (639 < y < 649.5 and x < 275),
 }
 
 
@@ -492,6 +505,65 @@ def letreiros(out):
     return out
 
 
+def no_quadro(out, A):
+    """O render retocado vai para o quadro comum (a base 16:9 na largura das pranchas) pelo inverso da
+    cadeia base -> render (a base reduzida ao tamanho do render, não uniforme, e o afim A), com 2 x
+    de superamostragem; fora da planta (a mancha da base chapada, com folga), o fundo fica branco."""
+    q = QUADRO
+    ht, wt = cv2.imread(str(BASE_CHAPADA), cv2.IMREAD_GRAYSCALE).shape
+    sxr, syr = out.shape[1] / wt, out.shape[0] / ht
+    WF, HF, s = q["largura"], q["altura"], q["ss"]
+    sxf, syf = WF * s / wt, HF * s / ht
+    D = np.float64([[sxr / sxf, 0, 0], [0, syr / syf, 0], [0, 0, 1]])
+    M = (np.vstack([A, [0, 0, 1]]) @ D)[:2]                    # quadro (2 x) -> render
+    grande = cv2.warpAffine(out, M, (WF * s, HF * s), flags=cv2.INTER_CUBIC | cv2.WARP_INVERSE_MAP,
+                            borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
+    final = cv2.resize(grande, (WF, HF), interpolation=cv2.INTER_AREA)
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), (WF, HF), interpolation=cv2.INTER_NEAREST)
+    nb = (chapada.min(axis=2) < 245).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(nb)
+    planta = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > 5000])
+    planta = cv2.dilate(planta.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
+    final[~planta] = 255
+    print(f"    quadro comum {WF} x {HF}: planta da base com folga de 3 px; fundo branco fora dela")
+    return final
+
+
+def tracejado(final):
+    """Traços do tracejado de fora (ARQ_PAREDE) do PDF, direto no quadro comum (sem o afim do render)."""
+    q = TRACEJADO
+    cfg = json.loads(CONFIG.read_text())
+    pg = pymupdf.open(PDF)[cfg["pavimentos"]["Subsolo"]["pagina"]]
+    fx0, fy0, fx1, fy1 = cfg["recorte"]
+    clip = pymupdf.Rect(pg.rect.width * fx0, pg.rect.height * fy0, pg.rect.width * fx1, pg.rect.height * fy1)
+    zoom = cfg["largura_px"] / clip.width
+    hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    ht, wt = cv2.imread(str(BASE_CHAPADA), cv2.IMREAD_GRAYSCALE).shape
+    HF, WF = final.shape[:2]
+    kv = clip.width / cfg["largura_visualizacao"]
+
+    def vis(p):
+        return (p.x - clip.x0) / kv, (p.y - clip.y0) / kv
+
+    def quadro(p):
+        return [int(round(((p.x - clip.x0) * zoom + (wt - wb) // 2) * WF / wt * SS)),
+                int(round(((p.y - clip.y0) * zoom + (ht - hb) // 2) * HF / ht * SS))]
+
+    m = np.zeros((HF * SS, WF * SS), np.uint8)
+    n = 0
+    for d in pg.get_drawings():
+        if d.get("layer") != "ARQ_PAREDE" or d["type"] != "s":
+            continue
+        for it in d["items"]:
+            if it[0] == "l" and q["fora"](*vis(it[1])) and q["fora"](*vis(it[2])):
+                cv2.line(m, quadro(it[1]), quadro(it[2]), 255, max(1, int(round(q["largura"] * SS))), cv2.LINE_AA)
+                n += 1
+    a = cv2.resize(m.astype(np.float32) / 255, (WF, HF), interpolation=cv2.INTER_AREA)[..., None]
+    final[:] = np.clip(final * (1 - a) + np.array(q["cor"], np.float32) * a, 0, 255).astype(np.uint8)
+    print(f"    tracejado de fora do pátio: {n} traços do PDF")
+    return final
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -527,6 +599,14 @@ def main():
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
     print(f"[fim] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+
+    print("[escala] quadro comum das bases, com a planta sob a do Térreo")
+    final = no_quadro(out, alinhar_base(orig))
+    print("[12] pátio: tracejado de fora")
+    final = tracejado(final)
+    nome_final = args.nome.replace("_retocado", "") + "_final"
+    cv2.imwrite(str(args.saida / f"{nome_final}.png"), final)
+    print(f"[fim] {args.saida / (nome_final + '.png')}")
 
 
 if __name__ == "__main__":

@@ -277,6 +277,23 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado
 ```
 
+## Retoque do Subsolo da Casa D: `retoque_subsolo_casad.py`
+
+O render do Subsolo manteve o layout, mas aproximou a planta (~2,73 x a base reduzida a 2000 px). Os retoques são feitos no quadro do render, com as ferramentas do Térreo (`interpolar`, `textura`, `quilting`, a placa do chuveiro e os cromados), e a geometria vem do PDF pela cadeia da base (`pdf_cadeia`, com o afim do SIFT).
+- **`apagar_largo`:** o `apagar` do Térreo para áreas largas: a luz do entorno vem de `interpolar` (várias escalas); `lum_min`/`lum_max` escolhem as amostras de luz (sem parede nem peças claras), e `escuros=True` troca também os traços escuros da máscara (contorno de símbolo).
+- **Depósito (erros 1 e 2):** a faixa areia inventada e as juntas gigantes e manchas claras viram o granito tecido do próprio piso; a folha da porta e os arcos ficam.
+- **WC DCE (erros 3 e 4):** `piso_box_wc` (ganho por canal até o tom do granito do resto do banheiro) e `trocar_chuveiro`.
+- **`trocar_chuveiro` (erros 4, 8 e 9):** o símbolo do CAD sai (piso tecido do ambiente, com margem de piso para a luz), a parede volta ao preto do próprio miolo onde a cruz entrou nela, o toco que passou para outro piso sai, e `desenhar_chuveiro` desenha a ducha (placa da Casa A), o braço (horizontal ou vertical, retângulo do PDF) e a canopla, com sombra e brilho na escala do render.
+- **Armário do DCE 1 (erro 5):** `armario_dce` tece (quilting) a madeira areia dos armários até o teto do Térreo retocado, ampliada na razão entre as escalas dos renders, com o veio no comprido.
+- **Sauna (erros 6 e 7):** `sauna` refaz o miolo em Bege Bahia tecido do pátio, na luz do piso; o banco do PDF fica em dois tons (0,93 e 0,88) com as linhas de ARQ_ELEMENTOS FIXOS.
+- **Cuba do vestiário (erro 10):** `cuba_vestiario` (aba, bacia em degradê, válvula e torneira com contorno escuro e sombra curta, em 8x).
+- **Esteiras (erro 11):** `letreiros` tira o texto das lonas.
+- **Escala e tracejado (erro 12):** `no_quadro` leva o retocado ao quadro comum das bases (3840 x 2160, inverso da cadeia, 2 x de superamostragem) e deixa branco o que fica fora da mancha da planta; `tracejado` desenha ali os traços da parede tracejada de fora (ARQ_PAREDE) direto do PDF, inclusive o trecho de baixo que o render cortou. Saídas: `_retocado` (quadro do render) e `_final` (quadro comum, com a planta sob a do Térreo).
+
+```bash
+python retoque_subsolo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Subsolo_v1_retocado
+```
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:
