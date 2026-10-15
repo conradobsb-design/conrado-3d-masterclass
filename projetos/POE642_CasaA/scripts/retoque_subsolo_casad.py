@@ -23,6 +23,10 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
 7. Sauna: o banco, que o motor fez em madeira, fica em Bege Bahia (pedido do usuário), em dois tons
    mais escuros, como na base: o degrau da frente (0,93) e o assento junto à parede (0,88), com as
    linhas do PDF (bordas e a linha dupla de cada nível, layer ARQ_ELEMENTOS FIXOS).
+8. Ducha da antessala: o símbolo do CAD (quadrado, braço e a cruz branca sobre a parede) vira o
+   chuveiro, com o braço saindo da parede de baixo; a parede volta ao preto.
+9. Box do vestiário: o mesmo, com o braço saindo da parede da direita; o toco da cruz que passou
+   para o vinílico da academia sai.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_subsolo_casad.py POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_render.webp \
@@ -114,6 +118,7 @@ SOMBRA_CHUVEIRO = {"desloc": (-2.7, 2.7), "sigma": 2.2, "forca": 0.3}
 CHUVEIRO_WC = {
     "nome": "WC DCE",
     "lum_max": 130,                                       # a luz vem só do granito, sem o branco do símbolo
+                                                          # (nos pisos de Bege Bahia, 235: o piso tem ~215)
     "apagar": [(711, 67, 754, 92)],                       # o quadrado, o braço e o toco junto à parede
     "fontes": [(714, 48, 730, 66), (756, 48, 806, 100), (714, 93, 750, 103)],
     "parede": (699, 72, 711, 87),                         # o toco branco que entrou na parede
@@ -153,17 +158,45 @@ SAUNA = {
     "largura": 1.2,
 }
 
+CHUVEIRO_DUCHA = {
+    "nome": "ducha da antessala",
+    "lum_min": 150,                                       # a luz só do Bege Bahia, sem a borda da parede
+    "apagar": [(894, 1030, 918, 1073), (884, 1063, 928, 1073)],   # quadrado, braço e a cruz acima da parede
+    "fontes": [(863, 1032, 890, 1070), (918, 1032, 945, 1070), (965, 990, 1045, 1065)],
+    "parede": (884, 1073, 928, 1088),                     # a cruz branca pintada sobre a parede de baixo
+    "ducha": (897.3, 1032.9, 914.1, 1049.6),
+    "braco": (904.6, 1041.2, 906.7, 1073.0),
+    "canopla": (902.9, 1071.3, 908.4, 1073.2),
+    "janela": (888, 1026, 924, 1080),
+}
+CHUVEIRO_BOX = {
+    "nome": "box do vestiário",
+    "lum_min": 150,                                       # a luz só do Bege Bahia, sem a borda da parede
+    "apagar": [(1278, 1009, 1322, 1048)],
+    "fontes": [(1276, 992, 1318, 1010), (1240, 1048, 1318, 1072)],
+    "parede": (1322, 1006, 1336, 1052),                   # a cruz (e o nicho) sobre a parede da direita
+    "alem": [(1336, 1023, 1343, 1036)],                   # o toco da cruz no vinílico da academia
+    "fontes_alem": [(1345, 985, 1440, 1065)],
+    "ducha": (1281.7, 1021.5, 1298.5, 1038.2),
+    "braco": (1290.1, 1028.8, 1322.0, 1030.9),
+    "canopla": (1320.3, 1027.1, 1322.3, 1032.5),
+    "janela": (1272, 1014, 1330, 1046),
+}
 
-def apagar_largo(out, ret, mascara, fontes, sigma=4.0, borda=0.8, lum_min=None, lum_max=None):
+
+def apagar_largo(out, ret, mascara, fontes, sigma=4.0, borda=0.8, lum_min=None, lum_max=None, escuros=False):
     """Como o apagar do Térreo, para áreas largas: a luz do entorno (por canal) vem da convolução
     normalizada em várias escalas (interpolar), que cobre o miolo da máscara; com lum_min, a parede
-    (escura) não entra na luz e não muda; com lum_max, peças claras (folhas de porta) não entram na luz."""
+    (escura) não entra na luz e não muda (com escuros=True, os traços escuros dentro da máscara, como o
+    contorno de um símbolo, também mudam); com lum_max, peças claras (folhas de porta) não entram na luz."""
     x0, y0, x1, y1 = ret
     h, w = y1 - y0, x1 - x0
     reg = out[y0:y1, x0:x1].astype(np.float32)
     claro = reg.mean(axis=2) > lum_min if lum_min is not None else np.ones((h, w), bool)
     m = cv2.GaussianBlur(mascara.astype(np.float32), (0, 0), borda) if borda else mascara.astype(np.float32)
-    m = np.maximum(m, mascara.astype(np.float32)) * claro
+    m = np.maximum(m, mascara.astype(np.float32))
+    if not escuros:
+        m *= claro
     amostra = ~mascara & claro
     if lum_max is not None:
         amostra &= reg.mean(axis=2) < lum_max
@@ -279,15 +312,22 @@ def trocar_chuveiro(out, q):
         m = np.zeros((y1 - y0 + 2 * pad, x1 - x0 + 2 * pad), bool)
         m[pad:-pad, pad:-pad] = True
         out = apagar_largo(out, (x0 - pad, y0 - pad, x1 + pad, y1 + pad), m, q["fontes"], sigma=2.0, borda=0.0,
-                           lum_min=45, lum_max=q.get("lum_max", 200))
+                           lum_min=q.get("lum_min", 45), lum_max=q.get("lum_max", 235), escuros=True)
     if q.get("parede"):
+        # a parede volta ao preto onde o símbolo entrou nela, no preto do miolo da própria parede em
+        # volta (praticamente 0, desvio < 1): o retalho inteiro, sem fantasma do contorno da cruz
         x0, y0, x1, y1 = q["parede"]
-        out[y0:y1, x0:x1] = np.minimum(out[y0:y1, x0:x1], 6)
+        e = 12
+        viz = out[y0 - e:y1 + e, x0 - e:x1 + e].reshape(-1, 3)
+        dentro = np.zeros((y1 - y0 + 2 * e, x1 - x0 + 2 * e), bool)
+        dentro[e:-e, e:-e] = True
+        miolo = viz[(viz.astype(np.float32).mean(axis=1) <= 5) & ~dentro.ravel()]
+        out[y0:y1, x0:x1] = np.median(miolo, axis=0).astype(np.uint8)
     for x0, y0, x1, y1 in q.get("alem", []):
         m = np.zeros((y1 - y0 + 2 * pad, x1 - x0 + 2 * pad), bool)
         m[pad:-pad, pad:-pad] = True
         out = apagar_largo(out, (x0 - pad, y0 - pad, x1 + pad, y1 + pad), m, q["fontes_alem"], sigma=2.0,
-                           borda=0.0, lum_min=45)
+                           borda=0.0, lum_min=45, lum_max=200, escuros=True)
     out = desenhar_chuveiro(out, q)
     print(f"    {q['nome']}: símbolo do CAD fora; ducha, braço e canopla do PDF")
     return out
@@ -363,6 +403,10 @@ def main():
     out = armario_dce(out)
     print("[6, 7] sauna: braço do banco em L e banco em Bege Bahia")
     out = sauna(out)
+    print("[8] ducha da antessala: chuveiro")
+    out = trocar_chuveiro(out, CHUVEIRO_DUCHA)
+    print("[9] box do vestiário: chuveiro")
+    out = trocar_chuveiro(out, CHUVEIRO_BOX)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
