@@ -31,6 +31,9 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    cobertor e ajustada à largura do PDF; o criado-mudo vem do criado-mudo da suíte. O piso que
    ficou à mostra (a sombra do eletrodoméstico) vem do piso limpo ao lado, e cada peça ganha a
    sombra curta que as camas do render têm.
+6. Tanques da área de serviço: a bancada tinha saído no granito do piso, com os tanques escuros.
+   A bancada fica no mesmo quartzo da cozinha e os dois tanques são os aprovados da Casa B (louça
+   branca, torneira do lado da parede), na mesma escala, nas posições da base alinhada.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -116,6 +119,15 @@ QUARTO_EXTERNO = {
     "pisos": [((1584, 386, 1590, 419), (-12, 0)), ((1636, 368, 1650, 369), (0, -3))],
     "sombra_cima": 0.91,                         # como em cima das camas do quarto 2
     "sombra_pe": 0.93,                           # no pé da cama (a ponta das camas do quarto 2)
+}
+# área de serviço: bancada dos tanques (até a parede da direita e a janela de baixo) e os dois
+# tanques do Térreo aprovado da Casa B (contorno de fora e torneira, sem a coluna da parede),
+# colados a partir do canto de cima à esquerda, na base alinhada (a torneira chega a 1 px da
+# parede, como no PDF)
+SERVICO = {
+    "bancada": (1384, 177, 1406, 253),
+    "fonte_tanques": (RAIZ / "POE642_CasaB/renders/POE642_CasaB_PH_Terreo_v4_retocado.png", (1147, 763, 1165, 804)),
+    "tanques_em": (1387, 182),
 }
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
@@ -229,15 +241,20 @@ def portas_de_vidro(out, base, chapada):
     return out
 
 
-def cozinha(out):
-    c = COZINHA
+def quartzo(out, alto, largo):
+    """Quartzo claro tecido (image quilting) dos trechos limpos da bancada gourmet do render."""
     fontes = []
-    for x0, y0, x1, y1 in c["fonte_quartzo"]:
+    for x0, y0, x1, y1 in COZINHA["fonte_quartzo"]:
         t = out[y0:y1, x0:x1].astype(np.float32)
         fontes += [np.ascontiguousarray(v) for v in (t, t[:, ::-1], t[::-1, :], t[::-1, ::-1])]
+    return quilting(fontes, alto, largo, p=16, sobra=4, candidatos=600)
+
+
+def cozinha(out):
+    c = COZINHA
     bx0, by0 = min(r[0] for r in c["quartzo"]), min(r[1] for r in c["quartzo"])
     bx1, by1 = max(r[2] for r in c["quartzo"]), max(r[3] for r in c["quartzo"])
-    tex = quilting(fontes, by1 - by0, bx1 - bx0, p=16, sobra=4, candidatos=600)
+    tex = quartzo(out, by1 - by0, bx1 - bx0)
     m = np.zeros((by1 - by0, bx1 - bx0), bool)
     for x0, y0, x1, y1 in c["quartzo"]:
         m[y0 - by0:y1 - by0, x0 - bx0:x1 - bx0] = True
@@ -297,6 +314,16 @@ def quarto_externo(out):
     return out
 
 
+def tanques(out):
+    x0, y0, x1, y1 = SERVICO["bancada"]
+    out[y0:y1, x0:x1] = np.clip(quartzo(out, y1 - y0, x1 - x0), 0, 255).astype(np.uint8)
+    arq, (fx0, fy0, fx1, fy1) = SERVICO["fonte_tanques"]
+    px, py = SERVICO["tanques_em"]
+    out[py:py + fy1 - fy0, px:px + fx1 - fx0] = cv2.imread(str(arq))[fy0:fy1, fx0:fx1]
+    print(f"    bancada: {(x1 - x0) * (y1 - y0)} px no quartzo; tanques da Casa B em ({px}, {py})")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -318,12 +345,14 @@ def main():
     out = cozinha(out)
     print("[5] quarto externo")
     out = quarto_externo(out)
+    print("[6] tanques da área de serviço")
+    out = tanques(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[6] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[7] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
