@@ -419,4 +419,11 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 - **Base v1** (cores do PDF): `bases/POE642_CasaD_BASE_Subsolo_v1(_16x9)` e a prévia `_16x9_preview.jpg`.
 - **Materiais (usuário, 15/10/26):** granito Marrom Tabaco #5A4232 no terracota (DCE 1, WC DCE, depósito), como as áreas de serviço do Térreo; vinílico #C8A27C na academia, como na Casa C; Bege Bahia #E8E8E8 na sauna, ducha, vestiário (com WC e chuveiro), circulação, escada e no pátio externo em L à esquerda (contorno ARQ_CONTRAPISO sem preenchimento: faixa ao lado do DCE e da escada + área à esquerda da academia e da sauna). Banco da sauna em dois tons de Bege Bahia mais escuros (#DCDCDC degrau da frente, #D0D0D0 assento), como os bancos aprovados das Casas B e C. Elevador branco. A divisória do box do WC DCE (faixa ARQ_REVESTIMENTOS que saía tracejada e avermelhada) virou cinza cheio #5B5B5B. A parede tracejada de fora do pátio (ARQ_PAREDE) fica como no PDF.
 - **Base v2** (legenda): `bases/POE642_CasaD_BASE_Subsolo_v2(_16x9)` e a prévia `_16x9_preview.jpg`.
+- **Base v3 (texturas):** `bases/POE642_CasaD_BASE_Subsolo_v3_texturas(_16x9)` e a prévia; as mesmas fontes do Térreo da Casa D, e o banco da sauna com o Bege Bahia escurecido (0,93 e 0,88), preso ao retângulo do banco.
+- **Prompt v1:** `POE642_CasaD_PH_Subsolo_v1.md` (entrada: `bases/POE642_CasaD_BASE_Subsolo_v3_texturas_16x9.png`). A planta ocupa de ~12,5% a ~40,5% da largura e de ~46% a ~82% da altura. Pontos do PDF que o prompt descreve:
+  - a antessala da sauna é aberta para a academia, sem parede nem porta;
+  - a porta da sauna fica no alto da parede da direita;
+  - os três chuveiros (WC DCE, ducha da antessala e box do vestiário) são duchas num braço que sai da parede, como no Térreo;
+  - o armário do DCE 1 vai até o teto;
+  - o elevador ocupa quase toda a caixa.
 
