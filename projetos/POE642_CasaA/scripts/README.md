@@ -262,6 +262,7 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **Louceiro, despensa e banho gourmet:** `sem_prateleiras` (granito por `textura` com a sombra das paredes por distância, folha da porta protegida) e `banho_gourmet` (divisória do box em 8x, chuveiro como em `chuveiros_bhm`).
 - **Bancada da gourmet:** `area_molhada` aceita os pontos; `gourmet_pia` desenha o vaso em 8x e cola a folhagem do vaso do hall (só os px verdes, pré-multiplicados) com sombra curta.
 - **Tapete orgânico:** `tapete_organico` (máscara do polígono do PDF por `mascara_pdf`; o que sai do círculo vira travertino de veios verticais na luz interpolada; poltronas e mesinhas protegidas).
+- **Inox:** `inox` trata uma lista de caixas (cozinha e área de serviço).
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado

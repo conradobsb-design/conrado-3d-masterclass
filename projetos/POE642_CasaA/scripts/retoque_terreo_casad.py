@@ -150,6 +150,8 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    (polígono branco da layer ARQ_CONTRAPISO). O tapete toma a forma do PDF: o que sai vira travertino
    (veios verticais da faixa limpa de baixo, na luz do travertino em volta), com as poltronas e as
    mesinhas protegidas e uma borda fina por fora.
+34. Máquinas da área de serviço (pedido do usuário): no PDF não têm diagonal (são eletrodomésticos);
+   ficam em inox, como os da cozinha (o sombreado do render, só o tom muda).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -265,7 +267,8 @@ AREA_MOLHADA = {
 # eletrodomésticos da cozinha (os dois volumes do PDF, ao lado do armário do canto): em inox. A caixa
 # do render fica (sombreado, borda das portas, divisória e sombra); só o tom muda, com escovado sutil
 INOX = {
-    "janela": (971, 317, 1024, 346),
+    # os dois da cozinha e as duas máquinas da área de serviço (no PDF, sem diagonal: eletrodomésticos)
+    "janelas": [("cozinha", (971, 317, 1024, 346)), ("área de serviço", (1141, 188, 1193, 217))],
     "cor": (186, 184, 181),                     # BGR: aço escovado, levemente frio
     "lum": (70.0, 150.0),                       # luminância: granito (0) .. caixa (1), nas bordas
     "escovado": 0.025, "semente": 642,
@@ -1089,17 +1092,17 @@ def area_molhada(out, pontos=None):
 
 def inox(out):
     q = INOX
-    x0, y0, x1, y1 = q["janela"]
-    reg = out[y0:y1, x0:x1].astype(np.float32)
-    Y = reg.mean(axis=2)
-    a = np.clip((Y - q["lum"][0]) / (q["lum"][1] - q["lum"][0]), 0, 1)[..., None]
-    ref = np.median(Y[a[..., 0] >= 1])
     rng = np.random.default_rng(q["semente"])
-    riscos = cv2.GaussianBlur(rng.normal(0, 1, (1, x1 - x0)).astype(np.float32), (0, 0), 0.7)
-    riscos = 1 + q["escovado"] * riscos / max(float(riscos.std()), 1e-6)
-    aco = np.array(q["cor"], np.float32)[None, None] * (Y / ref)[..., None] * riscos[..., None]
-    out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + aco * a, 0, 255).astype(np.uint8)
-    print("    eletrodomésticos da cozinha em inox (o armário do canto fica em areia)")
+    for nome, (x0, y0, x1, y1) in q["janelas"]:
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        Y = reg.mean(axis=2)
+        a = np.clip((Y - q["lum"][0]) / (q["lum"][1] - q["lum"][0]), 0, 1)[..., None]
+        ref = np.median(Y[a[..., 0] >= 1])
+        riscos = cv2.GaussianBlur(rng.normal(0, 1, (1, x1 - x0)).astype(np.float32), (0, 0), 0.7)
+        riscos = 1 + q["escovado"] * riscos / max(float(riscos.std()), 1e-6)
+        aco = np.array(q["cor"], np.float32)[None, None] * (Y / ref)[..., None] * riscos[..., None]
+        out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + aco * a, 0, 255).astype(np.uint8)
+        print(f"    {nome}: eletrodomésticos em inox")
     return out
 
 

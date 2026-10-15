@@ -399,3 +399,4 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   31. banho gourmet: divisória do box em cinza e chuveiro do PDF (ducha, braço e canopla), como no banho master.
   32. bancada da pia da gourmet: área molhada em traço cinza fino e o suporte de utensílios decorativo do PDF (vaso grafite com a folhagem do render).
   33. tapete da mesa redonda no contorno orgânico do PDF (o que sobra vira travertino).
+  34. máquinas da área de serviço em inox, como os eletrodomésticos da cozinha.
