@@ -44,6 +44,10 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
     o tampo fechado (pedido do usuário): louça com volume (bordas um pouco mais escuras), contorno
     fino e sombra curta no piso; o tampo cobre a bacia da linha da dobradiça do PDF à frente, recuado
     da borda, com volume, contorno e sombra leve sobre a louça.
+17. Portas de vidro de acesso à academia (pedido do usuário: mais finas): as quatro folhas de correr
+    (dois trilhos), que o render fez como cápsulas cinza de ~10 px, são refeitas na espessura do PDF
+    (3,4 px): vidro claro com a linha central fina, montantes de alumínio nas pontas e contorno fino;
+    o vão (a faixa branca entre as folhas e o vinílico) vira soleira de Bege Bahia, como o pátio.
 12. Pátio: a parede tracejada dupla de fora (à esquerda, embaixo e no alto), que o motor apagou ou
     cortou, volta: os traços do PDF (ARQ_PAREDE, fora da planta) desenhados no quadro comum.
 
@@ -255,6 +259,20 @@ VASO = {"dobradica": 5.7,                 # da parede até a linha da dobradiça
         "volume": (0.88, 5.0),             # louça: tom na borda e alcance (px) do sombreado de volume
         "volume_tampo": (0.9, 6.0)}
 # (parafusos e dobradiças ficam de fora: com 1 a 2 px viravam manchas sem forma)
+
+# portas de correr de vidro entre o pátio e a academia (px do render, do PDF, layer ARQ_PAREDE)
+PORTAS_VIDRO = {
+    "vao": (577, 517, 596, 869),           # do pátio (com a ponta arredondada da cápsula) ao vinílico
+    "luz": (556, 525, 578, 860),           # o pátio logo ao lado: tom da soleira
+    # folhas: (trilho x0, x1), (y0, y1), montantes (y de cada ponta) e a linha central do vidro
+    "folhas": [((581.2, 584.6), (517.9, 605.7), (526.4, 597.3), 582.9),
+               ((584.6, 588.0), (605.7, 693.6), (614.2, 685.1), 586.3),
+               ((584.6, 588.0), (693.6, 781.4), (702.0, 772.9), 586.3),
+               ((581.2, 584.6), (781.4, 869.2), (789.8, 860.7), 582.9)],
+    "batentes": [(581.2, 516.3, 593.9, 517.9), (581.2, 869.2, 593.9, 870.9)],
+    "vidro": (222, 218, 210), "aluminio": (150, 153, 156), "linha": (150, 152, 155),
+    "contorno": (70, 72, 74), "larg_contorno": 0.5, "larg_linha": 0.45,
+}
 
 
 def apagar_largo(out, ret, mascara, fontes, sigma=4.0, borda=0.8, lum_min=None, lum_max=None, escuros=False):
@@ -698,6 +716,52 @@ def vasos(out, A):
     return out
 
 
+def portas_vidro(out):
+    q = PORTAS_VIDRO
+    x0, y0, x1, y1 = q["vao"]
+    h, w = y1 - y0, x1 - x0
+    lx0, ly0, lx1, ly1 = q["luz"]
+    p = out[ly0:ly1, lx0:lx1].reshape(-1, 3).astype(np.float32)
+    luz = np.median(p[p.mean(axis=1) > 170], axis=0)[None, None, :]
+    reg = textura(out, SAUNA["fontes"], h, w, p=12) * luz          # soleira de Bege Bahia
+
+    def ret(r):
+        return (round((r[0] - x0) * SS), round((r[1] - y0) * SS)), (round((r[2] - x0) * SS), round((r[3] - y0) * SS))
+
+    def pintar(mm, cor):
+        nonlocal reg
+        a = cv2.resize(mm.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        reg = reg * (1 - a) + np.asarray(cor, np.float32) * a
+
+    for (tx0, tx1), (fy0, fy1), (gy0, gy1), xc in q["folhas"]:
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.rectangle(m, *ret((tx0, fy0, tx1, fy1)), 255, -1)
+        pintar(m, q["aluminio"])
+        m = np.zeros_like(m)
+        cv2.rectangle(m, *ret((tx0, gy0, tx1, gy1)), 255, -1)
+        pintar(m, q["vidro"])
+        m = np.zeros_like(m)
+        cv2.line(m, (round((xc - x0) * SS), round((gy0 - y0) * SS)), (round((xc - x0) * SS), round((gy1 - y0) * SS)),
+                 255, max(1, round(q["larg_linha"] * SS)))
+        pintar(m, q["linha"])
+        m = np.zeros_like(m)
+        cv2.rectangle(m, *ret((tx0, fy0, tx1, fy1)), 255, max(1, round(q["larg_contorno"] * SS)))
+        for gy in (gy0, gy1):
+            cv2.line(m, (round((tx0 - x0) * SS), round((gy - y0) * SS)), (round((tx1 - x0) * SS), round((gy - y0) * SS)),
+                     255, max(1, round(q["larg_contorno"] * SS)))
+        pintar(m, q["contorno"])
+    for b in q["batentes"]:
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.rectangle(m, *ret(b), 255, -1)
+        pintar(m, q["aluminio"])
+        m = np.zeros_like(m)
+        cv2.rectangle(m, *ret(b), 255, max(1, round(q["larg_contorno"] * SS)))
+        pintar(m, q["contorno"])
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    portas de vidro da academia: folhas na espessura do PDF, soleira de Bege Bahia")
+    return out
+
+
 def no_quadro(out, A):
     """O render retocado vai para o quadro comum (a base 16:9 na largura das pranchas) pelo inverso da
     cadeia base -> render (a base reduzida ao tamanho do render, não uniforme, e o afim A), com 2 x
@@ -795,6 +859,8 @@ def main():
     out = escada(out)
     print("[16] sanitários")
     out = vasos(out, alinhar_base(orig))
+    print("[17] portas de vidro de acesso à academia")
+    out = portas_vidro(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

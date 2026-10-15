@@ -288,6 +288,7 @@ O render do Subsolo manteve o layout, mas aproximou a planta (~2,73 x a base red
 - **Sauna (erros 6 e 7):** `sauna` refaz o miolo em Bege Bahia tecido do pátio, na luz do piso; o banco do PDF fica em dois tons (0,93 e 0,88) com as linhas de ARQ_ELEMENTOS FIXOS.
 - **Cuba do vestiário (erro 10):** `cuba_vestiario` (aba, bacia em degradê, válvula e torneira com contorno escuro e sombra curta, em 8x).
 - **Esteiras (erro 11):** `letreiros` tira o texto das lonas.
+- **Pedidos depois do retoque (13 a 17):** `arcos_granito` (o arco preto sai e entra o cinza fino do PDF, só no granito da base chapada); `escada` (Bege Bahia refeito sem linhas, pisos do PDF escurecendo para baixo e sombra curta de cada espelho no piso de baixo); `sauna` com o banco no mesmo mármore do piso, níveis pela sombra e pela quina, luz chapada; `vasos` (polígono do PDF em 8 x: louça com volume, contorno, sombra e tampo fechado); `portas_vidro` (folhas de correr na espessura do PDF, com vidro, linha central, montantes e soleira).
 - **Escala e tracejado (erro 12):** `no_quadro` leva o retocado ao quadro comum das bases (3840 x 2160, inverso da cadeia, 2 x de superamostragem) e deixa branco o que fica fora da mancha da planta; `tracejado` desenha ali os traços da parede tracejada de fora (ARQ_PAREDE) direto do PDF, inclusive o trecho de baixo que o render cortou. Saídas: `_retocado` (quadro do render) e `_final` (quadro comum, com a planta sob a do Térreo).
 
 ```bash
