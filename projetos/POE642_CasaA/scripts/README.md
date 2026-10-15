@@ -116,6 +116,8 @@ python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render 
 python pdf_entrega.py --config ../../POE642_CasaB/config_bases.json      # pranchas da entrega.pdf.ordem
 python rodape_entrega.py --config ../../POE642_CasaC/config_bases.json --render Subsolo=../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_v3_retocado.png --render Terreo=../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_v3_retocado.png
 python pdf_entrega.py --config ../../POE642_CasaC/config_bases.json      # Subsolo e Térreo
+# Térreo com o Barlavento nas piscinas (15/10/26): --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png
+# (e, nas Casas B, C e D, o ..._retocado_barlavento.png do Térreo)
 ```
 
 ## Prévia de texturas: `texturizar_base.py`
@@ -336,6 +338,25 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado
 ```
+
+## Barlavento nas piscinas das Casas A a D: `piscinas_barlavento.py`
+
+O mesmo revestimento da Casa E (item 35 do `retoque_terreo_casae.py`) num render já retocado: a água vira a pedra do `fontes_procedurais.barlavento` sob a água verde-azulada clara, com luz chapada (sombra curta só junto às bordas), a grade ondulada pela refração, as cáusticas do render suavizadas e um brilho difuso.
+
+- **Água:** pela cor do render (B − R > 7, G − R > −5, B > 95), em manchas de 300 px ou mais, com os reflexos e as linhas finas dentro dela. Espreguiçadeiras e tracejados de projeção ficam por cima.
+- **Degraus:** as linhas do projeto dentro da água, da base chapada (`--chapada`) alinhada ao render pela base com texturas (`--base`). As máscaras são feitas na resolução da base e reduzidas por área. A fronteira entre os dois tons de água da base (fundo e prainha) também conta como degrau.
+
+```bash
+# da pasta projetos/
+python3 POE642_CasaA/scripts/piscinas_barlavento.py POE642_CasaC/renders/POE642_CasaC_PH_Terreo_v3_retocado.png \
+    POE642_CasaC/renders/POE642_CasaC_PH_Terreo_v3_retocado_barlavento.png \
+    --base POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v3_texturas_16x9.png --chapada POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v2_16x9.png
+python3 POE642_CasaA/scripts/piscinas_barlavento.py POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png \
+    POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png \
+    --base POE642_CasaA/bases/POE642_CasaA_BASE_Terreo_v6_16x9.png --chapada POE642_CasaA/bases/POE642_CasaA_BASE_Terreo_v6_16x9.png
+```
+
+As pranchas do Térreo e os PDFs das quatro casas foram refeitos com essas imagens (`rodape_entrega.py --render Terreo=..._barlavento.png` e `pdf_entrega.py`).
 
 ## Acabamentos finais: `acabamentos_finais.py`
 

@@ -100,6 +100,7 @@ Todos ficam em `projetos/POE642_CasaA/scripts/` e servem à Casa A e à Casa B. 
 | 4. Retoques | `elementos_do_render.py` | Faz da base a imagem final, trazendo do render só os objetos fotorrealistas. Onde não há objeto, fica a base. |
 | 4. Retoques | `acabamentos_finais.py` | Troca os símbolos do PDF que sobraram (chuveiros, cuba, linha do banco) por objetos vistos de cima e pagina as pedras. |
 | 4. Retoques | `retoque_chuveiros_1pav.py`, `retoque_base_1pav.py`, `retoque_bege_bahia_terreo.py`, `retoque_subsolo.py` | Retoques pontuais da Casa A, feitos sem IA. |
+| 4. Retoques | `piscinas_barlavento.py` | Barlavento nas piscinas de um render já retocado (Casas A a D), no mesmo tratamento da Casa E. |
 | 5. Entrega | `rodape_entrega.py` | Monta o rodapé no padrão do carimbo e as pranchas, com o render alinhado ao quadro comum. Lê os dados da casa na chave `entrega` da config (`--config`). |
 | 5. Entrega | `pdf_entrega.py` | Junta as pranchas num PDF para o cliente (mesma chave `entrega`). |
 
@@ -514,3 +515,21 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 - **Cores do PDF:** laranja #CC9966 (suítes, sala íntima, circulação, closet master, rouparia), cinza #E4E4E4 (as três varandas); banhos brancos com hachura fina; closets das suítes 1 a 4, copinha, escada e elevador brancos.
 - **Base v1** (cores do PDF): `bases/POE642_CasaE_BASE_1Pavimento_v1(_16x9)` e a prévia `_16x9_preview.jpg`.
 
+## Casas A a D · Barlavento nas piscinas
+
+Pedido do usuário (15/10/26), depois do item 35 da Casa E: as piscinas das Casas A, B, C e D no mesmo revestimento Barlavento, com os mesmos efeitos de água, e as pranchas e os PDFs refeitos.
+
+- **Script:** `scripts/piscinas_barlavento.py`. Usa os números aprovados na Casa E (cor da água BGR 214, 222, 172; sombra curta só junto às bordas; refração de ~1 px; cáusticas do render suavizadas; brilho difuso na diagonal) e a mesma pedra (`fontes_procedurais.barlavento`).
+- **Água:** achada pela cor do próprio render (azulada, B acima de R), em manchas grandes. Ficam por cima, como estavam: bordas, espreguiçadeiras (Casa B, sem o halo claro da sombra antiga) e os tracejados de projeção (Casa A). O contorno escuro de 1 px junto às bordas entra na água, para não sobrar em entalhes.
+- **Degraus e contornos internos:** as linhas do projeto dentro da água, tiradas da base chapada da casa alinhada ao render (SIFT + afim) e reduzidas por área (as linhas de 1 px da base não somem na redução). Marcadas de leve, numa linha fina: degrau da prainha e anel do spa (A); faixa junto ao deck e anel do spa (B); os três degraus da prainha e o anel do spa (C); o degrau duplo da prainha e o anel duplo do spa (D).
+- **Imagens:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png`, `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_v4_retocado_barlavento.png`, `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_v3_retocado_barlavento.png` e `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento.png` (as anteriores ficam como estavam).
+- **Entrega refeita:** a prancha do Térreo de cada casa (`entrega/POE642_CasaX_PH_Terreo_entrega.png`) e o PDF (`entrega/POE642_CasaX_Plantas_Humanizadas.pdf`); os outros pavimentos não mudam. Na Casa A, o GIF `POE642_CasaA_pranchas_perfiladas.gif` não foi refeito.
+
+```bash
+# da pasta projetos/
+python3 POE642_CasaA/scripts/piscinas_barlavento.py POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png \
+    POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento.png \
+    --base POE642_CasaD/bases/POE642_CasaD_BASE_Terreo_v3_texturas_16x9.png --chapada POE642_CasaD/bases/POE642_CasaD_BASE_Terreo_v2_16x9.png
+# Casa A: --base e --chapada = POE642_CasaA/bases/POE642_CasaA_BASE_Terreo_v6_16x9.png
+# depois, de POE642_CasaA/scripts/: rodape_entrega.py --render Terreo=<..._barlavento.png> e pdf_entrega.py (com --config das Casas B, C e D)
+```
