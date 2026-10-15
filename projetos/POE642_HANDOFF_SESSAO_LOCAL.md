@@ -407,3 +407,4 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   39. pisantes de cima com o Bege Bahia do deck (veios suaves); a fileira junto à garagem já tinha veios.
   40. torneiras do PDF nas duas cubas da cozinha (cromado, no eixo de cada cuba).
   41. spa com o segundo contorno interno (o degrau em volta do fundo), no perfil das arestas do render.
+  42. paisagismo: canteiros com as touceiras do render nos dois gramados junto à escada da piscina (acima e abaixo dela).
