@@ -341,4 +341,28 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 - **Prévia de texturas:** `bases/POE642_CasaD_BASE_Terreo_v3_texturas(_16x9)`, com os materiais aprovados das Casas A, B e C (sem deck e sem pedra portuguesa, que a Casa D não tem).
 - **Prompt:** `POE642_CasaD/POE642_CasaD_PH_Terreo_v1.md` (PT de validação + EN para o motor), com a base `v3_texturas_16x9` como única entrada. Escala: lote em x ~9,5%–88% e muros em ~6,5% e ~89,5% da altura (medidos na base).
 - **Próximo passo:** o usuário roda o prompt v1 no Nano Banana Pro e traz o render; o retoque segue erro por erro, como na Casa C.
+- **Render (prompt v1):** `renders/POE642_CasaD_PH_Terreo_v1_render.webp` (afim 1,0001 x 1,0076, como na Casa C). Erros levantados, numerados em `renders/POE642_CasaD_PH_Terreo_v1_render_marcado.jpg` (a corrigir erro por erro, na ordem que o usuário escolher):
+  1. muro preto inventado na borda esquerda do lote (no PDF é a linha tracejada);
+  2. plantas passando do lote e dos muros nos cantos de cima e de baixo à esquerda;
+  3. faixa com X à direita do hall virou canteiro (base: grama com a projeção tracejada);
+  4. ponta direita do acesso de veículos em piso cinza (resto em granito);
+  5. projeção tracejada em X sobre a entrada da garagem sumiu;
+  6. portas sobre o granito sem arco (banho gourmet, louceiro, despensa, serviço → garagem, porta dupla da área descoberta);
+  7. vaso sanitário inventado na área descoberta e X tracejado apagado;
+  8. tanques com uma cuba (PDF: duas);
+  9. DCE sem a cama de solteiro e o criado-mudo (viraram marcenaria em L);
+  10. ilha da cozinha sem o cooktop de 5 bocas;
+  11. cooktop da gourmet com 4 bocas nos cantos e uma no meio (PDF: 2 em cima e 3 embaixo);
+  12. bancada da pia da gourmet em madeira (deve ser quartzo);
+  13. adega virou lavabo (cuba e vaso inventados);
+  14. lavabo sem o vaso e sem a bancada com cuba;
+  15. banco capitonê à direita do estar virou duas poltronas;
+  16. mesa redonda maior, tapete orgânico redondo e as duas mesinhas laterais sumiram;
+  17. plantas inventadas sobre as mesas (jantar, mesa redonda, varanda gourmet, escritório);
+  18. degrau interno do spa só em dois lados (PDF: quatro);
+  19. degrau estreito entre a piscina e a prainha virou faixa de água escura;
+  20. escada junto à suíte master com 11 degraus (PDF: 16);
+  21. suítes 1 e 2 sem o banco ao pé da cama (camas esticadas);
+  22. escrivaninha do escritório com 6 cadeiras (PDF: 2 de visita e 1 de trabalho);
+  23. elevador fora do padrão (cabine no tom do Subsolo da Casa B, como na Casa C).
 
