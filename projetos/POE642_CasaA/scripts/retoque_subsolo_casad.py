@@ -65,6 +65,11 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
 21. Janelas do WC DCE e do DCE 1 (pedido do usuário: vidros finos): as cápsulas grossas do render,
     que passavam 3 px do vão para dentro do cômodo e para a circulação, saem (granito em cima, Bege
     Bahia embaixo) e as janelas entram no desenho fino dos outros vidros (`vidros_fixos`).
+22. Portas de giro (pedido do usuário: mais finas e elegantes): as folhas, que o render fez como
+    barras de 10 a 12 px com contorno preto, e os arcos saem (piso tecido do próprio cômodo, sem tocar
+    nas paredes da base chapada) e entram do PDF: a folha na espessura do PDF (3,4 px), em branco
+    suave com contorno fino, e o arco em traço fino (no granito, o cinza dos arcos; no Bege Bahia, um
+    cinza mais escuro no lugar do preto).
 12. Pátio: a parede tracejada dupla de fora (à esquerda, embaixo e no alto), que o motor apagou ou
     cortou, volta: os traços do PDF (ARQ_PAREDE, fora da planta) desenhados no quadro comum.
 
@@ -329,6 +334,26 @@ for _nome, (_x0, _x1), (_jx0, _jx1), _paredes, _caix, _vidro, _yc, _faces in [
         "paredes": _paredes, "caixilhos": _caix, "vidro": _vidro,
         "centro": ((_vidro[0], _yc), (_vidro[2], _yc)), "faces": _faces})
 FACE = {"cor": (120, 122, 124), "larg": 0.45}
+
+# portas de giro (px do render, do PDF, layer ARQ_PAREDE): folha (retângulo) e o arco; o piso do cômodo
+PORTAS_GIRO = [
+    ("WC DCE", (758.1, 125.0, 811.1, 128.4), "granito"),
+    ("DCE 1", (831.3, 193.6, 834.7, 246.3), "granito"),
+    ("depósito, folha de cima", (1053.3, 261.4, 1102.0, 264.8), "granito"),
+    ("depósito, folha de baixo", (1053.3, 371.5, 1102.0, 374.9), "granito"),
+    ("depósito, fim da escada", (1142.6, 482.8, 1195.6, 486.2), "granito"),
+    ("sauna", (855.3, 890.1, 914.8, 893.5), "bege"),
+    ("ducha", (885.8, 965.9, 889.2, 1027.4), "bege"),
+    ("vestiário", (1076.3, 893.2, 1127.3, 896.6), "bege"),
+    ("WC do vestiário", (1213.1, 971.7, 1268.3, 975.1), "bege"),
+    ("box do vestiário", (1213.1, 983.5, 1268.3, 986.9), "bege"),
+]
+PORTA = {"folha": (238, 238, 236), "contorno": (88, 90, 92), "larg_contorno": 0.5,
+         "margem": (5, 4),                 # o que sai em volta da folha do PDF: na espessura e no comprimento
+         "faixa_arco": 2.5,                # e em volta do arco do PDF
+         "arco": {"granito": ((160, 161, 160), 1.1), "bege": ((110, 112, 115), 0.9)},
+         "lum": {"granito": (45, 110), "bege": (150, 240)},
+         "escuro": {"granito": 70, "bege": 150}}
 
 ELEVADOR_ENTRADA = {
     "janela": (1536, 364, 1566, 499),
@@ -957,6 +982,81 @@ def elevador_entrada(out):
     return out
 
 
+def portas_giro(out, A):
+    q = PORTA
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    # só as paredes grossas: a base também tem em preto os contornos finos das folhas e dos arcos
+    preto = (chapada.max(axis=2) < 60).astype(np.uint8)
+    parede = cv2.morphologyEx(preto, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
+    parede = cv2.dilate(parede, np.ones((3, 3), np.uint8)).astype(bool)
+    # e só onde o render também tem parede grossa (no vão do vestiário a base é preta onde o render
+    # tem a borda da folha antiga)
+    escuro = (out.astype(np.float32).mean(axis=2) < 45).astype(np.uint8)
+    parede &= cv2.dilate(cv2.morphologyEx(escuro, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8)),
+                         np.ones((3, 3), np.uint8)).astype(bool)
+    pg, p2r = pdf_cadeia(A, out.shape)
+    arcos = []
+    for d in pg.get_drawings():
+        if d.get("layer") == "ARQ_PAREDE" and any(it[0] == "c" for it in d["items"]):
+            (a0, b0), (a1, b1) = p2r(d["rect"].x0, d["rect"].y0), p2r(d["rect"].x1, d["rect"].y1)
+            if max(a1 - a0, b1 - b0) > 15:
+                curvas = []
+                for it in d["items"]:
+                    if it[0] == "c":
+                        pp = np.array([p2r(v.x, v.y) for v in it[1:5]])
+                        tt = np.linspace(0, 1, 80)[:, None]
+                        curvas.append((1 - tt) ** 3 * pp[0] + 3 * (1 - tt) ** 2 * tt * pp[1]
+                                      + 3 * (1 - tt) * tt ** 2 * pp[2] + tt ** 3 * pp[3])
+                arcos.append(((a0, b0, a1, b1), curvas))
+    for nome, (fx0, fy0, fx1, fy1), piso in PORTAS_GIRO:
+        # o arco da porta: o que toca a folha
+        arco = min(arcos, key=lambda a: min(abs(a[0][0] - fx0) + abs(a[0][1] - fy0), abs(a[0][2] - fx1) + abs(a[0][3] - fy1),
+                                            abs(a[0][0] - fx0) + abs(a[0][3] - fy1), abs(a[0][2] - fx1) + abs(a[0][1] - fy0)))
+        ax0, ay0, ax1, ay1 = arco[0]
+        x0, y0 = int(min(fx0, ax0)) - 10, int(min(fy0, ay0)) - 10
+        x1, y1 = int(np.ceil(max(fx1, ax1))) + 11, int(np.ceil(max(fy1, ay1))) + 11
+        h, w = y1 - y0, x1 - x0
+        horizontal = (fx1 - fx0) > (fy1 - fy0)
+        me, mc = q["margem"]
+        ex, ey = (mc, me) if horizontal else (me, mc)
+        m = np.zeros((h, w), bool)
+        m[max(0, int(fy0 - ey) - y0):int(np.ceil(fy1 + ey)) - y0, max(0, int(fx0 - ex) - x0):int(np.ceil(fx1 + ex)) - x0] = True
+
+        def traco(curvas, larg):
+            f = np.zeros((h * SS, w * SS), np.uint8)
+            for c in curvas:
+                cv2.polylines(f, [np.round((c - [x0, y0]) * SS).astype(np.int32)], False, 255,
+                              max(1, int(round(larg * SS))), cv2.LINE_AA)
+            return cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+        lum = out[y0:y1, x0:x1].astype(np.float32).mean(axis=2)
+        m |= (traco(arco[1], 2 * q["faixa_arco"]) > 0.05) & (lum < q["escuro"][piso])
+        m &= ~parede[y0:y1, x0:x1]
+        lo, hi = q["lum"][piso]
+        out = apagar_largo(out, (x0, y0, x1, y1), m, GRANITO if piso == "granito" else BEGE, sigma=2.0, borda=0.0,
+                           lum_min=lo, lum_max=hi, escuros=True)
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+
+        def pintar(a, cor):
+            nonlocal reg
+            reg = reg * (1 - a[..., None]) + np.asarray(cor, np.float32) * a[..., None]
+
+        cor_arco, larg_arco = q["arco"][piso]
+        pintar(traco(arco[1], larg_arco) * ~parede[y0:y1, x0:x1], cor_arco)
+        f = np.zeros((h * SS, w * SS), np.uint8)
+        p0 = (round((fx0 - x0) * SS), round((fy0 - y0) * SS))
+        p1 = (round((fx1 - x0) * SS), round((fy1 - y0) * SS))
+        cv2.rectangle(f, p0, p1, 255, -1)
+        pintar(cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA), q["folha"])
+        f = np.zeros_like(f)
+        cv2.rectangle(f, p0, p1, 255, max(1, round(q["larg_contorno"] * SS)))
+        pintar(cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA), q["contorno"])
+        out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    {len(PORTAS_GIRO)} portas de giro: folha fina do PDF e arco em traço fino")
+    return out
+
+
 def no_quadro(out, A):
     """O render retocado vai para o quadro comum (a base 16:9 na largura das pranchas) pelo inverso da
     cadeia base -> render (a base reduzida ao tamanho do render, não uniforme, e o afim A), com 2 x
@@ -1092,6 +1192,8 @@ def main():
     out = letreiros(out)
     print("[13] arcos das portas sobre o granito")
     out = arcos_granito(out, alinhar_base(orig))
+    print("[22] portas de giro mais finas")
+    out = portas_giro(out, alinhar_base(orig))
     print("[14] escada: sombreamento de descida, sem linhas")
     out = escada(out)
     print("[16] sanitários")
