@@ -134,6 +134,14 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
 29. Degrau de canto da prainha (pedido do usuário): veio com a água da segunda imagem e não está no
    PDF. Sai: as mesmas linhas, 3 placas à esquerda (a grade de ~12 px casa), com a sombra da borda da
    direita (fator por coluna medido nas linhas de cima).
+30. Louceiro e despensa (pedido do usuário): o motor desenhou prateleiras em L, com sombra funda no
+   piso; no PDF o L é só um preenchimento branco na layer DOC_LINHAS E PROJEÇÕES, sem desenho de
+   prateleira. O interior vira granito tecido do piso limpo da cozinha, com a sombra curta das paredes;
+   a folha da porta fica e o arco é redesenhado como os outros no granito.
+31. Banho gourmet (pedido do usuário): o chuveiro e o box sumiam no granito. A peça cinza do motor sai e
+   entram, com a geometria do PDF: a divisória do box em cinza claro (com contorno e as duas folhas de
+   correr) e o chuveiro como os do banho master (ducha quadrada com a placa da Casa A, braço cromado até
+   a parede de baixo e canopla, com sombra curta).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -535,6 +543,36 @@ ELEVADOR_D = {
     "cabine": (701, 641, 747, 686),          # ocupa a caixa, com 1-2 px de folga (pedido do usuário)
     "branco": (255, 255, 255),
     "fonte": ELEVADOR_C["fonte"],
+}
+
+# louceiro e despensa (pedido do usuário): o motor desenhou prateleiras em L, com sombra funda no
+# piso. No PDF o L é só um preenchimento branco na layer DOC_LINHAS E PROJEÇÕES, sem desenho de
+# prateleira. O interior vira granito tecido do piso limpo da cozinha, no tom dele, com a sombra
+# curta das paredes; a folha da porta fica (o arco é redesenhado depois, como os outros no granito)
+SEM_PRATELEIRAS = {
+    # (cômodo, interior, folha da porta, que fica)
+    "comodos": [("louceiro", (1093, 190, 1138, 253), (1093, 226, 1100, 253)),
+                ("despensa", (1093, 291, 1138, 349), (1093, 289, 1100, 315))],
+    "fonte_granito": [(1000, 300, 1060, 318), (1440, 96, 1640, 180)],
+    "ref": (1000, 300, 1060, 318),
+    "folha": 110,                              # px claros (Y > 110) na caixa da folha
+    "sombra_parede": (0.22, 2.0),
+}
+
+# banho gourmet (pedido do usuário): o chuveiro e o box sumiam no granito. A peça cinza que o motor
+# pôs no lugar do chuveiro sai (granito na luz do entorno) e entram, com a geometria do PDF (ARQ_LOUÇAS
+# E METAIS): a divisória do box em cinza claro (a faixa de vidro na espessura do PDF, com contorno e as
+# duas folhas de correr), e o chuveiro como os do banho master: a ducha quadrada (placa da Casa A
+# reduzida), o braço cromado até a parede de baixo e a canopla, com sombra curta
+BANHO_GOURMET = {
+    "apagar": (733, 221, 747, 239),
+    "fonte_granito": [(1000, 300, 1060, 318), (1440, 96, 1640, 180)],
+    "janela": (728, 186, 760, 242),
+    "divisoria": (753.8, 190.2, 755.4, 239.3), "folhas": [(754.3, 213.7, 239.3), (754.8, 207.3, 232.9)],
+    "vidro": (200, 203, 205), "contorno": (110, 116, 122), "larg_contorno": 0.3, "larg_folha": 0.25,
+    "ducha": (735.6, 224.6, 741.8, 230.7), "braco": (738.7, 227.7, 239.3), "larg_braco": 0.8,
+    "canopla": (737.8, 238.6, 739.6, 239.6),
+    "sombra": {"desloc": (-1.0, 1.0), "sigma": 0.8, "forca": 0.3},
 }
 
 
@@ -1711,6 +1749,95 @@ def elevador(out):
     return out
 
 
+def sem_prateleiras(out, chapada):
+    q = SEM_PRATELEIRAS
+    grossa = parede_grossa(chapada)
+    rx0, ry0, rx1, ry1 = q["ref"]
+    cor = np.median(out[ry0:ry1, rx0:rx1].reshape(-1, 3).astype(np.float32), axis=0)
+    fy = q["folha"]
+    forca, dist = q["sombra_parede"]
+    for nome, (x0, y0, x1, y1), (fx0, fy0, fx1, fy1) in q["comodos"]:
+        h, w = y1 - y0, x1 - x0
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        parede = grossa[y0:y1, x0:x1] | (reg.mean(axis=2) < 40) & (
+            cv2.dilate(grossa[y0:y1, x0:x1].astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
+        yy, xx = np.mgrid[y0:y1, x0:x1]
+        folha = (reg.mean(axis=2) > fy) & (xx >= fx0) & (xx < fx1) & (yy >= fy0) & (yy < fy1)
+        m = ~parede & ~folha
+        d = cv2.distanceTransform((~parede).astype(np.uint8), cv2.DIST_L2, 3)
+        luz = 1 - forca * np.exp(-np.maximum(d - 1, 0) / dist)
+        tex = textura(out, q["fonte_granito"], h, w) * cor * luz[..., None]
+        reg[m] = tex[m]
+        out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+        print(f"    {nome}: prateleiras do motor fora (granito)")
+    return out
+
+
+def banho_gourmet(out):
+    q = BANHO_GOURMET
+    x0, y0, x1, y1 = q["apagar"]
+    pad = 6
+    ret = (x0 - pad, y0 - pad, x1 + pad, y1)
+    m = np.zeros((ret[3] - ret[1], ret[2] - ret[0]), bool)
+    m[pad:, pad:pad + x1 - x0] = True
+    out = apagar(out, ret, m, q["fonte_granito"], sigma=4.0, borda=0)
+
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+
+    def px(v, o=0.0):
+        return int(round((v - o) * SS))
+
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+
+    def pintar(mascara, cor):
+        nonlocal reg
+        a = cv2.resize(mascara.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        reg = reg * (1 - a) + np.array(cor, np.float32) * a
+
+    # divisória do box
+    dx0, dy0, dx1, dy1 = q["divisoria"]
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(m, (px(dx0, wx0), px(dy0, wy0)), (px(dx1, wx0), px(dy1, wy0)), 255, -1)
+    pintar(m, q["vidro"])
+    m = np.zeros_like(m)
+    cv2.rectangle(m, (px(dx0, wx0), px(dy0, wy0)), (px(dx1, wx0), px(dy1, wy0)), 255, px(q["larg_contorno"]))
+    for fx, fy0, fy1 in q["folhas"]:
+        cv2.line(m, (px(fx, wx0), px(fy0, wy0)), (px(fx, wx0), px(fy1, wy0)), 255, px(q["larg_folha"]))
+    pintar(m, q["contorno"])
+
+    # chuveiro: sombra, ducha (placa da Casa A), braço e canopla
+    cx0, cy0, cx1, cy1 = q["ducha"]
+    ducha = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(ducha, (px(cx0, wx0), px(cy0, wy0)), (px(cx1, wx0), px(cy1, wy0)), 255, -1)
+    s = q["sombra"]
+    M = np.float32([[1, 0, s["desloc"][0] * SS], [0, 1, s["desloc"][1] * SS]])
+    sombra = cv2.GaussianBlur(cv2.warpAffine(ducha.astype(np.float32), M, (w * SS, h * SS)), (0, 0), s["sigma"] * SS) / 255
+    reg *= (1 - s["forca"] * cv2.resize(sombra, (w, h), interpolation=cv2.INTER_AREA))[..., None]
+    img = cv2.imread(str(CHUVEIRO_TETO[0]))
+    hx0, hy0, hx1, hy1 = CHUVEIRO_TETO[1]
+    placa = cv2.resize(img[hy0:hy1, hx0:hx1], (px(cx1 - cx0), px(cy1 - cy0)), interpolation=cv2.INTER_CUBIC)
+    cor = np.zeros((h * SS, w * SS, 3), np.uint8)
+    cor[px(cy0, wy0):px(cy0, wy0) + placa.shape[0], px(cx0, wx0):px(cx0, wx0) + placa.shape[1]] = placa
+    a = cv2.resize(ducha.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    c = cv2.resize(cor.astype(np.float32) * (ducha[..., None] / 255), (w, h), interpolation=cv2.INTER_AREA) / np.maximum(a, 1e-6)
+    reg = reg * (1 - a) + c * a
+    bx, by0, by1 = q["braco"]
+    braco = np.zeros_like(ducha)
+    cv2.line(braco, (px(bx, wx0), px(by0, wy0)), (px(bx, wx0), px(by1, wy0)), 255, px(q["larg_braco"]))
+    brilho = np.zeros_like(ducha)
+    cv2.line(brilho, (px(bx - 0.1, wx0), px(by0, wy0)), (px(bx - 0.1, wx0), px(by1, wy0)), 255, max(1, px(0.3)))
+    pintar(braco, CROMO_ESCURO)
+    pintar(brilho, CROMO_CLARO)
+    kx0, ky0, kx1, ky1 = q["canopla"]
+    canopla = np.zeros_like(ducha)
+    cv2.rectangle(canopla, (px(kx0, wx0), px(ky0, wy0)), (px(kx1, wx0), px(ky1, wy0)), 255, -1)
+    pintar(canopla, CROMO)
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    banho gourmet: divisória do box em cinza e chuveiro do PDF (ducha, braço e canopla)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1749,6 +1876,8 @@ def main():
     out = acesso(out)
     print("[11] erro 5: projeção com X sobre a entrada da garagem")
     out = projecao_garagem(out, A)
+    print("[12a] louceiro e despensa sem as prateleiras do motor")
+    out = sem_prateleiras(out, chapada)
     print("[12] erro 6: arcos das portas sobre o granito")
     out = arcos_no_granito(out, A, chapada)
     print("[13] erro 7: vaso inventado e X da área descoberta")
@@ -1781,6 +1910,8 @@ def main():
     out = cadeiras_escritorio(out)
     print("[27] erro 23: elevador")
     out = elevador(out)
+    print("[28] banho gourmet: box e chuveiro")
+    out = banho_gourmet(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

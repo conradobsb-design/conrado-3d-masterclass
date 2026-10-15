@@ -395,3 +395,5 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   27. erro 22 da lista: na escrivaninha do escritório ficam as 2 cadeiras de visita e a de trabalho do PDF (saem 3).
   28. erro 23 da lista: elevador com a cabine do Subsolo da Casa B, porta à direita, ocupando a caixa inteira (pedido do usuário: sem o branco largo em volta).
   29. degrau de canto da prainha removido (pedido do usuário): placas da mesma fileira, com a sombra da borda.
+  30. louceiro e despensa sem as prateleiras do motor (no PDF o L é só um preenchimento branco na layer de projeções): granito com a sombra das paredes.
+  31. banho gourmet: divisória do box em cinza e chuveiro do PDF (ducha, braço e canopla), como no banho master.
