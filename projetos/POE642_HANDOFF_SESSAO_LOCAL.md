@@ -365,4 +365,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   21. suítes 1 e 2 sem o banco ao pé da cama (camas esticadas);
   22. escrivaninha do escritório com 6 cadeiras (PDF: 2 de visita e 1 de trabalho);
   23. elevador fora do padrão (cabine no tom do Subsolo da Casa B, como na Casa C).
+- **Retoque (`POE642_CasaA/scripts/retoque_terreo_casad.py`, sem IA, na ordem pedida pelo usuário):** saída em `renders/POE642_CasaD_PH_Terreo_v1_retocado.png` (e `_camada.png`, só os px alterados).
+  1. porta pivotante principal (hall de entrada ↔ estar): a folha, cortada pelo motor no alinhamento da parede, vai até o fim do PDF, do lado do hall (mesmo caso da Casa C);
+  2. chuveiros do banho master: a barra de parede a parede do motor sai e entram as duas duchas do PDF, cada uma num braço que sai da parede lateral (placa da Casa A reduzida, braço cromado e canopla).
 
