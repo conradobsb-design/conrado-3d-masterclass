@@ -83,6 +83,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     baixo (até ~6 px), com a borda das folhas irregular; as folhas voltam do render original, por
     cima do traço da floreira, com uma sombra curta desenhada no travertino. Entram poucas flores tropicais coloridas (as estrelítzias
     do jardim do render, laranja, e as mesmas em vermelho, rosa e amarelo), espalhadas.
+20. Estar da varanda (pedido do usuário): ali não tem tapete. O tapete retangular que o motor pôs sob
+    o sofá, as poltronas, a mesa de centro e o banco sai: vira o Bege Bahia tecido da própria varanda,
+    na luz do piso em volta; os móveis (os polígonos brancos do PDF, com folga) ficam, e cada um ganha
+    de volta a sombra curta no piso.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1026,6 +1030,49 @@ def jardim_flores(out, orig):
     return out
 
 
+# sem tapete no estar da varanda (item 20): o retângulo do tapete do motor, a janela dos móveis em
+# volta e trechos limpos de Bege Bahia da varanda (acima do sofá e abaixo do banco)
+SEM_TAPETE = {
+    "tapete": (666, 653, 810, 769), "janela": (655, 630, 820, 790),
+    "fontes": [(700, 778, 786, 812), (530, 700, 600, 760)],
+    "camadas": ("ARQ_MOBILIÁRIO", "ARQ_LAYOUT HUMANIZAÇÃO"),
+    "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.3},
+}
+
+
+def sem_tapete(out, A):
+    q = SEM_TAPETE
+    wx0, wy0, wx1, wy1 = q["janela"]
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+
+    def movel(d):
+        c = caixa_render(d, p2r)
+        return (d.get("fill") == (1.0, 1.0, 1.0) and d.get("layer") in q["camadas"] and
+                c[2] > wx0 and c[0] < wx1 and c[3] > wy0 and c[1] < wy1 and (c[2] - c[0]) < 80)
+
+    moveis = mascara_pdf(q["janela"], A, out.shape, movel)
+    # os móveis do PDF com 1 px de folga, mais o contorno escuro do render até 2 px (o tapete, mais
+    # claro, não entra: senão ficava um halo dele em volta das peças)
+    mv = (moveis > 0.3).astype(np.uint8)
+    lum = out[wy0:wy1, wx0:wx1].astype(np.float32).mean(axis=2)
+    pecas = (cv2.dilate(mv, np.ones((3, 3), np.uint8)) > 0) | ((cv2.dilate(mv, np.ones((5, 5), np.uint8)) > 0) & (lum < 195))
+    tx0, ty0, tx1, ty1 = q["tapete"]
+    m = np.zeros(pecas.shape, bool)
+    m[ty0 - wy0:ty1 - wy0, tx0 - wx0:tx1 - wx0] = True
+    m &= ~pecas
+    out = apagar_largo(out, q["janela"], m, q["fontes"], sigma=6.0, borda=0.6, lum_min=185, lum_max=228, escuros=True)
+    # sombra curta dos móveis no piso refeito (só onde era tapete)
+    s = q["sombra"]
+    h, w = pecas.shape
+    M = np.float32([[1, 0, s["desloc"][0]], [0, 1, s["desloc"][1]]])
+    a = np.clip(moveis, 0, 1)
+    sb = cv2.GaussianBlur(cv2.warpAffine(a, M, (w, h)), (0, 0), s["sigma"]) * (1 - a) * m
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    out[wy0:wy1, wx0:wx1] = np.clip(reg * (1 - s["forca"] * sb)[..., None], 0, 255).astype(np.uint8)
+    print(f"    estar da varanda: tapete do motor fora ({int(m.sum())} px de Bege Bahia), sombra curta dos móveis")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1042,6 +1089,8 @@ def main():
     out = jardim_interno(out)
     print("[4] tapete do estar da varanda no contorno orgânico do PDF")
     out = tapete(out, A)
+    print("[20] estar da varanda: sem tapete")
+    out = sem_tapete(out, A)
     print("[5] varanda: as quatro barras a 45° do PDF")
     out = barras(out, A)
     print("[6] elevador: cabine ocupando a caixa")
