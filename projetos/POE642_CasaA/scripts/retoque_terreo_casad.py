@@ -92,6 +92,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    cuba de louça (torneira na parede de cima, como no PDF), contorno na face livre e sombra curta no
    piso; o vidro do jardim passa para depois da bancada (o perfil do vidro do render). O vaso é o
    suspenso branco do lavabo da Casa C, no retângulo do PDF, com a parede à esquerda.
+20. Erro 15 da lista (banco capitonê do estar): o motor fez duas poltronas no lugar do banco do PDF.
+   Elas saem com a sombra (cada coluna do travertino liga a faixa limpa de cima à de baixo, porque os
+   veios são verticais) e entra o banco do PDF (ARQ_MOBILIÁRIO): estofado no tecido do sofá do render,
+   com o capitonê em losangos (vincos e botões), contorno e a sombra curta dos móveis do render.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -377,6 +381,19 @@ LAVABO = {
     "vaso_fonte": RAIZ / "POE642_CasaC/renders/POE642_CasaC_PH_Terreo_v3_retocado.png",
     "vaso": (1233, 507, 1253, 523), "corpo": (1233.0, 508.5, 1251.5, 521.0), "piso": 215.0,
     "vaso_destino": (1281.9, 669.6, 1297.9, 680.5),
+}
+
+# banco capitonê do estar (erro 15): o motor fez duas poltronas no lugar do banco do PDF. Elas saem
+# com a sombra (cada coluna do travertino liga a faixa limpa de cima à de baixo: os veios são
+# verticais) e entra o banco do PDF (ARQ_MOBILIÁRIO): estofado no tecido do sofá do render, com o
+# capitonê em losangos (botões e vincos), contorno e a sombra curta dos móveis do render
+BANCO_ESTAR = {
+    "apagar": (1143, 569, 1171, 636), "faixa": 4,
+    "banco": (1149.0, 571.6, 1167.6, 627.6),
+    "janela": (1143, 566, 1173, 634),
+    "tecido": (226, 232, 238), "borda": (196, 202, 208), "botao": (150, 156, 163), "vinco": (205, 211, 218),
+    "passo": 4.65, "raio_botao": 0.45, "larg_vinco": 0.35, "larg_borda": 0.6,
+    "sombra": {"desloc": (-2.0, 2.0), "sigma": 1.2, "forca": 0.4},
 }
 
 
@@ -1225,6 +1242,61 @@ def lavabo(out):
     return out
 
 
+def banco_estar(out):
+    q = BANCO_ESTAR
+    x0, y0, x1, y1 = q["apagar"]
+    n = q["faixa"]
+    cima = out[y0 - n:y0].astype(np.float32).mean(axis=0)[x0:x1]
+    baixo = out[y1:y1 + n].astype(np.float32).mean(axis=0)[x0:x1]
+    tt = ((np.arange(y0, y1) - y0 + 0.5) / (y1 - y0))[:, None, None]
+    out[y0:y1, x0:x1] = np.clip(cima[None] * (1 - tt) + baixo[None] * tt, 0, 255).astype(np.uint8)
+
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+
+    def px(v, o):
+        return int(round((v - o) * SS))
+
+    bx0, by0, bx1, by1 = q["banco"]
+    corpo = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(corpo, (px(bx0, wx0), px(by0, wy0)), (px(bx1, wx0), px(by1, wy0)), 255, -1)
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    s = q["sombra"]
+    M = np.float32([[1, 0, s["desloc"][0] * SS], [0, 1, s["desloc"][1] * SS]])
+    sombra = cv2.GaussianBlur(cv2.warpAffine(corpo.astype(np.float32), M, (w * SS, h * SS)), (0, 0), s["sigma"] * SS) / 255
+    reg *= (1 - s["forca"] * cv2.resize(sombra, (w, h), interpolation=cv2.INTER_AREA))[..., None]
+
+    cor = np.zeros((h * SS, w * SS, 3), np.float32)
+    cor[:] = q["tecido"]
+    # vincos em losango e botões nos vértices
+    pa = q["passo"]
+    nx = int(round((bx1 - bx0) / pa))
+    ny = int(round((by1 - by0) / pa))
+    dx, dy = (bx1 - bx0) / nx, (by1 - by0) / ny
+    botoes = []
+    for j in range(ny + 1):
+        for i in range(nx + 1):
+            if (i + j) % 2 == 0:
+                botoes.append((bx0 + i * dx, by0 + j * dy))
+    vinco = np.zeros((h * SS, w * SS), np.uint8)
+    for (ax, ay) in botoes:
+        for (cx, cy) in botoes:
+            if abs(abs(cx - ax) - dx) < 1e-3 and abs(abs(cy - ay) - dy) < 1e-3 and (cx > ax):
+                cv2.line(vinco, (px(ax, wx0), px(ay, wy0)), (px(cx, wx0), px(cy, wy0)), 255, px(q["larg_vinco"], 0))
+    cor[vinco > 0] = q["vinco"]
+    for (ax, ay) in botoes:
+        if bx0 < ax < bx1 and by0 < ay < by1:
+            cv2.circle(cor, (px(ax, wx0), px(ay, wy0)), max(1, px(q["raio_botao"], 0)), q["botao"], -1)
+    borda = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(borda, (px(bx0, wx0), px(by0, wy0)), (px(bx1, wx0), px(by1, wy0)), 255, px(q["larg_borda"], 0))
+    cor[borda > 0] = q["borda"]
+    a = cv2.resize(corpo.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    c = cv2.resize(cor * (corpo[..., None] / 255), (w, h), interpolation=cv2.INTER_AREA) / np.maximum(a, 1e-6)
+    out[wy0:wy1, wx0:wx1] = np.clip(reg * (1 - a) + c * a, 0, 255).astype(np.uint8)
+    print("    estar: poltronas do motor fora; banco capitonê do PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1277,6 +1349,8 @@ def main():
     out = adega(out)
     print("[19] erro 14: vaso e bancada com cuba do lavabo")
     out = lavabo(out)
+    print("[20] erro 15: banco capitonê do estar")
+    out = banco_estar(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

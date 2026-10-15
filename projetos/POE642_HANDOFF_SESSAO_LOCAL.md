@@ -385,3 +385,4 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   17. erro 12 da lista: a bancada da pia da gourmet, em madeira, vira quartzo com a luz da própria bancada; a cuba fica.
   18. erro 13 da lista: a adega volta a ser vazia (travertino), sem o lavabo inventado.
   19. erro 14 da lista: lavabo com a bancada de quartzo e cuba junto à parede da direita (onde a base tinha pintado jardim) e o vaso suspenso da Casa C.
+  20. erro 15 da lista: as duas poltronas à direita do estar saem e entra o banco capitonê do PDF (tecido do sofá, losangos com botões).
