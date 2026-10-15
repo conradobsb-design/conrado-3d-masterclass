@@ -87,6 +87,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     o sofá, as poltronas, a mesa de centro e o banco sai: vira o Bege Bahia tecido da própria varanda,
     na luz do piso em volta; os móveis (os polígonos brancos do PDF, com folga) ficam, e cada um ganha
     de volta a sombra curta no piso.
+21. Escada externa do alto (pedido do usuário): sem linhas, com sombreamento que dá a percepção de
+    descida da direita para a esquerda. Como a interna (item 18), com o lado de baixo à esquerda: o
+    travertino refeito sem as linhas, os 17 pisos do PDF escurecendo para a esquerda e a sombra curta de
+    cada espelho no piso de baixo, à esquerda dele, inclusive o último, no deck.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -904,39 +908,46 @@ def veio_louceiro(out, orig):
     return out
 
 
-# escada interna (item 18, pedido do usuário): os degraus do PDF (ARQ_ESCADAS E RAMPAS) no quadro do
-# render; sobe da direita (piso mais baixo) para a esquerda
-ESCADA = {
-    "x": (976.4, 1154.6), "n": 19, "linhas": (497, 543),
-    "fonte": 600,                              # 1ª linha do travertino limpo abaixo da floreira
-    "escurece": 0.10,                          # o piso de baixo (à direita) fica 10% mais escuro
-    "sombra": (0.18, 2.0),                     # força e decaimento (px) da sombra de cada espelho
-    "fim_sombra": 1163,                        # a sombra do 1º espelho no piso da sala vai até aqui
-}
+# escadas (itens 18 e 21, pedidos do usuário): os degraus do PDF (ARQ_ESCADAS E RAMPAS) no quadro do
+# render, só com sombreamento, sem linhas. "baixo" diz de que lado fica o piso mais baixo: o degrau
+# desse lado é o mais escuro e cada espelho joga sombra curta no piso de baixo, do lado de "baixo";
+# a sombra do último espelho cai no piso vizinho até "fim_sombra". O travertino vem de "fonte" (a 1ª
+# linha e a 1ª coluna de um trecho limpo, com os veios verticais)
+ESCADAS = [
+    {"nome": "interna (sobe da direita para a esquerda)", "x": (976.4, 1154.6), "n": 19, "linhas": (497, 543),
+     "fonte": (600, 976), "baixo": "direita", "fim_sombra": 1163},
+    {"nome": "externa (desce da direita para a esquerda)", "x": (599.6, 758.1), "n": 17, "linhas": (212, 248),
+     "fonte": (612, 990), "baixo": "esquerda", "fim_sombra": 591},
+]
+ESCADA = {"escurece": 0.10, "sombra": (0.18, 2.0)}   # o mais baixo 10% mais escuro; força e decaimento
 
 
-def escada(out):
-    q = ESCADA
+def escada(out, q):
     xa, xb = q["x"]
     y0, y1 = q["linhas"]
     xi0, xi1 = int(np.floor(xa)), int(np.ceil(xb))
-    f0 = q["fonte"]
-    out[y0:y1, xi0:xi1] = out[f0:f0 + (y1 - y0), xi0:xi1]
+    f0, c0 = q["fonte"]
+    out[y0:y1, xi0:xi1] = out[f0:f0 + (y1 - y0), c0:c0 + (xi1 - xi0)]
     passo = (xb - xa) / q["n"]
-    forca, dec = q["sombra"]
-    xs = np.arange(xi0, q["fim_sombra"], dtype=np.float32)
-    sub = (xs[:, None] + (np.arange(8, dtype=np.float32)[None, :] + 0.5) / 8)       # 8 amostras por px
-    k = np.floor((sub - xa) / passo)
+    forca, dec = ESCADA["sombra"]
+    direita = q["baixo"] == "direita"
+    c0, c1 = (xi0, q["fim_sombra"]) if direita else (q["fim_sombra"], xi1)
+    xs = np.arange(c0, c1, dtype=np.float32)
+    sub = xs[:, None] + (np.arange(8, dtype=np.float32)[None, :] + 0.5) / 8          # 8 amostras por px
+    k = np.clip(np.floor((sub - xa) / passo), 0, q["n"] - 1)       # índice do degrau, da esquerda
+    baixeza = k / (q["n"] - 1) if direita else 1 - k / (q["n"] - 1)
     na_escada = (sub >= xa) & (sub < xb)
-    f = np.where(na_escada, 1 - q["escurece"] * np.clip(k, 0, q["n"] - 1) / (q["n"] - 1), 1.0)
-    # sombra de cada espelho no piso de baixo, à direita dele (o 1º, em xb, cai no piso da sala)
-    borda = xa + np.clip(np.floor((sub - xa) / passo), 0, q["n"]) * passo
-    dist = sub - borda
-    tem = (sub > xa + passo) | (sub >= xb)
-    f *= np.where(tem & (sub < q["fim_sombra"]), 1 - forca * np.exp(-dist / dec), 1.0)
+    f = np.where(na_escada, 1 - ESCADA["escurece"] * baixeza, 1.0)
+    if direita:      # espelho à esquerda de cada degrau de baixo: sombra para a direita
+        borda = xa + np.clip(np.floor((sub - xa) / passo), 0, q["n"]) * passo
+        dist, tem = sub - borda, (sub > xa + passo) | (sub >= xb)
+    else:            # espelho à direita de cada degrau de baixo: sombra para a esquerda
+        borda = xa + np.clip(np.ceil((sub - xa) / passo), 0, q["n"]) * passo
+        dist, tem = borda - sub, (sub < xb - passo) | (sub < xa)
+    f *= np.where(tem, 1 - forca * np.exp(-dist / dec), 1.0)
     f = f.mean(axis=1)
-    out[y0:y1, xi0:q["fim_sombra"]] = np.clip(out[y0:y1, xi0:q["fim_sombra"]] * f[None, :, None], 0, 255).astype(np.uint8)
-    print(f"    escada: {q['n']} pisos de {passo:.2f} px, sem linhas; sobe da direita para a esquerda")
+    out[y0:y1, c0:c1] = np.clip(out[y0:y1, c0:c1] * f[None, :, None], 0, 255).astype(np.uint8)
+    print(f"    escada {q['nome']}: {q['n']} pisos de {passo:.2f} px, sem linhas")
     return out
 
 
@@ -1117,8 +1128,9 @@ def main():
     out = arranjo(out, orig)
     print("[17] louceiro: veio de marcenaria")
     out = veio_louceiro(out, orig)
-    print("[18] escada: sombreamento de subida, sem linhas")
-    out = escada(out)
+    print("[18, 21] escadas: só sombreamento, sem linhas")
+    for q in ESCADAS:
+        out = escada(out, q)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
