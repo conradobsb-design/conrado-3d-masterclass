@@ -59,6 +59,12 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
 14. Pilar à direita do lavabo (pedido do usuário): o retângulo cinza da ARQ_ELEMENTOS FIXOS, que o
     motor fez como uma peça cinza-taupe com folhas por cima, é um pilar: fica no preto das paredes,
     na geometria do PDF (alto, cobre as folhas).
+15. Lavabo (pedido do usuário): cuba esculpida, com a torneira vindo do lado esquerdo. A cuba branca e
+    a torneira preta que o motor pôs no meio da bancada saem (quartzo tecido da própria bancada, na luz
+    dela); na metade esquerda da bancada do PDF entra a cuba esculpida no próprio quartzo: o fundo
+    inclinado escurece para trás, onde fica a fenda do ralo, as bordas de cima e da direita fazem uma
+    sombra curta para dentro, e um traço fino marca a borda. A torneira do PDF sai da parede da
+    esquerda: canopla e bica cromadas, com brilho e sombra curta.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -79,6 +85,7 @@ sys.path.insert(0, str(AQUI))
 
 from retoque_terreo_casad import desenhar_chuveiro, interpolar, textura  # noqa: E402
 from retoque_subsolo_casad import apagar_largo  # noqa: E402
+from retoque_terreo_casac import CROMO, CROMO_CLARO, CROMO_ESCURO  # noqa: E402
 
 SS = 8                             # superamostragem dos traços desenhados
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png"
@@ -750,6 +757,68 @@ def pilar(out):
     return out
 
 
+# lavabo (item 15, pedido do usuário): a bancada do render vai de x 1199 a 1251 e de y 667 a 682 (a
+# parede da esquerda termina em 1196 e a de baixo começa em 683); a cuba e a torneira do motor ficam
+# em x 1218-1239. A cuba esculpida ocupa a metade esquerda do PDF (até 1226,4) com ~2 px de borda,
+# e a torneira do PDF (ARQ_LOUÇAS E METAIS) sai da parede da esquerda, na altura do meio da cuba
+LAVABO = {
+    # a cuba e a torneira do motor saem: as mesmas linhas de quartzo limpo da própria bancada (a luz de
+    # cada linha fica), à esquerda e à direita em espelho
+    "bancada": (1199, 667, 1252, 683),
+    "copias": [((1218, 1227), (1205, 1214), False), ((1227, 1239), (1240, 1252), True)],
+    "cuba": (1201.0, 668.8, 1224.6, 680.6),
+    "inclinacao": 0.12,                       # o fundo escurece até 12% junto à fenda (atrás)
+    "sombra_borda": (0.16, 1.4),               # força e largura da sombra das bordas de cima e da direita
+    "luz_borda": 0.04,
+    "fenda": {"cor": (92, 94, 98), "larg": 0.8, "recuo": 1.3},
+    "contorno": (150, 150, 150), "larg_contorno": 0.4, "forca_contorno": 0.6,
+    "torneira": {"canopla": (1198.4, 672.6, 1200.3, 676.8), "bica": (1199.5, 1207.5), "larg": 1.2},
+    "sombra": {"desloc": (-1.0, 1.0), "sigma": 0.8, "forca": 0.3},
+}
+
+
+def lavabo(out):
+    q = LAVABO
+    bx0, by0, bx1, by1 = q["bancada"]
+    for (a0, a1), (f0, f1), espelho in q["copias"]:
+        fonte = out[by0:by1, f0:f1]
+        out[by0:by1, a0:a1] = fonte[:, ::-1] if espelho else fonte
+    forma = out.shape[:2]
+    yy, xx = np.mgrid[0:forma[0], 0:forma[1]].astype(np.float32) + 0.5
+    x0, y0, x1, y1 = q["cuba"]
+    al = poligono_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+    # fundo inclinado: escurece de frente (em cima) para trás (embaixo, junto à parede)
+    f = 1 - q["inclinacao"] * np.clip((yy - y0) / (y1 - y0), 0, 1)
+    # sombra curta das bordas de cima e da direita (a luz vem de cima e da direita) e luz nas outras
+    s, w = q["sombra_borda"]
+    f *= 1 - s * np.exp(-np.clip(yy - y0, 0, None) / w) - s * np.exp(-np.clip(x1 - xx, 0, None) / w)
+    f *= 1 + q["luz_borda"] * (np.exp(-np.clip(xx - x0, 0, None) / w) + np.exp(-np.clip(y1 - yy, 0, None) / w))
+    f = 1 + (f - 1) * al
+    out[:] = np.clip(out * f[..., None], 0, 255).astype(np.uint8)
+    fd = q["fenda"]
+    a = linha_aa(forma, [(x0 + 1.5, y1 - fd["recuo"]), (x1 - 1.5, y1 - fd["recuo"])], fd["larg"])[..., None]
+    out[:] = np.clip(out * (1 - a) + np.float32(fd["cor"]) * a, 0, 255).astype(np.uint8)
+    a = linha_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], q["larg_contorno"], fechada=True)[..., None] * q["forca_contorno"]
+    out[:] = np.clip(out * (1 - a) + np.float32(q["contorno"]) * a, 0, 255).astype(np.uint8)
+    # torneira: canopla na parede da esquerda e a bica cromada até o meio da cuba
+    tq = q["torneira"]
+    yc = (y0 + y1) / 2
+    bica = [(tq["bica"][0], yc), (tq["bica"][1], yc)]
+    sb = q["sombra"]
+    sombra = cv2.GaussianBlur(linha_aa(forma, [(u + sb["desloc"][0], v + sb["desloc"][1]) for u, v in bica], tq["larg"]),
+                              (0, 0), sb["sigma"])
+    out[:] = np.clip(out * (1 - sb["forca"] * sombra)[..., None], 0, 255).astype(np.uint8)
+    for pts, larg, cor in ((bica, tq["larg"], CROMO_ESCURO),
+                           ([(tq["bica"][0], yc - 0.15), (tq["bica"][1] - 0.3, yc - 0.15)], 0.35, CROMO_CLARO)):
+        a = linha_aa(forma, pts, larg)[..., None]
+        out[:] = np.clip(out * (1 - a) + np.float32(cor) * a, 0, 255).astype(np.uint8)
+    cx0, cy0, cx1, cy1 = tq["canopla"]
+    a = poligono_aa(forma, [(cx0, cy0), (cx1, cy0), (cx1, cy1), (cx0, cy1)])[..., None]
+    out[:] = np.clip(out * (1 - a) + np.float32(CROMO) * a, 0, 255).astype(np.uint8)
+    print("    lavabo: cuba do motor fora; cuba esculpida no quartzo e torneira saindo da parede da esquerda")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -786,6 +855,8 @@ def main():
     out = pontos_granito(out, orig, A)
     print("[14] pilar à direita do lavabo")
     out = pilar(out)
+    print("[15] lavabo: cuba esculpida, torneira da esquerda")
+    out = lavabo(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
