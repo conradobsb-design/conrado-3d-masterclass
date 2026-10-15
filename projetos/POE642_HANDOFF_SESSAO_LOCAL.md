@@ -318,7 +318,7 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
   24. **Bancos ao pé das camas (pedido do usuário):** o PDF tem banco ao pé da cama da suíte master, do Quarto 1, do Quarto 3 e das duas camas de solteiro do Quarto 2; o motor não fez os bancos e esticou as camas dos Quartos 1, 2 e 3 por cima deles. Essas camas voltaram ao comprimento do PDF e entraram os bancos do Térreo da Casa B (o de duas almofadas nas camas de casal, girado na suíte master; o liso nas de solteiro), levados ao retângulo do PDF, com a sombra. Feito.
   25. **Vaso do lavabo masculino (pedido do usuário):** o motor fez um vaso cinza, fora do padrão. Saiu, e entrou o vaso suspenso branco do lavabo ao lado da adega, espelhado e levado ao retângulo do PDF. Feito.
   - Todos os erros da lista estão feitos. Observação ainda não pedida: dentro do box do BH master 2 o piso saiu em dois tons (metade lisa, metade pontilhada).
-- **Depois do retoque:** pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
+- **Entrega (feita após a aprovação da prévia final pelo usuário):** o Térreo entrou em `entrega.pavimentos` (TÉRREO, linha 0 do quadro de áreas, base `v3_texturas_16x9`) e em `pdf.ordem` (Subsolo, Térreo); título do PDF "Casa C – Plantas Humanizadas (Subsolo e Térreo)". Pranchas `entrega/POE642_CasaC_PH_Terreo_entrega.png` e `..._Subsolo_entrega.png` (3840 × 2600 px, mesmo quadro; Térreo alinhado com 179 pontos, erro mediano 0,92 px) e `entrega/POE642_CasaC_Plantas_Humanizadas.pdf` (2 páginas A3, 12,9 MB).
 
 ```bash
 cd projetos/POE642_CasaA/scripts

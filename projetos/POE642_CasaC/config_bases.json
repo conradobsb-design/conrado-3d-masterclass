@@ -757,6 +757,11 @@
     "pasta_entrega": "entrega",
     "largura_prancha": 3840,
     "pavimentos": {
+      "Terreo": {
+        "titulo": "TÉRREO",
+        "linha_area": 0,
+        "base": "POE642_CasaC_BASE_Terreo_v3_texturas_16x9.png"
+      },
       "Subsolo": {
         "titulo": "SUBSOLO",
         "linha_area": 1,
@@ -798,9 +803,10 @@
     "pdf": {
       "nome": "POE642_CasaC_Plantas_Humanizadas.pdf",
       "ordem": [
-        "Subsolo"
+        "Subsolo",
+        "Terreo"
       ],
-      "titulo": "Casa C – Plantas Humanizadas (Subsolo)",
+      "titulo": "Casa C – Plantas Humanizadas (Subsolo e Térreo)",
       "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade C",
       "palavras": "planta humanizada, layout, Casa C"
     }

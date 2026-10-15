@@ -114,8 +114,8 @@ python pdf_entrega.py
 # Casa B
 python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final.png
 python pdf_entrega.py --config ../../POE642_CasaB/config_bases.json      # pranchas da entrega.pdf.ordem
-python rodape_entrega.py --config ../../POE642_CasaC/config_bases.json --render Subsolo=../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_v3_retocado.png
-python pdf_entrega.py --config ../../POE642_CasaC/config_bases.json
+python rodape_entrega.py --config ../../POE642_CasaC/config_bases.json --render Subsolo=../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_v3_retocado.png --render Terreo=../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_v3_retocado.png
+python pdf_entrega.py --config ../../POE642_CasaC/config_bases.json      # Subsolo e Térreo
 ```
 
 ## Prévia de texturas: `texturizar_base.py`
