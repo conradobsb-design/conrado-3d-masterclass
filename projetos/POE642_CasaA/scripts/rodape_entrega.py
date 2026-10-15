@@ -100,14 +100,20 @@ def rodape(ent, chave):
     texto(d, (ax0, topo + 18), "ÁREAS", fonte("Medium", 26), CINZA, 0.25)
     linha_h, y = 58, topo + 48
     areas = ent["areas"]
+    # um só tamanho para o quadro, o maior (até 31) em que cada nome e valor cabem com um respiro de
+    # 40 px (na Casa D, "SUBSOLO" e "NÃO INFORMADO" encostavam)
+    tam = 31
+    while tam > 22 and any(largura_txt(n, fonte("SemiBold", tam), 0.08) + largura_txt(v, fonte("SemiBold", tam), 0.04)
+                           + 40 > ax1 - ax0 for n, v in areas):
+        tam -= 1
     for i, (nome, valor) in enumerate(areas):
-        total = len(areas) > 1 and i == len(areas) - 1       # com uma linha só, não há total
+        total = nome == "TOTAL"           # a linha de total tem esse nome (a Casa D não tem total)
         if i == pav["linha_area"]:
             d.rectangle((ax0 - 18, y, ax1 + 18, y + linha_h - 6), fill=DESTAQUE)
         if total:
             d.line((ax0 - 18, y - 3, ax1 + 18, y - 3), fill=TINTA, width=2)
         peso = "SemiBold" if (i == pav["linha_area"] or total) else "Regular"
-        f = fonte(peso, 31)
+        f = fonte(peso, tam)
         texto(d, (ax0, y + 40), nome, f, TINTA, 0.08)
         texto(d, (ax1, y + 40), valor, f, TINTA, 0.04, ancora="rs")
         y += linha_h

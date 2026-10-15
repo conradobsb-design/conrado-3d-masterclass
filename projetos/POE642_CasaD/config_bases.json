@@ -719,7 +719,7 @@
  },
  "entrega": {
   "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
-  "_areas": "Área do Térreo não informada pelo usuário em 15/10/26: o quadro mostra 'NÃO INFORMADO' (a soma dos ambientes do PDF não é a área do quadro).",
+  "_areas": "Áreas não informadas pelo usuário em 15/10/26: Térreo e Subsolo com 'NÃO INFORMADO', sem linha de total (a soma dos ambientes do PDF não é a área do quadro).",
   "_confirmado": "Endereço (Lotes 17, Unidade D) confirmado pelo usuário em 15/10/26; norte o mesmo das Casas A, B e C.",
   "casa": "CASA D",
   "prefixo": "POE642_CasaD",
@@ -731,11 +731,20 @@
     "titulo": "TÉRREO",
     "linha_area": 0,
     "base": "POE642_CasaD_BASE_Terreo_v3_texturas_16x9.png"
+   },
+   "Subsolo": {
+    "titulo": "SUBSOLO",
+    "linha_area": 1,
+    "base": "POE642_CasaD_BASE_Subsolo_v3_texturas_16x9.png"
    }
   },
   "areas": [
    [
     "TÉRREO",
+    "NÃO INFORMADO"
+   ],
+   [
+    "SUBSOLO",
     "NÃO INFORMADO"
    ]
   ],
@@ -760,9 +769,10 @@
   "pdf": {
    "nome": "POE642_CasaD_Plantas_Humanizadas.pdf",
    "ordem": [
+    "Subsolo",
     "Terreo"
    ],
-   "titulo": "Casa D – Plantas Humanizadas (Térreo)",
+   "titulo": "Casa D – Plantas Humanizadas (Subsolo e Térreo)",
    "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade D",
    "palavras": "planta humanizada, layout, Casa D"
   }
