@@ -44,6 +44,10 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    mesas laterais quadradas viram as orgânicas do PDF (duas, a menor atrás), com a forma tirada
    do PDF levado ao render, no tampo de madeira da mesa de centro, com contorno e sombra curta.
    O piso que volta é tecido (image quilting) do travertino limpo do próprio estar.
+9. Gourmet: o motor pôs cinco banquetas embaixo da bancada do cooktop (no PDF não há nenhuma).
+   Elas saem com a sombra. O piso volta continuando os veios verticais de baixo, em espelho, e a
+   sombra da bancada (3 linhas abaixo da borda) é refeita com o perfil medido nos trechos limpos
+   da mesma borda, dos dois lados. Emenda suave dos lados.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -173,6 +177,15 @@ ESTAR = {
     "sombra": {"desloc": (-2, 2), "sigma": 1.2, "forca": 0.45},
 }
 SS = 8
+# gourmet: banquetas (com a sombra) abaixo da borda da bancada (linha 598, que fica); piso em
+# espelho a partir da linha de baixo; sombra da bancada medida nos trechos limpos da borda
+BANQUETAS = {
+    "ret": (666, 599, 786, 617),
+    "sombra_linhas": (599, 603),
+    "colunas_limpas": [(648, 664), (788, 806)],
+    "piso_ref": (606, 613),          # linhas de piso limpo nas colunas limpas (referência do tom)
+    "emenda": 3,
+}
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
     "BH master 1": (411.2, 187.9),
@@ -496,6 +509,28 @@ def estar(out, A):
     return out
 
 
+def banquetas(out):
+    q = BANQUETAS
+    x0, y0, x1, y1 = q["ret"]
+    a = out.astype(np.float32)
+    h, w = y1 - y0, x1 - x0
+    novo = a[y1 + h - 1:y1 - 1:-1, x0:x1].copy()                  # veios de baixo, em espelho
+    s0, s1 = q["sombra_linhas"]
+    r0, r1 = q["piso_ref"]
+    limpas = np.concatenate([a[:, c0:c1] for c0, c1 in q["colunas_limpas"]], axis=1)
+    piso = limpas[r0:r1].reshape(-1, 3).mean(axis=0)
+    for y in range(s0, s1):
+        novo[y - y0] *= limpas[y].mean(axis=0) / piso                # fator por canal
+    e = q["emenda"]
+    al = np.ones(w, np.float32)
+    al[:e] = (np.arange(e) + 1) / (e + 1)
+    al[-e:] = (np.arange(e)[::-1] + 1) / (e + 1)
+    reg = a[y0:y1, x0:x1]
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - al[None, :, None]) + novo * al[None, :, None], 0, 255).astype(np.uint8)
+    print(f"    cinco banquetas a mais: {w}x{h} px refeitos (piso e sombra da bancada)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -523,12 +558,14 @@ def main():
     out = poltronas_estar(out)
     print("[8] estar conforme o PDF")
     out = estar(out, A)
+    print("[9] banquetas a mais na gourmet")
+    out = banquetas(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[9] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[10] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
