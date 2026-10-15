@@ -25,6 +25,12 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    entre a geladeira e o armário volta o vão de piso do PDF; as duas
    cubas do PDF são desenhadas como as do lavatório gourmet da Casa B, com a torneira do lado da
    parede.
+5. Quarto externo: o motor trocou a cama de solteiro do PDF por dois eletrodomésticos e o
+   criado-mudo por uma caixa branca. A cama vem de uma das camas de solteiro do próprio render
+   (quarto 2), virada para a cabeceira ficar na parede da direita como no PDF, encurtada no
+   cobertor e ajustada à largura do PDF; o criado-mudo vem do criado-mudo da suíte. O piso que
+   ficou à mostra (a sombra do eletrodoméstico) vem do piso limpo ao lado, e cada peça ganha a
+   sombra curta que as camas do render têm.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -98,6 +104,18 @@ COZINHA = {
     "fonte_quartzo": [(646, 566, 714, 596), (752, 566, 812, 596), (647, 507, 666, 560)],
     "fonte_areia": (690, 281, 744, 290),         # painel laqueado do quarto (liso)
     "contorno": 0.75,                            # face livre do armário (1 px)
+}
+# quarto externo (geometria da base chapada alinhada; paredes conferidas no render)
+QUARTO_EXTERNO = {
+    "cama": (1589, 389, 1650, 419),              # até a parede da direita e a de baixo
+    "fonte_cama": (753, 189, 825, 222),          # cama de solteiro de cima do quarto 2 (cabeceira à esquerda)
+    "cortar_cobertor": (796, 807),               # colunas do cobertor liso tiradas da fonte
+    "criado": (1636, 369, 1650, 386),
+    "fonte_criado": (733, 178, 747, 195),        # criado-mudo da suíte
+    # piso: a sombra do eletrodoméstico à esquerda da cama e a borda de cima da caixa branca
+    "pisos": [((1584, 386, 1590, 419), (-12, 0)), ((1636, 368, 1650, 369), (0, -3))],
+    "sombra_cima": 0.91,                         # como em cima das camas do quarto 2
+    "sombra_pe": 0.93,                           # no pé da cama (a ponta das camas do quarto 2)
 }
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
@@ -259,6 +277,26 @@ def cozinha(out):
     return out
 
 
+def quarto_externo(out):
+    q = QUARTO_EXTERNO
+    a = out.copy()
+    for (x0, y0, x1, y1), (dx, dy) in q["pisos"]:
+        out[y0:y1, x0:x1] = a[y0 + dy:y1 + dy, x0 + dx:x1 + dx]
+    fx0, fy0, fx1, fy1 = q["fonte_cama"]
+    c0, c1 = q["cortar_cobertor"]
+    cama = np.concatenate([a[fy0:fy1, fx0:c0], a[fy0:fy1, c1:fx1]], axis=1)[:, ::-1]   # cabeceira à direita
+    x0, y0, x1, y1 = q["cama"]
+    out[y0:y1, x0:x1] = cv2.resize(cama, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+    out[y0 - 1, x0:x1] = np.clip(out[y0 - 1, x0:x1] * q["sombra_cima"], 0, 255).astype(np.uint8)
+    out[y0:y1, x0 - 1] = np.clip(out[y0:y1, x0 - 1] * q["sombra_pe"], 0, 255).astype(np.uint8)
+    print(f"    cama de solteiro: {fx1 - fx0 - (c1 - c0)}x{fy1 - fy0} px da fonte em {x1 - x0}x{y1 - y0} px")
+    fx0, fy0, fx1, fy1 = q["fonte_criado"]
+    x0, y0, x1, y1 = q["criado"]
+    out[y0:y1, x0:x1] = cv2.resize(a[fy0:fy1, fx0:fx1], (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+    print(f"    criado-mudo: {x1 - x0}x{y1 - y0} px")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -278,12 +316,14 @@ def main():
     out = portas_de_vidro(out, base, chapada)
     print("[4] cozinha")
     out = cozinha(out)
+    print("[5] quarto externo")
+    out = quarto_externo(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[5] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[6] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
