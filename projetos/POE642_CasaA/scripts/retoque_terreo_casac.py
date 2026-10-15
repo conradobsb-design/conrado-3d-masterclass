@@ -111,6 +111,12 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
 22. Arcos das portas sobre o granito: no granito marrom o arco escuro do motor não aparece. Os arcos
    das portas (curvas da layer ARQ_PAREDE) que caem sobre o granito são redesenhados em cinza claro,
    com a geometria do PDF levada ao render, só onde o piso é granito (cor exata da base chapada).
+23. Bancos ao pé das camas: o PDF tem banco ao pé da cama da suíte master, do Quarto 1, do Quarto 3
+   e das duas camas de solteiro do Quarto 2; o motor não fez os bancos e esticou as camas dos
+   Quartos 1, 2 e 3 por cima deles. Essas camas voltam ao comprimento do PDF (a ponta da cama, com
+   a borda e a sombra, vem para o pé do PDF; o vão vira o tapete ou o piso ao lado) e entram os
+   bancos do Térreo da Casa B aprovado (pedido do usuário): o de duas almofadas nas camas de casal
+   e o liso nas de solteiro, levados ao retângulo do PDF, com a sombra deles.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -370,6 +376,25 @@ PIVOTANTE = {"linhas": (670, 674), "fonte_x": 1370, "de": 1406, "ate": 1434, "po
 # do arco sobre o granito, cor e largura do traço
 ARCOS_GRANITO = {"granito": (50, 66, 90), "tol": 12, "fracao": 0.3, "min_px": 8,
                  "cor": (160, 161, 160), "larg": 0.45}   # cinza e fino: aparece no granito, discreto
+# bancos ao pé das camas. Camas a encurtar: linhas, faixa da ponta (com borda e sombra),
+# deslocamento até o pé do PDF e de que lado vem o preenchimento do vão (tapete ou piso)
+BANCOS = {
+    # (no Quarto 3 o tapete termina logo à esquerda: o vão repete só as colunas de tapete)
+    "encurtar": [("Quarto 1", (205, 276), (1043, 1057), 6, None),
+                 ("Quarto 3", (194, 257), (668, 679), 9, (664, 668)),
+                 ("Quarto 2, cama de cima", (186, 229), (815, 829), -10, None),
+                 ("Quarto 2, cama de baixo", (240, 283), (815, 829), -10, None)],
+    # bancos do Térreo da Casa B: recorte (com a sombra), corpo do banco e o tom do tapete em volta
+    "fonte": RAIZ / "POE642_CasaB/renders/POE642_CasaB_PH_Terreo_v4_retocado.png",
+    "modelos": {"casal": ((1078, 194, 1104, 257), (1083, 196, 1102, 253), 212.0),
+                "solteiro": ((1239, 181, 1256, 214), (1243, 182, 1254, 210), 205.0)},
+    # retângulo do banco no PDF (px do render) e o giro (anti-horário: a sombra continua embaixo)
+    "lugares": [("suíte master", "casal", (499.8, 367.8, 549.6, 380.2), True),
+                ("Quarto 1", "casal", (1044.4, 212.4, 1056.9, 262.1), False),
+                ("Quarto 3", "casal", (671.8, 197.5, 684.3, 247.2), False),
+                ("Quarto 2, cama de cima", "solteiro", (815.5, 191.0, 824.9, 219.0), False),
+                ("Quarto 2, cama de baixo", "solteiro", (815.5, 245.4, 824.9, 273.3), False)],
+}
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
 CROMO_CLARO = (238, 240, 242)
@@ -1144,6 +1169,48 @@ def arcos_no_granito(out, A, chapada):
     return out
 
 
+def bancos_camas(out):
+    q = BANCOS
+    a = out.copy()
+    for nome, (y0, y1), (s0, s1), d, tapete in q["encurtar"]:
+        out[y0:y1, s0 + d:s1 + d] = a[y0:y1, s0:s1]                   # a ponta vem para o pé do PDF
+        if tapete:                                                      # vão: só as colunas de tapete
+            t0, t1 = tapete
+            for k in range(abs(d)):
+                out[y0:y1, s0 + k] = a[y0:y1, t1 - 1 - (k % (t1 - t0))]
+        elif d > 0:                                                     # pé à esquerda: vão à esquerda
+            for k in range(d):
+                out[y0:y1, s0 + k] = a[y0:y1, s0 - 1 - k]
+        else:                                                           # pé à direita: vão à direita
+            for k in range(-d):
+                out[y0:y1, s1 - 1 - k] = a[y0:y1, s1 + k]
+        print(f"    {nome}: cama no comprimento do PDF ({d:+d} px)")
+    fonte = cv2.imread(str(q["fonte"])).astype(np.float32)
+    for nome, modelo, (dx0, dy0, dx1, dy1), girar in q["lugares"]:
+        (cx0, cy0, cx1, cy1), (bx0, by0, bx1, by1), piso = q["modelos"][modelo]
+        spr = fonte[cy0:cy1, cx0:cx1].copy()
+        bx0, by0, bx1, by1 = bx0 - cx0, by0 - cy0, bx1 - cx0, by1 - cy0
+        corpo = np.zeros(spr.shape[:2], np.float32)
+        corpo[by0:by1, bx0:bx1] = 1
+        fator = np.where(corpo > 0, 1.0, np.clip(spr.mean(axis=2) / piso, 0, 1)).astype(np.float32)
+        if girar:
+            W = spr.shape[1]
+            spr, corpo, fator = (cv2.rotate(m, cv2.ROTATE_90_COUNTERCLOCKWISE) for m in (spr, corpo, fator))
+            bx0, by0, bx1, by1 = by0, W - bx1, by1, W - bx0
+        sx, sy = (dx1 - dx0) / (bx1 - bx0), (dy1 - dy0) / (by1 - by0)
+        jx0, jy0 = int(np.floor(dx0 - bx0 * sx)) - 1, int(np.floor(dy0 - by0 * sy)) - 1
+        jw = int(np.ceil(spr.shape[1] * sx)) + 3
+        jh = int(np.ceil(spr.shape[0] * sy)) + 3
+        M = np.float32([[sx, 0, dx0 - bx0 * sx - jx0], [0, sy, dy0 - by0 * sy - jy0]])
+        spr_w = cv2.warpAffine(spr, M, (jw, jh), flags=cv2.INTER_AREA, borderMode=cv2.BORDER_REPLICATE)
+        al = cv2.warpAffine(corpo, M, (jw, jh), flags=cv2.INTER_LINEAR, borderValue=0)[..., None]
+        fa = cv2.warpAffine(fator, M, (jw, jh), flags=cv2.INTER_LINEAR, borderValue=1)[..., None]
+        reg = out[jy0:jy0 + jh, jx0:jx0 + jw].astype(np.float32) * fa
+        out[jy0:jy0 + jh, jx0:jx0 + jw] = np.clip(reg * (1 - al) + spr_w * al, 0, 255).astype(np.uint8)
+        print(f"    banco ({modelo}) ao pé da cama: {nome}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1199,12 +1266,14 @@ def main():
     out = pivotante(out)
     print("[22] arcos das portas sobre o granito")
     out = arcos_no_granito(out, A, chapada)
+    print("[23] bancos ao pé das camas")
+    out = bancos_camas(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[23] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[24] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
