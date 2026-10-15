@@ -31,6 +31,8 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
     bacia com a borda mais escura indo ao fundo claro, válvula cromada), com a torneira cromada
     saindo da faixa junto à parede, na geometria do PDF (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS).
 11. Esteiras: os letreiros que o motor escreveu nas lonas saem (sem texto na planta); fica a lona.
+13. Arcos das portas sobre o granito (pedido do usuário): como no Térreo, ficam em cinza e traço
+    fino; aqui o arco preto do render (~1,5 px) sai antes (granito tecido) e o cinza vem do PDF.
 12. Pátio: a parede tracejada dupla de fora (à esquerda, embaixo e no alto), que o motor apagou ou
     cortou, volta: os traços do PDF (ARQ_PAREDE, fora da planta) desenhados no quadro comum.
 
@@ -50,6 +52,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pymupdf
+from scipy import ndimage
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
@@ -218,6 +221,10 @@ TRACEJADO = {
     # fora da planta (vis de 1800 px): à esquerda do pátio, abaixo dele e a faixa de cima do pátio
     "fora": lambda x, y: x < 160 or y > 944 or (639 < y < 649.5 and x < 275),
 }
+
+# arcos das portas sobre o granito: o cinza do Térreo (Casa C), num traço na escala deste render
+ARCOS = {"granito": (50, 66, 90), "tol": 12, "fracao": 0.3, "min_px": 15,
+         "cor": (160, 161, 160), "larg": 1.1, "faixa": 2.5, "escuro": 70}
 
 
 def apagar_largo(out, ret, mascara, fontes, sigma=4.0, borda=0.8, lum_min=None, lum_max=None, escuros=False):
@@ -505,6 +512,56 @@ def letreiros(out):
     return out
 
 
+def arcos_granito(out, A):
+    """Arcos das portas (curvas da ARQ_PAREDE) sobre o granito: o arco preto do render sai (px escuros
+    numa faixa em volta da curva do PDF, só no granito da base chapada) e entra o arco cinza fino."""
+    q = ARCOS
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    gran = (np.abs(chapada.astype(np.int32) - np.array(q["granito"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    gran = cv2.morphologyEx(gran, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))   # fecha os traços finos
+    pg, p2r = pdf_cadeia(A, out.shape)
+    n = 0
+    for d in pg.get_drawings():
+        if d.get("layer") != "ARQ_PAREDE" or not any(it[0] == "c" for it in d["items"]):
+            continue
+        r = d["rect"]
+        (x0, y0), (x1, y1) = p2r(r.x0, r.y0), p2r(r.x1, r.y1)
+        x0, y0, x1, y1 = int(x0) - 6, int(y0) - 6, int(np.ceil(x1)) + 7, int(np.ceil(y1)) + 7
+        if max(x1 - x0, y1 - y0) < q["min_px"] or x0 < 0 or y0 < 0 or x1 > out.shape[1] or y1 > out.shape[0]:
+            continue
+        g = gran[y0:y1, x0:x1].astype(bool)
+        if g.mean() < q["fracao"]:
+            continue
+        h, w = y1 - y0, x1 - x0
+        curvas = []
+        for it in d["items"]:
+            if it[0] == "c":
+                pp = np.array([p2r(v.x, v.y) for v in it[1:5]])
+                tt = np.linspace(0, 1, 80)[:, None]
+                curvas.append((1 - tt) ** 3 * pp[0] + 3 * (1 - tt) ** 2 * tt * pp[1] + 3 * (1 - tt) * tt ** 2 * pp[2]
+                              + tt ** 3 * pp[3])
+
+        def traco(larg):
+            f = np.zeros((h * SS, w * SS), np.uint8)
+            for c in curvas:
+                cv2.polylines(f, [np.round((c - [x0, y0]) * SS).astype(np.int32)], False, 255,
+                              max(1, int(round(larg * SS))), cv2.LINE_AA)
+            return cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+        lum = out[y0:y1, x0:x1].astype(np.float32).mean(axis=2)
+        m = (traco(2 * q["faixa"]) > 0.05) & g & (lum < q["escuro"])
+        m = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & g
+        out = apagar_largo(out, (x0, y0, x1, y1), m, GRANITO, sigma=2.0, borda=0.0, lum_min=45, lum_max=130,
+                           escuros=True)
+        a = (traco(q["larg"]) * g)[..., None]
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + np.array(q["cor"], np.float32) * a, 0, 255).astype(np.uint8)
+        n += 1
+    print(f"    {n} arcos de porta sobre o granito em cinza fino")
+    return out
+
+
 def no_quadro(out, A):
     """O render retocado vai para o quadro comum (a base 16:9 na largura das pranchas) pelo inverso da
     cadeia base -> render (a base reduzida ao tamanho do render, não uniforme, e o afim A), com 2 x
@@ -523,6 +580,9 @@ def no_quadro(out, A):
     nb = (chapada.min(axis=2) < 245).astype(np.uint8)
     n, lab, st, _ = cv2.connectedComponentsWithStats(nb)
     planta = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > 5000])
+    # os objetos brancos na base (cama, criado-mudo, armário, elevador, aparelhos, louças) são buracos
+    # dentro da planta: entram nela, senão viravam fundo branco
+    planta = ndimage.binary_fill_holes(planta)
     planta = cv2.dilate(planta.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
     final[~planta] = 255
     print(f"    quadro comum {WF} x {HF}: planta da base com folga de 3 px; fundo branco fora dela")
@@ -593,6 +653,8 @@ def main():
     out = cuba_vestiario(out)
     print("[11] esteiras: letreiros nas lonas")
     out = letreiros(out)
+    print("[13] arcos das portas sobre o granito")
+    out = arcos_granito(out, alinhar_base(orig))
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
