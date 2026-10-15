@@ -166,6 +166,9 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    são os armários (eu os tinha tirado por engano no item 30). Voltam no polígono do PDF, como os outros
    armários até o teto: tom areia, veio vertical do armário do render, sem sombra de móvel baixo e com
    contorno fino nas faces livres.
+38. Veios do mobiliário do DCE (pedido do usuário: a marcenaria ficou lisa): o veio vem do tampo da
+   escrivaninha do escritório na segunda imagem (o de veio mais marcado), girado para correr no
+   comprimento de cada peça e um pouco realçado; o tom e a borda de cada peça ficam.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -657,6 +660,15 @@ CHUVEIROS_23 = {
 ARMARIOS_L = {
     "caixas": [("louceiro", (1094.4, 189.9, 1137.9, 250.5)), ("despensa", (1094.3, 290.9, 1137.7, 348.4))],
     "janela": (1090, 186, 1142, 352),
+}
+
+# veios do mobiliário de madeira do DCE (pedido do usuário: a marcenaria ficou lisa). O veio vem do
+# tampo da escrivaninha do escritório na segunda imagem (o de veio mais marcado, sem a planta), girado
+# para correr no comprimento de cada peça e um pouco realçado; o tom de cada peça fica
+VEIOS_DCE = {
+    "fonte": (1232, 808, 1254, 865),                     # na segunda imagem alinhada
+    "pecas": [("armário de baixo", (1296, 331, 1326, 348), "x"), ("criado-mudo", (1323, 272, 1334, 285), "y")],
+    "realce": 1.6, "sigma": 3.0, "lim": (0.85, 1.15), "borda": 1,
 }
 
 
@@ -2202,6 +2214,27 @@ def armarios_L(out, orig, chapada, A):
     return out
 
 
+def veios_dce(out, f2):
+    q = VEIOS_DCE
+    a, b, c, d = q["fonte"]
+    Y = f2[b:d, a:c].astype(np.float32).mean(axis=2)
+    v = Y / np.maximum(cv2.GaussianBlur(Y, (0, 0), q["sigma"], borderType=cv2.BORDER_REFLECT), 1)
+    v = np.clip(1 + q["realce"] * (v - 1), *q["lim"])                  # veio vertical (no comprimento)
+    e = q["borda"]
+    for nome, (x0, y0, x1, y1), eixo in q["pecas"]:
+        h, w = y1 - y0, x1 - x0
+        g = cv2.rotate(v, cv2.ROTATE_90_CLOCKWISE) if eixo == "x" else v
+        g = np.concatenate([g, g[::-1]] * (h // (2 * g.shape[0]) + 1), axis=0)[:h]
+        g = np.concatenate([g, g[:, ::-1]] * (w // (2 * g.shape[1]) + 1), axis=1)[:, :w]
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        base = cv2.GaussianBlur(reg, (0, 0), 1.2)
+        novo = reg.copy()
+        novo[e:-e, e:-e] = (base * g[..., None])[e:-e, e:-e]
+        out[y0:y1, x0:x1] = np.clip(novo, 0, 255).astype(np.uint8)
+        print(f"    DCE, {nome}: veio de madeira")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -2283,6 +2316,8 @@ def main():
     out = minibar(out, chapada)
     print("[31] chuveiros dos banhos 2 e 3")
     out = chuveiros_23(out)
+    print("[32] veios do mobiliário do DCE")
+    out = veios_dce(out, f2)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
