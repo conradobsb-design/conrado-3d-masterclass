@@ -102,7 +102,8 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
 20. BH master 1: o motor fez duas cubas soltas com a torneira na lateral (do lado da parede). No
    PDF é uma cuba esculpida longa: duas bacias com a torneira nas pontas (em cima e embaixo) e um
    trecho liso no meio. As cubas do motor saem (a bancada lisa entre elas é repetida em espelho)
-   e entra a cuba do PDF, em louça branca, com as bacias no desenho das cubas da cozinha. No BH
+   e entram as duas bacias do PDF, em louça branca, no desenho das cubas da cozinha; entre elas
+   fica a pedra da bancada (pedido do usuário: o meio não é branco). No BH
    master 2 a cuba está certa, mas a torneira saiu na lateral; no PDF ela fica no meio da borda de
    cima: a cuba é redesenhada no mesmo lugar, com a torneira em cima.
 21. Porta pivotante principal: o motor cortou a folha na soleira; no PDF ela vai de ponta a ponta,
@@ -138,7 +139,7 @@ import pymupdf
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
-from retoque_terreo_casab import LOUCA, LOUCA_CONTORNO, cuba  # noqa: E402
+from retoque_terreo_casab import cuba  # noqa: E402
 from texturizar_base import quilting  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v3_texturas_16x9.png"
@@ -364,10 +365,9 @@ CADEIRAS = {
                 ("suíte do canto", (621.5, 338.6), None, ("x", 626, 621))],
 }
 # BH master 1: trecho da bancada com as cubas do motor (<- linhas lisas entre elas, em espelho) e
-# a cuba esculpida do PDF: bloco de louça, bacia de cima (torneira em cima) e de baixo (embaixo)
+# as bacias da cuba do PDF: a de cima (torneira em cima) e a de baixo (embaixo); o meio é bancada
 CUBA_BHM1 = {
     "bancada": (392, 221, 408, 286), "lisa": (247, 260),
-    "bloco": (393, 225, 407, 280),
     "bacia_cima": (393, 225, 407, 244), "bacia_baixo": (393, 261, 407, 280),
     # BH master 2: trecho da cuba do motor (<- bancada lisa de baixo, em espelho) e a cuba do PDF
     "bhm2_bancada": (337, 455, 354, 478), "bhm2_lisa": (479, 494), "bhm2_cuba": (338, 457, 352, 475),
@@ -1105,17 +1105,6 @@ def cuba_bhm1(out):
     r0, r1 = q["lisa"]
     t = out[r0:r1, x0:x1].copy()
     out[y0:y1, x0:x1] = np.concatenate([t, t[::-1]] * ((y1 - y0) // (2 * t.shape[0]) + 1), axis=0)[:y1 - y0]
-    bx0, by0, bx1, by1 = q["bloco"]
-    h, w = by1 - by0, bx1 - bx0
-    f = np.zeros((h * SS, w * SS), np.uint8)
-    cv2.rectangle(f, (0, 0), (w * SS - 1, h * SS - 1), 255, -1)
-    miolo = cv2.erode(f, np.ones((5, 5), np.uint8))
-    a_f = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
-    a_m = cv2.resize(miolo.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
-    reg = out[by0:by1, bx0:bx1].astype(np.float32)
-    reg = reg * (1 - a_f) + np.array(LOUCA_CONTORNO, np.float32) * a_f
-    reg = reg * (1 - a_m) + np.array(LOUCA, np.float32) * a_m
-    out[by0:by1, bx0:bx1] = np.clip(reg, 0, 255).astype(np.uint8)
     cx0, cy0, cx1, cy1 = q["bacia_cima"]                       # torneira em cima: desenho virado
     reg = np.ascontiguousarray(out[cy0:cy1, cx0:cx1][::-1])
     out[cy0:cy1, cx0:cx1] = cuba(reg, (0, 0, cx1 - cx0, cy1 - cy0))[::-1]
