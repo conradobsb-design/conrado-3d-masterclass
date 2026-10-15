@@ -139,6 +139,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     degraus e o banco de bronze ganha um canteiro, como os da Casa D: um trecho das costelas-de-adão do
     próprio render (o canto do lote), espelhado, com o contorno orgânico onde o trecho corta a touceira,
     só sobre a grama (as pedras e o banco ficam), emendando nas plantas que já existem embaixo.
+33. Garagem, lateral direita (pedido do usuário): faltavam os brises. Os 8 retângulos da ARQ_ELEMENTOS
+    FIXOS sobre o granito, acima do trecho de parede, entram no mesmo desenho dos brises do escritório
+    (réguas de madeira em tons variados, contorno fino e sombra curta).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1307,11 +1310,13 @@ def porta_hall(out, A):
 # madeira da mesa de jantar do render (veio vertical; nas réguas, deitado)
 BRISES = {"janela": (1292, 500, 1308, 600), "fonte": (885, 505, 914, 589),
           "tons": (0.8, 1.0), "semente": 7, "contorno": (38, 52, 70), "larg_contorno": 0.4,   # BGR, marrom escuro
-          "sombra": {"desloc": (-1.2, 1.2), "sigma": 0.8, "forca": 0.4}}
+          "sombra": {"desloc": (-1.2, 1.2), "sigma": 0.8, "forca": 0.4}, "nome": "escritório"}
+# brises da lateral direita da garagem (item 33, pedido do usuário): os 8 do PDF sobre o granito, acima
+# do trecho de parede, no mesmo desenho dos do escritório
+BRISES_GARAGEM = dict(BRISES, janela=(1565, 240, 1580, 328), semente=13, nome="garagem")
 
 
-def brises(out, orig, A):
-    q = BRISES
+def brises(out, orig, A, q=BRISES):
     pg, p2r, _ = pdf_cadeia(A, out.shape)
     wx0, wy0, wx1, wy1 = q["janela"]
     rets = sorted({tuple(round(v, 2) for v in caixa_render(d, p2r)) for d in pg.get_drawings()
@@ -1335,7 +1340,7 @@ def brises(out, orig, A):
         out = colar(out, np.clip(peca, 0, 255).astype(np.uint8), (x0, y0, x1, y1))
         a_ = linha_aa(forma, cantos, q["larg_contorno"], fechada=True)[..., None]
         out[:] = np.clip(out * (1 - a_) + np.float32(q["contorno"]) * a_, 0, 255).astype(np.uint8)
-    print(f"    escritório: {len(rets)} brises de madeira do PDF fora da janela")
+    print(f"    {q['nome']}: {len(rets)} brises de madeira do PDF")
     return out
 
 
@@ -1701,6 +1706,8 @@ def main():
     out = vidros_piscina(out)
     print("[32] paisagismo abaixo das escadas")
     out = paisagismo(out)
+    print("[33] brises da lateral direita da garagem")
+    out = brises(out, orig, A, BRISES_GARAGEM)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
