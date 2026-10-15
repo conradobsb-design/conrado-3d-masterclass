@@ -290,7 +290,19 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
   - Nas texturas, a amostra da pedra portuguesa e a da floreira foram estreitadas: a da Casa B pegava gramado (manchas verdes no acesso) e fundo branco (faixas brancas no jardim de inverno).
 - **Piscina sem bordas a mais (pedido do usuário):** as paredes estruturais da piscina, da prainha, do spa, dos degraus e do deck estão na layer ARQ_PAREDE com preenchimento branco e viravam faixas de vidro em volta de tudo. Elas saíram da detecção de vidro (`zonas_excluidas`). Ficam só a borda de travertino, os dois degraus (linhas finas na prainha) e o vidro da borda infinita (linha dupla no lado esquerdo da piscina comprida).
 - **Prompt:** `POE642_CasaC/POE642_CasaC_PH_Terreo_v3.md` é o atual (v2: piscina sem as faixas; v3: garagem em granito). Escala na abertura e posição do lote medida na base (x ~8%–91%, y ~2,5%–85%).
-- **Próximos passos:** render do Térreo, retoque, e depois pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
+- **Render (prompt v3):** `renders/POE642_CasaC_PH_Terreo_v3_render.webp`. Mesma escala da base (afim 1,0001 x 1,0072).
+- **Retoque, erro por erro (pedido do usuário):** `renders/POE642_CasaC_PH_Terreo_v3_retocado.png`, pelo `retoque_terreo_casac.py`.
+  1. **Chuveiros de teto:** os boxes do BH master 1, BH 3, BH 2, BH 1 e BH master 2 estavam vazios. Cada um recebeu a placa aprovada da Casa A, no centro do símbolo do PDF. Feito.
+  2. **Erros levantados e ainda abertos:**
+     - plantas fora do lote nos cantos de cima e de baixo à esquerda;
+     - plantas do jardim de inverno passando do vidro, sobre o piso e a caixa do elevador;
+     - cozinha: bancadas e ilha em granito escuro (na base são claras), uma cuba só na bancada de cima (são duas);
+     - quarto externo: a cama virou dois eletrodomésticos;
+     - estar: duas poltronas a mais no alto do tapete;
+     - gourmet: cinco banquetas a mais na bancada de baixo;
+     - BH master 2: o box perdeu a porta de giro;
+     - elevador: a cabine (branca, com o contorno) virou piso.
+- **Depois do retoque:** pôr o Térreo em `entrega.pavimentos` e em `pdf.ordem` e gerar de novo a prancha e o PDF.
 
 ```bash
 cd projetos/POE642_CasaA/scripts
