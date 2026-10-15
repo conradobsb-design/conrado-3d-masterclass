@@ -76,6 +76,10 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    subida), passa para o lado de cima, com o perfil da mesma escada no Subsolo da Casa C aprovado:
    tira-se o perfil do motor (medido em cada aresta) e aplica-se o do Subsolo. As duas arestas em
    L também: a sombra fica do lado de fora (à esquerda, o nível mais baixo).
+16. Aparador do hall de entrada: o motor o fez comprido até a ponta da parede. No PDF ele termina
+   antes e ao lado fica uma mesa redonda. O aparador é encurtado (a ponta da direita, com a borda e
+   a sombra, vem para o fim do PDF), o resto volta a ser travertino (veios de baixo, em espelho) e
+   entra a mesa redonda do PDF, no tampo de madeira do próprio aparador, com contorno e sombra.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -274,6 +278,17 @@ DEGRAUS_LARGOS = {
     "perfil": {"d": list(range(-10, 7)),
                "f": [1.0, 1.0, 0.99, 0.99, 0.98, 0.96, 0.92, 0.87, 0.80, 0.71, 0.61, 0.99, 1.0, 1.0, 1.0, 1.0, 1.0]},
     "perfil_L": {"d": list(range(-7, 2)), "f": [1.0, 0.99, 0.95, 0.91, 0.84, 0.76, 0.64, 0.61, 1.0]},
+}
+# aparador do hall: linhas do aparador (com a borda da parede e a sombra), colunas da ponta da
+# direita levadas ao fim do PDF, trecho que vira piso e a mesa redonda do PDF (centro, raio)
+APARADOR = {
+    "linhas": (621, 639),
+    "ponta": ((1281, 1287), 1264),           # colunas da ponta -> a partir desta coluna
+    "piso": (1270, 622, 1289, 640),          # veios de baixo, em espelho
+    "mesa": ((1279.0, 630.5), 8.0),
+    "madeira": (1215, 624, 1260, 632),
+    "contorno": (80, 99, 118),
+    "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.4},
 }
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
@@ -809,6 +824,41 @@ def degraus_largos(out):
     return out
 
 
+def aparador_hall(out):
+    q = APARADOR
+    y0, y1 = q["linhas"]
+    (p0, p1), destino = q["ponta"]
+    a = out.copy()
+    out[y0:y1, destino:destino + p1 - p0] = a[y0:y1, p0:p1]
+    x0, fy0, x1, fy1 = q["piso"]
+    h = fy1 - fy0
+    out[fy0:fy1, x0:x1] = a[fy1 + h - 1:fy1 - 1:-1, x0:x1]
+    (cx, cy), raio = q["mesa"]
+    s = q["sombra"]
+    wx0, wy0 = int(cx - raio - 4), int(cy - raio - 4)
+    wx1, wy1 = int(cx + raio + 5), int(cy + raio + 5)
+    w, hh = wx1 - wx0, wy1 - wy0
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    forma = np.zeros((hh * SS, w * SS), np.uint8)
+    cv2.circle(forma, (int(round((cx - wx0) * SS)), int(round((cy - wy0) * SS))), int(round(raio * SS)), 255, -1)
+    forma = forma.astype(np.float32)
+    M = np.float32([[1, 0, s["desloc"][0] * SS], [0, 1, s["desloc"][1] * SS]])
+    sombra = cv2.GaussianBlur(cv2.warpAffine(forma, M, (w * SS, hh * SS)), (0, 0), s["sigma"] * SS) / 255
+    reg *= (1 - s["forca"] * cv2.resize(sombra, (w, hh), interpolation=cv2.INTER_AREA))[..., None]
+    mx0, my0, mx1, my1 = q["madeira"]
+    t = a[my0:my1, mx0:mx1].astype(np.float32)
+    lin = np.concatenate([t, t[::-1]] * (hh // (2 * t.shape[0]) + 1), axis=0)[:hh]
+    madeira = np.concatenate([lin, lin[:, ::-1]] * (w // (2 * t.shape[1]) + 1), axis=1)[:, :w]
+    borda = forma - cv2.erode(forma, np.ones((7, 7), np.uint8))
+    a_t = cv2.resize(forma / 255, (w, hh), interpolation=cv2.INTER_AREA)[..., None]
+    a_b = cv2.resize(borda / 255, (w, hh), interpolation=cv2.INTER_AREA)[..., None]
+    reg = reg * (1 - a_t) + madeira * a_t
+    reg = reg * (1 - a_b) + np.array(q["contorno"], np.float32) * a_b
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    aparador do hall no comprimento do PDF e a mesa redonda ao lado")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -850,12 +900,14 @@ def main():
     out = chuveiro_externo(out)
     print("[15] degraus largos")
     out = degraus_largos(out)
+    print("[16] aparador do hall")
+    out = aparador_hall(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[16] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[17] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
