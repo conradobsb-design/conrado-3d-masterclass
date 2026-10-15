@@ -52,6 +52,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
 12. Arcos das portas sobre o granito (pedido do usuário): como nas Casas C e D, em cinza e traço fino.
     O motor quase não os fez (só o do DCE, apagado e escuro); o arco escuro que houver sai (granito
     tecido, só no granito da base chapada) e entra o arco cinza fino das curvas do PDF (ARQ_PAREDE).
+13. Pontos claros do granito (pedido do usuário: muitos, espalhados; tirar alguns): os pontinhos
+    claros de 2 a 16 px que o motor salpicou no Marrom Tabaco saem onde se destacam (30 ou mais acima
+    do granito em volta); ficam os mais fracos e o grão fino. Cada um vira o granito de um trecho
+    vizinho sem ponto, colado com borda suave.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -673,6 +677,59 @@ def arcos_granito(out, A):
     return out
 
 
+# pontos claros do granito (item 13, pedido do usuário): pontinhos compactos (2 a 16 px, caixa de
+# até 5 x 5) mais claros que o granito em volta (mediana de 11 px), no render original e onde o
+# retoque não mexeu (assim os traços desenhados, arcos e X, nunca entram); saem os de contraste >= 30
+PONTOS = {"limiar": 18, "sai": 30, "area": (2, 16), "caixa": 5, "mediana": 11, "margem": 2,
+          "desloc": [(7, 0), (-7, 0), (0, 7), (0, -7), (7, 7), (-7, -7), (7, -7), (-7, 7), (12, 0), (-12, 0),
+                     (0, 12), (0, -12)]}
+
+
+def pontos_granito(out, orig, A):
+    q = PONTOS
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    gran = (np.abs(chapada.astype(np.int32) - np.array(ARCOS["granito"])).max(axis=2) <= ARCOS["tol"]).astype(np.uint8)
+    gran = cv2.morphologyEx(gran, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    igual = (np.abs(out.astype(np.int16) - orig.astype(np.int16)).max(axis=2) == 0).astype(np.uint8)
+    ok = (cv2.erode(gran, np.ones((7, 7), np.uint8)) > 0) & (cv2.erode(igual, np.ones((7, 7), np.uint8)) > 0)
+    Y = orig.astype(np.float32).mean(axis=2)
+    d = Y - cv2.medianBlur(orig, q["mediana"]).astype(np.float32).mean(axis=2)
+    claro = (d > q["limiar"]) & ok
+    n, lab, st, _ = cv2.connectedComponentsWithStats(claro.astype(np.uint8), connectivity=8)
+    a0, a1 = q["area"]
+    todos = np.zeros(claro.shape, bool)
+    sair = []
+    for i in range(1, n):
+        x, y, w, h, area = st[i]
+        if not (a0 <= area <= a1 and w <= q["caixa"] and h <= q["caixa"]):
+            continue
+        todos |= lab == i
+        if d[lab == i].max() >= q["sai"]:
+            sair.append((x, y, w, h, i))
+    proibido = cv2.dilate(todos.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    H, W = Y.shape
+    feitos = 0
+    e = q["margem"]
+    for x, y, w, h, i in sair:
+        x0, y0, x1, y1 = x - e, y - e, x + w + e, y + h + e
+        ponto = (lab[y0:y1, x0:x1] == i).astype(np.float32)
+        al = np.maximum(cv2.GaussianBlur(cv2.dilate(ponto, np.ones((3, 3), np.uint8)), (0, 0), 0.7), ponto)[..., None]
+        for dx, dy in q["desloc"]:
+            sx0, sy0, sx1, sy1 = x0 + dx, y0 + dy, x1 + dx, y1 + dy
+            if sx0 < 0 or sy0 < 0 or sx1 > W or sy1 > H:
+                continue
+            if not ok[sy0:sy1, sx0:sx1].all() or proibido[sy0:sy1, sx0:sx1].any():
+                continue
+            reg = out[y0:y1, x0:x1].astype(np.float32)
+            fonte = out[sy0:sy1, sx0:sx1].astype(np.float32)
+            out[y0:y1, x0:x1] = np.clip(reg * (1 - al) + fonte * al, 0, 255).astype(np.uint8)
+            feitos += 1
+            break
+    print(f"    granito: {feitos} de {len(sair)} pontos claros fortes fora (os mais fracos ficam)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -705,6 +762,8 @@ def main():
     out = wc_dce(out)
     print("[12] arcos das portas sobre o granito")
     out = arcos_granito(out, A)
+    print("[13] pontos claros do granito")
+    out = pontos_granito(out, orig, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
