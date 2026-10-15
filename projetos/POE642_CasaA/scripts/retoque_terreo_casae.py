@@ -109,6 +109,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     retângulos da ARQ_ELEMENTOS FIXOS junto à janela, que o motor apagou na grama, entram como réguas
     de madeira (o veio da mesa de jantar do render, no comprido de cada régua), cada uma num tom um
     pouco diferente, com contorno fino e sombra curta na grama.
+26. Carros (pedido do usuário: não precisam estar 100% alinhados): cada carro é recortado (a silhueta
+    do render), o granito volta no lugar dele e da sombra (tecido do próprio granito, na luz em volta)
+    e o carro volta com um deslocamento e um giro leves, diferentes para cada um, com a sombra curta
+    desenhada de novo.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -122,6 +126,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pymupdf
+from scipy import ndimage
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
@@ -1308,6 +1313,50 @@ def brises(out, orig, A):
     return out
 
 
+# carros (item 26): a janela da garagem, o granito limpo e, para cada carro (da esquerda para a
+# direita), o deslocamento (dx, dy) e o giro (graus) — leves, só para quebrar o alinhamento
+CARROS = {"janela": (1300, 250, 1580, 450), "fontes_granito": [(1300, 160, 1450, 200), (700, 160, 900, 200)],
+          "movimento": [(-1.0, 6.0, -2.5), (1.0, -4.0, 1.5), (-2.0, 2.0, -1.0)],
+          "sombra": {"desloc": (-2.0, 2.0), "sigma": 1.5, "forca": 0.4}}
+
+
+def carros(out):
+    q = CARROS
+    wx0, wy0, wx1, wy1 = q["janela"]
+    reg = out[wy0:wy1, wx0:wx1].astype(np.int32)
+    g = reg.mean(axis=2)
+    neutro = np.abs(reg[..., 2] - reg[..., 0]) < 12
+    m = ((g > 120) | (neutro & (g > 60))).astype(np.uint8)
+    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
+    n, lab, st, cen = cv2.connectedComponentsWithStats(m)
+    ids = sorted([i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > 1500], key=lambda i: cen[i, 0])
+    silhuetas = [ndimage.binary_fill_holes(lab == i) for i in ids]
+    antes = out.copy()
+    tudo = np.zeros(g.shape, bool)
+    for s_ in silhuetas:
+        tudo |= s_
+    sai = cv2.dilate(tudo.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+    out = apagar_largo(out, q["janela"], sai, q["fontes_granito"], sigma=4.0, borda=0.8, lum_min=40, lum_max=110,
+                       escuros=True)
+    h, w = g.shape
+    s = q["sombra"]
+    for sil, (dx, dy, ang) in zip(silhuetas, q["movimento"]):
+        ys, xs = np.nonzero(sil)
+        c = (float(xs.mean()), float(ys.mean()))
+        M = cv2.getRotationMatrix2D(c, ang, 1.0)
+        M[:, 2] += (dx, dy)
+        alfa = cv2.GaussianBlur(sil.astype(np.float32), (0, 0), 0.5)
+        alfa = cv2.warpAffine(alfa, M, (w, h), flags=cv2.INTER_LINEAR)
+        img = cv2.warpAffine(antes[wy0:wy1, wx0:wx1].astype(np.float32), M, (w, h), flags=cv2.INTER_LINEAR)
+        S = np.float32([[1, 0, s["desloc"][0]], [0, 1, s["desloc"][1]]])
+        sb = cv2.GaussianBlur(cv2.warpAffine(alfa, S, (w, h)), (0, 0), s["sigma"]) * (1 - alfa)
+        r = out[wy0:wy1, wx0:wx1].astype(np.float32) * (1 - s["forca"] * sb)[..., None]
+        a = np.clip(alfa, 0, 1)[..., None]
+        out[wy0:wy1, wx0:wx1] = np.clip(r * (1 - a) + img * a, 0, 255).astype(np.uint8)
+    print(f"    garagem: {len(silhuetas)} carros com deslocamento e giro leves")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1363,6 +1412,8 @@ def main():
     out = porta_hall(out, A)
     print("[25] brises de madeira na janela do escritório")
     out = brises(out, orig, A)
+    print("[26] carros levemente desalinhados")
+    out = carros(out)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
