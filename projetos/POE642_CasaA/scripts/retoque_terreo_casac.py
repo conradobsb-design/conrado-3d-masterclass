@@ -83,7 +83,9 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
 17. Lavabo ao lado da adega: o motor fez duas cubas; no PDF a de cima é só bancada. O miolo da
    de cima vira a bancada lisa do trecho de baixo (mesmas colunas, com a borda da direita); a borda
    de cima da bancada e a cuba de baixo ficam. Adega: o móvel comprido de madeira junto à parede
-   da direita não existe no PDF e vira o piso da adega (as colunas limpas, em espelho).
+   da direita não existe no PDF e vira o piso da adega (as colunas limpas, em espelho). O móvel do
+   topo do lavabo (malva no PDF, que o motor pintou no granito do piso) vira marcenaria areia,
+   como os armários da cozinha, com o contorno na face livre (embaixo).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -301,6 +303,7 @@ LAVABO_ADEGA = {
     "bancada_lisa": (595, 613),
     "movel": (1205, 480, 1227, 616),
     "piso_adega": (1190, 1205),
+    "movel_lavabo": ((1233, 482, 1284, 500), ("baixo",)),     # entre as paredes, até a borda de baixo
 }
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
@@ -882,7 +885,18 @@ def lavabo_adega(out):
     c0, c1 = q["piso_adega"]
     t = a[y0:y1, c0:c1]
     out[y0:y1, x0:x1] = np.concatenate([t, t[:, ::-1]] * ((x1 - x0) // (2 * t.shape[1]) + 1), axis=1)[:, :x1 - x0]
-    print("    lavabo: a cuba a mais vira bancada; adega: o móvel sai")
+    (x0, y0, x1, y1), faces = q["movel_lavabo"]
+    fx0, fy0, fx1, fy1 = COZINHA["fonte_areia"]
+    t = a[fy0:fy1, fx0:fx1]
+    h, w = y1 - y0, x1 - x0
+    lin = np.concatenate([t, t[::-1]] * (h // (2 * t.shape[0]) + 1), axis=0)[:h]
+    reg = np.concatenate([lin, lin[:, ::-1]] * (w // (2 * t.shape[1]) + 1), axis=1)[:, :w].astype(np.float32)
+    lado = {"esquerda": (slice(None), 0), "direita": (slice(None), -1), "cima": (0, slice(None)),
+            "baixo": (-1, slice(None))}
+    for face in faces:
+        reg[lado[face]] *= COZINHA["contorno"]
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    lavabo: a cuba a mais vira bancada e o móvel do topo vira marcenaria; adega: o móvel sai")
     return out
 
 
