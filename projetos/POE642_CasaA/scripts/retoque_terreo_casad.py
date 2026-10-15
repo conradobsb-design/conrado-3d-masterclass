@@ -30,6 +30,9 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
 4. Área molhada da bancada da pia da cozinha: o retângulo da layer ARQ_BANCADAS em volta das cubas
    é demarcado em traço cinza fino, como na Casa C, nos lados livres (esquerda e embaixo; em cima é
    a parede e à direita, o armário do canto).
+5. Eletrodomésticos da cozinha: os dois volumes ao lado do armário do canto (no PDF, sem diagonal)
+   ficam em inox; a caixa do render fica (sombreado, borda das portas, divisória e sombra) e só o tom
+   muda, para aço escovado levemente frio, com riscos verticais sutis. O do canto é armário (areia).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -138,6 +141,15 @@ PISO_SOB_ARMARIO = {
 AREA_MOLHADA = {
     "pontos": [(975.7, 190.5), (975.7, 209.5), (1062.1, 209.5)],
     "traco": COZINHA_C["traco"], "larg_traco": COZINHA_C["larg_traco"], "forca_traco": COZINHA_C["forca_traco"],
+}
+
+# eletrodomésticos da cozinha (os dois volumes do PDF, ao lado do armário do canto): em inox. A caixa
+# do render fica (sombreado, borda das portas, divisória e sombra); só o tom muda, com escovado sutil
+INOX = {
+    "janela": (971, 317, 1024, 346),
+    "cor": (186, 184, 181),                     # BGR: aço escovado, levemente frio
+    "lum": (70.0, 150.0),                       # luminância: granito (0) .. caixa (1), nas bordas
+    "escovado": 0.025, "semente": 642,
 }
 
 
@@ -458,6 +470,22 @@ def area_molhada(out):
     return out
 
 
+def inox(out):
+    q = INOX
+    x0, y0, x1, y1 = q["janela"]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    Y = reg.mean(axis=2)
+    a = np.clip((Y - q["lum"][0]) / (q["lum"][1] - q["lum"][0]), 0, 1)[..., None]
+    ref = np.median(Y[a[..., 0] >= 1])
+    rng = np.random.default_rng(q["semente"])
+    riscos = cv2.GaussianBlur(rng.normal(0, 1, (1, x1 - x0)).astype(np.float32), (0, 0), 0.7)
+    riscos = 1 + q["escovado"] * riscos / max(float(riscos.std()), 1e-6)
+    aco = np.array(q["cor"], np.float32)[None, None] * (Y / ref)[..., None] * riscos[..., None]
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + aco * a, 0, 255).astype(np.uint8)
+    print("    eletrodomésticos da cozinha em inox (o armário do canto fica em areia)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -477,6 +505,8 @@ def main():
     out = piso_sob_armario(out, chapada)
     print("[4] área molhada da bancada da pia")
     out = area_molhada(out)
+    print("[5] eletrodomésticos em inox")
+    out = inox(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
