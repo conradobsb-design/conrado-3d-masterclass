@@ -52,6 +52,10 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    meio de cima (fica o tampo do próprio cooktop). O da ilha da cozinha é o mesmo desenho girado
    (3 bocas na coluna da esquerda, 2 na da direita): vira o cooktop da gourmet já corrigido,
    girado 90° e levado à caixa do da ilha.
+11. Box do BH master 2: o motor deixou o vão da esquerda sem a porta de giro. Ela volta como no
+   PDF (layer ARQ_BANCADAS, levada ao render pela mesma cadeia da base): a folha de vidro aberta
+   junto à parede de cima e o arco do giro até o batente de baixo, no traço das portas do render.
+   O arco passa por baixo do chuveiro de teto (que fica por cima).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -195,6 +199,16 @@ COOKTOPS = {
     "gourmet": (718, 565, 747, 583),
     "boca_a_mais": (727, 566, 736, 573),        # a do meio de cima, entre os divisores
     "ilha": (1192, 207, 1212, 239),
+}
+# porta de giro do box do BH master 2 (PDF, layer ARQ_BANCADAS, em px do render): folha aberta
+# junto à parede de cima, arco com centro na dobradiça; o chuveiro de teto fica por cima do arco
+PORTA_BOX = {
+    "folha": (420.6, 469.2, 442.3, 471.0),
+    "centro": (420.6, 469.4), "raio": 21.7,
+    "janela": (416, 464, 448, 496),
+    "chuveiro": (437, 479, 448, 490),
+    "vidro": (211, 214, 214), "contorno": (85, 92, 98),
+    "arco": (110, 126, 144), "larg_arco": 0.8, "larg_contorno": 0.35,
 }
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
@@ -556,6 +570,38 @@ def cooktops(out):
     return out
 
 
+def porta_box(out):
+    q = PORTA_BOX
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+
+    def px(v, o):
+        return int(round((v - o) * SS))
+
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    arco = np.zeros((h * SS, w * SS), np.uint8)
+    cx, cy = q["centro"]
+    cv2.ellipse(arco, (px(cx, wx0), px(cy, wy0)), (px(q["raio"], 0), px(q["raio"], 0)), 0, 0, 90, 255,
+                max(1, px(q["larg_arco"], 0)), cv2.LINE_AA)
+    a = cv2.resize(arco.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    c0, c1, c2, c3 = q["chuveiro"]
+    a[c1 - wy0:c3 - wy0, c0 - wx0:c2 - wx0] = 0                     # o chuveiro de teto fica por cima
+    reg = reg * (1 - a[..., None]) + np.array(q["arco"], np.float32) * a[..., None]
+
+    fx0, fy0, fx1, fy1 = q["folha"]
+    folha = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(folha, (px(fx0, wx0), px(fy0, wy0)), (px(fx1, wx0), px(fy1, wy0)), 255, -1)
+    k = max(1, px(q["larg_contorno"], 0))
+    miolo = cv2.erode(folha, np.ones((2 * k + 1, 2 * k + 1), np.uint8))
+    a_f = cv2.resize(folha.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    a_m = cv2.resize(miolo.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    reg = reg * (1 - a_f) + np.array(q["contorno"], np.float32) * a_f
+    reg = reg * (1 - a_m) + np.array(q["vidro"], np.float32) * a_m
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    porta de giro do box do BH master 2: folha aberta e arco")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -587,12 +633,14 @@ def main():
     out = banquetas(out)
     print("[10] cooktops")
     out = cooktops(out)
+    print("[11] porta do box do BH master 2")
+    out = porta_box(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[11] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[12] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
