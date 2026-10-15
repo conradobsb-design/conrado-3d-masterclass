@@ -101,6 +101,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     cinza fino (o dos arcos sobre o granito), com o tampo um pouco mais claro (polido) e sombra curta no
     piso; no painel do meio, a cuba esculpida no próprio granito (como a do lavabo, com a fenda escura)
     e, saindo do painel da esquerda, a torneira cromada do PDF (base redonda e bica até a cuba).
+24. Porta do hall externo (pedido do usuário): faltavam a extensão e o arco. A porta do PDF tem duas
+    folhas: a grande (que o render fez, com o arco para baixo) e a pequena, à direita, que abre para
+    cima; a folha pequena entra na espessura do PDF, no desenho da grande (traço escuro em cima, traço
+    médio embaixo, miolo claro), com o encontro das duas marcado, e o arco dela no traço fino dos arcos.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1231,6 +1235,39 @@ def bancada_gourmet(out):
     return out
 
 
+# porta do hall externo (item 24): a folha pequena e o arco dela (ARQ_PAREDE), no desenho da folha
+# grande do render (os tons medidos nela)
+PORTA_HALL = {"folha": (1290.6, 709.4, 1312.4, 710.9), "arco": (1290.6, 688.4, 1312.4, 710.2),
+              "miolo": (206, 212, 220), "traco_cima": (70, 78, 88), "traco_baixo": (110, 116, 124),
+              "larg": 0.6, "cor_arco": (104, 108, 114), "larg_arco": 0.55}
+
+
+def porta_hall(out, A):
+    q = PORTA_HALL
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+    forma = out.shape[:2]
+    x0, y0, x1, y1 = q["folha"]
+    al = poligono_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])[..., None]
+    out[:] = np.clip(out * (1 - al) + np.float32(q["miolo"]) * al, 0, 255).astype(np.uint8)
+    for pts, cor in (([(x0, y0), (x1, y0)], q["traco_cima"]), ([(x0, y1), (x1, y1)], q["traco_baixo"]),
+                     ([(x1, y0), (x1, y1)], q["traco_cima"]), ([(x0, y0), (x0, y1)], q["traco_cima"])):
+        a = linha_aa(forma, pts, q["larg"])[..., None]
+        out[:] = np.clip(out * (1 - a) + np.float32(cor) * a, 0, 255).astype(np.uint8)
+    arco = next(d for d in pg.get_drawings() if d.get("layer") == "ARQ_PAREDE" and d["type"] == "s"
+                and any(it[0] == "c" for it in d["items"])
+                and max(abs(a - b) for a, b in zip(caixa_render(d, p2r), q["arco"])) < 1.0)
+    for it in arco["items"]:
+        if it[0] != "c":
+            continue
+        pp = np.array([p2r(v.x, v.y) for v in it[1:5]])
+        tt = np.linspace(0, 1, 60)[:, None]
+        curva = (1 - tt) ** 3 * pp[0] + 3 * (1 - tt) ** 2 * tt * pp[1] + 3 * (1 - tt) * tt ** 2 * pp[2] + tt ** 3 * pp[3]
+        a = linha_aa(forma, curva, q["larg_arco"])[..., None]
+        out[:] = np.clip(out * (1 - a) + np.float32(q["cor_arco"]) * a, 0, 255).astype(np.uint8)
+    print("    hall externo: folha pequena da porta e o arco dela, do PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1282,6 +1319,8 @@ def main():
     out = vasos(out, A)
     print("[23] banho gourmet: bancada da pia e torneira")
     out = bancada_gourmet(out)
+    print("[24] porta do hall externo: extensão e arco")
+    out = porta_hall(out, A)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
