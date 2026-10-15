@@ -117,6 +117,11 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     (ARQ_LAYOUT HUMANIZAÇÃO), a madeira lisa do motor ganha o veio (o da mesa de jantar, no comprido de
     cada braço) e as garrafas deitadas em fileiras, com o gargalo para a parede de cada braço: vidro
     verde-escuro, âmbar e vinho alternados, com o brilho no comprido e sombra curta na madeira.
+28. Área de serviço (pedido do usuário): a faixa junto à parede de baixo é em parte armário e em parte
+    bancada para roupas; o motor fez tudo em madeira lisa. No PDF, à esquerda, o armário (ARQ_LAYOUT
+    HUMANIZAÇÃO) fica em marcenaria areia com o veio (como o louceiro); à direita, a bancada
+    (ARQ_BANCADAS) vira o quartzo do tanque (tecido dos trechos limpos da bancada dele, no tom dela),
+    com a luz do próprio trecho; contorno fino nas duas peças e entre elas.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1439,6 +1444,46 @@ def adega(out, orig):
     return out
 
 
+# armário e bancada da área de serviço (item 28): as duas peças do PDF no quadro do render e o quartzo
+# limpo da bancada do tanque (nas pontas, fora das cubas)
+SERVICO = {"armario": (1084.6, 364.8, 1109.4, 383.5), "bancada": (1109.4, 364.8, 1154.6, 383.5),
+           "fontes_quartzo": [(1018, 292, 1027, 313), (1069, 292, 1076, 313)],
+           "contorno": (120, 116, 112), "larg_contorno": 0.4}
+
+
+def servico_bancada(out, orig):
+    q = SERVICO
+    forma = out.shape[:2]
+    # armário: o veio da mesa de jantar, deitado, sobre o tom desfocado da peça
+    x0, y0, x1, y1 = q["armario"]
+    X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
+    a, b, c, d = VEIO_LOUCEIRO["fonte"]
+    Y = orig[b:d, a:c].astype(np.float32).mean(axis=2)
+    v = np.clip(1 + VEIO_LOUCEIRO["realce"] * (Y / np.maximum(cv2.GaussianBlur(Y, (0, 0), 3.0), 1) - 1), 0.85, 1.15)
+    v = cv2.rotate(v, cv2.ROTATE_90_CLOCKWISE)
+    h, w = Y1 - Y0, X1 - X0
+    v = np.concatenate([v, v[::-1]] * (h // (2 * v.shape[0]) + 1), axis=0)[:h, :w]
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    al = poligono_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])[Y0:Y1, X0:X1, None]
+    out[Y0:Y1, X0:X1] = np.clip(reg * (1 - al) + cv2.GaussianBlur(reg, (0, 0), 1.2) * v[..., None] * al, 0, 255).astype(np.uint8)
+    # bancada: quartzo do tanque, com a luz (por coluna e linha) do próprio trecho de madeira
+    x0, y0, x1, y1 = q["bancada"]
+    X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
+    h, w = Y1 - Y0, X1 - X0
+    cor = np.median(np.concatenate([out[b_:d_, a_:c_].reshape(-1, 3) for a_, b_, c_, d_ in q["fontes_quartzo"]]).astype(np.float32), axis=0)
+    tex = textura(out, q["fontes_quartzo"], h, w, p=8) * cor
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    lum = reg.mean(axis=2)
+    luz = cv2.GaussianBlur(lum, (0, 0), 3.0) / max(float(np.median(lum)), 1)
+    al = poligono_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])[Y0:Y1, X0:X1, None]
+    out[Y0:Y1, X0:X1] = np.clip(reg * (1 - al) + tex * np.clip(luz, 0.85, 1.05)[..., None] * al, 0, 255).astype(np.uint8)
+    for x0, y0, x1, y1 in (q["armario"], q["bancada"]):
+        a_ = linha_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], q["larg_contorno"], fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - a_) + np.float32(q["contorno"]) * a_, 0, 255).astype(np.uint8)
+    print("    área de serviço: armário com veio e bancada de roupas em quartzo")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1498,6 +1543,8 @@ def main():
     out = carros(out)
     print("[27] adega: prateleira de vinhos em U")
     out = adega(out, orig)
+    print("[28] área de serviço: armário e bancada para roupas")
+    out = servico_bancada(out, orig)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 

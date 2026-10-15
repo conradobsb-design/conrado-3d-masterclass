@@ -325,6 +325,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **Brises do escritório (item 25):** `brises` cola um trecho da madeira da mesa de jantar em cada retângulo do PDF (`colar`), num tom sorteado, com contorno e sombra curta.
 - **Carros (item 26):** `carros` recorta cada silhueta, refaz o granito embaixo (`apagar_largo`) e recoloca o carro com o afim de `CARROS["movimento"]` e uma sombra curta nova.
 - **Adega (item 27):** `adega` dá veio ao U do PDF e desenha em 8 x as garrafas deitadas (gargalo, ombro e corpo), em fileiras por braço, com brilho e sombra curta.
+- **Área de serviço (item 28):** `servico_bancada` dá veio ao armário do PDF e troca a bancada pelo quartzo tecido do tanque, com contorno fino.
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado
