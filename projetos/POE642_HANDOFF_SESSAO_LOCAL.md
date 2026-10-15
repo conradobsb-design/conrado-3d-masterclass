@@ -393,4 +393,4 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   25. erro 20 da lista: a escada junto à suíte master com os 16 degraus da segunda imagem.
   26. erro 21 da lista: camas das suítes 1 e 2 no comprimento do PDF e os bancos de duas almofadas da Casa B ao pé delas.
   27. erro 22 da lista: na escrivaninha do escritório ficam as 2 cadeiras de visita e a de trabalho do PDF (saem 3).
-  28. erro 23 da lista: elevador com caixa branca e a cabine do Subsolo da Casa B, porta à direita, como na Casa C.
+  28. erro 23 da lista: elevador com a cabine do Subsolo da Casa B, porta à direita, ocupando a caixa inteira (pedido do usuário: sem o branco largo em volta).

@@ -129,7 +129,8 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    vira as mesmas linhas de um trecho limpo do próprio escritório ao lado (colunas em espelho).
 28. Erro 23 da lista (elevador): o motor fez a caixa num piso cinza claro manchado (e a segunda imagem,
    um lavabo). Como na Casa C: caixa branca e a cabine do Subsolo da Casa B aprovado, girada para a
-   porta ficar à direita (no PDF, a porta dá para a circulação), levada à cabine do PDF.
+   porta ficar à direita (no PDF, a porta dá para a circulação), ocupando a caixa inteira, com 1 a 2 px
+   de folga (pedido do usuário: sem o branco largo em volta).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -520,11 +521,11 @@ CADEIRAS_ESCRITORIO = {
 
 # elevador (erro 23): o motor fez a caixa num piso cinza claro manchado (e a segunda imagem, um
 # lavabo). Como na Casa C (pedido do usuário lá): caixa branca e a cabine do Subsolo da Casa B
-# aprovado, girada para a porta ficar à direita (no PDF, a porta dá para a circulação), levada à
-# cabine do PDF (INS_INSTALAÇÕES HIDRÁULICAS)
+# aprovado, girada para a porta ficar à direita (no PDF, a porta dá para a circulação), ocupando a
+# caixa inteira (pedido do usuário: sem o branco largo em volta)
 ELEVADOR_D = {
     "interior": (699, 639, 748, 688),
-    "cabine": (710, 645, 746, 683),
+    "cabine": (701, 641, 747, 686),          # ocupa a caixa, com 1-2 px de folga (pedido do usuário)
     "branco": (255, 255, 255),
     "fonte": ELEVADOR_C["fonte"],
 }
