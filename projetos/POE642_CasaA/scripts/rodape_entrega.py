@@ -101,7 +101,7 @@ def rodape(ent, chave):
     linha_h, y = 58, topo + 48
     areas = ent["areas"]
     for i, (nome, valor) in enumerate(areas):
-        total = i == len(areas) - 1
+        total = len(areas) > 1 and i == len(areas) - 1       # com uma linha só, não há total
         if i == pav["linha_area"]:
             d.rectangle((ax0 - 18, y, ax1 + 18, y + linha_h - 6), fill=DESTAQUE)
         if total:
