@@ -63,8 +63,9 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    o motor fez 6. As 5 arestas internas do motor saem (as colunas viram o piso limpo do degrau ao
    lado) e entram 9, repartidas por igual entre a primeira e a última aresta do render, com o
    perfil de sombra das arestas do próprio render, um pouco mais estreito para o degrau menor.
-13. Elevador: o motor fez a caixa no travertino do hall. Ela fica branca, com o contorno fino e
-   cinza da cabine na posição do PDF, como o elevador do Subsolo da Casa C aprovado.
+13. Elevador: o motor fez a caixa no travertino do hall. A caixa fica branca e a cabine, no tom
+   da cabine do Subsolo da Casa B aprovado (pedido do usuário): é a própria cabine de lá (sem a
+   soleira), girada para a porta ficar à esquerda e levada à cabine do PDF (quase a mesma escala).
 14. Chuveiro externo (no pisante junto ao muro de baixo): o motor fez uma cruz escura, que ainda
    atravessava o muro. A cruz sai (a barra deitada vira a pedra de cima do mesmo pisante; a em pé
    vira as colunas limpas ao lado, que já têm a pedra, a borda, a grama e o muro). Entra o
@@ -236,12 +237,14 @@ ESCADA = {
     "perfil": ([-0.7, 0.0, 0.7, 1.4, 2.1, 2.8], [0.97, 0.52, 0.77, 0.85, 0.95, 1.0]),
     "limpar": (5, 6),                            # colunas [borda-5, borda+1) <- as 6 px à direita
 }
-# elevador: interior da caixa (entre as paredes; a borda antisserrilhada da parede fica) e a
-# cabine do PDF, no traço da cabine do Subsolo da Casa C
+# elevador: interior da caixa (entre as paredes; a borda antisserrilhada da parede fica), a
+# cabine do PDF (px inteiros) e a cabine do Subsolo da Casa B (na resolução da base, sem a soleira
+# da porta, que lá fica embaixo)
 ELEVADOR = {
     "interior": (925, 426, 978, 475),
-    "cabine": (926.5, 428.5, 968.1, 471.9),
-    "branco": (255, 255, 255), "linha": (170, 170, 170), "larg": 0.7,
+    "cabine": (926, 428, 968, 472),
+    "branco": (255, 255, 255),
+    "fonte": (RAIZ / "POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final.png", (3116, 1011, 3276, 1162)),
 }
 # chuveiro externo: a cruz do motor (barra deitada e em pé, com a borda antisserrilhada), as
 # fontes limpas, e a geometria do PDF (ducha, braço e canopla, em px do render)
@@ -694,17 +697,12 @@ def escada(out):
 def elevador(out):
     q = ELEVADOR
     x0, y0, x1, y1 = q["interior"]
-    h, w = y1 - y0, x1 - x0
-    reg = np.empty((h, w, 3), np.float32)
-    reg[:] = q["branco"]
+    out[y0:y1, x0:x1] = q["branco"]
+    arq, (fx0, fy0, fx1, fy1) = q["fonte"]
+    cabine = cv2.rotate(cv2.imread(str(arq))[fy0:fy1, fx0:fx1], cv2.ROTATE_90_CLOCKWISE)   # porta à esquerda
     cx0, cy0, cx1, cy1 = q["cabine"]
-    f = np.zeros((h * SS, w * SS), np.uint8)
-    cv2.rectangle(f, (int(round((cx0 - x0) * SS)), int(round((cy0 - y0) * SS))),
-                  (int(round((cx1 - x0) * SS)), int(round((cy1 - y0) * SS))), 255, max(1, int(round(q["larg"] * SS))))
-    a = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
-    reg = reg * (1 - a) + np.array(q["linha"], np.float32) * a
-    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
-    print(f"    elevador: caixa branca com a cabine do PDF ({w}x{h} px)")
+    out[cy0:cy1, cx0:cx1] = cv2.resize(cabine, (cx1 - cx0, cy1 - cy0), interpolation=cv2.INTER_AREA)
+    print(f"    elevador: caixa branca e a cabine do Subsolo da Casa B ({cx1 - cx0}x{cy1 - cy0} px)")
     return out
 
 
