@@ -533,3 +533,9 @@ python3 POE642_CasaA/scripts/piscinas_barlavento.py POE642_CasaD/renders/POE642_
 # Casa A: --base e --chapada = POE642_CasaA/bases/POE642_CasaA_BASE_Terreo_v6_16x9.png
 # depois, de POE642_CasaA/scripts/: rodape_entrega.py --render Terreo=<..._barlavento.png> e pdf_entrega.py (com --config das Casas B, C e D)
 ```
+
+- **Casa D, ajuste da piscina (15/10/26):** pedido do usuário: "não gostei da finalização da piscina. precisa melhorar a borda da piscina, degraus internos [...]. pode fazer uma borda com dreno" e "o dreno é apenas uma linha contínua fina. somente na parte externa da piscina". Script `scripts/piscina_dreno_casad.py` (parte do render retocado, sem o Barlavento v1):
+  - **borda:** a água vai até o contorno do projeto, sem sombra de parede, só com uma leve definição junto ao piso;
+  - **dreno:** uma linha contínua fina e escura no piso (~2 cm), a ~6 cm da água, só no contorno de fora do conjunto piscina + spa (a faixa entre os dois não leva), com cantos em esquadro;
+  - **degraus internos:** as linhas duplas pareciam um rasgo no fundo. Agora cada nível tem a sua profundidade (fundo 1,40 m, degrau da prainha 0,80, prainha 0,30; banco do spa 0,45, degrau 0,65, fundo 0,90): a água fica mais clara no raso e o degrau é a troca de tom, com uma luz fina na quina e uma sombra curta ao pé. O fundo da piscina segue no tom aprovado;
+  - imagem `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v2.png`; prancha do Térreo e PDF da Casa D refeitos com ela.

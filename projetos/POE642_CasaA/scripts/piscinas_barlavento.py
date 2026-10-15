@@ -137,6 +137,32 @@ def mascara_agua(img):
     return agua, regiao & ~grandes
 
 
+def pedra_ondulada(h, wd):
+    """A pedra das peças sob a água (cor da água), com a grade ondulada pela refração."""
+    q = Q
+    pedra = barlavento(h + 8, wd + 8, semente=q["semente"]) * np.float32(q["cor"])
+    rng = np.random.default_rng(q["semente"])
+    amp, sig = q["ondas"]
+    dx, dy = (cv2.GaussianBlur(rng.normal(0, 1, (h, wd)).astype(np.float32), (0, 0), sig) for _ in range(2))
+    dx, dy = dx * amp / max(float(dx.std()), 1e-6), dy * amp / max(float(dy.std()), 1e-6)
+    gy, gx = np.mgrid[0:h, 0:wd].astype(np.float32)
+    return cv2.remap(pedra, gx + 4 + dx, gy + 4 + dy, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
+
+
+def causticas(Y, w):
+    """A rede de cáusticas do próprio render (Y), mais suave: o que clareia sobre a média local da
+    água (peso w), só para cima."""
+    q = Q
+    media = cv2.GaussianBlur(Y * w, (0, 0), 4.0) / np.maximum(cv2.GaussianBlur(w, (0, 0), 4.0), 1e-3)
+    return cv2.GaussianBlur(np.clip(Y - media, 0, None), (0, 0), q["suave_causticas"]) * q["causticas"]
+
+
+def brilho_diagonal(h, wd):
+    gy, gx = np.mgrid[0:h, 0:wd].astype(np.float32)
+    diag = ((gx / max(wd - 1, 1)) + (gy / max(h - 1, 1))) / 2
+    return 1 + Q["brilho"] * (1 - diag)
+
+
 def aplicar(img, linhas):
     q = Q
     agua, limite = mascara_agua(img)
@@ -148,27 +174,16 @@ def aplicar(img, linhas):
     reg = img[y0:y1, x0:x1].astype(np.float32)
     Y = reg.mean(axis=2)
     w = m.astype(np.float32)
-
-    def media(s):
-        return cv2.GaussianBlur(Y * w, (0, 0), s) / np.maximum(cv2.GaussianBlur(w, (0, 0), s), 1e-3)
-
     h, wd = Y.shape
     forca, dec = q["borda"]
     dist = cv2.distanceTransform(lim_.astype(np.uint8), cv2.DIST_L2, 3)
     luz = 1 - forca * np.exp(-np.maximum(dist - 0.5, 0) / dec)
     # degraus: a linha fina do render, suavizada, escurece de leve (sem a mancha larga em volta)
     luz *= 1 - q["degraus"] * np.clip(cv2.GaussianBlur(ln.astype(np.float32), (0, 0), 0.6) * 1.6, 0, 1)
-    pedra = barlavento(h + 8, wd + 8, semente=q["semente"]) * np.float32(q["cor"])
-    rng = np.random.default_rng(q["semente"])
-    amp, sig = q["ondas"]
-    dx, dy = (cv2.GaussianBlur(rng.normal(0, 1, (h, wd)).astype(np.float32), (0, 0), sig) for _ in range(2))
-    dx, dy = dx * amp / max(float(dx.std()), 1e-6), dy * amp / max(float(dy.std()), 1e-6)
-    gy, gx = np.mgrid[0:h, 0:wd].astype(np.float32)
-    pedra = cv2.remap(pedra, gx + 4 + dx, gy + 4 + dy, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
-    caust = cv2.GaussianBlur(np.clip(Y - media(4.0), 0, None), (0, 0), q["suave_causticas"]) * q["causticas"]
+    pedra = pedra_ondulada(h, wd)
+    caust = causticas(Y, w)
     caust *= np.clip(dist - 1.0, 0, 1)               # sem o reflexo da borda clara colada à água
-    diag = ((gx / max(wd - 1, 1)) + (gy / max(h - 1, 1))) / 2
-    brilho = 1 + q["brilho"] * (1 - diag)
+    brilho = brilho_diagonal(h, wd)
     novo = pedra * (luz * brilho)[..., None] + caust[..., None] * np.float32([1.0, 1.0, 0.92])
     a = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.5)
     a = np.maximum(a, m) * lim_                      # não passa para as bordas nem para as peças

@@ -358,6 +358,18 @@ python3 POE642_CasaA/scripts/piscinas_barlavento.py POE642_CasaA/renders/POE642_
 
 As pranchas do Térreo e os PDFs das quatro casas foram refeitos com essas imagens (`rodape_entrega.py --render Terreo=..._barlavento.png` e `pdf_entrega.py`).
 
+## Casa D: dreno em linha e degraus em níveis: `piscina_dreno_casad.py`
+
+Refaz a água da piscina e do spa da Casa D a partir do render retocado (pedido do usuário depois do Barlavento v1):
+- **Borda e dreno:** a água vai até o contorno do projeto, sem sombra de parede. O dreno é uma linha contínua fina no piso, a ~6 cm da água, só no contorno de fora do conjunto piscina + spa, com cantos em esquadro (distância de tabuleiro).
+- **Degraus em níveis:** as áreas da água vêm da base chapada alinhada (componentes entre as linhas do projeto). Cada uma tem uma profundidade (`D["areas"]`), e a cor da água muda com ela por absorção (`absorcao`, BGR por m; o tom aprovado vale no fundo, `prof_ref`). O degrau é a troca de tom, com uma luz fina na quina de cima (`quina`) e uma sombra curta ao pé (`pe`).
+- A pedra, a refração, as cáusticas e o brilho são as funções do `piscinas_barlavento.py` (`pedra_ondulada`, `causticas`, `brilho_diagonal`).
+
+```bash
+# da pasta projetos/
+python3 POE642_CasaA/scripts/piscina_dreno_casad.py      # -> POE642_CasaD/renders/..._Terreo_v1_retocado_barlavento_v2.png
+```
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:
