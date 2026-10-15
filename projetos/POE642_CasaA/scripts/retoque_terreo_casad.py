@@ -96,6 +96,17 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    Elas saem com a sombra (cada coluna do travertino liga a faixa limpa de cima à de baixo, porque os
    veios são verticais) e entra o banco do PDF (ARQ_MOBILIÁRIO): estofado no tecido do sofá do render,
    com o capitonê em losangos (vincos e botões), contorno e a sombra curta dos móveis do render.
+21. Segunda imagem (renders/POE642_CasaD_PH_Terreo_v1_render_fonte2.webp, trazida pelo usuário, mesmo
+   prompt): os elementos prontos vêm dela em vez de serem criados (pedido do usuário), levada ao render
+   por SIFT + afim. Armários dos quartos (closet do master, circulação, à esquerda do banho 1, suítes 1
+   e 2): os closets abertos dela, vistos de cima com os cabides, no tom areia, no retângulo do PDF.
+22. Erro 16 da lista (mesa redonda): o motor fez a mesa com o dobro do diâmetro do PDF e sem as duas
+   mesinhas laterais. O conjunto (tapete, poltronas e a mesa no diâmetro do PDF) vem da segunda imagem:
+   o círculo do tapete e, perto das poltronas, onde as duas imagens diferem, com emenda suave e o tom
+   do travertino ajustado no anel limpo em volta. A planta sai do tampo (a madeira do próprio tampo
+   interpolada, com o veio da madeira do render) e entram as duas mesinhas do PDF, com contorno e
+   sombra curta, por baixo das poltronas. O tapete da segunda imagem é redondo (no PDF, orgânico, no
+   mesmo contorno externo).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -396,6 +407,47 @@ BANCO_ESTAR = {
     "sombra": {"desloc": (-2.0, 2.0), "sigma": 1.2, "forca": 0.4},
 }
 
+# mesa redonda do estar (erros 16 e 17): o motor fez a mesa com o dobro do diâmetro do PDF, com uma
+# planta em cima, e não fez as duas mesinhas laterais. O conjunto (tapete, poltronas e a mesa no
+# diâmetro do PDF) vem da segunda imagem (pedido do usuário): o círculo do tapete e, fora dele, onde
+# as duas imagens diferem (poltronas e sombras), com emenda suave. A planta sai do tampo (a madeira
+# do próprio tampo, interpolada, com o veio da madeira do render) e entram as duas mesinhas do PDF,
+# na madeira do render, com contorno e a sombra curta das mesas; por baixo das poltronas
+MESA_REDONDA = {
+    "janela": (1096, 378, 1212, 494),
+    "tapete": ((1152.8, 436.3), 51.0),
+    "limiar_dif": 22.0,
+    "tampo": ((1153.0, 435.0), 17.0),
+    "fonte_madeira": [(1122, 425, 1138, 455), (1168, 425, 1183, 455)],
+    "poltronas": [(1108.3, 390.8, 1136.9, 419.4), (1168.7, 390.8, 1197.3, 419.4),
+                  (1108.2, 451.2, 1136.8, 479.8), (1168.6, 451.2, 1197.2, 479.8)],
+    "mesinhas": [((1108.1, 423.9), 5.1), ((1165.05, 476.35), 5.1)],
+    "contorno": (80, 99, 118), "larg_contorno": 0.5,
+    "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.4},
+}
+# segunda imagem do motor (trazida pelo usuário, mesmo prompt): elementos prontos são tirados dela
+# (pedido do usuário: usar elementos dela em vez de criar), levada ao render por SIFT + afim
+FONTE2 = RAIZ / "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render_fonte2.webp"
+# armários dos quartos (pedido do usuário): os da segunda imagem, closets abertos vistos de cima
+# (cabides) no tom areia, sem sombra de móvel baixo; entram no retângulo do PDF, sem as paredes
+ARMARIOS_FONTE2 = ["closet do master, braço de cima", "closet do master, braço da esquerda",
+                   "closet do master, braço de baixo", "circulação, à direita do banho master",
+                   "à esquerda do banho 1", "suíte 1, braço em pé", "suíte 1, braço deitado",
+                   "suíte 2, braço deitado", "suíte 2, braço em pé", "suíte 2, à direita"]
+
+
+def alinhar_fonte2(render):
+    """Segunda imagem levada ao render (SIFT + afim)."""
+    f2 = cv2.imread(str(FONTE2))
+    sift = cv2.SIFT_create(20000)
+    k1, d1 = sift.detectAndCompute(cv2.cvtColor(f2, cv2.COLOR_BGR2GRAY), None)
+    k2, d2 = sift.detectAndCompute(cv2.cvtColor(render, cv2.COLOR_BGR2GRAY), None)
+    pares = [a for a, b in cv2.BFMatcher().knnMatch(d1, d2, k=2) if a.distance < 0.7 * b.distance]
+    M, inl = cv2.estimateAffine2D(np.float32([k1[a.queryIdx].pt for a in pares]),
+                                  np.float32([k2[a.trainIdx].pt for a in pares]), ransacReprojThreshold=1.5)
+    print(f"    segunda imagem alinhada: {int(inl.sum())} pontos, escala {M[0, 0]:.4f} x {M[1, 1]:.4f}")
+    return cv2.warpAffine(f2, M, render.shape[1::-1], flags=cv2.INTER_LINEAR, borderValue=(255, 255, 255))
+
 
 def alinhar_base(render):
     """Base 16:9 reduzida e levada ao render por SIFT + afim; também a base chapada (v2)."""
@@ -432,12 +484,12 @@ def pdf_cadeia(A, forma_render):
     return pg, p2r
 
 
-def pdf_no_render(janela, A, forma_render):
-    """Trecho do PDF rasterizado e levado ao render pela mesma cadeia da base, em SS vezes a
-    resolução (cinza, 255 = papel)."""
+def mascara_pdf(janela, A, forma_render, filtro):
+    """Máscara (0..1, na resolução do render) dos desenhos do PDF escolhidos por filtro(d),
+    preenchidos, levados ao render pela mesma cadeia da base. Os desenhos são refeitos numa página
+    nova (o MuPDF não desliga as layers deste PDF no raster) e rasterizados em alta resolução."""
     cfg = json.loads(CONFIG.read_text())
-    doc = pymupdf.open(PDF)
-    pg = doc[cfg["pavimentos"]["Terreo"]["pagina"]]
+    pg = pymupdf.open(PDF)[cfg["pavimentos"]["Terreo"]["pagina"]]
     fx0, fy0, fx1, fy1 = cfg["recorte"]
     clip = pymupdf.Rect(pg.rect.width * fx0, pg.rect.height * fy0, pg.rect.width * fx1, pg.rect.height * fy1)
     zoom = cfg["largura_px"] / clip.width
@@ -455,18 +507,57 @@ def pdf_no_render(janela, A, forma_render):
         bx, by, _ = Ai @ [x, y, 1]
         return (bx / sx - (wt - wb) // 2) / zoom + clip.x0, (by / sy - (ht - hb) // 2) / zoom + clip.y0
 
+    nova = pymupdf.open()
+    pn = nova.new_page(width=pg.rect.width, height=pg.rect.height)
+    sh = pn.new_shape()
+    for d in pg.get_drawings():
+        if not filtro(d):
+            continue
+        for it in d["items"]:
+            if it[0] == "l":
+                sh.draw_line(it[1], it[2])
+            elif it[0] == "c":
+                sh.draw_bezier(it[1], it[2], it[3], it[4])
+            elif it[0] == "re":
+                sh.draw_rect(it[1])
+            elif it[0] == "qu":
+                sh.draw_quad(it[1])
+        sh.finish(fill=(0, 0, 0), color=None, closePath=d.get("closePath", True), even_odd=d.get("even_odd", False))
+    sh.commit()
     x0, y0, x1, y1 = janela
     a, b = r2p(x0 - 2, y0 - 2), r2p(x1 + 2, y1 + 2)
     ret = pymupdf.Rect(a[0], a[1], b[0], b[1])
     zp = 60
-    pix = pg.get_pixmap(clip=ret, matrix=pymupdf.Matrix(zp, zp), alpha=False, colorspace=pymupdf.csGRAY)
-    img = np.frombuffer(pix.samples, np.uint8).reshape(pix.height, pix.width)
+    pix = pn.get_pixmap(clip=ret, matrix=pymupdf.Matrix(zp, zp), alpha=False, colorspace=pymupdf.csGRAY)
+    img = 255 - np.frombuffer(pix.samples, np.uint8).reshape(pix.height, pix.width)
     src = [(0, 0), (pix.width, 0), (0, pix.height)]
-    dst = [((p2r(ret.x0 + u / zp, ret.y0 + v / zp)[0] - x0) * SS, (p2r(ret.x0 + u / zp, ret.y0 + v / zp)[1] - y0) * SS)
-           for u, v in src]
+    dst = [(p2r(ret.x0 + u / zp, ret.y0 + v / zp)[0] - x0, p2r(ret.x0 + u / zp, ret.y0 + v / zp)[1] - y0) for u, v in src]
     M = cv2.getAffineTransform(np.float32(src), np.float32(dst))
-    return cv2.warpAffine(np.ascontiguousarray(img), M, ((x1 - x0) * SS, (y1 - y0) * SS), flags=cv2.INTER_AREA,
-                          borderValue=255)
+    return cv2.warpAffine(np.ascontiguousarray(img).astype(np.float32) / 255, M, (x1 - x0, y1 - y0),
+                          flags=cv2.INTER_AREA, borderValue=0)
+
+
+def interpolar(valores, peso, sigma):
+    """Convolução normalizada em várias escalas: em cada px vale a menor escala (sigma, 2 sigma, ...)
+    com suporte suficiente de px com peso."""
+    w = peso.astype(np.float32)
+    if valores.ndim == 3:
+        w = w[..., None]
+    w = np.broadcast_to(w, valores.shape).astype(np.float32)
+    res = np.zeros(valores.shape, np.float32)
+    feito = np.zeros(valores.shape, bool)
+    s = sigma
+    for k in range(6):
+        num = cv2.GaussianBlur(valores * w, (0, 0), s)
+        den = cv2.GaussianBlur(w, (0, 0), s)
+        ok = (den > (0.08 if k < 5 else 1e-5)) & ~feito
+        res[ok] = num[ok] / den[ok]
+        feito |= ok
+        s *= 2
+    resto = ~feito
+    if resto.any():
+        res[resto] = (valores * w).sum() / max(w.sum(), 1e-6) if valores.ndim == 2 else 0
+    return res
 
 
 def grama(out, fontes, alto, largo):
@@ -1297,6 +1388,93 @@ def banco_estar(out):
     return out
 
 
+def mesa_redonda(out, f2, orig):
+    q = MESA_REDONDA
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+    yy, xx = np.mgrid[wy0:wy1, wx0:wx1].astype(np.float32) + 0.5
+    madeira = textura(orig, q["fonte_madeira"], 40, 40)                 # antes de colar (o tampo do motor)
+    cor_madeira = np.median(np.concatenate([orig[b:d, a:c].reshape(-1, 3) for a, b, c, d in q["fonte_madeira"]]).astype(np.float32), axis=0)
+    fonte = f2[wy0:wy1, wx0:wx1].astype(np.float32)
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    (cx, cy), r = q["tapete"]
+    circ = ((xx - cx) ** 2 + (yy - cy) ** 2 <= r * r).astype(np.uint8)
+    dif = cv2.GaussianBlur(np.abs(fonte - orig[wy0:wy1, wx0:wx1].astype(np.float32)).mean(axis=2), (0, 0), 1.5)
+    perto = np.zeros((h, w), np.uint8)                                   # perto das poltronas (as duas imagens)
+    for x0, y0, x1, y1 in q["poltronas"]:
+        perto[max(int(y0) - wy0 - 6, 0):int(y1) - wy0 + 7, max(int(x0) - wx0 - 6, 0):int(x1) - wx0 + 7] = 1
+    m = circ | (cv2.dilate((dif > q["limiar_dif"]).astype(np.uint8), np.ones((7, 7), np.uint8)) & perto)
+    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    # o travertino da segunda imagem é um pouco mais claro: ajuste por canal no anel limpo em volta
+    anel = ((xx - cx) ** 2 + (yy - cy) ** 2 > (r + 3) ** 2) & (dif < 10) & (m == 0)
+    fonte *= (np.median(orig[wy0:wy1, wx0:wx1][anel].astype(np.float32), axis=0) / np.median(fonte[anel], axis=0))[None, None]
+    a = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 1.2)
+    a[:3], a[-3:], a[:, :3], a[:, -3:] = 0, 0, 0, 0
+    reg = reg * (1 - a[..., None]) + fonte * a[..., None]
+
+    # planta (e a sombra dela) fora do tampo
+    (tx, ty), tr = q["tampo"]
+    disco = (xx - tx) ** 2 + (yy - ty) ** 2 <= (tr - 1.5) ** 2
+    Y = reg.mean(axis=2)
+    verde = (reg[..., 1] > reg[..., 2] + 2) & disco
+    Ym = np.median(Y[disco & ~verde])
+    planta = cv2.dilate((verde | (disco & (Y < 0.86 * Ym))).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & disco
+    liso = interpolar(reg, disco & ~planta, 2.0)
+    veio = cv2.resize(madeira, (2 * int(tr) + 4, 2 * int(tr) + 4), interpolation=cv2.INTER_LINEAR)
+    veio = veio / cv2.GaussianBlur(veio, (0, 0), 3.0)
+    vy0, vx0 = int(ty - tr - 2) - wy0, int(tx - tr - 2) - wx0
+    v = np.ones_like(reg)
+    v[vy0:vy0 + veio.shape[0], vx0:vx0 + veio.shape[1]] = veio
+    reg[planta] = (liso * v)[planta]
+
+    # mesinhas
+    pol = np.zeros((h, w), bool)
+    for x0, y0, x1, y1 in q["poltronas"]:
+        pol[int(y0) - wy0 - 1:int(np.ceil(y1)) - wy0 + 1, int(x0) - wx0 - 1:int(np.ceil(x1)) - wx0 + 1] = True
+    Y = reg.mean(axis=2)
+    poltrona = pol & (Y > 205) & (reg[..., 2] - reg[..., 0] < 22)
+
+    def disco_ss(centro, raio):
+        mm = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.circle(mm, (int(round((centro[0] - wx0) * SS)), int(round((centro[1] - wy0) * SS))), int(round(raio * SS)), 255, -1)
+        return mm
+
+    s = q["sombra"]
+    M = np.float32([[1, 0, s["desloc"][0] * SS], [0, 1, s["desloc"][1] * SS]])
+    for centro, raio in q["mesinhas"]:
+        mm = disco_ss(centro, raio)
+        sb = cv2.GaussianBlur(cv2.warpAffine(mm.astype(np.float32), M, (w * SS, h * SS)), (0, 0), s["sigma"] * SS) / 255
+        sb = cv2.resize(sb, (w, h), interpolation=cv2.INTER_AREA) * ~poltrona
+        reg *= (1 - s["forca"] * sb)[..., None]
+        cor = np.zeros((h * SS, w * SS, 3), np.float32)
+        x0, y0 = int(round((centro[0] - raio - wx0) * SS)), int(round((centro[1] - raio - wy0) * SS))
+        lado = int(round(2 * raio * SS)) + 2
+        cor[y0:y0 + lado, x0:x0 + lado] = cv2.resize(madeira, (lado, lado), interpolation=cv2.INTER_LINEAR) * cor_madeira
+        anel = np.zeros_like(mm)
+        cv2.circle(anel, (int(round((centro[0] - wx0) * SS)), int(round((centro[1] - wy0) * SS))),
+                   int(round(raio * SS)), 255, max(1, int(round(q["larg_contorno"] * SS))))
+        cor[anel > 0] = q["contorno"]
+        am = cv2.resize(mm.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+        cc = cv2.resize(cor * (mm[..., None] / 255), (w, h), interpolation=cv2.INTER_AREA) / np.maximum(am, 1e-6)[..., None]
+        al = (am * ~poltrona)[..., None]
+        reg = reg * (1 - al) + cc * al
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    mesa redonda, tapete e poltronas da segunda imagem; planta fora do tampo; as duas mesinhas do PDF")
+    return out
+
+
+def armarios_fonte2(out, f2, chapada):
+    grossa = parede_grossa(chapada)
+    rets = dict(ARMARIOS)
+    for nome in ARMARIOS_FONTE2:
+        x0, y0, x1, y1 = (int(round(v)) for v in rets[nome])
+        m = ~grossa[y0:y1, x0:x1]
+        alvo = out[y0:y1, x0:x1]
+        alvo[m] = f2[y0:y1, x0:x1][m]
+        print(f"    {nome}: armário da segunda imagem")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1314,6 +1492,8 @@ def main():
     _, chapada, _ = alinhar_base(orig)
     out = armarios(out, chapada)
     out = piso_sob_armario(out, chapada)
+    f2 = alinhar_fonte2(orig)
+    out = armarios_fonte2(out, f2, chapada)
     print("[4] área molhada da bancada da pia")
     out = area_molhada(out)
     print("[5] eletrodomésticos em inox")
@@ -1351,6 +1531,8 @@ def main():
     out = lavabo(out)
     print("[20] erro 15: banco capitonê do estar")
     out = banco_estar(out)
+    print("[21] erros 16 e 17: mesa redonda, tapete e mesinhas")
+    out = mesa_redonda(out, f2, orig)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

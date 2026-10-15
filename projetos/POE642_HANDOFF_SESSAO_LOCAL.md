@@ -386,3 +386,5 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   18. erro 13 da lista: a adega volta a ser vazia (travertino), sem o lavabo inventado.
   19. erro 14 da lista: lavabo com a bancada de quartzo e cuba junto à parede da direita (onde a base tinha pintado jardim) e o vaso suspenso da Casa C.
   20. erro 15 da lista: as duas poltronas à direita do estar saem e entra o banco capitonê do PDF (tecido do sofá, losangos com botões).
+  21. segunda imagem do motor (`renders/POE642_CasaD_PH_Terreo_v1_render_fonte2.webp`, trazida pelo usuário): fonte de elementos prontos. Armários dos quartos: os closets com cabides dela, no tom areia.
+  22. erro 16 da lista: mesa redonda, tapete e poltronas da segunda imagem (mesa no diâmetro do PDF), sem a planta, e as duas mesinhas do PDF. O tapete segue redondo (no PDF é orgânico).
