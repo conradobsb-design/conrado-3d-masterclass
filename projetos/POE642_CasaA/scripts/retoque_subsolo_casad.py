@@ -62,6 +62,9 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
     no quadro comum, a faixa da esquerda recebe o jardim vizinho do Térreo retocado na mesma altura
     (grama em cima, as touceiras de samambaias e palmeiras embaixo) e a de baixo, grama tecida da
     grama limpa do Térreo; só o fundo branco muda (pátio, prédio e peças brancas ficam).
+21. Janelas do WC DCE e do DCE 1 (pedido do usuário: vidros finos): as cápsulas grossas do render,
+    que passavam 3 px do vão para dentro do cômodo e para a circulação, saem (granito em cima, Bege
+    Bahia embaixo) e as janelas entram no desenho fino dos outros vidros (`vidros_fixos`).
 12. Pátio: a parede tracejada dupla de fora (à esquerda, embaixo e no alto), que o motor apagou ou
     cortou, volta: os traços do PDF (ARQ_PAREDE, fora da planta) desenhados no quadro comum.
 
@@ -306,6 +309,25 @@ VIDROS_FIXOS = [
      "vidro": (582.9, 890.9, 587.1, 1070.7), "centro": ((585.0, 890.9), (585.0, 1070.7)),
      "faces": [((581.2, 887.9), (581.2, 1073.6)), ((593.9, 890.4), (593.9, 1071.1))]},
 ]
+# janelas da parede de baixo do bloco do DCE: o que a cápsula do render cobriu fora do vão volta antes
+# (granito no cômodo, Bege Bahia na circulação; a luz vem só do próprio piso)
+BEGE = [(330, 430, 450, 620), (450, 430, 560, 620), (330, 640, 450, 830), (450, 640, 560, 830)]
+for _nome, (_x0, _x1), (_jx0, _jx1), _paredes, _caix, _vidro, _yc, _faces in [
+        ("janela do WC DCE", (732.7, 783.7), (726, 790),
+         [(732.7, 252.2, 735.3, 259.0), (781.1, 252.2, 783.7, 259.0)],
+         [(732.7, 248.0, 735.7, 252.2), (780.7, 248.0, 783.7, 252.2)], (734.4, 250.1, 782.0, 254.3), 252.2,
+         [((732.7, 246.3), (783.7, 246.3)), ((735.3, 259.0), (781.1, 259.0))]),
+        ("janela do DCE 1", (921.4, 1006.4), (914, 1014),
+         [(921.4, 252.3, 924.0, 259.0), (1003.9, 252.3, 1006.4, 259.0)],
+         [(921.4, 248.0, 924.4, 252.3), (1003.4, 248.1, 1006.4, 252.3)], (923.1, 250.1, 1004.7, 254.4), 252.3,
+         [((921.4, 246.4), (1006.4, 246.4)), ((924.0, 259.0), (1003.9, 259.0))])]:
+    VIDROS_FIXOS.append({
+        "nome": _nome, "janela": (_jx0, 238, _jx1, 268),
+        "restaurar": [((_jx0, 230, _jx1, 247), (int(_x0), 242, int(round(_x1)), 247), "granito", (45, 110)),
+                      ((_jx0, 258, _jx1, 274), (int(_x0), 258, int(round(_x1)), 263), "bege", (150, 240))],
+        "bege": (_x0, 246.3, _x1, 259.0), "luz": (_jx0 + 10, 264, _jx1 - 10, 272),
+        "paredes": _paredes, "caixilhos": _caix, "vidro": _vidro,
+        "centro": ((_vidro[0], _yc), (_vidro[2], _yc)), "faces": _faces})
 FACE = {"cor": (120, 122, 124), "larg": 0.45}
 
 ELEVADOR_ENTRADA = {
@@ -818,6 +840,12 @@ def portas_vidro(out):
 def vidros_fixos(out):
     pv = PORTAS_VIDRO
     for q in VIDROS_FIXOS:
+        for (wx0, wy0, wx1, wy1), (mx0, my0, mx1, my1), piso, (lo, hi) in q.get("restaurar", []):
+            m = np.zeros((wy1 - wy0, wx1 - wx0), bool)
+            m[my0 - wy0:my1 - wy0, mx0 - wx0:mx1 - wx0] = True
+            m[:, :] &= True
+            out = apagar_largo(out, (wx0, wy0, wx1, wy1), m, GRANITO if piso == "granito" else BEGE, sigma=2.0,
+                               borda=0.0, lum_min=lo, lum_max=hi, escuros=True)
         if q.get("vinil"):
             vx0, vy0, vx1, vy1 = q["vinil"]
             m = np.zeros((vy1 - vy0 + 16, vx1 - vx0 + 16), bool)
