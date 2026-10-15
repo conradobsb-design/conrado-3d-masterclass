@@ -27,6 +27,9 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    gás), a sombra é funda e emenda na da bancada: o piso é refeito em granito tecido dos trechos
    limpos, com a borda da sombra da bancada em diagonal (luz de cima à direita) e, na cozinha, a
    sombra da parede da direita continuando.
+4. Área molhada da bancada da pia da cozinha: o retângulo da layer ARQ_BANCADAS em volta das cubas
+   é demarcado em traço cinza fino, como na Casa C, nos lados livres (esquerda e embaixo; em cima é
+   a parede e à direita, o armário do canto).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -128,6 +131,13 @@ PISO_SOB_ARMARIO = {
     "faixas": [("cozinha, canto de cima", 20, True, []),
                ("serviço, vizinho ao gás", 26, False, [(1303, 219, 1331, 222), (1329, 215, 1336, 220)])],
     "penumbra": 3.0, "emenda": 6, "medida": 16,
+}
+
+# área molhada da bancada da pia da cozinha (PDF, ARQ_BANCADAS): traço cinza fino, como na Casa C,
+# nos lados livres (a esquerda e embaixo; em cima é a parede e à direita, o armário do canto)
+AREA_MOLHADA = {
+    "pontos": [(975.7, 190.5), (975.7, 209.5), (1062.1, 209.5)],
+    "traco": COZINHA_C["traco"], "larg_traco": COZINHA_C["larg_traco"], "forca_traco": COZINHA_C["forca_traco"],
 }
 
 
@@ -433,6 +443,21 @@ def piso_sob_armario(out, chapada):
     return out
 
 
+def area_molhada(out):
+    q = AREA_MOLHADA
+    xs, ys = [x for x, _ in q["pontos"]], [y for _, y in q["pontos"]]
+    jx0, jy0, jx1, jy1 = int(min(xs)) - 2, int(min(ys)) - 1, int(max(xs)) + 3, int(max(ys)) + 3
+    h, w = jy1 - jy0, jx1 - jx0
+    f = np.zeros((h * SS, w * SS), np.uint8)
+    pts = np.array([[int(round((x - jx0) * SS)), int(round((y - jy0) * SS))] for x, y in q["pontos"]], np.int32)
+    cv2.polylines(f, [pts], False, 255, max(1, int(round(q["larg_traco"] * SS))))
+    a = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None] * q["forca_traco"]
+    reg = out[jy0:jy1, jx0:jx1].astype(np.float32)
+    out[jy0:jy1, jx0:jx1] = np.clip(reg * (1 - a) + np.array(q["traco"], np.float32) * a, 0, 255).astype(np.uint8)
+    print("    área molhada da bancada da pia demarcada (lados livres: esquerda e embaixo)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -450,6 +475,8 @@ def main():
     _, chapada, _ = alinhar_base(orig)
     out = armarios(out, chapada)
     out = piso_sob_armario(out, chapada)
+    print("[4] área molhada da bancada da pia")
+    out = area_molhada(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

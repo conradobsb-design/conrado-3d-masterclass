@@ -369,4 +369,5 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   1. porta pivotante principal (hall de entrada ↔ estar): a folha, cortada pelo motor no alinhamento da parede, vai até o fim do PDF, do lado do hall (mesmo caso da Casa C);
   2. chuveiros do banho master: a barra de parede a parede do motor sai e entram as duas duchas do PDF, cada uma num braço que sai da parede lateral (placa da Casa A reduzida, braço cromado e canopla).
   3. armários até o teto (retângulos com diagonal no PDF): tom areia da Casa C com o veio do próprio armário do render (pedido do usuário), sem a sombra de móvel baixo no piso; embaixo dos armários junto a bancada (cozinha e vizinho ao gás), piso refeito em granito tecido.
+  4. área molhada da bancada da pia da cozinha: traço cinza fino nos lados livres (esquerda e embaixo), como na Casa C.
 
