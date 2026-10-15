@@ -20,9 +20,10 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
    armários até o teto do Térreo, com o veio no comprido, sem a diagonal e sem sombra. A mancha
    clara do piso junto ao criado-mudo sai, como as do depósito.
 6. Sauna: o braço do banco em L que o motor subiu junto ao vidro sai; ali volta o piso de Bege Bahia.
-7. Sauna: o banco, que o motor fez em madeira, fica em Bege Bahia (pedido do usuário), em dois tons
-   mais escuros, como na base: o degrau da frente (0,93) e o assento junto à parede (0,88), com as
-   linhas do PDF (bordas e a linha dupla de cada nível, layer ARQ_ELEMENTOS FIXOS).
+7. Sauna: o banco, que o motor fez em madeira, fica no mármore Bege Bahia (pedido do usuário), o
+   mesmo do piso, com o veio: os dois níveis do PDF (degrau da frente e assento junto à parede, layer
+   ARQ_ELEMENTOS FIXOS) se leem pela sombra curta de cada borda no nível de baixo e por um brilho
+   leve na quina, sem linhas escuras.
 8. Ducha da antessala: o símbolo do CAD (quadrado, braço e a cruz branca sobre a parede) vira o
    chuveiro, com o braço saindo da parede de baixo; a parede volta ao preto.
 9. Box do vestiário: o mesmo, com o braço saindo da parede da direita; o toco da cruz que passou
@@ -165,16 +166,12 @@ ARMARIO_DCE = {
 SAUNA = {
     "miolo": (597, 889, 846, 1073),        # entre o caixilho do vidro, as paredes e a linha da porta
     "fontes": [(330, 430, 450, 620), (450, 430, 560, 620), (330, 640, 450, 830), (450, 640, 560, 830)],
-    "luz": (660, 890, 845, 970),           # o piso que já era Bege Bahia
+    "luz": (675, 895, 840, 965),           # o piso limpo que já era Bege Bahia
     "banco": (609.1, 973.3, 846.9, 1073.6),
     "degrau_ate": 1023.5,                  # o degrau da frente vai até aqui; daí para baixo, o assento
-    "tons": (0.93, 0.88),
-    # (pontos, escurecimento): bordas de cada nível e a linha dupla de dentro (ARQ_ELEMENTOS FIXOS)
-    "linhas": [([(846.9, 973.3), (609.1, 973.3), (609.1, 1073.6)], 0.62),
-               ([(609.1, 1023.5), (846.9, 1023.5)], 0.62),
-               ([(846.9, 981.4), (618.3, 981.4), (618.3, 1073.7)], 0.78),
-               ([(618.3, 1031.9), (846.9, 1031.9)], 0.78)],
-    "largura": 1.2,
+    "tons": (0.97, 1.0),                   # degrau e assento: o mesmo mármore, o degrau só um pouco abaixo
+    "sombra": 0.18, "alcance": 4.0,        # sombra de cada borda no nível de baixo (força, decaimento px)
+    "brilho": 0.05, "quina": 1.5,          # brilho leve na quina do nível de cima (força, largura px)
 }
 
 CHUVEIRO_DUCHA = {
@@ -417,24 +414,39 @@ def sauna(out):
     x0, y0, x1, y1 = q["miolo"]
     h, w = y1 - y0, x1 - x0
     reg = out[y0:y1, x0:x1].astype(np.float32)
-    amostra = np.zeros((h, w), bool)
+    # luz chapada: a mediana do piso limpo (a sombra que o motor pôs junto ao L não entra)
     lx0, ly0, lx1, ly1 = q["luz"]
-    amostra[ly0 - y0:ly1 - y0, lx0 - x0:lx1 - x0] = reg[ly0 - y0:ly1 - y0, lx0 - x0:lx1 - x0].mean(axis=2) > 170
-    luz = interpolar(reg, amostra, 6.0)
+    p = reg[ly0 - y0:ly1 - y0, lx0 - x0:lx1 - x0].reshape(-1, 3)
+    luz = np.median(p[p.mean(axis=1) > 170], axis=0)[None, None, :]
     novo = textura(out, q["fontes"], h, w, p=24) * luz
+    # fator em 8 x (bordas sem serrilhado): tom de cada nível, sombra de cada borda no nível de baixo
+    # (o degrau no piso, o assento no degrau, as pontas da esquerda no piso) e brilho na quina de cima
     bx0, by0, bx1, by1 = q["banco"]
-    yy, xx = np.mgrid[y0:y1, x0:x1] + 0.5
-    no_banco = (xx >= bx0) & (xx <= bx1) & (yy >= by0)
-    novo[no_banco & (yy < q["degrau_ate"])] *= q["tons"][0]
-    novo[no_banco & (yy >= q["degrau_ate"])] *= q["tons"][1]
-    for pts, k in q["linhas"]:
-        m = np.zeros((h * SS, w * SS), np.uint8)
-        p = np.int32([[round((px - x0) * SS), round((py - y0) * SS)] for px, py in pts])
-        cv2.polylines(m, [p], False, 255, max(1, int(round(q["largura"] * SS))), cv2.LINE_AA)
-        a = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
-        novo = novo * (1 - a) + novo * k * a
-    out[y0:y1, x0:x1] = np.clip(novo, 0, 255).astype(np.uint8)
-    print("    sauna: braço do L fora; banco em Bege Bahia em dois tons, com as linhas do PDF")
+    ym = q["degrau_ate"]
+    yy, xx = np.mgrid[0:h * SS, 0:w * SS]
+    yy = y0 + (yy + 0.5) / SS
+    xx = x0 + (xx + 0.5) / SS
+    no_banco = xx >= bx0
+    degrau = no_banco & (yy >= by0) & (yy < ym)
+    assento = no_banco & (yy >= ym)
+    fator = np.ones(yy.shape, np.float32)
+    fator[degrau] = q["tons"][0]
+    fator[assento] = q["tons"][1]
+
+    def sombra(d):
+        return 1 - q["sombra"] * np.exp(-np.maximum(d, 0) / q["alcance"])
+
+    piso = ~(degrau | assento)
+    s_piso = np.minimum(np.where(no_banco & (yy < by0), sombra(by0 - yy), 1.0),
+                        np.where((xx < bx0) & (yy >= by0 - 2), sombra(bx0 - xx), 1.0))
+    fator[piso] *= s_piso[piso]
+    fator[degrau] *= sombra(ym - yy)[degrau]
+    quina = ((degrau & (yy - by0 < q["quina"])) | (assento & (yy - ym < q["quina"]))
+             | ((degrau | assento) & (xx - bx0 < q["quina"])))
+    fator[quina] *= 1 + q["brilho"]
+    fator = cv2.resize(fator, (w, h), interpolation=cv2.INTER_AREA)
+    out[y0:y1, x0:x1] = np.clip(novo * fator[..., None], 0, 255).astype(np.uint8)
+    print("    sauna: braço do L fora; banco no mármore Bege Bahia, níveis pela sombra e pela quina")
     return out
 
 
