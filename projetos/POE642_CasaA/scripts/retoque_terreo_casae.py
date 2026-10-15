@@ -127,6 +127,11 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     recebem os eletrodomésticos em inox da cozinha aprovada da Casa D (cada um, uma metade do par de
     lá); os dois trechos dos lados viram armários em marcenaria areia com o veio do louceiro (sem
     sombra de móvel baixo); contorno fino em todas as peças.
+30. Spa (pedido do usuário): mais um degrau na parte de dentro, formando um quadrado. No PDF o spa tem
+    dois contornos internos (o degrau, em volta, e o fundo); o render só tinha o do fundo. Entra o
+    contorno de fora do degrau (ARQ_PAREDE, 4,3 px para fora do fundo), como na Casa D: com o perfil de
+    luz das arestas do próprio render (medido na aresta do fundo, lado a lado: sombra larga em cima e
+    à direita, traço fino à esquerda e embaixo), um pouco mais suave.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1522,6 +1527,34 @@ def cozinha(out):
     return out
 
 
+# degrau interno do spa (item 30): o contorno de fora do degrau (PDF) e o perfil das arestas do fundo
+# medido no render (fator por px a partir da aresta, para dentro), por lado
+SPA = {"fora": (521.8, 593.6, 578.6, 650.5),
+       "perfis": {"cima": [0.65, 0.77, 0.80, 0.82, 0.86, 0.92], "baixo": [0.90, 0.95],
+                  "esquerda": [0.84, 0.91], "direita": [0.61, 0.70, 0.75, 0.82, 0.86, 0.90]},
+       "forca": 0.8}
+
+
+def degrau_spa(out):
+    q = SPA
+    x0, y0, x1, y1 = q["fora"]
+    X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
+    yy, xx = np.mgrid[Y0:Y1, X0:X1].astype(np.float32) + 0.5
+    k = q["forca"]
+    F = np.ones(yy.shape, np.float32)
+    for lado, dist in (("cima", yy - y0), ("baixo", y1 - yy), ("esquerda", xx - x0), ("direita", x1 - xx)):
+        perfil = np.float32(q["perfis"][lado] + [1.0])
+        f = np.interp(dist, np.arange(len(perfil), dtype=np.float32) + 0.5, perfil, left=1.0, right=1.0)
+        f = np.where(dist >= 0, f, 1.0)
+        F = np.minimum(F, 1 - k * (1 - f))
+    dentro = (xx > x0) & (xx < x1) & (yy > y0) & (yy < y1)
+    F = np.where(dentro, F, 1.0)
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    out[Y0:Y1, X0:X1] = np.clip(reg * F[..., None], 0, 255).astype(np.uint8)
+    print("    spa: o contorno de fora do degrau interno, com o perfil das arestas do render")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1585,6 +1618,8 @@ def main():
     out = servico_bancada(out, orig)
     print("[29] cozinha: inox ao centro, armários nas laterais")
     out = cozinha(out)
+    print("[30] spa: degrau interno")
+    out = degrau_spa(out)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 
