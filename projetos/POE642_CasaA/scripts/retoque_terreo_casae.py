@@ -65,6 +65,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     inclinado escurece para trás, onde fica a fenda do ralo, as bordas de cima e da direita fazem uma
     sombra curta para dentro, e um traço fino marca a borda. A torneira do PDF sai da parede da
     esquerda: canopla e bica cromadas, com brilho e sombra curta.
+16. Escritório (pedido do usuário): atrás do sofá é um arranjo de flores (o círculo do PDF, ARQ_LAYOUT
+    HUMANIZAÇÃO); o motor fez uma bola verde. Entra o arranjo com a estrelítzia do próprio jardim do
+    render (folhas em leque e as flores laranja, as mesmas do paisagismo), reduzida ao círculo do
+    PDF, com borda suave e sombra curta.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -819,6 +823,42 @@ def lavabo(out):
     return out
 
 
+# arranjo de flores do escritório (item 16): o círculo do PDF e a estrelítzia do jardim do próprio
+# render (centro da touceira com duas flores laranja), no quadro do render
+ARRANJO = {"centro": (1275.95, 606.2), "raio": 7.2, "fonte": ((1582, 899), 17),
+           "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.35}}
+
+
+def arranjo(out, orig):
+    q = ARRANJO
+    (cx, cy), r = q["centro"], q["raio"]
+    (fx, fy), fr = q["fonte"]
+    fonte = orig[fy - fr:fy + fr, fx - fr:fx + fr]
+    forma = out.shape[:2]
+    yy, xx = np.mgrid[0:forma[0], 0:forma[1]].astype(np.float32) + 0.5
+    disco = np.clip(r + 0.5 - np.hypot(xx - cx, yy - cy), 0, 1)
+    s = q["sombra"]
+    sombra = cv2.GaussianBlur(np.clip(r + 0.5 - np.hypot(xx - cx - s["desloc"][0], yy - cy - s["desloc"][1]), 0, 1),
+                              (0, 0), s["sigma"])
+    # a bola verde do motor sai junto: a sombra e o arranjo cobrem o círculo dela
+    out[:] = np.clip(out * (1 - s["forca"] * sombra)[..., None], 0, 255).astype(np.uint8)
+    out = colar_disco(out, fonte, (cx, cy), r, disco)
+    print(f"    escritório: arranjo de flores (estrelítzia do jardim) no círculo do PDF, raio {r} px")
+    return out
+
+
+def colar_disco(out, img, centro, r, alfa):
+    """Leva img (quadrada) ao quadrado de lado 2r em volta do centro, por afim, com a máscara alfa."""
+    cx, cy = centro
+    h, w = img.shape[:2]
+    M = cv2.getAffineTransform(np.float32([(0, 0), (w, 0), (0, h)]),
+                               np.float32([(cx - r, cy - r), (cx + r, cy - r), (cx - r, cy + r)]))
+    im = cv2.warpAffine(img.astype(np.float32), M, out.shape[1::-1], flags=cv2.INTER_AREA)
+    a = alfa[..., None]
+    out[:] = np.clip(out * (1 - a) + im * a, 0, 255).astype(np.uint8)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -857,6 +897,8 @@ def main():
     out = pilar(out)
     print("[15] lavabo: cuba esculpida, torneira da esquerda")
     out = lavabo(out)
+    print("[16] escritório: arranjo de flores")
+    out = arranjo(out, orig)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

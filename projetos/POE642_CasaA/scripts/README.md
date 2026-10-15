@@ -314,6 +314,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **Pontos do granito (item 13):** `pontos_granito` acha os pontinhos claros compactos no render original (contra a mediana de 11 px) e troca os fortes por um trecho vizinho de granito sem ponto.
 - **Pilar (item 14):** `pilar` pinta o retângulo do PDF no preto da parede vizinha (borda antisserrilhada).
 - **Lavabo (item 15):** `lavabo` limpa a bancada com as próprias linhas de quartzo e desenha a cuba esculpida (sombreamento do fundo inclinado, fenda, borda) e a torneira cromada saindo da parede da esquerda.
+- **Arranjo do escritório (item 16):** `arranjo` cola (`colar_disco`) o centro de uma estrelítzia do jardim do render no círculo do PDF, com sombra curta.
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado
