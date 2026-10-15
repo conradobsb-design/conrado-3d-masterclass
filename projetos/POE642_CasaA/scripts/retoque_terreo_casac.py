@@ -44,7 +44,8 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    (a emenda é refeita com a borda de baixo, a sombra e a borda de cima da própria mesa); as
    mesas laterais quadradas viram as orgânicas do PDF (duas, a menor atrás), com a forma tirada
    do PDF levado ao render, no tampo de madeira da mesa de centro, com contorno e sombra curta.
-   O piso que volta é tecido (image quilting) do travertino limpo do próprio estar.
+   O piso que volta é tecido (image quilting) do travertino limpo do próprio estar; o trecho da
+   cortina junto à janela, que ficava sob a ponta do aparador, fica como no render.
 9. Gourmet: o motor pôs cinco banquetas embaixo da bancada do cooktop (no PDF não há nenhuma).
    Elas saem com a sombra. O piso volta continuando os veios verticais de baixo, em espelho, e a
    sombra da bancada (3 linhas abaixo da borda) é refeita com o perfil medido nos trechos limpos
@@ -230,6 +231,8 @@ ESTAR = {
              ((889, 800, 911, 828), (2, 2, 0, 2)),
              ((1026, 800, 1049, 828), (0, 2, 2, 2))],
     "fonte_piso": [(880, 640, 1060, 668), (1050, 798, 1088, 846)],   # travertino limpo do estar
+    # trecho da cortina (ondas sobre a janela) que o piso do aparador cobriu: volta o do render
+    "cortina": (1005, 848, 1042, 851),
     # mesa de centro: no PDF são duas, com os contornos nas linhas 726-744 e 747-766; o render
     # fez uma só na mesma área. Linhas da emenda: destino <- origem (borda de baixo, sombra, sombra
     # clara e borda de cima da própria mesa)
@@ -693,7 +696,9 @@ def estar(out, A):
         fontes += [np.ascontiguousarray(v) for v in (f, f[:, ::-1], f[::-1, :], f[::-1, ::-1])]
     for k, (ret, emenda) in enumerate(e["piso"]):
         piso_tecido(out, ret, emenda, fontes, 642 + k)
-    print(f"    aparador e mesas laterais quadradas: {len(e['piso'])} trechos de piso tecido")
+    cx0, cy0, cx1, cy1 = e["cortina"]
+    out[cy0:cy1, cx0:cx1] = a[cy0:cy1, cx0:cx1]
+    print(f"    aparador e mesas laterais quadradas: {len(e['piso'])} trechos de piso tecido; cortina mantida")
 
     x0, x1 = e["mesa"]["x"]
     for destino, origem in e["mesa"]["linhas"].items():
