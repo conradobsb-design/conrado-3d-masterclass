@@ -107,6 +107,9 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
 21. Porta pivotante principal: o motor cortou a folha na soleira; no PDF ela vai de ponta a ponta,
    passando para o lado de fora até o arco. A folha é estendida com o próprio trecho dela (mesmas
    linhas) até o fim do PDF, e a ponta recebe o arremate da ponta de dentro, em espelho.
+22. Arcos das portas sobre o granito: no granito marrom o arco escuro do motor não aparece. Os arcos
+   das portas (curvas da layer ARQ_PAREDE) que caem sobre o granito são redesenhados em branco,
+   com a geometria do PDF levada ao render, só onde o piso é granito (cor exata da base chapada).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -360,6 +363,10 @@ CUBA_BHM1 = {
 # porta pivotante principal: linhas da folha, trecho da folha copiado, onde começa a parte que
 # faltou, fim no PDF e a ponta de dentro (arremate)
 PIVOTANTE = {"linhas": (670, 674), "fonte_x": 1370, "de": 1406, "ate": 1434, "ponta": (1340, 1342)}
+# arcos das portas sobre o granito: cor do granito na base chapada (BGR de #5A4232), parte mínima
+# do arco sobre o granito, cor e largura do traço
+ARCOS_GRANITO = {"granito": (50, 66, 90), "tol": 12, "fracao": 0.3, "min_px": 8,
+                 "cor": (238, 238, 236), "larg": 0.8}
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
 CROMO_CLARO = (238, 240, 242)
@@ -399,6 +406,25 @@ def alinhar_base(render):
     return (cv2.warpAffine(base, A, render.shape[1::-1], flags=cv2.INTER_LINEAR, borderValue=(255, 255, 255)),
             cv2.warpAffine(chapada, A, render.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255)),
             A)
+
+
+def pdf_cadeia(A, forma_render):
+    """Página do PDF e as conversões PDF -> render e render -> PDF pela mesma cadeia da base
+    (recorte, largura da base, tela 16:9, redução ao tamanho do render e o afim A)."""
+    cfg = json.loads(CONFIG.read_text())
+    pg = pymupdf.open(PDF)[cfg["pavimentos"]["Terreo"]["pagina"]]
+    fx0, fy0, fx1, fy1 = cfg["recorte"]
+    clip = pymupdf.Rect(pg.rect.width * fx0, pg.rect.height * fy0, pg.rect.width * fx1, pg.rect.height * fy1)
+    zoom = cfg["largura_px"] / clip.width
+    hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    ht, wt = cv2.imread(str(BASE_CHAPADA), cv2.IMREAD_GRAYSCALE).shape
+    sx, sy = forma_render[1] / wt, forma_render[0] / ht
+
+    def p2r(x, y):
+        bx, by = ((x - clip.x0) * zoom + (wt - wb) // 2) * sx, ((y - clip.y0) * zoom + (ht - hb) // 2) * sy
+        return A[0, 0] * bx + A[0, 1] * by + A[0, 2], A[1, 0] * bx + A[1, 1] * by + A[1, 2]
+
+    return pg, p2r
 
 
 def pdf_no_render(janela, A, forma_render):
@@ -1077,6 +1103,42 @@ def pivotante(out):
     return out
 
 
+def arcos_no_granito(out, A, chapada):
+    q = ARCOS_GRANITO
+    gran = (np.abs(chapada.astype(np.int32) - np.array(q["granito"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    gran = cv2.morphologyEx(gran, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))   # fecha os traços finos
+    pg, p2r = pdf_cadeia(A, out.shape)
+    n = 0
+    for d in pg.get_drawings():
+        if d.get("layer") != "ARQ_PAREDE" or not any(it[0] == "c" for it in d["items"]):
+            continue
+        r = d["rect"]
+        (x0, y0), (x1, y1) = p2r(r.x0, r.y0), p2r(r.x1, r.y1)
+        x0, y0, x1, y1 = int(x0) - 2, int(y0) - 2, int(np.ceil(x1)) + 3, int(np.ceil(y1)) + 3
+        if max(x1 - x0, y1 - y0) < q["min_px"] or x0 < 0 or y0 < 0 or x1 > out.shape[1] or y1 > out.shape[0]:
+            continue
+        g = gran[y0:y1, x0:x1]
+        if g.mean() < q["fracao"]:
+            continue
+        h, w = y1 - y0, x1 - x0
+        f = np.zeros((h * SS, w * SS), np.uint8)
+        for it in d["items"]:
+            if it[0] != "c":
+                continue
+            p = np.array([p2r(pt.x, pt.y) for pt in it[1:5]])
+            t = np.linspace(0, 1, 60)[:, None]
+            curva = ((1 - t) ** 3 * p[0] + 3 * (1 - t) ** 2 * t * p[1] + 3 * (1 - t) * t ** 2 * p[2] + t ** 3 * p[3])
+            pts = np.round((curva - [x0, y0]) * SS).astype(np.int32)
+            cv2.polylines(f, [pts], False, 255, max(1, int(round(q["larg"] * SS))), cv2.LINE_AA)
+        a = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * g
+        a = a[..., None]
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + np.array(q["cor"], np.float32) * a, 0, 255).astype(np.uint8)
+        n += 1
+    print(f"    {n} arcos de porta sobre o granito em branco")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1130,12 +1192,14 @@ def main():
     out = cuba_bhm1(out)
     print("[21] porta pivotante principal")
     out = pivotante(out)
+    print("[22] arcos das portas sobre o granito")
+    out = arcos_no_granito(out, A, chapada)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[22] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[23] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
