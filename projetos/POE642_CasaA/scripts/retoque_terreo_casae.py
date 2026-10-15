@@ -96,6 +96,11 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     do PDF, como os do Subsolo da Casa D, na escala deste render: louça com volume, contorno fino,
     sombra curta no piso e o tampo fechado, da linha da dobradiça (junto à caixa, na parede de cima)
     à frente, recuado da borda, com volume, contorno e sombra leve.
+23. Banho gourmet (pedido do usuário): faltava a bancada da pia e a torneira. A bancada do PDF
+    (ARQ_BANCADAS, encostada na parede de baixo) é em granito marrom, como o piso: entra pelo contorno
+    cinza fino (o dos arcos sobre o granito), com o tampo um pouco mais claro (polido) e sombra curta no
+    piso; no painel do meio, a cuba esculpida no próprio granito (como a do lavabo, com a fenda escura)
+    e, saindo do painel da esquerda, a torneira cromada do PDF (base redonda e bica até a cuba).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -809,19 +814,15 @@ LAVABO = {
 }
 
 
-def lavabo(out):
-    q = LAVABO
-    bx0, by0, bx1, by1 = q["bancada"]
-    for (a0, a1), (f0, f1), espelho in q["copias"]:
-        fonte = out[by0:by1, f0:f1]
-        out[by0:by1, a0:a1] = fonte[:, ::-1] if espelho else fonte
+def cuba_esculpida(out, ret, q):
+    """Cuba esculpida na própria pedra da bancada, com a parede embaixo: o fundo inclinado escurece
+    para trás, onde fica a fenda do ralo; as bordas de cima e da direita fazem sombra curta para
+    dentro, as outras pegam um pouco de luz; traço fino na borda."""
     forma = out.shape[:2]
     yy, xx = np.mgrid[0:forma[0], 0:forma[1]].astype(np.float32) + 0.5
-    x0, y0, x1, y1 = q["cuba"]
+    x0, y0, x1, y1 = ret
     al = poligono_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
-    # fundo inclinado: escurece de frente (em cima) para trás (embaixo, junto à parede)
     f = 1 - q["inclinacao"] * np.clip((yy - y0) / (y1 - y0), 0, 1)
-    # sombra curta das bordas de cima e da direita (a luz vem de cima e da direita) e luz nas outras
     s, w = q["sombra_borda"]
     f *= 1 - s * np.exp(-np.clip(yy - y0, 0, None) / w) - s * np.exp(-np.clip(x1 - xx, 0, None) / w)
     f *= 1 + q["luz_borda"] * (np.exp(-np.clip(xx - x0, 0, None) / w) + np.exp(-np.clip(y1 - yy, 0, None) / w))
@@ -832,6 +833,18 @@ def lavabo(out):
     out[:] = np.clip(out * (1 - a) + np.float32(fd["cor"]) * a, 0, 255).astype(np.uint8)
     a = linha_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], q["larg_contorno"], fechada=True)[..., None] * q["forca_contorno"]
     out[:] = np.clip(out * (1 - a) + np.float32(q["contorno"]) * a, 0, 255).astype(np.uint8)
+    return out
+
+
+def lavabo(out):
+    q = LAVABO
+    bx0, by0, bx1, by1 = q["bancada"]
+    for (a0, a1), (f0, f1), espelho in q["copias"]:
+        fonte = out[by0:by1, f0:f1]
+        out[by0:by1, a0:a1] = fonte[:, ::-1] if espelho else fonte
+    out = cuba_esculpida(out, q["cuba"], q)
+    x0, y0, x1, y1 = q["cuba"]
+    forma = out.shape[:2]
     # torneira: canopla na parede da esquerda e a bica cromada até o meio da cuba
     tq = q["torneira"]
     yc = (y0 + y1) / 2
@@ -1177,6 +1190,47 @@ def vasos(out, A):
     return out
 
 
+# bancada do banho gourmet (item 23): a bancada, a cuba (o painel do meio) e a torneira do PDF no
+# quadro do render; no granito, o contorno é o cinza fino dos arcos e a fenda do ralo é escura
+BANCADA_GOURMET = {
+    "bancada": (704.5, 289.4, 753.5, 302.7), "cuba": (715.3, 290.9, 729.4, 301.4),
+    "tampo": 1.07, "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.3},
+    "inclinacao": 0.14, "sombra_borda": (0.2, 1.4), "luz_borda": 0.05,
+    "fenda": {"cor": (22, 22, 24), "larg": 0.8, "recuo": 1.3},
+    "contorno": (160, 161, 160), "larg_contorno": 0.45, "forca_contorno": 0.8,
+    "torneira": {"base": (712.4, 296.3, 1.0), "bica": (712.4, 717.0), "larg": 1.0},
+}
+
+
+def bancada_gourmet(out):
+    q = BANCADA_GOURMET
+    forma = out.shape[:2]
+    x0, y0, x1, y1 = q["bancada"]
+    cantos = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    s = q["sombra"]
+    sombra = cv2.GaussianBlur(poligono_aa(forma, np.float32(cantos) + np.float32(s["desloc"])), (0, 0), s["sigma"])
+    al = poligono_aa(forma, cantos)
+    out[:] = np.clip(out * (1 - s["forca"] * sombra * (1 - al))[..., None], 0, 255).astype(np.uint8)
+    out[:] = np.clip(out * (1 + (q["tampo"] - 1) * al)[..., None], 0, 255).astype(np.uint8)
+    out = cuba_esculpida(out, q["cuba"], q)
+    a = linha_aa(forma, cantos, q["larg_contorno"], fechada=True)[..., None] * q["forca_contorno"]
+    out[:] = np.clip(out * (1 - a) + np.float32(q["contorno"]) * a, 0, 255).astype(np.uint8)
+    tq = q["torneira"]
+    bx, by, br = tq["base"]
+    bica = [(tq["bica"][0], by), (tq["bica"][1], by)]
+    sb = cv2.GaussianBlur(linha_aa(forma, [(u - 1.0, v + 1.0) for u, v in bica], tq["larg"]), (0, 0), 0.8)
+    out[:] = np.clip(out * (1 - 0.35 * sb)[..., None], 0, 255).astype(np.uint8)
+    for pts, larg, cor in ((bica, tq["larg"], CROMO_ESCURO),
+                           ([(bica[0][0], by - 0.15), (bica[1][0] - 0.3, by - 0.15)], 0.35, CROMO_CLARO)):
+        a = linha_aa(forma, pts, larg)[..., None]
+        out[:] = np.clip(out * (1 - a) + np.float32(cor) * a, 0, 255).astype(np.uint8)
+    yy, xx = np.mgrid[0:forma[0], 0:forma[1]].astype(np.float32) + 0.5
+    a = np.clip(br + 0.5 - np.hypot(xx - bx, yy - by), 0, 1)[..., None]
+    out[:] = np.clip(out * (1 - a) + np.float32(CROMO) * a, 0, 255).astype(np.uint8)
+    print("    banho gourmet: bancada em granito (contorno cinza), cuba esculpida e torneira")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1226,6 +1280,8 @@ def main():
         out = escada(out, q)
     print("[22] vaso do banho gourmet com tampo")
     out = vasos(out, A)
+    print("[23] banho gourmet: bancada da pia e torneira")
+    out = bancada_gourmet(out)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 

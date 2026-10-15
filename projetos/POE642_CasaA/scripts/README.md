@@ -320,6 +320,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **Jardim de inverno (item 19):** `jardim_flores` devolve as folhas do render original numa faixa irregular fora da floreira (lados e baixo; nunca em cima), com degradê nas pontas e sombra curta, e cola as flores (recorte laranja das estrelítzias, com o matiz girado para outras cores).
 - **Sem tapete na varanda (item 20):** `sem_tapete` apaga o retângulo do tapete (`apagar_largo`, Bege Bahia) fora dos móveis do PDF e devolve a sombra curta deles.
 - **Vaso com tampo (item 22):** `vasos`, o do Subsolo da Casa D com a parede em qualquer lado e os números na escala deste render; antes, o símbolo do motor vira granito tecido.
+- **Bancada do banho gourmet (item 23):** `bancada_gourmet` desenha a bancada do PDF no granito (contorno cinza fino, tampo um pouco mais claro, sombra curta), a cuba esculpida (`cuba_esculpida`, comum com o lavabo) e a torneira cromada.
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado
