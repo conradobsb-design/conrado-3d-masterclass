@@ -39,6 +39,11 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
     linhas dos degraus; os pisos (16, de 27,1 px, do PDF) escurecem para baixo (a escada sobe da
     esquerda, do pátio, para a direita) e cada espelho joga uma sombra curta no piso de baixo, à
     esquerda dele: os degraus se leem só pelo tom.
+16. Sanitários (pedido do usuário: mais bem representados): os vasos do WC DCE e do WC do vestiário,
+    chapados e com o contorno do CAD no render, são desenhados em 8 x no contorno exato do PDF, com
+    o tampo fechado (pedido do usuário): louça com volume (bordas um pouco mais escuras), contorno
+    fino e sombra curta no piso; o tampo cobre a bacia da linha da dobradiça do PDF à frente, recuado
+    da borda, com volume, contorno e sombra leve sobre a louça.
 12. Pátio: a parede tracejada dupla de fora (à esquerda, embaixo e no alto), que o motor apagou ou
     cortou, volta: os traços do PDF (ARQ_PAREDE, fora da planta) desenhados no quadro comum.
 
@@ -235,6 +240,21 @@ ESCADA = {
     "escurece": 0.12,                      # o piso de baixo fica 12% mais escuro que o de cima
     "sombra": 0.2, "alcance": 5.0,         # sombra do espelho no piso de baixo: força e decaimento (px)
 }
+
+# vasos: o polígono preenchido do PDF (ARQ_LOUÇAS E METAIS) pela caixa em px do render; a parede é
+# o lado do tanque; as cores são as louças aprovadas da Casa B
+VASOS = [
+    {"nome": "WC DCE", "caixa": (709.1, 197.6, 752.8, 227.4), "parede": "esquerda"},
+    {"nome": "WC do vestiário", "caixa": (1279.2, 918.9, 1322.8, 948.7), "parede": "direita"},
+]
+VASO = {"dobradica": 5.7,                 # da parede até a linha da dobradiça (o PDF quebra ali o contorno)
+        "recuo": 1.2,                      # o tampo recuado da borda da louça
+        "cor_tampo": (250, 250, 249),
+        "sombra": (1.6, 1.6, 2.2, 0.28),   # sombra no piso: dx, dy, sigma, força
+        "sombra_tampo": (0.5, 0.6, 0.8, 0.18),
+        "volume": (0.88, 5.0),             # louça: tom na borda e alcance (px) do sombreado de volume
+        "volume_tampo": (0.9, 6.0)}
+# (parafusos e dobradiças ficam de fora: com 1 a 2 px viravam manchas sem forma)
 
 
 def apagar_largo(out, ret, mascara, fontes, sigma=4.0, borda=0.8, lum_min=None, lum_max=None, escuros=False):
@@ -608,6 +628,76 @@ def escada(out):
     return out
 
 
+def vasos(out, A):
+    pg, p2r = pdf_cadeia(A, out.shape)
+    q = VASO
+    for v in VASOS:
+        cx0, cy0, cx1, cy1 = v["caixa"]
+        corpo = None
+        for d in pg.get_drawings():
+            if d.get("layer") != "ARQ_LOUÇAS E METAIS" or d["type"] != "f":
+                continue
+            (a0, b0), (a1, b1) = p2r(d["rect"].x0, d["rect"].y0), p2r(d["rect"].x1, d["rect"].y1)
+            if max(abs(a0 - cx0), abs(b0 - cy0), abs(a1 - cx1), abs(b1 - cy1)) < 1.0:
+                corpo = d
+                break
+        wx0, wy0, wx1, wy1 = int(cx0) - 6, int(cy0) - 6, int(np.ceil(cx1)) + 7, int(np.ceil(cy1)) + 7
+        h, w = wy1 - wy0, wx1 - wx0
+        pts = []
+        for it in corpo["items"]:
+            for p in it[1:]:
+                if hasattr(p, "x"):
+                    x, y = p2r(p.x, p.y)
+                    pts.append([round((x - wx0) * SS), round((y - wy0) * SS)])
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.fillPoly(m, [cv2.convexHull(np.int32(pts))], 255)
+        reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+
+        def reduzir(mm):
+            return cv2.resize(mm.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+
+        def pintar(mm, cor):
+            nonlocal reg
+            a = reduzir(mm / 255.0 if mm.dtype == np.uint8 else mm)[..., None]
+            reg = reg * (1 - a) + np.asarray(cor, np.float32) * a
+
+        sdx, sdy, ssig, sforca = q["sombra"]
+        sh = cv2.warpAffine(m.astype(np.float32) / 255, np.float32([[1, 0, sdx * SS], [0, 1, sdy * SS]]), (w * SS, h * SS))
+        reg *= (1 - sforca * reduzir(cv2.GaussianBlur(sh, (0, 0), ssig * SS)) * (1 - reduzir(m / 255.0)))[..., None]
+        # corpo: louça com volume (distância à borda) e contorno fino
+        dist = cv2.distanceTransform(m, cv2.DIST_L2, 5) / SS
+        borda, alcance = q["volume"]
+        tom = borda + (1 - borda) * np.clip(dist / alcance, 0, 1)
+        corpo_cor = np.asarray(LOUCA, np.float32)[None, None, :] * tom[..., None]
+        a = (m / 255.0)[..., None]
+        cor_ss = corpo_cor * a
+        pintar(m, (0, 0, 0))                          # zera onde entra o corpo
+        reg += cv2.resize(cor_ss, (w, h), interpolation=cv2.INTER_AREA)
+        anel = m & ~cv2.erode(m, np.ones((int(0.7 * SS), int(0.7 * SS)), np.uint8))
+        pintar(anel, LOUCA_CONTORNO)
+        # tampo fechado: o corpo recuado, da linha da dobradiça à frente, com volume e contorno
+        tampo = cv2.erode(m, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (int(2 * q["recuo"] * SS) + 1,) * 2))
+        xs = wx0 + (np.arange(w * SS) + 0.5) / SS
+        xd = cx0 + q["dobradica"] if v["parede"] == "esquerda" else cx1 - q["dobradica"]
+        if v["parede"] == "esquerda":
+            tampo[:, xs < xd] = 0
+        else:
+            tampo[:, xs > xd] = 0
+        tampo = cv2.morphologyEx(tampo, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3 * SS,) * 2))
+        tdx, tdy, tsig, tforca = q["sombra_tampo"]
+        st = cv2.warpAffine(tampo.astype(np.float32) / 255, np.float32([[1, 0, tdx * SS], [0, 1, tdy * SS]]), (w * SS, h * SS))
+        reg *= (1 - tforca * reduzir(cv2.GaussianBlur(st, (0, 0), tsig * SS)) * (1 - reduzir(tampo / 255.0)))[..., None]
+        dt = cv2.distanceTransform(tampo, cv2.DIST_L2, 5) / SS
+        borda, alcance = q["volume_tampo"]
+        tom = borda + (1 - borda) * np.clip(dt / alcance, 0, 1)
+        cor_t = np.asarray(q["cor_tampo"], np.float32)[None, None, :] * tom[..., None] * (tampo / 255.0)[..., None]
+        reg = reg * (1 - reduzir(tampo / 255.0)[..., None]) + cv2.resize(cor_t, (w, h), interpolation=cv2.INTER_AREA)
+        pintar(tampo & ~cv2.erode(tampo, np.ones((int(0.6 * SS), int(0.6 * SS)), np.uint8)), LOUCA_CONTORNO)
+        out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+        print(f"    vaso do {v['nome']}: louça com volume e tampo fechado")
+    return out
+
+
 def no_quadro(out, A):
     """O render retocado vai para o quadro comum (a base 16:9 na largura das pranchas) pelo inverso da
     cadeia base -> render (a base reduzida ao tamanho do render, não uniforme, e o afim A), com 2 x
@@ -703,6 +793,8 @@ def main():
     out = arcos_granito(out, alinhar_base(orig))
     print("[14] escada: sombreamento de descida, sem linhas")
     out = escada(out)
+    print("[16] sanitários")
+    out = vasos(out, alinhar_base(orig))
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
