@@ -80,6 +80,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    embaixo; a ilha da cozinha ficou sem cooktop e o da gourmet saiu com 4 bocas nos cantos e uma no
    meio. Os dois viram o cooktop da gourmet da Casa C já corrigido (2 em cima e 3 embaixo), levado à
    caixa do PDF; o da gourmet do motor sai antes (quartzo tecido da própria bancada, na luz dela).
+17. Erro 12 da lista (bancada da pia da gourmet): o motor a fez em madeira (em dois tons); é quartzo,
+   como as outras bancadas. Quartzo tecido da bancada do cooktop, na cor dela, com o perfil de luz por
+   linha do trecho limpo (sombra da parede e borda da frente) e, junto à geladeira, a luz 2D da
+   própria bancada (a sombra dela); a cuba fica.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -324,6 +328,21 @@ COOKTOPS_D = {
     "gourmet_motor": (795, 317, 828, 338),
     "fonte_quartzo": [(762, 320, 792, 348), (832, 320, 862, 348)],
     "caixas": [("ilha da cozinha", (1010, 249, 1038, 264)), ("gourmet", (798, 318, 825, 334))],
+}
+
+# bancada da pia da gourmet (erro 12): o motor a fez em madeira; é quartzo, como as outras bancadas.
+# Quartzo tecido da bancada da gourmet (a do cooktop), na cor dela, com a luz da própria bancada do
+# render (a sombra da parede, a da geladeira e a borda da frente: a luminância suavizada sobre a do
+# trecho limpo); a cuba fica
+BANCADA_GOURMET = {
+    "ret": (727, 245, 852, 270),
+    "cuba": (801, 248, 823, 268),
+    "fonte_quartzo": [(762, 320, 792, 348), (832, 320, 862, 348)],
+    "ref": (735, 252, 790, 266),
+    # o motor fez a madeira em dois tons (dois blocos): a luz é o perfil por linha do bloco da
+    # esquerda; só junto à geladeira (a partir de x 822, com transição até 832) vale a luz 2D do
+    # bloco da direita (a sombra da geladeira)
+    "ref_dir": (824, 258, 836, 266), "geladeira": (822, 832),
 }
 
 
@@ -1086,6 +1105,34 @@ def cooktops(out):
     return out
 
 
+def bancada_gourmet(out):
+    q = BANCADA_GOURMET
+    x0, y0, x1, y1 = q["ret"]
+    h, w = y1 - y0, x1 - x0
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    Y = reg.mean(axis=2)
+    rx0, ry0, rx1, ry1 = q["ref"]
+    ref = np.median(out[ry0:ry1, rx0:rx1].astype(np.float32).mean(axis=2))
+    perfil = np.median(Y[:, rx0 - x0:rx1 - x0], axis=1) / ref
+    dx0, dy0, dx1, dy1 = q["ref_dir"]
+    luz2 = cv2.GaussianBlur(Y, (0, 0), 1.2) / np.median(out[dy0:dy1, dx0:dx1].astype(np.float32).mean(axis=2))
+    g0, g1 = q["geladeira"]
+    tr = np.clip((np.arange(x0, x1) - g0) / (g1 - g0), 0, 1)[None, :]
+    luz = perfil[:, None] * (1 - tr) + luz2 * tr
+    cor = np.median(np.concatenate([out[b:d, a:c].reshape(-1, 3) for a, b, c, d in q["fonte_quartzo"]]).astype(np.float32),
+                    axis=0)
+    tex = textura(out, q["fonte_quartzo"], h, w)
+    novo = tex * cor * luz[..., None]
+    cx0, cy0, cx1, cy1 = q["cuba"]
+    m = np.ones((h, w), bool)
+    sub = reg[cy0 - y0:cy1 - y0, cx0 - x0:cx1 - x0]
+    m[cy0 - y0:cy1 - y0, cx0 - x0:cx1 - x0] = (sub[..., 2] - sub[..., 0]) > 28     # na caixa da cuba, só a madeira
+    reg[m] = novo[m]
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    bancada da pia da gourmet em quartzo (a cuba fica)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1132,6 +1179,8 @@ def main():
     out = dce(out, chapada)
     print("[16] erros 10 e 11: cooktops da ilha e da gourmet")
     out = cooktops(out)
+    print("[17] erro 12: bancada da pia da gourmet em quartzo")
+    out = bancada_gourmet(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
