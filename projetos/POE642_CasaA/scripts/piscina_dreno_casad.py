@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""Casa D · Térreo: piscina e spa com dreno em linha e degraus internos em níveis (POE 642).
+"""Casa D · Térreo: piscina e spa com capa, dreno em duas linhas e degraus internos em níveis (POE 642).
 
 Pedido do usuário (15/10/26), sobre o Barlavento da Casa D (`piscinas_barlavento.py`): "não gostei
 da finalização da piscina. precisa melhorar a borda da piscina, degraus internos [...]. pode fazer
-uma borda com dreno", e depois: "o dreno é apenas uma linha contínua fina. somente na parte externa
-da piscina". As linhas duplas dos degraus pareciam um rasgo (um furo) no fundo.
+uma borda com dreno", "o dreno é apenas uma linha contínua fina. somente na parte externa da
+piscina" e, com um render de referência da borda: "são duas linhas de borda". As linhas duplas dos
+degraus pareciam um rasgo (um furo) no fundo.
 
 Parte do render retocado (sem o Barlavento) e refaz a água inteira:
-- **borda**: a água vai até o contorno do projeto (cobre o traço escuro do render), sem a sombra de
-  parede, só com uma leve definição junto ao piso;
-- **dreno**: uma linha contínua fina e escura no piso, a ~6 cm da água, só no contorno de fora do
-  conjunto (piscina e spa). A faixa de piso entre a piscina e o spa não leva. Cantos em esquadro;
+- **borda**: a água vai até o contorno do projeto (cobre o traço escuro do render), com a sombra
+  curta aprovada da pedra sobre a água; em volta do conjunto (piscina e spa), uma capa de pedra da
+  largura da faixa entre os dois (~26 cm), um pouco mais clara que o piso;
+- **dreno**: na borda de fora da capa, duas linhas finas paralelas contínuas (as bordas do canal,
+  ~8 cm entre elas), só no contorno de fora do conjunto. A faixa entre a piscina e o spa é capa, sem
+  dreno. Cantos em esquadro;
 - **degraus em níveis**: cada área entre as linhas do projeto (fundo, degrau da prainha, prainha;
   banco, degrau e fundo do spa) tem a sua profundidade. Mais rasa, a água absorve menos (mais o
   vermelho) e fica mais clara; o fundo da piscina fica no tom aprovado. O degrau é a troca de tom,
@@ -24,7 +27,7 @@ As áreas vêm da base chapada (componentes da água, as linhas do projeto divid
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/piscina_dreno_casad.py
   # e a prancha: de POE642_CasaA/scripts/, rodape_entrega.py --config ../../POE642_CasaD/config_bases.json
-  #   --render Terreo=../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v2.png
+  #   --render Terreo=../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v3.png
 """
 import argparse
 import sys
@@ -43,7 +46,7 @@ CASA = AQUI.parent.parent / "POE642_CasaD"
 
 D = {
     "entrada": CASA / "renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
-    "saida": CASA / "renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v2.png",
+    "saida": CASA / "renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v3.png",
     "base": CASA / "bases/POE642_CasaD_BASE_Terreo_v3_texturas_16x9.png",
     "chapada": CASA / "bases/POE642_CasaD_BASE_Terreo_v2_16x9.png",
     "ss": 8,
@@ -61,12 +64,15 @@ D = {
     "quina": (0.07, 0.6),       # luz na quina de cima do degrau
     # px do render (~3,2 cm por px)
     "expande": 0.8,             # a água cobre o traço escuro do render na borda
-    "lamina": (0.05, 0.9),      # leve definição da água junto à borda (sem sombra de parede)
-    # dreno: uma linha contínua fina no piso, só por fora do conjunto (piscina e spa), a ~6 cm da
-    # água; a faixa entre a piscina e o spa não leva
+    "lamina": Q["borda"],       # sombra curta da borda de pedra sobre a água (a mesma aprovada)
+    # borda de pedra (capa) em volta do conjunto, da largura da faixa entre a piscina e o spa
+    # (~8 px, ~26 cm), e o dreno na borda de fora dela: duas linhas finas paralelas, as bordas do
+    # canal (render de referência do usuário). Só por fora do conjunto (piscina e spa); a faixa entre
+    # os dois é capa, sem dreno
     "fecha": 8,                 # fecha a faixa entre a piscina e o spa (10 px) no contorno do conjunto
-    "dreno": (1.8, 0.65),       # afastamento da água e largura, px
-    "dreno_cor": (92, 98, 96),
+    "dreno": [(8.0, 0.55), (10.4, 0.55)],   # cada linha: afastamento da água e largura, px
+    "dreno_cor": 0.64,          # as linhas: a pedra do piso escurecida
+    "capa": 1.015,              # a capa um pouco mais clara que o piso
 }
 
 
@@ -97,8 +103,8 @@ def areas_render(img, A, q=D):
     r = np.where(regiao, r[iy, ix], 0).astype(np.uint8)
     # para a grade 8x do recorte do render
     cx = (M[:2] @ np.array([[x0, x1], [y0, y1], [1, 1]]))
-    rx0, ry0 = int(np.floor(cx[0].min())) - 6, int(np.floor(cx[1].min())) - 6
-    rx1, ry1 = int(np.ceil(cx[0].max())) + 7, int(np.ceil(cx[1].max())) + 7
+    rx0, ry0 = int(np.floor(cx[0].min())) - 16, int(np.floor(cx[1].min())) - 16
+    rx1, ry1 = int(np.ceil(cx[0].max())) + 17, int(np.ceil(cx[1].max())) + 17
     ss = q["ss"]
     T = np.array([[ss, 0, -ss * rx0], [0, ss, -ss * ry0], [0, 0, 1.0]]) @ M
     T = T @ np.array([[1, 0, x0], [0, 1, y0], [0, 0, 1.0]])               # recorte da base -> 8x
@@ -133,8 +139,10 @@ def desenhar(img, r8, prof, caixa, q=D):
     conjunto = cv2.morphologyEx(agua.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((2 * f + 1, 2 * f + 1), np.uint8))
     conjunto = ndimage.binary_fill_holes(conjunto)
     fora = cv2.distanceTransform((~conjunto).astype(np.uint8), cv2.DIST_C, 3) / ss   # cantos em esquadro
-    o, lg = q["dreno"]
-    dreno = ~conjunto & (fora > o) & (fora <= o + lg)
+    dreno = np.zeros_like(conjunto)
+    for o, lg in q["dreno"]:
+        dreno |= ~conjunto & (fora > o) & (fora <= o + lg)
+    capa = ~agua & ~dreno & (conjunto | (fora <= q["dreno"][0][0]))
     # profundidade e a luz dos degraus
     p8 = np.zeros(r8.shape, np.float32)
     for k, p in prof.items():
@@ -157,7 +165,7 @@ def desenhar(img, r8, prof, caixa, q=D):
     fl, dl = q["lamina"]
     lamina = fl * np.exp(-d / dl)
     # reduzir
-    Ra, Rd = reduz(agua, ss), reduz(dreno, ss)
+    Ra, Rd, Rc = reduz(agua, ss), reduz(dreno, ss), reduz(capa, ss)
     pa = np.maximum(Ra, 1e-6)
     P = reduz(p8 * agua, ss) / pa
     S = reduz(sombra * agua, ss) / pa
@@ -183,11 +191,12 @@ def desenhar(img, r8, prof, caixa, q=D):
     base = reg.copy()
     resto = lim_old & (Ra < 0.5)
     base[resto] = piso
+    base *= (1 + (q["capa"] - 1) * Rc)[..., None]
     mix = base * (1 - Ra[..., None]) + agua_cor * Ra[..., None]
-    mix = mix * (1 - Rd[..., None]) + np.float32(q["dreno_cor"]) * Rd[..., None]
+    mix = mix * (1 - Rd[..., None]) + (piso * q["dreno_cor"]) * Rd[..., None]
     out = img.copy()
     out[ry0:ry1, rx0:rx1] = np.clip(mix, 0, 255).astype(np.uint8)
-    print(f"    degraus em {len(prof)} níveis e dreno em linha contínua; {int(resto.sum())} px da água antiga fora do contorno")
+    print(f"    degraus em {len(prof)} níveis, capa e dreno em duas linhas; {int(resto.sum())} px da água antiga fora do contorno")
     return out
 
 
