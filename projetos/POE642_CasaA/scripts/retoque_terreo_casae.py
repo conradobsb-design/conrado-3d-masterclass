@@ -39,6 +39,12 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
 9. Área de serviço descoberta: o X tracejado do PDF (layer DOC_LINHAS E PROJEÇÕES: as duas
    diagonais e a linha de baixo), que o motor apagou, volta como a projeção sobre a garagem e a área
    descoberta da Casa D: cinza e traço fino, só sobre o granito.
+10. DCE: o motor fez a cama como uma laje de pedra, o criado-mudo como um armário alto e o armário
+    até o teto (o da diagonal) como uma pia. As três peças do render saem (granito tecido do próprio
+    quarto; paredes, janela e porta ficam) e entram as do DCE do Térreo aprovado da Casa D, nos
+    retângulos do PDF: a cama de solteiro (girada, cabeceira na parede da direita, como o travesseiro
+    do PDF) e o criado-mudo, com sombra curta, e o armário até o teto em areia com veio, sem sombra de
+    móvel baixo e com contorno fino.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -518,6 +524,65 @@ def x_descoberta(out, A):
     return out
 
 
+# DCE (item 10): o que o motor fez (laje, armário alto e pia) sai, e entram as peças do DCE do Térreo
+# retocado da Casa D (aprovado) nos retângulos do PDF (ARQ_LAYOUT HUMANIZAÇÃO); a cama e o
+# criado-mudo de lá estão em pé (cabeceira em cima): giradas no sentido horário, a cabeceira fica à
+# direita, onde o PDF tem o travesseiro
+DCE = {
+    "janela": (1150, 250, 1250, 332),
+    "limpar": [(1177, 255, 1245, 299), (1156, 288, 1179, 327)],
+    "fontes_granito": [(1214, 299, 1240, 325)],
+    "fonte": RAIZ / "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
+    # (nome, recorte na Casa D, giro, retângulo do PDF no render, sombra de móvel baixo)
+    "pecas": [("cama", (1338, 271, 1369, 334), cv2.ROTATE_90_CLOCKWISE, (1179.1, 254.6, 1243.2, 284.4), True),
+              ("criado-mudo", (1323, 272, 1334, 285), cv2.ROTATE_90_CLOCKWISE, (1229.9, 285.4, 1242.4, 296.3), True),
+              ("armário até o teto", (1295, 330, 1326, 349), cv2.ROTATE_90_COUNTERCLOCKWISE,
+               (1159.2, 290.3, 1176.3, 324.5), False)],
+    "contorno": (70, 72, 74), "larg_contorno": 0.4,
+    "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.35},
+}
+
+
+def colar(out, img, ret):
+    """Leva img ao retângulo ret (x0, y0, x1, y1, em px do render, subpixel) por afim, com a borda
+    antisserrilhada."""
+    x0, y0, x1, y1 = ret
+    h, w = img.shape[:2]
+    M = cv2.getAffineTransform(np.float32([(0, 0), (w, 0), (0, h)]), np.float32([(x0, y0), (x1, y0), (x0, y1)]))
+    forma = out.shape[:2]
+    im = cv2.warpAffine(img.astype(np.float32), M, forma[::-1], flags=cv2.INTER_AREA)
+    al = poligono_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])[..., None]
+    out[:] = np.clip(out * (1 - al) + im * al, 0, 255).astype(np.uint8)
+    return out
+
+
+def sombra_curta(out, ret, s):
+    x0, y0, x1, y1 = ret
+    cantos = np.float32([(x0, y0), (x1, y0), (x1, y1), (x0, y1)]) + np.float32(s["desloc"])
+    sombra = cv2.GaussianBlur(poligono_aa(out.shape[:2], cantos), (0, 0), s["sigma"])
+    out[:] = np.clip(out * (1 - s["forca"] * sombra)[..., None], 0, 255).astype(np.uint8)
+    return out
+
+
+def dce(out):
+    q = DCE
+    wx0, wy0, wx1, wy1 = q["janela"]
+    m = np.zeros((wy1 - wy0, wx1 - wx0), bool)
+    for x0, y0, x1, y1 in q["limpar"]:
+        m[y0 - wy0:y1 - wy0, x0 - wx0:x1 - wx0] = True
+    out = apagar_largo(out, q["janela"], m, q["fontes_granito"], sigma=3.0, lum_min=40, escuros=False)
+    casad = cv2.imread(str(q["fonte"]))
+    for nome, (fx0, fy0, fx1, fy1), giro, ret, sombra in q["pecas"]:
+        if sombra:
+            out = sombra_curta(out, ret, q["sombra"])
+        out = colar(out, cv2.rotate(casad[fy0:fy1, fx0:fx1], giro), ret)
+        x0, y0, x1, y1 = ret
+        c = linha_aa(out.shape[:2], [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], q["larg_contorno"], fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - c) + np.float32(q["contorno"]) * c, 0, 255).astype(np.uint8)
+        print(f"    DCE, {nome}: a da Casa D em ({x0:.1f}, {y0:.1f}) - ({x1:.1f}, {y1:.1f})")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -544,6 +609,8 @@ def main():
     out = maquinas(out)
     print("[9] área de serviço descoberta: X tracejado")
     out = x_descoberta(out, A)
+    print("[10] DCE: cama, criado-mudo e armário até o teto")
+    out = dce(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
