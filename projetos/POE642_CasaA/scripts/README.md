@@ -253,6 +253,7 @@ Mesmo método da Casa C (render retocado sem IA, item por item, na ordem pedida 
 - **Banco capitonê (erro 15):** as poltronas saem por interpolação vertical coluna a coluna (veios verticais); o banco é desenhado em 8x (corpo, vincos em losango, botões, borda) com a sombra deslocada e desfocada.
 - **Segunda imagem:** `alinhar_fonte2` (SIFT + afim) leva a segunda imagem ao render; `armarios_fonte2` cola os armários dos quartos dela; `mesa_redonda` cola o conjunto da mesa (círculo do tapete e diferenças perto das poltronas, com o tom ajustado), tira a planta (`interpolar` em várias escalas, com o veio) e desenha as mesinhas.
 - **Plantas sobre as mesas (erro 17):** tampos da segunda imagem (disco ou retângulo, tom ajustado pela mediana da madeira) e, na mesa de jantar, interpolação vertical coluna a coluna sob a planta e a sombra dela.
+- **Piscina (erros 18 e 19):** água da segunda imagem onde qualquer das duas tem água (B - R > 30), fechada e com emenda gaussiana; a borda é a do render.
 
 ```bash
 python retoque_terreo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Terreo_v1_retocado

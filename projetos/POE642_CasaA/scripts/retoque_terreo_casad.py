@@ -111,6 +111,11 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    escritório, o tampo vem da segunda imagem (sem planta), com o tom ajustado ao tampo do render; na
    mesa de jantar (a segunda imagem também tem planta), cada coluna do tampo liga a madeira de cima à
    de baixo da planta (o veio é vertical).
+24. Erros 18 e 19 da lista (spa e degrau entre a piscina e a prainha): o motor fez o degrau interno do
+   spa só em dois lados e o degrau estreito como uma faixa de água escura. A água da piscina, da
+   prainha e do spa vem da segunda imagem (degrau do spa nos quatro lados, degrau estreito em água
+   clara, prainha com o piso em grade e os degraus de canto), onde qualquer das duas imagens tem água,
+   com emenda curta; a borda de pedra fica a do render.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -462,6 +467,13 @@ PLANTAS_MESAS = {
     "retangulos_fonte2": [(1231, 806, 1255, 867)],
     "jantar": (998, 397, 1035, 490),
 }
+
+# piscina, prainha e spa (erros 18 e 19): o motor fez o degrau interno do spa só em dois lados (no PDF
+# contorna os quatro) e o degrau estreito entre a piscina e a prainha como uma faixa de água escura.
+# A água das três vem da segunda imagem (degrau do spa nos quatro lados, degrau estreito em água
+# clara, prainha com o piso em grade e os degraus de canto): onde qualquer das duas imagens tem água,
+# com emenda curta; a borda de pedra fica a do render
+PISCINA = {"janela": (470, 255, 665, 505), "agua": 30, "emenda": 1.0}
 
 
 def alinhar_base(render):
@@ -1526,6 +1538,20 @@ def plantas_mesas(out, f2):
     return out
 
 
+def piscina(out, f2, orig):
+    q = PISCINA
+    x0, y0, x1, y1 = q["janela"]
+    a2 = f2[y0:y1, x0:x1].astype(np.int32)
+    a1 = orig[y0:y1, x0:x1].astype(np.int32)
+    agua = ((a2[..., 0] - a2[..., 2]) > q["agua"]) | ((a1[..., 0] - a1[..., 2]) > q["agua"])
+    agua = cv2.morphologyEx(agua.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    a = cv2.GaussianBlur(agua.astype(np.float32), (0, 0), q["emenda"])[..., None]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + a2 * a, 0, 255).astype(np.uint8)
+    print("    piscina, prainha e spa: água da segunda imagem (degraus do spa nos quatro lados)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1586,6 +1612,8 @@ def main():
     out = mesa_redonda(out, f2, orig)
     print("[22] erro 17: plantas sobre as mesas")
     out = plantas_mesas(out, f2)
+    print("[23] erros 18 e 19: spa e degrau entre a piscina e a prainha")
+    out = piscina(out, f2, orig)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
