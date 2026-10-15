@@ -57,6 +57,11 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
     fez como cápsulas cinza de ~8 px, ficam finas, na espessura do PDF (4,2 px), em inox com contorno
     fino; a soleira, branca chapada, vira a de entrada de elevador: inox escovado no sentido da porta,
     com os dois frisos-guia, entre os batentes de alumínio.
+20. Área verde (pedido do usuário): a faixa entre o pátio e a parede tracejada de fora (à esquerda, e
+    a faixa estreita embaixo, até o tracejado de dentro) é jardim, como a lateral do lote no Térreo:
+    no quadro comum, a faixa da esquerda recebe o jardim vizinho do Térreo retocado na mesma altura
+    (grama em cima, as touceiras de samambaias e palmeiras embaixo) e a de baixo, grama tecida da
+    grama limpa do Térreo; só o fundo branco muda (pátio, prédio e peças brancas ficam).
 12. Pátio: a parede tracejada dupla de fora (à esquerda, embaixo e no alto), que o motor apagou ou
     cortou, volta: os traços do PDF (ARQ_PAREDE, fora da planta) desenhados no quadro comum.
 
@@ -312,6 +317,14 @@ ELEVADOR_ENTRADA = {
     "batentes": [(1550.6, 402.7, 1563.3, 404.8), (1550.6, 459.7, 1563.3, 461.8)],
     "frisos": (1554.0, 1559.6), "larg_friso": 0.8,
     "inox": (190, 192, 195), "inox_folha": (200, 202, 205), "friso": (112, 115, 118), "brilho": (222, 224, 226),
+}
+
+AREA_VERDE = {
+    "ret_vis": (132.2, 648.0, 644.5, 949.3),   # dentro do tracejado de dentro (vis de 1800 px)
+    "esquerda_ate_vis": 166.0,                 # a faixa da esquerda (até o pátio, com folga)
+    "desloc": -66,                             # px do quadro: o jardim do Térreo logo à esquerda
+    "grama": [(370, 1160, 490, 1500)],         # grama limpa do Térreo no quadro de 3840
+    "branco": 235,                             # só o fundo claro vira jardim
 }
 
 
@@ -943,6 +956,48 @@ def no_quadro(out, A):
     return final
 
 
+def area_verde(final):
+    from PIL import Image
+    from rodape_entrega import no_quadro_comum
+    q = AREA_VERDE
+    cfg = json.loads(CONFIG.read_text())
+    ent = cfg["entrega"]
+    base_t = RAIZ / "POE642_CasaD" / ent["pasta_bases"] / ent["pavimentos"]["Terreo"]["base"]
+    HF, WF = final.shape[:2]
+    terreo = no_quadro_comum(Image.open(str(TERREO_RETOCADO)).convert("RGB"), base_t, "Terreo", WF)
+    terreo = cv2.cvtColor(np.asarray(terreo), cv2.COLOR_RGB2BGR)
+    ht, wt = cv2.imread(str(BASE_CHAPADA), cv2.IMREAD_GRAYSCALE).shape
+    hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    kv = wb / cfg["largura_visualizacao"]
+
+    def quadro(xv, yv):
+        return (((wt - wb) // 2 + xv * kv) * WF / wt, ((ht - hb) // 2 + yv * kv) * HF / ht)
+
+    (x0, y0), (x1, y1) = quadro(*q["ret_vis"][:2]), quadro(*q["ret_vis"][2:])
+    x0, y0, x1, y1 = int(round(x0)), int(round(y0)), int(round(x1)), int(round(y1))
+    xe = int(round(quadro(q["esquerda_ate_vis"], 0)[0]))
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), (WF, HF), interpolation=cv2.INTER_NEAREST)
+    nb = (chapada.min(axis=2) < 245).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(nb)
+    planta = ndimage.binary_fill_holes(np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > 5000]))
+    reg = final[y0:y1, x0:x1]
+    m = ~planta[y0:y1, x0:x1] & (reg.min(axis=2) >= q["branco"])
+    jardim = np.zeros_like(reg, dtype=np.float32)
+    d = q["desloc"]
+    jardim[:, :xe - x0] = terreo[y0:y1, x0 + d:xe + d]
+    fontes = []
+    for gx0, gy0, gx1, gy1 in q["grama"]:
+        g = terreo[gy0:gy1, gx0:gx1].astype(np.float32)
+        fontes += [np.ascontiguousarray(v) for v in (g, g[:, ::-1], g[::-1, :], g[::-1, ::-1])]
+    resto = x1 - xe
+    jardim[:, xe - x0:] = quilting(fontes, y1 - y0, resto, p=24, sobra=8, candidatos=500)[:y1 - y0, :resto]
+    a = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.6)
+    a = np.maximum(a, m)[..., None]
+    final[y0:y1, x0:x1] = np.clip(reg * (1 - a) + jardim * a, 0, 255).astype(np.uint8)
+    print(f"    área verde: {int(m.sum())} px (jardim do Térreo na faixa da esquerda, grama tecida embaixo)")
+    return final
+
+
 def tracejado(final):
     """Traços do tracejado de fora (ARQ_PAREDE) do PDF, direto no quadro comum (sem o afim do render)."""
     q = TRACEJADO
@@ -1028,6 +1083,8 @@ def main():
 
     print("[escala] quadro comum das bases, com a planta sob a do Térreo")
     final = no_quadro(out, alinhar_base(orig))
+    print("[20] área verde entre o pátio e a parede tracejada")
+    final = area_verde(final)
     print("[12] pátio: tracejado de fora")
     final = tracejado(final)
     nome_final = args.nome.replace("_retocado", "") + "_final"
