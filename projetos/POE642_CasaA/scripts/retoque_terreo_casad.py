@@ -33,6 +33,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
 5. Eletrodomésticos da cozinha: os dois volumes ao lado do armário do canto (no PDF, sem diagonal)
    ficam em inox; a caixa do render fica (sombreado, borda das portas, divisória e sombra) e só o tom
    muda, para aço escovado levemente frio, com riscos verticais sutis. O do canto é armário (areia).
+6. Porta de correr do abrigo de gás: o motor fez uma soleira cinza larga no vão de cima. As linhas
+   dela viram o piso do abrigo (as de baixo, em espelho) e entra a porta do PDF (ARQ_PAREDE): duas
+   folhas em planos diferentes na espessura da parede (a da esquerda por fora, a da direita por
+   dentro), com montantes e batentes, em 8x, e a sombra curta da folha de dentro.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -150,6 +154,20 @@ INOX = {
     "cor": (186, 184, 181),                     # BGR: aço escovado, levemente frio
     "lum": (70.0, 150.0),                       # luminância: granito (0) .. caixa (1), nas bordas
     "escovado": 0.025, "semente": 642,
+}
+
+# porta de correr do abrigo de gás (PDF, ARQ_PAREDE, em px do render): duas folhas em planos
+# diferentes na espessura da parede de cima (a da esquerda por fora, a da direita por dentro), com
+# os montantes nas pontas e os batentes. O motor fez uma soleira cinza larga: as linhas dela viram o
+# piso do abrigo (as de baixo, em espelho), com a sombra curta das folhas
+PORTA_GAS = {
+    "soleira": (1335, 185, 1370, 193),
+    "folhas": [(1336.7, 185.2, 1352.5, 186.5), (1352.5, 186.5, 1368.4, 187.7)],
+    "montantes": [(1336.7, 1338.2), (1351.0, 1352.5), (1352.5, 1354.1), (1366.9, 1368.4)],
+    "batentes": [(1335.4, 185.2, 1336.7, 186.8), (1368.4, 185.2, 1369.7, 186.8)],
+    "janela": (1332, 182, 1373, 196),
+    "folha": (196, 199, 202), "montante": (150, 154, 158), "contorno": (85, 92, 98), "larg_contorno": 0.3,
+    "sombra": (0.80, 0.90, 0.96),                # linhas logo abaixo da folha de dentro
 }
 
 
@@ -486,6 +504,51 @@ def inox(out):
     return out
 
 
+def porta_gas(out):
+    q = PORTA_GAS
+    x0, y0, x1, y1 = q["soleira"]
+    n = y1 - y0
+    out[y0:y1, x0:x1] = out[y1:y1 + n, x0:x1][::-1]       # piso do abrigo, em espelho
+    yb = int(np.ceil(q["folhas"][1][3]))
+    for k, f in enumerate(q["sombra"]):
+        out[yb + k, x0:x1] = np.clip(out[yb + k, x0:x1] * f, 0, 255).astype(np.uint8)
+
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+
+    def px(v, o):
+        return int(round((v - o) * SS))
+
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+
+    def pintar(mascara, cor):
+        nonlocal reg
+        a = cv2.resize(mascara.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        reg = reg * (1 - a) + np.array(cor, np.float32) * a
+
+    lc = max(1, px(q["larg_contorno"], 0))
+    for fx0, fy0, fx1, fy1 in q["folhas"]:
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.rectangle(m, (px(fx0, wx0), px(fy0, wy0)), (px(fx1, wx0), px(fy1, wy0)), 255, -1)
+        pintar(m, q["folha"])
+    for mx0, mx1 in q["montantes"]:
+        fy0, fy1 = next((f[1], f[3]) for f in q["folhas"] if f[0] - 0.01 <= mx0 and mx1 <= f[2] + 0.01)
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.rectangle(m, (px(mx0, wx0), px(fy0, wy0)), (px(mx1, wx0), px(fy1, wy0)), 255, -1)
+        pintar(m, q["montante"])
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    for fx0, fy0, fx1, fy1 in q["folhas"] + q["batentes"]:
+        cv2.rectangle(m, (px(fx0, wx0), px(fy0, wy0)), (px(fx1, wx0), px(fy1, wy0)), 255, lc)
+    pintar(m, q["contorno"])
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    for bx0, by0, bx1, by1 in q["batentes"]:
+        cv2.rectangle(m, (px(bx0, wx0), px(by0, wy0)), (px(bx1, wx0), px(by1, wy0)), 255, -1)
+    pintar(m, q["contorno"])
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print("    abrigo de gás: soleira do motor fora; porta de correr do PDF (duas folhas em dois planos)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -507,6 +570,8 @@ def main():
     out = area_molhada(out)
     print("[5] eletrodomésticos em inox")
     out = inox(out)
+    print("[6] porta de correr do abrigo de gás")
+    out = porta_gas(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
