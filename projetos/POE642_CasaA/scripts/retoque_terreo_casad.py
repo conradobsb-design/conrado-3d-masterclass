@@ -131,6 +131,9 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    um lavabo). Como na Casa C: caixa branca e a cabine do Subsolo da Casa B aprovado, girada para a
    porta ficar à direita (no PDF, a porta dá para a circulação), ocupando a caixa inteira, com 1 a 2 px
    de folga (pedido do usuário: sem o branco largo em volta).
+29. Degrau de canto da prainha (pedido do usuário): veio com a água da segunda imagem e não está no
+   PDF. Sai: as mesmas linhas, 3 placas à esquerda (a grade de ~12 px casa), com a sombra da borda da
+   direita (fator por coluna medido nas linhas de cima).
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -488,7 +491,11 @@ PLANTAS_MESAS = {
 # A água das três vem da segunda imagem (degrau do spa nos quatro lados, degrau estreito em água
 # clara, prainha com o piso em grade e os degraus de canto): onde qualquer das duas imagens tem água,
 # com emenda curta; a borda de pedra fica a do render
-PISCINA = {"janela": (470, 255, 665, 505), "agua": 30, "emenda": 1.0}
+PISCINA = {"janela": (470, 255, 665, 505), "agua": 30, "emenda": 1.0,
+           # degrau de canto da prainha (a segunda imagem o tem; no PDF não): sai pedido do usuário. As
+           # mesmas linhas, 3 placas à esquerda (a grade de ~12 px casa), com a sombra da borda da
+           # direita (fator por coluna medido nas linhas de cima)
+           "degrau": (626, 399, 659, 414), "desloc": -36, "medida": (380, 398)}
 
 # escada junto à suíte master (erro 20): o motor fez 11 degraus; no PDF são 16. A escada vem da
 # segunda imagem (16 degraus), no retângulo dela, com o tom ajustado ao piso do render em volta e
@@ -1603,7 +1610,12 @@ def piscina(out, f2, orig):
     a = cv2.GaussianBlur(agua.astype(np.float32), (0, 0), q["emenda"])[..., None]
     reg = out[y0:y1, x0:x1].astype(np.float32)
     out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + a2 * a, 0, 255).astype(np.uint8)
-    print("    piscina, prainha e spa: água da segunda imagem (degraus do spa nos quatro lados)")
+    dx0, dy0, dx1, dy1 = q["degrau"]
+    d = q["desloc"]
+    m0, m1 = q["medida"]
+    f = out[m0:m1, dx0:dx1].astype(np.float32).mean(axis=0) / out[m0:m1, dx0 + d:dx1 + d].astype(np.float32).mean(axis=0)
+    out[dy0:dy1, dx0:dx1] = np.clip(out[dy0:dy1, dx0 + d:dx1 + d].astype(np.float32) * f[None], 0, 255).astype(np.uint8)
+    print("    piscina, prainha e spa: água da segunda imagem (degraus do spa nos quatro lados); sem o degrau de canto da prainha")
     return out
 
 
