@@ -391,3 +391,4 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   23. erro 17 da lista: plantas fora das mesas (gourmet e escrivaninha com os tampos da segunda imagem; jantar por interpolação vertical no veio).
   24. erros 18 e 19 da lista: a água da piscina, da prainha e do spa vem da segunda imagem (degrau do spa nos quatro lados; o degrau estreito sem a faixa escura).
   25. erro 20 da lista: a escada junto à suíte master com os 16 degraus da segunda imagem.
+  26. erro 21 da lista: camas das suítes 1 e 2 no comprimento do PDF e os bancos de duas almofadas da Casa B ao pé delas.

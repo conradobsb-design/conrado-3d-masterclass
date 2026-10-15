@@ -119,6 +119,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
 25. Erro 20 da lista (escada junto à suíte master): o motor fez 11 degraus; no PDF são 16. A escada vem
    da segunda imagem (16 degraus), no retângulo dela, com o tom ajustado ao piso em volta (razão das
    medianas num anel) e emenda curta; a parede de baixo fica a do render.
+26. Erro 21 da lista (bancos ao pé das camas das suítes 1 e 2): o motor esticou as camas por cima dos
+   bancos do PDF. As camas voltam ao comprimento do PDF (a ponta, com a borda e a sombra, vem para o pé
+   do PDF; o vão vira o tapete) e entram os bancos de duas almofadas do Térreo da Casa B, como na
+   Casa C (mesmo código), no retângulo do PDF, com a sombra deles.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -139,7 +143,7 @@ RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
 from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO, SS  # noqa: E402
 from retoque_terreo_casac import COZINHA as COZINHA_C  # noqa: E402
-from retoque_terreo_casac import ARCOS_GRANITO  # noqa: E402
+from retoque_terreo_casac import ARCOS_GRANITO, BANCOS as BANCOS_C  # noqa: E402
 from retoque_terreo_casab import cuba  # noqa: E402
 from texturizar_base import quilting  # noqa: E402
 
@@ -482,6 +486,20 @@ PISCINA = {"janela": (470, 255, 665, 505), "agua": 30, "emenda": 1.0}
 # segunda imagem (16 degraus), no retângulo dela, com o tom ajustado ao piso do render em volta e
 # emenda curta; a parede de baixo fica a do render
 ESCADA_MASTER = {"ret": (434, 644, 600, 686), "anel": 5, "emenda": 1.0}
+
+# bancos ao pé das camas (erro 21): o PDF tem banco ao pé da cama das suítes 1 e 2; o motor não os fez
+# e esticou as camas por cima deles. As camas voltam ao comprimento do PDF (a ponta, com a borda e a
+# sombra, vem para o pé do PDF; o vão vira o tapete) e entram os bancos de duas almofadas do Térreo
+# da Casa B, como na Casa C, no retângulo do PDF, com a sombra deles
+BANCOS_D = {
+    # (linhas, ponta da cama com a borda e a sombra, deslocamento até o pé do PDF, colunas de tapete)
+    "encurtar": [("suíte 1", (796, 862), (676, 688), 12, (667, 673)),
+                 ("suíte 2", (796, 862), (1009, 1019), -10, (1019, 1022))],
+    "fonte": BANCOS_C["fonte"],
+    "modelos": BANCOS_C["modelos"],
+    "lugares": [("suíte 1", "casal", (674.6, 802.3, 687.0, 852.0), False),
+                ("suíte 2", "casal", (1002.5, 802.3, 1014.8, 852.0), False)],
+}
 
 
 def alinhar_base(render):
@@ -1586,6 +1604,50 @@ def escada_master(out, f2, chapada):
     return out
 
 
+def bancos_camas(out):
+    """Como na Casa C (mesmo código), com as camas e os bancos da Casa D."""
+    q = BANCOS_D
+    a = out.copy()
+    for nome, (y0, y1), (s0, s1), d, tapete in q["encurtar"]:
+        out[y0:y1, s0 + d:s1 + d] = a[y0:y1, s0:s1]                   # a ponta vem para o pé do PDF
+        if tapete:                                                      # vão: só as colunas de tapete
+            t0, t1 = tapete
+            v0 = s0 if d > 0 else s1 + d                                # o vão fica do lado do pé
+            for k in range(abs(d)):
+                out[y0:y1, v0 + k] = a[y0:y1, t1 - 1 - (k % (t1 - t0))]
+        elif d > 0:                                                     # pé à esquerda: vão à esquerda
+            for k in range(d):
+                out[y0:y1, s0 + k] = a[y0:y1, s0 - 1 - k]
+        else:                                                           # pé à direita: vão à direita
+            for k in range(-d):
+                out[y0:y1, s1 - 1 - k] = a[y0:y1, s1 + k]
+        print(f"    {nome}: cama no comprimento do PDF ({d:+d} px)")
+    fonte = cv2.imread(str(q["fonte"])).astype(np.float32)
+    for nome, modelo, (dx0, dy0, dx1, dy1), girar in q["lugares"]:
+        (cx0, cy0, cx1, cy1), (bx0, by0, bx1, by1), piso = q["modelos"][modelo]
+        spr = fonte[cy0:cy1, cx0:cx1].copy()
+        bx0, by0, bx1, by1 = bx0 - cx0, by0 - cy0, bx1 - cx0, by1 - cy0
+        corpo = np.zeros(spr.shape[:2], np.float32)
+        corpo[by0:by1, bx0:bx1] = 1
+        fator = np.where(corpo > 0, 1.0, np.clip(spr.mean(axis=2) / piso, 0, 1)).astype(np.float32)
+        if girar:
+            W = spr.shape[1]
+            spr, corpo, fator = (cv2.rotate(m, cv2.ROTATE_90_COUNTERCLOCKWISE) for m in (spr, corpo, fator))
+            bx0, by0, bx1, by1 = by0, W - bx1, by1, W - bx0
+        sx, sy = (dx1 - dx0) / (bx1 - bx0), (dy1 - dy0) / (by1 - by0)
+        jx0, jy0 = int(np.floor(dx0 - bx0 * sx)) - 1, int(np.floor(dy0 - by0 * sy)) - 1
+        jw = int(np.ceil(spr.shape[1] * sx)) + 3
+        jh = int(np.ceil(spr.shape[0] * sy)) + 3
+        M = np.float32([[sx, 0, dx0 - bx0 * sx - jx0], [0, sy, dy0 - by0 * sy - jy0]])
+        spr_w = cv2.warpAffine(spr, M, (jw, jh), flags=cv2.INTER_AREA, borderMode=cv2.BORDER_REPLICATE)
+        al = cv2.warpAffine(corpo, M, (jw, jh), flags=cv2.INTER_LINEAR, borderValue=0)[..., None]
+        fa = cv2.warpAffine(fator, M, (jw, jh), flags=cv2.INTER_LINEAR, borderValue=1)[..., None]
+        reg = out[jy0:jy0 + jh, jx0:jx0 + jw].astype(np.float32) * fa
+        out[jy0:jy0 + jh, jx0:jx0 + jw] = np.clip(reg * (1 - al) + spr_w * al, 0, 255).astype(np.uint8)
+        print(f"    banco ({modelo}) ao pé da cama: {nome}")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1650,6 +1712,8 @@ def main():
     out = piscina(out, f2, orig)
     print("[24] erro 20: escada junto à suíte master")
     out = escada_master(out, f2, chapada)
+    print("[25] erro 21: bancos ao pé das camas das suítes 1 e 2")
+    out = bancos_camas(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
