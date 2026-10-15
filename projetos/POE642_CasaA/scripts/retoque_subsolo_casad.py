@@ -33,6 +33,11 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
 11. Esteiras: os letreiros que o motor escreveu nas lonas saem (sem texto na planta); fica a lona.
 13. Arcos das portas sobre o granito (pedido do usuário): como no Térreo, ficam em cinza e traço
     fino; aqui o arco preto do render (~1,5 px) sai antes (granito tecido) e o cinza vem do PDF.
+14. Escada (pedido do usuário): só sombreamento que denota a descida, sem linhas nem tracejados. O
+    Bege Bahia é refeito sem a linha de caminhamento, o círculo, a marca de corte, o tracejado e as
+    linhas dos degraus; os pisos (16, de 27,1 px, do PDF) escurecem para baixo (a escada sobe da
+    esquerda, do pátio, para a direita) e cada espelho joga uma sombra curta no piso de baixo, à
+    esquerda dele: os degraus se leem só pelo tom.
 12. Pátio: a parede tracejada dupla de fora (à esquerda, embaixo e no alto), que o motor apagou ou
     cortou, volta: os traços do PDF (ARQ_PAREDE, fora da planta) desenhados no quadro comum.
 
@@ -225,6 +230,14 @@ TRACEJADO = {
 # arcos das portas sobre o granito: o cinza do Térreo (Casa C), num traço na escala deste render
 ARCOS = {"granito": (50, 66, 90), "tol": 12, "fracao": 0.3, "min_px": 15,
          "cor": (160, 161, 160), "larg": 1.1, "faixa": 2.5, "escuro": 70}
+
+ESCADA = {
+    "ret": (690, 390, 1130, 490),          # do pátio (a sombra do 1º espelho) à porta do depósito
+    "refazer_de": 693,                     # daí para a direita o Bege Bahia é refeito (some o círculo)
+    "x0": 696.4, "passo": 27.1, "pisos": 16,
+    "escurece": 0.12,                      # o piso de baixo fica 12% mais escuro que o de cima
+    "sombra": 0.2, "alcance": 5.0,         # sombra do espelho no piso de baixo: força e decaimento (px)
+}
 
 
 def apagar_largo(out, ret, mascara, fontes, sigma=4.0, borda=0.8, lum_min=None, lum_max=None, escuros=False):
@@ -562,6 +575,27 @@ def arcos_granito(out, A):
     return out
 
 
+def escada(out):
+    q = ESCADA
+    x0, y0, x1, y1 = q["ret"]
+    h, w = y1 - y0, x1 - x0
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    luz = interpolar(reg, reg.mean(axis=2) > 195, 6.0)          # sem as linhas (mais escuras)
+    novo = reg.copy()
+    r0 = q["refazer_de"] - x0
+    novo[:, r0:] = (textura(out, SAUNA["fontes"], h, w, p=24) * luz)[:, r0:]
+    # fator por coluna, com 8 amostras por px (bordas dos degraus sem serrilhado e sem linha)
+    xs = x0 + (np.arange(w * SS) + 0.5) / SS
+    k = np.clip(np.floor((xs - q["x0"]) / q["passo"]), -1, q["pisos"] - 1)
+    base = np.where(k < 0, 1.0, 1 - q["escurece"] * (q["pisos"] - 1 - k) / (q["pisos"] - 1))
+    d = q["x0"] + (k + 1) * q["passo"] - xs                   # distância ao espelho logo à direita
+    sombra = np.where(k < q["pisos"] - 1, 1 - q["sombra"] * np.exp(-d / q["alcance"]), 1.0)
+    fator = (base * sombra).reshape(w, SS).mean(axis=1)
+    out[y0:y1, x0:x1] = np.clip(novo * fator[None, :, None], 0, 255).astype(np.uint8)
+    print("    escada: sem linhas; degraus pelo tom, escurecendo para baixo, com a sombra de cada espelho")
+    return out
+
+
 def no_quadro(out, A):
     """O render retocado vai para o quadro comum (a base 16:9 na largura das pranchas) pelo inverso da
     cadeia base -> render (a base reduzida ao tamanho do render, não uniforme, e o afim A), com 2 x
@@ -655,6 +689,8 @@ def main():
     out = letreiros(out)
     print("[13] arcos das portas sobre o granito")
     out = arcos_granito(out, alinhar_base(orig))
+    print("[14] escada: sombreamento de descida, sem linhas")
+    out = escada(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
