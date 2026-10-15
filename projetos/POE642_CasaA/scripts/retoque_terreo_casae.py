@@ -30,6 +30,8 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
 6. Elevador: o motor fez a caixa num piso de pedra clara com um contorno de cabine solto no meio.
    Como nas Casas C e D: caixa branca e a cabine do Subsolo da Casa B aprovado (porta embaixo, como
    no PDF), ocupando a caixa inteira, com 1 a 2 px de folga; as folhas da porta e a soleira ficam.
+7. CPD: o vaso sanitário que o motor pôs junto à parede da direita (no PDF o CPD não tem louça) sai,
+   com a sombra; ali volta o granito tecido do próprio CPD, na luz do piso em volta.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -49,6 +51,7 @@ RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
 
 from retoque_terreo_casad import interpolar, textura  # noqa: E402
+from retoque_subsolo_casad import apagar_largo  # noqa: E402
 
 SS = 8                             # superamostragem dos traços desenhados
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png"
@@ -407,6 +410,25 @@ def elevador(out):
     return out
 
 
+# vaso inventado no CPD (item 7): a caixa do vaso e da sombra dele (a parede da direita começa em
+# x = 1290) e trechos limpos do granito do CPD (à direita da folha da porta, que fica em x ~1245)
+VASO_CPD = {
+    "janela": (1240, 368, 1290, 418), "vaso": (1259, 391, 1290, 414),
+    "fontes": [(1249, 372, 1286, 390), (1249, 391, 1258, 417)],
+}
+
+
+def vaso_cpd(out):
+    q = VASO_CPD
+    wx0, wy0, wx1, wy1 = q["janela"]
+    vx0, vy0, vx1, vy1 = q["vaso"]
+    m = np.zeros((wy1 - wy0, wx1 - wx0), bool)
+    m[vy0 - wy0:vy1 - wy0, vx0 - wx0:vx1 - wx0] = True
+    out = apagar_largo(out, q["janela"], m, q["fontes"], sigma=3.0, lum_min=40, escuros=True)
+    print(f"    vaso do CPD: {int(m.sum())} px de granito tecido")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -427,6 +449,8 @@ def main():
     out = barras(out, A)
     print("[6] elevador: cabine ocupando a caixa")
     out = elevador(out)
+    print("[7] CPD: vaso inventado")
+    out = vaso_cpd(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

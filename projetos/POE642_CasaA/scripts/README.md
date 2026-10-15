@@ -305,6 +305,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **Tapete (item 4):** `tapete` troca a elipse do render pelo polígono do PDF (`mascara_pdf`, como na Casa D): o que sai vira travertino das mesmas colunas (faixa limpa acima, em espelho), na luz do travertino em volta e com a sombra dos móveis; o que entra vira tapete tecido. Os móveis são os polígonos brancos do PDF em volta (`caixa_render` acha cada um pela caixa), com folga.
 - **Barras da varanda (item 5):** `barras` junta os quadradinhos brancos da ARQ_ELEMENTOS FIXOS em manchas, tira de cada uma o retângulo girado (largura pela área) e desenha em 8 x (`poligono_aa`, `linha_aa`): sombra curta, cinza da base com volume leve e contorno fino.
 - **Elevador (item 6):** `elevador`, como nas Casas C e D: caixa branca e a cabine do Subsolo da Casa B, sem girar (porta embaixo), ocupando a caixa.
+- **CPD (item 7):** `vaso_cpd` tira o vaso inventado com o `apagar_largo` do Subsolo da Casa D (granito tecido do próprio CPD, na luz do piso em volta).
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado
