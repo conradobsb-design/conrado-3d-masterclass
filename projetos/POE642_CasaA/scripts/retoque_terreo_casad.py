@@ -158,6 +158,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
    com o perfil de luz da madeira junto à parede; entram a cuba de louça, a torneira cromada, a área
    molhada em traço cinza fino nos lados livres e o frigobar em inox, com contorno e o vão da porta. O
    trecho de cima (armário) fica em madeira.
+36. Chuveiros dos banhos 2 e 3 (pedido do usuário): o motor escreveu um texto ilegível no lugar deles.
+   O texto sai (o piso limpo dos próprios banhos, na luz do entorno sem a parede) e entram os chuveiros
+   do PDF, como os do banho master: a ducha quadrada, o braço cromado até a parede do meio e a canopla,
+   com sombra curta.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -629,6 +633,20 @@ MINIBAR = {
     "janela": (912, 800, 940, 875),
 }
 
+# chuveiros dos banhos 2 e 3 (pedido do usuário): o motor escreveu um texto ilegível no lugar deles.
+# O texto sai (o piso limpo dos próprios banhos, na luz do entorno) e entram os chuveiros do PDF,
+# como os do banho master: a ducha quadrada (placa da Casa A), o braço cromado até a parede do meio e
+# a canopla, com sombra curta
+CHUVEIROS_23 = {
+    "apagar": [(1101, 881, 1121, 894), (1126, 881, 1147, 894)],
+    "fonte_piso": [(1082, 878, 1100, 898), (1148, 878, 1162, 898)],
+    "chuveiros": [{"nome": "banho 2", "ducha": (1106.4, 884.4, 1112.6, 890.5), "braco": (1109.5, 1121.3, 887.4),
+                   "canopla": (1120.6, 886.5, 1121.5, 888.4)},
+                  {"nome": "banho 3", "ducha": (1135.0, 884.5, 1141.2, 890.6), "braco": (1126.3, 1138.1, 887.6),
+                   "canopla": (1126.1, 886.6, 1127.0, 888.5)}],
+    "janela": (1100, 878, 1148, 896),
+}
+
 
 def alinhar_base(render):
     """Base 16:9 reduzida e levada ao render por SIFT + afim; também a base chapada (v2)."""
@@ -813,15 +831,20 @@ def textura(out, fontes, alto, largo, p=16):
     return quilting(f, alto, largo, p=p, sobra=max(3, p // 3), candidatos=600)[:alto, :largo]
 
 
-def apagar(out, ret, mascara, fontes, sigma=5.0, borda=1.0):
+def apagar(out, ret, mascara, fontes, sigma=5.0, borda=1.0, lum_min=None):
     """Tira um objeto: os px da máscara viram a textura das fontes na luz do entorno (o campo de
-    luz, por canal, é interpolado dos px de fora da máscara por convolução normalizada)."""
+    luz, por canal, é interpolado dos px de fora da máscara por convolução normalizada; com lum_min,
+    só dos px de fora mais claros que isso, para a parede não escurecer a luz)."""
     x0, y0, x1, y1 = ret
     h, w = y1 - y0, x1 - x0
     m = cv2.GaussianBlur(mascara.astype(np.float32), (0, 0), borda) if borda else mascara.astype(np.float32)
     m = np.maximum(m, mascara.astype(np.float32))
     reg = out[y0:y1, x0:x1].astype(np.float32)
-    fora = (1 - mascara.astype(np.float32))[..., None]
+    fora = 1 - mascara.astype(np.float32)
+    if lum_min is not None:
+        fora *= reg.mean(axis=2) > lum_min
+        m *= reg.mean(axis=2) > lum_min                # a parede (escura) fica
+    fora = fora[..., None]
     num = cv2.GaussianBlur(reg * fora, (0, 0), sigma)
     den = cv2.GaussianBlur(np.repeat(fora, 3, axis=2), (0, 0), sigma)
     luz = num / np.maximum(den, 1e-3)
@@ -2075,6 +2098,66 @@ def minibar(out, chapada):
     return out
 
 
+def desenhar_chuveiro(out, janela, d, larg_braco=0.8, sombra=None):
+    """Chuveiro visto de cima, como os do banho master: sombra curta, ducha quadrada (placa da Casa A
+    reduzida), braço cromado da parede até o centro da ducha e canopla."""
+    sombra = sombra or CHUVEIROS_BHM["sombra"]
+    wx0, wy0, wx1, wy1 = janela
+    h, w = wy1 - wy0, wx1 - wx0
+
+    def px(v, o=0.0):
+        return int(round((v - o) * SS))
+
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+
+    def pintar(mascara, cor):
+        nonlocal reg
+        a = cv2.resize(mascara.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        reg = reg * (1 - a) + np.array(cor, np.float32) * a
+
+    dx0, dy0, dx1, dy1 = d["ducha"]
+    ducha = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(ducha, (px(dx0, wx0), px(dy0, wy0)), (px(dx1, wx0), px(dy1, wy0)), 255, -1)
+    M = np.float32([[1, 0, sombra["desloc"][0] * SS], [0, 1, sombra["desloc"][1] * SS]])
+    sb = cv2.GaussianBlur(cv2.warpAffine(ducha.astype(np.float32), M, (w * SS, h * SS)), (0, 0), sombra["sigma"] * SS) / 255
+    reg *= (1 - sombra["forca"] * cv2.resize(sb, (w, h), interpolation=cv2.INTER_AREA))[..., None]
+    img = cv2.imread(str(CHUVEIRO_TETO[0]))
+    hx0, hy0, hx1, hy1 = CHUVEIRO_TETO[1]
+    placa = cv2.resize(img[hy0:hy1, hx0:hx1], (px(dx1 - dx0), px(dy1 - dy0)), interpolation=cv2.INTER_CUBIC)
+    cor = np.zeros((h * SS, w * SS, 3), np.uint8)
+    cor[px(dy0, wy0):px(dy0, wy0) + placa.shape[0], px(dx0, wx0):px(dx0, wx0) + placa.shape[1]] = placa
+    a = cv2.resize(ducha.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    c = cv2.resize(cor.astype(np.float32) * (ducha[..., None] / 255), (w, h), interpolation=cv2.INTER_AREA) / np.maximum(a, 1e-6)
+    reg = reg * (1 - a) + c * a
+    bx0, bx1, by = d["braco"]
+    braco = np.zeros_like(ducha)
+    cv2.line(braco, (px(bx0, wx0), px(by, wy0)), (px(bx1, wx0), px(by, wy0)), 255, px(larg_braco))
+    brilho = np.zeros_like(ducha)
+    cv2.line(brilho, (px(bx0, wx0), px(by - 0.1, wy0)), (px(bx1, wx0), px(by - 0.1, wy0)), 255, max(1, px(0.3)))
+    pintar(braco, CROMO_ESCURO)
+    pintar(brilho, CROMO_CLARO)
+    cx0, cy0, cx1, cy1 = d["canopla"]
+    canopla = np.zeros_like(ducha)
+    cv2.rectangle(canopla, (px(cx0, wx0), px(cy0, wy0)), (px(cx1, wx0), px(cy1, wy0)), 255, -1)
+    pintar(canopla, CROMO)
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    return out
+
+
+def chuveiros_23(out):
+    q = CHUVEIROS_23
+    for x0, y0, x1, y1 in q["apagar"]:
+        pad = 4
+        ret = (x0 - pad, y0 - pad, x1 + pad, y1 + pad)
+        m = np.zeros((ret[3] - ret[1], ret[2] - ret[0]), bool)
+        m[pad:-pad, pad:-pad] = True
+        out = apagar(out, ret, m, q["fonte_piso"], sigma=4.0, borda=0.8, lum_min=110)
+    for d in q["chuveiros"]:
+        out = desenhar_chuveiro(out, q["janela"], d)
+        print(f"    {d['nome']}: texto do motor fora; chuveiro do PDF (ducha, braço e canopla)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -2153,6 +2236,8 @@ def main():
     out = gourmet_pia(out, orig)
     print("[30] bancada da sala íntima: cuba, área molhada e frigobar")
     out = minibar(out, chapada)
+    print("[31] chuveiros dos banhos 2 e 3")
+    out = chuveiros_23(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

@@ -401,3 +401,4 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   33. tapete da mesa redonda no contorno orgânico do PDF (o que sobra vira travertino).
   34. máquinas da área de serviço em inox, como os eletrodomésticos da cozinha.
   35. bancada da sala íntima: quartzo com cuba redonda e torneira na parede, área molhada em traço cinza fino e frigobar em inox (o armário de cima fica em madeira).
+  36. chuveiros dos banhos 2 e 3: o texto ilegível do motor sai e entram as duchas do PDF com braço até a parede do meio, como no banho master.
