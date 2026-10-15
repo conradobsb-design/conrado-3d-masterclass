@@ -38,6 +38,12 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    Elas saem com a sombra. O piso volta continuando os veios verticais de cima, em espelho; a
    borda de cima do tapete vem do trecho limpo da mesma borda à direita; o tapete logo abaixo vem
    das linhas limpas de baixo, nas mesmas colunas. Emenda suave dos lados.
+8. Estar, conforme o PDF: o aparador comprido que o motor inventou abaixo do sofá sai (vira
+   piso); a mesa de centro, que o motor fez numa peça só, vira as duas do PDF, uma sobre a outra
+   (a emenda é refeita com a borda de baixo, a sombra e a borda de cima da própria mesa); as
+   mesas laterais quadradas viram as orgânicas do PDF (duas, a menor atrás), com a forma tirada
+   do PDF levado ao render, no tampo de madeira da mesa de centro, com contorno e sombra curta.
+   O piso que volta é tecido (image quilting) do travertino limpo do próprio estar.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -45,11 +51,13 @@ Uso:
   python retoque_terreo_casac.py RENDER.webp --saida PASTA --nome NOME
 """
 import argparse
+import json
 import sys
 from pathlib import Path
 
 import cv2
 import numpy as np
+import pymupdf
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
@@ -59,6 +67,9 @@ from texturizar_base import quilting  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v3_texturas_16x9.png"
 BASE_CHAPADA = RAIZ / "POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v2_16x9.png"   # cores exatas da legenda
+BASE_SEM_TELA = RAIZ / "POE642_CasaC/bases/POE642_CasaC_BASE_Terreo_v2.png"          # antes da tela 16:9
+PDF = RAIZ / "_pdfs_cliente/642 - TÉRREO - CASA C.pdf"
+CONFIG = RAIZ / "POE642_CasaC/config_bases.json"
 VIDRO = (211, 214, 214)                                  # BGR de #D6D6D3
 # lote no render: linha tracejada da esquerda e muros de cima e de baixo
 LOTE = {"x_esq": 155, "muro_cima": (24, 32), "muro_baixo": (952, 958)}
@@ -142,6 +153,26 @@ POLTRONAS = {
     "tapete_dy": 10,                    # 699-706: tapete das linhas de baixo, mesmas colunas
     "emenda": 3,
 }
+# estar, conforme o PDF (geometria do PDF levado ao render pela mesma cadeia da base)
+ESTAR = {
+    # aparador abaixo do sofá (não existe no PDF) e mesas laterais quadradas do motor, com a
+    # sombra: viram piso. Emenda suave (esq, cima, dir, baixo) só onde encosta em piso limpo
+    "piso": [((898, 834, 1042, 851), (2, 0, 2, 0)),
+             ((889, 800, 911, 828), (2, 2, 0, 2)),
+             ((1026, 800, 1049, 828), (0, 2, 2, 2))],
+    "fonte_piso": [(880, 640, 1060, 668), (1050, 798, 1088, 846)],   # travertino limpo do estar
+    # mesa de centro: no PDF são duas, com os contornos nas linhas 726-744 e 747-766; o render
+    # fez uma só na mesma área. Linhas da emenda: destino <- origem (borda de baixo, sombra, sombra
+    # clara e borda de cima da própria mesa)
+    "mesa": {"x": (930, 1002), "linhas": {744: 766, 745: 767, 746: 768, 747: 726}},
+    # mesas laterais orgânicas: janela e sementes (a menor, atrás, primeiro)
+    "laterais": [((885, 788, 916, 828), [(906, 800), (902, 813)]),
+                 ((1022, 786, 1052, 826), [(1040, 798), (1037, 811)])],
+    "madeira": (945, 735, 990, 762),             # tampo da mesa de centro (veio vertical)
+    "contorno": (80, 99, 118),                   # BGR do contorno da mesa de centro
+    "sombra": {"desloc": (-2, 2), "sigma": 1.2, "forca": 0.45},
+}
+SS = 8
 CHUVEIRO_TETO = (RAIZ / "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png", (1160, 214, 1171, 225))
 CHUVEIROS = {
     "BH master 1": (411.2, 187.9),
@@ -175,7 +206,44 @@ def alinhar_base(render):
     print(f"    base alinhada: {int(inl.sum())} pontos, escala {A[0, 0]:.4f} x {A[1, 1]:.4f}")
     chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), render.shape[1::-1], interpolation=cv2.INTER_NEAREST)
     return (cv2.warpAffine(base, A, render.shape[1::-1], flags=cv2.INTER_LINEAR, borderValue=(255, 255, 255)),
-            cv2.warpAffine(chapada, A, render.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255)))
+            cv2.warpAffine(chapada, A, render.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255)),
+            A)
+
+
+def pdf_no_render(janela, A, forma_render):
+    """Trecho do PDF rasterizado e levado ao render pela mesma cadeia da base (recorte, largura
+    da base, tela 16:9, redução ao tamanho do render e o afim A), em SS vezes a resolução."""
+    cfg = json.loads(CONFIG.read_text())
+    pg = pymupdf.open(PDF)[cfg["pavimentos"]["Terreo"]["pagina"]]
+    fx0, fy0, fx1, fy1 = cfg["recorte"]
+    clip = pymupdf.Rect(pg.rect.width * fx0, pg.rect.height * fy0, pg.rect.width * fx1, pg.rect.height * fy1)
+    zoom = cfg["largura_px"] / clip.width
+    hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    ht, wt = cv2.imread(str(BASE_CHAPADA), cv2.IMREAD_GRAYSCALE).shape
+    sx, sy = forma_render[1] / wt, forma_render[0] / ht
+
+    def p2r(x, y):
+        bx, by = ((x - clip.x0) * zoom + (wt - wb) // 2) * sx, ((y - clip.y0) * zoom + (ht - hb) // 2) * sy
+        return A[0, 0] * bx + A[0, 1] * by + A[0, 2], A[1, 0] * bx + A[1, 1] * by + A[1, 2]
+
+    Ai = np.linalg.inv(np.vstack([A, [0, 0, 1]]))
+
+    def r2p(x, y):
+        bx, by, _ = Ai @ [x, y, 1]
+        return (bx / sx - (wt - wb) // 2) / zoom + clip.x0, (by / sy - (ht - hb) // 2) / zoom + clip.y0
+
+    x0, y0, x1, y1 = janela
+    a, b = r2p(x0 - 2, y0 - 2), r2p(x1 + 2, y1 + 2)
+    ret = pymupdf.Rect(a[0], a[1], b[0], b[1])
+    zp = 60
+    pix = pg.get_pixmap(clip=ret, matrix=pymupdf.Matrix(zp, zp), alpha=False)
+    img = np.frombuffer(pix.samples, np.uint8).reshape(pix.height, pix.width, 3)[..., ::-1]
+    src = [(0, 0), (pix.width, 0), (0, pix.height)]
+    dst = [((p2r(ret.x0 + u / zp, ret.y0 + v / zp)[0] - x0) * SS, (p2r(ret.x0 + u / zp, ret.y0 + v / zp)[1] - y0) * SS)
+           for u, v in src]
+    M = cv2.getAffineTransform(np.float32(src), np.float32(dst))
+    return cv2.warpAffine(np.ascontiguousarray(img), M, ((x1 - x0) * SS, (y1 - y0) * SS), flags=cv2.INTER_AREA,
+                          borderValue=(255, 255, 255))
 
 
 def fora_do_lote(out, base):
@@ -359,6 +427,75 @@ def poltronas_estar(out):
     return out
 
 
+def piso_tecido(out, ret, emenda, fontes, semente):
+    """Travertino tecido (veios verticais: só espelhos, sem girar), no tom do piso limpo em volta."""
+    x0, y0, x1, y1 = ret
+    h, w = y1 - y0, x1 - x0
+    tex = quilting(fontes, h, w, p=16, sobra=4, candidatos=800, rng=np.random.default_rng(semente))
+    dentro = np.zeros(out.shape[:2], np.uint8)
+    dentro[y0:y1, x0:x1] = 1
+    anel = (cv2.dilate(dentro, np.ones((9, 9), np.uint8)) > 0) & (dentro == 0)
+    px = out[anel].astype(np.float32)
+    px = px[px.mean(axis=1) > 195]                         # só piso e tapete (sem parede e sombra)
+    tex += np.median(px, axis=0) - np.median(tex.reshape(-1, 3), axis=0)
+    al = np.ones((h, w), np.float32)
+    e, c, d, b = emenda
+    for k in range(e):
+        al[:, k] = np.minimum(al[:, k], (k + 1) / (e + 1))
+    for k in range(d):
+        al[:, w - 1 - k] = np.minimum(al[:, w - 1 - k], (k + 1) / (d + 1))
+    for k in range(c):
+        al[k, :] = np.minimum(al[k, :], (k + 1) / (c + 1))
+    for k in range(b):
+        al[h - 1 - k, :] = np.minimum(al[h - 1 - k, :], (k + 1) / (b + 1))
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - al[..., None]) + tex * al[..., None], 0, 255).astype(np.uint8)
+
+
+def estar(out, A):
+    e = ESTAR
+    a = out.copy()
+    mx0, my0, mx1, my1 = e["madeira"]
+    t = a[my0:my1, mx0:mx1].astype(np.float32)
+
+    fontes = []
+    for x0, y0, x1, y1 in e["fonte_piso"]:
+        f = a[y0:y1, x0:x1].astype(np.float32)
+        fontes += [np.ascontiguousarray(v) for v in (f, f[:, ::-1], f[::-1, :], f[::-1, ::-1])]
+    for k, (ret, emenda) in enumerate(e["piso"]):
+        piso_tecido(out, ret, emenda, fontes, 642 + k)
+    print(f"    aparador e mesas laterais quadradas: {len(e['piso'])} trechos de piso tecido")
+
+    x0, x1 = e["mesa"]["x"]
+    for destino, origem in e["mesa"]["linhas"].items():
+        out[destino, x0:x1] = a[origem, x0:x1]
+    print("    mesa de centro em duas peças, como no PDF")
+
+    s = e["sombra"]
+    for (wx0, wy0, wx1, wy1), sementes in e["laterais"]:
+        h, w = wy1 - wy0, wx1 - wx0
+        pdf = pdf_no_render((wx0, wy0, wx1, wy1), A, out.shape)
+        branco = (cv2.cvtColor(pdf, cv2.COLOR_BGR2GRAY) > 235).astype(np.uint8)
+        lin = np.concatenate([t, t[::-1]] * (h // (2 * t.shape[0]) + 1), axis=0)[:h]
+        madeira = np.concatenate([lin, lin[:, ::-1]] * (w // (2 * t.shape[1]) + 1), axis=1)[:, :w]
+        reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+        for sx, sy in sementes:
+            f = branco.copy()
+            cv2.floodFill(f, np.zeros((f.shape[0] + 2, f.shape[1] + 2), np.uint8), ((sx - wx0) * SS, (sy - wy0) * SS), 2)
+            forma = cv2.dilate((f == 2).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(np.float32)
+            M = np.float32([[1, 0, s["desloc"][0] * SS], [0, 1, s["desloc"][1] * SS]])
+            sombra = cv2.GaussianBlur(cv2.warpAffine(forma, M, (w * SS, h * SS)), (0, 0), s["sigma"] * SS)
+            reg *= (1 - s["forca"] * cv2.resize(sombra, (w, h), interpolation=cv2.INTER_AREA))[..., None]
+            borda = forma - cv2.erode(forma, np.ones((7, 7), np.uint8))           # contorno de ~0,8 px
+            a_tampo = cv2.resize(forma, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+            a_borda = cv2.resize(borda, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+            reg = reg * (1 - a_tampo) + madeira * a_tampo
+            reg = reg * (1 - a_borda) + np.array(e["contorno"], np.float32) * a_borda
+        out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    mesas laterais orgânicas do PDF: {len(e['laterais'])} pares")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -371,7 +508,7 @@ def main():
     print("[1] chuveiros de teto")
     out = chuveiros_teto(out)
     print("[2] plantas fora do lote")
-    base, chapada = alinhar_base(orig)
+    base, chapada, A = alinhar_base(orig)
     out = fora_do_lote(out, base)
     print("[3] jardins de inverno")
     out = jardins_de_inverno(out)
@@ -384,12 +521,14 @@ def main():
     out = tanques(out)
     print("[7] poltronas a mais no estar")
     out = poltronas_estar(out)
+    print("[8] estar conforme o PDF")
+    out = estar(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[8] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[9] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
