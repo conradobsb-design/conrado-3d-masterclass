@@ -61,6 +61,10 @@ Os itens são corrigidos um a um, na ordem pedida pelo usuário.
 11. Erro 5 da lista (projeção sobre a entrada da garagem): os retângulos com X (DOC_LINHAS E
    PROJEÇÕES) e o contorno tracejado (os traços curtos das layers de parede e de elementos fixos),
    levados ao render, em cinza e traço fino, como os arcos sobre o granito, só sobre o granito.
+12. Erro 6 da lista (portas sobre o granito sem arco): como na Casa C, os arcos das portas (curvas da
+   layer ARQ_PAREDE) que caem sobre o granito são redesenhados em cinza e traço fino, só onde o piso é
+   granito: banho gourmet, louceiro, despensa, serviço para a garagem e a porta dupla da área
+   descoberta.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -81,6 +85,7 @@ RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
 from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO, SS  # noqa: E402
 from retoque_terreo_casac import COZINHA as COZINHA_C  # noqa: E402
+from retoque_terreo_casac import ARCOS_GRANITO  # noqa: E402
 from texturizar_base import quilting  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaD/bases/POE642_CasaD_BASE_Terreo_v3_texturas_16x9.png"
@@ -846,6 +851,44 @@ def projecao_garagem(out, A):
     return out
 
 
+def arcos_no_granito(out, A, chapada):
+    """Como na Casa C: os arcos das portas (curvas da layer ARQ_PAREDE) que caem sobre o granito
+    são redesenhados em cinza e traço fino (pedido do usuário na Casa C), só onde o piso é granito."""
+    q = ARCOS_GRANITO
+    gran = (np.abs(chapada.astype(np.int32) - np.array(q["granito"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    gran = cv2.morphologyEx(gran, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))   # fecha os traços finos
+    pg, p2r = pdf_cadeia(A, out.shape)
+    n = 0
+    for d in pg.get_drawings():
+        if d.get("layer") != "ARQ_PAREDE" or not any(it[0] == "c" for it in d["items"]):
+            continue
+        r = d["rect"]
+        (x0, y0), (x1, y1) = p2r(r.x0, r.y0), p2r(r.x1, r.y1)
+        x0, y0, x1, y1 = int(x0) - 2, int(y0) - 2, int(np.ceil(x1)) + 3, int(np.ceil(y1)) + 3
+        if max(x1 - x0, y1 - y0) < q["min_px"] or x0 < 0 or y0 < 0 or x1 > out.shape[1] or y1 > out.shape[0]:
+            continue
+        g = gran[y0:y1, x0:x1]
+        if g.mean() < q["fracao"]:
+            continue
+        h, w = y1 - y0, x1 - x0
+        f = np.zeros((h * SS, w * SS), np.uint8)
+        for it in d["items"]:
+            if it[0] != "c":
+                continue
+            pp = np.array([p2r(v.x, v.y) for v in it[1:5]])
+            tt = np.linspace(0, 1, 60)[:, None]
+            curva = (1 - tt) ** 3 * pp[0] + 3 * (1 - tt) ** 2 * tt * pp[1] + 3 * (1 - tt) * tt ** 2 * pp[2] + tt ** 3 * pp[3]
+            pts = np.round((curva - [x0, y0]) * SS).astype(np.int32)
+            cv2.polylines(f, [pts], False, 255, max(1, int(round(q["larg"] * SS))), cv2.LINE_AA)
+        a = (cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * g)[..., None]
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + np.array(q["cor"], np.float32) * a, 0, 255).astype(np.uint8)
+        n += 1
+        print(f"      arco em ({(x0 + x1) / 2:.0f}, {(y0 + y1) / 2:.0f})")
+    print(f"    {n} arcos de porta sobre o granito em cinza")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -882,6 +925,8 @@ def main():
     out = acesso(out)
     print("[11] erro 5: projeção com X sobre a entrada da garagem")
     out = projecao_garagem(out, A)
+    print("[12] erro 6: arcos das portas sobre o granito")
+    out = arcos_no_granito(out, A, chapada)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

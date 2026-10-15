@@ -377,3 +377,4 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   9. erro 3 da lista: o canteiro à direita do hall vira grama tecida do gramado do render, com sombra dos muros e as linhas do PDF (retângulos com X e tracejados) em cinza claro.
   10. erro 4 da lista: a ponta direita do acesso de veículos, em cinza, vira o granito da garagem (quilting com o perfil de luz do granito ao lado).
   11. erro 5 da lista: a projeção com X e o contorno tracejado sobre a entrada da garagem, em cinza e traço fino, só sobre o granito.
+  12. erro 6 da lista: arcos das portas sobre o granito em cinza e traço fino, como na Casa C (banho gourmet, louceiro, despensa, serviço → garagem e porta dupla da área descoberta).
