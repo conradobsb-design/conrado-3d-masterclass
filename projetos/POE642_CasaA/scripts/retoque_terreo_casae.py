@@ -142,6 +142,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
 33. Garagem, lateral direita (pedido do usuário): faltavam os brises. Os 8 retângulos da ARQ_ELEMENTOS
     FIXOS sobre o granito, acima do trecho de parede, entram no mesmo desenho dos brises do escritório
     (réguas de madeira em tons variados, contorno fino e sombra curta).
+34. Banco do estar da varanda (pedido do usuário): banco de madeira sem encosto. O encosto de madeira
+    que o motor pôs embaixo do banco sai (Bege Bahia tecido da varanda, com a sombra dele); o banco, no
+    retângulo do PDF, vira um tampo de madeira (a da mesa de jantar do render, com o veio no comprido)
+    em ripas, com juntas finas, contorno fino e sombra curta, sem as almofadas.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -582,7 +586,7 @@ def maquinas(out):
         out[:] = np.clip(out * (1 - al) + img * al, 0, 255).astype(np.uint8)
         c = linha_aa(forma, cantos, q["larg_contorno"], fechada=True)[..., None]
         out[:] = np.clip(out * (1 - c) + np.float32(q["contorno"]) * c, 0, 255).astype(np.uint8)
-    print(f"    área de serviço: bloco de madeira em granito tecido e as duas máquinas em inox da Casa D")
+    print("    área de serviço: bloco de madeira em granito tecido e as duas máquinas em inox da Casa D")
     return out
 
 
@@ -1037,12 +1041,6 @@ def jardim_flores(out, orig):
     dentro[fy0 - wy0:fy1 - wy0, fx0 - wx0:fx1 - wx0] = True
     n, lab = cv2.connectedComponents(planta.astype(np.uint8))
     ligada = np.isin(lab, np.unique(lab[dentro & planta])) & (lab > 0)
-    r0, r1 = j["ref_trav"]
-    ref = np.median(orig[r0:r1, wx0:wx1].astype(np.float32).mean(axis=2), axis=0)[None, :]
-    k = 2 * j["alcance_sombra"] + 1
-    perto = cv2.dilate(ligada.astype(np.uint8), np.ones((k, k), np.uint8)) > 0
-    folha = cv2.dilate(ligada.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
-    sombra = perto & (lum < ref - j["sombra"]) & ~folha
     # quanto pode sair: borda irregular (ruído suave) entre o mínimo e o máximo de cada lado
     rng = np.random.default_rng(q["semente"])
     h, w = lum.shape
@@ -1637,6 +1635,42 @@ def paisagismo(out):
     return out
 
 
+# banco de madeira sem encosto (item 34): o retângulo do PDF, o encosto do motor (com a sombra) e o
+# Bege Bahia limpo da varanda
+BANCO_VARANDA = {"banco": (708.0, 746.4, 776.4, 765.0), "encosto": (700, 764, 782, 779),
+                 "janela": (690, 755, 795, 790), "fontes": [(700, 778, 786, 812), (530, 700, 600, 760)],
+                 "fonte_madeira": (885, 505, 914, 589), "ripas": 4, "junta": (70, 92, 118), "larg_junta": 0.35,
+                 "forca_junta": 0.45, "contorno": (60, 72, 88), "larg_contorno": 0.45,
+                 "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.35}}
+
+
+def banco_varanda(out, orig):
+    q = BANCO_VARANDA
+    wx0, wy0, wx1, wy1 = q["janela"]
+    bx0, by0, bx1, by1 = q["banco"]
+    ex0, ey0, ex1, ey1 = q["encosto"]
+    m = np.zeros((wy1 - wy0, wx1 - wx0), bool)
+    m[ey0 - wy0:ey1 - wy0, ex0 - wx0:ex1 - wx0] = True
+    m[:int(np.ceil(by1)) - wy0, int(bx0) - wx0:int(np.ceil(bx1)) - wx0] = False      # o banco fica
+    out = apagar_largo(out, q["janela"], m, q["fontes"], sigma=4.0, borda=0.6, lum_min=185, lum_max=228,
+                       escuros=True)
+    out = sombra_curta(out, q["banco"], q["sombra"])
+    a, b, c, d = q["fonte_madeira"]
+    madeira = cv2.rotate(orig[b:d, a:c], cv2.ROTATE_90_CLOCKWISE)          # veio no comprido (em x)
+    hh, ww = int(np.ceil(by1 - by0)), int(np.ceil(bx1 - bx0))
+    out = colar(out, madeira[:hh, :ww], q["banco"])
+    forma = out.shape[:2]
+    n = q["ripas"]
+    for k in range(1, n):
+        y = by0 + k * (by1 - by0) / n
+        a_ = linha_aa(forma, [(bx0, y), (bx1, y)], q["larg_junta"])[..., None] * q["forca_junta"]
+        out[:] = np.clip(out * (1 - a_) + np.float32(q["junta"]) * a_, 0, 255).astype(np.uint8)
+    a_ = linha_aa(forma, [(bx0, by0), (bx1, by0), (bx1, by1), (bx0, by1)], q["larg_contorno"], fechada=True)[..., None]
+    out[:] = np.clip(out * (1 - a_) + np.float32(q["contorno"]) * a_, 0, 255).astype(np.uint8)
+    print(f"    estar da varanda: banco de madeira em {n} ripas, sem encosto")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1708,6 +1742,8 @@ def main():
     out = paisagismo(out)
     print("[33] brises da lateral direita da garagem")
     out = brises(out, orig, A, BRISES_GARAGEM)
+    print("[34] estar da varanda: banco de madeira sem encosto")
+    out = banco_varanda(out, orig)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
 

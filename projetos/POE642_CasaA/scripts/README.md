@@ -330,6 +330,7 @@ O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase 
 - **Spa (item 30):** `degrau_spa`, o da Casa D com subpixel: o contorno de fora do degrau escurece por lado com o perfil das arestas do fundo.
 - **Vidros da piscina (item 31):** `vidros_piscina` desenha as duas folhas do PDF como os vidros finos da Casa D (vidro, linha central, contorno).
 - **Paisagismo (item 32):** `paisagismo`, o da Casa D: um trecho de touceira do render, recortado pela densidade da folhagem, com borda ondulada nos lados cortados, só sobre a grama.
+- **Banco da varanda (item 34):** `banco_varanda` apaga o encosto do motor (`apagar_largo`, Bege Bahia) e cola a madeira da mesa de jantar no retângulo do PDF, em ripas, com contorno e sombra curta.
 
 ```bash
 python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado
