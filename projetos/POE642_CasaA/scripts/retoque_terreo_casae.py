@@ -27,6 +27,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
 5. Varanda: as quatro barras a 45° à esquerda das poltronas (ARQ_ELEMENTOS FIXOS), que o motor
    apagou, voltam na geometria do PDF (cada uma, o retângulo girado da mancha do PDF), no cinza em que
    aparecem na base, com volume leve, contorno fino e sombra curta no piso.
+6. Elevador: o motor fez a caixa num piso de pedra clara com um contorno de cabine solto no meio.
+   Como nas Casas C e D: caixa branca e a cabine do Subsolo da Casa B aprovado (porta embaixo, como
+   no PDF), ocupando a caixa inteira, com 1 a 2 px de folga; as folhas da porta e a soleira ficam.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -382,6 +385,28 @@ def barras(out, A):
     return out
 
 
+# elevador (item 6): o vão da caixa entre as paredes (no quadro do render) e a cabine do Subsolo da
+# Casa B aprovado, a mesma das Casas C e D; lá a porta já fica embaixo, como aqui (sem girar)
+ELEVADOR = {
+    "interior": (1018, 370, 1067, 415),
+    "cabine": (1020, 372, 1066, 414),          # ocupa a caixa, com 1-2 px de folga (como na Casa D)
+    "branco": (255, 255, 255),
+    "fonte": (RAIZ / "POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final.png", (3116, 1011, 3276, 1162)),
+}
+
+
+def elevador(out):
+    q = ELEVADOR
+    x0, y0, x1, y1 = q["interior"]
+    out[y0:y1, x0:x1] = q["branco"]
+    arq, (fx0, fy0, fx1, fy1) = q["fonte"]
+    cabine = cv2.imread(str(arq))[fy0:fy1, fx0:fx1]
+    cx0, cy0, cx1, cy1 = q["cabine"]
+    out[cy0:cy1, cx0:cx1] = cv2.resize(cabine, (cx1 - cx0, cy1 - cy0), interpolation=cv2.INTER_AREA)
+    print(f"    elevador: caixa branca e a cabine do Subsolo da Casa B ({cx1 - cx0}x{cy1 - cy0} px)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -400,6 +425,8 @@ def main():
     out = tapete(out, A)
     print("[5] varanda: as quatro barras a 45° do PDF")
     out = barras(out, A)
+    print("[6] elevador: cabine ocupando a caixa")
+    out = elevador(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
