@@ -19,6 +19,10 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
 5. DCE 1: o armário até o teto (o da linha diagonal) saiu quase branco; vira a madeira areia dos
    armários até o teto do Térreo, com o veio no comprido, sem a diagonal e sem sombra. A mancha
    clara do piso junto ao criado-mudo sai, como as do depósito.
+6. Sauna: o braço do banco em L que o motor subiu junto ao vidro sai; ali volta o piso de Bege Bahia.
+7. Sauna: o banco, que o motor fez em madeira, fica em Bege Bahia (pedido do usuário), em dois tons
+   mais escuros, como na base: o degrau da frente (0,93) e o assento junto à parede (0,88), com as
+   linhas do PDF (bordas e a linha dupla de cada nível, layer ARQ_ELEMENTOS FIXOS).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_subsolo_casad.py POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_render.webp \
@@ -130,6 +134,23 @@ ARMARIO_DCE = {
     "mancha": (921, 192, 9, 8),            # mancha clara no granito, acima do criado-mudo
     "janela_mancha": (906, 178, 945, 204),
     "fontes_piso": [(840, 110, 900, 180), (840, 200, 880, 240)],
+}
+
+# sauna (px do render, da geometria do PDF): o miolo é refeito inteiro em Bege Bahia tecido do pátio
+# (o mesmo tom do piso da sauna no render), na luz do piso que já era Bege Bahia
+SAUNA = {
+    "miolo": (597, 889, 846, 1073),        # entre o caixilho do vidro, as paredes e a linha da porta
+    "fontes": [(330, 430, 450, 620), (450, 430, 560, 620), (330, 640, 450, 830), (450, 640, 560, 830)],
+    "luz": (660, 890, 845, 970),           # o piso que já era Bege Bahia
+    "banco": (609.1, 973.3, 846.9, 1073.6),
+    "degrau_ate": 1023.5,                  # o degrau da frente vai até aqui; daí para baixo, o assento
+    "tons": (0.93, 0.88),
+    # (pontos, escurecimento): bordas de cada nível e a linha dupla de dentro (ARQ_ELEMENTOS FIXOS)
+    "linhas": [([(846.9, 973.3), (609.1, 973.3), (609.1, 1073.6)], 0.62),
+               ([(609.1, 1023.5), (846.9, 1023.5)], 0.62),
+               ([(846.9, 981.4), (618.3, 981.4), (618.3, 1073.7)], 0.78),
+               ([(618.3, 1031.9), (846.9, 1031.9)], 0.78)],
+    "largura": 1.2,
 }
 
 
@@ -295,6 +316,32 @@ def armario_dce(out):
     return out
 
 
+def sauna(out):
+    q = SAUNA
+    x0, y0, x1, y1 = q["miolo"]
+    h, w = y1 - y0, x1 - x0
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    amostra = np.zeros((h, w), bool)
+    lx0, ly0, lx1, ly1 = q["luz"]
+    amostra[ly0 - y0:ly1 - y0, lx0 - x0:lx1 - x0] = reg[ly0 - y0:ly1 - y0, lx0 - x0:lx1 - x0].mean(axis=2) > 170
+    luz = interpolar(reg, amostra, 6.0)
+    novo = textura(out, q["fontes"], h, w, p=24) * luz
+    bx0, by0, bx1, by1 = q["banco"]
+    yy, xx = np.mgrid[y0:y1, x0:x1] + 0.5
+    no_banco = (xx >= bx0) & (xx <= bx1) & (yy >= by0)
+    novo[no_banco & (yy < q["degrau_ate"])] *= q["tons"][0]
+    novo[no_banco & (yy >= q["degrau_ate"])] *= q["tons"][1]
+    for pts, k in q["linhas"]:
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        p = np.int32([[round((px - x0) * SS), round((py - y0) * SS)] for px, py in pts])
+        cv2.polylines(m, [p], False, 255, max(1, int(round(q["largura"] * SS))), cv2.LINE_AA)
+        a = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        novo = novo * (1 - a) + novo * k * a
+    out[y0:y1, x0:x1] = np.clip(novo, 0, 255).astype(np.uint8)
+    print("    sauna: braço do L fora; banco em Bege Bahia em dois tons, com as linhas do PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -314,6 +361,8 @@ def main():
     out = trocar_chuveiro(out, CHUVEIRO_WC)
     print("[5] DCE 1: armário até o teto")
     out = armario_dce(out)
+    print("[6, 7] sauna: braço do banco em L e banco em Bege Bahia")
+    out = sauna(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

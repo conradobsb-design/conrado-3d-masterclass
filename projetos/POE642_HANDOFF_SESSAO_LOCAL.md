@@ -433,3 +433,6 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   3. WC DCE: o piso da área do chuveiro (acima da divisória), mais claro e acinzentado, voltou ao tom do granito do resto do banheiro (ganho por canal; a textura do render fica).
   4. WC DCE: o símbolo do CAD virou o chuveiro do Térreo (placa aprovada da Casa A, braço cromado até a parede da esquerda e canopla), na geometria do PDF levada ao render pela cadeia da base (`pdf_cadeia`); sombra e brilho na escala do render (~2,73 x a do Térreo).
   5. DCE 1: o armário até o teto (o da diagonal), quase branco no render, virou a madeira areia dos armários até o teto do Térreo retocado (tecida por quilting, ampliada 2,73 x, o mesmo aspecto que ela tem na prancha), com o veio no comprido, sem a diagonal; os contornos escuros do render ficam. A mancha clara do piso acima do criado-mudo saiu.
+  6. sauna: o braço do banco em L que o motor subiu junto ao vidro saiu; ali voltou o piso de Bege Bahia.
+  7. sauna: o banco de madeira do motor ficou em Bege Bahia (pedido do usuário), em dois tons como na base (degrau da frente 0,93, assento junto à parede 0,88), com as linhas do PDF (bordas e linha dupla de cada nível, ARQ_ELEMENTOS FIXOS). O miolo da sauna foi refeito em Bege Bahia tecido do pátio, na luz do piso que já era Bege Bahia.
+
