@@ -11,23 +11,70 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
    PDF) vira o granito do piso.
 2. Depósito: as juntas de placas gigantes (~1,9 m) e as quatro manchas claras do granito saem; o piso
    fica contínuo, como no DCE 1 e no WC DCE (pedido do usuário).
+3. WC DCE: o piso da área do chuveiro (acima da divisória) saiu mais claro e acinzentado; volta ao tom
+   do granito do resto do banheiro (ganho por canal, a textura do render fica).
+4. WC DCE: o símbolo do CAD (quadrado, braço e o toco na parede) vira o chuveiro do Térreo: ducha
+   quadrada (a placa aprovada da Casa A), braço cromado até a parede da esquerda e canopla, na
+   geometria do PDF.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_subsolo_casad.py POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_render.webp \
       --saida POE642_CasaD/renders --nome POE642_CasaD_PH_Subsolo_v1_retocado
 """
 import argparse
+import json
 import sys
 from pathlib import Path
 
 import cv2
 import numpy as np
+import pymupdf
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
 
+from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO, SS  # noqa: E402
 from retoque_terreo_casad import interpolar, textura  # noqa: E402
+
+BASE = RAIZ / "POE642_CasaD/bases/POE642_CasaD_BASE_Subsolo_v3_texturas_16x9.png"
+BASE_CHAPADA = RAIZ / "POE642_CasaD/bases/POE642_CasaD_BASE_Subsolo_v2_16x9.png"   # cores exatas da legenda
+BASE_SEM_TELA = RAIZ / "POE642_CasaD/bases/POE642_CasaD_BASE_Subsolo_v2.png"          # antes da tela 16:9
+PDF = RAIZ / "_pdfs_cliente/642 - SUBSOLO - CASA D.pdf"
+CONFIG = RAIZ / "POE642_CasaD/config_bases.json"
+
+
+def alinhar_base(render):
+    """Base 16:9 reduzida ao tamanho do render e levada a ele por SIFT + afim (como no Térreo)."""
+    base = cv2.resize(cv2.imread(str(BASE)), render.shape[1::-1], interpolation=cv2.INTER_AREA)
+    sift = cv2.SIFT_create(10000)
+    k1, d1 = sift.detectAndCompute(cv2.cvtColor(base, cv2.COLOR_BGR2GRAY), None)
+    k2, d2 = sift.detectAndCompute(cv2.cvtColor(render, cv2.COLOR_BGR2GRAY), None)
+    pares = [a for a, b in cv2.BFMatcher().knnMatch(d1, d2, k=2) if a.distance < 0.7 * b.distance]
+    A, inl = cv2.estimateAffine2D(np.float32([k1[a.queryIdx].pt for a in pares]),
+                                  np.float32([k2[a.trainIdx].pt for a in pares]), ransacReprojThreshold=2.0)
+    print(f"    base alinhada: {int(inl.sum())} pontos, escala {A[0, 0]:.4f} x {A[1, 1]:.4f}")
+    return A
+
+
+def pdf_cadeia(A, forma_render):
+    """Página do PDF e a conversão PDF -> render pela mesma cadeia da base (recorte, largura da base,
+    tela 16:9, redução ao tamanho do render e o afim A)."""
+    cfg = json.loads(CONFIG.read_text())
+    pg = pymupdf.open(PDF)[cfg["pavimentos"]["Subsolo"]["pagina"]]
+    fx0, fy0, fx1, fy1 = cfg["recorte"]
+    clip = pymupdf.Rect(pg.rect.width * fx0, pg.rect.height * fy0, pg.rect.width * fx1, pg.rect.height * fy1)
+    zoom = cfg["largura_px"] / clip.width
+    hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    ht, wt = cv2.imread(str(BASE_CHAPADA), cv2.IMREAD_GRAYSCALE).shape
+    sx, sy = forma_render[1] / wt, forma_render[0] / ht
+
+    def p2r(x, y):
+        bx, by = ((x - clip.x0) * zoom + (wt - wb) // 2) * sx, ((y - clip.y0) * zoom + (ht - hb) // 2) * sy
+        return A[0, 0] * bx + A[0, 1] * by + A[0, 2], A[1, 0] * bx + A[1, 1] * by + A[1, 2]
+
+    return pg, p2r
+
 
 # trechos limpos do granito do depósito, entre as juntas do motor (px do render)
 GRANITO = [(1110, 60, 1176, 220), (1192, 60, 1326, 220), (1192, 240, 1326, 380)]
@@ -45,6 +92,27 @@ JUNTAS_DEPOSITO = {
     "manchas": [(1112, 252, 9, 8), (1092, 305, 9, 10), (1130, 305, 9, 9), (1204, 422, 9, 10)],
     "lum": (45, 200),                      # só o granito e as juntas mudam; a parede e os arcos ficam
     "folha": (1141, 479, 1199, 488),       # a folha da porta no fim da escada (com o contorno) não muda
+}
+
+BOX_WC = {
+    "box": (711, 45, 809, 104),            # piso do box do WC DCE, acima da divisória cinza
+    "ref": (712, 114, 808, 245),           # o granito do resto do banheiro
+    "lum": (50, 130),                      # só o piso entra na conta (sem louças nem paredes)
+}
+
+# chuveiros na geometria do PDF (px do render), com a placa aprovada da Casa A, como no Térreo;
+# a escala do render é ~2,73 x a do Térreo, então sombra e brilho crescem na mesma proporção
+SOMBRA_CHUVEIRO = {"desloc": (-2.7, 2.7), "sigma": 2.2, "forca": 0.3}
+CHUVEIRO_WC = {
+    "nome": "WC DCE",
+    "lum_max": 130,                                       # a luz vem só do granito, sem o branco do símbolo
+    "apagar": [(711, 67, 754, 92)],                       # o quadrado, o braço e o toco junto à parede
+    "fontes": [(714, 48, 730, 66), (756, 48, 806, 100), (714, 93, 750, 103)],
+    "parede": (699, 72, 711, 87),                         # o toco branco que entrou na parede
+    "ducha": (733.4, 70.8, 750.2, 87.5),
+    "braco": (709.6, 78.1, 741.8, 80.2),                  # do centro da ducha à face da parede
+    "canopla": (709.6, 76.4, 711.4, 81.9),
+    "janela": (698, 62, 760, 98),
 }
 
 
@@ -95,6 +163,98 @@ def juntas_deposito(out):
     return out
 
 
+def piso_box_wc(out):
+    q = BOX_WC
+    reg = out.astype(np.float32)
+
+    def mediana(r):
+        x0, y0, x1, y1 = r
+        p = reg[y0:y1, x0:x1].reshape(-1, 3)
+        lum = p.mean(axis=1)
+        return np.median(p[(lum > q["lum"][0]) & (lum < q["lum"][1])], axis=0)
+
+    ganho = mediana(q["ref"]) / mediana(q["box"])
+    x0, y0, x1, y1 = q["box"]
+    b = reg[y0:y1, x0:x1]
+    piso = (b.mean(axis=2) > 45)[..., None]
+    out[y0:y1, x0:x1] = np.clip(np.where(piso, b * ganho, b), 0, 255).astype(np.uint8)
+    print(f"    piso do box do WC DCE no tom do granito (ganho BGR {np.round(ganho, 3)})")
+    return out
+
+
+def desenhar_chuveiro(out, d, sombra=SOMBRA_CHUVEIRO):
+    """Chuveiro visto de cima, como o do WC DCE do Térreo: sombra curta, ducha quadrada (a placa da
+    Casa A), braço cromado (horizontal ou vertical, um retângulo do PDF) do centro da ducha à face da
+    parede, com o brilho no eixo, e a canopla na parede."""
+    wx0, wy0, wx1, wy1 = d["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+
+    def ret_ss(r):
+        return (int(round((r[0] - wx0) * SS)), int(round((r[1] - wy0) * SS)),
+                int(round((r[2] - wx0) * SS)), int(round((r[3] - wy0) * SS)))
+
+    def pintar(mascara, cor):
+        nonlocal reg
+        a = cv2.resize(mascara.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        reg = reg * (1 - a) + np.array(cor, np.float32) * a
+
+    dx0, dy0, dx1, dy1 = ret_ss(d["ducha"])
+    ducha = np.zeros((h * SS, w * SS), np.uint8)
+    cv2.rectangle(ducha, (dx0, dy0), (dx1, dy1), 255, -1)
+    M = np.float32([[1, 0, sombra["desloc"][0] * SS], [0, 1, sombra["desloc"][1] * SS]])
+    sb = cv2.GaussianBlur(cv2.warpAffine(ducha.astype(np.float32), M, (w * SS, h * SS)), (0, 0), sombra["sigma"] * SS) / 255
+    reg *= (1 - sombra["forca"] * cv2.resize(sb, (w, h), interpolation=cv2.INTER_AREA))[..., None]
+    img = cv2.imread(str(CHUVEIRO_TETO[0]))
+    hx0, hy0, hx1, hy1 = CHUVEIRO_TETO[1]
+    placa = cv2.resize(img[hy0:hy1, hx0:hx1], (dx1 - dx0, dy1 - dy0), interpolation=cv2.INTER_CUBIC)
+    cor = np.zeros((h * SS, w * SS, 3), np.uint8)
+    cor[dy0:dy1, dx0:dx1] = placa
+    a = cv2.resize(ducha.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    c = cv2.resize(cor.astype(np.float32) * (ducha[..., None] / 255), (w, h), interpolation=cv2.INTER_AREA) / np.maximum(a, 1e-6)
+    reg = reg * (1 - a) + c * a
+    bx0, by0, bx1, by1 = ret_ss(d["braco"])
+    braco = np.zeros_like(ducha)
+    cv2.rectangle(braco, (bx0, by0), (bx1, by1), 255, -1)
+    brilho = np.zeros_like(ducha)
+    if bx1 - bx0 >= by1 - by0:                       # braço horizontal: brilho ao longo de x
+        yc = (by0 + by1) // 2 - SS // 4
+        cv2.line(brilho, (bx0, yc), (bx1, yc), 255, max(1, SS // 2))
+    else:
+        xc = (bx0 + bx1) // 2 - SS // 4
+        cv2.line(brilho, (xc, by0), (xc, by1), 255, max(1, SS // 2))
+    pintar(braco, CROMO_ESCURO)
+    pintar(brilho, CROMO_CLARO)
+    cx0, cy0, cx1, cy1 = ret_ss(d["canopla"])
+    canopla = np.zeros_like(ducha)
+    cv2.rectangle(canopla, (cx0, cy0), (cx1, cy1), 255, -1)
+    pintar(canopla, CROMO)
+    out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
+    return out
+
+
+def trocar_chuveiro(out, q):
+    """O símbolo do CAD sai (piso tecido do próprio ambiente, na luz do entorno), a parede volta ao
+    preto onde o símbolo entrou nela, e entra o chuveiro desenhado."""
+    pad = 8                                          # margem de piso em volta: a luz vem dela
+    for x0, y0, x1, y1 in q["apagar"]:
+        m = np.zeros((y1 - y0 + 2 * pad, x1 - x0 + 2 * pad), bool)
+        m[pad:-pad, pad:-pad] = True
+        out = apagar_largo(out, (x0 - pad, y0 - pad, x1 + pad, y1 + pad), m, q["fontes"], sigma=2.0, borda=0.0,
+                           lum_min=45, lum_max=q.get("lum_max", 200))
+    if q.get("parede"):
+        x0, y0, x1, y1 = q["parede"]
+        out[y0:y1, x0:x1] = np.minimum(out[y0:y1, x0:x1], 6)
+    for x0, y0, x1, y1 in q.get("alem", []):
+        m = np.zeros((y1 - y0 + 2 * pad, x1 - x0 + 2 * pad), bool)
+        m[pad:-pad, pad:-pad] = True
+        out = apagar_largo(out, (x0 - pad, y0 - pad, x1 + pad, y1 + pad), m, q["fontes_alem"], sigma=2.0,
+                           borda=0.0, lum_min=45)
+    out = desenhar_chuveiro(out, q)
+    print(f"    {q['nome']}: símbolo do CAD fora; ducha, braço e canopla do PDF")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -108,6 +268,10 @@ def main():
     out = faixa_deposito(out)
     print("[2] depósito: juntas gigantes e manchas claras")
     out = juntas_deposito(out)
+    print("[3] WC DCE: piso do box no tom do granito")
+    out = piso_box_wc(out)
+    print("[4] WC DCE: chuveiro")
+    out = trocar_chuveiro(out, CHUVEIRO_WC)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
