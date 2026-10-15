@@ -192,6 +192,7 @@ python retoque_subsolo_casac_v3.py ../../POE642_CasaC/renders/POE642_CasaC_PH_Su
 A imagem final do Térreo da Casa C é o render, retocado sem IA, erro por erro.
 - **Chuveiros de teto:** a placa aprovada da Casa A no centro de cada símbolo de chuveiro do PDF.
 - **Plantas fora do lote:** fora da linha tracejada e dos muros volta a ser a base (fundo branco); os muros cobertos por folhas são refeitos com o muro do próprio render.
+- **Jardins de inverno:** as plantas ficam só dentro das floreiras; vidros e parede refeitos com o perfil de um trecho limpo; o piso em volta vem do piso limpo ao lado, com emenda suave.
 
 ```bash
 python retoque_terreo_casac.py ../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_v3_render.webp --saida ../../POE642_CasaC/renders --nome POE642_CasaC_PH_Terreo_v3_retocado
