@@ -55,7 +55,10 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
 11. Box do BH master 2: o motor deixou o vão da esquerda sem a porta de giro. Ela volta como no
    PDF (layer ARQ_BANCADAS, levada ao render pela mesma cadeia da base): a folha de vidro aberta
    junto à parede de cima e o arco do giro até o batente de baixo, no traço das portas do render.
-   O arco passa por baixo do chuveiro de teto (que fica por cima).
+   O arco passa por baixo do chuveiro de teto (que fica por cima). O vão ao lado do chuveiro
+   (retângulo com dois X tracejados na layer DOC_LINHAS E PROJEÇÕES, algo acima do plano de corte)
+   fica tracejado sobre o piso, como no PDF: os X vêm do próprio PDF levado ao render e o lado
+   livre (o da esquerda, os outros são parede) ganha um contorno tracejado no mesmo traço.
 12. Escada estreita abaixo do box: no PDF são 10 degraus (do 11 ao 20, subindo para a direita);
    o motor fez 6. As 5 arestas internas do motor saem (as colunas viram o piso limpo do degrau ao
    lado) e entram 9, repartidas por igual entre a primeira e a última aresta do render, com o
@@ -213,6 +216,9 @@ PORTA_BOX = {
     "chuveiro": (437, 479, 448, 490),
     "vidro": (211, 214, 214), "contorno": (85, 92, 98),
     "arco": (110, 126, 144), "larg_arco": 0.8, "larg_contorno": 0.35,
+    # vão (projeção) ao lado do chuveiro: retângulo do PDF, lado livre à esquerda e o tracejado
+    "vao": (452.3, 469.4, 462.4, 500.1), "janela_vao": (448, 466, 466, 503),
+    "traco": 2.0, "espaco": 1.2, "larg_traco": 0.5,
 }
 # escada estreita (degraus 11 a 20 do PDF): linhas dos degraus (com a sombra da parede em cima e a
 # aresta de baixo), bordas das arestas (x onde volta o claro), perfil da sombra à esquerda da aresta
@@ -583,7 +589,7 @@ def cooktops(out):
     return out
 
 
-def porta_box(out):
+def porta_box(out, A):
     q = PORTA_BOX
     wx0, wy0, wx1, wy1 = q["janela"]
     h, w = wy1 - wy0, wx1 - wx0
@@ -612,6 +618,25 @@ def porta_box(out):
     reg = reg * (1 - a_m) + np.array(q["vidro"], np.float32) * a_m
     out[wy0:wy1, wx0:wx1] = np.clip(reg, 0, 255).astype(np.uint8)
     print("    porta de giro do box do BH master 2: folha aberta e arco")
+
+    # vão ao lado do chuveiro: os X tracejados do PDF e o contorno tracejado do lado livre
+    jx0, jy0, jx1, jy1 = q["janela_vao"]
+    h, w = jy1 - jy0, jx1 - jx0
+    cinza = cv2.cvtColor(pdf_no_render((jx0, jy0, jx1, jy1), A, out.shape), cv2.COLOR_BGR2GRAY).astype(np.float32)
+    vx0, vy0, vx1, vy1 = q["vao"]
+    dentro = np.zeros((h * SS, w * SS), np.float32)
+    dentro[px(vy0, jy0) + 3:px(vy1, jy0) - 3, px(vx0, jx0) + 3:px(vx1, jx0) - 3] = 1
+    k = max(1, px(q["larg_traco"], 0))                                   # diagonais na largura do traço
+    tracos = cv2.dilate(((cinza < 160) & (dentro > 0)).astype(np.uint8), np.ones((k, k), np.uint8)).astype(np.float32)
+    y = vy0
+    while y < vy1:
+        cv2.line(tracos, (px(vx0, jx0), px(y, jy0)), (px(vx0, jx0), px(min(y + q["traco"], vy1), jy0)), 1.0,
+                 max(1, px(q["larg_traco"], 0)))
+        y += q["traco"] + q["espaco"]
+    a = np.clip(cv2.resize(tracos, (w, h), interpolation=cv2.INTER_AREA), 0, 1)[..., None]
+    reg = out[jy0:jy1, jx0:jx1].astype(np.float32)
+    out[jy0:jy1, jx0:jx1] = np.clip(reg * (1 - a) + np.array(q["arco"], np.float32) * a, 0, 255).astype(np.uint8)
+    print("    vão ao lado do chuveiro: tracejado sobre o piso, como no PDF")
     return out
 
 
@@ -670,7 +695,7 @@ def main():
     print("[10] cooktops")
     out = cooktops(out)
     print("[11] porta do box do BH master 2")
-    out = porta_box(out)
+    out = porta_box(out, A)
     print("[12] degraus da escada estreita")
     out = escada(out)
 
