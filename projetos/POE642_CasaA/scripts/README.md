@@ -297,6 +297,15 @@ O render do Subsolo manteve o layout, mas aproximou a planta (~2,73 x a base red
 python retoque_subsolo_casad.py ../../POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_render.webp --saida ../../POE642_CasaD/renders --nome POE642_CasaD_PH_Subsolo_v1_retocado
 ```
 
+## Retoque do Térreo da Casa E: `retoque_terreo_casae.py`
+
+O render do Térreo da Casa E manteve a escala da base (o afim do SIFT é quase a identidade). Os retoques são feitos no quadro do render, um item por vez.
+- **Lote (itens 1 e 2):** `lote` deixa a base alinhada fora do lote (à esquerda do gramado, entre o gramado e a linha tracejada da direita e abaixo do muro de baixo): saem a vegetação que passava para fora e a faixa de Bege Bahia inventada à direita dos pisantes, e voltam as linhas tracejadas. Os muros de cima e de baixo viram, linha a linha, a mediana de um trecho limpo (sem as folhas por cima).
+
+```bash
+python retoque_terreo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Terreo_v1_retocado
+```
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:
