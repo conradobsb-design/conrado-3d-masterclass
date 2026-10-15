@@ -45,6 +45,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     retângulos do PDF: a cama de solteiro (girada, cabeceira na parede da direita, como o travesseiro
     do PDF) e o criado-mudo, com sombra curta, e o armário até o teto em areia com veio, sem sombra de
     móvel baixo e com contorno fino.
+11. WC DCE 1: o motor pôs um segundo vaso no alto, onde o PDF tem o chuveiro. O vaso sai (Bege Bahia
+    tecido do próprio WC, na luz do piso em volta; a linha do box fica) e entra o chuveiro do PDF como
+    o do WC DCE da Casa D (ducha quadrada com a placa da Casa A, braço cromado até a parede da direita
+    e canopla, com sombra curta).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -63,7 +67,7 @@ AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
 
-from retoque_terreo_casad import interpolar, textura  # noqa: E402
+from retoque_terreo_casad import desenhar_chuveiro, interpolar, textura  # noqa: E402
 from retoque_subsolo_casad import apagar_largo  # noqa: E402
 
 SS = 8                             # superamostragem dos traços desenhados
@@ -583,6 +587,32 @@ def dce(out):
     return out
 
 
+# WC DCE 1 (item 11): o vaso que o motor pôs onde o PDF tem o chuveiro (a parede da direita começa em
+# x = 1289; a linha do box, que fica, nas linhas 280-281) e o chuveiro do PDF (ARQ_LOUÇAS E METAIS),
+# no mesmo desenho do WC DCE da Casa D (a mesma geometria, quase)
+WC_DCE = {
+    "janela": (1248, 254, 1292, 286), "vaso": (1263, 257, 1289, 280),
+    "fontes": [(1251, 258, 1264, 279), (1251, 283, 1270, 299)],
+    # a luz vem só do piso limpo (~200-212): sem a linha do box nem a borda da parede, que escureciam
+    "lum_min": 192,
+    "chuveiro": {"nome": "WC DCE 1", "ducha": (1275.0, 264.4, 1281.2, 270.5), "braco": (1278.1, 1289.7, 267.5),
+                 "canopla": (1288.9, 266.5, 1290.1, 268.5)},
+    "sombra": {"desloc": (-1.0, 1.0), "sigma": 0.8, "forca": 0.3},
+}
+
+
+def wc_dce(out):
+    q = WC_DCE
+    wx0, wy0, wx1, wy1 = q["janela"]
+    vx0, vy0, vx1, vy1 = q["vaso"]
+    m = np.zeros((wy1 - wy0, wx1 - wx0), bool)
+    m[vy0 - wy0:vy1 - wy0, vx0 - wx0:vx1 - wx0] = True
+    out = apagar_largo(out, q["janela"], m, q["fontes"], sigma=3.0, lum_min=q["lum_min"], lum_max=235, escuros=True)
+    out = desenhar_chuveiro(out, q["janela"], q["chuveiro"], sombra=q["sombra"])
+    print("    WC DCE 1: vaso inventado fora; chuveiro do PDF (ducha, braço e canopla)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -611,6 +641,8 @@ def main():
     out = x_descoberta(out, A)
     print("[10] DCE: cama, criado-mudo e armário até o teto")
     out = dce(out)
+    print("[11] WC DCE 1: vaso a mais no lugar do chuveiro")
+    out = wc_dce(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
