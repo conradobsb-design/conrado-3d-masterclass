@@ -30,6 +30,7 @@ Itens (o mapa está em POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_erros.jpg
 10. Vestiário: a cuba da bancada saiu só com o contorno cinza; vira uma cuba branca de verdade (aba,
     bacia com a borda mais escura indo ao fundo claro, válvula cromada), com a torneira cromada
     saindo da faixa junto à parede, na geometria do PDF (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS).
+11. Esteiras: os letreiros que o motor escreveu nas lonas saem (sem texto na planta); fica a lona.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_subsolo_casad.py POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_v1_render.webp \
@@ -196,6 +197,13 @@ CUBA_VEST = {
     "base": ((1076.0, 1017.65), 2.6), "bica": (1076.0, 1089.5, 1017.65), "larg_bica": 2.6,
     "escuro": (92, 96, 100), "sombra": (1.6, 1.6, 2.0, 0.35),
     "janela": (1062, 982, 1114, 1052),
+}
+
+LETREIROS = {
+    # (janela, caixa das letras): as letras são os px claros (> 100) da caixa, com 2 px de folga
+    "lonas": [((1138, 780, 1183, 822), (1142, 788, 1153, 813)), ((1223, 777, 1268, 820), (1227, 785, 1238, 810))],
+    "fontes": [(1150, 812, 1175, 836), (1238, 812, 1262, 836)],
+    "lum": (60, 100),                      # a luz vem só da lona (sem os trilhos nem as letras)
 }
 
 
@@ -463,6 +471,27 @@ def cuba_vestiario(out):
     return out
 
 
+def letreiros(out):
+    q = LETREIROS
+    total = 0
+    for janela, caixa in q["lonas"]:
+        x0, y0, x1, y1 = janela
+        cx0, cy0, cx1, cy1 = caixa
+        lum = out[y0:y1, x0:x1].astype(np.float32).mean(axis=2)
+        m = np.zeros((y1 - y0, x1 - x0), np.uint8)
+        m[cy0 - y0:cy1 - y0, cx0 - x0:cx1 - x0] = (lum[cy0 - y0:cy1 - y0, cx0 - x0:cx1 - x0] > q["lum"][1])
+        m = cv2.dilate(m, np.ones((5, 5), np.uint8)).astype(bool)
+        m[:cy0 - y0] = False
+        m[cy1 - y0:] = False
+        m[:, :cx0 - x0] = False
+        m[:, cx1 - x0:] = False
+        total += int(m.sum())
+        out = apagar_largo(out, janela, m, q["fontes"], sigma=2.0, borda=0.6, lum_min=q["lum"][0],
+                           lum_max=q["lum"][1], escuros=True)
+    print(f"    letreiros das esteiras fora: {total} px")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -490,6 +519,8 @@ def main():
     out = trocar_chuveiro(out, CHUVEIRO_BOX)
     print("[10] vestiário: cuba da bancada")
     out = cuba_vestiario(out)
+    print("[11] esteiras: letreiros nas lonas")
+    out = letreiros(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
