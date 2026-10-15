@@ -117,6 +117,9 @@ Os erros são corrigidos um a um, na ordem combinada com o usuário.
    a borda e a sombra, vem para o pé do PDF; o vão vira o tapete ou o piso ao lado) e entram os
    bancos do Térreo da Casa B aprovado (pedido do usuário): o de duas almofadas nas camas de casal
    e o liso nas de solteiro, levados ao retângulo do PDF, com a sombra deles.
+24. Vaso do lavabo masculino: o motor fez um vaso cinza, fora do padrão dos outros. Ele sai (o piso
+   vem do trecho limpo à esquerda, nas mesmas linhas) e entra o vaso suspenso branco do lavabo ao
+   lado da adega, espelhado (a parede fica à direita) e levado ao retângulo do PDF.
 
 As coordenadas estão em px do render (2000 x 1116).
 
@@ -394,6 +397,13 @@ BANCOS = {
                 ("Quarto 3", "casal", (671.8, 197.5, 684.3, 247.2), False),
                 ("Quarto 2, cama de cima", "solteiro", (815.5, 191.0, 824.9, 219.0), False),
                 ("Quarto 2, cama de baixo", "solteiro", (815.5, 245.4, 824.9, 273.3), False)],
+}
+# vaso do lavabo masculino: o vaso cinza do motor (com a sombra), o piso limpo à esquerda e o vaso
+# padrão (recorte, corpo e tom do piso em volta) do lavabo ao lado da adega; retângulo do PDF
+VASO_MASC = {
+    "apagar": (664, 826, 687, 843), "piso_dx": -23,
+    "fonte": (1233, 507, 1253, 523), "corpo": (1233.0, 508.5, 1251.5, 521.0), "piso": 215.0,
+    "destino": (670.6, 828.6, 686.3, 839.9),
 }
 CROMO_ESCURO = (130, 134, 138)
 CROMO = (196, 199, 202)
@@ -1211,6 +1221,32 @@ def bancos_camas(out):
     return out
 
 
+def vaso_masc(out):
+    q = VASO_MASC
+    a = out.copy()
+    x0, y0, x1, y1 = q["apagar"]
+    d = q["piso_dx"]
+    out[y0:y1, x0:x1] = a[y0:y1, x0 + d:x1 + d]
+    fx0, fy0, fx1, fy1 = q["fonte"]
+    spr = a[fy0:fy1, fx0:fx1].astype(np.float32)[:, ::-1]                # espelhado: parede à direita
+    alfa = np.clip((np.abs(spr.mean(axis=2) - q["piso"]) - 6) / 14, 0, 1)
+    w = fx1 - fx0
+    bx0, by0, bx1, by1 = q["corpo"]
+    bx0, bx1 = w - (bx1 - fx0), w - (bx0 - fx0)
+    by0, by1 = by0 - fy0, by1 - fy0
+    dx0, dy0, dx1, dy1 = q["destino"]
+    sx, sy = (dx1 - dx0) / (bx1 - bx0), (dy1 - dy0) / (by1 - by0)
+    jx0, jy0 = int(np.floor(dx0 - bx0 * sx)) - 1, int(np.floor(dy0 - by0 * sy)) - 1
+    jw, jh = int(np.ceil(w * sx)) + 3, int(np.ceil(spr.shape[0] * sy)) + 3
+    M = np.float32([[sx, 0, dx0 - bx0 * sx - jx0], [0, sy, dy0 - by0 * sy - jy0]])
+    spr_w = cv2.warpAffine(spr, M, (jw, jh), flags=cv2.INTER_AREA, borderMode=cv2.BORDER_REPLICATE)
+    al = cv2.warpAffine(alfa, M, (jw, jh), flags=cv2.INTER_LINEAR, borderValue=0)[..., None]
+    reg = out[jy0:jy0 + jh, jx0:jx0 + jw].astype(np.float32)
+    out[jy0:jy0 + jh, jx0:jx0 + jw] = np.clip(reg * (1 - al) + spr_w * al, 0, 255).astype(np.uint8)
+    print("    lavabo masculino: vaso suspenso branco, como os outros")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -1268,12 +1304,14 @@ def main():
     out = arcos_no_granito(out, A, chapada)
     print("[23] bancos ao pé das camas")
     out = bancos_camas(out)
+    print("[24] vaso do lavabo masculino")
+    out = vaso_masc(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
-    print(f"[24] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    print(f"[25] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
 
 
 if __name__ == "__main__":
