@@ -3,7 +3,7 @@
 
 Os erros são corrigidos um a um, na ordem combinada com o usuário.
 
-1. Chuveiros de teto: o motor deixou os boxes vazios. Cada um recebe a placa quadrada aprovada
+1. Chuveiros de teto: o motor deixou os boxes vazios (e, na ducha entre os lavabos, um ralo redondo). Cada um recebe a placa quadrada aprovada
    na Casa A (banho 3 do 1º Pavimento, 11 x 11 px, a mesma escala), no centro do símbolo do PDF
    (quadrado de 20 cm da layer ARQ_LOUÇAS E METAIS, levado ao render pela base alinhada).
 2. Plantas fora do lote: o motor deixou palmeiras passando da linha tracejada em todo o lado
@@ -267,6 +267,7 @@ CHUVEIROS = {
     "BH 2": (868.4, 149.8),
     "BH 1": (1016.1, 149.8),
     "BH master 2": (442.3, 484.6),
+    "ducha entre os lavabos": (716.06, 834.2),      # o motor pôs um ralo redondo; a placa o cobre
 }
 
 
