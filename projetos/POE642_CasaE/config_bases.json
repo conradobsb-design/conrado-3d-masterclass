@@ -32,7 +32,141 @@
    "layers_ocultas": [
     "ARQ_TERRENO PLANEJADO"
    ],
-   "_layers_ocultas": "Curvas de nível saem, como nas Casas A, B, C e D: fundo todo branco."
+   "_layers_ocultas": "Curvas de nível saem, como nas Casas A, B, C e D: fundo todo branco.",
+   "zonas_excluidas": {
+    "piscina, prainha e spa: só as bordas desenhadas, sem faixas de vidro": [
+     212,
+     486,
+     492,
+     705
+    ]
+   },
+   "_zonas_excluidas": "Como nas Casas C e D: as paredes da piscina na layer de parede não viram vidro em volta da água.",
+   "legenda": {
+    "_sobre": "Casa E · Térreo (materiais definidos pelo usuário em 15/10/26). Granito Marrom Tabaco #5A4232: o rosa #BFA79F (cozinha, área e circulação gourmet, BH e lavabo gourmet, serviço, DCE, garagem e a faixa de cima). Travertino #DCD9CA: o oliva #BAB596 (living, jantar, circulações internas, escritório, lavabo, hall, louceiro do piso). Bege Bahia #E8E8E8: o cinza #E4E4E4 (varanda, deck, blocos e degraus à esquerda, pisantes) e o WC DCE 1 (#E0E0E0). Pedra portuguesa caramelo #C49A6C: o acesso de veículos curvo (sem os hexágonos do PDF). Pilares (EST - Pilar, rosa-choque) em preto, como as paredes. Jardim interno #4F7A3A: o retângulo branco abaixo da escada. Louceiro em marcenaria areia #CBB89E: a faixa branca acima da escada. Bancos em bronze fosco #76604A: o L embaixo à esquerda e o retângulo estreito entre a piscina e os degraus. Piscina, prainha e spa #DFF6FE. Gramado #6E9150: o entorno do lote.",
+    "tolerancia_px": 10,
+    "poligonos": [
+     {
+      "nome": "acesso de veículos (hexágonos) → pedra portuguesa caramelo",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.894,
+       0.894,
+       0.894
+      ],
+      "bbox_vis": [
+       1205,
+       489,
+       1731,
+       815
+      ],
+      "cor_render": "#E4E4E4",
+      "para": "#C49A6C",
+      "cor_linha": "#C49A6C",
+      "_nota": "Os hexágonos do PDF somem na pedra portuguesa."
+     },
+     {
+      "nome": "área externa cinza (varanda, deck, blocos, pisantes) → Bege Bahia",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.894,
+       0.894,
+       0.894
+      ],
+      "cor_render": "#E4E4E4",
+      "para": "#E8E8E8"
+     },
+     {
+      "nome": "WC DCE 1 → Bege Bahia",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.878,
+       0.878,
+       0.878
+      ],
+      "cor_render": "#E0E0E0",
+      "para": "#E8E8E8"
+     }
+    ],
+    "trocas_cor": [
+     [
+      "#BFA79F",
+      "#5A4232"
+     ],
+     [
+      "#BAB596",
+      "#DCD9CA"
+     ],
+     [
+      "#7FDFFF",
+      "#DFF6FE"
+     ],
+     [
+      "#FF7FC0",
+      "#111111"
+     ]
+    ],
+    "retangulos": [
+     {
+      "nome": "jardim interno abaixo da escada → floreira",
+      "bbox_vis": [
+       877.1,
+       565.4,
+       1060.0,
+       605.3
+      ],
+      "so_branco": true,
+      "para": "#4F7A3A",
+      "cor_linha": "#4F7A3A"
+     },
+     {
+      "nome": "louceiro acima da escada → marcenaria areia",
+      "bbox_vis": [
+       886.1,
+       491.3,
+       1053.4,
+       513.5
+      ],
+      "so_branco": true,
+      "para": "#CBB89E",
+      "_nota": "Definido pelo usuário: a faixa branca entre paredes acima da escada é o louceiro."
+     },
+     {
+      "nome": "banco entre a piscina e os degraus → bronze fosco",
+      "bbox_vis": [
+       280.2,
+       608.3,
+       305.0,
+       710.6
+      ],
+      "so_branco": true,
+      "para": "#76604A"
+     },
+     {
+      "nome": "banco em L embaixo à esquerda → bronze fosco",
+      "bbox_vis": [
+       285.0,
+       801.5,
+       463.4,
+       894.2
+      ],
+      "so_branco": true,
+      "para": "#76604A"
+     }
+    ],
+    "gramados": [
+     {
+      "nome": "entorno do lote → grama",
+      "bbox_vis": [
+       11,
+       10,
+       1727,
+       968
+      ],
+      "para": "#6E9150"
+     }
+    ]
+   }
   }
  }
 }
