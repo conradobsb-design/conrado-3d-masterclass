@@ -293,8 +293,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 - **Render (prompt v3):** `renders/POE642_CasaC_PH_Terreo_v3_render.webp`. Mesma escala da base (afim 1,0001 x 1,0072).
 - **Retoque, erro por erro (pedido do usuário):** `renders/POE642_CasaC_PH_Terreo_v3_retocado.png`, pelo `retoque_terreo_casac.py`.
   1. **Chuveiros de teto:** os boxes do BH master 1, BH 3, BH 2, BH 1 e BH master 2 estavam vazios. Cada um recebeu a placa aprovada da Casa A, no centro do símbolo do PDF. Feito.
-  2. **Erros levantados e ainda abertos:**
-     - plantas fora do lote nos cantos de cima e de baixo à esquerda;
+  2. **Plantas fora do lote:** a faixa de palmeiras passava da linha tracejada em todo o lado esquerdo e dos muros nos cantos. Fora do lote volta a ser a base (fundo branco e linha tracejada) e os trechos de muro cobertos são refeitos com o muro do próprio render. Feito.
+  3. **Erros levantados e ainda abertos:**
      - plantas do jardim de inverno passando do vidro, sobre o piso e a caixa do elevador;
      - cozinha: bancadas e ilha em granito escuro (na base são claras), uma cuba só na bancada de cima (são duas);
      - quarto externo: a cama virou dois eletrodomésticos;
