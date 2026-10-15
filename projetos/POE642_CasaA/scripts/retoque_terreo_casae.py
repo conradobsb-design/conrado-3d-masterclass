@@ -32,6 +32,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
    no PDF), ocupando a caixa inteira, com 1 a 2 px de folga; as folhas da porta e a soleira ficam.
 7. CPD: o vaso sanitário que o motor pôs junto à parede da direita (no PDF o CPD não tem louça) sai,
    com a sombra; ali volta o granito tecido do próprio CPD, na luz do piso em volta.
+8. Área de serviço: as duas máquinas do PDF (dois quadrados da ARQ_LAYOUT HUMANIZAÇÃO ao lado do
+   tanque duplo), que o motor juntou num bloco de madeira, voltam como as máquinas em inox do Térreo
+   da Casa D aprovado (cada uma, a metade do par de lá, no quadrado do PDF), com sombra curta; o resto
+   do bloco vira o granito tecido do piso.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -429,6 +433,50 @@ def vaso_cpd(out):
     return out
 
 
+# máquinas da área de serviço (item 8): o bloco de madeira do render, os dois quadrados do PDF e as
+# máquinas em inox do Térreo retocado da Casa D (o par fica em x 1143-1190, y 191-216; a divisória
+# em 1166)
+MAQUINAS = {
+    "bloco": (1078, 289, 1128, 317), "janela": (1010, 289, 1150, 345),
+    "fontes_granito": [(1032, 318, 1115, 334), (1130, 300, 1148, 340)],
+    "quadrados": [(1079.8, 291.6, 1101.5, 313.4), (1103.3, 291.6, 1125.0, 313.4)],
+    "fonte": (RAIZ / "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
+              [(1143, 191, 1166, 216), (1167, 191, 1190, 216)]),
+    "contorno": (70, 70, 72), "larg_contorno": 0.4,
+    "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.35},
+}
+
+
+def maquinas(out):
+    q = MAQUINAS
+    wx0, wy0, wx1, wy1 = q["janela"]
+    bx0, by0, bx1, by1 = q["bloco"]
+    m = np.zeros((wy1 - wy0, wx1 - wx0), bool)
+    m[by0 - wy0:by1 - wy0, bx0 - wx0:bx1 - wx0] = True
+    # a parede de cima (preta) fica
+    m &= out[wy0:wy1, wx0:wx1].mean(axis=2) > 35
+    out = apagar_largo(out, q["janela"], m, q["fontes_granito"], sigma=3.0, lum_min=40, escuros=False)
+    arq, fontes = q["fonte"]
+    casad = cv2.imread(str(arq))
+    forma = out.shape[:2]
+    s = q["sombra"]
+    for (x0, y0, x1, y1), (fx0, fy0, fx1, fy1) in zip(q["quadrados"], fontes):
+        cantos = np.float32([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+        sombra = cv2.GaussianBlur(poligono_aa(forma, cantos + np.float32(s["desloc"])), (0, 0), s["sigma"])
+        out[:] = np.clip(out * (1 - s["forca"] * sombra)[..., None], 0, 255).astype(np.uint8)
+        # a máquina de lá, levada ao quadrado do PDF (subpixel, por afim)
+        maq = casad[fy0:fy1, fx0:fx1].astype(np.float32)
+        M = cv2.getAffineTransform(np.float32([(0, 0), (fx1 - fx0, 0), (0, fy1 - fy0)]),
+                                   np.float32([(x0, y0), (x1, y0), (x0, y1)]))
+        img = cv2.warpAffine(maq, M, forma[::-1], flags=cv2.INTER_AREA)
+        al = poligono_aa(forma, cantos)[..., None]
+        out[:] = np.clip(out * (1 - al) + img * al, 0, 255).astype(np.uint8)
+        c = linha_aa(forma, cantos, q["larg_contorno"], fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - c) + np.float32(q["contorno"]) * c, 0, 255).astype(np.uint8)
+    print(f"    área de serviço: bloco de madeira em granito tecido e as duas máquinas em inox da Casa D")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -451,6 +499,8 @@ def main():
     out = elevador(out)
     print("[7] CPD: vaso inventado")
     out = vaso_cpd(out)
+    print("[8] área de serviço: as duas máquinas")
+    out = maquinas(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
