@@ -17,6 +17,9 @@ Uso:
   python rodape_entrega.py --render Terreo=../renders/t.png --render 1Pavimento=../renders/p.png
       # também as pranchas: render alinhado ao quadro comum + rodapé
   python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render Subsolo=../../POE642_CasaB/renders/s.png
+  # versões de uma prancha (opções para o cliente), com a montagem já no quadro comum
+  python rodape_entrega.py --config ../../POE642_CasaE/config_bases.json --no-quadro --sufixo _pb \
+      --render 1Pavimento=../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final_pb.png
 """
 import argparse
 import json
@@ -182,6 +185,11 @@ def main():
                     help="monta a prancha render + rodapé (pode repetir)")
     ap.add_argument("--largura", type=int, default=None,
                     help="largura das pranchas em px, a mesma em todos os pavimentos (padrão: entrega.largura_prancha, ou 2000)")
+    ap.add_argument("--sufixo", default="",
+                    help="no nome das pranchas (ex.: _pb, para versões da mesma prancha)")
+    ap.add_argument("--no-quadro", action="store_true",
+                    help="os renders já estão no quadro comum, na largura da prancha (ex.: montagens do "
+                         "opcoes_1pav_casae.py): entram sem realinhar, sem reamostrar")
     args = ap.parse_args()
     ent = json.loads(args.config.read_text())["entrega"]
     raiz = args.config.resolve().parent
@@ -198,12 +206,19 @@ def main():
     for item in args.render:
         chave, arq = item.split("=", 1)
         base_png = raiz / ent["pasta_bases"] / ent["pavimentos"][chave]["base"]
-        render = no_quadro_comum(Image.open(arq).convert("RGB"), base_png, chave, args.largura)
+        if args.no_quadro:
+            render = Image.open(arq).convert("RGB")
+            base_wh = Image.open(base_png).size
+            esperado = (args.largura, round(base_wh[1] * args.largura / base_wh[0]))
+            if render.size != esperado:
+                raise SystemExit(f"{arq}: {render.size}, mas o quadro comum na largura da prancha é {esperado}")
+        else:
+            render = no_quadro_comum(Image.open(arq).convert("RGB"), base_png, chave, args.largura)
         rod = feitos[chave].resize((render.width, round(ALTURA * render.width / LARGURA)), Image.LANCZOS)
         prancha = Image.new("RGB", (render.width, render.height + rod.height), BRANCO)
         prancha.paste(render, (0, 0))
         prancha.paste(rod, (0, render.height))
-        caminho = args.saida / f"{ent['prefixo']}_PH_{chave}_entrega.png"
+        caminho = args.saida / f"{ent['prefixo']}_PH_{chave}_entrega{args.sufixo}.png"
         prancha.save(caminho)
         print(caminho, prancha.size)
 

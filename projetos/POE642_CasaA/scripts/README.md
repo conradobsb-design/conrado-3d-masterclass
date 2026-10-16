@@ -120,6 +120,19 @@ python pdf_entrega.py --config ../../POE642_CasaC/config_bases.json      # Subso
 # (e, nas Casas B, C e D, o ..._retocado_barlavento.png do Térreo)
 ```
 
+**Versões de uma prancha (opções para o cliente):** `rodape_entrega.py --sufixo _x` grava `..._PH_{pavimento}_entrega_x.png`, sem tocar na prancha padrão; `--no-quadro` aceita um render que já está no quadro comum, na largura da prancha (como as montagens do `opcoes_1pav_casae.py`), e o usa como está, sem realinhar nem reamostrar (se o tamanho não bater, para com erro). No `pdf_entrega.py`, `--prancha PAVIMENTO=ARQUIVO` troca a prancha de um pavimento, e `--nome` e `--titulo` dão outro arquivo e outro título ao PDF. Casa E, 1º Pavimento em duas opções (16/10/26):
+
+```bash
+C=../../POE642_CasaE
+python rodape_entrega.py --config $C/config_bases.json --render Terreo=$C/renders/POE642_CasaE_PH_Terreo_v1_retocado.png
+python rodape_entrega.py --config $C/config_bases.json --no-quadro --sufixo _pb --render 1Pavimento=$C/renders/POE642_CasaE_PH_1Pavimento_v1_final_pb.png
+python rodape_entrega.py --config $C/config_bases.json --no-quadro --sufixo _linhas --render 1Pavimento=$C/renders/POE642_CasaE_PH_1Pavimento_v1_final_linhas.png
+python pdf_entrega.py --config $C/config_bases.json --prancha 1Pavimento=$C/entrega/POE642_CasaE_PH_1Pavimento_entrega_pb.png \
+    --nome POE642_CasaE_Plantas_Humanizadas_opcao_PB.pdf --titulo "Casa E – Plantas Humanizadas (Térreo e 1º Pavimento) · opção P&B"
+python pdf_entrega.py --config $C/config_bases.json --prancha 1Pavimento=$C/entrega/POE642_CasaE_PH_1Pavimento_entrega_linhas.png \
+    --nome POE642_CasaE_Plantas_Humanizadas_opcao_Linhas.pdf --titulo "Casa E – Plantas Humanizadas (Térreo e 1º Pavimento) · opção linhas"
+```
+
 ## Prévia de texturas: `texturizar_base.py`
 
 Troca as cores chapadas da legenda pelas texturas aprovadas nos renders da Casa A, para o motor ver na base o aspecto de cada piso.
@@ -415,6 +428,8 @@ O `entorno_esmaecido.py` foi dividido em `contexto_render` (o entorno a partir d
 ```bash
 python3 opcoes_1pav_casae.py      # -> POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final_{pb,linhas}.png (+ _preview.jpg)
 ```
+
+As duas viram pranchas e PDFs de entrega com `rodape_entrega.py --no-quadro --sufixo _pb` / `_linhas` e `pdf_entrega.py --prancha` (comandos em "Pranchas de entrega").
 
 ## Acabamentos finais: `acabamentos_finais.py`
 

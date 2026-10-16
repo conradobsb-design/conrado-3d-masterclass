@@ -546,7 +546,12 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - `renders/POE642_CasaE_PH_1Pavimento_v1_final_pb.png` (e `_preview.jpg`): o Térreo aprovado em volta, 75% mais claro e em preto e branco.
   - `renders/POE642_CasaE_PH_1Pavimento_v1_final_linhas.png` (e `_preview.jpg`): o Térreo só com as linhas do PDF (sem as camadas de piso, curvas de nível, textos e zonas), em cinza.
   - Nas duas, o 1º Pavimento retocado entra por cima integralmente e os nomes e áreas são reescritos em 3840 px (nítidos), com as mesmas regras. Os rótulos longos saíam cortados no fim ("CLOSET MASTE…"): a área de desenho do texto ficou mais larga, também na imagem de 2000 px.
-  - Falta: depois da escolha do cliente, pôr o 1º Pavimento na `entrega` da `config_bases.json` da Casa E e refazer a prancha e o PDF.
+- **Pranchas e PDFs das duas opções (usuário, 16/10/26: "prepare as pranchas para cada uma delas e os PDFs"):**
+  - **Config:** o 1º Pavimento entrou na chave `entrega` da `POE642_CasaE/config_bases.json` (título "1º PAVIMENTO", linha 1 do quadro de áreas, base `POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png`). O quadro de áreas ficou com Térreo e 1º Pavimento "NÃO INFORMADO", sem total, como no Térreo (o PDF traz só as áreas dos ambientes). Em `pdf.ordem`: Térreo e 1º Pavimento.
+  - **Scripts:** `rodape_entrega.py` ganhou `--sufixo` (versões da mesma prancha) e `--no-quadro` (a montagem já está no quadro comum, em 3840 px: entra como está, sem realinhar nem reamostrar). `pdf_entrega.py` ganhou `--prancha PAVIMENTO=ARQUIVO`, `--titulo` e usa `--nome`.
+  - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_1Pavimento_entrega_pb.png` e `..._entrega_linhas.png`. A do Térreo (`..._Terreo_entrega.png`) foi refeita só pelo rodapé novo (o quadro de áreas agora tem as duas linhas); a imagem é a mesma (realinhada com 128 pontos, erro mediano 0,78 px; diferença máxima de 1 nível para a anterior). Rodapés `entrega/POE642_CasaE_rodape_Terreo.png` e `..._rodape_1Pavimento.png`.
+  - **PDFs (2 páginas A3 cada: Térreo e 1º Pavimento):** `entrega/POE642_CasaE_Plantas_Humanizadas_opcao_PB.pdf` (18,1 MB) e `entrega/POE642_CasaE_Plantas_Humanizadas_opcao_Linhas.pdf` (16,2 MB). O PDF anterior, só do Térreo (`POE642_CasaE_Plantas_Humanizadas.pdf`), saiu da pasta: as duas opções o substituem (está no histórico do git).
+  - **Depois da escolha do cliente:** rodar o `rodape_entrega.py` da opção escolhida sem `--sufixo` (gera `..._PH_1Pavimento_entrega.png`) e o `pdf_entrega.py` sem `--prancha`/`--nome` (gera `POE642_CasaE_Plantas_Humanizadas.pdf`). Comandos no README dos scripts, em "Pranchas de entrega".
 
 ## Casas A a D · Barlavento nas piscinas
 

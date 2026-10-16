@@ -804,8 +804,8 @@
  },
  "entrega": {
   "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
-  "_areas": "Áreas não informadas (usuário, 15/10/26): Térreo 'NÃO INFORMADO', sem linha de total, como na Casa D.",
-  "_confirmado": "Endereço (Lotes 17, Unidade E) confirmado pelo usuário em 15/10/26; norte o mesmo das Casas A, B, C e D. Só o Térreo (o PDF do Subsolo não veio).",
+  "_areas": "Áreas não informadas (usuário, 15/10/26): Térreo 'NÃO INFORMADO', sem linha de total, como na Casa D. 1º Pavimento (16/10/26): também 'NÃO INFORMADO' (o PDF traz só as áreas dos ambientes, não a do pavimento).",
+  "_confirmado": "Endereço (Lotes 17, Unidade E) confirmado pelo usuário em 15/10/26; norte o mesmo das Casas A, B, C e D. Térreo e 1º Pavimento (o PDF do Subsolo não veio). O 1º Pavimento tem duas opções para o cliente (entorno em P&B ou só com as linhas do PDF): pranchas com sufixo _pb e _linhas e um PDF para cada opção.",
   "casa": "CASA E",
   "prefixo": "POE642_CasaE",
   "pasta_bases": "bases",
@@ -816,11 +816,20 @@
     "titulo": "TÉRREO",
     "linha_area": 0,
     "base": "POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png"
+   },
+   "1Pavimento": {
+    "titulo": "1º PAVIMENTO",
+    "linha_area": 1,
+    "base": "POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png"
    }
   },
   "areas": [
    [
     "TÉRREO",
+    "NÃO INFORMADO"
+   ],
+   [
+    "1º PAVIMENTO",
     "NÃO INFORMADO"
    ]
   ],
@@ -845,9 +854,10 @@
   "pdf": {
    "nome": "POE642_CasaE_Plantas_Humanizadas.pdf",
    "ordem": [
-    "Terreo"
+    "Terreo",
+    "1Pavimento"
    ],
-   "titulo": "Casa E – Planta Humanizada (Térreo)",
+   "titulo": "Casa E – Plantas Humanizadas (Térreo e 1º Pavimento)",
    "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade E",
    "palavras": "planta humanizada, layout, Casa E"
   }
