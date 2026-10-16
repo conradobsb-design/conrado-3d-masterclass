@@ -940,6 +940,65 @@ def granito(out, pg, p2r, chapada, tex):
     return out
 
 
+# item 14: sombras longas no vinílico da academia. As que vêm das paredes (sob a parede de cima, sob a
+# parede do DCE e à direita do vestiário) são faixas de sombra dura, uniformes ao longo da parede: cada
+# linha (ou coluna) do vinílico ganha a razão entre a luz do vinílico logo depois da faixa e a dela (luz
+# chapada, como pedido nas outras casas). As peças (cinza, preto, branco, o móvel claro) não mudam. As
+# sombras curtas das peças do render ficam.
+SOMBRAS = {"faixas": [("linhas", (516, 251, 855, 292)), ("linhas", (856, 330, 990, 351)),
+                      ("colunas", (777, 385, 798, 476))],
+           "excluir_pdf": [(1438.0, 836.0, 1511.0, 851.0)],   # o móvel baixo junto à parede do DCE
+           "limiar": 0.9, "ganho_max": 2.0, "janela": 31, "ref_linhas": 10}
+
+
+def eh_vinil(reg):
+    """O vinílico, aceso ou na sombra (o tom quente e a saturação dele), longe das peças cinza e claras."""
+    lum = reg.mean(axis=2)
+    mx, mn = reg.max(axis=2), reg.min(axis=2)
+    sat = (mx - mn) / np.maximum(mx, 1)
+    v = (sat > 0.3) & (sat < 0.75) & (lum > 40) & (lum < 175) & (reg[..., 2] > reg[..., 1] + 8) & (reg[..., 1] > reg[..., 0] + 6)
+    peca = ~v & ((sat < 0.3) | (lum >= 175))
+    return v & ~cv2.dilate(peca.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+
+
+def sombras_longas(out, p2r, chapada):
+    q = SOMBRAS
+    n = 0
+    fora = np.zeros(out.shape[:2], bool)
+    for r in q["excluir_pdf"]:
+        a0, b0, a1, b1 = caixa_pdf(p2r, *r, folga=2)
+        fora[b0:b1, a0:a1] = True
+    for modo, (x0, y0, x1, y1) in q["faixas"]:
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        livre = ~fora[y0:y1, x0:x1]
+        if modo == "colunas":
+            reg = reg.transpose(1, 0, 2)
+            livre = livre.T
+        v = eh_vinil(reg) & livre
+        lum = reg.mean(axis=2)
+        # a luz de cada linha, local ao longo da parede (a faixa muda de largura: vidros, aberturas)
+        k = (q["janela"], 1)
+        vf = v.astype(np.float32)
+        local = cv2.boxFilter(lum * vf, -1, k, normalize=False) / np.maximum(cv2.boxFilter(vf, -1, k, normalize=False), 1e-3)
+        tem = cv2.boxFilter(vf, -1, k, normalize=False) >= 4
+        # a luz de referência: a das linhas de fora da faixa, o quartil de cima (a cunha de sombra pode
+        # descer até elas em alguns trechos)
+        k_ref = q["ref_linhas"]
+        with np.errstate(all="ignore"):
+            ref = np.nanpercentile(np.where(tem[-k_ref:], local[-k_ref:], np.nan), 75, axis=0)
+        ref = np.where(np.isnan(ref), np.nanmedian(ref), ref)
+        g = np.where(tem & (local < q["limiar"] * ref[None, :]), ref[None, :] / np.maximum(local, 1), 1.0)
+        g = np.clip(np.nan_to_num(g, nan=1.0), 1.0, q["ganho_max"])
+        g = cv2.GaussianBlur(g.astype(np.float32), (0, 0), sigmaX=3.0, sigmaY=0.01)
+        reg = np.where(v[..., None], reg * g[..., None], reg)
+        n += int((v & (g > 1.05)).sum())
+        if modo == "colunas":
+            reg = reg.transpose(1, 0, 2)
+        out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    sombras das paredes fora em {n} px de vinílico")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -1025,6 +1084,7 @@ def main():
         ("chuveiros da ducha e do box do vestiário", lambda o: chuveiros(o, pg, p2r, chapada, tex)),
         ("portas do vestiário (e o vestiário refeito, com a bancada e a bacia)", lambda o: vestiario(o, pg, p2r, chapada, tex)),
         ("granito em grão no DCE e na casa de máquinas de baixo; as portas deles", lambda o: granito(o, pg, p2r, chapada, tex)),
+        ("sombras longas fora do vinílico da academia", lambda o: sombras_longas(o, p2r, chapada)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
         if n <= args.ate:

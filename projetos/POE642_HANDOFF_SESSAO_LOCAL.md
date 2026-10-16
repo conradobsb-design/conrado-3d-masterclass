@@ -654,6 +654,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - O piso vira o granito da base (a fonte aprovada na Casa A), no tom do granito do Térreo retocado (mediana BGR 52, 59, 83).
      - No DCE ficam a cama, o criado-mudo e o armário do render (o que é claro e grande), com a sombra curta.
      - As portas do DCE e da casa de máquinas entram pelo PDF, com o arco cinza fino aprovado no granito.
+  14. **Sombras longas no vinílico da academia:** as das paredes, sob a parede de cima, sob a parede do DCE e à direita do vestiário, eram faixas de sombra dura, uniformes ao longo da parede.
+     - Cada linha (ou coluna) do vinílico ganha a razão entre a luz do vinílico logo depois da faixa (o quartil de cima) e a dela. A conta é local ao longo da parede, em janelas de 31 px, porque a faixa muda de largura.
+     - As peças (cinza, preto, branco e o móvel baixo junto ao DCE) não mudam, e as sombras curtas das peças do render ficam.
+     - Duas tentativas descartadas: um ganho por campo de luz, que deixou halos e manchas laranja no grão do vinílico, e a troca automática das manchas, que apagou partes da estação de musculação.
 
 ## Casas A a D · Barlavento nas piscinas
 
