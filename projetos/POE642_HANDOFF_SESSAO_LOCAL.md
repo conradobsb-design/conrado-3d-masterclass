@@ -629,6 +629,9 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   6. **Suporte de halteres:** o motor pôs um armário alto de madeira no lugar do suporte do PDF (dois andares de halteres sextavados, dez pares, com o quadro e os pés).
      - O armário e a sombra dele saem: entra o vinílico das mesmas linhas, logo à esquerda (as réguas são horizontais e continuam).
      - Entra o suporte desenhado pelas peças do PDF (ARQ_ MOB COMUM): quadro, trilhos e pés em grafite, cabeças em borracha preta, pegadores cromados e a sombra curta.
+  7. **Elípticos:** os dois aparelhos pequenos do PDF são elípticos vistos de cima (trilhos, pedais, braços e console); o motor desenhou dois halteres grandes.
+     - Os halteres e as sombras saem. Cada linha recebe o vinílico da mesma linha, deslocado até um trecho limpo (`vinilico`: as réguas do render não coincidem com as da base), com a luz acertada pelo vinílico em volta.
+     - Entram os elípticos pelo PDF (ARQ_ MOB COMUM): silhueta em grafite, os traços do desenho em preto e a sombra curta.
 
 ## Casas A a D · Barlavento nas piscinas
 

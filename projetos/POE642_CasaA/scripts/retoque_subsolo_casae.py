@@ -28,6 +28,7 @@ sys.path.insert(0, str(AQUI))
 
 from retoque_terreo_casab import BACIA_BORDA, BACIA_FUNDO, LOUCA, LOUCA_CONTORNO  # noqa: E402
 from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO  # noqa: E402
+from retoque_terreo_casad import interpolar  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png"
 BASE_CHAPADA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Subsolo_v2_16x9.png"   # cores exatas da legenda
@@ -552,6 +553,47 @@ def poligono_pdf(tl, d):
     return cv2.convexHull(np.int32(np.round(pts)))
 
 
+VINIL = {"lum": (95, 200), "sat_max": 0.62, "sat_min": 0.25, "max_dx": 260}
+
+
+def vinilico(out, ret, mascara=None, evitar=None):
+    """Apaga o que está sobre o vinílico da academia: cada linha do retângulo (só os px da máscara) recebe a
+    mesma linha do render deslocada na horizontal até um trecho limpo de vinílico (as réguas são
+    horizontais, então continuam). 'evitar' marca px que não servem de fonte (peças já desenhadas)."""
+    q = VINIL
+    x0, y0, x1, y1 = ret
+    w = x1 - x0
+    f = out.astype(np.float32)
+    lum = f.mean(axis=2)
+    mx, mn = f.max(axis=2), f.min(axis=2)
+    sat = (mx - mn) / np.maximum(mx, 1)
+    limpo = (lum > q["lum"][0]) & (lum < q["lum"][1]) & (sat > q["sat_min"]) & (sat < q["sat_max"])
+    limpo = cv2.erode(limpo.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    if evitar is not None:
+        limpo &= ~evitar
+    m = np.ones((y1 - y0, w), bool) if mascara is None else mascara
+    novo = out[y0:y1, x0:x1].astype(np.float32)
+    for i, y in enumerate(range(y0, y1)):
+        for dx in sorted(range(-q["max_dx"], q["max_dx"] + 1), key=abs):
+            if abs(dx) < w or x0 + dx < 0 or x1 + dx > out.shape[1]:
+                continue
+            if limpo[y, x0 + dx:x1 + dx].all():
+                novo[i][m[i]] = out[y, x0 + dx:x1 + dx][m[i]]
+                break
+    # a luz: a do vinílico em volta (px limpos de fora da máscara, numa janela maior) sobre a do trecho copiado
+    e = 14
+    X0, Y0, X1, Y1 = max(0, x0 - e), max(0, y0 - e), min(out.shape[1], x1 + e), min(out.shape[0], y1 + e)
+    viz = f[Y0:Y1, X0:X1]
+    dentro = np.zeros(viz.shape[:2], bool)
+    dentro[y0 - Y0:y1 - Y0, x0 - X0:x1 - X0] = m
+    alvo = interpolar(viz, limpo[Y0:Y1, X0:X1] & ~dentro, 6.0)[y0 - Y0:y1 - Y0, x0 - X0:x1 - X0]
+    tem = cv2.GaussianBlur(novo, (0, 0), 6.0)
+    ganho = np.clip(alvo / np.maximum(tem, 1), 0.7, 1.4)
+    novo = np.where(m[..., None], novo * ganho, novo)
+    out[y0:y1, x0:x1] = np.clip(novo, 0, 255).astype(np.uint8)
+    return out
+
+
 # item 6: suporte de halteres. O motor pôs um armário alto de madeira no lugar do suporte do PDF (dois
 # andares de halteres sextavados, dez pares, com o quadro e os pés). O armário e a sombra dele saem (o
 # vinílico das mesmas linhas, logo à esquerda: as réguas são horizontais e continuam) e entra o suporte
@@ -595,6 +637,51 @@ def halteres(out, pg, p2r):
             n += 1
     out = tl.gravar()
     print(f"    suporte de halteres do PDF: {n} cabeças, armário do render fora")
+    return out
+
+
+# item 7: os dois aparelhos pequenos do PDF são elípticos (vistos de cima: trilhos, pedais, braços e o
+# console); o motor desenhou dois halteres grandes. Os halteres e as sombras saem (vinílico das mesmas
+# linhas) e entram os elípticos pelo PDF (ARQ_ MOB COMUM): a silhueta em grafite e os traços do desenho
+# em preto, com a sombra curta, como os outros aparelhos do render.
+ELIPTICOS = {"pdf": (860.0, 705.0, 952.0, 802.0), "apagar": (532, 252, 603, 318),
+             "corpo": (66, 68, 71), "traco": (34, 35, 37), "forca_traco": 0.75, "pes": (48, 50, 52)}
+
+
+def elipticos(out, pg, p2r):
+    q = ELIPTICOS
+    out = vinilico(out, q["apagar"])
+    z = pymupdf.Rect(*q["pdf"])
+    tl = Tela(out, p2r, q["pdf"], folga=3)
+    corpo = tl.vazia()
+    pes = tl.vazia()
+    for d in pg.get_drawings():
+        if d.get("layer") != "ARQ_ MOB COMUM" or not z.contains(d["rect"]) or d["type"] not in ("f", "fs"):
+            continue
+        cont = [tl.pt(it[1].x, it[1].y) for it in d["items"] if it[0] == "l"]
+        cont += [tl.pt(d["items"][-1][2].x, d["items"][-1][2].y)] if d["items"][-1][0] == "l" else []
+        alvo = pes if d["rect"].width < 20 else corpo
+        cv2.fillPoly(alvo, [np.int32(np.round(cont))], 255)
+    # os traços do desenho (só a layer dos móveis), na mesma cadeia PDF -> render
+    tr = tl.vazia()
+    for d in pg.get_drawings():
+        if d.get("layer") == "ARQ_ MOB COMUM" and d["type"] == "s" and z.contains(d["rect"]):
+            for it in d["items"]:
+                if it[0] == "l":
+                    a, b = tl.pt(it[1].x, it[1].y), tl.pt(it[2].x, it[2].y)
+                    cv2.line(tr, (int(a[0]), int(a[1])), (int(b[0]), int(b[1])), 255, max(1, SS // 3), cv2.LINE_AA)
+                elif it[0] == "c":
+                    pp = np.array([tl.pt(v.x, v.y) for v in it[1:5]])
+                    tt = np.linspace(0, 1, 12)[:, None]
+                    c = (1 - tt) ** 3 * pp[0] + 3 * (1 - tt) ** 2 * tt * pp[1] + 3 * (1 - tt) * tt ** 2 * pp[2] + tt ** 3 * pp[3]
+                    cv2.polylines(tr, [np.int32(np.round(c))], False, 255, max(1, SS // 3), cv2.LINE_AA)
+    tudo = corpo | pes
+    tl.sombra(tudo, **SOMBRA)
+    tl.pintar(corpo, q["corpo"])
+    tl.pintar(pes, q["pes"])
+    tl.pintar(tr & tudo, q["traco"], q["forca_traco"])
+    out = tl.gravar()
+    print("    dois elípticos do PDF no lugar dos halteres do render")
     return out
 
 
@@ -676,6 +763,7 @@ def main():
         ("casa de máquinas da direita em Bege Bahia", lambda o: casa_maquinas_dir(o, pg, p2r, chapada, tex)),
         ("elevador: o do Térreo aprovado", lambda o: elevador(o, A, p2r, terreo_no_render(A, o.shape)[0])),
         ("suporte de halteres do PDF no lugar do armário de madeira", lambda o: halteres(o, pg, p2r)),
+        ("dois elípticos do PDF no lugar dos halteres grandes", lambda o: elipticos(o, pg, p2r)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
         if n <= args.ate:
