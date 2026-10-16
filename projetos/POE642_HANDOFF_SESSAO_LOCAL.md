@@ -642,6 +642,9 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   10. **Antessala:** o motor pôs uma bacia sanitária entre a ducha e o vestiário (o PDF não tem), além de sombras longas e arcos tracejados.
      - A antessala e a ducha vêm da base (o travertino), no tom do render; o vinílico da academia, logo acima da abertura, fica.
      - As portas da sauna e da ducha são as do PDF, com folha e arco finos. O chuveiro da ducha entra no item 11.
+  11. **Chuveiros:** os da ducha da antessala e do box do vestiário saíram fora do padrão aprovado (um símbolo solto; um círculo com manchas).
+     - O box é refeito pela base (travertino, sem as sombras longas), com a porta do PDF.
+     - Os dois chuveiros entram como o do WC DCE 2: ducha quadrada, braço cromado até a parede desenhada (a de baixo, na ducha; a da direita, no box) e canopla.
 
 ## Casas A a D · Barlavento nas piscinas
 

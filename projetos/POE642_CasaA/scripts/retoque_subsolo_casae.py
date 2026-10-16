@@ -839,6 +839,31 @@ def antessala(out, pg, p2r, chapada, tex):
     return out
 
 
+# item 11: chuveiros. O da ducha da antessala e o do box do vestiário saíram fora do padrão aprovado (um
+# símbolo solto e um círculo com manchas). O box é refeito pela base (travertino, sem as sombras longas),
+# com a porta do PDF, e os dois chuveiros entram como o do WC DCE 2: ducha quadrada, braço cromado até a
+# parede desenhada (de baixo, na ducha; da direita, no box) e canopla.
+CHUVEIROS = {
+    "box": {"interior": (1218.6, 1027.1, 1289.5, 1090.3),
+            "porta": ((1218.6, 1027.1, 1220.8, 1065.9), (1218.6, 1027.1, 1257.4, 1065.9))},
+    "pecas": [((1031.0, 1062.9, 1042.2, 1074.1), (1035.8, 1067.4, 1037.3, 1089.7), (1034.9, 1089.7, 1038.3, 1090.3)),
+              ((1262.1, 1053.2, 1273.3, 1064.4), (1266.6, 1058.1, 1288.9, 1059.5), (1288.9, 1057.1, 1289.5, 1060.5))]}
+
+
+def chuveiros(out, pg, p2r, chapada, tex):
+    q = CHUVEIROS
+    m, parede = ambiente(out, p2r, chapada, [q["box"]["interior"]])
+    trav = np.abs(chapada.astype(int) - (202, 217, 220)).max(axis=2) <= 3
+    ganho = np.asarray(TRAV["render"], np.float32) / np.asarray(TRAV["base"], np.float32)
+    out = pela_base(out, m, tex, ganho, buracos=m & ~trav)
+    out = desenhar_porta(out, pg, p2r, *q["box"]["porta"], "bege")
+    out = limpar_paredes(out, p2r, parede, q["box"]["interior"])
+    for ducha, braco, canopla in q["pecas"]:
+        out = chuveiro(out, p2r, ducha, braco, canopla)
+    print("    chuveiros da ducha e do box do vestiário no padrão aprovado; box refeito com a porta do PDF")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -921,6 +946,7 @@ def main():
         ("piscina e ofurô: água aprovada, sem degraus; visor de vidro", lambda o: piscina(o, A, p2r, chapada, tex)),
         ("sauna: banco de travertino em dois níveis, ao longo da parede de baixo", lambda o: sauna(o, p2r, chapada, tex)),
         ("antessala: sem a bacia; portas da sauna e da ducha", lambda o: antessala(o, pg, p2r, chapada, tex)),
+        ("chuveiros da ducha e do box do vestiário", lambda o: chuveiros(o, pg, p2r, chapada, tex)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
         if n <= args.ate:
