@@ -535,7 +535,8 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   5. vazios (abaixo da escada, sobre o jardim de inverno do Térreo, e no hall de entrada): o motor deixou o cinza-escuro liso. Primeiro entrou o X tracejado do PDF sobre o cinza; depois, a pedido do usuário ("use a cor branca, em vez de cinza escuro"), os vazios ficaram brancos (250, como os da Casa A), com o X do PDF em cinza médio (cada traço da DOC_LINHAS E PROJEÇÕES na posição exata: 34 e 35 traços) e o guarda-corpo de vidro que isola os vazios (usuário: "tem um guarda corpo de vidro isolando essas áreas vazadas"): os retângulos de 2 cm da ARQ_ELEMENTOS FIXOS, na base e à esquerda do vazio da escada e à esquerda do vazio do hall, numa faixa fina no vidro fino aprovado. Nos lados com guarda-corpo o vazio vai até o vidro do PDF (o motor tinha deixado o piso entrar até 4 px);
   6. arcos das portas: o motor desenhou as folhas, mas nenhum arco. Entraram os 12 arcos do PDF (curvas da ARQ_PAREDE) no padrão aprovado no Térreo (cinza (160, 161, 160), traço de 0,45 px). Sobre o vazio do hall entrou também a folha da porta pivotante P1 do hall do Térreo (vista pelo vazio), que faltava;
   7. cortinas (usuário: "desenhe as cortinas"): as linhas onduladas do PDF ao longo das janelas das suítes (10 trechos, 160 arcos da ARQ_LOUÇAS E METAIS) entraram nas posições exatas como cortina de linho off-white, em traço fino, com a sombra curta aprovada (um branco puro testado antes ficou forte demais);
-  8. vasos nas varandas: ficam (usuário: "mantenha os vasos").
+  8. vasos nas varandas: ficam (usuário: "mantenha os vasos");
+  9. shaft (usuário: "preciso da marcação em x para sinalizar o shaft ... pode desenhar em cor cinza"): o PDF tem um shaft dentro da parede grossa de cima da suíte master (retângulo e X tracejado, 10 traços da DOC_LINHAS E PROJEÇÕES), que sumia no preto da parede; entrou em cinza (147), fino.
 
 ## Casas A a D · Barlavento nas piscinas
 

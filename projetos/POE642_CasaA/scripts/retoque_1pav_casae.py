@@ -34,6 +34,8 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
    160 arcos) entram nas posições exatas como cortina de linho off-white, em traço fino, com a sombra
    curta aprovada.
 8. (Sem retoque, pedido do usuário.) Os três vasos de planta que o motor pôs nas varandas ficam.
+9. Shaft (pedido do usuário): o retângulo e o X tracejado do PDF dentro da parede grossa de cima da
+   suíte master (10 traços da DOC_LINHAS E PROJEÇÕES), que somem no preto, entram em cinza, finos.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -479,6 +481,36 @@ def cortinas(out, pg, p2r):
     return out
 
 
+# item 9: shaft (pedido do usuário: "preciso da marcação em x para sinalizar o shaft ... em cor cinza").
+# O PDF tem um shaft dentro da parede grossa de cima da suíte master: o retângulo e o X tracejado da
+# DOC_LINHAS E PROJEÇÕES (10 segmentos), que somem no preto da parede. Entram em cinza, finos, só
+# sobre a parede
+SHAFT = {"pdf": (1216.0, 736.5, 1252.5, 754.6), "camada": "DOC_LINHAS E PROJEÇÕES", "cor": (147, 147, 147),
+         "largura": 0.6, "parede": 40}
+
+
+def shaft(out, pg, p2r):
+    q = SHAFT
+    caixa = pymupdf.Rect(*q["pdf"])
+    segs = [(p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)) for d in pg.get_drawings()
+            if d.get("layer") == q["camada"] and d["rect"] in caixa for it in d["items"] if it[0] == "l"]
+    pts = np.array([p for s in segs for p in s])
+    x0, y0 = np.floor(pts.min(axis=0)).astype(int) - 3
+    x1, y1 = np.ceil(pts.max(axis=0)).astype(int) + 4
+    h, w = y1 - y0, x1 - x0
+    f = np.zeros((h * SS, w * SS), np.uint8)
+    for (ax, ay), (bx, by) in segs:
+        cv2.line(f, (int(round((ax - x0) * SS)), int(round((ay - y0) * SS))),
+                 (int(round((bx - x0) * SS)), int(round((by - y0) * SS))), 255,
+                 max(1, int(round(q["largura"] * SS))), cv2.LINE_AA)
+    a = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    a *= reg.mean(axis=2) < q["parede"]
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None], 0, 255).astype(np.uint8)
+    print(f"    shaft em ({x0}, {y0}) a ({x1}, {y1}): {len(segs)} traços em cinza")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -502,6 +534,8 @@ def main():
     out = arcos_portas(out, pg, p2r)
     print("[7] cortinas nas janelas das suítes")
     out = cortinas(out, pg, p2r)
+    print("[9] shaft: X em cinza na parede")
+    out = shaft(out, pg, p2r)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
