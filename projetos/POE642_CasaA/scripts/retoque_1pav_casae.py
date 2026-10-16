@@ -19,6 +19,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
 3. (Sem retoque.) Banhos das duas suítes da esquerda: as bacias parecem uma peça só atravessando a
    parede, mas o PDF desenha assim mesmo: duas bacias suspensas, costas com costas na parede entre os
    banhos. O render ficou fiel.
+4. Copinha: o motor pintou a bancada em areia, como o armário ao lado, e não pôs a cuba. A bancada
+   do PDF (da parede da esquerda ao armário) vira o Bege Bahia da varanda da esquerda do próprio
+   render, na luz da bancada do render; a cuba redonda da Casa A entra no círculo do PDF (34 cm),
+   com a torneira atrás, no cromo das cubas do Térreo, e uma sombra curta bem leve.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -38,8 +42,9 @@ RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
 
 from retoque_terreo_casad import CHUVEIROS_BHM  # noqa: E402
-from retoque_terreo_casac import CHUVEIRO_TETO, SS  # noqa: E402
+from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO, SS  # noqa: E402
 from retoque_subsolo_casad import apagar_largo  # noqa: E402
+from retoque_terreo_casad import textura  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png"
 TERREO = RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado.png"
@@ -191,6 +196,85 @@ def chuveiros(out, A):
     return out
 
 
+# item 4: copinha. O motor pintou a bancada em areia, como o armário ao lado, e não pôs a cuba. A
+# bancada do PDF (ARQ_BANCADAS, da parede da esquerda ao armário) vira o Bege Bahia da varanda da
+# esquerda do próprio render, na luz da bancada do render (perfil por linha, com o brilho junto à
+# parede); a cuba redonda da Casa A entra no círculo do PDF, com a torneira atrás (lado da parede)
+COPINHA = {"bancada_pdf": (1672.2, 1096.41, 1828.97, 1130.03), "fontes": [(622, 380, 712, 520), (622, 540, 712, 680)],
+           "lum_parede": 10.0, "cuba_pdf": (1810.92, 1110.57, 9.64), "torneira_pdf": (1810.92, 1125.5),
+           "bacia": 0.80, "sombra": {"desloc": (-0.8, 1.0), "sigma": 0.8, "forca": 0.2}}
+
+
+def bancada_copinha(out, p2r):
+    q = COPINHA
+    (bx0, by0), (bx1, by1) = p2r(*q["bancada_pdf"][:2]), p2r(*q["bancada_pdf"][2:])
+    # janela com um px de folga em cima, embaixo e à esquerda (as bordas do render, entre a bancada,
+    # a linha da frente e as paredes, entram pela luminância); à direita, o fim exato do PDF
+    x0, y0, x1, y1 = int(np.floor(bx0)) - 1, int(np.floor(by0)) - 1, int(np.ceil(bx1)), int(np.ceil(by1)) + 1
+    h, w = y1 - y0, x1 - x0
+    cob = np.ones((h, w), np.float32)
+    cob[:, -1] = bx1 - (x1 - 1)
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    L = reg.mean(axis=2)
+    # areia do render por linha (mediana); as linhas de borda usam a linha cheia mais próxima
+    med = np.median(reg[:, 2:-2], axis=1)
+    cheia = med.mean(axis=1) > 0.9 * med.mean(axis=1).max()
+    idx = np.flatnonzero(cheia)
+    areia = med[idx[np.abs(np.arange(h)[:, None] - idx[None]).argmin(axis=1)]]
+    Ls = areia.mean(axis=1)
+    m = cob * np.clip((L - q["lum_parede"]) / (Ls[:, None] - q["lum_parede"]), 0, 1)
+    fontes = q["fontes"]
+    bege = np.mean([out[fy0:fy1, fx0:fx1].reshape(-1, 3).astype(np.float32).mean(axis=0)
+                    for fx0, fy0, fx1, fy1 in fontes], axis=0)
+    tex = textura(out, fontes, h, w, p=12)
+    alvo = tex * bege * (Ls / Ls[cheia].mean())[:, None, None]
+    out[y0:y1, x0:x1] = np.clip(reg + m[..., None] * (alvo - areia[:, None, :]), 0, 255).astype(np.uint8)
+    print(f"    bancada em Bege Bahia de ({bx0:.1f}, {by0:.1f}) a ({bx1:.1f}, {by1:.1f})")
+    return out
+
+
+def cuba_redonda(out, cx, cy, R, tx, ty, bacia, s):
+    """A cuba redonda da Casa A (retoque_base_1pav.py, 3b): borda de louça, bacia, contorno fino, ralo e a
+    torneira atrás (base redonda e bica até o centro, no cromo das cubas do Térreo), em 8x; com uma
+    sombra curta, bem leve."""
+    n = int(np.ceil(2 * max(R, abs(ty - cy), abs(tx - cx)) + 12))
+    ox, oy = int(np.floor(cx - n / 2)), int(np.floor(cy - n / 2))
+    big = np.zeros((n * SS, n * SS, 4), np.float32)
+    c = (int(round((cx - ox) * SS)), int(round((cy - oy) * SS)))
+    Rs = int(round(R * SS))
+    cv2.circle(big, c, Rs, (238, 239, 240, 1.0), -1, cv2.LINE_AA)                              # borda da louça
+    cv2.circle(big, c, int(Rs * bacia), (250, 250, 250, 1.0), -1, cv2.LINE_AA)                 # bacia
+    cv2.circle(big, c, Rs, (168, 170, 172, 1.0), max(1, int(round(0.5 * SS))), cv2.LINE_AA)   # contorno fino
+    cv2.circle(big, c, int(Rs * bacia), (205, 207, 209, 1.0), max(1, int(round(0.35 * SS))), cv2.LINE_AA)
+    cv2.circle(big, c, max(2, int(round(0.7 * SS))), (150, 152, 155, 1.0), -1, cv2.LINE_AA)  # ralo
+    t0 = (int(round((tx - ox) * SS)), int(round((ty - oy) * SS)))
+    t1 = (c[0], int(round(c[1] + Rs * 0.15)))
+    # torneira no cromo das cubas do Térreo (acabamentos_finais.cuba): base redonda e bica
+    for larg, cor in ((0.78, CROMO_ESCURO), (0.48, CROMO), (0.2, CROMO_CLARO)):
+        cv2.line(big, t0, t1, (*cor, 1.0), max(1, int(round(larg * SS))), cv2.LINE_AA)
+    for raio, cor in ((0.86, CROMO_ESCURO), (0.72, CROMO), (0.42, CROMO_CLARO)):
+        cv2.circle(big, t0, max(1, int(round(raio * SS))), (*cor, 1.0), -1, cv2.LINE_AA)
+    peq = cv2.resize(big, (n, n), interpolation=cv2.INTER_AREA)
+    a = peq[..., 3]
+    out = sombra(out, a, (ox, oy, ox + n, oy + n), s["desloc"], s["sigma"], s["forca"])
+    reg = out[oy:oy + n, ox:ox + n].astype(np.float32)
+    cor = peq[..., :3] / np.maximum(a[..., None], 1e-6)
+    out[oy:oy + n, ox:ox + n] = np.clip(reg * (1 - a[..., None]) + cor * a[..., None], 0, 255).astype(np.uint8)
+    return out
+
+
+def copinha(out, p2r):
+    q = COPINHA
+    out = bancada_copinha(out, p2r)
+    cxp, cyp, rp = q["cuba_pdf"]
+    cx, cy = p2r(cxp, cyp)
+    R = np.hypot(*np.subtract(p2r(cxp + rp, cyp), (cx, cy)))
+    tx, ty = p2r(*q["torneira_pdf"])
+    out = cuba_redonda(out, cx, cy, R, tx, ty, q["bacia"], q["sombra"])
+    print(f"    cuba redonda em ({cx:.1f}, {cy:.1f}), diâmetro {2 * R:.1f} px; torneira em ({tx:.1f}, {ty:.1f})")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -205,6 +289,9 @@ def main():
     out = floreira(out, A)
     print("[2] banho master: dois chuveiros de teto")
     out = chuveiros(out, A)
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    print("[4] copinha: bancada em Bege Bahia e cuba redonda")
+    out = copinha(out, p2r)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

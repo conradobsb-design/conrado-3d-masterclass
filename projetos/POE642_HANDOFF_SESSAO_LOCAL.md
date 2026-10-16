@@ -530,7 +530,8 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 - **Retoque** (`POE642_CasaA/scripts/retoque_1pav_casae.py`, sem IA, um item por vez; saída `renders/POE642_CasaE_PH_1Pavimento_v1_retocado.png`, `_camada.png` e `_previa.jpg`):
   1. banho master, floreira: as três plantas do PDF junto à janela da parede da esquerda; o motor deixou o piso liso. Entram as plantas tropicais do jardim interno do Térreo aprovado (um trecho girado para a vertical), no retângulo do PDF, com contorno fino da floreira e sombra curta;
   2. banho master, chuveiros: o motor pôs uma ducha de parede com braço e um registro no piso; saem (quartzito tecido do próprio banho) e entram as duas placas de teto de 30 cm da Casa A nos centros dos quadradinhos do PDF;
-  3. banhos das duas suítes da esquerda: sem retoque. As bacias parecem uma peça só atravessando a parede, mas o PDF desenha assim: duas bacias suspensas, costas com costas na parede entre os banhos. O render ficou fiel (um redesenho testado ficou pior, com halo, e saiu).
+  3. banhos das duas suítes da esquerda: sem retoque. As bacias parecem uma peça só atravessando a parede, mas o PDF desenha assim: duas bacias suspensas, costas com costas na parede entre os banhos. O render ficou fiel (um redesenho testado ficou pior, com halo, e saiu);
+  4. copinha: o motor pintou a bancada em areia, como o armário ao lado, e não pôs a cuba. A bancada do PDF (da parede da esquerda ao armário) virou o Bege Bahia da varanda da esquerda do próprio render, na luz da bancada do render; a cuba redonda da Casa A entrou no círculo do PDF (34 cm), com a torneira atrás, no cromo das cubas do Térreo. O armário à direita fica em areia.
 
 ## Casas A a D · Barlavento nas piscinas
 

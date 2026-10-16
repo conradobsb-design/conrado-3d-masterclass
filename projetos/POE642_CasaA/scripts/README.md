@@ -388,6 +388,7 @@ Retoques sem IA no render v1 (fundo branco), no quadro do render; as posições 
 - **Banho master, floreira (item 1):** trecho do jardim interno do Térreo aprovado, girado, no retângulo das plantas do PDF, com contorno fino e sombra curta.
 - **Banho master, chuveiros (item 2):** a ducha de parede e o registro saem (`apagar_largo`, quartzito do próprio banho) e entram as placas de teto da Casa A (`placa_teto`).
 - **Bacias das suítes da esquerda (item 3):** sem retoque; o PDF desenha duas bacias suspensas costas com costas, como o render.
+- **Copinha (item 4):** `bancada_copinha` troca a areia da bancada (retângulo da ARQ_BANCADAS, pela cadeia do PDF) pelo Bege Bahia tecido da varanda do próprio render, somando a diferença de cor na luz da bancada (perfil por linha; as bordas com a parede e a linha da frente pela luminância); `cuba_redonda` desenha a cuba da Casa A no círculo do PDF, com a torneira no cromo das cubas do Térreo.
 
 ```bash
 python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \
