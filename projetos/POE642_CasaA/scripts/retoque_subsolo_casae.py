@@ -191,6 +191,12 @@ def circulacao_deposito(out, A, pg, p2r, chapada, tex):
     for s in q["soleiras_pdf"]:
         x0, y0, x1, y1 = caixa_pdf(p2r, *s)
         m[y0:y1, x0:x1] |= ~parede[y0:y1, x0:x1]
+    # o contorno da escada (o render tinha uma linha em volta): a faixa de 2 px em volta dos degraus
+    ex0, ey0, ex1, ey1 = caixa_pdf(p2r, *ESCADA["pdf"])
+    anel = np.zeros_like(m)
+    anel[ey0 - 2:ey1 + 2, ex0 - 2:ex1 + 2] = True
+    anel[ey0 + 1:ey1 - 1, ex0 + 1:ex1 - 1] = False
+    m |= anel & ~parede
     out = trocar_piso(out, m, tex, q["cor"], buracos=m & ~piso)
     # a borda da esquerda: onde o motor pôs a parede, a linha fina do contorno do piso, como a de cima
     bx, by0, by1 = q["borda_esq_pdf"]
@@ -205,6 +211,51 @@ def circulacao_deposito(out, A, pg, p2r, chapada, tex):
     for folha, arco in q["portas"]:
         out = desenhar_porta(out, pg, p2r, folha, arco, "bege")
     print(f"    Bege Bahia aprovado em {int(m.sum())} px (circulação e depósito); borda da esquerda sem parede")
+    return out
+
+
+# item 2: escada. É a mesma escada externa do Térreo (no mesmo lugar da folha), já aprovada lá (item 21
+# do Térreo: sem linhas, com o sombreamento de descida da direita para a esquerda). O trecho dela vem do
+# Térreo retocado, levado ao quadro deste render pelas duas bases (Térreo e Subsolo têm o mesmo quadro);
+# a sombra curta do primeiro espelho cai na circulação, à esquerda, como no Térreo.
+ESCADA = {"terreo": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado.png",
+          "base_terreo": RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png",
+          "pdf": (972.0, 617.0, 1262.9, 685.0),          # os degraus (ARQ_ESCADAS E RAMPAS)
+          "sombra": (0.18, 2.0), "alcance": 8}           # do 1º espelho: força, decaimento e alcance (px)
+
+
+def alinhar(img, base_png):
+    b = cv2.resize(cv2.imread(str(base_png)), img.shape[1::-1], interpolation=cv2.INTER_AREA)
+    sift = cv2.SIFT_create(10000)
+    k1, d1 = sift.detectAndCompute(cv2.cvtColor(b, cv2.COLOR_BGR2GRAY), None)
+    k2, d2 = sift.detectAndCompute(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), None)
+    pares = [a for a, c in cv2.BFMatcher().knnMatch(d1, d2, k=2) if a.distance < 0.7 * c.distance]
+    M, inl = cv2.estimateAffine2D(np.float32([k1[a.queryIdx].pt for a in pares]),
+                                  np.float32([k2[a.trainIdx].pt for a in pares]), ransacReprojThreshold=2.0)
+    return M, int(inl.sum())
+
+
+def escada(out, A, p2r):
+    q = ESCADA
+    t = cv2.imread(str(q["terreo"]))
+    At, n = alinhar(t, q["base_terreo"])
+    M = (np.vstack([At, [0, 0, 1]]) @ np.linalg.inv(np.vstack([A, [0, 0, 1]])))[:2]     # este render -> Térreo
+    tw = cv2.warpAffine(t, M, out.shape[1::-1], flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP,
+                        borderValue=(255, 255, 255))
+    (xa, ya), (xb, yb) = p2r(q["pdf"][0], q["pdf"][1]), p2r(q["pdf"][2], q["pdf"][3])
+    x0, y0, x1, y1 = int(np.floor(xa)), int(np.floor(ya)), int(np.ceil(xb)), int(np.ceil(yb))
+    # cobertura de cada px pela escada (as bordas fracionárias misturam)
+    cx = np.clip(np.minimum(np.arange(x0, x1) + 1, xb) - np.maximum(np.arange(x0, x1), xa), 0, 1)
+    cy = np.clip(np.minimum(np.arange(y0, y1) + 1, yb) - np.maximum(np.arange(y0, y1), ya), 0, 1)
+    a = (cy[:, None] * cx[None, :])[..., None]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + tw[y0:y1, x0:x1] * a, 0, 255).astype(np.uint8)
+    forca, dec = q["sombra"]
+    xs = np.arange(x0 - q["alcance"], x0) + 0.5
+    f = 1 - forca * np.exp(-(xa - xs) / dec)
+    yi0, yi1 = int(np.ceil(ya)), int(np.floor(yb))
+    out[yi0:yi1, x0 - q["alcance"]:x0] = np.clip(out[yi0:yi1, x0 - q["alcance"]:x0] * f[None, :, None], 0, 255).astype(np.uint8)
+    print(f"    escada do Térreo aprovado ({n} pontos no alinhamento): x {xa:.1f} a {xb:.1f}, y {ya:.1f} a {yb:.1f}")
     return out
 
 
@@ -277,6 +328,8 @@ def main():
     tex = texturas_no_render(A, orig.shape)
     print("[1] circulação e depósito em Bege Bahia, sem a parede da esquerda")
     out = circulacao_deposito(out, A, pg, p2r, chapada, tex)
+    print("[2] escada: a do Térreo aprovado (sem linhas, sombreamento de descida para a esquerda)")
+    out = escada(out, A, p2r)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

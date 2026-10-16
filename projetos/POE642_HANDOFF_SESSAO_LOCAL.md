@@ -613,6 +613,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - O piso da circulação e do depósito (o Bege Bahia da base chapada) vira a textura aprovada da base v3, alinhada ao render e na cor do Bege Bahia do próprio render.
      - Na borda da esquerda fica só a linha fina do contorno, como a de cima.
      - A porta dupla do depósito é redesenhada pelo PDF (folhas e arcos finos), com o vão em piso contínuo.
+  2. **Escada:** o motor desenhou linhas pretas fortes, seta nas duas pontas, a marca de corte e uma cunha de sombra.
+     - É a mesma escada externa do Térreo, no mesmo lugar da folha, já aprovada lá (item 21 do Térreo: sem linhas, sombreamento de descida da direita para a esquerda).
+     - O trecho dela vem do Térreo retocado, levado a este render pelas duas bases (128 pontos; cai em x 599,4 a 759,0 e y 210,7 a 247,8, os degraus do PDF).
+     - A sombra curta do primeiro espelho cai na circulação, à esquerda. Sai também a linha que o render fazia em volta da escada.
 
 ## Casas A a D · Barlavento nas piscinas
 
