@@ -576,6 +576,21 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - escada em #DDDACB;
   - em branco: banco da sauna, armário do DCE, elevador.
 - **Base v1** (cores do PDF): `bases/POE642_CasaE_BASE_Subsolo_v1(_16x9)` e a prévia `_16x9_preview.jpg`.
+- **Respostas do usuário (16/10/26):**
+  - "não tem parede": a circulação fica aberta no alto, à esquerda da escada, só com a borda do piso.
+  - "parte da piscina e ofurô": o tanque comprido e o de baixo à esquerda são a piscina; o tanque pequeno de baixo à direita, junto à sauna, é o ofurô.
+  - Os materiais propostos, no código de cores do Térreo e do 1º Pavimento, ficaram como estavam.
+- **Materiais:**
+  - vinílico #A8784F, o do 1º Pavimento, no laranja da academia; as réguas do PDF ficam, como no 1º Pavimento;
+  - travertino #DCD9CA no oliva (sauna, antessala com ducha, vestiário) e na escada;
+  - granito Marrom Tabaco #5A4232 no rosa (DCE e casa de máquinas de baixo);
+  - Bege Bahia #E8E8E8 no cinza (circulação, depósito, casa de máquinas da direita, WC DCE 2);
+  - piscina e ofurô em #DFF6FE, como a piscina do Térreo;
+  - banco da sauna em dois tons de Bege Bahia mais escuros (#DCDCDC no degrau, #D0D0D0 no assento), como na Casa D;
+  - armário do DCE em marcenaria areia #CBB89E; elevador branco.
+- **Base v2** (legenda): `bases/POE642_CasaE_BASE_Subsolo_v2(_16x9)` e a prévia.
+  - Como no Térreo, as bordas brancas da piscina e do ofurô (ARQ_PAREDE de 8 pt) entram em `zonas_excluidas` e não viram vidro.
+  - O visor de vidro entre a piscina e a academia, que continua até o ofurô, fica como vidro fino.
 
 ## Casas A a D · Barlavento nas piscinas
 

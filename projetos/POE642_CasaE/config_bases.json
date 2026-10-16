@@ -807,7 +807,108 @@
    "layers_ocultas": [
     "ARQ_TERRENO PLANEJADO"
    ],
-   "_layers_ocultas": "Curvas de nível saem, como no Térreo e no 1º Pavimento: fundo todo branco."
+   "_layers_ocultas": "Curvas de nível saem, como no Térreo e no 1º Pavimento: fundo todo branco.",
+   "zonas_excluidas": {
+    "piscina e ofurô (bordas brancas): só as bordas desenhadas, sem faixas de vidro": [
+     324.9,
+     254.8,
+     391.4,
+     516.1
+    ],
+    "ofurô (bordas da direita e de baixo)": [
+     398.5,
+     411.0,
+     439.6,
+     516.1
+    ]
+   },
+   "_zonas_excluidas": "Como no Térreo: as bordas brancas da piscina e do ofurô (ARQ_PAREDE, 8 pt) não viram vidro. Fica fora das zonas o visor de vidro entre a piscina e a academia, que continua até o ofurô (x 807,6 a 819 pt no PDF, com o vidro no meio).",
+   "legenda": {
+    "_sobre": "Casa E · Subsolo (materiais aprovados pelo usuário em 16/10/26, no mesmo código de cores do Térreo e do 1º Pavimento). Vinílico #A8784F (o do 1º Pavimento): o laranja #CC9966 (academia; as réguas do PDF ficam, como no 1º Pavimento). Travertino #DCD9CA: o oliva #BAB596 (sauna, antessala com ducha, vestiário) e a escada. Granito Marrom Tabaco #5A4232: o rosa #BFA79F (DCE e a casa de máquinas de baixo). Bege Bahia #E8E8E8: o cinza #E0E0E0 (circulação, depósito, casa de máquinas da direita, WC DCE 2). Piscina e ofurô #DFF6FE, como a piscina do Térreo (usuário: o tanque comprido e o de baixo à esquerda são a piscina; o pequeno de baixo à direita, junto à sauna, é o ofurô). Banco da sauna em dois tons de Bege Bahia mais escuros, como na Casa D. Armário do DCE em marcenaria areia #CBB89E. Elevador branco. A circulação fica sem parede no alto, à esquerda da escada, como no PDF (usuário: 'não tem parede').",
+    "tolerancia_px": 10,
+    "poligonos": [
+     {
+      "nome": "circulação, depósito, casa de máquinas da direita e WC DCE 2 (cinza) → Bege Bahia",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.878,
+       0.878,
+       0.878
+      ],
+      "cor_render": "#E0E0E0",
+      "para": "#E8E8E8"
+     }
+    ],
+    "trocas_cor": [
+     [
+      "#BFA79F",
+      "#5A4232"
+     ],
+     [
+      "#BAB596",
+      "#DCD9CA"
+     ],
+     [
+      "#7FDFFF",
+      "#DFF6FE"
+     ],
+     [
+      "#CC9966",
+      "#A8784F"
+     ]
+    ],
+    "retangulos": [
+     {
+      "nome": "escada → travertino",
+      "bbox_vis": [
+       485.2,
+       221.8,
+       650.4,
+       260.3
+      ],
+      "so_cores": [
+       "#DDDACB"
+      ],
+      "para": "#DCD9CA",
+      "cor_linha": "#A9A593",
+      "_nota": "Como as escadas do Térreo e do 1º Pavimento: degraus e linha de caminhamento em cinza-travertino."
+     },
+     {
+      "nome": "banco da sauna, degrau da frente → Bege Bahia mais escuro",
+      "bbox_vis": [
+       437.9,
+       451.5,
+       500.9,
+       471.0
+      ],
+      "so_branco": true,
+      "para": "#DCDCDC",
+      "_nota": "Como na Casa D: dois tons da pedra para o banco se ler como banco (ARQ_ELEMENTOS FIXOS, y 1021,3 a 1055,5 pt)."
+     },
+     {
+      "nome": "banco da sauna, assento junto à parede → Bege Bahia ainda mais escuro",
+      "bbox_vis": [
+       437.9,
+       471.0,
+       500.9,
+       490.4
+      ],
+      "so_branco": true,
+      "para": "#D0D0D0"
+     },
+     {
+      "nome": "DCE: armário (branco com diagonal) → marcenaria areia",
+      "bbox_vis": [
+       750.9,
+       323.3,
+       789.5,
+       342.6
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     }
+    ]
+   }
   }
  },
  "entrega": {
