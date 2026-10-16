@@ -50,7 +50,8 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
     tampo limpo do lado, espelhado, na luz do tampo.
 12. Bancos em frente às camas (pedido do usuário): os cinco bancos do PDF (ARQ_LAYOUT HUMANIZAÇÃO, na
     largura da cama), no pé de cada cama do render, com a folga do PDF (o motor fez as camas 3 a 5 px
-    mais compridas; a da master, 22 px), estofados em bege (pedido do usuário), com a sombra curta.
+    mais compridas; a da master, 22 px), estofados em bege (pedidos do usuário): almofadas com o tecido, o
+    volume e as costuras da almofada do sofá da sala íntima, trama fina e a sombra curta.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -709,11 +710,14 @@ def cubas_banhos(out, orig):
 # PDF, na largura e na altura do PDF. Primeiro entrou o banco de madeira em ripas do Térreo; a pedido do
 # usuário ficou estofado em bege, com a sombra curta do banco do Térreo (BANCO_VARANDA)
 BANCOS = {"camada": "ARQ_LAYOUT HUMANIZAÇÃO", "altura_pdf": 22.7, "busca": 32, "folga": 1.0,
-          # estofado bege (pedido do usuário: "para os bancos em frente às camas use o tom bege"): o tecido
-          # fino do edredom do próprio render (normalizado, metade do relevo), o volume leve da almofada
-          # (mais claro no meio, bordas arredondadas) e um contorno bege escuro, fino
-          "bege": (156, 182, 207), "fonte_tecido": (1235, 395, 1258, 410), "relevo": 0.5,
-          "almofada": (0.03, 0.10, 0.06), "contorno": (112, 132, 156), "larg_contorno": 0.45}
+          # estofado bege (pedidos do usuário: "use o tom bege"; "precisam ter textura de estofados"):
+          # almofadas lado a lado com o tecido, o volume e as costuras da almofada do meio do assento do
+          # sofá da sala íntima do próprio render (normalizada, no bege), na proporção dela (uma almofada a
+          # cada 1,7 vez a altura do banco), e um contorno bege escuro, fino
+          # mais uma trama fina de tecido (ruído suave, 4%), para o estofado não ficar liso
+          "bege": (156, 182, 207), "fonte_almofada": (1001, 633, 1034, 654), "proporcao": 1.7, "relevo": 1.8,
+          "trama": (0.04, 0.5), "semente": 642,
+          "contorno": (112, 132, 156), "larg_contorno": 0.45}
 
 
 def bancos_camas(out, pg, p2r):
@@ -722,11 +726,12 @@ def bancos_camas(out, pg, p2r):
     lay = [d["rect"] for d in pg.get_drawings() if d.get("layer") == q["camada"] and d["type"] == "f"
            and len(d["items"]) == 4]
     bancos = [r for r in lay if abs(r.height - q["altura_pdf"]) < 0.5 and 70 < r.width < 130]
-    fx0, fy0, fx1, fy1 = q["fonte_tecido"]
-    tecido = out[fy0:fy1, fx0:fx1].astype(np.float32)
-    tecido = 1 + q["relevo"] * (tecido / tecido.reshape(-1, 3).mean(axis=0) - 1)
+    fx0, fy0, fx1, fy1 = q["fonte_almofada"]
+    almofada = out[fy0:fy1, fx0:fx1].astype(np.float32)
+    almofada = 1 + q["relevo"] * (almofada / almofada.reshape(-1, 3).mean(axis=0) - 1)
     L = out.astype(np.float32).mean(axis=2)
     forma = out.shape[:2]
+    rng = np.random.default_rng(q["semente"])
     n = 0
     for B in bancos:
         camas = [r for r in lay if abs(r.width - B.width) < 1.5 and abs(r.x0 - B.x0) < 1.5 and r.height > 80
@@ -765,18 +770,20 @@ def bancos_camas(out, pg, p2r):
         s = bv["sombra"]
         out = sombra(out, mm, (x0, y0, x1, y1), s["desloc"], s["sigma"], s["forca"])
         hh, ww = int(np.ceil(alt)) * SS, int(np.ceil(bx1 - bx0)) * SS
-        tex = cv2.resize(np.concatenate([tecido, tecido[:, ::-1]] * 4, axis=1), (ww, hh), interpolation=cv2.INTER_CUBIC)
-        u = np.linspace(-1, 1, ww)[None, :, None]
-        v = np.linspace(-1, 1, hh)[:, None, None]
-        c0, cv_, cu = q["almofada"]
-        volume = 1 + c0 - cv_ * v ** 2 - cu * np.abs(u) ** 10
-        peca = np.clip(tex * np.float32(q["bege"]) * volume, 0, 255)
+        secoes = max(1, int(round((bx1 - bx0) / (q["proporcao"] * alt))))
+        cortes = np.linspace(0, ww, secoes + 1).astype(int)
+        peca = np.concatenate([cv2.resize(almofada, (int(b_ - a_), hh), interpolation=cv2.INTER_CUBIC)
+                               for a_, b_ in zip(cortes[:-1], cortes[1:])], axis=1)
+        amp, sig = q["trama"]
+        trama = cv2.GaussianBlur(rng.normal(0, 1, (hh, ww)).astype(np.float32), (0, 0), sig * SS)
+        trama = 1 + amp * trama / max(trama.std(), 1e-6)
+        peca = np.clip(peca * trama[..., None] * np.float32(q["bege"]), 0, 255)
         peca = cv2.resize(peca, (ww // SS, hh // SS), interpolation=cv2.INTER_AREA)
         out = colar(out, peca, ret)
         a_ = linha_aa(forma, [(bx0, by0), (bx1, by0), (bx1, by1), (bx0, by1)], q["larg_contorno"], fechada=True)[..., None]
         out[:] = np.clip(out * (1 - a_) + np.float32(q["contorno"]) * a_, 0, 255).astype(np.uint8)
         n += 1
-        print(f"    banco em ({bx0:.1f}, {by0:.1f}) a ({bx1:.1f}, {by1:.1f}); pé da cama do render em {pe}")
+        print(f"    banco em ({bx0:.1f}, {by0:.1f}) a ({bx1:.1f}, {by1:.1f}), {secoes} almofadas; pé da cama do render em {pe}")
     print(f"    {n} bancos estofados em bege no pé das camas")
     return out
 
