@@ -205,11 +205,11 @@ THE ROOMS AND WHERE THEY ARE
 - Elevator: below the small plant room, with its door at the bottom into the gym. Seen from above, the cabin fills almost the whole box, with no white gap around it; the narrow white strip to the right of the box stays as drawn.
 - Gym, in vinyl: the large room in the middle, which on its right side runs down to the bottom wall. Its left side is the thin glass viewing wall onto the pool, from the top down to the sauna; its top wall has the drawn glass sections onto the corridor. The equipment stays exactly as drawn: two small machines and two treadmills on the left, the two exercise balls at the top, the weight station in the centre, the dumbbell rack on the right wall, the barbell bench and the flat bench at the bottom right, and the low piece against the maid's-room wall.
 
-POOL AND OFURO, ON THE LEFT
-The pool is the long tank to the left of the gym, behind the glass viewing wall, together with the lower-left tank below it. The ofuro is the small lower-right tank next to the sauna, separated from the pool by the same thin glass line. The water is a clear, transparent light aqua over small mosaic tiles, with the white edges exactly as drawn and at the same size. No pool ladder, steps, new edges or objects in the water.
-
 - Bottom block, below the gym, left to right: (1) the sauna, in travertine — a Bege Bahia bench along the bottom wall in two levels: the front step and the seat against the wall, one tone darker; its door at the top of its right wall, into the anteroom; (2) the anteroom, in travertine — the space between the sauna and the changing room, open to the gym at the top, with no wall or door, and with the shower stall and its door in its bottom-left corner; (3) the changing room, in travertine — its door at the top-left from the anteroom, a basin on a countertop in the top-right corner, the toilet room at the bottom-left and the shower box at the bottom-right, with the two swing doors of the toilet room and the shower box as drawn.
 - Large plant room, in granite: the empty room below the bottom block, with its door at the top-right from the gym.
+
+POOL AND OFURO, ON THE LEFT
+The pool is the long tank to the left of the gym, behind the glass viewing wall, together with the lower-left tank below it. The ofuro is the small lower-right tank next to the sauna, separated from the pool by the same thin glass line. The water is a clear, transparent light aqua over small mosaic tiles, with the white edges exactly as drawn and at the same size. No pool ladder, steps, new edges or objects in the water.
 
 SHOWERS — each one exactly where the plan draws it
 Each shower is a square chrome shower head at the small square, on a short chrome arm that comes out of the wall along the drawn line, with its round wall flange at the wall:
