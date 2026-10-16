@@ -26,6 +26,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
 5. Vazios (abaixo da escada e no hall): o motor deixou o cinza-escuro liso. Entra o X tracejado do PDF
    (cada traço da DOC_LINHAS E PROJEÇÕES na posição exata), fino, no cinza claro das linhas dos vazios
    da base (#BDBDBD), só sobre o cinza do vazio.
+6. Arcos das portas: o motor desenhou as folhas, mas nenhum arco. Entram os 12 arcos do PDF (curvas da
+   ARQ_PAREDE) no padrão aprovado no Térreo (cinza (160, 161, 160), traço de 0,45 px); sobre o vazio do
+   hall, no cinza claro do X, com a folha da porta pivotante P1 do Térreo, que também faltava.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -314,6 +317,63 @@ def vazios(out, A, pg, p2r, r2p):
     return out
 
 
+# item 6: arcos das portas. O motor desenhou as folhas, mas nenhum arco. Entram as curvas da ARQ_PAREDE
+# do PDF no padrão aprovado no Térreo (retoque_terreo_casae.ARCOS: cinza (160, 161, 160), traço de
+# 0,45 px); sobre o cinza do vazio do hall, no cinza claro do X; as paredes (escuras) não mudam. A porta
+# pivotante P1 do hall do Térreo, vista pelo vazio, também ficou sem a folha (retângulo branco da
+# ARQ_PAREDE, dos dois lados do pivô): entra cheia, no mesmo cinza
+ARCOS = {"cor": (160, 161, 160), "larg": 0.45, "min_px": 6, "parede": 45,
+         "folhas_pdf": [(2122.6, 1526.6, 2271.7, 1529.4)]}
+
+
+def pintar_traco(out, f, ret, q):
+    """Traço desenhado em 8x (f) na janela ret: cinza fino no piso, cinza claro do X sobre o vazio;
+    as paredes (escuras) não mudam."""
+    x0, y0, x1, y1 = ret
+    a = cv2.resize(f.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    a *= reg.mean(axis=2) > q["parede"]
+    c, tol = VAZIOS["cinza"]
+    vazio = (np.abs(reg - c).max(axis=2) < tol)[..., None]
+    cor = np.where(vazio, np.float32(VAZIOS["cor"]), np.float32(q["cor"]))
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + cor * a[..., None], 0, 255).astype(np.uint8)
+    return out
+
+
+def arcos_portas(out, pg, p2r):
+    q = ARCOS
+    n = 0
+    for d in pg.get_drawings():
+        if d.get("layer") != "ARQ_PAREDE" or not any(it[0] == "c" for it in d["items"]):
+            continue
+        x0, y0, x1, y1 = caixa_render(d, p2r)
+        if max(x1 - x0, y1 - y0) < q["min_px"]:
+            continue
+        x0, y0, x1, y1 = int(x0) - 4, int(y0) - 4, int(np.ceil(x1)) + 5, int(np.ceil(y1)) + 5
+        h, w = y1 - y0, x1 - x0
+        f = np.zeros((h * SS, w * SS), np.uint8)
+        for it in d["items"]:
+            if it[0] == "c":
+                pp = np.array([p2r(v.x, v.y) for v in it[1:5]])
+                tt = np.linspace(0, 1, 80)[:, None]
+                c = (1 - tt) ** 3 * pp[0] + 3 * (1 - tt) ** 2 * tt * pp[1] + 3 * (1 - tt) * tt ** 2 * pp[2] + tt ** 3 * pp[3]
+                cv2.polylines(f, [np.round((c - [x0, y0]) * SS).astype(np.int32)], False, 255,
+                              max(1, int(round(q["larg"] * SS))), cv2.LINE_AA)
+        out = pintar_traco(out, f, (x0, y0, x1, y1), q)
+        n += 1
+    for fx0, fy0, fx1, fy1 in q["folhas_pdf"]:
+        canto = np.array([p2r(fx0, fy0), p2r(fx1, fy0), p2r(fx1, fy1), p2r(fx0, fy1)])
+        x0, y0 = np.floor(canto.min(axis=0)).astype(int) - 3
+        x1, y1 = np.ceil(canto.max(axis=0)).astype(int) + 3
+        h, w = y1 - y0, x1 - x0
+        f = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.fillConvexPoly(f, np.round((canto - [x0, y0]) * SS).astype(np.int32), 255, cv2.LINE_AA)
+        out = pintar_traco(out, f, (x0, y0, x1, y1), q)
+        print(f"    folha da porta pivotante do hall em ({x0}, {y0}) a ({x1}, {y1})")
+    print(f"    {n} arcos de porta em cinza fino")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -333,6 +393,8 @@ def main():
     out = copinha(out, p2r)
     print("[5] vazios: X tracejado claro")
     out = vazios(out, A, pg, p2r, r2p)
+    print("[6] arcos das portas em cinza fino")
+    out = arcos_portas(out, pg, p2r)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

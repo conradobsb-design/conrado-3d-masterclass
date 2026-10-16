@@ -532,7 +532,8 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   2. banho master, chuveiros: o motor pôs uma ducha de parede com braço e um registro no piso; saem (quartzito tecido do próprio banho) e entram as duas placas de teto de 30 cm da Casa A nos centros dos quadradinhos do PDF;
   3. banhos das duas suítes da esquerda: sem retoque. As bacias parecem uma peça só atravessando a parede, mas o PDF desenha assim: duas bacias suspensas, costas com costas na parede entre os banhos. O render ficou fiel (um redesenho testado ficou pior, com halo, e saiu);
   4. copinha: o motor pintou a bancada em areia, como o armário ao lado, e não pôs a cuba. A bancada do PDF (da parede da esquerda ao armário) virou o Bege Bahia da varanda da esquerda do próprio render, na luz da bancada do render; a cuba redonda da Casa A entrou no círculo do PDF (34 cm), com a torneira atrás, no cromo das cubas do Térreo. O armário à direita fica em areia;
-  5. vazios (abaixo da escada e no hall de entrada): o motor deixou o cinza-escuro liso. Entrou o X tracejado do PDF (cada traço da DOC_LINHAS E PROJEÇÕES na posição exata: 34 e 35 traços), fino, no cinza claro das linhas dos vazios da base (#BDBDBD), só sobre o cinza do vazio.
+  5. vazios (abaixo da escada e no hall de entrada): o motor deixou o cinza-escuro liso. Entrou o X tracejado do PDF (cada traço da DOC_LINHAS E PROJEÇÕES na posição exata: 34 e 35 traços), fino, no cinza claro das linhas dos vazios da base (#BDBDBD), só sobre o cinza do vazio;
+  6. arcos das portas: o motor desenhou as folhas, mas nenhum arco. Entraram os 12 arcos do PDF (curvas da ARQ_PAREDE) no padrão aprovado no Térreo (cinza (160, 161, 160), traço de 0,45 px). Sobre o vazio do hall, no cinza claro do X, entrou também a folha da porta pivotante P1 do hall do Térreo (vista pelo vazio), que faltava.
 
 ## Casas A a D · Barlavento nas piscinas
 
