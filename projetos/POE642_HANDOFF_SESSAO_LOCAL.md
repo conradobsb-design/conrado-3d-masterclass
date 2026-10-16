@@ -594,6 +594,17 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 - **Base v3 (texturas):** `bases/POE642_CasaE_BASE_Subsolo_v3_texturas(_16x9)` e a prévia.
   - As mesmas fontes do Térreo e do 1º Pavimento da Casa E: vinílico das suítes do 1º Pavimento da Casa A, travertino do hall do Subsolo da Casa A, granito da cozinha do Térreo da Casa A, Bege Bahia das varandas da Casa A, água da piscina do Térreo da Casa A e marcenaria areia do Térreo retocado da Casa D.
   - O banco da sauna leva o Bege Bahia escurecido (0,93 e 0,88), preso ao retângulo do banco, como na Casa D.
+- **Prompt v1:** `POE642_CasaE_PH_Subsolo_v1.md` (entrada: `bases/POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png`).
+  - A planta ocupa de ~22% a ~54% da largura e de ~14% a ~51% da altura; as linhas tracejadas do lote ficam a ~7% e ~92,5% da largura e a ~95% da altura.
+  - Ambientes descritos por posição.
+  - Pontos que o prompt reforça:
+    - a circulação sem parede no alto, à esquerda da escada;
+    - a piscina (tanque comprido e o de baixo à esquerda) e o ofurô (o pequeno junto à sauna), com bordas brancas e o visor de vidro fino para a academia, sem escadas nem degraus na água;
+    - a antessala da sauna aberta para a academia;
+    - os três chuveiros (WC DCE 2, ducha da antessala, box do vestiário) num braço que sai da parede desenhada;
+    - o armário do DCE até o teto;
+    - o elevador ocupando quase toda a caixa;
+    - nenhuma vegetação.
 
 ## Casas A a D · Barlavento nas piscinas
 
