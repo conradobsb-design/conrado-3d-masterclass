@@ -674,6 +674,11 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - No granito Marrom Tabaco (DCE e casa de máquinas de baixo) o texto fica cinza (150).
      - Dois ambientes estreitos ficam no corpo do PDF (1,0×), porque o 1,3× não cabe no piso livre. Na casa de máquinas da direita, "CASA DE MÁQUINAS" encostava nas duas paredes. No WC DCE 2, o "m²" caía sobre o chuveiro, e o rótulo foi também 6 px para a esquerda, para o piso livre do box.
      - `retoque_1pav_casae.rotulos_ambientes` ganhou `ajustes=` (os desvios de outro pavimento, cada um com o corpo opcional). As duas montagens do 1º Pavimento saem idênticas às anteriores.
+- **Entrega (16/10/26, depois da aprovação do usuário: "prancha e o PDF. aprovado."):** a casa passa a ter três pavimentos, na ordem da Casa A (Subsolo, Térreo, 1º Pavimento).
+  - **Config:** o Subsolo entrou na chave `entrega` da `POE642_CasaE/config_bases.json` (título "SUBSOLO", linha 0 do quadro de áreas, base `POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png`). O Térreo passou à linha 1 e o 1º Pavimento à linha 2. O quadro de áreas tem os três "NÃO INFORMADO", sem total. Em `pdf.ordem`: Subsolo, Térreo e 1º Pavimento; título "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)".
+  - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_Subsolo_entrega.png`, nova. A imagem final, já no quadro comum e com os rótulos, entra com `--no-quadro`, sem realinhar. A do Térreo (realinhada com 128 pontos, erro mediano 0,78 px) e as duas do 1º Pavimento (`_pb` e `_linhas`) foram refeitas só pelo rodapé novo, com a linha do Subsolo no quadro de áreas. Rodapés `entrega/POE642_CasaE_rodape_{Subsolo,Terreo,1Pavimento}.png`.
+  - **PDFs (3 páginas A3: Subsolo, Térreo e 1º Pavimento):** `entrega/POE642_CasaE_Plantas_Humanizadas_opcao_PB.pdf` (20,6 MB) e `..._opcao_Linhas.pdf` (18,6 MB). Só a página do 1º Pavimento muda entre as duas opções. Comandos no README dos scripts, em "Pranchas de entrega".
+  - **Depois da escolha do cliente** (o 1º Pavimento continua em duas opções): como no 1º Pavimento, rodar o `rodape_entrega.py` da opção escolhida sem `--sufixo` e o `pdf_entrega.py` sem `--prancha`/`--nome`; sai `POE642_CasaE_Plantas_Humanizadas.pdf` com os três pavimentos.
 
 ## Casas A a D · Barlavento nas piscinas
 
