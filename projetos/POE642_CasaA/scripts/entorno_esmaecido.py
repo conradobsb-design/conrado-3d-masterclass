@@ -24,13 +24,13 @@ Uso (da pasta POE642_CasaA/scripts/):
   python3 entorno_esmaecido.py ../../POE642_CasaE/renders/<render_1Pavimento>.png \\
       ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado.png \\
       ../../POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png \\
-      ../../POE642_CasaE/renders/<saida>.png --fora 820 748 1096 816 \\
+      ../../POE642_CasaE/renders/<saida>.png --fora 912 752 1096 816 \\
       --base-cima ../../POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png --largura 3840
   # base com o entorno (v4): a primeira imagem é a própria base
   python3 entorno_esmaecido.py ../../POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png \\
       ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado.png \\
       ../../POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png \\
-      ../../POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v4_entorno_16x9.png --fora 820 748 1096 816
+      ../../POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v4_entorno_16x9.png --fora 912 752 1096 816
 """
 import argparse
 from pathlib import Path
