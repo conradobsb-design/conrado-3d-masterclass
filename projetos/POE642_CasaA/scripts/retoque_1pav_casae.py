@@ -52,6 +52,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
     largura da cama), no pé de cada cama do render, com a folga do PDF (o motor fez as camas 3 a 5 px
     mais compridas; a da master, 22 px), estofados em bege (pedidos do usuário): almofadas com o tecido, o
     volume e as costuras da almofada do sofá da sala íntima, trama fina e a sombra curta.
+13. Torneira de piso da banheira do banho master (pedido do usuário): a do PDF (base redonda de ~16 cm
+    logo fora da borda, no canto de cima à esquerda, e a bica em diagonal sobre a banheira), na mesma
+    posição relativa à banheira do render (maior que a do PDF), no cromo aprovado, com sombra curta.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -65,6 +68,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pymupdf
+from scipy import ndimage
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
@@ -788,6 +792,83 @@ def bancos_camas(out, pg, p2r):
     return out
 
 
+# item 13: torneira de piso da banheira do banho master (pedido do usuário: "faltou a torneira de piso da
+# banheira"). No PDF (ARQ_LOUÇAS E METAIS) ela fica no canto de cima, à esquerda, da banheira: a base
+# redonda (9 de diâmetro, ~16 cm) logo fora da borda e a bica em diagonal sobre a banheira. A banheira do
+# render é maior que a do PDF; a base vai à mesma posição relativa ao contorno dela (a elipse ajustada ao
+# branco da banheira), no tamanho do PDF, no cromo aprovado e com a sombra curta das placas de teto
+TORNEIRA_BANHEIRA = {"banheira_pdf": (1588.2, 657.7, 1639.0, 753.2), "base_pdf": (1591.3, 655.9, 1600.3, 664.9),
+                     "bica_pdf": (1595.1, 659.6, 1607.6, 672.1), "janela": (925, 225, 990, 315),
+                     "alavanca": 2.0, "larg_bica": 0.9, "larg_alavanca": 0.7}
+
+
+def torneira_banheira(out, p2r):
+    q = TORNEIRA_BANHEIRA
+    wx0, wy0, wx1, wy1 = q["janela"]
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    branco = ((reg.mean(axis=2) > 200) & (reg.max(axis=2) - reg.min(axis=2) < 30)).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(branco)
+    m = (lab == 1 + np.argmax(st[1:, cv2.CC_STAT_AREA])).astype(np.uint8)
+    m = ndimage.binary_fill_holes(cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))).astype(np.uint8)
+    cs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    (ecx, ecy), (ew, eh), _ = cv2.fitEllipse(max(cs, key=cv2.contourArea))
+    ecx, ecy, ea, eb = ecx + wx0, ecy + wy0, ew / 2, eh / 2
+    (b0x, b0y), (b1x, b1y) = p2r(*q["banheira_pdf"][:2]), p2r(*q["banheira_pdf"][2:])
+    pcx, pcy, pa, pb = (b0x + b1x) / 2, (b0y + b1y) / 2, (b1x - b0x) / 2, (b1y - b0y) / 2
+    (s0x, s0y), (s1x, s1y) = p2r(*q["base_pdf"][:2]), p2r(*q["base_pdf"][2:])
+    bcx, bcy, raio = (s0x + s1x) / 2, (s0y + s1y) / 2, (s1x - s0x) / 2
+    k1x, k1y = p2r(*q["bica_pdf"][2:])
+    bica = np.array([k1x - bcx, k1y - bcy])                       # da base à ponta da bica (para baixo e à direita)
+    # a base na mesma posição relativa à elipse da banheira do render
+    tx, ty = ecx + (bcx - pcx) / pa * ea, ecy + (bcy - pcy) / pb * eb
+    ux = bica / np.linalg.norm(bica)
+    ponta = np.array([tx, ty]) + bica
+    alav = np.array([tx, ty]) - ux * q["alavanca"]
+    x0, y0 = int(np.floor(min(tx - raio, alav[0]))) - 4, int(np.floor(min(ty - raio, alav[1]))) - 4
+    x1, y1 = int(np.ceil(ponta[0])) + 5, int(np.ceil(ponta[1])) + 5
+    h, w = y1 - y0, x1 - x0
+    cor = np.zeros((h * SS, w * SS, 3), np.float32)
+    alfa = np.zeros((h * SS, w * SS), np.float32)
+
+    def p(v):
+        return int(round((v[0] - x0) * SS)), int(round((v[1] - y0) * SS))
+
+    def pinta(forma, c):
+        mm = forma > 0
+        cor[mm] = c
+        alfa[mm] = 1
+
+    def linha(a, b, larg, c):
+        f = np.zeros(alfa.shape, np.uint8)
+        cv2.line(f, p(a), p(b), 255, max(1, int(round(larg * SS))), cv2.LINE_8)
+        pinta(f, c)
+
+    def circulo(c0, r, c):
+        f = np.zeros(alfa.shape, np.uint8)
+        cv2.circle(f, p(c0), max(1, int(round(r * SS))), 255, -1, cv2.LINE_8)
+        pinta(f, c)
+
+    base = np.array([tx, ty])
+    linha(base, ponta, q["larg_bica"], CROMO_ESCURO)                # bica
+    linha(base, ponta, q["larg_bica"] * 0.6, CROMO)
+    linha(base, ponta - ux * 0.3, q["larg_bica"] * 0.22, CROMO_CLARO)
+    circulo(ponta, q["larg_bica"] * 0.6, CROMO_ESCURO)
+    circulo(base, raio, CROMO_ESCURO)                              # base redonda
+    circulo(base, raio * 0.82, CROMO)
+    circulo(base - ux * raio * 0.3, raio * 0.35, CROMO_CLARO)
+    linha(base, alav, q["larg_alavanca"], CROMO_ESCURO)            # alavanca
+    linha(base, alav, q["larg_alavanca"] * 0.55, CROMO)
+    a = cv2.resize(alfa, (w, h), interpolation=cv2.INTER_AREA)
+    c = cv2.resize(cor * alfa[..., None], (w, h), interpolation=cv2.INTER_AREA) / np.maximum(a[..., None], 1e-6)
+    s = CHUVEIROS_BHM["sombra"]
+    out = sombra(out, a, (x0, y0, x1, y1), s["desloc"], s["sigma"], s["forca"])
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + c * a[..., None], 0, 255).astype(np.uint8)
+    print(f"    banheira do render: elipse em ({ecx:.1f}, {ecy:.1f}), semi-eixos {ea:.1f} x {eb:.1f} "
+          f"(PDF {pa:.1f} x {pb:.1f}); torneira em ({tx:.1f}, {ty:.1f}), base de {2 * raio:.1f} px")
+    return out
+
+
 # item 9: shaft (pedido do usuário: "preciso da marcação em x para sinalizar o shaft ... em cor cinza").
 # O PDF tem um shaft dentro da parede grossa de cima da suíte master: o retângulo e o X tracejado da
 # DOC_LINHAS E PROJEÇÕES (10 segmentos), que somem no preto da parede. Entram em cinza, finos, só
@@ -847,6 +928,8 @@ def main():
     out = cubas_banhos(out, orig)
     print("[12] bancos em bege no pé das camas")
     out = bancos_camas(out, pg, p2r)
+    print("[13] torneira de piso da banheira do banho master")
+    out = torneira_banheira(out, p2r)
     print("[9] shaft: X em cinza na parede")
     out = shaft(out, pg, p2r)
 
