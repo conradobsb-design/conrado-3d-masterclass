@@ -917,10 +917,10 @@ def rotulos_pdf(pg):
     return out
 
 
-def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None):
+def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, ajustes=None):
     """Escreve os rótulos do PDF na imagem (BGR), no corpo do PDF levado à escala dela (pdf2img leva um
     ponto do PDF à imagem); granito: máscara (bool, no quadro da imagem) do granito marrom, onde o texto
-    fica cinza."""
+    fica cinza; ajustes: os desvios de outro pavimento (o padrão é o deste)."""
     from PIL import Image, ImageDraw, ImageFont
     from rodape_entrega import FONTES
     q = ROTULOS
@@ -932,11 +932,12 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None):
     out = img.astype(np.float32)
     for nome, linhas, (pcx, pcy), caixa in rotulos:
         cx, cy = pdf2img(pcx, pcy)
-        dx, dy = 0.0, 0.0
-        for n, (axx, ayy), d in q["ajustes"]:
+        dx, dy, e = 0.0, 0.0, q["escala"]
+        # um ajuste pode trazer também o corpo do rótulo (o do PDF, 1.0, onde o 1,3x não cabe no piso livre)
+        for n, (axx, ayy), d, *corpo in (q["ajustes"] if ajustes is None else ajustes):
             if n == nome and np.hypot(cx - axx * W / 2000, cy - ayy * W / 2000) < 25 * W / 2000:
                 dx, dy = d[0] * escala_desvio, d[1] * escala_desvio
-        e = q["escala"]
+                e = corpo[0] if corpo else e
         (x0, y0), (x1, y1) = pdf2img(caixa.x0, caixa.y0), pdf2img(caixa.x1, caixa.y1)
         x0, x1 = cx + (x0 - cx) * e, cx + (x1 - cx) * e
         y0, y1 = cy + (y0 - cy) * e, cy + (y1 - cy) * e

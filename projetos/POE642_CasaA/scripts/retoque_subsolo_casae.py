@@ -1071,6 +1071,36 @@ def bordas_piscina(out, p2r):
     return out
 
 
+# item 18 (pedido do usuário, 16/10/26): "vamos adicionar os nomes e áreas, conforme regras que adotamos
+# anteriormente para o 1º pavimento da casa E". A regra do 1º Pavimento (`retoque_1pav_casae.rotulos_ambientes`):
+# cada linha do rótulo do PDF entra igual (o nome e "A: 12,65 m²"), na posição do PDF, no corpo do PDF 30%
+# maior, em Inter Regular preta; no granito marrom, cinza (150); os que caem sobre móvel vão ao piso livre mais
+# próximo. São escritos na imagem final (3840 px), depois das linhas do fundo. O título da folha ("-1. 1º
+# SUBSOLO", na margem de baixo) não entra.
+ROTULOS = {"fora": ("SUBSOLO",),
+           # (nome, centro do rótulo do PDF no quadro final em px de 2000, desvio em px de 2000[, corpo]);
+           # nos dois ambientes estreitos o corpo 1,3x não cabe no piso livre, e o rótulo fica no corpo do PDF
+           "ajustes": [("CASA DE MÁQUINAS", (1043.4, 335.8), (0, 0), 1.0),   # 1,3x encostava nas paredes
+                       ("WC DCE 2", (986.5, 310.9), (-3, 0), 1.0)]}         # o "m²" caía no chuveiro: à esquerda dele
+
+
+def rotulos(final):
+    import retoque_1pav_casae as R1
+    from opcoes_1pav_casae import quadro_pdf
+    q = ROTULOS
+    cfg = json.loads(CONFIG.read_text())
+    pg = pymupdf.open(PDF)[cfg["pavimentos"]["Subsolo"]["pagina"]]
+    H, W = final.shape[:2]
+    at, lt = cv2.imread(str(BASE), cv2.IMREAD_GRAYSCALE).shape
+    hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    p2q = quadro_pdf(pg, cfg, lt, at, wb, hb, W)
+    rot = [r for r in R1.rotulos_pdf(pg) if not any(f in r[0] for f in q["fora"])]
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), (W, H), interpolation=cv2.INTER_NEAREST)
+    granito = np.abs(chapada.astype(int) - np.array(GRANITO["legenda"])).max(axis=2) <= 6
+    print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
+    return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=W / 2000, granito=granito, ajustes=q["ajustes"])
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -1170,6 +1200,8 @@ def main():
         print("[15] imagem final no quadro comum, com o tracejado do lote da base")
         print("[17] fundo com as linhas do PDF do Térreo (pedido do usuário)")
         final = final_quadro(out)
+        print("[18] nomes e áreas dos ambientes, pela regra do 1º Pavimento (pedido do usuário)")
+        final = rotulos(final)
         nome_final = args.nome.replace("_retocado", "_final")
         cv2.imwrite(str(args.saida / f"{nome_final}.png"), final)
         cv2.imwrite(str(args.saida / f"{nome_final}_preview.jpg"),

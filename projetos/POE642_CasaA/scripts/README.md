@@ -439,6 +439,7 @@ Retoques locais, sem IA, no render v1 do Subsolo da Casa E, no quadro do render 
 - **Pisos refeitos:** onde o motor trocou o material ou o manchou, o piso da base chapada vira a textura aprovada da base v3 (a mesma prévia que o motor recebeu), alinhada ao render, normalizada e multiplicada pela cor do material no próprio render (`trocar_piso`). Folhas e soleiras de porta da base dentro da área são preenchidas pelo piso em volta (`buracos`).
 - **Portas:** `desenhar_porta` desenha a folha (retângulo do PDF) e o arco (a curva do PDF) em traço fino, em 8 x.
 - **`--ate N`:** roda só os itens até N (para gravar e conferir um item por vez).
+- **Imagem final (`_final.png`, 3840 × 2160):** a planta retocada no quadro comum, com as linhas do PDF do Térreo em cinza no fundo (`opcoes_1pav_casae.contexto_linhas`). Nela são escritos os nomes e as áreas pela regra do 1º Pavimento (`retoque_1pav_casae.rotulos_ambientes`; no granito, cinza). Os desvios e o corpo de cada rótulo ficam em `ROTULOS["ajustes"]` (nome, centro em px de 2000, desvio e, se preciso, o corpo; 1.0 é o do PDF). O retocado de 2000 px fica sem rótulos.
 
 ```bash
 python3 retoque_subsolo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_render.webp \

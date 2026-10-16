@@ -669,6 +669,11 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - Usa `opcoes_1pav_casae.contexto_linhas`: sem terreno, contrapiso, zonas e textos, com 70% do traço.
      - As linhas caem no lugar: a escada e o elevador do Térreo coincidem com os do Subsolo.
      - O tracejado do lote continua o da base, e a planta retocada entra inteira na pegada.
+  18. **Nomes e áreas (usuário, 16/10/26: "vamos adicionar os nomes e áreas, conforme regras que adotamos anteriormente para o 1º pavimento da casa E"):** a regra do 1º Pavimento, escrita na imagem final (3840 px), depois das linhas do fundo; o retocado de 2000 px fica sem rótulos.
+     - Os 11 rótulos do PDF: circulação, depósito, DCE, WC DCE 2, as duas casas de máquinas, elevador, academia, piscina, sauna e vestiário. Cada linha entra igual ao PDF ("ACADEMIA" / "A: 85,5 m²"), na posição do PDF, no corpo do PDF 30% maior, em Inter Regular preta. O título da folha ("-1. 1º SUBSOLO") não entra.
+     - No granito Marrom Tabaco (DCE e casa de máquinas de baixo) o texto fica cinza (150).
+     - Dois ambientes estreitos ficam no corpo do PDF (1,0×), porque o 1,3× não cabe no piso livre. Na casa de máquinas da direita, "CASA DE MÁQUINAS" encostava nas duas paredes. No WC DCE 2, o "m²" caía sobre o chuveiro, e o rótulo foi também 6 px para a esquerda, para o piso livre do box.
+     - `retoque_1pav_casae.rotulos_ambientes` ganhou `ajustes=` (os desvios de outro pavimento, cada um com o corpo opcional). As duas montagens do 1º Pavimento saem idênticas às anteriores.
 
 ## Casas A a D · Barlavento nas piscinas
 
