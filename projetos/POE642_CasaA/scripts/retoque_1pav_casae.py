@@ -56,9 +56,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
     logo fora da borda, no canto de cima à esquerda, e a bica em diagonal sobre a banheira), na mesma
     posição relativa à banheira do render (maior que a do PDF), no cromo aprovado, com sombra curta.
 14. Nomes e áreas dos ambientes (pedido do usuário: "insira as cotas nos ambientes"; escolha: nome +
-    área do PDF): os 23 rótulos do PDF no centro do bloco de cada um, em Inter, num corpo legível, com a
-    cor conforme o piso; alguns deslocados para o piso livre (camas e banheira do render maiores que as
-    do PDF), as varandas estreitas menores e a copinha numa linha. Sai também `_sem_rotulos.png`.
+    área do PDF; "tem que ficar no tamanho de como está no PDF"): cada linha dos 23 rótulos do PDF igual,
+    no mesmo texto, posição e corpo (8 pt; 5,3 pt no "2"), em Inter Light, com a cor conforme o piso; os da
+    suíte master e do banho master descem para o piso livre (peças do render maiores que as do PDF). Sai
+    também `_sem_rotulos.png`.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -874,103 +875,70 @@ def torneira_banheira(out, p2r):
 
 
 # item 14: nomes e áreas dos ambientes (pedido do usuário: "insira as cotas nos ambientes"; escolheu
-# "nome + área do PDF"). Os rótulos do PDF (o nome e a linha "A: 44,94 m²" logo abaixo) entram no centro
-# do bloco do PDF, em Inter (a fonte das pranchas), num corpo legível; a cor segue o piso (texto escuro
-# nos pisos claros, claro com sombra suave nos escuros). Desvios em px do render de 2000 px para os
-# rótulos que caem sobre móveis do render (as camas do render são mais compridas que as do PDF)
-ROTULOS = {"nome": ("SemiBold", 0.0050, 0.06), "area": ("Regular", 0.0044, 0.02), "entrelinha": 0.30,
-           "escuro": (52, 50, 48), "claro": (250, 249, 246), "limite": 160, "sombra": (0.6, 0.45),
-           # (nome, centro do rótulo do PDF no render, desvio em px, escala, numa linha só)
-           "ajustes": [("SUÍTE MASTER", (813.7, 395.2), (0, 26), 1.0, False),      # abaixo do banco
-                       ("BANHO MASTER", (961.0, 302.1), (0, 19), 1.0, False),      # abaixo da banheira
-                       ("SALA ÍNTIMA", (949.1, 670.9), (-12, 46), 1.0, False),     # fora do sofá
-                       ("VARANDA", (1313.8, 593.4), (0, 0), 0.72, False),          # varandas estreitas
-                       ("VARANDA", (1311.2, 408.6), (0, 0), 0.72, False),
-                       ("COPINHA", (1107.1, 482.9), (4, 0), 0.8, True)]}         # faixa estreita: sobre o armário
+# "nome + área do PDF"; depois: "ficou grosseiro. tem que ficar no tamanho de como está no PDF"). Cada
+# linha do rótulo do PDF entra igual: o mesmo texto ("SUÍTE 1", "A: 17 m" e o "2" sobrescrito), na mesma
+# posição (a origem da linha no PDF) e no mesmo corpo (8 pt; 5,3 pt no "2"), levado à escala da imagem,
+# em Inter Light (traço leve, como a Malgun Gothic Semilight do PDF), desenhado em 4x e reduzido. A cor
+# segue o piso (escuro nos claros, claro nos escuros), sem sombra. Os rótulos que caem sobre peças do
+# render maiores que as do PDF (cama e banco da master, banheira) descem para o piso livre
+ROTULOS = {"fonte": "Light", "ss": 4, "escuro": (40, 38, 36), "claro": (248, 247, 244), "limite": 150,
+           # (nome, centro do rótulo do PDF no render de 2000 px, desvio em px desse render)
+           "ajustes": [("SUÍTE MASTER", (813.7, 395.2), (0, 20)),       # abaixo do banco
+                       ("BANHO MASTER", (961.0, 302.1), (0, 8))]}       # abaixo da banheira
 
 
 def rotulos_pdf(pg):
-    """Os rótulos dos ambientes do PDF: nome, área ("44,94 m²") e o centro do bloco (pontos do PDF)."""
-    spans = [(s["text"].strip(), s["size"], pymupdf.Rect(s["bbox"])) for b in pg.get_text("dict")["blocks"]
-             for li in b.get("lines", []) for s in li["spans"] if s["text"].strip()]
+    """Os rótulos dos ambientes do PDF: o nome, as linhas logo abaixo ("A: 17 m" e o "2") e o centro do
+    bloco; cada linha com o texto, o corpo (pt) e a origem (pontos do PDF)."""
+    spans = [(s["text"].strip(), s["size"], pymupdf.Rect(s["bbox"]), s["origin"])
+             for b in pg.get_text("dict")["blocks"] for li in b.get("lines", []) for s in li["spans"]
+             if s["text"].strip()]
     out = []
-    for i, (t, tam, r) in enumerate(spans):
+    for i, (t, tam, r, o) in enumerate(spans):
         if tam < 7.5 or t.startswith("A:") or not any(c.isalpha() for c in t) or "PAVIMENTO" in t or "ESC." in t:
             continue
-        caixa, area = pymupdf.Rect(r), None
+        linhas, caixa = [(t, tam, o)], pymupdf.Rect(r)
         if i + 1 < len(spans) and spans[i + 1][0].startswith("A:") and spans[i + 1][2].y0 - r.y1 < 2:
-            area = spans[i + 1][0][2:].strip().rstrip("m").strip()
-            area = f"{float(area.replace(',', '.')):.2f}".replace(".", ",") + " m²"
+            linhas.append((spans[i + 1][0], spans[i + 1][1], spans[i + 1][3]))
             caixa |= spans[i + 1][2]
-        out.append((t, area, ((caixa.x0 + caixa.x1) / 2, (caixa.y0 + caixa.y1) / 2)))
+            if i + 2 < len(spans) and spans[i + 2][0] == "2" and spans[i + 2][1] < 6:
+                linhas.append((spans[i + 2][0], spans[i + 2][1], spans[i + 2][3]))
+        out.append((t, linhas, ((caixa.x0 + caixa.x1) / 2, (caixa.y0 + caixa.y1) / 2), caixa))
     return out
 
 
-def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=1.0):
-    """Escreve os rótulos na imagem (BGR), no tamanho dela: pdf2img leva um ponto do PDF à imagem."""
-    from PIL import Image, ImageDraw, ImageFilter, ImageFont
+def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None):
+    """Escreve os rótulos do PDF na imagem (BGR), no corpo do PDF levado à escala dela (pdf2img leva um
+    ponto do PDF à imagem)."""
+    from PIL import Image, ImageDraw, ImageFont
     from rodape_entrega import FONTES
     q = ROTULOS
     H, W = img.shape[:2]
-
-    def fonte(peso, frac):
-        return ImageFont.truetype(str(FONTES / f"Inter-{peso}.otf"), max(6, int(round(frac * W))))
-
-    def ajuste(nome, cx, cy):
-        for n, (ax, ay), d, e, u in q["ajustes"]:
-            if n == nome and np.hypot(cx - ax * W / 2000, cy - ay * W / 2000) < 25 * W / 2000:
-                return d, e, u
-        return (0, 0), 1.0, False
-
-    texto = Image.new("L", (W, H), 0)
-    dt = ImageDraw.Draw(texto)
-    cores = []
+    escala_desvio = W / 2000 if escala_desvio is None else escala_desvio
+    (ax_, ay_), (bx_, by_) = pdf2img(0, 0), pdf2img(100, 0)
+    px_pt = np.hypot(bx_ - ax_, by_ - ay_) / 100                # px da imagem por ponto do PDF
+    ss = q["ss"]
     L = img.astype(np.float32).mean(axis=2)
-
-    def largura(s, f, esp):
-        return sum(f.getlength(c) for c in s) + esp * f.size * (len(s) - 1)
-
-    def escreve(s, f, esp, x, y):
-        for c in s:
-            dt.text((x, y), c, font=f, fill=255, anchor="ls")
-            x += f.getlength(c) + esp * f.size
-
-    for nome, area, (px, py) in rotulos:
-        cx, cy = pdf2img(px, py)
-        (dx, dy), esc, uma = ajuste(nome, cx, cy)
-        cx, cy = cx + dx * escala_desvio, cy + dy * escala_desvio
-        fn = fonte(q["nome"][0], q["nome"][1] * esc)
-        fa = fonte(q["area"][0], q["area"][1] * esc)
-        if uma and area:
-            linhas = [(f"{nome}  ·  {area}", fn, q["nome"][2])]
-        else:
-            linhas = [(nome, fn, q["nome"][2])] + ([(area, fa, q["area"][2])] if area else [])
-        alturas = [f.getbbox("ÁM")[3] - f.getbbox("ÁM")[1] for _, f, _ in linhas]
-        total = sum(alturas) + q["entrelinha"] * fn.size * (len(linhas) - 1)
-        y = cy - total / 2
-        caixa = []
-        for (s, f, esp), h in zip(linhas, alturas):
-            w = largura(s, f, esp)
-            escreve(s, f, esp, cx - w / 2, y + h)
-            caixa.append((cx - w / 2, y, cx + w / 2, y + h))
-            y += h + q["entrelinha"] * fn.size
-        x0 = int(min(c[0] for c in caixa)) - 2
-        y0 = int(caixa[0][1]) - 2
-        x1 = int(max(c[2] for c in caixa)) + 3
-        y1 = int(caixa[-1][3]) + 3
-        fundo = float(np.median(L[max(y0, 0):y1, max(x0, 0):x1]))
-        cores.append(((x0, y0, x1, y1), fundo < q["limite"]))
-    a = np.asarray(texto, np.float32) / 255
-    raio, forca = q["sombra"]
-    s = np.asarray(texto.filter(ImageFilter.GaussianBlur(raio * W / 2000)), np.float32) / 255
     out = img.astype(np.float32)
-    for (x0, y0, x1, y1), claro in cores:
-        x0, y0 = max(x0 - 4, 0), max(y0 - 4, 0)
-        sl = (slice(y0, y1 + 4), slice(x0, x1 + 4))
-        if claro:
-            out[sl] *= (1 - forca * s[sl])[..., None]
+    for nome, linhas, (pcx, pcy), caixa in rotulos:
+        cx, cy = pdf2img(pcx, pcy)
+        dx, dy = 0.0, 0.0
+        for n, (axx, ayy), d in q["ajustes"]:
+            if n == nome and np.hypot(cx - axx * W / 2000, cy - ayy * W / 2000) < 25 * W / 2000:
+                dx, dy = d[0] * escala_desvio, d[1] * escala_desvio
+        (x0, y0), (x1, y1) = pdf2img(caixa.x0, caixa.y0), pdf2img(caixa.x1, caixa.y1)
+        x0, y0 = int(np.floor(x0 + dx)) - 3, int(np.floor(y0 + dy)) - 3
+        x1, y1 = int(np.ceil(x1 + dx)) + 4, int(np.ceil(y1 + dy)) + 4
+        tela = Image.new("L", ((x1 - x0) * ss, (y1 - y0) * ss), 0)
+        d = ImageDraw.Draw(tela)
+        for texto, tam, (ox, oy) in linhas:
+            f = ImageFont.truetype(str(FONTES / f"Inter-{q['fonte']}.otf"), max(4, int(round(tam * px_pt * ss))))
+            gx, gy = pdf2img(ox, oy)
+            d.text(((gx + dx - x0) * ss, (gy + dy - y0) * ss), texto, font=f, fill=255, anchor="ls")
+        a = np.asarray(tela.resize((x1 - x0, y1 - y0), Image.LANCZOS), np.float32)[..., None] / 255
+        claro = float(np.median(L[max(y0, 0):y1, max(x0, 0):x1])) < q["limite"]
         cor = np.float32(q["claro"] if claro else q["escuro"])
-        out[sl] = out[sl] * (1 - a[sl][..., None]) + cor * a[sl][..., None]
+        out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + cor * a
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
