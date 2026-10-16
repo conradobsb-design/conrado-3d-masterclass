@@ -43,6 +43,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
     o sombreado do caixilho no piso de dentro some. Os brises (as colunas da ARQ_ELEMENTOS FIXOS na
     fachada da esquerda e na borda de fora das varandas da direita) entram como faixa de bronze. Roda
     antes das cortinas.
+11. Cubas dos banhos das suítes da direita (pedido do usuário: "cuba posicionada mais à direita da
+    bancada da pia"): a cuba do render, com a torneira, vai para o centro do recorte do PDF (10,8 e
+    10,7 px para a direita); onde estava, o tampo limpo do lado, espelhado, na luz do tampo.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -645,6 +648,49 @@ def fachadas(out, pg, p2r):
     return out
 
 
+# item 11: cubas dos banhos das suítes da direita (pedido do usuário: "cuba posicionada mais à direita
+# da bancada da pia"). No PDF a cuba fica no lado direito da bancada, junto ao vaso (ARQ_BANCADAS: o
+# recorte de 28 x 24 do PDF, centro em x 1259,8 do render); o motor a pôs no meio (centro em 1249,0).
+# A cuba do próprio render, com a torneira, vai para o centro do PDF (deslocamento com subpixel, borda
+# suave); onde ela estava, o tampo limpo do lado, espelhado, na luz do tampo em volta
+CUBAS_BANHOS = [
+    {"nome": "banho da suíte de cima", "cuba": (1240, 292, 1258, 307), "dx": 1259.8 - 1249.0, "fonte_x": (1258, 1268)},
+    {"nome": "banho da suíte de baixo", "cuba": (1241, 484, 1259, 497), "dx": 1259.7 - 1249.0, "fonte_x": (1259, 1268)},
+]
+
+
+def cubas_banhos(out, orig):
+    for q in CUBAS_BANHOS:
+        cx0, cy0, cx1, cy1 = q["cuba"]
+        sprite = orig[cy0:cy1, cx0:cx1].copy()
+        # o tampo onde a cuba estava: o trecho limpo à direita, nas mesmas linhas, espelhado na horizontal,
+        # na luz do tampo interpolada entre as colunas logo à esquerda e logo à direita
+        fx0, fx1 = q["fonte_x"]
+        fonte = orig[cy0:cy1, fx0:fx1].astype(np.float32)
+        h, w = cy1 - cy0, cx1 - cx0
+        tex = np.concatenate([fonte, fonte[:, ::-1]] * (w // (2 * fonte.shape[1]) + 1), axis=1)[:, :w]
+        tex = tex / tex.mean(axis=1, keepdims=True)
+        esq = orig[cy0:cy1, cx0 - 2:cx0].astype(np.float32).mean(axis=1)
+        dir_ = orig[cy0:cy1, cx1:cx1 + 2].astype(np.float32).mean(axis=1)
+        tt = np.linspace(0, 1, w)[None, :, None]
+        luz = esq[:, None, :] * (1 - tt) + dir_[:, None, :] * tt
+        out[cy0:cy1, cx0:cx1] = np.clip(tex * luz, 0, 255).astype(np.uint8)
+        # a cuba no lugar do PDF: deslocada com subpixel, borda suave de 1 px
+        nx0 = int(np.floor(cx0 + q["dx"])) - 1
+        W = w + 3
+        M = np.float32([[1, 0, cx0 + q["dx"] - nx0], [0, 1, 0]])
+        peca = cv2.warpAffine(sprite.astype(np.float32), M, (W, h), flags=cv2.INTER_LINEAR)
+        a = np.zeros((h * SS, w * SS), np.float32)
+        a[SS:-SS, SS:-SS] = 1
+        a = cv2.GaussianBlur(a, (0, 0), 0.6 * SS)
+        a = cv2.resize(a, (w, h), interpolation=cv2.INTER_AREA)
+        a = cv2.warpAffine(a, M, (W, h), flags=cv2.INTER_LINEAR)[..., None]
+        reg = out[cy0:cy1, nx0:nx0 + W].astype(np.float32)
+        out[cy0:cy1, nx0:nx0 + W] = np.clip(reg * (1 - a) + peca * a, 0, 255).astype(np.uint8)
+        print(f"    {q['nome']}: cuba {q['dx']:.1f} px para a direita, no centro do PDF")
+    return out
+
+
 # item 9: shaft (pedido do usuário: "preciso da marcação em x para sinalizar o shaft ... em cor cinza").
 # O PDF tem um shaft dentro da parede grossa de cima da suíte master: o retângulo e o X tracejado da
 # DOC_LINHAS E PROJEÇÕES (10 segmentos), que somem no preto da parede. Entram em cinza, finos, só
@@ -700,6 +746,8 @@ def main():
     print("[10] fachadas das suítes: brises de bronze e portas de correr de vidro finas")
     out = fachadas(out, pg, p2r)
     out = cortinas(out, pg, p2r)
+    print("[11] cubas dos banhos da direita no lado direito da bancada")
+    out = cubas_banhos(out, orig)
     print("[9] shaft: X em cinza na parede")
     out = shaft(out, pg, p2r)
 
