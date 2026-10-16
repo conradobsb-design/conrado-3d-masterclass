@@ -382,6 +382,17 @@ python3 entorno_esmaecido.py ../../POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimen
     ../../POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v4_entorno_16x9.png --fora 820 748 1096 816
 ```
 
+## Retoque do 1º Pavimento da Casa E: `retoque_1pav_casae.py`
+
+Retoques sem IA no render v1 (fundo branco), no quadro do render; as posições vêm da prévia de 1800 px (as coordenadas da `config_bases.json` e do PDF), levadas ao render pela base alinhada (`vis2r`). O Térreo esmaecido entra depois, pelo `entorno_esmaecido.py`.
+- **Banho master, floreira (item 1):** trecho do jardim interno do Térreo aprovado, girado, no retângulo das plantas do PDF, com contorno fino e sombra curta.
+- **Banho master, chuveiros (item 2):** a ducha de parede e o registro saem (`apagar_largo`, quartzito do próprio banho) e entram as placas de teto da Casa A (`placa_teto`).
+
+```bash
+python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \
+    --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_1Pavimento_v1_retocado
+```
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:

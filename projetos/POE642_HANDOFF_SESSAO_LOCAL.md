@@ -526,6 +526,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - **Prompt v2:** `POE642_CasaE_PH_1Pavimento_v2.md` (entrada: a base v4). O fundo branco virou o Térreo esmaecido, mantido exatamente como está; a vegetação fica só nele; em cor cheia, só o 1º Pavimento.
   - **Fluxo escolhido (usuário, 16/10/26):** para a fidelidade, o Térreo não passa pelo motor (nem como imagem 02, que arrisca desalinhar e misturar os pavimentos). O motor renderiza só o 1º Pavimento em fundo branco (base v3 + prompt v1). Depois, o `entorno_esmaecido.py` com `--base-cima` põe o Térreo aprovado esmaecido em volta, e o render do 1º Pavimento por cima, integralmente ("na parte do 1º pavimento, sobrepor integralmente"). A pegada sai da base (geometria do projeto), não do render. A base v4 e o prompt v2 ficam como alternativa.
   - **Camada do Térreo recortado:** `bases/POE642_CasaE_1Pavimento_entorno_terreo_recortado.png` (3840 × 2160, RGBA): o Térreo esmaecido com a área do 1º Pavimento transparente, para montar por cima (opção `--recorte`). Teste com a base v3 no lugar do render: 787 pontos, erro mediano 0,16 px.
+- **Render v1:** `renders/POE642_CasaE_PH_1Pavimento_v1_render.webp` (2000 × 1116; base v3 + prompt v1, fundo branco), na escala da base: SIFT + afim com 56 pontos, escala 0,9997 × 1,0085. O que diverge da base está marcado em `renders/POE642_CasaE_PH_1Pavimento_v1_erros.jpg`.
+- **Retoque** (`POE642_CasaA/scripts/retoque_1pav_casae.py`, sem IA, um item por vez; saída `renders/POE642_CasaE_PH_1Pavimento_v1_retocado.png`, `_camada.png` e `_previa.jpg`):
+  1. banho master, floreira: as três plantas do PDF junto à janela da parede da esquerda; o motor deixou o piso liso. Entram as plantas tropicais do jardim interno do Térreo aprovado (um trecho girado para a vertical), no retângulo do PDF, com contorno fino da floreira e sombra curta;
+  2. banho master, chuveiros: o motor pôs uma ducha de parede com braço e um registro no piso; saem (quartzito tecido do próprio banho) e entram as duas placas de teto de 30 cm da Casa A nos centros dos quadradinhos do PDF.
 
 ## Casas A a D · Barlavento nas piscinas
 
