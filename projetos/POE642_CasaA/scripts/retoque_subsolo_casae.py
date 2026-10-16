@@ -793,6 +793,31 @@ def sauna(out, p2r, chapada, tex):
     return out
 
 
+# item 10: antessala. O motor pôs uma bacia sanitária entre a ducha e o vestiário (o PDF não tem), além de
+# sombras longas e arcos tracejados. A antessala e a ducha vêm da base (o travertino), no tom do render, e
+# as portas da sauna e da ducha são as do PDF (folha e arco finos). O chuveiro da ducha entra no item 11.
+ANTESSALA = {"interior": (1000.6, 946.0, 1155.5, 1090.3),
+             "portas": [((1008.9, 961.4, 1048.6, 963.6), (1008.9, 961.4, 1048.6, 1001.1)),     # sauna
+                        ((1026.5, 1022.3, 1028.1, 1061.1), (1026.9, 1022.3, 1065.7, 1061.1))]}  # ducha
+
+
+def antessala(out, pg, p2r, chapada, tex):
+    q = ANTESSALA
+    m, parede = ambiente(out, p2r, chapada, [q["interior"]])
+    # só o travertino da antessala: o vinílico da academia, logo acima da abertura, fica
+    trav = np.abs(chapada.astype(int) - (202, 217, 220)).max(axis=2) <= 3
+    vinil = cv2.dilate((np.abs(chapada.astype(int) - (79, 120, 168)).max(axis=2) <= 3).astype(np.uint8),
+                       np.ones((3, 3), np.uint8)).astype(bool)
+    m &= ~vinil
+    ganho = np.asarray(TRAV["render"], np.float32) / np.asarray(TRAV["base"], np.float32)
+    out = pela_base(out, m, tex, ganho, buracos=m & ~trav)
+    for folha, arco in q["portas"]:
+        out = desenhar_porta(out, pg, p2r, folha, arco, "bege")
+    out = limpar_paredes(out, p2r, parede, q["interior"])
+    print(f"    antessala e ducha da base: {int(m.sum())} px (sem a bacia do render); portas da sauna e da ducha")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -874,6 +899,7 @@ def main():
         ("dois elípticos do PDF no lugar dos halteres grandes", lambda o: elipticos(o, pg, p2r)),
         ("piscina e ofurô: água aprovada, sem degraus; visor de vidro", lambda o: piscina(o, A, p2r, chapada, tex)),
         ("sauna: banco de Bege Bahia em dois níveis, ao longo da parede de baixo", lambda o: sauna(o, p2r, chapada, tex)),
+        ("antessala: sem a bacia; portas da sauna e da ducha", lambda o: antessala(o, pg, p2r, chapada, tex)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
         if n <= args.ate:

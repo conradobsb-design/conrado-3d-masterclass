@@ -638,6 +638,9 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   9. **Sauna:** o motor fez um banco em L de ripas de madeira, subindo pela parede da esquerda. O banco do PDF é de Bege Bahia, em dois níveis, só ao longo da parede de baixo (ARQ_ELEMENTOS FIXOS), como na Casa D.
      - A sauna vem inteira da base (`pela_base`): o travertino do piso e o banco nos dois tons de Bege Bahia, que é a legenda aprovada, no tom do travertino do render (ganho por canal) e sem os contornos da base.
      - Os dois níveis se leem pela sombra curta de cada borda no nível de baixo e por um brilho leve na quina.
+  10. **Antessala:** o motor pôs uma bacia sanitária entre a ducha e o vestiário (o PDF não tem), além de sombras longas e arcos tracejados.
+     - A antessala e a ducha vêm da base (o travertino), no tom do render; o vinílico da academia, logo acima da abertura, fica.
+     - As portas da sauna e da ducha são as do PDF, com folha e arco finos. O chuveiro da ducha entra no item 11.
 
 ## Casas A a D · Barlavento nas piscinas
 
