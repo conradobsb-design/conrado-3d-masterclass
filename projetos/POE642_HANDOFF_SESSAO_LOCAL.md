@@ -554,6 +554,29 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - **Faixa abaixo da suíte 3 (usuário, 16/10/26: "corrija esse defeito. deveria ser linhas apenas"):** abaixo da parede de baixo da suíte 3, uma faixa branca da base, fechada pela linha fina do PDF, caía dentro da pegada, e lá aparecia uma barra cinza do render. Ela entrou numa segunda área `FORA` do `opcoes_1pav_casae.py` (822, 800, 912, 816 em px de 2000), que começa abaixo da parede para não pegar a escrivaninha. Agora a faixa mostra o entorno: as linhas do Térreo na opção linhas, o Térreo esmaecido na P&B. Só essa faixa mudou (cerca de 3.300 px). As duas montagens, as duas pranchas do 1º Pavimento e os dois PDFs foram refeitos.
   - **Depois da escolha do cliente:** rodar o `rodape_entrega.py` da opção escolhida sem `--sufixo` (gera `..._PH_1Pavimento_entrega.png`) e o `pdf_entrega.py` sem `--prancha`/`--nome` (gera `POE642_CasaE_Plantas_Humanizadas.pdf`). Comandos no README dos scripts, em "Pranchas de entrega".
 
+## Casa E · Subsolo
+
+- **PDF:** `_pdfs_cliente/642 - SUBSOLO - CASA E.pdf` (recebido em 16/10/26; mesma folha 3370 × 2384 pt e mesmo enquadramento: o elevador cai a 2 pt do elevador do Térreo). Pavimento `Subsolo` na `POE642_CasaE/config_bases.json` (curvas de nível ocultas).
+- **Ambientes (textos do PDF):**
+  - academia (85,5 m²), no centro;
+  - piscina (14,76 m²) à esquerda, em dois tanques: um comprido junto à academia, com um vidro entre os dois, e um embaixo, dividido em dois por um vidro;
+  - sauna (4,62 m², banco em dois níveis), uma antessala com ducha e o vestiário (6 m², com bancada e cuba, vaso e chuveiro);
+  - circulação (38,37 m²) na faixa de cima, com a escada (18 degraus, sobe);
+  - depósito (12,65 m², porta dupla);
+  - DCE (8,4 m², cama e armário) e WC DCE 2 (3,36 m², com chuveiro);
+  - duas casas de máquinas (5,83 m² à direita, 15,07 m² embaixo);
+  - elevador.
+  - A faixa da circulação não tem parede no alto, à esquerda da escada (só a borda do piso).
+- **Cores do PDF:**
+  - laranja #CC9966 em réguas: a academia;
+  - oliva #BAB596: sauna, antessala, ducha e vestiário;
+  - rosa #BFA79F: DCE e a casa de máquinas de baixo;
+  - cinza #E0E0E0: circulação, depósito, casa de máquinas da direita e WC DCE 2;
+  - azul #7FDFFF: a piscina;
+  - escada em #DDDACB;
+  - em branco: banco da sauna, armário do DCE, elevador.
+- **Base v1** (cores do PDF): `bases/POE642_CasaE_BASE_Subsolo_v1(_16x9)` e a prévia `_16x9_preview.jpg`.
+
 ## Casas A a D · Barlavento nas piscinas
 
 Pedido do usuário (15/10/26), depois do item 35 da Casa E: as piscinas das Casas A, B, C e D no mesmo revestimento Barlavento, com os mesmos efeitos de água, e as pranchas e os PDFs refeitos.
