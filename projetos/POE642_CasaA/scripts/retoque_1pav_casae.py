@@ -55,11 +55,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
 13. Torneira de piso da banheira do banho master (pedido do usuário): a do PDF (base redonda de ~16 cm
     logo fora da borda, no canto de cima à esquerda, e a bica em diagonal sobre a banheira), na mesma
     posição relativa à banheira do render (maior que a do PDF), no cromo aprovado, com sombra curta.
-14. Nomes e áreas dos ambientes (pedido do usuário: "insira as cotas nos ambientes"; escolha: nome +
-    área do PDF; "tem que ficar no tamanho de como está no PDF"): cada linha dos 23 rótulos do PDF igual,
-    no mesmo texto, posição e corpo (8 pt; 5,3 pt no "2"), em Inter Light, com a cor conforme o piso; os da
-    suíte master e do banho master descem para o piso livre (peças do render maiores que as do PDF). Sai
-    também `_sem_rotulos.png`.
+14. Nomes e áreas dos ambientes (pedidos do usuário: nome + área do PDF, no tamanho do PDF e um pouco
+    maior, no piso, em preto; no granito marrom, cinza): cada linha dos 23 rótulos do PDF igual (texto,
+    posição, corpo do PDF 30% maior), em Inter Light preta; os que caem sobre peças do render vão para o
+    piso livre. Sai também `_sem_rotulos.png`.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -875,16 +874,24 @@ def torneira_banheira(out, p2r):
 
 
 # item 14: nomes e áreas dos ambientes (pedido do usuário: "insira as cotas nos ambientes"; escolheu
-# "nome + área do PDF"; depois: "ficou grosseiro. tem que ficar no tamanho de como está no PDF"). Cada
+# "nome + área do PDF"; depois: "tem que ficar no tamanho de como está no PDF"; "os escritos devem ser feitos
+# em piso, caso seja possível, na cor preta; no granito marrom, cinza"; "e um pouco maior a fonte"). Cada
 # linha do rótulo do PDF entra igual: o mesmo texto ("SUÍTE 1", "A: 17 m" e o "2" sobrescrito), na mesma
-# posição (a origem da linha no PDF) e no mesmo corpo (8 pt; 5,3 pt no "2"), levado à escala da imagem,
-# em Inter Light (traço leve, como a Malgun Gothic Semilight do PDF), desenhado em 4x e reduzido. A cor
-# segue o piso (escuro nos claros, claro nos escuros), sem sombra. Os rótulos que caem sobre peças do
-# render maiores que as do PDF (cama e banco da master, banheira) descem para o piso livre
-ROTULOS = {"fonte": "Light", "ss": 4, "escuro": (40, 38, 36), "claro": (248, 247, 244), "limite": 150,
+# posição (a origem da linha no PDF) e no corpo do PDF (8 pt; 5,3 pt no "2") levado à escala da imagem e
+# 30% maior, em Inter Light (traço leve, como a Malgun Gothic Semilight do PDF), desenhado em 4x e
+# reduzido, em preto. Os que caem sobre peças do render (maiores que as do PDF) vão para o piso livre
+ROTULOS = {"fonte": "Light", "ss": 4,
+           # cor (pedido do usuário): preto no piso; no granito marrom, cinza (neste pavimento não há granito)
+           "cor": (20, 20, 20), "cor_granito": (150, 150, 150),
+           # corpo um pouco maior que o do PDF (pedido do usuário: "e um pouco maior a fonte")
+           "escala": 1.3,
            # (nome, centro do rótulo do PDF no render de 2000 px, desvio em px desse render)
-           "ajustes": [("SUÍTE MASTER", (813.7, 395.2), (0, 20)),       # abaixo do banco
-                       ("BANHO MASTER", (961.0, 302.1), (0, 8))]}       # abaixo da banheira
+           # (os escritos ficam no piso sempre que possível: pedido do usuário)
+           "ajustes": [("SUÍTE MASTER", (813.7, 395.2), (6, 26)),       # abaixo do banco, fora do tapete e do pufe
+                       ("BANHO MASTER", (961.0, 302.1), (0, 8)),        # abaixo da banheira
+                       ("SALA ÍNTIMA", (949.1, 670.9), (-6, 0)),        # longe do sofá
+                       ("CLOSET 3", (873.5, 655.2), (-5, 0)),           # fora do armário
+                       ("COPINHA", (1107.1, 482.9), (0, -20))]}         # no piso em frente à bancada
 
 
 def rotulos_pdf(pg):
@@ -907,9 +914,10 @@ def rotulos_pdf(pg):
     return out
 
 
-def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None):
+def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None):
     """Escreve os rótulos do PDF na imagem (BGR), no corpo do PDF levado à escala dela (pdf2img leva um
-    ponto do PDF à imagem)."""
+    ponto do PDF à imagem); granito: máscara (bool, no quadro da imagem) do granito marrom, onde o texto
+    fica cinza."""
     from PIL import Image, ImageDraw, ImageFont
     from rodape_entrega import FONTES
     q = ROTULOS
@@ -918,7 +926,6 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None):
     (ax_, ay_), (bx_, by_) = pdf2img(0, 0), pdf2img(100, 0)
     px_pt = np.hypot(bx_ - ax_, by_ - ay_) / 100                # px da imagem por ponto do PDF
     ss = q["ss"]
-    L = img.astype(np.float32).mean(axis=2)
     out = img.astype(np.float32)
     for nome, linhas, (pcx, pcy), caixa in rotulos:
         cx, cy = pdf2img(pcx, pcy)
@@ -926,18 +933,22 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None):
         for n, (axx, ayy), d in q["ajustes"]:
             if n == nome and np.hypot(cx - axx * W / 2000, cy - ayy * W / 2000) < 25 * W / 2000:
                 dx, dy = d[0] * escala_desvio, d[1] * escala_desvio
+        e = q["escala"]
         (x0, y0), (x1, y1) = pdf2img(caixa.x0, caixa.y0), pdf2img(caixa.x1, caixa.y1)
+        x0, x1 = cx + (x0 - cx) * e, cx + (x1 - cx) * e
+        y0, y1 = cy + (y0 - cy) * e, cy + (y1 - cy) * e
         x0, y0 = int(np.floor(x0 + dx)) - 3, int(np.floor(y0 + dy)) - 3
         x1, y1 = int(np.ceil(x1 + dx)) + 4, int(np.ceil(y1 + dy)) + 4
         tela = Image.new("L", ((x1 - x0) * ss, (y1 - y0) * ss), 0)
         d = ImageDraw.Draw(tela)
         for texto, tam, (ox, oy) in linhas:
-            f = ImageFont.truetype(str(FONTES / f"Inter-{q['fonte']}.otf"), max(4, int(round(tam * px_pt * ss))))
+            f = ImageFont.truetype(str(FONTES / f"Inter-{q['fonte']}.otf"), max(4, int(round(tam * px_pt * e * ss))))
             gx, gy = pdf2img(ox, oy)
+            gx, gy = cx + (gx - cx) * e, cy + (gy - cy) * e          # as linhas afastam na mesma escala
             d.text(((gx + dx - x0) * ss, (gy + dy - y0) * ss), texto, font=f, fill=255, anchor="ls")
         a = np.asarray(tela.resize((x1 - x0, y1 - y0), Image.LANCZOS), np.float32)[..., None] / 255
-        claro = float(np.median(L[max(y0, 0):y1, max(x0, 0):x1])) < q["limite"]
-        cor = np.float32(q["claro"] if claro else q["escuro"])
+        no_granito = granito is not None and granito[max(y0, 0):y1, max(x0, 0):x1].mean() > 0.5
+        cor = np.float32(q["cor_granito"] if no_granito else q["cor"])
         out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + cor * a
     return np.clip(out, 0, 255).astype(np.uint8)
 
