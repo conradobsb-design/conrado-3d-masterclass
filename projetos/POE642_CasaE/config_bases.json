@@ -408,7 +408,271 @@
    "layers_ocultas": [
     "ARQ_TERRENO PLANEJADO"
    ],
-   "_layers_ocultas": "Curvas de nível saem, como no Térreo: fundo todo branco."
+   "_layers_ocultas": "Curvas de nível saem, como no Térreo: fundo todo branco.",
+   "legenda": {
+    "_sobre": "Casa E · 1º Pavimento (materiais definidos pelo usuário em 16/10/26). Vinílico #A8784F (o mesmo da área íntima do 1º Pavimento da Casa A, Durafloor City Petra): o laranja #CC9966 do PDF (suítes, closets, closet master, rouparia, sala íntima, circulação). Quartzito Aura #EAD4BF (a cor da legenda do cliente): os cinco banhos (brancos com hachura fina no PDF). Bege Bahia #E8E8E8: as três varandas (cinza #E4E4E4) e a bancada da copinha. Armários (brancos com diagonal) em marcenaria areia #CBB89E. Escada em travertino #DCD9CA, como a do Térreo. Vazios (sobre o jardim interno e o hall de entrada) em #4A4A4A com o X claro, como na Casa A.",
+    "tolerancia_px": 10,
+    "poligonos": [
+     {
+      "nome": "varandas (cinza) → Bege Bahia",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.894,
+       0.894,
+       0.894
+      ],
+      "cor_render": "#E4E4E4",
+      "para": "#E8E8E8"
+     }
+    ],
+    "trocas_cor": [
+     [
+      "#CC9966",
+      "#A8784F"
+     ]
+    ],
+    "retangulos": [
+     {
+      "nome": "banho master → quartzito Aura",
+      "bbox_vis": [
+       807.3,
+       239.6,
+       913.6,
+       437.7
+      ],
+      "so_branco": true,
+      "para": "#EAD4BF",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_LAYOUT HUMANIZAÇÃO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+     },
+     {
+      "nome": "banho da suíte 1 → quartzito Aura",
+      "bbox_vis": [
+       1137.5,
+       305.6,
+       1243.8,
+       363.6
+      ],
+      "so_branco": true,
+      "para": "#EAD4BF",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_LAYOUT HUMANIZAÇÃO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+     },
+     {
+      "nome": "banho da suíte 2 → quartzito Aura",
+      "bbox_vis": [
+       1137.5,
+       503.7,
+       1243.8,
+       561.7
+      ],
+      "so_branco": true,
+      "para": "#EAD4BF",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_LAYOUT HUMANIZAÇÃO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+     },
+     {
+      "nome": "banho da suíte 3 → quartzito Aura",
+      "bbox_vis": [
+       623.7,
+       601.9,
+       730.0,
+       650.3
+      ],
+      "so_branco": true,
+      "para": "#EAD4BF",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_LAYOUT HUMANIZAÇÃO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+     },
+     {
+      "nome": "banho da suíte 4 → quartzito Aura",
+      "bbox_vis": [
+       623.7,
+       656.7,
+       730.0,
+       705.0
+      ],
+      "so_branco": true,
+      "para": "#EAD4BF",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_LAYOUT HUMANIZAÇÃO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+     },
+     {
+      "nome": "closet master: armários de cima → marcenaria areia",
+      "bbox_vis": [
+       920.4,
+       304.0,
+       1060.2,
+       323.3
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "closet master: armários de baixo → marcenaria areia",
+      "bbox_vis": [
+       920.4,
+       362.0,
+       1060.2,
+       381.3
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "closet da suíte 1: armários em L → marcenaria areia",
+      "bbox_vis": [
+       1065.0,
+       305.6,
+       1132.7,
+       363.6
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "closet da suíte 2: armários em L → marcenaria areia",
+      "bbox_vis": [
+       1065.0,
+       503.7,
+       1132.7,
+       561.7
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "closet da suíte 3: armários → marcenaria areia",
+      "bbox_vis": [
+       734.9,
+       601.9,
+       802.5,
+       650.3
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "closet da suíte 4: armários → marcenaria areia",
+      "bbox_vis": [
+       734.9,
+       656.7,
+       802.5,
+       705.0
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "rouparia: prateleiras → marcenaria areia",
+      "bbox_vis": [
+       987.7,
+       386.1,
+       1060.2,
+       437.7
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "copinha: armário ao lado da bancada → marcenaria areia",
+      "bbox_vis": [
+       972.1,
+       494.3,
+       1060.2,
+       513.4
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "copinha: bancada → Bege Bahia",
+      "bbox_vis": [
+       883.0,
+       494.3,
+       953.4,
+       513.4
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "_nota": "Pedido do usuário: bancada da copinha em Bege Bahia; a cuba (953,5 a 970,9) fica branca."
+     },
+     {
+      "nome": "escada → travertino",
+      "bbox_vis": [
+       875.6,
+       518.2,
+       1060.2,
+       565.3
+      ],
+      "so_branco": true,
+      "para": "#DCD9CA",
+      "cor_linha": "#A9A593",
+      "_nota": "Como a escada interna do Térreo (travertino); degraus, linha de caminhamento e seta em cinza-travertino."
+     },
+     {
+      "nome": "vazio sobre o jardim interno do Térreo (abaixo da escada)",
+      "bbox_vis": [
+       875.6,
+       565.4,
+       1060.2,
+       605.6
+      ],
+      "so_branco": true,
+      "para": "#4A4A4A",
+      "cor_linha": "#BDBDBD",
+      "_nota": "Mesma posição do jardim interno do Térreo (877,1 a 1060,0 × 565,4 a 605,3): pé-direito duplo, como os vazios da Casa A."
+     },
+     {
+      "nome": "vazio do hall de entrada",
+      "bbox_vis": [
+       1062.3,
+       716.4,
+       1200.5,
+       850.5
+      ],
+      "so_branco": true,
+      "para": "#4A4A4A",
+      "cor_linha": "#BDBDBD",
+      "_nota": "O X tracejado do PDF: pé-direito duplo do hall de entrada do Térreo."
+     }
+    ]
+   }
   }
  },
  "entrega": {
