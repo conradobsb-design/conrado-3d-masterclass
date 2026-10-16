@@ -59,29 +59,39 @@ def pegada(base, fora=()):
     return cv2.morphologyEx(peg.astype(np.uint8), cv2.MORPH_OPEN, np.ones((5, 5), np.uint8)) > 0
 
 
-def compor(base, render_baixo, base_baixo, clarear=0.75, saturacao=0.4, fora=(), cima=None, recorte=None):
-    """base: a base 16:9 do pavimento de cima (pegada e tracejado); cima: a imagem que vai por cima,
-    já no quadro da base (o render do pavimento de cima), ou None para a própria base."""
-    H, W = base.shape[:2]
-    cima = base if cima is None else cima
-    peg = pegada(base, fora)
+def contexto_render(render_baixo, base_baixo, W, clarear=0.75, saturacao=0.4):
+    """O render aprovado do pavimento de baixo no quadro comum, na largura W, mais claro e menos saturado."""
     t = no_quadro_comum(Image.open(render_baixo).convert("RGB"), base_baixo, "pavimento de baixo", W)
     t = cv2.cvtColor(np.asarray(t), cv2.COLOR_RGB2BGR).astype(np.float32)
     cinza = t.mean(axis=2, keepdims=True)
     t = cinza + (t - cinza) * saturacao
-    t = 255 - (255 - t) * (1 - clarear)
+    return 255 - (255 - t) * (1 - clarear)
+
+
+def sobrepor(base, t, fora=(), cima=None, recorte=None):
+    """O pavimento de cima (cima, já no quadro da base; ou a própria base) por cima do contexto t (BGR
+    float, no quadro da base), integralmente na pegada; as linhas tracejadas do lote por cima."""
+    cima = base if cima is None else cima
+    peg = pegada(base, fora)
     a = cv2.GaussianBlur(peg.astype(np.float32), (0, 0), 1.0)
     a = np.maximum(a, peg)[..., None]
     out = cima.astype(np.float32) * a + t * (1 - a)
     tracejado = (base.min(axis=2) < 225) & ~peg
     out[tracejado] = base[tracejado]
     if recorte is not None:
-        # o térreo esmaecido sem a parte que fica atrás do pavimento de cima (transparente), como camada
+        # o contexto sem a parte que fica atrás do pavimento de cima (transparente), como camada
         camada = np.dstack([np.clip(t, 0, 255), 255 * (1 - a)]).astype(np.uint8)
         cv2.imwrite(str(recorte), camada)
         print(f"    camada do térreo recortado: {recorte}")
     print(f"    pegada do pavimento de cima: {100 * peg.mean():.1f}% da imagem")
     return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def compor(base, render_baixo, base_baixo, clarear=0.75, saturacao=0.4, fora=(), cima=None, recorte=None):
+    """base: a base 16:9 do pavimento de cima (pegada e tracejado); cima: a imagem que vai por cima,
+    já no quadro da base (o render do pavimento de cima), ou None para a própria base."""
+    t = contexto_render(render_baixo, base_baixo, base.shape[1], clarear, saturacao)
+    return sobrepor(base, t, fora, cima, recorte)
 
 
 def main():

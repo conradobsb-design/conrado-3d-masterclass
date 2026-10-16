@@ -404,6 +404,18 @@ python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavime
     --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_1Pavimento_v1_retocado
 ```
 
+## Opções de montagem do 1º Pavimento da Casa E: `opcoes_1pav_casae.py`
+
+Duas opções em 3840 px para o cliente (pedido do usuário: "em preto e branco e só com as linhas do PDF"). Nas duas, o render retocado sem rótulos vai ao quadro 16:9 comum e entra por cima integralmente na pegada da base v3 (`entorno_esmaecido.sobrepor`), e os nomes e áreas são reescritos na resolução final (`retoque_1pav_casae.rotulos_ambientes`, com o PDF do 1º Pavimento levado ao quadro por `quadro_pdf`).
+- **`_final_pb`:** o entorno é o render aprovado do Térreo, 75% mais claro e sem saturação (`entorno_esmaecido.contexto_render`).
+- **`_final_linhas`:** o entorno é o PDF do Térreo só em linhas (`contexto_linhas`): a página desenhada pelo `Raster` do `gerar_bases.py` com as camadas ARQ_CONTRAPISO (cores e hachuras de piso), ARQ_TERRENO PLANEJADO, DOC_TEXTOS e ARQ_ZONA desligadas, sem os textos que sobram (título, escala, números da escada), na tela 16:9 e em cinza (`LINHAS["forca"]`: 70% do traço). O Térreo e o 1º Pavimento têm a mesma página e o mesmo recorte, então o PDF do Térreo cai direto no quadro comum.
+
+O `entorno_esmaecido.py` foi dividido em `contexto_render` (o entorno a partir de um render) e `sobrepor` (pegada, sobreposição integral, tracejado do lote), com o `compor` de antes por cima dos dois.
+
+```bash
+python3 opcoes_1pav_casae.py      # -> POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final_{pb,linhas}.png (+ _preview.jpg)
+```
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:

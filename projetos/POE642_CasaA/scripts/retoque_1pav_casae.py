@@ -940,8 +940,10 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None):
         (x0, y0), (x1, y1) = pdf2img(caixa.x0, caixa.y0), pdf2img(caixa.x1, caixa.y1)
         x0, x1 = cx + (x0 - cx) * e, cx + (x1 - cx) * e
         y0, y1 = cy + (y0 - cy) * e, cy + (y1 - cy) * e
-        x0, y0 = int(np.floor(x0 + dx)) - 3, int(np.floor(y0 + dy)) - 3
-        x1, y1 = int(np.ceil(x1 + dx)) + 4, int(np.ceil(y1 + dy)) + 4
+        # folga larga: a Inter é mais larga que a fonte do PDF (sem ela, "CLOSET MASTER" saía cortado)
+        fx, fy = 0.35 * (x1 - x0) + 4, 0.35 * (y1 - y0) + 4
+        x0, y0 = int(np.floor(x0 + dx - fx)), int(np.floor(y0 + dy - fy))
+        x1, y1 = int(np.ceil(x1 + dx + fx)), int(np.ceil(y1 + dy + fy))
         tela = Image.new("L", ((x1 - x0) * ss, (y1 - y0) * ss), 0)
         d = ImageDraw.Draw(tela)
         for texto, tam, (ox, oy) in linhas:
