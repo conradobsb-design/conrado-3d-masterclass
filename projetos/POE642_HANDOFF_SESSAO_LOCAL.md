@@ -520,7 +520,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 - **Prompt v1:** `POE642_CasaE_PH_1Pavimento_v1.md` (entrada: `bases/POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png`). A casa vai de ~30% a ~69% da largura e de ~20% a ~74% da altura; as linhas tracejadas do lote ficam a ~7% e ~92,5% da largura e a ~95% da altura. Fundo branco (sem entorno do Térreo, como na base). Ambientes descritos por posição, porque o texto do PDF sai da base.
 - **Entorno (pedido do usuário, 16/10/26):** vegetação no entorno da residência, com o Térreo esmaecido em volta, como no 1º Pavimento da Casa A (opção escolhida entre: Térreo esmaecido, Térreo em cor cheia ou só grama).
   - **Base v4:** `bases/POE642_CasaE_BASE_1Pavimento_v4_entorno_16x9.png` e a prévia. É a v3 com texturas, mais o render aprovado do Térreo (`renders/POE642_CasaE_PH_Terreo_v1_retocado.png`, com o Barlavento) em volta da pegada do 1º Pavimento.
-    - O Térreo vai ao quadro comum (106 pontos, erro mediano 1,28 px na largura da base), 50% mais claro e 40% menos saturado.
+    - O Térreo vai ao quadro comum (106 pontos, erro mediano 1,28 px na largura da base), 75% mais claro e 60% menos saturado (o usuário pediu "temos que esmaecer mais"; antes, 50% e 40%; comparados 50, 65 e 75%).
     - A área branca abaixo da sala íntima, fora da casa, também mostra o contexto.
     - Script novo: `scripts/entorno_esmaecido.py`.
   - **Prompt v2:** `POE642_CasaE_PH_1Pavimento_v2.md` (entrada: a base v4). O fundo branco virou o Térreo esmaecido, mantido exatamente como está; a vegetação fica só nele; em cor cheia, só o 1º Pavimento.

@@ -59,7 +59,7 @@ def pegada(base, fora=()):
     return cv2.morphologyEx(peg.astype(np.uint8), cv2.MORPH_OPEN, np.ones((5, 5), np.uint8)) > 0
 
 
-def compor(base, render_baixo, base_baixo, clarear=0.5, saturacao=0.6, fora=(), cima=None, recorte=None):
+def compor(base, render_baixo, base_baixo, clarear=0.75, saturacao=0.4, fora=(), cima=None, recorte=None):
     """base: a base 16:9 do pavimento de cima (pegada e tracejado); cima: a imagem que vai por cima,
     já no quadro da base (o render do pavimento de cima), ou None para a própria base."""
     H, W = base.shape[:2]
@@ -90,8 +90,8 @@ def main():
     ap.add_argument("render_baixo", type=Path, help="render aprovado do pavimento de baixo")
     ap.add_argument("base_baixo", type=Path, help="base 16:9 do pavimento de baixo (alinhamento)")
     ap.add_argument("saida", type=Path)
-    ap.add_argument("--clarear", type=float, default=0.5)
-    ap.add_argument("--saturacao", type=float, default=0.6)
+    ap.add_argument("--clarear", type=float, default=0.75)
+    ap.add_argument("--saturacao", type=float, default=0.4)
     ap.add_argument("--base-cima", type=Path, default=None,
                     help="base 16:9 do pavimento de cima, quando a primeira imagem é o render dele")
     ap.add_argument("--largura", type=int, default=None, help="largura da saída (padrão: a da base)")

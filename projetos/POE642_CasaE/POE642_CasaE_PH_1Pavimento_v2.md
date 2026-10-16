@@ -10,7 +10,7 @@ _16/10/2026. Motor: Higgsfield Nano Banana Pro (image-to-image, 16:9, 2K, PNG), 
 
 **Da v1 para a v2 (pedido seu, 16/10/26):** vegetação no entorno da residência, com o Térreo esmaecido em volta, como no 1º Pavimento da Casa A.
 - **Base v4:** a v3 com texturas, mais o render aprovado do Térreo da Casa E em volta da casa.
-  - mais claro (50%) e menos saturado (40%);
+  - 75% mais claro e 60% menos saturado;
   - gramado, paisagismo, piscina em Barlavento, deck, bloco gourmet, garagem com os carros, acesso de pedra portuguesa e pisantes;
   - script `entorno_esmaecido.py`.
 - **Prompt:** o fundo branco vira o Térreo esmaecido. O motor mantém esse contexto exatamente como está, claro e sem reforçar cor ou textura, e a vegetação fica só nele.
