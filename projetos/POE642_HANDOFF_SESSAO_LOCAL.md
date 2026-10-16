@@ -591,6 +591,9 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 - **Base v2** (legenda): `bases/POE642_CasaE_BASE_Subsolo_v2(_16x9)` e a prévia.
   - Como no Térreo, as bordas brancas da piscina e do ofurô (ARQ_PAREDE de 8 pt) entram em `zonas_excluidas` e não viram vidro.
   - O visor de vidro entre a piscina e a academia, que continua até o ofurô, fica como vidro fino.
+- **Base v3 (texturas):** `bases/POE642_CasaE_BASE_Subsolo_v3_texturas(_16x9)` e a prévia.
+  - As mesmas fontes do Térreo e do 1º Pavimento da Casa E: vinílico das suítes do 1º Pavimento da Casa A, travertino do hall do Subsolo da Casa A, granito da cozinha do Térreo da Casa A, Bege Bahia das varandas da Casa A, água da piscina do Térreo da Casa A e marcenaria areia do Térreo retocado da Casa D.
+  - O banco da sauna leva o Bege Bahia escurecido (0,93 e 0,88), preso ao retângulo do banco, como na Casa D.
 
 ## Casas A a D · Barlavento nas piscinas
 

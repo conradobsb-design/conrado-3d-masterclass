@@ -908,6 +908,219 @@
       "para": "#CBB89E"
      }
     ]
+   },
+   "texturas": {
+    "_sobre": "Prévia de texturas do Subsolo da Casa E: as mesmas fontes do Térreo e do 1º Pavimento da Casa E (materiais aprovados das Casas A a D; bbox em px de um render de 2000 px); o banco da sauna como na Casa D.",
+    "tolerancia": 4,
+    "materiais": [
+     {
+      "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+      "cores": [
+       "#A8784F"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          858,
+          638,
+          972,
+          684
+         ],
+         [
+          922,
+          719,
+          978,
+          826
+         ],
+         [
+          1012,
+          212,
+          1060,
+          268
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "travertino (sauna, antessala, vestiário e escada; hall do Subsolo da Casa A)",
+      "cores": [
+       "#DCD9CA"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+        "bbox": [
+         [
+          582,
+          580,
+          686,
+          775
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "granito Marrom Tabaco (piso da cozinha do Térreo da Casa A)",
+      "cores": [
+       "#5A4232"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          997,
+          603,
+          1124,
+          633
+         ],
+         [
+          998,
+          690,
+          1108,
+          718
+         ]
+        ]
+       }
+      ],
+      "_fonte": "Só o piso: o trecho de baixo parava em y 732 e pegava o topo dos armários (faixa clara perto da ilha)."
+     },
+     {
+      "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+      "cores": [
+       "#E8E8E8"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          1350,
+          582,
+          1452,
+          848
+         ],
+         [
+          648,
+          636,
+          698,
+          848
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "piscina e ofurô (água sobre pastilha, Térreo da Casa A)",
+      "cores": [
+       "#DFF6FE"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          582,
+          285,
+          678,
+          440
+         ]
+        ]
+       }
+      ],
+      "_fonte": "Só a água, sem as bordas: de x 684 em diante a amostra escurece (borda e sombra da parede) e deixava uma faixa escura na piscina."
+     },
+     {
+      "nome": "armário do DCE em marcenaria areia (armário até o teto do Térreo retocado da Casa D, veio no comprido)",
+      "cores": [
+       "#CBB89E"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
+        "bbox": [
+         [
+          1128,
+          740,
+          1143,
+          797
+         ]
+        ]
+       }
+      ],
+      "girar": 90
+     },
+     {
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          1350,
+          582,
+          1452,
+          848
+         ],
+         [
+          648,
+          636,
+          698,
+          848
+         ]
+        ]
+       }
+      ],
+      "nome": "banco da sauna em Bege Bahia: degrau da frente, um tom mais escuro",
+      "cores": [
+       "#DCDCDC"
+      ],
+      "bbox_vis": [
+       437.9,
+       451.5,
+       500.9,
+       471.0
+      ],
+      "escurecer": 0.93
+     },
+     {
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          1350,
+          582,
+          1452,
+          848
+         ],
+         [
+          648,
+          636,
+          698,
+          848
+         ]
+        ]
+       }
+      ],
+      "nome": "banco da sauna em Bege Bahia: assento junto à parede, mais escuro",
+      "cores": [
+       "#D0D0D0"
+      ],
+      "bbox_vis": [
+       437.9,
+       471.0,
+       500.9,
+       490.4
+      ],
+      "escurecer": 0.88
+     }
+    ]
    }
   }
  },
