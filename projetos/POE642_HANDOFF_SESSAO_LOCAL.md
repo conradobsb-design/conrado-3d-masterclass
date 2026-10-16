@@ -624,6 +624,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - bacia no contorno do PDF, na parede da direita, com volume, contorno fino, sombra curta e o tampo fechado;
      - divisória de vidro do box, fina;
      - chuveiro: ducha quadrada, braço cromado até a parede da direita e canopla.
+  4. **Casa de máquinas da direita:** o motor fez o piso em granito; é Bege Bahia (o cinza do PDF, como o depósito). O ambiente vira o Bege Bahia aprovado, com o vão da porta, e a porta vinda do depósito é a do PDF.
 
 ## Casas A a D · Barlavento nas piscinas
 

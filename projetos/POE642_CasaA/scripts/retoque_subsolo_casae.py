@@ -245,13 +245,48 @@ def alinhar(img, base_png):
     return M, int(inl.sum())
 
 
-def escada(out, A, p2r):
+def terreo_no_render(A, forma):
+    """O Térreo retocado (aprovado) levado ao quadro deste render pelas duas bases (mesmo quadro)."""
     q = ESCADA
     t = cv2.imread(str(q["terreo"]))
     At, n = alinhar(t, q["base_terreo"])
     M = (np.vstack([At, [0, 0, 1]]) @ np.linalg.inv(np.vstack([A, [0, 0, 1]])))[:2]     # este render -> Térreo
-    tw = cv2.warpAffine(t, M, out.shape[1::-1], flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP,
-                        borderValue=(255, 255, 255))
+    return cv2.warpAffine(t, M, forma[1::-1], flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP,
+                          borderValue=(255, 255, 255)), n
+
+
+def cobertura(forma, p2r, rets):
+    """Fração (0..1) de cada px do render coberta pela união dos retângulos do PDF (em pt), em SS x."""
+    h, w = forma[:2]
+    xs = [p2r(r[0], r[1])[0] for r in rets] + [p2r(r[2], r[3])[0] for r in rets]
+    ys = [p2r(r[0], r[1])[1] for r in rets] + [p2r(r[2], r[3])[1] for r in rets]
+    x0, y0, x1, y1 = int(min(xs)) - 2, int(min(ys)) - 2, int(np.ceil(max(xs))) + 2, int(np.ceil(max(ys))) + 2
+    m = np.zeros(((y1 - y0) * SS, (x1 - x0) * SS), np.uint8)
+    for r in rets:
+        (a, b), (c, d) = p2r(r[0], r[1]), p2r(r[2], r[3])
+        cv2.rectangle(m, (round((a - x0) * SS), round((b - y0) * SS)), (round((c - x0) * SS) - 1, round((d - y0) * SS) - 1), 255, -1)
+    a = np.zeros((h, w), np.float32)
+    a[y0:y1, x0:x1] = cv2.resize(m.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+    return a
+
+
+# item 5: elevador. O motor fez a caixa com piso de mármore e um quadrado claro, sem cabine. É o mesmo
+# elevador do Térreo, no mesmo lugar da folha e com a porta para o mesmo lado (para baixo): o miolo da
+# caixa e o vão da porta (até a face de fora da parede) vêm do Térreo aprovado.
+ELEVADOR = {"caixa": (1734.6, 906.1, 1825.3, 996.8), "vao": (1760.1, 996.8, 1799.8, 1005.3)}
+
+
+def elevador(out, A, p2r, tw):
+    q = ELEVADOR
+    a = cobertura(out.shape, p2r, [q["caixa"], q["vao"]])[..., None]
+    out[:] = np.clip(out * (1 - a) + tw * a, 0, 255).astype(np.uint8)
+    print(f"    elevador do Térreo aprovado: {int((a > 0.5).sum())} px")
+    return out
+
+
+def escada(out, A, p2r):
+    q = ESCADA
+    tw, n = terreo_no_render(A, out.shape)
     (xa, ya), (xb, yb) = p2r(q["pdf"][0], q["pdf"][1]), p2r(q["pdf"][2], q["pdf"][3])
     x0, y0, x1, y1 = int(np.floor(xa)), int(np.floor(ya)), int(np.ceil(xb)), int(np.ceil(yb))
     # cobertura de cada px pela escada (as bordas fracionárias misturam)
@@ -487,6 +522,21 @@ def wc_dce2(out, pg, p2r, chapada, tex):
     return out
 
 
+# item 4: casa de máquinas da direita. O motor fez o piso em granito; é Bege Bahia (o cinza do PDF, como o
+# depósito). O ambiente vira o Bege Bahia aprovado, com o vão da porta, e a porta vinda do depósito é a do PDF.
+CASA_MAQ_DIR = {"interior": (1732.9, 693.5, 1825.3, 897.6),
+                "soleira": (1738.8, 685.0, 1784.2, 693.5),
+                "porta": ((1738.8, 693.5, 1741.1, 738.8), (1738.8, 693.5, 1784.2, 738.8))}
+
+
+def casa_maquinas_dir(out, pg, p2r, chapada, tex):
+    q = CASA_MAQ_DIR
+    out, m = preencher_ambiente(out, p2r, chapada, tex, q["interior"], BEGE["cor"], extra=(q["soleira"],))
+    out = desenhar_porta(out, pg, p2r, *q["porta"], "bege")
+    print(f"    casa de máquinas da direita: Bege Bahia em {int(m.sum())} px, porta do PDF")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -541,6 +591,7 @@ def main():
     ap.add_argument("--saida", type=Path, default=Path("."))
     ap.add_argument("--nome", default=None)
     ap.add_argument("--mapa", type=Path, default=None, help="só gera o mapa dos erros neste arquivo")
+    ap.add_argument("--ate", type=int, default=99, help="roda os itens só até este número (conferência)")
     args = ap.parse_args()
 
     orig = cv2.imread(str(args.render))
@@ -554,12 +605,20 @@ def main():
     out = orig.copy()
     chapada = chapada_no_render(A, orig.shape)
     tex = texturas_no_render(A, orig.shape)
-    print("[1] circulação e depósito em Bege Bahia, sem a parede da esquerda")
-    out = circulacao_deposito(out, A, pg, p2r, chapada, tex)
-    print("[2] escada: a do Térreo aprovado (sem linhas, sombreamento de descida para a esquerda)")
-    out = escada(out, A, p2r)
-    print("[3] WC DCE 2: piso, porta, louças, vidro do box e chuveiro pelo PDF")
-    out = wc_dce2(out, pg, p2r, chapada, tex)
+    itens = [
+        ("circulação e depósito em Bege Bahia, sem a parede da esquerda",
+         lambda o: circulacao_deposito(o, A, pg, p2r, chapada, tex)),
+        ("escada: a do Térreo aprovado (sem linhas, sombreamento de descida para a esquerda)",
+         lambda o: escada(o, A, p2r)),
+        ("WC DCE 2: piso, porta, louças, vidro do box e chuveiro pelo PDF",
+         lambda o: wc_dce2(o, pg, p2r, chapada, tex)),
+        ("casa de máquinas da direita em Bege Bahia", lambda o: casa_maquinas_dir(o, pg, p2r, chapada, tex)),
+        ("elevador: o do Térreo aprovado", lambda o: elevador(o, A, p2r, terreo_no_render(A, o.shape)[0])),
+    ]
+    for n, (desc, f) in enumerate(itens, 1):
+        if n <= args.ate:
+            print(f"[{n}] {desc}")
+            out = f(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
