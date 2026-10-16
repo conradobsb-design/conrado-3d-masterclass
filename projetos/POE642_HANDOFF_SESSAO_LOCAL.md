@@ -524,6 +524,8 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - A área branca abaixo da sala íntima, fora da casa, também mostra o contexto.
     - Script novo: `scripts/entorno_esmaecido.py`.
   - **Prompt v2:** `POE642_CasaE_PH_1Pavimento_v2.md` (entrada: a base v4). O fundo branco virou o Térreo esmaecido, mantido exatamente como está; a vegetação fica só nele; em cor cheia, só o 1º Pavimento.
+  - **Fluxo escolhido (usuário, 16/10/26):** para a fidelidade, o Térreo não passa pelo motor (nem como imagem 02, que arrisca desalinhar e misturar os pavimentos). O motor renderiza só o 1º Pavimento em fundo branco (base v3 + prompt v1). Depois, o `entorno_esmaecido.py` com `--base-cima` põe o Térreo aprovado esmaecido em volta, e o render do 1º Pavimento por cima, integralmente ("na parte do 1º pavimento, sobrepor integralmente"). A pegada sai da base (geometria do projeto), não do render. A base v4 e o prompt v2 ficam como alternativa.
+  - **Camada do Térreo recortado:** `bases/POE642_CasaE_1Pavimento_entorno_terreo_recortado.png` (3840 × 2160, RGBA): o Térreo esmaecido com a área do 1º Pavimento transparente, para montar por cima (opção `--recorte`). Teste com a base v3 no lugar do render: 787 pontos, erro mediano 0,16 px.
 
 ## Casas A a D · Barlavento nas piscinas
 
