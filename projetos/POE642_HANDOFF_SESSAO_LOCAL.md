@@ -662,6 +662,9 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - A planta retocada vai ao quadro comum (64 pontos, erro mediano 0,66 px) e entra inteira na pegada da base (`entorno_esmaecido.sobrepor`).
      - Fora dela, o fundo é branco e as linhas tracejadas do lote são as da base, nas posições exatas do PDF.
      - Saída `renders/POE642_CasaE_PH_Subsolo_v1_final.png` e `_final_preview.jpg`.
+  16. **Bordas da piscina e vidros (usuário, 16/10/26):** "as bordas da piscina são em mármore bege bahia. a folha de vidro entre a academia e a piscina e a folha de vidro entre a piscina e a sauna também são finas e elegantes". O usuário confirmou depois que o segundo vidro é o que fica entre o ofurô e a piscina. O render deixava as bordas brancas.
+     - O branco junto à água (lum > 212, pouca saturação, até 17 px dela), dentro do contorno de fora das bordas no PDF (694,2, 679,3 a 888,9, 1130,0 pt), e a faixa do visor viram o Bege Bahia tecido da circulação, no tom dela. O pilar entre os dois trechos do visor fica preto.
+     - Os dois trechos de vidro do visor (812,2 a 815,0 pt de largura) entram como uma folha fina, em vidro claro com contorno fino: o de cima, entre a academia e a piscina; o de baixo, depois do pilar, entre a piscina e o ofurô.
 
 ## Casas A a D · Barlavento nas piscinas
 

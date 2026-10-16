@@ -28,7 +28,7 @@ sys.path.insert(0, str(AQUI))
 
 from retoque_terreo_casab import BACIA_BORDA, BACIA_FUNDO, LOUCA, LOUCA_CONTORNO  # noqa: E402
 from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO  # noqa: E402
-from retoque_terreo_casad import interpolar  # noqa: E402
+from retoque_terreo_casad import interpolar, textura  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png"
 BASE_CHAPADA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Subsolo_v2_16x9.png"   # cores exatas da legenda
@@ -1020,6 +1020,53 @@ def final_quadro(out):
     return sobrepor(base, branco, (), cima)
 
 
+# item 16 (pedido do usuário, 16/10/26): "as bordas da piscina são em mármore Bege Bahia. a folha de vidro
+# entre a academia e a piscina e a folha de vidro entre a piscina e a sauna também são finas e elegantes."
+# As bordas brancas da piscina e do ofurô (as do PDF, que a base deixava em branco) viram o Bege Bahia, tecido
+# do Bege Bahia aprovado da circulação, na cor dele. A faixa do visor (a linha do PDF entre a academia e a
+# piscina, que continua entre a piscina e o ofurô, junto à sauna) também é borda de Bege Bahia, e só a folha
+# de vidro do PDF (2,8 pt) fica no meio: vidro claro com os contornos finos. A junção com a parede da
+# academia fica preta.
+BORDAS = {"piscina_pdf": (690.0, 677.0, 892.0, 1132.0),
+          "contorno_pdf": (694.2, 679.3, 888.9, 1130.0),            # o lado de fora das bordas no PDF
+          "visor_pdf": (807.6, 690.7, 819.0, 1090.3),
+          "vidros_pdf": [(812.2, 693.5, 815.0, 945.8), (812.2, 957.1, 815.0, 1090.3)],
+          "parede_pdf": (807.6, 945.8, 819.0, 957.1),
+          "fontes_bege": [(470, 160, 590, 205), (790, 160, 900, 240)],     # px: o Bege Bahia da circulação
+          "vidro": (226, 229, 229), "borda_vidro": (112, 116, 118)}
+
+
+def bordas_piscina(out, p2r):
+    q = BORDAS
+    x0, y0, x1, y1 = caixa_pdf(p2r, *q["piscina_pdf"])
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    lum = reg.mean(axis=2)
+    sat = (reg.max(axis=2) - reg.min(axis=2)) / np.maximum(reg.max(axis=2), 1)
+    branco = (lum > 212) & (sat < 0.09)
+    # só o branco preso à piscina (as bordas), não o fundo de fora: o que fica dentro da pegada fechada
+    agua = (reg[..., 0] - reg[..., 2] > 12)
+    perto = cv2.dilate(agua.astype(np.uint8), np.ones((17, 17), np.uint8)).astype(bool)
+    dentro = cobertura(out.shape, p2r, [q["contorno_pdf"]])[y0:y1, x0:x1] > 0.5
+    borda = branco & perto & dentro
+    visor = cobertura(out.shape, p2r, [q["visor_pdf"]])[y0:y1, x0:x1] > 0.3
+    parede = cobertura(out.shape, p2r, [q["parede_pdf"]])[y0:y1, x0:x1] > 0.3
+    borda |= visor & ~parede & (lum > 60)
+    h, w = borda.shape
+    bege = textura(out, q["fontes_bege"], h, w) * np.asarray(BEGE["cor"], np.float32)
+    a = borda.astype(np.float32)
+    reg = reg * (1 - a[..., None]) + bege * a[..., None]
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    # a folha de vidro, fina: vidro claro com os contornos finos
+    for r in q["vidros_pdf"]:
+        tl = Tela(out, p2r, r, folga=2)
+        m = tl.ret(r)
+        tl.pintar(m, q["vidro"])
+        tl.contorno(m, 0.3, q["borda_vidro"])
+        out = tl.gravar()
+    print(f"    bordas da piscina em Bege Bahia ({int(borda.sum())} px); folha de vidro fina do visor")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -1106,6 +1153,8 @@ def main():
         ("portas do vestiário (e o vestiário refeito, com a bancada e a bacia)", lambda o: vestiario(o, pg, p2r, chapada, tex)),
         ("granito em grão no DCE e na casa de máquinas de baixo; as portas deles", lambda o: granito(o, pg, p2r, chapada, tex)),
         ("sombras longas fora do vinílico da academia", lambda o: sombras_longas(o, p2r, chapada)),
+        ("(o 15 é a imagem final, no fim)", lambda o: o),
+        ("bordas da piscina em Bege Bahia e vidros finos (pedido do usuário)", lambda o: bordas_piscina(o, p2r)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
         if n <= args.ate:
