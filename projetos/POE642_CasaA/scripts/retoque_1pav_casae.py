@@ -914,13 +914,28 @@ def rotulos_pdf(pg):
             if i + 2 < len(spans) and spans[i + 2][0] == "2" and spans[i + 2][1] < 6:
                 linhas.append((spans[i + 2][0], spans[i + 2][1], spans[i + 2][3]))
         out.append((t, linhas, ((caixa.x0 + caixa.x1) / 2, (caixa.y0 + caixa.y1) / 2), caixa))
-    return out
+    # nome em duas linhas no PDF ("LIVING E SALA DE" / "JANTAR"): a linha de cima, sozinha e logo acima da
+    # outra, entra no mesmo rótulo (separadas, cada parte crescia em volta do próprio centro e se encostavam)
+    juntos = []
+    for r in out:
+        if juntos:
+            t0, l0, _, k0 = juntos[-1]
+            t1, l1, _, k1 = r
+            if len(l0) == 1 and 0 <= k1.y0 - k0.y1 < 3 and abs((k0.x0 + k0.x1) / 2 - (k1.x0 + k1.x1) / 2) < 10:
+                k = pymupdf.Rect(k0) | k1
+                juntos[-1] = (f"{t0} {t1}", l0 + l1, ((k.x0 + k.x1) / 2, (k.y0 + k.y1) / 2), k)
+                continue
+        juntos.append(r)
+    return juntos
 
 
 def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, ajustes=None):
     """Escreve os rótulos do PDF na imagem (BGR), no corpo do PDF levado à escala dela (pdf2img leva um
     ponto do PDF à imagem); granito: máscara (bool, no quadro da imagem) do granito marrom, onde o texto
-    fica cinza; ajustes: os desvios de outro pavimento (o padrão é o deste)."""
+    fica cinza; ajustes: os desvios de outro pavimento (o padrão é o deste). Cada ajuste é (nome, centro em
+    px de 2000, desvio em px de 2000[, opções]); as opções são o corpo (um número) ou um dicionário com
+    "corpo", "quebra" (o nome em mais linhas, cada uma centrada no nome do PDF, para ambiente estreito) e
+    "cor"."""
     from PIL import Image, ImageDraw, ImageFont
     from rodape_entrega import FONTES
     q = ROTULOS
@@ -932,12 +947,24 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, a
     out = img.astype(np.float32)
     for nome, linhas, (pcx, pcy), caixa in rotulos:
         cx, cy = pdf2img(pcx, pcy)
-        dx, dy, e = 0.0, 0.0, q["escala"]
+        dx, dy, e, opc = 0.0, 0.0, q["escala"], {}
         # um ajuste pode trazer também o corpo do rótulo (o do PDF, 1.0, onde o 1,3x não cabe no piso livre)
-        for n, (axx, ayy), d, *corpo in (q["ajustes"] if ajustes is None else ajustes):
+        for n, (axx, ayy), d, *extra in (q["ajustes"] if ajustes is None else ajustes):
             if n == nome and np.hypot(cx - axx * W / 2000, cy - ayy * W / 2000) < 25 * W / 2000:
                 dx, dy = d[0] * escala_desvio, d[1] * escala_desvio
-                e = corpo[0] if corpo else e
+                opc = extra[0] if extra and isinstance(extra[0], dict) else ({"corpo": extra[0]} if extra else {})
+                e = opc.get("corpo", e)
+        linhas = [(t, tam, o, "ls") for t, tam, o in linhas]
+        if "quebra" in opc:
+            # o nome em mais linhas, centradas no nome do PDF, no espaçamento do nome à área; o bloco fica
+            # centrado no mesmo ponto
+            _, tam0, (_, oy0), _ = linhas[0]
+            passo = linhas[1][2][1] - oy0 if len(linhas) > 1 else 1.33 * tam0
+            extra_n = len(opc["quebra"]) - 1
+            sobe, xm = extra_n * passo / 2, (caixa.x0 + caixa.x1) / 2
+            linhas = ([(p, tam0, (xm, oy0 - sobe + k * passo), "ms") for k, p in enumerate(opc["quebra"])]
+                      + [(t, tam, (ox, oy - sobe + extra_n * passo), a) for t, tam, (ox, oy), a in linhas[1:]])
+            caixa = pymupdf.Rect(caixa.x0, caixa.y0 - sobe, caixa.x1, caixa.y1 + sobe)
         (x0, y0), (x1, y1) = pdf2img(caixa.x0, caixa.y0), pdf2img(caixa.x1, caixa.y1)
         x0, x1 = cx + (x0 - cx) * e, cx + (x1 - cx) * e
         y0, y1 = cy + (y0 - cy) * e, cy + (y1 - cy) * e
@@ -947,14 +974,14 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, a
         x1, y1 = int(np.ceil(x1 + dx + fx)), int(np.ceil(y1 + dy + fy))
         tela = Image.new("L", ((x1 - x0) * ss, (y1 - y0) * ss), 0)
         d = ImageDraw.Draw(tela)
-        for texto, tam, (ox, oy) in linhas:
+        for texto, tam, (ox, oy), ancora in linhas:
             f = ImageFont.truetype(str(FONTES / f"Inter-{q['fonte']}.otf"), max(4, int(round(tam * px_pt * e * ss))))
             gx, gy = pdf2img(ox, oy)
             gx, gy = cx + (gx - cx) * e, cy + (gy - cy) * e          # as linhas afastam na mesma escala
-            d.text(((gx + dx - x0) * ss, (gy + dy - y0) * ss), texto, font=f, fill=255, anchor="ls")
+            d.text(((gx + dx - x0) * ss, (gy + dy - y0) * ss), texto, font=f, fill=255, anchor=ancora)
         a = np.asarray(tela.resize((x1 - x0, y1 - y0), Image.LANCZOS), np.float32)[..., None] / 255
         no_granito = granito is not None and granito[max(y0, 0):y1, max(x0, 0):x1].mean() > 0.5
-        cor = np.float32(q["cor_granito"] if no_granito else q["cor"])
+        cor = np.float32(opc.get("cor", q["cor_granito"] if no_granito else q["cor"]))
         out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + cor * a
     return np.clip(out, 0, 255).astype(np.uint8)
 

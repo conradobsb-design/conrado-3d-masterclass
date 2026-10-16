@@ -1747,14 +1747,78 @@ def piscinas(out, A):
     return out
 
 
+# 36. Nomes e áreas dos ambientes (pedido do usuário, 16/10/26: "vamos voltar no térreo da Casa E e adicionar
+# os rótulos com área. seguindo o padrão que determinamos"). A regra do 1º Pavimento e do Subsolo
+# (`retoque_1pav_casae.rotulos_ambientes`): cada linha do rótulo do PDF entra igual (o nome e "A: 16,63 m²"),
+# na posição do PDF, no corpo do PDF 30% maior, em Inter Regular preta; no granito marrom, cinza (150); os
+# que caem sobre móvel vão ao piso livre mais próximo. São escritos na imagem final (3840 px): o retocado
+# levado ao quadro comum, como na prancha. O retocado de 2000 px fica sem rótulos (é o contexto do 1º
+# Pavimento na opção P&B). Ficam fora as notas "PROJ. COBERTURA" (projeção da cobertura, não são ambientes)
+# e o título da folha ("0. TÉRREO").
+ROTULOS = {"fora": ("PROJ.", "TÉRREO"),
+           # (nome, centro do rótulo do PDF no quadro final em px de 2000, desvio em px de 2000[, opções]);
+           # os que caem sobre móvel ou peça vão ao piso livre mais próximo
+           "ajustes": [("GARAGEM", (1420.5, 323.9), (0, 123)),          # sobre o carro do meio: abaixo dos carros
+                       ("VARANDA", (715.5, 609.3), (0, 18)),           # nas cadeiras da mesa: abaixo delas
+                       ("DCE", (1202.4, 293.6), (0, 3)),               # encostado na cama: um pouco abaixo
+                       ("ÁREA DE SERVIÇO", (1094.2, 324.9), (0, 2)),   # encostado nas máquinas
+                       ("COZINHA", (915.6, 372.8), (0, 2)),            # encostado nos bancos da ilha
+                       ("CIRCULAÇÃO", (1170.6, 601.3), (-3, 0)),       # encostado na parede do escritório
+                       # o "1" caía no chuveiro e o 1,3x não cabe no piso livre do box: corpo do PDF, à esquerda
+                       ("WC DCE 1", (1261.6, 271.3), (-2, 0), 1.0),
+                       # o lavabo é uma faixa estreita entre o banco e a parede: o nome em duas linhas, no meio dela
+                       ("LAVABO GOURMET", (552.4, 291.3), (-5.5, 0), {"quebra": ["LAVABO", "GOURMET"]}),
+                       # o jardim interno é todo planta: no verde escuro o preto e o cinza somem; fica em branco
+                       ("JARDIM", (1059.5, 562.8), (0, 0), {"cor": (250, 250, 250)})]}
+FINAL = {"largura": 3840}
+
+
+def final_rotulos(out):
+    from PIL import Image
+    import retoque_1pav_casae as R1
+    from opcoes_1pav_casae import quadro_pdf
+    from rodape_entrega import no_quadro_comum
+    q = ROTULOS
+    W = FINAL["largura"]
+    final = cv2.cvtColor(np.asarray(no_quadro_comum(Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)), BASE,
+                                                    "Terreo", W)), cv2.COLOR_RGB2BGR)
+    H = final.shape[0]
+    cfg = json.loads(CONFIG.read_text())
+    pg = pymupdf.open(PDF)[cfg["pavimentos"]["Terreo"]["pagina"]]
+    at, lt = cv2.imread(str(BASE), cv2.IMREAD_GRAYSCALE).shape
+    hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    p2q = quadro_pdf(pg, cfg, lt, at, wb, hb, W)
+    rot = [r for r in R1.rotulos_pdf(pg) if not any(f in r[0] for f in q["fora"])]
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), (W, H), interpolation=cv2.INTER_NEAREST)
+    granito = np.abs(chapada.astype(int) - np.array(ARCOS["granito"])).max(axis=2) <= 6
+    print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
+    return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=W / 2000, granito=granito, ajustes=q["ajustes"])
+
+
+def salvar_final(out, saida, nome):
+    print("[36] imagem final no quadro comum, com os nomes e áreas dos ambientes")
+    final = final_rotulos(out)
+    saida.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(saida / f"{nome}.png"), final)
+    cv2.imwrite(str(saida / f"{nome}_preview.jpg"),
+                cv2.resize(final, (2000, round(2000 * final.shape[0] / final.shape[1])), interpolation=cv2.INTER_AREA),
+                [cv2.IMWRITE_JPEG_QUALITY, 90])
+    print(f"    {saida / (nome + '.png')} {final.shape[1]}x{final.shape[0]}")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
     ap.add_argument("--saida", type=Path, default=Path("."))
     ap.add_argument("--nome", required=True)
+    ap.add_argument("--so-final", action="store_true",
+                    help="o render dado já é o retocado: só a imagem final com os rótulos (gravada em --nome)")
     args = ap.parse_args()
 
     orig = cv2.imread(str(args.render))
+    if args.so_final:
+        salvar_final(orig, args.saida, args.nome)
+        return
     out = orig.copy()
     A, base = alinhar_base(orig)
     print("[1, 2] lote: vegetação fora do lote, linhas tracejadas e faixa à direita dos pisantes")
@@ -1831,6 +1895,7 @@ def main():
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
     cv2.imwrite(str(args.saida / f"{args.nome}_previa.jpg"), out, [cv2.IMWRITE_JPEG_QUALITY, 88])
     print(f"[fim] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
+    salvar_final(out, args.saida, args.nome.replace("_retocado", "_final"))
 
 
 if __name__ == "__main__":
