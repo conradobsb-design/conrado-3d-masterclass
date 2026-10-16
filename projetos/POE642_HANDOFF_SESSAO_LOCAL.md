@@ -625,6 +625,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - divisória de vidro do box, fina;
      - chuveiro: ducha quadrada, braço cromado até a parede da direita e canopla.
   4. **Casa de máquinas da direita:** o motor fez o piso em granito; é Bege Bahia (o cinza do PDF, como o depósito). O ambiente vira o Bege Bahia aprovado, com o vão da porta, e a porta vinda do depósito é a do PDF.
+  5. **Elevador:** o motor fez a caixa com piso de mármore e um quadrado claro, sem cabine. É o mesmo elevador do Térreo, no mesmo lugar da folha e com a porta para o mesmo lado (para baixo). O miolo da caixa e o vão da porta, até a face de fora da parede, vêm do Térreo aprovado: cabine em inox com a moldura branca e a soleira.
 
 ## Casas A a D · Barlavento nas piscinas
 
