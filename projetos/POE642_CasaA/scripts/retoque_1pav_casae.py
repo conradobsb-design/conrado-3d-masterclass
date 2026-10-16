@@ -23,12 +23,13 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
    do PDF (da parede da esquerda ao armário) vira o Bege Bahia da varanda da esquerda do próprio
    render, na luz da bancada do render; a cuba redonda da Casa A entra no círculo do PDF (34 cm),
    com a torneira atrás, no cromo das cubas do Térreo, e uma sombra curta bem leve.
-5. Vazios (abaixo da escada e no hall): o motor deixou o cinza-escuro liso. Entra o X tracejado do PDF
-   (cada traço da DOC_LINHAS E PROJEÇÕES na posição exata), fino, no cinza claro das linhas dos vazios
-   da base (#BDBDBD), só sobre o cinza do vazio.
+5. Vazios (abaixo da escada, sobre o jardim de inverno do Térreo, e no hall de entrada): o motor deixou o
+   cinza-escuro liso. Ficam brancos (pedido do usuário), como os vazios da Casa A, com o X tracejado do PDF
+   (cada traço da DOC_LINHAS E PROJEÇÕES na posição exata) em cinza médio e o guarda-corpo de vidro do PDF
+   (ARQ_ELEMENTOS FIXOS) que isola os vazios, no vidro fino aprovado.
 6. Arcos das portas: o motor desenhou as folhas, mas nenhum arco. Entram os 12 arcos do PDF (curvas da
    ARQ_PAREDE) no padrão aprovado no Térreo (cinza (160, 161, 160), traço de 0,45 px); sobre o vazio do
-   hall, no cinza claro do X, com a folha da porta pivotante P1 do Térreo, que também faltava.
+   hall, com a folha da porta pivotante P1 do Térreo, que também faltava.
 7. Cortinas (pedido do usuário): as linhas onduladas do PDF ao longo das janelas das suítes (10 trechos,
    160 arcos) entram nas posições exatas como cortina de linho off-white, em traço fino, com a sombra
    curta aprovada.
@@ -285,21 +286,58 @@ def copinha(out, p2r):
     return out
 
 
-# item 5: vazios (abaixo da escada e no hall). O motor deixou os dois em cinza-escuro liso; o PDF tem
-# o X tracejado (cada traço é um segmento da DOC_LINHAS E PROJEÇÕES). Os traços entram nas posições
-# exatas, finos, no cinza claro das linhas dos vazios da base (#BDBDBD), só sobre o cinza do vazio
-VAZIOS = {"vis": [(875.6, 565.4, 1060.2, 605.6), (1062.3, 716.4, 1200.5, 850.5)],
-          "camada": "DOC_LINHAS E PROJEÇÕES", "cor": (189, 189, 189), "largura": 0.7, "cinza": (68.0, 14.0)}
+# item 5: vazios (abaixo da escada, sobre o jardim de inverno do Térreo, e no hall de entrada). O motor
+# deixou os dois em cinza-escuro liso. A pedido do usuário ficam brancos, como os vazios aprovados da
+# Casa A (250), com o X tracejado do PDF (cada traço é um segmento da DOC_LINHAS E PROJEÇÕES) em cinza
+# médio, como o da Casa A, e o guarda-corpo de vidro que isola os vazios (os retângulos de 2 cm da
+# ARQ_ELEMENTOS FIXOS, na base e à esquerda do vazio da escada e à esquerda do vazio do hall), no vidro
+# fino aprovado (vidro, contorno). O cinza do render vira branco; nos lados com guarda-corpo, o vazio
+# vai até o vidro do PDF (o motor deixou o piso entrar até 4 px); as paredes (escuras) não mudam
+VAZIOS = {"vazios": [{"vis": (875.6, 565.4, 1060.2, 605.6),
+                      "guardas": [(1657.3, 1292.6, 1984.0, 1293.7), (1657.3, 1217.9, 1658.4, 1293.7)]},
+                     {"vis": (1062.3, 716.4, 1200.5, 850.5), "guardas": [(1986.3, 1487.2, 1987.4, 1697.0)]}],
+          "camada": "DOC_LINHAS E PROJEÇÕES", "branco": 250, "cor": (147, 147, 147), "largura": 0.7,
+          "cinza": (68.0, 16.0), "parede": 40, "faixa": 6,
+          "vidro": (222, 218, 210), "alfa_vidro": 0.85, "contorno": (70, 72, 74), "larg_contorno": 0.5,
+          "larg_guarda": 1.6}
 
 
 def vazios(out, A, pg, p2r, r2p):
     q = VAZIOS
     tracos = [d for d in pg.get_drawings() if d.get("layer") == q["camada"]]
-    for v in q["vis"]:
-        (x0, y0), (x1, y1) = vis2r(A, out.shape, *v[:2]), vis2r(A, out.shape, *v[2:])
-        clip = pymupdf.Rect(*r2p(x0, y0), *r2p(x1, y1))
-        x0, y0, x1, y1 = int(np.floor(x0)) - 4, int(np.floor(y0)) - 4, int(np.ceil(x1)) + 4, int(np.ceil(y1)) + 4
-        tela = np.zeros(((y1 - y0) * SS, (x1 - x0) * SS), np.uint8)
+    for v in q["vazios"]:
+        (vx0, vy0), (vx1, vy1) = vis2r(A, out.shape, *v["vis"][:2]), vis2r(A, out.shape, *v["vis"][2:])
+        clip = pymupdf.Rect(*r2p(vx0, vy0), *r2p(vx1, vy1))
+        x0, y0, x1, y1 = int(np.floor(vx0)) - 8, int(np.floor(vy0)) - 8, int(np.ceil(vx1)) + 8, int(np.ceil(vy1)) + 8
+        h, w = y1 - y0, x1 - x0
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+
+        def tela_ret(rx0, ry0, rx1, ry1):
+            f = np.zeros((h * SS, w * SS), np.uint8)
+            cv2.rectangle(f, (int(round((rx0 - x0) * SS)), int(round((ry0 - y0) * SS))),
+                          (int(round((rx1 - x0) * SS)) - 1, int(round((ry1 - y0) * SS)) - 1), 255, -1)
+            return f
+
+        def reduz(f):
+            return cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+        # o branco: o cinza do render (perto do retângulo) e, nos lados com guarda-corpo, a faixa até o vidro
+        c, tol = q["cinza"]
+        perto = reduz(tela_ret(vx0 - 2, vy0 - 2, vx1 + 2, vy1 + 2)) > 0.5
+        m = ((np.abs(reg - c).max(axis=2) < tol) & perto).astype(np.float32)
+        guardas = []
+        for g in v["guardas"]:
+            (gx0, gy0), (gx1, gy1) = p2r(*g[:2]), p2r(*g[2:])
+            guardas.append((gx0, gy0, gx1, gy1))
+            k = q["faixa"]
+            if gy1 - gy0 > gx1 - gx0:                                   # vertical: o vazio à direita
+                f = tela_ret(gx1, max(gy0, vy0), gx1 + k, min(gy1, vy1))
+            else:                                                       # horizontal: o vazio acima
+                f = tela_ret(max(gx0, vx0), gy0 - k, min(gx1, vx1), gy0)
+            m = np.maximum(m, reduz(f) * (reg.mean(axis=2) > q["parede"]))
+        reg = reg * (1 - m[..., None]) + q["branco"] * m[..., None]
+        # o X tracejado, só sobre o branco do vazio
+        f = np.zeros((h * SS, w * SS), np.uint8)
         n = 0
         for d in tracos:
             if not d["rect"].intersects(clip):
@@ -308,22 +346,38 @@ def vazios(out, A, pg, p2r, r2p):
                 if it[0] != "l":
                     continue
                 (ax, ay), (bx, by) = p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)
-                cv2.line(tela, (int(round((ax - x0) * SS)), int(round((ay - y0) * SS))),
+                cv2.line(f, (int(round((ax - x0) * SS)), int(round((ay - y0) * SS))),
                          (int(round((bx - x0) * SS)), int(round((by - y0) * SS))), 255,
                          max(1, int(round(q["largura"] * SS))), cv2.LINE_AA)
                 n += 1
-        a = cv2.resize(tela.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
-        reg = out[y0:y1, x0:x1].astype(np.float32)
-        c, tol = q["cinza"]
-        a *= np.abs(reg - c).max(axis=2) < tol                      # só sobre o cinza do vazio
-        out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None], 0, 255).astype(np.uint8)
-        print(f"    vazio em ({x0}, {y0}) a ({x1}, {y1}): {n} traços do X")
+        a = (reduz(f) * m)[..., None]
+        reg = reg * (1 - a) + np.float32(q["cor"]) * a
+        # guarda-corpo de vidro: faixa fina centrada no retângulo do PDF (2 cm), vidro e contorno
+        for gx0, gy0, gx1, gy1 in guardas:
+            e = q["larg_guarda"] / 2
+            if gy1 - gy0 > gx1 - gx0:
+                xc = (gx0 + gx1) / 2
+                r_ = (xc - e, gy0, xc + e, gy1)
+            else:
+                yc = (gy0 + gy1) / 2
+                r_ = (gx0, yc - e, gx1, yc + e)
+            a = (reduz(tela_ret(*r_)) * q["alfa_vidro"])[..., None]
+            reg = reg * (1 - a) + np.float32(q["vidro"]) * a
+            f = np.zeros((h * SS, w * SS), np.uint8)
+            cv2.rectangle(f, (int(round((r_[0] - x0) * SS)), int(round((r_[1] - y0) * SS))),
+                          (int(round((r_[2] - x0) * SS)), int(round((r_[3] - y0) * SS))), 255,
+                          max(1, int(round(q["larg_contorno"] * SS))))
+            a = reduz(f)[..., None]
+            reg = reg * (1 - a) + np.float32(q["contorno"]) * a
+        out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+        print(f"    vazio em ({vx0:.1f}, {vy0:.1f}) a ({vx1:.1f}, {vy1:.1f}): branco, {n} traços do X, "
+              f"{len(guardas)} guarda-corpo(s) de vidro")
     return out
 
 
 # item 6: arcos das portas. O motor desenhou as folhas, mas nenhum arco. Entram as curvas da ARQ_PAREDE
 # do PDF no padrão aprovado no Térreo (retoque_terreo_casae.ARCOS: cinza (160, 161, 160), traço de
-# 0,45 px); sobre o cinza do vazio do hall, no cinza claro do X; as paredes (escuras) não mudam. A porta
+# 0,45 px), também sobre o branco do vazio do hall; as paredes (escuras) não mudam. A porta
 # pivotante P1 do hall do Térreo, vista pelo vazio, também ficou sem a folha (retângulo branco da
 # ARQ_PAREDE, dos dois lados do pivô): entra cheia, no mesmo cinza
 ARCOS = {"cor": (160, 161, 160), "larg": 0.45, "min_px": 6, "parede": 45,
@@ -331,16 +385,12 @@ ARCOS = {"cor": (160, 161, 160), "larg": 0.45, "min_px": 6, "parede": 45,
 
 
 def pintar_traco(out, f, ret, q):
-    """Traço desenhado em 8x (f) na janela ret: cinza fino no piso, cinza claro do X sobre o vazio;
-    as paredes (escuras) não mudam."""
+    """Traço desenhado em 8x (f) na janela ret, em cinza fino; as paredes (escuras) não mudam."""
     x0, y0, x1, y1 = ret
     a = cv2.resize(f.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
     reg = out[y0:y1, x0:x1].astype(np.float32)
     a *= reg.mean(axis=2) > q["parede"]
-    c, tol = VAZIOS["cinza"]
-    vazio = (np.abs(reg - c).max(axis=2) < tol)[..., None]
-    cor = np.where(vazio, np.float32(VAZIOS["cor"]), np.float32(q["cor"]))
-    out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + cor * a[..., None], 0, 255).astype(np.uint8)
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None], 0, 255).astype(np.uint8)
     return out
 
 
