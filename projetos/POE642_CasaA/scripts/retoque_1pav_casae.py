@@ -50,7 +50,7 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
     tampo limpo do lado, espelhado, na luz do tampo.
 12. Bancos em frente às camas (pedido do usuário): os cinco bancos do PDF (ARQ_LAYOUT HUMANIZAÇÃO, na
     largura da cama), no pé de cada cama do render, com a folga do PDF (o motor fez as camas 3 a 5 px
-    mais compridas; a da master, 22 px), no banco de madeira em ripas aprovado no Térreo.
+    mais compridas; a da master, 22 px), estofados em bege (pedido do usuário), com a sombra curta.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -706,9 +706,14 @@ def cubas_banhos(out, orig):
 # tem um banco (ARQ_LAYOUT HUMANIZAÇÃO) no pé de cada cama das cinco suítes, na largura da cama, a 1,6 px
 # dela; o motor não desenhou nenhum e fez as camas um pouco mais compridas (3 a 5 px; a da master, 22 px).
 # Cada banco fica no pé da cama do render (a linha de sombra do pé, na coluna do meio), com a folga do
-# PDF, na largura e na altura do PDF: o banco de madeira aprovado no Térreo (retoque_terreo_casae.
-# BANCO_VARANDA: a madeira da mesa de jantar do Térreo, em ripas, contorno e sombra curta), em 3 ripas
-BANCOS = {"camada": "ARQ_LAYOUT HUMANIZAÇÃO", "altura_pdf": 22.7, "busca": 32, "folga": 1.0, "ripas": 3}
+# PDF, na largura e na altura do PDF. Primeiro entrou o banco de madeira em ripas do Térreo; a pedido do
+# usuário ficou estofado em bege, com a sombra curta do banco do Térreo (BANCO_VARANDA)
+BANCOS = {"camada": "ARQ_LAYOUT HUMANIZAÇÃO", "altura_pdf": 22.7, "busca": 32, "folga": 1.0,
+          # estofado bege (pedido do usuário: "para os bancos em frente às camas use o tom bege"): o tecido
+          # fino do edredom do próprio render (normalizado, metade do relevo), o volume leve da almofada
+          # (mais claro no meio, bordas arredondadas) e um contorno bege escuro, fino
+          "bege": (156, 182, 207), "fonte_tecido": (1235, 395, 1258, 410), "relevo": 0.5,
+          "almofada": (0.03, 0.10, 0.06), "contorno": (112, 132, 156), "larg_contorno": 0.45}
 
 
 def bancos_camas(out, pg, p2r):
@@ -717,8 +722,9 @@ def bancos_camas(out, pg, p2r):
     lay = [d["rect"] for d in pg.get_drawings() if d.get("layer") == q["camada"] and d["type"] == "f"
            and len(d["items"]) == 4]
     bancos = [r for r in lay if abs(r.height - q["altura_pdf"]) < 0.5 and 70 < r.width < 130]
-    a, b, c, d = bv["fonte_madeira"]
-    madeira = cv2.rotate(cv2.imread(str(TERREO))[b:d, a:c], cv2.ROTATE_90_CLOCKWISE)   # veio no comprido
+    fx0, fy0, fx1, fy1 = q["fonte_tecido"]
+    tecido = out[fy0:fy1, fx0:fx1].astype(np.float32)
+    tecido = 1 + q["relevo"] * (tecido / tecido.reshape(-1, 3).mean(axis=0) - 1)
     L = out.astype(np.float32).mean(axis=2)
     forma = out.shape[:2]
     n = 0
@@ -758,17 +764,20 @@ def bancos_camas(out, pg, p2r):
         mm = cv2.resize(m.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
         s = bv["sombra"]
         out = sombra(out, mm, (x0, y0, x1, y1), s["desloc"], s["sigma"], s["forca"])
-        hh, ww = int(np.ceil(alt)), int(np.ceil(bx1 - bx0))
-        out = colar(out, madeira[:hh, :ww], ret)
-        for k in range(1, q["ripas"]):
-            y = by0 + k * alt / q["ripas"]
-            a_ = linha_aa(forma, [(bx0, y), (bx1, y)], bv["larg_junta"])[..., None] * bv["forca_junta"]
-            out[:] = np.clip(out * (1 - a_) + np.float32(bv["junta"]) * a_, 0, 255).astype(np.uint8)
-        a_ = linha_aa(forma, [(bx0, by0), (bx1, by0), (bx1, by1), (bx0, by1)], bv["larg_contorno"], fechada=True)[..., None]
-        out[:] = np.clip(out * (1 - a_) + np.float32(bv["contorno"]) * a_, 0, 255).astype(np.uint8)
+        hh, ww = int(np.ceil(alt)) * SS, int(np.ceil(bx1 - bx0)) * SS
+        tex = cv2.resize(np.concatenate([tecido, tecido[:, ::-1]] * 4, axis=1), (ww, hh), interpolation=cv2.INTER_CUBIC)
+        u = np.linspace(-1, 1, ww)[None, :, None]
+        v = np.linspace(-1, 1, hh)[:, None, None]
+        c0, cv_, cu = q["almofada"]
+        volume = 1 + c0 - cv_ * v ** 2 - cu * np.abs(u) ** 10
+        peca = np.clip(tex * np.float32(q["bege"]) * volume, 0, 255)
+        peca = cv2.resize(peca, (ww // SS, hh // SS), interpolation=cv2.INTER_AREA)
+        out = colar(out, peca, ret)
+        a_ = linha_aa(forma, [(bx0, by0), (bx1, by0), (bx1, by1), (bx0, by1)], q["larg_contorno"], fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - a_) + np.float32(q["contorno"]) * a_, 0, 255).astype(np.uint8)
         n += 1
         print(f"    banco em ({bx0:.1f}, {by0:.1f}) a ({bx1:.1f}, {by1:.1f}); pé da cama do render em {pe}")
-    print(f"    {n} bancos de madeira no pé das camas")
+    print(f"    {n} bancos estofados em bege no pé das camas")
     return out
 
 
@@ -829,7 +838,7 @@ def main():
     out = cortinas(out, pg, p2r)
     print("[11] cubas dos banhos no lugar do PDF")
     out = cubas_banhos(out, orig)
-    print("[12] bancos de madeira no pé das camas")
+    print("[12] bancos em bege no pé das camas")
     out = bancos_camas(out, pg, p2r)
     print("[9] shaft: X em cinza na parede")
     out = shaft(out, pg, p2r)
