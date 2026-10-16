@@ -55,10 +55,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
 13. Torneira de piso da banheira do banho master (pedido do usuário): a do PDF (base redonda de ~16 cm
     logo fora da borda, no canto de cima à esquerda, e a bica em diagonal sobre a banheira), na mesma
     posição relativa à banheira do render (maior que a do PDF), no cromo aprovado, com sombra curta.
-14. Nomes e áreas dos ambientes (pedidos do usuário: nome + área do PDF, no tamanho do PDF e um pouco
-    maior, no piso, em preto; no granito marrom, cinza): cada linha dos 23 rótulos do PDF igual (texto,
-    posição, corpo do PDF 30% maior), em Inter Light preta; os que caem sobre peças do render vão para o
-    piso livre. Sai também `_sem_rotulos.png`.
+14. Nomes e áreas dos ambientes (pedidos do usuário: nome + área do PDF, na posição e no tamanho do PDF,
+    um pouco maior, em preto, legível; no granito marrom, cinza): cada linha dos 23 rótulos do PDF igual
+    (texto, posição exata, corpo do PDF 30% maior), em Inter Regular preta. Sai também `_sem_rotulos.png`.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -874,24 +873,20 @@ def torneira_banheira(out, p2r):
 
 
 # item 14: nomes e áreas dos ambientes (pedido do usuário: "insira as cotas nos ambientes"; escolheu
-# "nome + área do PDF"; depois: "tem que ficar no tamanho de como está no PDF"; "os escritos devem ser feitos
-# em piso, caso seja possível, na cor preta; no granito marrom, cinza"; "e um pouco maior a fonte"). Cada
-# linha do rótulo do PDF entra igual: o mesmo texto ("SUÍTE 1", "A: 17 m" e o "2" sobrescrito), na mesma
-# posição (a origem da linha no PDF) e no corpo do PDF (8 pt; 5,3 pt no "2") levado à escala da imagem e
-# 30% maior, em Inter Light (traço leve, como a Malgun Gothic Semilight do PDF), desenhado em 4x e
-# reduzido, em preto. Os que caem sobre peças do render (maiores que as do PDF) vão para o piso livre
-ROTULOS = {"fonte": "Light", "ss": 4,
+# "nome + área do PDF"; depois: "tem que ficar no tamanho de como está no PDF"; "na cor preta; no granito
+# marrom, cinza"; "um pouco maior a fonte"; "na mesma posição [do PDF] e com leitura visível"). Cada linha
+# do rótulo do PDF entra igual: o mesmo texto ("SUÍTE 1", "A: 17 m" e o "2" sobrescrito), na mesma posição
+# (a origem da linha no PDF, sem desvios) e no corpo do PDF (8 pt; 5,3 pt no "2") levado à escala da
+# imagem e 30% maior, em Inter Regular, desenhado em 4x e reduzido, em preto
+ROTULOS = {"fonte": "Regular", "ss": 4,
            # cor (pedido do usuário): preto no piso; no granito marrom, cinza (neste pavimento não há granito)
            "cor": (20, 20, 20), "cor_granito": (150, 150, 150),
            # corpo um pouco maior que o do PDF (pedido do usuário: "e um pouco maior a fonte")
            "escala": 1.3,
            # (nome, centro do rótulo do PDF no render de 2000 px, desvio em px desse render)
-           # (os escritos ficam no piso sempre que possível: pedido do usuário)
-           "ajustes": [("SUÍTE MASTER", (813.7, 395.2), (6, 26)),       # abaixo do banco, fora do tapete e do pufe
-                       ("BANHO MASTER", (961.0, 302.1), (0, 8)),        # abaixo da banheira
-                       ("SALA ÍNTIMA", (949.1, 670.9), (-6, 0)),        # longe do sofá
-                       ("CLOSET 3", (873.5, 655.2), (-5, 0)),           # fora do armário
-                       ("COPINHA", (1107.1, 482.9), (0, -20))]}         # no piso em frente à bancada
+           # todos na posição do PDF (pedido do usuário: "preciso que estejam na mesma posição e com
+           # leitura visível"); sem desvios
+           "ajustes": []}
 
 
 def rotulos_pdf(pg):
