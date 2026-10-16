@@ -433,6 +433,19 @@ python3 opcoes_1pav_casae.py      # -> POE642_CasaE/renders/POE642_CasaE_PH_1Pav
 
 As duas viram pranchas e PDFs de entrega com `rodape_entrega.py --no-quadro --sufixo _pb` / `_linhas` e `pdf_entrega.py --prancha` (comandos em "Pranchas de entrega").
 
+## Retoque do Subsolo da Casa E: `retoque_subsolo_casae.py`
+
+Retoques locais, sem IA, no render v1 do Subsolo da Casa E, no quadro do render (que manteve a escala da base). Cada item tem o seu número no mapa `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_erros.jpg` (gerado com `--mapa`) e no handoff.
+- **Pisos refeitos:** onde o motor trocou o material ou o manchou, o piso da base chapada vira a textura aprovada da base v3 (a mesma prévia que o motor recebeu), alinhada ao render, normalizada e multiplicada pela cor do material no próprio render (`trocar_piso`). Folhas e soleiras de porta da base dentro da área são preenchidas pelo piso em volta (`buracos`).
+- **Portas:** `desenhar_porta` desenha a folha (retângulo do PDF) e o arco (a curva do PDF) em traço fino, em 8 x.
+
+```bash
+python3 retoque_subsolo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_render.webp \
+    --mapa ../../POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_erros.jpg      # só o mapa dos erros
+python3 retoque_subsolo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_render.webp \
+    --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Subsolo_v1_retocado
+```
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:

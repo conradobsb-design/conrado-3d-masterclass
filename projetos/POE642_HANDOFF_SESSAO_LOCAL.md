@@ -605,6 +605,14 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - o armário do DCE até o teto;
     - o elevador ocupando quase toda a caixa;
     - nenhuma vegetação.
+- **Render v1:** `renders/POE642_CasaE_PH_Subsolo_v1_render.webp` (2000 × 1116; base v3 + prompt v1, fundo branco).
+  - Está na escala da base: SIFT + afim com 38 pontos, escala 0,9996 × 1,0066.
+  - O que diverge da base e do PDF está marcado em `renders/POE642_CasaE_PH_Subsolo_v1_erros.jpg` (15 itens).
+- **Retoque** (`POE642_CasaA/scripts/retoque_subsolo_casae.py`, sem IA, um item por vez; saída `renders/POE642_CasaE_PH_Subsolo_v1_retocado.png`, `_camada.png` e `_previa.jpg`):
+  1. **Circulação e depósito:** o motor fez a faixa da esquerda da circulação em travertino, com uma junta, e pôs uma parede preta na borda da esquerda (o PDF não tem; usuário: "não tem parede"). O resto saiu num Bege Bahia com veios em nuvem e sombras longas das paredes.
+     - O piso da circulação e do depósito (o Bege Bahia da base chapada) vira a textura aprovada da base v3, alinhada ao render e na cor do Bege Bahia do próprio render.
+     - Na borda da esquerda fica só a linha fina do contorno, como a de cima.
+     - A porta dupla do depósito é redesenhada pelo PDF (folhas e arcos finos), com o vão em piso contínuo.
 
 ## Casas A a D · Barlavento nas piscinas
 
