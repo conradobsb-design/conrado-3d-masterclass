@@ -57,7 +57,8 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
     posição relativa à banheira do render (maior que a do PDF), no cromo aprovado, com sombra curta.
 14. Nomes e áreas dos ambientes (pedidos do usuário: nome + área do PDF, na posição e no tamanho do PDF,
     um pouco maior, em preto, legível; no granito marrom, cinza): cada linha dos 23 rótulos do PDF igual
-    (texto, posição exata, corpo do PDF 30% maior), em Inter Regular preta. Sai também `_sem_rotulos.png`.
+    (texto, posição do PDF, corpo do PDF 30% maior), em Inter Regular preta; os seis que caem sobre móvel
+    vão ao piso livre mais próximo (autorizado pelo usuário). Sai também `_sem_rotulos.png`.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -876,17 +877,24 @@ def torneira_banheira(out, p2r):
 # "nome + área do PDF"; depois: "tem que ficar no tamanho de como está no PDF"; "na cor preta; no granito
 # marrom, cinza"; "um pouco maior a fonte"; "na mesma posição [do PDF] e com leitura visível"). Cada linha
 # do rótulo do PDF entra igual: o mesmo texto ("SUÍTE 1", "A: 17 m" e o "2" sobrescrito), na mesma posição
-# (a origem da linha no PDF, sem desvios) e no corpo do PDF (8 pt; 5,3 pt no "2") levado à escala da
-# imagem e 30% maior, em Inter Regular, desenhado em 4x e reduzido, em preto
+# (a origem da linha no PDF) e no corpo do PDF (8 pt; 5,3 pt no "2") levado à escala da imagem e 30%
+# maior, em Inter Regular, desenhado em 4x e reduzido, em preto; os que caem sobre móvel vão ao piso livre
 ROTULOS = {"fonte": "Regular", "ss": 4,
            # cor (pedido do usuário): preto no piso; no granito marrom, cinza (neste pavimento não há granito)
            "cor": (20, 20, 20), "cor_granito": (150, 150, 150),
            # corpo um pouco maior que o do PDF (pedido do usuário: "e um pouco maior a fonte")
            "escala": 1.3,
            # (nome, centro do rótulo do PDF no render de 2000 px, desvio em px desse render)
-           # todos na posição do PDF (pedido do usuário: "preciso que estejam na mesma posição e com
-           # leitura visível"); sem desvios
-           "ajustes": []}
+           # na posição do PDF (pedido do usuário: "preciso que estejam na mesma posição e com leitura
+           # visível"); os que caem sobre móvel vão ao piso livre mais próximo ("nesses casos em que o escrito
+           # fica sobre algum mobiliário, está autorizado deslocar para outro local do piso"):
+           # (nome, centro do rótulo do PDF no render de 2000 px, desvio em px desse render)
+           "ajustes": [("SUÍTE MASTER", (813.7, 395.2), (6, 26)),       # sobre o banco: abaixo, fora do tapete e do pufe
+                       ("BANHO MASTER", (961.0, 302.1), (0, 8)),        # na ponta da banheira: logo abaixo
+                       ("SALA ÍNTIMA", (949.1, 670.9), (-13, 0)),       # no braço do sofá: à esquerda
+                       ("CLOSET 2", (1192.8, 319.8), (4, 0)),           # na borda do armário: à direita
+                       ("CLOSET 3", (873.5, 655.2), (-5, 0)),           # na borda do armário: à esquerda
+                       ("COPINHA", (1107.1, 482.9), (0, -20))]}         # sobre a bancada: no piso em frente
 
 
 def rotulos_pdf(pg):
