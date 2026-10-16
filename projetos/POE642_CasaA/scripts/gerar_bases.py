@@ -556,6 +556,10 @@ def aplicar_legenda(img, page, raster, legenda, cfg):
                     mh = raster.rotacionar_arr(raster.mascara(hach, "stroke", 2.5 / raster.zoom))[y0:y1, x0:x1]
                     mh = ndimage.binary_dilation(mh, iterations=1) & ~mp & neutro & (orig.min(axis=-1) >= 60)
                     branco |= mh
+                if r.get("apagar_hachura_quente"):
+                    # hachura do piso em tom quente claro (ex.: banhos do 1º Pavimento da Casa E, pontilhado
+                    # rosado): fora das peças protegidas, também vira o material
+                    branco |= (orig[..., 0] - orig[..., 2] >= 6) & (orig.min(axis=-1) >= 170) & ~mp
             bloco[branco] = hex_rgb(r["para"])
             if r.get("cor_linha"):
                 bloco[neutro & (orig.min(axis=-1) >= 60) & (orig.min(axis=-1) < 235)] = hex_rgb(r["cor_linha"])

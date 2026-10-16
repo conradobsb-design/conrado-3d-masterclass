@@ -450,7 +450,8 @@
        "ARQ_PAREDE",
        "INS_INSTALAÇÕES HIDRÁULICAS"
       ],
-      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+      "apagar_linhas_layer": "ARQ_CONTRAPISO",
+      "apagar_hachura_quente": true
      },
      {
       "nome": "banho da suíte 1 → quartzito Aura",
@@ -470,7 +471,8 @@
        "ARQ_PAREDE",
        "INS_INSTALAÇÕES HIDRÁULICAS"
       ],
-      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+      "apagar_linhas_layer": "ARQ_CONTRAPISO",
+      "apagar_hachura_quente": true
      },
      {
       "nome": "banho da suíte 2 → quartzito Aura",
@@ -490,7 +492,8 @@
        "ARQ_PAREDE",
        "INS_INSTALAÇÕES HIDRÁULICAS"
       ],
-      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+      "apagar_linhas_layer": "ARQ_CONTRAPISO",
+      "apagar_hachura_quente": true
      },
      {
       "nome": "banho da suíte 3 → quartzito Aura",
@@ -510,7 +513,8 @@
        "ARQ_PAREDE",
        "INS_INSTALAÇÕES HIDRÁULICAS"
       ],
-      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+      "apagar_linhas_layer": "ARQ_CONTRAPISO",
+      "apagar_hachura_quente": true
      },
      {
       "nome": "banho da suíte 4 → quartzito Aura",
@@ -530,7 +534,8 @@
        "ARQ_PAREDE",
        "INS_INSTALAÇÕES HIDRÁULICAS"
       ],
-      "apagar_linhas_layer": "ARQ_CONTRAPISO"
+      "apagar_linhas_layer": "ARQ_CONTRAPISO",
+      "apagar_hachura_quente": true
      },
      {
       "nome": "closet master: armários de cima → marcenaria areia",
@@ -670,6 +675,128 @@
       "para": "#4A4A4A",
       "cor_linha": "#BDBDBD",
       "_nota": "O X tracejado do PDF: pé-direito duplo do hall de entrada do Térreo."
+     }
+    ]
+   },
+   "texturas": {
+    "_sobre": "Prévia de texturas do 1º Pavimento da Casa E: os materiais aprovados das Casas A a D e do Térreo da Casa E (bbox em px de um render de 2000 px); o quartzito Aura é gerado por código.",
+    "tolerancia": 4,
+    "materiais": [
+     {
+      "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+      "cores": [
+       "#A8784F"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          858,
+          638,
+          972,
+          684
+         ],
+         [
+          922,
+          719,
+          978,
+          826
+         ],
+         [
+          1012,
+          212,
+          1060,
+          268
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "quartzito Aura (banhos; fonte gerada por código, fontes_procedurais.py: placas de 90 cm, pêssego claro com veios finos)",
+      "cores": [
+       "#EAD4BF"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaE/bases/fontes/quartzito_aura.png",
+        "bbox": [
+         [
+          0,
+          0,
+          420,
+          420
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+      "cores": [
+       "#E8E8E8"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          1350,
+          582,
+          1452,
+          848
+         ],
+         [
+          648,
+          636,
+          698,
+          848
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "travertino (escada; hall do Subsolo da Casa A)",
+      "cores": [
+       "#DCD9CA"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+        "bbox": [
+         [
+          582,
+          580,
+          686,
+          775
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "armários em marcenaria areia (armário até o teto do Térreo retocado da Casa D, veio no comprido)",
+      "cores": [
+       "#CBB89E"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
+        "bbox": [
+         [
+          1128,
+          740,
+          1143,
+          797
+         ]
+        ]
+       }
+      ],
+      "girar": 90
      }
     ]
    }
