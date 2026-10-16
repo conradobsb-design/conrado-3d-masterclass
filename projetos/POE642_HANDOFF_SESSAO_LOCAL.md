@@ -645,6 +645,11 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   11. **Chuveiros:** os da ducha da antessala e do box do vestiário saíram fora do padrão aprovado (um símbolo solto; um círculo com manchas).
      - O box é refeito pela base (travertino, sem as sombras longas), com a porta do PDF.
      - Os dois chuveiros entram como o do WC DCE 2: ducha quadrada, braço cromado até a parede desenhada (a de baixo, na ducha; a da direita, no box) e canopla.
+  12. **Portas do vestiário:** o motor fez arcos tracejados e sombras longas. O vestiário é refeito pela base (travertino), com:
+     - as portas do PDF: a do vestiário, vinda da antessala, e a do WC;
+     - a bancada de quartzo com a cuba e a torneira da parede da direita;
+     - a bacia na parede da esquerda, com o tampo fechado, como as outras peças desta planta.
+     - As portas do DCE e da casa de máquinas de baixo, que estavam sem arco, entram com o granito, no item 13.
 
 ## Casas A a D · Barlavento nas piscinas
 

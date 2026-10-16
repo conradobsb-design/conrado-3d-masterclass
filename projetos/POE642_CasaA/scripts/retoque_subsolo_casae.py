@@ -864,6 +864,37 @@ def chuveiros(out, pg, p2r, chapada, tex):
     return out
 
 
+# item 12: portas. No vestiário o motor fez os arcos tracejados (e sombras longas); o DCE e a casa de máquinas
+# de baixo ficaram sem arco (eles entram com o granito, no item 13). O vestiário é refeito pela base
+# (travertino), com as portas do PDF (do vestiário, vinda da antessala, e a do WC), a bancada de quartzo com
+# a cuba e a torneira da parede da direita, e a bacia na parede da esquerda, com o tampo fechado, como as
+# outras peças desta planta.
+VESTIARIO = {"interior": [(1139.3, 955.0, 1289.5, 1027.1), (1147.8, 1027.1, 1215.3, 1090.3)],
+             "portas": [((1147.8, 964.2, 1193.1, 966.5), (1147.8, 964.2, 1193.1, 1009.6)),
+                        ((1212.6, 1027.1, 1214.9, 1065.9), (1176.1, 1027.1, 1214.9, 1065.9))],
+             "bancada": (1262.8, 954.3, 1289.5, 1023.7), "cuba": (1267.3, 972.5, 1282.1, 1005.0),
+             "torneira": (1278.8, 987.3, 1286.4, 989.6), "vaso": (1147.8, 1056.8, 1176.9, 1076.8)}
+
+
+def vestiario(out, pg, p2r, chapada, tex):
+    q = VESTIARIO
+    m, parede = ambiente(out, p2r, chapada, q["interior"])
+    trav = np.abs(chapada.astype(int) - (202, 217, 220)).max(axis=2) <= 3
+    vinil = cv2.dilate((np.abs(chapada.astype(int) - (79, 120, 168)).max(axis=2) <= 3).astype(np.uint8),
+                       np.ones((3, 3), np.uint8)).astype(bool)
+    m &= ~vinil
+    ganho = np.asarray(TRAV["render"], np.float32) / np.asarray(TRAV["base"], np.float32)
+    out = pela_base(out, m, tex, ganho, buracos=m & ~trav)
+    for folha, arco in q["portas"]:
+        out = desenhar_porta(out, pg, p2r, folha, arco, "bege")
+    out = bancada_cuba(out, p2r, q["bancada"], q["cuba"], q["torneira"], "direita")
+    out = vaso(out, pg, p2r, q["vaso"], "esquerda")
+    for r in q["interior"]:
+        out = limpar_paredes(out, p2r, parede, r)
+    print(f"    vestiário da base: {int(m.sum())} px; portas, bancada com cuba e bacia do PDF")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -947,6 +978,7 @@ def main():
         ("sauna: banco de travertino em dois níveis, ao longo da parede de baixo", lambda o: sauna(o, p2r, chapada, tex)),
         ("antessala: sem a bacia; portas da sauna e da ducha", lambda o: antessala(o, pg, p2r, chapada, tex)),
         ("chuveiros da ducha e do box do vestiário", lambda o: chuveiros(o, pg, p2r, chapada, tex)),
+        ("portas do vestiário (e o vestiário refeito, com a bancada e a bacia)", lambda o: vestiario(o, pg, p2r, chapada, tex)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
         if n <= args.ate:
