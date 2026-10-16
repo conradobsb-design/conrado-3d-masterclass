@@ -23,6 +23,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
    do PDF (da parede da esquerda ao armário) vira o Bege Bahia da varanda da esquerda do próprio
    render, na luz da bancada do render; a cuba redonda da Casa A entra no círculo do PDF (34 cm),
    com a torneira atrás, no cromo das cubas do Térreo, e uma sombra curta bem leve.
+5. Vazios (abaixo da escada e no hall): o motor deixou o cinza-escuro liso. Entra o X tracejado do PDF
+   (cada traço da DOC_LINHAS E PROJEÇÕES na posição exata), fino, no cinza claro das linhas dos vazios
+   da base (#BDBDBD), só sobre o cinza do vazio.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -275,6 +278,42 @@ def copinha(out, p2r):
     return out
 
 
+# item 5: vazios (abaixo da escada e no hall). O motor deixou os dois em cinza-escuro liso; o PDF tem
+# o X tracejado (cada traço é um segmento da DOC_LINHAS E PROJEÇÕES). Os traços entram nas posições
+# exatas, finos, no cinza claro das linhas dos vazios da base (#BDBDBD), só sobre o cinza do vazio
+VAZIOS = {"vis": [(875.6, 565.4, 1060.2, 605.6), (1062.3, 716.4, 1200.5, 850.5)],
+          "camada": "DOC_LINHAS E PROJEÇÕES", "cor": (189, 189, 189), "largura": 0.7, "cinza": (68.0, 14.0)}
+
+
+def vazios(out, A, pg, p2r, r2p):
+    q = VAZIOS
+    tracos = [d for d in pg.get_drawings() if d.get("layer") == q["camada"]]
+    for v in q["vis"]:
+        (x0, y0), (x1, y1) = vis2r(A, out.shape, *v[:2]), vis2r(A, out.shape, *v[2:])
+        clip = pymupdf.Rect(*r2p(x0, y0), *r2p(x1, y1))
+        x0, y0, x1, y1 = int(np.floor(x0)) - 4, int(np.floor(y0)) - 4, int(np.ceil(x1)) + 4, int(np.ceil(y1)) + 4
+        tela = np.zeros(((y1 - y0) * SS, (x1 - x0) * SS), np.uint8)
+        n = 0
+        for d in tracos:
+            if not d["rect"].intersects(clip):
+                continue
+            for it in d["items"]:
+                if it[0] != "l":
+                    continue
+                (ax, ay), (bx, by) = p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)
+                cv2.line(tela, (int(round((ax - x0) * SS)), int(round((ay - y0) * SS))),
+                         (int(round((bx - x0) * SS)), int(round((by - y0) * SS))), 255,
+                         max(1, int(round(q["largura"] * SS))), cv2.LINE_AA)
+                n += 1
+        a = cv2.resize(tela.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        c, tol = q["cinza"]
+        a *= np.abs(reg - c).max(axis=2) < tol                      # só sobre o cinza do vazio
+        out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None], 0, 255).astype(np.uint8)
+        print(f"    vazio em ({x0}, {y0}) a ({x1}, {y1}): {n} traços do X")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -289,9 +328,11 @@ def main():
     out = floreira(out, A)
     print("[2] banho master: dois chuveiros de teto")
     out = chuveiros(out, A)
-    _, p2r, _ = pdf_cadeia(A, out.shape)
+    pg, p2r, r2p = pdf_cadeia(A, out.shape)
     print("[4] copinha: bancada em Bege Bahia e cuba redonda")
     out = copinha(out, p2r)
+    print("[5] vazios: X tracejado claro")
+    out = vazios(out, A, pg, p2r, r2p)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
