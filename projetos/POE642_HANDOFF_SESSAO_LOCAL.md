@@ -632,6 +632,9 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   7. **Elípticos:** os dois aparelhos pequenos do PDF são elípticos vistos de cima (trilhos, pedais, braços e console); o motor desenhou dois halteres grandes.
      - Os halteres e as sombras saem. Cada linha recebe o vinílico da mesma linha, deslocado até um trecho limpo (`vinilico`: as réguas do render não coincidem com as da base), com a luz acertada pelo vinílico em volta.
      - Entram os elípticos pelo PDF (ARQ_ MOB COMUM): silhueta em grafite, os traços do desenho em preto e a sombra curta.
+  8. **Piscina e ofurô:** o motor fez degraus e bancos dentro dos tanques (o PDF não tem), a água num turquesa forte e, embaixo, a borda da piscina diferente do PDF; o vidro entre a piscina de baixo e o ofurô virou parede branca.
+     - A água dos três tanques, tirada da base chapada (sem as bordas brancas), vira a água aprovada nas piscinas: Barlavento (`piscinas_barlavento`), com a pedra das peças sob a água verde-azulada clara, a grade ondulada, o brilho na diagonal e a sombra curta junto às bordas. Fica sem degraus e sem as cáusticas do render, que eram os degraus.
+     - O visor de vidro entre os tanques e a academia volta inteiro, como na base: vidro fino com os caixilhos.
 
 ## Casas A a D · Barlavento nas piscinas
 

@@ -685,6 +685,43 @@ def elipticos(out, pg, p2r):
     return out
 
 
+# item 8: piscina e ofurô. O motor fez degraus e bancos dentro dos tanques (o PDF não tem) e a água num
+# turquesa forte; o vidro entre a piscina de baixo e o ofurô virou parede branca. A água dos três tanques
+# (a da base chapada, sem as bordas brancas) vira a água aprovada nas piscinas (Barlavento: a pedra das
+# peças sob a água verde-azulada clara, a grade ondulada, o brilho na diagonal e a sombra curta junto às
+# bordas), sem degraus e sem as cáusticas do render (que eram os degraus). O visor de vidro entre os
+# tanques e a academia volta inteiro como na base (vidro fino com caixilhos).
+PISCINA = {"agua_base": (254, 246, 223), "tol": 3,
+           "tanques_pdf": [(694.0, 679.0, 890.0, 1131.0)],
+           "visor_pdf": (807.6, 690.7, 819.0, 1090.3)}
+
+
+def piscina(out, A, p2r, chapada, tex):
+    import piscinas_barlavento as PB
+    q = PISCINA
+    x0, y0, x1, y1 = caixa_pdf(p2r, *q["tanques_pdf"][0])
+    ch = chapada[y0:y1, x0:x1].astype(np.int32)
+    agua = np.abs(ch - q["agua_base"]).max(axis=2) <= q["tol"]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    lum = reg.mean(axis=2)
+    # a água do render vai até a borda branca: a da base, crescida 1 px onde o render não é branco
+    agua = (cv2.dilate(agua.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0) & (lum < 232) | agua
+    limite = agua.copy()
+    h, w = agua.shape
+    forca, dec = PB.Q["borda"]
+    dist = cv2.distanceTransform(limite.astype(np.uint8), cv2.DIST_L2, 3)
+    luz = 1 - forca * np.exp(-np.maximum(dist - 0.5, 0) / dec)
+    novo = PB.pedra_ondulada(h, w) * (luz * PB.brilho_diagonal(h, w))[..., None]
+    a = np.maximum(cv2.GaussianBlur(agua.astype(np.float32), (0, 0), 0.5), agua) * agua
+    reg = reg * (1 - a[..., None]) + novo * a[..., None]
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    # o visor: o vidro fino da base (com os caixilhos), inteiro
+    a = cobertura(out.shape, p2r, [q["visor_pdf"]])[..., None]
+    out[:] = np.clip(out * (1 - a) + tex * a, 0, 255).astype(np.uint8)
+    print(f"    água aprovada (Barlavento) em {int(agua.sum())} px, sem degraus; visor de vidro da base")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -764,6 +801,7 @@ def main():
         ("elevador: o do Térreo aprovado", lambda o: elevador(o, A, p2r, terreo_no_render(A, o.shape)[0])),
         ("suporte de halteres do PDF no lugar do armário de madeira", lambda o: halteres(o, pg, p2r)),
         ("dois elípticos do PDF no lugar dos halteres grandes", lambda o: elipticos(o, pg, p2r)),
+        ("piscina e ofurô: água aprovada, sem degraus; visor de vidro", lambda o: piscina(o, A, p2r, chapada, tex)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
         if n <= args.ate:
