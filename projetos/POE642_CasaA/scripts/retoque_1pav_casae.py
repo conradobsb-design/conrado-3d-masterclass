@@ -46,6 +46,9 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
 11. Cubas dos banhos das suítes da direita (pedido do usuário: "cuba posicionada mais à direita da
     bancada da pia"): a cuba do render, com a torneira, vai para o centro do recorte do PDF (10,8 e
     10,7 px para a direita); onde estava, o tampo limpo do lado, espelhado, na luz do tampo.
+12. Bancos em frente às camas (pedido do usuário): os cinco bancos do PDF (ARQ_LAYOUT HUMANIZAÇÃO, na
+    largura da cama), no pé de cada cama do render, com a folga do PDF (o motor fez as camas 3 a 5 px
+    mais compridas; a da master, 22 px), no banco de madeira em ripas aprovado no Térreo.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -691,6 +694,76 @@ def cubas_banhos(out, orig):
     return out
 
 
+# item 12: bancos em frente às camas (pedido do usuário: "faltando os bancos em frente às camas"). O PDF
+# tem um banco (ARQ_LAYOUT HUMANIZAÇÃO) no pé de cada cama das cinco suítes, na largura da cama, a 1,6 px
+# dela; o motor não desenhou nenhum e fez as camas um pouco mais compridas (3 a 5 px; a da master, 22 px).
+# Cada banco fica no pé da cama do render (a linha de sombra do pé, na coluna do meio), com a folga do
+# PDF, na largura e na altura do PDF: o banco de madeira aprovado no Térreo (retoque_terreo_casae.
+# BANCO_VARANDA: a madeira da mesa de jantar do Térreo, em ripas, contorno e sombra curta), em 3 ripas
+BANCOS = {"camada": "ARQ_LAYOUT HUMANIZAÇÃO", "altura_pdf": 22.7, "busca": 32, "folga": 1.0, "ripas": 3}
+
+
+def bancos_camas(out, pg, p2r):
+    from retoque_terreo_casae import BANCO_VARANDA, colar, linha_aa
+    q, bv = BANCOS, BANCO_VARANDA
+    lay = [d["rect"] for d in pg.get_drawings() if d.get("layer") == q["camada"] and d["type"] == "f"
+           and len(d["items"]) == 4]
+    bancos = [r for r in lay if abs(r.height - q["altura_pdf"]) < 0.5 and 70 < r.width < 130]
+    a, b, c, d = bv["fonte_madeira"]
+    madeira = cv2.rotate(cv2.imread(str(TERREO))[b:d, a:c], cv2.ROTATE_90_CLOCKWISE)   # veio no comprido
+    L = out.astype(np.float32).mean(axis=2)
+    forma = out.shape[:2]
+    n = 0
+    for B in bancos:
+        camas = [r for r in lay if abs(r.width - B.width) < 1.5 and abs(r.x0 - B.x0) < 1.5 and r.height > 80
+                 and (abs(r.y1 - B.y0) < 6 or abs(r.y0 - B.y1) < 6)]
+        if not camas:
+            continue                                   # os aparadores (sem cama encostada) ficam
+        cama = camas[0]
+        abaixo = abs(cama.y1 - B.y0) < 6               # o banco abaixo da cama (o pé embaixo)
+        (bx0, by0), (bx1, by1) = p2r(B.x0, B.y0), p2r(B.x1, B.y1)
+        alt = by1 - by0
+        xc = int(round((bx0 + bx1) / 2))
+        col = L[:, xc - 6:xc + 7].mean(axis=1)
+        # pé da cama no render: a primeira queda depois do edredom (abaixo de 88% dele), no mínimo local
+        # logo em seguida (a borda do tapete, mais escura, fica mais adiante)
+        passo = 1 if abaixo else -1
+        ya = int(round(p2r(cama.x0, cama.y1 if abaixo else cama.y0)[1])) - 4 * passo
+        edredom = col[ya]
+        y = ya
+        while abs(y - ya) < q["busca"] and col[y] > 0.88 * edredom:
+            y += passo
+        janela = [y + k * passo for k in range(4)]
+        pe = janela[int(np.argmin([col[v] for v in janela]))]
+        if abaixo:
+            by0 = pe + q["folga"]
+            by1 = by0 + alt
+        else:
+            by1 = pe - q["folga"] + 1
+            by0 = by1 - alt
+        ret = (bx0, by0, bx1, by1)
+        x0, y0 = int(np.floor(bx0)) - 4, int(np.floor(by0)) - 4
+        x1, y1 = int(np.ceil(bx1)) + 4, int(np.ceil(by1)) + 4
+        m = np.zeros(((y1 - y0) * SS, (x1 - x0) * SS), np.uint8)
+        cv2.rectangle(m, (int(round((bx0 - x0) * SS)), int(round((by0 - y0) * SS))),
+                      (int(round((bx1 - x0) * SS)) - 1, int(round((by1 - y0) * SS)) - 1), 255, -1)
+        mm = cv2.resize(m.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+        s = bv["sombra"]
+        out = sombra(out, mm, (x0, y0, x1, y1), s["desloc"], s["sigma"], s["forca"])
+        hh, ww = int(np.ceil(alt)), int(np.ceil(bx1 - bx0))
+        out = colar(out, madeira[:hh, :ww], ret)
+        for k in range(1, q["ripas"]):
+            y = by0 + k * alt / q["ripas"]
+            a_ = linha_aa(forma, [(bx0, y), (bx1, y)], bv["larg_junta"])[..., None] * bv["forca_junta"]
+            out[:] = np.clip(out * (1 - a_) + np.float32(bv["junta"]) * a_, 0, 255).astype(np.uint8)
+        a_ = linha_aa(forma, [(bx0, by0), (bx1, by0), (bx1, by1), (bx0, by1)], bv["larg_contorno"], fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - a_) + np.float32(bv["contorno"]) * a_, 0, 255).astype(np.uint8)
+        n += 1
+        print(f"    banco em ({bx0:.1f}, {by0:.1f}) a ({bx1:.1f}, {by1:.1f}); pé da cama do render em {pe}")
+    print(f"    {n} bancos de madeira no pé das camas")
+    return out
+
+
 # item 9: shaft (pedido do usuário: "preciso da marcação em x para sinalizar o shaft ... em cor cinza").
 # O PDF tem um shaft dentro da parede grossa de cima da suíte master: o retângulo e o X tracejado da
 # DOC_LINHAS E PROJEÇÕES (10 segmentos), que somem no preto da parede. Entram em cinza, finos, só
@@ -748,6 +821,8 @@ def main():
     out = cortinas(out, pg, p2r)
     print("[11] cubas dos banhos da direita no lado direito da bancada")
     out = cubas_banhos(out, orig)
+    print("[12] bancos de madeira no pé das camas")
+    out = bancos_camas(out, pg, p2r)
     print("[9] shaft: X em cinza na parede")
     out = shaft(out, pg, p2r)
 
