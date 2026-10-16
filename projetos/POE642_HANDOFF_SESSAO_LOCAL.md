@@ -635,9 +635,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   8. **Piscina e ofurô:** o motor fez degraus e bancos dentro dos tanques (o PDF não tem), a água num turquesa forte e, embaixo, a borda da piscina diferente do PDF; o vidro entre a piscina de baixo e o ofurô virou parede branca.
      - A água dos três tanques, tirada da base chapada (sem as bordas brancas), vira a água aprovada nas piscinas: Barlavento (`piscinas_barlavento`), com a pedra das peças sob a água verde-azulada clara, a grade ondulada, o brilho na diagonal e a sombra curta junto às bordas. Fica sem degraus e sem as cáusticas do render, que eram os degraus.
      - O visor de vidro entre os tanques e a academia volta inteiro, como na base: vidro fino com os caixilhos.
-  9. **Sauna:** o motor fez um banco em L de ripas de madeira, subindo pela parede da esquerda. O banco do PDF é de Bege Bahia, em dois níveis, só ao longo da parede de baixo (ARQ_ELEMENTOS FIXOS), como na Casa D.
-     - A sauna vem inteira da base (`pela_base`): o travertino do piso e o banco nos dois tons de Bege Bahia, que é a legenda aprovada, no tom do travertino do render (ganho por canal) e sem os contornos da base.
-     - Os dois níveis se leem pela sombra curta de cada borda no nível de baixo e por um brilho leve na quina.
+  9. **Sauna:** o motor fez um banco em L de ripas de madeira, subindo pela parede da esquerda. O banco do PDF tem dois níveis, só ao longo da parede de baixo (ARQ_ELEMENTOS FIXOS).
+     - A sauna vem da base (`pela_base`): o travertino do piso, no tom do travertino do render (ganho por canal) e sem os contornos da base.
+     - O banco é de travertino. Usuário (16/10/26): "os bancos da sauna devem ficar em mármore travertino também, com a devida separação com a linha em sombreamento discreto para dar a entender que o de baixo está mais alto que o de cima, que por sua vez está mais alto do que o piso". Recebe o travertino do piso da sauna, espelhado. A primeira versão, nos dois tons de Bege Bahia da Casa D, saiu.
+     - Os níveis se separam por uma linha fina (cinza, força 0,22) com uma sombra discreta no lado mais baixo de cada borda (até 14%, em 1,8 pt) e um brilho leve na quina de cima. O assento junto à parede é o mais alto, o degrau da frente fica no meio e o piso é o mais baixo.
   10. **Antessala:** o motor pôs uma bacia sanitária entre a ducha e o vestiário (o PDF não tem), além de sombras longas e arcos tracejados.
      - A antessala e a ducha vêm da base (o travertino), no tom do render; o vinílico da academia, logo acima da abertura, fica.
      - As portas da sauna e da ducha são as do PDF, com folha e arco finos. O chuveiro da ducha entra no item 11.

@@ -767,29 +767,50 @@ def limpar_paredes(out, p2r, parede, r):
 
 
 # item 9: sauna. O motor fez um banco em L de ripas de madeira (subindo pela parede da esquerda); o banco
-# do PDF é de Bege Bahia, em dois níveis, só ao longo da parede de baixo (ARQ_ELEMENTOS FIXOS), como na
-# Casa D. A sauna vem inteira da base (o travertino do piso e o banco nos dois tons de Bege Bahia, que é a
-# legenda aprovada), na cor do travertino do render; os dois níveis se leem pela sombra curta de cada
-# borda no nível de baixo e um brilho leve na quina.
+# do PDF tem dois níveis, só ao longo da parede de baixo (ARQ_ELEMENTOS FIXOS). A sauna vem da base (o
+# travertino do piso), no tom do travertino do render, e o banco também é de travertino (pedido do usuário:
+# "os bancos da sauna devem ficar em mármore travertino também"): o travertino do piso da sauna, espelhado.
+# Os níveis se separam por uma linha fina com sombreamento discreto no lado mais baixo de cada borda: o
+# assento junto à parede (embaixo) é o mais alto, o degrau da frente fica no meio e o piso é o mais baixo.
 SAUNA = {"interior": (888.9, 955.0, 1000.6, 1090.3),
-         "niveis": [(888.9, 1021.3, 999.8, 1055.5), (888.9, 1055.5, 999.8, 1089.8)],   # degrau e assento
-         "sombra": 0.16, "brilho": 0.05}
+         "banco": (888.9, 1021.3, 999.8, 1089.8),
+         "bordas": [1021.3, 1055.5],                 # piso | degrau; degrau | assento (pt do PDF)
+         "sombra": (0.14, 1.8),                      # no nível de baixo, junto à borda: força e alcance (pt)
+         "linha": (0.22, 0.35), "brilho": (0.05, 0.8)}   # linha: força e largura (px); brilho: força e largura (pt)
 
 
 def sauna(out, p2r, chapada, tex):
     q = SAUNA
     m, parede = ambiente(out, p2r, chapada, [q["interior"]])
     ganho = np.asarray(TRAV["render"], np.float32) / np.asarray(TRAV["base"], np.float32)
-    out = pela_base(out, m, tex, ganho)
-    # quinas dos níveis: sombra curta abaixo de cada borda de cima (no nível de baixo) e brilho na quina
+    # o banco recebe o travertino do piso da sauna (da base), espelhado na borda de cima do banco
+    tex2 = tex.copy()
+    (bx0, by0), (bx1, by1) = p2r(q["banco"][0], q["banco"][1]), p2r(q["banco"][2], q["banco"][3])
+    xa, xb, ya, yb = int(np.floor(bx0)), int(np.ceil(bx1)), int(round(by0)), int(np.ceil(by1))
+    ytopo = int(np.ceil(p2r(q["interior"][0], q["interior"][1])[1])) + 4
+    n = ya - ytopo
+    for y in range(ya, yb):
+        tex2[y, xa:xb] = tex[ya - 1 - ((y - ya) % n), xa:xb]
+    out = pela_base(out, m, tex2, ganho)
     tl = Tela(out, p2r, q["interior"], folga=2)
-    for (x0, y0, x1, y1) in q["niveis"]:
-        faixa = tl.ret((x0, y0, x1, y0 + 1.6))
-        tl.reg *= (1 - q["sombra"] * tl.reduzir(faixa))[..., None]
-        tl.pintar(tl.ret((x0, y0 - 0.9, x1, y0)), (255, 255, 255), q["brilho"])
+    x0, x1 = q["banco"][0], q["banco"][2]
+    forca, alcance = q["sombra"]
+    for yb_pt in q["bordas"]:
+        # sombra no nível de baixo (acima da borda), mais forte junto a ela
+        for k in range(6):
+            a0 = yb_pt - alcance * (k + 1) / 6
+            tl.reg *= (1 - forca / 6 * tl.reduzir(tl.ret((x0, a0, x1, yb_pt))))[..., None]
+        tl.pintar(tl.ret((x0, yb_pt, x1, yb_pt + q["brilho"][1])), (255, 255, 255), q["brilho"][0])
+        fl, lg = q["linha"]
+        lin = tl.vazia()
+        _, yy = tl.pt(x0, yb_pt)
+        a, _ = tl.pt(x0, yb_pt)
+        b, _ = tl.pt(x1, yb_pt)
+        cv2.line(lin, (int(a), int(yy)), (int(b), int(yy)), 255, max(1, int(round(lg * SS))))
+        tl.pintar(lin, (70, 78, 86), fl)
     out = tl.gravar()
     out = limpar_paredes(out, p2r, parede, q["interior"])
-    print(f"    sauna da base: {int(m.sum())} px (piso de travertino e banco de Bege Bahia em dois níveis)")
+    print(f"    sauna: {int(m.sum())} px; piso e banco em travertino, os níveis pela linha e sombra discretas")
     return out
 
 
@@ -898,7 +919,7 @@ def main():
         ("suporte de halteres do PDF no lugar do armário de madeira", lambda o: halteres(o, pg, p2r)),
         ("dois elípticos do PDF no lugar dos halteres grandes", lambda o: elipticos(o, pg, p2r)),
         ("piscina e ofurô: água aprovada, sem degraus; visor de vidro", lambda o: piscina(o, A, p2r, chapada, tex)),
-        ("sauna: banco de Bege Bahia em dois níveis, ao longo da parede de baixo", lambda o: sauna(o, p2r, chapada, tex)),
+        ("sauna: banco de travertino em dois níveis, ao longo da parede de baixo", lambda o: sauna(o, p2r, chapada, tex)),
         ("antessala: sem a bacia; portas da sauna e da ducha", lambda o: antessala(o, pg, p2r, chapada, tex)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
