@@ -1,0 +1,1339 @@
+{
+  "_sobre": "Configuração das bases da Casa B (POE 642). Usa o mesmo gerar_bases.py da Casa A (projetos/POE642_CasaA/scripts), com --config apontando para este arquivo. Mesma folha (3370 x 2384 pt), mesmo recorte e mesmo enquadramento da Casa A.",
+  "layer_parede": "ARQ_PAREDE",
+  "cinza_parede": 0.357,
+  "cinza_parede_qualquer_layer": false,
+  "tolerancia_cor": 0.012,
+  "recorte": [
+    0.035,
+    0.095,
+    0.975,
+    0.955
+  ],
+  "largura_px": 6000,
+  "largura_visualizacao": 1800,
+  "saida_16x9": true,
+  "layers_ocultas": [],
+  "vidro": {
+    "espessura_max_pt": 4.0,
+    "comprimento_min_pt": 12.0,
+    "razao_min": 4.0,
+    "tolerancia_arco_pt": 1.5,
+    "tolerancia_raio": 0.3,
+    "largura_min_px": 6,
+    "contorno_px": 2
+  },
+  "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede.",
+  "prefixo": "POE642_CasaB",
+  "pavimentos": {
+    "Subsolo": {
+      "pagina": 0,
+      "rotacao": 0,
+      "layers_ocultas": [
+        "ARQ_TERRENO PLANEJADO"
+      ],
+      "_layers_ocultas": "Curvas de nível e linha do lote saem, como na Casa A: fundo todo branco.",
+      "legenda": {
+        "_sobre": "Casa B · Subsolo. Bege Bahia #E8E8E8: todo o malva #BFA79F do PDF (garagem, circulação até a sauna, BH de serviço e o piso do chuveiro dele). Vinílico #C8A27C: academia (prévia com o piso das suítes do 1º Pavimento da Casa A). Deck de madeira #AE8863 com réguas #8A6A4C: ducha. Travertino #DCD9CA: todo o resto (depósito, sauna, banco, BH sauna, a pedra grande de acesso à escada e a escada que desce até a ducha, com as bordas dos degraus em #8F8574).",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "depósito → travertino",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.878,
+              0.878,
+              0.878
+            ],
+            "cor_render": "#E0E0E0",
+            "bbox_vis": [
+              700,
+              190,
+              840,
+              270
+            ],
+            "para": "#DCD9CA"
+          },
+          {
+            "nome": "academia → vinílico (réguas preservadas)",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "bbox_vis": [
+              700,
+              300,
+              760,
+              360
+            ],
+            "modo": "neutros",
+            "para": "#C8A27C",
+            "cor_linha": "#A88560",
+            "proteger_layers": [
+              "ARQ_PAREDE",
+              "ARQ_LAYOUT HUMANIZAÇÃO",
+              "DOC_LINHAS E PROJEÇÕES",
+              "ARQ_LOUÇAS E METAIS",
+              "ARQ_REVESTIMENTOS",
+              "INS_INSTALAÇÕES HIDRÁULICAS",
+              "ARQ_BANCADAS"
+            ]
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BFA79F",
+            "#E8E8E8"
+          ],
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ]
+        ],
+        "retangulos": [
+          {
+            "nome": "ducha → deck de madeira",
+            "bbox_vis": [
+              275.5,
+              322.2,
+              380.2,
+              418.9
+            ],
+            "so_cores": [
+              "#E4E4E4"
+            ],
+            "para": "#AE8863",
+            "cor_linha": "#8A6A4C",
+            "_ordem": "vem antes da escada; o meio círculo que sobra na ducha vira linha marrom e some na prévia de texturas"
+          },
+          {
+            "nome": "escada que desce até a ducha → travertino",
+            "bbox_vis": [
+              226.3,
+              322.2,
+              275.5,
+              372.2
+            ],
+            "para": "#DCD9CA",
+            "linhas_layer": "ARQ_ESCADAS E RAMPAS",
+            "cor_linha": "#8F8574",
+            "sem_linhas_bbox_vis": [
+              [
+                226.8,
+                343.5,
+                231.0,
+                351.0
+              ],
+              [
+                273.6,
+                345.3,
+                277.5,
+                349.1
+              ]
+            ],
+            "_sem_linhas_bbox_vis": "A seta só aponta para baixo, da pedra grande para a ducha (os degraus vão de 6 a 1 nesse sentido): saem a ponta de seta da esquerda e o círculo da ponta da direita."
+          },
+          {
+            "nome": "pedra grande de acesso à escada → travertino",
+            "bbox_vis": [
+              75.8,
+              322.2,
+              227.2,
+              476.2
+            ],
+            "para": "#DCD9CA"
+          }
+        ]
+      },
+      "esmaecer": {
+        "_sobre": "Ficam com a cor cheia o subsolo (com o muro que sobe), a ducha, a escada que desce até ela e a pedra grande de acesso à escada. O resto do Térreo (placas, deck, a outra escada, linhas do lote) clareia.",
+        "clarear": 0.55,
+        "manter_bbox_vis": [
+          [
+            346,
+            56,
+            856,
+            418.6
+          ],
+          [
+            275,
+            322,
+            381,
+            419
+          ],
+          [
+            226,
+            322,
+            276,
+            373
+          ],
+          [
+            75.5,
+            322,
+            227.5,
+            476.5
+          ]
+        ]
+      },
+      "texturas": {
+        "_sobre": "Prévia de texturas: cada cor da legenda vira a textura do mesmo material num render aprovado da Casa A (bbox em px de um render de 2000 px).",
+        "tolerancia": 12,
+        "materiais": [
+          {
+            "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+            "cores": [
+              "#E8E8E8"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                "bbox": [
+                  [
+                    1350,
+                    582,
+                    1452,
+                    848
+                  ],
+                  [
+                    648,
+                    636,
+                    698,
+                    848
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "travertino (hall do Subsolo da Casa A)",
+            "cores": [
+              "#DCD9CA"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    582,
+                    580,
+                    686,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "banco da sauna em travertino: degrau da frente, um tom mais escuro",
+            "cores": [
+              "#CAC6AE"
+            ],
+            "bbox_vis": [
+              386.7,
+              378,
+              481.7,
+              397
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    582,
+                    580,
+                    686,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true,
+            "escurecer": 0.93
+          },
+          {
+            "nome": "banco da sauna em travertino: assento junto à parede, mais escuro",
+            "cores": [
+              "#C1BDA1"
+            ],
+            "bbox_vis": [
+              386.7,
+              397,
+              481.7,
+              412.4
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    582,
+                    580,
+                    686,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true,
+            "escurecer": 0.88
+          },
+          {
+            "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+            "cores": [
+              "#C8A27C"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                "bbox": [
+                  [
+                    858,
+                    638,
+                    972,
+                    684
+                  ],
+                  [
+                    922,
+                    719,
+                    978,
+                    826
+                  ],
+                  [
+                    1012,
+                    212,
+                    1060,
+                    268
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "deck de madeira da ducha (deck do Térreo da Casa A)",
+            "cores": [
+              "#AE8863",
+              "#8A6A4C"
+            ],
+            "bbox_vis": [
+              275.5,
+              322.2,
+              380.2,
+              418.9
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    383,
+                    308,
+                    462,
+                    575
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          }
+        ],
+        "_fonte_travertino": "Trecho do hall do Subsolo da Casa A sem a faixa de cima (y < 580), que tinha a sombra da parede e deixava uma mancha escura na pedra grande."
+      },
+      "elementos_do_render": {
+        "_sobre": "Render v2 do Subsolo (motor, 2K) levado para a base v3 com texturas, em 6905 px. Do render vêm só os objetos fotorrealistas, nas posições da base (layout do PDF). Onde o render não tem elemento para trocar, fica a base: chuveiros, a peça branca da academia, a faixa com diagonal ao lado do elevador, as paredes, os vidros, as portas, as escadas e o entorno esmaecido.",
+        "apagar": [
+          {
+            "nome": "aparelhos da academia em traço",
+            "bbox_vis": [
+              [
+                690.8,
+                244.2,
+                745.4,
+                269.7
+              ],
+              [
+                691.1,
+                275.4,
+                745.7,
+                300.9
+              ],
+              [
+                630.2,
+                249.6,
+                660.5,
+                263.7
+              ],
+              [
+                630.2,
+                286.2,
+                660.5,
+                300.0
+              ],
+              [
+                636.8,
+                324.8,
+                683.0,
+                383.0
+              ]
+            ],
+            "piso_vis": [
+              690,
+              305,
+              770,
+              395
+            ]
+          },
+          {
+            "nome": "bacia do BH de serviço em traço",
+            "bbox_vis": [
+              [
+                601.5,
+                217.3,
+                621.1,
+                231.2
+              ]
+            ],
+            "piso_vis": [
+              622,
+              203,
+              639,
+              237
+            ]
+          },
+          {
+            "nome": "bacia do BH sauna em traço",
+            "bbox_vis": [
+              [
+                580.4,
+                389.9,
+                598.4,
+                403.1
+              ]
+            ],
+            "piso_vis": [
+              545,
+              338,
+              577,
+              388
+            ]
+          }
+        ],
+        "pintar": [
+          {
+            "nome": "bancada do BH de serviço (em volta da cuba, que fica a da base)",
+            "bbox_vis": [
+              600.5,
+              177.3,
+              615.8,
+              186.6
+            ],
+            "cor": "#E9E5DE"
+          },
+          {
+            "nome": "bancada do BH de serviço (em volta da cuba, que fica a da base)",
+            "bbox_vis": [
+              600.5,
+              201.5,
+              615.8,
+              211.8
+            ],
+            "cor": "#E9E5DE"
+          },
+          {
+            "nome": "bancada do BH de serviço (em volta da cuba, que fica a da base)",
+            "bbox_vis": [
+              600.5,
+              186.6,
+              603.4,
+              201.5
+            ],
+            "cor": "#E9E5DE"
+          }
+        ],
+        "objetos": [
+          {
+            "nome": "esteiras (giradas: o console fica à esquerda, como na base)",
+            "de_vis": [
+              691.1,
+              243.0,
+              716.0,
+              301.1
+            ],
+            "mascara": "neutro",
+            "girar": 90,
+            "para_vis": [
+              [
+                692.0,
+                245.4,
+                744.2,
+                268.5
+              ],
+              [
+                692.3,
+                276.6,
+                744.5,
+                299.7
+              ]
+            ]
+          },
+          {
+            "nome": "bicicletas",
+            "de_vis": [
+              622.4,
+              254.4,
+              641.6,
+              296.4
+            ],
+            "mascara": "neutro",
+            "girar": 90,
+            "para_vis": [
+              [
+                631.4,
+                250.8,
+                659.3,
+                262.5
+              ],
+              [
+                631.4,
+                287.4,
+                659.3,
+                298.8
+              ]
+            ]
+          },
+          {
+            "nome": "banco de supino com barra",
+            "de_vis": [
+              633.8,
+              323.9,
+              683.6,
+              380.3
+            ],
+            "mascara": "neutro",
+            "para_vis": [
+              [
+                638.0,
+                326.0,
+                681.8,
+                381.8
+              ]
+            ]
+          },
+          {
+            "nome": "bacia do BH de serviço",
+            "de_vis": [
+              600.5,
+              216.5,
+              623.5,
+              231.5
+            ],
+            "mascara": "claro",
+            "para_vis": [
+              [
+                602.3,
+                218.1,
+                620.3,
+                230.4
+              ]
+            ]
+          },
+          {
+            "nome": "bacia do BH sauna",
+            "de_vis": [
+              570.5,
+              388.0,
+              597.3,
+              404.0
+            ],
+            "mascara": "claro",
+            "para_vis": [
+              [
+                581.0,
+                390.5,
+                597.8,
+                402.5
+              ]
+            ]
+          },
+          {
+            "nome": "bancada com cuba do BH sauna",
+            "de_vis": [
+              579.8,
+              327.3,
+              597.6,
+              360.8
+            ],
+            "para_vis": [
+              [
+                579.8,
+                327.3,
+                597.6,
+                360.8
+              ]
+            ]
+          }
+        ],
+        "copiar": [
+          {
+            "nome": "cabine do elevador",
+            "bbox_vis": [
+              794,
+              303,
+              849,
+              351
+            ]
+          }
+        ],
+        "_cuba_bh_servico": "A cuba do BH de serviço fica a da base; o acabamento_finais.py desenha por cima uma cuba branca com torneira cromada."
+      },
+      "acabamentos": {
+        "_nota": "Rodar depois do elementos_do_render.py. Troca os símbolos do PDF que ficaram na imagem final por objetos vistos de cima.",
+        "clonar": [
+          {
+            "nome": "símbolo do chuveiro do BH de serviço (braço e quadrado)",
+            "bbox_vis": [
+              663.2,
+              219.8,
+              679.75,
+              228.2
+            ],
+            "desloc_vis": [
+              -16,
+              0
+            ]
+          },
+          {
+            "nome": "símbolo do chuveiro do BH sauna (registro em cruz, braço e quadrado)",
+            "bbox_vis": [
+              486.85,
+              388.6,
+              503.0,
+              404.2
+            ],
+            "desloc_vis": [
+              20,
+              0
+            ]
+          },
+          {
+            "nome": "peça branca comprida da academia (erro do PDF), completada com o vinílico",
+            "bbox_vis": [
+              613.0,
+              396.0,
+              689.1,
+              414.5
+            ],
+            "desloc_vis": [
+              78,
+              0
+            ],
+            "lum_fonte_min": 60,
+            "_nota": "Deslocamento na horizontal: as réguas do vinílico correm em x, então as fiadas continuam alinhadas.",
+            "borda_px": 3.0,
+            "ganho": 1.0
+          },
+          {
+            "nome": "marquinhas brancas do PDF no vinílico, no canto do armário",
+            "bbox_vis": [
+              773.27,
+              347.35,
+              774.75,
+              351.25
+            ],
+            "desloc_vis": [
+              -6,
+              0
+            ],
+            "lum_fonte_min": 60
+          },
+          {
+            "nome": "soleira da porta do BH sauna, no travertino do piso",
+            "bbox_vis": [
+              529.95,
+              331.55,
+              536.1,
+              356.45
+            ],
+            "desloc_vis": [
+              34,
+              0
+            ],
+            "corrigir_tom": false,
+            "so_onde_alvo_branco": true,
+            "borda_px": 0,
+            "_nota": "Só o branco entre os batentes; os traços das bordas e os batentes ficam."
+          },
+          {
+            "nome": "linha preta na frente da bancada do BH sauna",
+            "bbox_vis": [
+              579.5,
+              334.85,
+              579.8,
+              362.6
+            ],
+            "desloc_vis": [
+              -1.0,
+              0
+            ],
+            "corrigir_tom": false,
+            "borda_px": 0,
+            "_nota": "Contorno da bancada da base, de 1 px, que sobrava ao lado da bancada do render e subia em direção à porta."
+          },
+          {
+            "nome": "rebaixo da bancada do BH sauna, igual ao tampo e sem os traços",
+            "bbox_vis": [
+              585.75,
+              360.83,
+              597.45,
+              380.75
+            ],
+            "fonte_vis": [
+              585.75,
+              329.0,
+              597.45,
+              339.0
+            ],
+            "lum_fonte_min": 0,
+            "borda_px": 0,
+            "_nota": "Retângulo inteiro (branco, linha dupla vertical, linha de baixo e a linha entre tampo e rebaixo) com a textura do tampo, nas mesmas colunas, repetida em espelho."
+          },
+          {
+            "nome": "resto da linha de baixo da bancada do BH sauna, no piso",
+            "bbox_vis": [
+              579.4,
+              360.83,
+              585.75,
+              362.7
+            ],
+            "desloc_vis": [
+              0,
+              3
+            ],
+            "corrigir_tom": false,
+            "borda_px": 0,
+            "_nota": "Trecho da linha (com o tracinho do canto) entre a frente da bancada e o rebaixo; os veios verticais continuam com o deslocamento vertical."
+          },
+          {
+            "nome": "soleira do elevador, no tom da soleira da sauna",
+            "bbox_vis": [
+              811.8,
+              349.2,
+              834.3,
+              355.85
+            ],
+            "fonte_vis": [
+              482.2,
+              334.0,
+              486.0,
+              354.0
+            ],
+            "girar_fonte": 90,
+            "so_onde_alvo_branco": true,
+            "lum_fonte_min": 0,
+            "borda_px": 0,
+            "_nota": "A soleira da porta da sauna (vertical) girada para a horizontal e repetida em espelho; só o branco muda, os traços das bordas ficam."
+          }
+        ],
+        "preencher_colunas": [
+          {
+            "nome": "piso em volta da bacia do BH sauna",
+            "bbox_vis": [
+              580.4,
+              389.93,
+              597.2,
+              403.13
+            ],
+            "grao_desloc_vis": [
+              -17,
+              0
+            ],
+            "grao": 0.6,
+            "preservar_branco": {
+              "lum_min": 232,
+              "fechar_px": 3,
+              "dilatar_px": 2
+            },
+            "_nota": "O recorte da bacia trouxe o piso do render, mais frio e liso (px 2387-2442 x 1300-1343). Cada coluna liga o travertino de cima ao de baixo; fica só a louça."
+          }
+        ],
+        "parede": [
+          {
+            "nome": "parede da sauna sob o registro em cruz",
+            "bbox_vis": [
+              481.0,
+              388.6,
+              487.0,
+              404.2
+            ],
+            "linha_limpa_vis": 408.0
+          },
+          {
+            "nome": "face da parede ao lado da bacia do BH sauna",
+            "bbox_vis": [
+              597.2,
+              389.5,
+              599.0,
+              403.4
+            ],
+            "linha_limpa_vis": 406.0
+          }
+        ],
+        "arestas_banco": [
+          {
+            "nome": "degrau do banco da sauna",
+            "x_vis": [
+              386.5,
+              483.2
+            ],
+            "faixa_vis": [
+              395.3,
+              398.4
+            ],
+            "aresta_vis": 397.15,
+            "desloc_vis": 3.0,
+            "cor": "#7B796C",
+            "_nota": "A linha dupla do PDF parecia um cano indo até o registro do chuveiro; fica uma aresta de 1 px, como a da frente do banco (y 380)."
+          }
+        ],
+        "pintar": [
+          {
+            "nome": "bancada do BH de serviço em volta da cuba",
+            "bbox_vis": [
+              602.6,
+              186.0,
+              615.4,
+              202.0
+            ],
+            "cor": "#E9E5DE",
+            "so_onde_clara": 235,
+            "_nota": "Mesmo quartzo claro do 'pintar' do elementos_do_render, que deixou de fora o retângulo da cuba."
+          }
+        ],
+        "cubas": [
+          {
+            "nome": "cuba do BH de serviço",
+            "aro_vis": [
+              604.55,
+              187.3,
+              617.8,
+              200.95
+            ],
+            "raio_aro_vis": 1.6,
+            "bacia_vis": [
+              607.9,
+              188.75,
+              616.55,
+              199.5
+            ],
+            "raio_bacia_vis": 2.6,
+            "valvula_vis": [
+              612.0,
+              194.12
+            ],
+            "torneira": {
+              "base_vis": [
+                606.05,
+                194.12
+              ],
+              "bica_ate_x_vis": 609.7,
+              "alavanca_ate_x_vis": 604.95
+            }
+          }
+        ],
+        "armarios": [
+          {
+            "nome": "armário ao lado do elevador",
+            "bbox_vis": [
+              774.9,
+              287.15,
+              794.3,
+              351.25
+            ],
+            "cor": "#CEB8A4",
+            "contorno": "#846E5A",
+            "faces_livres": [
+              "esquerda"
+            ],
+            "_nota": "No PDF é o retângulo branco com diagonal tracejada. Cor e contorno dos closets da Casa A (1º Pavimento); a frente dá para a academia."
+          }
+        ],
+        "chuveiros": [
+          {
+            "nome": "BH de serviço",
+            "parede_x_vis": 679.8,
+            "y_vis": 224.0,
+            "sentido": "esquerda",
+            "cabeca_x_vis": 667.4,
+            "diametro_vis": 6.44,
+            "registro_dy_vis": 6.5
+          },
+          {
+            "nome": "BH sauna",
+            "parede_x_vis": 486.8,
+            "y_vis": 396.5,
+            "sentido": "direita",
+            "cabeca_x_vis": 498.9,
+            "diametro_vis": 6.44,
+            "registro_dy_vis": 7.0
+          }
+        ]
+      }
+    },
+    "Terreo": {
+      "pagina": 0,
+      "rotacao": 0,
+      "layers_ocultas": [
+        "ARQ_TERRENO PLANEJADO"
+      ],
+      "_layers_ocultas": "Curvas de nível saem, como no Subsolo.",
+      "legenda": {
+        "_sobre": "Casa B · Térreo. Travertino #DCD9CA: todo o oliva #BAB596 do PDF (áreas sociais, varanda, banhos, halls, jardim de inverno, faixa externa e pedras de acesso), as escadas #DDDACB, a borda das piscinas, a pedra grande e as pedras escalonadas. Granito Marrom Tabaco #5A4232: todo o malva #BFA79F, como na Casa A (cozinha, faixa da bancada gourmet, louceiro, despensa, serviço, área de serviço descoberta e bloco do motorista). Vinílico #C8A27C: o laranja #CC9966 (suítes, sala íntima, closet master e circulação íntima), o mesmo da Casa A. Deck de madeira #AE8863 com réguas #8A6A4C: os três decks listrados. Pedra portuguesa caramelo #B98A55: garagem e acesso de carros, sem os hexágonos. Piscina #DFF6FE. Gramado #6E9150: o entorno do lote e o jardim de 4,62 m². Pilares #FF7FC0 viram parede. Floreira #4F7A3A: o jardim de inverno (plantas tropicais). Banco em L do deck grande em bronze #7A5A3C. Borda infinita: a faixa entre o deck e o braço de cima da piscina é a mesma água da piscina, sem calha.",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "garagem e acesso de carros → pedra portuguesa caramelo (sem os hexágonos)",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              1018,
+              695,
+              1760,
+              1000
+            ],
+            "para": "#B98A55",
+            "cor_linha": "#B98A55",
+            "proteger_layers": [
+              "ARQ_LAYOUT HUMANIZAÇÃO",
+              "ARQ_PAREDE",
+              "EST_PILAR",
+              "ARQ_ELEMENTOS FIXOS"
+            ]
+          },
+          {
+            "nome": "deck sobre a ducha → madeira",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              320,
+              365,
+              336,
+              377
+            ],
+            "para": "#AE8863",
+            "cor_linha": "#8A6A4C"
+          },
+          {
+            "nome": "deck à esquerda da piscina → madeira",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              260,
+              497,
+              276,
+              511
+            ],
+            "para": "#AE8863",
+            "cor_linha": "#8A6A4C"
+          },
+          {
+            "nome": "deck de baixo (43,95 m²) → madeira",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              318,
+              824,
+              333,
+              838
+            ],
+            "para": "#AE8863",
+            "cor_linha": "#8A6A4C"
+          },
+          {
+            "nome": "borda das piscinas, pedra grande e pedras escalonadas → travertino",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "para": "#DCD9CA"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ],
+          [
+            "#BFA79F",
+            "#5A4232"
+          ],
+          [
+            "#CC9966",
+            "#C8A27C"
+          ],
+          [
+            "#7FDFFF",
+            "#DFF6FE"
+          ],
+          [
+            "#FF7FC0",
+            "#111111"
+          ]
+        ],
+        "retangulos": [
+          {
+            "nome": "borda infinita do braço de cima da piscina, junto ao deck → água até a borda",
+            "bbox_vis": [
+              267.8,
+              490.2,
+              277.0,
+              589.9
+            ],
+            "so_branco": true,
+            "para": "#DFF6FE",
+            "_nota": "Definido pelo usuário: o braço de cima da piscina tem borda infinita junto ao deck (a faixa branca de 30 cm do PDF, sem borda cinza). Não há transbordo nem calha: a faixa é a mesma água da piscina até a linha do deck."
+          },
+          {
+            "nome": "jardim de 4,62 m² junto à entrada da garagem → grama",
+            "bbox_vis": [
+              1131.5,
+              645.5,
+              1233.5,
+              689.5
+            ],
+            "so_branco": true,
+            "para": "#6E9150"
+          },
+          {
+            "nome": "jardim de inverno → floreira com plantas tropicais",
+            "bbox_vis": [
+              964.6,
+              401.0,
+              1072.2,
+              503.0
+            ],
+            "so_cores": [
+              "#DCD9CA"
+            ],
+            "para": "#4F7A3A",
+            "_nota": "Definido pelo usuário: jardim com floreira. Só o travertino entre as paredes e o vidro muda; o X tracejado da abertura fica."
+          },
+          {
+            "nome": "banco em L do deck grande, perna vertical → bronze",
+            "bbox_vis": [
+              198.0,
+              745.4,
+              220.8,
+              919.8
+            ],
+            "so_branco": true,
+            "para": "#7A5A3C"
+          },
+          {
+            "nome": "banco em L do deck grande, perna de baixo → bronze",
+            "bbox_vis": [
+              198.0,
+              897.0,
+              346.4,
+              919.8
+            ],
+            "so_branco": true,
+            "para": "#7A5A3C",
+            "_nota": "Definido pelo usuário: a peça branca em L é um banco em tom bronze. Fica a borda dupla desenhada."
+          }
+        ],
+        "gramados": [
+          {
+            "nome": "entorno do lote → grama",
+            "bbox_vis": [
+              26,
+              55,
+              1757,
+              1013
+            ],
+            "para": "#6E9150"
+          }
+        ],
+        "_escadas": "As escadas #DDDACB ficam como estão: a 1 ponto do travertino #DCD9CA, a prévia de texturas já as lê como travertino. Uma troca #DDDACB→#DCD9CA com a tolerância 10 pegava também os vidros #D6D6D3.",
+        "_granito": "Definido pelo usuário em 14/10/26: no Térreo, as áreas delimitadas em malva são de granito marrom, como na Casa A. No Subsolo, o malva continua Bege Bahia."
+      },
+      "texturas": {
+        "_sobre": "Prévia de texturas do Térreo: cada cor da legenda vira a textura do mesmo material num render aprovado da Casa A (bbox em px de um render de 2000 px). Sem esmaecer, vale a planta inteira.",
+        "tolerancia": 4,
+        "_tolerancia": "4, e não 12 como no Subsolo: as cores da legenda são exatas, e com 12 o vidro #D6D6D3 entraria no travertino #DCD9CA. As escadas #DDDACB entram no travertino.",
+        "materiais": [
+          {
+            "nome": "granito Marrom Tabaco (piso da cozinha do Térreo da Casa A)",
+            "cores": [
+              "#5A4232"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    997,
+                    603,
+                    1124,
+                    633
+                  ],
+                  [
+                    998,
+                    690,
+                    1108,
+                    718
+                  ]
+                ]
+              }
+            ],
+            "_fonte": "Só o piso: o trecho de baixo parava em y 732 e pegava o topo dos armários (faixa clara perto da ilha)."
+          },
+          {
+            "nome": "travertino (hall do Subsolo da Casa A)",
+            "cores": [
+              "#DCD9CA"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+                "bbox": [
+                  [
+                    582,
+                    580,
+                    686,
+                    775
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+            "cores": [
+              "#C8A27C"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                "bbox": [
+                  [
+                    858,
+                    638,
+                    972,
+                    684
+                  ],
+                  [
+                    922,
+                    719,
+                    978,
+                    826
+                  ],
+                  [
+                    1012,
+                    212,
+                    1060,
+                    268
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "deck de madeira (deck do Térreo da Casa A), os três decks",
+            "cores": [
+              "#AE8863",
+              "#8A6A4C"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    383,
+                    308,
+                    462,
+                    575
+                  ]
+                ]
+              }
+            ],
+            "so_espelho_vertical": true
+          },
+          {
+            "nome": "pedra portuguesa caramelo (acesso de veículos do Térreo da Casa A)",
+            "cores": [
+              "#B98A55"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    1210,
+                    870,
+                    1640,
+                    1000
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "gramado (Térreo da Casa A)",
+            "cores": [
+              "#6E9150"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    1530,
+                    460,
+                    1700,
+                    690
+                  ]
+                ]
+              }
+            ]
+          },
+          {
+            "nome": "piscina (água sobre pastilha, Térreo da Casa A)",
+            "cores": [
+              "#DFF6FE"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    582,
+                    285,
+                    678,
+                    440
+                  ]
+                ]
+              }
+            ],
+            "_fonte": "Só a água, sem as bordas: de x 684 em diante a amostra escurece (borda e sombra da parede) e deixava uma faixa escura na piscina."
+          },
+          {
+            "nome": "floreira do jardim de inverno (touceiras tropicais do Térreo da Casa A)",
+            "cores": [
+              "#4F7A3A"
+            ],
+            "fontes": [
+              {
+                "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+                "bbox": [
+                  [
+                    120,
+                    95,
+                    290,
+                    230
+                  ],
+                  [
+                    1428,
+                    500,
+                    1515,
+                    710
+                  ]
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "entrega": {
+    "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
+    "_confirmado": "Endereço (Lotes 17, Unidade B), unidade e norte (o mesmo da Casa A) confirmados pelo usuário em 14/10/26.",
+    "casa": "CASA B",
+    "prefixo": "POE642_CasaB",
+    "pasta_bases": "bases",
+    "pasta_entrega": "entrega",
+    "largura_prancha": 3840,
+    "pavimentos": {
+      "Terreo": {
+        "titulo": "TÉRREO",
+        "linha_area": 0,
+        "base": "POE642_CasaB_BASE_Terreo_v3_texturas_16x9.png"
+      },
+      "Subsolo": {
+        "titulo": "SUBSOLO",
+        "linha_area": 1,
+        "base": "POE642_CasaB_BASE_Subsolo_v3_texturas_16x9.png"
+      }
+    },
+    "areas": [
+      [
+        "TÉRREO",
+        "638,70 m²"
+      ],
+      [
+        "SUBSOLO",
+        "79,05 m²"
+      ],
+      [
+        "TOTAL",
+        "717,75 m²"
+      ]
+    ],
+    "projeto": [
+      [
+        "CLIENTE",
+        "PAULO OCTÁVIO"
+      ],
+      [
+        "ENDEREÇO",
+        "ML 10 – CONJUNTO 02, LOTES 17, UNIDADE B"
+      ],
+      [
+        "PROJETO",
+        "CASA B · UNIDADE AUTÔNOMA \"B\""
+      ],
+      [
+        "DATA INICIAL",
+        "14/10/26"
+      ]
+    ],
+    "pdf": {
+      "nome": "POE642_CasaB_Plantas_Humanizadas.pdf",
+      "ordem": [
+        "Subsolo",
+        "Terreo"
+      ],
+      "titulo": "Casa B – Plantas Humanizadas (Subsolo e Térreo)",
+      "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade B",
+      "palavras": "planta humanizada, layout, Casa B"
+    }
+  }
+}
