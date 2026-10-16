@@ -371,6 +371,17 @@ Refaz a água da piscina e do spa da Casa D a partir do render retocado (pedido 
 python3 POE642_CasaA/scripts/piscina_dreno_casad.py      # -> POE642_CasaD/renders/..._Terreo_v1_retocado_barlavento_v4.png
 ```
 
+## Pavimento de baixo esmaecido em volta: `entorno_esmaecido.py`
+
+Para um pavimento superior cujo PDF não traz o térreo (Casa E · 1º Pavimento): leva o render aprovado do pavimento de baixo ao quadro 16:9 comum (o `no_quadro_comum` das pranchas), clareia (`--clarear`, padrão 0,5) e tira saturação (`--saturacao`, padrão 0,6), e põe por cima a pegada do pavimento de cima em cor cheia (o que não é branco, fechado e com os furos preenchidos). `--fora` devolve ao contexto uma área branca de fora presa na pegada (px de uma prévia de 2000 px). As linhas tracejadas do lote continuam por cima.
+
+```bash
+python3 entorno_esmaecido.py ../../POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png \
+    ../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado.png \
+    ../../POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png \
+    ../../POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v4_entorno_16x9.png --fora 820 748 1096 816
+```
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:

@@ -518,6 +518,12 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 - **Base v2** (legenda): `bases/POE642_CasaE_BASE_1Pavimento_v2(_16x9)` e a prévia. Os banhos são retângulos `so_branco` com as louças, bancadas, plantas e o layout protegidos e a hachura do contrapiso apagada (como os banhos da Casa D); a cuba da copinha fica branca. O pontilhado rosado da hachura dos banhos (não é cinza) some no quartzito com a opção nova `apagar_hachura_quente` do `gerar_bases.py`.
 - **Base v3 (texturas):** `bases/POE642_CasaE_BASE_1Pavimento_v3_texturas(_16x9)` e a prévia. Vinílico das suítes do 1º Pavimento da Casa A, Bege Bahia das varandas da Casa A, travertino do hall do Subsolo da Casa A (escada), marcenaria areia do Térreo retocado da Casa D (armários) e o quartzito Aura gerado por código (`fontes_procedurais.quartzito_aura`, saída `bases/fontes/quartzito_aura.png`: placas de 90 cm, pêssego claro #EAD4BF com nuvens suaves, veios finos e fluidos claros e alguns dourados, juntas finas).
 - **Prompt v1:** `POE642_CasaE_PH_1Pavimento_v1.md` (entrada: `bases/POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png`). A casa vai de ~30% a ~69% da largura e de ~20% a ~74% da altura; as linhas tracejadas do lote ficam a ~7% e ~92,5% da largura e a ~95% da altura. Fundo branco (sem entorno do Térreo, como na base). Ambientes descritos por posição, porque o texto do PDF sai da base.
+- **Entorno (pedido do usuário, 16/10/26):** vegetação no entorno da residência, com o Térreo esmaecido em volta, como no 1º Pavimento da Casa A (opção escolhida entre: Térreo esmaecido, Térreo em cor cheia ou só grama).
+  - **Base v4:** `bases/POE642_CasaE_BASE_1Pavimento_v4_entorno_16x9.png` e a prévia. É a v3 com texturas, mais o render aprovado do Térreo (`renders/POE642_CasaE_PH_Terreo_v1_retocado.png`, com o Barlavento) em volta da pegada do 1º Pavimento.
+    - O Térreo vai ao quadro comum (106 pontos, erro mediano 1,28 px na largura da base), 50% mais claro e 40% menos saturado.
+    - A área branca abaixo da sala íntima, fora da casa, também mostra o contexto.
+    - Script novo: `scripts/entorno_esmaecido.py`.
+  - **Prompt v2:** `POE642_CasaE_PH_1Pavimento_v2.md` (entrada: a base v4). O fundo branco virou o Térreo esmaecido, mantido exatamente como está; a vegetação fica só nele; em cor cheia, só o 1º Pavimento.
 
 ## Casas A a D · Barlavento nas piscinas
 
