@@ -635,6 +635,9 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   8. **Piscina e ofurô:** o motor fez degraus e bancos dentro dos tanques (o PDF não tem), a água num turquesa forte e, embaixo, a borda da piscina diferente do PDF; o vidro entre a piscina de baixo e o ofurô virou parede branca.
      - A água dos três tanques, tirada da base chapada (sem as bordas brancas), vira a água aprovada nas piscinas: Barlavento (`piscinas_barlavento`), com a pedra das peças sob a água verde-azulada clara, a grade ondulada, o brilho na diagonal e a sombra curta junto às bordas. Fica sem degraus e sem as cáusticas do render, que eram os degraus.
      - O visor de vidro entre os tanques e a academia volta inteiro, como na base: vidro fino com os caixilhos.
+  9. **Sauna:** o motor fez um banco em L de ripas de madeira, subindo pela parede da esquerda. O banco do PDF é de Bege Bahia, em dois níveis, só ao longo da parede de baixo (ARQ_ELEMENTOS FIXOS), como na Casa D.
+     - A sauna vem inteira da base (`pela_base`): o travertino do piso e o banco nos dois tons de Bege Bahia, que é a legenda aprovada, no tom do travertino do render (ganho por canal) e sem os contornos da base.
+     - Os dois níveis se leem pela sombra curta de cada borda no nível de baixo e por um brilho leve na quina.
 
 ## Casas A a D · Barlavento nas piscinas
 

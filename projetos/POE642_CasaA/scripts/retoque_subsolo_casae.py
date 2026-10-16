@@ -722,6 +722,77 @@ def piscina(out, A, p2r, chapada, tex):
     return out
 
 
+TRAV = {"render": (191, 208, 224), "base": (203, 216, 228)}   # BGR: o travertino limpo do render e o da base
+
+
+def pela_base(out, mascara, tex, ganho, buracos=None):
+    """Os px da máscara viram a base v3 (texturas e peças da legenda) na cor do render (ganho por canal),
+    com os traços finos da base (contornos) preenchidos pelo piso em volta e a borda suavizada."""
+    lum = tex.astype(np.float32).mean(axis=2)
+    viz = cv2.GaussianBlur(lum, (0, 0), 1.5)
+    tracos = mascara & (lum < 0.9 * viz)
+    if buracos is not None:
+        tracos |= buracos
+    if tracos.any():
+        tex = cv2.inpaint(tex, cv2.dilate((tracos & mascara).astype(np.uint8), np.ones((2, 2), np.uint8)), 2,
+                          cv2.INPAINT_TELEA)
+    novo = tex.astype(np.float32) * np.asarray(ganho, np.float32)
+    m = mascara.astype(np.float32)
+    m = np.maximum(cv2.GaussianBlur(m, (0, 0), 0.6), m) * cv2.dilate(mascara.astype(np.uint8), np.ones((3, 3), np.uint8))
+    out[:] = np.clip(out * (1 - m[..., None]) + novo * m[..., None], 0, 255).astype(np.uint8)
+    return out
+
+
+def ambiente(out, p2r, chapada, rets):
+    """Máscara dos px de um ambiente (retângulos do PDF), sem as paredes grossas da base."""
+    parede = cv2.morphologyEx((chapada.max(axis=2) < 60).astype(np.uint8), cv2.MORPH_OPEN,
+                              np.ones((3, 3), np.uint8)).astype(bool)
+    m = np.zeros(parede.shape, bool)
+    for r in rets:
+        x0, y0, x1, y1 = caixa_pdf(p2r, *r)
+        m[y0:y1, x0:x1] = True
+    return m & ~parede, parede
+
+
+def limpar_paredes(out, p2r, parede, r):
+    """O que o render pôs sobre as paredes em volta (restos de peças, sombras claras): volta ao preto."""
+    x0, y0, x1, y1 = caixa_pdf(p2r, *r, folga=4)
+    reg = out[y0:y1, x0:x1]
+    lum = reg.astype(np.float32).mean(axis=2)
+    pw = parede[y0:y1, x0:x1]
+    resto = pw & (lum > 90) & cv2.erode(pw.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    if resto.any():
+        reg[resto] = np.median(reg[pw & (lum < 40)], axis=0).astype(np.uint8)
+    return out
+
+
+# item 9: sauna. O motor fez um banco em L de ripas de madeira (subindo pela parede da esquerda); o banco
+# do PDF é de Bege Bahia, em dois níveis, só ao longo da parede de baixo (ARQ_ELEMENTOS FIXOS), como na
+# Casa D. A sauna vem inteira da base (o travertino do piso e o banco nos dois tons de Bege Bahia, que é a
+# legenda aprovada), na cor do travertino do render; os dois níveis se leem pela sombra curta de cada
+# borda no nível de baixo e um brilho leve na quina.
+SAUNA = {"interior": (888.9, 955.0, 1000.6, 1090.3),
+         "niveis": [(888.9, 1021.3, 999.8, 1055.5), (888.9, 1055.5, 999.8, 1089.8)],   # degrau e assento
+         "sombra": 0.16, "brilho": 0.05}
+
+
+def sauna(out, p2r, chapada, tex):
+    q = SAUNA
+    m, parede = ambiente(out, p2r, chapada, [q["interior"]])
+    ganho = np.asarray(TRAV["render"], np.float32) / np.asarray(TRAV["base"], np.float32)
+    out = pela_base(out, m, tex, ganho)
+    # quinas dos níveis: sombra curta abaixo de cada borda de cima (no nível de baixo) e brilho na quina
+    tl = Tela(out, p2r, q["interior"], folga=2)
+    for (x0, y0, x1, y1) in q["niveis"]:
+        faixa = tl.ret((x0, y0, x1, y0 + 1.6))
+        tl.reg *= (1 - q["sombra"] * tl.reduzir(faixa))[..., None]
+        tl.pintar(tl.ret((x0, y0 - 0.9, x1, y0)), (255, 255, 255), q["brilho"])
+    out = tl.gravar()
+    out = limpar_paredes(out, p2r, parede, q["interior"])
+    print(f"    sauna da base: {int(m.sum())} px (piso de travertino e banco de Bege Bahia em dois níveis)")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -802,6 +873,7 @@ def main():
         ("suporte de halteres do PDF no lugar do armário de madeira", lambda o: halteres(o, pg, p2r)),
         ("dois elípticos do PDF no lugar dos halteres grandes", lambda o: elipticos(o, pg, p2r)),
         ("piscina e ofurô: água aprovada, sem degraus; visor de vidro", lambda o: piscina(o, A, p2r, chapada, tex)),
+        ("sauna: banco de Bege Bahia em dois níveis, ao longo da parede de baixo", lambda o: sauna(o, p2r, chapada, tex)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
         if n <= args.ate:
