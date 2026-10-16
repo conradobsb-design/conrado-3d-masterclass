@@ -391,6 +391,7 @@ Retoques sem IA no render v1 (fundo branco), no quadro do render; as posições 
 - **Copinha (item 4):** `bancada_copinha` troca a areia da bancada (retângulo da ARQ_BANCADAS, pela cadeia do PDF) pelo Bege Bahia tecido da varanda do próprio render, somando a diferença de cor na luz da bancada (perfil por linha; as bordas com a parede e a linha da frente pela luminância); `cuba_redonda` desenha a cuba da Casa A no círculo do PDF, com a torneira no cromo das cubas do Térreo.
 - **Vazios (item 5):** `vazios` desenha cada traço do X tracejado do PDF (DOC_LINHAS E PROJEÇÕES) pela cadeia do PDF, em 8x, no cinza claro #BDBDBD, só sobre o cinza do vazio.
 - **Arcos das portas (item 6):** `arcos_portas` desenha as curvas da ARQ_PAREDE do PDF (como o `arcos_granito` do Térreo, sem apagar nada: o motor não pôs arco nenhum) e a folha da porta pivotante do hall sobre o vazio; `pintar_traco` usa o cinza fino (160, 161, 160) no piso e o #BDBDBD do X sobre o vazio, sem mexer nas paredes.
+- **Cortinas (item 7):** `cortinas` junta os arcos da ARQ_LOUÇAS E METAIS em traço de 0,85 (as ondas do PDF) em trechos e desenha cada trecho pela cadeia do PDF, em 8x, no linho off-white (210, 221, 230 BGR), traço de 0,85 px, com a sombra curta (`sombra`). Os vasos das varandas (item 8) ficam, a pedido do usuário.
 
 ```bash
 python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \

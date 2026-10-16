@@ -29,6 +29,10 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
 6. Arcos das portas: o motor desenhou as folhas, mas nenhum arco. Entram os 12 arcos do PDF (curvas da
    ARQ_PAREDE) no padrão aprovado no Térreo (cinza (160, 161, 160), traço de 0,45 px); sobre o vazio do
    hall, no cinza claro do X, com a folha da porta pivotante P1 do Térreo, que também faltava.
+7. Cortinas (pedido do usuário): as linhas onduladas do PDF ao longo das janelas das suítes (10 trechos,
+   160 arcos) entram nas posições exatas como cortina de linho off-white, em traço fino, com a sombra
+   curta aprovada.
+8. (Sem retoque, pedido do usuário.) Os três vasos de planta que o motor pôs nas varandas ficam.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -374,6 +378,57 @@ def arcos_portas(out, pg, p2r):
     return out
 
 
+# item 7: cortinas (pedido do usuário). O PDF tem as linhas onduladas ao longo das janelas das suítes
+# (10 trechos, 160 arcos da ARQ_LOUÇAS E METAIS em traço de 0,85); o motor não desenhou. Entram as
+# ondas exatas do PDF como cortina de linho off-white (a dos prompts da Casa A: "leves, finas e rentes
+# ao vidro"), num traço fino, com a sombra curta aprovada; as paredes (escuras) não mudam
+CORTINAS = {"camada": "ARQ_LOUÇAS E METAIS", "traco_pdf": 0.85, "cor": (210, 221, 230), "larg": 0.85,
+            "sombra": {"desloc": (-0.8, 1.0), "sigma": 0.7, "forca": 0.3}, "parede": 45}
+
+
+def cortinas(out, pg, p2r):
+    q = CORTINAS
+    arcos = [d for d in pg.get_drawings() if d.get("layer") == q["camada"] and d.get("color") == (0.0, 0.0, 0.0)
+             and abs((d.get("width") or 0) - q["traco_pdf"]) < 0.01]
+    # trechos: arcos que se tocam
+    trechos = []
+    for d in arcos:
+        b = pymupdf.Rect(d["rect"]) + (-1.5, -1.5, 1.5, 1.5)
+        for t in trechos:
+            if any(b.intersects(e["rect"]) for e in t):
+                t.append(d)
+                break
+        else:
+            trechos.append([d])
+    for t in trechos:
+        pts = []
+        for d in t:
+            for it in d["items"]:
+                if it[0] == "c":
+                    pp = np.array([p2r(v.x, v.y) for v in it[1:5]])
+                    tt = np.linspace(0, 1, 24)[:, None]
+                    pts.append((1 - tt) ** 3 * pp[0] + 3 * (1 - tt) ** 2 * tt * pp[1] + 3 * (1 - tt) * tt ** 2 * pp[2]
+                               + tt ** 3 * pp[3])
+                elif it[0] == "l":
+                    pts.append(np.array([p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)]))
+        todos = np.vstack(pts)
+        x0, y0 = np.floor(todos.min(axis=0)).astype(int) - 4
+        x1, y1 = np.ceil(todos.max(axis=0)).astype(int) + 5
+        h, w = y1 - y0, x1 - x0
+        f = np.zeros((h * SS, w * SS), np.uint8)
+        for c in pts:
+            cv2.polylines(f, [np.round((c - [x0, y0]) * SS).astype(np.int32)], False, 255,
+                          max(1, int(round(q["larg"] * SS))), cv2.LINE_AA)
+        a = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+        a *= out[y0:y1, x0:x1].astype(np.float32).mean(axis=2) > q["parede"]
+        s = q["sombra"]
+        out = sombra(out, a, (x0, y0, x1, y1), s["desloc"], s["sigma"], s["forca"])
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None], 0, 255).astype(np.uint8)
+    print(f"    {len(trechos)} trechos de cortina ({len(arcos)} arcos do PDF)")
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("render", type=Path)
@@ -395,6 +450,8 @@ def main():
     out = vazios(out, A, pg, p2r, r2p)
     print("[6] arcos das portas em cinza fino")
     out = arcos_portas(out, pg, p2r)
+    print("[7] cortinas nas janelas das suítes")
+    out = cortinas(out, pg, p2r)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
