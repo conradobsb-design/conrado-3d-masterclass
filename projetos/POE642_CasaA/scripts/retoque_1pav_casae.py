@@ -16,17 +16,22 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
    METAIS); o motor pôs uma ducha de parede com braço e um registro no piso. Os dois saem (quartzito
    tecido do próprio banho, na luz do piso em volta) e entram as duas placas de teto de 30 cm da Casa
    A aprovada, nos centros do PDF, com sombra curta.
+3. (Sem retoque.) Banhos das duas suítes da esquerda: as bacias parecem uma peça só atravessando a
+   parede, mas o PDF desenha assim mesmo: duas bacias suspensas, costas com costas na parede entre os
+   banhos. O render ficou fiel.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
       --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_1Pavimento_v1_retocado
 """
 import argparse
+import json
 import sys
 from pathlib import Path
 
 import cv2
 import numpy as np
+import pymupdf
 
 AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
@@ -38,6 +43,10 @@ from retoque_subsolo_casad import apagar_largo  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png"
 TERREO = RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado.png"
+BASE_CHAPADA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v2_16x9.png"   # cores exatas da legenda
+BASE_SEM_TELA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v2.png"          # antes da tela 16:9
+PDF = RAIZ / "_pdfs_cliente/642 - 1º PAVIMENTO - CASA E.pdf"
+CONFIG = RAIZ / "POE642_CasaE/config_bases.json"
 VIS, BASE_LARG, TELA_LARG, TELA_ALT = 1800, 6001, 6905, 3884   # prévia de 1800 px, base e tela 16:9
 
 
@@ -59,6 +68,35 @@ def vis2r(A, forma, x, y):
     bx = (x * BASE_LARG / VIS + (TELA_LARG - BASE_LARG) // 2) * forma[1] / TELA_LARG
     by = (y * BASE_LARG / VIS) * forma[0] / TELA_ALT
     return A[0, 0] * bx + A[0, 1] * by + A[0, 2], A[1, 0] * bx + A[1, 1] * by + A[1, 2]
+
+
+def pdf_cadeia(A, forma_render):
+    """Página do PDF e as conversões PDF -> render e render -> PDF pela mesma cadeia da base (recorte,
+    largura da base, tela 16:9, redução ao tamanho do render e o afim A), como no Térreo."""
+    cfg = json.loads(CONFIG.read_text())
+    pg = pymupdf.open(PDF)[cfg["pavimentos"]["1Pavimento"]["pagina"]]
+    fx0, fy0, fx1, fy1 = cfg["recorte"]
+    clip = pymupdf.Rect(pg.rect.width * fx0, pg.rect.height * fy0, pg.rect.width * fx1, pg.rect.height * fy1)
+    zoom = cfg["largura_px"] / clip.width
+    hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    ht, wt = cv2.imread(str(BASE_CHAPADA), cv2.IMREAD_GRAYSCALE).shape
+    sx, sy = forma_render[1] / wt, forma_render[0] / ht
+    Ai = np.linalg.inv(np.vstack([A, [0, 0, 1]]))
+
+    def p2r(x, y):
+        bx, by = ((x - clip.x0) * zoom + (wt - wb) // 2) * sx, ((y - clip.y0) * zoom + (ht - hb) // 2) * sy
+        return A[0, 0] * bx + A[0, 1] * by + A[0, 2], A[1, 0] * bx + A[1, 1] * by + A[1, 2]
+
+    def r2p(x, y):
+        bx, by, _ = Ai @ [x, y, 1]
+        return (bx / sx - (wt - wb) // 2) / zoom + clip.x0, (by / sy - (ht - hb) // 2) / zoom + clip.y0
+
+    return pg, p2r, r2p
+
+
+def caixa_render(d, p2r):
+    (x0, y0), (x1, y1) = p2r(d["rect"].x0, d["rect"].y0), p2r(d["rect"].x1, d["rect"].y1)
+    return x0, y0, x1, y1
 
 
 def sombra(out, mascara, ret, desloc=(-1.0, 1.0), sigma=0.8, forca=0.3):
