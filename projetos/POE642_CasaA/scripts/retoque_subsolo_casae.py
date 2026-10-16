@@ -537,6 +537,67 @@ def casa_maquinas_dir(out, pg, p2r, chapada, tex):
     return out
 
 
+def poligono_pdf(tl, d):
+    """Os pontos de um desenho do PDF (linhas, curvas, retângulos) na janela tl, como polígono convexo."""
+    pts = []
+    for it in d["items"]:
+        if it[0] == "re":
+            r = it[1]
+            pts += [tl.pt(r.x0, r.y0), tl.pt(r.x1, r.y0), tl.pt(r.x1, r.y1), tl.pt(r.x0, r.y1)]
+        elif it[0] == "qu":
+            q = it[1]
+            pts += [tl.pt(p.x, p.y) for p in (q.ul, q.ur, q.lr, q.ll)]
+        else:
+            pts += [tl.pt(p.x, p.y) for p in it[1:] if hasattr(p, "x")]
+    return cv2.convexHull(np.int32(np.round(pts)))
+
+
+# item 6: suporte de halteres. O motor pôs um armário alto de madeira no lugar do suporte do PDF (dois
+# andares de halteres sextavados, dez pares, com o quadro e os pés). O armário e a sombra dele saem (o
+# vinílico das mesmas linhas, logo à esquerda: as réguas são horizontais e continuam) e entra o suporte
+# desenhado pelas peças do PDF (ARQ_ MOB COMUM): quadro e pés em grafite, cabeças em borracha preta e
+# pegadores cromados, com a sombra curta.
+HALTERES = {"pdf": (1691.0, 845.0, 1721.5, 936.0),
+            "apagar": (994, 331, 1013, 402), "desloc": 40,          # px do render: o armário e a sombra
+            "grafite": (70, 72, 75), "borracha": (48, 50, 52), "brilho": (92, 95, 98),
+            "trilhos": [(1702.6, 848.3, 1703.8, 932.6), (1709.4, 848.3, 1710.6, 932.6)]}
+
+
+def halteres(out, pg, p2r):
+    q = HALTERES
+    x0, y0, x1, y1 = q["apagar"]
+    out[y0:y1, x0:x1] = out[y0:y1, x0 - q["desloc"]:x1 - q["desloc"]]
+    z = pymupdf.Rect(*q["pdf"])
+    pecas = [d for d in pg.get_drawings() if d.get("layer") == "ARQ_ MOB COMUM" and d["type"] in ("f", "fs")
+             and z.contains(d["rect"]) and d["rect"].width * d["rect"].height > 2]
+    tl = Tela(out, p2r, q["pdf"], folga=4)
+    todas = tl.vazia()
+    for d in pecas:
+        cv2.fillPoly(todas, [poligono_pdf(tl, d)], 255)
+    for r in q["trilhos"]:
+        todas |= tl.ret(r)
+    tl.sombra(todas, **SOMBRA)
+    for r in q["trilhos"]:
+        tl.pintar(tl.ret(r), q["grafite"])
+    n = 0
+    for d in sorted(pecas, key=lambda d: -d["rect"].width * d["rect"].height):
+        r = d["rect"]
+        m = tl.vazia()
+        cv2.fillPoly(m, [poligono_pdf(tl, d)], 255)
+        if r.height < 3.5 and r.width > 6 and r.y0 > 849 and r.y1 < 932:       # pegador
+            tl.pintar(m, CROMO)
+        elif r.y1 <= 848.4 or r.y0 >= 932.5:                                   # quadro e pés
+            tl.pintar(m, q["grafite"])
+        else:                                                                   # cabeça do halter
+            tl.pintar(m, q["borracha"])
+            tl.pintar(cv2.erode(m, np.ones((SS // 2, SS // 2), np.uint8)) & np.roll(m, SS // 2, axis=0) & ~np.roll(m, SS, axis=0),
+                      q["brilho"])
+            n += 1
+    out = tl.gravar()
+    print(f"    suporte de halteres do PDF: {n} cabeças, armário do render fora")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -614,6 +675,7 @@ def main():
          lambda o: wc_dce2(o, pg, p2r, chapada, tex)),
         ("casa de máquinas da direita em Bege Bahia", lambda o: casa_maquinas_dir(o, pg, p2r, chapada, tex)),
         ("elevador: o do Térreo aprovado", lambda o: elevador(o, A, p2r, terreo_no_render(A, o.shape)[0])),
+        ("suporte de halteres do PDF no lugar do armário de madeira", lambda o: halteres(o, pg, p2r)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
         if n <= args.ate:
