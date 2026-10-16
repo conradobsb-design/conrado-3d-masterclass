@@ -36,6 +36,13 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
 8. (Sem retoque, pedido do usuário.) Os três vasos de planta que o motor pôs nas varandas ficam.
 9. Shaft (pedido do usuário): o retângulo e o X tracejado do PDF dentro da parede grossa de cima da
    suíte master (10 traços da DOC_LINHAS E PROJEÇÕES), que somem no preto, entram em cinza, finos.
+10. Fachadas das suítes (pedido do usuário: cortinas, portas de correr de vidro finas e delicadas e
+    brises em bronze): o motor fez um caixilho largo e cinza em toda a faixa da janela e nenhum brise. A
+    faixa da parede é refeita pelo PDF (parede em preto, vão como soleira no Bege Bahia da varanda), com
+    as folhas de correr do PDF (pares de meias-folhas e montantes) e as janelas dos banhos no vidro fino;
+    o sombreado do caixilho no piso de dentro some. Os brises (as colunas da ARQ_ELEMENTOS FIXOS na
+    fachada da esquerda e na borda de fora das varandas da direita) entram como faixa de bronze. Roda
+    antes das cortinas.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
@@ -481,6 +488,163 @@ def cortinas(out, pg, p2r):
     return out
 
 
+# item 10: fachadas das suítes (pedido do usuário: "temos 3 camadas: cortinas, portas de vidro finas e
+# delicadas de correr e brises em bronze"; "brise de bronze mais a externa da fachada"; "portas/folhas de
+# vidro de correr nas varandas, mais finas e melhor representadas"). O motor desenhou um caixilho largo
+# e cinza em toda a faixa da janela e nenhum brise. A faixa da parede é refeita pelo PDF (ARQ_PAREDE):
+# parede (cinza no PDF) em preto, vão (branco no PDF) como soleira no Bege Bahia da varanda; por cima,
+# as folhas de correr do PDF (cada par de meias-folhas, com os montantes das pontas) e as janelas dos
+# banhos, finas, no vidro aprovado; o sombreado do caixilho no piso de dentro some (a luz do piso logo
+# ao lado). Os brises (colunas de lâminas da ARQ_ELEMENTOS FIXOS: na fachada da esquerda e na borda de
+# fora das varandas da direita; lâminas de 0,9 px, finas demais para desenhar uma a uma sem moiré) entram
+# como uma faixa de bronze com as bordas escuras, um brilho no meio e a sombra curta aprovada
+FACHADAS = {
+    "faixas": [{"nome": "esquerda", "x": (1204.48, 1215.82), "y": (760.0, 1690.0), "dentro": +1},
+               {"nome": "direita", "x": (2233.46, 2241.96), "y": (875.0, 1445.0), "dentro": -1}],
+    "brises": [(1199.94, 733.7, 1203.91, 1682.2), (2316.2, 753.0, 2320.2, 1450.3)],
+    "fontes_bege": [(622, 380, 712, 520), (622, 540, 712, 680)],
+    "parede": (12, 12, 15), "dentro_px": 4, "ref_px": (5, 10),
+    "vidro": (222, 218, 210), "alfa_vidro": 0.9, "montante": (150, 153, 156), "contorno": (88, 90, 93),
+    "larg_contorno": 0.35, "brilho_vidro": (240, 240, 238), "larg_brilho": 0.25,
+    "bronze": (74, 106, 139), "bronze_borda": (44, 66, 90), "bronze_brilho": (112, 146, 180),
+    "larg_bronze_borda": 0.35, "larg_bronze_brilho": 0.4,
+    "sombra": {"desloc": (-0.8, 1.0), "sigma": 0.8, "forca": 0.3},
+}
+
+
+def fachadas(out, pg, p2r):
+    q = FACHADAS
+    D = pg.get_drawings()
+
+    def canto(r):
+        return np.array([p2r(r[0], r[1]), p2r(r[2], r[1]), p2r(r[2], r[3]), p2r(r[0], r[3])])
+
+    bege = np.mean([out[fy0:fy1, fx0:fx1].reshape(-1, 3).astype(np.float32).mean(axis=0)
+                    for fx0, fy0, fx1, fy1 in q["fontes_bege"]], axis=0)
+    for fa in q["faixas"]:
+        bx0, bx1 = fa["x"]
+        fy0, fy1 = fa["y"]
+        dentro = [d for d in D if d.get("layer") == "ARQ_PAREDE" and d["type"] == "f"
+                  and d["rect"].x0 >= bx0 - 0.05 and d["rect"].x1 <= bx1 + 0.05 and fy0 <= d["rect"].y0 <= fy1]
+        paredes = [d["rect"] for d in dentro if d["fill"][0] < 0.5]
+        brancos = [d["rect"] for d in dentro if d["fill"][0] > 0.9]
+        cx = np.array([canto((bx0, fy0, bx1, fy1))])[0]
+        x0, y0 = np.floor(cx.min(axis=0)).astype(int) - 2
+        x1, y1 = np.ceil(cx.max(axis=0)).astype(int) + 2
+        x0w, x1w = (x0, x1 + q["ref_px"][1] + 2) if fa["dentro"] > 0 else (x0 - q["ref_px"][1] - 2, x1)
+        h, w = y1 - y0, x1w - x0w
+
+        def tela(polis, linha=None):
+            f = np.zeros((h * SS, w * SS), np.uint8)
+            for p in polis:
+                pp = np.round((p - [x0w, y0]) * SS).astype(np.int32)
+                if linha is None:
+                    cv2.fillConvexPoly(f, pp, 255, cv2.LINE_AA)
+                else:
+                    cv2.polylines(f, [pp], True, 255, max(1, int(round(linha * SS))), cv2.LINE_AA)
+            return cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+
+        reg = out[y0:y1, x0w:x1w].astype(np.float32)
+        # trechos da fachada: intervalos de y com desenho na faixa (onde não há, como nos banhos da
+        # direita, que avançam até a varanda, a faixa não existe)
+        trechos = []
+        for r in sorted(paredes + brancos, key=lambda r: r.y0):
+            if trechos and r.y0 <= trechos[-1][1] + 2.0:
+                trechos[-1][1] = max(trechos[-1][1], r.y1)
+            else:
+                trechos.append([r.y0, r.y1])
+        faixa = tela([canto((bx0, ta, bx1, tb)) for ta, tb in trechos])[..., 0]
+        cols = np.flatnonzero(faixa.max(axis=0) > 0.5)
+        borda = cols.max() + 1 if fa["dentro"] > 0 else cols.min() - 1
+        k, (r0, r1) = q["dentro_px"], q["ref_px"]
+        if fa["dentro"] > 0:
+            alvo, ref = slice(borda, borda + k), slice(borda + r0, borda + r1)
+        else:
+            alvo, ref = slice(borda - k + 1, borda + 1), slice(borda - r1 + 1, borda - r0 + 1)
+        L = reg.mean(axis=2)
+        lr = cv2.GaussianBlur(np.median(L[:, ref], axis=1)[:, None], (0, 0), 2.0)[:, 0]
+        la = cv2.GaussianBlur(L[:, alvo].mean(axis=1)[:, None], (0, 0), 2.0)[:, 0]
+        ganho = np.clip(lr / np.maximum(la, 1), 1.0, 1.3)
+        # só nas linhas de vão (sem parede na borda de dentro da faixa)
+        muro = tela([canto(r) for r in paredes])[..., 0]
+        lado = slice(max(borda - 3, 0), borda) if fa["dentro"] > 0 else slice(borda + 1, borda + 4)
+        vao = (faixa[:, lado].max(axis=1) > 0.5) & (muro[:, lado].max(axis=1) < 0.05)
+        ganho = np.where(vao, ganho, 1.0)
+        reg[:, alvo] *= ganho[:, None, None]
+        # a faixa: soleira de Bege Bahia no vão, parede em preto, folhas e janelas de vidro
+        tex = textura(out, q["fontes_bege"], h, w, p=12) * bege
+        a = faixa[..., None]
+        reg = reg * (1 - a) + tex * a
+        a = muro[..., None] * faixa[..., None]
+        reg = reg * (1 - a) + np.float32(q["parede"]) * a
+        # folhas de correr: pares de meias-folhas (1,42 de largura) lado a lado, com os montantes das
+        # pontas (os brancos da largura da folha logo acima e abaixo)
+        meias = sorted([r for r in brancos if abs(r.width - 1.42) < 0.05 and r.height > 20], key=lambda r: (r.y0, r.x0))
+        folhas = []
+        for i in range(0, len(meias) - 1):
+            m0, m1 = meias[i], meias[i + 1]
+            if abs(m0.y0 - m1.y0) < 0.1 and abs(m0.x1 - m1.x0) < 0.05:
+                folhas.append((m0.x0, m0.y0, m1.x1, m0.y1))
+        n_jan = 0
+        for fx0_, fy0_, fx1_, fy1_ in folhas:
+            mont = [r for r in brancos if abs(r.x0 - fx0_) < 0.05 and abs(r.x1 - fx1_) < 0.05 and r.height < 6
+                    and (abs(r.y1 - fy0_) < 0.05 or abs(r.y0 - fy1_) < 0.05)]
+            ya = min([fy0_] + [r.y0 for r in mont])
+            yb = max([fy1_] + [r.y1 for r in mont])
+            a = tela([canto((fx0_, fy0_, fx1_, fy1_))]) * q["alfa_vidro"]
+            reg = reg * (1 - a) + np.float32(q["vidro"]) * a
+            for r in mont:
+                a = tela([canto((r.x0, r.y0, r.x1, r.y1))])
+                reg = reg * (1 - a) + np.float32(q["montante"]) * a
+            xm = (fx0_ + fx1_) / 2
+            a = tela([np.array([p2r(xm, fy0_), p2r(xm, fy1_)])], q["larg_brilho"])
+            reg = reg * (1 - a) + np.float32(q["brilho_vidro"]) * a
+            a = tela([canto((fx0_, ya, fx1_, yb))], q["larg_contorno"])
+            reg = reg * (1 - a) + np.float32(q["contorno"]) * a
+        # janelas dos banhos: o vidro (branco mais largo que uma meia-folha, dentro do vão), com contorno
+        for r in brancos:
+            if 3.5 < r.width < 5 and r.height > 40:
+                a = tela([canto((r.x0, r.y0, r.x1, r.y1))]) * q["alfa_vidro"]
+                reg = reg * (1 - a) + np.float32(q["vidro"]) * a
+                a = tela([canto((r.x0, r.y0, r.x1, r.y1))], q["larg_contorno"])
+                reg = reg * (1 - a) + np.float32(q["contorno"]) * a
+                n_jan += 1
+        out[y0:y1, x0w:x1w] = np.clip(reg, 0, 255).astype(np.uint8)
+        print(f"    fachada da {fa['nome']}: {len(paredes)} trechos de parede, {len(folhas)} folhas de correr, "
+              f"{n_jan} janelas de banho")
+    # brises de bronze
+    for r in q["brises"]:
+        c = canto(r)
+        x0, y0 = np.floor(c.min(axis=0)).astype(int) - 4
+        x1, y1 = np.ceil(c.max(axis=0)).astype(int) + 4
+        h, w = y1 - y0, x1 - x0
+
+        def tela(polis, linha=None):
+            f = np.zeros((h * SS, w * SS), np.uint8)
+            for p in polis:
+                pp = np.round((p - [x0, y0]) * SS).astype(np.int32)
+                if linha is None:
+                    cv2.fillConvexPoly(f, pp, 255, cv2.LINE_AA)
+                else:
+                    cv2.polylines(f, [pp], False, 255, max(1, int(round(linha * SS))), cv2.LINE_AA)
+            return cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+        a = tela([c])
+        s = q["sombra"]
+        out = sombra(out, a, (x0, y0, x1, y1), s["desloc"], s["sigma"], s["forca"])
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        reg = reg * (1 - a[..., None]) + np.float32(q["bronze"]) * a[..., None]
+        xm = (r[0] + r[2]) / 2
+        a = tela([np.array([p2r(xm, r[1]), p2r(xm, r[3])])], q["larg_bronze_brilho"])[..., None]
+        reg = reg * (1 - a) + np.float32(q["bronze_brilho"]) * a
+        a = tela([np.array([p2r(r[0], r[1]), p2r(r[0], r[3])]), np.array([p2r(r[2], r[1]), p2r(r[2], r[3])])],
+                 q["larg_bronze_borda"])[..., None]
+        reg = reg * (1 - a) + np.float32(q["bronze_borda"]) * a
+        out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+        print(f"    brises de bronze de ({c[:, 0].min():.1f}, {c[:, 1].min():.1f}) a ({c[:, 0].max():.1f}, {c[:, 1].max():.1f})")
+    return out
+
+
 # item 9: shaft (pedido do usuário: "preciso da marcação em x para sinalizar o shaft ... em cor cinza").
 # O PDF tem um shaft dentro da parede grossa de cima da suíte master: o retângulo e o X tracejado da
 # DOC_LINHAS E PROJEÇÕES (10 segmentos), que somem no preto da parede. Entram em cinza, finos, só
@@ -533,6 +697,8 @@ def main():
     print("[6] arcos das portas em cinza fino")
     out = arcos_portas(out, pg, p2r)
     print("[7] cortinas nas janelas das suítes")
+    print("[10] fachadas das suítes: brises de bronze e portas de correr de vidro finas")
+    out = fachadas(out, pg, p2r)
     out = cortinas(out, pg, p2r)
     print("[9] shaft: X em cinza na parede")
     out = shaft(out, pg, p2r)
