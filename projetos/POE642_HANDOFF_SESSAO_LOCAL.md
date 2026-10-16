@@ -650,6 +650,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - a bancada de quartzo com a cuba e a torneira da parede da direita;
      - a bacia na parede da esquerda, com o tampo fechado, como as outras peças desta planta.
      - As portas do DCE e da casa de máquinas de baixo, que estavam sem arco, entram com o granito, no item 13.
+  13. **Granito:** o motor fez o DCE e a casa de máquinas de baixo num mármore marrom com veios claros; o aprovado é o granito Marrom Tabaco em grão, o do Térreo.
+     - O piso vira o granito da base (a fonte aprovada na Casa A), no tom do granito do Térreo retocado (mediana BGR 52, 59, 83).
+     - No DCE ficam a cama, o criado-mudo e o armário do render (o que é claro e grande), com a sombra curta.
+     - As portas do DCE e da casa de máquinas entram pelo PDF, com o arco cinza fino aprovado no granito.
 
 ## Casas A a D · Barlavento nas piscinas
 

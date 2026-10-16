@@ -895,6 +895,51 @@ def vestiario(out, pg, p2r, chapada, tex):
     return out
 
 
+# item 13: granito. O motor fez o DCE e a casa de máquinas de baixo num mármore marrom com veios claros; o
+# aprovado é o granito Marrom Tabaco em grão (o do Térreo). O piso vira o granito da base (a fonte aprovada
+# na Casa A), no tom do granito do Térreo retocado. No DCE ficam a cama, o criado-mudo e o armário do
+# render (o que é claro e grande), com a sombra curta; as portas do DCE e da casa de máquinas entram pelo
+# PDF, com o arco cinza fino aprovado no granito.
+GRANITO = {"terreo": (52, 59, 83), "base": (55, 60, 84), "legenda": (50, 66, 90),
+           "salas": [{"nome": "DCE", "interior": [(1439.8, 693.5, 1638.2, 829.6), (1444.0, 685.0, 1489.4, 693.5)],
+                      "pecas": True,
+                      "porta": ((1444.0, 697.0, 1446.3, 738.8), (1444.0, 693.5, 1489.4, 738.8))},
+                     {"nome": "casa de máquinas de baixo",
+                      "interior": [(971.0, 1107.4, 1359.0, 1232.0), (1309.4, 1090.3, 1354.7, 1107.4)],
+                      "pecas": False,
+                      "porta": ((1352.4, 1107.4, 1354.7, 1152.7), (1309.4, 1107.4, 1354.7, 1152.7))}],
+           "peca_lum": 120, "peca_area": 15}
+
+
+def granito(out, pg, p2r, chapada, tex):
+    q = GRANITO
+    ganho = np.asarray(q["terreo"], np.float32) / np.asarray(q["base"], np.float32)
+    gr = np.abs(chapada.astype(int) - q["legenda"]).max(axis=2) <= 3
+    for s in q["salas"]:
+        m, parede = ambiente(out, p2r, chapada, s["interior"])
+        manter = np.zeros_like(m)
+        if s["pecas"]:
+            lum = out.astype(np.float32).mean(axis=2)
+            claro = (m & (lum > q["peca_lum"])).astype(np.uint8)
+            claro = cv2.morphologyEx(claro, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+            n, lab, st, _ = cv2.connectedComponentsWithStats(claro)
+            manter = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["peca_area"]])
+            manter = cv2.dilate(manter.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        out = pela_base(out, m & ~manter, tex, ganho, buracos=(m & ~manter) & ~gr)
+        if manter.any():
+            x0, y0, x1, y1 = caixa_pdf(p2r, *s["interior"][0], folga=2)
+            reg = out[y0:y1, x0:x1].astype(np.float32)
+            mk = manter[y0:y1, x0:x1].astype(np.float32)
+            sb = cv2.GaussianBlur(cv2.warpAffine(mk, np.float32([[1, 0, -0.6], [0, 1, 0.6]]), mk.shape[::-1]), (0, 0), 0.7)
+            reg *= (1 - 0.3 * sb * (1 - mk))[..., None]
+            out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+        out = desenhar_porta(out, pg, p2r, *s["porta"], "granito")
+        for r in s["interior"]:
+            out = limpar_paredes(out, p2r, parede, r)
+        print(f"    {s['nome']}: granito em grão em {int((m & ~manter).sum())} px; porta do PDF")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -979,6 +1024,7 @@ def main():
         ("antessala: sem a bacia; portas da sauna e da ducha", lambda o: antessala(o, pg, p2r, chapada, tex)),
         ("chuveiros da ducha e do box do vestiário", lambda o: chuveiros(o, pg, p2r, chapada, tex)),
         ("portas do vestiário (e o vestiário refeito, com a bancada e a bacia)", lambda o: vestiario(o, pg, p2r, chapada, tex)),
+        ("granito em grão no DCE e na casa de máquinas de baixo; as portas deles", lambda o: granito(o, pg, p2r, chapada, tex)),
     ]
     for n, (desc, f) in enumerate(itens, 1):
         if n <= args.ate:
