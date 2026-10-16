@@ -658,6 +658,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - Cada linha (ou coluna) do vinílico ganha a razão entre a luz do vinílico logo depois da faixa (o quartil de cima) e a dela. A conta é local ao longo da parede, em janelas de 31 px, porque a faixa muda de largura.
      - As peças (cinza, preto, branco e o móvel baixo junto ao DCE) não mudam, e as sombras curtas das peças do render ficam.
      - Duas tentativas descartadas: um ganho por campo de luz, que deixou halos e manchas laranja no grão do vinílico, e a troca automática das manchas, que apagou partes da estação de musculação.
+  15. **Imagem final no quadro comum** (3840 × 2160, a mesma folha do Térreo e do 1º Pavimento): o motor tinha deslocado um trecho da linha tracejada do lote, à direita.
+     - A planta retocada vai ao quadro comum (64 pontos, erro mediano 0,66 px) e entra inteira na pegada da base (`entorno_esmaecido.sobrepor`).
+     - Fora dela, o fundo é branco e as linhas tracejadas do lote são as da base, nas posições exatas do PDF.
+     - Saída `renders/POE642_CasaE_PH_Subsolo_v1_final.png` e `_final_preview.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

@@ -999,6 +999,27 @@ def sombras_longas(out, p2r, chapada):
     return out
 
 
+# item 15: a imagem final no quadro comum (3840 x 2160, a mesma folha do Térreo e do 1º Pavimento). O motor
+# deslocou um trecho da linha tracejada do lote, à direita. A planta retocada entra inteira na pegada da base
+# (`entorno_esmaecido.sobrepor`); fora dela o fundo é branco e as linhas tracejadas do lote são as da base,
+# nas posições exatas do PDF.
+QUADRO = {"largura": 3840}
+
+
+def final_quadro(out):
+    from PIL import Image
+    from entorno_esmaecido import sobrepor
+    from rodape_entrega import no_quadro_comum
+    W = QUADRO["largura"]
+    base = cv2.imread(str(BASE))
+    H = round(base.shape[0] * W / base.shape[1])
+    base = cv2.resize(base, (W, H), interpolation=cv2.INTER_AREA)
+    cima = cv2.cvtColor(np.asarray(no_quadro_comum(Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)), BASE,
+                                                   "Subsolo", W)), cv2.COLOR_RGB2BGR)
+    branco = np.full(base.shape, 255, np.float32)
+    return sobrepor(base, branco, (), cima)
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -1092,6 +1113,15 @@ def main():
             out = f(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
+    if args.ate >= 15:
+        print("[15] imagem final no quadro comum, com o tracejado do lote da base")
+        final = final_quadro(out)
+        nome_final = args.nome.replace("_retocado", "_final")
+        cv2.imwrite(str(args.saida / f"{nome_final}.png"), final)
+        cv2.imwrite(str(args.saida / f"{nome_final}_preview.jpg"),
+                    cv2.resize(final, (2000, round(2000 * final.shape[0] / final.shape[1])), interpolation=cv2.INTER_AREA),
+                    [cv2.IMWRITE_JPEG_QUALITY, 90])
+        print(f"    {args.saida / (nome_final + '.png')} {final.shape[1]}x{final.shape[0]}")
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
     alfa = np.where(np.abs(out.astype(int) - orig.astype(int)).max(axis=2) > 0, 255, 0).astype(np.uint8)
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
