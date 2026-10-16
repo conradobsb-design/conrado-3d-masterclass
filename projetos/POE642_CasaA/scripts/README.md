@@ -423,6 +423,8 @@ Duas opções em 3840 px para o cliente (pedido do usuário: "em preto e branco 
 - **`_final_pb`:** o entorno é o render aprovado do Térreo, 75% mais claro e sem saturação (`entorno_esmaecido.contexto_render`).
 - **`_final_linhas`:** o entorno é o PDF do Térreo só em linhas (`contexto_linhas`): a página desenhada pelo `Raster` do `gerar_bases.py` com as camadas ARQ_CONTRAPISO (cores e hachuras de piso), ARQ_TERRENO PLANEJADO, DOC_TEXTOS e ARQ_ZONA desligadas, sem os textos que sobram (título, escala, números da escada), na tela 16:9 e em cinza (`LINHAS["forca"]`: 70% do traço). O Térreo e o 1º Pavimento têm a mesma página e o mesmo recorte, então o PDF do Térreo cai direto no quadro comum.
 
+`FORA` tem duas áreas brancas de fora presas na pegada: a de baixo da sala íntima e a faixa abaixo da parede de baixo da suíte 3, fechada pela linha fina do PDF. Nessa faixa o render tinha uma barra cinza, e na opção linhas devia haver só linhas. Ela começa abaixo da parede, para não pegar a escrivaninha da suíte, que é branca na base.
+
 O `entorno_esmaecido.py` foi dividido em `contexto_render` (o entorno a partir de um render) e `sobrepor` (pegada, sobreposição integral, tracejado do lote), com o `compor` de antes por cima dos dois.
 
 ```bash

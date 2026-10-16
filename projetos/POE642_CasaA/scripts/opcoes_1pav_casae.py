@@ -38,7 +38,10 @@ BASE_CIMA = CASA / "bases/POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png"
 TERREO = CASA / "renders/POE642_CasaE_PH_Terreo_v1_retocado.png"
 BASE_TERREO = CASA / "bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png"
 PDF_TERREO = R.RAIZ / "_pdfs_cliente/642 - TÉRREO - CASA E.pdf"
-FORA = [(912, 752, 1096, 816)]              # área branca abaixo da sala íntima (px de uma prévia de 2000 px)
+# áreas brancas de fora presas na pegada (px de uma prévia de 2000 px): abaixo da sala íntima, e a faixa
+# abaixo da parede de baixo da suíte 3, fechada pela linha fina do PDF (lá o render tinha uma barra cinza);
+# esta começa abaixo da parede, para não pegar a escrivaninha da suíte (branca na base)
+FORA = [(912, 752, 1096, 816), (822, 800, 912, 816)]
 LINHAS = {"ocultas": ["ARQ_TERRENO PLANEJADO", "ARQ_CONTRAPISO", "DOC_TEXTOS", "ARQ_ZONA"],
           "forca": 0.7}                     # 0: branco; 1: o traço do PDF (preto)
 
