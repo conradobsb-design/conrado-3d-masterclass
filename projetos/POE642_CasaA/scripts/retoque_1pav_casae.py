@@ -43,9 +43,11 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
     o sombreado do caixilho no piso de dentro some. Os brises (as colunas da ARQ_ELEMENTOS FIXOS na
     fachada da esquerda e na borda de fora das varandas da direita) entram como faixa de bronze. Roda
     antes das cortinas.
-11. Cubas dos banhos das suítes da direita (pedido do usuário: "cuba posicionada mais à direita da
-    bancada da pia"): a cuba do render, com a torneira, vai para o centro do recorte do PDF (10,8 e
-    10,7 px para a direita); onde estava, o tampo limpo do lado, espelhado, na luz do tampo.
+11. Cubas no lugar do PDF (pedidos do usuário: "cuba posicionada mais à direita da bancada da pia";
+    "ambas as cubas estão mais à esquerda, do que centralizadas nas bancadas"): a cuba do render, com a
+    torneira, vai para o centro do recorte do PDF: nos banhos das suítes da direita, 10,8 e 10,7 px para
+    a direita; nos dois banhos da esquerda (costas com costas), 9,7 px para a esquerda. Onde estava, o
+    tampo limpo do lado, espelhado, na luz do tampo.
 12. Bancos em frente às camas (pedido do usuário): os cinco bancos do PDF (ARQ_LAYOUT HUMANIZAÇÃO, na
     largura da cama), no pé de cada cama do render, com a folga do PDF (o motor fez as camas 3 a 5 px
     mais compridas; a da master, 22 px), no banco de madeira em ripas aprovado no Térreo.
@@ -659,6 +661,11 @@ def fachadas(out, pg, p2r):
 CUBAS_BANHOS = [
     {"nome": "banho da suíte de cima", "cuba": (1240, 292, 1258, 307), "dx": 1259.8 - 1249.0, "fonte_x": (1258, 1268)},
     {"nome": "banho da suíte de baixo", "cuba": (1241, 484, 1259, 497), "dx": 1259.7 - 1249.0, "fonte_x": (1259, 1268)},
+    # banhos da esquerda, costas com costas (pedido do usuário: "ambas as cubas estão mais à esquerda, do
+    # que centralizadas nas bancadas"): no PDF a cuba fica no lado esquerdo da bancada (centro em x 806,5);
+    # o motor a centralizou (centro em 816,1)
+    {"nome": "banho da esquerda, de cima", "cuba": (807, 609, 825, 623), "dx": 806.45 - 816.1, "fonte_x": (798, 807)},
+    {"nome": "banho da esquerda, de baixo", "cuba": (807, 630, 825, 645), "dx": 806.45 - 816.1, "fonte_x": (798, 807)},
 ]
 
 
@@ -690,7 +697,8 @@ def cubas_banhos(out, orig):
         a = cv2.warpAffine(a, M, (W, h), flags=cv2.INTER_LINEAR)[..., None]
         reg = out[cy0:cy1, nx0:nx0 + W].astype(np.float32)
         out[cy0:cy1, nx0:nx0 + W] = np.clip(reg * (1 - a) + peca * a, 0, 255).astype(np.uint8)
-        print(f"    {q['nome']}: cuba {q['dx']:.1f} px para a direita, no centro do PDF")
+        print(f"    {q['nome']}: cuba {abs(q['dx']):.1f} px para a {'direita' if q['dx'] > 0 else 'esquerda'}, "
+              f"no centro do PDF")
     return out
 
 
@@ -819,7 +827,7 @@ def main():
     print("[10] fachadas das suítes: brises de bronze e portas de correr de vidro finas")
     out = fachadas(out, pg, p2r)
     out = cortinas(out, pg, p2r)
-    print("[11] cubas dos banhos da direita no lado direito da bancada")
+    print("[11] cubas dos banhos no lugar do PDF")
     out = cubas_banhos(out, orig)
     print("[12] bancos de madeira no pé das camas")
     out = bancos_camas(out, pg, p2r)
