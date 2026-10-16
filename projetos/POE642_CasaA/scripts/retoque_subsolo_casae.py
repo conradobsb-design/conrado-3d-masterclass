@@ -26,6 +26,9 @@ AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent          # projetos/
 sys.path.insert(0, str(AQUI))
 
+from retoque_terreo_casab import BACIA_BORDA, BACIA_FUNDO, LOUCA, LOUCA_CONTORNO  # noqa: E402
+from retoque_terreo_casac import CHUVEIRO_TETO, CROMO, CROMO_CLARO, CROMO_ESCURO  # noqa: E402
+
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png"
 BASE_CHAPADA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Subsolo_v2_16x9.png"   # cores exatas da legenda
 BASE_SEM_TELA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Subsolo_v2.png"          # antes da tela 16:9
@@ -94,8 +97,15 @@ def trocar_piso(out, mascara, tex, cor, borda=0.6, buracos=None):
     """Os px da máscara viram a textura aprovada da base (normalizada, média 1 por canal) na cor dada
     (a cor média do material no próprio render), com a borda suavizada. Em 'buracos' (px da máscara que
     na base não são piso: folhas e soleiras de porta), a textura é preenchida a partir do piso em volta."""
-    if buracos is not None and buracos.any():
-        tex = cv2.inpaint(tex, (buracos & mascara).astype(np.uint8), 3, cv2.INPAINT_TELEA)
+    # também os traços finos da base que a base chapada (vizinho mais próximo) não pega: px da textura
+    # bem mais escuros ou mais claros que o piso
+    lum = tex.astype(np.float32).mean(axis=2)
+    med = np.median(lum[mascara])
+    fora = mascara & ((lum < 0.85 * med) | (lum > 1.08 * med))
+    buracos = fora if buracos is None else (buracos | fora)
+    if buracos.any():
+        tex = cv2.inpaint(tex, cv2.dilate((buracos & mascara).astype(np.uint8), np.ones((3, 3), np.uint8)),
+                          3, cv2.INPAINT_TELEA)
     m = mascara.astype(np.float32)
     if borda:
         m = np.maximum(cv2.GaussianBlur(m, (0, 0), borda), m) * cv2.dilate(mascara.astype(np.uint8), np.ones((3, 3), np.uint8))
@@ -259,6 +269,224 @@ def escada(out, A, p2r):
     return out
 
 
+class Tela:
+    """Uma janela do render desenhada em SS x: máscaras em pt do PDF, pintadas por cobertura."""
+
+    def __init__(self, out, p2r, caixa_pt, folga=4):
+        self.out, self.p2r = out, p2r
+        self.x0, self.y0, self.x1, self.y1 = caixa_pdf(p2r, *caixa_pt, folga=folga)
+        self.h, self.w = self.y1 - self.y0, self.x1 - self.x0
+        self.reg = out[self.y0:self.y1, self.x0:self.x1].astype(np.float32)
+
+    def pt(self, x, y):
+        a, b = self.p2r(x, y)
+        return (a - self.x0) * SS, (b - self.y0) * SS
+
+    def vazia(self):
+        return np.zeros((self.h * SS, self.w * SS), np.uint8)
+
+    def ret(self, r, raio_pt=0.0):
+        m = self.vazia()
+        (a, b), (c, d) = self.pt(r[0], r[1]), self.pt(r[2], r[3])
+        a, b, c, d = (int(round(v)) for v in (a, b, c, d))
+        rr = int(min(round(raio_pt * 0.5483 * SS), (c - a) // 2, (d - b) // 2))
+        if rr <= 0:
+            cv2.rectangle(m, (a, b), (c, d), 255, -1)
+            return m
+        cv2.rectangle(m, (a + rr, b), (c - rr, d), 255, -1)
+        cv2.rectangle(m, (a, b + rr), (c, d - rr), 255, -1)
+        for cx, cy in ((a + rr, b + rr), (c - rr, b + rr), (a + rr, d - rr), (c - rr, d - rr)):
+            cv2.circle(m, (cx, cy), rr, 255, -1)
+        return m
+
+    def reduzir(self, m):
+        return cv2.resize(m.astype(np.float32) / (255 if m.dtype == np.uint8 else 1), (self.w, self.h),
+                          interpolation=cv2.INTER_AREA)
+
+    def pintar(self, m, cor, forca=1.0):
+        a = self.reduzir(m)[..., None] * forca
+        self.reg = self.reg * (1 - a) + np.asarray(cor, np.float32) * a
+
+    def contorno(self, m, larg_px, cor):
+        k = max(1, int(round(larg_px * SS)))
+        self.pintar(m & ~cv2.erode(m, np.ones((k, k), np.uint8)), cor)
+
+    def sombra(self, m, dx=-0.6, dy=0.6, sigma=0.7, forca=0.28):
+        s = cv2.warpAffine(m.astype(np.float32) / 255, np.float32([[1, 0, dx * SS], [0, 1, dy * SS]]),
+                           (self.w * SS, self.h * SS))
+        s = self.reduzir(cv2.GaussianBlur(s, (0, 0), sigma * SS)) * (1 - self.reduzir(m))
+        self.reg *= (1 - forca * s)[..., None]
+
+    def gravar(self):
+        self.out[self.y0:self.y1, self.x0:self.x1] = np.clip(self.reg, 0, 255).astype(np.uint8)
+        return self.out
+
+
+QUARTZO = (225, 232, 236)                  # BGR de #ECE8E1, as bancadas do prompt
+VIDRO_BOX = {"cor": (212, 214, 213), "borda": (128, 131, 133)}
+SOMBRA = {"dx": -0.6, "dy": 0.6, "sigma": 0.7, "forca": 0.28}   # a sombra curta das peças, nesta escala
+VASO = {"dobradica": 4.0, "recuo": 0.9,   # pt: da parede à dobradiça do tampo; recuo do tampo
+        "cor_tampo": (250, 250, 249), "volume": (0.88, 2.0), "volume_tampo": (0.92, 2.4)}
+
+
+def bancada_cuba(out, p2r, bancada, cuba, torneira, parede):
+    """Bancada de quartzo claro com a cuba retangular branca (aba, bacia da borda ao fundo, válvula) e a
+    torneira cromada saindo da parede ('direita' ou 'esquerda'), na geometria do PDF."""
+    tl = Tela(out, p2r, bancada)
+    b = tl.ret(bancada)
+    tl.sombra(b, **SOMBRA)
+    tl.pintar(b, QUARTZO)
+    tl.contorno(b, 0.35, (150, 153, 155))
+    c = tl.ret(cuba, 2.0)
+    tl.pintar(c, LOUCA_CONTORNO)
+    x0, y0, x1, y1 = cuba
+    tl.pintar(tl.ret((x0 + 0.8, y0 + 0.8, x1 - 0.8, y1 - 0.8), 1.6), LOUCA)
+    for i in range(6):
+        k = i / 5
+        cor = tuple(BACIA_BORDA[j] * (1 - k) + BACIA_FUNDO[j] * k for j in range(3))
+        ins = 2.4 + k * 3.0
+        tl.pintar(tl.ret((x0 + ins, y0 + ins, x1 - ins, y1 - ins), max(0.6, 1.6 - k)), cor)
+    vx, vy = tl.pt((x0 + x1) / 2, (y0 + y1) / 2)
+    v = tl.vazia()
+    cv2.circle(v, (int(vx), int(vy)), int(1.1 * SS), 255, -1)
+    tl.pintar(v, CROMO_ESCURO)
+    tx0, ty0, tx1, ty1 = torneira
+    m = tl.ret(torneira, 0.8)
+    tl.sombra(m, **SOMBRA)
+    tl.pintar(m, CROMO_ESCURO)
+    tl.pintar(tl.ret((tx0 + 0.4, ty0 + 0.4, tx1 - 0.4, (ty0 + ty1) / 2), 0.4), CROMO_CLARO)
+    bx = tx1 if parede == "direita" else tx0
+    base = tl.vazia()
+    cx, cy = tl.pt(bx, (ty0 + ty1) / 2)
+    cv2.circle(base, (int(cx), int(cy)), int(1.0 * SS), 255, -1)
+    tl.pintar(base, CROMO)
+    return tl.gravar()
+
+
+def vaso(out, pg, p2r, caixa, parede):
+    """Vaso visto de cima no contorno do PDF (ARQ_LOUÇAS E METAIS, o polígono da caixa dada), como os
+    aprovados nas outras casas: louça com volume, contorno fino, sombra curta e o tampo fechado."""
+    q = VASO
+    corpo = next(d for d in pg.get_drawings() if d.get("layer") == "ARQ_LOUÇAS E METAIS" and d["type"] == "f"
+                 and max(abs(d["rect"].x0 - caixa[0]), abs(d["rect"].y0 - caixa[1]), abs(d["rect"].x1 - caixa[2]),
+                         abs(d["rect"].y1 - caixa[3])) < 0.3)
+    tl = Tela(out, p2r, caixa)
+    pts = [tl.pt(p.x, p.y) for it in corpo["items"] for p in it[1:] if hasattr(p, "x")]
+    m = tl.vazia()
+    cv2.fillPoly(m, [cv2.convexHull(np.int32(np.round(pts)))], 255)
+    tl.sombra(m, **SOMBRA)
+    dist = cv2.distanceTransform(m, cv2.DIST_L2, 5) / SS
+    borda, alcance = q["volume"]
+    tom = borda + (1 - borda) * np.clip(dist / alcance, 0, 1)
+    a = tl.reduzir(m)[..., None]
+    cor = cv2.resize(np.asarray(LOUCA, np.float32)[None, None] * tom[..., None] * (m / 255.0)[..., None],
+                     (tl.w, tl.h), interpolation=cv2.INTER_AREA)
+    tl.reg = tl.reg * (1 - a) + cor
+    tl.contorno(m, 0.35, LOUCA_CONTORNO)
+    k = int(2 * q["recuo"] * 0.5483 * SS) + 1
+    tampo = cv2.erode(m, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
+    xd = caixa[2] - q["dobradica"] if parede == "direita" else caixa[0] + q["dobradica"]
+    xs_pt = tl.pt(xd, caixa[1])[0]
+    if parede == "direita":
+        tampo[:, int(xs_pt):] = 0
+    else:
+        tampo[:, :int(xs_pt)] = 0
+    tl.sombra(tampo, dx=-0.25, dy=0.3, sigma=0.4, forca=0.18)
+    dt = cv2.distanceTransform(tampo, cv2.DIST_L2, 5) / SS
+    borda, alcance = q["volume_tampo"]
+    tom = borda + (1 - borda) * np.clip(dt / alcance, 0, 1)
+    a = tl.reduzir(tampo)[..., None]
+    cor = cv2.resize(np.asarray(q["cor_tampo"], np.float32)[None, None] * tom[..., None] * (tampo / 255.0)[..., None],
+                     (tl.w, tl.h), interpolation=cv2.INTER_AREA)
+    tl.reg = tl.reg * (1 - a) + cor
+    tl.contorno(tampo, 0.3, LOUCA_CONTORNO)
+    return tl.gravar()
+
+
+def vidro_box(out, p2r, r):
+    """Divisória de vidro do box, fina: vidro claro com as bordas finas."""
+    tl = Tela(out, p2r, r)
+    m = tl.ret(r)
+    tl.pintar(m, VIDRO_BOX["cor"])
+    tl.contorno(m, 0.3, VIDRO_BOX["borda"])
+    return tl.gravar()
+
+
+def chuveiro(out, p2r, ducha, braco, canopla):
+    """Chuveiro visto de cima, como os aprovados: ducha quadrada (a placa da Casa A), braço cromado do
+    centro da ducha à face da parede, com o brilho no eixo, e a canopla na parede; sombra curta."""
+    tl = Tela(out, p2r, (min(ducha[0], braco[0], canopla[0]), min(ducha[1], braco[1], canopla[1]),
+                         max(ducha[2], braco[2], canopla[2]), max(ducha[3], braco[3], canopla[3])))
+    d = tl.ret(ducha, 0.6)
+    tl.sombra(d, **SOMBRA)
+    img = cv2.imread(str(CHUVEIRO_TETO[0]))
+    hx0, hy0, hx1, hy1 = CHUVEIRO_TETO[1]
+    ys, xs = np.nonzero(d)
+    placa = cv2.resize(img[hy0:hy1, hx0:hx1], (xs.max() - xs.min() + 1, ys.max() - ys.min() + 1),
+                       interpolation=cv2.INTER_CUBIC).astype(np.float32)
+    cor = np.zeros((tl.h * SS, tl.w * SS, 3), np.float32)
+    cor[ys.min():ys.max() + 1, xs.min():xs.max() + 1] = placa
+    a = tl.reduzir(d)[..., None]
+    c = cv2.resize(cor * (d[..., None] / 255.0), (tl.w, tl.h), interpolation=cv2.INTER_AREA) / np.maximum(a, 1e-6)
+    tl.reg = tl.reg * (1 - a) + c * a
+    b = tl.ret(braco)
+    tl.pintar(b, CROMO_ESCURO)
+    bx0, by0, bx1, by1 = braco
+    if bx1 - bx0 >= by1 - by0:
+        tl.pintar(tl.ret((bx0, by0 + 0.2, bx1, (by0 + by1) / 2)), CROMO_CLARO)
+    else:
+        tl.pintar(tl.ret((bx0 + 0.2, by0, (bx0 + bx1) / 2, by1)), CROMO_CLARO)
+    tl.pintar(tl.ret(canopla), CROMO)
+    return tl.gravar()
+
+
+def preencher_ambiente(out, p2r, chapada, tex, caixa_pdf_amb, cor, extra=()):
+    """O ambiente inteiro (menos as paredes da base) vira o piso aprovado, sem nada do render dentro."""
+    # só as paredes grossas: os símbolos finos e pretos da base (registros, contornos) entram no piso
+    parede = cv2.morphologyEx((chapada.max(axis=2) < 60).astype(np.uint8), cv2.MORPH_OPEN,
+                              np.ones((3, 3), np.uint8)).astype(bool)
+    m = np.zeros(parede.shape, bool)
+    for r in (caixa_pdf_amb,) + tuple(extra):
+        x0, y0, x1, y1 = caixa_pdf(p2r, *r)
+        m[y0:y1, x0:x1] = True
+    m &= ~parede
+    piso = np.abs(chapada.astype(int) - BEGE["legenda"]).max(axis=2) <= BEGE["tol"]
+    out = trocar_piso(out, m, tex, cor, buracos=m & ~piso)
+    # o que o render pôs sobre as paredes em volta (restos de peças): volta ao preto da parede
+    x0, y0, x1, y1 = caixa_pdf(p2r, *caixa_pdf_amb, folga=4)
+    reg = out[y0:y1, x0:x1]
+    lum = reg.astype(np.float32).mean(axis=2)
+    pw = parede[y0:y1, x0:x1]
+    resto = pw & (lum > 90) & cv2.erode(pw.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    if resto.any():
+        reg[resto] = np.median(reg[pw & (lum < 40)], axis=0).astype(np.uint8)
+    return out, m
+
+
+# item 3: WC DCE 2. O motor fez o piso em granito (é Bege Bahia), uma bancada comprida que pega também o
+# lugar da bacia, a bacia no lugar do chuveiro e nenhum chuveiro. O ambiente é refeito pelo PDF.
+WC_DCE2 = {"interior": (1646.7, 693.5, 1726.1, 829.6),
+           "bancada": (1697.6, 693.5, 1726.1, 729.1), "cuba": (1700.9, 700.4, 1720.8, 723.1),
+           "torneira": (1712.6, 710.8, 1720.2, 713.0),
+           "vaso": (1696.9, 739.2, 1726.1, 759.2),
+           "vidro": (1647.3, 777.1, 1725.5, 780.0),
+           "ducha": (1698.6, 797.8, 1709.8, 809.0), "braco": (1703.1, 802.7, 1725.4, 804.1),
+           "canopla": (1725.4, 801.7, 1726.1, 805.1),
+           "porta": ((1646.7, 697.7, 1692.0, 700.0), (1646.7, 697.7, 1692.0, 743.1))}
+
+
+def wc_dce2(out, pg, p2r, chapada, tex):
+    q = WC_DCE2
+    out, m = preencher_ambiente(out, p2r, chapada, tex, q["interior"], BEGE["cor"])
+    out = desenhar_porta(out, pg, p2r, *q["porta"], "bege")
+    out = vidro_box(out, p2r, q["vidro"])
+    out = bancada_cuba(out, p2r, q["bancada"], q["cuba"], q["torneira"], "direita")
+    out = vaso(out, pg, p2r, q["vaso"], "direita")
+    out = chuveiro(out, p2r, q["ducha"], q["braco"], q["canopla"])
+    print(f"    WC DCE 2: Bege Bahia em {int(m.sum())} px; porta, bancada com cuba, bacia, vidro do box e chuveiro do PDF")
+    return out
+
+
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
 ITENS = [
     (1, "Circulação: a faixa da esquerda saiu em travertino (com uma junta) e com uma parede preta na borda "
@@ -330,6 +558,8 @@ def main():
     out = circulacao_deposito(out, A, pg, p2r, chapada, tex)
     print("[2] escada: a do Térreo aprovado (sem linhas, sombreamento de descida para a esquerda)")
     out = escada(out, A, p2r)
+    print("[3] WC DCE 2: piso, porta, louças, vidro do box e chuveiro pelo PDF")
+    out = wc_dce2(out, pg, p2r, chapada, tex)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

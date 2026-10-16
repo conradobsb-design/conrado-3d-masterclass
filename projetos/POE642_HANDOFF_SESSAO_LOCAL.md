@@ -617,6 +617,13 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - É a mesma escada externa do Térreo, no mesmo lugar da folha, já aprovada lá (item 21 do Térreo: sem linhas, sombreamento de descida da direita para a esquerda).
      - O trecho dela vem do Térreo retocado, levado a este render pelas duas bases (128 pontos; cai em x 599,4 a 759,0 e y 210,7 a 247,8, os degraus do PDF).
      - A sombra curta do primeiro espelho cai na circulação, à esquerda. Sai também a linha que o render fazia em volta da escada.
+  3. **WC DCE 2:** o motor fez o piso em granito (é Bege Bahia), uma bancada comprida que ocupava também o lugar da bacia, pôs a bacia no lugar do chuveiro e não desenhou o chuveiro. O ambiente é refeito pelo PDF:
+     - piso inteiro no Bege Bahia aprovado; o que o render deixava sobre as paredes em volta volta ao preto;
+     - porta (folha e arco finos) vinda do DCE;
+     - bancada em quartzo claro #ECE8E1 com a cuba retangular branca (aba, bacia da borda ao fundo, válvula) e a torneira cromada saindo da parede da direita;
+     - bacia no contorno do PDF, na parede da direita, com volume, contorno fino, sombra curta e o tampo fechado;
+     - divisória de vidro do box, fina;
+     - chuveiro: ducha quadrada, braço cromado até a parede da direita e canopla.
 
 ## Casas A a D · Barlavento nas piscinas
 
