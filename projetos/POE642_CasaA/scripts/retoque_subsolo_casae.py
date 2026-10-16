@@ -1003,6 +1003,10 @@ def sombras_longas(out, p2r, chapada):
 # deslocou um trecho da linha tracejada do lote, à direita. A planta retocada entra inteira na pegada da base
 # (`entorno_esmaecido.sobrepor`); fora dela o fundo é branco e as linhas tracejadas do lote são as da base,
 # nas posições exatas do PDF.
+# item 17 (pedido do usuário, 16/10/26): "coloque as linhas do PDF no fundo branco". Fora da pegada entram as
+# linhas do PDF do Térreo (a casa de cima), em cinza, como na opção "linhas" do 1º Pavimento
+# (`opcoes_1pav_casae.contexto_linhas`: sem terreno, contrapiso, zonas e textos; 70% do traço). As linhas
+# tracejadas do lote continuam as da base.
 QUADRO = {"largura": 3840}
 
 
@@ -1016,8 +1020,8 @@ def final_quadro(out):
     base = cv2.resize(base, (W, H), interpolation=cv2.INTER_AREA)
     cima = cv2.cvtColor(np.asarray(no_quadro_comum(Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)), BASE,
                                                    "Subsolo", W)), cv2.COLOR_RGB2BGR)
-    branco = np.full(base.shape, 255, np.float32)
-    return sobrepor(base, branco, (), cima)
+    from opcoes_1pav_casae import contexto_linhas
+    return sobrepor(base, contexto_linhas(W, H), (), cima)
 
 
 # item 16 (pedido do usuário, 16/10/26): "as bordas da piscina são em mármore Bege Bahia. a folha de vidro
@@ -1164,6 +1168,7 @@ def main():
     args.saida.mkdir(parents=True, exist_ok=True)
     if args.ate >= 15:
         print("[15] imagem final no quadro comum, com o tracejado do lote da base")
+        print("[17] fundo com as linhas do PDF do Térreo (pedido do usuário)")
         final = final_quadro(out)
         nome_final = args.nome.replace("_retocado", "_final")
         cv2.imwrite(str(args.saida / f"{nome_final}.png"), final)
