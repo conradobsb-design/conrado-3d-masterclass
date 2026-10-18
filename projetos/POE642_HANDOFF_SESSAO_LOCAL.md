@@ -710,6 +710,12 @@ Pedido do usuário (18/10/26): "vamos fazer os ajustes nas plantas da casa A", o
   - Banho do motorista, WC, banho da varanda e despensa: estreitos, no corpo do PDF (1,0×), no piso livre entre as peças. O banho da varanda cruza o arco da porta, uma linha fina, como o hall interno.
   - Varanda (encostava na poltrona: um pouco acima), lavabo (na bancada) e sala de jantar (no vidro): alguns px.
   - Jardim da escada (17,46 m²): fica na posição do PDF, sobre a faixa verde, em preto (o verde é claro e chapado, e o preto se lê).
+- **1º Pavimento** (`renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png`): 22 rótulos (suítes, closets, banhos, sala íntima, circulação, quarto e banho de serviço, saleta, as quatro varandas e o elevador).
+  - Suítes 3 e 2: estavam sobre a cama. Foram para o tapete, abaixo da cama (suíte 3) e acima dela (suíte 2).
+  - Suíte master: estava sobre o pufe. Foi para o piso acima dele, fora do tapete.
+  - Sala íntima: estava sobre a mesa de centro. Foi para o espaço entre ela e o sofá.
+  - Banho de serviço: o "m²" caía no vaso. Foi para o piso livre de cima do banho.
+  - Banho 1 (no vaso) e closet master (no armário): alguns px.
 
 ## Casas A a D · Barlavento nas piscinas
 
