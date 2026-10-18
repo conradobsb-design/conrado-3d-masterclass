@@ -691,6 +691,19 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - **PDFs (3 páginas A3: Subsolo, Térreo e 1º Pavimento):** `entrega/POE642_CasaE_Plantas_Humanizadas_opcao_PB.pdf` (20,6 MB) e `..._opcao_Linhas.pdf` (18,6 MB). Só a página do 1º Pavimento muda entre as duas opções. Comandos no README dos scripts, em "Pranchas de entrega".
   - **Depois da escolha do cliente** (o 1º Pavimento continua em duas opções): como no 1º Pavimento, rodar o `rodape_entrega.py` da opção escolhida sem `--sufixo` e o `pdf_entrega.py` sem `--prancha`/`--nome`; sai `POE642_CasaE_Plantas_Humanizadas.pdf` com os três pavimentos.
 
+## Casa A · nomes e áreas dos ambientes
+
+Pedido do usuário (18/10/26): "vamos fazer os ajustes nas plantas da casa A", os mesmos da Casa E, ou seja, os nomes e as áreas dos ambientes em cada pavimento, depois as pranchas e o PDF.
+
+- **PDFs:** os da Casa A não estavam no repositório. Vieram do Drive do usuário, da pasta onde estão os que geraram as bases ("642- SUBSOLO CASA A.pdf", "642- TÉRREO CASA A.pdf" e "642- 1° PAVIMENTO CASA A (1).pdf"). Foram salvos em `_pdfs_cliente/642 - <PAVIMENTO> - CASA A.pdf`, fora do git, como os das outras casas.
+- **Script:** `POE642_CasaA/scripts/rotulos_casaa.py <Pavimento>`. Usa a regra da Casa E (`retoque_1pav_casae.rotulos_ambientes`): cada linha do rótulo do PDF igual, na posição do PDF, no corpo do PDF 30% maior, em Inter Regular preta; no granito marrom, cinza (150); sobre móvel ou peça, o piso livre mais próximo.
+  - Ficam fora as notas que não são ambientes (projeções, shafts, floreira, afastamentos, divisa, muros, limite do lote, acessos) e o título da folha.
+  - As imagens aprovadas da Casa A têm 2000 px, e nelas o rótulo ficaria com ~6 px de corpo, ilegível. A imagem vai ao quadro comum em 3840 px (ampliada com Lanczos, como nas pranchas), e os rótulos são escritos nessa resolução.
+  - O granito é achado na própria imagem (luminância desfocada abaixo de 95, tom quente), porque a base da Casa A não tem a cor da legenda.
+- **Subsolo** (`renders/POE642_CasaA_PH_Subsolo_final_rotulos.png`, 3840 × 2160): 9 rótulos (hall, academia, depósito, circulação, banho de serviço, sauna, banho feminino, banho masculino e elevador).
+  - Banho de serviço: no PDF o rótulo passava da parede da direita e encostava no vaso. Foi para o piso livre de cima do banho, no 1,3×.
+  - Banho masculino: 4 px à esquerda, para não encostar no arco da porta.
+
 ## Casas A a D · Barlavento nas piscinas
 
 Pedido do usuário (15/10/26), depois do item 35 da Casa E: as piscinas das Casas A, B, C e D no mesmo revestimento Barlavento, com os mesmos efeitos de água, e as pranchas e os PDFs refeitos.
