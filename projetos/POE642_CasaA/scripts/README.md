@@ -459,6 +459,7 @@ Os rótulos do PDF de cada pavimento da Casa A (`_pdfs_cliente/642 - <PAVIMENTO>
 
 ```bash
 python3 rotulos_casaa.py Subsolo      # -> ../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png (+ _preview.jpg)
+python3 rotulos_casaa.py Terreo       # -> ../renders/POE642_CasaA_PH_Terreo_final_rotulos.png
 ```
 
 ## Acabamentos finais: `acabamentos_finais.py`

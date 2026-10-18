@@ -703,6 +703,13 @@ Pedido do usuário (18/10/26): "vamos fazer os ajustes nas plantas da casa A", o
 - **Subsolo** (`renders/POE642_CasaA_PH_Subsolo_final_rotulos.png`, 3840 × 2160): 9 rótulos (hall, academia, depósito, circulação, banho de serviço, sauna, banho feminino, banho masculino e elevador).
   - Banho de serviço: no PDF o rótulo passava da parede da direita e encostava no vaso. Foi para o piso livre de cima do banho, no 1,3×.
   - Banho masculino: 4 px à esquerda, para não encostar no arco da porta.
+- **Térreo** (`renders/POE642_CasaA_PH_Terreo_final_rotulos.png`, a partir da imagem com o Barlavento): 26 rótulos. No granito (cozinha, área gourmet, área de serviço, despensa, garagem e bloco do motorista) o texto fica cinza.
+  - Garagem: os três carros ocupam a garagem, então o rótulo vai no corpo do PDF (1,0×), no vão entre o primeiro e o segundo carro.
+  - Sala de estar: estava sobre a mesa de centro. Foi para baixo dela, no tapete, antes das poltronas.
+  - Quarto do motorista: estava sobre a cama. Foi para o piso abaixo dela, em cinza. A caixa do texto pega parte da cama, então a cor vai dada no ajuste.
+  - Banho do motorista, WC, banho da varanda e despensa: estreitos, no corpo do PDF (1,0×), no piso livre entre as peças. O banho da varanda cruza o arco da porta, uma linha fina, como o hall interno.
+  - Varanda (encostava na poltrona: um pouco acima), lavabo (na bancada) e sala de jantar (no vidro): alguns px.
+  - Jardim da escada (17,46 m²): fica na posição do PDF, sobre a faixa verde, em preto (o verde é claro e chapado, e o preto se lê).
 
 ## Casas A a D · Barlavento nas piscinas
 
