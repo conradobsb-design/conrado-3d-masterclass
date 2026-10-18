@@ -704,6 +704,8 @@
     "prefixo": "POE642_CasaA",
     "pasta_bases": "../bases",
     "pasta_entrega": "../entrega",
+    "_largura_prancha": "3840 px desde os nomes e áreas (18/10/26): as imagens com rótulos estão no quadro comum em 3840 px, como nas outras casas (em 2000 px o rótulo não se lia).",
+    "largura_prancha": 3840,
     "pavimentos": {
       "Subsolo": {
         "titulo": "SUBSOLO",

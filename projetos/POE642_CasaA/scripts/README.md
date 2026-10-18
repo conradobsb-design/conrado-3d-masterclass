@@ -108,7 +108,9 @@ As três pranchas têm o mesmo tamanho e a planta no mesmo pixel, para que, vist
 - **Alinhamento:** cada render é alinhado à base do seu pavimento, por SIFT e transformação afim, e levado ao quadro 16:9 dessa base.
 
 ```bash
-python rodape_entrega.py --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_bege.png --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final2.png --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final.png
+# Casa A, desde os nomes e áreas (18/10/26): as imagens com rótulos já estão no quadro comum, em 3840 px
+python rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png \
+    --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png
 python pdf_entrega.py
 
 # Casa B

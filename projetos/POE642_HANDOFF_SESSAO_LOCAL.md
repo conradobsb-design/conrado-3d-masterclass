@@ -166,7 +166,7 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 - o PDF `POE642_CasaA_Plantas_Humanizadas.pdf`, em A3 de largura;
 - os rodapés e o GIF das pranchas alternando.
 
-**Pendência opcional:** as pranchas estão em 2000 px porque os renders chegaram comprimidos pelo chat. Com os PNGs originais do motor, rode de novo os retoques e o `rodape_entrega.py` em resolução cheia.
+**Pendência opcional:** os renders da Casa A chegaram comprimidos pelo chat (2000 px). Desde os nomes e áreas (18/10/26) as pranchas saem em 3840 px, com a imagem ampliada e os rótulos nítidos (ver "Casa A · nomes e áreas dos ambientes"). Com os PNGs originais do motor, rode de novo os retoques, o `rotulos_casaa.py` e o `rodape_entrega.py`.
 
 ---
 
@@ -716,6 +716,7 @@ Pedido do usuário (18/10/26): "vamos fazer os ajustes nas plantas da casa A", o
   - Sala íntima: estava sobre a mesa de centro. Foi para o espaço entre ela e o sofá.
   - Banho de serviço: o "m²" caía no vaso. Foi para o piso livre de cima do banho.
   - Banho 1 (no vaso) e closet master (no armário): alguns px.
+- **Entrega refeita:** as três pranchas agora usam as imagens com rótulos (`--no-quadro`) e passaram de 2000 para 3840 px de largura, como as das outras casas (`entrega.largura_prancha` = 3840 na config da Casa A). Os rodapés também saem em 3840 px, com o mesmo quadro de áreas. O PDF `entrega/POE642_CasaA_Plantas_Humanizadas.pdf` (3 páginas A3: Subsolo, Térreo e 1º Pavimento) tem 15,9 MB. O GIF `POE642_CasaA_pranchas_perfiladas.gif` não foi refeito.
 
 ## Casas A a D · Barlavento nas piscinas
 
