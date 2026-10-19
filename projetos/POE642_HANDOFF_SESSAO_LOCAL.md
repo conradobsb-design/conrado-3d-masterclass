@@ -738,6 +738,21 @@ Pedido do usuário (19/10/26): "vamos inserir as referências de imagem das text
   - granito: mais liso (ruído fino x 0,25, manchas x 0,6) e menos escuro (x 1,25).
 - **Sem cara de porcelanato:** na escala da planta, a foto de 60 cm vira ~36 px, e o quilting direto só a repetia em espelho, como um piso impresso. De cada material sai primeiro uma amostra de 3 x 3 m tecida a 320 px/m, com retalhos de 10 cm (`amostras/`). É dela que a textura sai em qualquer escala (`textura(nome, px_por_m, alto, largo)`), tecida de novo, sem repetição visível.
 - **Cartela:** `_texturas/cartela_texturas.jpg`, com a foto, a textura de uso, um trecho de 3 x 2 m na escala da prancha e o mesmo ampliado.
+- **Madeira, vinílico, grama e vegetação externa (19/10/26).** Pedido do usuário: "para o madeira e o vinílico, use a imagem de referência. use também a vegetação externa como referencia dessa imagem também. Importante preservar a escala. Use a grama como referência também".
+  - A referência é uma planta humanizada de outra casa (`_texturas/originais/referencia_planta.webp`).
+  - **Escala medida nela mesma: 26 px/m.** A cama king (1,93 x 2,03 m) tem 50 x 53 px; o sedã (4,55 m), 118 px; a picape grande (6,0 m), 158 px; a porta (0,85 m), 22 px. É quase a escala dos renders (a Casa A em 2000 px tem 31,45 px/m).
+  - As texturas saem de recortes limpos, sem móveis, sombra ou tapete. As caixas estão em `texturas.json`, e a cartela as marca na miniatura.
+    - **madeira:** o deck da piscina, réguas de ~15 cm;
+    - **vinílico:** o piso dos quartos (quatro trechos), réguas de ~20 cm, mais claras e de tons alternados;
+    - **grama:** o gramado fora da sombra das árvores.
+  - A amostra de cada uma é tecida na escala da própria referência (10 a 12 m de lado, retalhos de ~50 cm): a foto tem pouca resolução, e ampliá-la só borraria. Madeira e vinílico têm as réguas na vertical da imagem; para aplicar, girar conforme o ambiente.
+  - **Vegetação:** `vegetacao()` recorta 9 plantas com fundo transparente, em `_texturas/vegetacao/` a 52 px/m:
+    - 3 árvores de copa redonda (4,5, 4,5 e 3,4 m);
+    - 3 arbustos redondos (~1,1 m);
+    - 3 palmeiras baixas (1,2 a 1,6 m).
+    - **Contorno:** sai da textura fina das folhas, de dentro para fora pelo raio, suavizado em volta, sem a grama na sombra e sem o piso.
+    - **Para aplicar:** `pousar(fundo, nome, cx, cy, px_por_m)` põe a planta no render no tamanho real, com a sombra da referência (luz do alto à direita: a sombra cai para baixo e à esquerda).
+  - A cartela ganhou as linhas 6 a 9; a 9 mostra as plantas sobre a grama, no tamanho real, na escala da prancha.
 
 ## Casa A · conferência item a item com o PDF
 

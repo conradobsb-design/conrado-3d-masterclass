@@ -74,6 +74,89 @@
         "manchas": 0.6,
         "clarear": 1.25
       }
+    },
+    "madeira": {
+      "titulo": "6. Madeira (deck)",
+      "fonte": "referencia",
+      "recortes": [
+        [
+          442,
+          248,
+          485,
+          518
+        ]
+      ],
+      "arquivo": "madeira.jpg",
+      "direcional": true,
+      "nota": "o deck da piscina da referência: réguas de ~15 cm (4 px a 26 px/m), contínuas, na vertical da imagem",
+      "amostra": {
+        "px_por_m": 26,
+        "lado_m": 10,
+        "retalho": 12
+      }
+    },
+    "vinilico": {
+      "titulo": "7. Vinílico",
+      "fonte": "referencia",
+      "recortes": [
+        [
+          376,
+          182,
+          436,
+          199
+        ],
+        [
+          556,
+          184,
+          600,
+          211
+        ],
+        [
+          559,
+          112,
+          575,
+          158
+        ],
+        [
+          265,
+          118,
+          287,
+          163
+        ]
+      ],
+      "arquivo": "vinilico.jpg",
+      "direcional": true,
+      "nota": "o piso dos quartos da referência: réguas de ~20 cm, mais claras e de tons alternados, na vertical da imagem (só trechos sem móveis, tapete ou sombra)",
+      "amostra": {
+        "px_por_m": 26,
+        "lado_m": 10,
+        "retalho": 12
+      }
+    },
+    "grama": {
+      "titulo": "8. Grama",
+      "fonte": "referencia",
+      "recortes": [
+        [
+          528,
+          2,
+          680,
+          42
+        ],
+        [
+          28,
+          2,
+          95,
+          78
+        ]
+      ],
+      "arquivo": "grama.jpg",
+      "nota": "o gramado da referência, fora da sombra das árvores: verde médio, manchas suaves de 0,5 a 1 m",
+      "amostra": {
+        "px_por_m": 26,
+        "lado_m": 12,
+        "retalho": 14
+      }
     }
   },
   "amostra": {
@@ -81,5 +164,95 @@
     "lado_m": 3.0,
     "retalho": 32,
     "largura_max_uso": 1000
+  },
+  "referencia_planta": {
+    "original": "originais/referencia_planta.webp",
+    "px_por_m": 26,
+    "nota": "planta humanizada que o usuário mandou como referência da madeira, do vinílico, da grama e da vegetação externa (19/10/26). Escala medida nela mesma: a cama king (1,93 x 2,03 m) tem 50 x 53 px; o sedã (4,55 m), 118 px; a picape grande (6,0 m), 158 px; a porta (0,85 m), 22 px: 26 px/m (a planta da Casa A em 2000 px tem 31,45 px/m)."
+  },
+  "vegetacao": {
+    "_sobre": "plantas recortadas da referência, com fundo transparente: centro e raio da copa em px da referência (26 px/m)",
+    "px_por_m_sprite": 52,
+    "plantas": {
+      "arvore_1": {
+        "centro": [
+          90,
+          142
+        ],
+        "raio": 58,
+        "tipo": "árvore de copa redonda"
+      },
+      "arvore_2": {
+        "centro": [
+          90,
+          622
+        ],
+        "raio": 59,
+        "tipo": "árvore de copa redonda"
+      },
+      "arvore_3": {
+        "centro": [
+          72,
+          789
+        ],
+        "raio": 44,
+        "tipo": "árvore de copa redonda, menor"
+      },
+      "arbusto_1": {
+        "centro": [
+          679,
+          140
+        ],
+        "raio": 15,
+        "tipo": "arbusto redondo"
+      },
+      "arbusto_2": {
+        "centro": [
+          679,
+          175
+        ],
+        "raio": 15,
+        "tipo": "arbusto redondo"
+      },
+      "arbusto_3": {
+        "centro": [
+          525,
+          795
+        ],
+        "raio": 14,
+        "tipo": "arbusto redondo, mais claro"
+      },
+      "palmeira_1": {
+        "centro": [
+          677,
+          96
+        ],
+        "raio": 21,
+        "tipo": "palmeira de folhas finas, em leque"
+      },
+      "palmeira_2": {
+        "centro": [
+          266,
+          765
+        ],
+        "raio": 17,
+        "tipo": "palmeira baixa / agave"
+      },
+      "palmeira_3": {
+        "centro": [
+          429,
+          730
+        ],
+        "raio": 16,
+        "tipo": "palmeira baixa / agave"
+      }
+    },
+    "sombra": {
+      "dx": -0.12,
+      "dy": 0.12,
+      "desfoque": 0.08,
+      "opacidade": 0.45,
+      "nota": "na referência a luz vem do alto à direita: a sombra cai para baixo e à esquerda (frações do diâmetro)"
+    }
   }
 }
