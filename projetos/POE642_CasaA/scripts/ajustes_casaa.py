@@ -61,6 +61,8 @@ Itens:
      inox e a torneira gourmet, no lugar das duas caixas do motor.
   Térreo, bancada da cozinha (pedido do usuário, 19/10/26): em quartzo com o desenho de pedra, com a área molhada, as
      duas cubas em inox e as torneiras do PDF.
+  Térreo 3. Estar sob a projeção (pedido do usuário, 19/10/26): no lugar da mesa de jantar do motor, as 4 poltronas em
+     X e a mesa triangular do PDF, com o X tracejado por cima.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -94,6 +96,7 @@ BANCO_SAUNA = {"ret": (625.0, 826.7, 717.5, 845.3),
 # o Bege Bahia aprovado da Casa A: o mármore das varandas do 1º Pavimento (os mesmos trechos que foram ao Térreo,
 # `retoque_bege_bahia_terreo.FONTES_1PAV`), tecido por image quilting
 BEGE_1PAV = CASA / "renders/POE642_CasaA_PH_1Pavimento_v7_final2.png"
+SS_E = 8                                   # supersampling dos desenhos do estar sob a projeção
 
 
 def textura_bege(alto, largo, semente=642):
@@ -1691,6 +1694,225 @@ def cozinha_pias(out):
     return out
 
 
+# Térreo 3. Estar sob a projeção do pavimento superior (pedido do usuário, 19/10/26: "melhorar a representação dessa
+# área. não é mesa de jantar. área de estar."). O motor pôs uma mesa retangular com 6 cadeiras. No PDF (ARQ_LAYOUT
+# HUMANIZAÇÃO e ARQ_MOBILIÁRIO) são 4 poltronas em X, voltadas para uma mesa triangular de cantos arredondados no
+# centro, sob o X tracejado da projeção (DOC_LINHAS E PROJEÇÕES). Sem IA:
+# 1. a mesa e as cadeiras do motor saem, com as sombras: o travertino volta, tecido (image quilting) de um trecho
+#    limpo dele ao lado, na luz do lugar (a do piso em volta);
+# 2. as poltronas são as do PDF (poltronas de encosto curvo, que abraça o assento até os braços), no estilo do sofá
+#    aprovado da sala: o contorno do PDF cheio, dividido pelas linhas dele em assento e encosto com os braços (cada
+#    parte com o volume arredondado e o vinco nas linhas), nas cores do sofá, com a sombra na mesma luz (as poltronas
+#    do render têm outro desenho);
+# 3. a mesa triangular, no contorno do PDF, no carvalho da mesa do motor (o veio no comprido), com o contorno fino e
+#    a sombra curta;
+# 4. o X tracejado volta por cima, como o render o desenha: os traços do PDF, no passo e na fase dos traços do render
+#    em volta, na cor e na largura deles.
+ESTAR_PROJ = {
+    "apagar": (1026, 332, 1107, 443),                         # px: a mesa e as cadeiras do motor, com as sombras
+    "janela": (996, 312, 1132, 458),                          # px: o quadrado da projeção
+    "fonte_piso": (1137, 330, 1177, 450),                     # px: travertino limpo, à direita do quadrado
+    "poltronas": [(1703.75, 859.16, 1773.19, 928.52), (1816.11, 858.86, 1885.46, 928.31),
+                  (1814.96, 947.8, 1884.4, 1017.15), (1704.62, 947.57, 1773.97, 1017.02)],   # pt (contornos do PDF)
+    "mesa": (1777.07, 914.87, 1819.33, 955.39),               # pt
+    "fonte_madeira": (1053, 338, 1083, 361),                  # px da imagem aprovada: o tampo da mesa do motor
+    "sombra_poltrona": [(-1.4, 1.4, 2.0, 0.30), (0, 0, 0.9, 0.14)], "sombra_mesa": (-1.0, 1.0, 1.2, 0.28),
+    "vinco": 0.18,                                            # as linhas do PDF, no tecido
+    "contorno_mesa": ((70, 96, 128), 0.35),
+    "traco": {"cor": (112, 116, 120), "larg": 1.25, "forca": 0.62}}
+
+
+def estar_projecao(out):
+    from retoque_bege_bahia_terreo import quilting
+    q = ESTAR_PROJ
+    pg, p2r = pdf_pavimento("Terreo")
+    orig = cv2.imread(str(APROVADAS["Terreo"]))
+    X0, Y0, X1, Y1 = q["janela"]
+    H, W = (Y1 - Y0) * SS_E, (X1 - X0) * SS_E
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    h, w = reg.shape[:2]
+
+    def ss(pts):
+        return np.int32(np.round((np.asarray(pts) - (X0, Y0)) * SS_E))
+
+    def red(m):
+        return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+    def poli(caixa, camada):
+        d = next(d for d in pg.get_drawings() if d.get("layer") == camada and d["type"] == "f"
+                 and d["rect"].x0 >= caixa[0] - 0.5 and d["rect"].x1 <= caixa[2] + 0.5
+                 and d["rect"].y0 >= caixa[1] - 0.5 and d["rect"].y1 <= caixa[3] + 0.5)
+        return np.vstack(caminhos_pdf(d, p2r, 16))
+
+    # os traços do X, do PDF (cada traço é uma linha da DOC_LINHAS E PROJEÇÕES)
+    tracos = []
+    for d in pg.get_drawings():
+        r = d["rect"]
+        if d.get("layer") == "DOC_LINHAS E PROJEÇÕES" and r.width > 5 and r.height > 5 and \
+                abs(r.width - r.height) < 0.2 and r.width < 11:
+            (a, b), (c, e) = p2r(r.x0, r.y0), p2r(r.x1, r.y1)
+            if X0 <= a and c <= X1 and Y0 <= b and e <= Y1:
+                it = d["items"][0]
+                tracos.append((np.float64(p2r(it[1].x, it[1].y)), np.float64(p2r(it[2].x, it[2].y))))
+    Yo = out.astype(np.float32).mean(axis=2)
+    ax0, ay0, ax1, ay1 = q["apagar"]
+
+    # 4 (medida antes de apagar): a fase dos traços do render em cada diagonal, fora da área apagada
+    def perfil_escuro(pts):
+        return np.float32([float(cv2.getRectSubPix(Yo, (1, 1), (float(x), float(y)))[0, 0]) for x, y in pts])
+
+    fases = {}
+    for sentido in (1, -1):
+        seg = [t for t in tracos if np.sign((t[1][0] - t[0][0]) * (t[1][1] - t[0][1])) == sentido]
+        u = seg[0][1] - seg[0][0]
+        u = u / np.hypot(*u)
+        if u[1] < 0:
+            u = -u
+        melhor = (-1e9, 0.0)
+        for desl in np.arange(-5.5, 5.51, 0.25):
+            sc = 0.0
+            for a, b in seg:
+                a2, b2 = a + desl * u, b + desl * u
+                fora = lambda p: not (ax0 - 2 <= p[0] <= ax1 + 2 and ay0 - 2 <= p[1] <= ay1 + 2)
+                if not (fora(a2) and fora(b2)):
+                    continue
+                dentro = [a2 + (b2 - a2) * k for k in np.linspace(0.15, 0.85, 7)]
+                vao = [b2 + u * k for k in (0.9, 1.5, 2.1)]
+                sc += perfil_escuro(vao).mean() - perfil_escuro(dentro).mean()
+            melhor = max(melhor, (sc, desl))
+        fases[sentido] = (melhor[1], u)
+        print(f"    traços da diagonal {'\\' if sentido > 0 else '/'}: fase do render {melhor[1]:+.2f} px ao longo dela")
+
+    # 1. a mesa e as cadeiras do motor saem: o travertino tecido, na luz do lugar
+    med = cv2.medianBlur(out, 7).astype(np.float32)
+    apaga = np.zeros(out.shape[:2], bool)
+    apaga[ay0:ay1, ax0:ax1] = True
+    riscos = np.zeros(out.shape[:2], np.uint8)
+    for a, b in tracos:
+        cv2.line(riscos, tuple(np.int32(np.round(a))), tuple(np.int32(np.round(b))), 255, 3)
+    riscos = cv2.dilate(riscos, np.ones((7, 7), np.uint8)) > 0
+    piso = np.zeros_like(apaga)
+    piso[Y0:Y1, X0:X1] = True
+    piso &= ~cv2.dilate(apaga.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool) & ~riscos & (Yo > 185)
+
+    def nconv(img, m, sig):
+        return cv2.GaussianBlur(img * m[..., None], (0, 0), sig) / \
+            np.maximum(cv2.GaussianBlur(m, (0, 0), sig), 1e-4)[..., None]
+    peso = cv2.GaussianBlur(piso.astype(np.float32), (0, 0), 10)
+    campo = np.where((peso > 0.05)[..., None], nconv(med, piso.astype(np.float32), 10),
+                     nconv(med, piso.astype(np.float32), 30))   # no meio da área apagada, a luz de mais longe
+    fx0, fy0, fx1, fy1 = q["fonte_piso"]
+    campo_f = nconv(med, np.ones(out.shape[:2], np.float32), 10)[fy0:fy1, fx0:fx1]
+    f = out[fy0:fy1, fx0:fx1].astype(np.float32) / campo_f
+    f = f / f.reshape(-1, 3).mean(axis=0)
+    fontes = [np.ascontiguousarray(v) for v in (f, f[:, ::-1], f[::-1, :], f[::-1, ::-1])]
+    tex = quilting(fontes, ay1 - ay0, ax1 - ax0, p=24, sobra=8, candidatos=400, rng=np.random.default_rng(646))
+    novo = out.astype(np.float32)
+    novo[ay0:ay1, ax0:ax1] = tex[:ay1 - ay0, :ax1 - ax0] * campo[ay0:ay1, ax0:ax1]
+    a = np.zeros(out.shape[:2], np.float32)
+    a[ay0:ay1, ax0:ax1] = 1
+    a = cv2.GaussianBlur(a, (0, 0), 1.2) * apaga + apaga * 0
+    a = np.maximum(a, cv2.erode(apaga.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(np.float32))
+    novo = out.astype(np.float32) * (1 - a[..., None]) + novo * a[..., None]
+    reg = novo[Y0:Y1, X0:X1].copy()
+
+    gx, gy = np.meshgrid(np.arange(W) / SS_E + X0 + 0.5 / SS_E, np.arange(H) / SS_E + Y0 + 0.5 / SS_E)
+    gx1, gy1 = np.meshgrid(np.arange(w) + X0 + 0.5, np.arange(h) + Y0 + 0.5)
+
+    def sombra(m, dx, dy, sig, forca):
+        nonlocal reg
+        sm = cv2.warpAffine(m.astype(np.float32) / 255, np.float32([[1, 0, dx * SS_E], [0, 1, dy * SS_E]]), (W, H))
+        sm = cv2.resize(cv2.GaussianBlur(sm, (0, 0), sig * SS_E), (w, h), interpolation=cv2.INTER_AREA)
+        reg *= (1 - forca * sm * (1 - red(m)))[..., None]
+
+    # 2. as poltronas do PDF, no estilo do sofá aprovado
+    cores = SALA["cores"]
+
+    def lisa(t):
+        return t * t * (3 - 2 * t)
+
+    def pintar(cor, tom, m):
+        nonlocal reg
+        c = cv2.resize(np.float32(cor)[None, None] * tom[..., None] * (m[..., None] / 255.0), (w, h),
+                       interpolation=cv2.INTER_AREA)
+        a = red(m)
+        reg = reg * (1 - a[..., None]) + c
+
+    for k, caixa in enumerate(q["poltronas"]):
+        ds = [d for d in pg.get_drawings() if d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO"
+              and d["rect"].x0 >= caixa[0] - 0.5 and d["rect"].x1 <= caixa[2] + 0.5
+              and d["rect"].y0 >= caixa[1] - 0.5 and d["rect"].y1 <= caixa[3] + 0.5]
+        corpo = np.zeros((H, W), np.uint8)
+        for d in ds:
+            if d["type"] == "f":
+                for c in caminhos_pdf(d, p2r, 16):
+                    cv2.fillPoly(corpo, [ss(c)], 255)
+        linhas = np.zeros((H, W), np.uint8)
+        for d in ds:
+            if d["type"] == "s":
+                for c in caminhos_pdf(d, p2r, 16):
+                    cv2.polylines(linhas, [ss(c)], False, 255, 2)
+        linhas &= corpo
+        for par in q["sombra_poltrona"]:
+            sombra(corpo, *par)
+        n, lab, st, _ = cv2.connectedComponentsWithStats(((corpo > 0) & (linhas == 0)).astype(np.uint8), connectivity=4)
+        assento = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+        partes = [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > 4 * SS_E * SS_E]
+        perto = cv2.dilate(np.isin(lab, partes).astype(np.uint8), np.ones((5, 5), np.uint8))
+        resto = (corpo > 0) & ~np.isin(lab, partes) & (perto == 0)     # sobras finas: vão com o encosto
+        for i in partes:
+            m = ((lab == i) | (cv2.dilate((lab == i).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0) & (linhas > 0))
+            m = (m & (corpo > 0)).astype(np.uint8) * 255
+            dist = cv2.distanceTransform(m, cv2.DIST_L2, 5) / SS_E
+            if i == assento:
+                pintar(cores["assento"], 0.80 + 0.20 * lisa(np.clip(dist / 3.0, 0, 1)), m)
+            else:
+                pintar(cores["encosto"], 0.80 + 0.20 * lisa(np.clip(dist / 1.8, 0, 1)), m)
+        if resto.any():
+            m = resto.astype(np.uint8) * 255
+            pintar(cores["encosto"], np.full((H, W), 0.85, np.float32), m)
+        reg *= (1 - q["vinco"] * red(linhas))[..., None]
+        print(f"    poltrona {k + 1}: contorno do PDF, {len(partes)} partes (assento {st[assento, cv2.CC_STAT_AREA] / SS_E ** 2:.0f} px)")
+
+    # 3. a mesa triangular em carvalho
+    pm = poli(q["mesa"], "ARQ_MOBILIÁRIO")
+    mm = np.zeros((H, W), np.uint8)
+    cv2.fillPoly(mm, [ss(pm)], 255)
+    sombra(mm, *q["sombra_mesa"])
+    a0, b0, a1, b1 = q["fonte_madeira"]
+    mx0, my0 = pm.min(axis=0)
+    mx1, my1 = pm.max(axis=0)
+    M = cv2.getAffineTransform(np.float32([(0, 0), (a1 - a0, 0), (0, b1 - b0)]),
+                               np.float32([(mx0 - X0 - 1, my0 - Y0 - 1), (mx1 - X0 + 1, my0 - Y0 - 1), (mx0 - X0 - 1, my1 - Y0 + 1)]))
+    madeira = cv2.warpAffine(orig[b0:b1, a0:a1].astype(np.float32), M, (w, h), flags=cv2.INTER_AREA,
+                             borderMode=cv2.BORDER_REFLECT)
+    al = red(mm)[..., None]
+    reg = reg * (1 - al) + madeira * al
+    cor, larg = q["contorno_mesa"]
+    borda = mm & ~cv2.erode(mm, np.ones((max(1, int(round(larg * SS_E))),) * 2, np.uint8))
+    al = red(borda)[..., None]
+    reg = reg * (1 - al) + np.float32(cor) * al
+
+    # 4. o X tracejado por cima, na fase do render
+    t = q["traco"]
+    risco = np.zeros((H, W), np.uint8)
+    for a, b in tracos:
+        sentido = np.sign((b[0] - a[0]) * (b[1] - a[1]))
+        desl, u = fases[sentido]
+        a2, b2 = a + desl * u, b + desl * u
+        meio = (a2 + b2) / 2
+        if not (ax0 - 6 <= meio[0] <= ax1 + 6 and ay0 - 6 <= meio[1] <= ay1 + 6):
+            continue
+        cv2.line(risco, tuple(ss(a2)), tuple(ss(b2)), 255, max(1, int(round(t["larg"] * SS_E))))
+    al = red(risco)[..., None] * t["forca"]
+    # só dentro da área refeita (fora dela, os traços do render ficam)
+    dentro = cv2.GaussianBlur(apaga[Y0:Y1, X0:X1].astype(np.float32), (0, 0), 0.8)[..., None]
+    reg = reg * (1 - al * dentro) + np.float32(t["cor"]) * al * dentro
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print("    estar sob a projeção: mesa e 6 cadeiras do motor fora; 4 poltronas em X e a mesa triangular do PDF")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1836,7 +2058,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("portas_granito", "portas no granito: folhas do PDF e arcos em cinza fino", portas_granito),
                     ("inox", "eletrodomésticos em inox (cozinha, gourmet e área de serviço)", inox),
                     ("gourmet", "bancada gourmet: área molhada, divisória, cuba e torneira", gourmet),
-                    ("cozinha_pias", "bancada da cozinha em pedra: área molhada, cubas e torneiras", cozinha_pias)]}
+                    ("cozinha_pias", "bancada da cozinha em pedra: área molhada, cubas e torneiras", cozinha_pias),
+                    ("3", "estar sob a projeção: 4 poltronas em X e a mesa triangular, não mesa de jantar", estar_projecao)]}
 
 
 def main():

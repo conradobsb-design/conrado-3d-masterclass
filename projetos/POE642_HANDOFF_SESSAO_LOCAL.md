@@ -890,6 +890,17 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - Entram as cubas em inox, com as válvulas, e as torneiras cromadas, com a sombra curta.
     - Na prancha, só a bancada mudou.
     - Antes e depois em `renders/POE642_CasaA_PH_Terreo_cozinha_pias_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
+  - **Térreo 3, estar sob a projeção (usuário: "melhorar a representação dessa área. não é mesa de jantar. área de estar."; item 3 da conferência):** o motor pôs uma mesa retangular com 6 cadeiras. No PDF (ARQ_LAYOUT HUMANIZAÇÃO e ARQ_MOBILIÁRIO) são 4 poltronas em X, de encosto curvo que abraça o assento até os braços, voltadas para uma mesa triangular de cantos arredondados no centro, sob o X tracejado da projeção.
+    - A mesa e as cadeiras saem, com as sombras. O travertino volta, tecido (image quilting) de um trecho limpo à direita do quadrado, na luz do piso em volta.
+    - As poltronas entram no contorno do PDF, no estilo do sofá aprovado da sala:
+      - assento e encosto com os braços, divididos pelas linhas do PDF;
+      - cada parte com o volume arredondado e o vinco nas linhas;
+      - nas cores do sofá, com a sombra na mesma luz.
+    - Por que não um clone: a poltrona aprovada da sala é de outro desenho e só cobria 59% do contorno.
+    - A mesa triangular entra no contorno do PDF, no carvalho da mesa do motor, com o contorno fino e a sombra curta.
+    - O X tracejado volta por cima, como o render o desenha: os traços do PDF, no passo e na fase dos traços do render em volta (medida: −4,5 px numa diagonal e +1,25 px na outra), na cor e na largura deles.
+    - Na prancha, só o quadrado da projeção mudou.
+    - Antes e depois em `renders/POE642_CasaA_PH_Terreo_estar_projecao_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
   - Mais pedidos (19/10/26): "vamos melhorar a representação da escada. não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal. sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter um aspecto melhor"; "trazer o rótulo do shaft". E ainda: "representar a cama no quarto do motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro adequadamente. o rótulo do quarto do motorista está no local errado. o arco da porta de entrada do banho do motorista está imperceptível, devendo ser em cinza, como de regra" (o arco já foi, nas portas no granito); "mude as cores, deixe cada carro com uma única cor e deixe os carros desalinhados".
   - Pedidos seguintes do usuário (19/10/26): "melhorar a representação dessa escada caracol. somente uma parte será representada, sendo a outra esmaecida [...] onde o arco está em destaque"; "melhorar a representação dos arcos e portas. lembrando que os arcos das portas no marrom granito são em cinza, com traço fino"; "eletrodomésticos em inox"; "melhore a representação da área molhada e divisoria da bancada" (gourmet); "melhore as representações das pias e bancada, com a área molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"; "melhorar a representação dessa área. não é mesa de jantar. área de estar" (item 3); "melhorar cuba e sua posição e tamanho. representar a bancada da cuba. representar o sanitário. representar e gerar o rótulo da claraboia" (lavabo); "melhorar a representação da porta pivotante, mostrando-a até o hall externo com seus respectivos arcos".
 
