@@ -866,6 +866,19 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - O volume do motor passava até 2 px do quadrado do PDF, para fora (com um brilho na quina de cima). O inox cobre os dois, para não sobrar moldura lilás. Os armários com diagonal (até o teto) ficam como estão.
     - Na prancha, só a fileira dos eletrodomésticos mudou.
     - Antes e depois em `renders/POE642_CasaA_PH_Terreo_inox_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
+  - **Térreo, bancada gourmet (usuário: "melhore a representação da área molhada e divisoria da bancada"):** o motor fez, no braço de baixo da bancada, duas caixas: uma com um "texto" ilegível e outra com a cuba.
+    - No PDF (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS):
+      - a área molhada é o retângulo em volta da cuba, a 2,3 pt da borda e da ponta da bancada, até a parede;
+      - a divisória é a linha que corta a área molhada de lado a lado, interrompida pela cuba;
+      - a cuba é retangular, de aba fina;
+      - a torneira gourmet tem a base e a alavanca junto à parede e a mola até a bica, sobre a cuba.
+    - As duas caixas saem: no lugar delas entra a bancada logo à esquerda, coluna a coluna, na mesma luz.
+    - Entram:
+      - a área molhada e a divisória em traço cinza fino, o da área molhada das Casas C e D, com a área 3% mais escura que a bancada para se ler como uma zona (o lado de cima fica a 1 px da borda e se lê junto com ela);
+      - a cuba em inox (aba, bacia da borda ao fundo, contorno);
+      - a torneira cromada (base, alavanca, mola e bica com o arejador), com a sombra curta.
+    - Na prancha, só a bancada mudou.
+    - Antes e depois em `renders/POE642_CasaA_PH_Terreo_gourmet_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
   - Mais pedidos (19/10/26): "vamos melhorar a representação da escada. não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal. sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter um aspecto melhor"; "trazer o rótulo do shaft". E ainda: "representar a cama no quarto do motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro adequadamente. o rótulo do quarto do motorista está no local errado. o arco da porta de entrada do banho do motorista está imperceptível, devendo ser em cinza, como de regra" (o arco já foi, nas portas no granito); "mude as cores, deixe cada carro com uma única cor e deixe os carros desalinhados".
   - Pedidos seguintes do usuário (19/10/26): "melhorar a representação dessa escada caracol. somente uma parte será representada, sendo a outra esmaecida [...] onde o arco está em destaque"; "melhorar a representação dos arcos e portas. lembrando que os arcos das portas no marrom granito são em cinza, com traço fino"; "eletrodomésticos em inox"; "melhore a representação da área molhada e divisoria da bancada" (gourmet); "melhore as representações das pias e bancada, com a área molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"; "melhorar a representação dessa área. não é mesa de jantar. área de estar" (item 3); "melhorar cuba e sua posição e tamanho. representar a bancada da cuba. representar o sanitário. representar e gerar o rótulo da claraboia" (lavabo); "melhorar a representação da porta pivotante, mostrando-a até o hall externo com seus respectivos arcos".
 

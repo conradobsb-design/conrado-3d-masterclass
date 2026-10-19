@@ -57,6 +57,8 @@ Itens:
      PDF e o arco em cinza fino, como de regra.
   Térreo, eletrodomésticos (pedido do usuário, 19/10/26): os quadrados do PDF da cozinha, do gourmet e da área de
      serviço com o inox aprovado da Casa D.
+  Térreo, bancada gourmet (pedido do usuário, 19/10/26): a área molhada e a divisória do PDF em traço fino, a cuba em
+     inox e a torneira gourmet, no lugar das duas caixas do motor.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1518,6 +1520,94 @@ def inox(out):
     return out
 
 
+# Térreo, bancada gourmet (pedido do usuário, 19/10/26: "melhore a representação da área molhada e divisoria da
+# bancada"). O motor fez, no braço de baixo da bancada, duas caixas: uma com um "texto" ilegível e outra com a cuba.
+# No PDF (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS): a área molhada é o retângulo em volta da cuba, a 2,3 pt da borda da
+# bancada e da ponta, até a parede; a divisória é a linha que corta a área molhada de lado a lado, interrompida pela
+# cuba; a cuba é retangular, de aba fina; a torneira gourmet tem a base e a alavanca junto à parede e a mola até a
+# bica, sobre a cuba. As duas caixas saem (a bancada logo à esquerda, coluna a coluna, na mesma luz) e entram: a área
+# molhada e a divisória em traço cinza fino (o da área molhada das Casas C e D), com a área 3% mais escura que a
+# bancada para se ler como uma zona; a cuba em inox (aba, bacia da borda ao fundo, contorno) e a torneira cromada,
+# com a sombra curta.
+GOURMET = {
+    "limpar": (866, 923, 729, 750), "desloc": 60, "esfumar": 3,   # px: x0, x1, y0, y1; de onde vem a bancada
+    "area_molhada": (1443.52, 1559.17, 1554.07, 1596.59),         # pt; o lado de baixo é a parede
+    "divisoria": 1576.75,
+    "cuba": (1492.85, 1564.28, 1534.8, 1589.22), "bacia": (1493.98, 1565.41, 1533.66, 1588.09),
+    "bica": ((1513.75, 1580.3), 3.1), "mola": (1514.52, 1579.35, 1516.23, 1591.69),
+    "base": ((1515.35, 1591.9), 1.4), "alavanca": (1510.9, 1590.6, 1513.75, 1593.1),
+    "traco": ((140, 142, 144), 0.4, 0.7),                         # cor, largura (px), força
+    "tom_area": 0.97,                                              # a área molhada, um pouco mais escura que a bancada
+    "aba": (222, 221, 218), "contorno": (120, 124, 128), "bacia_cor": ((166, 165, 162), (202, 201, 198))}
+
+
+def gourmet(out):
+    from retoque_subsolo_casae import Tela, SOMBRA, CROMO, CROMO_CLARO, CROMO_ESCURO, SS
+    q = GOURMET
+    x0, x1, y0, y1 = q["limpar"]
+    d, e = q["desloc"], q["esfumar"]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    fonte = out[y0:y1, x0 - d:x1 - d].astype(np.float32)
+    w = x1 - x0
+    a = np.clip(np.minimum(np.arange(w) + 1, w - np.arange(w)) / e, 0, 1)[None, :, None]
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + fonte * a, 0, 255).astype(np.uint8)
+
+    _, p2r = pdf_pavimento("Terreo")
+    ax0, ay0, ax1, ay1 = q["area_molhada"]
+    tl = Tela(out, p2r, (ax0 - 3, ay0 - 3, ax1 + 3, ay1))
+    cor, larg, forca = q["traco"]
+
+    def linha(p0, p1):
+        m = tl.vazia()
+        a_, b_ = tl.pt(*p0), tl.pt(*p1)
+        cv2.line(m, (int(round(a_[0])), int(round(a_[1]))), (int(round(b_[0])), int(round(b_[1]))), 255,
+                 max(1, int(round(larg * SS))))
+        return m
+
+    area = tl.ret(q["area_molhada"])
+    tl.reg *= (1 - (1 - q["tom_area"]) * tl.reduzir(area))[..., None]
+    cx0, cy0, cx1, cy1 = q["cuba"]
+    for p0, p1 in [((ax0, ay1), (ax0, ay0)), ((ax0, ay0), (ax1, ay0)), ((ax1, ay0), (ax1, ay1)),
+                   ((ax0, q["divisoria"]), (cx0, q["divisoria"])), ((cx1, q["divisoria"]), (ax1, q["divisoria"]))]:
+        tl.pintar(linha(p0, p1), cor, forca)
+
+    c = tl.ret(q["cuba"], 1.0)
+    tl.sombra(c, **SOMBRA)
+    tl.pintar(c, q["aba"])
+    bx0, by0, bx1, by1 = q["bacia"]
+    borda, fundo = q["bacia_cor"]
+    for i in range(6):                       # a bacia, da borda ao fundo
+        k = i / 5
+        tom = tuple(borda[j] * (1 - k) + fundo[j] * k for j in range(3))
+        ins = k * 3.6
+        tl.pintar(tl.ret((bx0 + ins, by0 + ins, bx1 - ins, by1 - ins), max(0.6, 1.4 - k)), tom)
+    tl.contorno(c, 0.3, q["contorno"])
+
+    mx0, my0, mx1, my1 = q["mola"]           # a mola, da base à bica
+    m = tl.ret(q["mola"], 0.8)
+    tl.sombra(m, **SOMBRA)
+    tl.pintar(m, CROMO_ESCURO)
+    tl.pintar(tl.ret((mx0 + 0.2, my0, (mx0 + mx1) / 2, my1), 0.3), CROMO_CLARO, 0.7)
+    for (px_, py_), r, tom in [(q["base"][0], q["base"][1], CROMO), (q["bica"][0], q["bica"][1], CROMO)]:
+        disco = tl.vazia()
+        u, v = tl.pt(px_, py_)
+        cv2.circle(disco, (int(round(u)), int(round(v))), int(round(r * 0.5483 * SS)), 255, -1)
+        tl.sombra(disco, **SOMBRA)
+        tl.pintar(disco, tom)
+        tl.contorno(disco, 0.25, CROMO_ESCURO)
+    (u, v), r = tl.pt(*q["bica"][0]), q["bica"][1]
+    face = tl.vazia()                        # a face da bica, com o arejador
+    cv2.circle(face, (int(round(u)), int(round(v))), int(round(r * 0.6 * 0.5483 * SS)), 255, -1)
+    tl.pintar(face, CROMO_ESCURO)
+    lv = tl.ret(q["alavanca"], 0.5)
+    tl.sombra(lv, **SOMBRA)
+    tl.pintar(lv, CROMO)
+    tl.contorno(lv, 0.25, CROMO_ESCURO)
+    out = tl.gravar()
+    print("    bancada gourmet: caixas do motor fora; área molhada e divisória em traço fino, cuba em inox e torneira")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1661,7 +1751,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("portoes", "área descoberta: os portões de correr dos dois lados", portoes),
                     ("9", "escada caracol: degraus 1 a 7 cheios, o resto esmaecido", caracol),
                     ("portas_granito", "portas no granito: folhas do PDF e arcos em cinza fino", portas_granito),
-                    ("inox", "eletrodomésticos em inox (cozinha, gourmet e área de serviço)", inox)]}
+                    ("inox", "eletrodomésticos em inox (cozinha, gourmet e área de serviço)", inox),
+                    ("gourmet", "bancada gourmet: área molhada, divisória, cuba e torneira", gourmet)]}
 
 
 def main():
