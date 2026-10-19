@@ -759,6 +759,11 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - Sem linhas e com o sombreamento de descida das Casas D e E: cada degrau 6% mais escuro de cima para baixo e a sombra curta de cada espelho no degrau de baixo, à direita (0,25 em 2,5 px). A circulação recebe a sombra do último espelho.
     - O `rotulos_casaa.py` passou a alinhar a imagem com ajustes pelo afim da imagem aprovada (`no_quadro_fixo`). O SIFT na imagem ajustada achava um afim um pouco diferente, e a prancha inteira mudava por reamostragem. Agora, contra a prancha de antes dos ajustes, só mudam a escada e a sauna.
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_escada_antes_depois.jpg`; prancha do Subsolo e PDF de entrega refeitos.
+  - **Subsolo 1, chuveiro do banho de serviço (usuário, 19/10/26: "siga com o chuveiro do banho de serviço"):** faltavam o chuveiro e o vidro do box.
+    - No PDF da Casa A (ARQ_LOUÇAS E METAIS), o chuveiro sai da parede da esquerda (canopla, braço e ducha). O box é fechado por duas folhas de vidro de correr sobrepostas, da parede da esquerda até 982,3 pt; o resto, até a parede da direita, é a passagem.
+    - Entram como os aprovados da Casa E (`chuveiro` e `vidro_box` do `retoque_subsolo_casae.py`): a ducha quadrada de 20 cm (11,2 pt), centrada na ducha do PDF, o braço cromado até a parede e a canopla; cada folha de vidro fina, com as bordas finas.
+    - O rótulo "BANHO SERV.", que estava no piso de cima do banho, caía sobre o chuveiro. Foi para a direita da ducha, dentro do box, no corpo do PDF (1,0×); o resto do banho é vaso, bancada e o arco da porta.
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_banho_servico_antes_depois.jpg`. Prancha do Subsolo e PDF de entrega refeitos; contra a prancha de antes dos ajustes, só mudam o banho de serviço, a escada e a sauna.
 
 ## Casas A a D · Barlavento nas piscinas
 

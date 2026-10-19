@@ -49,8 +49,9 @@ PAVIMENTOS = {
                 "sem_tela": "bases/POE642_CasaA_BASE_Subsolo_v4.png",
                 # (nome, centro do rótulo do PDF no quadro final em px de 2000, desvio em px de 2000[, opções])
                 "ajustes": [
-                    # passava da parede da direita e encostava no vaso: no piso livre de cima do banho
-                    ("BANHO SERV.", (605.5, 513.0), (-9, -34)),
+                    # o piso de cima do banho é o box (o chuveiro e o vidro entraram nos ajustes): no corpo do PDF,
+                    # à direita da ducha, dentro do box (o resto do banho é vaso, bancada e o arco da porta)
+                    ("BANHO SERV.", (605.5, 513.0), (-4.5, -39), 1.0),
                     ("BANHO MASC.", (926.4, 809.0), (-2, 0))]},          # encostado no arco da porta
     "Terreo": {"render": "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png",
                "pdf": "642 - TÉRREO - CASA A.pdf",

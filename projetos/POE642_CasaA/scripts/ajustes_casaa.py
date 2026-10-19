@@ -7,6 +7,8 @@ vez, no quadro da imagem aprovada (2000 px). A saída é `renders/<imagem aprova
 aos nomes e áreas (`rotulos_casaa.py`), às pranchas e ao PDF.
 
 Itens:
+  Subsolo 1. Banho de serviço (pedido do usuário, 19/10/26): o chuveiro e as duas folhas de vidro do box, do PDF,
+     como os aprovados da Casa E.
   Subsolo 2. Sauna (pedido do usuário, 19/10/26: "Eu quero que você traga esse banco de volta"). O banco do PDF
      é horizontal, ao longo da parede de baixo, de parede a parede; a faixa vertical à esquerda, no tom do piso
      da piscina, é a passagem da sauna para a piscina e fica como piso ("o banco não é em L"). Na v6 o banco
@@ -162,7 +164,56 @@ def escada(out):
     return out
 
 
-ITENS = {"Subsolo": [("2", "sauna: o banco horizontal de volta", banco_sauna),
+# Subsolo 1. Banho de serviço (pedido do usuário, 19/10/26: "siga com o chuveiro do banho de serviço"): faltavam o
+# chuveiro e o vidro do box. No PDF da Casa A (ARQ_LOUÇAS E METAIS), o chuveiro sai da parede da esquerda (canopla,
+# braço e ducha) e o box é fechado por duas folhas de vidro de correr, sobrepostas, da parede da esquerda até 982,3
+# pt; o resto, até a parede da direita, é a passagem. Entram como os aprovados da Casa E (`chuveiro` e `vidro_box`
+# do `retoque_subsolo_casae.py`): a ducha quadrada de 20 cm (11,2 pt), centrada na ducha do PDF, o braço cromado
+# até a parede e a canopla; e cada folha de vidro fina, com as bordas finas. Pontos do PDF (pt), levados à imagem
+# pelo quadro comum e pelo afim da base.
+CHUVEIRO_SERV = {"ducha": (933.2, 1086.4, 944.4, 1097.6),    # centro (938,8; 1092,0): a ducha do PDF
+                 "braco": (930.5, 1091.3, 938.8, 1092.8),
+                 "canopla": (929.9, 1090.4, 930.5, 1093.6),
+                 "vidros": [(929.9, 1121.8, 971.6, 1123.2), (940.6, 1123.2, 982.3, 1124.6)]}
+# quadro comum (2000 px) -> imagem aprovada do Subsolo (o mesmo afim do banco e da escada)
+AFIM_QR = ((0.99911, -0.000617, 1.542), (0.000113, 0.99973, -3.617))
+
+
+def p2r_subsolo():
+    import json
+    import pymupdf
+    import rotulos_casaa as A
+    from opcoes_1pav_casae import quadro_pdf
+    cfg = json.loads(A.CONFIG.read_text())
+    q = A.PAVIMENTOS["Subsolo"]
+    base = (A.CONFIG.parent / cfg["entrega"]["pasta_bases"] / cfg["entrega"]["pavimentos"]["Subsolo"]["base"]).resolve()
+    pg = pymupdf.open(A.RAIZ / "_pdfs_cliente" / q["pdf"])[cfg["pavimentos"]["Subsolo"]["pagina"]]
+    at, lt = cv2.imread(str(base), cv2.IMREAD_GRAYSCALE).shape
+    hb, wb = cv2.imread(str(A.CASA / q["sem_tela"]), cv2.IMREAD_GRAYSCALE).shape
+    p2q = quadro_pdf(pg, cfg, lt, at, wb, hb, 2000)
+    (a, b, c), (d, e, f) = AFIM_QR
+
+    def p2r(x, y):
+        qx, qy = p2q(x, y)
+        return a * qx + b * qy + c, d * qx + e * qy + f
+    return p2r
+
+
+def chuveiro_servico(out):
+    from retoque_subsolo_casae import chuveiro, vidro_box
+    q = CHUVEIRO_SERV
+    p2r = p2r_subsolo()
+    for r in q["vidros"]:
+        out = vidro_box(out, p2r, r)
+    out = chuveiro(out, p2r, q["ducha"], q["braco"], q["canopla"])
+    (x0, y0), (x1, y1) = p2r(*q["ducha"][:2]), p2r(*q["ducha"][2:])
+    print(f"    banho de serviço: chuveiro na parede da esquerda (ducha em x {x0:.1f}-{x1:.1f}, y {y0:.1f}-{y1:.1f} px) "
+          f"e as duas folhas de vidro do box")
+    return out
+
+
+ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chuveiro_servico),
+                     ("2", "sauna: o banco horizontal de volta", banco_sauna),
                      ("3", "escada: depois da linha de corte, os degraus na cor e textura do Subsolo", escada)]}
 
 
