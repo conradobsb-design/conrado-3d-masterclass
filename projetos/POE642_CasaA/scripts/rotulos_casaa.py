@@ -57,6 +57,9 @@ PAVIMENTOS = {
                "aprovada": "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png",
                "pdf": "642 - TÉRREO - CASA A.pdf",
                "sem_tela": "bases/POE642_CasaA_BASE_Terreo_v6.png",
+               # notas do PDF que entram mesmo sendo projeção (pedido do usuário, 19/10/26: "representar e gerar o
+               # rótulo da claraboia")
+               "incluir": ("PROJ. CLARABOIA",),
                "ajustes": [
                    # a garagem é toda carro: no corpo do PDF, no vão entre o primeiro e o segundo carro
                    ("GARAGEM", (1265.1, 771.7), (-40.6, 0), 1.0),
@@ -77,7 +80,10 @@ PAVIMENTOS = {
                    ("SALA DE JANTAR", (1142.7, 506.4), (-2.5, 0)),       # encostado no vidro
                    # o jardim de 4,79 m² ficou verde, com as três touceiras (ajustes): em branco, que se lê sobre a
                    # grama e as palmeiras
-                   ("JARDIM", (826.1, 870.7), (0, 0), {"cor": (255, 255, 255)})]},
+                   ("JARDIM", (826.1, 870.7), (0, 0), {"cor": (255, 255, 255)}),
+                   # a claraboia do lavabo: no corpo do PDF, em duas linhas (numa só, encostava na parede e no vaso),
+                   # logo abaixo do tracejado
+                   ("PROJ. CLARABOIA", (1192.2, 204.2), (0, 4), {"corpo": 1.0, "quebra": ["PROJ.", "CLARABOIA"]})]},
     "1Pavimento": {"render": "renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
                    "pdf": "642 - 1º PAVIMENTO - CASA A.pdf",
                    "sem_tela": "bases/POE642_CasaA_BASE_1Pavimento_v3.png",
@@ -137,7 +143,7 @@ def final_rotulos(chave):
     at, lt = cv2.imread(str(base), cv2.IMREAD_GRAYSCALE).shape
     hb, wb = cv2.imread(str(CASA / q["sem_tela"]), cv2.IMREAD_GRAYSCALE).shape
     p2q = quadro_pdf(pg, cfg, lt, at, wb, hb, LARGURA)
-    rot = [r for r in R1.rotulos_pdf(pg) if not any(f in r[0] for f in FORA)]
+    rot = [r for r in R1.rotulos_pdf(pg) if r[0] in q.get("incluir", ()) or not any(f in r[0] for f in FORA)]
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
     return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=LARGURA / 2000, granito=granito(final),
                                 ajustes=q["ajustes"])

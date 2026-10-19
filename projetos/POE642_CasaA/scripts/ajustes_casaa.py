@@ -63,6 +63,8 @@ Itens:
      duas cubas em inox e as torneiras do PDF.
   Térreo 3. Estar sob a projeção (pedido do usuário, 19/10/26): no lugar da mesa de jantar do motor, as 4 poltronas em
      X e a mesa triangular do PDF, com o X tracejado por cima.
+  Térreo 5. Lavabo (pedido do usuário, 19/10/26): bancada de quartzo com a cuba esculpida e a torneira, o vaso
+     suspenso e o tracejado da claraboia, nas medidas do PDF.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1913,6 +1915,128 @@ def estar_projecao(out):
     return out
 
 
+# Térreo 5. Lavabo (pedido do usuário, 19/10/26: "melhorar cuba e sua posição e tamanho. representar a bancada da
+# cuba. representar o sanitário. representar e gerar o rótulo da claraboia"). O motor pôs no alto uma peça estranha
+# com um arco e um bloco claro (onde ficam a projeção da claraboia e o vaso) e, à direita, uma cuba branca solta,
+# menor que a bancada e longe da parede. No PDF (ARQ_BANCADAS, ARQ_LOUÇAS E METAIS e DOC_LINHAS E PROJEÇÕES): a
+# bancada vai da parede da direita até 1,6 m de fundo, com a cuba esculpida (a bacia, com a fenda do ralo junto à
+# parede, e um friso atrás) e a torneira saindo da parede; o vaso suspenso na parede da direita, no alto; a projeção
+# da claraboia é o retângulo tracejado com o X, no alto do lavabo, com a nota "PROJ. CLARABOIA" logo abaixo. Entram:
+# 1. o piso do lavabo de volta onde estavam as peças do motor (travertino tecido do próprio lavabo, na luz dele);
+# 2. a bancada em quartzo (como a da cozinha), com a cuba esculpida no próprio quartzo, como a do lavabo aprovado da
+#    Casa E: o fundo escurece para a fenda, junto à parede; as bordas de cima e da direita fazem sombra curta para
+#    dentro; traço fino na borda; e a torneira cromada saindo da parede;
+# 3. o vaso suspenso no contorno do PDF, como os aprovados (louça com volume e o tampo fechado);
+# 4. o tracejado da claraboia, como o do estar sob a projeção; o rótulo vem em `rotulos_casaa.py`.
+LAVABO_A = {
+    "limpar": [(1189, 179, 1236, 198), (1210, 201, 1236, 240)],     # px: as peças do motor, com as sombras
+    "fonte_piso": (1191, 199, 1209, 236),                           # px: piso limpo do lavabo, à esquerda
+    "sala": (2021.22, 561.94, 2106.26, 715.01),                     # pt: o lavabo, por dentro das paredes
+    "bancada": (2077.92, 615.8, 2106.26, 670.23), "cuba": (2079.05, 616.94, 2099.46, 669.09),
+    "fenda": 2100.03,                                               # pt: x da fenda do ralo (o friso do PDF)
+    "torneira": (2096.65, 644.89, 2104.59, 646.81), "canopla": (2104.59, 643.9, 2106.26, 647.8),
+    "vaso": (2077.15, 577.45, 2106.26, 597.46),
+    "inclinacao": 0.12, "sombra_borda": (0.16, 1.4), "luz_borda": 0.04,
+    "cor_fenda": (92, 94, 98), "contorno_cuba": ((150, 150, 150), 0.4, 0.6)}
+
+
+def lavabo_a(out):
+    from retoque_bege_bahia_terreo import quilting
+    from retoque_subsolo_casae import Tela, SOMBRA, CROMO, CROMO_CLARO, CROMO_ESCURO, vaso, SS
+    from retoque_terreo_casae import poligono_aa, linha_aa
+    q, qc = LAVABO_A, COZINHA_PIAS
+    pg, p2r = pdf_pavimento("Terreo")
+    (sx0, sy0), (sx1, sy1) = p2r(*q["sala"][:2]), p2r(*q["sala"][2:])
+
+    # 1. o piso de volta
+    apaga = np.zeros(out.shape[:2], bool)
+    for x0, y0, x1, y1 in q["limpar"]:
+        apaga[y0:y1, x0:x1] = True
+    sala = np.zeros_like(apaga)
+    sala[int(np.ceil(sy0)) + 1:int(sy1) - 1, int(np.ceil(sx0)) + 1:int(sx1) - 1] = True
+    Yo = out.astype(np.float32).mean(axis=2)
+    piso = sala & ~cv2.dilate(apaga.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & \
+        (Yo > cv2.medianBlur(out, 9).astype(np.float32).mean(axis=2) - 12)
+    med = cv2.medianBlur(out, 5).astype(np.float32)
+
+    def nconv(img, m, sig):
+        return cv2.GaussianBlur(img * m[..., None], (0, 0), sig) / \
+            np.maximum(cv2.GaussianBlur(m, (0, 0), sig), 1e-4)[..., None]
+    peso = cv2.GaussianBlur(piso.astype(np.float32), (0, 0), 6)
+    campo = np.where((peso > 0.05)[..., None], nconv(med, piso.astype(np.float32), 6),
+                     nconv(med, piso.astype(np.float32), 15))
+    fx0, fy0, fx1, fy1 = q["fonte_piso"]
+    f = out[fy0:fy1, fx0:fx1].astype(np.float32) / nconv(med, piso.astype(np.float32), 6)[fy0:fy1, fx0:fx1]
+    f = f / f.reshape(-1, 3).mean(axis=0)
+    fontes = [np.ascontiguousarray(v) for v in (f, f[:, ::-1], f[::-1, :], f[::-1, ::-1])]
+    ys, xs = np.nonzero(apaga)
+    by0, by1, bx0, bx1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    tex = quilting(fontes, by1 - by0, bx1 - bx0, p=14, sobra=5, candidatos=300, rng=np.random.default_rng(647))
+    novo = out.astype(np.float32)
+    novo[by0:by1, bx0:bx1] = tex[:by1 - by0, :bx1 - bx0] * campo[by0:by1, bx0:bx1]
+    a = (cv2.GaussianBlur(apaga.astype(np.float32), (0, 0), 0.8) * apaga)[..., None]
+    out[:] = np.clip(out * (1 - a) + novo * a, 0, 255).astype(np.uint8)
+
+    # 2. a bancada em quartzo, a cuba esculpida e a torneira
+    tl = Tela(out, p2r, q["bancada"])
+    b = tl.ret(q["bancada"])
+    tl.sombra(b, **SOMBRA)
+    tex = textura_bege(tl.h, tl.w, 648)
+    lum = tex.mean(axis=2)
+    pedra = np.float32(qc["quartzo"])[None, None] * (1 + qc["contraste"] * (lum / lum.mean() - 1))[..., None]
+    a = tl.reduzir(b)[..., None]
+    tl.reg = tl.reg * (1 - a) + pedra * a
+    tl.contorno(b, 0.35, (150, 153, 155))
+    out = tl.gravar()
+    forma = out.shape[:2]
+    yy, xx = np.mgrid[0:forma[0], 0:forma[1]].astype(np.float32) + 0.5
+    (x0, y0), (x1, y1) = p2r(*q["cuba"][:2]), p2r(*q["cuba"][2:])
+    al = poligono_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
+    fa = 1 - q["inclinacao"] * np.clip((xx - x0) / (x1 - x0), 0, 1)       # o fundo desce para a parede
+    s_, w_ = q["sombra_borda"]
+    fa *= 1 - s_ * np.exp(-np.clip(yy - y0, 0, None) / w_) - s_ * np.exp(-np.clip(x1 - xx, 0, None) / w_)
+    fa *= 1 + q["luz_borda"] * (np.exp(-np.clip(xx - x0, 0, None) / w_) + np.exp(-np.clip(y1 - yy, 0, None) / w_))
+    fa = 1 + (fa - 1) * al
+    out[:] = np.clip(out * fa[..., None], 0, 255).astype(np.uint8)
+    xf = p2r(q["fenda"], q["cuba"][1])[0]
+    a = linha_aa(forma, [(xf, y0 + 1.5), (xf, y1 - 1.5)], 0.8)[..., None]
+    out[:] = np.clip(out * (1 - a) + np.float32(q["cor_fenda"]) * a, 0, 255).astype(np.uint8)
+    cor, larg, forca = q["contorno_cuba"]
+    a = linha_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], larg, fechada=True)[..., None] * forca
+    out[:] = np.clip(out * (1 - a) + np.float32(cor) * a, 0, 255).astype(np.uint8)
+    (tx0, ty0), (tx1, ty1) = p2r(*q["torneira"][:2]), p2r(*q["torneira"][2:])
+    yc, lt = (ty0 + ty1) / 2, ty1 - ty0
+    bica = [(tx1, yc), (tx0, yc)]
+    sb = cv2.GaussianBlur(linha_aa(forma, [(u - 1.0, v + 1.0) for u, v in bica], lt), (0, 0), 0.8)
+    out[:] = np.clip(out * (1 - 0.3 * sb)[..., None], 0, 255).astype(np.uint8)
+    for pts, lg, c in ((bica, lt, CROMO_ESCURO), ([(tx1 - 0.3, yc - 0.15), (tx0, yc - 0.15)], 0.35, CROMO_CLARO)):
+        a = linha_aa(forma, pts, lg)[..., None]
+        out[:] = np.clip(out * (1 - a) + np.float32(c) * a, 0, 255).astype(np.uint8)
+    (cx0, cy0), (cx1, cy1) = p2r(*q["canopla"][:2]), p2r(*q["canopla"][2:])
+    a = poligono_aa(forma, [(cx0, cy0), (cx1, cy0), (cx1, cy1), (cx0, cy1)])[..., None]
+    out[:] = np.clip(out * (1 - a) + np.float32(CROMO) * a, 0, 255).astype(np.uint8)
+
+    # 3. o vaso suspenso
+    out = vaso(out, pg, p2r, q["vaso"], "direita")
+
+    # 4. o tracejado da claraboia (por cima do vaso, como no PDF)
+    t = ESTAR_PROJ["traco"]
+    ax0, ay0, ax1, ay1 = q["sala"]
+    risco = np.zeros(forma, np.float32)
+    for d in pg.get_drawings():
+        r = d["rect"]
+        if d.get("layer") == "DOC_LINHAS E PROJEÇÕES" and r.x0 >= ax0 - 0.1 and r.x1 <= ax1 + 0.1 and \
+                r.y0 >= ay0 - 0.1 and r.y1 <= ay1 + 0.1 and max(r.width, r.height) > 3:
+            it = d["items"][0]
+            risco = np.maximum(risco, linha_aa(forma, [p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)], t["larg"]))
+    risco *= sala
+    a = (risco * t["forca"])[..., None]
+    out[:] = np.clip(out * (1 - a) + np.float32(t["cor"]) * a, 0, 255).astype(np.uint8)
+    print("    lavabo: peças do motor fora; bancada de quartzo com cuba esculpida e torneira; vaso suspenso; "
+          "tracejado da claraboia")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -2059,7 +2183,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("inox", "eletrodomésticos em inox (cozinha, gourmet e área de serviço)", inox),
                     ("gourmet", "bancada gourmet: área molhada, divisória, cuba e torneira", gourmet),
                     ("cozinha_pias", "bancada da cozinha em pedra: área molhada, cubas e torneiras", cozinha_pias),
-                    ("3", "estar sob a projeção: 4 poltronas em X e a mesa triangular, não mesa de jantar", estar_projecao)]}
+                    ("3", "estar sob a projeção: 4 poltronas em X e a mesa triangular, não mesa de jantar", estar_projecao),
+                    ("5", "lavabo: bancada com a cuba esculpida, vaso suspenso e a claraboia", lavabo_a)]}
 
 
 def main():

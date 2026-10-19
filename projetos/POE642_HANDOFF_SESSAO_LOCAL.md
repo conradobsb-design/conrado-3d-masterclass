@@ -901,6 +901,22 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - O X tracejado volta por cima, como o render o desenha: os traços do PDF, no passo e na fase dos traços do render em volta (medida: −4,5 px numa diagonal e +1,25 px na outra), na cor e na largura deles.
     - Na prancha, só o quadrado da projeção mudou.
     - Antes e depois em `renders/POE642_CasaA_PH_Terreo_estar_projecao_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
+  - **Térreo 5, lavabo (usuário: "melhorar cuba e sua posição e tamanho. representar a bancada da cuba. representar o sanitário. representar e gerar o rótulo da claraboia"; item 5 da conferência):**
+    - O que o motor fez: no alto, uma peça estranha com um arco e um bloco claro (onde ficam a claraboia e o vaso); à direita, uma cuba branca solta, menor que a bancada e longe da parede.
+    - O que o PDF tem (ARQ_BANCADAS, ARQ_LOUÇAS E METAIS e DOC_LINHAS E PROJEÇÕES):
+      - a bancada na parede da direita, com a cuba esculpida (a bacia, a fenda do ralo junto à parede e um friso atrás) e a torneira saindo da parede;
+      - o vaso suspenso na parede da direita, no alto;
+      - a projeção da claraboia: o retângulo tracejado com o X, no alto, e a nota "PROJ. CLARABOIA" logo abaixo.
+    - As peças do motor saem; o travertino é tecido do próprio lavabo, na luz dele.
+    - Entram:
+      - a bancada em quartzo, como a da cozinha;
+      - a cuba esculpida no próprio quartzo, como a do lavabo aprovado da Casa E: o fundo escurece para a fenda, junto à parede; as bordas de cima e da direita fazem sombra curta para dentro; traço fino na borda;
+      - a torneira cromada saindo da parede;
+      - o vaso suspenso no contorno do PDF, como os aprovados (louça com volume e o tampo fechado);
+      - o tracejado da claraboia, como o do estar sob a projeção.
+    - Rótulo: `rotulos_casaa.py` ganhou a lista `incluir`, de notas do PDF que entram mesmo sendo projeção. "PROJ. CLARABOIA" fica logo abaixo do tracejado, em duas linhas, no corpo do PDF (numa linha só encostava na parede e no vaso).
+    - Na prancha, só o lavabo mudou.
+    - Antes e depois em `renders/POE642_CasaA_PH_Terreo_lavabo_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
   - Mais pedidos (19/10/26): "vamos melhorar a representação da escada. não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal. sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter um aspecto melhor"; "trazer o rótulo do shaft". E ainda: "representar a cama no quarto do motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro adequadamente. o rótulo do quarto do motorista está no local errado. o arco da porta de entrada do banho do motorista está imperceptível, devendo ser em cinza, como de regra" (o arco já foi, nas portas no granito); "mude as cores, deixe cada carro com uma única cor e deixe os carros desalinhados".
   - Pedidos seguintes do usuário (19/10/26): "melhorar a representação dessa escada caracol. somente uma parte será representada, sendo a outra esmaecida [...] onde o arco está em destaque"; "melhorar a representação dos arcos e portas. lembrando que os arcos das portas no marrom granito são em cinza, com traço fino"; "eletrodomésticos em inox"; "melhore a representação da área molhada e divisoria da bancada" (gourmet); "melhore as representações das pias e bancada, com a área molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"; "melhorar a representação dessa área. não é mesa de jantar. área de estar" (item 3); "melhorar cuba e sua posição e tamanho. representar a bancada da cuba. representar o sanitário. representar e gerar o rótulo da claraboia" (lavabo); "melhorar a representação da porta pivotante, mostrando-a até o hall externo com seus respectivos arcos".
 
