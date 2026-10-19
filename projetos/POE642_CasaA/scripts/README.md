@@ -478,7 +478,7 @@ python3 conferencia_casaa.py            # -> ../renders/POE642_CasaA_PH_{Terreo,
 Os itens da conferência corrigidos, um por vez, na imagem aprovada (2000 px). Saída `../renders/<imagem aprovada>_ajustes.png` (+ `_camada.png`), que o `rotulos_casaa.py` usa no lugar da aprovada. O alinhamento ao quadro comum continua vindo da imagem aprovada (`PAVIMENTOS[...]["aprovada"]`, `no_quadro_fixo`), para que só os trechos ajustados mudem na prancha. O PDF de cada pavimento chega à imagem pelo quadro comum e pelo afim `AFIM_QR` do pavimento (`pdf_pavimento`). Depois: `rotulos_casaa.py`, `rodape_entrega.py --no-quadro` e `pdf_entrega.py`.
 
 ```bash
-python3 ajustes_casaa.py Subsolo      # itens 1 a 6: chuveiro e vidro do banho de serviço; banco da sauna; escada; portas de vidro da academia; janelas; traço da circulação
+python3 ajustes_casaa.py Subsolo      # itens 1 a 7: chuveiro e vidro do banho de serviço; banco da sauna; escada; portas de vidro da academia; janelas; traço da circulação; juntas
 python3 rotulos_casaa.py Subsolo
 python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png
 python3 ajustes_casaa.py Terreo       # item 1: pilares da varanda e do gourmet no preto das paredes, na geometria do PDF

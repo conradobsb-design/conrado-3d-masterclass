@@ -23,6 +23,8 @@ Itens:
      geometria do PDF (peitoril, faces da parede, vidro, caixilhos e retornos), no lugar da peça cinza do motor.
   Subsolo 6. Circulação (pedido do usuário, 19/10/26): sai o traço preto ao longo da borda esquerda, que o PDF
      não tem.
+  Subsolo 7. Depósito e circulação interna (pedido do usuário, 19/10/26): o piso sem as juntas das placas, contínuo,
+     com a textura do próprio render, na luz dele.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
 
@@ -390,6 +392,57 @@ def traco_circulacao(out):
     return out
 
 
+# Subsolo 7. Juntas do depósito e da circulação interna (pedido do usuário, 19/10/26: "As marcações de juntas não
+# existem na área de depósito e nem na circulação interna (entre banho de serviço e depósito)"). O piso desses dois
+# ambientes (Bege Bahia na legenda) saiu como placas de ~44 x 22 px, cada uma num tom, com a junta marcada (linhas
+# em x 661, 749, 793, 837, 880 e 925 e em y 478, 496 e 522). O piso volta contínuo, com a textura do próprio
+# render: tecida (image quilting, como o Bege Bahia aprovado do Térreo) de miolos de placas, cada miolo normalizado
+# pelo seu tom, e posta na luz do render (o tom médio do piso em volta, suavizado o bastante para as placas
+# sumirem e a sombra junto às paredes ficar). Ficam como estão as paredes, a porta do depósito com o arco e a peça
+# junto à parede de baixo.
+JUNTAS = {
+    # ambientes (px da imagem: x0, y0, x1, y1), por dentro das paredes e das janelas
+    "areas": [(702, 455, 974, 541), (626, 455, 695, 538)],
+    # miolos de placas, longe das juntas, das paredes, da porta e da sombra da parede da direita
+    "fontes": [(753, 458, 790, 476), (797, 458, 834, 476), (841, 458, 877, 476), (884, 458, 921, 476),
+               (753, 499, 790, 520), (797, 499, 834, 520), (841, 499, 877, 520), (884, 499, 921, 520),
+               (797, 525, 834, 539), (841, 525, 877, 539)],
+    "proteger": [(699, 524, 746, 545)],      # a peça junto à parede de baixo do depósito (com a sua sombra)
+    "piso_min": 100,                         # abaixo disso é parede ou peça
+    "linha": 18,                             # traço fino mais escuro que o piso em volta (o arco da porta)
+    "luz_sigma": (14, 8),                    # suavização da luz (x, y): mais que uma placa, menos que a sala
+    "p": 12}
+
+
+def juntas(out):
+    from retoque_bege_bahia_terreo import quilting
+    q = JUNTAS
+    fontes = []
+    for x0, y0, x1, y1 in q["fontes"]:
+        g = out[y0:y1, x0:x1].astype(np.float32)
+        g = g / g.reshape(-1, 3).mean(axis=0)
+        fontes += [np.ascontiguousarray(v) for v in (g, g[:, ::-1], g[::-1, :], g[::-1, ::-1])]
+    for k, (x0, y0, x1, y1) in enumerate(q["areas"]):
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        lum = reg.mean(axis=2)
+        piso = lum >= q["piso_min"]
+        piso &= lum - cv2.GaussianBlur(lum, (0, 0), 2) > -q["linha"]          # o arco e outros traços finos
+        for a, b, c, d in q["proteger"]:
+            piso[max(b - y0, 0):max(d - y0, 0), max(a - x0, 0):max(c - x0, 0)] = False
+        piso = cv2.erode(piso.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        m = piso.astype(np.float32)
+        sx, sy = q["luz_sigma"]
+        luz = cv2.GaussianBlur(reg * m[..., None], (0, 0), sigmaX=sx, sigmaY=sy) / \
+            np.maximum(cv2.GaussianBlur(m, (0, 0), sigmaX=sx, sigmaY=sy), 1e-3)[..., None]
+        tex = quilting(fontes, y1 - y0, x1 - x0, p=q["p"], sobra=max(3, q["p"] // 3), candidatos=600,
+                       rng=np.random.default_rng(642 + k))
+        a = cv2.GaussianBlur(m, (0, 0), 0.5) * m
+        novo = reg * (1 - a[..., None]) + tex * luz * a[..., None]
+        out[y0:y1, x0:x1] = np.clip(np.round(novo), 0, 255).astype(np.uint8)
+        print(f"    {'depósito' if k == 0 else 'circulação interna'}: piso contínuo, sem juntas ({int(piso.sum())} px)")
+    return out
+
+
 # Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
 # varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
 # (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
@@ -454,7 +507,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("3", "escada: depois da linha de corte, os degraus na cor e textura do Subsolo", escada),
                      ("4", "portas de vidro da academia: folhas de vidro claras, não pretas", portas_academia),
                      ("5", "janelas: vão, peitoril, vidro e caixilhos do PDF, no lugar da peça cinza", janelas),
-                     ("6", "circulação: sem o traço preto na borda", traco_circulacao)],
+                     ("6", "circulação: sem o traço preto na borda", traco_circulacao),
+                     ("7", "depósito e circulação interna: piso contínuo, sem juntas", juntas)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares)]}
 
 

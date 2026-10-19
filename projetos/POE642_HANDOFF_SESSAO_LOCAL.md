@@ -782,6 +782,11 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
   - **Subsolo 6, traço preto no fim da circulação:** ao longo da borda esquerda da circulação, ~5 px para dentro do travertino, o motor fez um traço preto vertical, da escada do deck até a parede de baixo. No PDF da Casa A a circulação só termina, sem linha.
     - O traço sai como o das portas da academia (`tirar_traco`): em cada linha, o trecho escuro (abaixo de 140) e 1 px de cada lado recebem em espelho o travertino de cada lado. A última linha antes da parede de baixo fica fora, para a parede não ser tocada.
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_circulacao_traco_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só muda a borda da circulação.
+  - **Subsolo 7, juntas do depósito e da circulação interna:** o piso desses dois ambientes (Bege Bahia na legenda) saiu como placas de ~44 × 22 px, cada uma num tom, com a junta marcada (linhas em x 661, 749, 793, 837, 880 e 925 e em y 478, 496 e 522 px).
+    - O piso volta contínuo, com a textura do próprio render: tecida por image quilting (como o Bege Bahia aprovado do Térreo, `retoque_bege_bahia_terreo.quilting`) de dez miolos de placas, longe das juntas, cada um normalizado pelo seu tom.
+    - A textura vai na luz do render: o tom do piso em volta, suavizado (sigma 14 px em x e 8 px em y) o bastante para as placas sumirem e a sombra junto à parede da direita ficar.
+    - Ficam como estão as paredes, as janelas, a porta do depósito com o arco (traço fino, protegido) e a peça junto à parede de baixo do depósito.
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_juntas_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só mudam os pisos do depósito e da circulação interna.
 
 ## Casas A a D · Barlavento nas piscinas
 
