@@ -882,6 +882,9 @@ def torneira_banheira(out, p2r):
 ROTULOS = {"fonte": "Regular", "ss": 4,
            # cor (pedido do usuário): preto no piso; no granito marrom, cinza (neste pavimento não há granito)
            "cor": (20, 20, 20), "cor_granito": (150, 150, 150),
+           # regra R6 (usuário, 19/10/26: "Apresentar os rótulos em branco quando for piso marrom granito"): o branco
+           # que os pavimentos passam a usar, um por vez (cor_granito=ROTULOS["branco"])
+           "branco": (250, 250, 250),
            # corpo um pouco maior que o do PDF (pedido do usuário: "e um pouco maior a fonte")
            "escala": 1.3,
            # (nome, centro do rótulo do PDF no render de 2000 px, desvio em px desse render)
@@ -929,7 +932,7 @@ def rotulos_pdf(pg):
     return juntos
 
 
-def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, ajustes=None):
+def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, ajustes=None, cor_granito=None):
     """Escreve os rótulos do PDF na imagem (BGR), no corpo do PDF levado à escala dela (pdf2img leva um
     ponto do PDF à imagem); granito: máscara (bool, no quadro da imagem) do granito marrom, onde o texto
     fica cinza; ajustes: os desvios de outro pavimento (o padrão é o deste). Cada ajuste é (nome, centro em
@@ -981,7 +984,7 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, a
             d.text(((gx + dx - x0) * ss, (gy + dy - y0) * ss), texto, font=f, fill=255, anchor=ancora)
         a = np.asarray(tela.resize((x1 - x0, y1 - y0), Image.LANCZOS), np.float32)[..., None] / 255
         no_granito = granito is not None and granito[max(y0, 0):y1, max(x0, 0):x1].mean() > 0.5
-        cor = np.float32(opc.get("cor", q["cor_granito"] if no_granito else q["cor"]))
+        cor = np.float32(opc.get("cor", (cor_granito or q["cor_granito"]) if no_granito else q["cor"]))
         out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + cor * a
     return np.clip(out, 0, 255).astype(np.uint8)
 

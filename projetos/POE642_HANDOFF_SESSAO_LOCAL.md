@@ -733,6 +733,11 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
       - **Triângulo:** cheio, cinza-escuro, de 24 × 26 cm, no 1º degrau, a 10 cm do início, apontando para a subida.
       - **Conferência:** na prancha, só a escada mudou (22.994 px, 1 região). A prancha e os três PDFs foram refeitos.
       - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_escada_antes_depois.jpg`.
+  24. **Rótulos no granito em branco (R6, 19/10/26: "Apresentar os rótulos em branco quando for piso marrom granito"):** no DCE e na casa de máquinas de baixo, o texto passou do cinza (150) ao branco (250).
+      - `retoque_1pav_casae.rotulos_ambientes` ganhou `cor_granito=` (e `ROTULOS["branco"]`), para cada pavimento passar ao branco quando for refeito. O padrão continua o cinza, para nenhuma outra prancha mudar sem pedido.
+      - **R7 (nenhum rótulo sobre objeto):** conferido nos 12 rótulos; todos estão no piso livre. Na piscina e no elevador, o rótulo fica sobre o próprio ambiente.
+      - **Conferência:** na prancha, só os dois rótulos mudaram (1.188 px). A prancha e os três PDFs foram refeitos.
+      - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_rotulos_granito_antes_depois.jpg`.
 - **Entrega (16/10/26, depois da aprovação do usuário: "prancha e o PDF. aprovado."):** a casa passa a ter três pavimentos, na ordem da Casa A (Subsolo, Térreo, 1º Pavimento).
   - **Config:** o Subsolo entrou na chave `entrega` da `POE642_CasaE/config_bases.json` (título "SUBSOLO", linha 0 do quadro de áreas, base `POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png`). O Térreo passou à linha 1 e o 1º Pavimento à linha 2. O quadro de áreas tem os três "NÃO INFORMADO", sem total. Em `pdf.ordem`: Subsolo, Térreo e 1º Pavimento; título "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)".
   - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_Subsolo_entrega.png`, nova. A imagem final, já no quadro comum e com os rótulos, entra com `--no-quadro`, sem realinhar. A do Térreo (realinhada com 128 pontos, erro mediano 0,78 px) e as duas do 1º Pavimento (`_pb` e `_linhas`) foram refeitas só pelo rodapé novo, com a linha do Subsolo no quadro de áreas. Rodapés `entrega/POE642_CasaE_rodape_{Subsolo,Terreo,1Pavimento}.png`.

@@ -1320,7 +1320,9 @@ def rotulos(final):
     chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), (W, H), interpolation=cv2.INTER_NEAREST)
     granito = np.abs(chapada.astype(int) - np.array(GRANITO["legenda"])).max(axis=2) <= 6
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
-    return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=W / 2000, granito=granito, ajustes=q["ajustes"])
+    # R6 (19/10/26): no granito marrom, branco
+    return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=W / 2000, granito=granito, ajustes=q["ajustes"],
+                                cor_granito=R1.ROTULOS["branco"])
 
 
 # Mapa dos erros do render v1 (pontos em pt do PDF do Subsolo, convertidos ao render pela cadeia da base)
