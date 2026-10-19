@@ -84,9 +84,13 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Em cada bocel, uma linha cinza suave e uma sombra de ~10 cm no degrau de baixo.
   - Nenhum traço preto.
   - Número de degraus igual ao PDF.
-  - Sem seta.
+- **[19/10] R14. Triângulo de orientação no início da escada,** indicando o sentido, ora subida ora descida, conforme o pavimento. Usuário: "precisamos do triangulo como símbolo de orientação no inicio de escadas, indicando o sentido ora subida ora descida, a depender da situação".
+  - Cheio, cinza-escuro, de 24 × 26 cm, no meio da largura e a 10 cm do início.
+  - A ponta segue o sentido do percurso de quem chega por aquele pavimento.
+  - Subida: no 1º degrau, apontando para cima. Descida: no topo, apontando para baixo.
+  - Substitui a seta. Fica sem texto.
 - **Escada que passa de pavimento:** cheia até a linha de corte do PDF e esmaecida depois, com os bocéis pontilhados (a projeção) e o corrimão fino. A linha de corte não é desenhada. Na caracol, só o trecho do pavimento fica cheio.
-- Função: `_texturas/elementos.py` → `escada`.
+- Função: `_texturas/elementos.py` → `escada(..., triangulo="sobe" | "desce")`.
 
 ## 6. Banhos
 
@@ -159,7 +163,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - sem bordas ou vidros inventados;
   - degraus, prainha e spa como no PDF;
   - a borda em pedra conforme a casa.
-- **[19/10] R12. Carros:** em todas as plantas, alinhados, do mesmo tamanho e na mesma cor, **prata** (escolha do usuário em 19/10). Proposta para o tamanho: um carro de ~4,70 × 1,85 m, igual nas cinco casas. A quantidade segue o PDF.
+- **[19/10] R12. Carros:** em todas as plantas, alinhados, do mesmo tamanho e na mesma cor, **prata**. O tamanho é um carro de 4,70 × 1,85 m, igual nas cinco casas (cor e tamanho aceitos pelo usuário em 19/10). A quantidade segue o PDF.
 - **Lote:** linhas tracejadas do lote nas posições do PDF; nada do motor fora do lote; fundo branco fora do terreno; curvas de nível ocultas.
 
 ## 11. Pavimentos
@@ -210,6 +214,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 |---|---|
 | Arco das portas em cinza fino (160, 161, 160) sobre o granito, por toda parte | **Sem arco** (R3) |
 | Escadas só com sombreamento, sem linhas | **Com linha suave no bocel** |
+| Escada sem seta nem símbolo de sentido | **Triângulo de orientação no início** (R14) |
 | Rótulo cinza (150) sobre o granito | **Branco** (R6) |
 | Carros cada um numa cor, levemente desalinhados (Casas A, D e E) | **Alinhados, mesmo tamanho, mesma cor** (R12) |
 | Subsolo com o Térreo em volta (esmaecido na Casa B; linhas do PDF do Térreo na Casa E; deck esmaecido na Casa A) | **Só o subsolo, terreno hachurado** (R2) |
@@ -220,7 +225,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 
 O "x" marca o que cada regra exige em cada prancha já entregue.
 
-| Prancha | Arcos (R3) | Escadas com linha | Rótulos (R6, R7) | Carros (R12) | Subsolo hachurado (R2) | Texturas na escala (R1, R4) | Projeções e brises (R8, R9) | Soleiras (R13) | Outros |
+| Prancha | Arcos (R3) | Escadas com linha e triângulo (R14) | Rótulos (R6, R7) | Carros (R12) | Subsolo hachurado (R2) | Texturas na escala (R1, R4) | Projeções e brises (R8, R9) | Soleiras (R13) | Outros |
 |---|---|---|---|---|---|---|---|---|---|
 | A · Subsolo | x | x | x | – | x | x | x | conferir | |
 | A · Térreo | feito | x | x | x | – | x | x (brises) | conferir | itens 4, 6, 7 e 10 da conferência |
@@ -237,15 +242,16 @@ O "x" marca o que cada regra exige em cada prancha já entregue.
 
 "Novos": as Casas B, C e D ainda não têm nomes e áreas e passam a ter.
 
-## 17. Decisões de 19/10 e o que ainda falta
+## 17. Decisões de 19/10 e ordem de execução
 
 **Respondido pelo usuário em 19/10:**
-- carros em prata;
+- carros em prata, de 4,70 × 1,85 m;
 - brises com o tracejado da projeção da cobertura;
 - hachura do Subsolo em diagonais finas a 45°, cinza-claro;
-- rótulos em todas as casas.
+- rótulos em todas as casas;
+- triângulo de orientação no início das escadas.
 
-**Ainda em aberto:**
-1. **Tamanho do carro padrão (R12):** proposta de ~4,70 × 1,85 m, igual nas cinco casas.
-2. **Roupa de cama:** fica como opção, até o usuário decidir onde usar.
-3. **Ordem de execução:** casa por casa (A, E, D, C, B) ou regra por regra em todas as casas?
+**Em aberto:** a roupa de cama fica como opção, até o usuário decidir onde usar.
+
+**Ordem de execução (usuário, 19/10):** Casa E, Casa A, Casa B, Casa C, Casa D.
+- Dentro de cada casa, um item por vez, com antes/depois, prancha e PDF refeitos a cada item.

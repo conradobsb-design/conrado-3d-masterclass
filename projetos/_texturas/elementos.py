@@ -19,6 +19,9 @@ O que se vê nelas, e como cada função desenha (em metros, na escala do render
   com contorno, saindo do caixilho; `porta_giro`: a folha branca fina, aberta a 90°, sem o arco (decisão do
   usuário, 19/10/26: "remover os arcos, escadas com linhas"; com `arco=True`, o arco cinza fino da regra antiga).
 - Escadas com linhas (mesma decisão): o bocel em linha cinza suave, como na referência.
+- Triângulo de orientação no início da escada (usuário, 19/10/26): cheio, cinza-escuro, 24 x 26 cm, no meio da
+  largura, a 10 cm do início, com a ponta no sentido do percurso: subida, no 1º degrau, para quem sobe a partir do
+  pavimento; descida, no topo, para quem desce (`escada(..., triangulo="sobe" | "desce")`).
 - Roupa de cama, como mais uma opção (usuário, 19/10/26, com a mesma planta: "use as referencias de roupa de cama.
   como mais uma opção. ainda não aplique"): só a referência, na cartela, sem função de desenho ainda. Na cama de
   casal, lençol e edredom brancos com a dobra branca junto aos travesseiros, uma manta bordô (RGB ~118, 81, 85)
@@ -92,8 +95,25 @@ def guarda_roupa(comp_m, prof_m, px_m, semente=1):
     return _reduz(t, W, H), np.ones((H, W), np.float32)
 
 
-def escada(larg_m, n, piso_m, px_m, corte, cor=(222, 222, 226), esmaecer=0.8):
-    """n degraus subindo para cima (o 1º embaixo); de `corte` em diante, a projeção pontilhada, esmaecida."""
+TRIANGULO = {"base_m": 0.24, "altura_m": 0.26, "recuo_m": 0.10, "cor": (88, 88, 92)}
+
+
+def triangulo_escada(t, k, w, y_ponta, para_cima):
+    """O triângulo de orientação no início da escada (usuário, 19/10/26: "precisamos do triangulo como símbolo de
+    orientação no inicio de escadas, indicando o sentido ora subida ora descida, a depender da situação"): cheio,
+    cinza-escuro, no meio da largura, com a ponta no sentido do percurso de quem chega por este pavimento."""
+    q = TRIANGULO
+    cx, b, a = w / 2, q["base_m"] * k / 2, q["altura_m"] * k
+    yb = y_ponta + (a if para_cima else -a)
+    pts = np.int32(np.round([(cx, y_ponta), (cx - b, yb), (cx + b, yb)]))
+    cv2.fillPoly(t, [pts], q["cor"], lineType=cv2.LINE_8)
+
+
+def escada(larg_m, n, piso_m, px_m, corte=None, cor=(222, 222, 226), esmaecer=0.8, triangulo=None):
+    """n degraus subindo para cima (o 1º embaixo); de `corte` em diante, a projeção pontilhada, esmaecida (corte=None:
+    a escada inteira cheia). triangulo="sobe": no 1º degrau, apontando para cima (quem está neste pavimento sobe);
+    "desce": no último, apontando para baixo (quem está no pavimento de cima desce)."""
+    corte = n + 1 if corte is None else corte
     W, H = _px(larg_m, px_m), _px(n * piso_m, px_m)
     k = px_m * SS
     w, h = W * SS, H * SS
@@ -112,7 +132,7 @@ def escada(larg_m, n, piso_m, px_m, corte, cor=(222, 222, 226), esmaecer=0.8):
             t[y0:y0 + len(sombra)] -= 26 * sombra
             _retangulo(t, 0, y_boc - 0.006 * k, w, y_boc + 0.006 * k, (176, 176, 180))
     # depois do corte: esmaecido, bocéis pontilhados
-    yc = h - (corte - 1) * p
+    yc = max(0.0, h - (corte - 1) * p)
     t[:int(yc)] = 255 - (255 - t[:int(yc)]) * esmaecer
     traco, vao = 0.03 * k, 0.025 * k
     for i in range(corte - 1, n - 1):
@@ -128,6 +148,11 @@ def escada(larg_m, n, piso_m, px_m, corte, cor=(222, 222, 226), esmaecer=0.8):
         _retangulo(t, w - 0.05 * k, x, w - 0.04 * k, min(yc, x + traco), (190, 190, 194))
         x += traco + vao
     _contorno(t, 0, 0, w, h, (170, 170, 174), max(1, 0.005 * k))
+    rec = TRIANGULO["recuo_m"] * k
+    if triangulo == "sobe":
+        triangulo_escada(t, k, w, h - rec - TRIANGULO["altura_m"] * k, True)
+    elif triangulo == "desce":
+        triangulo_escada(t, k, w, rec + TRIANGULO["altura_m"] * k, False)
     return _reduz(t, W, H), np.ones((H, W), np.float32)
 
 
@@ -231,8 +256,13 @@ def cartela():
         return cv2.resize(a, None, fx=f, fy=f, interpolation=cv2.INTER_NEAREST)
 
     gr = sobre_piso(*guarda_roupa(2.4, 0.6, px_m))
-    es = sobre_piso(*escada(1.0, 14, 0.28, px_m, corte=8))
+    es = sobre_piso(*escada(1.0, 14, 0.28, px_m, corte=8, triangulo="sobe"))
     es = cv2.rotate(es, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    ed = sobre_piso(*escada(1.0, 14, 0.28, px_m, triangulo="desce"))
+    ed = cv2.rotate(ed, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    escadas = np.full((es.shape[0] + 20 + ed.shape[0], es.shape[1], 3), 255, np.float32)
+    escadas[:es.shape[0]] = es
+    escadas[es.shape[0] + 20:] = ed
     bx = sobre_piso(*box(1.2, 2.5, 1.5, px_m))
     pc = sobre_piso(*porta_correr(2.4, px_m))
     pg = sobre_piso(*porta_giro(0.8, px_m))
@@ -243,9 +273,9 @@ def cartela():
         ("1. Guarda-roupa  ·  referência (closet da suíte; armário do quarto)  |  a nossa, 2,40 x 0,60 m, na escala "
          "da prancha e ampliada 2 x",
          [caber(sup[17:46, 122:168], 140), caber(sup[133:234, 232:258]), gr, amp(gr)]),
-        ("2. Escada  ·  referência (vista de cima; o lance que sobe, com a projeção pontilhada)  |  a nossa: 14 "
-         "degraus de 28 cm, corte no 8º, e ampliada 2 x",
-         [caber(sup[16:92, 166:260]), caber(inf[22:107, 280:397]), es, amp(es)]),
+        ("2. Escada  ·  referência  |  a nossa, 14 degraus de 28 cm: em cima, quem sobe (triângulo no 1º degrau, "
+         "corte no 8º); embaixo, quem desce (triângulo no topo); e ampliadas 2 x",
+         [caber(sup[16:92, 166:260]), caber(inf[22:107, 280:397]), escadas, amp(escadas)]),
         ("3. Box  ·  referência (banho da suíte; banho de baixo)  |  o nosso, 1,20 x 2,50 m, e ampliado 2 x",
          [caber(sup[128:234, 102:170]), caber(inf[133:242, 213:287]), bx, amp(bx)]),
         ("4. Portas  ·  referência (porta de correr do terraço; janela de correr do quarto)  |  as nossas: de "
