@@ -747,6 +747,12 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
   2. Sauna: o banco do PDF, horizontal, ao longo da parede de baixo, virou piso na v6, por decisão anterior. Usuário (19/10/26): o banco não é em L; a faixa vertical à esquerda, no tom do piso da piscina, é a passagem da sauna para a piscina e fica como piso.
 - **Conferidos sem divergência:** cozinha, garagem (carros), hall interno e externo, escada interna e jardim da escada, piscina, prainha, spa, deck e escada do deck, gourmet, lavatório e WC, garagem e acesso; no 1º Pavimento, banhos 1, 2 e 3, closets, circulação, sala íntima, saleta com a caracol e as varandas; no Subsolo, academia (2 esteiras, 2 bicicletas e o banco com a barra), depósito, circulação, hall, banhos feminino e masculino e elevador.
 - **Próximo passo:** o usuário confirma a lista; o retoque segue um item por vez, sem IA, como na Casa E.
+- **Ajustes (`POE642_CasaA/scripts/ajustes_casaa.py`, sem IA, um item por vez):** saem em `renders/<imagem aprovada>_ajustes.png` (+ `_camada.png`). O `rotulos_casaa.py` usa a imagem com ajustes, e dela saem as pranchas e o PDF.
+  - **Subsolo 2, banco da sauna (usuário, 19/10/26: "Eu quero que você traga esse banco de volta"):** na v6 o banco virou piso; sobrou só uma faixa um pouco mais clara, sem a borda. O banco volta de parede a parede, ao longo da parede de baixo (x 625,0 a 717,5 px; borda em y 826,7 px na imagem de 2000 px, a linha do PDF levada pelo afim da base).
+    - Marcado como o banco da sauna da Casa E: a linha fina da borda, a sombra discreta no piso (o lado mais baixo) e um brilho leve na quina. O tampo fica 3% mais claro.
+    - Os números da Casa E quase não apareciam nesta imagem de 2000 px, ampliada para 3840 na prancha. Ficaram: linha 0,35 em 0,6 px e sombra 0,18 em 1,6 px.
+    - A faixa vertical à esquerda (passagem para a piscina) continua como piso.
+    - Saídas: `renders/POE642_CasaA_PH_Subsolo_final_ajustes.png`, o rótulo, a prancha do Subsolo (só a sauna mudou: cerca de 7 mil px) e o PDF de entrega refeitos. Antes e depois em `renders/POE642_CasaA_PH_Subsolo_sauna_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

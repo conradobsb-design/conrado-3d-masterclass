@@ -473,6 +473,17 @@ As divergências entre as imagens aprovadas da Casa A e os PDFs do cliente, em `
 python3 conferencia_casaa.py            # -> ../renders/POE642_CasaA_PH_{Terreo,1Pavimento,Subsolo}_conferencia.jpg
 ```
 
+## Ajustes da Casa A depois da conferência: `ajustes_casaa.py`
+
+Os itens da conferência corrigidos, um por vez, na imagem aprovada (2000 px). Saída `../renders/<imagem aprovada>_ajustes.png` (+ `_camada.png`), que o `rotulos_casaa.py` usa no lugar da aprovada. Depois: `rotulos_casaa.py`, `rodape_entrega.py --no-quadro` e `pdf_entrega.py`.
+
+```bash
+python3 ajustes_casaa.py Subsolo      # item 2: o banco horizontal da sauna de volta
+python3 rotulos_casaa.py Subsolo
+python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png
+python3 pdf_entrega.py
+```
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:

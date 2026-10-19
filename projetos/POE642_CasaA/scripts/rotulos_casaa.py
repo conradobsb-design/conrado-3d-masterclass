@@ -42,7 +42,7 @@ FORA = ("PROJ.", "SHAFT", "FLOREIRA", "AFASTAMENTO", "DIVISA", "MURO", "LIMITE",
 GRANITO = {"lum_max": 95, "quente_min": 12, "sigma": 3}
 
 PAVIMENTOS = {
-    "Subsolo": {"render": "renders/POE642_CasaA_PH_Subsolo_final.png",
+    "Subsolo": {"render": "renders/POE642_CasaA_PH_Subsolo_final_ajustes.png",   # com os ajustes da conferência
                 "pdf": "642 - SUBSOLO - CASA A.pdf",
                 "sem_tela": "bases/POE642_CasaA_BASE_Subsolo_v4.png",
                 # (nome, centro do rótulo do PDF no quadro final em px de 2000, desvio em px de 2000[, opções])
