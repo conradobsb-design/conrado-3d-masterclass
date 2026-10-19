@@ -141,7 +141,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Pilares em preto, como as paredes, na geometria do PDF (EST - Pilar).
   - Projeções (DOC_LINHAS E PROJEÇÕES, cobertura, claraboia, shaft com X, áreas descobertas) em tracejado bem visível.
   - Exemplo do usuário: na Casa A faltaram as projeções dos brises.
-- **[19/10] R9. Brises com as projeções de cobertura.** Interpretação a confirmar (seção 17).
+- **[19/10] R9. Brises com as projeções de cobertura:** junto dos brises, o tracejado da projeção da cobertura (beiral ou laje), na posição do PDF e por cima. Escolha do usuário em 19/10: "tracejado da cobertura".
 - **Brises:** na cor pedida para cada fachada:
   - Casa E: madeira no Térreo, bronze no 1º Pavimento;
   - Casa E 1º Pavimento, fachada das suítes em três camadas: cortina, porta de vidro de correr e brise na face externa.
@@ -159,14 +159,14 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - sem bordas ou vidros inventados;
   - degraus, prainha e spa como no PDF;
   - a borda em pedra conforme a casa.
-- **[19/10] R12. Carros:** em todas as plantas, alinhados, do mesmo tamanho e da mesma cor. A quantidade segue o PDF. A cor está a confirmar (seção 17).
+- **[19/10] R12. Carros:** em todas as plantas, alinhados, do mesmo tamanho e na mesma cor, **prata** (escolha do usuário em 19/10). Proposta para o tamanho: um carro de ~4,70 × 1,85 m, igual nas cinco casas. A quantidade segue o PDF.
 - **Lote:** linhas tracejadas do lote nas posições do PDF; nada do motor fora do lote; fundo branco fora do terreno; curvas de nível ocultas.
 
 ## 11. Pavimentos
 
 - **[19/10] R2. Subsolo:** mostrar só o subsolo, com o restante do terreno hachurado.
   - Sai o contexto do Térreo (esmaecido ou em linhas) em volta do subsolo.
-  - Padrão proposto para a hachura: linhas diagonais finas a 45°, em cinza-claro, sobre o branco, dentro do lote (a confirmar).
+  - **Hachura:** linhas diagonais finas a 45°, em cinza-claro, sobre o branco, dentro do lote (escolha do usuário em 19/10).
 - **1º Pavimento:** o Térreo "nublado" em volta (padrão, referência de 19/10).
   - `entorno_esmaecido.py --nublado`: 70% de branco, 80% da saturação, desfoque leve.
   - O Térreo usado é o aprovado, sem passar pelo motor.
@@ -183,6 +183,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **[19/10] R7. Proibido rótulo sobre objeto** (banheira, cama, móvel, bancada, louça). O rótulo vai para o piso livre mais próximo. Exemplo do usuário: o "BANHO MASTER" sobre a banheira na Casa E.
 - **Notas que não entram:** projeções de cobertura, floreira, muros e título da folha. Entram, quando pedido, o shaft e a claraboia.
 - **Resolução:** os rótulos são escritos na final em 3840 px.
+- **Todas as casas têm rótulos** (escolha do usuário em 19/10): as Casas B, C e D passam a ter nome e área, com as mesmas regras de A e E.
 
 ## 13. Pranchas e PDF
 
@@ -224,23 +225,27 @@ O "x" marca o que cada regra exige em cada prancha já entregue.
 | A · Subsolo | x | x | x | – | x | x | x | conferir | |
 | A · Térreo | feito | x | x | x | – | x | x (brises) | conferir | itens 4, 6, 7 e 10 da conferência |
 | A · 1º Pav | x | x | x | – | – | x | x | conferir | o Térreo nublado em volta (hoje é o do motor); guarda-roupas com cabides (R11); itens 1 a 7 da conferência |
-| B · Subsolo | x | x | (sem rótulos) | – | x | x | x | conferir | |
-| B · Térreo | x | x | (sem rótulos) | x | – | x | x | conferir | |
-| C · Subsolo | x | x | (sem rótulos) | – | x | x | x | conferir | |
-| C · Térreo | x | x | (sem rótulos) | x | – | x | x | conferir | |
-| D · Subsolo | x | x | (sem rótulos) | – | x | x | x | conferir | |
-| D · Térreo | x | x | (sem rótulos) | x | – | x | x | conferir | |
+| B · Subsolo | x | x | x (novos) | – | x | x | x | conferir | |
+| B · Térreo | x | x | x (novos) | x | – | x | x | conferir | |
+| C · Subsolo | x | x | x (novos) | – | x | x | x | conferir | |
+| C · Térreo | x | x | x (novos) | x | – | x | x | conferir | |
+| D · Subsolo | x | x | x (novos) | – | x | x | x | conferir | |
+| D · Térreo | x | x | x (novos) | x | – | x | x | conferir | |
 | E · Subsolo | x | x | x | – | x | x | x | conferir | |
 | E · Térreo | x | x | x | x | – | x | x | conferir | box do banho gourmet (R5) |
 | E · 1º Pav | x | x | x (banheira) | – | – | x | x | conferir | box com folha contínua (R10); guarda-roupas com cabides (R11); nublado vira a opção única |
 
-"Sem rótulos": as Casas B, C e D ainda não têm nomes e áreas. Se elas também devem ter, é mais uma regra a confirmar.
+"Novos": as Casas B, C e D ainda não têm nomes e áreas e passam a ter.
 
-## 17. A confirmar com o usuário antes de executar
+## 17. Decisões de 19/10 e o que ainda falta
 
-1. **Carros (R12):** qual a cor única e qual o modelo e tamanho padrão? Proposta: um carro de ~4,70 × 1,85 m, igual nas cinco casas.
-2. **Brises com projeções de cobertura (R9):** é o tracejado da projeção da cobertura (beiral ou laje) por cima dos brises? Ou a sombra da cobertura sobre eles?
-3. **Hachura do terreno no Subsolo (R2):** diagonais finas a 45°, em cinza-claro, dentro do lote? Ou outro padrão (cruzada, pontilhada)?
-4. **Rótulos nas Casas B, C e D:** passam a ter nome e área, como A e E?
-5. **Roupa de cama:** fica como opção, até o usuário decidir onde usar.
-6. **Ordem de execução:** casa por casa (A, E, D, C, B) ou regra por regra em todas as casas?
+**Respondido pelo usuário em 19/10:**
+- carros em prata;
+- brises com o tracejado da projeção da cobertura;
+- hachura do Subsolo em diagonais finas a 45°, cinza-claro;
+- rótulos em todas as casas.
+
+**Ainda em aberto:**
+1. **Tamanho do carro padrão (R12):** proposta de ~4,70 × 1,85 m, igual nas cinco casas.
+2. **Roupa de cama:** fica como opção, até o usuário decidir onde usar.
+3. **Ordem de execução:** casa por casa (A, E, D, C, B) ou regra por regra em todas as casas?
