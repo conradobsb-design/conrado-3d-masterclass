@@ -44,6 +44,8 @@ Itens:
      com as almofadas, a poltrona da direita e a mesinha na ponta do sofá (clones do render).
   Térreo, rejuntes (pedido do usuário, 19/10/26): o travertino do piso interno contínuo, sem as juntas nem os
      degraus de tom das placas, com a textura e a luz do próprio render.
+  Térreo 8. Jardim de 4,79 m² (pedido do usuário, 19/10/26): verde, com o gramado do Térreo e as três touceiras do
+     PDF (clones da palmeira em estrela do jardim lateral do render).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1033,6 +1035,78 @@ def sala_estar(out):
 
 
 
+
+# Térreo 8. Jardim de 4,79 m² (pedido do usuário, 19/10/26: "aqui é um jardim verde com plantas"; item 8 da
+# conferência). O motor fez o jardim como piso claro, vazio. No PDF da Casa A ele tem a forração (as setinhas da
+# hachura de grama) até a faixa de piso junto à porta da direita, e três touceiras. Entra o gramado do próprio Térreo
+# (um trecho do gramado ao lado, do tamanho do canteiro), com a sombra curta das paredes em volta (a luz vem do alto à
+# direita, como no resto da prancha), e as três touceiras, nas posições e no tamanho do PDF: clones da palmeira em
+# estrela do jardim lateral do render (já sobre a grama, com a sua sombra), recortada do gramado pela cor, cada uma
+# girada e espelhada para não repetir, com uma sombra curta a mais no canteiro.
+JARDIM = {"canteiro": (783.0, 856.0, 890.0, 897.8),       # px da imagem: do PDF (a faixa à direita fica piso)
+          "fonte_grama": (600, 885),                      # canto do trecho do gramado ao lado (px)
+          "grama_ref": (600, 885, 720, 935),              # gramado limpo: a cor de referência para recortar a planta
+          "parede_sombra": (0.22, 2.2),                   # força e alcance da sombra das paredes (px)
+          # touceiras: centro (px), raio no PDF (px), planta-fonte (centro, raio) e giro (graus) / espelho
+          "touceiras": [((805.6, 877.4), 14.5, ((1500.0, 485.0), 26.0), 15, False),
+                        ((835.5, 876.7), 14.5, ((1500.0, 485.0), 26.0), 130, True),
+                        ((866.7, 876.7), 14.5, ((1500.0, 485.0), 26.0), 250, False)],
+          "sombra": (-1.2, 1.2, 1.2, 0.30)}
+
+
+def jardim(out):
+    q = JARDIM
+    x0, y0, x1, y1 = q["canteiro"]
+    xa, ya, xb, yb = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
+    reg = out[ya:yb, xa:xb].astype(np.float32)
+    fx, fy = q["fonte_grama"]
+    grama = out[fy:fy + yb - ya, fx:fx + xb - xa].astype(np.float32)
+    a = (cobertura_colunas(x0, x1, xa, xb)[None, :] * cobertura_linhas(y0, y1, ya, yb)[:, None])[..., None]
+    # sombra das paredes: mais forte junto à de cima e à da direita (a luz vem do alto à direita)
+    forca, alc = q["parede_sombra"]
+    ys = np.arange(ya, yb)[:, None] + 0.5
+    xs = np.arange(xa, xb)[None, :] + 0.5
+    som = np.maximum(np.clip(1 - (ys - y0) / alc, 0, 1), np.clip(1 - (x1 - xs) / alc, 0, 1) * 0.6)
+    som = np.maximum(som, np.clip(1 - (xs - x0) / alc, 0, 1) * 0.5)
+    som = np.maximum(som, np.clip(1 - (y1 - ys) / alc, 0, 1) * 0.5)
+    grama *= (1 - forca * som)[..., None]
+    out[ya:yb, xa:xb] = np.clip(np.round(reg * (1 - a) + grama * a), 0, 255).astype(np.uint8)
+    # a planta-fonte: o que não é gramado (distância de cor ao gramado limpo, em Lab), com a borda suave
+    fonte = cv2.imread(str(APROVADAS["Terreo"]))
+    lab = cv2.cvtColor(fonte, cv2.COLOR_BGR2LAB).astype(np.float32)
+    gx0, gy0, gx1, gy1 = q["grama_ref"]
+    gref = lab[gy0:gy1, gx0:gx1].reshape(-1, 3)
+    mu, sd = gref.mean(axis=0), np.maximum(gref.std(axis=0), 1)
+    z = np.sqrt((((cv2.GaussianBlur(lab, (0, 0), 1.0) - mu) / sd) ** 2).sum(axis=2))
+    planta = cv2.GaussianBlur((cv2.GaussianBlur((z > 2.2).astype(np.float32), (0, 0), 1.5) > 0.4).astype(np.float32),
+                              (0, 0), 0.6)
+    fonte = fonte.astype(np.float32)
+    for (cx_, cy_), raio, ((sx, sy), sr), giro, espelho in q["touceiras"]:
+        k = raio / sr
+        t = np.radians(giro)
+        R = np.array([[np.cos(t), -np.sin(t)], [np.sin(t), np.cos(t)]]) * k
+        if espelho:
+            R = R @ np.diag([-1, 1])
+        Ri = np.linalg.inv(R)                               # destino -> fonte: p_fonte = s + Ri (p - c)
+        ja, jb = int(cx_ - raio - 4), int(cx_ + raio + 5)
+        ia, ib = int(cy_ - raio - 4), int(cy_ + raio + 5)
+        t0 = np.array([sx, sy]) - Ri @ np.array([cx_, cy_]) + Ri @ np.array([ja, ia])
+        M = np.hstack([Ri, t0[:, None]]).astype(np.float32)
+        cor = cv2.warpAffine(fonte, M, (jb - ja, ib - ia), flags=cv2.INTER_AREA | cv2.WARP_INVERSE_MAP)
+        m = cv2.warpAffine(planta, M, (jb - ja, ib - ia), flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP)
+        yy, xx = np.mgrid[ia:ib, ja:jb] + 0.5
+        m *= np.clip((raio + 1.0 - np.hypot(xx - cx_, yy - cy_)) / 2.0, 0, 1)   # só a planta-fonte, sem vizinhas
+        sdx, sdy, ssig, sf = q["sombra"]
+        sh = cv2.warpAffine(m, np.float32([[1, 0, sdx], [0, 1, sdy]]), (jb - ja, ib - ia))
+        sh = cv2.GaussianBlur(sh, (0, 0), ssig) * (1 - m)
+        jan = out[ia:ib, ja:jb].astype(np.float32) * (1 - sf * sh)[..., None]
+        jan = jan * (1 - m[..., None]) + cor * m[..., None]
+        out[ia:ib, ja:jb] = np.clip(np.round(jan), 0, 255).astype(np.uint8)
+    print(f"    jardim: gramado do Térreo em x {x0}-{x1}, y {y0}-{y1} px, com a sombra das paredes; "
+          f"{len(q['touceiras'])} touceiras do PDF (a palmeira em estrela do jardim lateral)")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1168,7 +1242,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("13", "gramado depois do último degrau da escada do deck", gramado_escada)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
                     ("2", "sala de estar: o sofá curvo do PDF, a poltrona da direita e a mesinha", sala_estar),
-                    ("rejuntes", "piso interno sem os rejuntes: o travertino contínuo", rejuntes)]}
+                    ("rejuntes", "piso interno sem os rejuntes: o travertino contínuo", rejuntes),
+                    ("8", "jardim de 4,79 m²: verde, com as três touceiras do PDF", jardim)]}
 
 
 def main():

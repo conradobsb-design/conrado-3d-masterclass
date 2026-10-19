@@ -70,7 +70,10 @@ PAVIMENTOS = {
                    ("DESPENSA", (1092.0, 825.2), (-3, -7.2), 1.0),
                    ("VARANDA", (879.1, 345.6), (0, -8)),                  # na poltrona: um pouco acima
                    ("LAVABO", (1192.4, 224.3), (-2, 0)),                  # encostado na bancada
-                   ("SALA DE JANTAR", (1142.7, 506.4), (-2.5, 0))]},     # encostado no vidro
+                   ("SALA DE JANTAR", (1142.7, 506.4), (-2.5, 0)),       # encostado no vidro
+                   # o jardim de 4,79 m² ficou verde, com as três touceiras (ajustes): em branco, que se lê sobre a
+                   # grama e as palmeiras
+                   ("JARDIM", (826.1, 870.7), (0, 0), {"cor": (255, 255, 255)})]},
     "1Pavimento": {"render": "renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
                    "pdf": "642 - 1º PAVIMENTO - CASA A.pdf",
                    "sem_tela": "bases/POE642_CasaA_BASE_1Pavimento_v3.png",
