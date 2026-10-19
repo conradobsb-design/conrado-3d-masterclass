@@ -25,6 +25,8 @@ Itens:
      não tem.
   Subsolo 7. Depósito e circulação interna (pedido do usuário, 19/10/26): o piso sem as juntas das placas, contínuo,
      com a textura do próprio render, na luz dele.
+  Subsolo 8. Banhos feminino e masculino (pedido do usuário, 19/10/26): as cubas no tamanho do PDF (calhas quase da
+     largura da bancada), como as cubas aprovadas da Casa E.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
 
@@ -443,6 +445,54 @@ def juntas(out):
     return out
 
 
+# Subsolo 8. Cubas dos banhos feminino e masculino (pedido do usuário, 19/10/26: "as cubas dos banhos femininos e
+# masculinos são maiores"). O motor fez em cada bancada uma cuba branca pequena (~16 x 10 px). No PDF da Casa A
+# (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS) a cuba é uma calha de ~32 x 15 px, quase da largura da bancada e de toda
+# a profundidade, com uma faixa plana junto à parede do fundo, onde fica a torneira. Entra nessa geometria, como
+# as cubas aprovadas da Casa E (`retoque_subsolo_casae.bancada_cuba`): a louça branca com o contorno fino, a
+# bacia escurecendo da borda ao fundo, a válvula no meio e a torneira cromada saindo da parede, com a sombra
+# curta. A bancada do render fica.
+CUBAS_BANHOS = [
+    {"nome": "feminino", "cuba": (1307.18, 1748.53, 1366.14, 1775.17), "bacia": (1308.31, 1749.66, 1365.0, 1768.37),
+     "torneira": (1335.61, 1762.87, 1337.71, 1772.25)},
+    {"nome": "masculino", "cuba": (1573.35, 1748.53, 1639.68, 1775.17), "bacia": (1574.48, 1749.66, 1638.55, 1768.37),
+     "torneira": (1606.32, 1762.87, 1608.41, 1772.25)}]
+
+
+def cubas_banhos(out):
+    from retoque_subsolo_casae import (Tela, SOMBRA, LOUCA, LOUCA_CONTORNO, BACIA_BORDA, BACIA_FUNDO, CROMO,
+                                       CROMO_CLARO, CROMO_ESCURO, SS)
+    _, p2r = pdf_pavimento("Subsolo")
+    for q in CUBAS_BANHOS:
+        tl = Tela(out, p2r, q["cuba"])
+        x0, y0, x1, y1 = q["cuba"]
+        tl.pintar(tl.ret(q["cuba"], 1.0), LOUCA_CONTORNO)
+        tl.pintar(tl.ret((x0 + 0.8, y0 + 0.8, x1 - 0.8, y1 - 0.8), 0.8), LOUCA)
+        bx0, by0, bx1, by1 = q["bacia"]
+        for i in range(6):                   # a bacia, da borda ao fundo
+            k = i / 5
+            cor = tuple(BACIA_BORDA[j] * (1 - k) + BACIA_FUNDO[j] * k for j in range(3))
+            ins = 0.6 + k * 3.0
+            tl.pintar(tl.ret((bx0 + ins, by0 + ins, bx1 - ins, by1 - ins), max(0.6, 1.6 - k)), cor)
+        vx, vy = tl.pt((bx0 + bx1) / 2, (by0 + by1) / 2)
+        v = tl.vazia()
+        cv2.circle(v, (int(vx), int(vy)), int(1.1 * SS), 255, -1)
+        tl.pintar(v, CROMO_ESCURO)
+        tx0, ty0, tx1, ty1 = q["torneira"]   # vem da parede do fundo (embaixo)
+        m = tl.ret(q["torneira"], 0.8)
+        tl.sombra(m, **SOMBRA)
+        tl.pintar(m, CROMO_ESCURO)
+        tl.pintar(tl.ret((tx0 + 0.3, ty0 + 0.4, (tx0 + tx1) / 2, ty1 - 0.4), 0.4), CROMO_CLARO)
+        base = tl.vazia()
+        cx, cy = tl.pt((tx0 + tx1) / 2, ty1)
+        cv2.circle(base, (int(cx), int(cy)), int(1.0 * SS), 255, -1)
+        tl.pintar(base, CROMO)
+        out = tl.gravar()
+        (a, b), (c, d) = p2r(x0, y0), p2r(x1, y1)
+        print(f"    cuba do banho {q['nome']}: x {a:.1f}-{c:.1f}, y {b:.1f}-{d:.1f} px, com a torneira da parede do fundo")
+    return out
+
+
 # Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
 # varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
 # (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
@@ -508,7 +558,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("4", "portas de vidro da academia: folhas de vidro claras, não pretas", portas_academia),
                      ("5", "janelas: vão, peitoril, vidro e caixilhos do PDF, no lugar da peça cinza", janelas),
                      ("6", "circulação: sem o traço preto na borda", traco_circulacao),
-                     ("7", "depósito e circulação interna: piso contínuo, sem juntas", juntas)],
+                     ("7", "depósito e circulação interna: piso contínuo, sem juntas", juntas),
+                     ("8", "banhos feminino e masculino: as cubas grandes do PDF", cubas_banhos)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares)]}
 
 

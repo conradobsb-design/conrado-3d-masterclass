@@ -787,6 +787,9 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - A textura vai na luz do render: o tom do piso em volta, suavizado (sigma 14 px em x e 8 px em y) o bastante para as placas sumirem e a sombra junto à parede da direita ficar.
     - Ficam como estão as paredes, as janelas, a porta do depósito com o arco (traço fino, protegido) e a peça junto à parede de baixo do depósito.
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_juntas_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só mudam os pisos do depósito e da circulação interna.
+  - **Subsolo 8, cubas dos banhos feminino e masculino:** o motor fez em cada bancada uma cuba branca pequena (~16 × 10 px). No PDF da Casa A (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS) a cuba é uma calha de ~32 × 15 px, quase da largura da bancada e de toda a profundidade, com uma faixa plana junto à parede do fundo, onde fica a torneira.
+    - Entra nessa geometria, como as cubas aprovadas da Casa E (`retoque_subsolo_casae.bancada_cuba`): louça branca com o contorno fino, a bacia escurecendo da borda ao fundo, a válvula no meio e a torneira cromada saindo da parede do fundo, com a sombra curta. A bancada do render fica.
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_cubas_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só mudam as duas cubas.
 
 ## Casas A a D · Barlavento nas piscinas
 
