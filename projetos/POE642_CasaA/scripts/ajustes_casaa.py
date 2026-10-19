@@ -46,6 +46,8 @@ Itens:
      degraus de tom das placas, com a textura e a luz do próprio render.
   Térreo 8. Jardim de 4,79 m² (pedido do usuário, 19/10/26): verde, com o gramado do Térreo e as três touceiras do
      PDF (clones da palmeira em estrela do jardim lateral do render).
+  Térreo, tanques (pedido do usuário, 19/10/26): na área de serviço, a bancada com os dois tanques de louça e as
+     torneiras de parede, nas medidas do PDF.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1107,6 +1109,73 @@ def jardim(out):
     return out
 
 
+# Térreo, tanques (pedido do usuário, 19/10/26: "aqui são dois tanques de água com torneiras, na área de serviço"). O
+# motor fez duas peças lilás com um símbolo estranho. No PDF da Casa A (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS) é a bancada
+# junto à parede de cima, com dois tanques de louça lado a lado: cada um com o esfregador (a faixa de cima, com a borda
+# de baixo arredondada) e a bacia funda, e a torneira de parede no meio, a bica descendo até o esfregador. Entram
+# nessas medidas, no padrão das cubas aprovadas: a bancada no quartzo claro das bancadas, com a borda fina e a sombra
+# curta; cada tanque de louça branca com o contorno fino, as nervuras do esfregador, a bacia escurecendo da borda ao
+# fundo e a válvula; a torneira cromada, da parede.
+TANQUES = {"bancada": [(1530.83, 1605.1, 1610.77, 1642.51), (1610.77, 1605.1, 1613.03, 1644.78)],
+           "tanques": [{"caixa": (1532.7, 1610.37, 1568.64, 1640.64), "esfregador": (1533.66, 1611.33, 1567.68, 1622.67),
+                        "bacia": (1533.66, 1618.13, 1567.68, 1639.68), "torneira": (1549.99, 1605.1, 1551.35, 1618.36)},
+                       {"caixa": (1572.39, 1610.37, 1608.33, 1640.64), "esfregador": (1573.35, 1611.33, 1607.37, 1622.67),
+                        "bacia": (1573.35, 1618.13, 1607.37, 1639.68), "torneira": (1589.67, 1605.1, 1591.04, 1618.36)}],
+           "nervuras": 5}
+
+
+def tanques(out):
+    from retoque_subsolo_casae import (Tela, SOMBRA, LOUCA, LOUCA_CONTORNO, BACIA_BORDA, BACIA_FUNDO, CROMO,
+                                       CROMO_CLARO, CROMO_ESCURO, QUARTZO, SS)
+    q = TANQUES
+    _, p2r = pdf_pavimento("Terreo")
+    caixa = (q["bancada"][0][0], q["bancada"][0][1], q["bancada"][1][2], q["bancada"][1][3])
+    tl = Tela(out, p2r, caixa)
+    for b in q["bancada"]:
+        m = tl.ret(b)
+        tl.sombra(m, **SOMBRA)
+        tl.pintar(m, QUARTZO)
+        tl.contorno(m, 0.35, (150, 153, 155))
+    for t in q["tanques"]:
+        x0, y0, x1, y1 = t["caixa"]
+        c = tl.ret(t["caixa"], 3.0)
+        tl.sombra(c, dx=-0.4, dy=0.4, sigma=0.5, forca=0.2)
+        tl.pintar(c, LOUCA_CONTORNO)
+        tl.pintar(tl.ret((x0 + 0.8, y0 + 0.8, x1 - 0.8, y1 - 0.8), 2.6), LOUCA)
+        bx0, by0, bx1, by1 = t["bacia"]
+        for i in range(6):                   # a bacia, da borda ao fundo
+            k = i / 5
+            cor = tuple(BACIA_BORDA[j] * (1 - k) + BACIA_FUNDO[j] * k for j in range(3))
+            ins = 0.5 + k * 3.2
+            tl.pintar(tl.ret((bx0 + ins, by0 + ins, bx1 - ins, by1 - ins), max(0.8, 2.6 - k)), cor)
+        ex0, ey0, ex1, ey1 = t["esfregador"]  # o esfregador: plano, um pouco acima da bacia, com as nervuras
+        e = tl.ret(t["esfregador"], 2.6)
+        tl.sombra(e, dx=0, dy=0.5, sigma=0.4, forca=0.25)
+        tl.pintar(e, LOUCA)
+        tl.contorno(e, 0.3, LOUCA_CONTORNO)
+        n = q["nervuras"]
+        for k in range(1, n + 1):
+            xk = ex0 + 3 + (ex1 - ex0 - 6) * k / (n + 1)
+            tl.pintar(tl.ret((xk - 0.3, ey0 + 2.5, xk + 0.3, ey1 - 2.0)), BACIA_BORDA, 0.8)
+        vx, vy = tl.pt((bx0 + bx1) / 2, (by0 + by1) / 2 + 3)
+        v = tl.vazia()
+        cv2.circle(v, (int(vx), int(vy)), int(1.1 * SS), 255, -1)
+        tl.pintar(v, CROMO_ESCURO)
+        tx0, ty0, tx1, ty1 = t["torneira"]  # da parede de cima, descendo até o esfregador
+        m = tl.ret(t["torneira"], 0.6)
+        tl.sombra(m, **SOMBRA)
+        tl.pintar(m, CROMO_ESCURO)
+        tl.pintar(tl.ret((tx0 + 0.25, ty0, (tx0 + tx1) / 2, ty1 - 0.4), 0.3), CROMO_CLARO)
+        base = tl.vazia()
+        cx, cy = tl.pt((tx0 + tx1) / 2, ty0 + 1.0)
+        cv2.circle(base, (int(cx), int(cy)), int(1.0 * SS), 255, -1)
+        tl.pintar(base, CROMO)
+    out = tl.gravar()
+    (a, b), (c, d) = p2r(*caixa[:2]), p2r(*caixa[2:])
+    print(f"    área de serviço: bancada x {a:.1f}-{c:.1f}, y {b:.1f}-{d:.1f} px, com os dois tanques e as torneiras do PDF")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1243,7 +1312,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
                     ("2", "sala de estar: o sofá curvo do PDF, a poltrona da direita e a mesinha", sala_estar),
                     ("rejuntes", "piso interno sem os rejuntes: o travertino contínuo", rejuntes),
-                    ("8", "jardim de 4,79 m²: verde, com as três touceiras do PDF", jardim)]}
+                    ("8", "jardim de 4,79 m²: verde, com as três touceiras do PDF", jardim),
+                    ("tanques", "área de serviço: a bancada com os dois tanques e as torneiras", tanques)]}
 
 
 def main():
