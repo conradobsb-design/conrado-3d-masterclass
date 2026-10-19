@@ -171,6 +171,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **[19/10] R2. Subsolo:** mostrar só o subsolo, com o restante do terreno hachurado.
   - Sai o contexto do Térreo (esmaecido ou em linhas) em volta do subsolo.
   - **Hachura:** linhas diagonais finas a 45°, em cinza-claro, sobre o branco, dentro do lote (escolha do usuário em 19/10).
+  - **Como é feito:** a cada 0,40 m, traço de 1,3 px, cinza 198, com o contorno do lote em cinza fino. O lote é o do Térreo aprovado no mesmo quadro. Referência: Casa E, `retoque_subsolo_casae.contexto_hachura`.
 - **1º Pavimento:** o Térreo "nublado" em volta (padrão, referência de 19/10).
   - `entorno_esmaecido.py --nublado`: 70% de branco, 80% da saturação, desfoque leve.
   - O Térreo usado é o aprovado, sem passar pelo motor.

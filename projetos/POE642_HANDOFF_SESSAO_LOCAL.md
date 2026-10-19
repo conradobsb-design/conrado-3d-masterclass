@@ -713,6 +713,13 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
       - Fica sem área, porque o PDF não a dá e o ambiente é aberto para a academia.
       - **Conferência:** na prancha, só a piscina e o rótulo mudaram (15.203 px, 2 regiões). A prancha do Subsolo e os três PDFs da casa foram refeitos.
       - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_piscina_cliente_antes_depois.jpg`.
+  21. **R2, só o Subsolo com o terreno hachurado (regra nova de 19/10/26 para todas as casas: "Quando representar a planta de subsolo, mostrar somente o subsolo com o restante do terreno hachurado"):** substitui o item 17 (as linhas do PDF do Térreo no fundo).
+      - Fora da pegada do Subsolo, o terreno do lote fica hachurado em diagonais finas a 45° (/), em cinza-claro (198), a cada 0,40 m (24 px na prancha), com traço de 1,3 px. A hachura foi escolhida pelo usuário.
+      - O lote é o do Térreo aprovado, no mesmo quadro: tudo o que não é branco nele, fechado e com os furos preenchidos. Ele leva um contorno cinza fino (165).
+      - Fora do lote fica o branco, com as linhas tracejadas da base (as do PDF).
+      - `HACHURA`, `lote_do_terreo` e `contexto_hachura` no `retoque_subsolo_casae.py`.
+      - Na prancha, só o fundo mudou (a planta do Subsolo e o rodapé ficaram iguais). A prancha e os três PDFs foram refeitos.
+      - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_terreno_hachurado_antes_depois.jpg`.
 - **Entrega (16/10/26, depois da aprovação do usuário: "prancha e o PDF. aprovado."):** a casa passa a ter três pavimentos, na ordem da Casa A (Subsolo, Térreo, 1º Pavimento).
   - **Config:** o Subsolo entrou na chave `entrega` da `POE642_CasaE/config_bases.json` (título "SUBSOLO", linha 0 do quadro de áreas, base `POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png`). O Térreo passou à linha 1 e o 1º Pavimento à linha 2. O quadro de áreas tem os três "NÃO INFORMADO", sem total. Em `pdf.ordem`: Subsolo, Térreo e 1º Pavimento; título "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)".
   - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_Subsolo_entrega.png`, nova. A imagem final, já no quadro comum e com os rótulos, entra com `--no-quadro`, sem realinhar. A do Térreo (realinhada com 128 pontos, erro mediano 0,78 px) e as duas do 1º Pavimento (`_pb` e `_linhas`) foram refeitas só pelo rodapé novo, com a linha do Subsolo no quadro de áreas. Rodapés `entrega/POE642_CasaE_rodape_{Subsolo,Terreo,1Pavimento}.png`.

@@ -1007,7 +1007,48 @@ def sombras_longas(out, p2r, chapada):
 # linhas do PDF do Térreo (a casa de cima), em cinza, como na opção "linhas" do 1º Pavimento
 # (`opcoes_1pav_casae.contexto_linhas`: sem terreno, contrapiso, zonas e textos; 70% do traço). As linhas
 # tracejadas do lote continuam as da base.
+# R2 (regra nova do usuário, 19/10/26, para todas as casas: "Quando representar a planta de subsolo, mostrar somente o
+# subsolo com o restante do terreno hachurado"; hachura escolhida por ele: diagonais finas a 45°, cinza-claro). Fora da
+# pegada do Subsolo, no lugar das linhas do Térreo (item 17), o terreno do lote hachurado. O lote é o do Térreo
+# aprovado, no mesmo quadro: tudo o que não é branco nele (gramado, casa, muros), fechado e com os furos preenchidos.
+# Fora do lote, o branco, com as linhas tracejadas da base (as do PDF).
 QUADRO = {"largura": 3840}
+HACHURA = {"terreo": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_final.png",
+           "passo_m": 0.40, "px_por_m": 60.0, "largura_px": 1.3, "cor": (198, 198, 198),
+           "contorno_px": 1.6, "cor_contorno": (165, 165, 165)}
+
+
+def lote_do_terreo(W, H):
+    """O lote no quadro final: o que não é branco no Térreo aprovado, fechado e com os furos preenchidos (a maior
+    mancha)."""
+    from scipy import ndimage
+    t = cv2.resize(cv2.imread(str(HACHURA["terreo"])), (W, H), interpolation=cv2.INTER_AREA)
+    nb = t.min(axis=2) < 235
+    nb = cv2.morphologyEx(nb.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((15, 15), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(nb, connectivity=8)
+    lote = lab == 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+    return ndimage.binary_fill_holes(lote)
+
+
+def contexto_hachura(W, H):
+    """O terreno do lote hachurado em diagonais finas a 45° (/), cinza-claro, sobre o branco, com o contorno do lote
+    em cinza fino; fora do lote, branco."""
+    q = HACHURA
+    lote = lote_do_terreo(W, H)
+    s = q["passo_m"] * q["px_por_m"] * W / 3840
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    u = (xx + yy) / np.sqrt(2)
+    fr = np.mod(u, s)
+    dist = np.minimum(fr, s - fr)
+    a = np.clip(q["largura_px"] / 2 + 0.5 - dist, 0, 1) * lote
+    t = np.full((H, W, 3), 255, np.float32)
+    t = t * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None]
+    borda = lote & ~cv2.erode(lote.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    k = max(1, int(round(q["contorno_px"])))
+    borda = cv2.dilate(borda.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & lote
+    t[borda] = q["cor_contorno"]
+    print(f"    terreno hachurado: lote de {100 * lote.mean():.1f}% do quadro, diagonais a cada {s:.1f} px")
+    return t
 
 
 def final_quadro(out, referencia=None):
@@ -1021,8 +1062,7 @@ def final_quadro(out, referencia=None):
     ref = None if referencia is None else Image.fromarray(cv2.cvtColor(referencia, cv2.COLOR_BGR2RGB))
     cima = cv2.cvtColor(np.asarray(no_quadro_comum(Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)), BASE,
                                                    "Subsolo", W, referencia=ref)), cv2.COLOR_RGB2BGR)
-    from opcoes_1pav_casae import contexto_linhas
-    return sobrepor(base, contexto_linhas(W, H), (), cima)
+    return sobrepor(base, contexto_hachura(W, H), (), cima)
 
 
 # item 16 (pedido do usuário, 16/10/26): "as bordas da piscina são em mármore Bege Bahia. a folha de vidro
@@ -1286,7 +1326,7 @@ def main():
     args.saida.mkdir(parents=True, exist_ok=True)
     if args.ate >= 15:
         print("[15] imagem final no quadro comum, com o tracejado do lote da base")
-        print("[17] fundo com as linhas do PDF do Térreo (pedido do usuário)")
+        print("[R2] fora do Subsolo, o terreno do lote hachurado a 45° (regra nova; substitui as linhas do Térreo do item 17)")
         final = final_quadro(out, referencia=aprovado)
         print("[18] nomes e áreas dos ambientes, pela regra do 1º Pavimento (pedido do usuário); [20] o rótulo AMBIENTE")
         final = rotulos(final)
