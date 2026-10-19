@@ -40,6 +40,8 @@ Itens:
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
   Térreo 2. Sala de estar (pedido do usuário, 19/10/26): o sofá curvo do PDF acompanhando o tapete pela esquerda,
      com as almofadas, a poltrona da direita e a mesinha na ponta do sofá (clones do render).
+  Térreo, rejuntes (pedido do usuário, 19/10/26): o travertino do piso interno contínuo, sem as juntas nem os
+     degraus de tom das placas, com a textura e a luz do próprio render.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -990,6 +992,124 @@ def sala_estar(out):
     return out
 
 
+
+# Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
+# interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
+# placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
+# contínuo, com a textura do próprio render e na luz dele:
+# - onde: o travertino da legenda (#DCD9CA na base v6, levada à imagem pelo afim do Térreo), sem a escada interna;
+#   dentro dele, só o que é piso pela cor (claro e quente como o travertino). Ficam os móveis, os tapetes, as
+#   paredes, os traços desenhados (os do PDF: tracejados de projeção, arcos e folhas de porta, escadas; e o que for
+#   muito mais escuro que o piso em volta) e um anel de 3 px em volta de tudo isso;
+# - a textura: miolos de 32 px do próprio piso sem junta vertical (os veios horizontais do travertino ficam, são a
+#   textura), sem os pontinhos escuros, cada um dividido pela luz do lugar, tecidos por image quilting;
+# - a luz: o tom do piso em volta, suavizado (sigma 12 px) o bastante para os degraus de tom entre placas sumirem;
+#   as sombras dos móveis ficam (o que é 2 a 7% ou mais mais escuro que a luz do lugar);
+# - no anel em volta dos móveis e dos traços, o piso original fica, no tom do piso refeito ao lado; o que sobrou de
+#   junta vertical ali vira a média dos dois lados.
+REJUNTES = {"legenda": (0xCA, 0xD9, 0xDC), "tol": 8,      # travertino na base (BGR)
+            "fora": [(1185, 462, 1335, 556)],             # a escada interna (px da imagem: x0, y0, x1, y1)
+            "piso": {"L": (140, 214), "quente": (22, 44), "sat": (20, 46)},
+            "camadas_desenho": ("DOC_LINHAS E PROJEÇÕES", "ARQ_PAREDE", "ARQ_ESCADAS E RAMPAS", "ARQ_PERGOLADO"),
+            "traco": 35,                                  # traço desenhado: mais escuro que a mediana 9 px por isto
+            "anel": 7, "janela": 32, "luz": 12}
+
+
+def rejuntes(out):
+    import json
+    from retoque_bege_bahia_terreo import quilting
+    q = REJUNTES
+    import rotulos_casaa as A
+    cfg = json.loads(A.CONFIG.read_text())
+    base = cv2.imread(str((A.CONFIG.parent / cfg["entrega"]["pasta_bases"] /
+                           cfg["entrega"]["pavimentos"]["Terreo"]["base"]).resolve()))
+    b2 = cv2.resize(base, (2000, round(base.shape[0] * 2000 / base.shape[1])), interpolation=cv2.INTER_NEAREST)
+    trav = (np.abs(b2.astype(int) - q["legenda"]).max(axis=2) <= q["tol"]).astype(np.uint8)
+    T = cv2.warpAffine(trav, np.float32(AFIM_QR["Terreo"]), (out.shape[1], out.shape[0]), flags=cv2.INTER_NEAREST)
+    for x0, y0, x1, y1 in q["fora"]:
+        T[y0:y1, x0:x1] = 0
+    T = cv2.erode(T, np.ones((3, 3), np.uint8)).astype(bool)
+    rf = out.astype(np.float32)
+    L = cv2.GaussianBlur(rf.mean(axis=2), (0, 0), 0.5)
+    sat, quente = rf.max(axis=2) - rf.min(axis=2), rf[..., 2] - rf[..., 0]
+    pp = q["piso"]
+    piso = T & (rf.mean(axis=2) >= pp["L"][0]) & (rf.mean(axis=2) <= pp["L"][1]) & (quente >= pp["quente"][0]) & \
+        (quente <= pp["quente"][1]) & (sat >= pp["sat"][0]) & (sat <= pp["sat"][1])
+    # os traços desenhados ficam: os do PDF (tracejados de projeção, arcos e folhas de porta, escadas, pergolado),
+    # rasterizados e levados à imagem, com 2 px de folga; e o que for muito mais escuro que o piso em volta (as
+    # juntas do motor chegam a -25; os traços, a -40 ou mais)
+    import pymupdf
+    pg, p2r = pdf_pavimento("Terreo")
+    doc = pg.parent
+    for u in doc.layer_ui_configs():
+        doc.set_layer_ui_config(u["number"], action=0 if u["text"] in q["camadas_desenho"] else 2)
+    Z = 4
+    pix = doc[pg.number].get_pixmap(matrix=pymupdf.Matrix(Z, Z), alpha=False)
+    des = (np.frombuffer(pix.samples, np.uint8).reshape(pix.height, pix.width, 3).min(axis=2) < 200).astype(np.uint8)
+    src = np.float32([[100, 100], [1500, 100], [100, 1500]])
+    M = np.vstack([cv2.getAffineTransform(src, np.float32([p2r(*pt) for pt in src])), [0, 0, 1]]) @ np.diag([1 / Z, 1 / Z, 1])
+    des = cv2.warpAffine(des * 255, M[:2], (out.shape[1], out.shape[0]), flags=cv2.INTER_AREA) > 20
+    forte = (L - cv2.medianBlur(out, 9).astype(np.float32).mean(axis=2)) < -q["traco"]
+    piso &= ~cv2.dilate((des | forte).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    piso = cv2.morphologyEx(piso.astype(np.uint8), cv2.MORPH_OPEN, np.ones((2, 2), np.uint8)).astype(bool)
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (q["anel"], q["anel"]))
+    nucleo = piso & ~cv2.dilate((T & ~piso).astype(np.uint8), k).astype(bool)
+
+    def nconv(img, m, sig):
+        return cv2.GaussianBlur(img * m[..., None], (0, 0), sig) / \
+            np.maximum(cv2.GaussianBlur(m, (0, 0), sig), 1e-4)[..., None]
+    med5 = cv2.medianBlur(out, 5).astype(np.float32)
+    campo = nconv(med5, nucleo.astype(np.float32), q["luz"])
+    d = np.clip(1 - nconv(med5, piso.astype(np.float32), 1.5).mean(axis=2) / np.maximum(campo.mean(axis=2), 1), 0, 1)
+    t = np.clip((d - 0.02) / 0.05, 0, 1)
+    fator = 1 - d * t * t * (3 - 2 * t)                    # as sombras dos móveis
+
+    dv = L - 0.5 * (np.roll(L, 2, axis=1) + np.roll(L, -2, axis=1))
+    J = q["janela"]
+    ys, xs = np.nonzero(nucleo)
+    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    cob = cv2.blur(nucleo.astype(np.float32), (J, J), anchor=(0, 0), borderType=cv2.BORDER_CONSTANT)
+    usados, fontes = [], []
+    for yy in range(y0, y1 - J, 6):
+        for xx in range(x0, x1 - J, 6):
+            if cob[yy, xx] >= 0.98 and (dv[yy:yy + J, xx:xx + J] < -1.2).mean(axis=0).max() < 0.5 and \
+                    all(abs(yy - a) >= 24 or abs(xx - b) >= 24 for a, b in usados):
+                usados.append((yy, xx))
+    for yy, xx in usados:
+        g = rf[yy:yy + J, xx:xx + J].copy()
+        md = med5[yy:yy + J, xx:xx + J]
+        pinta = (md.mean(axis=2) - g.mean(axis=2)) > 7
+        g[pinta] = md[pinta]
+        g = g / campo[yy:yy + J, xx:xx + J]
+        g = g / g.reshape(-1, 3).mean(axis=0)
+        fontes += [np.ascontiguousarray(g), np.ascontiguousarray(g[:, ::-1])]
+    tex = quilting(fontes, y1 - y0, x1 - x0, p=30, sobra=9, candidatos=500, rng=np.random.default_rng(642))
+    novo = rf.copy()
+    novo[y0:y1, x0:x1] = tex * campo[y0:y1, x0:x1] * fator[y0:y1, x0:x1, None]
+    a = (cv2.GaussianBlur(nucleo.astype(np.float32), (0, 0), 0.7) * nucleo)[..., None]
+    res = rf * (1 - a) + novo * a
+    # no anel em volta dos móveis e dos traços, o piso original fica, mas no tom novo: a razão entre o piso refeito e
+    # o original ali perto (as placas tinham tons diferentes; sem isso a borda do anel marca um degrau)
+    wn = nucleo.astype(np.float32)
+    den = cv2.GaussianBlur(wn, (0, 0), 4)
+    razao = cv2.GaussianBlur(res * wn[..., None], (0, 0), 4) / np.maximum(cv2.GaussianBlur(rf * wn[..., None], (0, 0), 4), 1)
+    razao = np.where(den[..., None] > 0.05, razao, 1.0)
+    anel = (piso & ~nucleo).astype(np.float32)[..., None] * (1 - a)
+    res = res * (1 - anel) + res * razao * anel
+    # o que sobrou de junta vertical no anel em volta dos móveis: a média dos dois lados (2 px)
+    Lo = res.mean(axis=2)
+    c = ((Lo - 0.5 * (np.roll(Lo, 2, axis=1) + np.roll(Lo, -2, axis=1)) < -1.2) & piso).astype(np.float32)
+    fv = cv2.filter2D(c, -1, np.ones((20, 1), np.float32) / 20) >= 0.7
+    fv = cv2.dilate(fv.astype(np.uint8), np.ones((10, 1), np.uint8)).astype(bool) & (c > 0) & T
+    fv = cv2.dilate(fv.astype(np.uint8), np.ones((1, 2), np.uint8)).astype(bool) & piso
+    yv, xv = np.nonzero(fv)
+    res[yv, xv] = 0.5 * (res[yv, np.clip(xv - 2, 0, None)] + res[yv, np.clip(xv + 2, None, out.shape[1] - 1)])
+    out[:] = np.clip(np.round(res), 0, 255).astype(np.uint8)
+    print(f"    rejuntes: travertino {int(T.sum())} px, piso {int(piso.sum())} px, refeito {int(nucleo.sum())} px "
+          f"({len(usados)} miolos de {J} px); resto de junta vertical no anel: {len(yv)} px")
+    return out
+
+
 # A ordem da lista é a de execução: o piso do depósito sem juntas (7) e o Bege Bahia (11) vêm antes da escada (3),
 # para a sombra do último espelho cair no Bege Bahia, e antes dos itens que apagam traços em espelho (4 e 6), para
 # o piso de cada lado já ser o Bege Bahia.
@@ -1006,7 +1126,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("10", "divisória entre os banhos: peça clara do PDF, não parede", divisoria),
                      ("12", "banho de serviço: bancada e cuba nas medidas do PDF", bancada_servico)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
-                    ("2", "sala de estar: o sofá curvo do PDF, a poltrona da direita e a mesinha", sala_estar)]}
+                    ("2", "sala de estar: o sofá curvo do PDF, a poltrona da direita e a mesinha", sala_estar),
+                    ("rejuntes", "piso interno sem os rejuntes: o travertino contínuo", rejuntes)]}
 
 
 def main():
