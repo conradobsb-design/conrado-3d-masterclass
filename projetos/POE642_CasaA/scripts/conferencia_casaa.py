@@ -63,8 +63,10 @@ ITENS = {
     "Subsolo": [
         (1, "Banho de serviço: faltam o chuveiro (na parede da esquerda) e a divisória de vidro do box",
          [(590, 480)]),
-        (2, "Sauna: o banco em L do PDF (paredes de baixo e da esquerda) virou piso na v6, por decisão anterior; "
-            "nas Casas D e E o banco ficou em mármore, em níveis (confirmar)", [(670, 840)]),
+        # usuário (19/10/26): o banco é horizontal; a faixa vertical à esquerda é o piso da piscina, a passagem
+        # da sauna para a piscina ("não é em L")
+        (2, "Sauna: o banco horizontal do PDF, ao longo da parede de baixo, virou piso na v6, por decisão anterior "
+            "(a faixa vertical à esquerda é a passagem da sauna para a piscina e fica como piso)", [(670, 840)]),
     ],
 }
 

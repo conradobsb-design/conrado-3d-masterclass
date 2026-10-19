@@ -744,7 +744,7 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
   7. Banho master: a banheira do PDF é oval; a do render, retangular de cantos arredondados.
 - **Subsolo (2 itens):**
   1. Banho de serviço: faltam o chuveiro e a divisória de vidro do box.
-  2. Sauna: o banco em L do PDF virou piso na v6, por decisão anterior. Nas Casas D e E o banco ficou em mármore, em níveis; a confirmar.
+  2. Sauna: o banco do PDF, horizontal, ao longo da parede de baixo, virou piso na v6, por decisão anterior. Usuário (19/10/26): o banco não é em L; a faixa vertical à esquerda, no tom do piso da piscina, é a passagem da sauna para a piscina e fica como piso.
 - **Conferidos sem divergência:** cozinha, garagem (carros), hall interno e externo, escada interna e jardim da escada, piscina, prainha, spa, deck e escada do deck, gourmet, lavatório e WC, garagem e acesso; no 1º Pavimento, banhos 1, 2 e 3, closets, circulação, sala íntima, saleta com a caracol e as varandas; no Subsolo, academia (2 esteiras, 2 bicicletas e o banco com a barra), depósito, circulação, hall, banhos feminino e masculino e elevador.
 - **Próximo passo:** o usuário confirma a lista; o retoque segue um item por vez, sem IA, como na Casa E.
 
