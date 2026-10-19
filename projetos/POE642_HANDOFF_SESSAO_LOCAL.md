@@ -726,6 +726,13 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
       - Opção nova `so_folha=True`: a reta do centro a uma ponta do arco só é protegida se lá houver mesmo uma folha. Na porta dupla do depósito, a ponta do arco fechado sobrava como um tracinho no meio do vão.
       - **Conferência:** na prancha, só as 9 regiões das portas mudaram (6.880 px). A prancha e os três PDFs foram refeitos.
       - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_sem_arcos_antes_depois.jpg`.
+  23. **Escada com linhas e o triângulo de orientação (regras de 19/10/26: "escadas com linhas" e R14):** a escada sobe para a direita, com 17 degraus de 30 cm. A linha de corte do PDF passa em diagonal pelos degraus 7 e 8. Item `escada_r14`, que substitui o sombreado do item 2.
+      - O piso é o travertino da base v3, sem os traços do PDF (removidos por inpaint), na cor do render.
+      - **Antes do corte:** em cada bocel, uma linha cinza suave (80%) e a sombra curta de 10 cm no degrau de baixo. Nenhum traço preto.
+      - **Depois do corte:** esmaecida (80%), com os bocéis e o contorno tracejados do PDF. Ficam de fora a linha de percurso, a linha de corte e o símbolo dela, como nas escadas aprovadas.
+      - **Triângulo:** cheio, cinza-escuro, de 24 × 26 cm, no 1º degrau, a 10 cm do início, apontando para a subida.
+      - **Conferência:** na prancha, só a escada mudou (22.994 px, 1 região). A prancha e os três PDFs foram refeitos.
+      - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_escada_antes_depois.jpg`.
 - **Entrega (16/10/26, depois da aprovação do usuário: "prancha e o PDF. aprovado."):** a casa passa a ter três pavimentos, na ordem da Casa A (Subsolo, Térreo, 1º Pavimento).
   - **Config:** o Subsolo entrou na chave `entrega` da `POE642_CasaE/config_bases.json` (título "SUBSOLO", linha 0 do quadro de áreas, base `POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png`). O Térreo passou à linha 1 e o 1º Pavimento à linha 2. O quadro de áreas tem os três "NÃO INFORMADO", sem total. Em `pdf.ordem`: Subsolo, Térreo e 1º Pavimento; título "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)".
   - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_Subsolo_entrega.png`, nova. A imagem final, já no quadro comum e com os rótulos, entra com `--no-quadro`, sem realinhar. A do Térreo (realinhada com 128 pontos, erro mediano 0,78 px) e as duas do 1º Pavimento (`_pb` e `_linhas`) foram refeitas só pelo rodapé novo, com a linha do Subsolo no quadro de áreas. Rodapés `entrega/POE642_CasaE_rodape_{Subsolo,Terreo,1Pavimento}.png`.

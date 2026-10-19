@@ -1190,6 +1190,99 @@ def piscina_cliente(out, p2r):
 ARCOS = {"camadas": ("ARQ_PAREDE", "ARQ - Parede", "ARQ_REVESTIMENTOS")}
 
 
+# item 23 (regras do usuário de 19/10/26: "escadas com linhas" e o triângulo de orientação "no inicio de escadas,
+# indicando o sentido ora subida ora descida"). A escada do Subsolo sobe para a direita: 17 degraus de 30 cm (17 pt),
+# do 1º (o "S" do PDF, em x 972) ao 17º; a linha de corte do PDF passa em diagonal pelos degraus 7 e 8. O trecho
+# sai do item 2 (o da escada do Térreo, só sombreado) e fica:
+# - antes do corte, cheio, no travertino da base v3 na cor do render: em cada bocel (a borda de cada degrau) uma
+#   linha cinza suave e, no degrau de baixo (à esquerda), a sombra curta de 10 cm; nenhum traço preto;
+# - depois do corte, esmaecido, com os bocéis e o contorno tracejados do PDF (a projeção); a linha de corte não é
+#   desenhada (como nas escadas aprovadas da Casa A);
+# - o triângulo cheio, cinza-escuro, de 24 x 26 cm, no 1º degrau, a 10 cm do início, apontando para a subida.
+ESCADA_R14 = {"pdf": (972.0, 617.0, 1261.2, 685.0), "passo_pt": 17.0, "n": 17,
+              "corte": [(1073.8, 616.4), (1089.2, 647.2), (1093.0, 654.8), (1108.1, 685.0)],
+              "bocel": 0.80, "bocel_pt": 0.55, "sombra": (0.16, 5.67), "esmaecer": 0.8,
+              "tracejado": (160, 160, 164), "tracejado_px": 0.5, "simbolo_x": 1091.1,
+              "triangulo": {"base_pt": 13.6, "altura_pt": 14.7, "recuo_pt": 5.67, "cor": (88, 88, 92)}}
+
+
+def escada_r14(out, pg, p2r, tex):
+    q = ESCADA_R14
+    ex0, ey0, ex1, ey1 = q["pdf"]
+    x0, y0, x1, y1 = caixa_pdf(p2r, ex0 - 8, ey0 - 3, ex1 + 3, ey1 + 3)
+    h, w = y1 - y0, x1 - x0
+
+    def P(x, y, ss=SS):
+        a, b = p2r(x, y)
+        return ((a - x0) * ss, (b - y0) * ss)
+
+    def poli(pts, ss=SS):
+        m = np.zeros((h * ss, w * ss), np.uint8)
+        cv2.fillPoly(m, [np.int32(np.round([P(x, y, ss) for x, y in pts]))], 255)
+        return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    # o piso limpo: o travertino da base v3 sem os traços do PDF (degraus, linha de percurso, corte: o que é mais
+    # escuro que a mediana em volta, preenchido por inpaint), na cor do render
+    caixa = [(ex0, ey0), (ex1, ey0), (ex1, ey1), (ex0, ey1)]
+    esc = poli(caixa)
+    base = tex[y0:y1, x0:x1].copy()
+    L = base.astype(np.float32).mean(axis=2)
+    tracos = (cv2.medianBlur(base, 7).astype(np.float32).mean(axis=2) - L > 4) | (L < 150)
+    tracos = cv2.dilate(tracos.astype(np.uint8), np.ones((3, 3), np.uint8))
+    limpo = cv2.inpaint(base, tracos, 3, cv2.INPAINT_TELEA).astype(np.float32)
+    ganho = np.asarray(TRAV["render"], np.float32) / np.asarray(TRAV["base"], np.float32)
+    reg0 = out[y0:y1, x0:x1].astype(np.float32)
+    reg = reg0 * (1 - esc[..., None]) + limpo * ganho * esc[..., None]
+    cheia = poli([(ex0, ey0)] + q["corte"] + [(ex0, ey1)])
+    # antes do corte: o bocel (linha suave) e a sombra curta no degrau de baixo (à esquerda)
+    fator = np.ones((h, w), np.float32)
+    forca, alcance = q["sombra"]
+    for k in range(q["n"]):
+        xb = ex0 + k * q["passo_pt"]
+        lin = poli([(xb - q["bocel_pt"] / 2, ey0), (xb + q["bocel_pt"] / 2, ey0),
+                    (xb + q["bocel_pt"] / 2, ey1), (xb - q["bocel_pt"] / 2, ey1)])
+        fator *= 1 - (1 - q["bocel"]) * lin
+        for f in np.linspace(0, 1, 9)[:-1]:
+            fx0, fx1 = xb - alcance * (f + 1 / 8), xb - alcance * f
+            faixa = poli([(fx0, ey0), (fx1, ey0), (fx1, ey1), (fx0, ey1)])
+            fator *= 1 - forca * (1 - f - 1 / 16) ** 1.6 * faixa
+    fator = 1 - (1 - fator) * cheia
+    reg *= fator[..., None]
+    # depois do corte: esmaecido, com os tracejados do PDF (a projeção)
+    apos = np.clip(esc - cheia, 0, 1)[..., None]
+    reg = reg * (1 - apos) + (255 - (255 - reg) * q["esmaecer"]) * apos
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    lw = max(1, int(round(q["tracejado_px"] * SS)))
+    for d in pg.get_drawings():
+        if d.get("layer") != "ARQ_ESCADAS E RAMPAS":
+            continue
+        for it in d["items"]:
+            if it[0] != "l":
+                continue
+            a, b = it[1], it[2]
+            if not (ex0 - 1 <= min(a.x, b.x) and max(a.x, b.x) <= ex1 + 1 and ey0 - 1 <= min(a.y, b.y) and max(a.y, b.y) <= ey1 + 1):
+                continue
+            # só os traços do tracejado (peças curtas, retas na vertical ou na horizontal): sem a linha de percurso, a
+            # linha de corte e o símbolo dela (os "<" e o tracinho do meio)
+            if np.hypot(b.x - a.x, b.y - a.y) > 7.0 or (abs(a.x - b.x) > 0.05 and abs(a.y - b.y) > 0.05):
+                continue
+            # e sem as peças do símbolo de corte (no meio da altura, junto à linha de corte)
+            if abs(min(a.y, b.y) + max(a.y, b.y) - (ey0 + ey1)) / 2 < 5.0 and abs((a.x + b.x) / 2 - q["simbolo_x"]) < 8:
+                continue
+            pa, pb = P(a.x, a.y), P(b.x, b.y)
+            cv2.line(m, (int(round(pa[0])), int(round(pa[1]))), (int(round(pb[0])), int(round(pb[1]))), 255, lw, cv2.LINE_AA)
+    tr = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * apos[..., 0]
+    reg = reg * (1 - tr[..., None]) + np.float32(q["tracejado"]) * tr[..., None]
+    # o triângulo de orientação: no 1º degrau, apontando para a subida (direita)
+    t = q["triangulo"]
+    xb, yc = ex0 + t["recuo_pt"], (ey0 + ey1) / 2
+    tri = poli([(xb + t["altura_pt"], yc), (xb, yc - t["base_pt"] / 2), (xb, yc + t["base_pt"] / 2)])
+    reg = reg * (1 - tri[..., None]) + np.float32(t["cor"]) * tri[..., None]
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    escada: {q['n']} degraus, bocéis em linha suave com a sombra curta até o corte, esmaecida e tracejada "
+          f"depois; triângulo de subida no 1º degrau")
+    return out
+
+
 # item 18 (pedido do usuário, 16/10/26): "vamos adicionar os nomes e áreas, conforme regras que adotamos
 # anteriormente para o 1º pavimento da casa E". A regra do 1º Pavimento (`retoque_1pav_casae.rotulos_ambientes`):
 # cada linha do rótulo do PDF entra igual (o nome e "A: 12,65 m²"), na posição do PDF, no corpo do PDF 30%
@@ -1332,6 +1425,8 @@ def main():
         print("[22] portas sem os arcos (R3)")
         from arcos import remover_arcos
         out = remover_arcos(out, pg, p2r, camadas=ARCOS["camadas"], so_folha=True)
+        print("[23] escada com linhas e o triângulo de orientação (R14)")
+        out = escada_r14(out, pg, p2r, tex)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     if args.ate >= 15:
