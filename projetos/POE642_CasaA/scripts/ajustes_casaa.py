@@ -36,6 +36,8 @@ Itens:
      escada do deck tira dele a textura do degrau.
   Subsolo 12. Banho de serviço (pedido do usuário, 19/10/26): a bancada da pia e a cuba, nas medidas do PDF, no
      padrão das cubas aprovadas.
+  Subsolo 13. Escada do deck (pedido do usuário, 19/10/26): abaixo dela, entre o deck e a circulação, o gramado do
+     Térreo, no lugar do branco.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
   Térreo 2. Sala de estar (pedido do usuário, 19/10/26): o sofá curvo do PDF acompanhando o tapete pela esquerda,
@@ -706,6 +708,44 @@ def bancada_servico(out):
     return out
 
 
+# Subsolo 13. Gramado junto à escada do deck (pedido do usuário, 19/10/26: "ao termino dos degraus no sentido do subsolo,
+# ou seja, a escada desce, no último degrau, após ele, há um gramado, que separa o último degrau da área de circulação
+# do subsolo", com o recorte da prancha do Térreo). Abaixo da escada que desce do deck, entre a borda do deck
+# esmaecido e a circulação, a prancha do Subsolo estava em branco; no Térreo ali é o gramado. Entra o gramado do
+# próprio Térreo aprovado, no mesmo lugar (as duas imagens vão ao quadro comum, e o afim de uma à outra passa por ele),
+# na cor dele, só onde o Subsolo está em branco: da escada até a parede de baixo do Subsolo, da borda esquerda do
+# deck esmaecido até a circulação. A borda com o branco é suave (a parte branca de cada px).
+GRAMADO_ESCADA = {"caixa": (376, 584, 575, 849),    # px da imagem do Subsolo: x0, y0, x1, y1
+                  "branco": (230, 250)}             # rampa da borda: mínimo do px de 230 (nada) a 250 (tudo)
+
+
+def gramado_escada(out):
+    q = GRAMADO_ESCADA
+    m = lambda k: np.vstack([np.float64(AFIM_QR[k]), [0, 0, 1]])
+    s2t = m("Terreo") @ np.linalg.inv(m("Subsolo"))          # px do Subsolo -> px do Térreo
+    terreo = cv2.imread(str(APROVADAS["Terreo"]))
+    x0, y0, x1, y1 = q["caixa"]
+    gx, gy = np.meshgrid(np.arange(x0, x1, dtype=np.float32), np.arange(y0, y1, dtype=np.float32))
+    mx = (s2t[0, 0] * gx + s2t[0, 1] * gy + s2t[0, 2]).astype(np.float32)
+    my = (s2t[1, 0] * gx + s2t[1, 1] * gy + s2t[1, 2]).astype(np.float32)
+    grama = cv2.remap(terreo, mx, my, cv2.INTER_LINEAR).astype(np.float32)
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    lo, hi = q["branco"]
+    a = np.clip((reg.min(axis=2) - lo) / (hi - lo), 0, 1)
+    verde = (grama[..., 1] > grama[..., 2] + 8) & (grama[..., 1] > grama[..., 0] + 8)
+    a *= cv2.GaussianBlur(verde.astype(np.float32), (0, 0), 0.7)
+    out[y0:y1, x0:x1] = np.clip(np.round(reg * (1 - a[..., None]) + grama * a[..., None]), 0, 255).astype(np.uint8)
+    # na emenda com a circulação sobrava o px claro da borda dela (contra o branco): vira a média dos dois lados
+    for y in range(y0, y1):
+        xs = np.nonzero(a[y - y0] > 0.5)[0]
+        if len(xs):
+            xl = x0 + xs.max()
+            if xl + 2 < out.shape[1] and out[y, xl + 1].mean() > out[y, xl + 2].mean() + 12:
+                out[y, xl + 1] = ((out[y, xl].astype(np.float32) + out[y, xl + 2]) / 2).astype(np.uint8)
+    print(f"    gramado do Térreo abaixo da escada: {int((a > 0.5).sum())} px (x {x0}-{x1}, y {y0}-{y1})")
+    return out
+
+
 # Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
 # varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
 # (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
@@ -1124,7 +1164,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("8", "banhos feminino e masculino: as cubas grandes do PDF", cubas_banhos),
                      ("9", "boxes de vidro: ducha ao lado da sauna e banho feminino", boxes),
                      ("10", "divisória entre os banhos: peça clara do PDF, não parede", divisoria),
-                     ("12", "banho de serviço: bancada e cuba nas medidas do PDF", bancada_servico)],
+                     ("12", "banho de serviço: bancada e cuba nas medidas do PDF", bancada_servico),
+                     ("13", "gramado depois do último degrau da escada do deck", gramado_escada)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
                     ("2", "sala de estar: o sofá curvo do PDF, a poltrona da direita e a mesinha", sala_estar),
                     ("rejuntes", "piso interno sem os rejuntes: o travertino contínuo", rejuntes)]}

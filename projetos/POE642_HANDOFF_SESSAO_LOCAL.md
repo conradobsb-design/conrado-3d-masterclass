@@ -823,6 +823,12 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - No PDF da Casa A a bancada (ARQ_BANCADAS) tem 22,7 × 51,0 pt (x 577,0 a 589,4 px, y 513,1 a 541,1 px), da parede da esquerda, com um recorte onde entra a cuba (ARQ_LOUÇAS E METAIS): quadrada, de cantos arredondados, 22,6 pt (x 580,7 a 593,1 px, y 520,9 a 533,3 px), avançando além da bancada, com a bacia à direita e a torneira monocomando no lado da parede, com a bica para a direita.
     - Entram nessas medidas, no padrão das cubas aprovadas (item 8 e Casa E): a bancada no tom das bancadas do render, com a borda fina e a sombra curta; a cuba de louça com o contorno fino, a bacia escurecendo da borda ao fundo e a válvula; a torneira cromada. O que sobrava do quadrado do motor à direita da bancada volta ao piso.
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_banho_servico_bancada_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só muda a bancada.
+  - **Subsolo 13, gramado junto à escada do deck (usuário, 19/10/26, com o recorte da prancha do Térreo):** "ao termino dos degraus no sentido do subsolo, ou seja, a escada desce, no último degrau, após ele, há um gramado, que separa o último degrau da área de circulação do subsolo". Abaixo da escada, entre a borda do deck esmaecido e a circulação, a prancha do Subsolo estava em branco; no Térreo ali é o gramado.
+    - Entra o gramado do próprio Térreo aprovado, no mesmo lugar: as duas imagens vão ao quadro comum, e o afim de uma à outra passa por ele. Fica na cor dele, só onde o Subsolo está em branco: da escada até a parede de baixo do Subsolo (x 376 a 575, y 584 a 849 px), da borda esquerda do deck esmaecido até a circulação.
+    - A borda com o branco é suave. Na emenda com a circulação, o px claro da borda dela vira a média dos dois lados.
+    - Fica em cor plena, não esmaecido como o deck: o gramado está no nível do pátio do Subsolo, junto à circulação.
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_gramado_escada_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos.
+  - **Novos pedidos do usuário para o Térreo (19/10/26), com recortes da prancha:** "aqui é um jardim verde com plantas" (o jardim de 4,79 m²); "aqui são dois tanques de água com torneiras, na área de serviço"; "piso da área do Gás é marrom granito"; "faltando a representação da porta do gás e seu arco"; "faltando também as duas portas da área de jardim e seus arcos"; "representar os portões, de ambos os lados, da área descoberta". Seguem um por vez.
 
 ## Casas A a D · Barlavento nas piscinas
 
