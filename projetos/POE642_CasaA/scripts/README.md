@@ -481,7 +481,7 @@ Os itens da conferência corrigidos, um por vez, na imagem aprovada (2000 px). S
 python3 ajustes_casaa.py Subsolo      # itens 1 a 13: chuveiro e vidro do banho de serviço; banco da sauna; escada; portas de vidro da academia; janelas; traço da circulação; juntas; cubas; boxes; divisória dos banhos; Bege Bahia; bancada do banho de serviço; gramado junto à escada (roda na ordem 1, 2, 7, 11, 3 a 10, 12, 13)
 python3 rotulos_casaa.py Subsolo
 python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png
-python3 ajustes_casaa.py Terreo       # itens 1, 2 e 8 (pilares em preto; sala de estar; jardim verde), os rejuntes do piso interno, os tanques, o gás (piso e porta), a porta do jardim, os portões da área descoberta, a escada caracol, as portas no granito (folhas do PDF, arcos em cinza fino), os eletrodomésticos em inox e a bancada gourmet (área molhada, divisória, cuba e torneira)
+python3 ajustes_casaa.py Terreo       # itens 1, 2 e 8 (pilares em preto; sala de estar; jardim verde), os rejuntes do piso interno, os tanques, o gás (piso e porta), a porta do jardim, os portões da área descoberta, a escada caracol, as portas no granito (folhas do PDF, arcos em cinza fino), os eletrodomésticos em inox a bancada gourmet (área molhada, divisória, cuba e torneira) e a bancada da cozinha em pedra (área molhada, cubas e torneiras)
 python3 rotulos_casaa.py Terreo
 python3 rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png
 python3 pdf_entrega.py

@@ -59,6 +59,8 @@ Itens:
      serviço com o inox aprovado da Casa D.
   Térreo, bancada gourmet (pedido do usuário, 19/10/26): a área molhada e a divisória do PDF em traço fino, a cuba em
      inox e a torneira gourmet, no lugar das duas caixas do motor.
+  Térreo, bancada da cozinha (pedido do usuário, 19/10/26): em quartzo com o desenho de pedra, com a área molhada, as
+     duas cubas em inox e as torneiras do PDF.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1608,6 +1610,87 @@ def gourmet(out):
     return out
 
 
+# Térreo, bancada da cozinha (pedido do usuário, 19/10/26: "melhore as representações das pias e bancada, com a área
+# molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"). O motor fez a bancada da
+# parede da direita no lilás dos armários, chapada, com duas cubas borradas. No prompt, todas as bancadas são de
+# quartzo claro, com pontilhado fino. No PDF (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS): a bancada vai da parede de cima à de
+# baixo; a área molhada é o retângulo em volta das duas cubas, até a parede; as cubas são retangulares, de aba fina; em
+# cada uma, a válvula e a torneira de bica reta, com a base e a alavanca junto à parede.
+# Entram: a bancada em pedra, o quartzo do próprio render (o da ilha e da bancada gourmet) com o desenho do Bege Bahia
+# aprovado (manchas em nuvem e pontinhos) só na luz, para se ler como pedra clara; a área molhada como na
+# bancada gourmet (traço cinza fino e 3% mais escura); as cubas em inox e as torneiras cromadas, com a sombra curta.
+COZINHA_PIAS = {
+    "bancada": (1888.0, 1395.33, 1922.01, 1670.29),               # pt, da parede de cima à de baixo
+    "quartzo": (216, 219, 233), "contraste": 1.8, "semente": 645,  # BGR do quartzo da ilha no render
+    "area_molhada": (1890.26, 1477.54, 1922.01, 1615.3),           # o lado da direita é a parede
+    "cubas": [((1891.96, 1484.91, 1916.91, 1521.19), (1893.1, 1486.04, 1915.78, 1520.06)),
+              ((1891.96, 1530.26, 1916.91, 1566.54), (1893.1, 1531.39, 1915.78, 1565.41))],
+    "valvula": 3.1, "valvulas": [(1908.0, 1502.9), (1908.0, 1548.26)],
+    "bicas": [(1908.59, 1501.43, 1919.74, 1502.61), (1908.59, 1546.79, 1919.74, 1547.96)],
+    "bases": [(1917.63, 1500.49, 1920.69, 1503.55), (1917.63, 1545.85, 1920.69, 1548.91)],
+    "alavancas": [(1918.3, 1504.1, 1920.0, 1505.6), (1918.3, 1549.4, 1920.0, 1551.0)]}
+
+
+def cozinha_pias(out):
+    from retoque_subsolo_casae import Tela, SOMBRA, CROMO, CROMO_CLARO, CROMO_ESCURO, SS
+    q, g = COZINHA_PIAS, GOURMET
+    _, p2r = pdf_pavimento("Terreo")
+    tl = Tela(out, p2r, q["bancada"])
+    b = tl.ret(q["bancada"])
+    tl.sombra(b, **SOMBRA)
+    tex = textura_bege(tl.h, tl.w, q["semente"])
+    lum = tex.mean(axis=2)
+    rel = 1 + q["contraste"] * (lum / lum.mean() - 1)
+    pedra = np.float32(q["quartzo"])[None, None] * rel[..., None]
+    a = tl.reduzir(b)[..., None]
+    tl.reg = tl.reg * (1 - a) + pedra * a
+    tl.contorno(b, 0.35, (150, 153, 155))
+
+    ax0, ay0, ax1, ay1 = q["area_molhada"]
+    area = tl.ret(q["area_molhada"])
+    tl.reg *= (1 - (1 - g["tom_area"]) * tl.reduzir(area))[..., None]
+    cor, larg, forca = g["traco"]
+    for p0, p1 in [((ax1, ay0), (ax0, ay0)), ((ax0, ay0), (ax0, ay1)), ((ax0, ay1), (ax1, ay1))]:
+        m = tl.vazia()
+        u0, u1 = tl.pt(*p0), tl.pt(*p1)
+        cv2.line(m, (int(round(u0[0])), int(round(u0[1]))), (int(round(u1[0])), int(round(u1[1]))), 255,
+                 max(1, int(round(larg * SS))))
+        tl.pintar(m, cor, forca)
+
+    borda, fundo = g["bacia_cor"]
+    for aba, bacia in q["cubas"]:
+        c = tl.ret(aba, 1.4)
+        tl.sombra(c, **SOMBRA)
+        tl.pintar(c, g["aba"])
+        bx0, by0, bx1, by1 = bacia
+        for i in range(6):                   # a bacia, da borda ao fundo
+            k = i / 5
+            tom = tuple(borda[j] * (1 - k) + fundo[j] * k for j in range(3))
+            ins = k * 3.6
+            tl.pintar(tl.ret((bx0 + ins, by0 + ins, bx1 - ins, by1 - ins), max(0.6, 1.2 - k)), tom)
+        tl.contorno(c, 0.3, g["contorno"])
+    for vx, vy in q["valvulas"]:
+        u, v = tl.pt(vx, vy)
+        for r, tom in [(q["valvula"], CROMO), (q["valvula"] * 0.65, CROMO_ESCURO)]:
+            m = tl.vazia()
+            cv2.circle(m, (int(round(u)), int(round(v))), int(round(r * 0.5483 * SS)), 255, -1)
+            tl.pintar(m, tom)
+    for bica, base, alav in zip(q["bicas"], q["bases"], q["alavancas"]):
+        m = tl.ret(bica, 0.6)
+        tl.sombra(m, **SOMBRA)
+        tl.pintar(m, CROMO_ESCURO)
+        tx0, ty0, tx1, ty1 = bica
+        tl.pintar(tl.ret((tx0 + 0.3, ty0 + 0.2, tx1 - 0.3, (ty0 + ty1) / 2), 0.3), CROMO_CLARO)
+        for peca, tom in [(base, CROMO), (alav, CROMO_ESCURO)]:
+            m = tl.ret(peca, 0.4)
+            tl.sombra(m, **SOMBRA)
+            tl.pintar(m, tom)
+            tl.contorno(m, 0.25, CROMO_ESCURO)
+    out = tl.gravar()
+    print("    bancada da cozinha: quartzo com o desenho de pedra, área molhada, duas cubas em inox e torneiras")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1752,7 +1835,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("9", "escada caracol: degraus 1 a 7 cheios, o resto esmaecido", caracol),
                     ("portas_granito", "portas no granito: folhas do PDF e arcos em cinza fino", portas_granito),
                     ("inox", "eletrodomésticos em inox (cozinha, gourmet e área de serviço)", inox),
-                    ("gourmet", "bancada gourmet: área molhada, divisória, cuba e torneira", gourmet)]}
+                    ("gourmet", "bancada gourmet: área molhada, divisória, cuba e torneira", gourmet),
+                    ("cozinha_pias", "bancada da cozinha em pedra: área molhada, cubas e torneiras", cozinha_pias)]}
 
 
 def main():

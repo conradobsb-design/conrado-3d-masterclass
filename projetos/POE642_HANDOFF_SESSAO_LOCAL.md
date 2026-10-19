@@ -879,6 +879,17 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
       - a torneira cromada (base, alavanca, mola e bica com o arejador), com a sombra curta.
     - Na prancha, só a bancada mudou.
     - Antes e depois em `renders/POE642_CasaA_PH_Terreo_gourmet_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
+  - **Térreo, bancada da cozinha (usuário: "melhore as representações das pias e bancada, com a área molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"):** o motor fez a bancada da parede da direita no lilás dos armários, chapada, com duas cubas borradas. No prompt, todas as bancadas, inclusive as da cozinha, são de quartzo claro com pontilhado fino.
+    - No PDF (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS):
+      - a bancada vai da parede de cima à de baixo;
+      - a área molhada é o retângulo em volta das duas cubas, até a parede;
+      - as cubas são retangulares, de aba fina;
+      - cada cuba tem a válvula e a torneira de bica reta, com a base e a alavanca junto à parede.
+    - A bancada passa a ser de pedra: o quartzo do próprio render (o da ilha e da bancada gourmet), com o desenho do Bege Bahia aprovado (manchas em nuvem e pontinhos) só na luz, para se ler como pedra clara. Leva o contorno fino e a sombra curta.
+    - A área molhada fica como na bancada gourmet: traço cinza fino nos lados livres e 3% mais escura.
+    - Entram as cubas em inox, com as válvulas, e as torneiras cromadas, com a sombra curta.
+    - Na prancha, só a bancada mudou.
+    - Antes e depois em `renders/POE642_CasaA_PH_Terreo_cozinha_pias_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
   - Mais pedidos (19/10/26): "vamos melhorar a representação da escada. não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal. sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter um aspecto melhor"; "trazer o rótulo do shaft". E ainda: "representar a cama no quarto do motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro adequadamente. o rótulo do quarto do motorista está no local errado. o arco da porta de entrada do banho do motorista está imperceptível, devendo ser em cinza, como de regra" (o arco já foi, nas portas no granito); "mude as cores, deixe cada carro com uma única cor e deixe os carros desalinhados".
   - Pedidos seguintes do usuário (19/10/26): "melhorar a representação dessa escada caracol. somente uma parte será representada, sendo a outra esmaecida [...] onde o arco está em destaque"; "melhorar a representação dos arcos e portas. lembrando que os arcos das portas no marrom granito são em cinza, com traço fino"; "eletrodomésticos em inox"; "melhore a representação da área molhada e divisoria da bancada" (gourmet); "melhore as representações das pias e bancada, com a área molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"; "melhorar a representação dessa área. não é mesa de jantar. área de estar" (item 3); "melhorar cuba e sua posição e tamanho. representar a bancada da cuba. representar o sanitário. representar e gerar o rótulo da claraboia" (lavabo); "melhorar a representação da porta pivotante, mostrando-a até o hall externo com seus respectivos arcos".
 
