@@ -1,6 +1,8 @@
 # POE 642 · Casas A e B — handoff para continuar no computador local
 _14/10/2026. Estado ao fim da sessão na nuvem. Branch: `claude/poe642-casa-a-handoff-jmchm3`. PR: conradobsb-design/conrado-3d-masterclass#1 (rascunho)._
 
+**Regras de representação: `POE642_REGRAS.md` (consolidadas em 19/10/26). Elas valem mais que as decisões antigas registradas aqui.**
+
 Este arquivo é o ponto de partida da sessão no computador. Ele resume o que já foi feito, as decisões do cliente, como o trabalho é feito, os comandos de cada script e o que falta. A sessão nova não traz o histórico da conversa: tudo o que importa está aqui e nos arquivos citados.
 
 ---
