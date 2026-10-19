@@ -71,6 +71,8 @@ Itens:
      sombreamento de subida, sem linhas; do 8º em diante esmaecida; o jardim em volta no gramado aprovado.
   Térreo 11 e 12. Motorista (pedido do usuário, 19/10/26): a cama de solteiro, a bancada com a cuba de apoio e a
      torneira, as folhas de vidro do box e o chuveiro, no lugar dos blocos lilás do motor.
+  Térreo, carros (pedido do usuário, 19/10/26): cada carro numa cor (branco perolado, grafite, azul-marinho, a
+     paleta da Casa D) e os três levemente desalinhados, como na Casa E.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -2365,6 +2367,106 @@ def motorista(out):
     return out
 
 
+# Térreo, carros (pedido do usuário, 19/10/26: "mude as cores, deixe cada carro com uma única cor e deixe os carros
+# desalinhados"). O motor fez o da esquerda branco e os outros dois no mesmo lilás, alinhados. Como nas Casas D e E
+# (aprovadas): cada carro numa cor só, a da paleta da Casa D (branco perolado, grafite, azul-marinho), por uma curva
+# de tom na luminância do próprio carro (a ordem do render fica: vidros mais escuros que a lataria, reflexos), com a
+# cor só nos tons médios e claros (o vidro escuro fica neutro); e cada um com um deslocamento e um giro leves, para
+# quebrar o alinhamento: o carro sai com a sombra dele (o granito volta, tecido por image quilting de trechos limpos
+# do granito, na luz do lugar) e entra no lugar novo, com a sombra curta.
+CARROS_A = {
+    "janela": (1150, 680, 1420, 853),                         # px: a garagem (sem a pedra portuguesa de baixo)
+    "fontes_granito": [(1292, 585, 1316, 640), (1234, 712, 1248, 842)],   # px: o quarto do motorista e o meio do vão
+    # (nome, curva: ("escurecer", base, faixa, expoente) ou ("clarear", ini, fim, força), cor BGR, (dx, dy, giro))
+    "carros": [("esquerda", ("clarear", 150.0, 215.0, 0.35), (0.99, 1.0, 1.01), (-1.0, 5.0, -2.0)),     # branco perolado
+               ("meio", ("escurecer", 26.0, 74.0, 1.6), (1.02, 1.0, 0.98), (1.5, -4.0, 1.5)),           # grafite
+               ("direita", ("escurecer", 18.0, 52.0, 1.4), (1.34, 0.96, 0.74), (-1.5, 3.0, -1.0))],     # azul-marinho
+    "lum_carro": 95.0, "fecho": 9, "reflexo": 0.6, "cor_lum": (70.0, 140.0),
+    "lanterna": (70, 140),                                    # R - B (e R - G) e R mínimos: só luz vermelha ou âmbar
+    "folga": 31, "x_max": 1410,                               # o que sai: o carro e a sombra dele (até o jardim)
+    "sombra": {"desloc": (-2.0, 2.0), "sigma": 1.5, "forca": 0.4}}
+
+
+def carros_a(out):
+    from scipy import ndimage
+    from retoque_bege_bahia_terreo import quilting
+    q = CARROS_A
+    wx0, wy0, wx1, wy1 = q["janela"]
+    reg = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    Y = reg.mean(axis=2)
+    m = cv2.morphologyEx((Y > q["lum_carro"]).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((q["fecho"],) * 2, np.uint8))
+    n, lab, st, cen = cv2.connectedComponentsWithStats(m)
+    ids = sorted([i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > 1500], key=lambda i: cen[i, 0])
+    silhuetas = [ndimage.binary_fill_holes(lab == i) for i in ids]
+    assert len(silhuetas) == len(q["carros"]), f"{len(silhuetas)} carros achados"
+    # 1. cada carro numa cor só
+    pintado = reg.copy()
+    for sil, (nome, curva, cor, _) in zip(silhuetas, q["carros"]):
+        lanterna = (reg[..., 2] - reg[..., 0] > q["lanterna"][0]) & (reg[..., 2] > q["lanterna"][1]) & \
+            (reg[..., 2] - reg[..., 1] > q["lanterna"][0])
+        topo = np.percentile(Y[sil], 97)
+        if curva[0] == "escurecer":
+            _, base, faixa, ex = curva
+            Yn = base + faixa * np.clip(Y / topo, 0, 1) ** ex + q["reflexo"] * np.clip(Y - topo, 0, None)
+        else:
+            _, ini_, fim_, forca = curva
+            t = np.clip((Y - ini_) / (fim_ - ini_), 0, 1)
+            Yn = Y + forca * t * t * (3 - 2 * t) * (250 - Y)
+        lo, hi = q["cor_lum"]
+        sc = np.clip((Y - lo) / (hi - lo), 0, 1)[..., None]
+        novo = Yn[..., None] * (1 + sc * (np.float32(cor)[None, None] - 1))
+        a = (sil & ~lanterna)[..., None]
+        pintado = np.where(a, novo, pintado)
+        print(f"    carro da {nome}: curva {curva[0]}, cor {cor}")
+    # 2. os carros saem: o granito tecido dos vãos, na luz do lugar
+    tudo = np.zeros(Y.shape, bool)
+    for s_ in silhuetas:
+        tudo |= s_
+    sai = cv2.dilate(tudo.astype(np.uint8), np.ones((q["folga"],) * 2, np.uint8)) > 0
+    sai[:, q["x_max"] - wx0:] = False
+    apaga = np.zeros(out.shape[:2], bool)
+    apaga[wy0:wy1, wx0:wx1] = sai
+    Yo = out.astype(np.float32).mean(axis=2)
+    janela = np.zeros_like(apaga)
+    janela[wy0:wy1, wx0:wx1] = True
+    piso = janela & ~cv2.dilate(apaga.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & (Yo > 25) & (Yo < 110)
+    med = cv2.medianBlur(out, 5).astype(np.float32)
+
+    def nconv(img, m, sig):
+        return cv2.GaussianBlur(img * m[..., None], (0, 0), sig) / \
+            np.maximum(cv2.GaussianBlur(m, (0, 0), sig), 1e-4)[..., None]
+    peso = cv2.GaussianBlur(piso.astype(np.float32), (0, 0), 10)
+    campo = np.where((peso > 0.05)[..., None], nconv(med, piso.astype(np.float32), 10),
+                     nconv(med, piso.astype(np.float32), 30))
+    fontes = []
+    for fx0, fy0, fx1, fy1 in q["fontes_granito"]:
+        f = out[fy0:fy1, fx0:fx1].astype(np.float32) / cv2.GaussianBlur(med[fy0:fy1, fx0:fx1], (0, 0), 6)
+        f = f / f.reshape(-1, 3).mean(axis=0)
+        fontes += [np.ascontiguousarray(v) for v in (f, f[:, ::-1], f[::-1, :], f[::-1, ::-1])]
+    tex = quilting(fontes, wy1 - wy0, wx1 - wx0, p=14, sobra=5, candidatos=400, rng=np.random.default_rng(652))
+    novo_g = out.astype(np.float32)
+    novo_g[wy0:wy1, wx0:wx1] = tex[:wy1 - wy0, :wx1 - wx0] * campo[wy0:wy1, wx0:wx1]
+    a = (cv2.GaussianBlur(apaga.astype(np.float32), (0, 0), 1.0) * apaga)[..., None]
+    out[:] = np.clip(out * (1 - a) + novo_g * a, 0, 255).astype(np.uint8)
+    # 3. e entram no lugar novo, com o giro leve e a sombra curta
+    h, w = Y.shape
+    s = q["sombra"]
+    for sil, (nome, _, _, (dx, dy, ang)) in zip(silhuetas, q["carros"]):
+        ys, xs = np.nonzero(sil)
+        c = (float(xs.mean()), float(ys.mean()))
+        M = cv2.getRotationMatrix2D(c, ang, 1.0)
+        M[:, 2] += (dx, dy)
+        alfa = cv2.warpAffine(cv2.GaussianBlur(sil.astype(np.float32), (0, 0), 0.5), M, (w, h), flags=cv2.INTER_LINEAR)
+        img = cv2.warpAffine(pintado, M, (w, h), flags=cv2.INTER_LINEAR)
+        S = np.float32([[1, 0, s["desloc"][0]], [0, 1, s["desloc"][1]]])
+        sb = cv2.GaussianBlur(cv2.warpAffine(alfa, S, (w, h)), (0, 0), s["sigma"]) * (1 - alfa)
+        r = out[wy0:wy1, wx0:wx1].astype(np.float32) * (1 - s["forca"] * sb)[..., None]
+        a = np.clip(alfa, 0, 1)[..., None]
+        out[wy0:wy1, wx0:wx1] = np.clip(r * (1 - a) + img * a, 0, 255).astype(np.uint8)
+    print(f"    garagem: {len(silhuetas)} carros, cada um numa cor, com deslocamento e giro leves")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -2515,7 +2617,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("5", "lavabo: bancada com a cuba esculpida, vaso suspenso e a claraboia", lavabo_a),
                     ("pivotante", "porta pivotante: a folha até o hall externo e o arco pequeno", pivotante),
                     ("escada_interna", "escada interna: cheia até o corte, esmaecida depois; o jardim em volta", escada_interna),
-                    ("11-12", "motorista: a cama, a bancada com a cuba, o box e o chuveiro", motorista)]}
+                    ("11-12", "motorista: a cama, a bancada com a cuba, o box e o chuveiro", motorista),
+                    ("carros", "garagem: cada carro numa cor e os três levemente desalinhados", carros_a)]}
 
 
 def main():

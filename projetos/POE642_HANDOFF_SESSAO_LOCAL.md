@@ -959,6 +959,16 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - Rótulo: o Q. MOTORISTA vai para o lado da cama, como no PDF, no piso livre entre a cama e o armário (~26 px). Fica em corpo 0,8, porque a Inter é mais larga que a fonte do PDF, e em cinza no granito.
     - Na prancha, só o bloco do motorista mudou.
     - Antes e depois em `renders/POE642_CasaA_PH_Terreo_motorista_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
+  - **Térreo, carros (usuário: "mude as cores, deixe cada carro com uma única cor e deixe os carros desalinhados"):** o motor fez o da esquerda branco e os outros dois no mesmo lilás, alinhados. Feito como nas Casas D e E (aprovadas):
+    - Cada carro fica numa cor só, a da paleta da Casa D: branco perolado (esquerda), grafite (meio) e azul-marinho (direita).
+      - A cor vem de uma curva de tom na luminância do próprio carro. A ordem do render fica: vidros mais escuros que a lataria, reflexos.
+      - A cor entra só nos tons médios e claros; o vidro escuro fica neutro.
+      - O lilás dos retrovisores, que caía no filtro de lanternas, também muda; só luz vermelha ou âmbar fica.
+    - Cada carro sai do lugar com um deslocamento e um giro leves (até 5 px e 2°), para quebrar o alinhamento:
+      - o carro sai com a sombra dele (15 px em volta) e o granito volta, tecido por image quilting de trechos limpos, na luz do lugar;
+      - ele entra no lugar novo, com a sombra curta.
+    - Na prancha, só a garagem mudou.
+    - Antes e depois em `renders/POE642_CasaA_PH_Terreo_carros_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
   - Mais pedidos (19/10/26): "vamos melhorar a representação da escada. não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal. sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter um aspecto melhor"; "trazer o rótulo do shaft". E ainda: "representar a cama no quarto do motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro adequadamente. o rótulo do quarto do motorista está no local errado. o arco da porta de entrada do banho do motorista está imperceptível, devendo ser em cinza, como de regra" (o arco já foi, nas portas no granito); "mude as cores, deixe cada carro com uma única cor e deixe os carros desalinhados".
   - Pedidos seguintes do usuário (19/10/26): "melhorar a representação dessa escada caracol. somente uma parte será representada, sendo a outra esmaecida [...] onde o arco está em destaque"; "melhorar a representação dos arcos e portas. lembrando que os arcos das portas no marrom granito são em cinza, com traço fino"; "eletrodomésticos em inox"; "melhore a representação da área molhada e divisoria da bancada" (gourmet); "melhore as representações das pias e bancada, com a área molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"; "melhorar a representação dessa área. não é mesa de jantar. área de estar" (item 3); "melhorar cuba e sua posição e tamanho. representar a bancada da cuba. representar o sanitário. representar e gerar o rótulo da claraboia" (lavabo); "melhorar a representação da porta pivotante, mostrando-a até o hall externo com seus respectivos arcos".
 
