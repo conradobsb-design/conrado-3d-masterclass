@@ -48,6 +48,7 @@ Itens:
      PDF (clones da palmeira em estrela do jardim lateral do render).
   Térreo, tanques (pedido do usuário, 19/10/26): na área de serviço, a bancada com os dois tanques de louça e as
      torneiras de parede, nas medidas do PDF.
+  Térreo, gás (pedidos do usuário, 19/10/26): o piso em granito marrom e a porta de duas folhas com os arcos.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1176,6 +1177,43 @@ def tanques(out):
     return out
 
 
+# Térreo, gás (pedidos do usuário, 19/10/26: "piso da área do Gás é marrom granito" e "faltando a representação da
+# porta do gás e seu arco"). O motor fez o piso do gás em lilás e a porta como uma faixa cinza, sem folhas nem arcos.
+# No PDF da Casa A o gás tem porta de duas folhas, que abrem para a área de serviço descoberta. Entram: o granito
+# marrom da área de serviço (um trecho limpo dela, no tom dela), do fundo do gás até a face de fora da parede; e as
+# duas folhas abertas, nas medidas do PDF, com os arcos finos (como as portas aprovadas, `desenhar_porta`), mais
+# escuros que os do granito, para lerem sobre a pedra portuguesa.
+GAS = {"piso": (899.3, 836.9, 932.4, 855.7),          # px da imagem: dentro das paredes do PDF, até a face de fora
+       "fonte_granito": (940, 826),                   # canto de um trecho limpo do granito da área de serviço (px)
+       "portas": [((1501.24, 1789.35, 1503.5, 1811.85), (1501.24, 1786.51, 1529.41, 1814.69)),
+                  ((1555.32, 1789.35, 1557.59, 1811.85), (1529.41, 1786.51, 1557.59, 1814.69))],
+       "arco_pedra": ((92, 94, 96), 0.5)}             # cor e largura do arco sobre a pedra portuguesa
+
+
+def porta_pdf(out, pg, p2r, folha, arco, cor_arco, larg):
+    """Folha (retângulo do PDF, em pt) e arco (bbox da curva do PDF) de uma porta, como as aprovadas
+    (`retoque_subsolo_casae.desenhar_porta`), com a cor e a largura do arco dadas."""
+    import retoque_subsolo_casae as RS
+    RS.PORTA["arco"]["_ajuste"] = (cor_arco, larg)
+    return RS.desenhar_porta(out, pg, p2r, folha, arco, "_ajuste")
+
+
+def gas(out):
+    q = GAS
+    x0, y0, x1, y1 = q["piso"]
+    xa, ya, xb, yb = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
+    fx, fy = q["fonte_granito"]
+    gran = out[fy:fy + yb - ya, fx:fx + xb - xa].astype(np.float32)
+    a = (cobertura_colunas(x0, x1, xa, xb)[None, :] * cobertura_linhas(y0, y1, ya, yb)[:, None])[..., None]
+    reg = out[ya:yb, xa:xb].astype(np.float32)
+    out[ya:yb, xa:xb] = np.clip(np.round(reg * (1 - a) + gran * a), 0, 255).astype(np.uint8)
+    pg, p2r = pdf_pavimento("Terreo")
+    for folha, arco in q["portas"]:
+        out = porta_pdf(out, pg, p2r, folha, arco, *q["arco_pedra"])
+    print(f"    gás: piso de granito em x {x0}-{x1}, y {y0}-{y1} px; porta de duas folhas com os arcos do PDF")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1313,7 +1351,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("2", "sala de estar: o sofá curvo do PDF, a poltrona da direita e a mesinha", sala_estar),
                     ("rejuntes", "piso interno sem os rejuntes: o travertino contínuo", rejuntes),
                     ("8", "jardim de 4,79 m²: verde, com as três touceiras do PDF", jardim),
-                    ("tanques", "área de serviço: a bancada com os dois tanques e as torneiras", tanques)]}
+                    ("tanques", "área de serviço: a bancada com os dois tanques e as torneiras", tanques),
+                    ("gas", "gás: piso de granito e a porta de duas folhas com os arcos", gas)]}
 
 
 def main():
