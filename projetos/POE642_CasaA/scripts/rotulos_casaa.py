@@ -57,9 +57,9 @@ PAVIMENTOS = {
                "aprovada": "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png",
                "pdf": "642 - TÉRREO - CASA A.pdf",
                "sem_tela": "bases/POE642_CasaA_BASE_Terreo_v6.png",
-               # notas do PDF que entram mesmo sendo projeção (pedido do usuário, 19/10/26: "representar e gerar o
-               # rótulo da claraboia")
-               "incluir": ("PROJ. CLARABOIA",),
+               # notas do PDF que entram mesmo estando em FORA (pedidos do usuário, 19/10/26: "representar e gerar o
+               # rótulo da claraboia"; "trazer o rótulo do shaft")
+               "incluir": ("PROJ. CLARABOIA", "SHAFT"),
                "ajustes": [
                    # a garagem é toda carro: no corpo do PDF, no vão entre o primeiro e o segundo carro
                    ("GARAGEM", (1265.1, 771.7), (-40.6, 0), 1.0),
@@ -83,7 +83,9 @@ PAVIMENTOS = {
                    ("JARDIM", (826.1, 870.7), (0, 0), {"cor": (255, 255, 255)}),
                    # a claraboia do lavabo: no corpo do PDF, em duas linhas (numa só, encostava na parede e no vaso),
                    # logo abaixo do tracejado
-                   ("PROJ. CLARABOIA", (1192.2, 204.2), (0, 4), {"corpo": 1.0, "quebra": ["PROJ.", "CLARABOIA"]})]},
+                   ("PROJ. CLARABOIA", (1192.2, 204.2), (0, 4), {"corpo": 1.0, "quebra": ["PROJ.", "CLARABOIA"]}),
+                   # o shaft ao lado do elevador tem ~15 px de largura: no corpo do PDF um pouco menor, para caber
+                   ("SHAFT", (1233.4, 606.7), (0, 0), 0.85)]},
     "1Pavimento": {"render": "renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
                    "pdf": "642 - 1º PAVIMENTO - CASA A.pdf",
                    "sem_tela": "bases/POE642_CasaA_BASE_1Pavimento_v3.png",
