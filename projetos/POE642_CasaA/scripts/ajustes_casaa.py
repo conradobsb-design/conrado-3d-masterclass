@@ -53,6 +53,8 @@ Itens:
   Térreo, portões (pedido do usuário, 19/10/26): os portões de correr dos dois lados da área descoberta, do PDF.
   Térreo 9. Escada caracol (pedido do usuário, 19/10/26): os degraus 1 a 7, até o corte, cheios, em madeira, com o
      corrimão; o resto esmaecido.
+  Térreo, portas no granito (pedidos do usuário, 19/10/26): as quatro portas de giro sobre o granito com a folha do
+     PDF e o arco em cinza fino, como de regra.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1407,6 +1409,47 @@ def caracol(out):
     return out
 
 
+# Térreo, portas no granito (pedidos do usuário, 19/10/26: "melhorar a representação dos arcos e portas. lembrando que
+# os arcos das portas no marrom granito são em cinza, com traço fino" e, no banho do motorista, "o arco da porta de
+# entrada [...] está imperceptível, devendo ser em cinza, como de regra"). As quatro portas de giro sobre o granito (a
+# da cozinha para a área de serviço, a da despensa, a do banho e a do quarto do motorista): o motor fez as folhas
+# grossas e um pouco fora do lugar, e os arcos não se viam. A folha do motor sai (os px claros na faixa dela viram o
+# granito logo ao lado, do lado de fora da faixa) e entram a folha e o arco do PDF, como as portas aprovadas, o arco
+# no cinza fino da regra (160, 161, 160; 0,45 px), o das Casas C, D e E.
+PORTAS_GRANITO = {"portas": [  # (nome, folha, arco), em pt do PDF
+    ("cozinha para a área de serviço", (1766.11, 1613.6, 1817.13, 1615.87), (1766.11, 1613.6, 1817.13, 1664.62)),
+    ("despensa", (1832.72, 1678.8, 1834.99, 1718.48), (1832.72, 1678.8, 1872.41, 1718.48)),
+    ("banho do motorista", (2103.43, 1455.43, 2143.11, 1457.69), (2103.43, 1418.01, 2143.11, 1457.69)),
+    ("quarto do motorista", (2274.08, 1415.17, 2276.34, 1466.2), (2225.32, 1415.17, 2276.34, 1466.2))],
+    "arco": ((160, 161, 160), 0.45), "claro": 30, "faixa": 3}
+
+
+def portas_granito(out):
+    q = PORTAS_GRANITO
+    pg, p2r = pdf_pavimento("Terreo")
+    for nome, folha, arco in q["portas"]:
+        (a, b), (c, d) = p2r(*folha[:2]), p2r(*folha[2:])
+        horiz = (c - a) > (d - b)
+        f = q["faixa"]
+        x0, y0 = int(np.floor(a)) - (1 if horiz else f), int(np.floor(b)) - (f if horiz else 1)
+        x1, y1 = int(np.ceil(c)) + (1 if horiz else f), int(np.ceil(d)) + (f if horiz else 1)
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        lum = reg.mean(axis=2)
+        gran = np.median(lum[lum < np.percentile(lum, 50)])
+        claro = lum > gran + q["claro"]
+        claro = cv2.dilate(claro.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        ys, xs = np.nonzero(claro)
+        n = 0
+        for y, x in zip(ys + y0, xs + x0):
+            cands = [(y, x + f + 2), (y, x - f - 2)] if not horiz else [(y + f + 2, x), (y - f - 2, x)]
+            melhor = min(cands, key=lambda t: abs(out[t].astype(np.float32).mean() - gran))
+            out[y, x] = out[melhor]
+            n += 1
+        out = porta_pdf(out, pg, p2r, folha, arco, *q["arco"])
+        print(f"    porta {nome}: folha do motor fora ({n} px); folha e arco do PDF, arco em cinza fino")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1548,7 +1591,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("gas", "gás: piso de granito e a porta de duas folhas com os arcos", gas),
                     ("porta_jardim", "jardim: a porta para a área descoberta, com o arco", porta_jardim),
                     ("portoes", "área descoberta: os portões de correr dos dois lados", portoes),
-                    ("9", "escada caracol: degraus 1 a 7 cheios, o resto esmaecido", caracol)]}
+                    ("9", "escada caracol: degraus 1 a 7 cheios, o resto esmaecido", caracol),
+                    ("portas_granito", "portas no granito: folhas do PDF e arcos em cinza fino", portas_granito)]}
 
 
 def main():

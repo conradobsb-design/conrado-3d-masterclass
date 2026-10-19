@@ -64,10 +64,14 @@ PAVIMENTOS = {
                    # na cama: no piso abaixo dela; no granito (a caixa do texto pega a cama, então a cor vai dada)
                    ("Q. MOTORISTA", (1281.4, 632.7), (-13.4, 29.3), {"cor": (150, 150, 150)}),
                    # banhos e despensa estreitos: no corpo do PDF, no piso livre entre as peças
-                   ("B. MOTORISTA", (1211.8, 661.1), (7.7, 0), 1.0),
+                   # o banho do motorista ganhou o arco da porta em cinza (ajustes, portas no granito): o rótulo sobe
+                   # e vai à esquerda, entre o vaso e o arco, um pouco menor, para o arco não cortar o texto
+                   ("B. MOTORISTA", (1211.8, 661.1), (0, -7), 0.9),
                    ("WC", (803.7, 833.6), (0, 0), 1.0),
                    ("BANHO VARANDA", (862.0, 793.0), (1, 0), 1.0),
-                   ("DESPENSA", (1092.0, 825.2), (-3, -7.2), 1.0),
+                   # a despensa ganhou o arco da porta (ajustes, portas no granito): o rótulo desce para baixo do
+                   # arco, como no PDF, um pouco menor
+                   ("DESPENSA", (1092.0, 825.2), (-1, -3.2), 0.9),
                    ("VARANDA", (879.1, 345.6), (0, -8)),                  # na poltrona: um pouco acima
                    ("LAVABO", (1192.4, 224.3), (-2, 0)),                  # encostado na bancada
                    ("SALA DE JANTAR", (1142.7, 506.4), (-2.5, 0)),       # encostado no vidro
