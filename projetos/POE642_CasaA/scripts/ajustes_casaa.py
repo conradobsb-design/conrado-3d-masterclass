@@ -50,6 +50,7 @@ Itens:
      torneiras de parede, nas medidas do PDF.
   Térreo, gás (pedidos do usuário, 19/10/26): o piso em granito marrom e a porta de duas folhas com os arcos.
   Térreo, porta do jardim (pedido do usuário, 19/10/26): a folha e o arco da porta do jardim para a área descoberta.
+  Térreo, portões (pedido do usuário, 19/10/26): os portões de correr dos dois lados da área descoberta, do PDF.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1229,6 +1230,59 @@ def porta_jardim(out):
     return out
 
 
+# Térreo, portões (pedido do usuário, 19/10/26: "representar os portões, de ambos os lados, da área descoberta"). No
+# PDF da Casa A (ARQ_PAREDE) cada lado da área de serviço descoberta tem um portão de correr de duas folhas
+# desencontradas, com os batentes nas pontas: à esquerda, para o gramado; à direita, para o acesso de pedestres. O
+# render tinha só uma faixa clara com uma borda escura. A faixa sai (em cada linha, o piso de cada lado continua em
+# espelho: a grama e a pedra portuguesa) e entram as folhas nas medidas do PDF, em metal (o alumínio das portas de
+# vidro do Subsolo), com a borda fina escura e a linha do meio de cada folha.
+PORTOES = {
+    "lados": [
+        {"nome": "esquerdo", "faixa": (891, 899, 903, 1005),     # px da imagem: x0, x1, linhas y0..y1
+         "folhas": [(1493.98, 1873.82, 1496.81, 1967.36), (1491.14, 1962.83, 1493.98, 2056.37)],
+         "batentes": [(1491.14, 1871.55, 1499.65, 1873.82), (1491.14, 2056.37, 1499.65, 2058.64)]},
+        {"nome": "direito", "faixa": (1006, 1012, 857, 1005),
+         "folhas": [(1695.24, 1788.78, 1698.07, 1924.84), (1698.07, 1920.31, 1700.91, 2056.37)],
+         "batentes": [(1692.41, 1786.51, 1700.91, 1788.78), (1692.41, 2056.37, 1700.91, 2058.64)]}],
+    "metal": (150, 153, 156), "borda": ((70, 72, 74), 0.35), "meio": ((112, 115, 118), 0.3)}
+
+
+def refazer_faixa(out, faixa):
+    """Uma faixa vertical (x0..x1, linhas y0..y1) some: cada metade recebe, em espelho, o que está do seu lado."""
+    x0, x1, y0, y1 = faixa
+    meio = (x0 + x1) / 2
+    for y in range(y0, y1 + 1):
+        for x in range(x0, x1 + 1):
+            out[y, x] = out[y, x0 - 1 - (x - x0)] if x <= meio else out[y, x1 + 1 + (x1 - x)]
+
+
+def portoes(out):
+    from retoque_subsolo_casae import Tela
+    q = PORTOES
+    _, p2r = pdf_pavimento("Terreo")
+    for lado in q["lados"]:
+        refazer_faixa(out, lado["faixa"])
+        caixa = [f(v) for f, v in zip((min, min, max, max), zip(*(lado["folhas"] + lado["batentes"])))]
+        tl = Tela(out, p2r, caixa)
+        for r in lado["folhas"] + lado["batentes"]:
+            m = tl.ret(r)
+            tl.sombra(m, dx=-0.5, dy=0.5, sigma=0.5, forca=0.25)
+        for r in lado["batentes"]:
+            m = tl.ret(r)
+            tl.pintar(m, q["metal"])
+            tl.contorno(m, q["borda"][1], q["borda"][0])
+        for f in lado["folhas"]:
+            m = tl.ret(f)
+            tl.pintar(m, q["metal"])
+            xm = (f[0] + f[2]) / 2
+            tl.pintar(m & tl.ret((xm - 0.3, f[1], xm + 0.3, f[3])), q["meio"][0])
+            tl.contorno(m, q["borda"][1], q["borda"][0])
+        out = tl.gravar()
+        print(f"    portão {lado['nome']}: faixa do motor refeita; {len(lado['folhas'])} folhas e "
+              f"{len(lado['batentes'])} batentes do PDF")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1368,7 +1422,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("8", "jardim de 4,79 m²: verde, com as três touceiras do PDF", jardim),
                     ("tanques", "área de serviço: a bancada com os dois tanques e as torneiras", tanques),
                     ("gas", "gás: piso de granito e a porta de duas folhas com os arcos", gas),
-                    ("porta_jardim", "jardim: a porta para a área descoberta, com o arco", porta_jardim)]}
+                    ("porta_jardim", "jardim: a porta para a área descoberta, com o arco", porta_jardim),
+                    ("portoes", "área descoberta: os portões de correr dos dois lados", portoes)]}
 
 
 def main():
