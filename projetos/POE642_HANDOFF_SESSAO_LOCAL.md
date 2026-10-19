@@ -764,6 +764,22 @@ Pedido do usuário (19/10/26): "vamos inserir as referências de imagem das text
     - **Para aplicar:** `pousar(fundo, nome, cx, cy, px_por_m)` põe a planta no render no tamanho real, com a sombra da referência (luz do alto à direita: a sombra cai para baixo e à esquerda).
   - A cartela ganhou as linhas 6 a 9; a 9 mostra as plantas sobre a grama, no tamanho real, na escala da prancha.
 
+- **Guarda-roupas, escadas, box e portas (19/10/26).** Pedido do usuário, com duas plantas de um duplex: "referencia dos guarda-roupas e escadas, box e portas".
+  - **Fonte:** as plantas estão em `_texturas/originais/referencia_elementos_{superior,inferior}.png`. A escala foi medida nas camas: 36 px/m.
+  - **Código:** `_texturas/elementos.py` desenha cada elemento em metros, na escala de qualquer render (supersampling 4 x). Cada função devolve cor e alfa, na horizontal; para aplicar, girar e pousar.
+  - **Cartela:** `_texturas/cartela_elementos.jpg` mostra a referência ao lado da nossa versão, na escala da prancha.
+  - **guarda_roupa:** o armário visto de cima, aberto.
+    - Moldura branca fina (portas e laterais) com contorno cinza.
+    - Miolo cinza-claro, mais escuro junto às portas.
+    - Cabides em traços cinza de través, a cada ~12 cm, com pequenas diferenças.
+  - **escada:** degraus claros.
+    - Em cada bocel, uma linha cinza suave e uma sombra de ~10 cm no degrau de baixo; nenhum traço preto.
+    - Depois do corte, levemente esmaecida, com os bocéis pontilhados (a projeção) e o corrimão fino.
+  - **box:** piso contínuo, o vidro em linha fina clara com sombra cinza ao lado, e o chuveiro de teto como disco cinza a ~35 cm da parede, com o braço curto até ela.
+  - **porta_correr:** caixilho em faixa branca de 5 cm com contorno cinza, e as folhas em duas linhas sobrepostas. Os batentes (nas pontas e no encontro das folhas) são quadradinhos brancos de 8 cm.
+  - **porta_giro:** folha branca fina aberta a 90°, com o arco cinza fino. A referência não desenha arco, mas a regra das casas até aqui é o arco cinza fino; ficou assim até o usuário dizer o contrário.
+  - **Atenção nas escadas:** a referência tem o bocel em linha cinza suave. As escadas já aprovadas (pedido anterior: "sombreamento, sem linhas") ficam como estão até o usuário decidir.
+
 ## Casa A · conferência item a item com o PDF
 
 Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do render da casa A, conforme fizemos com a casa E. Pegar o PDF da casa A e rever item a item com o render."
