@@ -13,6 +13,8 @@ Itens:
      tinha virado piso: sobrou só uma faixa um pouco mais clara, sem a borda. Ele volta como o banco aprovado
      da sauna da Casa E: o travertino da própria faixa, a borda marcada por uma linha fina, uma sombra discreta
      no piso, que é mais baixo, e um brilho leve na quina do banco.
+  Subsolo 3. Escada que desce do deck (pedido do usuário, 19/10/26): depois da linha de corte do PDF (a
+     diagonal, que não é desenhada), os degraus no travertino do Subsolo, visíveis; antes dela, esmaecidos.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -82,7 +84,86 @@ def banco_sauna(out):
     return out
 
 
-ITENS = {"Subsolo": [("2", "sauna: o banco horizontal de volta", banco_sauna)]}
+# Subsolo 3. Escada que desce do deck para a circulação em frente à academia (pedido do usuário, 19/10/26): "tem
+# uma linha diagonal discriminando até onde tem o esmaecimento [...] até o terceiro degrau de uma pessoa que está
+# vindo de cima para baixo é esmaecido. Do terceiro degrau, depois dessa linha diagonal, já tem que ter a cor do
+# subsolo, a cor do degrau, a cor da textura do degrau, de forma visível. [...] essa linha em diagonal não precisa
+# estar desenhada". A diagonal é a linha de corte da escada no PDF da Casa A (ARQ_ESCADAS E RAMPAS); antes dela,
+# vindo do deck, os degraus ficam como estão (esmaecidos, com o deck). Depois dela, os degraus são refeitos com a
+# textura do travertino da circulação, na cor creme da escada (a da legenda), nos espelhos do PDF (a v6 tinha um
+# degrau a menos no fim), sem linhas e
+# com o sombreamento de descida aprovado nas Casas D e E: cada degrau um pouco mais escuro que o de cima e a
+# sombra curta de cada espelho no degrau de baixo, à direita dele (a escada desce da esquerda para a direita).
+# Medidas do PDF no quadro comum (2000 px), levadas à imagem pelo afim da base (x' = 0,99911 x - 0,000617 y +
+# 1,542; y' = 0,000113 x + 0,99973 y - 3,617): diagonal de (479,9; 551,0) a (498,7; 588,6), espelhos em x 489,2
+# a 563,9 (o último é a borda com a circulação). Topo e base: as bordas que a imagem já tem (y 548 e 585,5).
+ESCADA = {"diagonal": ((480.67, 547.29), (499.44, 584.88)),
+          "espelhos": [480.66, 489.96, 499.25, 508.64, 517.93, 527.22, 536.61, 545.90, 555.19, 564.58],
+          "faixa_y": (548.6, 585.2),
+          "fonte": (580, 600, 690, 770),     # travertino da circulação (px da imagem): a textura do degrau
+          # a cor do degrau: o creme da legenda desta escada (#D8CDB4, `retangulos` do Subsolo na config), no tom
+          # em que o travertino da base (#DCD9CA) saiu nesta imagem (ganho por canal 1,017; 1,001; 1,044, BGR)
+          "cor": (183, 205, 226),
+          "escurecer": 0.06,                 # do degrau de cima ao de baixo
+          "sombra": (0.25, 2.5)}             # força e alcance (px), à direita de cada espelho
+
+
+def escada(out):
+    q = ESCADA
+    (dx0, dy0), (dx1, dy1) = q["diagonal"]
+    esp = np.asarray(q["espelhos"])
+    ya0, ya1 = q["faixa_y"]
+    forca, alc = q["sombra"]
+    xa, xb = int(np.floor(esp[0])) - 1, int(np.ceil(esp[-1] + alc)) + 1
+    ya, yb = int(np.floor(ya0)), int(np.ceil(ya1))
+    h, w = yb - ya, xb - xa
+    ss = 8
+    sub = (np.arange(ss) + 0.5) / ss - 0.5
+    X = (np.arange(xa, xb)[:, None] + sub[None, :]).reshape(-1)          # subamostras em x
+    Y = (np.arange(ya, yb)[:, None] + sub[None, :]).reshape(-1)
+    XX, YY = np.meshgrid(X, Y)
+    dentro = (YY >= ya0) & (YY < ya1) & (XX < esp[-1])
+    xd = dx0 + (YY - dy0) * (dx1 - dx0) / (dy1 - dy0)
+    dentro &= XX > xd                                                    # depois da linha de corte
+    k = np.searchsorted(esp, XX) - 1                                     # degrau: entre os espelhos k e k+1
+    dentro &= k >= 0
+    n = len(esp) - 1
+    tom = 1 - q["escurecer"] * np.clip(k, 0, n - 1) / (n - 1)
+    d = XX - esp[np.clip(k, 0, n - 1)]
+    fator = tom * (1 - forca * np.clip(1 - d / alc, 0, 1))
+    # a circulação, logo depois do último espelho, também recebe a sombra curta dele (fica com a textura dela)
+    circ = (YY >= ya0) & (YY < ya1) & (XX >= esp[-1]) & (XX < esp[-1] + alc)
+    fcirc = 1 - forca * np.clip(1 - (XX - esp[-1]) / alc, 0, 1)
+
+    def por_pixel(m):
+        return m.reshape(h, ss, w, ss).mean(axis=(1, 3))
+
+    reg = out[ya:yb, xa:xb].astype(np.float32)
+    novo = reg * (1 - por_pixel(dentro))[..., None]
+    fx0, fy0, fx1, fy1 = q["fonte"]
+    src = out[fy0:fy1, fx0:fx1].astype(np.float32)
+    src *= np.asarray(q["cor"], np.float32) / src.reshape(-1, 3).mean(axis=0)
+    for j in range(n):
+        m = dentro & (k == j)
+        c = por_pixel(m)
+        if c.max() == 0:
+            continue
+        f = por_pixel(np.where(m, fator, 0)) / np.maximum(c, 1e-6)
+        # um trecho diferente do travertino para cada degrau, para não repetir
+        sx, sy = (7 + 23 * j) % (src.shape[1] - w), (11 + 37 * j) % (src.shape[0] - h)
+        tex = src[sy:sy + h, sx:sx + w]
+        novo += (c * f)[..., None] * tex
+    c = por_pixel(circ)
+    f = por_pixel(np.where(circ, fcirc, 1))
+    novo = novo * (1 - c)[..., None] + (reg * f[..., None]) * c[..., None]
+    out[ya:yb, xa:xb] = np.clip(np.round(novo), 0, 255).astype(np.uint8)
+    print(f"    escada: degraus depois da linha de corte no creme da escada, com a textura do travertino ({int(por_pixel(dentro).sum())} px), "
+          f"sem linhas, com o sombreamento de descida")
+    return out
+
+
+ITENS = {"Subsolo": [("2", "sauna: o banco horizontal de volta", banco_sauna),
+                     ("3", "escada: depois da linha de corte, os degraus na cor e textura do Subsolo", escada)]}
 
 
 def main():

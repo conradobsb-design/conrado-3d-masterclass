@@ -67,6 +67,10 @@ ITENS = {
         # da sauna para a piscina ("não é em L")
         (2, "Sauna: o banco horizontal do PDF, ao longo da parede de baixo, virou piso na v6, por decisão anterior "
             "(a faixa vertical à esquerda é a passagem da sauna para a piscina e fica como piso)", [(670, 840)]),
+        # apontado pelo usuário (19/10/26), depois da conferência
+        (3, "Escada que desce do deck para a circulação: depois da linha de corte do PDF (a diagonal), os degraus "
+            "devem ter a cor e a textura do Subsolo, visíveis; antes dela (três degraus, vindo de cima), "
+            "esmaecidos", [(525, 566)]),
     ],
 }
 
@@ -92,7 +96,8 @@ def mapa(chave, saida):
     cfg = json.loads(A.CONFIG.read_text())
     q = A.PAVIMENTOS[chave]
     base = (A.CONFIG.parent / cfg["entrega"]["pasta_bases"] / cfg["entrega"]["pavimentos"][chave]["base"]).resolve()
-    img = no_quadro_comum(Image.open(A.CASA / q["render"]).convert("RGB"), base, chave, LARGURA)
+    # o mapa mostra a imagem aprovada, antes dos ajustes
+    img = no_quadro_comum(Image.open(A.CASA / q.get("aprovada", q["render"])).convert("RGB"), base, chave, LARGURA)
     k = LARGURA / 2000
     x0, y0, x1, y1 = RECORTE[chave]
     img = img.crop((int(x0 * k), int(y0 * k), int(x1 * k), int(y1 * k)))

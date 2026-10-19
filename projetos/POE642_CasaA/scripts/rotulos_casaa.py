@@ -43,6 +43,8 @@ GRANITO = {"lum_max": 95, "quente_min": 12, "sigma": 3}
 
 PAVIMENTOS = {
     "Subsolo": {"render": "renders/POE642_CasaA_PH_Subsolo_final_ajustes.png",   # com os ajustes da conferência
+                # o alinhamento ao quadro comum vem sempre da imagem aprovada: os ajustes não mexem no resto
+                "aprovada": "renders/POE642_CasaA_PH_Subsolo_final.png",
                 "pdf": "642 - SUBSOLO - CASA A.pdf",
                 "sem_tela": "bases/POE642_CasaA_BASE_Subsolo_v4.png",
                 # (nome, centro do rótulo do PDF no quadro final em px de 2000, desvio em px de 2000[, opções])
@@ -88,12 +90,40 @@ def granito(img):
     return (lum < q["lum_max"]) & (f[..., 2] - f[..., 0] > q["quente_min"]) & (f[..., 2] >= f[..., 1])
 
 
+def no_quadro_fixo(render, aprovada, base_png, chave):
+    """Como `rodape_entrega.no_quadro_comum`, mas o afim vem da imagem aprovada e é aplicado à ajustada: o SIFT
+    na imagem ajustada achava um afim um pouco diferente e a prancha inteira mudava por reamostragem."""
+    base = cv2.imread(str(base_png))
+    W = LARGURA
+    H = round(base.shape[0] * W / base.shape[1])
+    base_red = cv2.resize(base, (W, H), interpolation=cv2.INTER_AREA)
+
+    def ampliar(im):
+        r = cv2.cvtColor(np.asarray(im), cv2.COLOR_RGB2BGR)
+        interp = cv2.INTER_AREA if r.shape[1] > W else cv2.INTER_LANCZOS4
+        return cv2.resize(r, (W, round(r.shape[0] * W / r.shape[1])), interpolation=interp)
+    ap, aj = ampliar(aprovada), ampliar(render)
+    sift = cv2.SIFT_create(12000)
+    k1, d1 = sift.detectAndCompute(cv2.cvtColor(base_red, cv2.COLOR_BGR2GRAY), None)
+    k2, d2 = sift.detectAndCompute(cv2.cvtColor(ap, cv2.COLOR_BGR2GRAY), None)
+    bons = [a for a, b in cv2.BFMatcher().knnMatch(d1, d2, k=2) if a.distance < 0.75 * b.distance]
+    src = np.float32([k1[m.queryIdx].pt for m in bons])
+    dst = np.float32([k2[m.trainIdx].pt for m in bons])
+    A, inl = cv2.estimateAffine2D(src, dst, ransacReprojThreshold=2.5)
+    print(f"    {chave}: afim da imagem aprovada ({int(inl.sum())} pontos), aplicado à imagem com ajustes")
+    return cv2.warpAffine(aj, cv2.invertAffineTransform(A), (W, H), flags=cv2.INTER_CUBIC,
+                          borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
+
+
 def final_rotulos(chave):
     q = PAVIMENTOS[chave]
     cfg = json.loads(CONFIG.read_text())
     base = (CONFIG.parent / cfg["entrega"]["pasta_bases"] / cfg["entrega"]["pavimentos"][chave]["base"]).resolve()
     render = Image.open(CASA / q["render"]).convert("RGB")
-    final = cv2.cvtColor(np.asarray(no_quadro_comum(render, base, chave, LARGURA)), cv2.COLOR_RGB2BGR)
+    if "aprovada" in q:
+        final = no_quadro_fixo(render, Image.open(CASA / q["aprovada"]).convert("RGB"), base, chave)
+    else:
+        final = cv2.cvtColor(np.asarray(no_quadro_comum(render, base, chave, LARGURA)), cv2.COLOR_RGB2BGR)
     pg = pymupdf.open(RAIZ / "_pdfs_cliente" / q["pdf"])[cfg["pavimentos"][chave]["pagina"]]
     at, lt = cv2.imread(str(base), cv2.IMREAD_GRAYSCALE).shape
     hb, wb = cv2.imread(str(CASA / q["sem_tela"]), cv2.IMREAD_GRAYSCALE).shape

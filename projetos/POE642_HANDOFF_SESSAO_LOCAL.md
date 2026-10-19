@@ -753,6 +753,12 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - Os números da Casa E quase não apareciam nesta imagem de 2000 px, ampliada para 3840 na prancha. Ficaram: linha 0,35 em 0,6 px e sombra 0,18 em 1,6 px.
     - A faixa vertical à esquerda (passagem para a piscina) continua como piso.
     - Saídas: `renders/POE642_CasaA_PH_Subsolo_final_ajustes.png`, o rótulo, a prancha do Subsolo (só a sauna mudou: cerca de 7 mil px) e o PDF de entrega refeitos. Antes e depois em `renders/POE642_CasaA_PH_Subsolo_sauna_antes_depois.jpg`.
+  - **Subsolo 3, escada que desce do deck para a circulação (usuário, 19/10/26):** "tem uma linha diagonal discriminando até onde tem o esmaecimento [...] até o terceiro degrau de uma pessoa que está vindo de cima para baixo é esmaecido. Do terceiro degrau, depois dessa linha diagonal, já tem que ter a cor do subsolo, a cor do degrau, a cor da textura do degrau, de forma visível. [...] essa linha em diagonal não precisa estar desenhada".
+    - A diagonal é a linha de corte da escada no PDF da Casa A (ARQ_ESCADAS E RAMPAS), de (479,9; 551,0) a (498,7; 588,6) no quadro comum. Antes dela, os degraus ficam esmaecidos, com o deck; a linha não é desenhada.
+    - Depois dela, os degraus são refeitos nos espelhos do PDF (x 489,2 a 563,9; a v6 tinha um degrau a menos no fim). Textura: o travertino da circulação do Subsolo. Cor: o creme desta escada na legenda (#D8CDB4), no tom em que o travertino saiu na imagem.
+    - Sem linhas e com o sombreamento de descida das Casas D e E: cada degrau 6% mais escuro de cima para baixo e a sombra curta de cada espelho no degrau de baixo, à direita (0,25 em 2,5 px). A circulação recebe a sombra do último espelho.
+    - O `rotulos_casaa.py` passou a alinhar a imagem com ajustes pelo afim da imagem aprovada (`no_quadro_fixo`). O SIFT na imagem ajustada achava um afim um pouco diferente, e a prancha inteira mudava por reamostragem. Agora, contra a prancha de antes dos ajustes, só mudam a escada e a sauna.
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_escada_antes_depois.jpg`; prancha do Subsolo e PDF de entrega refeitos.
 
 ## Casas A a D · Barlavento nas piscinas
 
