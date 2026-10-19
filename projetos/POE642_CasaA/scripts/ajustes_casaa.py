@@ -19,6 +19,8 @@ Itens:
      diagonal, que não é desenhada), os degraus no travertino do Subsolo, visíveis; antes dela, esmaecidos.
   Subsolo 4. Portas de vidro da academia (pedido do usuário, 19/10/26): para a circulação e para o hall, as
      folhas de vidro do PDF, claras e finas como o vidro da sauna, no lugar do traço preto do motor.
+  Subsolo 5. Janelas (pedido do usuário, 19/10/26): a do banho de serviço e a da circulação para o depósito, na
+     geometria do PDF (peitoril, faces da parede, vidro, caixilhos e retornos), no lugar da peça cinza do motor.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
 
@@ -296,6 +298,82 @@ def portas_academia(out):
     return out
 
 
+# Subsolo 5. Janelas (pedido do usuário, 19/10/26: "melhore o aspecto das janelas"): a do banho de serviço (para a
+# circulação) e a da circulação para o depósito. O motor fez cada uma como uma peça cinza de cantos arredondados,
+# com a borda grossa e borrada, um pouco para fora da parede. No PDF da Casa A (ARQ_PAREDE) é o vão na parede com o
+# vidro fino no meio, os caixilhos nas pontas, os retornos da parede e as faces da parede passando pelo vão (o
+# peitoril). Entram nessa geometria: o peitoril claro (o quartzo das bancadas), as duas faces em linha fina, o
+# vidro como o das portas da academia, os caixilhos em alumínio e os retornos no preto das paredes; acima e
+# abaixo do vão, a parede preta. Fora do vão, a borda escura da peça do motor volta ao piso do lado.
+JANELAS = [
+    {"nome": "do banho de serviço",
+     "vao": (1009.25, 1066.51, 1017.76, 1111.87),
+     "paredes": [(1009.25, 1060.0, 1017.76, 1066.51), (1009.25, 1111.87, 1017.76, 1118.0),
+                 (1013.22, 1066.51, 1017.76, 1068.21), (1013.22, 1110.17, 1017.76, 1111.87)],
+     "faces": [(1009.25, 1066.51, 1111.87), (1017.76, 1068.21, 1110.17)],
+     "caixilhos": [(1010.39, 1066.51, 1013.22, 1068.5), (1010.39, 1109.88, 1013.22, 1111.87)],
+     "vidro": (1010.39, 1068.5, 1014.64, 1109.88)},
+    {"nome": "da circulação para o depósito",
+     "vao": (1145.32, 1077.85, 1156.66, 1134.54),
+     "paredes": [(1145.32, 1071.0, 1156.66, 1077.85), (1145.32, 1134.54, 1156.66, 1141.0),
+                 (1145.32, 1077.85, 1149.85, 1079.55), (1152.69, 1077.85, 1156.66, 1079.55),
+                 (1145.32, 1132.84, 1149.85, 1134.54), (1152.69, 1132.84, 1156.66, 1134.54)],
+     "faces": [(1145.32, 1079.55, 1132.84), (1156.66, 1079.55, 1132.84)],
+     "caixilhos": [(1149.85, 1077.85, 1152.69, 1079.83), (1149.85, 1132.56, 1152.69, 1134.54)],
+     "vidro": (1148.44, 1079.83, 1152.69, 1132.56)}]
+JANELA = {"peitoril": (225, 232, 236),     # BGR de #ECE8E1, o quartzo das bancadas
+          "face": ((90, 92, 94), 0.35),    # cor e largura (px) das faces da parede no vão
+          "fora": (1.6, 25)}               # faixa fora do vão (px) e quanto mais escura que o piso vira piso
+
+
+def limpar_fora(out, x0, x1, y0, y1, faixa, limiar):
+    """Nos px logo fora do vão (de cada lado), o que é bem mais escuro que o piso logo adiante vira esse piso."""
+    for y in range(int(np.floor(y0)), int(np.ceil(y1))):
+        for lado, borda in ((-1, x0), (1, x1)):
+            xs = [int(np.floor(borda - faixa)) + i for i in range(int(np.ceil(faixa)) + 1)] if lado < 0 else \
+                 [int(np.floor(borda)) + i for i in range(int(np.ceil(faixa)) + 1)]
+            xs = [x for x in xs if (x + 0.5 < borda if lado < 0 else x + 0.5 > borda)]
+            ref = out[y, xs[0] - 3:xs[0] - 1] if lado < 0 else out[y, xs[-1] + 2:xs[-1] + 4]
+            piso = ref.astype(np.float32).mean(axis=0)
+            for x in xs:
+                if out[y, x].astype(np.float32).mean() < piso.mean() - limiar:
+                    out[y, x] = np.clip(np.round(piso), 0, 255).astype(np.uint8)
+
+
+def janelas(out):
+    from retoque_subsolo_casae import Tela
+    q, pa = JANELA, PORTAS_ACADEMIA
+    _, p2r = pdf_pavimento("Subsolo")
+    k = 0.5483                               # px por pt nesta imagem
+    for j in JANELAS:
+        (x0, y0), (x1, y1) = p2r(*j["vao"][:2]), p2r(*j["vao"][2:])
+        limpar_fora(out, x0, x1, y0, y1, *q["fora"])
+        caixa = [f(v) for f, v in zip((min, min, max, max), zip(*(j["paredes"] + [j["vao"]])))]
+        tl = Tela(out, p2r, caixa)
+        viz = tl.reg.reshape(-1, 3)
+        preto = np.median(viz[viz.mean(axis=1) < 40], axis=0)
+        tl.pintar(tl.ret(j["vao"]), q["peitoril"])
+        for r in j["paredes"]:
+            tl.pintar(tl.ret(r), preto)
+        cor, larg = q["face"]
+        for x, fy0, fy1 in j["faces"]:
+            tl.pintar(tl.ret((x - larg / k / 2, fy0, x + larg / k / 2, fy1)), cor)
+        for r in j["caixilhos"]:
+            m = tl.ret(r)
+            tl.pintar(m, pa["aluminio"])
+            tl.contorno(m, pa["borda"][1], pa["borda"][0])
+        v = j["vidro"]
+        m = tl.ret(v)
+        tl.pintar(m, pa["vidro"])
+        xm = (v[0] + v[2]) / 2
+        tl.pintar(m & tl.ret((xm - 0.25, v[1], xm + 0.25, v[3])), pa["meio"][0])
+        tl.contorno(m, pa["borda"][1], pa["borda"][0])
+        out = tl.gravar()
+        print(f"    janela {j['nome']}: vão x {x0:.1f}-{x1:.1f}, y {y0:.1f}-{y1:.1f} px; peitoril, faces, vidro, "
+              f"caixilhos e retornos do PDF")
+    return out
+
+
 # Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
 # varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
 # (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
@@ -358,7 +436,8 @@ def pilares(out):
 ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chuveiro_servico),
                      ("2", "sauna: o banco horizontal de volta", banco_sauna),
                      ("3", "escada: depois da linha de corte, os degraus na cor e textura do Subsolo", escada),
-                     ("4", "portas de vidro da academia: folhas de vidro claras, não pretas", portas_academia)],
+                     ("4", "portas de vidro da academia: folhas de vidro claras, não pretas", portas_academia),
+                     ("5", "janelas: vão, peitoril, vidro e caixilhos do PDF, no lugar da peça cinza", janelas)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares)]}
 
 

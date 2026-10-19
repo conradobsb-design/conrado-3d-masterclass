@@ -775,6 +775,10 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - O traço sai: em cada linha de pixel, o trecho escuro em volta do px mais escuro (abaixo de 120 de luminância, mais 1 px de cada lado) recebe em espelho o piso do seu lado (travertino da circulação, madeira da academia, soleira e travertino do hall).
     - As folhas entram claras, como o vidro da sauna: vidro (226, 228, 228), a borda fina e escura (70, 72, 74, 0,35 px), que faz o vidro se ler, e a linha do meio do PDF (as duas metades da folha) mais clara. Batentes em alumínio, com a mesma borda.
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_portas_academia_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; contra a prancha anterior, só mudam os dois lados da academia.
+  - **Subsolo 5, janelas:** a do banho de serviço (para a circulação) e a da circulação para o depósito. O motor fez cada uma como uma peça cinza de cantos arredondados, com a borda grossa e borrada, um pouco para fora da parede.
+    - No PDF da Casa A (ARQ_PAREDE) é o vão na parede com o vidro fino no meio, os caixilhos nas pontas, os retornos da parede e as faces da parede passando pelo vão (o peitoril).
+    - Entram nessa geometria: o peitoril claro (o quartzo das bancadas, #ECE8E1), as duas faces em linha fina (0,35 px), o vidro como o das portas da academia, os caixilhos em alumínio e os retornos no preto das paredes; acima e abaixo do vão, a parede preta. Fora do vão, a borda escura da peça do motor volta ao piso do lado.
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_janelas_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só mudam as duas janelas.
 
 ## Casas A a D · Barlavento nas piscinas
 
