@@ -1,0 +1,85 @@
+{
+  "_sobre": "Texturas de referência das plantas humanizadas (POE 642), as mesmas para todas as casas. Pedido do usuário (19/10/26): simular pedra, não porcelanato, na devida escala dos renders. 'largura_m' é a largura real que a imagem de uso cobre (estimada pelo que se vê na foto; ajustar aqui se o usuário passar a medida). A escala de cada render vem do PDF (1:50, 1 pt = 17,64 mm): a planta da Casa A em 2000 px tem 31,45 px/m; na prancha de 3840 px, 60 px/m.",
+  "escala_prancha_px_por_m": 60,
+  "materiais": {
+    "bege_bahia": {
+      "titulo": "1. Bege Bahia",
+      "original": "originais/bege_bahia.png",
+      "arquivo": "bege_bahia.jpg",
+      "largura_m": 0.6,
+      "nota": "foto de uma placa de mármore Bege Bahia; as manchas em nuvem têm 10 a 20 cm, o que dá uma placa de ~60 cm"
+    },
+    "travertino": {
+      "titulo": "2. Travertino",
+      "original": "originais/travertino.webp",
+      "arquivo": "travertino.jpg",
+      "largura_m": 1.2,
+      "nota": "veios horizontais de 5 a 20 cm e os poros, numa placa de ~1,20 m; o veio corre na horizontal da imagem",
+      "direcional": true
+    },
+    "quartzito_aura": {
+      "titulo": "3. Quartzito Aura",
+      "original": "originais/quartzito_aura.jpg",
+      "arquivo": "quartzito_aura.jpg",
+      "largura_m": 3.0,
+      "nota": "a chapa inteira (proporção 3,00 x 1,95 m, a de uma chapa de quartzito), com as ondas cinza e bege",
+      "direcional": true
+    },
+    "pedra_portuguesa": {
+      "titulo": "4. Pedra Portuguesa",
+      "original": "originais/pedra_portuguesa.webp",
+      "arquivo": "pedra_portuguesa.jpg",
+      "largura_m": 1.14,
+      "nota": "a foto é de uma calçada em perspectiva: a faixa do meio (57% da largura), vista de cima; com a calçada de ~2,00 m, as pedras dão 6 a 8 cm, o tamanho da pedra portuguesa",
+      "tratamento": {
+        "tipo": "vista_de_cima",
+        "borda_esq": [
+          [
+            235,
+            0
+          ],
+          [
+            0,
+            480
+          ]
+        ],
+        "borda_dir": [
+          [
+            590,
+            0
+          ],
+          [
+            818,
+            330
+          ]
+        ],
+        "base_y": 816,
+        "topo_y": 230,
+        "faixa_t": [
+          0.15,
+          0.72
+        ],
+        "alto_por_largura": 1.463
+      }
+    },
+    "granito_marrom": {
+      "titulo": "5. Granito Marrom",
+      "original": "originais/granito_marrom.png",
+      "arquivo": "granito_marrom.jpg",
+      "largura_m": 0.6,
+      "nota": "pedido do usuário: mais liso e menos escuro que a foto",
+      "tratamento": {
+        "tipo": "liso_e_claro",
+        "liso": 0.75,
+        "manchas": 0.6,
+        "clarear": 1.25
+      }
+    }
+  },
+  "amostra": {
+    "px_por_m": 320,
+    "lado_m": 3.0,
+    "retalho": 32,
+    "largura_max_uso": 1000
+  }
+}

@@ -718,6 +718,27 @@ Pedido do usuário (18/10/26): "vamos fazer os ajustes nas plantas da casa A", o
   - Banho 1 (no vaso) e closet master (no armário): alguns px.
 - **Entrega refeita:** as três pranchas agora usam as imagens com rótulos (`--no-quadro`) e passaram de 2000 para 3840 px de largura, como as das outras casas (`entrega.largura_prancha` = 3840 na config da Casa A). Os rodapés também saem em 3840 px, com o mesmo quadro de áreas. O PDF `entrega/POE642_CasaA_Plantas_Humanizadas.pdf` (3 páginas A3: Subsolo, Térreo e 1º Pavimento) tem 15,9 MB. O GIF `POE642_CasaA_pranchas_perfiladas.gif` não foi refeito.
 
+## Texturas de referência · todas as casas
+
+Pedido do usuário (19/10/26): "vamos inserir as referências de imagem das texturas (que devem simular pedra, não porcelanato) a serem utilizadas em todas as casas. lembrando da importância de aplicar a devida escala aos renders. 1- Bege bahia. 2- Travertino 3- Quartzito Aura 4- Pedra Portuguesa 5- Marrom granito (deixar mais liso e menos escuro)".
+
+- **Pasta:** `projetos/_texturas/`, a mesma para as cinco casas.
+  - `originais/`: as fotos como vieram.
+  - `texturas.json`: cada material com a largura real que a imagem cobre (a escala) e o tratamento.
+  - `texturas.py`: prepara tudo e faz a cartela.
+- **Escala:** o PDF é 1:50 (1 pt = 17,64 mm; conferido pela área do lavabo da Casa A, 4,05 m²). A planta da Casa A em 2000 px tem 31,45 px/m; na prancha de 3840 px, 60 px/m.
+- **Largura real de cada foto (estimada pelo que se vê; ajustar no `texturas.json` se o usuário passar a medida):**
+  - Bege Bahia: 0,60 m (manchas de 10 a 20 cm);
+  - travertino: 1,20 m;
+  - quartzito Aura: 3,00 m (a chapa inteira, 3,00 x 1,95 m);
+  - pedra portuguesa: 1,14 m;
+  - granito: 0,60 m.
+- **Tratamentos:**
+  - pedra portuguesa: a foto é de uma calçada em perspectiva. Vira vista de cima por homografia: as bordas da grama e do meio-fio se encontram no ponto de fuga, e fica só a faixa do meio. Com a calçada de ~2 m, as pedras dão 6 a 8 cm;
+  - granito: mais liso (ruído fino x 0,25, manchas x 0,6) e menos escuro (x 1,25).
+- **Sem cara de porcelanato:** na escala da planta, a foto de 60 cm vira ~36 px, e o quilting direto só a repetia em espelho, como um piso impresso. De cada material sai primeiro uma amostra de 3 x 3 m tecida a 320 px/m, com retalhos de 10 cm (`amostras/`). É dela que a textura sai em qualquer escala (`textura(nome, px_por_m, alto, largo)`), tecida de novo, sem repetição visível.
+- **Cartela:** `_texturas/cartela_texturas.jpg`, com a foto, a textura de uso, um trecho de 3 x 2 m na escala da prancha e o mesmo ampliado.
+
 ## Casa A · conferência item a item com o PDF
 
 Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do render da casa A, conforme fizemos com a casa E. Pegar o PDF da casa A e rever item a item com o render."
