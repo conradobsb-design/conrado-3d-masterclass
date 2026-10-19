@@ -795,6 +795,10 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - O render não tinha o vidro: na ducha, nada; no banho feminino, um traço escuro de cima a baixo, que sai (o travertino de cada lado continua, `tirar_traco`).
     - As folhas entram como as do box do banho de serviço (`vidro_box`): cada uma na metade do trilho do PDF (1,4 pt), fina, clara e com a borda fina.
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_boxes_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só mudam os dois boxes.
+  - **Subsolo 10, divisória entre os banhos feminino e masculino:** o motor a fez como parede preta (~3 px). No PDF da Casa A ela não está na camada das paredes: está na das bancadas (ARQ_BANCADAS), com o miolo branco (na ARQ_PAREDE o trecho é branco, vão) e as peças finas em cinza por dentro, em degrau, como as placas de pedra das bancadas; ~19 cm no total.
+    - Entra na geometria do PDF (x 883,8 a 889,7 px) como peça clara, no tom das bancadas do render (BGR 192, 209, 222), com a borda fina e as peças finas do PDF em cinza; o registro pequeno do lado do banho feminino, cromado. O preto do motor sai antes (o piso de cada lado continua); em cima e embaixo ficam as paredes.
+    - O material não está escrito no PDF: se não for pedra, muda só a cor (`DIVISORIA["pedra"]`).
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_divisoria_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só muda a divisória.
 
 ## Casas A a D · Barlavento nas piscinas
 

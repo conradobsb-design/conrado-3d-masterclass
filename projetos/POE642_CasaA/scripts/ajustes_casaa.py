@@ -29,6 +29,8 @@ Itens:
      largura da bancada), como as cubas aprovadas da Casa E.
   Subsolo 9. Boxes dos chuveiros (pedido do usuário, 19/10/26): na ducha ao lado da sauna e no banho feminino, as
      folhas de vidro de correr do PDF, como as do box do banho de serviço.
+  Subsolo 10. Divisória entre os banhos feminino e masculino (pedido do usuário, 19/10/26): não é parede; entra como
+     no PDF (camada das bancadas), peça clara no tom das bancadas, com as peças finas em cinza.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
 
@@ -521,6 +523,42 @@ def boxes(out):
     return out
 
 
+# Subsolo 10. Divisória entre os banhos feminino e masculino (pedido do usuário, 19/10/26: "essa divisória não é
+# parede. é outra coisa!"). O motor a fez como parede preta (~3 px). No PDF da Casa A ela não está na camada das
+# paredes: está na das bancadas (ARQ_BANCADAS), com o miolo branco (na ARQ_PAREDE o trecho é branco, vão) e as
+# peças finas em cinza por dentro, em degrau, como as placas de pedra das bancadas, com ~19 cm no total. Entra na
+# geometria do PDF como peça clara, no tom das bancadas do render, com a borda fina e as peças finas do PDF em
+# cinza; o registro pequeno do lado do banho feminino (ARQ_LOUÇAS E METAIS), cromado. O preto do motor sai antes
+# (o piso de cada lado continua); em cima e embaixo ficam as paredes.
+DIVISORIA = {"caixa": (1490.01, 1664.62, 1500.78, 1775.17),
+             "traco": (882, 894, 786, 845),          # px da imagem: x0, x1, linhas y0..y1 (o preto do motor)
+             # as peças finas (pt do PDF): as cinzas da ARQ_BANCADAS e a placa da direita (as linhas de 0,85 pt)
+             "pecas": [(1490.01, 1664.62, 1493.98, 1665.76), (1491.71, 1665.76, 1492.85, 1692.97),
+                       (1490.01, 1692.97, 1496.81, 1694.1), (1495.68, 1694.1, 1496.81, 1775.17),
+                       (1490.01, 1774.04, 1495.68, 1775.17), (1494.05, 1664.62, 1495.18, 1692.97)],
+             "registro": (1490.79, 1675.11, 1491.71, 1682.49),
+             "pedra": (192, 209, 222),               # BGR da bancada do banho feminino no render
+             "peca": (138, 141, 143), "borda": ((120, 122, 124), 0.3)}
+
+
+def divisoria(out):
+    from retoque_subsolo_casae import Tela, CROMO
+    q = DIVISORIA
+    n = tirar_traco(out, q["traco"], 120)
+    _, p2r = pdf_pavimento("Subsolo")
+    tl = Tela(out, p2r, q["caixa"])
+    m = tl.ret(q["caixa"])
+    tl.pintar(m, q["pedra"])
+    for r in q["pecas"]:
+        tl.pintar(tl.ret(r), q["peca"])
+    tl.contorno(m, q["borda"][1], q["borda"][0])
+    tl.pintar(tl.ret(q["registro"]), CROMO)
+    out = tl.gravar()
+    (a, b), (c, d) = p2r(*q["caixa"][:2]), p2r(*q["caixa"][2:])
+    print(f"    divisória: preto do motor apagado ({n} px); peça clara do PDF em x {a:.1f}-{c:.1f}, y {b:.1f}-{d:.1f} px")
+    return out
+
+
 # Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
 # varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
 # (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
@@ -588,7 +626,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("6", "circulação: sem o traço preto na borda", traco_circulacao),
                      ("7", "depósito e circulação interna: piso contínuo, sem juntas", juntas),
                      ("8", "banhos feminino e masculino: as cubas grandes do PDF", cubas_banhos),
-                     ("9", "boxes de vidro: ducha ao lado da sauna e banho feminino", boxes)],
+                     ("9", "boxes de vidro: ducha ao lado da sauna e banho feminino", boxes),
+                     ("10", "divisória entre os banhos: peça clara do PDF, não parede", divisoria)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares)]}
 
 
