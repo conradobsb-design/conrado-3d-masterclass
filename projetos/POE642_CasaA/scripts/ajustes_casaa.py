@@ -65,6 +65,8 @@ Itens:
      X e a mesa triangular do PDF, com o X tracejado por cima.
   Térreo 5. Lavabo (pedido do usuário, 19/10/26): bancada de quartzo com a cuba esculpida e a torneira, o vaso
      suspenso e o tracejado da claraboia, nas medidas do PDF.
+  Térreo, porta pivotante (pedido do usuário, 19/10/26): a folha até a ponta do PDF, no hall externo, e o arco
+     pequeno do lado de lá.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -2037,6 +2039,48 @@ def lavabo_a(out):
     return out
 
 
+# Térreo, porta pivotante (pedido do usuário, 19/10/26: "melhorar a representação da porta pivotante, mostrando-a até
+# o hall externo com seus respectivos arcos"). O motor parou a folha no batente entre os dois halls e só fez o arco
+# grande, no hall interno. No PDF (ARQ_PAREDE) a folha passa do pivô e entra 0,65 m no hall externo, e esse trecho
+# tem o arco pequeno, do lado de lá. A folha e o arco grande do render ficam (estão no lugar do PDF); entram, no
+# mesmo desenho deles: o resto da folha até a ponta do PDF (as três linhas da folha do render: contorno, miolo claro,
+# contorno, com o contorno na ponta) e o arco pequeno, do fim da folha ao batente de cima, centrado no pivô, no
+# cinza e na largura do arco grande.
+PIVOTANTE = {"pivo": (2201.22, 877.44), "ponta": (2238.08, 877.44), "topo": (2201.22, 840.59),   # pt
+             "folha_render": (1240, 1280, 351, 354),     # px: x0, x1, linhas da folha do render (contorno, miolo, contorno)
+             "inicio": 1288.5,                            # px: onde a folha do render para (no batente)
+             "arco": ((118, 121, 124), 1.0, 0.75)}        # cor, largura (px) e força: o arco grande do render
+
+
+def pivotante(out):
+    from retoque_terreo_casae import linha_aa
+    q = PIVOTANTE
+    _, p2r = pdf_pavimento("Terreo")
+    (px, py), (ex, _), (_, ty) = p2r(*q["pivo"]), p2r(*q["ponta"]), p2r(*q["topo"])
+    x0, x1, y0, y1 = q["folha_render"]
+    linhas = np.median(out[y0:y1, x0:x1].astype(np.float32), axis=1)        # BGR de cada linha da folha
+    forma = out.shape[:2]
+    # o resto da folha: as três linhas, com a cobertura de subpixel na ponta, e o contorno da ponta
+    xi = q["inicio"]
+    for k, y in enumerate(range(y0, y1)):
+        a = linha_aa(forma, [(xi, y + 0.5), (ex, y + 0.5)], 1.0)
+        a[y, :] = np.clip(a[y, :], 0, 1)
+        a[:y, :] = 0
+        a[y + 1:, :] = 0
+        out[:] = np.clip(out * (1 - a[..., None]) + linhas[k] * a[..., None], 0, 255).astype(np.uint8)
+    a = linha_aa(forma, [(ex - 0.5, y0), (ex - 0.5, y1)], 1.0)[..., None]
+    out[:] = np.clip(out * (1 - a) + linhas[0] * a, 0, 255).astype(np.uint8)
+    # o arco pequeno, do fim da folha ao batente de cima
+    r = ex - px
+    cor, larg, forca = q["arco"]
+    pts = [(px + r * np.cos(t), py - r * np.sin(t)) for t in np.linspace(0, np.pi / 2 * (py - ty) / r, 60)]
+    a = linha_aa(forma, pts, larg)[..., None] * forca
+    out[:] = np.clip(out * (1 - a) + np.float32(cor) * a, 0, 255).astype(np.uint8)
+    print(f"    porta pivotante: folha até a ponta do PDF (x {xi:.1f} a {ex:.1f} px) e o arco pequeno no hall externo "
+          f"(raio {r:.1f} px)")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -2184,7 +2228,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("gourmet", "bancada gourmet: área molhada, divisória, cuba e torneira", gourmet),
                     ("cozinha_pias", "bancada da cozinha em pedra: área molhada, cubas e torneiras", cozinha_pias),
                     ("3", "estar sob a projeção: 4 poltronas em X e a mesa triangular, não mesa de jantar", estar_projecao),
-                    ("5", "lavabo: bancada com a cuba esculpida, vaso suspenso e a claraboia", lavabo_a)]}
+                    ("5", "lavabo: bancada com a cuba esculpida, vaso suspenso e a claraboia", lavabo_a),
+                    ("pivotante", "porta pivotante: a folha até o hall externo e o arco pequeno", pivotante)]}
 
 
 def main():
