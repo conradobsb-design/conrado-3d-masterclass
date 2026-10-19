@@ -8,6 +8,10 @@ não traz o Térreo, então ele vem do render aprovado do Térreo:
   dele, o mesmo `no_quadro_comum` das pranchas), na largura da base de cima;
 - fica mais claro e menos saturado (`--clarear`, `--saturacao`): gramado, paisagismo, piscina, deck e
   acessos aparecem como contexto;
+- `--nublado` é o padrão dos 1º Pavimentos (usuário, 19/10/26, com a planta de referência
+  `_texturas/originais/referencia_1pav_nublado.png`: "referência com o piso inferior mais 'nublado'. Usaremos
+  para as plantas dos 1º pavimentos das casas"): um véu branco de 70%, com a cor do Térreo mantida (80% da
+  saturação) e um leve desfoque, em vez do cinza;
 - por cima, o pavimento de cima sobreposto integralmente (100% opaco, pedido do usuário: "na parte
   do 1º pavimento, sobrepor integralmente"), na pegada dele: tudo o que não é branco na base dele
   (paredes, pisos, varandas, vazios), fechado e com os furos preenchidos; áreas brancas de fora
@@ -42,6 +46,12 @@ from scipy import ndimage
 
 from rodape_entrega import no_quadro_comum
 
+# O Térreo "nublado" da referência do usuário. Medido nela: o gramado esmaecido sai em RGB (205, 209, 195) e a
+# palmeira em (195, 203, 181), em tons pastel, sem virar cinza. O gramado do Térreo aprovado da Casa E, RGB
+# (85, 107, 43), chega lá com 70% de branco (sobra 29% do contraste: luminância 78 -> 203) e 80% da saturação
+# (G - B: 64 -> 14). O desfoque é em px de uma imagem de 3840 px (o 1º Pavimento fica nítido por cima).
+NUBLADO = {"clarear": 0.70, "saturacao": 0.80, "desfoque": 1.2}
+
 
 def pegada(base, fora=()):
     """A pegada do pavimento de cima: o que não é branco, em manchas grandes (sem as linhas
@@ -59,10 +69,13 @@ def pegada(base, fora=()):
     return cv2.morphologyEx(peg.astype(np.uint8), cv2.MORPH_OPEN, np.ones((5, 5), np.uint8)) > 0
 
 
-def contexto_render(render_baixo, base_baixo, W, clarear=0.75, saturacao=0.4):
-    """O render aprovado do pavimento de baixo no quadro comum, na largura W, mais claro e menos saturado."""
+def contexto_render(render_baixo, base_baixo, W, clarear=0.75, saturacao=0.4, desfoque=0.0):
+    """O render aprovado do pavimento de baixo no quadro comum, na largura W, mais claro e menos saturado
+    (e, com desfoque, um pouco macio: sigma em px de 3840)."""
     t = no_quadro_comum(Image.open(render_baixo).convert("RGB"), base_baixo, "pavimento de baixo", W)
     t = cv2.cvtColor(np.asarray(t), cv2.COLOR_RGB2BGR).astype(np.float32)
+    if desfoque > 0:
+        t = cv2.GaussianBlur(t, (0, 0), desfoque * W / 3840)
     cinza = t.mean(axis=2, keepdims=True)
     t = cinza + (t - cinza) * saturacao
     return 255 - (255 - t) * (1 - clarear)
@@ -87,10 +100,11 @@ def sobrepor(base, t, fora=(), cima=None, recorte=None):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def compor(base, render_baixo, base_baixo, clarear=0.75, saturacao=0.4, fora=(), cima=None, recorte=None):
+def compor(base, render_baixo, base_baixo, clarear=0.75, saturacao=0.4, fora=(), cima=None, recorte=None,
+           desfoque=0.0):
     """base: a base 16:9 do pavimento de cima (pegada e tracejado); cima: a imagem que vai por cima,
     já no quadro da base (o render do pavimento de cima), ou None para a própria base."""
-    t = contexto_render(render_baixo, base_baixo, base.shape[1], clarear, saturacao)
+    t = contexto_render(render_baixo, base_baixo, base.shape[1], clarear, saturacao, desfoque)
     return sobrepor(base, t, fora, cima, recorte)
 
 
@@ -102,6 +116,9 @@ def main():
     ap.add_argument("saida", type=Path)
     ap.add_argument("--clarear", type=float, default=0.75)
     ap.add_argument("--saturacao", type=float, default=0.4)
+    ap.add_argument("--desfoque", type=float, default=0.0, help="sigma do desfoque do pavimento de baixo (px de 3840)")
+    ap.add_argument("--nublado", action="store_true",
+                    help=f"o Térreo nublado da referência do usuário (padrão dos 1º Pavimentos): {NUBLADO}")
     ap.add_argument("--base-cima", type=Path, default=None,
                     help="base 16:9 do pavimento de cima, quando a primeira imagem é o render dele")
     ap.add_argument("--largura", type=int, default=None, help="largura da saída (padrão: a da base)")
@@ -110,6 +127,8 @@ def main():
     ap.add_argument("--fora", type=float, nargs=4, action="append", default=[], metavar=("X0", "Y0", "X1", "Y1"),
                     help="área branca de fora presa na pegada (px de uma prévia de 2000 px); pode repetir")
     args = ap.parse_args()
+    if args.nublado:
+        args.clarear, args.saturacao, args.desfoque = NUBLADO["clarear"], NUBLADO["saturacao"], NUBLADO["desfoque"]
     base = cv2.imread(str(args.base_cima or args.cima))
     W = args.largura or base.shape[1]
     if W != base.shape[1]:
@@ -118,7 +137,8 @@ def main():
     if args.base_cima:
         cima = cv2.cvtColor(np.asarray(no_quadro_comum(Image.open(args.cima).convert("RGB"), args.base_cima,
                                                        "pavimento de cima", W)), cv2.COLOR_RGB2BGR)
-    out = compor(base, args.render_baixo, args.base_baixo, args.clarear, args.saturacao, args.fora, cima, args.recorte)
+    out = compor(base, args.render_baixo, args.base_baixo, args.clarear, args.saturacao, args.fora, cima, args.recorte,
+                 args.desfoque)
     cv2.imwrite(str(args.saida), out)
     prev = args.saida.with_name(args.saida.stem + "_preview.jpg")
     cv2.imwrite(str(prev), cv2.resize(out, (2000, round(2000 * out.shape[0] / out.shape[1])), interpolation=cv2.INTER_AREA),

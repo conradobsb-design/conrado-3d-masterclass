@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Duas opções de montagem do 1º Pavimento da Casa E (POE 642) para o cliente, em 3840 px.
+"""Opções de montagem do 1º Pavimento da Casa E (POE 642) para o cliente, em 3840 px.
 
 Pedido do usuário (16/10/26): "vou apresentar ao cliente duas opções: em preto e branco e só com as
-linhas do PDF. prepare as duas opções."
+linhas do PDF. prepare as duas opções." Depois (19/10/26), com uma planta de referência: "referência com o
+piso inferior mais 'nublado'. Usaremos para as plantas dos 1º pavimentos das casas" (opção nublado).
 
 Nas duas, o render retocado do 1º Pavimento sem rótulos (`retoque_1pav_casae.py`) vai ao quadro 16:9 comum
 (SIFT + afim contra a base v3) e entra por cima integralmente, na pegada da base, como no
@@ -10,13 +11,16 @@ Nas duas, o render retocado do 1º Pavimento sem rótulos (`retoque_1pav_casae.p
 as áreas dos ambientes são escritos de novo na resolução final (`retoque_1pav_casae.rotulos_ambientes`, as
 mesmas regras: posição do PDF, sobre móvel no piso livre, preto, 30% maior que o PDF), nítidos.
 - Opção P&B: o entorno é o render aprovado do Térreo, 75% mais claro e sem saturação.
+- Opção nublado: o mesmo render, sob um véu branco de 70%, com a cor dele (80% da saturação) e um leve
+  desfoque, como na referência do usuário (`entorno_esmaecido.NUBLADO`).
 - Opção linhas: o entorno é o PDF do Térreo só em linhas, sem render: a página desenhada com as camadas de
   piso (ARQ_CONTRAPISO: cores e hachuras), das curvas de nível, dos textos e das zonas desligadas, sem o
   título nem os números da escada, em cinza (paredes cinza-claro, traços cinza-médio). O Térreo e o 1º
   Pavimento têm a mesma página e o mesmo recorte, então o PDF do Térreo cai direto no quadro comum.
 
 Uso (da pasta POE642_CasaA/scripts/):
-  python3 opcoes_1pav_casae.py
+  python3 opcoes_1pav_casae.py                 # as três opções
+  python3 opcoes_1pav_casae.py --opcao nublado # só uma
 """
 import argparse
 import json
@@ -27,7 +31,7 @@ import numpy as np
 import pymupdf
 from PIL import Image
 
-from entorno_esmaecido import contexto_render, sobrepor
+from entorno_esmaecido import NUBLADO, contexto_render, sobrepor
 from gerar_bases import Raster, em_16x9, ocultar_layers
 from rodape_entrega import no_quadro_comum
 import retoque_1pav_casae as R
@@ -80,6 +84,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--largura", type=int, default=3840)
     ap.add_argument("--saida", type=Path, default=CASA / "renders")
+    ap.add_argument("--opcao", action="append", choices=["pb", "linhas", "nublado"], default=None,
+                    help="só estas opções (pode repetir; padrão: todas)")
     args = ap.parse_args()
     W = args.largura
     base = cv2.imread(str(BASE_CIMA))
@@ -96,13 +102,15 @@ def main():
     rot = R.rotulos_pdf(pg1)
 
     opcoes = {
-        "pb": ("Térreo esmaecido em preto e branco", contexto_render(TERREO, BASE_TERREO, W, 0.75, 0.0)),
-        "linhas": ("Térreo só com as linhas do PDF", contexto_linhas(W, H)),
+        "pb": ("Térreo esmaecido em preto e branco", lambda: contexto_render(TERREO, BASE_TERREO, W, 0.75, 0.0)),
+        "linhas": ("Térreo só com as linhas do PDF", lambda: contexto_linhas(W, H)),
+        "nublado": ("Térreo nublado, com a cor dele", lambda: contexto_render(TERREO, BASE_TERREO, W, **NUBLADO)),
     }
+    opcoes = {k: v for k, v in opcoes.items() if not args.opcao or k in args.opcao}
     args.saida.mkdir(parents=True, exist_ok=True)
-    for chave, (desc, t) in opcoes.items():
+    for chave, (desc, contexto) in opcoes.items():
         print(f"[{chave}] {desc}")
-        out = sobrepor(base, t, FORA, cima)
+        out = sobrepor(base, contexto(), FORA, cima)
         out = R.rotulos_ambientes(out, rot, p2q, escala_desvio=W / 2000)
         nome = args.saida / f"POE642_CasaE_PH_1Pavimento_v1_final_{chave}.png"
         cv2.imwrite(str(nome), out)

@@ -122,7 +122,7 @@ python pdf_entrega.py --config ../../POE642_CasaC/config_bases.json      # Subso
 # (e, nas Casas B, C e D, o ..._retocado_barlavento.png do Térreo)
 ```
 
-**Versões de uma prancha (opções para o cliente):** `rodape_entrega.py --sufixo _x` grava `..._PH_{pavimento}_entrega_x.png`, sem tocar na prancha padrão; `--no-quadro` aceita um render que já está no quadro comum, na largura da prancha (como as montagens do `opcoes_1pav_casae.py`), e o usa como está, sem realinhar nem reamostrar (se o tamanho não bater, para com erro). No `pdf_entrega.py`, `--prancha PAVIMENTO=ARQUIVO` troca a prancha de um pavimento, e `--nome` e `--titulo` dão outro arquivo e outro título ao PDF. Casa E, 1º Pavimento em duas opções (16/10/26); o Subsolo e o Térreo (imagens finais já no quadro comum, com os rótulos) entram com `--no-quadro`:
+**Versões de uma prancha (opções para o cliente):** `rodape_entrega.py --sufixo _x` grava `..._PH_{pavimento}_entrega_x.png`, sem tocar na prancha padrão; `--no-quadro` aceita um render que já está no quadro comum, na largura da prancha (como as montagens do `opcoes_1pav_casae.py`), e o usa como está, sem realinhar nem reamostrar (se o tamanho não bater, para com erro). No `pdf_entrega.py`, `--prancha PAVIMENTO=ARQUIVO` troca a prancha de um pavimento, e `--nome` e `--titulo` dão outro arquivo e outro título ao PDF. Casa E, 1º Pavimento em duas opções (16/10/26) e, depois, a terceira, nublado (19/10/26); o Subsolo e o Térreo (imagens finais já no quadro comum, com os rótulos) entram com `--no-quadro`:
 
 ```bash
 C=../../POE642_CasaE
@@ -134,6 +134,11 @@ python pdf_entrega.py --config $C/config_bases.json --prancha 1Pavimento=$C/entr
     --nome POE642_CasaE_Plantas_Humanizadas_opcao_PB.pdf --titulo "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento) · opção P&B"
 python pdf_entrega.py --config $C/config_bases.json --prancha 1Pavimento=$C/entrega/POE642_CasaE_PH_1Pavimento_entrega_linhas.png \
     --nome POE642_CasaE_Plantas_Humanizadas_opcao_Linhas.pdf --titulo "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento) · opção linhas"
+# opção nublado (19/10/26, referência do usuário; padrão dos 1º Pavimentos: entorno_esmaecido.py --nublado)
+python opcoes_1pav_casae.py --opcao nublado
+python rodape_entrega.py --config $C/config_bases.json --no-quadro --sufixo _nublado --render 1Pavimento=$C/renders/POE642_CasaE_PH_1Pavimento_v1_final_nublado.png
+python pdf_entrega.py --config $C/config_bases.json --prancha 1Pavimento=$C/entrega/POE642_CasaE_PH_1Pavimento_entrega_nublado.png \
+    --nome POE642_CasaE_Plantas_Humanizadas_opcao_Nublado.pdf --titulo "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento) · opção nublado"
 ```
 
 ## Prévia de texturas: `texturizar_base.py`

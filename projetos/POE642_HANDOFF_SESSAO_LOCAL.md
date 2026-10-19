@@ -563,6 +563,16 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_1Pavimento_entrega_pb.png` e `..._entrega_linhas.png`. A do Térreo (`..._Terreo_entrega.png`) foi refeita só pelo rodapé novo (o quadro de áreas agora tem as duas linhas); a imagem é a mesma (realinhada com 128 pontos, erro mediano 0,78 px; diferença máxima de 1 nível para a anterior). Rodapés `entrega/POE642_CasaE_rodape_Terreo.png` e `..._rodape_1Pavimento.png`.
   - **PDFs (2 páginas A3 cada: Térreo e 1º Pavimento):** `entrega/POE642_CasaE_Plantas_Humanizadas_opcao_PB.pdf` (18,1 MB) e `entrega/POE642_CasaE_Plantas_Humanizadas_opcao_Linhas.pdf` (16,2 MB). O PDF anterior, só do Térreo (`POE642_CasaE_Plantas_Humanizadas.pdf`), saiu da pasta: as duas opções o substituem (está no histórico do git).
   - **Faixa abaixo da suíte 3 (usuário, 16/10/26: "corrija esse defeito. deveria ser linhas apenas"):** abaixo da parede de baixo da suíte 3, uma faixa branca da base, fechada pela linha fina do PDF, caía dentro da pegada, e lá aparecia uma barra cinza do render. Ela entrou numa segunda área `FORA` do `opcoes_1pav_casae.py` (822, 800, 912, 816 em px de 2000), que começa abaixo da parede para não pegar a escrivaninha. Agora a faixa mostra o entorno: as linhas do Térreo na opção linhas, o Térreo esmaecido na P&B. Só essa faixa mudou (cerca de 3.300 px). As duas montagens, as duas pranchas do 1º Pavimento e os dois PDFs foram refeitos.
+  - **Opção nublado (usuário, 19/10/26, com uma planta humanizada de referência: "referência com o piso inferior mais 'nublado'. Usaremos para as plantas dos 1º pavimentos das casas"):**
+    - A referência está em `_texturas/originais/referencia_1pav_nublado.png`. Nela, o Térreo fica sob um véu branco, em tons pastel (gramado RGB 205, 209, 195; palmeira 195, 203, 181), sem virar cinza.
+    - **Calibragem:** `entorno_esmaecido.NUBLADO` = 70% de branco, 80% da saturação e um desfoque de 1,2 px a 3840 px.
+      - Medida no gramado do Térreo aprovado da Casa E, RGB (85, 107, 43): a luminância vai de 78 a 203, e o G − B de 64 a 14.
+      - Na montagem, o gramado saiu em (203, 209, 193).
+      - O 1º Pavimento continua por cima, integralmente e nítido, como nas outras opções.
+    - **Arquivos:**
+      - `opcoes_1pav_casae.py` ganhou a opção `nublado` (`--opcao` escolhe quais rodar). A P&B e a de linhas foram rodadas de novo e saíram iguais, byte a byte.
+      - Saídas: `renders/POE642_CasaE_PH_1Pavimento_v1_final_nublado.png` (e `_preview.jpg`), a prancha `entrega/POE642_CasaE_PH_1Pavimento_entrega_nublado.png` e o PDF `entrega/POE642_CasaE_Plantas_Humanizadas_opcao_Nublado.pdf` (3 páginas A3, 21,9 MB).
+    - **Para os próximos 1º Pavimentos:** `entorno_esmaecido.py --nublado`.
   - **Depois da escolha do cliente:** rodar o `rodape_entrega.py` da opção escolhida sem `--sufixo` (gera `..._PH_1Pavimento_entrega.png`) e o `pdf_entrega.py` sem `--prancha`/`--nome` (gera `POE642_CasaE_Plantas_Humanizadas.pdf`). Comandos no README dos scripts, em "Pranchas de entrega".
 
 ## Casa E · Subsolo
