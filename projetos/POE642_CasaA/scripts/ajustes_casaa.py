@@ -49,6 +49,7 @@ Itens:
   Térreo, tanques (pedido do usuário, 19/10/26): na área de serviço, a bancada com os dois tanques de louça e as
      torneiras de parede, nas medidas do PDF.
   Térreo, gás (pedidos do usuário, 19/10/26): o piso em granito marrom e a porta de duas folhas com os arcos.
+  Térreo, porta do jardim (pedido do usuário, 19/10/26): a folha e o arco da porta do jardim para a área descoberta.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1214,6 +1215,20 @@ def gas(out):
     return out
 
 
+# Térreo, porta do jardim (pedido do usuário, 19/10/26: "faltando também as duas portas da área de jardim e seus
+# arcos"). No PDF da Casa A o jardim de 4,79 m² abre para a área de serviço descoberta por uma porta de uma folha, no
+# vão da parede da direita, que abre para fora; a folha aberta fica junto à parede de baixo (as duas folhas vizinhas
+# são as do gás, já feitas). O render tinha só o vão. Entra a folha aberta e o arco, como a porta do gás.
+PORTA_JARDIM = {"folha": (1502.48, 1854.26, 1542.17, 1856.53), "arco": (1499.65, 1811.17, 1545.0, 1856.53)}
+
+
+def porta_jardim(out):
+    pg, p2r = pdf_pavimento("Terreo")
+    out = porta_pdf(out, pg, p2r, PORTA_JARDIM["folha"], PORTA_JARDIM["arco"], *GAS["arco_pedra"])
+    print("    jardim: porta de uma folha para a área descoberta, com o arco do PDF")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1352,7 +1367,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("rejuntes", "piso interno sem os rejuntes: o travertino contínuo", rejuntes),
                     ("8", "jardim de 4,79 m²: verde, com as três touceiras do PDF", jardim),
                     ("tanques", "área de serviço: a bancada com os dois tanques e as torneiras", tanques),
-                    ("gas", "gás: piso de granito e a porta de duas folhas com os arcos", gas)]}
+                    ("gas", "gás: piso de granito e a porta de duas folhas com os arcos", gas),
+                    ("porta_jardim", "jardim: a porta para a área descoberta, com o arco", porta_jardim)]}
 
 
 def main():
