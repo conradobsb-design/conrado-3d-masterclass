@@ -481,7 +481,7 @@ Os itens da conferência corrigidos, um por vez, na imagem aprovada (2000 px). S
 python3 ajustes_casaa.py Subsolo      # itens 1 a 12: chuveiro e vidro do banho de serviço; banco da sauna; escada; portas de vidro da academia; janelas; traço da circulação; juntas; cubas; boxes; divisória dos banhos; Bege Bahia; bancada do banho de serviço (roda na ordem 1, 2, 7, 11, 3 a 10, 12)
 python3 rotulos_casaa.py Subsolo
 python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png
-python3 ajustes_casaa.py Terreo       # item 1: pilares da varanda e do gourmet no preto das paredes, na geometria do PDF
+python3 ajustes_casaa.py Terreo       # itens 1 e 2: pilares em preto; sala de estar (sofá curvo do PDF, poltrona e mesinha)
 python3 rotulos_casaa.py Terreo
 python3 rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png
 python3 pdf_entrega.py

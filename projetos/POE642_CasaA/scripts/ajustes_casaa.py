@@ -38,6 +38,8 @@ Itens:
      padrão das cubas aprovadas.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
+  Térreo 2. Sala de estar (pedido do usuário, 19/10/26): o sofá curvo do PDF acompanhando o tapete pela esquerda,
+     com as almofadas, a poltrona da direita e a mesinha na ponta do sofá (clones do render).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -761,6 +763,233 @@ def pilares(out):
     return out
 
 
+
+# Térreo 2. Sala de estar (pedido do usuário, 19/10/26: "siga com o item 2 do térreo"). No PDF da Casa A (camada ARQ_LAYOUT
+# HUMANIZAÇÃO) o sofá curvo acompanha o tapete redondo pela esquerda, das 12h às 7h, com o encosto na borda do tapete
+# (um pouco para fora dela) e o assento em C; sobre o assento, duas almofadas e duas almofadas redondas com pregas (os
+# círculos com raios, que a conferência leu como vasos); na ponta de cima do sofá, uma mesinha redonda; à direita, a
+# poltrona voltada para a mesa de centro. O motor pôs o sofá ao longo do alto do tapete, até a direita, sem a mesinha
+# e sem a poltrona. Sem IA:
+# 1. o sofá do motor sai: o tapete volta, copiado em volta do centro dele, no mesmo raio (a borda do tapete fica
+#    contínua), de um setor livre à direita, em espelho;
+# 2. o sofá do PDF entra no estilo do do render (o tecido creme, o rolo do encosto mais claro, a face do encosto que
+#    escurece no vinco com o assento, a borda da frente arredondada e a sombra suave no tapete, da luz do alto à
+#    direita, como a da mesa de centro); as divisões do encosto do PDF viram costura fina;
+# 3. as almofadas do PDF, com volume e sombra curta; as redondas com as pregas e o botão;
+# 4. a poltrona da direita é a poltrona de baixo à direita do render, girada para o contorno do PDF (o ângulo que
+#    melhor cobre o contorno, com o encosto para a borda do tapete); a mesinha é a mesinha redonda entre as poltronas
+#    de baixo; o pufe/mesinha do render junto ao sofá (o contorno grosso do PDF ali) volta por cima. Cada clone com a
+#    sombra nova, na mesma luz.
+SALA = {"caixa": (995, 180, 1145, 330),                  # janela de trabalho (px da imagem)
+        "tapete": ((1073.27, 255.73), 62.91),           # centro e raio (o círculo da ARQ_MOBILIÁRIO)
+        # o sofá do motor (px da imagem), com folga para a sombra dele
+        "sofa_velho": [(1026.7, 213.3), (1038.3, 205.0), (1055.0, 200.0), (1073.3, 198.0), (1093.3, 198.7),
+                       (1108.3, 203.3), (1118.0, 209.7), (1122.0, 218.3), (1119.3, 227.0), (1112.0, 232.3),
+                       (1100.0, 234.0), (1086.7, 231.7), (1075.0, 229.7), (1063.3, 230.0), (1050.0, 231.7),
+                       (1040.0, 233.7), (1032.7, 236.0), (1028.7, 240.7), (1028.7, 255.0), (1024.3, 260.3),
+                       (1015.3, 261.7), (1007.0, 259.3), (1004.0, 252.0), (1004.3, 240.0), (1008.0, 231.0),
+                       (1015.3, 224.3), (1021.7, 218.3)],
+        "setor_livre": (-40.0, 15.0),                    # graus, anti-horário a partir do leste
+        "pufe": ((1036.7, 251.7), 7.2),
+        # pontos dentro de cada parte do sofá (px da imagem); a face do encosto é a região de 20 a 40 mil px (8x)
+        "encosto": [(1052.5, 194.5), (1025.9, 211.2), (1009.7, 238.7)],
+        "assento": [(1072.3, 213.5), (1030.1, 241.6)],
+        "almofadas": [[(1052.8, 202.8), (1054.8, 207.0)], [(1022.2, 244.0), (1017.7, 242.4)]],
+        "redondas": [((1044.1, 213.4), 4.7), ((1032.55, 223.05), 4.9)],
+        "cores": {"assento": (206, 212, 232), "encosto": (213, 219, 237), "face": (204, 210, 229),
+                  "almofada": (211, 217, 237)},       # BGR, do sofá e das almofadas do render
+        "sombra": [(-1.4, 1.4, 2.0, 0.30), (0, 0, 0.9, 0.14)],   # dx, dy, sigma (px), força: no tapete
+        "poltrona": {"fonte": (1815, 752, 1865, 805), "destino": (1865, 638, 1925, 698),   # pt do PDF
+                     "angulo": 226.5, "desvio": (-3.09, 1.95)},
+        "mesinha": {"fonte": ((1069.7, 294.5), 6.1), "destino": (1095.5, 222.05)}}
+
+
+def caminhos_pdf(d, p2r, passos=16):
+    """Polilinhas (px da imagem) de um desenho do PDF, uma por subcaminho; as curvas são amostradas."""
+    out, atual, ult = [], [], None
+    for it in d["items"]:
+        if it[0] not in ("l", "c"):
+            continue
+        a, b = it[1], it[-1]
+        if ult is None or abs(a.x - ult.x) + abs(a.y - ult.y) > 0.05:
+            if atual:
+                out.append(atual)
+            atual = [p2r(a.x, a.y)]
+        if it[0] == "l":
+            atual.append(p2r(b.x, b.y))
+        else:
+            c1, c2 = it[2], it[3]
+            for t in np.linspace(0, 1, passos)[1:]:
+                x = (1 - t) ** 3 * a.x + 3 * (1 - t) ** 2 * t * c1.x + 3 * (1 - t) * t ** 2 * c2.x + t ** 3 * b.x
+                y = (1 - t) ** 3 * a.y + 3 * (1 - t) ** 2 * t * c1.y + 3 * (1 - t) * t ** 2 * c2.y + t ** 3 * b.y
+                atual.append(p2r(x, y))
+        ult = b
+    if atual:
+        out.append(atual)
+    return [np.float64(c) for c in out]
+
+
+def sala_estar(out):
+    q = SALA
+    pg, p2r = pdf_pavimento("Terreo")
+    SS = 8
+    X0, Y0, X1, Y1 = q["caixa"]
+    W, H = (X1 - X0) * SS, (Y1 - Y0) * SS
+    (CX, CY), R = q["tapete"]
+    fonte = out[Y0:Y1, X0:X1].astype(np.float32)
+    reg = fonte.copy()
+    org = out.astype(np.float32)
+
+    def ss(c):
+        return np.int32(np.round((np.asarray(c, np.float64) - [X0, Y0]) * SS))
+
+    def red(m):
+        return cv2.resize(m.astype(np.float32) / (255 if m.dtype == np.uint8 else 1), (X1 - X0, Y1 - Y0),
+                          interpolation=cv2.INTER_AREA)
+
+    def dist(m):
+        return cv2.distanceTransform((m > 0).astype(np.uint8), cv2.DIST_L2, 5) / SS
+
+    def lisa(t):
+        return t * t * (3 - 2 * t)
+
+    def pintar(cor, tom, m):
+        nonlocal reg
+        a = red(m)[..., None]
+        c = cv2.resize(np.float32(cor)[None, None] * tom[..., None] * (m[..., None] / 255.0), (X1 - X0, Y1 - Y0),
+                       interpolation=cv2.INTER_AREA)
+        reg = reg * (1 - a) + c
+
+    def sombra(m, dx, dy, sig, forca):
+        nonlocal reg
+        sh = cv2.warpAffine(m.astype(np.float32) / 255, np.float32([[1, 0, dx * SS], [0, 1, dy * SS]]), (W, H))
+        reg *= (1 - forca * red(cv2.GaussianBlur(sh, (0, 0), sig * SS) * (1 - m / 255.0)))[..., None]
+
+    # 1. o sofá do motor sai: o tapete, copiado em volta do centro, do setor livre (em espelho)
+    mv = np.zeros((Y1 - Y0, X1 - X0), np.uint8)
+    cv2.fillPoly(mv, [np.int32(np.round(np.float64(q["sofa_velho"]) - [X0, Y0]))], 1)
+    mv = cv2.dilate(mv, np.ones((3, 3), np.uint8)).astype(bool)
+    ys, xs = np.mgrid[Y0:Y1, X0:X1] + 0.5
+    rr, th = np.hypot(xs - CX, ys - CY), np.degrees(np.arctan2(CY - ys, xs - CX))
+    (pcx, pcy), pr = q["pufe"]
+    buraco = mv & (np.hypot(xs - pcx, ys - pcy) > pr + 1.3) & (rr <= R + 1.0)
+    A0, A1 = q["setor_livre"]
+    larg = A1 - A0
+    t = np.mod(th - A0, 2 * larg)
+    ts = np.radians(A0 + np.where(t < larg, t, 2 * larg - t))
+    copia = cv2.remap(fonte, (CX + rr * np.cos(ts) - X0 - 0.5).astype(np.float32),
+                      (CY - rr * np.sin(ts) - Y0 - 0.5).astype(np.float32), cv2.INTER_LINEAR)
+    a = cv2.GaussianBlur(buraco.astype(np.float32), (0, 0), 0.6)[..., None] * (rr <= R + 1.0)[..., None]
+    reg = reg * (1 - a) + copia * a
+
+    # 2. o sofá do PDF: contorno, linhas (barreiras entre as partes) e as partes
+    ds = [d for d in pg.get_drawings() if d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO"
+          and d["rect"].x0 >= 1685 and d["rect"].x1 <= 1850 and d["rect"].y0 >= 578 and d["rect"].y1 <= 730]
+    contorno = next(d for d in ds if d["type"] == "f" and d["rect"].width > 100)
+    sofa = np.zeros((H, W), np.uint8)
+    cv2.fillPoly(sofa, [ss(np.vstack(caminhos_pdf(contorno, p2r, 24)))], 255)
+    bar = np.zeros((H, W), np.uint8)
+    cost = np.zeros((H, W), np.uint8)
+    for d in ds:
+        r_ = d["rect"]
+        if d["type"] != "s" or r_.x0 < 1690 or (r_.x0 > 1780 and r_.y0 > 680):    # sem a planta e a mesa de centro
+            continue
+        for c in caminhos_pdf(d, p2r, 24):
+            cv2.polylines(bar, [ss(c)], False, 255, 3)
+            if 4 < max(r_.width, r_.height) < 9 and r_.x0 > 1700 and r_.y0 < 650:     # as divisões do encosto
+                cv2.polylines(cost, [ss(c)], False, 255, 3)
+    _, lab = cv2.connectedComponents(((sofa > 0) & (bar == 0)).astype(np.uint8), connectivity=4)
+
+    def regiao(pts=(), ks=()):
+        ks = list(ks)
+        for x, y in pts:
+            j, i = int((y - Y0) * SS), int((x - X0) * SS)
+            v = lab[j - 6:j + 7, i - 6:i + 7].ravel()
+            ks.append(np.bincount(v[v > 0]).argmax())
+        return cv2.dilate(np.isin(lab, ks).astype(np.uint8) * 255, np.ones((5, 5), np.uint8)) & sofa
+
+    areas = np.bincount(lab.ravel())
+    encosto = regiao(q["encosto"])
+    face = regiao(ks=[k for k in range(1, len(areas)) if 20000 < areas[k] < 40000])
+    assento = regiao(q["assento"])
+    alm = [regiao(p) for p in q["almofadas"]]
+    circ = np.zeros((H, W), np.uint8)
+    for c, r_ in q["redondas"]:
+        cv2.circle(circ, tuple(ss(c)), int(r_ * SS), 255, -1)
+    cor = q["cores"]
+    for par in q["sombra"]:
+        sombra(sofa, *par)
+    base = assento | alm[0] | alm[1] | (circ & sofa)
+    pintar(cor["assento"], 0.80 + 0.20 * lisa(np.clip(dist(sofa) / 5.0, 0, 1)), base)          # a frente arredondada
+    d_ass = cv2.distanceTransform((assento == 0).astype(np.uint8), cv2.DIST_L2, 5) / SS
+    pintar(cor["face"], 0.78 + 0.22 * lisa(np.clip(d_ass / 2.0, 0, 1)), face)                 # escurece no vinco
+    pintar(cor["encosto"], 0.80 + 0.20 * lisa(np.clip(dist(encosto) / 1.8, 0, 1)), encosto)   # o rolo
+    d_face = cv2.distanceTransform((face == 0).astype(np.uint8), cv2.DIST_L2, 5) / SS
+    reg *= (1 - 0.22 * red(np.clip(1 - d_face / 1.4, 0, 1) * (assento > 0)))[..., None]       # o vinco no assento
+    reg *= (1 - 0.18 * red(cost & encosto))[..., None]                                           # as costuras
+
+    # 3. as almofadas
+    for m in alm:
+        m = cv2.erode(m, np.ones((3, 3), np.uint8))
+        sombra(m, -0.6, 0.6, 0.8, 0.22)
+        pintar(cor["almofada"], 0.86 + 0.14 * lisa(np.clip(dist(m) / 2.4, 0, 1)), m)
+    for (cx, cy), r_ in q["redondas"]:
+        m = np.zeros((H, W), np.uint8)
+        cv2.circle(m, tuple(ss((cx, cy))), int(r_ * SS), 255, -1)
+        sombra(m, -0.6, 0.6, 0.8, 0.22)
+        pintar(cor["almofada"], 0.86 + 0.14 * lisa(np.clip(dist(m) / 2.6, 0, 1)), m)
+        pregas = np.zeros((H, W), np.uint8)
+        for k in range(8):
+            ang = np.radians(22.5 + 45 * k)
+            cv2.line(pregas, tuple(ss((cx, cy))), tuple(ss((cx + 0.92 * r_ * np.cos(ang), cy + 0.92 * r_ * np.sin(ang)))),
+                     255, 2)
+        reg *= (1 - 0.12 * red(pregas & m))[..., None]
+        botao = np.zeros((H, W), np.uint8)
+        cv2.circle(botao, tuple(ss((cx, cy))), int(0.55 * SS), 255, -1)
+        reg *= (1 - 0.25 * red(botao))[..., None]
+
+    # 4. os clones do render, cada um com a sombra nova
+    gx, gy = np.meshgrid(np.arange(W) / SS + X0 + 0.5 / SS, np.arange(H) / SS + Y0 + 0.5 / SS)
+    gx1, gy1 = np.meshgrid(np.arange(X1 - X0) + X0 + 0.5, np.arange(Y1 - Y0) + Y0 + 0.5)
+
+    def clonar(dentro, c_src, c_dst, ang, par):
+        nonlocal reg
+        ca, sa = np.cos(np.radians(ang)), np.sin(np.radians(ang))
+        ux, uy = gx - c_dst[0], gy - c_dst[1]
+        m = dentro(c_src[0] + ca * ux + sa * uy, c_src[1] - sa * ux + ca * uy).astype(np.uint8) * 255
+        sombra(m, *par)
+        ux, uy = gx1 - c_dst[0], gy1 - c_dst[1]
+        cor_ = cv2.remap(org, (c_src[0] + ca * ux + sa * uy - 0.5).astype(np.float32),
+                         (c_src[1] - sa * ux + ca * uy - 0.5).astype(np.float32), cv2.INTER_CUBIC)
+        a = red(m)[..., None]
+        reg = reg * (1 - a) + cor_ * a
+
+    def poli(caixa):
+        d = next(d for d in pg.get_drawings() if d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO" and d["type"] == "f"
+                 and d["rect"].x0 >= caixa[0] and d["rect"].x1 <= caixa[2] and d["rect"].y0 >= caixa[1]
+                 and d["rect"].y1 <= caixa[3])
+        return np.vstack(caminhos_pdf(d, p2r, 16))
+    qp = q["poltrona"]
+    pf, pdst = poli(qp["fonte"]), poli(qp["destino"])
+    mpf = np.zeros((H, W), np.uint8)
+    cv2.fillPoly(mpf, [ss(pf)], 255)
+    mpf = cv2.dilate(mpf, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (int(2 * 0.9 * SS) + 1,) * 2))
+
+    def na_poltrona(sx, sy):
+        return mpf[np.clip(((sy - Y0) * SS).astype(int), 0, H - 1), np.clip(((sx - X0) * SS).astype(int), 0, W - 1)] > 0
+
+    def no_circulo(c, r_):
+        return lambda sx, sy: np.hypot(sx - c[0], sy - c[1]) <= r_
+    clonar(na_poltrona, pf.mean(axis=0), pdst.mean(axis=0) + qp["desvio"], qp["angulo"], (-1.2, 1.2, 1.6, 0.28))
+    (mc, mr), mdst = q["mesinha"]["fonte"], q["mesinha"]["destino"]
+    clonar(no_circulo(mc, mr), mc, mdst, 0.0, (-0.8, 0.8, 1.0, 0.28))
+    clonar(no_circulo((pcx, pcy), pr), (pcx, pcy), (pcx, pcy), 0.0, (-0.8, 0.8, 1.0, 0.25))
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    sala de estar: sofá do motor fora ({int(buraco.sum())} px de tapete de volta); sofá curvo do PDF pela "
+          f"esquerda do tapete, com 2 almofadas e 2 redondas; poltrona da direita (girada {qp['angulo']}°) e mesinha")
+    return out
+
+
 # A ordem da lista é a de execução: o piso do depósito sem juntas (7) e o Bege Bahia (11) vêm antes da escada (3),
 # para a sombra do último espelho cair no Bege Bahia, e antes dos itens que apagam traços em espelho (4 e 6), para
 # o piso de cada lado já ser o Bege Bahia.
@@ -776,7 +1005,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("9", "boxes de vidro: ducha ao lado da sauna e banho feminino", boxes),
                      ("10", "divisória entre os banhos: peça clara do PDF, não parede", divisoria),
                      ("12", "banho de serviço: bancada e cuba nas medidas do PDF", bancada_servico)],
-         "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares)]}
+         "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
+                    ("2", "sala de estar: o sofá curvo do PDF, a poltrona da direita e a mesinha", sala_estar)]}
 
 
 def main():
