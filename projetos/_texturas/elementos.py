@@ -19,6 +19,13 @@ O que se vê nelas, e como cada função desenha (em metros, na escala do render
   com contorno, saindo do caixilho; `porta_giro`: a folha branca fina, aberta a 90°, sem o arco (decisão do
   usuário, 19/10/26: "remover os arcos, escadas com linhas"; com `arco=True`, o arco cinza fino da regra antiga).
 - Escadas com linhas (mesma decisão): o bocel em linha cinza suave, como na referência.
+- Roupa de cama, como mais uma opção (usuário, 19/10/26, com a mesma planta: "use as referencias de roupa de cama.
+  como mais uma opção. ainda não aplique"): só a referência, na cartela, sem função de desenho ainda. Na cama de
+  casal, lençol e edredom brancos com a dobra branca junto aos travesseiros, uma manta bordô (RGB ~118, 81, 85)
+  atravessada na metade dos pés, com dobras suaves, dois travesseiros bordô na frente de dois cinza-claros e os
+  criados redondos de madeira com abajur branco; na de solteiro, a cama de madeira com o criado embutido, o
+  edredom branco com uma faixa bordô atravessada, um travesseiro bordô sobre um cinza e a manta cinza-clara na
+  cabeceira.
 
 Cada função devolve (BGR float32, alfa 0 a 1), na horizontal; para aplicar, girar e pousar no render.
 
@@ -244,6 +251,8 @@ def cartela():
         ("4. Portas  ·  referência (porta de correr do terraço; janela de correr do quarto)  |  as nossas: de "
          "correr de 2,40 m e de giro de 0,80 m (sem arco), e ampliadas 2 x",
          [caber(inf[122:142, 142:212], 120), caber(sup[224:240, 180:245], 120), portas, amp(portas)]),
+        ("5. Roupa de cama (opção, ainda não aplicada)  ·  referência: cama de casal da suíte e de solteiro do quarto",
+         [caber(sup[24:118, 30:122]), caber(sup[134:232, 170:213])]),
     ]
     blocos = []
     for titulo, pecas in linhas:
