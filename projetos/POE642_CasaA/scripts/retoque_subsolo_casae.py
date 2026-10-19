@@ -1183,6 +1183,13 @@ def piscina_cliente(out, p2r):
     return out
 
 
+# item 22 (R3, regra do usuário de 19/10/26 para todas as casas: "Não mostrar arco da porta"): os arcos de porta do
+# PDF saem (`arcos.remover_arcos`, o mesmo do Térreo da Casa A), os desenhados pelos itens acima e os do motor; as
+# folhas e os batentes ficam. Aqui os arcos estão em três camadas: ARQ_PAREDE (as portas), "ARQ - Parede" (as duas
+# portas de dentro do vestiário) e ARQ_REVESTIMENTOS (a porta de vidro da ducha da antessala).
+ARCOS = {"camadas": ("ARQ_PAREDE", "ARQ - Parede", "ARQ_REVESTIMENTOS")}
+
+
 # item 18 (pedido do usuário, 16/10/26): "vamos adicionar os nomes e áreas, conforme regras que adotamos
 # anteriormente para o 1º pavimento da casa E". A regra do 1º Pavimento (`retoque_1pav_casae.rotulos_ambientes`):
 # cada linha do rótulo do PDF entra igual (o nome e "A: 12,65 m²"), na posição do PDF, no corpo do PDF 30%
@@ -1322,6 +1329,9 @@ def main():
     if args.ate >= 16:
         print("[19] piscina sem divisória; vidros sem base (visor e sauna); esquadria evidente (pedido do cliente)")
         out = piscina_cliente(out, p2r)
+        print("[22] portas sem os arcos (R3)")
+        from arcos import remover_arcos
+        out = remover_arcos(out, pg, p2r, camadas=ARCOS["camadas"], so_folha=True)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     if args.ate >= 15:

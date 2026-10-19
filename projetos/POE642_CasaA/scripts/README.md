@@ -466,6 +466,14 @@ python3 retoque_subsolo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Subs
     --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Subsolo_v1_retocado
 ```
 
+## Portas sem arcos: `arcos.py`
+
+`remover_arcos(out, pg, p2r, camadas=..., so_folha=False)` tira da imagem os arcos de porta do PDF: as curvas das camadas dadas, um quarto de círculo por arco. As folhas e os batentes ficam. Segue a regra R3 de `POE642_REGRAS.md`.
+- **Portas de giro:** a faixa do arco vira a textura do mesmo piso logo depois dela, na mesma direção, com a borda suave; quando isso não dá, inpaint.
+- **Porta camarão** (arcos rasos): o setor volta a ser o piso tecido (`camarao_fontes`).
+- **`so_folha=True`:** só protege a reta de uma ponta se houver folha nela (porta dupla).
+- **Onde é usado:** Térreo da Casa A (`ajustes_casaa.sem_arcos`) e Subsolo da Casa E (item 22 do `retoque_subsolo_casae.py`).
+
 ## Nomes e áreas da Casa A: `rotulos_casaa.py`
 
 Os rótulos do PDF de cada pavimento da Casa A (`_pdfs_cliente/642 - <PAVIMENTO> - CASA A.pdf`), pela regra da Casa E (`retoque_1pav_casae.rotulos_ambientes`). A imagem aprovada (2000 px) vai ao quadro comum em 3840 px (`rodape_entrega.no_quadro_comum`), e os rótulos são escritos nessa resolução. O granito, onde o texto fica cinza, é achado na própria imagem (`GRANITO`). As notas que não são ambientes ficam fora (`FORA`). Os desvios de cada pavimento estão em `PAVIMENTOS[...]["ajustes"]`, no mesmo formato da Casa E.

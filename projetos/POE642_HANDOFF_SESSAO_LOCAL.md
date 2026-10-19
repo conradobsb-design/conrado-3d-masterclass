@@ -720,6 +720,12 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
       - `HACHURA`, `lote_do_terreo` e `contexto_hachura` no `retoque_subsolo_casae.py`.
       - Na prancha, só o fundo mudou (a planta do Subsolo e o rodapé ficaram iguais). A prancha e os três PDFs foram refeitos.
       - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_terreno_hachurado_antes_depois.jpg`.
+  22. **R3, portas sem arcos (regra de 19/10/26: "Não mostrar arco da porta"):** os 11 arcos de porta do PDF saíram; as folhas e os batentes ficam.
+      - Os arcos estão em três camadas: ARQ_PAREDE (as portas), "ARQ - Parede" (as duas portas de dentro do vestiário) e ARQ_REVESTIMENTOS (a porta de vidro da ducha da antessala).
+      - A remoção virou um módulo comum, `scripts/arcos.py` (`remover_arcos`). O `ajustes_casaa.sem_arcos` da Casa A agora o usa, e o resultado lá ficou igual, px a px.
+      - Opção nova `so_folha=True`: a reta do centro a uma ponta do arco só é protegida se lá houver mesmo uma folha. Na porta dupla do depósito, a ponta do arco fechado sobrava como um tracinho no meio do vão.
+      - **Conferência:** na prancha, só as 9 regiões das portas mudaram (6.880 px). A prancha e os três PDFs foram refeitos.
+      - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_sem_arcos_antes_depois.jpg`.
 - **Entrega (16/10/26, depois da aprovação do usuário: "prancha e o PDF. aprovado."):** a casa passa a ter três pavimentos, na ordem da Casa A (Subsolo, Térreo, 1º Pavimento).
   - **Config:** o Subsolo entrou na chave `entrega` da `POE642_CasaE/config_bases.json` (título "SUBSOLO", linha 0 do quadro de áreas, base `POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png`). O Térreo passou à linha 1 e o 1º Pavimento à linha 2. O quadro de áreas tem os três "NÃO INFORMADO", sem total. Em `pdf.ordem`: Subsolo, Térreo e 1º Pavimento; título "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)".
   - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_Subsolo_entrega.png`, nova. A imagem final, já no quadro comum e com os rótulos, entra com `--no-quadro`, sem realinhar. A do Térreo (realinhada com 128 pontos, erro mediano 0,78 px) e as duas do 1º Pavimento (`_pb` e `_linhas`) foram refeitas só pelo rodapé novo, com a linha do Subsolo no quadro de áreas. Rodapés `entrega/POE642_CasaE_rodape_{Subsolo,Terreo,1Pavimento}.png`.
