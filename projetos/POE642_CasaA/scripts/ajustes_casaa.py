@@ -21,6 +21,8 @@ Itens:
      folhas de vidro do PDF, claras e finas como o vidro da sauna, no lugar do traço preto do motor.
   Subsolo 5. Janelas (pedido do usuário, 19/10/26): a do banho de serviço e a da circulação para o depósito, na
      geometria do PDF (peitoril, faces da parede, vidro, caixilhos e retornos), no lugar da peça cinza do motor.
+  Subsolo 6. Circulação (pedido do usuário, 19/10/26): sai o traço preto ao longo da borda esquerda, que o PDF
+     não tem.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
 
@@ -374,6 +376,20 @@ def janelas(out):
     return out
 
 
+# Subsolo 6. Traço preto no fim da circulação (pedido do usuário, 19/10/26: "Esse traço preto no fim da área de
+# circulação não existe"): ao longo da borda esquerda da circulação, ~5 px para dentro do travertino, o motor fez
+# um traço preto vertical, da escada do deck até a parede de baixo. No PDF da Casa A a circulação só termina (a
+# borda do piso, sem linha). O traço sai como o das portas da academia: em cada linha, o travertino de cada lado
+# continua em espelho.
+TRACO_CIRCULACAO = {"faixa": (566, 584, 585, 845), "escuro": 140}   # px da imagem: x0, x1, linhas y0..y1 (846: a parede)
+
+
+def traco_circulacao(out):
+    n = tirar_traco(out, TRACO_CIRCULACAO["faixa"], TRACO_CIRCULACAO["escuro"])
+    print(f"    traço preto da borda da circulação apagado ({n} px, o travertino de cada lado)")
+    return out
+
+
 # Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
 # varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
 # (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
@@ -437,7 +453,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("2", "sauna: o banco horizontal de volta", banco_sauna),
                      ("3", "escada: depois da linha de corte, os degraus na cor e textura do Subsolo", escada),
                      ("4", "portas de vidro da academia: folhas de vidro claras, não pretas", portas_academia),
-                     ("5", "janelas: vão, peitoril, vidro e caixilhos do PDF, no lugar da peça cinza", janelas)],
+                     ("5", "janelas: vão, peitoril, vidro e caixilhos do PDF, no lugar da peça cinza", janelas),
+                     ("6", "circulação: sem o traço preto na borda", traco_circulacao)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares)]}
 
 

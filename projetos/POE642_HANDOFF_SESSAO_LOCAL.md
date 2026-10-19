@@ -779,6 +779,9 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - No PDF da Casa A (ARQ_PAREDE) é o vão na parede com o vidro fino no meio, os caixilhos nas pontas, os retornos da parede e as faces da parede passando pelo vão (o peitoril).
     - Entram nessa geometria: o peitoril claro (o quartzo das bancadas, #ECE8E1), as duas faces em linha fina (0,35 px), o vidro como o das portas da academia, os caixilhos em alumínio e os retornos no preto das paredes; acima e abaixo do vão, a parede preta. Fora do vão, a borda escura da peça do motor volta ao piso do lado.
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_janelas_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só mudam as duas janelas.
+  - **Subsolo 6, traço preto no fim da circulação:** ao longo da borda esquerda da circulação, ~5 px para dentro do travertino, o motor fez um traço preto vertical, da escada do deck até a parede de baixo. No PDF da Casa A a circulação só termina, sem linha.
+    - O traço sai como o das portas da academia (`tirar_traco`): em cada linha, o trecho escuro (abaixo de 140) e 1 px de cada lado recebem em espelho o travertino de cada lado. A última linha antes da parede de baixo fica fora, para a parede não ser tocada.
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_circulacao_traco_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só muda a borda da circulação.
 
 ## Casas A a D · Barlavento nas piscinas
 
