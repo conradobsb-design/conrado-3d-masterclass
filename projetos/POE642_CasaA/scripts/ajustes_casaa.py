@@ -55,6 +55,8 @@ Itens:
      corrimão; o resto esmaecido.
   Térreo, portas no granito (pedidos do usuário, 19/10/26): as quatro portas de giro sobre o granito com a folha do
      PDF e o arco em cinza fino, como de regra.
+  Térreo, eletrodomésticos (pedido do usuário, 19/10/26): os quadrados do PDF da cozinha, do gourmet e da área de
+     serviço com o inox aprovado da Casa D.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1450,6 +1452,72 @@ def portas_granito(out):
     return out
 
 
+# Térreo, eletrodomésticos (pedido do usuário, 19/10/26: "eletrodomésticos em inox", na fileira de baixo da cozinha
+# e do gourmet). O motor fez os volumes no lilás dos armários. No PDF (ARQ_LAYOUT HUMANIZAÇÃO), os quadrados sem
+# diagonal são eletrodomésticos: dois no fim da bancada do gourmet, dois na cozinha e as duas máquinas da área de
+# serviço. Cada um recebe o inox aprovado da Casa D, levado ao quadrado do PDF, com a sombra curta e o contorno fino,
+# como na cozinha e nas máquinas da Casa E: na cozinha e no gourmet, as metades do par da cozinha da Casa D; na área
+# de serviço, as máquinas de lá. O volume do motor passa até 2 px do quadrado do PDF (para fora): o inox cobre os
+# dois, para não sobrar uma moldura lilás.
+INOX = {"quadrados": [  # (onde, quadrado em pt, qual fonte)
+    ("gourmet", (1559.67, 1548.4, 1605.02, 1593.76), 0), ("gourmet", (1607.37, 1548.4, 1652.72, 1593.76), 1),
+    ("cozinha", (1672.56, 1548.4, 1717.92, 1593.76), 0), ("cozinha", (1717.92, 1548.4, 1763.27, 1593.76), 1),
+    ("área de serviço", (1615.87, 1607.93, 1655.55, 1647.61), 2), ("área de serviço", (1661.22, 1607.93, 1700.91, 1647.61), 3)],
+    "fonte": (CASA.parent / "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
+              [(972, 319, 996, 345), (998, 319, 1022, 345),        # o par da cozinha
+               (1143, 191, 1166, 216), (1167, 191, 1190, 216)]),   # as máquinas da área de serviço
+    "contorno": (70, 72, 74), "larg_contorno": 0.4,
+    "sombra": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.3},
+    "claro": 150.0, "alcance": 2.5}           # o volume do motor: px claros (lilás) junto ao quadrado, até 2,5 px
+
+
+def bloco_render(Y, r, claro, alcance):
+    """Bordas (subpixel) do volume claro do render em volta do retângulo r do PDF (px): em cada lado, da borda do
+    PDF para fora, enquanto o px é claro (passando por cima de um px mais escuro entre dois claros: o brilho da quina
+    do volume), até o alcance; o px de transição entra pela fração. Nunca menor que o PDF."""
+    x0, y0, x1, y1 = r
+    ph = Y[int(y0 + (y1 - y0) * 0.3):int(y1 - (y1 - y0) * 0.3), :].mean(axis=0)
+    pv = Y[:, int(x0 + (x1 - x0) * 0.3):int(x1 - (x1 - x0) * 0.3)].mean(axis=1)
+
+    def lado(p, borda, passo):
+        i = int(np.floor(borda + 0.5)) - (1 if passo > 0 else 0)
+        def cabe(k):
+            return abs(i + k * passo + 0.5 - borda) <= alcance
+
+        while cabe(1) and (p[i + passo] >= claro or (cabe(2) and p[i + 2 * passo] >= claro)):
+            i += passo
+        if not cabe(1):
+            return borda
+        v, fora, luz = p[i + passo], p[i + 2 * passo], p[i]
+        c = float(np.clip((v - fora) / (luz - fora), 0, 1)) if luz > fora < v else 0.0
+        return min(i - c, borda) if passo < 0 else max(i + 1 + c, borda)
+
+    return lado(ph, x0, -1), lado(pv, y0, -1), lado(ph, x1, 1), lado(pv, y1, 1)
+
+
+def inox(out):
+    from retoque_terreo_casae import colar, sombra_curta, linha_aa
+    q = INOX
+    _, p2r = pdf_pavimento("Terreo")
+    arq, fontes = q["fonte"]
+    casad = cv2.imread(str(arq))
+    forma = out.shape[:2]
+    feitos = {}
+    Y = out.astype(np.float32).mean(axis=2)
+    for onde, quad, f in q["quadrados"]:
+        (x0, y0), (x1, y1) = p2r(*quad[:2]), p2r(*quad[2:])
+        x0, y0, x1, y1 = bloco_render(Y, (x0, y0, x1, y1), q["claro"], q["alcance"])
+        out = sombra_curta(out, (x0, y0, x1, y1), q["sombra"])
+        fx0, fy0, fx1, fy1 = fontes[f]
+        out = colar(out, casad[fy0:fy1, fx0:fx1], (x0, y0, x1, y1))
+        a = linha_aa(forma, [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], q["larg_contorno"], fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - a) + np.float32(q["contorno"]) * a, 0, 255).astype(np.uint8)
+        feitos[onde] = feitos.get(onde, 0) + 1
+    print("    eletrodomésticos em inox: " + ", ".join(f"{n} no {k}" if k != "área de serviço" else f"{n} na {k}"
+                                                     for k, n in feitos.items()))
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1592,7 +1660,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("porta_jardim", "jardim: a porta para a área descoberta, com o arco", porta_jardim),
                     ("portoes", "área descoberta: os portões de correr dos dois lados", portoes),
                     ("9", "escada caracol: degraus 1 a 7 cheios, o resto esmaecido", caracol),
-                    ("portas_granito", "portas no granito: folhas do PDF e arcos em cinza fino", portas_granito)]}
+                    ("portas_granito", "portas no granito: folhas do PDF e arcos em cinza fino", portas_granito),
+                    ("inox", "eletrodomésticos em inox (cozinha, gourmet e área de serviço)", inox)]}
 
 
 def main():
