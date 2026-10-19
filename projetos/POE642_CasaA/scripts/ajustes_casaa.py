@@ -67,6 +67,8 @@ Itens:
      suspenso e o tracejado da claraboia, nas medidas do PDF.
   Térreo, porta pivotante (pedido do usuário, 19/10/26): a folha até a ponta do PDF, no hall externo, e o arco
      pequeno do lado de lá.
+  Térreo, escada interna (pedido do usuário, 19/10/26): os degraus 1 a 7 cheios até a linha de corte, com o
+     sombreamento de subida, sem linhas; do 8º em diante esmaecida; o jardim em volta no gramado aprovado.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -2081,6 +2083,151 @@ def pivotante(out):
     return out
 
 
+# Térreo, escada interna e o jardim em volta (pedido do usuário, 19/10/26: "vamos melhorar a representação da escada.
+# não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal.
+# sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter
+# um aspecto melhor"). O motor fez a escada em U inteira cheia, com as linhas dos degraus e um retângulo de traço
+# por cima (a "barreira"), e o jardim num verde chapado. No PDF (ARQ_ESCADAS E RAMPAS) a escada sobe do degrau 1, à
+# esquerda do lanço de cima, para a direita; a linha de corte (o traço em diagonal com o X) passa no 7º degrau; do 8º
+# em diante (o resto do lanço de cima, o patamar e o lanço de baixo) é tracejado, acima do corte. O jardim (17,46 m²)
+# inclui a área da escada: ela sobe de dentro dele. Sem IA, como a escada caracol:
+# 1. o jardim inteiro (com a área da escada) vira o gramado aprovado (o da grama ao lado do jardim de 4,79 m², tecido
+#    por image quilting, no tom dele), com a sombra curta das paredes;
+# 2. os degraus 1 a 7, até a linha de corte, cheios: o travertino do piso interno (tecido de um trecho limpo), com o
+#    sombreamento de subida das escadas aprovadas, sem linhas: cada degrau um pouco mais claro que o de baixo (de 0,86
+#    a 1) e a sombra curta de cada espelho no degrau de baixo; e a sombra curta da escada no gramado;
+# 3. do 8º degrau em diante, os mesmos pisos esmaecidos sobre o gramado (30%), com os espelhos e o contorno em traço
+#    claro;
+# 4. a linha de corte do PDF (o traço com o X), fina.
+ESCADA_INT = {
+    "caixa": (1180, 455, 1335, 575),                          # px: o jardim com a escada (até o vidro da direita)
+    "lanco1": (2021.22, 1094.86, 2174.3, 1162.89), "lanco2": (2021.22, 1185.57, 2174.3, 1253.6),
+    "patamar": (2174.3, 1094.86, 2242.33, 1253.6),            # pt
+    "espelhos": [2038.23, 2055.24, 2072.25, 2089.26, 2106.26, 2123.27, 2140.28, 2157.29],   # pt: entre os degraus
+    "cheios": 7,                                              # degraus cheios: até o corte, no 7º
+    "corte_caixa": (2118, 1090, 2162, 1166),                  # pt: onde ficam os traços da linha de corte
+    "fonte_grama": (600, 885, 720, 935),                      # px da imagem aprovada: o gramado limpo
+    "fonte_piso": (1137, 330, 1177, 450),                     # px: travertino limpo
+    "piso": (186, 198, 217),                                  # BGR: o travertino dos degraus do render
+    "tom": (0.86, 1.0), "espelho": (0.35, 2.2), "esmaecer": 0.30, "espelho_esm": ((170, 170, 170), 0.35),
+    "parede": (0.22, 2.5), "sombra": (-1.0, 1.0, 1.2, 0.35), "corte": ((90, 92, 94), 0.5)}
+
+
+def escada_interna(out):
+    from retoque_bege_bahia_terreo import quilting
+    from retoque_terreo_casae import poligono_aa, linha_aa
+    q = ESCADA_INT
+    pg, p2r = pdf_pavimento("Terreo")
+    X0, Y0, X1, Y1 = q["caixa"]
+    forma = out.shape[:2]
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    h, w = reg.shape[:2]
+
+    def ret_px(r):
+        (a, b), (c, d) = p2r(*r[:2]), p2r(*r[2:])
+        return a - X0, b - Y0, c - X0, d - Y0
+
+    def poli(pts):
+        return poligono_aa(forma, [(x, y) for x, y in pts])[Y0:Y1, X0:X1]
+
+    def ret_aa(r):
+        a, b, c, d = ret_px(r)
+        return poli([(a + X0, b + Y0), (c + X0, b + Y0), (c + X0, d + Y0), (a + X0, d + Y0)])
+
+    escada = np.maximum.reduce([ret_aa(q[k]) for k in ("lanco1", "lanco2", "patamar")])
+    verde = (reg[..., 1] - reg[..., 2] > 6) & (reg[..., 1] - reg[..., 0] > 6)
+    jardim = cv2.morphologyEx((verde | (escada > 0.01)).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+    jardim = jardim.astype(bool) & (reg.mean(axis=2) > 25)     # as paredes ficam
+
+    # 1. o gramado aprovado
+    ap = cv2.imread(str(APROVADAS["Terreo"])).astype(np.float32)
+    fx0, fy0, fx1, fy1 = q["fonte_grama"]
+    g = ap[fy0:fy1, fx0:fx1]
+    cor_grama = np.median(g.reshape(-1, 3), axis=0)
+    g = g / g.reshape(-1, 3).mean(axis=0)
+    fontes = [np.ascontiguousarray(v) for v in (g, g[:, ::-1], g[::-1, :], g[::-1, ::-1])]
+    tex = quilting(fontes, h, w, p=30, sobra=10, candidatos=400, rng=np.random.default_rng(649))[:h, :w]
+    grama = tex * cor_grama
+    parede = (~jardim) & (reg.mean(axis=2) < 70)
+    dist = cv2.distanceTransform((~parede).astype(np.uint8), cv2.DIST_L2, 5)
+    forca, alc = q["parede"]
+    grama *= (1 - forca * np.clip(1 - dist / alc, 0, 1))[..., None]
+    aj = cv2.GaussianBlur(jardim.astype(np.float32), (0, 0), 0.6) * jardim
+    reg = reg * (1 - aj[..., None]) + grama * aj[..., None]
+
+    # o travertino dos degraus
+    fx0, fy0, fx1, fy1 = q["fonte_piso"]
+    f = out[fy0:fy1, fx0:fx1].astype(np.float32)
+    f = f / cv2.GaussianBlur(f, (0, 0), 8)
+    fontes = [np.ascontiguousarray(v) for v in (f, f[:, ::-1], f[::-1, :], f[::-1, ::-1])]
+    piso = quilting(fontes, h, w, p=24, sobra=8, candidatos=300, rng=np.random.default_rng(650))[:h, :w] * np.float32(q["piso"])
+
+    # a parte cheia: do degrau 1 até a linha de corte
+    corte = []
+    for d in pg.get_drawings():
+        r = d["rect"]
+        cx0, cy0, cx1, cy1 = q["corte_caixa"]
+        if d.get("layer") == "ARQ_ESCADAS E RAMPAS" and d["type"] == "s" and r.x0 >= cx0 and r.x1 <= cx1 and \
+                r.y0 >= cy0 and r.y1 <= cy1 and r.width > 1 and r.height > 1:
+            it = d["items"][0]
+            corte.append([p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)])
+    longos = sorted([c for c in corte if np.hypot(c[1][0] - c[0][0], c[1][1] - c[0][1]) > 8],
+                    key=lambda c: min(c[0][1], c[1][1]))
+    a1, c1 = longos[0], longos[-1]                            # o primeiro e o último trecho da diagonal
+    a1 = sorted(a1, key=lambda p: p[1])
+    c1 = sorted(c1, key=lambda p: p[1])
+    l0, t0, _, b0 = ret_px(q["lanco1"])
+    cheio = poli([(l0 + X0, t0 + Y0), (a1[0][0], t0 + Y0), a1[1], c1[0], (c1[1][0], b0 + Y0), (l0 + X0, b0 + Y0)])
+    cheio = np.minimum(cheio, escada)
+    esm = np.clip(escada - cheio, 0, 1)
+
+    # 2. os degraus cheios, com o sombreamento de subida e a sombra curta no gramado
+    xs = np.arange(w)[None, :] + 0.5
+    bordas = [p2r(x, q["lanco1"][1])[0] - X0 for x in [q["lanco1"][0]] + q["espelhos"][:q["cheios"]]]
+    tom0, tom1 = q["tom"]
+    fator = np.ones((h, w), np.float32)
+    n = q["cheios"]
+    for k in range(n):
+        xa = bordas[k]
+        xb = bordas[k + 1] if k + 1 < len(bordas) else w
+        dentro = (xs >= xa) & (xs < xb)
+        fator = np.where(dentro, tom0 + (tom1 - tom0) * k / (n - 1), fator)
+        if k + 1 < len(bordas):                               # a sombra do espelho de cima neste degrau
+            sf, sl = q["espelho"]
+            fator = np.where(dentro, fator * (1 - sf * np.exp(-np.clip(xb - xs, 0, None) / sl)), fator)
+    dx, dy, sig, frc = q["sombra"]
+    som = cv2.GaussianBlur(cv2.warpAffine(cheio, np.float32([[1, 0, dx], [0, 1, dy]]), (w, h)), (0, 0), sig)
+    reg *= (1 - frc * som * (1 - cheio))[..., None]
+    reg = reg * (1 - cheio[..., None]) + piso * fator[..., None] * cheio[..., None]
+
+    # 3. do 8º em diante, esmaecido sobre o gramado, com os espelhos e o contorno claros
+    k_ = q["esmaecer"]
+    reg = reg * (1 - k_ * esm[..., None]) + piso * k_ * esm[..., None]
+    cor, frc = q["espelho_esm"]
+    traco = np.zeros(forma, np.float32)
+    for lanco in ("lanco1", "lanco2"):
+        _, y0, _, y1 = q[lanco]
+        for x in q["espelhos"] + [q["lanco1"][2]]:
+            traco = np.maximum(traco, linha_aa(forma, [p2r(x, y0), p2r(x, y1)], 0.5))
+    for k in ("lanco1", "lanco2", "patamar"):
+        x0, y0, x1, y1 = q[k]
+        traco = np.maximum(traco, linha_aa(forma, [p2r(x0, y0), p2r(x1, y0), p2r(x1, y1), p2r(x0, y1)], 0.5, fechada=True))
+    traco = traco[Y0:Y1, X0:X1] * (esm > 0.5)
+    reg = reg * (1 - frc * traco[..., None]) + np.float32(cor) * frc * traco[..., None]
+
+    # 4. a linha de corte
+    cor, larg = q["corte"]
+    lc = np.zeros(forma, np.float32)
+    for c in corte:
+        lc = np.maximum(lc, linha_aa(forma, c, larg))
+    lc = lc[Y0:Y1, X0:X1][..., None]
+    reg = reg * (1 - lc) + np.float32(cor) * lc
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    escada interna: degraus 1 a {n} cheios até o corte, o resto esmaecido ({k_:.0%}) sobre o gramado "
+          f"aprovado; sem a barreira do motor")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -2229,7 +2376,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("cozinha_pias", "bancada da cozinha em pedra: área molhada, cubas e torneiras", cozinha_pias),
                     ("3", "estar sob a projeção: 4 poltronas em X e a mesa triangular, não mesa de jantar", estar_projecao),
                     ("5", "lavabo: bancada com a cuba esculpida, vaso suspenso e a claraboia", lavabo_a),
-                    ("pivotante", "porta pivotante: a folha até o hall externo e o arco pequeno", pivotante)]}
+                    ("pivotante", "porta pivotante: a folha até o hall externo e o arco pequeno", pivotante),
+                    ("escada_interna", "escada interna: cheia até o corte, esmaecida depois; o jardim em volta", escada_interna)]}
 
 
 def main():

@@ -924,6 +924,21 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
       - o arco pequeno, do fim da folha ao batente de cima, centrado no pivô, no cinza e na largura do arco grande.
     - Na prancha, só esse trecho mudou.
     - Antes e depois em `renders/POE642_CasaA_PH_Terreo_pivotante_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
+  - **Térreo, escada interna e o jardim em volta (usuário: "não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal. sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter um aspecto melhor"):**
+    - O que o motor fez: a escada em U inteira cheia, com as linhas dos degraus e um retângulo de traço por cima (a "barreira"), e o jardim num verde chapado.
+    - O que o PDF tem (ARQ_ESCADAS E RAMPAS):
+      - a escada sobe do degrau 1, à esquerda do lanço de cima, para a direita;
+      - a linha de corte (o traço em diagonal com o X) passa no 7º degrau;
+      - do 8º em diante (o resto do lanço de cima, o patamar e o lanço de baixo) é tracejado, acima do corte;
+      - o jardim (17,46 m²) inclui a área da escada: ela sobe de dentro dele.
+    - Feito como na escada caracol:
+      - o jardim inteiro, com a área da escada, vira o gramado aprovado (o da grama ao lado do jardim de 4,79 m², tecido por image quilting, no tom dele), com a sombra curta das paredes;
+      - os degraus 1 a 7, até a linha de corte, ficam cheios: o travertino do piso interno, com o sombreamento de subida das escadas aprovadas e sem linhas. Cada degrau é um pouco mais claro que o de baixo (de 0,86 a 1), com a sombra curta de cada espelho no degrau de baixo, e a escada faz sombra curta no gramado;
+      - do 8º degrau em diante, os mesmos pisos esmaecidos sobre o gramado (30%), com os espelhos e o contorno em traço claro;
+      - a linha de corte do PDF (o traço com o X), fina.
+    - A barreira do motor sai junto.
+    - Na prancha, só o jardim com a escada mudou.
+    - Antes e depois em `renders/POE642_CasaA_PH_Terreo_escada_interna_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
   - Mais pedidos (19/10/26): "vamos melhorar a representação da escada. não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal. sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter um aspecto melhor"; "trazer o rótulo do shaft". E ainda: "representar a cama no quarto do motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro adequadamente. o rótulo do quarto do motorista está no local errado. o arco da porta de entrada do banho do motorista está imperceptível, devendo ser em cinza, como de regra" (o arco já foi, nas portas no granito); "mude as cores, deixe cada carro com uma única cor e deixe os carros desalinhados".
   - Pedidos seguintes do usuário (19/10/26): "melhorar a representação dessa escada caracol. somente uma parte será representada, sendo a outra esmaecida [...] onde o arco está em destaque"; "melhorar a representação dos arcos e portas. lembrando que os arcos das portas no marrom granito são em cinza, com traço fino"; "eletrodomésticos em inox"; "melhore a representação da área molhada e divisoria da bancada" (gourmet); "melhore as representações das pias e bancada, com a área molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"; "melhorar a representação dessa área. não é mesa de jantar. área de estar" (item 3); "melhorar cuba e sua posição e tamanho. representar a bancada da cuba. representar o sanitário. representar e gerar o rótulo da claraboia" (lavabo); "melhorar a representação da porta pivotante, mostrando-a até o hall externo com seus respectivos arcos".
 
