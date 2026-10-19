@@ -697,6 +697,22 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
      - No granito Marrom Tabaco (DCE e casa de máquinas de baixo) o texto fica cinza (150).
      - Dois ambientes estreitos ficam no corpo do PDF (1,0×), porque o 1,3× não cabe no piso livre. Na casa de máquinas da direita, "CASA DE MÁQUINAS" encostava nas duas paredes. No WC DCE 2, o "m²" caía sobre o chuveiro, e o rótulo foi também 6 px para a esquerda, para o piso livre do box.
      - `retoque_1pav_casae.rotulos_ambientes` ganhou `ajustes=` (os desvios de outro pavimento, cada um com o corpo opcional). As duas montagens do 1º Pavimento saem idênticas às anteriores.
+  19. **Piscina, ofurô e sauna (pedido do cliente, trazido pelo usuário em 19/10/26, com a planta marcada e uma vista 3D da fachada da academia):**
+      - Pedido: "remova as bordas onde está apontado. Note que entre a sauna e o furô temos um vidro, sem base. Já a piscina, fica sem divisória. Esses comandos vieram do cliente, contrariando o PDF original. Por isso, vamos adotar conforme nos solicitaram".
+      - Na marcação: "A representação da esquadria precisa ser mais evidente, e não terá parede abaixo dela".
+      - Item `piscina_cliente` do `retoque_subsolo_casae.py`, depois do 16:
+        - **Piscina sem divisória:** sai a faixa de Bege Bahia entre a piscina e a parte de baixo (o X da marcação). A piscina vira uma água só.
+        - **Vidro sem base no visor:** no trecho de baixo (entre a piscina e o ofurô), a faixa de Bege Bahia em volta da folha vira água, dos dois lados.
+        - **Vidro sem base entre o ofurô e a sauna:** a faixa de Bege Bahia sai, e a água do ofurô vai até um vidro na face da sauna.
+        - **Esquadrias mais evidentes, como na vista 3D:** folha de vidro clara, perfis em grafite dos dois lados e montantes a cada ~1,1 m. Isso vale no visor inteiro (fachada da academia e trecho de baixo) e no vidro da sauna.
+        - **Água:** é a mesma do item 8 (a mesma pedra Barlavento na mesma janela), com a luz de borda refeita para o contorno novo.
+        - **Fica como estava:** a borda de Bege Bahia no alto do ofurô, junto à parede.
+      - **Alinhamento estável:** o alinhamento da imagem final passa a ser medido no retocado dos itens 1 a 16 (`no_quadro_comum(..., referencia=)`). Sem isso, o retoque novo mudava o afim em fração de pixel e a imagem inteira se mexia. Agora só a região do item muda.
+  20. **Rótulo "AMBIENTE" (usuário, 19/10/26: "Adicione o rótulo 'Ambiente', entre a sauna e vestuário"):** a antessala entre a sauna e o vestiário não tem rótulo no PDF.
+      - Entra pela lista `ROTULOS["extras"]`: na linha dos nomes da sauna e do vestiário, no piso livre à direita da porta da sauna, no corpo e na regra dos outros.
+      - Fica sem área, porque o PDF não a dá e o ambiente é aberto para a academia.
+      - **Conferência:** na prancha, só a piscina e o rótulo mudaram (15.203 px, 2 regiões). A prancha do Subsolo e os três PDFs da casa foram refeitos.
+      - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_piscina_cliente_antes_depois.jpg`.
 - **Entrega (16/10/26, depois da aprovação do usuário: "prancha e o PDF. aprovado."):** a casa passa a ter três pavimentos, na ordem da Casa A (Subsolo, Térreo, 1º Pavimento).
   - **Config:** o Subsolo entrou na chave `entrega` da `POE642_CasaE/config_bases.json` (título "SUBSOLO", linha 0 do quadro de áreas, base `POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png`). O Térreo passou à linha 1 e o 1º Pavimento à linha 2. O quadro de áreas tem os três "NÃO INFORMADO", sem total. Em `pdf.ordem`: Subsolo, Térreo e 1º Pavimento; título "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)".
   - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_Subsolo_entrega.png`, nova. A imagem final, já no quadro comum e com os rótulos, entra com `--no-quadro`, sem realinhar. A do Térreo (realinhada com 128 pontos, erro mediano 0,78 px) e as duas do 1º Pavimento (`_pb` e `_linhas`) foram refeitas só pelo rodapé novo, com a linha do Subsolo no quadro de áreas. Rodapés `entrega/POE642_CasaE_rodape_{Subsolo,Terreo,1Pavimento}.png`.

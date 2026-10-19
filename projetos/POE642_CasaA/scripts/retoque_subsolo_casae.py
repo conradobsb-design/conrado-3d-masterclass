@@ -1010,7 +1010,7 @@ def sombras_longas(out, p2r, chapada):
 QUADRO = {"largura": 3840}
 
 
-def final_quadro(out):
+def final_quadro(out, referencia=None):
     from PIL import Image
     from entorno_esmaecido import sobrepor
     from rodape_entrega import no_quadro_comum
@@ -1018,8 +1018,9 @@ def final_quadro(out):
     base = cv2.imread(str(BASE))
     H = round(base.shape[0] * W / base.shape[1])
     base = cv2.resize(base, (W, H), interpolation=cv2.INTER_AREA)
+    ref = None if referencia is None else Image.fromarray(cv2.cvtColor(referencia, cv2.COLOR_BGR2RGB))
     cima = cv2.cvtColor(np.asarray(no_quadro_comum(Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)), BASE,
-                                                   "Subsolo", W)), cv2.COLOR_RGB2BGR)
+                                                   "Subsolo", W, referencia=ref)), cv2.COLOR_RGB2BGR)
     from opcoes_1pav_casae import contexto_linhas
     return sobrepor(base, contexto_linhas(W, H), (), cima)
 
@@ -1071,6 +1072,77 @@ def bordas_piscina(out, p2r):
     return out
 
 
+# item 19 (pedido do cliente, trazido pelo usuário em 19/10/26, com a planta marcada e uma vista 3D da fachada da
+# academia: "remova as bordas onde está apontado. Note que entre a sauna e o furô temos um vidro, sem base. Já a
+# piscina, fica sem divisória. Esses comandos vieram do cliente, contrariando o PDF original. Por isso, vamos adotar
+# conforme nos solicitaram"; na marcação: "A representação da esquadria precisa ser mais evidente, e não terá parede
+# abaixo dela"):
+# - a faixa de Bege Bahia que dividia a piscina da parte de baixo sai: a piscina fica uma água só;
+# - no trecho de baixo do visor (entre a piscina e o ofurô, junto à sauna), o vidro fica sem base: a faixa de Bege
+#   Bahia em volta da folha vira água, dos dois lados, até o vidro;
+# - entre o ofurô e a sauna, a faixa de Bege Bahia (a base) sai: a água vai até um vidro na face da sauna;
+# - a esquadria do visor inteiro (a fachada da academia e o trecho de baixo) e a do vidro da sauna ficam mais
+#   evidentes, como na vista 3D: a folha de vidro com os perfis em grafite dos dois lados e os montantes a cada
+#   ~1,1 m.
+# A água é a mesma do item 8 (Barlavento, a mesma pedra da mesma janela), com a luz de borda refeita para a água
+# nova: a sombra curta da divisória que saiu some, e a do vidro aparece.
+PISCINA_CLIENTE = {"divisoria_pdf": (705.6, 950.0, 807.6, 972.0),
+                   "visor_baixo_pdf": [(807.6, 957.1, 812.2, 1090.3), (815.0, 957.1, 819.0, 1090.3)],
+                   "sauna_faixa_pdf": (877.6, 957.1, 886.1, 1090.3),     # a faixa entre o ofurô e a sauna
+                   "vidros_pdf": [(812.2, 693.5, 815.0, 945.8), (812.2, 957.1, 815.0, 1090.3),
+                                  (886.1, 957.1, 888.9, 1090.3)],
+                   "esquadria_pdf": [(807.6, 690.7, 819.0, 945.8), (807.6, 957.1, 819.0, 1090.3),
+                                     (884.4, 957.1, 890.6, 1090.3)],
+                   "vidro": (222, 226, 227), "perfil": (58, 60, 62), "perfil_px": 1.3,
+                   "montante_pt": 3.6, "vao_max_m": 1.25, "pt_por_m": 56.69}
+
+
+def piscina_cliente(out, p2r):
+    import piscinas_barlavento as PB
+    q = PISCINA_CLIENTE
+    x0, y0, x1, y1 = caixa_pdf(p2r, *PISCINA["tanques_pdf"][0])
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    agua = reg[..., 0] - reg[..., 2] > 12
+    novo_m = np.zeros(agua.shape, bool)
+    parede = reg.mean(axis=2) < 60
+    for r in [q["divisoria_pdf"], q["sauna_faixa_pdf"]] + q["visor_baixo_pdf"]:
+        a, b, c, d = caixa_pdf(p2r, *r)
+        novo_m[max(b - y0, 0):d - y0, max(a - x0, 0):c - x0] = True
+    vid = np.zeros(agua.shape, bool)
+    for r in q["vidros_pdf"]:
+        a, b, c, d = caixa_pdf(p2r, *r)
+        vid[max(b - y0, 0):d - y0, max(a - x0, 0):c - x0] = True
+    novo_m &= ~agua & ~parede & ~vid
+    W_ = agua | novo_m
+    # a mesma água do item 8: a pedra da janela inteira, com a luz de borda do novo contorno
+    h, w = W_.shape
+    forca, dec = PB.Q["borda"]
+    dist = cv2.distanceTransform(W_.astype(np.uint8), cv2.DIST_L2, 3)
+    luz = 1 - forca * np.exp(-np.maximum(dist - 0.5, 0) / dec)
+    agua_nova = PB.pedra_ondulada(h, w) * (luz * PB.brilho_diagonal(h, w))[..., None]
+    a = np.maximum(cv2.GaussianBlur(W_.astype(np.float32), (0, 0), 0.5), W_) * W_
+    reg = reg * (1 - a[..., None]) + agua_nova * a[..., None]
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    # a esquadria: a folha de vidro, os perfis em grafite dos dois lados e os montantes
+    n_mont = 0
+    for (vx0, vy0, vx1, vy1), (ex0, ey0, ex1, ey1) in zip(q["vidros_pdf"], q["esquadria_pdf"]):
+        tl = Tela(out, p2r, (ex0, ey0, ex1, ey1), folga=3)
+        m = tl.ret((vx0, vy0, vx1, vy1))
+        tl.pintar(m, q["vidro"])
+        tl.contorno(m, q["perfil_px"], q["perfil"])
+        vaos = max(1, int(np.ceil((vy1 - vy0) / (q["vao_max_m"] * q["pt_por_m"]))))
+        recuo = min(1.2, (ex1 - ex0 - (vx1 - vx0)) / 4)
+        for k in range(vaos + 1):
+            yc = vy0 + (vy1 - vy0) * k / vaos
+            mm = tl.ret((ex0 + recuo, yc - q["montante_pt"] / 2, ex1 - recuo, yc + q["montante_pt"] / 2))
+            tl.pintar(mm, q["perfil"])
+            n_mont += 1
+        out = tl.gravar()
+    print(f"    piscina sem divisória; vidros sem base (visor e sauna): {int(novo_m.sum())} px viram água; esquadria com perfis "
+          f"em grafite e {n_mont} montantes")
+    return out
+
+
 # item 18 (pedido do usuário, 16/10/26): "vamos adicionar os nomes e áreas, conforme regras que adotamos
 # anteriormente para o 1º pavimento da casa E". A regra do 1º Pavimento (`retoque_1pav_casae.rotulos_ambientes`):
 # cada linha do rótulo do PDF entra igual (o nome e "A: 12,65 m²"), na posição do PDF, no corpo do PDF 30%
@@ -1081,7 +1153,11 @@ ROTULOS = {"fora": ("SUBSOLO",),
            # (nome, centro do rótulo do PDF no quadro final em px de 2000, desvio em px de 2000[, corpo]);
            # nos dois ambientes estreitos o corpo 1,3x não cabe no piso livre, e o rótulo fica no corpo do PDF
            "ajustes": [("CASA DE MÁQUINAS", (1043.4, 335.8), (0, 0), 1.0),   # 1,3x encostava nas paredes
-                       ("WC DCE 2", (986.5, 310.9), (-3, 0), 1.0)]}         # o "m²" caía no chuveiro: à esquerda dele
+                       ("WC DCE 2", (986.5, 310.9), (-3, 0), 1.0)],         # o "m²" caía no chuveiro: à esquerda dele
+           # rótulos que o PDF não tem (nome, centro em pt do PDF, corpo em pt): a antessala entre a sauna e o
+           # vestiário (usuário, 19/10/26: "Adicione o rótulo 'Ambiente', entre a sauna e vestuário"), na linha
+           # dos nomes da sauna e do vestiário, no piso livre à direita da porta da sauna; sem área (o PDF não a dá)
+           "extras": [("AMBIENTE", (1093.5, 980.0), 8.0037)]}
 
 
 def rotulos(final):
@@ -1095,6 +1171,12 @@ def rotulos(final):
     hb, wb = cv2.imread(str(BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
     p2q = quadro_pdf(pg, cfg, lt, at, wb, hb, W)
     rot = [r for r in R1.rotulos_pdf(pg) if not any(f in r[0] for f in q["fora"])]
+    from PIL import ImageFont
+    from rodape_entrega import FONTES
+    for nome, (cx, cy), tam in q.get("extras", []):
+        larg = ImageFont.truetype(str(FONTES / "Inter-Regular.otf"), 100).getlength(nome) * tam / 100
+        caixa = pymupdf.Rect(cx - larg / 2, cy - 0.5 * tam, cx + larg / 2, cy + 0.5 * tam)
+        rot.append((nome, [(nome, tam, (cx - larg / 2, cy + 0.36 * tam))], (cx, cy), caixa))
     chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), (W, H), interpolation=cv2.INTER_NEAREST)
     granito = np.abs(chapada.astype(int) - np.array(GRANITO["legenda"])).max(axis=2) <= 6
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
@@ -1194,13 +1276,19 @@ def main():
         if n <= args.ate:
             print(f"[{n}] {desc}")
             out = f(out)
+    # o alinhamento da imagem final é medido no retocado dos itens 1 a 16 (o aprovado): os itens novos não mudam
+    # o afim, e o resto da imagem final fica igual
+    aprovado = out.copy()
+    if args.ate >= 16:
+        print("[19] piscina sem divisória; vidros sem base (visor e sauna); esquadria evidente (pedido do cliente)")
+        out = piscina_cliente(out, p2r)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     if args.ate >= 15:
         print("[15] imagem final no quadro comum, com o tracejado do lote da base")
         print("[17] fundo com as linhas do PDF do Térreo (pedido do usuário)")
-        final = final_quadro(out)
-        print("[18] nomes e áreas dos ambientes, pela regra do 1º Pavimento (pedido do usuário)")
+        final = final_quadro(out, referencia=aprovado)
+        print("[18] nomes e áreas dos ambientes, pela regra do 1º Pavimento (pedido do usuário); [20] o rótulo AMBIENTE")
         final = rotulos(final)
         nome_final = args.nome.replace("_retocado", "_final")
         cv2.imwrite(str(args.saida / f"{nome_final}.png"), final)

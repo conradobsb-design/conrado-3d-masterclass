@@ -452,6 +452,12 @@ Retoques locais, sem IA, no render v1 do Subsolo da Casa E, no quadro do render 
 - **Portas:** `desenhar_porta` desenha a folha (retângulo do PDF) e o arco (a curva do PDF) em traço fino, em 8 x.
 - **`--ate N`:** roda só os itens até N (para gravar e conferir um item por vez).
 - **Imagem final (`_final.png`, 3840 × 2160):** a planta retocada no quadro comum, com as linhas do PDF do Térreo em cinza no fundo (`opcoes_1pav_casae.contexto_linhas`). Nela são escritos os nomes e as áreas pela regra do 1º Pavimento (`retoque_1pav_casae.rotulos_ambientes`; no granito, cinza). Os desvios e o corpo de cada rótulo ficam em `ROTULOS["ajustes"]` (nome, centro em px de 2000, desvio e, se preciso, as opções: o corpo, 1.0 sendo o do PDF, ou um dicionário com `corpo`, `quebra` e `cor`). Os nomes em duas linhas no PDF entram como um rótulo só (`rotulos_pdf`). O retocado de 2000 px fica sem rótulos.
+- **Item 19 (`piscina_cliente`, pedido do cliente):**
+  - a piscina sem a divisória;
+  - o visor de baixo e o vidro da sauna sem a base de Bege Bahia, com a água até o vidro;
+  - as esquadrias com perfis em grafite e montantes.
+- **Rótulos que o PDF não tem:** entram por `ROTULOS["extras"]` (nome, centro em pt do PDF, corpo); o "AMBIENTE" da antessala é o primeiro.
+- **Alinhamento da imagem final:** é medido no retocado dos itens 1 a 16 (`rodape_entrega.no_quadro_comum(..., referencia=)`). Assim, um item novo não mexe no resto da imagem.
 
 ```bash
 python3 retoque_subsolo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_render.webp \

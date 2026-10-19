@@ -153,19 +153,26 @@ def rodape(ent, chave):
     return im.convert("RGB")
 
 
-def no_quadro_comum(render, base_png, chave, largura):
-    """Leva o render para o quadro da base 16:9 (o mesmo em todos os pavimentos), na largura dada."""
+def no_quadro_comum(render, base_png, chave, largura, referencia=None):
+    """Leva o render para o quadro da base 16:9 (o mesmo em todos os pavimentos), na largura dada. Com
+    `referencia` (uma versão anterior do mesmo render, no mesmo quadro), o alinhamento é medido nela e aplicado ao
+    render: um retoque novo não muda o afim, e o resto da imagem final fica igual, px a px."""
     base = cv2.imread(str(base_png))
-    r = cv2.cvtColor(np.asarray(render), cv2.COLOR_RGB2BGR)
-    if r.shape[1] != largura:
-        # reduzir com INTER_AREA; ampliar (ex.: render 2K numa prancha de 3840 px) com Lanczos
-        interp = cv2.INTER_AREA if r.shape[1] > largura else cv2.INTER_LANCZOS4
-        r = cv2.resize(r, (largura, round(r.shape[0] * largura / r.shape[1])), interpolation=interp)
+
+    def preparar(img):
+        r = cv2.cvtColor(np.asarray(img), cv2.COLOR_RGB2BGR)
+        if r.shape[1] != largura:
+            # reduzir com INTER_AREA; ampliar (ex.: render 2K numa prancha de 3840 px) com Lanczos
+            interp = cv2.INTER_AREA if r.shape[1] > largura else cv2.INTER_LANCZOS4
+            r = cv2.resize(r, (largura, round(r.shape[0] * largura / r.shape[1])), interpolation=interp)
+        return r
+    r = preparar(render)
+    ref = r if referencia is None else preparar(referencia)
     altura = round(base.shape[0] * largura / base.shape[1])
     base_red = cv2.resize(base, (largura, altura), interpolation=cv2.INTER_AREA)
     sift = cv2.SIFT_create(12000)
     k1, d1 = sift.detectAndCompute(cv2.cvtColor(base_red, cv2.COLOR_BGR2GRAY), None)
-    k2, d2 = sift.detectAndCompute(cv2.cvtColor(r, cv2.COLOR_BGR2GRAY), None)
+    k2, d2 = sift.detectAndCompute(cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY), None)
     bons = [a for a, b in cv2.BFMatcher().knnMatch(d1, d2, k=2) if a.distance < 0.75 * b.distance]
     src = np.float32([k1[m.queryIdx].pt for m in bons])
     dst = np.float32([k2[m.trainIdx].pt for m in bons])
