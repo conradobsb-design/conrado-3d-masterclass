@@ -34,6 +34,8 @@ Itens:
   Subsolo 11. Bege Bahia (pedido do usuário, 19/10/26): a área de circulação (era travertino), o depósito e a
      circulação interna no Bege Bahia aprovado (o do 1º Pavimento, que foi ao Térreo), com a sombra do render; a
      escada do deck tira dele a textura do degrau.
+  Subsolo 12. Banho de serviço (pedido do usuário, 19/10/26): a bancada da pia e a cuba, nas medidas do PDF, no
+     padrão das cubas aprovadas.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
 
@@ -637,6 +639,69 @@ def bege_bahia(out):
     return out
 
 
+# Subsolo 12. Bancada e cuba do banho de serviço (pedido do usuário, 19/10/26: "faltou a bancada da pia, com a cuba;
+# ambos em suas respectivas dimensões"). O motor fez só um quadrado claro junto à parede da esquerda. No PDF da Casa
+# A a bancada (ARQ_BANCADAS) tem 22,7 x 51,0 pt (~12 x 28 px), da parede da esquerda, com um recorte onde entra a
+# cuba (ARQ_LOUÇAS E METAIS): quadrada, de cantos arredondados, 22,6 pt (~12 px), avançando além da bancada, com a
+# bacia à direita e a torneira monocomando no lado da parede, a bica para a direita. Entram nessas medidas, no padrão
+# das cubas aprovadas (item 8 e Casa E): a bancada no tom das bancadas do render, com a borda fina e a sombra curta;
+# a cuba de louça com o contorno fino, a bacia escurecendo da borda ao fundo e a válvula; a torneira cromada.
+BANCADA_SERV = {"bancada": (929.88, 1168.56, 952.56, 1219.58),
+                "cuba": (936.73, 1182.77, 959.32, 1205.37),
+                "bacia": (942.88, 1185.0, 957.1, 1203.14),
+                "torneira": (938.6, 1192.65, 948.38, 1195.49),
+                # o quadrado claro do motor passava ~1,5 px da bancada do PDF, para a direita: volta ao piso
+                "limpar": (589, 593, 512, 542)}       # px da imagem: x0, x1, linhas y0..y1
+
+
+def bancada_servico(out):
+    from retoque_subsolo_casae import (Tela, SOMBRA, LOUCA, LOUCA_CONTORNO, BACIA_BORDA, BACIA_FUNDO, CROMO,
+                                       CROMO_CLARO, CROMO_ESCURO, SS)
+    q = BANCADA_SERV
+    x0, x1, y0, y1 = q["limpar"]
+    for y in range(y0, y1 + 1):              # o que sobra do quadrado do motor: o piso logo à direita
+        piso = out[y, x1 + 1:x1 + 4].astype(np.float32).mean(axis=0)
+        for x in range(x0, x1 + 1):
+            if out[y, x].astype(np.float32).mean() > piso.mean() + 20:
+                out[y, x] = np.round(piso).astype(np.uint8)
+    _, p2r = pdf_pavimento("Subsolo")
+    caixa = (q["bancada"][0], q["bancada"][1], q["cuba"][2], q["bancada"][3])
+    tl = Tela(out, p2r, caixa)
+    b = tl.ret(q["bancada"])
+    tl.sombra(b, **SOMBRA)
+    tl.pintar(b, DIVISORIA["pedra"])
+    tl.contorno(b, 0.35, (150, 153, 155))
+    c = tl.ret(q["cuba"], 2.0)
+    tl.sombra(c, **SOMBRA)
+    tl.pintar(c, LOUCA_CONTORNO)
+    cx0, cy0, cx1, cy1 = q["cuba"]
+    tl.pintar(tl.ret((cx0 + 0.8, cy0 + 0.8, cx1 - 0.8, cy1 - 0.8), 1.6), LOUCA)
+    bx0, by0, bx1, by1 = q["bacia"]
+    for i in range(6):                       # a bacia, da borda ao fundo
+        k = i / 5
+        cor = tuple(BACIA_BORDA[j] * (1 - k) + BACIA_FUNDO[j] * k for j in range(3))
+        ins = 0.4 + k * 2.6
+        tl.pintar(tl.ret((bx0 + ins, by0 + ins, bx1 - ins, by1 - ins), max(0.6, 1.8 - k)), cor)
+    vx, vy = tl.pt((bx0 + bx1) / 2 + 1.5, (by0 + by1) / 2)
+    v = tl.vazia()
+    cv2.circle(v, (int(vx), int(vy)), int(1.1 * SS), 255, -1)
+    tl.pintar(v, CROMO_ESCURO)
+    tx0, ty0, tx1, ty1 = q["torneira"]       # monocomando no lado da parede, a bica para a direita
+    m = tl.ret(q["torneira"], 0.8)
+    tl.sombra(m, **SOMBRA)
+    tl.pintar(m, CROMO_ESCURO)
+    tl.pintar(tl.ret((tx0 + 0.4, ty0 + 0.4, tx1 - 0.4, (ty0 + ty1) / 2), 0.4), CROMO_CLARO)
+    base = tl.vazia()
+    cx, cy = tl.pt(tx0 + 1.2, (ty0 + ty1) / 2)
+    cv2.circle(base, (int(cx), int(cy)), int(1.0 * SS), 255, -1)
+    tl.pintar(base, CROMO)
+    out = tl.gravar()
+    (a, b_), (c_, d) = p2r(*q["bancada"][:2]), p2r(*q["bancada"][2:])
+    (e, f), (g, h) = p2r(*q["cuba"][:2]), p2r(*q["cuba"][2:])
+    print(f"    banho de serviço: bancada x {a:.1f}-{c_:.1f}, y {b_:.1f}-{d:.1f} px; cuba x {e:.1f}-{g:.1f}, y {f:.1f}-{h:.1f} px")
+    return out
+
+
 # Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
 # varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
 # (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
@@ -709,7 +774,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("6", "circulação: sem o traço preto na borda", traco_circulacao),
                      ("8", "banhos feminino e masculino: as cubas grandes do PDF", cubas_banhos),
                      ("9", "boxes de vidro: ducha ao lado da sauna e banho feminino", boxes),
-                     ("10", "divisória entre os banhos: peça clara do PDF, não parede", divisoria)],
+                     ("10", "divisória entre os banhos: peça clara do PDF, não parede", divisoria),
+                     ("12", "banho de serviço: bancada e cuba nas medidas do PDF", bancada_servico)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares)]}
 
 

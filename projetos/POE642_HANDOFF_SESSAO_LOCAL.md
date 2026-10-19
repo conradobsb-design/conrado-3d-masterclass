@@ -804,8 +804,12 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - A sombra suave do render fica, como no Térreo: a textura nova escurece onde o piso do render era mais escuro que o piso em volta (mediana 7 px, suavização 6 px, até 14%).
     - Ficam: as paredes, as janelas, a sauna, as folhas de vidro da academia (a faixa vai até elas, linha a linha), a folha da porta do depósito com a peça junto à parede, e o arco da porta, que volta por cima do mármore como escurecimento relativo. A soleira da porta do depósito também é Bege Bahia.
     - A escada que desce do deck (item 3) passa a tirar a textura do degrau do mesmo Bege Bahia, no creme dela (a legenda já dava a escada como Bege Bahia, creme forte).
-    - Ordem de execução no `ajustes_casaa.py`: 1, 2, 7, 11, 3, 4, 5, 6, 8, 9, 10. O Bege Bahia vem antes da escada (a sombra do último espelho cai nele) e antes dos itens que apagam traços em espelho (o piso de cada lado já é o mármore).
+    - Ordem de execução no `ajustes_casaa.py`: 1, 2, 7, 11, 3, 4, 5, 6, 8, 9, 10 (e depois 12). O Bege Bahia vem antes da escada (a sombra do último espelho cai nele) e antes dos itens que apagam traços em espelho (o piso de cada lado já é o mármore).
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_bege_bahia_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos.
+  - **Subsolo 12, bancada e cuba do banho de serviço:** o motor fez só um quadrado claro junto à parede da esquerda.
+    - No PDF da Casa A a bancada (ARQ_BANCADAS) tem 22,7 × 51,0 pt (x 577,0 a 589,4 px, y 513,1 a 541,1 px), da parede da esquerda, com um recorte onde entra a cuba (ARQ_LOUÇAS E METAIS): quadrada, de cantos arredondados, 22,6 pt (x 580,7 a 593,1 px, y 520,9 a 533,3 px), avançando além da bancada, com a bacia à direita e a torneira monocomando no lado da parede, com a bica para a direita.
+    - Entram nessas medidas, no padrão das cubas aprovadas (item 8 e Casa E): a bancada no tom das bancadas do render, com a borda fina e a sombra curta; a cuba de louça com o contorno fino, a bacia escurecendo da borda ao fundo e a válvula; a torneira cromada. O que sobrava do quadrado do motor à direita da bancada volta ao piso.
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_banho_servico_bancada_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só muda a bancada.
 
 ## Casas A a D · Barlavento nas piscinas
 
