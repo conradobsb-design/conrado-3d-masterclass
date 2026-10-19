@@ -64,8 +64,10 @@ PAVIMENTOS = {
                    # a garagem é toda carro: no corpo do PDF, no vão entre o primeiro e o segundo carro
                    ("GARAGEM", (1265.1, 771.7), (-40.6, 0), 1.0),
                    ("SALA DE ESTAR", (1074.6, 270.8), (-8.6, 12.2)),      # na mesa de centro: abaixo dela, no tapete
-                   # na cama: no piso abaixo dela; no granito (a caixa do texto pega a cama, então a cor vai dada)
-                   ("Q. MOTORISTA", (1281.4, 632.7), (-13.4, 29.3), {"cor": (150, 150, 150)}),
+                   # o quarto do motorista (pedido do usuário, 19/10/26: "o rótulo do quarto do motorista está no local
+                   # errado"): ao lado da cama, como no PDF, no piso livre entre a cama e o armário (~26 px), um pouco
+                   # menor que o PDF (a Inter é mais larga); no granito (a caixa do texto pega a cama, então a cor vai dada)
+                   ("Q. MOTORISTA", (1281.4, 632.7), (6.2, -0.2), {"cor": (150, 150, 150), "corpo": 0.8}),
                    # banhos e despensa estreitos: no corpo do PDF, no piso livre entre as peças
                    # o banho do motorista ganhou o arco da porta em cinza (ajustes, portas no granito): o rótulo sobe
                    # e vai à esquerda, entre o vaso e o arco, um pouco menor, para o arco não cortar o texto

@@ -944,6 +944,21 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - Entrou pela lista `incluir` do `rotulos_casaa.py`, na posição do PDF, em corpo 0,85, porque o shaft tem ~15 px de largura.
     - Na prancha, só o rótulo mudou.
     - Antes e depois em `renders/POE642_CasaA_PH_Terreo_shaft_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
+  - **Térreo 11 e 12, quarto e banho do motorista (usuário: "representar a cama no quarto do motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro adequadamente. o rótulo do quarto do motorista está no local errado. o arco da porta de entrada do banho do motorista está imperceptível"):**
+    - O que o motor fez: a cama e o box como blocos lilás, e a pia como uma cuba solta, sem bancada.
+    - O que o PDF tem (ARQ_LAYOUT HUMANIZAÇÃO, ARQ_BANCADAS e ARQ_LOUÇAS E METAIS):
+      - a cama de solteiro encostada na parede de cima, com o travesseiro e o edredom com a ponta dobrada;
+      - no banho, a bancada na parede de cima e na da direita, com a cuba quadrada de apoio (passa da frente da bancada) e a torneira saindo da parede de cima;
+      - o box na ponta da esquerda, até as duas folhas de vidro de correr, com o chuveiro de braço na parede de cima.
+    - Os blocos do motor viram o granito, tecido de um trecho limpo do quarto, na luz do lugar.
+    - Entram, na geometria do PDF:
+      - a cama: lençol e edredom brancos com volume, a ponta dobrada mostrando o avesso, o travesseiro e a sombra curta;
+      - a bancada de quartzo com a cuba de louça, a válvula e a torneira cromada;
+      - as folhas de vidro do box e o chuveiro, como os aprovados.
+    - O arco da porta do banho já tinha entrado em cinza fino, nas portas no granito.
+    - Rótulo: o Q. MOTORISTA vai para o lado da cama, como no PDF, no piso livre entre a cama e o armário (~26 px). Fica em corpo 0,8, porque a Inter é mais larga que a fonte do PDF, e em cinza no granito.
+    - Na prancha, só o bloco do motorista mudou.
+    - Antes e depois em `renders/POE642_CasaA_PH_Terreo_motorista_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
   - Mais pedidos (19/10/26): "vamos melhorar a representação da escada. não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal. sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter um aspecto melhor"; "trazer o rótulo do shaft". E ainda: "representar a cama no quarto do motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro adequadamente. o rótulo do quarto do motorista está no local errado. o arco da porta de entrada do banho do motorista está imperceptível, devendo ser em cinza, como de regra" (o arco já foi, nas portas no granito); "mude as cores, deixe cada carro com uma única cor e deixe os carros desalinhados".
   - Pedidos seguintes do usuário (19/10/26): "melhorar a representação dessa escada caracol. somente uma parte será representada, sendo a outra esmaecida [...] onde o arco está em destaque"; "melhorar a representação dos arcos e portas. lembrando que os arcos das portas no marrom granito são em cinza, com traço fino"; "eletrodomésticos em inox"; "melhore a representação da área molhada e divisoria da bancada" (gourmet); "melhore as representações das pias e bancada, com a área molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"; "melhorar a representação dessa área. não é mesa de jantar. área de estar" (item 3); "melhorar cuba e sua posição e tamanho. representar a bancada da cuba. representar o sanitário. representar e gerar o rótulo da claraboia" (lavabo); "melhorar a representação da porta pivotante, mostrando-a até o hall externo com seus respectivos arcos".
 

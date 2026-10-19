@@ -69,6 +69,8 @@ Itens:
      pequeno do lado de lá.
   Térreo, escada interna (pedido do usuário, 19/10/26): os degraus 1 a 7 cheios até a linha de corte, com o
      sombreamento de subida, sem linhas; do 8º em diante esmaecida; o jardim em volta no gramado aprovado.
+  Térreo 11 e 12. Motorista (pedido do usuário, 19/10/26): a cama de solteiro, a bancada com a cuba de apoio e a
+     torneira, as folhas de vidro do box e o chuveiro, no lugar dos blocos lilás do motor.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -2228,6 +2230,141 @@ def escada_interna(out):
     return out
 
 
+# Térreo 11 e 12. Quarto e banho do motorista (pedido do usuário, 19/10/26: "representar a cama no quarto do
+# motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro
+# adequadamente. o rótulo do quarto do motorista está no local errado"; o arco da porta do banho já foi, nas portas no
+# granito). O motor fez a cama e o box como blocos lilás e a pia como uma cuba solta, sem bancada. No PDF
+# (ARQ_LAYOUT HUMANIZAÇÃO, ARQ_BANCADAS e ARQ_LOUÇAS E METAIS):
+# - a cama de solteiro encostada na parede de cima, com o travesseiro e o edredom com a ponta dobrada;
+# - no banho, a bancada na parede de cima e na da direita, com a cuba quadrada de apoio (passa da frente da
+#   bancada) e a torneira saindo da parede de cima;
+# - o box ocupa a ponta da esquerda, até as duas folhas de vidro de correr, com o chuveiro de braço na parede de cima.
+# Sem IA: os blocos do motor viram o granito (tecido de um trecho limpo do quarto, na luz do lugar) e entram, na
+# geometria do PDF: a cama (lençol e edredom brancos com volume, a ponta dobrada mostrando o avesso, o travesseiro, a
+# sombra curta); a bancada de quartzo com a cuba de louça, a válvula e a torneira cromada; as folhas de vidro do box
+# e o chuveiro, como os aprovados. O rótulo do quarto vai para o lado da cama, como no PDF (`rotulos_casaa.py`).
+MOTORISTA = {
+    "limpar": [(1188, 631, 1211, 678), (1233, 630, 1257, 649), (1259, 576, 1293, 642)],   # px: box, pia, cama
+    "fonte_granito": (1292, 585, 1316, 640),
+    "cama": (2152.75, 1288.75, 2203.78, 1396.46), "travesseiro": (2156.15, 1292.15, 2200.37, 1315.96),
+    "edredom": (2154.45, 1313.69, 2202.08, 1394.76), "dobra": (2191.87, 1313.69, 2202.08, 1323.9),
+    "cores_cama": {"base": (196, 202, 210), "edredom": (228, 232, 237), "travesseiro": (238, 241, 244),
+                   "avesso": (206, 212, 219), "contorno": (150, 154, 158)},
+    "bancada": (2103.57, 1381.16, 2143.25, 1403.83), "cuba": (2112.11, 1388.0, 2134.7, 1410.6),
+    "torneira": (2121.99, 1389.87, 2124.83, 1399.65), "valvula": ((2123.4, 1404.0), 1.3),
+    "folhas": [(2060.2, 1421.69, 2060.77, 1466.14), (2061.05, 1410.42, 2061.62, 1454.87)],
+    "chuveiro": {"ducha": (2039.2, 1388.2, 2042.9, 1391.9), "braco": (2040.5, 1381.8, 2041.7, 1389.2),
+                 "canopla": (2039.6, 1381.2, 2042.5, 1381.8)}}
+
+
+def motorista(out):
+    from retoque_bege_bahia_terreo import quilting
+    from retoque_subsolo_casae import (Tela, SOMBRA, LOUCA, LOUCA_CONTORNO, BACIA_BORDA, BACIA_FUNDO, CROMO,
+                                       CROMO_CLARO, CROMO_ESCURO, QUARTZO, SS, vidro_box, chuveiro)
+    q = MOTORISTA
+    _, p2r = pdf_pavimento("Terreo")
+
+    # os blocos do motor viram o granito
+    apaga = np.zeros(out.shape[:2], bool)
+    for x0, y0, x1, y1 in q["limpar"]:
+        apaga[y0:y1, x0:x1] = True
+    Yo = out.astype(np.float32).mean(axis=2)
+    piso = ~cv2.dilate(apaga.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & (Yo > 25) & (Yo < 110)
+    med = cv2.medianBlur(out, 5).astype(np.float32)
+
+    def nconv(img, m, sig):
+        return cv2.GaussianBlur(img * m[..., None], (0, 0), sig) / \
+            np.maximum(cv2.GaussianBlur(m, (0, 0), sig), 1e-4)[..., None]
+    peso = cv2.GaussianBlur(piso.astype(np.float32), (0, 0), 6)
+    campo = np.where((peso > 0.05)[..., None], nconv(med, piso.astype(np.float32), 6), nconv(med, piso.astype(np.float32), 18))
+    fx0, fy0, fx1, fy1 = q["fonte_granito"]
+    f = out[fy0:fy1, fx0:fx1].astype(np.float32) / campo[fy0:fy1, fx0:fx1]
+    f = f / f.reshape(-1, 3).mean(axis=0)
+    fontes = [np.ascontiguousarray(v) for v in (f, f[:, ::-1], f[::-1, :], f[::-1, ::-1])]
+    novo = out.astype(np.float32)
+    for k, (x0, y0, x1, y1) in enumerate(q["limpar"]):
+        tex = quilting(fontes, y1 - y0, x1 - x0, p=16, sobra=5, candidatos=300, rng=np.random.default_rng(651 + k))
+        novo[y0:y1, x0:x1] = tex[:y1 - y0, :x1 - x0] * campo[y0:y1, x0:x1]
+    a = (cv2.GaussianBlur(apaga.astype(np.float32), (0, 0), 0.7) * apaga)[..., None]
+    a *= (Yo > 25)[..., None]                                   # as paredes ficam
+    out[:] = np.clip(out * (1 - a) + novo * a, 0, 255).astype(np.uint8)
+
+    # a cama
+    c = q["cores_cama"]
+    tl = Tela(out, p2r, q["cama"])
+    base = tl.ret(q["cama"], 0.8)
+    tl.sombra(base, dx=-1.2, dy=1.2, sigma=1.4, forca=0.32)
+    tl.pintar(base, c["base"])
+    ed = tl.ret(q["edredom"], 1.2)
+    dx0, dy0, dx1, dy1 = q["dobra"]
+    tri = tl.vazia()                                            # a ponta dobrada (o avesso do edredom)
+    pts = np.int32([tl.pt(dx0, dy0), tl.pt(dx1, dy1), tl.pt(dx1, dy0)])
+    cv2.fillPoly(tri, [pts], 255)
+    ed_sem = ed & ~tri
+    dist = cv2.distanceTransform(ed_sem, cv2.DIST_L2, 5) / SS
+    tom = 0.88 + 0.12 * np.clip(dist / 3.0, 0, 1)
+    a_ = tl.reduzir(ed_sem)[..., None]
+    cor = cv2.resize(np.float32(c["edredom"])[None, None] * tom[..., None] * (ed_sem[..., None] / 255.0), (tl.w, tl.h),
+                     interpolation=cv2.INTER_AREA)
+    tl.reg = tl.reg * (1 - a_) + cor
+    tl.pintar(tri & ed, c["avesso"])
+    dobra = tl.vazia()
+    cv2.line(dobra, tuple(pts[0]), tuple(pts[1]), 255, max(1, int(0.5 * SS)))
+    tl.sombra(dobra, dx=-0.4, dy=0.4, sigma=0.4, forca=0.25)
+    tl.pintar(dobra & ed, c["contorno"], 0.6)
+    tv = tl.ret(q["travesseiro"], 1.6)
+    tl.sombra(tv, dx=-0.5, dy=0.5, sigma=0.6, forca=0.22)
+    dist = cv2.distanceTransform(tv, cv2.DIST_L2, 5) / SS
+    tom = 0.86 + 0.14 * np.clip(dist / 2.2, 0, 1)
+    a_ = tl.reduzir(tv)[..., None]
+    cor = cv2.resize(np.float32(c["travesseiro"])[None, None] * tom[..., None] * (tv[..., None] / 255.0), (tl.w, tl.h),
+                     interpolation=cv2.INTER_AREA)
+    tl.reg = tl.reg * (1 - a_) + cor
+    tl.contorno(base, 0.3, c["contorno"])
+    out = tl.gravar()
+
+    # a bancada, a cuba de apoio e a torneira da parede de cima
+    tl = Tela(out, p2r, (q["bancada"][0], q["bancada"][1], q["bancada"][2], q["cuba"][3]))
+    b = tl.ret(q["bancada"])
+    tl.sombra(b, **SOMBRA)
+    tl.pintar(b, QUARTZO)
+    tl.contorno(b, 0.35, (150, 153, 155))
+    cb = tl.ret(q["cuba"], 2.4)
+    tl.sombra(cb, **SOMBRA)
+    tl.pintar(cb, LOUCA_CONTORNO)
+    x0, y0, x1, y1 = q["cuba"]
+    tl.pintar(tl.ret((x0 + 0.8, y0 + 0.8, x1 - 0.8, y1 - 0.8), 2.0), LOUCA)
+    for i in range(6):                       # a bacia, da borda ao fundo
+        k = i / 5
+        tom = tuple(BACIA_BORDA[j] * (1 - k) + BACIA_FUNDO[j] * k for j in range(3))
+        ins = 2.0 + k * 3.0
+        tl.pintar(tl.ret((x0 + ins, y0 + ins, x1 - ins, y1 - ins), max(0.6, 1.8 - k)), tom)
+    (vx, vy), vr = q["valvula"]
+    u, v = tl.pt(vx, vy)
+    m = tl.vazia()
+    cv2.circle(m, (int(u), int(v)), int(vr * 0.5483 * SS), 255, -1)
+    tl.pintar(m, CROMO_ESCURO)
+    tx0, ty0, tx1, ty1 = q["torneira"]
+    m = tl.ret(q["torneira"], 0.6)
+    tl.sombra(m, **SOMBRA)
+    tl.pintar(m, CROMO_ESCURO)
+    tl.pintar(tl.ret((tx0 + 0.3, ty0, (tx0 + tx1) / 2, ty1 - 0.4), 0.3), CROMO_CLARO)
+    m = tl.vazia()
+    u, v = tl.pt((tx0 + tx1) / 2, ty0 + 0.9)
+    cv2.circle(m, (int(u), int(v)), int(1.0 * SS), 255, -1)
+    tl.pintar(m, CROMO)
+    out = tl.gravar()
+
+    # o box: as duas folhas de vidro de correr e o chuveiro
+    for folha in q["folhas"]:
+        out = vidro_box(out, p2r, folha)
+    ch = q["chuveiro"]
+    out = chuveiro(out, p2r, ch["ducha"], ch["braco"], ch["canopla"])
+    print("    motorista: blocos do motor em granito; cama com travesseiro e a ponta dobrada; bancada com a cuba de "
+          "apoio e a torneira; box com as folhas de vidro e o chuveiro")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -2377,7 +2514,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("3", "estar sob a projeção: 4 poltronas em X e a mesa triangular, não mesa de jantar", estar_projecao),
                     ("5", "lavabo: bancada com a cuba esculpida, vaso suspenso e a claraboia", lavabo_a),
                     ("pivotante", "porta pivotante: a folha até o hall externo e o arco pequeno", pivotante),
-                    ("escada_interna", "escada interna: cheia até o corte, esmaecida depois; o jardim em volta", escada_interna)]}
+                    ("escada_interna", "escada interna: cheia até o corte, esmaecida depois; o jardim em volta", escada_interna),
+                    ("11-12", "motorista: a cama, a bancada com a cuba, o box e o chuveiro", motorista)]}
 
 
 def main():
