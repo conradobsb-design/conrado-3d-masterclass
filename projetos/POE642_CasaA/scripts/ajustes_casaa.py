@@ -51,6 +51,8 @@ Itens:
   Térreo, gás (pedidos do usuário, 19/10/26): o piso em granito marrom e a porta de duas folhas com os arcos.
   Térreo, porta do jardim (pedido do usuário, 19/10/26): a folha e o arco da porta do jardim para a área descoberta.
   Térreo, portões (pedido do usuário, 19/10/26): os portões de correr dos dois lados da área descoberta, do PDF.
+  Térreo 9. Escada caracol (pedido do usuário, 19/10/26): os degraus 1 a 7, até o corte, cheios, em madeira, com o
+     corrimão; o resto esmaecido.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -1283,6 +1285,128 @@ def portoes(out):
     return out
 
 
+# Térreo 9. Escada caracol da área de serviço (pedido do usuário, 19/10/26: "vamos melhorar a representação dessa
+# escada caracol. somente uma parte será representada, sendo a outra esmaecida. note onde o arco está em destaque, a
+# qual é a área que fica bem destacada, ao contrário da área tracejada"; item 9 da conferência). O motor fez só um
+# círculo com doze raios escuros sobre o granito. No PDF da Casa A (ARQ_ESCADAS E RAMPAS e ARQ_ELEMENTOS FIXOS) a
+# escada sobe da direita (o "S"), no sentido anti-horário: os degraus 1 a 7, até a linha de corte, são cheios, com o
+# corrimão de madeira cheio por fora; o resto (8 em diante, acima do corte) é tracejado. Entra assim:
+# - o círculo do motor sai: o granito em volta, tecido de trechos limpos dele (image quilting), na luz do lugar;
+# - degraus 1 a 7 (de 0° a 131,4°, os raios do PDF): pisos de madeira clara (a da mesa do render, com o veio no
+#   sentido do raio), do pilar central à borda, com o sombreamento de subida das escadas aprovadas (cada degrau um
+#   pouco mais claro que o de baixo e a sombra curta de cada espelho no degrau de baixo), sem linhas; o corrimão de
+#   madeira por fora, cheio; a sombra curta da escada no granito;
+# - degraus 8 em diante: os mesmos pisos, esmaecidos (misturados ao granito), com os espelhos em traço claro;
+# - o pilar central, em metal.
+CARACOL = {"centro": (1756.4, 1718.5), "r_corrimao": (50.5, 53.4), "r_piso": 50.5, "r_pilar": 4.0,   # pt do PDF
+           "angulos": [0.0, 18.0, 36.4, 55.2, 74.2, 93.3, 112.5, 131.4],      # os raios cheios do PDF (graus)
+           "fontes_granito": [(960, 786, 1010, 846)],    # trecho limpo do granito, à esquerda da escada (px)
+           "madeira": (1053, 337, 1073, 360),                                 # trecho limpo da mesa (px)
+           "tom": (0.86, 1.0), "espelho": (0.35, 2.2),     # degrau 1 a 7; sombra do espelho: força e alcance (px)
+           "esmaecer": 0.22, "espelho_esm": ((170, 170, 170), 0.25),
+           "corrimao": ((52, 92, 138), (30, 50, 70)), "pilar": (88, 90, 92),
+           "sombra": (-1.0, 1.0, 1.2, 0.35)}
+
+
+def caracol(out):
+    from retoque_bege_bahia_terreo import quilting
+    q = CARACOL
+    _, p2r = pdf_pavimento("Terreo")
+    cx, cy = p2r(*q["centro"])
+    k = p2r(q["centro"][0] + 100, q["centro"][1])[0] - cx
+    k /= 100                                               # px por pt
+    Rc0, Rc1 = q["r_corrimao"][0] * k, q["r_corrimao"][1] * k
+    Rp, rn = q["r_piso"] * k, q["r_pilar"] * k
+    SS = 8
+    x0, y0 = int(cx - Rc1 - 6), int(cy - Rc1 - 6)
+    x1, y1 = int(cx + Rc1 + 7), int(cy + Rc1 + 7)
+    h, w = y1 - y0, x1 - x0
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    # 1. o granito: tecido de trechos limpos, na luz do lugar (a média do anel em volta do disco)
+    fontes = []
+    for a, b, c, d in q["fontes_granito"]:
+        g = out[b:d, a:c].astype(np.float32)
+        g = g / g.reshape(-1, 3).mean(axis=0)
+        fontes += [np.ascontiguousarray(v) for v in (g, g[:, ::-1], g[::-1, :], g[::-1, ::-1])]
+    tex = quilting(fontes, h, w, p=16, sobra=5, candidatos=500, rng=np.random.default_rng(6420))
+    yy, xx = np.mgrid[y0:y1, x0:x1] + 0.5
+    rr = np.hypot(xx - cx, yy - cy)
+    th = np.degrees(np.arctan2(cy - yy, xx - cx)) % 360
+    lum = reg.mean(axis=2)
+    anel = (rr > Rc1 + 1.5) & (rr < Rc1 + 6) & (lum > 35) & (lum < 120)   # só o granito (sem a parede e a porta)
+    luz = np.median(reg[anel], axis=0)
+    disco = np.clip(Rc1 + 1.5 - rr, 0, 1)[..., None]
+    reg = reg * (1 - disco) + tex * luz * disco
+    granito = reg.copy()
+
+    # coberturas em SS x
+    def em_ss(f):
+        ys, xs = np.mgrid[y0 * SS:y1 * SS, x0 * SS:x1 * SS]
+        return f((xs + 0.5) / SS, (ys + 0.5) / SS)
+    R_ss = em_ss(lambda X, Y: np.hypot(X - cx, Y - cy))
+    T_ss = em_ss(lambda X, Y: np.degrees(np.arctan2(cy - Y, X - cx)) % 360)
+
+    def red(m):
+        return cv2.resize(m.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+    ang = q["angulos"]
+    passo = (ang[-1] - ang[0]) / (len(ang) - 1)
+    bordas = ang + [ang[-1] + passo * i for i in range(1, 40) if ang[-1] + passo * i < 360] + [360.0]
+    a0, b0, a1, b1 = q["madeira"]
+    mad = cv2.imread(str(APROVADAS["Terreo"]))[b0:b1, a0:a1].astype(np.float32)
+    # piso de cada degrau: a madeira no sistema (raio, ângulo), veio no sentido do raio
+    u = np.clip((rr - rn) / (Rp - rn), 0, 1) * (mad.shape[0] - 1)
+    piso = np.zeros_like(reg)
+    for i in range(len(bordas) - 1):
+        t0, t1 = bordas[i], bordas[i + 1]
+        dentro = (th >= t0) & (th < t1)
+        v = ((th - t0) / (t1 - t0) * (mad.shape[1] - 1) + 7 * i) % (mad.shape[1] - 1)
+        cor = cv2.remap(mad, v.astype(np.float32), u.astype(np.float32), cv2.INTER_LINEAR)
+        piso[dentro] = cor[dentro]
+    na_escada = red((R_ss > rn) & (R_ss <= Rp))
+    nvis = len(ang) - 1
+    vis_ss = (T_ss >= ang[0]) & (T_ss < ang[-1])
+    vis = red(vis_ss & (R_ss <= Rc1)) 
+    # 2. a parte esmaecida (acima do corte): o piso misturado ao granito, os espelhos em traço claro
+    e = q["esmaecer"]
+    a_esm = (na_escada * (1 - red(vis_ss)))[..., None] * e
+    reg = reg * (1 - a_esm) + piso * a_esm
+    cor_e, larg_e = q["espelho_esm"]
+    for t in bordas[nvis:-1]:
+        lin = (np.abs(((T_ss - t + 180) % 360) - 180) * np.pi / 180 * R_ss < larg_e / 2) & (R_ss > rn) & (R_ss <= Rp)
+        al = red(lin)[..., None] * 0.45
+        reg = reg * (1 - al) + np.float32(cor_e) * al
+    # 3. a parte cheia: a sombra curta da escada no granito, os pisos com o sombreamento de subida, o corrimão
+    sdx, sdy, ssig, sf = q["sombra"]
+    m = red(vis_ss & (R_ss <= Rc1))
+    sh = cv2.GaussianBlur(cv2.warpAffine(m, np.float32([[1, 0, sdx], [0, 1, sdy]]), (w, h)), (0, 0), ssig) * (1 - m)
+    reg *= (1 - sf * sh)[..., None]
+    tmin, tmax = q["tom"]
+    forca, alc = q["espelho"]
+    fator = np.ones((h * SS, w * SS), np.float32)
+    for i in range(nvis):
+        t0, t1 = ang[i], ang[i + 1]
+        dentro = (T_ss >= t0) & (T_ss < t1)
+        tom = tmin + (tmax - tmin) * i / (nvis - 1)
+        dist = (t1 - T_ss) * np.pi / 180 * R_ss          # distância (px) ao espelho do degrau de cima
+        f = tom * (1 - forca * np.clip(1 - dist / alc, 0, 1)) if i < nvis - 1 else np.full_like(dist, tom)
+        fator = np.where(dentro, f, fator)
+    a_vis = (red(vis_ss & (R_ss > rn) & (R_ss <= Rp)))[..., None]
+    reg = reg * (1 - a_vis) + piso * red(np.where(vis_ss, fator, 1))[..., None] * a_vis
+    corr = vis_ss & (R_ss > Rc0) & (R_ss <= Rc1)
+    reg = reg * (1 - red(corr)[..., None]) + np.float32(q["corrimao"][0]) * red(corr)[..., None]
+    borda = vis_ss & (np.abs(R_ss - Rc1) < 0.25)
+    reg = reg * (1 - red(borda)[..., None]) + np.float32(q["corrimao"][1]) * red(borda)[..., None]
+    # 4. o pilar central, em metal, com um brilho
+    pil = R_ss <= rn
+    reg = reg * (1 - red(pil)[..., None]) + np.float32(q["pilar"]) * red(pil)[..., None]
+    bri = np.hypot(em_ss(lambda X, Y: X - cx + rn * 0.3), em_ss(lambda X, Y: Y - cy + rn * 0.3)) <= rn * 0.35
+    reg = reg * (1 - 0.5 * red(bri)[..., None]) + 200 * 0.5 * red(bri)[..., None]
+    out[y0:y1, x0:x1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    caracol: centro ({cx:.1f}, {cy:.1f}) px, raio {Rc1:.1f} px; degraus 1 a {nvis} cheios "
+          f"({ang[0]}° a {ang[-1]}°), {len(bordas) - 1 - nvis} esmaecidos")
+    return out
+
+
 # Térreo, rejuntes (pedido do usuário, 19/10/26: "Precisamos remover os rejuntes"; escopo escolhido por ele: o piso
 # interno do Térreo). O travertino da varanda, das salas, do hall interno, da área gourmet e dos cômodos saiu em
 # placas grandes, com a junta marcada (linhas finas verticais e horizontais) e cada placa num tom. O piso volta
@@ -1423,7 +1547,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("tanques", "área de serviço: a bancada com os dois tanques e as torneiras", tanques),
                     ("gas", "gás: piso de granito e a porta de duas folhas com os arcos", gas),
                     ("porta_jardim", "jardim: a porta para a área descoberta, com o arco", porta_jardim),
-                    ("portoes", "área descoberta: os portões de correr dos dois lados", portoes)]}
+                    ("portoes", "área descoberta: os portões de correr dos dois lados", portoes),
+                    ("9", "escada caracol: degraus 1 a 7 cheios, o resto esmaecido", caracol)]}
 
 
 def main():
