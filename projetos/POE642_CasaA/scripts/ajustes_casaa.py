@@ -17,9 +17,12 @@ Itens:
      no piso, que é mais baixo, e um brilho leve na quina do banco.
   Subsolo 3. Escada que desce do deck (pedido do usuário, 19/10/26): depois da linha de corte do PDF (a
      diagonal, que não é desenhada), os degraus no travertino do Subsolo, visíveis; antes dela, esmaecidos.
+  Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
+     em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
+  python3 ajustes_casaa.py Terreo      # -> ../renders/POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png
 """
 import argparse
 from pathlib import Path
@@ -29,7 +32,8 @@ import numpy as np
 
 AQUI = Path(__file__).resolve().parent
 CASA = AQUI.parent
-APROVADAS = {"Subsolo": CASA / "renders/POE642_CasaA_PH_Subsolo_final.png"}
+APROVADAS = {"Subsolo": CASA / "renders/POE642_CasaA_PH_Subsolo_final.png",
+             "Terreo": CASA / "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png"}
 
 # Subsolo 2: o banco da sauna, em px da imagem aprovada (2000 x 1116). As faces de dentro das paredes da
 # esquerda, da direita e de baixo foram medidas na imagem (625,0; 717,5; 845,3); a borda do banco é a linha do
@@ -175,34 +179,36 @@ CHUVEIRO_SERV = {"ducha": (933.2, 1086.4, 944.4, 1097.6),    # centro (938,8; 10
                  "braco": (930.5, 1091.3, 938.8, 1092.8),
                  "canopla": (929.9, 1090.4, 930.5, 1093.6),
                  "vidros": [(929.9, 1121.8, 971.6, 1123.2), (940.6, 1123.2, 982.3, 1124.6)]}
-# quadro comum (2000 px) -> imagem aprovada do Subsolo (o mesmo afim do banco e da escada)
-AFIM_QR = ((0.99911, -0.000617, 1.542), (0.000113, 0.99973, -3.617))
+# quadro comum (2000 px) -> imagem aprovada de cada pavimento (SIFT entre a base e a imagem, no quadro comum)
+AFIM_QR = {"Subsolo": ((0.99911, -0.000617, 1.542), (0.000113, 0.99973, -3.617)),     # o do banco e da escada
+           "Terreo": ((1.01177, -0.000681, 0.608099), (-0.000652, 1.009677, -7.747429))}  # 45 pontos, 0,6 px
 
 
-def p2r_subsolo():
+def pdf_pavimento(chave):
+    """A página do PDF da Casa A do pavimento e a função pt do PDF -> px da imagem aprovada."""
     import json
     import pymupdf
     import rotulos_casaa as A
     from opcoes_1pav_casae import quadro_pdf
     cfg = json.loads(A.CONFIG.read_text())
-    q = A.PAVIMENTOS["Subsolo"]
-    base = (A.CONFIG.parent / cfg["entrega"]["pasta_bases"] / cfg["entrega"]["pavimentos"]["Subsolo"]["base"]).resolve()
-    pg = pymupdf.open(A.RAIZ / "_pdfs_cliente" / q["pdf"])[cfg["pavimentos"]["Subsolo"]["pagina"]]
+    q = A.PAVIMENTOS[chave]
+    base = (A.CONFIG.parent / cfg["entrega"]["pasta_bases"] / cfg["entrega"]["pavimentos"][chave]["base"]).resolve()
+    pg = pymupdf.open(A.RAIZ / "_pdfs_cliente" / q["pdf"])[cfg["pavimentos"][chave]["pagina"]]
     at, lt = cv2.imread(str(base), cv2.IMREAD_GRAYSCALE).shape
     hb, wb = cv2.imread(str(A.CASA / q["sem_tela"]), cv2.IMREAD_GRAYSCALE).shape
     p2q = quadro_pdf(pg, cfg, lt, at, wb, hb, 2000)
-    (a, b, c), (d, e, f) = AFIM_QR
+    (a, b, c), (d, e, f) = AFIM_QR[chave]
 
     def p2r(x, y):
         qx, qy = p2q(x, y)
         return a * qx + b * qy + c, d * qx + e * qy + f
-    return p2r
+    return pg, p2r
 
 
 def chuveiro_servico(out):
     from retoque_subsolo_casae import chuveiro, vidro_box
     q = CHUVEIRO_SERV
-    p2r = p2r_subsolo()
+    _, p2r = pdf_pavimento("Subsolo")
     for r in q["vidros"]:
         out = vidro_box(out, p2r, r)
     out = chuveiro(out, p2r, q["ducha"], q["braco"], q["canopla"])
@@ -212,9 +218,69 @@ def chuveiro_servico(out):
     return out
 
 
+# Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
+# varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
+# (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
+# na geometria do PDF (o contorno preenchido de cada pilar, levado à imagem), com a borda antisserrilhada. O
+# marrom do motor sai um pouco maior que o PDF (raio ~7,3 px contra 6,3 px, ~1 px a mais no quadrado): o anel de
+# marrom que sobra fora do contorno do PDF volta ao piso de cada pixel (tira-se só a parte marrom da mistura).
+PILARES = {"camada": "EST - Pilar",
+           "parede": (770, 740, 900, 870),   # paredes do banho da varanda e do WC (px da imagem): o preto
+           "janela": 14,                     # meia janela em volta de cada pilar (px)
+           "fundo": (3, 8),                  # anel de fundo: distância ao contorno do PDF (px)
+           "sigma": 2.5,                     # suavização do fundo de cada lugar (px)
+           "anel": 2.5,                      # até onde, fora do contorno do PDF, o marrom do motor vai (px)
+           "w_min": 0.15,                    # abaixo disso é o veio do piso, não o marrom
+           "residuo": 30}                    # só é marrom o que está na mistura marrom-fundo
+
+
+def pilares(out):
+    from retoque_terreo_casae import poligono_aa
+    q = PILARES
+    a, b, c, d = q["parede"]
+    viz = out[b:d, a:c].reshape(-1, 3)
+    preto = np.median(viz[viz.astype(np.float32).mean(axis=1) < 40], axis=0).astype(np.float32)
+    pg, p2r = pdf_pavimento("Terreo")
+    n = 0
+    for dr in pg.get_drawings():
+        if dr.get("layer") != q["camada"] or dr["type"] != "f":
+            continue                         # o círculo só traçado é o eixo da escada caracol
+        pts = [p2r(it[1].x, it[1].y) for it in dr["items"]]
+        al = poligono_aa(out.shape[:2], pts)
+        ys, xs = np.nonzero(al)
+        cx, cy = int(np.average(xs, weights=al[ys, xs])), int(np.average(ys, weights=al[ys, xs]))
+        k = q["janela"]
+        sl = np.s_[cy - k:cy + k + 1, cx - k:cx + k + 1]
+        reg, alr = out[sl].astype(np.float32), al[sl]
+        # o marrom do motor e o fundo em volta: cada pixel do anel é fundo + w (marrom - fundo). O fundo é o de
+        # cada lugar (média suave dos pixels de fora, sem os pretos), porque em volta do pilar do gourmet há piso,
+        # grama e a folha da porta; um fundo único clareava a borda de cima
+        marrom = np.median(reg[alr > 0.99], axis=0)
+        dist = cv2.distanceTransform((alr < 0.5).astype(np.uint8), cv2.DIST_L2, 5)
+        fm = ((dist > q["fundo"][0]) & (dist < q["fundo"][1]) & (reg.mean(axis=2) > 60)).astype(np.float32)
+        fundo = (cv2.GaussianBlur(reg * fm[..., None], (0, 0), q["sigma"])
+                 / np.maximum(cv2.GaussianBlur(fm, (0, 0), q["sigma"]), 1e-4)[..., None])
+        v = marrom - fundo
+        w = np.clip(((reg - fundo) * v).sum(axis=2) / np.maximum((v * v).sum(axis=2), 1), 0, 1)
+        w[np.linalg.norm(reg - (fundo + w[..., None] * v), axis=2) >= q["residuo"]] = 0
+        w[(dist > q["anel"]) | (w < q["w_min"]) | (reg[..., 1] > reg[..., 2])] = 0   # longe, veio ou grama (verde)
+        reg -= w[..., None] * v              # o marrom sai, fica o piso
+        reg = reg * (1 - alr[..., None]) + preto * alr[..., None]
+        out[sl] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+        x0, y0 = np.min(pts, axis=0)
+        x1, y1 = np.max(pts, axis=0)
+        forma = "redondo" if len(pts) > 4 else "quadrado"
+        print(f"    pilar {forma}: ({x0:.1f}, {y0:.1f}) - ({x1:.1f}, {y1:.1f}) px; marrom {marrom.astype(int).tolist()} "
+              f"-> preto; anel fora do PDF: {float((w * (1 - alr)).sum()):.0f} px de marrom de volta ao piso")
+        n += 1
+    print(f"    {n} pilares no preto das paredes {preto.astype(int).tolist()}")
+    return out
+
+
 ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chuveiro_servico),
                      ("2", "sauna: o banco horizontal de volta", banco_sauna),
-                     ("3", "escada: depois da linha de corte, os degraus na cor e textura do Subsolo", escada)]}
+                     ("3", "escada: depois da linha de corte, os degraus na cor e textura do Subsolo", escada)],
+         "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares)]}
 
 
 def main():

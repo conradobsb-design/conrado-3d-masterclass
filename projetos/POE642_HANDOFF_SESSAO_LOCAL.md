@@ -764,6 +764,11 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - Entram como os aprovados da Casa E (`chuveiro` e `vidro_box` do `retoque_subsolo_casae.py`): a ducha quadrada de 20 cm (11,2 pt), centrada na ducha do PDF, o braço cromado até a parede e a canopla; cada folha de vidro fina, com as bordas finas.
     - O rótulo "BANHO SERV.", que estava no piso de cima do banho, caía sobre o chuveiro. Foi para a direita da ducha, dentro do box, no corpo do PDF (1,0×); o resto do banho é vaso, bancada e o arco da porta.
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_banho_servico_antes_depois.jpg`. Prancha do Subsolo e PDF de entrega refeitos; contra a prancha de antes dos ajustes, só mudam o banho de serviço, a escada e a sauna.
+  - **Térreo 1, pilares (usuário, 19/10/26: "siga com os pilares do térreo"):** os três pilares redondos da varanda e o quadrado junto ao gourmet tinham saído em marrom. No PDF da Casa A são os pilares estruturais (camada EST - Pilar).
+    - Ficam no preto das paredes (BGR 2, 2, 3, medido nas paredes do banho da varanda e do WC), como o pilar do Térreo da Casa E, na geometria do PDF: o contorno preenchido de cada pilar, levado à imagem pelo quadro comum e pelo afim do Térreo (SIFT, 45 pontos, 0,6 px), com a borda antisserrilhada. O círculo só traçado da mesma camada é o eixo da escada caracol e não entra.
+    - O marrom do motor saiu ~1 px maior que o PDF (raio ~7,3 px contra 6,3 px). No anel de até 2,5 px fora do contorno, a parte marrom de cada pixel sai e fica o piso (ou a grama) do lugar; o veio do piso e a grama não são tocados.
+    - Imagem com ajustes: `renders/POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png`. O `rotulos_casaa.py` passou a usá-la, alinhada pelo afim da imagem aprovada (como no Subsolo).
+    - Antes e depois em `renders/POE642_CasaA_PH_Terreo_pilares_antes_depois.jpg`. Prancha do Térreo e PDF de entrega refeitos; contra a prancha anterior, só mudam os quatro pilares.
 
 ## Casas A a D · Barlavento nas piscinas
 
