@@ -790,6 +790,11 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
   - **Subsolo 8, cubas dos banhos feminino e masculino:** o motor fez em cada bancada uma cuba branca pequena (~16 × 10 px). No PDF da Casa A (ARQ_BANCADAS e ARQ_LOUÇAS E METAIS) a cuba é uma calha de ~32 × 15 px, quase da largura da bancada e de toda a profundidade, com uma faixa plana junto à parede do fundo, onde fica a torneira.
     - Entra nessa geometria, como as cubas aprovadas da Casa E (`retoque_subsolo_casae.bancada_cuba`): louça branca com o contorno fino, a bacia escurecendo da borda ao fundo, a válvula no meio e a torneira cromada saindo da parede do fundo, com a sombra curta. A bancada do render fica.
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_cubas_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só mudam as duas cubas.
+  - **Novos pedidos do usuário para o Subsolo (19/10/26), com recortes do PDF e da prancha:** "essa divisória não é parede. é outra coisa! esse piso da circulação é marmore bege bahia. Inclusive melhore a representação do bege bahia no depósito e na área de circulação"; "faltando a representação dos boxes dos chuveiros, em vidro"; "faltou a bancada da pia, com a cuba; ambos em suas respectivas dimensões" (banho de serviço). Ficam como os itens 9 a 12 do Subsolo, um por vez.
+  - **Subsolo 9, boxes dos chuveiros:** a ducha ao lado da sauna e o chuveiro do banho feminino. No PDF da Casa A (ARQ_LOUÇAS E METAIS) cada box é de correr: o trilho tracejado de parede a parede e duas folhas de vidro desencontradas; onde não há folha é a entrada do box (na ducha, à direita; no banho feminino, embaixo).
+    - O render não tinha o vidro: na ducha, nada; no banho feminino, um traço escuro de cima a baixo, que sai (o travertino de cada lado continua, `tirar_traco`).
+    - As folhas entram como as do box do banho de serviço (`vidro_box`): cada uma na metade do trilho do PDF (1,4 pt), fina, clara e com a borda fina.
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_boxes_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só mudam os dois boxes.
 
 ## Casas A a D · Barlavento nas piscinas
 

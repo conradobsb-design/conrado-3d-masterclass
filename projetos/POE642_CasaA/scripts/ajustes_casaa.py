@@ -27,6 +27,8 @@ Itens:
      com a textura do próprio render, na luz dele.
   Subsolo 8. Banhos feminino e masculino (pedido do usuário, 19/10/26): as cubas no tamanho do PDF (calhas quase da
      largura da bancada), como as cubas aprovadas da Casa E.
+  Subsolo 9. Boxes dos chuveiros (pedido do usuário, 19/10/26): na ducha ao lado da sauna e no banho feminino, as
+     folhas de vidro de correr do PDF, como as do box do banho de serviço.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
 
@@ -493,6 +495,32 @@ def cubas_banhos(out):
     return out
 
 
+# Subsolo 9. Boxes dos chuveiros (pedido do usuário, 19/10/26: "faltando a representação dos boxes dos chuveiros, em
+# vidro"): a ducha ao lado da sauna e o chuveiro do banho feminino. No PDF da Casa A (ARQ_LOUÇAS E METAIS) cada box
+# é de correr: o trilho tracejado de parede a parede e duas folhas de vidro desencontradas; onde não há folha é a
+# entrada do box (na ducha, à direita; no banho feminino, embaixo). O render não tem o vidro: na ducha, nada; no
+# banho feminino, um traço escuro de cima a baixo, que sai (o travertino de cada lado continua). As folhas entram
+# como as do box do banho de serviço (`vidro_box`, aprovado): cada uma na metade do trilho do PDF (1,4 pt), fina,
+# clara e com a borda fina.
+BOXES = [
+    {"nome": "ducha ao lado da sauna",
+     "folhas": [(1196.34, 1719.9, 1240.85, 1721.32), (1207.67, 1721.32, 1252.12, 1722.73)]},
+    {"nome": "chuveiro do banho feminino", "traco": (846, 862, 786, 844),   # px da imagem: x0, x1, linhas y0..y1
+     "folhas": [(1434.45, 1664.62, 1435.87, 1721.88), (1433.03, 1678.5, 1434.45, 1735.7)]}]
+
+
+def boxes(out):
+    from retoque_subsolo_casae import vidro_box
+    _, p2r = pdf_pavimento("Subsolo")
+    for q in BOXES:
+        n = tirar_traco(out, q["traco"], 130) if "traco" in q else 0
+        for f in q["folhas"]:
+            out = vidro_box(out, p2r, f)
+        print(f"    box da {q['nome']}: {len(q['folhas'])} folhas de vidro do PDF" +
+              (f"; traço escuro do render apagado ({n} px)" if n else ""))
+    return out
+
+
 # Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
 # varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
 # (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
@@ -559,7 +587,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("5", "janelas: vão, peitoril, vidro e caixilhos do PDF, no lugar da peça cinza", janelas),
                      ("6", "circulação: sem o traço preto na borda", traco_circulacao),
                      ("7", "depósito e circulação interna: piso contínuo, sem juntas", juntas),
-                     ("8", "banhos feminino e masculino: as cubas grandes do PDF", cubas_banhos)],
+                     ("8", "banhos feminino e masculino: as cubas grandes do PDF", cubas_banhos),
+                     ("9", "boxes de vidro: ducha ao lado da sauna e banho feminino", boxes)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares)]}
 
 
