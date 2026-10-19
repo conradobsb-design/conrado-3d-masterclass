@@ -16,8 +16,9 @@ O que se vê nelas, e como cada função desenha (em metros, na escala do render
   e o chuveiro de teto como um disco cinza a ~35 cm da parede, com o braço curto até ela.
 - `porta_correr`: o caixilho como faixa branca de 5 cm com contorno cinza, as folhas em duas linhas cinza
   sobrepostas por dentro, e os batentes (nas pontas e no encontro das folhas) em quadradinhos brancos de 8 cm
-  com contorno, saindo do caixilho; `porta_giro`: a folha branca fina, aberta a 90°, com o arco cinza fino
-  (regra das casas: arcos em cinza fino) e o batente.
+  com contorno, saindo do caixilho; `porta_giro`: a folha branca fina, aberta a 90°, sem o arco (decisão do
+  usuário, 19/10/26: "remover os arcos, escadas com linhas"; com `arco=True`, o arco cinza fino da regra antiga).
+- Escadas com linhas (mesma decisão): o bocel em linha cinza suave, como na referência.
 
 Cada função devolve (BGR float32, alfa 0 a 1), na horizontal; para aplicar, girar e pousar no render.
 
@@ -175,8 +176,9 @@ def porta_correr(larg_m, px_m, folhas=2):
     return _reduz(t, W, H), _reduz(a, W, H)
 
 
-def porta_giro(larg_m, px_m):
-    """O vão na horizontal (parede embaixo, em y = larg); a folha aberta a 90° na esquerda, o arco cinza fino."""
+def porta_giro(larg_m, px_m, arco=False):
+    """O vão na horizontal (parede embaixo, em y = larg); a folha aberta a 90° na esquerda (com arco=True, também o
+    arco cinza fino da regra antiga)."""
     W = H = _px(larg_m + 0.06, px_m)
     k = px_m * SS
     w, h = W * SS, H * SS
@@ -187,9 +189,10 @@ def porta_giro(larg_m, px_m):
     L = larg_m * k
     yy, xx = np.mgrid[0:h, 0:w]
     d = np.hypot(xx - xd, yy - yb)
-    arco = (np.abs(d - L) < 0.004 * k) & (xx >= xd) & (yy <= yb)
-    t[arco] = (160, 161, 160)
-    a[arco] = 1
+    if arco:
+        tr = (np.abs(d - L) < 0.004 * k) & (xx >= xd) & (yy <= yb)
+        t[tr] = (160, 161, 160)
+        a[tr] = 1
     _retangulo(t, xd, yb - L, xd + e, yb, (168, 170, 172))
     _retangulo(t, xd + 0.004 * k, yb - L + 0.004 * k, xd + e - 0.004 * k, yb - 0.004 * k, (247, 247, 248))
     _retangulo(a, xd, yb - L, xd + e, yb, 1)
@@ -239,7 +242,7 @@ def cartela():
         ("3. Box  ·  referência (banho da suíte; banho de baixo)  |  o nosso, 1,20 x 2,50 m, e ampliado 2 x",
          [caber(sup[128:234, 102:170]), caber(inf[133:242, 213:287]), bx, amp(bx)]),
         ("4. Portas  ·  referência (porta de correr do terraço; janela de correr do quarto)  |  as nossas: de "
-         "correr de 2,40 m e de giro de 0,80 m (com o arco cinza fino), e ampliadas 2 x",
+         "correr de 2,40 m e de giro de 0,80 m (sem arco), e ampliadas 2 x",
          [caber(inf[122:142, 142:212], 120), caber(sup[224:240, 180:245], 120), portas, amp(portas)]),
     ]
     blocos = []

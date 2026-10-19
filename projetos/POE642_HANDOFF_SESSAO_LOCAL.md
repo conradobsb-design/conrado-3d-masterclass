@@ -777,8 +777,8 @@ Pedido do usuário (19/10/26): "vamos inserir as referências de imagem das text
     - Depois do corte, levemente esmaecida, com os bocéis pontilhados (a projeção) e o corrimão fino.
   - **box:** piso contínuo, o vidro em linha fina clara com sombra cinza ao lado, e o chuveiro de teto como disco cinza a ~35 cm da parede, com o braço curto até ela.
   - **porta_correr:** caixilho em faixa branca de 5 cm com contorno cinza, e as folhas em duas linhas sobrepostas. Os batentes (nas pontas e no encontro das folhas) são quadradinhos brancos de 8 cm.
-  - **porta_giro:** folha branca fina aberta a 90°, com o arco cinza fino. A referência não desenha arco, mas a regra das casas até aqui é o arco cinza fino; ficou assim até o usuário dizer o contrário.
-  - **Atenção nas escadas:** a referência tem o bocel em linha cinza suave. As escadas já aprovadas (pedido anterior: "sombreamento, sem linhas") ficam como estão até o usuário decidir.
+  - **porta_giro:** folha branca fina aberta a 90°, sem arco. Decisão do usuário (19/10/26): "remover os arcos, escadas com linhas".
+  - **Escadas com linhas (mesma decisão):** o bocel em linha cinza suave, como na referência.
 
 ## Casa A · conferência item a item com o PDF
 
@@ -1030,6 +1030,17 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
       - o carro sai com a sombra dele (15 px em volta) e o granito volta, tecido por image quilting de trechos limpos, na luz do lugar;
       - ele entra no lugar novo, com a sombra curta.
     - Na prancha, só a garagem mudou.
+  - **Térreo, sem arcos (decisão do usuário, 19/10/26, com as plantas de referência dos elementos: "remover os arcos, escadas com linhas"):** item `sem_arcos`, o último da lista.
+    - **Quais arcos saíram:** os do PDF da Casa A, que são as curvas da camada ARQ_PAREDE: 16 portas de giro (com os dois arcos da pivotante) e os 12 arcos rasos da porta camarão da varanda. Saíram os arcos do motor e também os que os itens anteriores desenharam no lugar do PDF (gás, jardim, portas no granito, pivotante, motorista). As folhas e os batentes ficam.
+    - **Portas de giro:** o círculo passa pelas pontas e pelo meio do arco.
+      - Numa faixa de ±3 px em volta dele, onde o traço passa, a faixa inteira vira a textura do mesmo piso logo depois dela, na mesma direção. O afastamento usado é, de quatro, o mais parecido com o piso em volta, e a borda é suave, para não sobrar fantasma do traço.
+      - Onde nenhum afastamento serve, entra inpaint.
+      - A folha, o batente (as retas do centro às pontas) e o que é preto ficam.
+      - 14 dos 16 tinham traço na imagem.
+    - **Porta camarão:** o motor tinha pintado de cinza o setor entre cada folha e o arco. Esse setor volta a ser travertino: tecido de trechos limpos da varanda, normalizado e vezes o campo de luz do piso em volta. Ficam as folhas em zigue-zague, as sombras delas e o trilho.
+    - **Conferência:** só as regiões das portas mudaram (5.946 px na imagem, 19 regiões; na prancha, 20 regiões).
+    - **Antes/depois:** `renders/POE642_CasaA_PH_Terreo_sem_arcos_antes_depois.jpg`. A prancha e o PDF foram refeitos.
+    - **Regra nova para todas as casas:** porta sem arco (só a folha e o batente) e escada com o bocel em linha cinza suave, como na referência. `_texturas/elementos.py` segue isso: `porta_giro` sem arco.
     - Antes e depois em `renders/POE642_CasaA_PH_Terreo_carros_antes_depois.jpg`. Prancha do Térreo e PDF refeitos.
   - Mais pedidos (19/10/26): "vamos melhorar a representação da escada. não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal. sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter um aspecto melhor"; "trazer o rótulo do shaft". E ainda: "representar a cama no quarto do motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro adequadamente. o rótulo do quarto do motorista está no local errado. o arco da porta de entrada do banho do motorista está imperceptível, devendo ser em cinza, como de regra" (o arco já foi, nas portas no granito); "mude as cores, deixe cada carro com uma única cor e deixe os carros desalinhados".
   - Pedidos seguintes do usuário (19/10/26): "melhorar a representação dessa escada caracol. somente uma parte será representada, sendo a outra esmaecida [...] onde o arco está em destaque"; "melhorar a representação dos arcos e portas. lembrando que os arcos das portas no marrom granito são em cinza, com traço fino"; "eletrodomésticos em inox"; "melhore a representação da área molhada e divisoria da bancada" (gourmet); "melhore as representações das pias e bancada, com a área molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"; "melhorar a representação dessa área. não é mesa de jantar. área de estar" (item 3); "melhorar cuba e sua posição e tamanho. representar a bancada da cuba. representar o sanitário. representar e gerar o rótulo da claraboia" (lavabo); "melhorar a representação da porta pivotante, mostrando-a até o hall externo com seus respectivos arcos".
