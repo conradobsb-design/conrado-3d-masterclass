@@ -31,6 +31,9 @@ Itens:
      folhas de vidro de correr do PDF, como as do box do banho de serviço.
   Subsolo 10. Divisória entre os banhos feminino e masculino (pedido do usuário, 19/10/26): não é parede; entra como
      no PDF (camada das bancadas), peça clara no tom das bancadas, com as peças finas em cinza.
+  Subsolo 11. Bege Bahia (pedido do usuário, 19/10/26): a área de circulação (era travertino), o depósito e a
+     circulação interna no Bege Bahia aprovado (o do 1º Pavimento, que foi ao Térreo), com a sombra do render; a
+     escada do deck tira dele a textura do degrau.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
 
@@ -61,6 +64,21 @@ BANCO_SAUNA = {"ret": (625.0, 826.7, 717.5, 845.3),
                "brilho": (0.05, 0.45),       # na quina do banco: força e largura (px)
                "linha": ((70, 78, 86), 0.35, 0.6),   # cor, força e largura (px)
                "clarear": 1.03}              # tampo do banco
+
+
+# o Bege Bahia aprovado da Casa A: o mármore das varandas do 1º Pavimento (os mesmos trechos que foram ao Térreo,
+# `retoque_bege_bahia_terreo.FONTES_1PAV`), tecido por image quilting
+BEGE_1PAV = CASA / "renders/POE642_CasaA_PH_1Pavimento_v7_final2.png"
+
+
+def textura_bege(alto, largo, semente=642):
+    from retoque_bege_bahia_terreo import quilting, FONTES_1PAV
+    p1 = cv2.imread(str(BEGE_1PAV)).astype(np.float32)
+    fontes = []
+    for x0, y0, x1, y1 in FONTES_1PAV:
+        f = p1[y0:y1, x0:x1]
+        fontes += [np.ascontiguousarray(v) for v in (f, f[:, ::-1], f[::-1, :], f[::-1, ::-1])]
+    return quilting(fontes, alto, largo, p=36, sobra=10, rng=np.random.default_rng(semente))
 
 
 def cobertura_linhas(y0, y1, ya, yb, n=16):
@@ -120,7 +138,9 @@ def banco_sauna(out):
 ESCADA = {"diagonal": ((480.67, 547.29), (499.44, 584.88)),
           "espelhos": [480.66, 489.96, 499.25, 508.64, 517.93, 527.22, 536.61, 545.90, 555.19, 564.58],
           "faixa_y": (548.6, 585.2),
-          "fonte": (580, 600, 690, 770),     # travertino da circulação (px da imagem): a textura do degrau
+          # a textura do degrau: o Bege Bahia da circulação (item 11; antes, o travertino que o motor tinha feito
+          # nela), num trecho do tamanho deste (largura x altura, px)
+          "fonte": (110, 170),
           # a cor do degrau: o creme da legenda desta escada (#D8CDB4, `retangulos` do Subsolo na config), no tom
           # em que o travertino da base (#DCD9CA) saiu nesta imagem (ganho por canal 1,017; 1,001; 1,044, BGR)
           "cor": (183, 205, 226),
@@ -160,8 +180,7 @@ def escada(out):
 
     reg = out[ya:yb, xa:xb].astype(np.float32)
     novo = reg * (1 - por_pixel(dentro))[..., None]
-    fx0, fy0, fx1, fy1 = q["fonte"]
-    src = out[fy0:fy1, fx0:fx1].astype(np.float32)
+    src = textura_bege(q["fonte"][1], q["fonte"][0], semente=643)
     src *= np.asarray(q["cor"], np.float32) / src.reshape(-1, 3).mean(axis=0)
     for j in range(n):
         m = dentro & (k == j)
@@ -559,6 +578,65 @@ def divisoria(out):
     return out
 
 
+# Subsolo 11. Bege Bahia (pedido do usuário, 19/10/26: "esse piso da circulação é marmore bege bahia. Inclusive melhore
+# a representação do bege bahia no depósito e na área de circulação"). A circulação ao longo da academia (do pé da
+# escada do deck até a parede de baixo, a "área de circulação") tinha saído em travertino, e o depósito e a
+# circulação interna num bege fosco, sem cara de mármore. Os três passam ao Bege Bahia aprovado da Casa A: o mármore
+# das varandas do 1º Pavimento, que já foi ao Térreo (`textura_bege`), na cor dele, com a sombra suave do render
+# (como no Térreo: a textura nova escurece onde o piso do render era mais escuro que o piso em volta, até 14%). A
+# escada que desce do deck (item 3) passa a tirar a textura do degrau do mesmo Bege Bahia, no creme dela.
+BEGE = {
+    "areas": [
+        # nome, caixa (px da imagem), semente; a faixa vai até as folhas de vidro da academia (o x de cada linha)
+        ("área de circulação", (565, 543, 697, 846), 651),
+        ("depósito", (695, 455, 974, 541), 652),          # com a soleira da porta, na parede da circulação interna
+        ("circulação interna", (626, 455, 695, 538), 653)],
+    "fora": [(619, 779, 700, 846),           # a sauna, com o vidro dela
+             (694, 455, 702, 495),           # a janela da circulação para o depósito (item 5)
+             (700, 529, 734, 546)],          # a folha da porta do depósito e a peça junto à parede de baixo
+    "piso": (100, 245),                      # luminância do piso (fora: paredes, peças escuras e o branco do papel)
+    # o arco da porta do depósito: o traço fino volta por cima do Bege Bahia, como escurecimento relativo (a razão
+    # entre cada px e a mediana do piso em volta, na imagem de antes deste item)
+    "arcos": [(700, 494, 737, 530)],
+    "sombra": (0.86, 6)}                     # escurecimento máximo e suavização da luz (px)
+
+
+def bege_bahia(out):
+    q = BEGE
+    folhas = [f for lado in PORTAS_ACADEMIA["lados"] if "circulação" in lado["nome"] for f in lado["folhas"]]
+    _, p2r = pdf_pavimento("Subsolo")
+    lim = [(p2r(f[0], f[1])[1], p2r(f[2], f[3])[1], p2r(f[0], f[1])[0]) for f in folhas]   # y0, y1, x da folha
+    for nome, (x0, y0, x1, y1), semente in q["areas"]:
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        lum = reg.mean(axis=2)
+        m = (lum >= q["piso"][0]) & (lum <= q["piso"][1])
+        ys, xs = np.mgrid[y0:y1, x0:x1]
+        for a, b, c, d in q["fora"]:
+            m &= ~((xs >= a) & (xs < c) & (ys >= b) & (ys < d))
+        if nome == "área de circulação":
+            xmax = np.full(y1 - y0, 694.9)
+            for fy0, fy1, fx in lim:
+                k = (np.arange(y0, y1) + 0.5 >= fy0) & (np.arange(y0, y1) + 0.5 < fy1)
+                xmax[k] = fx
+            m &= xs + 0.5 <= xmax[:, None]
+        m = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_OPEN, np.ones((2, 2), np.uint8)).astype(bool)
+        mf = m.astype(np.float32)
+        lum_m = cv2.medianBlur(np.clip(lum, 0, 255).astype(np.uint8), 7).astype(np.float32)
+        sig = q["sombra"][1]
+        viz = cv2.GaussianBlur(lum_m * mf, (0, 0), sig) / np.maximum(cv2.GaussianBlur(mf, (0, 0), sig), 1e-3)
+        sombra = np.clip(viz / float(np.median(lum[m])), q["sombra"][0], 1.0)[..., None]
+        tex = textura_bege(y1 - y0, x1 - x0, semente) * sombra
+        for a, b, c, d in q["arcos"]:
+            k = (xs >= a) & (xs < c) & (ys >= b) & (ys < d)
+            if k.any():
+                razao = np.clip(lum / np.maximum(cv2.medianBlur(np.clip(lum, 0, 255).astype(np.uint8), 7), 1), 0.4, 1.0)
+                tex[k] *= np.where(razao < 0.97, razao, 1.0)[k][:, None]
+        a = (cv2.GaussianBlur(mf, (0, 0), 0.5) * mf)[..., None]
+        out[y0:y1, x0:x1] = np.clip(np.round(reg * (1 - a) + tex * a), 0, 255).astype(np.uint8)
+        print(f"    {nome}: Bege Bahia do 1º Pavimento ({int(m.sum())} px), com a sombra suave do render")
+    return out
+
+
 # Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
 # varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
 # (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
@@ -618,13 +696,17 @@ def pilares(out):
     return out
 
 
+# A ordem da lista é a de execução: o piso do depósito sem juntas (7) e o Bege Bahia (11) vêm antes da escada (3),
+# para a sombra do último espelho cair no Bege Bahia, e antes dos itens que apagam traços em espelho (4 e 6), para
+# o piso de cada lado já ser o Bege Bahia.
 ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chuveiro_servico),
                      ("2", "sauna: o banco horizontal de volta", banco_sauna),
+                     ("7", "depósito e circulação interna: piso contínuo, sem juntas", juntas),
+                     ("11", "Bege Bahia na área de circulação, no depósito e na circulação interna", bege_bahia),
                      ("3", "escada: depois da linha de corte, os degraus na cor e textura do Subsolo", escada),
                      ("4", "portas de vidro da academia: folhas de vidro claras, não pretas", portas_academia),
                      ("5", "janelas: vão, peitoril, vidro e caixilhos do PDF, no lugar da peça cinza", janelas),
                      ("6", "circulação: sem o traço preto na borda", traco_circulacao),
-                     ("7", "depósito e circulação interna: piso contínuo, sem juntas", juntas),
                      ("8", "banhos feminino e masculino: as cubas grandes do PDF", cubas_banhos),
                      ("9", "boxes de vidro: ducha ao lado da sauna e banho feminino", boxes),
                      ("10", "divisória entre os banhos: peça clara do PDF, não parede", divisoria)],

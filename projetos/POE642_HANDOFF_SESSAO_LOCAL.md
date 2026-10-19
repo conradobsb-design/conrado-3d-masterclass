@@ -799,6 +799,13 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - Entra na geometria do PDF (x 883,8 a 889,7 px) como peça clara, no tom das bancadas do render (BGR 192, 209, 222), com a borda fina e as peças finas do PDF em cinza; o registro pequeno do lado do banho feminino, cromado. O preto do motor sai antes (o piso de cada lado continua); em cima e embaixo ficam as paredes.
     - O material não está escrito no PDF: se não for pedra, muda só a cor (`DIVISORIA["pedra"]`).
     - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_divisoria_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; só muda a divisória.
+  - **Subsolo 11, Bege Bahia:** a área de circulação ao longo da academia (do pé da escada do deck até a parede de baixo) tinha saído em travertino; o depósito e a circulação interna, num bege fosco sem cara de mármore (no item 7, sem as juntas). No PDF a circulação tem a hachura do mármore.
+    - Os três passam ao Bege Bahia aprovado da Casa A: o mármore das varandas do 1º Pavimento, que já foi ao Térreo (`textura_bege`: os trechos `FONTES_1PAV` de `renders/POE642_CasaA_PH_1Pavimento_v7_final2.png`, tecidos por image quilting), na cor dele.
+    - A sombra suave do render fica, como no Térreo: a textura nova escurece onde o piso do render era mais escuro que o piso em volta (mediana 7 px, suavização 6 px, até 14%).
+    - Ficam: as paredes, as janelas, a sauna, as folhas de vidro da academia (a faixa vai até elas, linha a linha), a folha da porta do depósito com a peça junto à parede, e o arco da porta, que volta por cima do mármore como escurecimento relativo. A soleira da porta do depósito também é Bege Bahia.
+    - A escada que desce do deck (item 3) passa a tirar a textura do degrau do mesmo Bege Bahia, no creme dela (a legenda já dava a escada como Bege Bahia, creme forte).
+    - Ordem de execução no `ajustes_casaa.py`: 1, 2, 7, 11, 3, 4, 5, 6, 8, 9, 10. O Bege Bahia vem antes da escada (a sombra do último espelho cai nele) e antes dos itens que apagam traços em espelho (o piso de cada lado já é o mármore).
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_bege_bahia_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos.
 
 ## Casas A a D · Barlavento nas piscinas
 
