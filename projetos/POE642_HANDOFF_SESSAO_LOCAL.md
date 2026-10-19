@@ -718,6 +718,36 @@ Pedido do usuário (18/10/26): "vamos fazer os ajustes nas plantas da casa A", o
   - Banho 1 (no vaso) e closet master (no armário): alguns px.
 - **Entrega refeita:** as três pranchas agora usam as imagens com rótulos (`--no-quadro`) e passaram de 2000 para 3840 px de largura, como as das outras casas (`entrega.largura_prancha` = 3840 na config da Casa A). Os rodapés também saem em 3840 px, com o mesmo quadro de áreas. O PDF `entrega/POE642_CasaA_Plantas_Humanizadas.pdf` (3 páginas A3: Subsolo, Térreo e 1º Pavimento) tem 15,9 MB. O GIF `POE642_CasaA_pranchas_perfiladas.gif` não foi refeito.
 
+## Casa A · conferência item a item com o PDF
+
+Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do render da casa A, conforme fizemos com a casa E. Pegar o PDF da casa A e rever item a item com o render."
+
+- **Como:** cada pavimento, PDF e imagem aprovada no quadro comum, comparados lado a lado em recortes com a mesma grade.
+- **Script:** `POE642_CasaA/scripts/conferencia_casaa.py`. Os itens ficam em `ITENS`, com pontos em px de 2000 do quadro comum. Os mapas numerados, com a legenda, são `renders/POE642_CasaA_PH_{Terreo,1Pavimento,Subsolo}_conferencia.jpg`.
+- **Térreo (12 itens):**
+  1. Pilares da varanda e o pilar junto ao gourmet em marrom; no PDF são os pilares estruturais. No padrão da Casa E, pretos como as paredes.
+  2. Sala de estar: faltam a poltrona da direita e os dois vasos de plantas junto ao sofá. O sofá curvo do PDF acompanha o tapete pela esquerda; o render o pôs ao longo do alto.
+  3. Estar sob a projeção do pavimento superior: no PDF são 4 poltronas em X com a mesa triangular no centro; o render fez uma mesa retangular com 6 cadeiras.
+  4. Sala de jantar: a mesa do PDF é oval; a do render é retangular chanfrada.
+  5. Lavabo: faltam o vaso sanitário e o X tracejado da claraboia; no lugar, uma peça estranha com um arco.
+  6. Escritório: no PDF a mesa tem uma cadeira em cima (de escritório) e duas embaixo; o render pôs duas em cima.
+  7. Banho da varanda: uma bacia sanitária no lugar do chuveiro.
+  8. Jardim (4,79 m²): sem as três touceiras do PDF.
+  9. Área de serviço: a escada caracol saiu só como um traço fino sobre o granito.
+  10. Área de serviço: a porta da direita, no alto, sem o arco.
+  11. Quarto do motorista: a cama virou um bloco lilás.
+  12. Banho do motorista: o chuveiro e a divisória do box viraram um bloco lilás.
+- **1º Pavimento (7 itens):**
+  1. Suíte 3: os criados-mudos do PDF são redondos; os do render, quadrados.
+  2. a 5. Suítes 3, 2, master e 1: falta o banco ao pé da cama (na Casa E o usuário pediu esses bancos).
+  6. Quarto de serviço: faltam a cama de solteiro e o criado-mudo.
+  7. Banho master: a banheira do PDF é oval; a do render, retangular de cantos arredondados.
+- **Subsolo (2 itens):**
+  1. Banho de serviço: faltam o chuveiro e a divisória de vidro do box.
+  2. Sauna: o banco em L do PDF virou piso na v6, por decisão anterior. Nas Casas D e E o banco ficou em mármore, em níveis; a confirmar.
+- **Conferidos sem divergência:** cozinha, garagem (carros), hall interno e externo, escada interna e jardim da escada, piscina, prainha, spa, deck e escada do deck, gourmet, lavatório e WC, garagem e acesso; no 1º Pavimento, banhos 1, 2 e 3, closets, circulação, sala íntima, saleta com a caracol e as varandas; no Subsolo, academia (2 esteiras, 2 bicicletas e o banco com a barra), depósito, circulação, hall, banhos feminino e masculino e elevador.
+- **Próximo passo:** o usuário confirma a lista; o retoque segue um item por vez, sem IA, como na Casa E.
+
 ## Casas A a D · Barlavento nas piscinas
 
 Pedido do usuário (15/10/26), depois do item 35 da Casa E: as piscinas das Casas A, B, C e D no mesmo revestimento Barlavento, com os mesmos efeitos de água, e as pranchas e os PDFs refeitos.

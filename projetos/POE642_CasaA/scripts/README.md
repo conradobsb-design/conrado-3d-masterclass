@@ -465,6 +465,14 @@ python3 rotulos_casaa.py Terreo       # -> ../renders/POE642_CasaA_PH_Terreo_fin
 python3 rotulos_casaa.py 1Pavimento   # -> ../renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png
 ```
 
+## Conferência da Casa A com o PDF: `conferencia_casaa.py`
+
+As divergências entre as imagens aprovadas da Casa A e os PDFs do cliente, em `ITENS` (pontos em px de 2000 do quadro comum), e o mapa numerado de cada pavimento, com a legenda em Inter (acentos corretos).
+
+```bash
+python3 conferencia_casaa.py            # -> ../renders/POE642_CasaA_PH_{Terreo,1Pavimento,Subsolo}_conferencia.jpg
+```
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:
