@@ -769,6 +769,12 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
     - O marrom do motor saiu ~1 px maior que o PDF (raio ~7,3 px contra 6,3 px). No anel de até 2,5 px fora do contorno, a parte marrom de cada pixel sai e fica o piso (ou a grama) do lugar; o veio do piso e a grama não são tocados.
     - Imagem com ajustes: `renders/POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png`. O `rotulos_casaa.py` passou a usá-la, alinhada pelo afim da imagem aprovada (como no Subsolo).
     - Antes e depois em `renders/POE642_CasaA_PH_Terreo_pilares_antes_depois.jpg`. Prancha do Térreo e PDF de entrega refeitos; contra a prancha anterior, só mudam os quatro pilares.
+  - **Novos pedidos do usuário para o Subsolo (19/10/26), com recortes da prancha:** "portas de vidro não pretas da sauna da casa A. melhore o aspecto das janelas. Esse traço preto no fim da área de circulação não existe. As marcações de juntas não existem na área de depósito e nem na circulação interna (entre banho de serviço e depósito). as cubas dos banhos femininos e masculinos são maiores." Ficam como os itens 4 a 8 do Subsolo, um por vez.
+  - **Subsolo 4, portas de vidro da academia:** nos dois lados da academia (para a circulação e para o hall), o motor fez as portas de correr como um traço preto com dentes, e no lado da circulação com os dentes ao contrário do PDF.
+    - No PDF da Casa A (ARQ_PAREDE) são folhas de vidro de 2,83 pt (~1,6 px), desencontradas duas a duas: quatro do lado da circulação (as duas do meio mais para dentro da academia) e duas do lado do hall, com o batente fino em cima e embaixo.
+    - O traço sai: em cada linha de pixel, o trecho escuro em volta do px mais escuro (abaixo de 120 de luminância, mais 1 px de cada lado) recebe em espelho o piso do seu lado (travertino da circulação, madeira da academia, soleira e travertino do hall).
+    - As folhas entram claras, como o vidro da sauna: vidro (226, 228, 228), a borda fina e escura (70, 72, 74, 0,35 px), que faz o vidro se ler, e a linha do meio do PDF (as duas metades da folha) mais clara. Batentes em alumínio, com a mesma borda.
+    - Antes e depois em `renders/POE642_CasaA_PH_Subsolo_portas_academia_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos; contra a prancha anterior, só mudam os dois lados da academia.
 
 ## Casas A a D · Barlavento nas piscinas
 

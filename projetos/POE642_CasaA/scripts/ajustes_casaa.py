@@ -17,6 +17,8 @@ Itens:
      no piso, que é mais baixo, e um brilho leve na quina do banco.
   Subsolo 3. Escada que desce do deck (pedido do usuário, 19/10/26): depois da linha de corte do PDF (a
      diagonal, que não é desenhada), os degraus no travertino do Subsolo, visíveis; antes dela, esmaecidos.
+  Subsolo 4. Portas de vidro da academia (pedido do usuário, 19/10/26): para a circulação e para o hall, as
+     folhas de vidro do PDF, claras e finas como o vidro da sauna, no lugar do traço preto do motor.
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
 
@@ -218,6 +220,82 @@ def chuveiro_servico(out):
     return out
 
 
+# Subsolo 4. Portas de vidro da academia (pedido do usuário, 19/10/26: "portas de vidro não pretas da sauna da casa
+# A"): nos dois lados da academia, para a circulação e para o hall, o motor fez as portas de correr como um traço
+# preto com dentes. No PDF da Casa A (ARQ_PAREDE) são folhas de vidro de 2,83 pt (~1,6 px), duas a duas
+# desencontradas: quatro do lado da circulação (as do meio mais para dentro da academia) e duas do lado do hall,
+# com o batente fino em cima e embaixo. O traço preto sai (em cada linha de pixel, o piso de cada lado continua
+# em espelho: o travertino da circulação, a madeira da academia, a soleira e o travertino do hall), e as folhas
+# entram como o vidro da sauna: claras, com a borda fina, e a linha do meio do PDF (as duas metades da folha).
+PORTAS_ACADEMIA = {
+    "lados": [
+        # faixa a limpar (px da imagem: x0, x1, linhas y0..y1), folhas e batentes (pt do PDF)
+        {"nome": "da circulação", "faixa": (690, 705, 548, 779),
+         "folhas": [(1145.32, 1233.19, 1148.15, 1340.62), (1148.15, 1336.09, 1150.99, 1443.52),
+                    (1148.15, 1443.52, 1150.99, 1550.95), (1145.32, 1546.42, 1148.15, 1653.85)],
+         "batentes": [(1145.32, 1230.92, 1156.66, 1233.19), (1145.32, 1653.85, 1156.66, 1656.12)]},
+        {"nome": "do hall", "faixa": (972, 985, 548, 624),
+         "folhas": [(1662.64, 1233.19, 1664.91, 1301.79), (1660.37, 1301.79, 1662.64, 1370.39)],
+         "batentes": [(1660.37, 1230.92, 1666.89, 1233.19), (1655.55, 1230.92, 1660.37, 1232.34),
+                      (1660.37, 1370.39, 1666.89, 1372.65), (1655.55, 1371.24, 1660.37, 1372.65)]}],
+    # o traço do motor: o trecho abaixo desta luminância em volta do px mais escuro de cada linha (no fim do lado
+    # da circulação ele é cinza, ~65 a 100), mais 1 px de cada lado, a borda dele
+    "escuro": 120,
+    # o vidro: claro, com a borda fina e escura (como a da sauna, que se lê) e a linha do meio mais clara
+    "vidro": (226, 228, 228), "borda": ((70, 72, 74), 0.35), "meio": ((168, 171, 173), 0.25),
+    "aluminio": (150, 153, 156)}
+
+
+def tirar_traco(out, faixa, escuro):
+    """Apaga o traço escuro de cada linha da faixa: os px de cada lado do meio dele recebem, em espelho, o piso
+    do seu lado."""
+    x0, x1, y0, y1 = faixa
+    n = 0
+    for y in range(y0, y1 + 1):
+        lum = out[y, x0:x1].astype(np.float32).mean(axis=1)
+        i = int(np.argmin(lum))
+        if lum[i] >= escuro:
+            continue
+        a, b = i, i                          # o trecho escuro em volta do px mais escuro da linha
+        while a > 0 and lum[a - 1] < escuro:
+            a -= 1
+        while b < len(lum) - 1 and lum[b + 1] < escuro:
+            b += 1
+        a, b = max(a - 1, 0), min(b + 1, x1 - x0 - 1)
+        meio = (a + b) / 2
+        for i in range(a, b + 1):
+            if i <= meio:
+                out[y, x0 + i] = out[y, x0 + a - 1 - (i - a)]
+            else:
+                out[y, x0 + i] = out[y, x0 + b + 1 + (b - i)]
+            n += 1
+    return n
+
+
+def portas_academia(out):
+    from retoque_subsolo_casae import Tela
+    q = PORTAS_ACADEMIA
+    _, p2r = pdf_pavimento("Subsolo")
+    for lado in q["lados"]:
+        n = tirar_traco(out, lado["faixa"], q["escuro"])
+        caixa = [f(v) for f, v in zip((min, min, max, max), zip(*(lado["folhas"] + lado["batentes"])))]
+        tl = Tela(out, p2r, caixa)
+        for b in lado["batentes"]:
+            m = tl.ret(b)
+            tl.pintar(m, q["aluminio"])
+            tl.contorno(m, *q["borda"][::-1])
+        for f in lado["folhas"]:
+            m = tl.ret(f)
+            tl.pintar(m, q["vidro"])
+            xm = (f[0] + f[2]) / 2
+            tl.pintar(m & tl.ret((xm - 0.25, f[1], xm + 0.25, f[3])), q["meio"][0])
+            tl.contorno(m, q["borda"][1], q["borda"][0])
+        out = tl.gravar()
+        print(f"    lado {lado['nome']}: traço preto apagado ({n} px, o piso de cada lado), "
+              f"{len(lado['folhas'])} folhas de vidro e {len(lado['batentes'])} batentes do PDF")
+    return out
+
+
 # Térreo 1. Pilares (pedido do usuário, 19/10/26: "siga com os pilares do térreo"): os três pilares redondos da
 # varanda e o quadrado junto ao gourmet, que o motor fez em marrom, são os pilares estruturais do PDF da Casa A
 # (camada EST - Pilar) e ficam no preto das paredes, como o pilar do Térreo da Casa E (`retoque_terreo_casae.pilar`),
@@ -279,7 +357,8 @@ def pilares(out):
 
 ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chuveiro_servico),
                      ("2", "sauna: o banco horizontal de volta", banco_sauna),
-                     ("3", "escada: depois da linha de corte, os degraus na cor e textura do Subsolo", escada)],
+                     ("3", "escada: depois da linha de corte, os degraus na cor e textura do Subsolo", escada),
+                     ("4", "portas de vidro da academia: folhas de vidro claras, não pretas", portas_academia)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares)]}
 
 
