@@ -173,6 +173,8 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     tracejada; o triângulo no início de cada uma, apontando para o percurso. A externa do alto desce da
     esquerda para a direita (usuário: "pode inverter"; fica sobre a do Subsolo, que sobe da direita para a
     esquerda), contra o "D" do PDF; o triângulo dela fica à esquerda.
+40. Rótulos (R6 e R7): no granito Marrom Tabaco, em branco (antes, cinza 150); nenhum sobre objeto (conferidos os
+    29; o do louceiro fica sobre a marcenaria, que é o próprio ambiente, sem piso livre).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1990,7 +1992,9 @@ def final_rotulos(out, referencia=None):
     chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), (W, H), interpolation=cv2.INTER_NEAREST)
     granito = np.abs(chapada.astype(int) - np.array(ARCOS["granito"])).max(axis=2) <= 6
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
-    return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=W / 2000, granito=granito, ajustes=q["ajustes"])
+    # R6 (19/10/26): "Apresentar os rótulos em branco quando for piso marrom granito"
+    return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=W / 2000, granito=granito, ajustes=q["ajustes"],
+                                cor_granito=R1.ROTULOS["branco"])
 
 
 def salvar_final(out, saida, nome, referencia=None):
