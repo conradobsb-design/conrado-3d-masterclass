@@ -202,6 +202,8 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     relativa e as sombras do lugar (`texturas_escala.pedra_portuguesa_leque`); as plantas por cima ficam, e a franja
     laranja da borda (px de mistura com a grama) recebe a troca de tom. No retocado as pedras têm ~2 px; na imagem
     final são desenhadas de novo nos 3840 px (~4 px cada), só pela área da base, para se lerem.
+48. Título da folha (pente fino de 20/10, item 4; seção 12: "título da folha" não entra): o sublinhado do "0. TÉRREO",
+    que sobrou no canto de baixo à esquerda, abaixo do canto tracejado do lote, volta ao branco.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2135,6 +2137,30 @@ def pedra_retocado(out, A):
     return pedra_portuguesa(out, chapada, float(np.hypot(c - a, d - b)), PEDRA["folga"])
 
 
+# título da folha (item 48; pente fino de 20/10, item 4). A regra (seção 12: "notas que não entram: [...] título da
+# folha"): o texto "0. TÉRREO / ESC.:1:50" já não entrava, mas o sublinhado dele (a linha do PDF logo abaixo do canto
+# tracejado do lote, sem camada) sobrou no canto de baixo à esquerda. Fora do lote o fundo é branco: a faixa da linha,
+# com folga, volta ao branco, só nos px claros (o tracejado do lote, 7 px acima, fica).
+TITULO = {"linhas": [(136.4, 2187.0, 181.9, 2187.0)], "folga": 2.0, "branco": (255, 255, 255), "claro": 120}
+
+
+def titulo_folha(out, A):
+    q = TITULO
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    n = 0
+    for x0, y0, x1, y1 in q["linhas"]:
+        (a, b), (c, d) = p2r(x0, y0), p2r(x1, y1)
+        f = q["folga"]
+        X0, Y0 = int(np.floor(min(a, c) - f)), int(np.floor(min(b, d) - f))
+        X1, Y1 = int(np.ceil(max(a, c) + f)) + 1, int(np.ceil(max(b, d) + f)) + 1
+        reg = out[Y0:Y1, X0:X1]
+        claro = reg.astype(np.float32).mean(axis=2) > q["claro"]
+        reg[claro] = q["branco"]
+        n += int(claro.sum())
+    print(f"    sublinhado do título da folha: {n} px de volta ao branco")
+    return out
+
+
 # paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
 # canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
 PAISAGISMO = {
@@ -2451,6 +2477,8 @@ def main():
     out = cortinas(out, A)
     print("[47] pedra portuguesa do acesso na escala da regra, 7 cm (pente fino, item 3)")
     out = pedra_retocado(out, A)
+    print("[48] sublinhado do título da folha fora (pente fino, item 4)")
+    out = titulo_folha(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)

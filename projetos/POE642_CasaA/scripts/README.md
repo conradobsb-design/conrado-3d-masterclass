@@ -503,6 +503,10 @@ python3 retoque_subsolo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Subs
 
 No Térreo da Casa E (item 47) entra no retocado e de novo na final de 3840 px, onde as pedras têm ~4 px. A área do retocado é o caramelo da base chapada, só onde o px ainda é caramelo e sem as plantas. Na final vale só a base, porque o retocado já chega com a pedra nova. No retocado, a franja da borda recebe a troca de tom na fração de caramelo que tem.
 
+## Título da folha: `retoque_terreo_casae.titulo_folha`
+
+O texto do título ("0. TÉRREO / ESC.:1:50") não entra nas bases, mas o sublinhado dele, uma linha do PDF sem camada logo abaixo do canto tracejado do lote, pode sobrar. `titulo_folha` volta ao branco a faixa da linha (pt do PDF em `TITULO["linhas"]`, folga de 2 px), só nos px claros, e deixa o tracejado do lote. Para as outras casas, basta achar a linha logo abaixo do título no PDF delas.
+
 ## Nomes e áreas da Casa A: `rotulos_casaa.py`
 
 Os rótulos do PDF de cada pavimento da Casa A (`_pdfs_cliente/642 - <PAVIMENTO> - CASA A.pdf`), pela regra da Casa E (`retoque_1pav_casae.rotulos_ambientes`). A imagem aprovada (2000 px) vai ao quadro comum em 3840 px (`rodape_entrega.no_quadro_comum`), e os rótulos são escritos nessa resolução. O granito, onde o texto fica cinza, é achado na própria imagem (`GRANITO`). As notas que não são ambientes ficam fora (`FORA`). Os desvios de cada pavimento estão em `PAVIMENTOS[...]["ajustes"]`, no mesmo formato da Casa E.
