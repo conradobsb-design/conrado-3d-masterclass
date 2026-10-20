@@ -1900,9 +1900,11 @@ ESCADA_LINHAS = {"bocel": 0.80, "bocel_pt": 0.55, "sombra": (0.16, 5.67), "esmae
                       "viva": "esquerda", "apos": "esmaecida", "esmaecer": 0.45}]}
 
 
-def escada_linhas(out, A, e):
+def escada_linhas(out, A, e, p2r=None):
+    """p2r: a cadeia PDF -> imagem de outro pavimento (o 1º Pavimento usa esta rotina com a dele); padrão, a deste."""
     q = ESCADA_LINHAS
-    _, p2r, _ = pdf_cadeia(A, out.shape)
+    if p2r is None:
+        _, p2r, _ = pdf_cadeia(A, out.shape)
     ex0, ey0, ex1, ey1 = e["pdf"]
     (a, b), (c, d) = p2r(ex0 - 4, ey0 - 4), p2r(ex1 + 4, ey1 + 4)
     x0, y0, x1, y1 = int(np.floor(a)), int(np.floor(b)), int(np.ceil(c)) + 1, int(np.ceil(d)) + 1

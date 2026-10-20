@@ -65,6 +65,8 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
 Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_pente_fino_mapa.jpg):
 - item 1, R3: o item 6 deixa de desenhar os arcos (ARCOS["sem_arco"]); a floreira (item 1 de 16/10) passa a vir do
   Térreo aprovado de 15/10 (TERREO_FLOREIRA), de onde ela saiu;
+- item 2, escada (R14): o travertino limpo do Térreo aprovado na caixa do PDF e as linhas do `escada_linhas` do Térreo
+  (19 pisos, triângulo no topo apontando a descida, esmaecida depois do corte do Térreo, como a escada que desce de lá);
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -1019,6 +1021,46 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, a
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# item 2 do pente fino de 20/10/26: escada com linhas e o triângulo de orientação (regras de 19/10: "escadas com linhas",
+# R14; e, de 20/10, a do Térreo: "o esmaecimento parcial da escada que desce, a partir da linha diagonal discriminada no
+# PDF base"). O motor desenhou ~10 degraus, e o PDF tem 19 pisos mais o patamar (a mesma escada do Térreo, mesma caixa e
+# mesmos bocéis nos dois PDFs). Ela desce da esquerda para a direita (o "D" do PDF à esquerda; no Térreo, sobe da direita
+# para a esquerda).
+# - o piso: o travertino limpo do Térreo aprovado logo abaixo do jardim (veio no sentido dos pisos), na caixa do PDF, como
+#   a limpeza da escada do Térreo (itens 18 e 21 de lá), com borda suave;
+# - as linhas: `retoque_terreo_casae.escada_linhas`, com a cadeia deste PDF: bocel em linha suave e sombra curta no degrau
+#   de baixo (à direita), o triângulo no topo (à esquerda) apontando a descida; o PDF deste pavimento não tem corte, e,
+#   como na escada que desce do Térreo, ela fica viva até o corte do outro pavimento (o do Térreo, entre o 7º e o 8º
+#   degrau, contados da direita) e esmaecida depois (0,45, com os bocéis e as sombras, sem tracejado: fica por baixo)
+ESCADA = {"fonte": (600, 976),     # linha e coluna do Térreo aprovado que caem no canto de cima, à esquerda, da escada
+          "linhas": {"nome": "interna, desce da esquerda para a direita", "pdf": (1659.2, 1138.5, 1984.0, 1221.4),
+                     "bocels": [1677.9 + 17.0 * k for k in range(18)], "baixo": "direita", "inicio": "esquerda",
+                     "corte": [(1840.5, 1138.5), (1859.3, 1176.2), (1863.1, 1183.8), (1882.2, 1222.0)],
+                     "viva": "esquerda", "apos": "esmaecida", "esmaecer": 0.45}}
+
+
+def escada_r14(out, p2r):
+    from retoque_terreo_casae import escada_linhas
+    q = ESCADA
+    e = q["linhas"]
+    ex0, ey0, ex1, ey1 = e["pdf"]
+    canto = np.array([p2r(ex0, ey0), p2r(ex1, ey0), p2r(ex1, ey1), p2r(ex0, ey1)])
+    x0, y0 = np.floor(canto.min(axis=0)).astype(int) - 2
+    x1, y1 = np.ceil(canto.max(axis=0)).astype(int) + 2
+    m = np.zeros(((y1 - y0) * SS, (x1 - x0) * SS), np.uint8)
+    cv2.fillConvexPoly(m, np.round((canto - [x0, y0]) * SS).astype(np.int32), 255, cv2.LINE_AA)
+    a = cv2.resize(m.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)[..., None]
+    ax, ay = canto[0]
+    fr, fc = q["fonte"]
+    t = cv2.imread(str(TERREO_FLOREIRA))
+    r0, c0 = fr + (y0 - int(round(ay))), fc + (x0 - int(round(ax)))
+    src = t[r0:r0 + (y1 - y0), c0:c0 + (x1 - x0)].astype(np.float32)
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + src * a, 0, 255).astype(np.uint8)
+    print(f"    escada: travertino limpo do Térreo aprovado na caixa do PDF ({x0}, {y0}) a ({x1}, {y1})")
+    return escada_linhas(out, None, e, p2r=p2r)
+
+
 # item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
 # é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
 # quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
@@ -1112,6 +1154,8 @@ def main():
     pg, p2r, r2p = pdf_cadeia(A, out.shape)
     print("[4] copinha: bancada em Bege Bahia e cuba redonda")
     out = copinha(out, p2r)
+    print("[pente fino 2] escada com linhas, triângulo no topo e esmaecida depois do corte do Térreo (R14)")
+    out = escada_r14(out, p2r)
     print("[5] vazios: X tracejado claro")
     out = vazios(out, A, pg, p2r, r2p)
     print("[6] portas: sem os arcos (R3), com a folha da pivotante do hall")
@@ -1128,7 +1172,7 @@ def main():
     out = torneira_banheira(out, p2r)
     print("[9] shaft: X em cinza na parede")
     out = shaft(out, pg, p2r)
-    print("[16] quartzito dos banhos como a referência (o tom e a chapa da foto)")
+    print("[pente fino 16] quartzito dos banhos como a referência (o tom e a chapa da foto)")
     out = quartzito_referencia(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)

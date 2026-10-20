@@ -437,6 +437,7 @@ Retoques sem IA no render v1 (fundo branco), no quadro do render; as posições 
 
 - **Pente fino de 20/10/26:**
   - item 1, R3: `ARCOS["sem_arco"]`, os arcos não entram mais e fica a folha da pivotante; a floreira usa o Térreo aprovado de 15/10 (`TERREO_FLOREIRA`);
+  - item 2, escada (R14): `escada_r14` copia o travertino limpo do Térreo aprovado (abaixo do jardim) para a caixa da escada do PDF e chama o `escada_linhas` do Térreo com a cadeia deste PDF (`p2r`): 19 pisos, triângulo no topo apontando a descida, esmaecida (0,45) depois do corte do Térreo;
   - item 16, quartzito dos banhos: `quartzito_referencia`. Nas áreas de quartzito da base chapada, a parte pêssego de cada px vai ao tom da foto do quadro de 19/10. A fração vem do R − B contra o do piso, então sombras acompanham e as bordas de louças e vidros não ganham halo. Depois, `retexturizar` aplica a chapa da biblioteca na escala, só na luz (sem a faixa bege da foto), no piso limpo.
 
 ```bash

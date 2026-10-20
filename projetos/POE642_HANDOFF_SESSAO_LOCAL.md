@@ -798,6 +798,14 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - **Rótulo do banho 3 (feito; usuário: "afasta um pouco o rótulo do sanitário").** Estava colado no vaso, logo acima dele: o vaso terminava em y ≈ 1253 e o texto começava em 1256, na final de 3840 px. Em `ROTULOS["ajustes"]` entrou ("BANHO 3", (785,1; 659,4), (0, 7)). O rótulo foi para o meio do piso livre até a parede de baixo (texto de 1269 a 1290), com a folga que o do banho 4 tem do vaso dele (~15 px).
     - **Conferência:** só o rótulo mudou, no retocado com rótulos, nas montagens e nas pranchas; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_rotulo_banho3_antes_depois.jpg`.
+  - **Item 2, escada com linhas e o triângulo de orientação (R14), feito.** O motor desenhou ~10 degraus, com o último terço liso. Os dois PDFs têm a mesma escada: caixa de 1659,2 a 1984,0 pt, 19 pisos e o patamar, bocéis a cada 17 pt. No 1º Pavimento ela desce da esquerda para a direita (o "D" do PDF à esquerda).
+    - **O piso:** o travertino limpo do Térreo aprovado logo abaixo do jardim (veio no sentido dos pisos) foi copiado para a caixa do PDF, com borda suave. É a mesma limpeza da escada do Térreo (itens 18 e 21 de lá).
+    - **As linhas:** `retoque_terreo_casae.escada_linhas`, que ganhou o parâmetro `p2r` (a cadeia deste PDF; sem ele, o Térreo segue igual). Em cada bocel, a linha suave e a sombra curta no degrau de baixo (à direita); o triângulo fica no topo, à esquerda, apontando a descida.
+    - **Esmaecida depois do corte:** o PDF deste pavimento não tem corte. Como na escada que desce do Térreo (pedido do usuário de 20/10: "o esmaecimento parcial da escada que desce, a partir da linha diagonal discriminada no PDF base"), ela fica viva até o corte do outro pavimento: o do Térreo, entre o 7º e o 8º degrau contados da direita. Depois dele, esmaecida (0,45), com os bocéis e as sombras, sem tracejado, porque fica por baixo.
+    - **Passo novo:** `retoque_1pav_casae.escada_r14` (config `ESCADA`), antes dos vazios: o guarda-corpo de vidro do vazio entra por cima.
+    - **Conferência:** no retocado, nas montagens e nas pranchas, só a caixa da escada mudou; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_escada_r14_antes_depois.jpg`.
+  - **Pedidos do usuário durante o item 2 (20/10/26):** "complementar os boxes de banhos de forma contínua, fora a fora" (o item 3) e "representar as cortinas da mesma forma que fizemos no terreo" (o item 10). Vão nessa ordem, logo depois.
 
 ## Casa E · Subsolo
 
