@@ -175,6 +175,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     esquerda), contra o "D" do PDF; o triângulo dela fica à esquerda.
 40. Rótulos (R6 e R7): no granito Marrom Tabaco, em branco (antes, cinza 150); nenhum sobre objeto (conferidos os
     29; o do louceiro fica sobre a marcenaria, que é o próprio ambiente, sem piso livre).
+41. Carros (R12): alinhados, do mesmo tamanho e da mesma cor. Com `R12_CARROS`, o item 26 apaga os três
+    carros como antes e põe, no centro de cada carro do PDF, o carro prata do render (o do meio) levado a
+    4,70 x 1,85 m (carroceria, sem os retrovisores), sem giro, com a sombra curta.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1394,10 +1397,17 @@ def brises(out, orig, A, q=BRISES):
 # direita), o deslocamento (dx, dy) e o giro (graus) — leves, só para quebrar o alinhamento
 CARROS = {"janela": (1300, 250, 1580, 450), "fontes_granito": [(1300, 160, 1450, 200), (700, 160, 900, 200)],
           "movimento": [(-1.0, 6.0, -2.5), (1.0, -4.0, 1.5), (-2.0, 2.0, -1.0)],
-          "sombra": {"desloc": (-2.0, 2.0), "sigma": 1.5, "forca": 0.4}}
+          "sombra": {"desloc": (-2.0, 2.0), "sigma": 1.5, "forca": 0.4},
+          # R12 (item 41, 19/10/26): "todos os carros de todas as plantas devem estar alinhados, serem do mesmo
+          # tamanho e da mesma cor" (prata, 4,70 x 1,85 m). O modelo é o carro prata do render (o do meio), levado
+          # a 4,70 m de comprimento e 1,85 m de carroceria (sem os retrovisores), sem giro, no centro de cada carro
+          # do PDF (ARQ_LAYOUT HUMANIZAÇÃO, as duas metades de cada um): os três na mesma linha, paralelos.
+          "r12": {"modelo": 1, "comprimento_m": 4.70, "largura_m": 1.85, "faixa_largura": (0.35, 0.85),
+                  "centros_pdf": [(2355.8, 863.2), (2503.3, 863.2), (2647.3, 863.2)]}}
+R12_CARROS = True
 
 
-def carros(out):
+def carros(out, A):
     q = CARROS
     wx0, wy0, wx1, wy1 = q["janela"]
     reg = out[wy0:wy1, wx0:wx1].astype(np.int32)
@@ -1417,6 +1427,8 @@ def carros(out):
                        escuros=True)
     h, w = g.shape
     s = q["sombra"]
+    if R12_CARROS:
+        return carros_r12(out, A, antes, silhuetas[q["r12"]["modelo"]])
     for sil, (dx, dy, ang) in zip(silhuetas, q["movimento"]):
         ys, xs = np.nonzero(sil)
         c = (float(xs.mean()), float(ys.mean()))
@@ -1431,6 +1443,41 @@ def carros(out):
         a = np.clip(alfa, 0, 1)[..., None]
         out[wy0:wy1, wx0:wx1] = np.clip(r * (1 - a) + img * a, 0, 255).astype(np.uint8)
     print(f"    garagem: {len(silhuetas)} carros com deslocamento e giro leves")
+    return out
+
+
+def carros_r12(out, A, antes, sil):
+    """Os carros da R12: o modelo (silhueta do render) na escala de 4,70 x 1,85 m, no centro de cada carro do PDF."""
+    q, r = CARROS, CARROS["r12"]
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                   # 1 m na escala 1:50 = 56,69 pt
+    px_m = np.hypot(c - a, d - b)
+    ys, xs = np.nonzero(sil)
+    y0, y1 = ys.min(), ys.max() + 1
+    comp = y1 - y0
+    f0, f1 = r["faixa_largura"]
+    larguras = sil[int(y0 + f0 * comp):int(y0 + f1 * comp)].sum(axis=1)
+    larg = float(np.median(larguras[larguras > 0]))             # a carroceria, sem os retrovisores
+    sx, sy = r["largura_m"] * px_m / larg, r["comprimento_m"] * px_m / comp
+    cx, cy = float(xs.mean()), (y0 + y1) / 2
+    s = q["sombra"]
+    alfa0 = cv2.GaussianBlur(sil.astype(np.float32), (0, 0), 0.5)
+    img0 = antes[wy0:wy1, wx0:wx1].astype(np.float32)
+    for px, py in r["centros_pdf"]:
+        tx, ty = p2r(px, py)
+        M = np.float32([[sx, 0, tx - wx0 - sx * cx], [0, sy, ty - wy0 - sy * cy]])
+        alfa = cv2.warpAffine(alfa0, M, (w, h), flags=cv2.INTER_LINEAR)
+        img = cv2.warpAffine(img0, M, (w, h), flags=cv2.INTER_CUBIC)
+        S = np.float32([[1, 0, s["desloc"][0]], [0, 1, s["desloc"][1]]])
+        sb = cv2.GaussianBlur(cv2.warpAffine(alfa, S, (w, h)), (0, 0), s["sigma"]) * (1 - alfa)
+        reg = out[wy0:wy1, wx0:wx1].astype(np.float32) * (1 - s["forca"] * sb)[..., None]
+        al = np.clip(alfa, 0, 1)[..., None]
+        out[wy0:wy1, wx0:wx1] = np.clip(reg * (1 - al) + img * al, 0, 255).astype(np.uint8)
+    print(f"    garagem (R12): {len(r['centros_pdf'])} carros prata iguais, de {r['comprimento_m']:.2f} x "
+          f"{r['largura_m']:.2f} m ({comp * sy:.0f} x {larg * sx:.0f} px; modelo de {comp} x {larg:.0f} px), "
+          f"alinhados nos centros do PDF")
     return out
 
 
@@ -2069,7 +2116,7 @@ def main():
     print("[25] brises de madeira na janela do escritório")
     out = brises(out, orig, A)
     print("[26] carros levemente desalinhados")
-    out = carros(out)
+    out = carros(out, A)
     print("[27] adega: prateleira de vinhos em U")
     out = adega(out, orig)
     print("[28] área de serviço: armário e bancada para roupas")
