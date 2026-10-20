@@ -612,6 +612,21 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
       - o anel azul da chama da foto ficou em inox;
       - na final de 3840 px o cooktop é redesenhado, para sair nítido.
     - **Conferência:** só os dois cooktops mudaram, no retocado e na final. Antes e depois: `renders/POE642_CasaE_PH_Terreo_cooktops_antes_depois.jpg`.
+  58. poltronas dos ambientes sociais (pente fino, item 11; pedido do usuário: "vamos melhorar os aspectos das poltronas desses ambientes sociais"). **Em andamento.**
+    - **As 8 poltronas do PDF:**
+      - 2 de rattan na varanda, junto ao banco;
+      - 2 redondas junto à mesa de centro do living;
+      - 4 em X em volta da mesa redonda do living.
+      - Elas estão em `POLTRONAS["pecas"]`: centro e ponto para onde olham, em pt; tamanho do PDF, em m.
+    - **O que já funciona (`poltronas`):**
+      - a poltrona do motor sai: disco do tamanho dela mais a sombra, preenchido com o piso do ponto próximo que melhor continua o anel, com a luz ajustada;
+      - o bloco entra virado para a mesa, com a sombra curta;
+      - na final de 3840 px é redesenhado por cima, nítido.
+    - **Teste com os blocos da biblioteca** (bouclé no living, rattan na varanda): a frente da bouclé na folha é para cima (`POLTRONAS["frente"]`). Ainda sobra um halo leve do preenchimento no travertino.
+    - **Pendente:** no meio do item, o usuário mandou uma folha com 9 poltronas vistas de cima ("seguem algumas opções de poltronas"): bouclé creme, palhinha com madeira, veludo verde-oliva, terracota, bege, sálvia com madeira, pelúcia creme, couro trançado e madeira. Ela chegou só como imagem na conversa, sem arquivo, e não dá para recortar. Ao chegar como arquivo:
+      - recortar as 9 para a `_blocos` (folha_07);
+      - montar as opções por ambiente;
+      - ligar o passo (`POLTRONAS["ativo"]`).
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";

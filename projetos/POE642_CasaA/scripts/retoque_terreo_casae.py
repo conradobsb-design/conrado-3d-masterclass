@@ -2694,6 +2694,104 @@ def cooktops_ilhas(out, A):
     return cooktops(out, p2r)
 
 
+# poltronas dos ambientes sociais (item 58; pente fino de 20/10, item 11, usuário: "vamos melhorar os aspectos das
+# poltronas desses ambientes sociais"). O motor fez as 8 poltronas do PDF (ARQ_MOBILIÁRIO e ARQ_LAYOUT HUMANIZAÇÃO) como
+# manchas brancas genéricas. Entram os blocos da biblioteca (`_blocos`), como ela mesma indica: a poltrona bouclé nas
+# 4 em X em volta da mesa redonda do living e nas 2 redondas junto à mesa de centro; a de rattan nas 2 da varanda, ao
+# lado do banco. "pecas": (bloco, centro em pt, ponto para onde a poltrona olha em pt, tamanho em m: o maior lado, o
+# do PDF); "frente": para onde a frente do assento aponta na folha do bloco. A poltrona do motor sai antes: um disco de
+# "raio" x tamanho, mais o mesmo disco deslocado para baixo e à esquerda (a sombra), preenchido com o piso de um ponto
+# próximo (o que melhor continua o anel em volta, sem outra peça dentro: "busca", múltiplos do tamanho, 8 direções).
+# A sombra é a curta dos móveis ("sombra"). A bouclé tem os vincos clareados ("clarear": gama), que no tamanho da
+# planta viravam traços escuros. Na final de 3840 px as poltronas são redesenhadas por cima, nítidas, sem a sombra (que
+# já vem do retocado). Desligado ("ativo") até o usuário escolher entre as poltronas da folha que mandou ("seguem
+# algumas opções de poltronas"; chegou só como imagem na conversa, sem arquivo para recortar).
+POLTRONAS = {"ativo": False,              # aguarda a escolha entre as poltronas da folha do usuário (pente fino, item 11)
+             "pecas": [("poltrona_rattan", (1108.4, 1519.4), (1155.1, 1519.4), 0.82),
+                       ("poltrona_rattan", (1108.4, 1576.3), (1155.1, 1576.3), 0.82),
+                       ("poltrona_boucle", (1510.0, 1473.0), (1544.6, 1537.6), 0.76),
+                       ("poltrona_boucle", (1454.7, 1521.7), (1544.6, 1537.6), 0.76),
+                       ("poltrona_boucle", (1739.3, 1528.5), (1790.6, 1570.5), 0.71),
+                       ("poltrona_boucle", (1837.4, 1528.7), (1790.6, 1570.5), 0.71),
+                       ("poltrona_boucle", (1739.3, 1614.5), (1790.6, 1570.5), 0.71),
+                       ("poltrona_boucle", (1837.4, 1614.5), (1790.6, 1570.5), 0.71)],
+             "frente": {"poltrona_boucle": (0, -1), "poltrona_rattan": (0, -1)}, "clarear": {"poltrona_boucle": 0.35},
+             "raio": 0.66, "sombra_motor": 0.08, "busca": (1.3, 1.7, 2.1),
+             "sombra": {"dx": -0.06, "dy": 0.06, "desfoque": 0.06, "opacidade": 0.35}}
+
+
+def poltronas(out, p2x, limpar=True):
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    q = POLTRONAS
+    if not q["ativo"]:
+        print("    (desligado: aguarda a escolha das poltronas)")
+        return out
+    (a, b), (c, d) = p2x(0, 0), p2x(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    img = out.astype(np.float32)
+    H, W = out.shape[:2]
+    yy, xx = np.mgrid[0:H, 0:W]
+    pecas = [(bid, np.float32(p2x(*cen)), np.float32(p2x(*alvo)), tam * px_m) for bid, cen, alvo, tam in q["pecas"]]
+    if limpar:
+        # a poltrona do motor, com a sombra: um disco e o mesmo disco deslocado para baixo e à esquerda
+        mascaras = []
+        for _, cen, _, t in pecas:
+            r, s = q["raio"] * t, q["sombra_motor"] * t
+            mascaras.append((np.hypot(xx - cen[0], yy - cen[1]) < r) | (np.hypot(xx - cen[0] + s, yy - cen[1] - s) < r))
+        todas = np.logical_or.reduce(mascaras)
+        L = img.mean(axis=2)
+        for (_, cen, _, t), m in zip(pecas, mascaras):
+            anel = cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~m
+            ya, xa = np.nonzero(anel)
+            ym, xm = np.nonzero(m)
+            melhor = None
+            for f in q["busca"]:
+                for ang in range(0, 360, 45):
+                    ox, oy = int(round(f * t * np.cos(np.radians(ang)))), int(round(f * t * np.sin(np.radians(ang))))
+                    if min(xa.min() + ox, ya.min() + oy) < 0 or xa.max() + ox >= W or ya.max() + oy >= H:
+                        continue
+                    custo = np.abs(img[ya + oy, xa + ox] - img[ya, xa]).mean()
+                    fonte_l = L[ym + oy, xm + ox]
+                    custo += 60 * (np.abs(fonte_l - np.median(L[ya + oy, xa + ox])) > 22).mean()
+                    custo += 200 * todas[ym + oy, xm + ox].mean()
+                    if melhor is None or custo < melhor[0]:
+                        melhor = (custo, ox, oy)
+            _, ox, oy = melhor
+            # a luz do piso de onde vem levada à do anel em volta do buraco (ganho por canal)
+            ganho = img[ya, xa].mean(axis=0) / np.maximum(img[ya + oy, xa + ox].mean(axis=0), 1)
+            novo = img.copy()
+            novo[ym, xm] = img[ym + oy, xm + ox] * ganho
+            al = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 1.2 * t / 24)[..., None]
+            img = img * (1 - al) + novo * al
+    for bid, cen, alvo, t in pecas:
+        cor, al = blocos.bloco(bid, 100)
+        k = q["clarear"].get(bid)
+        if k:
+            cor = 255 * (np.clip(cor, 0, 255) / 255) ** (1 - k)
+        esc = t / max(al.shape)
+        fx, fy = q["frente"][bid]
+        ang = np.degrees(np.arctan2(alvo[0] - cen[0], alvo[1] - cen[1]) - np.arctan2(fx, fy))
+        h, w = al.shape
+        lado = int(np.ceil(max(h, w) * esc * 1.5)) + 4
+        M = cv2.getRotationMatrix2D((w / 2, h / 2), float(ang), esc)
+        M[0, 2] += lado / 2 - w / 2
+        M[1, 2] += lado / 2 - h / 2
+        c2 = cv2.warpAffine(cor * al[..., None], M, (lado, lado), flags=cv2.INTER_AREA)
+        a2 = cv2.warpAffine(al, M, (lado, lado), flags=cv2.INTER_AREA)
+        c2 = c2 / np.maximum(a2, 1e-4)[..., None]
+        sombra = q["sombra"] if limpar else {**q["sombra"], "opacidade": 0.0}
+        pousar_planta(img, c2, a2, float(cen[0]), float(cen[1]), t, sombra)
+    print(f"    {len(pecas)} poltronas da biblioteca (bouclé no living, rattan na varanda)"
+          + ("" if limpar else ", redesenhadas por cima"))
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def poltronas_sociais(out, A):
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    return poltronas(out, p2r)
+
+
 # esquadrias finas (item 55; pente fino de 20/10, item 8, usuário: "portas vidros e janelas mais delicados e finos?").
 # O motor desenhou caixilhos largos e brancos, com duas ou três linhas, nas janelas, nos vidros da fachada e nas folhas.
 # No PDF, tudo está na ARQ_PAREDE: os brancos finos (até 12,5 pt de espessura e 15 pt ou mais de comprimento; fora as
@@ -3066,6 +3164,8 @@ def final_rotulos(out, referencia=None):
     final = banquetas(final, p2q)
     print("    [57] cooktops das ilhas redesenhados na final (nítidos):")
     final = cooktops(final, p2q)
+    print("    [58] poltronas redesenhadas na final (nítidas):")
+    final = poltronas(final, p2q, limpar=False)
     rot = [r for r in R1.rotulos_pdf(pg) if not any(f in r[0] for f in q["fora"])]
     granito = np.abs(chapada.astype(int) - np.array(ARCOS["granito"])).max(axis=2) <= 6
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
@@ -3185,6 +3285,8 @@ def main():
     out = banquetas_ilha(out, A)
     print("[57] cooktops das ilhas: inox, 5 bocas, da biblioteca (pente fino, item 10)")
     out = cooktops_ilhas(out, A)
+    print("[58] poltronas do living e da varanda: blocos da biblioteca (pente fino, item 11)")
+    out = poltronas_sociais(out, A)
     print("[53] vegetação do gramado: árvores, arbustos e palmeiras da referência no tamanho real (pente fino, item 7)")
     out = vegetacao(out, A)
     print("[50] granito menos escuro (opção B) e sem os pontos brancos grandes (pente fino, item 6)")
