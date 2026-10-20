@@ -633,6 +633,14 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
       - entram os blocos no centro e na altura dos conjuntos do PDF, com sombra curta; o segundo é girado 180° para o tampo cinza variar;
       - na final, os conjuntos são redesenhados, nítidos.
     - **Conferência:** só a faixa das duas mesas mudou. Antes e depois, com a referência: `renders/POE642_CasaE_PH_Terreo_mesas_varanda_antes_depois.jpg`.
+  60. mesa de jantar do living (pedido do usuário, com uma foto: "mesa de jantar"). A foto é uma prévia do Shutterstock (2279721019), com a marca d'água no rodapé. Perguntei antes de usar, e o usuário confirmou: "tenho a licença, pode usar".
+    - **Biblioteca:** `_blocos/originais/folha_08_mesa_jantar_10.jpg`, bloco "mesa_jantar_10": mesa de madeira com 10 cadeiras estofadas em cinza claro, 4 de cada lado e uma em cada cabeceira, como no PDF; 3,75 m. A caixa do bloco fica acima do rodapé, e a marca d'água não entra no recorte. A cartela foi refeita.
+    - **Feito (`jantar`):**
+      - o conjunto do motor sai: a mancha dele dentro da caixa do PDF, com a sombra;
+      - o buraco recebe o travertino tecido dos trechos limpos em volta (image quilting), sob a luz do piso, emendado em gradiente;
+      - o bloco entra no centro da caixa do PDF, girado 90° (cabeceiras em cima e embaixo), com sombra curta;
+      - na final, a mesa é redesenhada, nítida.
+    - **Conferência:** só a área da mesa mudou. Antes e depois: `renders/POE642_CasaE_PH_Terreo_mesa_jantar_antes_depois.jpg`.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";

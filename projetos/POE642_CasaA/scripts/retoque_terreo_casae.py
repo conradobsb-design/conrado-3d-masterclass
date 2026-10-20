@@ -239,6 +239,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
 59. Mesas redondas da varanda (usuário: "mesas e cadeiras para a varanda", com uma foto que entrou na biblioteca): os
     dois conjuntos do motor saem (o Bege Bahia da biblioteca no lugar, emendado em gradiente) e entra a mesa de madeira
     com 6 cadeiras de couro, no centro e na altura dos conjuntos do PDF.
+60. Mesa de jantar do living (usuário: "mesa de jantar", com uma foto licenciada que entrou na biblioteca): o conjunto
+    do motor sai (o travertino tecido em volta no lugar, emendado em gradiente) e entra a mesa de madeira com 10
+    cadeiras estofadas, no centro da caixa do PDF, com as cabeceiras em cima e embaixo.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2914,6 +2917,81 @@ def mesas_varanda(out, A):
     return mesas(out, p2r)
 
 
+# mesa de jantar do living (item 60; pedido do usuário, com uma foto: "mesa de jantar"; a foto é do Shutterstock e o
+# usuário tem a licença: "tenho a licença, pode usar"). Entrou na biblioteca (`_blocos`, folha_08, "mesa_jantar_10":
+# mesa de madeira com 10 cadeiras estofadas em cinza claro, 4 de cada lado e uma em cada cabeceira, como no PDF; a
+# marca d'água do rodapé fica fora da caixa). O conjunto do motor sai: a mancha dele dentro da caixa do PDF ("caixa",
+# pt, com "margem" px; o que foge da luz do travertino em "foge" níveis, ligado ao centro), dilatada em "folga" px,
+# mais a mesma mancha deslocada para baixo e à esquerda (a sombra). O buraco recebe o travertino tecido (image
+# quilting) dos trechos limpos em volta ("fontes", px do retocado), sob a luz larga do piso limpo, emendado em
+# gradiente (cv2.seamlessClone). O bloco entra no centro da caixa, girado 90° (as cabeceiras em cima e embaixo), na
+# medida da biblioteca (3,75 m), com a sombra curta, e é redesenhado na final de 3840 px, nítido.
+JANTAR = {"bloco": "mesa_jantar_10", "caixa": (1462.8, 1125.6, 1571.8, 1338.8), "giro": 90, "margem": 6, "foge": 12,
+          "folga": 2, "sombra_motor": (-3, 3), "luz_m": 1.0, "p": 14,
+          "fontes": [(940, 430, 972, 660), (866, 424, 934, 480), (866, 616, 934, 660), (838, 430, 862, 660)],
+          "sombra": {"dx": -0.03, "dy": 0.03, "desfoque": 0.03, "opacidade": 0.35}}
+
+
+def jantar(out, p2x, limpar=True):
+    sys.path[:0] = [str(RAIZ / "_blocos"), str(RAIZ / "_texturas")]
+    import blocos
+    from texturas_escala import nconv
+    q = JANTAR
+    (a, b), (c, d) = p2x(0, 0), p2x(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    img = out.astype(np.float32)
+    (x0, y0), (x1, y1) = p2x(*q["caixa"][:2]), p2x(*q["caixa"][2:])
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    if limpar:
+        H, W = out.shape[:2]
+        L0 = img.mean(axis=2)
+        g = q["margem"]
+        caixa = np.zeros((H, W), bool)
+        caixa[int(y0) - g:int(y1) + g + 1, int(x0) - g:int(x1) + g + 1] = True
+        anel = cv2.dilate(caixa.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool) & ~caixa
+        piso = np.median(L0[anel])
+        foge = caixa & (np.abs(L0 - piso) > q["foge"])
+        n, lab = cv2.connectedComponents(foge.astype(np.uint8), connectivity=8)
+        ids = np.unique(lab[int(cy) - 5:int(cy) + 6, int(cx) - 5:int(cx) + 6])
+        blob = np.isin(lab, ids[ids > 0])
+        from scipy import ndimage
+        blob = ndimage.binary_fill_holes(blob)
+        k = 2 * q["folga"] + 1
+        m = cv2.dilate(blob.astype(np.uint8), np.ones((k, k), np.uint8))
+        dx, dy = q["sombra_motor"]
+        m = (m | np.roll(m, (dy, dx), axis=(0, 1))).astype(bool)
+        ys, xs = np.nonzero(m)
+        by0, by1, bx0, bx1 = ys.min() - 4, ys.max() + 5, xs.min() - 4, xs.max() + 5
+        perto = cv2.dilate(m.astype(np.uint8), np.ones((31, 31), np.uint8)).astype(bool) & ~m
+        limpo = perto & (np.abs(L0 - piso) < 20)
+        luz = nconv(img, limpo.astype(np.float32), q["luz_m"] * px_m)
+        T = textura(out, q["fontes"], by1 - by0, bx1 - bx0, p=q["p"])
+        fonte = img.copy()
+        fonte[by0:by1, bx0:bx1] = luz[by0:by1, bx0:bx1] * T
+        mm = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)) * 255
+        bx, by, bw, bh = cv2.boundingRect(mm)
+        img = cv2.seamlessClone(np.clip(fonte, 0, 255).astype(np.uint8), np.clip(img, 0, 255).astype(np.uint8), mm,
+                                (bx + bw // 2, by + bh // 2), cv2.NORMAL_CLONE).astype(np.float32)
+    cor, al = blocos.bloco(q["bloco"], px_m)
+    hh, ww = al.shape
+    lado = int(np.ceil(max(hh, ww) * 1.2)) + 4
+    M = cv2.getRotationMatrix2D((ww / 2, hh / 2), float(q["giro"]), 1.0)
+    M[0, 2] += lado / 2 - ww / 2
+    M[1, 2] += lado / 2 - hh / 2
+    c2 = cv2.warpAffine(cor * al[..., None], M, (lado, lado), flags=cv2.INTER_AREA)
+    a2 = cv2.warpAffine(al, M, (lado, lado), flags=cv2.INTER_AREA)
+    c2 = c2 / np.maximum(a2, 1e-4)[..., None]
+    sombra = q["sombra"] if limpar else {**q["sombra"], "opacidade": 0.0}
+    pousar_planta(img, c2, a2, float(cx), float(cy), max(hh, ww), sombra)
+    print(f"    mesa de jantar de 10 lugares da biblioteca ({q['bloco']})" + ("" if limpar else ", redesenhada por cima"))
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def jantar_living(out, A):
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    return jantar(out, p2r)
+
+
 # esquadrias finas (item 55; pente fino de 20/10, item 8, usuário: "portas vidros e janelas mais delicados e finos?").
 # O motor desenhou caixilhos largos e brancos, com duas ou três linhas, nas janelas, nos vidros da fachada e nas folhas.
 # No PDF, tudo está na ARQ_PAREDE: os brancos finos (até 12,5 pt de espessura e 15 pt ou mais de comprimento; fora as
@@ -3290,6 +3368,8 @@ def final_rotulos(out, referencia=None):
     final = poltronas(final, p2q, limpar=False)
     print("    [59] mesas da varanda redesenhadas na final (nítidas):")
     final = mesas(final, p2q, limpar=False)
+    print("    [60] mesa de jantar redesenhada na final (nítida):")
+    final = jantar(final, p2q, limpar=False)
     rot = [r for r in R1.rotulos_pdf(pg) if not any(f in r[0] for f in q["fora"])]
     granito = np.abs(chapada.astype(int) - np.array(ARCOS["granito"])).max(axis=2) <= 6
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
@@ -3413,6 +3493,8 @@ def main():
     out = poltronas_sociais(out, A)
     print("[59] mesas redondas da varanda: madeira e couro, da referência do usuário")
     out = mesas_varanda(out, A)
+    print("[60] mesa de jantar do living: 10 lugares, da referência do usuário")
+    out = jantar_living(out, A)
     print("[53] vegetação do gramado: árvores, arbustos e palmeiras da referência no tamanho real (pente fino, item 7)")
     out = vegetacao(out, A)
     print("[50] granito menos escuro (opção B) e sem os pontos brancos grandes (pente fino, item 6)")

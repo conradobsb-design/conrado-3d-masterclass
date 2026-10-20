@@ -572,6 +572,15 @@ Pedido do usuário ("mesas e cadeiras para a varanda", com a foto da `_blocos` f
 - **Retocado (`mesas_varanda`, item 59):** a mancha do conjunto do motor (o que foge da luz do piso, ligado ao centro, até `alcance` x altura), com `folga` e o disco da sombra, sai. O buraco recebe o Bege Bahia da biblioteca nos parâmetros de `BEGE` (o do item 43), sob a luz larga do piso limpo em volta (`luz_m`), emendado com `cv2.seamlessClone`. O bloco entra com a sombra curta.
 - **Final de 3840 px:** só redesenha o bloco por cima (`limpar=False`).
 
+## Mesa de jantar do living: `retoque_terreo_casae.jantar`
+
+Pedido do usuário ("mesa de jantar", com a foto da `_blocos` folha_08, bloco "mesa_jantar_10"; imagem licenciada pelo usuário). `JANTAR["caixa"]` é a caixa do conjunto no PDF (pt). No retocado (`jantar_living`, item 60):
+- **Limpeza:** a mancha do motor dentro da caixa (o que foge da luz do travertino em `foge` níveis, ligado ao centro, com os furos preenchidos), dilatada em `folga` px, mais a mesma mancha deslocada em `sombra_motor`.
+- **Piso:** o travertino é tecido dos trechos limpos de `fontes` (`retoque_terreo_casad.textura`, image quilting), sob a luz larga do piso limpo, e emendado com `cv2.seamlessClone`.
+- **Bloco:** entra no centro, girado `giro`, na medida da biblioteca, com a sombra curta.
+
+Na final de 3840 px, só redesenha o bloco por cima (`limpar=False`).
+
 ## Título da folha: `retoque_terreo_casae.titulo_folha`
 
 O texto do título ("0. TÉRREO / ESC.:1:50") não entra nas bases, mas o sublinhado dele, uma linha do PDF sem camada logo abaixo do canto tracejado do lote, pode sobrar. `titulo_folha` volta ao branco a faixa da linha (pt do PDF em `TITULO["linhas"]`, folga de 2 px), só nos px claros, e deixa o tracejado do lote. Para as outras casas, basta achar a linha logo abaixo do título no PDF delas.
