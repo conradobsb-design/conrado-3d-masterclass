@@ -226,6 +226,10 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
 55. Esquadrias finas (pente fino, item 8; usuário: "portas vidros e janelas mais delicados e finos?"): os caixilhos
     largos e brancos do motor saem e os vidros, as folhas de porta e os caixilhos da ARQ_PAREDE entram pelo PDF, na
     espessura do desenho, com traço cinza fino; peitoril em Bege Bahia onde há vidro no vão.
+56. Ilha do espaço gourmet com 5 banquetas (pente fino, item 9; usuário: "na ilha do espaço gourmet, deixe apenas 5
+    cadeiras", com a referência da banqueta para a biblioteca): as 7 do PDF e do motor saem (o Bege Bahia de baixo,
+    com a sombra curta da ilha) e entram 5 da referência (madeira e linho, `_blocos` "banqueta_linho"), no tamanho da
+    do PDF, de frente para a ilha e espaçadas por igual ao longo dela.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2557,6 +2561,74 @@ def soleiras(out, A):
     return out
 
 
+# banquetas da ilha do espaço gourmet (item 56; pente fino de 20/10, item 9, usuário: "na ilha do espaço gourmet, deixe
+# apenas 5 cadeiras"; e, com uma foto: "referencia de banqueta pra ser utilizada e inserida na biblioteca"). O PDF
+# (ARQ_LAYOUT HUMANIZAÇÃO) e o motor têm 7 banquetas de 22,7 pt a cada 34 pt, no lado da varanda. A faixa delas (da
+# borda da ilha até a sombra, "faixa": px abaixo da ilha; "folga": px para os lados) volta ao Bege Bahia, copiado das
+# linhas logo abaixo ("fonte_dy"), com a sombra curta da ilha. Entram 5 banquetas da referência (`_blocos`,
+# "banqueta_linho": madeira clara e linho cru), no tamanho da banqueta do PDF, de frente para a ilha (a frente do
+# assento fica sob o tampo, como no PDF), espaçadas por igual ao longo dela (centro em 1/10, 3/10 ... 9/10), com a
+# sombra da biblioteca (texturas.json), por baixo da ilha. Na final de 3840 px elas são redesenhadas (como a pedra
+# portuguesa, item 47), para o bloco sair nítido (24 px por banqueta, e não 12 px ampliados).
+BANQUETAS = {"ilha_pdf": (990.6, 901.1, 1251.2, 963.9), "modelo_pdf": (1109.3, 959.5, 1132.0, 982.0),
+             "primeira_pdf": 1007.3, "ultima_pdf": 1234.0, "n": 5, "faixa": 18, "folga": 4, "fonte_dy": 20,
+             "bloco": "banqueta_linho", "sombra_ilha": {"desloc": (-1.5, 1.5), "sigma": 1.0, "forca": 0.3}}
+
+
+def banquetas(out, p2x):
+    """As 5 banquetas da ilha em `out` (o retocado ou a final), com p2x (pt do PDF -> px desse quadro): a faixa das 7
+    volta ao piso e as 5 da biblioteca entram. As medidas em px de BANQUETAS são as do retocado (escala ajustada)."""
+    sys.path[:0] = [str(RAIZ / "_blocos"), str(RAIZ / "_texturas")]
+    import blocos
+    from texturas import CONFIG as CFG_TEX
+    q = BANQUETAS
+    (ix0, iy0), (ix1, iy1) = p2x(*q["ilha_pdf"][:2]), p2x(*q["ilha_pdf"][2:])
+    (mx0, my0), (mx1, my1) = p2x(*q["modelo_pdf"][:2]), p2x(*q["modelo_pdf"][2:])
+    e = (mx1 - mx0) / 12.4                                             # 1 no retocado (12,4 px por banqueta)
+    xa, xb = p2x(q["primeira_pdf"], 0)[0], p2x(q["ultima_pdf"], 0)[0] + (mx1 - mx0)
+    img = out.astype(np.float32)
+    Y0, Y1 = int(np.ceil(iy1)), int(np.ceil(iy1)) + round(q["faixa"] * e)
+    X0, X1 = int(np.floor(xa)) - round(q["folga"] * e), int(np.ceil(xb)) + round(q["folga"] * e)
+    dy = round(q["fonte_dy"] * e)
+    # a faixa volta ao piso: as linhas logo abaixo, com a borda suave
+    limpo = img.copy()
+    limpo[Y0:Y1, X0:X1] = img[Y0 + dy:Y1 + dy, X0:X1]
+    m = np.zeros(out.shape[:2], np.float32)
+    m[Y0:Y1, X0:X1] = 1
+    a = cv2.GaussianBlur(m, (0, 0), 0.7 * e)
+    a[:Y0] = 0
+    limpo = img * (1 - a[..., None]) + limpo * a[..., None]
+    # a sombra curta da ilha, só na faixa refeita
+    sq = q["sombra_ilha"]
+    cantos = np.float32([(ix0, iy0), (ix1, iy0), (ix1, iy1), (ix0, iy1)]) + np.float32(sq["desloc"]) * e
+    sb = cv2.GaussianBlur(poligono_aa(out.shape[:2], cantos), (0, 0), sq["sigma"] * e) * a
+    limpo *= (1 - sq["forca"] * sb)[..., None]
+    # as banquetas da biblioteca, no tamanho da do PDF, só abaixo da borda da ilha
+    larg_m = next(b["largura_m"] for b in blocos.CFG["blocos"] if b["id"] == q["bloco"])
+    cor, al = blocos.bloco(q["bloco"], (mx1 - mx0) / larg_m)
+    sombra = json.loads(CFG_TEX.read_text())["vegetacao"]["sombra"]
+    camada = limpo.copy()
+    L = ix1 - ix0
+    cy = (my0 + my1) / 2
+    h, w = al.shape
+    for i in range(q["n"]):
+        cx = ix0 + L * (i + 0.5) / q["n"]
+        fx, fy = np.floor(cx - w / 2), np.floor(cy - h / 2)
+        M = np.float32([[1, 0, cx - w / 2 - fx], [0, 1, cy - h / 2 - fy]])
+        c2 = cv2.warpAffine(cor, M, (w + 1, h + 1), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+        a2 = cv2.warpAffine(al, M, (w + 1, h + 1), flags=cv2.INTER_LINEAR)
+        pousar_planta(camada, c2, a2, fx + (w + 1) / 2, fy + (h + 1) / 2, mx1 - mx0, sombra)
+    sob = np.clip(np.arange(out.shape[0], dtype=np.float32) - iy1 + 0.5, 0, 1)[:, None, None]
+    limpo = limpo * (1 - sob) + camada * sob
+    print(f"    ilha gourmet: 7 banquetas fora, {q['n']} da biblioteca ({q['bloco']}) a cada {L / q['n']:.1f} px")
+    return np.clip(limpo, 0, 255).astype(np.uint8)
+
+
+def banquetas_ilha(out, A):
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    return banquetas(out, p2r)
+
+
 # esquadrias finas (item 55; pente fino de 20/10, item 8, usuário: "portas vidros e janelas mais delicados e finos?").
 # O motor desenhou caixilhos largos e brancos, com duas ou três linhas, nas janelas, nos vidros da fachada e nas folhas.
 # No PDF, tudo está na ARQ_PAREDE: os brancos finos (até 12,5 pt de espessura e 15 pt ou mais de comprimento; fora as
@@ -2925,6 +2997,8 @@ def final_rotulos(out, referencia=None):
     (a, b), (c, d) = p2q(0, 0), p2q(56.69, 0)
     print("    [47] pedra portuguesa redesenhada na final:")
     final = pedra_portuguesa(final, chapada, float(np.hypot(c - a, d - b)), 0, retocado=False)
+    print("    [56] banquetas da ilha gourmet redesenhadas na final (nítidas):")
+    final = banquetas(final, p2q)
     rot = [r for r in R1.rotulos_pdf(pg) if not any(f in r[0] for f in q["fora"])]
     granito = np.abs(chapada.astype(int) - np.array(ARCOS["granito"])).max(axis=2) <= 6
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
@@ -3040,6 +3114,8 @@ def main():
     out = grama_referencia(out, A)
     print("[43] Bege Bahia como a referência (R1)")
     out = bege_referencia(out, A)
+    print("[56] ilha do espaço gourmet: 5 banquetas (pente fino, item 9)")
+    out = banquetas_ilha(out, A)
     print("[53] vegetação do gramado: árvores, arbustos e palmeiras da referência no tamanho real (pente fino, item 7)")
     out = vegetacao(out, A)
     print("[50] granito menos escuro (opção B) e sem os pontos brancos grandes (pente fino, item 6)")

@@ -6,7 +6,8 @@
     "folha_02": {"arquivo": "originais/folha_02_estar_madeira.jpg", "fundo": "xadrez", "conteudo": "estar em madeira e branco: sofás, poltronas, mesas, jantar 6, ilha, escrivaninhas"},
     "folha_03": {"arquivo": "originais/folha_03_banho_jantar.jpg", "fundo": [232, 232, 232], "conteudo": "louças, banheira, jantar oval e retangular, tapete, banqueta, guarda-sóis, plantas"},
     "folha_04": {"arquivo": "originais/folha_04_sofas_organicos.jpg", "fundo": [232, 232, 232], "conteudo": "sofás orgânicos, mesas de centro, poltronas, mesa redonda de 4, plantas"},
-    "folha_05": {"arquivo": "originais/folha_05_externo_plantas.jpg", "fundo": [232, 232, 232], "conteudo": "externo: mesa de teca, mesa redonda, poltronas de rattan, sofá, bancada gourmet, guarda-sol, grama, plantas"}
+    "folha_05": {"arquivo": "originais/folha_05_externo_plantas.jpg", "fundo": [232, 232, 232], "conteudo": "externo: mesa de teca, mesa redonda, poltronas de rattan, sofá, bancada gourmet, guarda-sol, grama, plantas"},
+    "folha_06": {"arquivo": "originais/folha_06_banqueta_linho.jpg", "fundo": [255, 255, 255], "conteudo": "banqueta de madeira clara com assento e encosto em linho cru, vista de cima (referência do usuário, 20/10/26: 'referencia de banqueta pra ser utilizada e inserida na biblioteca')"}
   },
   "folhas_pendentes": "O usuário mandou mais 6 folhas no meio da execução (pias e mesas; jantar, guarda-roupa, rede, lavanderia, esteira; tapetes, camas e mesa oval; árvore, escrivaninhas e máquinas; jantar externo e carros; e a de piso de madeira, sofá em L, camas com criados, cooktop de 4 bocas e louças). Elas chegaram só como imagem na conversa, não como arquivo, e não dá para recortar: reenviar numa mensagem nova. As camas, o sofá em L, o guarda-roupa e as máquinas de lavar dos PDFs estão nelas.",
   "fora": {
@@ -43,6 +44,7 @@
     {"id": "mesa_redonda_4", "nome": "Mesa redonda de 4 lugares", "categoria": "jantar", "folha": "folha_04", "caixa": [64, 880, 176, 168], "largura_m": 1.60, "onde": "mesas redondas do gourmet (Térreo C, D e E; nos PDFs, de 6 lugares)"},
     {"id": "ilha_banquetas", "nome": "Ilha com banquetas", "categoria": "jantar", "folha": "folha_02", "caixa": [0, 416, 166, 257], "altura_m": 2.40, "onde": "ilha da cozinha com banquetas (Térreo C, D e E)"},
     {"id": "banqueta_madeira", "nome": "Banqueta de madeira", "categoria": "jantar", "folha": "folha_03", "caixa": [408, 917, 98, 82], "largura_m": 0.45, "onde": "banquetas da ilha e do balcão gourmet (Térreo C, D e E)"},
+    {"id": "banqueta_linho", "nome": "Banqueta de madeira e linho", "categoria": "jantar", "folha": "folha_06", "caixa": [60, 86, 480, 442], "largura_m": 0.45, "onde": "banquetas da ilha do espaço gourmet (Térreo E; referência do usuário); na folha, a frente do assento fica em cima e o encosto embaixo"},
 
     {"id": "cooktop_inox_5", "nome": "Cooktop de inox, 5 bocas", "categoria": "cozinha", "folha": "folha_01", "caixa": [550, 297, 169, 122], "largura_m": 0.75, "onde": "cooktop da cozinha (todas as casas; inox, como os eletrodomésticos)"},
     {"id": "cooktop_inox_5_90", "nome": "Cooktop de inox, 5 bocas, 90 cm", "categoria": "cozinha", "folha": "folha_01", "caixa": [27, 456, 199, 139], "largura_m": 0.90, "onde": "cooktop grande (Térreo A e B, de 6 bocas no PDF)"},

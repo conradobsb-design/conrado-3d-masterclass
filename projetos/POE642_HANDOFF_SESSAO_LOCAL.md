@@ -599,6 +599,11 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
       - os traços do PDF por cima, em cinza médio de 0,3 px.
     - **Ordem:** roda depois do granito (item 50) e antes das soleiras, das projeções e das cortinas, que ficam por cima.
     - **Conferência:** no retocado mudaram 15,2 mil px nas esquadrias e 30 px fora delas (uma coluna de 1 px junto ao vidro do escritório). Antes e depois de cada trecho: `renders/POE642_CasaE_PH_Terreo_esquadrias_antes_depois.jpg`.
+  56. ilha do espaço gourmet com 5 banquetas (pente fino, item 9). Pedido do usuário: "na ilha do espaço gourmet, deixe apenas 5 cadeiras". O PDF e o motor tinham 7 banquetas de 22,7 pt, a cada 34 pt. No meio do item, o usuário mandou uma foto: "referencia de banqueta pra ser utilizada e inserida na biblioteca".
+    - **Biblioteca:** a foto entrou em `_blocos/originais/folha_06_banqueta_linho.jpg`, como o bloco "banqueta_linho" (madeira clara e linho cru, 0,45 m). O recorte é do `blocos.recortar` (fundo branco). A cartela foi refeita.
+    - **Feito (`banquetas`):** a faixa das 7 voltou ao Bege Bahia, com a sombra curta da ilha. Entraram 5 banquetas da referência, no tamanho da do PDF e espaçadas por igual ao longo da ilha (a cada 28,6 px no retocado). Estão de frente para a ilha, com a frente do assento sob o tampo, e a sombra é a da biblioteca.
+    - **Nitidez:** no retocado a banqueta tem 12 px e ficava borrada ao ampliar. Por isso, na final de 3840 px, ela é redesenhada (24 px), como a pedra portuguesa.
+    - **Conferência:** só a faixa sob a ilha mudou: 2,6 mil px no retocado e 10,2 mil px na final. Antes e depois, com a referência: `renders/POE642_CasaE_PH_Terreo_ilha_gourmet_antes_depois.jpg`.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";

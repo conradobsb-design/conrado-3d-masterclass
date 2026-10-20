@@ -5,7 +5,9 @@ Pedido do usuário (20/10/26), com um pin do Pinterest e depois as folhas de blo
 [pin] à nossa biblioteca de blocos a serem utilizados e oferecidos, dentro do escopo do projeto das casas. temos
 várias opções. quero que você escolha dentro do que está nos pdfs base das casas. e encontre uma cortina para
 usarmos." O Pinterest não abre desta sessão (proxy 403 / DNS); as folhas que chegaram como arquivo estão em
-`originais/` (folha_01 a folha_05).
+`originais/` (folha_01 a folha_05). A folha_06 é a foto de uma banqueta de madeira e linho que o usuário mandou no
+pente fino do Térreo da Casa E ("referencia de banqueta pra ser utilizada e inserida na biblioteca"): o bloco
+"banqueta_linho", usado nas 5 banquetas da ilha gourmet (item 56 do `retoque_terreo_casae.py`).
 
 O que entra (`blocos.json`): só as peças que têm correspondente no mobiliário dos PDFs base, conferido nas camadas
 ARQ_MOBILIÁRIO, ARQ_LAYOUT HUMANIZAÇÃO, ARQ_LOUÇAS E METAIS e ARQ_MARCENARIA das 12 plantas: sofás orgânicos e

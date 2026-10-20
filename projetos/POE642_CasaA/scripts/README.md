@@ -547,6 +547,12 @@ Pente fino do Térreo da Casa E, item 8 ("portas vidros e janelas mais delicados
 
 No `main`, roda depois do granito (item 50) e antes das soleiras, das projeções e das cortinas.
 
+## Banquetas da ilha gourmet: `retoque_terreo_casae.banquetas`
+
+Pente fino do Térreo da Casa E, item 9 ("na ilha do espaço gourmet, deixe apenas 5 cadeiras", com a foto da banqueta para a biblioteca: `_blocos`, folha_06, bloco "banqueta_linho"). `banquetas(out, p2x)` funciona no retocado (`banquetas_ilha`, item 56) e de novo na final de 3840 px (`final_rotulos`, depois da pedra portuguesa), onde a banqueta tem 24 px e sai nítida.
+- **Limpeza:** a faixa das 7 banquetas do motor (`BANQUETAS["faixa"]` px abaixo da ilha, com `folga` para os lados; px do retocado, escalados na final) recebe as linhas de Bege Bahia logo abaixo (`fonte_dy`), com a borda suave e a sombra curta da ilha.
+- **Banquetas:** 5 do bloco, no tamanho da banqueta do PDF (`modelo_pdf`, 22,7 pt), centradas em 1/10, 3/10 ... 9/10 do comprimento da ilha, na linha do PDF, com a sombra de `texturas.json`. Só o que fica abaixo da borda da ilha entra: a frente do assento fica sob o tampo, como no PDF.
+
 ## Título da folha: `retoque_terreo_casae.titulo_folha`
 
 O texto do título ("0. TÉRREO / ESC.:1:50") não entra nas bases, mas o sublinhado dele, uma linha do PDF sem camada logo abaixo do canto tracejado do lote, pode sobrar. `titulo_folha` volta ao branco a faixa da linha (pt do PDF em `TITULO["linhas"]`, folga de 2 px), só nos px claros, e deixa o tracejado do lote. Para as outras casas, basta achar a linha logo abaixo do título no PDF delas.
