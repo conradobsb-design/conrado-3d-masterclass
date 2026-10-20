@@ -536,7 +536,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     2. living: a cortina da fachada de baixo é um zigue-zague cinza do motor. A regra pede linho off-white, e a cortina da biblioteca foi aprovada;
     3. acesso de veículos: as pedras portuguesas saem com ~12 a 15 cm na prancha (7 a 9 px a 60 px/m), e a regra pede 6 a 8 cm;
     4. canto de baixo à esquerda do lote: sobrou o traço do título da folha ("título da folha não entra");
-    5. rótulos: o "m²" da circulação de 7,11 m² sai com o "2" afastado; nos outros 28 rótulos, ele encosta no "m". Uniformizar.
+    5. rótulos: o "m²" da circulação de 7,11 m² sai com o "2" afastado; nos outros, ele encosta no "m" (o "2" fica na posição do PDF e o "m", 30% maior, chega até ele). Uniformizar.
 - **Aprovado pelo usuário (15/10/26):** `renders/POE642_CasaE_PH_Terreo_v1_retocado.png` (itens 1 a 34); depois da aprovação, o item 35 (Barlavento nas piscinas) e a prancha e o PDF refeitos com ele.
 - **Entrega (15/10/26, depois da aprovação):** chave `entrega` na `POE642_CasaE/config_bases.json`, por decisão do usuário: endereço ML 10 – Conjunto 02, Lotes 17, Unidade E (projeto CASA E · UNIDADE AUTÔNOMA "E"), norte o mesmo das outras casas, quadro de áreas com Térreo "NÃO INFORMADO" e sem total. Só o Térreo (o PDF do Subsolo não veio; se vier, entra como na Casa D). Prancha `entrega/POE642_CasaE_PH_Terreo_entrega.png` (3840 × 2600 px; o retocado realinhado à base com 132 pontos, erro mediano 0,77 px), rodapé `entrega/POE642_CasaE_rodape_Terreo.png` e `entrega/POE642_CasaE_Plantas_Humanizadas.pdf` (1 página A3, 12,5 MB).
 
