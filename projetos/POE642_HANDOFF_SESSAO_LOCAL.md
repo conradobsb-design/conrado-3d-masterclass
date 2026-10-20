@@ -589,6 +589,16 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Feito (`jardim_flores`):** forração escura, com plantas tropicais da biblioteca de blocos por cima: bananeira, comigo-ninguém-pode, arbusto e planta com flores, no tamanho real. São 11, em duas fileiras desencontradas. As copas saem um pouco da floreira (como no item 19), nunca sobre a escada, e as 5 flores tropicais ficam.
     - **Por que blocos:** as plantas da planta de referência (26 px/m) ficaram borradas nos 39 px da floreira.
     - **Imagens:** antes e depois dos itens 53 e 54 em `renders/POE642_CasaE_PH_Terreo_vegetacao_antes_depois.jpg`. A prancha e os PDFs ficam para o fim da lista.
+  55. esquadrias finas (pente fino, item 8; pedido do usuário: "portas vidros e janelas mais delicados e finos?"). O motor desenhou caixilhos largos e brancos, com duas ou três linhas, nas janelas, nos vidros da fachada do living e da varanda, no escritório e no hall. No PDF não há camada de esquadria: vidros, folhas e caixilhos estão na ARQ_PAREDE, como brancos finos.
+    - **O que entra (`esquadrias`):** os 78 brancos finos da ARQ_PAREDE, com até 12,5 pt de espessura e 15 pt ou mais de comprimento. Ficam de fora as 12 soleiras do item 52, as bordas da piscina e do spa e as portas do elevador (item 6). Eles se juntam em 41 esquadrias, pela vizinhança na mesma direção.
+    - **Limpeza:** cada esquadria é limpa numa faixa de 3 px no eixo fino, com o piso de fora espelhado. Do lado de uma parede, vem o piso do outro lado.
+    - **Redesenho pelo PDF, em 8x:**
+      - paredes em preto;
+      - vão de janela com vidro dentro em Bege Bahia, como peitoril; a passagem sem nada (a do escritório) fica no piso;
+      - caixilho em alumínio claro; folha de porta em cinza bem claro; vidro no vidro aprovado;
+      - os traços do PDF por cima, em cinza médio de 0,3 px.
+    - **Ordem:** roda depois do granito (item 50) e antes das soleiras, das projeções e das cortinas, que ficam por cima.
+    - **Conferência:** no retocado mudaram 15,2 mil px nas esquadrias e 30 px fora delas (uma coluna de 1 px junto ao vidro do escritório). Antes e depois de cada trecho: `renders/POE642_CasaE_PH_Terreo_esquadrias_antes_depois.jpg`.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";

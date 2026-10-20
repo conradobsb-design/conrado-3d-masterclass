@@ -223,6 +223,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     bananeiras, comigo-ninguém-pode, arbustos e plantas com flores da biblioteca de blocos, no tamanho real, em duas
     fileiras sobre forração, no lugar das folhagens do motor; as copas saem um pouco da floreira (item 19) e as flores
     tropicais ficam.
+55. Esquadrias finas (pente fino, item 8; usuário: "portas vidros e janelas mais delicados e finos?"): os caixilhos
+    largos e brancos do motor saem e os vidros, as folhas de porta e os caixilhos da ARQ_PAREDE entram pelo PDF, na
+    espessura do desenho, com traço cinza fino; peitoril em Bege Bahia onde há vidro no vão.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2554,6 +2557,176 @@ def soleiras(out, A):
     return out
 
 
+# esquadrias finas (item 55; pente fino de 20/10, item 8, usuário: "portas vidros e janelas mais delicados e finos?").
+# O motor desenhou caixilhos largos e brancos, com duas ou três linhas, nas janelas, nos vidros da fachada e nas folhas.
+# No PDF, tudo está na ARQ_PAREDE: os brancos finos (até 12,5 pt de espessura e 15 pt ou mais de comprimento; fora as
+# 12 soleiras do item 52, as bordas da piscina e do spa e as portas do elevador do item 6) são vidros, folhas de porta
+# e caixilhos. Cada um, agrupado com os vizinhos da mesma direção (junta de 3 pt):
+# - limpo numa faixa de 3 px para cada lado, no eixo fino: o piso logo fora da faixa, espelhado (do lado de uma
+#   parede, fonte escura, vem o do outro lado);
+# - redesenhado pelo PDF, em 8x, com 1,5 pt de folga: paredes (cinza) em preto; brancos do maior para o menor: vão
+#   de janela com vidro dentro em Bege Bahia (peitoril; passagem sem nada fica no piso), caixilho (3,2 a 7 pt) em
+#   alumínio claro, folha de porta (1,6 a 2,5 pt) em cinza bem claro, vidro (até 1,6 pt) no vidro aprovado; os
+#   traços do PDF por cima, em cinza médio de 0,3 px.
+ESQUADRIAS = {"espessura_max": 12.5, "comprimento_min": 15.0, "junta": 3.0, "faixa_px": 3, "folga_pt": 1.5,
+              "escuro": 50, "fora": [(1735.0, 985.0, 1825.0, 1000.0)],          # portas do elevador (item 6)
+              "parede": (12, 12, 15), "aluminio": (212, 214, 215), "folha": (222, 224, 225),
+              "vidro": (222, 218, 210), "alfa_vidro": 0.9, "contorno": (116, 118, 121), "larg": 0.3,
+              "bege_forca": 0.5, "semente": 7}
+
+
+def esquadrias_elementos(D):
+    q = ESQUADRIAS
+    sol = SOLEIRAS["pdf"]
+    el = []
+    for d in D:
+        if d.get("layer") != "ARQ_PAREDE" or d["type"] != "f" or not d["fill"] or min(d["fill"]) < 0.9:
+            continue
+        r = d["rect"]
+        if max(r.width, r.height) < q["comprimento_min"] or min(r.width, r.height) > q["espessura_max"]:
+            continue
+        if any(abs(r.x0 - a) < 0.5 and abs(r.y0 - b) < 0.5 for a, b, _, _ in sol):
+            continue
+        if r.x1 < 1000 and r.y0 > 1085:                                 # bordas da piscina e do spa
+            continue
+        if any(f0 <= r.x0 and r.x1 <= f2 and f1 <= r.y0 and r.y1 <= f3 for f0, f1, f2, f3 in q["fora"]):
+            continue
+        el.append(r)
+    # grupos: vizinhos da mesma direção, com a junta
+    pai = list(range(len(el)))
+
+    def raiz(i):
+        while pai[i] != i:
+            pai[i] = pai[pai[i]]
+            i = pai[i]
+        return i
+
+    j = q["junta"]
+    for i, a in enumerate(el):
+        for k in range(i + 1, len(el)):
+            b = el[k]
+            if ((a.width >= a.height) == (b.width >= b.height) and a.x0 - j <= b.x1 and b.x0 - j <= a.x1
+                    and a.y0 - j <= b.y1 and b.y0 - j <= a.y1):
+                pai[raiz(i)] = raiz(k)
+    grupos = {}
+    for i, r in enumerate(el):
+        grupos.setdefault(raiz(i), []).append(r)
+    return el, list(grupos.values())
+
+
+def esquadria_limpar(img, r, p2r):
+    q = ESQUADRIAS
+    (u0, v0), (u1, v1) = p2r(r.x0, r.y0), p2r(r.x1, r.y1)
+    f = q["faixa_px"]
+    lum = img.mean(axis=2)
+    hor = (u1 - u0) >= (v1 - v0)
+    if hor:
+        X0, X1, Y0, Y1 = int(np.floor(u0)), int(np.ceil(u1)), int(np.floor(v0)) - f, int(np.ceil(v1)) + f
+        meio = (v0 + v1) / 2
+        for y in range(Y0, Y1):
+            a, b = 2 * Y0 - y - 1, 2 * Y1 - y - 1
+            ca, cb, la, lb = img[a, X0:X1].copy(), img[b, X0:X1].copy(), lum[a, X0:X1], lum[b, X0:X1]
+            pref, outra, lp = (ca, cb, la) if y < meio else (cb, ca, lb)
+            img[y, X0:X1] = np.where((lp < q["escuro"])[:, None], outra, pref)
+    else:
+        X0, X1, Y0, Y1 = int(np.floor(u0)) - f, int(np.ceil(u1)) + f, int(np.floor(v0)), int(np.ceil(v1))
+        meio = (u0 + u1) / 2
+        for x in range(X0, X1):
+            a, b = 2 * X0 - x - 1, 2 * X1 - x - 1
+            ca, cb, la, lb = img[Y0:Y1, a].copy(), img[Y0:Y1, b].copy(), lum[Y0:Y1, a], lum[Y0:Y1, b]
+            pref, outra, lp = (ca, cb, la) if x < meio else (cb, ca, lb)
+            img[Y0:Y1, x] = np.where((lp < q["escuro"])[:, None], outra, pref)
+
+
+def esquadria_desenhar(img, zona, par, p2r, px_m, textura):
+    q = ESQUADRIAS
+    mg = q["folga_pt"]
+    px0, py0, px1, py1 = zona[0] - mg, zona[1] - mg, zona[2] + mg, zona[3] + mg
+    (u0, v0), (u1, v1) = p2r(px0, py0), p2r(px1, py1)
+    J0, K0 = int(np.floor(u0)) - 1, int(np.floor(v0)) - 1
+    J1, K1 = int(np.ceil(u1)) + 2, int(np.ceil(v1)) + 2
+    h, w = K1 - K0, J1 - J0
+    reg = img[K0:K1, J0:J1].copy()
+
+    def T(x, y):
+        u, v = p2r(x, y)
+        return int(round((u - J0) * SS)), int(round((v - K0) * SS))
+
+    def caixa(x0, y0, x1, y1):
+        x0, y0, x1, y1 = max(x0, px0), max(y0, py0), min(x1, px1), min(y1, py1)
+        return np.array([T(x0, y0), T(x1, y0), T(x1, y1), T(x0, y1)], np.int32)
+
+    def pintar(m, cor, alfa=1.0):
+        nonlocal reg
+        a = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None] * alfa
+        reg = reg * (1 - a) + (np.float32(cor) if isinstance(cor, tuple) else cor) * a
+
+    bege = textura("bege_bahia", px_m, h, w, semente=q["semente"]).astype(np.float32)
+    bege = (1 + q["bege_forca"] * (bege / bege.reshape(-1, 3).mean(axis=0) - 1)) * np.float32(BEGE["tom"])
+    perto = [d for d in par if d["rect"].x1 >= px0 and d["rect"].x0 <= px1 and d["rect"].y1 >= py0
+             and d["rect"].y0 <= py1]
+    for d in perto:
+        if d["type"] == "f" and d["fill"] and min(d["fill"]) < 0.9:
+            m = np.zeros((h * SS, w * SS), np.uint8)
+            cv2.fillPoly(m, [caixa(*d["rect"])], 255)
+            pintar(m, q["parede"])
+    brancos = [d for d in perto if d["type"] == "f" and d["fill"] and min(d["fill"]) >= 0.9]
+    for d in sorted(brancos, key=lambda d: -d["rect"].width * d["rect"].height):
+        r = d["rect"]
+        t = min(r.width, r.height)
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.fillPoly(m, [caixa(*r)], 255)
+        if t > 7:
+            # peitoril em Bege Bahia só onde há vidro dentro do vão; a passagem sem nada fica no piso
+            if any(e is not d and min(e["rect"].width, e["rect"].height) <= 3.2 and e["rect"].x0 >= r.x0 - 0.2
+                   and e["rect"].x1 <= r.x1 + 0.2 and e["rect"].y0 >= r.y0 - 0.2 and e["rect"].y1 <= r.y1 + 0.2
+                   for e in brancos):
+                pintar(m, bege)
+        elif t > 3.2:
+            pintar(m, q["aluminio"])
+        elif 1.6 < t < 2.5:
+            pintar(m, q["folha"])
+        else:
+            pintar(m, q["vidro"], q["alfa_vidro"])
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    e = max(1, int(round(q["larg"] * SS)))
+    for d in perto:
+        if d["type"] != "s":
+            continue
+        for it in d["items"]:
+            if it[0] == "l":
+                cv2.line(m, T(it[1].x, it[1].y), T(it[2].x, it[2].y), 255, e)
+            elif it[0] == "re":
+                rr = it[1]
+                cv2.polylines(m, [np.array([T(rr.x0, rr.y0), T(rr.x1, rr.y0), T(rr.x1, rr.y1), T(rr.x0, rr.y1)],
+                                           np.int32)], True, 255, e)
+    corte = np.zeros_like(m)
+    cv2.fillPoly(corte, [caixa(px0, py0, px1, py1)], 255)
+    pintar(m & corte, q["contorno"])
+    img[K0:K1, J0:J1] = reg
+
+
+def esquadrias(out, A):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    D = pg.get_drawings()
+    par = [d for d in D if d.get("layer") == "ARQ_PAREDE"]
+    el, grupos = esquadrias_elementos(D)
+    img = out.astype(np.float32)
+    zonas = []
+    for rs in grupos:
+        for r in rs:
+            esquadria_limpar(img, r, p2r)
+        zonas.append((min(r.x0 for r in rs), min(r.y0 for r in rs), max(r.x1 for r in rs), max(r.y1 for r in rs)))
+    for z in zonas:
+        esquadria_desenhar(img, z, par, p2r, px_m, textura)
+    print(f"    {len(el)} vidros, folhas e caixilhos do PDF em {len(zonas)} esquadrias, finos")
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
 # paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
 # canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
 PAISAGISMO = {
@@ -2871,6 +3044,8 @@ def main():
     out = vegetacao(out, A)
     print("[50] granito menos escuro (opção B) e sem os pontos brancos grandes (pente fino, item 6)")
     out = granito_tom(out, A)
+    print("[55] esquadrias finas: vidros, folhas e caixilhos pelo PDF (pente fino, item 8)")
+    out = esquadrias(out, A)
     print("[52] soleiras: as 12 do PDF, iguais, em Bege Bahia (R13; usuário: revisar todas as soleiras)")
     out = soleiras(out, A)
     print("[44] projeções da cobertura em tracejado cinza fino (R8, R9)")

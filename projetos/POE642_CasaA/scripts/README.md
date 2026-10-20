@@ -534,6 +534,19 @@ Pente fino do Térreo da Casa E, item 7 (escolha do usuário entre as opções d
 
 `jardim_flores` (itens 19 e 54) refaz a floreira do jardim de inverno: forração escura (o desenho da grama, com o contraste aumentado, no tom `JARDIM_FORA["forracao"]`) no miolo, sem a borda escura do item 3. Por cima vêm as plantas tropicais da biblioteca de blocos (`JARDIM_FORA["plantas"]`: bananeira, comigo-ninguém-pode, arbusto e planta com flores, no tamanho real, sem o fio claro do recorte), em duas fileiras desencontradas na ordem de `"ciclo"`, giradas, as maiores por baixo. As da planta de referência (26 px/m) ficavam borradas nos 39 px da floreira. As copas saem só até a borda irregular do item 19 (nunca sobre a escada), com a sombra curta no travertino. As flores tropicais vão por cima.
 
+## Esquadrias finas: `retoque_terreo_casae.esquadrias`
+
+Pente fino do Térreo da Casa E, item 8 ("portas vidros e janelas mais delicados e finos?"). No PDF, vidros, folhas e caixilhos estão na ARQ_PAREDE, como brancos finos. `esquadrias_elementos` pega os de até `ESQUADRIAS["espessura_max"]` (12,5 pt) e `comprimento_min` (15 pt) ou mais. Ficam de fora as soleiras de `SOLEIRAS["pdf"]`, as bordas da piscina e do spa e as caixas de `ESQUADRIAS["fora"]` (portas do elevador). Os vizinhos da mesma direção, a 3 pt ou menos, formam um grupo.
+
+`esquadria_limpar` limpa uma faixa de `faixa_px` (3 px) para cada lado, no eixo fino, com o piso logo fora espelhado. Se a fonte for escura (parede), vem o do outro lado.
+
+`esquadria_desenhar` redesenha a zona do grupo (com `folga_pt`), em 8x:
+- paredes cinza do PDF em preto;
+- os brancos, do maior para o menor: vão com vidro dentro em Bege Bahia (peitoril; sem vidro, a passagem fica no piso); 3,2 a 7 pt em alumínio claro (caixilho); 1,6 a 2,5 pt em cinza bem claro (folha de porta); até 1,6 pt no vidro aprovado;
+- os traços do PDF (`l` e `re`) por cima, em cinza médio de 0,3 px, recortados na zona.
+
+No `main`, roda depois do granito (item 50) e antes das soleiras, das projeções e das cortinas.
+
 ## Título da folha: `retoque_terreo_casae.titulo_folha`
 
 O texto do título ("0. TÉRREO / ESC.:1:50") não entra nas bases, mas o sublinhado dele, uma linha do PDF sem camada logo abaixo do canto tracejado do lote, pode sobrar. `titulo_folha` volta ao branco a faixa da linha (pt do PDF em `TITULO["linhas"]`, folga de 2 px), só nos px claros, e deixa o tracejado do lote. Para as outras casas, basta achar a linha logo abaixo do título no PDF delas.
