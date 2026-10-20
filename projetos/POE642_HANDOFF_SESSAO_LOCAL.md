@@ -749,6 +749,16 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
         - O desenho é o detalhe da textura da biblioteca abaixo de ~25 cm.
       - **Conferência:** na prancha, só os pisos de Bege Bahia e travertino mudaram (nada fora da planta). A prancha e os três PDFs foram refeitos.
       - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_texturas_escala_antes_depois.jpg`.
+  26. **Soleiras conferidas com o PDF (R13, 19/10/26: "atenção às soleiras, representar onde tem e evitar adicionar onde não tem"):** no PDF, a soleira é o vão da porta na espessura da parede deixado em branco, entre os batentes. Onde o piso de um dos lados atravessa o vão, não há soleira.
+      - **Com soleira no PDF:**
+        - o DCE e o WC DCE 2 já tinham soleira na imagem;
+        - no depósito (porta dupla), o Bege Bahia passava direto: a soleira entrou;
+        - na casa de máquinas de baixo, o motor tinha deixado o vinílico e dois triângulos cinza no vão: a soleira entrou.
+      - **Sem soleira no PDF:** a casa de máquinas da direita, a sauna, o vestiário e as portas de dentro do vestiário e da ducha. Nenhuma tinha soleira na imagem, e assim ficam.
+      - **Como é a soleira:** Bege Bahia na escala (a textura da biblioteca na cor do Bege Bahia do render, força 0,5), com as duas faces da parede em traço cinza fino, como no PDF. Item `soleiras` (`SOLEIRAS`).
+      - **Conferência:** na prancha, só os dois vãos mudaram. A prancha e os três PDFs foram refeitos.
+      - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_soleiras_antes_depois.jpg`.
+  - **Subsolo da Casa E fechado pelas regras de 19/10:** R2, R3, escadas com linhas e R14, R6/R7, R1 e R13. Os pedidos do cliente (piscina, vidros, rótulo AMBIENTE) também foram feitos.
 - **Entrega (16/10/26, depois da aprovação do usuário: "prancha e o PDF. aprovado."):** a casa passa a ter três pavimentos, na ordem da Casa A (Subsolo, Térreo, 1º Pavimento).
   - **Config:** o Subsolo entrou na chave `entrega` da `POE642_CasaE/config_bases.json` (título "SUBSOLO", linha 0 do quadro de áreas, base `POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png`). O Térreo passou à linha 1 e o 1º Pavimento à linha 2. O quadro de áreas tem os três "NÃO INFORMADO", sem total. Em `pdf.ordem`: Subsolo, Térreo e 1º Pavimento; título "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)".
   - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_Subsolo_entrega.png`, nova. A imagem final, já no quadro comum e com os rótulos, entra com `--no-quadro`, sem realinhar. A do Térreo (realinhada com 128 pontos, erro mediano 0,78 px) e as duas do 1º Pavimento (`_pb` e `_linhas`) foram refeitas só pelo rodapé novo, com a linha do Subsolo no quadro de áreas. Rodapés `entrega/POE642_CasaE_rodape_{Subsolo,Terreo,1Pavimento}.png`.

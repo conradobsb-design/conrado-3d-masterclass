@@ -1310,6 +1310,52 @@ def texturas_na_escala(out, p2r, chapada):
     return out
 
 
+# item 25 (R13, regra do usuário de 19/10/26: "atenção às soleiras, representar onde tem e evitar adicionar onde não
+# tem"). No PDF, a soleira é o vão da porta na espessura da parede deixado em branco, entre os batentes; onde o piso de
+# um dos lados atravessa o vão, não há soleira. Conferido porta a porta:
+# - com soleira no PDF: o DCE, o WC DCE 2, o depósito (porta dupla) e a casa de máquinas de baixo. As duas primeiras já
+#   estavam na imagem; no depósito, o Bege Bahia passava direto (fica a soleira), e na casa de máquinas de baixo o
+#   motor deixou o vinílico e dois triângulos cinza no vão (fica a soleira);
+# - sem soleira no PDF: a casa de máquinas da direita, a sauna e o vestiário (o piso atravessa o vão) e as portas de
+#   dentro do vestiário e da ducha; na imagem, nenhuma tinha soleira, e assim ficam.
+# A soleira é de Bege Bahia, na escala (a textura da biblioteca, na cor do Bege Bahia do render), com as duas faces da
+# parede em traço cinza fino, como no PDF.
+SOLEIRAS = {"pdf": [(1556.0, 563.1, 1564.5, 642.5),     # depósito: a faixa branca do PDF (ARQ_PAREDE)
+                    (1307.0, 1090.3, 1357.1, 1107.4)],  # casa de máquinas de baixo: entre os batentes, na espessura
+            "faces": ["v", "h"], "linha": (150, 152, 154), "linha_px": 0.4,
+            "forca": 0.5, "tom": 0.97}                         # o desenho da pedra, como no piso em volta (item 24)
+
+
+def soleiras(out, p2r):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    q = SOLEIRAS
+    (a, b), (c, d) = p2r(0, 0), p2r(56.6929, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    for r, faces in zip(q["pdf"], q["faces"]):
+        tl = Tela(out, p2r, r, folga=2)
+        m = tl.ret(r)
+        T = textura("bege_bahia", px_m, tl.h, tl.w, semente=7).astype(np.float32)
+        T = (1 + q["forca"] * (T / T.reshape(-1, 3).mean(axis=0) - 1)) * np.asarray(BEGE["cor"], np.float32) * q["tom"]
+        a_ = tl.reduzir(m)[..., None]
+        tl.reg = tl.reg * (1 - a_) + T * a_
+        # as faces da parede (os lados compridos do vão), em traço cinza fino
+        e = max(1, int(round(q["linha_px"] * SS)))
+        f = tl.vazia()
+        (x0, y0), (x1, y1) = tl.pt(r[0], r[1]), tl.pt(r[2], r[3])
+        x0, y0, x1, y1 = (int(round(v)) for v in (x0, y0, x1, y1))
+        if faces == "v":
+            f[y0:y1, x0:x0 + e] = 255
+            f[y0:y1, x1 - e:x1] = 255
+        else:
+            f[y0:y0 + e, x0:x1] = 255
+            f[y1 - e:y1, x0:x1] = 255
+        tl.pintar(f, q["linha"])
+        out = tl.gravar()
+    print("    soleiras de Bege Bahia no depósito e na casa de máquinas de baixo (as do PDF que faltavam)")
+    return out
+
+
 # item 18 (pedido do usuário, 16/10/26): "vamos adicionar os nomes e áreas, conforme regras que adotamos
 # anteriormente para o 1º pavimento da casa E". A regra do 1º Pavimento (`retoque_1pav_casae.rotulos_ambientes`):
 # cada linha do rótulo do PDF entra igual (o nome e "A: 12,65 m²"), na posição do PDF, no corpo do PDF 30%
@@ -1456,6 +1502,8 @@ def main():
         out = remover_arcos(out, pg, p2r, camadas=ARCOS["camadas"], so_folha=True)
         print("[24] Bege Bahia e travertino com o desenho da biblioteca, na escala (R1)")
         out = texturas_na_escala(out, p2r, chapada)
+        print("[25] soleiras onde o PDF tem (R13)")
+        out = soleiras(out, p2r)
         print("[23] escada com linhas e o triângulo de orientação (R14)")
         out = escada_r14(out, pg, p2r, tex)
 

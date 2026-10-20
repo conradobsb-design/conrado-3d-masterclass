@@ -76,6 +76,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - retornos da parede em preto.
 - **Guarda-corpo de vidro fino** nos vazios.
 - **[19/10] R13. Soleiras:** representar onde o PDF tem, e não acrescentar onde não tem. As soleiras já desenhadas precisam ser conferidas contra o PDF (seção 16).
+  - **Como ler no PDF:** a soleira é o vão da porta na espessura da parede deixado em branco, entre os batentes. Onde o piso de um dos lados atravessa o vão, não há soleira.
+  - **Como desenhar:** Bege Bahia na escala, com as duas faces da parede em traço cinza fino (Casa E, Subsolo).
 - **Portões de correr** da área descoberta em alumínio. A porta do elevador em inox, com soleira em inox escovado.
 
 ## 5. Escadas
