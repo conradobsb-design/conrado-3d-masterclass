@@ -86,3 +86,49 @@ def trocar_grama(out, mascara, px_por_m, cor=None, semente=1, sig_luz_m=1.5, sig
     novo[by0:by1, bx0:bx1] = (Lg * sombra[..., None])[by0:by1, bx0:bx1] * det
     a = (cv2.GaussianBlur(m, (0, 0), 0.7) * m)[..., None]
     return np.clip(im * (1 - a) + novo * a, 0, 255).astype(np.uint8), int(mascara.sum())
+
+
+def mascara_grama(out, gramado, croma=None):
+    """A grama de verdade dentro do gramado da base (`gramado`, bool): sem as plantas e com a borda junto aos pisos.
+    - plantas: o que não é grama (cor fora da da grama, escuro, claro ou com folhagem), em manchas de 120 px ou mais,
+      só a mais de 4 px da borda do gramado (junto aos pisos a cor e a folhagem são falsas), fechadas (17 px) e com os
+      vãos pequenos entre folhas (< 1500 px) incluídos;
+    - grama: os px verdes no tom da grama, com a vizinhança medida só nos px verdes (a borda dos pisos não conta), até
+      3 px fora do gramado da base; os buracos pequenos (< 120 px) no meio dela entram.
+    croma: a cromaticidade (b, r) da grama; sem ela, a mediana dos px verdes do gramado."""
+    from scipy import ndimage
+    gramD = cv2.dilate(gramado.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
+    im = out.astype(np.float32)
+    b, g, r = im[..., 0], im[..., 1], im[..., 2]
+    Y = im.mean(axis=2)
+    verde = (g > r + 4) & (g > b + 12) & (Y < 115)
+    s0 = im.sum(axis=2) + 1
+    if croma is None:
+        sel = gramado & verde
+        croma = (float(np.median(b[sel] / s0[sel])), float(np.median(r[sel] / s0[sel])))
+    f = cv2.GaussianBlur(im, (0, 0), 0.8)
+    s = f.sum(axis=2) + 1
+    d = np.hypot(f[..., 0] / s - croma[0], f[..., 2] / s - croma[1])
+    est = cv2.GaussianBlur(np.abs(cv2.GaussianBlur(Y, (0, 0), 1.0) - cv2.GaussianBlur(Y, (0, 0), 3.0)), (0, 0), 1.5)
+    folha = (d >= 0.03) | (f.mean(axis=2) <= 35) | (f.mean(axis=2) >= 140) | (est >= 9)
+    longe = cv2.distanceTransform(gramado.astype(np.uint8), cv2.DIST_L2, 5) > 4
+    nao = cv2.morphologyEx((gramado & folha & longe).astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(nao, 8)
+    planta = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= 120])
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (17, 17))
+    planta = cv2.morphologyEx(planta.astype(np.uint8), cv2.MORPH_CLOSE, k).astype(bool) & gramado
+    buracos = ndimage.binary_fill_holes(planta) & ~planta
+    n, lab, st, _ = cv2.connectedComponentsWithStats(buracos.astype(np.uint8), 8)
+    planta |= np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] < 1500])
+    planta = cv2.dilate(planta.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    vf = verde.astype(np.float32)
+    fv = np.dstack([cv2.GaussianBlur(im[..., c] * vf, (0, 0), 0.8) for c in range(3)]) / \
+        np.maximum(cv2.GaussianBlur(vf, (0, 0), 0.8), 1e-4)[..., None]
+    sv = fv.sum(axis=2) + 1
+    dv = np.hypot(fv[..., 0] / sv - croma[0], fv[..., 2] / sv - croma[1])
+    Lv = fv.mean(axis=2)
+    grama = verde & (dv < 0.03) & (Lv > 35) & (Lv < 102) & gramD & ~planta
+    inv = gramado & ~grama & ~planta
+    n, lab, st, _ = cv2.connectedComponentsWithStats(inv.astype(np.uint8), 8)
+    grama |= np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] < 120])
+    return grama, planta

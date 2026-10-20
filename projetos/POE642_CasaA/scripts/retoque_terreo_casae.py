@@ -178,6 +178,8 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
 41. Carros (R12): alinhados, do mesmo tamanho e da mesma cor. Com `R12_CARROS`, o item 26 apaga os três
     carros como antes e põe, no centro de cada carro do PDF, o carro prata do render (o do meio) levado a
     4,70 x 1,85 m (carroceria, sem os retrovisores), sem giro, com a sombra curta.
+42. Grama (R1, R4): o grão de carpete do motor vira o desenho da grama da referência, na escala, com a luz larga
+    do lugar e as sombras das plantas, no tom verde do render (escolha do usuário, opção B). Plantas e pisos ficam.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1844,6 +1846,37 @@ def escada_linhas(out, A, e):
     return out
 
 
+# grama na escala da referência (item 42, R1 e R4: "representar a escala da madeira conforme modelo referência
+# apresentado, bem com o da grama, garantindo textura"). A grama do motor tem grão fino de carpete (o detalhe fino com o
+# triplo do da referência) e manchas fora de escala; ela passa ao desenho da grama da biblioteca (_texturas, a da
+# planta de referência), na escala do render, com a luz larga do lugar e as sombras das plantas. Tom (usuário,
+# 20/10/26, entre as opções A, tom da referência, e B: "OPÇÃO B"): o verde do próprio render. Plantas, pisos e o branco
+# de fora do lote ficam (texturas_escala.mascara_grama).
+# A cor da grama (cromaticidade) é medida num trecho limpo do gramado ("amostra", px: x0, y0, x1, y1), à esquerda: a
+# mediana do gramado inteiro puxa para a das palmeiras e as folhas claras viravam grama.
+GRAMA = {"cor_chapada": (0x50, 0x91, 0x6E), "tol": 10, "px_por_m": None, "cor": None, "semente": 5,
+         "amostra": (150, 380, 330, 500)}
+
+
+def grama_referencia(out, A):
+    from texturas_escala import mascara_grama, trocar_grama
+    q = GRAMA
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    gramado = np.abs(chapada.astype(np.int32) - np.array(q["cor_chapada"])).max(axis=2) <= q["tol"]
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                   # 1 m na escala 1:50 = 56,69 pt
+    px_m = q["px_por_m"] or float(np.hypot(c - a, d - b))
+    x0, y0, x1, y1 = q["amostra"]
+    am = cv2.GaussianBlur(out.astype(np.float32), (0, 0), 1.5)[y0:y1, x0:x1].reshape(-1, 3)
+    soma = am.sum(axis=1) + 1
+    croma = (float(np.median(am[:, 0] / soma)), float(np.median(am[:, 2] / soma)))
+    grama, planta = mascara_grama(out, gramado, croma=croma)
+    out, n = trocar_grama(out, grama, px_m, cor=q["cor"], semente=q["semente"])
+    print(f"    grama da referência a {px_m:.2f} px/m em {n} px (plantas fora: {int(planta.sum())} px)")
+    return out
+
+
 # paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
 # canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
 PAISAGISMO = {
@@ -2147,6 +2180,8 @@ def main():
     print("[39] escadas com linhas e o triângulo de orientação (R14)")
     for e in ESCADA_LINHAS["escadas"]:
         out = escada_linhas(out, A, e)
+    print("[42] grama na escala da referência (R1, R4), no tom do render")
+    out = grama_referencia(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
