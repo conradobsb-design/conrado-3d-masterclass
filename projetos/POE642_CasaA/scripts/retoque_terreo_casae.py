@@ -2051,7 +2051,7 @@ def pousar_planta(fundo, cor, a, cx, cy, d_px, sombra):
 def restos_fora_do_verde(img, chapada, verde, px_m):
     q = VEGETACAO
     ch = chapada.astype(np.int32)
-    k = 2 * round(q["faixa_m"] * px_m / 2) + 1
+    k = 2 * round(q["faixa_m"] * px_m) + 1                             # faixa_m é o alcance (raio)
     faixa = cv2.dilate(verde.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & ~verde
     faixa &= (ch.max(axis=2) >= 80) & (ch.min(axis=2) < 240)          # sem as linhas do PDF e o branco de fora
     chave = ch[..., 0] * 65536 + ch[..., 1] * 256 + ch[..., 2]

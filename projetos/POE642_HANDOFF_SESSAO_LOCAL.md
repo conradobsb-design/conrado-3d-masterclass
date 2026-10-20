@@ -578,6 +578,17 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Na imagem, antes:** as soleiras eram as do motor, desiguais. No granito eram cremes lisas, de larguras variadas; no travertino, quase sumidas (cozinha/circulação, circulação/garagem de baixo e lavabo).
     - **Agora:** todas iguais, como no Subsolo da mesma casa. O vão exato do PDF em Bege Bahia na escala, no tom da referência, e as duas faces da parede (os lados compridos) em traço cinza fino.
     - **Conferência:** mudaram só os 12 vãos, no retocado e na final. Folha de comparação de todos os vãos com o PDF e antes e depois: `renders/POE642_CasaE_PH_Terreo_soleiras_antes_depois.jpg`.
+  53. vegetação do gramado (pente fino, item 7; pedido do usuário: "a vegetação e grama?"; R1, R4). A grama já era a aprovada (item 42). A vegetação do motor estava fora de escala: folhas de costela-de-adão de ~1,2 m e touceiras de 5 a 8 m. Ela também passava do verde, sobre a pedra portuguesa do acesso e os pisantes.
+    - **Opções levadas ao usuário,** nas mesmas manchas de hoje: A, árvores, arbustos e palmeiras da planta de referência de 19/10 (`_texturas/vegetacao`); B, jardim tropical em maciços com os blocos da biblioteca. Na B, a costela-de-adão e a planta de folhas largas ficaram de fora, porque mostram o vaso. A folha está em `renders/POE642_CasaE_PH_Terreo_vegetacao_opcoes.jpg`. Escolha do usuário: "opção A".
+    - **Feito (`vegetacao`):**
+      - As folhas do motor que passavam do verde saem, numa faixa de 0,6 m. Cada px volta ao material da base chapada, copiado do próprio material ao lado. Na pedra portuguesa, o item 47 redesenha.
+      - A grama da referência entra sob as manchas.
+      - Entram 60 plantas da referência no tamanho real (árvores de 4,5 e 3,4 m, palmeiras e arbustos de 1,1 a 1,6 m), com a copa dentro do verde. Elas não giram: a sombra vem no desenho, para baixo e à esquerda.
+    - **Conferência:** no retocado mudaram só o verde (255 mil px), a faixa em volta (4,5 mil px) e o jardim de inverno (item 54); fora disso, 0 px.
+  54. jardim de inverno (pedido do usuário durante o item 7: "precisamos alterar também o jardim de inverno interno da casa E"). A floreira tem 5,7 x 1,25 m, e as folhagens do motor, cerca de 1 m cada.
+    - **Feito (`jardim_flores`):** forração escura, com plantas tropicais da biblioteca de blocos por cima: bananeira, comigo-ninguém-pode, arbusto e planta com flores, no tamanho real. São 11, em duas fileiras desencontradas. As copas saem um pouco da floreira (como no item 19), nunca sobre a escada, e as 5 flores tropicais ficam.
+    - **Por que blocos:** as plantas da planta de referência (26 px/m) ficaram borradas nos 39 px da floreira.
+    - **Imagens:** antes e depois dos itens 53 e 54 em `renders/POE642_CasaE_PH_Terreo_vegetacao_antes_depois.jpg`. A prancha e os PDFs ficam para o fim da lista.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";
