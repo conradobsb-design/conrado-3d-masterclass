@@ -204,6 +204,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     final são desenhadas de novo nos 3840 px (~4 px cada), só pela área da base, para se lerem.
 48. Título da folha (pente fino de 20/10, item 4; seção 12: "título da folha" não entra): o sublinhado do "0. TÉRREO",
     que sobrou no canto de baixo à esquerda, abaixo do canto tracejado do lote, volta ao branco.
+49. "m²" dos rótulos (pente fino de 20/10, item 5): o "2" sobrescrito logo depois do "m" medido na Inter, com a mesma
+    folga em todos (`retoque_1pav_casae.ROTULOS["folga_m2"]`), na altura do PDF; antes ele ficava na posição do PDF e
+    encostava no "m" (números largos) ou se afastava ("7,11"). Só a imagem final muda.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \

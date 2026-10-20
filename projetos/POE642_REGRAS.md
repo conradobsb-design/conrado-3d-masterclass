@@ -185,6 +185,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 
 - **Texto:** o texto e a quebra do PDF ("SUÍTE 1 / A: 17 m²"), na posição do PDF.
 - **Fonte:** Inter Regular, no corpo do PDF × 1,3 (ambiente estreito: 0,8 a 1,0×).
+- **[20/10] "m²":** o "2" sobrescrito fica logo depois do "m", com a mesma folga pequena em todos os rótulos (7% do corpo), na altura do PDF. Antes ele ficava na posição do PDF e, com a Inter, encostava no "m" ou se afastava, conforme a largura dos números.
 - **Cor:** preta sobre os pisos.
   - **[19/10] R6.** Branca sobre o granito marrom.
   - Branca também sobre verde escuro (jardins).

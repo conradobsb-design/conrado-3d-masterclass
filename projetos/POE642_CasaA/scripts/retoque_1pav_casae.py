@@ -887,6 +887,10 @@ ROTULOS = {"fonte": "Regular", "ss": 4,
            "branco": (250, 250, 250),
            # corpo um pouco maior que o do PDF (pedido do usuário: "e um pouco maior a fonte")
            "escala": 1.3,
+           # o "2" do m²: logo depois do fim do "m" medido na Inter, com esta folga (fração do corpo da linha), na
+           # altura do PDF (pente fino do Térreo da Casa E, 20/10/26: na posição do PDF, ele encostava no "m" quando
+           # os números eram largos e se afastava com os "1" estreitos, como em "7,11")
+           "folga_m2": 0.07,
            # (nome, centro do rótulo do PDF no render de 2000 px, desvio em px desse render)
            # na posição do PDF (pedido do usuário: "preciso que estejam na mesma posição e com leitura
            # visível"); os que caem sobre móvel vão ao piso livre mais próximo ("nesses casos em que o escrito
@@ -977,11 +981,18 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, a
         x1, y1 = int(np.ceil(x1 + dx + fx)), int(np.ceil(y1 + dy + fy))
         tela = Image.new("L", ((x1 - x0) * ss, (y1 - y0) * ss), 0)
         d = ImageDraw.Draw(tela)
+        fim_area = None                                            # onde termina o "A: ... m" (px de ss)
         for texto, tam, (ox, oy), ancora in linhas:
-            f = ImageFont.truetype(str(FONTES / f"Inter-{q['fonte']}.otf"), max(4, int(round(tam * px_pt * e * ss))))
+            corpo = max(4, int(round(tam * px_pt * e * ss)))
+            f = ImageFont.truetype(str(FONTES / f"Inter-{q['fonte']}.otf"), corpo)
             gx, gy = pdf2img(ox, oy)
             gx, gy = cx + (gx - cx) * e, cy + (gy - cy) * e          # as linhas afastam na mesma escala
-            d.text(((gx + dx - x0) * ss, (gy + dy - y0) * ss), texto, font=f, fill=255, anchor=ancora)
+            px_, py_ = (gx + dx - x0) * ss, (gy + dy - y0) * ss
+            if texto == "2" and fim_area is not None:               # o "2" do m², logo depois do "m"
+                px_ = fim_area[0] + q["folga_m2"] * fim_area[1]
+            d.text((px_, py_), texto, font=f, fill=255, anchor=ancora)
+            fim_area = (px_ + d.textlength(texto, font=f), corpo) if texto.startswith("A:") and ancora == "ls" \
+                else None
         a = np.asarray(tela.resize((x1 - x0, y1 - y0), Image.LANCZOS), np.float32)[..., None] / 255
         no_granito = granito is not None and granito[max(y0, 0):y1, max(x0, 0):x1].mean() > 0.5
         cor = np.float32(opc.get("cor", (cor_granito or q["cor_granito"]) if no_granito else q["cor"]))
