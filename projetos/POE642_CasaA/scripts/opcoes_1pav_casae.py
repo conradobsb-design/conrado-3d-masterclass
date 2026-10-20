@@ -19,7 +19,8 @@ mesmas regras: posição do PDF, sobre móvel no piso livre, preto, 30% maior qu
   Pavimento têm a mesma página e o mesmo recorte, então o PDF do Térreo cai direto no quadro comum.
 
 Desde 20/10/26 (pente fino do 1º Pavimento): o alinhamento do 1º Pavimento vem da versão entregue (CIMA_APROVADO),
-e o setor branco da porta pequena à direita do vazio do hall mostra o entorno (SETOR_PORTA, R3).
+e o setor branco da porta pequena à direita do vazio do hall mostra o entorno (SETOR_PORTA, R3); os vazios mostram o
+Térreo de baixo, nevoado, com o X e o vidro por cima (nevoar_vazios).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 opcoes_1pav_casae.py                 # as três opções
@@ -31,6 +32,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from scipy import ndimage
 import pymupdf
 from PIL import Image
 
@@ -58,6 +60,13 @@ PDF_TERREO = R.RAIZ / "_pdfs_cliente/642 - TÉRREO - CASA E.pdf"
 # parede, escura, fica. A base não muda: sem o arco, o caixilho saía da pegada (deixava de ser área fechada)
 SETOR_PORTA = (1297, 690, 1315, 712)
 FORA = [(912, 752, 1096, 816), (822, 800, 912, 816), SETOR_PORTA]
+# vazios com o Térreo nevoado (pente fino do 1º Pavimento, 20/10/26, item 15; usuário: "Mostrar a jardineira de
+# baixo mais nevoada", no vazio sob a escada, sobre o jardim de inverno, e "Mostrar o andar de baixo nevoado", no
+# vazio do hall): o branco dos vazios (item 5 do retoque, pedido de 16/10) passa a mostrar o Térreo de baixo, no
+# mesmo entorno da montagem; o X tracejado, o guarda-corpo de vidro e a folha da pivotante ficam por cima, como
+# um papel transparente (o Térreo multiplicado pelo tom deles). Os vazios são o cinza da base v3 (cor, área
+# mínima em px de 3840, folga em px); o peso vem do branco do render (de "claro" a 255)
+VAZIOS = {"cor": 74, "tol": 12, "area": 1500, "folga": 3, "claro": (205, 245)}
 LINHAS = {"ocultas": ["ARQ_TERRENO PLANEJADO", "ARQ_CONTRAPISO", "DOC_TEXTOS", "ARQ_ZONA"],
           "forca": 0.7}                     # 0: branco; 1: o traço do PDF (preto)
 
@@ -72,6 +81,28 @@ def quadro_pdf(pg, cfg, larg_tela, alt_tela, larg_sem_tela, alt_sem_tela, W):
         px, py = r.para_px(pymupdf.Point(x, y))
         return (px + dx) * k, (py + dy) * k
     return f
+
+
+def mascara_vazios(base):
+    """Os vazios do 1º Pavimento no quadro da montagem: o cinza da base v3, fechado e com os furos (o X claro)
+    preenchidos, com uma folga."""
+    q = VAZIOS
+    cinza = np.abs(base.astype(int) - q["cor"]).max(axis=2) < q["tol"]
+    n, lab, st, _ = cv2.connectedComponentsWithStats(cinza.astype(np.uint8), connectivity=8)
+    m = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > q["area"]]).astype(np.uint8)
+    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
+    m = ndimage.binary_fill_holes(m).astype(np.uint8)
+    return cv2.dilate(m, np.ones((2 * q["folga"] + 1,) * 2, np.uint8)) > 0
+
+
+def nevoar_vazios(out, t, cima, vazios):
+    """No branco dos vazios, o Térreo de baixo (t, o entorno da montagem); os traços do render (X, vidro, folha)
+    ficam por cima, multiplicados."""
+    lo, hi = VAZIOS["claro"]
+    w = vazios * np.clip((cima.min(axis=2).astype(np.float32) - lo) / (hi - lo), 0, 1)
+    w = cv2.GaussianBlur(w, (0, 0), 0.6) * vazios
+    nev = t * np.clip(cima.astype(np.float32) / 250, 0, 1)
+    return np.clip(out * (1 - w[..., None]) + nev * w[..., None], 0, 255).astype(np.uint8)
 
 
 def contexto_linhas(W, H):
@@ -108,6 +139,7 @@ def main():
     s_min = base[sy0:sy1, sx0:sx1].min(axis=2)
     arco = cv2.dilate(((s_min > 60) & (s_min < 245)).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
     arco &= cv2.dilate((s_min <= 60).astype(np.uint8), np.ones((9, 9), np.uint8)) == 0    # a borda da parede fica
+    vazios = mascara_vazios(base)
     cima = cv2.cvtColor(np.asarray(no_quadro_comum(Image.open(CIMA).convert("RGB"), BASE_CIMA, "1º Pavimento", W,
                                                    referencia=Image.open(CIMA_APROVADO).convert("RGB"))),
                         cv2.COLOR_RGB2BGR)
@@ -130,6 +162,7 @@ def main():
         t = contexto()
         out = sobrepor(base, t, FORA, cima)
         out[sy0:sy1, sx0:sx1][arco] = np.clip(t[sy0:sy1, sx0:sx1][arco], 0, 255).astype(np.uint8)
+        out = nevoar_vazios(out, t, cima, vazios)
         out = R.rotulos_ambientes(out, rot, p2q, escala_desvio=W / 2000)
         nome = args.saida / f"POE642_CasaE_PH_1Pavimento_v1_final_{chave}.png"
         cv2.imwrite(str(nome), out)

@@ -784,6 +784,12 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Alinhamento fixo na montagem:** o SIFT refeito a cada rodada mexia na pegada inteira, por reamostragem. Agora o afim vem da versão entregue (`renders/POE642_CasaE_PH_1Pavimento_v1_retocado_aprovado.png`), como no Térreo.
     - **Conferência:** no retocado sem rótulos, mudaram só as 12 áreas dos arcos (fora elas, diferenças de 1 nível, de arredondamento). Nas três montagens e nas três pranchas, também só as 12 áreas; rodapé igual. As três pranchas e os três PDFs foram refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_sem_arcos_antes_depois.jpg`.
+  - **Item 15, vazios com o Térreo nevoado, feito.** Na montagem (`opcoes_1pav_casae.nevoar_vazios`), o branco dos dois vazios passa a mostrar o Térreo de baixo, no mesmo entorno da montagem (no nublado, o Térreo nublado):
+    - no vazio sob a escada, a jardineira (o jardim de inverno, já só no verde);
+    - no do hall, o piso e a planta do hall de entrada.
+    - **Como:** os vazios são o cinza (74) da base v3, fechados e com o X preenchido, com 3 px de folga (`VAZIOS`). O peso vem do branco do render (de 205 a 245), e o Térreo é multiplicado pelo tom do render. Assim, o X tracejado, o guarda-corpo de vidro e a folha da pivotante P1 ficam por cima, como num papel transparente.
+    - **Conferência:** nas três montagens e nas três pranchas, só os dois vazios mudaram; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_vazios_nevoados_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 

@@ -451,6 +451,7 @@ Duas opções em 3840 px para o cliente (pedido do usuário: "em preto e branco 
 Desde 20/10/26 (pente fino do 1º Pavimento, item 1, sem os arcos):
 - **Alinhamento fixo:** o afim do 1º Pavimento ao quadro comum é medido em `CIMA_APROVADO` (`renders/POE642_CasaE_PH_1Pavimento_v1_retocado_aprovado.png`, a versão entregue até 20/10, sem rótulos) e aplicado ao retocado atual (`no_quadro_comum(..., referencia=...)`, como o Térreo). Sem isso, cada retoque refazia o SIFT e a pegada inteira saía reamostrada.
 - **`SETOR_PORTA`:** o setor branco da porta pequena à direita do vazio do hall, do lado de fora, entra em `FORA`. Os px do traço do arco (da base e do render) recebem o entorno depois da montagem. A base não muda, porque sem o arco o caixilho deixava de ser área fechada e saía da pegada.
+- **Vazios nevoados (`nevoar_vazios`, item 15):** o branco dos dois vazios mostra o Térreo de baixo, no entorno da opção, multiplicado pelo tom do render. Assim o X, o vidro e a folha da pivotante ficam por cima. Os vazios são o cinza 74 da base v3 (`VAZIOS`).
 
 O `entorno_esmaecido.py` foi dividido em `contexto_render` (o entorno a partir de um render) e `sobrepor` (pegada, sobreposição integral, tracejado do lote), com o `compor` de antes por cima dos dois.
 
