@@ -196,10 +196,12 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     Living, fachada de baixo (item 2 do pente fino: "corrija as cortinas aqui também"): o zigue-zague cinza e os tracinhos
     do motor saem; o trilho vai do trilho do vidro da varanda (fecha o L no canto) até a parede da direita, logo acima
     das quatro folhas escalonadas, e os dois panos ficam nos trechos do PDF (ARQ_MOBILIÁRIO), a meia distância.
-47. Pedra portuguesa do acesso de veículos na escala da regra (pente fino de 20/10, item 3; R1, "pedras de 6 a 8 cm"):
-    as pedras de 12 a 15 cm do motor saem e entram as pedras caramelo, ocre e creme de 7 cm, com juntas finas mais
-    escuras, sobre a luz e as sombras do lugar (`texturas_escala.trocar_pedra_portuguesa`); as plantas por cima ficam.
-    No retocado elas têm ~2 px; na imagem final são desenhadas de novo nos 3840 px (~4 px cada), para se lerem.
+47. Pedra portuguesa do acesso de veículos (pente fino de 20/10, item 3; R1, "pedras de 6 a 8 cm"), como a foto de
+    referência do usuário (escolha de 20/10: "opção 1, tom da foto"): as pedras caramelo de 12 a 15 cm do motor saem e
+    entram pedras de 7 cm assentadas em leque, com juntas claras de areia e as cores das pedras da foto, sobre a luz
+    relativa e as sombras do lugar (`texturas_escala.pedra_portuguesa_leque`); as plantas por cima ficam, e a franja
+    laranja da borda (px de mistura com a grama) recebe a troca de tom. No retocado as pedras têm ~2 px; na imagem
+    final são desenhadas de novo nos 3840 px (~4 px cada), só pela área da base, para se lerem.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2076,34 +2078,52 @@ def cortinas(out, A):
     return out
 
 
-# pedra portuguesa do acesso de veículos na escala da regra (item 47; pente fino de 20/10, item 3). A regra (R1; seção 3:
-# "pedras de 6 a 8 cm") e o material da casa (pedra portuguesa caramelo). O motor fez pedras de 12 a 15 cm. Saem as
-# dele e entram as do `fontes_procedurais.pedra_portuguesa` (caramelo, ocre e creme), de 7 cm, com juntas finas mais
-# escuras, sobre a luz larga do lugar e as sombras dele (`texturas_escala.trocar_pedra_portuguesa`). Área: o caramelo
-# #C49A6C da base chapada (com folga), só onde o px é caramelo (as plantas por cima e a grama ficam). No retocado as
-# pedras têm ~2 px; na imagem final elas são desenhadas de novo nos 3840 px (~4 px cada), para se lerem.
+# pedra portuguesa do acesso de veículos (item 47; pente fino de 20/10, item 3). A regra (R1; seção 3: "pedras de 6 a
+# 8 cm") e a referência (a foto do usuário de 19/10, `_texturas/originais/pedra_portuguesa.webp`; escolha do usuário,
+# 20/10: "opção 1, tom da foto"). O motor fez pedras caramelo de 12 a 15 cm. Entram as pedras da foto, de 7 cm,
+# assentadas em leque como nela, com as juntas claras de areia e as cores sorteadas das pedras da foto (bege, cinza e
+# rosado), sobre a luz relativa e as sombras do lugar (`texturas_escala.pedra_portuguesa_leque` e
+# `trocar_pedra_portuguesa`, fonte "leque"). A foto tecida ou espelhada não serviu: nessa escala (7 cm = ~4 px na final)
+# o leque some e fica cara de granito ou de caleidoscópio. Área: o caramelo #C49A6C da base chapada (com folga), só onde
+# o px é do acesso (as plantas por cima e a grama ficam). No retocado as pedras têm ~2 px; na imagem final são
+# desenhadas de novo nos 3840 px, para se lerem.
 PEDRA = {"cor_chapada": (0x6C, 0x9A, 0xC4), "tol": 6, "folga": 3, "pedra_cm": 7.0, "junta": (0.6, 0.78),
-         "contraste": 0.85, "semente": 642}
+         "contraste": 1.0, "semente": 642, "fonte": "leque"}
 
 
-def mascara_pedra(img, chapada, folga):
+def mascara_pedra(img, chapada, folga, caramelo=True):
+    """O acesso: o caramelo da base chapada, com folga, sem as plantas e as paredes; com `caramelo`, só onde o px ainda
+    é o caramelo do motor (no retocado). Na final o retocado já chega com a pedra nova, e vale só a base."""
     q = PEDRA
     cm = np.abs(chapada.astype(np.int32) - np.array(q["cor_chapada"])).max(axis=2) <= q["tol"]
     im = img.astype(np.int32)
     b, g, r = im[..., 0], im[..., 1], im[..., 2]
-    caramelo = (r > g + 18) & (g > b + 12) & (im.mean(axis=2) > 95)
+    cor = (r > g + 18) & (g > b + 12) & (im.mean(axis=2) > 95)
     planta = cv2.dilate(((g >= r - 8) | (im.mean(axis=2) < 90)).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
     k = 2 * folga + 1
-    return cv2.dilate(cm.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & caramelo & ~planta
+    area = cv2.dilate(cm.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & ~planta
+    return area & cor if caramelo else area & cm
 
 
-def pedra_portuguesa(img, chapada, px_m, folga):
+def pedra_portuguesa(img, chapada, px_m, folga, retocado=True):
     from texturas_escala import trocar_pedra_portuguesa
     q = PEDRA
-    m = mascara_pedra(img, chapada, folga)
+    m = mascara_pedra(img, chapada, folga, caramelo=retocado)
+    antes = img.astype(np.float32)
+    caramelo = np.median(antes[m], axis=0)
     img, n = trocar_pedra_portuguesa(img, m, px_m, pedra_cm=q["pedra_cm"], semente=q["semente"], junta=q["junta"],
-                                     contraste=q["contraste"])
-    print(f"    pedra portuguesa caramelo: {n} px, pedras de {q['pedra_cm']:.0f} cm a {px_m:.2f} px/m")
+                                     contraste=q["contraste"], fonte=q["fonte"])
+    # a franja: os px da borda que misturam o caramelo do motor com a grama ou a parede ficam fora da máscara e
+    # deixavam um fio laranja; cada um recebe a troca de tom (pedra nova - caramelo) na fração de caramelo que tem,
+    # estimada pelo r - g (caramelo ~ +43; grama ~ -23)
+    pedra = np.median(img[m].astype(np.float32), axis=0)
+    borda = cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~m
+    rg = antes[..., 2] - antes[..., 1]
+    c_rg = caramelo[2] - caramelo[1]
+    frac = np.clip((rg + 23) / (c_rg + 23), 0, 1) * borda * retocado          # na final, a borda já vem certa
+    img[:] = np.clip(img.astype(np.float32) + frac[..., None] * (pedra - caramelo), 0, 255).astype(np.uint8)
+    print(f"    pedra portuguesa ({q['fonte']}): {n} px, pedras de {q['pedra_cm']:.0f} cm a {px_m:.2f} px/m; "
+          f"franja da borda: {int((frac > 0.05).sum())} px")
     return img
 
 
@@ -2309,7 +2329,7 @@ def final_rotulos(out, referencia=None):
     chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), (W, H), interpolation=cv2.INTER_NEAREST)
     (a, b), (c, d) = p2q(0, 0), p2q(56.69, 0)
     print("    [47] pedra portuguesa redesenhada na final:")
-    final = pedra_portuguesa(final, chapada, float(np.hypot(c - a, d - b)), 2 * PEDRA["folga"] + 1)
+    final = pedra_portuguesa(final, chapada, float(np.hypot(c - a, d - b)), 0, retocado=False)
     rot = [r for r in R1.rotulos_pdf(pg) if not any(f in r[0] for f in q["fora"])]
     granito = np.abs(chapada.astype(int) - np.array(ARCOS["granito"])).max(axis=2) <= 6
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))

@@ -41,7 +41,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Bege Bahia (placa de 0,60 m): "uniforme, quase liso, sem manchas"; o padrão é o Bege Bahia das varandas do 1º Pavimento da Casa A.
   - Travertino (1,20 m, veio horizontal).
   - Quartzito Aura (chapa de 3,00 × 1,95 m).
-  - Pedra portuguesa (pedras de 6 a 8 cm), só no acesso de veículos.
+  - Pedra portuguesa (pedras de 6 a 8 cm), só no acesso de veículos. **[20/10]** No desenho e no tom da foto de referência (`_texturas/originais/pedra_portuguesa.webp`): assentada em leque, com juntas claras de areia, em bege, cinza e rosado (usuário: "opção 1, tom da foto"; substitui o caramelo). Na escala da planta é desenhada por código (`texturas_escala.pedra_portuguesa_leque`), porque a foto ampliada perde o leque.
   - Granito marrom (mais liso e menos escuro que a foto, sem excesso de pontos claros).
 - **[19/10] R4. Madeira e grama na escala da referência**, com textura: `referencia_planta.webp`, medida em 26 px/m.
   - Madeira de deck: réguas de ~15 cm.

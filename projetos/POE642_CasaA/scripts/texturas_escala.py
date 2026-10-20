@@ -134,13 +134,99 @@ def mascara_grama(out, gramado, croma=None):
     return grama, planta
 
 
+def pedra_portuguesa_foto(px_por_m, alto, largo, buraco=0.55):
+    """A pedra portuguesa da foto de referência do usuário (19/10/26), vista de cima (`_texturas/pedra_portuguesa.jpg`,
+    largura real em `texturas.json`), na escala px_por_m e no tom da foto, cobrindo alto x largo. As pedras soltas muito
+    escuras (buracos: mais escuras que `buraco` x a luz em volta) viram a média em volta; a foto é espelhada em blocos de
+    2 x 2 (2,28 x 3,34 m), para os leques se encontrarem sem emenda."""
+    import json
+    tex = Path(__file__).resolve().parents[2] / "_texturas"
+    q = json.loads((tex / "texturas.json").read_text())["materiais"]["pedra_portuguesa"]
+    foto = cv2.imread(str(tex / q["arquivo"])).astype(np.float32)
+    lum = foto.mean(axis=2)
+    escuro = (lum < buraco * cv2.GaussianBlur(lum, (0, 0), 25)).astype(np.uint8)
+    escuro = cv2.dilate(escuro, np.ones((7, 7), np.uint8))
+    foto = cv2.inpaint(np.clip(foto, 0, 255).astype(np.uint8), escuro, 9, cv2.INPAINT_TELEA).astype(np.float32)
+    w = max(2, int(round(q["largura_m"] * px_por_m)))
+    h = max(2, int(round(w * foto.shape[0] / foto.shape[1])))
+    t = cv2.resize(foto, (w, h), interpolation=cv2.INTER_AREA)
+    bloco = np.vstack([np.hstack([t, t[:, ::-1]]), np.hstack([t[::-1], t[::-1, ::-1]])])
+    reps = (alto // bloco.shape[0] + 1, largo // bloco.shape[1] + 1, 1)
+    return np.tile(bloco, reps)[:alto, :largo]
+
+
+def pedra_portuguesa_leque(px_por_m, alto, largo, raio_m=1.2, pedra_m=0.07, junta_m=0.012, ss=3, semente=642):
+    """A pedra portuguesa da foto de referência (19/10/26) desenhada por código, para se ler na escala da planta: as
+    pedras de ~7 cm assentadas em leque (escamas de raio `raio_m`, em fiadas desencontradas, com as pedras ao longo de
+    arcos concêntricos), contornos levemente irregulares, juntas claras de areia e as cores sorteadas das pedras da
+    própria foto (bege, cinza e rosado). Devolve BGR float32 (alto x largo), no tom da foto."""
+    import json
+    tex = Path(__file__).resolve().parents[2] / "_texturas"
+    q = json.loads((tex / "texturas.json").read_text())["materiais"]["pedra_portuguesa"]
+    foto = cv2.imread(str(tex / q["arquivo"])).astype(np.float32)
+    lum = foto.mean(axis=2)
+    rng = np.random.default_rng(semente)
+    k = px_por_m * ss
+    H, W = alto * ss, largo * ss
+    Y, X = np.mgrid[0:H, 0:W].astype(np.float32)
+    def ruido(sig):                                               # campo suave, em px de ss
+        n = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), sig)
+        return n / (n.std() + 1e-6)
+    X = X + ruido(0.03 * k) * 0.008 * k                           # contornos irregulares (~8 mm)
+    Y = Y + ruido(0.03 * k) * 0.008 * k
+    R = raio_m * k
+    jb = np.floor(Y / R)
+    melhor = np.full((H, W), -1e9, np.float32)
+    leque = np.zeros((H, W), np.int64)
+    rr = np.zeros((H, W), np.float32)
+    th = np.zeros((H, W), np.float32)
+    for dj in (-1, 0, 1):                                         # a fiada de baixo cobre a de cima (escamas)
+        j = jb + dj
+        cx0 = (j % 2) * R
+        i = np.round((X - cx0) / (2 * R))
+        cx, cy = cx0 + i * 2 * R, j * R
+        d = np.hypot(X - cx, Y - cy)
+        ok = (d < R * 1.0) & (j > melhor)
+        melhor = np.where(ok, j, melhor)
+        leque = np.where(ok, (j.astype(np.int64) * 100003 + i.astype(np.int64)), leque)
+        rr = np.where(ok, d, rr)
+        th = np.where(ok, np.arctan2(Y - cy, X - cx), th)
+    s = pedra_m * k
+    anel = np.floor(rr / s)
+    rc = (anel + 0.5) * s
+    desloc = (np.sin(anel * 12.9898 + leque % 997) * 43758.5453) % 1.0      # cada anel começa num ponto
+    pos = th * rc / s + desloc
+    ang = np.floor(pos)
+    ident = (leque * 1000 + anel.astype(np.int64)) * 100000 + ang.astype(np.int64)
+    _, inv = np.unique(ident, return_inverse=True)
+    inv = inv.reshape(H, W)
+    # juntas: borda radial (entre anéis) e angular (entre pedras), e a borda das escamas
+    fr = rr / s - anel
+    fa = pos - ang
+    jt = junta_m / pedra_m / 2
+    junta = (fr < jt) | (fr > 1 - jt) | (fa < jt) | (fa > 1 - jt) | (rr > R - junta_m * k)
+    # cores das pedras: amostras do miolo das pedras da foto (sem as juntas claras nem os buracos escuros)
+    lb = cv2.GaussianBlur(lum, (0, 0), 2)
+    miolo = (lb > np.percentile(lb, 15)) & (lb < np.percentile(lb, 70))
+    ys, xs = np.nonzero(miolo)
+    sel = rng.integers(0, len(ys), inv.max() + 1)
+    cores = cv2.GaussianBlur(foto, (0, 0), 2)[ys[sel], xs[sel]]
+    img = cores[inv]
+    img *= (0.97 + 0.06 * np.clip(np.minimum(np.minimum(fr, 1 - fr), np.minimum(fa, 1 - fa)) * 4, 0, 1))[..., None]
+    areia = np.percentile(foto.reshape(-1, 3), 92, axis=0)
+    img[junta] = areia
+    return cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
+
+
 def trocar_pedra_portuguesa(out, mascara, px_por_m, pedra_cm=7.0, semente=642, sig_luz_m=1.5, sig_sombra_m=0.25,
-                            sombra_limiar=0.93, contraste=1.0, junta=(0.6, 0.78)):
+                            sombra_limiar=0.93, contraste=1.0, junta=(0.6, 0.78), fonte="foto"):
     """A pedra portuguesa do motor (pedras de 12 a 15 cm, fora da regra) vira a da regra, de 6 a 8 cm (R1; seção 3 do
     POE642_REGRAS.md): as pedras caramelo, ocre e creme com juntas de areia do `fontes_procedurais.pedra_portuguesa`,
     desenhadas na escala da imagem (`pedra_cm`, a px_por_m), sobre a luz larga do lugar (no tom que já está lá) e com as
     sombras dele, como em `trocar_grama`. Na imagem final (3840 px) as pedras de 7 cm têm ~4 px e se leem; no render de
-    2000 px, ~2 px. `junta`: (largura em px, escurecimento) das juntas entre as pedras."""
+    2000 px, ~2 px. `junta`: (largura em px, escurecimento) das juntas entre as pedras.
+    fonte="foto" (escolha do usuário, 20/10/26: "opção 1, tom da foto"): o desenho e o tom da foto de referência
+    (`pedra_portuguesa_foto`), com a luz relativa do lugar (sombras e variações), em vez do caramelo procedural."""
     sys.path.insert(0, str(Path(__file__).resolve().parent))
     import fontes_procedurais as fp
     im = out.astype(np.float32)
@@ -150,9 +236,16 @@ def trocar_pedra_portuguesa(out, mascara, px_por_m, pedra_cm=7.0, semente=642, s
     sombra = np.minimum(1.0, ((Lc.mean(axis=2) + 1) / (Lg.mean(axis=2) + 1)) / sombra_limiar)
     ys, xs = np.nonzero(mascara)
     bx0, by0, bx1, by1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
-    P = fp.pedra_portuguesa(lado=max(by1 - by0, bx1 - bx0), pedra_cm=pedra_cm, semente=semente,
-                            cm_por_px=100.0 / px_por_m, junta=junta).astype(np.float32)[:by1 - by0, :bx1 - bx0]
-    det = 1 + contraste * (P / P.reshape(-1, 3).mean(axis=0) - 1)
+    if fonte in ("foto", "leque"):
+        P = (pedra_portuguesa_leque if fonte == "leque" else pedra_portuguesa_foto)(px_por_m, by1 - by0, bx1 - bx0)
+        Lg = Lg / Lg[mascara].mean(axis=0)                        # só a luz relativa do lugar; o tom é o da foto
+    else:
+        P = fp.pedra_portuguesa(lado=max(by1 - by0, bx1 - bx0), pedra_cm=pedra_cm, semente=semente,
+                                cm_por_px=100.0 / px_por_m, junta=junta).astype(np.float32)[:by1 - by0, :bx1 - bx0]
+    media = P.reshape(-1, 3).mean(axis=0)
+    det = 1 + contraste * (P / media - 1)
+    if fonte in ("foto", "leque"):
+        det = det * media
     novo = im.copy()
     novo[by0:by1, bx0:bx1] = (Lg * sombra[..., None])[by0:by1, bx0:bx1] * det
     a = (cv2.GaussianBlur(m, (0, 0), 0.7) * m)[..., None]

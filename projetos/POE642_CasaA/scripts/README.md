@@ -496,12 +496,12 @@ python3 retoque_subsolo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Subs
 
 ## Pedra portuguesa na escala: `texturas_escala.trocar_pedra_portuguesa`
 
-`trocar_pedra_portuguesa(out, mascara, px_por_m, pedra_cm=7.0, junta=(0.6, 0.78))` troca a pedra portuguesa do motor pelas pedras de `fontes_procedurais.pedra_portuguesa`, desenhadas na escala da imagem:
-- `cm_por_px`: a escala de desenho, um parâmetro novo do gerador;
-- `junta`: a largura em px e o escurecimento das juntas, para cada pedra se ler com poucos px;
-- a luz larga do lugar, no tom que já está lá, e as sombras dele, como em `trocar_grama`.
+`trocar_pedra_portuguesa(out, mascara, px_por_m, fonte="foto" | "leque" | "procedural")` troca a pedra portuguesa do motor pela da regra (6 a 8 cm), sobre a luz e as sombras do lugar, como em `trocar_grama`:
+- `fonte="leque"` (Casa E, escolha do usuário em 20/10: "opção 1, tom da foto"): `pedra_portuguesa_leque` desenha as pedras de 7 cm assentadas em leque, como na foto de referência (`_texturas/pedra_portuguesa.jpg`). As escamas têm 1,2 m de raio, em fiadas desencontradas, e as pedras seguem arcos concêntricos. Os contornos são levemente irregulares, as juntas, claras de areia, e as cores são sorteadas das pedras da própria foto. A luz do lugar entra só como relativa; o tom é o da foto.
+- `fonte="foto"`: a foto vista de cima, espelhada em blocos. Testada e descartada: com 7 cm em ~4 px, o leque some e fica um caleidoscópio. A foto tecida da biblioteca vira cara de granito.
+- `fonte="procedural"`: as pedras caramelo soltas de `fontes_procedurais.pedra_portuguesa` (a da base v3), agora com a escala e a junta como parâmetros.
 
-No Térreo da Casa E (item 47) entra no retocado e de novo na final de 3840 px, onde as pedras de 7 cm têm ~4 px. A máscara é o caramelo da base chapada, só onde o px é caramelo, sem as plantas.
+No Térreo da Casa E (item 47) entra no retocado e de novo na final de 3840 px, onde as pedras têm ~4 px. A área do retocado é o caramelo da base chapada, só onde o px ainda é caramelo e sem as plantas. Na final vale só a base, porque o retocado já chega com a pedra nova. No retocado, a franja da borda recebe a troca de tom na fração de caramelo que tem.
 
 ## Nomes e áreas da Casa A: `rotulos_casaa.py`
 
