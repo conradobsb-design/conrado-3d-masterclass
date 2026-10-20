@@ -745,7 +745,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 
 - **Pente fino pelas regras (20/10/26).** Pedido do usuário: "Vamos às alterações no primeiro pavimento da casa E. Adotar as regras que elencamos." A imagem final nublada (a opção padrão, seção 11 do `POE642_REGRAS.md`), com o Térreo do pente fino em volta, foi conferida trecho a trecho contra as regras e o PDF (`_pdfs_cliente/642 - 1º PAVIMENTO - CASA E.pdf`). Nada foi retocado ainda.
   - **Conforme:**
-    - rótulos: o do banho master já está fora da banheira (R7), nenhum fica sobre objeto, e o "m²" segue a regra de 20/10;
+    - rótulos: nenhum outro fica sobre objeto, e o "m²" segue a regra de 20/10 (o do banho master: ver abaixo);
     - vazios brancos com o X e o guarda-corpo de vidro;
     - shaft da suíte master;
     - brises em bronze;
@@ -770,6 +770,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     13. floreira do banho master: tem uma flor laranja; fica só o verde, como o jardim de inverno do Térreo (pedido de 20/10);
     14. a plantinha sobre o aparador da sala íntima não está no PDF ("nada inventado"): sai. A do canto, junto ao vazio, está no PDF e fica.
   - **No fim:** o nublado vira a opção única (seção 16). A prancha sai sem sufixo, e o PDF único `POE642_CasaE_Plantas_Humanizadas.pdf`.
+  - **Rótulo do banho master (feito; usuário: "O escrito do banho master não pode ficar sobre a banheira").** No mapa ele tinha passado como conforme, mas encostava na banheira: o texto começava em y = 592 e a banheira terminava em y = 591 (na final de 3840 px). O desvio em `retoque_1pav_casae.ROTULOS["ajustes"]` passou de (0, 8) a (0, 35) px de 2000, e ele foi para o meio do piso livre entre a banheira e o vidro do box (y ≈ 600 a 712).
+    - **Conferência:** nas três montagens mudou só o rótulo (as duas áreas, a de antes e a de agora); rodapé igual.
+    - **Refeitos:** as três pranchas do 1º Pavimento e os três PDFs. O retocado de 2000 px com rótulos (que não vai à entrega) sai assim na próxima rodada do `retoque_1pav_casae.py`.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_rotulo_banho_master_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 

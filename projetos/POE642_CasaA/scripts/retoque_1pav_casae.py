@@ -897,7 +897,9 @@ ROTULOS = {"fonte": "Regular", "ss": 4,
            # fica sobre algum mobiliário, está autorizado deslocar para outro local do piso"):
            # (nome, centro do rótulo do PDF no render de 2000 px, desvio em px desse render)
            "ajustes": [("SUÍTE MASTER", (813.7, 395.2), (6, 26)),       # sobre o banco: abaixo, fora do tapete e do pufe
-                       ("BANHO MASTER", (961.0, 302.1), (0, 8)),        # na ponta da banheira: logo abaixo
+                       # na ponta da banheira; logo abaixo (8) ainda encostava nela (usuário, 20/10/26: "O escrito do
+                       # banho master não pode ficar sobre a banheira"): no meio do piso livre entre ela e o box
+                       ("BANHO MASTER", (961.0, 302.1), (0, 35)),
                        ("SALA ÍNTIMA", (949.1, 670.9), (-13, 0)),       # no braço do sofá: à esquerda
                        ("CLOSET 2", (1192.8, 319.8), (4, 0)),           # na borda do armário: à direita
                        ("CLOSET 3", (873.5, 655.2), (-5, 0)),           # na borda do armário: à esquerda
