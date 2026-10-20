@@ -167,7 +167,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - degraus, prainha e spa como no PDF;
   - a borda em pedra conforme a casa.
 - **[19/10] R12. Carros:** em todas as plantas, alinhados, do mesmo tamanho e na mesma cor, **prata**. O tamanho é um carro de 4,70 × 1,85 m, igual nas cinco casas (cor e tamanho aceitos pelo usuário em 19/10). A quantidade segue o PDF.
-  - **[20/10] Casa E Térreo:** os três carros passam ao modelo da foto do usuário, um SUV visto de cima ("para os três carros, adote esse modelo"), os três em **bronze**, como na foto ("Bronze"). Continuam alinhados e do mesmo tamanho. Falta saber se o modelo bronze vale também para as Casas A a D. A foto chegou só como imagem na conversa e aguarda o arquivo para entrar na biblioteca.
+  - **[20/10] Casa E Térreo:** os três carros passam ao modelo da foto do usuário, um SUV visto de cima ("para os três carros, adote esse modelo"), os três em **bronze**, como na foto ("Bronze"). Continuam alinhados e do mesmo tamanho. Só na Casa E ("só para a Casa E"): as Casas A a D seguem com os carros prata. A foto chegou só como imagem na conversa e aguarda o arquivo para entrar na biblioteca.
 - **Lote:** linhas tracejadas do lote nas posições do PDF; nada do motor fora do lote; fundo branco fora do terreno; curvas de nível ocultas.
 
 ## 11. Pavimentos
