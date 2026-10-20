@@ -559,6 +559,13 @@ Pente fino do Térreo da Casa E, item 10 ("melhorar a representação dos cookto
 - **Limpeza:** o retângulo do PDF, com `margem` (2,5 px do retocado; o contorno do motor passa do retângulo), volta ao tampo da ilha. A fonte é o tampo logo à esquerda, com a borda suave.
 - **Bloco:** gira 180° (`giro`), para os botões ficarem do lado de quem cozinha (o oposto das banquetas). Entra na altura do PDF, com até 10% de alongamento na largura (`esticar`), centrado e em 8x. O anel azul da chama da foto vira inox (`azul`).
 
+## Poltronas do living e da varanda: `retoque_terreo_casae.poltronas`
+
+Pente fino do Térreo da Casa E, item 11 (escolha do usuário: "use a bouclé creme no living e a palhinha na varanda"). As 8 poltronas do PDF ficam em `POLTRONAS["pecas"]`: bloco, centro, ponto para onde olham (pt) e tamanho (m). `frente` diz para onde a frente do assento aponta na folha de cada bloco. Roda no retocado (`poltronas_sociais`, item 58) e de novo na final de 3840 px, só desenhando por cima (`limpar=False`).
+- **Limpeza:** a poltrona do motor é a mancha clara perto do centro do PDF. O disco vai no centro dela, com o raio dela + `folga` (ou `raio` x tamanho, o que for maior), mais o disco deslocado da sombra, sem os círculos de `proteger` (a mesa em X).
+- **Preenchimento:** o piso vem do deslocamento (`busca` x tamanho, nas `direcoes` quase verticais) que melhor continua o anel em volta. Ficam de fora os que caem sobre outra poltrona ou têm px a mais de `objeto` níveis do piso. A emenda é em gradiente (`cv2.seamlessClone`), e os px soltos viram a mediana 7x7.
+- **Bloco:** girado para o ponto, no tamanho do PDF, com a sombra curta (`sombra`). Os vincos da bouclé são clareados (`clarear`).
+
 ## Título da folha: `retoque_terreo_casae.titulo_folha`
 
 O texto do título ("0. TÉRREO / ESC.:1:50") não entra nas bases, mas o sublinhado dele, uma linha do PDF sem camada logo abaixo do canto tracejado do lote, pode sobrar. `titulo_folha` volta ao branco a faixa da linha (pt do PDF em `TITULO["linhas"]`, folga de 2 px), só nos px claros, e deixa o tracejado do lote. Para as outras casas, basta achar a linha logo abaixo do título no PDF delas.

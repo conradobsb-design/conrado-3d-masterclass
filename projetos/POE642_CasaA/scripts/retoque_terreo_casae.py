@@ -233,6 +233,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
 57. Cooktops das ilhas (pente fino, item 10; usuário: "melhorar a representação dos cooktops das ilhas, com novo
     bloco"): nas ilhas gourmet e da cozinha, o retângulo manchado do motor volta ao tampo e entra o cooktop de inox de
     5 bocas e 90 cm da biblioteca, no retângulo do PDF, com os botões do lado de quem cozinha.
+58. Poltronas do living e da varanda (pente fino, item 11; usuário: "use a bouclé creme no living e a palhinha na
+    varanda"): as 8 do motor saem (com a sombra, o piso emendado em gradiente) e entram os blocos da biblioteca,
+    virados para a mesa, no tamanho do PDF.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2699,14 +2702,20 @@ def cooktops_ilhas(out, A):
 # manchas brancas genéricas. Entram os blocos da biblioteca (`_blocos`), como ela mesma indica: a poltrona bouclé nas
 # 4 em X em volta da mesa redonda do living e nas 2 redondas junto à mesa de centro; a de rattan nas 2 da varanda, ao
 # lado do banco. "pecas": (bloco, centro em pt, ponto para onde a poltrona olha em pt, tamanho em m: o maior lado, o
-# do PDF); "frente": para onde a frente do assento aponta na folha do bloco. A poltrona do motor sai antes: um disco de
-# "raio" x tamanho, mais o mesmo disco deslocado para baixo e à esquerda (a sombra), preenchido com o piso de um ponto
-# próximo (o que melhor continua o anel em volta, sem outra peça dentro: "busca", múltiplos do tamanho, 8 direções).
+# do PDF); "frente": para onde a frente do assento aponta na folha do bloco (na bouclé, o encosto fica em cima e a frente
+# embaixo; na de palhinha, o arco do encosto embaixo e os braços abertos em cima). A poltrona do motor sai antes: um disco de
+# "raio" x tamanho (ou o raio da mancha clara da poltrona do motor, que ele desenhou maior e um pouco fora do lugar, com
+# "folga" px; no centro dela), mais o mesmo disco deslocado para baixo e à esquerda (a sombra), sem a mesa em X
+# ("proteger": centro e raio em pt), preenchido com o piso de um ponto
+# próximo (o que melhor continua o anel em volta e é piso limpo, sem px a mais de "fuga" níveis da luz do anel e nunca
+# sobre outra poltrona nem com px de outra peça, a mais de "objeto" níveis: "busca", múltiplos do tamanho, nas
+# "direcoes" quase verticais, para o veio vertical do travertino seguir; "lateral" pesa contra o deslocamento para os
+# lados), emendado em gradiente (cv2.seamlessClone), sem a borda do disco.
 # A sombra é a curta dos móveis ("sombra"). A bouclé tem os vincos clareados ("clarear": gama), que no tamanho da
 # planta viravam traços escuros. Na final de 3840 px as poltronas são redesenhadas por cima, nítidas, sem a sombra (que
-# já vem do retocado). Desligado ("ativo") até o usuário escolher entre as poltronas da folha que mandou ("seguem
-# algumas opções de poltronas"; chegou só como imagem na conversa, sem arquivo para recortar).
-POLTRONAS = {"ativo": False,              # aguarda a escolha entre as poltronas da folha do usuário (pente fino, item 11)
+# já vem do retocado). Escolha do usuário na folha de poltronas que mandou: "use a bouclé creme no living e a palhinha
+# na varanda" (a folha chegou só como imagem; entram os blocos mais próximos da biblioteca até chegar o arquivo).
+POLTRONAS = {"ativo": True,
              "pecas": [("poltrona_rattan", (1108.4, 1519.4), (1155.1, 1519.4), 0.82),
                        ("poltrona_rattan", (1108.4, 1576.3), (1155.1, 1576.3), 0.82),
                        ("poltrona_boucle", (1510.0, 1473.0), (1544.6, 1537.6), 0.76),
@@ -2715,8 +2724,9 @@ POLTRONAS = {"ativo": False,              # aguarda a escolha entre as poltronas
                        ("poltrona_boucle", (1837.4, 1528.7), (1790.6, 1570.5), 0.71),
                        ("poltrona_boucle", (1739.3, 1614.5), (1790.6, 1570.5), 0.71),
                        ("poltrona_boucle", (1837.4, 1614.5), (1790.6, 1570.5), 0.71)],
-             "frente": {"poltrona_boucle": (0, -1), "poltrona_rattan": (0, -1)}, "clarear": {"poltrona_boucle": 0.35},
-             "raio": 0.66, "sombra_motor": 0.08, "busca": (1.3, 1.7, 2.1),
+             "frente": {"poltrona_boucle": (0, 1), "poltrona_rattan": (0, -1)}, "clarear": {"poltrona_boucle": 0.35},
+             "raio": 0.80, "sombra_motor": 0.18, "busca": (1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.6, 3.0, 3.5), "direcoes": (90, 270, 60, 120, 240, 300), "objeto": 32,
+             "fuga": 18, "lateral": 6, "solto": 14, "claro": 8, "folga": 3, "proteger": [((1790.6, 1570.5), 30.0)],
              "sombra": {"dx": -0.06, "dy": 0.06, "desfoque": 0.06, "opacidade": 0.35}}
 
 
@@ -2734,11 +2744,29 @@ def poltronas(out, p2x, limpar=True):
     yy, xx = np.mgrid[0:H, 0:W]
     pecas = [(bid, np.float32(p2x(*cen)), np.float32(p2x(*alvo)), tam * px_m) for bid, cen, alvo, tam in q["pecas"]]
     if limpar:
-        # a poltrona do motor, com a sombra: um disco e o mesmo disco deslocado para baixo e à esquerda
+        # a poltrona do motor (que ele desenhou maior e um pouco fora do lugar do PDF): a mancha clara perto do centro
+        # do PDF; o disco vai no centro dela, com o raio dela (+ "folga" px) ou "raio" x tamanho, o que for maior, mais
+        # o mesmo disco deslocado para baixo e à esquerda (a sombra); a mesa ("proteger", pt) fica de fora
+        L0 = img.mean(axis=2)
+        prot = np.zeros((H, W), bool)
+        for (px, py), rp in q["proteger"]:
+            (cx_, cy_), (ex_, _) = p2x(px, py), p2x(px + rp, py)
+            prot |= np.hypot(xx - cx_, yy - cy_) < abs(ex_ - cx_) + 1.5
         mascaras = []
         for _, cen, _, t in pecas:
-            r, s = q["raio"] * t, q["sombra_motor"] * t
-            mascaras.append((np.hypot(xx - cen[0], yy - cen[1]) < r) | (np.hypot(xx - cen[0] + s, yy - cen[1] - s) < r))
+            d = np.hypot(xx - cen[0], yy - cen[1])
+            piso = np.median(L0[(d > 1.0 * t) & (d < 1.3 * t) & ~prot])
+            claro = (d < 0.9 * t) & (L0 > piso + q["claro"]) & ~prot
+            n, lab, st, cc = cv2.connectedComponentsWithStats(claro.astype(np.uint8), connectivity=8)
+            if n > 1:
+                k = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+                c0 = cc[k]
+                rb = np.hypot(xx[lab == k] - c0[0], yy[lab == k] - c0[1]).max() + q["folga"]
+            else:
+                c0, rb = cen, 0
+            r, s = max(q["raio"] * t, rb), q["sombra_motor"] * t
+            m = (np.hypot(xx - c0[0], yy - c0[1]) < r) | (np.hypot(xx - c0[0] + s, yy - c0[1] - s) < r)
+            mascaras.append(m & ~prot)
         todas = np.logical_or.reduce(mascaras)
         L = img.mean(axis=2)
         for (_, cen, _, t), m in zip(pecas, mascaras):
@@ -2746,24 +2774,34 @@ def poltronas(out, p2x, limpar=True):
             ya, xa = np.nonzero(anel)
             ym, xm = np.nonzero(m)
             melhor = None
+            ref = np.median(L[ya, xa])
             for f in q["busca"]:
-                for ang in range(0, 360, 45):
+                for ang in q["direcoes"]:
                     ox, oy = int(round(f * t * np.cos(np.radians(ang)))), int(round(f * t * np.sin(np.radians(ang))))
                     if min(xa.min() + ox, ya.min() + oy) < 0 or xa.max() + ox >= W or ya.max() + oy >= H:
                         continue
+                    if (todas | prot)[ym + oy, xm + ox].any():           # nunca de outra poltrona nem da mesa
+                        continue
+                    if (np.abs(L[ym + oy, xm + ox] - ref) > q["objeto"]).mean() > 0.002:   # nem de outra peça
+                        continue
                     custo = np.abs(img[ya + oy, xa + ox] - img[ya, xa]).mean()
-                    fonte_l = L[ym + oy, xm + ox]
-                    custo += 60 * (np.abs(fonte_l - np.median(L[ya + oy, xa + ox])) > 22).mean()
-                    custo += 200 * todas[ym + oy, xm + ox].mean()
+                    custo += q["lateral"] * abs(np.cos(np.radians(ang)))      # o veio do travertino é vertical
+                    # a fonte tem de ser piso limpo: px longe da luz do anel (outra peça, barra, sombra) pesam muito
+                    custo += 400 * (np.abs(L[ym + oy, xm + ox] - ref) > q["fuga"]).mean()
                     if melhor is None or custo < melhor[0]:
                         melhor = (custo, ox, oy)
             _, ox, oy = melhor
-            # a luz do piso de onde vem levada à do anel em volta do buraco (ganho por canal)
-            ganho = img[ya, xa].mean(axis=0) / np.maximum(img[ya + oy, xa + ox].mean(axis=0), 1)
-            novo = img.copy()
-            novo[ym, xm] = img[ym + oy, xm + ox] * ganho
-            al = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 1.2 * t / 24)[..., None]
-            img = img * (1 - al) + novo * al
+            # o piso de onde vem entra pela emenda em gradiente (cv2.seamlessClone): a luz casa com a do anel em
+            # volta, sem a borda do disco
+            fonte = np.clip(np.roll(img, (-oy, -ox), axis=(0, 1)), 0, 255).astype(np.uint8)
+            mm = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)) * 255
+            bx, by, bw, bh = cv2.boundingRect(mm)
+            img = cv2.seamlessClone(fonte, np.clip(img, 0, 255).astype(np.uint8), mm, (bx + bw // 2, by + bh // 2),
+                                    cv2.NORMAL_CLONE).astype(np.float32)
+            # pontos claros ou escuros soltos que vieram com a fonte: dentro do buraco, o px que foge da mediana 7x7
+            med = cv2.medianBlur(np.clip(img, 0, 255).astype(np.uint8), 7).astype(np.float32)
+            solto = (mm > 0) & (np.abs(img - med).max(axis=2) > q["solto"])
+            img[solto] = med[solto]
     for bid, cen, alvo, t in pecas:
         cor, al = blocos.bloco(bid, 100)
         k = q["clarear"].get(bid)
