@@ -2172,18 +2172,27 @@ def titulo_folha(out, A):
 # marrom menos escuro?"; das três opções (renders/POE642_CasaE_PH_Terreo_granito_opcoes.jpg), "opção B, sem pontos os
 # grandes brancos". Só no granito da base chapada, nos px de granito: perto do marrom no croma e de 40% a 150% da
 # luminosidade mediana (carros, inox, móveis, paredes e traços ficam; as sombras acompanham).
-# 1. Pontos: os claros do motor (mais de 10 níveis acima da mediana de 7 px em volta), em manchas de até 40 px e 8 x 8
+# 1. Pontos: os claros do motor (mais de 10 níveis acima da mediana de 7 px em volta), em manchas de até 80 px e 12 x 12
 #    px, viram a mediana em volta, com a borda suave. Ficam de fora os traços cinza neutros (o X tracejado, as folhas
 #    das portas), as linhas do PDF da DOC_LINHAS E PROJEÇÕES (desenhadas como máscara) e o que encosta em objeto
 #    (retrovisores, bordas): tudo a 2 px de px neutro, de linha do PDF ou de fora do granito.
-# 2. Tom: ganho por canal da mediana atual (RGB ~83, 59, 52) à da opção B (RGB 124, 95, 81), com o peso do granito.
+# 2. Manchas (pedido seguinte do usuário, ao ver a planta: a grade de manchas que o motor repete no granito ficou visível
+#    no tom claro, com cara de porcelanato): a variação entre ~3 cm e ~1 m (razão entre a média de 30 px e a de 1 px
+#    do granito, nos px com a luz de granito e não neutros, inclusive as manchas claras rosadas) sai inteira, a
+#    mais de 12 px de objeto e parede; de 5 a 12 px ela some aos poucos (as sombras ficam). O grão de 1 px fica.
+# 3. Tom: ganho por canal da mediana atual (RGB ~83, 59, 52) à da opção B (RGB 124, 95, 81), com o peso do granito.
 # Vem antes das projeções (item 44), para o tracejado delas não ser tocado.
-GRANITO_TOM = {"alvo": (81, 95, 124), "croma": (6, 12), "luz": (0.40, 1.50), "pontos": {"limiar": 10, "area": 40,
-               "lado": 8, "mediana": 7, "neutro": 6, "folga": 2, "fonte": 9,
+GRANITO_TOM = {"alvo": (81, 95, 124), "croma": (6, 12), "luz": (0.40, 1.50),
+               # manchas da grade do motor (usuário: "sim, corrija o granito antes do 7"): a variação entre ~10 cm e
+               # ~1 m sai (razão entre a média larga e a curta do granito), longe dos objetos; perto deles some aos
+               # poucos, para as sombras ficarem
+               "manchas": {"sig_curto": 1.0, "sig_largo": 30.0, "forca": 1.0, "longe": (5, 12)}, "pontos": {"limiar": 10, "area": 80,
+               "lado": 12, "mediana": 7, "neutro": 6, "folga": 2, "fonte": 13,
                                                                        "camada": "DOC_LINHAS E PROJEÇÕES"}}
 
 
 def granito_tom(out, A):
+    from texturas_escala import nconv
     q = GRANITO_TOM
     g = granito_render(out.shape[:2], A).astype(bool)
     lab = cv2.cvtColor(out, cv2.COLOR_BGR2LAB).astype(np.float32)
@@ -2221,7 +2230,21 @@ def granito_tom(out, A):
                                      (0, 0), 0.7), pontos)[..., None] * g[..., None]
     fonte = cv2.medianBlur(out, pq["fonte"]).astype(np.float32)
     im = out.astype(np.float32) * (1 - al) + fonte * al
-    # 2. tom
+    # 2. manchas de média escala (a grade que o motor repete no granito)
+    mq = q["manchas"]
+    # aqui vale todo px da área de granito com a luz de granito e que não é cinza neutro (as manchas claras são mais
+    # rosadas e ficariam fora do peso de croma); carros, inox, móveis claros e paredes continuam de fora
+    croma0 = np.hypot(lab[..., 1] - 128, lab[..., 2] - 128)
+    puro = (g & (L > l0 * med[0]) & (L < l1 * med[0]) & (croma0 > 5)).astype(np.uint8)
+    dist = cv2.distanceTransform(cv2.erode(puro, np.ones((3, 3), np.uint8)), cv2.DIST_L2, 3)
+    l0_, l1_ = mq["longe"]
+    longe = np.clip((dist - l0_) / (l1_ - l0_), 0, 1) * puro
+    pf = puro.astype(np.float32)
+    curto = nconv(im, pf, mq["sig_curto"]).mean(axis=2)
+    largo = nconv(im, pf, mq["sig_largo"]).mean(axis=2)
+    razao = largo / np.maximum(curto, 1)
+    im = im * (1 + (mq["forca"] * longe * (razao - 1)))[..., None]
+    # 3. tom
     cur = np.median(im[g & (w > 0.9)], axis=0)
     ganho = np.float32(q["alvo"]) / cur
     im = im * (1 + w[..., None] * (ganho - 1))
