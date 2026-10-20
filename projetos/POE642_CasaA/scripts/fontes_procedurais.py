@@ -152,3 +152,56 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# granito marrom da referência do usuário (20/10/26, "use essa referencia de granito marrom"; a foto veio só na conversa,
+# sem arquivo: o desenho é reproduzido por código). Base marrom quente com nuvens suaves e lascas de agregado de vários
+# tamanhos (muitas de 2 a 8 mm, algumas de 1 a 3 cm e raras de 3 a 6 cm), em creme, bege, chocolate, ferrugem, cinza e
+# quase preto. A foto tem ~60 cm de largura (estimado pelas lascas).
+GRANITO_REF = {"base": (68, 88, 118),                       # BGR, o marrom da base
+               "nuvem": (0.15, 0.045), "mancha": (0.03, 0.02),  # (escala em m, amplitude) das nuvens e do mosqueado
+               "lascas": [  # (densidade por m², diâmetro mín. e máx. em mm)
+                   (3200, 2, 7), (320, 7, 22), (22, 22, 55)],
+               # a maioria em tons de marrom perto da base (mais escuros e mais claros), menos as claras e as escuras
+               "cores": [((50, 66, 92), 0.24), ((92, 112, 140), 0.18), ((176, 188, 204), 0.17), ((140, 156, 176), 0.10),
+                         ((44, 62, 108), 0.10), ((104, 108, 112), 0.11), ((36, 40, 46), 0.10)],
+               "suave": 0.45}                                  # desfoque das lascas (px em ss)
+
+
+def granito_referencia(alto, largo, px_por_m, ss=4, semente=642):
+    """O granito marrom da referência, BGR float32 (alto x largo), na escala px_por_m."""
+    q = GRANITO_REF
+    rng = np.random.default_rng(semente)
+    H, W = alto * ss, largo * ss
+    k = px_por_m * ss                                          # px (em ss) por metro
+
+    def ruido(esc_m, amp):
+        n = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), max(0.5, esc_m * k))
+        return 1 + amp * n / (n.std() + 1e-6)
+    img = np.empty((H, W, 3), np.float32)
+    img[:] = np.float32(q["base"])
+    img *= (ruido(*q["nuvem"]) * ruido(*q["mancha"]))[..., None]
+    cores = np.float32([c for c, _ in q["cores"]])
+    pesos = np.float32([w for _, w in q["cores"]])
+    pesos /= pesos.sum()
+    area_m2 = (H / k) * (W / k)
+    for dens, d0, d1 in q["lascas"]:
+        n = rng.poisson(dens * area_m2)
+        diam = np.exp(rng.uniform(np.log(d0), np.log(d1), n)) / 1000 * k   # px (em ss)
+        cx, cy = rng.uniform(0, W, n), rng.uniform(0, H, n)
+        cor = cores[rng.choice(len(cores), n, p=pesos)] * rng.uniform(0.9, 1.08, (n, 1))
+        peq = diam < 1.6
+        # as menores: um px (em ss), com a força pela área
+        xs, ys = cx[peq].astype(int), cy[peq].astype(int)
+        f = np.clip((diam[peq] / 1.6) ** 2, 0.15, 1)[:, None]
+        img[ys, xs] = img[ys, xs] * (1 - f) + cor[peq] * f
+        # as maiores: polígonos irregulares
+        for x, y, d, c in zip(cx[~peq], cy[~peq], diam[~peq], cor[~peq]):
+            m = rng.integers(6, 10)
+            ang = np.sort(rng.uniform(0, 2 * np.pi, m))
+            r = d / 2 * rng.uniform(0.72, 1.0, m)
+            pts = np.stack([x + r * np.cos(ang), y + r * np.sin(ang) * rng.uniform(0.6, 1.0)], 1)
+            cv2.fillPoly(img, [np.round(pts * 4).astype(np.int32)], tuple(float(v) for v in c), cv2.LINE_AA, shift=2)
+    img = cv2.GaussianBlur(img, (0, 0), q["suave"])
+    return cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
+

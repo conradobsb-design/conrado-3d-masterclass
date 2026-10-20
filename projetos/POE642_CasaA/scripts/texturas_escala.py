@@ -251,3 +251,33 @@ def trocar_pedra_portuguesa(out, mascara, px_por_m, pedra_cm=7.0, semente=642, s
     a = (cv2.GaussianBlur(m, (0, 0), 0.7) * m)[..., None]
     return np.clip(im * (1 - a) + novo * a, 0, 255).astype(np.uint8), int(mascara.sum())
 
+
+def trocar_granito(out, peso, px_por_m, protegido=None, sig_luz_px=2.5, semente=642):
+    """O granito do render vira o granito marrom da referência do usuário (`fontes_procedurais.granito_referencia`), na
+    escala px_por_m: a luz do lugar (média local de sig_luz_px nos px de granito, relativa à mediana; as sombras de
+    paredes e objetos ficam) vezes o desenho da referência, no tom dela. peso: 0..1 por px (o quanto é granito);
+    protegido: px que ficam como estão (traços do PDF)."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import fontes_procedurais as fp
+    im = out.astype(np.float32)
+    a = peso.astype(np.float32)
+    if protegido is not None:
+        a = a * ~protegido
+    m = (a > 0.5).astype(np.float32)
+    luz = nconv(im, m, sig_luz_px).mean(axis=2)
+    ref = np.median(luz[a > 0.9])
+    rel = np.clip(luz / ref, 0.3, 1.3)
+    ys, xs = np.nonzero(a > 0)
+    bx0, by0, bx1, by1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
+    T = fp.granito_referencia(by1 - by0, bx1 - bx0, px_por_m, semente=semente)
+    novo = im.copy()
+    novo[by0:by1, bx0:bx1] = T * rel[by0:by1, bx0:bx1, None]
+    res = im * (1 - a[..., None]) + novo * a[..., None]
+    if protegido is not None:
+        # os traços protegidos misturam o granito antigo: recebem a troca de tom na fração de granito que têm, para
+        # não ficar um halo do tom antigo em volta deles
+        ganho = T.reshape(-1, 3).mean(axis=0) / np.median(im[a > 0.9], axis=0)
+        f = (peso.astype(np.float32) * protegido)[..., None]
+        res = res * (1 - f) + im * (1 + 0.85 * (ganho - 1)) * f
+    return np.clip(res, 0, 255).astype(np.uint8), int((a > 0.5).sum())
+

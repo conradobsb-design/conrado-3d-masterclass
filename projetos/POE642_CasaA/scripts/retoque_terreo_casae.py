@@ -2244,13 +2244,15 @@ def granito_tom(out, A):
     largo = nconv(im, pf, mq["sig_largo"]).mean(axis=2)
     razao = largo / np.maximum(curto, 1)
     im = im * (1 + (mq["forca"] * longe * (razao - 1)))[..., None]
-    # 3. tom
-    cur = np.median(im[g & (w > 0.9)], axis=0)
-    ganho = np.float32(q["alvo"]) / cur
-    im = im * (1 + w[..., None] * (ganho - 1))
-    out[:] = np.clip(im, 0, 255).astype(np.uint8)
-    print(f"    granito: {int(ok.sum())} pontos claros fora ({int(pontos.sum())} px); tom de RGB "
-          f"{tuple(int(v) for v in cur[::-1])} para {tuple(q['alvo'][::-1])} (opção B)")
+    # 3. o desenho e o tom da referência do usuário (o granito marrom com lascas), com a luz do lugar
+    from texturas_escala import trocar_granito
+    linhas_d = cv2.dilate(linhas, np.ones((3, 3), np.uint8)).astype(bool)
+    _, p2r_, _ = pdf_cadeia(A, out.shape)
+    (a_, b_), (c_, d_) = p2r_(0, 0), p2r_(56.69, 0)
+    px_m = float(np.hypot(c_ - a_, d_ - b_))
+    out[:], n = trocar_granito(np.clip(im, 0, 255).astype(np.uint8), w, px_m, protegido=neutro | linhas_d)
+    print(f"    granito: {int(ok.sum())} pontos claros fora ({int(pontos.sum())} px); {n} px no granito da referência, "
+          f"a {px_m:.2f} px/m")
     return out
 
 
