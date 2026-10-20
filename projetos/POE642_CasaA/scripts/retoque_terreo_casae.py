@@ -230,6 +230,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     cadeiras", com a referência da banqueta para a biblioteca): as 7 do PDF e do motor saem (o Bege Bahia de baixo,
     com a sombra curta da ilha) e entram 5 da referência (madeira e linho, `_blocos` "banqueta_linho"), no tamanho da
     do PDF, de frente para a ilha e espaçadas por igual ao longo dela.
+57. Cooktops das ilhas (pente fino, item 10; usuário: "melhorar a representação dos cooktops das ilhas, com novo
+    bloco"): nas ilhas gourmet e da cozinha, o retângulo manchado do motor volta ao tampo e entra o cooktop de inox de
+    5 bocas e 90 cm da biblioteca, no retângulo do PDF, com os botões do lado de quem cozinha.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2629,6 +2632,68 @@ def banquetas_ilha(out, A):
     return banquetas(out, p2r)
 
 
+# cooktops das ilhas (item 57; pente fino de 20/10, item 10, usuário: "melhorar a representação dos cooktops das ilhas,
+# com novo bloco"). O motor fez um retângulo cinza manchado nas duas ilhas (gourmet e cozinha), sem as bocas. Regra
+# (seção 7): cooktop com as bocas do PDF, eletrodomésticos em inox. O PDF (ARQ_LOUÇAS E METAIS) tem nas duas o mesmo
+# cooktop de 5 bocas, 49,9 x 28,3 pt (0,88 x 0,50 m); entra o bloco de inox de 5 bocas e 90 cm da biblioteca
+# (`_blocos`, "cooktop_inox_5_90"): o retângulo do PDF, com "margem" px (o contorno do motor passa dele), volta ao tampo
+# da ilha (o tampo logo à esquerda, "fonte_dx" px além da largura), e o bloco entra centrado nele, na altura do PDF e com até 10% de alongamento na largura
+# ("esticar"), girado de 180° para os botões ficarem do lado de quem cozinha (o oposto das banquetas). O anel azul da
+# chama da foto vira inox ("azul": b - r acima disso). Como as banquetas, é redesenhado na final de 3840 px.
+COOKTOPS = {"pdf": [(1153.1, 904.3, 1203.0, 932.7), (1563.7, 806.7, 1613.6, 835.0)], "bloco": "cooktop_inox_5_90",
+            "giro": 180, "esticar": 1.10, "fonte_dx": 3, "margem": 2.5, "azul": 18}
+
+
+def cooktops(out, p2x):
+    q = COOKTOPS
+    rgba = cv2.imread(str(RAIZ / "_blocos" / "recortes" / f"{q['bloco']}.png"), cv2.IMREAD_UNCHANGED)
+    rgba = cv2.rotate(rgba, cv2.ROTATE_180) if q["giro"] == 180 else rgba
+    cor0 = rgba[..., :3].astype(np.float32)
+    b, r = cor0[..., 0], cor0[..., 2]
+    azul = np.clip((b - r - q["azul"]) / 20, 0, 1)[..., None]
+    cor0 = cor0 * (1 - azul) + cor0.mean(axis=2, keepdims=True) * azul
+    a0 = rgba[..., 3].astype(np.float32) / 255
+    img = out.astype(np.float32)
+    for r_ in q["pdf"]:
+        (x0, y0), (x1, y1) = p2x(r_[0], r_[1]), p2x(r_[2], r_[3])
+        e = (x1 - x0) / 27.0                                           # 1 no retocado (27 px de cooktop)
+        # o retângulo volta ao tampo: o tampo logo à esquerda, com a borda suave
+        g = round(q["margem"] * e)                                     # o contorno do motor passa do retângulo
+        X0, Y0, X1, Y1 = int(np.floor(x0)) - g, int(np.floor(y0)) - g, int(np.ceil(x1)) + g, int(np.ceil(y1)) + g
+        dx = (X1 - X0) + round(q["fonte_dx"] * e)
+        m = np.zeros(out.shape[:2], np.float32)
+        m[Y0:Y1, X0:X1] = 1
+        m = cv2.GaussianBlur(m, (0, 0), 0.5 * e)
+        tampo = img.copy()
+        tampo[Y0 - 2:Y1 + 2, X0 - 2:X1 + 2] = img[Y0 - 2:Y1 + 2, X0 - 2 - dx:X1 + 2 - dx]
+        img = img * (1 - m[..., None]) + tampo * m[..., None]
+        # o bloco: na altura do PDF, até `esticar` na largura, centrado
+        H = y1 - y0
+        W = min(x1 - x0, H * rgba.shape[1] / rgba.shape[0] * q["esticar"])
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        k = 8
+        Wi, Hi = int(np.ceil(W)) + 2, int(np.ceil(H)) + 2
+        fx, fy = np.floor(cx - W / 2) - 1, np.floor(cy - H / 2) - 1
+        M = cv2.getAffineTransform(np.float32([(0, 0), (rgba.shape[1], 0), (0, rgba.shape[0])]),
+                                   np.float32([((cx - W / 2 - fx) * k, (cy - H / 2 - fy) * k),
+                                               ((cx + W / 2 - fx) * k, (cy - H / 2 - fy) * k),
+                                               ((cx - W / 2 - fx) * k, (cy + H / 2 - fy) * k)]))
+        c8 = cv2.warpAffine(cor0 * a0[..., None], M, (Wi * k, Hi * k), flags=cv2.INTER_AREA)
+        a8 = cv2.warpAffine(a0, M, (Wi * k, Hi * k), flags=cv2.INTER_AREA)
+        c1 = cv2.resize(c8, (Wi, Hi), interpolation=cv2.INTER_AREA)
+        a1 = cv2.resize(a8, (Wi, Hi), interpolation=cv2.INTER_AREA)[..., None]
+        fx, fy = int(fx), int(fy)
+        reg = img[fy:fy + Hi, fx:fx + Wi]
+        img[fy:fy + Hi, fx:fx + Wi] = reg * (1 - a1) + c1
+    print(f"    {len(q['pdf'])} cooktops de inox, 5 bocas ({q['bloco']}), no retângulo do PDF")
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def cooktops_ilhas(out, A):
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    return cooktops(out, p2r)
+
+
 # esquadrias finas (item 55; pente fino de 20/10, item 8, usuário: "portas vidros e janelas mais delicados e finos?").
 # O motor desenhou caixilhos largos e brancos, com duas ou três linhas, nas janelas, nos vidros da fachada e nas folhas.
 # No PDF, tudo está na ARQ_PAREDE: os brancos finos (até 12,5 pt de espessura e 15 pt ou mais de comprimento; fora as
@@ -2999,6 +3064,8 @@ def final_rotulos(out, referencia=None):
     final = pedra_portuguesa(final, chapada, float(np.hypot(c - a, d - b)), 0, retocado=False)
     print("    [56] banquetas da ilha gourmet redesenhadas na final (nítidas):")
     final = banquetas(final, p2q)
+    print("    [57] cooktops das ilhas redesenhados na final (nítidos):")
+    final = cooktops(final, p2q)
     rot = [r for r in R1.rotulos_pdf(pg) if not any(f in r[0] for f in q["fora"])]
     granito = np.abs(chapada.astype(int) - np.array(ARCOS["granito"])).max(axis=2) <= 6
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
@@ -3116,6 +3183,8 @@ def main():
     out = bege_referencia(out, A)
     print("[56] ilha do espaço gourmet: 5 banquetas (pente fino, item 9)")
     out = banquetas_ilha(out, A)
+    print("[57] cooktops das ilhas: inox, 5 bocas, da biblioteca (pente fino, item 10)")
+    out = cooktops_ilhas(out, A)
     print("[53] vegetação do gramado: árvores, arbustos e palmeiras da referência no tamanho real (pente fino, item 7)")
     out = vegetacao(out, A)
     print("[50] granito menos escuro (opção B) e sem os pontos brancos grandes (pente fino, item 6)")

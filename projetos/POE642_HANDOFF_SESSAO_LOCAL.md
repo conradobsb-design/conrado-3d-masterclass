@@ -604,6 +604,14 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Feito (`banquetas`):** a faixa das 7 voltou ao Bege Bahia, com a sombra curta da ilha. Entraram 5 banquetas da referência, no tamanho da do PDF e espaçadas por igual ao longo da ilha (a cada 28,6 px no retocado). Estão de frente para a ilha, com a frente do assento sob o tampo, e a sombra é a da biblioteca.
     - **Nitidez:** no retocado a banqueta tem 12 px e ficava borrada ao ampliar. Por isso, na final de 3840 px, ela é redesenhada (24 px), como a pedra portuguesa.
     - **Conferência:** só a faixa sob a ilha mudou: 2,6 mil px no retocado e 10,2 mil px na final. Antes e depois, com a referência: `renders/POE642_CasaE_PH_Terreo_ilha_gourmet_antes_depois.jpg`.
+  57. cooktops das ilhas (pente fino, item 10; pedido do usuário: "melhorar a representação dos cooktops das ilhas, com novo bloco"). O motor tinha feito um retângulo cinza manchado nas ilhas gourmet e da cozinha, sem bocas. No PDF as duas têm o mesmo cooktop de 5 bocas, de 0,88 x 0,50 m.
+    - **Bloco:** `cooktop_inox_5_90` da biblioteca: inox, 5 bocas, 90 cm. Segue a regra da seção 7 (bocas do PDF, eletrodomésticos em inox).
+    - **Feito (`cooktops`):**
+      - o retângulo do motor voltou ao tampo da ilha;
+      - o bloco entrou na altura do PDF, centrado, girado de 180° para os botões ficarem do lado de quem cozinha (o oposto das banquetas);
+      - o anel azul da chama da foto ficou em inox;
+      - na final de 3840 px o cooktop é redesenhado, para sair nítido.
+    - **Conferência:** só os dois cooktops mudaram, no retocado e na final. Antes e depois: `renders/POE642_CasaE_PH_Terreo_cooktops_antes_depois.jpg`.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";

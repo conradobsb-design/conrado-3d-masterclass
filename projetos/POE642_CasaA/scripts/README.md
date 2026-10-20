@@ -553,6 +553,12 @@ Pente fino do Térreo da Casa E, item 9 ("na ilha do espaço gourmet, deixe apen
 - **Limpeza:** a faixa das 7 banquetas do motor (`BANQUETAS["faixa"]` px abaixo da ilha, com `folga` para os lados; px do retocado, escalados na final) recebe as linhas de Bege Bahia logo abaixo (`fonte_dy`), com a borda suave e a sombra curta da ilha.
 - **Banquetas:** 5 do bloco, no tamanho da banqueta do PDF (`modelo_pdf`, 22,7 pt), centradas em 1/10, 3/10 ... 9/10 do comprimento da ilha, na linha do PDF, com a sombra de `texturas.json`. Só o que fica abaixo da borda da ilha entra: a frente do assento fica sob o tampo, como no PDF.
 
+## Cooktops das ilhas: `retoque_terreo_casae.cooktops`
+
+Pente fino do Térreo da Casa E, item 10 ("melhorar a representação dos cooktops das ilhas, com novo bloco"). Regra da seção 7: cooktop com as bocas do PDF, eletrodomésticos em inox. Os dois cooktops do PDF (`COOKTOPS["pdf"]`, ARQ_LOUÇAS E METAIS, 5 bocas, 49,9 x 28,3 pt) recebem o bloco `cooktop_inox_5_90` da biblioteca. Como as banquetas, roda no retocado (`cooktops_ilhas`, item 57) e de novo na final de 3840 px (`final_rotulos`):
+- **Limpeza:** o retângulo do PDF, com `margem` (2,5 px do retocado; o contorno do motor passa do retângulo), volta ao tampo da ilha. A fonte é o tampo logo à esquerda, com a borda suave.
+- **Bloco:** gira 180° (`giro`), para os botões ficarem do lado de quem cozinha (o oposto das banquetas). Entra na altura do PDF, com até 10% de alongamento na largura (`esticar`), centrado e em 8x. O anel azul da chama da foto vira inox (`azul`).
+
 ## Título da folha: `retoque_terreo_casae.titulo_folha`
 
 O texto do título ("0. TÉRREO / ESC.:1:50") não entra nas bases, mas o sublinhado dele, uma linha do PDF sem camada logo abaixo do canto tracejado do lote, pode sobrar. `titulo_folha` volta ao branco a faixa da linha (pt do PDF em `TITULO["linhas"]`, folga de 2 px), só nos px claros, e deixa o tracejado do lote. Para as outras casas, basta achar a linha logo abaixo do título no PDF delas.
