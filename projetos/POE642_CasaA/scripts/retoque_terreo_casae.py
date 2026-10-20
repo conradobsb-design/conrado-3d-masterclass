@@ -212,6 +212,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     as bordas de objetos ficam), a grade de manchas repetida sai e o granito passa a ter o desenho e o tom da referência
     do usuário ("use essa referencia de granito marrom"), com a luz do lugar, só nos px de granito. Antes das projeções.
 51. Rótulo da adega no piso, dentro do U da prateleira (R7; usuário: "escreva no piso, dentro da adega").
+52. Soleiras (R13; usuário: "revisar todas as soleiras"): das 16 portas de giro do PDF, as 12 com o vão branco na
+    espessura da parede ganham a soleira igual, no vão exato do PDF, em Bege Bahia na escala e no tom da referência, com
+    as duas faces da parede em traço cinza fino (como no Subsolo); as do gás e a pivotante do hall não têm soleira.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2261,6 +2264,64 @@ def granito_tom(out, A):
     return out
 
 
+# soleiras (item 52; usuário, 20/10/26: "revisar todas as soleiras"; R13). As 16 portas de giro do PDF, conferidas uma a
+# uma pelo arco: 12 têm o vão na espessura da parede deixado em branco (a soleira); as duas do gás abrem para o interior
+# do abrigo (branco no PDF, sem soleira à parte) e a pivotante do hall fica na fachada de vidro. Na imagem, as soleiras
+# eram as do motor, desiguais: cremes lisas no granito, de larguras variadas, e no travertino quase sumidas (cozinha para
+# a circulação, lavabo, circulação para a garagem). Todas são refeitas iguais, como no Subsolo da mesma casa: o vão
+# exato do PDF, em Bege Bahia na escala (o desenho da biblioteca, no tom da referência, BEGE["tom"]), com as duas faces
+# da parede (os lados compridos) em traço cinza fino.
+SOLEIRAS = {"pdf": [(1252.7, 697.7, 1261.2, 748.7),     # BH gourmet
+                    (906.8, 730.1, 915.3, 781.1),       # lavabo gourmet
+                    (1936.1, 753.0, 1981.4, 761.5),     # área de serviço descoberta
+                    (2145.6, 776.3, 2154.1, 821.7),     # WC DCE 1
+                    (2027.6, 823.9, 2073.0, 832.4),     # DCE
+                    (1726.1, 836.0, 1734.6, 892.7),     # área de serviço / cozinha
+                    (2202.3, 839.9, 2210.8, 890.9),     # circulação / garagem (de cima)
+                    (1998.6, 897.6, 2043.9, 906.1),     # despensa
+                    (2147.4, 897.6, 2192.7, 906.1),     # CPD
+                    (1662.6, 996.8, 1719.3, 1005.3),    # cozinha / circulação
+                    (2199.4, 1018.0, 2207.9, 1074.7),   # circulação / garagem (de baixo)
+                    (2047.5, 1377.3, 2059.4, 1439.6)],  # lavabo
+            "forca": 0.5, "linha": (150, 152, 154), "linha_px": 0.4, "semente": 7}
+
+
+def soleiras(out, A):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    q = SOLEIRAS
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    k = SS
+    for r in q["pdf"]:
+        (x0, y0), (x1, y1) = p2r(r[0], r[1]), p2r(r[2], r[3])
+        X0, Y0, X1, Y1 = int(np.floor(x0)) - 1, int(np.floor(y0)) - 1, int(np.ceil(x1)) + 2, int(np.ceil(y1)) + 2
+        h, w = Y1 - Y0, X1 - X0
+        m = np.zeros((h * k, w * k), np.uint8)
+        u0, v0, u1, v1 = (int(round((x0 - X0) * k)), int(round((y0 - Y0) * k)), int(round((x1 - X0) * k)),
+                          int(round((y1 - Y0) * k)))
+        m[v0:v1, u0:u1] = 255
+        f = np.zeros_like(m)
+        e = max(1, int(round(q["linha_px"] * k)))
+        if (x1 - x0) >= (y1 - y0):                                # faces da parede: os lados compridos
+            f[v0:v0 + e, u0:u1] = 255
+            f[v1 - e:v1, u0:u1] = 255
+        else:
+            f[v0:v1, u0:u0 + e] = 255
+            f[v0:v1, u1 - e:u1] = 255
+        al = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        fl = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        T = textura("bege_bahia", px_m, h, w, semente=q["semente"]).astype(np.float32)
+        T = (1 + q["forca"] * (T / T.reshape(-1, 3).mean(axis=0) - 1)) * np.float32(BEGE["tom"])
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        reg = reg * (1 - al) + T * al
+        reg = reg * (1 - fl) + np.float32(q["linha"]) * fl
+        out[Y0:Y1, X0:X1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    {len(q['pdf'])} soleiras de Bege Bahia no vão do PDF, com as faces da parede em cinza fino")
+    return out
+
+
 # paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
 # canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
 PAISAGISMO = {
@@ -2576,6 +2637,8 @@ def main():
     out = bege_referencia(out, A)
     print("[50] granito menos escuro (opção B) e sem os pontos brancos grandes (pente fino, item 6)")
     out = granito_tom(out, A)
+    print("[52] soleiras: as 12 do PDF, iguais, em Bege Bahia (R13; usuário: revisar todas as soleiras)")
+    out = soleiras(out, A)
     print("[44] projeções da cobertura em tracejado cinza fino (R8, R9)")
     out = projecoes(out, A)
     print("[46] cortinas de linho: escritório e living (pente fino, itens 1 e 2)")

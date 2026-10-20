@@ -516,6 +516,14 @@ Age só no granito da base chapada, nos px de granito: perto do marrom no croma 
 
 Roda antes das projeções, para não tocar o tracejado delas. A máscara da pedra portuguesa (item 47) exclui o granito da base: mais claro, ele passava pelo teste de caramelo na borda do acesso.
 
+## Soleiras do Térreo da Casa E: `retoque_terreo_casae.soleiras`
+
+`SOLEIRAS["pdf"]` traz os 12 vãos de porta do PDF com soleira: o retângulo branco da ARQ_PAREDE na espessura da parede, junto de cada arco. Foram achados pelo arco de cada porta de giro, pegando o branco encostado nele com o comprimento do raio. Cada um é refeito igual, em 8 x:
+- o vão exato, em Bege Bahia da biblioteca, na escala e no tom `BEGE["tom"]` (força 0,5 do desenho);
+- as duas faces da parede (os lados compridos), em traço cinza fino de 0,4 px.
+
+É a mesma regra do Subsolo (`retoque_subsolo_casae.soleiras`). Para as outras casas, os vãos saem do PDF da mesma forma.
+
 ## Título da folha: `retoque_terreo_casae.titulo_folha`
 
 O texto do título ("0. TÉRREO / ESC.:1:50") não entra nas bases, mas o sublinhado dele, uma linha do PDF sem camada logo abaixo do canto tracejado do lote, pode sobrar. `titulo_folha` volta ao branco a faixa da linha (pt do PDF em `TITULO["linhas"]`, folga de 2 px), só nos px claros, e deixa o tracejado do lote. Para as outras casas, basta achar a linha logo abaixo do título no PDF delas.
