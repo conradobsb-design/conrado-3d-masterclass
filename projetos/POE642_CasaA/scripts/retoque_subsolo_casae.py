@@ -1120,7 +1120,9 @@ def bordas_piscina(out, p2r):
 # - a faixa de Bege Bahia que dividia a piscina da parte de baixo sai: a piscina fica uma água só;
 # - no trecho de baixo do visor (entre a piscina e o ofurô, junto à sauna), o vidro fica sem base: a faixa de Bege
 #   Bahia em volta da folha vira água, dos dois lados, até o vidro;
-# - entre o ofurô e a sauna, a faixa de Bege Bahia (a base) sai: a água vai até um vidro na face da sauna;
+# - entre o ofurô e a sauna, a faixa de Bege Bahia (a base) sai: a água vai até a borda da sauna. Na primeira versão
+#   havia um vidro na face da sauna; o usuário pediu para tirar (19/10/26: "REMOVA ESSA BORDA EM PEDRA NA PARTE DE CIMA
+#   E O VIDRO DA SAUNA À DIREITA"), e com ele a borda de pedra no alto do ofurô: a água vai até a parede de cima;
 # - a esquadria do visor inteiro (a fachada da academia e o trecho de baixo) e a do vidro da sauna ficam mais
 #   evidentes, como na vista 3D: a folha de vidro com os perfis em grafite dos dois lados e os montantes a cada
 #   ~1,1 m.
@@ -1128,11 +1130,10 @@ def bordas_piscina(out, p2r):
 # nova: a sombra curta da divisória que saiu some, e a do vidro aparece.
 PISCINA_CLIENTE = {"divisoria_pdf": (705.6, 950.0, 807.6, 972.0),
                    "visor_baixo_pdf": [(807.6, 957.1, 812.2, 1090.3), (815.0, 957.1, 819.0, 1090.3)],
-                   "sauna_faixa_pdf": (877.6, 957.1, 886.1, 1090.3),     # a faixa entre o ofurô e a sauna
-                   "vidros_pdf": [(812.2, 693.5, 815.0, 945.8), (812.2, 957.1, 815.0, 1090.3),
-                                  (886.1, 957.1, 888.9, 1090.3)],
-                   "esquadria_pdf": [(807.6, 690.7, 819.0, 945.8), (807.6, 957.1, 819.0, 1090.3),
-                                     (884.4, 957.1, 890.6, 1090.3)],
+                   "sauna_faixa_pdf": (877.6, 957.1, 888.9, 1090.3),     # a faixa entre o ofurô e a sauna, sem vidro
+                   "ofuro_topo_pdf": (815.0, 957.1, 888.9, 968.5),       # a borda de pedra no alto do ofurô
+                   "vidros_pdf": [(812.2, 693.5, 815.0, 945.8), (812.2, 957.1, 815.0, 1090.3)],
+                   "esquadria_pdf": [(807.6, 690.7, 819.0, 945.8), (807.6, 957.1, 819.0, 1090.3)],
                    "vidro": (222, 226, 227), "perfil": (58, 60, 62), "perfil_px": 1.3,
                    "montante_pt": 3.6, "vao_max_m": 1.25, "pt_por_m": 56.69}
 
@@ -1145,7 +1146,7 @@ def piscina_cliente(out, p2r):
     agua = reg[..., 0] - reg[..., 2] > 12
     novo_m = np.zeros(agua.shape, bool)
     parede = reg.mean(axis=2) < 60
-    for r in [q["divisoria_pdf"], q["sauna_faixa_pdf"]] + q["visor_baixo_pdf"]:
+    for r in [q["divisoria_pdf"], q["sauna_faixa_pdf"], q["ofuro_topo_pdf"]] + q["visor_baixo_pdf"]:
         a, b, c, d = caixa_pdf(p2r, *r)
         novo_m[max(b - y0, 0):d - y0, max(a - x0, 0):c - x0] = True
     vid = np.zeros(agua.shape, bool)
@@ -1178,7 +1179,7 @@ def piscina_cliente(out, p2r):
             tl.pintar(mm, q["perfil"])
             n_mont += 1
         out = tl.gravar()
-    print(f"    piscina sem divisória; vidros sem base (visor e sauna): {int(novo_m.sum())} px viram água; esquadria com perfis "
+    print(f"    piscina sem divisória; ofurô sem a borda de cima e sem o vidro da sauna; visor sem base: {int(novo_m.sum())} px viram água; esquadria com perfis "
           f"em grafite e {n_mont} montantes")
     return out
 
@@ -1191,25 +1192,28 @@ ARCOS = {"camadas": ("ARQ_PAREDE", "ARQ - Parede", "ARQ_REVESTIMENTOS")}
 
 
 # item 23 (regras do usuário de 19/10/26: "escadas com linhas" e o triângulo de orientação "no inicio de escadas,
-# indicando o sentido ora subida ora descida"). A escada do Subsolo sobe para a direita: 17 degraus de 30 cm (17 pt),
-# do 1º (o "S" do PDF, em x 972) ao 17º; a linha de corte do PDF passa em diagonal pelos degraus 7 e 8. O trecho
-# sai do item 2 (o da escada do Térreo, só sombreado) e fica:
-# - antes do corte, cheio, no travertino da base v3 na cor do render: em cada bocel (a borda de cada degrau) uma
-#   linha cinza suave e, no degrau de baixo (à esquerda), a sombra curta de 10 cm; nenhum traço preto;
-# - depois do corte, esmaecido, com os bocéis e o contorno tracejados do PDF (a projeção); a linha de corte não é
-#   desenhada (como nas escadas aprovadas da Casa A);
-# - o triângulo cheio, cinza-escuro, de 24 x 26 cm, no 1º degrau, a 10 cm do início, apontando para a subida.
+# indicando o sentido ora subida ora descida"). 17 degraus de 30 cm (17 pt); a linha de corte do PDF passa em
+# diagonal entre o 7º e o 8º degrau contados da esquerda. Sentido (usuário, 20/10/26: "TÁ INVERTIDA. O TRIANGULO É DA
+# DIREITA PARA ESQUERDA. SUBINDO DA DIREITA PARA ESQUERDA, COM A PARTE DA DIREITA VIVA, E A PARTE DA ESCADA À ESQUERDA
+# ESMAECIDA [...] COM TRACEJADO À ESQUERDA, NÃO À DIREITA"): a escada sobe da direita para a esquerda. O trecho sai do
+# item 2 (o da escada do Térreo, só sombreado) e fica:
+# - à direita do corte, viva, no travertino da base v3 na cor do render: em cada bocel (a borda de cada degrau) uma
+#   linha cinza suave e, no degrau de baixo (à direita do bocel), a sombra curta de 10 cm; nenhum traço preto;
+# - à esquerda do corte, esmaecida, com os bocéis e o contorno tracejados (a projeção, no tracejado do PDF: 5,7 pt de
+#   traço e 2,8 de vão); a linha de corte não é desenhada;
+# - o triângulo cheio, cinza-escuro, de 24 x 26 cm, no 1º degrau (o da direita), a 10 cm do início, apontando para a
+#   esquerda (a subida).
 ESCADA_R14 = {"pdf": (972.0, 617.0, 1261.2, 685.0), "passo_pt": 17.0, "n": 17,
               "corte": [(1073.8, 616.4), (1089.2, 647.2), (1093.0, 654.8), (1108.1, 685.0)],
               "bocel": 0.80, "bocel_pt": 0.55, "sombra": (0.16, 5.67), "esmaecer": 0.8,
-              "tracejado": (160, 160, 164), "tracejado_px": 0.5, "simbolo_x": 1091.1,
+              "tracejado": (160, 160, 164), "tracejado_px": 0.5, "traco_pt": 5.7, "vao_pt": 2.8,
               "triangulo": {"base_pt": 13.6, "altura_pt": 14.7, "recuo_pt": 5.67, "cor": (88, 88, 92)}}
 
 
 def escada_r14(out, pg, p2r, tex):
     q = ESCADA_R14
     ex0, ey0, ex1, ey1 = q["pdf"]
-    x0, y0, x1, y1 = caixa_pdf(p2r, ex0 - 8, ey0 - 3, ex1 + 3, ey1 + 3)
+    x0, y0, x1, y1 = caixa_pdf(p2r, ex0 - 3, ey0 - 3, ex1 + 8, ey1 + 3)
     h, w = y1 - y0, x1 - x0
 
     def P(x, y, ss=SS):
@@ -1232,54 +1236,54 @@ def escada_r14(out, pg, p2r, tex):
     ganho = np.asarray(TRAV["render"], np.float32) / np.asarray(TRAV["base"], np.float32)
     reg0 = out[y0:y1, x0:x1].astype(np.float32)
     reg = reg0 * (1 - esc[..., None]) + limpo * ganho * esc[..., None]
-    cheia = poli([(ex0, ey0)] + q["corte"] + [(ex0, ey1)])
-    # antes do corte: o bocel (linha suave) e a sombra curta no degrau de baixo (à esquerda)
+    viva = poli(q["corte"] + [(ex1, ey1), (ex1, ey0)])
+    # parte viva: o bocel (linha suave) e a sombra curta no degrau de baixo (à direita do bocel)
     fator = np.ones((h, w), np.float32)
     forca, alcance = q["sombra"]
-    for k in range(q["n"]):
+    for k in range(q["n"] + 1):
         xb = ex0 + k * q["passo_pt"]
         lin = poli([(xb - q["bocel_pt"] / 2, ey0), (xb + q["bocel_pt"] / 2, ey0),
                     (xb + q["bocel_pt"] / 2, ey1), (xb - q["bocel_pt"] / 2, ey1)])
         fator *= 1 - (1 - q["bocel"]) * lin
+        if k == q["n"]:
+            continue
         for f in np.linspace(0, 1, 9)[:-1]:
-            fx0, fx1 = xb - alcance * (f + 1 / 8), xb - alcance * f
+            fx0, fx1 = xb + alcance * f, xb + alcance * (f + 1 / 8)
             faixa = poli([(fx0, ey0), (fx1, ey0), (fx1, ey1), (fx0, ey1)])
             fator *= 1 - forca * (1 - f - 1 / 16) ** 1.6 * faixa
-    fator = 1 - (1 - fator) * cheia
+    fator = 1 - (1 - fator) * viva
     reg *= fator[..., None]
-    # depois do corte: esmaecido, com os tracejados do PDF (a projeção)
-    apos = np.clip(esc - cheia, 0, 1)[..., None]
+    # à esquerda do corte: esmaecida, com os bocéis e o contorno tracejados (a projeção)
+    apos = np.clip(esc - viva, 0, 1)[..., None]
     reg = reg * (1 - apos) + (255 - (255 - reg) * q["esmaecer"]) * apos
     m = np.zeros((h * SS, w * SS), np.uint8)
     lw = max(1, int(round(q["tracejado_px"] * SS)))
-    for d in pg.get_drawings():
-        if d.get("layer") != "ARQ_ESCADAS E RAMPAS":
-            continue
-        for it in d["items"]:
-            if it[0] != "l":
-                continue
-            a, b = it[1], it[2]
-            if not (ex0 - 1 <= min(a.x, b.x) and max(a.x, b.x) <= ex1 + 1 and ey0 - 1 <= min(a.y, b.y) and max(a.y, b.y) <= ey1 + 1):
-                continue
-            # só os traços do tracejado (peças curtas, retas na vertical ou na horizontal): sem a linha de percurso, a
-            # linha de corte e o símbolo dela (os "<" e o tracinho do meio)
-            if np.hypot(b.x - a.x, b.y - a.y) > 7.0 or (abs(a.x - b.x) > 0.05 and abs(a.y - b.y) > 0.05):
-                continue
-            # e sem as peças do símbolo de corte (no meio da altura, junto à linha de corte)
-            if abs(min(a.y, b.y) + max(a.y, b.y) - (ey0 + ey1)) / 2 < 5.0 and abs((a.x + b.x) / 2 - q["simbolo_x"]) < 8:
-                continue
-            pa, pb = P(a.x, a.y), P(b.x, b.y)
-            cv2.line(m, (int(round(pa[0])), int(round(pa[1]))), (int(round(pb[0])), int(round(pb[1]))), 255, lw, cv2.LINE_AA)
+
+    def tracejar(a, b):
+        comp = np.hypot(b[0] - a[0], b[1] - a[1])
+        t = 0.0
+        while t < comp:
+            t1 = min(comp, t + q["traco_pt"])
+            pa = P(a[0] + (b[0] - a[0]) * t / comp, a[1] + (b[1] - a[1]) * t / comp)
+            pb = P(a[0] + (b[0] - a[0]) * t1 / comp, a[1] + (b[1] - a[1]) * t1 / comp)
+            cv2.line(m, (int(round(pa[0])), int(round(pa[1]))), (int(round(pb[0])), int(round(pb[1]))), 255, lw,
+                     cv2.LINE_AA)
+            t = t1 + q["vao_pt"]
+    for k in range(q["n"] + 1):
+        xb = ex0 + k * q["passo_pt"]
+        tracejar((xb, ey0), (xb, ey1))
+    tracejar((ex0, ey0), (ex1, ey0))
+    tracejar((ex0, ey1), (ex1, ey1))
     tr = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * apos[..., 0]
     reg = reg * (1 - tr[..., None]) + np.float32(q["tracejado"]) * tr[..., None]
-    # o triângulo de orientação: no 1º degrau, apontando para a subida (direita)
+    # o triângulo de orientação: no 1º degrau (o da direita), apontando para a subida (esquerda)
     t = q["triangulo"]
-    xb, yc = ex0 + t["recuo_pt"], (ey0 + ey1) / 2
-    tri = poli([(xb + t["altura_pt"], yc), (xb, yc - t["base_pt"] / 2), (xb, yc + t["base_pt"] / 2)])
+    xb, yc = ex1 - t["recuo_pt"], (ey0 + ey1) / 2
+    tri = poli([(xb - t["altura_pt"], yc), (xb, yc - t["base_pt"] / 2), (xb, yc + t["base_pt"] / 2)])
     reg = reg * (1 - tri[..., None]) + np.float32(t["cor"]) * tri[..., None]
     out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
-    print(f"    escada: {q['n']} degraus, bocéis em linha suave com a sombra curta até o corte, esmaecida e tracejada "
-          f"depois; triângulo de subida no 1º degrau")
+    print(f"    escada: {q['n']} degraus subindo da direita para a esquerda; viva à direita do corte (bocéis em linha "
+          f"suave, sombra curta), esmaecida e tracejada à esquerda; triângulo de subida à direita")
     return out
 
 
@@ -1289,7 +1293,20 @@ def escada_r14(out, pg, p2r, tex):
 # claros do motor, e o travertino (sauna, antessala, vestiário), em estrias verticais que liam como madeira. Os dois
 # passam ao desenho da biblioteca (`_texturas`), na escala do render, com a luz e a cor do lugar
 # (`texturas_escala.retexturizar`). A escada (o travertino da base v3, item 23) fica.
-TEXTURAS = {"materiais": [("bege_bahia", (232, 232, 232), 0.6, 1), ("travertino", (202, 217, 220), 0.6, 3)],
+# Travertino (usuário, 20/10/26, com o recorte da sauna, antessala e vestiário: "PISO EM TRAVERTINO"): na escala do
+# render, a foto da biblioteca fica quase lisa (os veios de 5 a 20 cm somem na redução) e o piso lia como Bege Bahia.
+# Passa a ser o travertino aprovado do Térreo da mesma casa, na mesma escala (o mesmo quadro): trechos limpos da sala,
+# tecidos por image quilting, com os veios na mesma direção (vertical), e o desenho inteiro dele entra (força 1,4),
+# sobre a luz do lugar (raio de 1 m, que tira o desenho antigo).
+# Bege Bahia (usuário, 20/10/26: "A REPRESENTAÇÃO DO MARMORE BEGE BAHIA CONFORME A REFERENCIA DEFINIDA ESTÁ
+# ADEQUADA?"): comparado na mesma escala, estava liso demais (o desenho com ~40% do contraste da foto) e acinzentado. O
+# desenho da biblioteca entra inteiro (força 1, suavização 0,4 px) e o tom vai ao da foto de referência (RGB 230, 211,
+# 186), com a luz do lugar.
+# (nome, cor da legenda na base chapada, força, semente, raio da luz do lugar em m, fonte, tom BGR, suavização)
+TEXTURAS = {"materiais": [("bege_bahia", (232, 232, 232), 1.0, 1, 0.25, None, (186, 211, 230), 0.4),
+                          ("travertino", (202, 217, 220), 1.4, 3, 1.0, "terreo", None, 0.8)],
+            "terreo": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado.png",
+            "terreo_trechos": [(1000, 600, 1160, 690), (830, 610, 990, 665)],     # px do Térreo retocado (sala)
             "janela_pdf": (690, 510, 1850, 1160), "tol": 3}
 
 
@@ -1303,9 +1320,17 @@ def texturas_na_escala(out, p2r, chapada):
     jan[y0:y1, x0:x1] = True
     ex0, ey0, ex1, ey1 = caixa_pdf(p2r, *ESCADA_R14["pdf"], folga=2)
     jan[ey0:ey1, ex0:ex1] = False
-    for nome, leg, forca, semente in q["materiais"]:
+    from retoque_bege_bahia_terreo import quilting
+    terreo = cv2.imread(str(q["terreo"])).astype(np.float32)
+    fontes = [terreo[b:d, a:c] for a, b, c, d in q["terreo_trechos"]]
+
+    def do_terreo(h, w):
+        fs = fontes + [f[::-1] for f in fontes]          # os espelhos na vertical (os veios correm na vertical)
+        return quilting(fs, h, w, p=24, sobra=8, candidatos=400, rng=np.random.default_rng(653))[:h, :w]
+    for nome, leg, forca, semente, sig_m, fonte, tom, suav in q["materiais"]:
         m = jan & (np.abs(chapada.astype(int) - leg).max(axis=2) <= q["tol"])
-        out, n = retexturizar(out, m, nome, px_m, forca=forca, semente=semente)
+        out, n = retexturizar(out, m, nome, px_m, forca=forca, semente=semente, sig_m=sig_m,
+                              pronta=do_terreo if fonte == "terreo" else None, cor=tom, suavizar=suav)
         print(f"    {nome}: {n} px no desenho da biblioteca, a {px_m:.1f} px/m")
     return out
 

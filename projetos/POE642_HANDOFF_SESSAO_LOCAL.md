@@ -759,6 +759,23 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
       - **Conferência:** na prancha, só os dois vãos mudaram. A prancha e os três PDFs foram refeitos.
       - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_soleiras_antes_depois.jpg`.
   - **Subsolo da Casa E fechado pelas regras de 19/10:** R2, R3, escadas com linhas e R14, R6/R7, R1 e R13. Os pedidos do cliente (piscina, vidros, rótulo AMBIENTE) também foram feitos.
+  27. **Ajustes do usuário (20/10/26), revisando o Subsolo fechado:**
+      - **Ofurô** ("REMOVA ESSA BORDA EM PEDRA NA PARTE DE CIMA E O VIDRO DA SAUNA À DIREITA"): saem a borda de Bege Bahia no alto do ofurô e o vidro que eu tinha posto na face da sauna (item 19). A água vai até a parede de cima e até a borda da sauna. Fica só o vidro do visor, entre a piscina e o ofurô.
+      - **Travertino** ("PISO EM TRAVERTINO", com o recorte da sauna, da antessala e do vestiário): a foto da biblioteca, reduzida à escala do render, fica quase lisa (os veios somem), e o piso lia como Bege Bahia.
+        - Passa a ser o travertino aprovado do Térreo da mesma casa, na mesma escala: trechos limpos da sala, tecidos por image quilting, com os veios na vertical, o desenho inteiro (força 1,4) sobre a luz do lugar.
+        - `texturas_escala.retexturizar` ganhou `pronta=` (uma textura já na escala, de outro pavimento).
+      - **Escada** ("TÁ INVERTIDA. O TRIANGULO É DA DIREITA PARA ESQUERDA. SUBINDO DA DIREITA PARA ESQUERDA, COM A PARTE DA DIREITA VIVA, E A PARTE DA ESCADA À ESQUERDA ESMAECIDA [...] COM TRACEJADO À ESQUERDA, NÃO À DIREITA"): a escada sobe da direita para a esquerda.
+        - Viva à direita do corte do PDF, com a sombra curta à direita de cada bocel (o degrau de baixo).
+        - Esmaecida à esquerda, com os bocéis e o contorno tracejados no tracejado do PDF (5,7 pt de traço, 2,8 de vão).
+        - O triângulo fica no 1º degrau da direita, apontando para a esquerda.
+        - **Atenção:** o PDF traz o "S" e o tracejado do outro lado. Vale o que o usuário definiu.
+      - **Bege Bahia** ("A REPRESENTAÇÃO DO MARMORE BEGE BAHIA CONFORME A REFERENCIA DEFINIDA ESTÁ ADEQUADA?"): comparado com a foto de referência na mesma escala, não estava.
+        - O desenho tinha ~40% do contraste da foto (desvio 0,014 contra 0,037) e o tom estava acinzentado: RGB (222, 207, 190) contra (231, 211, 187).
+        - Agora o desenho entra inteiro (força 1, suavização 0,4 px) e o tom vai ao da foto: desvio 0,030; RGB (228, 209, 184). A luz do lugar fica.
+        - Comparação em `renders/POE642_CasaE_PH_Subsolo_bege_bahia_vs_referencia.jpg`.
+        - **Regra para as outras casas:** o Bege Bahia segue a foto de referência (desenho em nuvens visível, tom quente). Isso substitui o "quase liso, sem manchas" antigo.
+      - Na prancha, só mudaram a planta do Subsolo (os pisos, a escada e o ofurô); nada fora dela. A prancha e os três PDFs foram refeitos.
+      - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_ajustes_20out_antes_depois.jpg`.
 - **Entrega (16/10/26, depois da aprovação do usuário: "prancha e o PDF. aprovado."):** a casa passa a ter três pavimentos, na ordem da Casa A (Subsolo, Térreo, 1º Pavimento).
   - **Config:** o Subsolo entrou na chave `entrega` da `POE642_CasaE/config_bases.json` (título "SUBSOLO", linha 0 do quadro de áreas, base `POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png`). O Térreo passou à linha 1 e o 1º Pavimento à linha 2. O quadro de áreas tem os três "NÃO INFORMADO", sem total. Em `pdf.ordem`: Subsolo, Térreo e 1º Pavimento; título "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)".
   - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_Subsolo_entrega.png`, nova. A imagem final, já no quadro comum e com os rótulos, entra com `--no-quadro`, sem realinhar. A do Térreo (realinhada com 128 pontos, erro mediano 0,78 px) e as duas do 1º Pavimento (`_pb` e `_linhas`) foram refeitas só pelo rodapé novo, com a linha do Subsolo no quadro de áreas. Rodapés `entrega/POE642_CasaE_rodape_{Subsolo,Terreo,1Pavimento}.png`.

@@ -258,3 +258,9 @@ O "x" marca o que cada regra exige em cada prancha já entregue.
 
 **Ordem de execução (usuário, 19/10):** Casa E, Casa A, Casa B, Casa C, Casa D.
 - Dentro de cada casa, um item por vez, com antes/depois, prancha e PDF refeitos a cada item.
+
+## 18. Ajustes de 20/10/26 (Casa E, Subsolo), valem para as outras casas
+
+- **Bege Bahia:** segue a foto de referência na escala: desenho em nuvens visível, no contraste dela, e tom quente (RGB ~230, 211, 186). Substitui o "uniforme, quase liso, sem manchas".
+- **Travertino:** quando a foto da biblioteca perde os veios na escala do render, usa-se o travertino aprovado da própria casa (o do Térreo), na mesma escala, com os veios visíveis.
+- **Escadas:** o sentido (de onde sobe) é o que o usuário define, mesmo quando o PDF indica outro. O triângulo fica no 1º degrau de quem sobe, apontando para a subida. A parte viva fica desse lado; a parte esmaecida e tracejada, depois do corte.
