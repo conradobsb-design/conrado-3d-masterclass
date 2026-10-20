@@ -215,6 +215,13 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
 52. Soleiras (R13; usuário: "revisar todas as soleiras"): das 16 portas de giro do PDF, as 12 com o vão branco na
     espessura da parede ganham a soleira igual, no vão exato do PDF, em Bege Bahia na escala e no tom da referência, com
     as duas faces da parede em traço cinza fino (como no Subsolo); as do gás e a pivotante do hall não têm soleira.
+53. Vegetação do gramado (pente fino de 20/10, item 7; R1, R4; escolha do usuário: "opção A"): nas manchas de planta do
+    gramado, as folhagens fora de escala do motor dão lugar às árvores, arbustos e palmeiras da planta de referência
+    de 19/10 no tamanho real, com sombra; a grama da referência entra por baixo; as folhas do motor que passavam do
+    verde (sobre a pedra portuguesa do acesso e os pisantes) saem. Nada sai do verde.
+54. Jardim de inverno (pente fino, item 7; usuário: "precisamos alterar também o jardim de inverno interno da casa E"):
+    palmeiras e arbustos da referência no tamanho real sobre forração, no lugar das folhagens do motor; as copas saem
+    um pouco da floreira (item 19) e as flores tropicais ficam.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1106,9 +1113,17 @@ def escada(out, q):
 
 # jardim de inverno (item 19, pedido do usuário): quanto as folhas podem sair da floreira (px, com
 # uma borda irregular entre o mínimo e o máximo) e as flores (o centro da estrelítzia no render, o
-# raio do recorte, onde entra na floreira e o tom: o laranja do render ou girado para outra cor)
+# raio do recorte, onde entra na floreira e o tom: o laranja do render ou girado para outra cor).
+# Plantas (item 54; pente fino de 20/10, item 7, usuário: "precisamos alterar também o jardim de inverno interno da
+# casa E"): as folhagens do motor (folhas de costela-de-adão de ~1 m numa floreira de 5,7 x 1,25 m) dão lugar às
+# palmeiras e arbustos da planta de referência no tamanho real, como no gramado (item 53), sobre uma forração
+# ("forracao": o desenho da grama da biblioteca nesse tom BGR); o maior que cabe primeiro, com a copa até a borda
+# irregular (nunca sobre a escada), as menores por baixo. As flores ficam por cima.
 JARDIM_FORA = {
     "lados": (1.5, 3.5), "baixo": (3.0, 6.5), "semente": 642,
+    "plantas": [("palmeira_1", 1.4), ("palmeira_3", 1.1), ("palmeira_2", 1.1), ("arbusto_1", 0.9),
+                ("arbusto_3", 0.9)],
+    "folga_copa": 0.8, "afastar": 0.75, "forracao": (62, 104, 80),
     "flores": {"fonte": [((1671, 540), 9), ((1773, 605), 9), ((1582, 905), 9), ((1440, 722), 8)],
                "pos": [((1002, 557), 0, None), ((1046, 571), 1, "vermelho"), ((1089, 554), 2, None),
                        ((1121, 572), 3, "rosa"), ((1143, 556), 0, "amarelo")],
@@ -1116,22 +1131,17 @@ JARDIM_FORA = {
 }
 
 
-def jardim_flores(out, orig):
+def jardim_flores(out, orig, A):
+    from texturas import textura, CONFIG as CFG_TEX
     q = JARDIM_FORA
     j = JARDIM
     fx0, fy0, fx1, fy1 = j["floreira"]
     wx0, wy0, wx1, wy1 = j["janela"]
-    reg = orig[wy0:wy1, wx0:wx1].astype(np.float32)
-    lum = reg.mean(axis=2)
-    ri = reg.astype(int)
-    planta = (ri[..., 1] > ri[..., 2] + j["verde"]) | (lum < j["escuro"])
-    dentro = np.zeros(lum.shape, bool)
+    h, w = wy1 - wy0, wx1 - wx0
+    dentro = np.zeros((h, w), bool)
     dentro[fy0 - wy0:fy1 - wy0, fx0 - wx0:fx1 - wx0] = True
-    n, lab = cv2.connectedComponents(planta.astype(np.uint8))
-    ligada = np.isin(lab, np.unique(lab[dentro & planta])) & (lab > 0)
     # quanto pode sair: borda irregular (ruído suave) entre o mínimo e o máximo de cada lado
     rng = np.random.default_rng(q["semente"])
-    h, w = lum.shape
     ys, xs = np.mgrid[wy0:wy1, wx0:wx1].astype(np.float32) + 0.5
 
     def ruido(n_, a, b):
@@ -1149,18 +1159,44 @@ def jardim_flores(out, orig):
     miolo = (ys > fy0 + 1.5) & (ys < fy1 - 1.5) & (xs > fx0 + 1.5) & (xs < fx1 - 1.5)
     faixa = pode & ~miolo
     suave = np.clip(folga / 2.0, 0, 1)
-    # só as folhas voltam (a sombra antiga do render, larga, borrava a borda); a sombra é desenhada:
-    # curta, embaixo e à esquerda das folhas que saem, só no travertino
-    fora = faixa & ligada & ~(dentro & ~faixa)            # só px de folha (sem o halo claro do render)
-    a = fora.astype(np.float32)
-    a = np.maximum(cv2.GaussianBlur(a, (0, 0), 0.5), a) * faixa * suave
+    # item 54: forração no miolo da floreira (a borda escura do item 3 fica) e as plantas da referência por cima
     cur = out[wy0:wy1, wx0:wx1].astype(np.float32)
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    (a0, b0), (c0, d0) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c0 - a0, d0 - b0))
+    T = textura("grama", px_m, h, w, semente=q["semente"]).astype(np.float32)
+    camada = cur.copy()
+    camada[miolo] = (T / T.reshape(-1, 3).mean(axis=0) * np.float32(q["forracao"]))[miolo]
+    permitido = dentro | pode
+    dv = cv2.distanceTransform(permitido.astype(np.uint8), cv2.DIST_L2, 5)
+    postas = []
+    for nome, dm in q["plantas"]:
+        r = dm * px_m / 2
+        cand = np.argwhere(dentro & (dv >= q["folga_copa"] * r))
+        rng.shuffle(cand)
+        for y, x in cand:
+            if all(np.hypot(x - px, y - py) >= q["afastar"] * (r + pr) for px, py, pr, _ in postas):
+                postas.append((x, y, r, nome))
+    sombra = json.loads(CFG_TEX.read_text())["vegetacao"]["sombra"]
+    alfa = np.zeros((h, w), np.float32)
+    for x, y, r, nome in sorted(postas, key=lambda t: t[2]):
+        cor, al, dm = sprite_referencia(nome, px_m)
+        esc = 2 * r / (dm * px_m)
+        cor = cv2.resize(cor, None, fx=esc, fy=esc, interpolation=cv2.INTER_LINEAR)
+        al = cv2.resize(al, None, fx=esc, fy=esc, interpolation=cv2.INTER_LINEAR)
+        pousar_planta(camada, cor, al, x, y, dm * px_m * esc, sombra)
+        so = np.zeros((h, w, 3), np.float32)
+        pousar_planta(so, np.ones_like(cor), al, x, y, dm * px_m * esc, {**sombra, "opacidade": 0.0})
+        alfa = np.maximum(alfa, so[..., 0])
+    # fora da floreira, só as copas (com a borda irregular e o degradê de 2 px); a sombra é desenhada: curta,
+    # embaixo e à esquerda das copas que saem, só no travertino
+    a = np.clip(alfa, 0, 1) * faixa * suave * ~dentro
     tudo = np.maximum(dentro.astype(np.float32), a)
     M = np.float32([[1, 0, -1.5], [0, 1, 1.5]])
     sb = cv2.GaussianBlur(cv2.warpAffine(tudo, M, (w, h)), (0, 0), 1.0) * (1 - tudo) * (ys > fy0 + 2)
     cur *= (1 - 0.35 * sb)[..., None]
-    a = a[..., None]
-    out[wy0:wy1, wx0:wx1] = np.clip(cur * (1 - a) + reg * a, 0, 255).astype(np.uint8)
+    a = np.where(dentro, 1.0, a)[..., None]
+    out[wy0:wy1, wx0:wx1] = np.clip(cur * (1 - a) + camada * a, 0, 255).astype(np.uint8)
     # flores: o laranja da estrelítzia (pétalas e bico), recortado com borda suave e girado de matiz
     fq = q["flores"]
     forma = out.shape[:2]
@@ -1184,7 +1220,8 @@ def jardim_flores(out, orig):
         im = cv2.warpAffine(img, M, forma[::-1], flags=cv2.INTER_AREA)
         al = cv2.warpAffine(flor, M, forma[::-1], flags=cv2.INTER_AREA)[..., None]
         out[:] = np.clip(out * (1 - al) + im * al, 0, 255).astype(np.uint8)
-    print(f"    jardim de inverno: folhas um pouco para fora (sem a escada) e {len(fq['pos'])} flores tropicais")
+    print(f"    jardim de inverno: {len(postas)} plantas da referência sobre forração, as copas um pouco para fora "
+          f"(sem a escada), e {len(fq['pos'])} flores tropicais")
     return out
 
 
@@ -1948,6 +1985,189 @@ def bege_referencia(out, A):
     return out
 
 
+# vegetação do gramado (item 53, R1 e R4; pente fino de 20/10, item 7: "a vegetação e grama?"; escolha do usuário entre
+# as opções A e B de POE642_CasaE_PH_Terreo_vegetacao_opcoes.jpg: "opção A"). O motor pôs folhagens fora de escala nas
+# manchas de planta do gramado (folhas de costela-de-adão de ~1,2 m, touceiras de 5 a 8 m) e deixou folhas passando do
+# verde, sobre a pedra portuguesa do acesso e os pisantes. Nas mesmas manchas (texturas_escala.mascara_grama):
+# - restos: as folhas (e a sombra delas) que passam do verde, numa faixa de 0,6 m ("faixa_m"), viram o material da base
+#   chapada: vale a mancha com folha verde de verdade a 3 px ou mais do verde (a franja da borda é só mistura), de até
+#   1,6 m ("mancha_px"); as juntas de grama entre os pisantes (finas, até 4 px) saem do núcleo por uma abertura 5x5. O
+#   px refeito copia o próprio material de 12 a 24 px ao lado (a pedra portuguesa é redesenhada depois, item 47);
+# - grama: a da referência sob as manchas e onde o gramado não é grama (pontas de folha), com a luz larga só da grama;
+# - plantas: as árvores, arbustos e palmeiras da planta de referência de 19/10 (_texturas/vegetacao), no tamanho real
+#   ("catalogo": nome, diâmetro em m, chance), o maior que cabe primeiro, com a copa a 0,9 do raio dentro do verde e
+#   afastadas (0,85 da soma dos raios); sem girar, porque a sombra vem no desenho (para baixo e à esquerda) e a de
+#   texturas.json entra por baixo; o anel escuro da borda da copa (a sombra recortada junto) sai. Nada sai do verde.
+VEGETACAO = {"catalogo": [("arvore_1", 4.5, 1.0), ("arvore_3", 3.4, 1.0), ("palmeira_1", 1.6, 0.9),
+                          ("arbusto_1", 1.1, 1.0), ("arbusto_3", 1.1, 1.0), ("palmeira_2", 1.3, 0.8)],
+             "folga_copa": 0.9, "afastar": 0.85, "mancha_min": 200, "escala": (0.9, 1.1), "semente": 3,
+             "faixa_m": 0.6, "mancha_px": 50, "desvio": 24, "copiar": (12, 24)}
+
+
+def sprite_referencia(nome, px_m):
+    """A planta da referência na escala do render, sem o anel escuro na borda da copa (raio > 0,7 r): ali o alfa cai
+    onde o px é bem mais escuro que a copa."""
+    from texturas import planta, CONFIG as CFG_TEX
+    cfg = json.loads(CFG_TEX.read_text())
+    cor, a = planta(nome, px_m)
+    cor, a = cor.astype(np.float32), a.astype(np.float32)
+    d = 2 * cfg["vegetacao"]["plantas"][nome]["raio"] / cfg["referencia_planta"]["px_por_m"]
+    lum = cor.mean(axis=2)
+    med = float(np.median(lum[a > 0.9]))
+    h, w = a.shape
+    yy, xx = np.mgrid[0:h, 0:w]
+    k = np.clip((lum - 0.6 * med) / (0.2 * med), 0, 1).astype(np.float32)
+    k[np.hypot(xx - w / 2, yy - h / 2) <= 0.35 * d * px_m] = 1
+    return cor, a * cv2.GaussianBlur(k, (0, 0), 0.8), d
+
+
+def pousar_planta(fundo, cor, a, cx, cy, d_px, sombra):
+    """A planta (BGR, alfa) com o centro em (cx, cy), com a sombra de texturas.json por baixo (fundo float32)."""
+    camadas = [(None, cv2.GaussianBlur(a, (0, 0), max(0.5, sombra["desfoque"] * d_px)) * sombra["opacidade"],
+                cx + sombra["dx"] * d_px, cy + sombra["dy"] * d_px), (cor, a, cx, cy)]
+    for c, aa, x, y in camadas:
+        h, w = aa.shape
+        x0, y0 = int(round(x - w / 2)), int(round(y - h / 2))
+        fx0, fy0, fx1, fy1 = max(0, x0), max(0, y0), min(fundo.shape[1], x0 + w), min(fundo.shape[0], y0 + h)
+        if fx1 <= fx0 or fy1 <= fy0:
+            continue
+        al = aa[fy0 - y0:fy1 - y0, fx0 - x0:fx1 - x0, None]
+        reg = fundo[fy0:fy1, fx0:fx1]
+        alvo = reg * 0.4 if c is None else c[fy0 - y0:fy1 - y0, fx0 - x0:fx1 - x0]
+        fundo[fy0:fy1, fx0:fx1] = reg * (1 - al) + alvo * al
+
+
+def restos_fora_do_verde(img, chapada, verde, px_m):
+    q = VEGETACAO
+    ch = chapada.astype(np.int32)
+    k = 2 * round(q["faixa_m"] * px_m / 2) + 1
+    faixa = cv2.dilate(verde.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & ~verde
+    faixa &= (ch.max(axis=2) >= 80) & (ch.min(axis=2) < 240)          # sem as linhas do PDF e o branco de fora
+    chave = ch[..., 0] * 65536 + ch[..., 1] * 256 + ch[..., 2]
+    # px soltos de cores raras da base (antialias das linhas) dentro de um material ganham o material mais próximo
+    ks, ns = np.unique(chave[faixa], return_counts=True)
+    maior = np.isin(chave, ks[ns >= 50]) & faixa
+    _, lbl = cv2.distanceTransformWithLabels((~maior).astype(np.uint8), cv2.DIST_L2, 5,
+                                             labelType=cv2.DIST_LABEL_PIXEL)
+    chave = np.where(faixa & ~maior, chave[maior][lbl - 1], chave)
+    f = cv2.GaussianBlur(img, (0, 0), 0.8)
+    cand = np.zeros(verde.shape, bool)
+    meds = {}
+    for c in np.unique(chave[faixa]):
+        m = faixa & (chave == c)
+        if m.sum() < 50:
+            continue
+        meds[c] = np.median(f[m], axis=0)
+        cand |= m & ((f[..., 1] >= f[..., 2] - 8) | (np.abs(f - meds[c]).max(axis=2) > q["desvio"]))
+    dv = cv2.distanceTransform((~verde).astype(np.uint8), cv2.DIST_L2, 3)
+    nucleo = cv2.morphologyEx((cand & (dv > 2)).astype(np.uint8), cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(nucleo, connectivity=8)
+    folha = np.bincount(lab[(nucleo > 0) & (f[..., 1] > f[..., 2] + 4)], minlength=n)
+    ok = (folha >= 3) & (st[:, cv2.CC_STAT_WIDTH] <= q["mancha_px"]) & (st[:, cv2.CC_STAT_HEIGHT] <= q["mancha_px"])
+    ok[0] = False
+    resto = cv2.dilate(ok[lab].astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool) & cand
+    resto = cv2.dilate(resto.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & faixa
+    H, W = verde.shape
+    a, b = q["copiar"]
+    desl = [(-a, 0), (0, -a), (0, a), (a, 0), (-b, 0), (0, -b), (0, b), (b, 0), (-a, -a), (-a, a)]
+    for c, med in meds.items():
+        m = resto & (chave == c)
+        if not m.any():
+            continue
+        sao = (chave == c) & ~resto & ~cand
+        falta = m.copy()
+        for dy, dx in desl:
+            ys, xs = np.nonzero(falta)
+            sy, sx = np.clip(ys + dy, 0, H - 1), np.clip(xs + dx, 0, W - 1)
+            v = sao[sy, sx]
+            img[ys[v], xs[v]] = img[sy[v], sx[v]]
+            falta[ys[v], xs[v]] = False
+        if falta.any():
+            base = img.copy()
+            base[~sao & ~(m & ~falta)] = med
+            img[falta] = cv2.inpaint(np.clip(base, 0, 255).astype(np.uint8), falta.astype(np.uint8), 3,
+                                     cv2.INPAINT_TELEA)[falta]
+    # pontinhos soltos (pontas de folha claras e as que vieram com a cópia): perto das manchas, no miolo de cada
+    # material, o px que foge da mediana 5x5 vira ela
+    med5 = cv2.medianBlur(np.clip(img, 0, 255).astype(np.uint8), 5).astype(np.float32)
+    perto = cv2.dilate(resto.astype(np.uint8), np.ones((31, 31), np.uint8)).astype(bool) & faixa & (dv > 3)
+    miolo = np.zeros(verde.shape, bool)
+    for c in meds:
+        miolo |= cv2.erode((chave == c).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    ponto = perto & miolo & (np.abs(img - med5).max(axis=2) > 14)
+    img[ponto] = med5[ponto]
+    return img, int((resto | ponto).sum()), int(ok.sum())
+
+
+def vegetacao(out, A):
+    from texturas_escala import mascara_grama, nconv
+    from texturas import textura, CONFIG as CFG_TEX
+    q, g = VEGETACAO, GRAMA
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    gramado = np.abs(chapada.astype(np.int32) - np.array(g["cor_chapada"])).max(axis=2) <= g["tol"]
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    x0, y0, x1, y1 = g["amostra"]
+    am = cv2.GaussianBlur(out.astype(np.float32), (0, 0), 1.5)[y0:y1, x0:x1].reshape(-1, 3)
+    soma = am.sum(axis=1) + 1
+    croma = (float(np.median(am[:, 0] / soma)), float(np.median(am[:, 2] / soma)))
+    grama, planta = mascara_grama(out, gramado, croma=croma)
+    planta &= gramado
+    verde = gramado | planta
+    img, n_resto, n_manchas = restos_fora_do_verde(out.astype(np.float32), chapada, verde, px_m)
+    # grama nova sob as manchas e no que, dentro do gramado, não é grama
+    Lg = nconv(img, (grama & ~planta).astype(np.float32), 1.5 * px_m)
+    ys, xs = np.nonzero(verde)
+    bx0, by0, bx1, by1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
+    T = cv2.GaussianBlur(textura("grama", px_m, by1 - by0, bx1 - bx0, semente=g["semente"]).astype(np.float32),
+                         (0, 0), 0.6)
+    novo = img.copy()
+    novo[by0:by1, bx0:bx1] = Lg[by0:by1, bx0:bx1] * (T / T.reshape(-1, 3).mean(axis=0))
+    refazer = (cv2.dilate(planta.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) | ~grama) & verde
+    al = (cv2.GaussianBlur(refazer.astype(np.float32), (0, 0), 0.8) * verde)[..., None]
+    img = img * (1 - al) + novo * al
+    # as plantas, mancha por mancha: o maior que cabe primeiro
+    sombra = json.loads(CFG_TEX.read_text())["vegetacao"]["sombra"]
+    dv = cv2.distanceTransform(verde.astype(np.uint8), cv2.DIST_L2, 5)
+    rng = np.random.default_rng(q["semente"])
+    n, lab = cv2.connectedComponents(planta.astype(np.uint8))
+    postas = []
+    for i in range(1, n):
+        m = lab == i
+        if m.sum() < q["mancha_min"]:
+            continue
+        ocup = np.zeros(m.shape, np.uint8)
+        for nome, dm, chance in q["catalogo"]:
+            r = dm * px_m / 2
+            cand = np.argwhere(m & (dv >= q["folga_copa"] * r))
+            rng.shuffle(cand)
+            for y, x in cand:
+                if ocup[y, x] or rng.random() > chance:
+                    continue
+                if any(np.hypot(x - px, y - py) < q["afastar"] * (r + pr) for px, py, pr, _ in postas):
+                    continue
+                postas.append((x, y, r, nome))
+                cv2.circle(ocup, (int(x), int(y)), int(r * 0.8), 1, -1)
+    fundo = img.copy()
+    cache = {}
+    for x, y, r, nome in sorted(postas, key=lambda t: t[2]):            # as menores por baixo
+        if nome not in cache:
+            cache[nome] = sprite_referencia(nome, px_m)
+        cor, a, dm = cache[nome]
+        rng.uniform(0, 360)                                 # o giro das opções (a sequência das opções se mantém)
+        esc = 2 * r / (dm * px_m) * float(rng.uniform(*q["escala"]))
+        cor_e = cv2.resize(cor, None, fx=esc, fy=esc, interpolation=cv2.INTER_LINEAR)
+        a_e = cv2.resize(a, None, fx=esc, fy=esc, interpolation=cv2.INTER_LINEAR)
+        pousar_planta(fundo, cor_e, a_e, x, y, dm * px_m * esc, sombra)
+    al = cv2.GaussianBlur(verde.astype(np.float32), (0, 0), 0.7)[..., None]
+    img = img * (1 - al) + fundo * al
+    print(f"    restos do motor fora do verde: {n_resto} px em {n_manchas} manchas; grama refeita em "
+          f"{int(refazer.sum())} px; {len(postas)} plantas da referência em {n - 1} manchas")
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
 # projeções da cobertura (item 44, R8 e R9; usuário, 20/10/26: "quero que você desenhe um tracejado cinza fino sobre
 # essas bordas (pode usar a varanda do primeiro pavimento como referência), inclusive junto aos brises da garagem, para
 # marcar a projeção. na garagem tem uma linha no PDF. na varanda, existem os escritos da 'PROJ. COBERTURA' fazendo o
@@ -2620,7 +2840,7 @@ def main():
     print("[34] estar da varanda: banco de madeira sem encosto")
     out = banco_varanda(out, orig)
     print("[19] jardim de inverno: um pouco para fora, com flores")
-    out = jardim_flores(out, orig)
+    out = jardim_flores(out, orig, A)
     # o alinhamento da imagem final é medido no retocado aprovado (itens 1 a 35, APROVADO): os itens das regras
     # novas (19 e 20/10) não mudam o afim, e o resto da imagem final fica igual, px a px
     aprovado = cv2.imread(str(APROVADO))
@@ -2635,6 +2855,8 @@ def main():
     out = grama_referencia(out, A)
     print("[43] Bege Bahia como a referência (R1)")
     out = bege_referencia(out, A)
+    print("[53] vegetação do gramado: árvores, arbustos e palmeiras da referência no tamanho real (pente fino, item 7)")
+    out = vegetacao(out, A)
     print("[50] granito menos escuro (opção B) e sem os pontos brancos grandes (pente fino, item 6)")
     out = granito_tom(out, A)
     print("[52] soleiras: as 12 do PDF, iguais, em Bege Bahia (R13; usuário: revisar todas as soleiras)")

@@ -524,6 +524,16 @@ Roda antes das projeções, para não tocar o tracejado delas. A máscara da ped
 
 É a mesma regra do Subsolo (`retoque_subsolo_casae.soleiras`). Para as outras casas, os vãos saem do PDF da mesma forma.
 
+## Vegetação do gramado e jardim de inverno: `retoque_terreo_casae.vegetacao` e `jardim_flores`
+
+Pente fino do Térreo da Casa E, item 7 (escolha do usuário entre as opções de `renders/POE642_CasaE_PH_Terreo_vegetacao_opcoes.jpg`: "opção A"). `vegetacao` (item 53) roda depois da grama (item 42) e do Bege Bahia (item 43), e antes da pedra portuguesa (item 47):
+1. **Manchas:** o gramado da base chapada (`GRAMA`) e as manchas de planta dele (`texturas_escala.mascara_grama`, com a cor da grama da amostra). O verde é o gramado mais as manchas.
+2. **Restos fora do verde** (`restos_fora_do_verde`): numa faixa de 0,6 m em volta do verde, cada material da base chapada (os px soltos de cor rara ganham o material mais próximo) dá os candidatos: verdes, ou longe da mediana do material (a sombra das folhas). Vale a mancha com folha verde a 3 px ou mais do verde e com até 50 px de lado. A abertura 5x5 tira do núcleo as juntas de grama entre os pisantes (finas). O px refeito copia o próprio material a 12 ou 24 px ao lado (inpaint só no que sobra). Depois, os pontinhos que fogem da mediana 5x5 no miolo do material viram ela. Na pedra portuguesa a cópia é do caramelo, que o item 47 redesenha.
+3. **Grama:** a da biblioteca, sob as manchas e onde o gramado não é grama (pontas de folha), com a luz larga (1,5 m) só da grama.
+4. **Plantas** (`VEGETACAO["catalogo"]`): as árvores, arbustos e palmeiras de `_texturas/vegetacao` (planta de referência de 19/10), no tamanho real. Em cada mancha entra o maior que cabe primeiro, com a copa a 0,9 do raio dentro do verde e afastadas (0,85 da soma dos raios). As menores ficam por baixo. Sem girar: a sombra vem no desenho (para baixo e à esquerda), e a de `texturas.json` entra por baixo. `sprite_referencia` tira o anel escuro da borda da copa (a sombra recortada junto), só no raio > 0,7 r. Por fim, tudo é recortado no verde.
+
+`jardim_flores` (itens 19 e 54) refaz a floreira do jardim de inverno: forração (o desenho da grama no tom `JARDIM_FORA["forracao"]`) no miolo, sem a borda escura do item 3. Por cima vêm as palmeiras e os arbustos da referência (`JARDIM_FORA["plantas"]`), o maior que cabe primeiro, com a copa até a borda irregular do item 19 (nunca sobre a escada). Fora da floreira ficam só as copas, com a sombra curta no travertino. As flores tropicais vão por cima.
+
 ## Título da folha: `retoque_terreo_casae.titulo_folha`
 
 O texto do título ("0. TÉRREO / ESC.:1:50") não entra nas bases, mas o sublinhado dele, uma linha do PDF sem camada logo abaixo do canto tracejado do lote, pode sobrar. `titulo_folha` volta ao branco a faixa da linha (pt do PDF em `TITULO["linhas"]`, folga de 2 px), só nos px claros, e deixa o tracejado do lote. Para as outras casas, basta achar a linha logo abaixo do título no PDF delas.
