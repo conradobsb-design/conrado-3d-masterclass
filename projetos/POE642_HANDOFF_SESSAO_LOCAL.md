@@ -806,6 +806,15 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Conferência:** no retocado, nas montagens e nas pranchas, só a caixa da escada mudou; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_escada_r14_antes_depois.jpg`.
   - **Pedidos do usuário durante o item 2 (20/10/26):** "complementar os boxes de banhos de forma contínua, fora a fora" (o item 3) e "representar as cortinas da mesma forma que fizemos no terreo" (o item 10). Vão nessa ordem, logo depois.
+  - **Item 3, boxes em folha contínua de parede a parede (R10), feito.** O vidro de cada box no PDF (ARQ_LOUÇAS E METAIS) vai de uma parede à outra:
+    - banho master: horizontal, em y = 907,5 pt, de 1621,7 a 1719,8;
+    - banhos 2 e 1: vertical, em x ≈ 2247, de 764,9 a 865,8 e de 1113,6 a 1214,5;
+    - banhos 4 e 3: vertical, em x = 1276,4, de 1286,5 a 1370,4 e de 1382,9 a 1466,8.
+    - **Antes:** o motor fez só trechos (nos banhos 1 e 2, até o meio; nos 3 e 4, sem as pontas; no master, falhado).
+    - **Feito (`retoque_1pav_casae.boxes_continuos`, config `BOXES`):** o traço do motor sai. Numa faixa de 2,5 px em volta do eixo do PDF, cada px que foge da média dos dois lados (a 5 px) vira essa média. Depois entra o vidro do box do banho gourmet do Térreo: a linha clara fina (226, 229, 230; 0,8 px), sem montantes nem marcas no meio (regra de 20/10: folha contínua), com a borda cinza fina e a sombra suave do lado do chuveiro. O passo roda depois do quartzito.
+    - **Conferência:** no retocado, nas montagens e nas pranchas, só as linhas dos cinco boxes mudaram; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_boxes_antes_depois.jpg`.
+  - **Carros (Térreo):** a foto do SUV chegou de novo só na conversa (sem arquivo na pasta de imagens recebidas); continua pendente.
 
 ## Casa E · Subsolo
 

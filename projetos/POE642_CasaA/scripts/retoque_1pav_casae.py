@@ -67,6 +67,7 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
   Térreo aprovado de 15/10 (TERREO_FLOREIRA), de onde ela saiu;
 - item 2, escada (R14): o travertino limpo do Térreo aprovado na caixa do PDF e as linhas do `escada_linhas` do Térreo
   (19 pisos, triângulo no topo apontando a descida, esmaecida depois do corte do Térreo, como a escada que desce de lá);
+- item 3, boxes em folha contínua de parede a parede (BOXES): o traço do motor sai e entra o vidro do box do Térreo;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -1061,6 +1062,61 @@ def escada_r14(out, p2r):
     return escada_linhas(out, None, e, p2r=p2r)
 
 
+# item 3 do pente fino de 20/10/26: boxes em folha contínua, de parede a parede (R10: "Folha contínua também no 1º
+# Pavimento da Casa E, onde o box está incompleto"; usuário: "complementar os boxes de banhos de forma contínua, fora a
+# fora"). No PDF (ARQ_LOUÇAS E METAIS) cada box vai de uma parede à outra; o motor fez só trechos (nos banhos 1 e 2, até o
+# meio; nos 3 e 4, sem as pontas; no master, falhado). O traço do motor sai (numa faixa de 2,5 px em volta do eixo do
+# PDF, cada px que foge da média dos dois lados, a 5 px, vira essa média) e entra o vidro do box do banho gourmet do
+# Térreo: linha clara fina, sem montantes nem marcas no meio, com a borda cinza fina e a sombra suave do lado do
+# chuveiro. Eixo do vidro e lado do chuveiro (+1: x ou y crescente) em pt do PDF
+BOXES = {"boxes": [("banho master", (1621.7, 907.5, 1719.8, 907.5), +1),
+                   ("banho 2", (2247.2, 764.9, 2247.2, 865.8), +1),
+                   ("banho 1", (2247.5, 1113.6, 2247.5, 1214.5), +1),
+                   ("banho 4", (1276.4, 1286.5, 1276.4, 1370.4), -1),
+                   ("banho 3", (1276.4, 1382.9, 1276.4, 1466.8), -1)],
+         "faixa": 2.5, "lado": 5, "foge": 12,
+         "vidro": (226, 229, 230), "larg": 0.8, "borda": (150, 153, 155), "larg_borda": 0.3,
+         "sombra": {"d": 1.2, "sigma": 1.0, "forca": 0.22}}
+
+
+def boxes_continuos(out, p2r):
+    from retoque_terreo_casae import linha_aa
+    q = BOXES
+    forma = out.shape[:2]
+    for nome, (fx0, fy0, fx1, fy1), lado in q["boxes"]:
+        (a, b), (c, d) = p2r(fx0, fy0), p2r(fx1, fy1)
+        vert = abs(c - a) < abs(d - b)
+        im = out.astype(np.float32)
+        # o traço do motor: na faixa do eixo, o que foge da média dos dois lados
+        if vert:
+            xc = (a + c) / 2
+            ys = np.arange(int(np.floor(min(b, d))), int(np.ceil(max(b, d))) + 1)
+            for xx in range(int(np.floor(xc - q["faixa"])), int(np.ceil(xc + q["faixa"])) + 1):
+                viz = (im[ys, xx - q["lado"]] + im[ys, xx + q["lado"]]) / 2
+                foge = np.abs(im[ys, xx] - viz).max(axis=1) > q["foge"]
+                im[ys[foge], xx] = viz[foge]
+        else:
+            yc = (b + d) / 2
+            xs = np.arange(int(np.floor(min(a, c))), int(np.ceil(max(a, c))) + 1)
+            for yy in range(int(np.floor(yc - q["faixa"])), int(np.ceil(yc + q["faixa"])) + 1):
+                viz = (im[yy - q["lado"], xs] + im[yy + q["lado"], xs]) / 2
+                foge = np.abs(im[yy, xs] - viz).max(axis=1) > q["foge"]
+                im[yy, xs[foge]] = viz[foge]
+        out = np.clip(im, 0, 255).astype(np.uint8)
+        # o vidro, de parede a parede, com a sombra e a borda do lado do chuveiro
+        def eixo(desl):
+            return ([(a + desl, b), (c + desl, d)] if vert else [(a, b + desl), (c, d + desl)])
+        s = q["sombra"]
+        sm = cv2.GaussianBlur(linha_aa(forma, eixo(lado * s["d"]), q["larg"]), (0, 0), s["sigma"])
+        out = np.clip(out * (1 - s["forca"] * sm)[..., None], 0, 255).astype(np.uint8)
+        al = linha_aa(forma, eixo(0), q["larg"])[..., None]
+        out = np.clip(out * (1 - al) + np.float32(q["vidro"]) * al, 0, 255).astype(np.uint8)
+        al = linha_aa(forma, eixo(lado * q["larg"] / 2), q["larg_borda"])[..., None]
+        out = np.clip(out * (1 - al) + np.float32(q["borda"]) * al, 0, 255).astype(np.uint8)
+        print(f"    box do {nome}: vidro contínuo de ({a:.1f}, {b:.1f}) a ({c:.1f}, {d:.1f})")
+    return out
+
+
 # item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
 # é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
 # quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
@@ -1174,6 +1230,8 @@ def main():
     out = shaft(out, pg, p2r)
     print("[pente fino 16] quartzito dos banhos como a referência (o tom e a chapa da foto)")
     out = quartzito_referencia(out, A)
+    print("[pente fino 3] boxes em folha contínua, de parede a parede (R10)")
+    out = boxes_continuos(out, p2r)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     # sem rótulos: a imagem que vai à montagem com o Térreo esmaecido (os rótulos são escritos de novo na
