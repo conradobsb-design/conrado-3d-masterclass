@@ -448,6 +448,10 @@ Duas opções em 3840 px para o cliente (pedido do usuário: "em preto e branco 
 
 `FORA` tem duas áreas brancas de fora presas na pegada: a de baixo da sala íntima e a faixa abaixo da parede de baixo da suíte 3, fechada pela linha fina do PDF. Nessa faixa o render tinha uma barra cinza, e na opção linhas devia haver só linhas. Ela começa abaixo da parede, para não pegar a escrivaninha da suíte, que é branca na base.
 
+Desde 20/10/26 (pente fino do 1º Pavimento, item 1, sem os arcos):
+- **Alinhamento fixo:** o afim do 1º Pavimento ao quadro comum é medido em `CIMA_APROVADO` (`renders/POE642_CasaE_PH_1Pavimento_v1_retocado_aprovado.png`, a versão entregue até 20/10, sem rótulos) e aplicado ao retocado atual (`no_quadro_comum(..., referencia=...)`, como o Térreo). Sem isso, cada retoque refazia o SIFT e a pegada inteira saía reamostrada.
+- **`SETOR_PORTA`:** o setor branco da porta pequena à direita do vazio do hall, do lado de fora, entra em `FORA`. Os px do traço do arco (da base e do render) recebem o entorno depois da montagem. A base não muda, porque sem o arco o caixilho deixava de ser área fechada e saía da pegada.
+
 O `entorno_esmaecido.py` foi dividido em `contexto_render` (o entorno a partir de um render) e `sobrepor` (pegada, sobreposição integral, tracejado do lote), com o `compor` de antes por cima dos dois.
 
 ```bash

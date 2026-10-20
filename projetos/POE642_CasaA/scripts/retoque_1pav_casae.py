@@ -30,6 +30,8 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
 6. Arcos das portas: o motor desenhou as folhas, mas nenhum arco. Entram os 12 arcos do PDF (curvas da
    ARQ_PAREDE) no padrão aprovado no Térreo (cinza (160, 161, 160), traço de 0,45 px); sobre o vazio do
    hall, com a folha da porta pivotante P1 do Térreo, que também faltava.
+   Depois, R3 (regras de 19/10/26, pente fino do 1º Pavimento de 20/10, item 1): os arcos saem todos
+   (ARCOS["sem_arco"]); ficam as folhas e os batentes, e a folha da pivotante P1 vista pelo vazio.
 7. Cortinas (pedido do usuário): as linhas onduladas do PDF ao longo das janelas das suítes (10 trechos,
    160 arcos) entram nas posições exatas como cortina de linho off-white, em traço fino, com a sombra
    curta aprovada.
@@ -85,6 +87,9 @@ from retoque_terreo_casad import textura  # noqa: E402
 
 BASE = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png"
 TERREO = RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado.png"
+# a fonte da floreira (item 1) é o Térreo aprovado de 15/10, de onde ela saiu: o retocado do Térreo mudou depois
+# (pente fino de 20/10, jardim só no verde), e a floreira mudaria junto, fora do item pedido
+TERREO_FLOREIRA = RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado_aprovado.png"
 BASE_CHAPADA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v2_16x9.png"   # cores exatas da legenda
 BASE_SEM_TELA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_1Pavimento_v2.png"          # antes da tela 16:9
 PDF = RAIZ / "_pdfs_cliente/642 - 1º PAVIMENTO - CASA E.pdf"
@@ -163,7 +168,7 @@ def floreira(out, A):
     (x0, y0), (x1, y1) = vis2r(A, out.shape, *q["vis"][:2]), vis2r(A, out.shape, *q["vis"][2:])
     w, h = x1 - x0, y1 - y0
     fx0, fy0, fx1, fy1 = q["fonte"]
-    t = cv2.imread(str(TERREO))[fy0:fy1, fx0:fx1]
+    t = cv2.imread(str(TERREO_FLOREIRA))[fy0:fy1, fx0:fx1]
     t = np.rot90(t, -1)                                   # a faixa do jardim passa a correr na vertical
     rx0, ry0 = int(np.floor(x0)) - 3, int(np.floor(y0)) - 3
     rx1, ry1 = int(np.ceil(x1)) + 4, int(np.ceil(y1)) + 4
@@ -406,7 +411,10 @@ def vazios(out, A, pg, p2r, r2p):
 # 0,45 px), também sobre o branco do vazio do hall; as paredes (escuras) não mudam. A porta
 # pivotante P1 do hall do Térreo, vista pelo vazio, também ficou sem a folha (retângulo branco da
 # ARQ_PAREDE, dos dois lados do pivô): entra cheia, no mesmo cinza
-ARCOS = {"cor": (160, 161, 160), "larg": 0.45, "min_px": 6, "parede": 45,
+# R3 (regras de 19/10/26: "Nunca mostrar o arco da porta"; pente fino do 1º Pavimento, 20/10/26, item 1): com
+# "sem_arco", os arcos não são desenhados (o motor não fez nenhum: volta o piso do render) e fica só a folha da
+# pivotante P1 do hall
+ARCOS = {"cor": (160, 161, 160), "larg": 0.45, "min_px": 6, "parede": 45, "sem_arco": True,
          "folhas_pdf": [(2122.6, 1526.6, 2271.7, 1529.4)]}
 
 
@@ -424,7 +432,7 @@ def arcos_portas(out, pg, p2r):
     q = ARCOS
     n = 0
     for d in pg.get_drawings():
-        if d.get("layer") != "ARQ_PAREDE" or not any(it[0] == "c" for it in d["items"]):
+        if q["sem_arco"] or d.get("layer") != "ARQ_PAREDE" or not any(it[0] == "c" for it in d["items"]):
             continue
         x0, y0, x1, y1 = caixa_render(d, p2r)
         if max(x1 - x0, y1 - y0) < q["min_px"]:
@@ -450,7 +458,7 @@ def arcos_portas(out, pg, p2r):
         cv2.fillConvexPoly(f, np.round((canto - [x0, y0]) * SS).astype(np.int32), 255, cv2.LINE_AA)
         out = pintar_traco(out, f, (x0, y0, x1, y1), q)
         print(f"    folha da porta pivotante do hall em ({x0}, {y0}) a ({x1}, {y1})")
-    print(f"    {n} arcos de porta em cinza fino")
+    print(f"    {n} arcos de porta em cinza fino" + (" (R3: sem arcos)" if q["sem_arco"] else ""))
     return out
 
 
@@ -1051,7 +1059,7 @@ def main():
     out = copinha(out, p2r)
     print("[5] vazios: X tracejado claro")
     out = vazios(out, A, pg, p2r, r2p)
-    print("[6] arcos das portas em cinza fino")
+    print("[6] portas: sem os arcos (R3), com a folha da pivotante do hall")
     out = arcos_portas(out, pg, p2r)
     print("[7] cortinas nas janelas das suítes")
     print("[10] fachadas das suítes: brises de bronze e portas de correr de vidro finas")

@@ -774,6 +774,16 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Conferência:** nas três montagens mudou só o rótulo (as duas áreas, a de antes e a de agora); rodapé igual.
     - **Refeitos:** as três pranchas do 1º Pavimento e os três PDFs. O retocado de 2000 px com rótulos (que não vai à entrega) sai assim na próxima rodada do `retoque_1pav_casae.py`.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_rotulo_banho_master_antes_depois.jpg`.
+  - **Novas anotações do usuário (20/10/26, sobre a prancha), na lista:**
+    15. vazios com o Térreo nevoado: "Mostrar a jardineira de baixo mais nevoada" (o vazio sob a escada, sobre o jardim de inverno) e "Mostrar o andar de baixo nevoado" (o vazio do hall). Hoje os dois são brancos (pedido de 16/10: "use a cor branca, em vez de cinza escuro");
+    16. quartzito dos banhos: "Textura do quartzito está errada - é um tom mais entre o branco e o cinza" (hoje pêssego, o #EAD4BF da legenda);
+    - sobre a opção linhas: "Mostrar o térreo humanizado, mas de forma enevoada e não técnica". Confirma o fecho já previsto: o nublado vira a opção única.
+  - **Item 1, portas sem os arcos (R3), feito.** No `retoque_1pav_casae.py`, `ARCOS["sem_arco"]`: o item 6 de 16/10 não desenha mais os arcos do PDF (o motor não tinha feito nenhum: volta o piso do render). Ficam as folhas, os batentes e a folha da pivotante P1 vista pelo vazio do hall.
+    - **Porta pequena à direita do vazio do hall:** sem o arco, sobrava o setor branco. Ele entrou em `FORA` (`opcoes_1pav_casae.SETOR_PORTA`) e mostra o entorno; os px do traço do arco recebem o entorno depois da montagem; o caixilho e a folha ficam.
+    - **Floreira do banho master (fonte fixa):** ela é tirada do retocado do Térreo, que mudou hoje (jardim só no verde). Para não mudar fora do item, a fonte passou a ser o Térreo aprovado de 15/10 (`TERREO_FLOREIRA`); o miolo dela sai igual, px a px. Ela muda no item 13.
+    - **Alinhamento fixo na montagem:** o SIFT refeito a cada rodada mexia na pegada inteira, por reamostragem. Agora o afim vem da versão entregue (`renders/POE642_CasaE_PH_1Pavimento_v1_retocado_aprovado.png`), como no Térreo.
+    - **Conferência:** no retocado sem rótulos, mudaram só as 12 áreas dos arcos (fora elas, diferenças de 1 nível, de arredondamento). Nas três montagens e nas três pranchas, também só as 12 áreas; rodapé igual. As três pranchas e os três PDFs foram refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_sem_arcos_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 

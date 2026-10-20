@@ -18,6 +18,9 @@ mesmas regras: posição do PDF, sobre móvel no piso livre, preto, 30% maior qu
   título nem os números da escada, em cinza (paredes cinza-claro, traços cinza-médio). O Térreo e o 1º
   Pavimento têm a mesma página e o mesmo recorte, então o PDF do Térreo cai direto no quadro comum.
 
+Desde 20/10/26 (pente fino do 1º Pavimento): o alinhamento do 1º Pavimento vem da versão entregue (CIMA_APROVADO),
+e o setor branco da porta pequena à direita do vazio do hall mostra o entorno (SETOR_PORTA, R3).
+
 Uso (da pasta POE642_CasaA/scripts/):
   python3 opcoes_1pav_casae.py                 # as três opções
   python3 opcoes_1pav_casae.py --opcao nublado # só uma
@@ -38,6 +41,10 @@ import retoque_1pav_casae as R
 
 CASA = R.RAIZ / "POE642_CasaE"
 CIMA = CASA / "renders/POE642_CasaE_PH_1Pavimento_v1_retocado_sem_rotulos.png"
+# o alinhamento do 1º Pavimento ao quadro comum é medido nesta versão fixa (a entregue até 20/10/26, sem
+# rótulos) e aplicado ao retocado atual: um retoque novo não muda o afim, e a montagem muda só onde ele mexeu
+# (sem isso, cada retoque refazia o SIFT e a pegada inteira saía reamostrada)
+CIMA_APROVADO = CASA / "renders/POE642_CasaE_PH_1Pavimento_v1_retocado_aprovado.png"
 BASE_CIMA = CASA / "bases/POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png"
 TERREO = CASA / "renders/POE642_CasaE_PH_Terreo_v1_retocado.png"
 BASE_TERREO = CASA / "bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png"
@@ -45,7 +52,12 @@ PDF_TERREO = R.RAIZ / "_pdfs_cliente/642 - TÉRREO - CASA E.pdf"
 # áreas brancas de fora presas na pegada (px de uma prévia de 2000 px): abaixo da sala íntima, e a faixa
 # abaixo da parede de baixo da suíte 3, fechada pela linha fina do PDF (lá o render tinha uma barra cinza);
 # esta começa abaixo da parede, para não pegar a escrivaninha da suíte (branca na base)
-FORA = [(912, 752, 1096, 816), (822, 800, 912, 816)]
+# e o setor branco da porta pequena à direita do vazio do hall, do lado de fora, que o arco fechava (R3,
+# pente fino de 20/10/26, item 1: sem o arco, o setor some e aparece o entorno; a folha fica). Nele, os px do
+# traço cinza do arco (o da base, que fecha a pegada, e o do render) recebem o entorno depois da montagem; a
+# parede, escura, fica. A base não muda: sem o arco, o caixilho saía da pegada (deixava de ser área fechada)
+SETOR_PORTA = (1297, 690, 1315, 712)
+FORA = [(912, 752, 1096, 816), (822, 800, 912, 816), SETOR_PORTA]
 LINHAS = {"ocultas": ["ARQ_TERRENO PLANEJADO", "ARQ_CONTRAPISO", "DOC_TEXTOS", "ARQ_ZONA"],
           "forca": 0.7}                     # 0: branco; 1: o traço do PDF (preto)
 
@@ -92,8 +104,13 @@ def main():
     lt, at = base.shape[1], base.shape[0]
     H = round(at * W / lt)
     base = cv2.resize(base, (W, H), interpolation=cv2.INTER_AREA)
-    cima = cv2.cvtColor(np.asarray(no_quadro_comum(Image.open(CIMA).convert("RGB"), BASE_CIMA,
-                                                   "1º Pavimento", W)), cv2.COLOR_RGB2BGR)
+    sx0, sy0, sx1, sy1 = (int(v * W / 2000) for v in SETOR_PORTA)
+    s_min = base[sy0:sy1, sx0:sx1].min(axis=2)
+    arco = cv2.dilate(((s_min > 60) & (s_min < 245)).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    arco &= cv2.dilate((s_min <= 60).astype(np.uint8), np.ones((9, 9), np.uint8)) == 0    # a borda da parede fica
+    cima = cv2.cvtColor(np.asarray(no_quadro_comum(Image.open(CIMA).convert("RGB"), BASE_CIMA, "1º Pavimento", W,
+                                                   referencia=Image.open(CIMA_APROVADO).convert("RGB"))),
+                        cv2.COLOR_RGB2BGR)
     # rótulos no quadro final: PDF do 1º Pavimento -> quadro 16:9 na largura W
     cfg = json.loads(R.CONFIG.read_text())
     pg1 = pymupdf.open(R.PDF)[cfg["pavimentos"]["1Pavimento"]["pagina"]]
@@ -110,7 +127,9 @@ def main():
     args.saida.mkdir(parents=True, exist_ok=True)
     for chave, (desc, contexto) in opcoes.items():
         print(f"[{chave}] {desc}")
-        out = sobrepor(base, contexto(), FORA, cima)
+        t = contexto()
+        out = sobrepor(base, t, FORA, cima)
+        out[sy0:sy1, sx0:sx1][arco] = np.clip(t[sy0:sy1, sx0:sx1][arco], 0, 255).astype(np.uint8)
         out = R.rotulos_ambientes(out, rot, p2q, escala_desvio=W / 2000)
         nome = args.saida / f"POE642_CasaE_PH_1Pavimento_v1_final_{chave}.png"
         cv2.imwrite(str(nome), out)
