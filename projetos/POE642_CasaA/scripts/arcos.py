@@ -20,9 +20,11 @@ import numpy as np
 
 
 def remover_arcos(out, pg, p2r, camadas=("ARQ_PAREDE",), tol=3.0, limiar=7, inpaint=18, raso=1.6,
-                  camarao_fontes=(), tam_min_pt=12.0, so_folha=False):
+                  camarao_fontes=(), tam_min_pt=12.0, so_folha=False, filtro=None, proteger=None):
     """so_folha: a reta do centro a uma ponta só é protegida se lá houver mesmo uma folha (o traço difere do piso
-    dos dois lados dela); sem isso, as duas retas são protegidas (na porta dupla, a ponta do arco fechado ficava)."""
+    dos dois lados dela); sem isso, as duas retas são protegidas (na porta dupla, a ponta do arco fechado ficava).
+    filtro: só os desenhos d com filtro(d) verdadeiro; proteger: máscara (H x W, bool) de px que ficam como estão
+    (ex.: linhas tracejadas que cruzam o arco)."""
     from retoque_bege_bahia_terreo import quilting
     q = {"tol": tol, "limiar": limiar, "inpaint": inpaint, "raso": raso, "camarao_fontes": camarao_fontes}
     im = out.copy()
@@ -43,6 +45,8 @@ def remover_arcos(out, pg, p2r, camadas=("ARQ_PAREDE",), tol=3.0, limiar=7, inpa
     n_giro = n_px = 0
     for d in pg.get_drawings():
         if d.get("layer") not in camadas or max(d["rect"].width, d["rect"].height) < tam_min_pt:
+            continue
+        if filtro is not None and not filtro(d):
             continue
         for it in d["items"]:
             if it[0] != "c":
@@ -78,6 +82,8 @@ def remover_arcos(out, pg, p2r, camadas=("ARQ_PAREDE",), tol=3.0, limiar=7, inpa
                 prot |= (np.abs((xx - cx) * u[1] - (yy - cy) * u[0]) < 1.8) & ((xx - cx) * u[0] + (yy - cy) * u[1] > 0)
             reg = res[y0:y1, x0:x1]
             prot |= reg.mean(axis=2) < 55
+            if proteger is not None:
+                prot |= proteger[y0:y1, x0:x1]
             bb = d["rect"]
             if max(bb.width, bb.height) / max(1e-3, min(bb.width, bb.height)) >= q["raso"]:
                 camarao[y0:y1, x0:x1] |= (((r <= R + T) & (ang > lim0 - 0.05) & (ang < lim3 + 0.05)) | faixa) & ~prot

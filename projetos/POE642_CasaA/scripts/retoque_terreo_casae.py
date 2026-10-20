@@ -163,6 +163,10 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     é de correr, com duas folhas (a fixa, junto à parede de baixo, e a de correr, por dentro); o vão fica
     em cima. O traço escuro do motor, de parede a parede, sai; as folhas entram como no box da
     referência: linha clara de vidro, sem montantes, borda cinza do lado do chuveiro e sombra suave.
+38. Portas sem os arcos (R3: "Não mostrar arco da porta"). No granito, os arcos eram o cinza fino do item
+    12 (e o da folha pequena do hall, item 24), desenhados pelo próprio script: deixam de ser desenhados; o
+    arco escuro do motor (DCE) segue saindo. No travertino e no Bege Bahia, os arcos do motor saem pelo
+    `arcos.remover_arcos`, só nos arcos fora do granito, com o tracejado do PDF que os cruza protegido.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -194,6 +198,9 @@ BASE_CHAPADA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v2_16x9.png" 
 BASE_SEM_TELA = RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v2.png"          # antes da tela 16:9
 PDF = RAIZ / "_pdfs_cliente/642 - TÉRREO - CASA E.pdf"
 CONFIG = RAIZ / "POE642_CasaE/config_bases.json"
+# o retocado aprovado (itens 1 a 35, 15/10/26): a imagem final é alinhada nele, e os itens das regras novas,
+# inclusive os que mudam itens antigos (R3, item 12), não mexem no afim
+APROVADO = RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado_aprovado.png"
 
 
 def alinhar_base(render):
@@ -732,20 +739,27 @@ def wc_dce(out):
 
 
 # arcos das portas sobre o granito (item 12, pedido do usuário): o padrão das Casas C e D (cinza
-# (160, 161, 160) e traço de 0,45 px na escala do Térreo), só onde a base chapada é granito
-ARCOS = {"granito": (50, 66, 90), "tol": 12, "fracao": 0.3, "min_px": 8,
+# (160, 161, 160) e traço de 0,45 px na escala do Térreo), só onde a base chapada é granito. Com a R3 (item 38,
+# "Não mostrar arco da porta"), o arco cinza deixa de ser desenhado ("desenhar"); o arco escuro do motor segue saindo
+ARCOS = {"granito": (50, 66, 90), "tol": 12, "fracao": 0.3, "min_px": 8, "desenhar": False,
          "cor": (160, 161, 160), "larg": 0.45, "faixa": 1.5, "escuro": 55,
          "fontes_granito": [(700, 160, 900, 200), (1300, 160, 1450, 200)]}
 
 
+def granito_render(forma, A):
+    """Máscara (0/1) do granito da base chapada no quadro do render, com os traços finos fechados."""
+    q = ARCOS
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), forma[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, forma[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    gran = (np.abs(chapada.astype(np.int32) - np.array(q["granito"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    return cv2.morphologyEx(gran, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))   # fecha os traços finos
+
+
 def arcos_granito(out, A):
     """Arcos das portas (curvas da ARQ_PAREDE) sobre o granito: o arco escuro do render sai (px
-    escuros numa faixa em volta da curva do PDF, só no granito da base chapada) e entra o cinza fino."""
+    escuros numa faixa em volta da curva do PDF, só no granito da base chapada) e, sem a R3, entra o cinza fino."""
     q = ARCOS
-    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
-    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
-    gran = (np.abs(chapada.astype(np.int32) - np.array(q["granito"])).max(axis=2) <= q["tol"]).astype(np.uint8)
-    gran = cv2.morphologyEx(gran, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))   # fecha os traços finos
+    gran = granito_render(out.shape[:2], A)
     pg, p2r, _ = pdf_cadeia(A, out.shape)
     n = 0
     for d in pg.get_drawings():
@@ -780,11 +794,14 @@ def arcos_granito(out, A):
             m = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & g
             out = apagar_largo(out, (x0, y0, x1, y1), m, q["fontes_granito"], sigma=2.0, borda=0.0,
                                lum_min=45, lum_max=130, escuros=True)
+        n += 1
+        if not q["desenhar"]:
+            continue
         a = (traco(q["larg"]) * g)[..., None]
         reg = out[y0:y1, x0:x1].astype(np.float32)
         out[y0:y1, x0:x1] = np.clip(reg * (1 - a) + np.array(q["cor"], np.float32) * a, 0, 255).astype(np.uint8)
-        n += 1
-    print(f"    {n} arcos de porta sobre o granito em cinza fino")
+    print(f"    {n} arcos de porta sobre o granito: o escuro do motor fora" +
+          ("; o cinza fino desenhado" if q["desenhar"] else "; sem o arco (R3)"))
     return out
 
 
@@ -1290,8 +1307,8 @@ def bancada_gourmet(out):
 
 
 # porta do hall externo (item 24): a folha pequena e o arco dela (ARQ_PAREDE), no desenho da folha
-# grande do render (os tons medidos nela)
-PORTA_HALL = {"folha": (1290.6, 709.4, 1312.4, 710.9), "arco": (1290.6, 688.4, 1312.4, 710.2),
+# grande do render (os tons medidos nela); com a R3 (item 38), sem o arco ("desenhar_arco")
+PORTA_HALL = {"folha": (1290.6, 709.4, 1312.4, 710.9), "arco": (1290.6, 688.4, 1312.4, 710.2), "desenhar_arco": False,
               "miolo": (206, 212, 220), "traco_cima": (70, 78, 88), "traco_baixo": (110, 116, 124),
               "larg": 0.6, "cor_arco": (104, 108, 114), "larg_arco": 0.55}
 
@@ -1310,7 +1327,7 @@ def porta_hall(out, A):
     arco = next(d for d in pg.get_drawings() if d.get("layer") == "ARQ_PAREDE" and d["type"] == "s"
                 and any(it[0] == "c" for it in d["items"])
                 and max(abs(a - b) for a, b in zip(caixa_render(d, p2r), q["arco"])) < 1.0)
-    for it in arco["items"]:
+    for it in (arco["items"] if q["desenhar_arco"] else []):
         if it[0] != "c":
             continue
         pp = np.array([p2r(v.x, v.y) for v in it[1:5]])
@@ -1640,6 +1657,40 @@ def box_gourmet(out, A):
     return out
 
 
+# portas sem os arcos (item 38, R3: "Não mostrar arco da porta"). No granito, os arcos eram desenhados pelo próprio
+# script (o cinza fino do item 12 e o da folha pequena do hall, item 24): deixam de ser desenhados (ARCOS["desenhar"],
+# PORTA_HALL["desenhar_arco"]). No travertino ficam os que o motor fez: saem pelo arcos.remover_arcos (o do Subsolo e
+# da Casa A), só nos arcos fora do granito, com as linhas tracejadas do PDF que cruzam o arco protegidas (o X do hall).
+# O arco da folha pequena do hall (item 24) era só nosso: fica de fora. Faixa de ±2 px (os arcos aqui são finos).
+SEM_ARCOS = {"camada": "ARQ_PAREDE", "fracao_granito": 0.3, "tracejado": "DOC_LINHAS E PROJEÇÕES", "larg_prot": 2,
+             "tol": 2.0}
+
+
+def sem_arcos(out, A):
+    from arcos import remover_arcos
+    q = SEM_ARCOS
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+    gran = granito_render(out.shape[:2], A).astype(bool)
+
+    def fora_do_granito(d):
+        c = caixa_render(d, p2r)
+        if max(abs(u - v) for u, v in zip(c, PORTA_HALL["arco"])) < 1.0:
+            return False
+        x0, y0, x1, y1 = (int(round(v)) for v in c)
+        g = gran[max(0, y0):y1 + 1, max(0, x0):x1 + 1]
+        return g.size > 0 and g.mean() < q["fracao_granito"]
+    prot = np.zeros(out.shape[:2], np.uint8)
+    for d in pg.get_drawings():
+        if d.get("layer") == q["tracejado"]:
+            for it in d["items"]:
+                if it[0] == "l":
+                    a, b = p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)
+                    cv2.line(prot, (int(round(a[0])), int(round(a[1]))), (int(round(b[0])), int(round(b[1]))), 1,
+                             q["larg_prot"])
+    return remover_arcos(out, pg, p2r, camadas=(q["camada"],), tol=q["tol"], so_folha=True, filtro=fora_do_granito,
+                         proteger=prot.astype(bool))
+
+
 # paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
 # canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
 PAISAGISMO = {
@@ -1931,11 +1982,13 @@ def main():
     out = banco_varanda(out, orig)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
-    # o alinhamento da imagem final é medido no retocado aprovado (itens 1 a 35): os itens das regras novas
-    # (19 e 20/10) não mudam o afim, e o resto da imagem final fica igual, px a px
-    aprovado = out.copy()
+    # o alinhamento da imagem final é medido no retocado aprovado (itens 1 a 35, APROVADO): os itens das regras
+    # novas (19 e 20/10) não mudam o afim, e o resto da imagem final fica igual, px a px
+    aprovado = cv2.imread(str(APROVADO))
     print("[37] banho gourmet: box de vidro de correr (R5)")
     out = box_gourmet(out, A)
+    print("[38] portas sem os arcos (R3): no granito, o item 12 já não os desenha; no travertino, os do motor saem")
+    out = sem_arcos(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
