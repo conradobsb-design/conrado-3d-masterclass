@@ -512,7 +512,7 @@ O "2" sobrescrito do "A: ... m²" fica logo depois do fim do "A: ... m", medido 
 Age só no granito da base chapada, nos px de granito: perto do marrom no croma e de 40% a 150% da luminosidade mediana. Carros, inox, móveis, paredes, rótulos e traços ficam, e as sombras acompanham o tom.
 1. **Pontos:** os claros do motor, mais de 10 níveis acima da mediana de 7 px em volta, em manchas de até 40 px e 8 × 8 px, viram a mediana em volta, com a borda suave. Ficam protegidos os px a 2 px de cinza neutro (folhas de porta), das linhas do PDF da DOC_LINHAS E PROJEÇÕES (o X tracejado, desenhado como máscara) e de fora do granito.
 2. **Grade de manchas:** a variação de média escala que o motor repete (razão entre a média de 30 px e a de 1 px do granito) sai, longe de objetos e paredes (de 5 a 12 px ela some aos poucos, para as sombras ficarem); o grão fino fica (`GRANITO_TOM["manchas"]`).
-3. **Tom:** ganho por canal da mediana atual ao alvo (`GRANITO_TOM["alvo"]`, a opção B: RGB 124, 95, 81), com o peso do granito.
+3. **Referência:** `texturas_escala.trocar_granito` põe o granito marrom da referência do usuário (`fontes_procedurais.granito_referencia`): base marrom com nuvens e lascas de agregado de 2 a 55 mm em tons de marrom, creme, cinza e quase preto, na escala do render. Usa a luz do lugar (média de 2,5 px nos px de granito, relativa à mediana), para as sombras ficarem. Os traços do PDF e os cinza neutros ficam, com a troca de tom na fração de granito que têm. Substitui o ganho de cor da opção B (`GRANITO_TOM["alvo"]` deixou de ser usado).
 
 Roda antes das projeções, para não tocar o tracejado delas. A máscara da pedra portuguesa (item 47) exclui o granito da base: mais claro, ele passava pelo teste de caramelo na borda do acesso.
 

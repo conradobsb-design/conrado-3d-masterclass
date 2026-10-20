@@ -209,7 +209,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     encostava no "m" (números largos) ou se afastava ("7,11"). Só a imagem final muda.
 50. Granito menos escuro e sem os pontos brancos grandes (pente fino de 20/10, item 6; escolha do usuário: "opção B, sem
     pontos os grandes brancos"): os pontos claros do motor viram a mediana em volta (os traços cinza, as linhas do PDF e
-    as bordas de objetos ficam) e o tom vai de RGB 83, 59, 52 a 124, 95, 81, só nos px de granito. Antes das projeções.
+    as bordas de objetos ficam), a grade de manchas repetida sai e o granito passa a ter o desenho e o tom da referência
+    do usuário ("use essa referencia de granito marrom"), com a luz do lugar, só nos px de granito. Antes das projeções.
+51. Rótulo da adega no piso, dentro do U da prateleira (R7; usuário: "escreva no piso, dentro da adega").
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2180,7 +2182,10 @@ def titulo_folha(out, A):
 #    no tom claro, com cara de porcelanato): a variação entre ~3 cm e ~1 m (razão entre a média de 30 px e a de 1 px
 #    do granito, nos px com a luz de granito e não neutros, inclusive as manchas claras rosadas) sai inteira, a
 #    mais de 12 px de objeto e parede; de 5 a 12 px ela some aos poucos (as sombras ficam). O grão de 1 px fica.
-# 3. Tom: ganho por canal da mediana atual (RGB ~83, 59, 52) à da opção B (RGB 124, 95, 81), com o peso do granito.
+# 3. Referência (usuário, 20/10: "use essa referencia de granito marrom", a foto de um granito marrom com lascas de
+#    agregado): o desenho e o tom dela (`fontes_procedurais.granito_referencia`, base RGB ~118, 89, 69), com a luz do
+#    lugar (`texturas_escala.trocar_granito`); os traços do PDF e os cinza neutros ficam, com a troca de tom na fração de
+#    granito que têm (sem halo). Substitui o tom da opção B (RGB 124, 95, 81), que era só um ganho de cor.
 # Vem antes das projeções (item 44), para o tracejado delas não ser tocado.
 GRANITO_TOM = {"alvo": (81, 95, 124), "croma": (6, 12), "luz": (0.40, 1.50),
                # manchas da grade do motor (usuário: "sim, corrija o granito antes do 7"): a variação entre ~10 cm e
