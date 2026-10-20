@@ -1135,7 +1135,9 @@ PISCINA_CLIENTE = {"divisoria_pdf": (705.6, 950.0, 807.6, 972.0),
                    "vidros_pdf": [(812.2, 693.5, 815.0, 945.8), (812.2, 957.1, 815.0, 1090.3)],
                    "esquadria_pdf": [(807.6, 690.7, 819.0, 945.8), (807.6, 957.1, 819.0, 1090.3)],
                    "vidro": (222, 226, 227), "perfil": (58, 60, 62), "perfil_px": 1.3,
-                   "montante_pt": 3.6, "vao_max_m": 1.25, "pt_por_m": 56.69}
+                   # sem montantes (usuário, 20/10/26: "ESSE VIDRO É UMA FOLHA CONTINUA. TALVEZ ESSES PONTOS PRETOS
+                   # PODEM DAR A IMPRESSÃO DE QUE SÃO VÁRIAS FOLHAS"): só a folha, com os perfis dos dois lados
+                   "montantes": False, "montante_pt": 3.6, "vao_max_m": 1.25, "pt_por_m": 56.69}
 
 
 def piscina_cliente(out, p2r):
@@ -1171,7 +1173,7 @@ def piscina_cliente(out, p2r):
         m = tl.ret((vx0, vy0, vx1, vy1))
         tl.pintar(m, q["vidro"])
         tl.contorno(m, q["perfil_px"], q["perfil"])
-        vaos = max(1, int(np.ceil((vy1 - vy0) / (q["vao_max_m"] * q["pt_por_m"]))))
+        vaos = max(1, int(np.ceil((vy1 - vy0) / (q["vao_max_m"] * q["pt_por_m"])))) if q["montantes"] else -1
         recuo = min(1.2, (ex1 - ex0 - (vx1 - vx0)) / 4)
         for k in range(vaos + 1):
             yc = vy0 + (vy1 - vy0) * k / vaos
