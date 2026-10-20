@@ -132,3 +132,29 @@ def mascara_grama(out, gramado, croma=None):
     n, lab, st, _ = cv2.connectedComponentsWithStats(inv.astype(np.uint8), 8)
     grama |= np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] < 120])
     return grama, planta
+
+
+def trocar_pedra_portuguesa(out, mascara, px_por_m, pedra_cm=7.0, semente=642, sig_luz_m=1.5, sig_sombra_m=0.25,
+                            sombra_limiar=0.93, contraste=1.0, junta=(0.6, 0.78)):
+    """A pedra portuguesa do motor (pedras de 12 a 15 cm, fora da regra) vira a da regra, de 6 a 8 cm (R1; seção 3 do
+    POE642_REGRAS.md): as pedras caramelo, ocre e creme com juntas de areia do `fontes_procedurais.pedra_portuguesa`,
+    desenhadas na escala da imagem (`pedra_cm`, a px_por_m), sobre a luz larga do lugar (no tom que já está lá) e com as
+    sombras dele, como em `trocar_grama`. Na imagem final (3840 px) as pedras de 7 cm têm ~4 px e se leem; no render de
+    2000 px, ~2 px. `junta`: (largura em px, escurecimento) das juntas entre as pedras."""
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    import fontes_procedurais as fp
+    im = out.astype(np.float32)
+    m = mascara.astype(np.float32)
+    Lg = nconv(im, m, sig_luz_m * px_por_m)
+    Lc = nconv(im, m, sig_sombra_m * px_por_m)
+    sombra = np.minimum(1.0, ((Lc.mean(axis=2) + 1) / (Lg.mean(axis=2) + 1)) / sombra_limiar)
+    ys, xs = np.nonzero(mascara)
+    bx0, by0, bx1, by1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
+    P = fp.pedra_portuguesa(lado=max(by1 - by0, bx1 - bx0), pedra_cm=pedra_cm, semente=semente,
+                            cm_por_px=100.0 / px_por_m, junta=junta).astype(np.float32)[:by1 - by0, :bx1 - bx0]
+    det = 1 + contraste * (P / P.reshape(-1, 3).mean(axis=0) - 1)
+    novo = im.copy()
+    novo[by0:by1, bx0:bx1] = (Lg * sombra[..., None])[by0:by1, bx0:bx1] * det
+    a = (cv2.GaussianBlur(m, (0, 0), 0.7) * m)[..., None]
+    return np.clip(im * (1 - a) + novo * a, 0, 255).astype(np.uint8), int(mascara.sum())
+

@@ -28,10 +28,12 @@ import numpy as np
 CM_POR_PX = 3.2          # escala dos renders (2000 px de largura)
 
 
-def pedra_portuguesa(lado=420, pedra_cm=6.5, ss=4, semente=642):
+def pedra_portuguesa(lado=420, pedra_cm=6.5, ss=4, semente=642, cm_por_px=CM_POR_PX, junta=None):
+    """junta: None, as juntas finas de areia clara (base v3); ou (largura em px da imagem, fator de escurecimento), para
+    a pedra se ler na imagem final, onde cada pedra tem poucos px."""
     rng = np.random.default_rng(semente)
     n = lado * ss
-    passo = pedra_cm / CM_POR_PX * ss                     # px (em ss) entre centros de pedras
+    passo = pedra_cm / cm_por_px * ss                     # px (em ss) entre centros de pedras
     gx, gy = np.meshgrid(np.arange(0, n + passo, passo), np.arange(0, n + passo, passo))
     pts = np.stack([gx.ravel(), gy.ravel()], 1) + rng.uniform(-0.42, 0.42, (gx.size, 2)) * passo
     # Voronoi: a pedra de cada px é o centro mais próximo (via rótulos de distância)
@@ -54,8 +56,12 @@ def pedra_portuguesa(lado=420, pedra_cm=6.5, ss=4, semente=642):
     cores = paleta[escolha] * rng.uniform(0.94, 1.05, (len(pts) + 1, 1))
     img = cores[pedra]
     # juntas: a borda de cada pedra, em areia clara
-    borda = (cv2.dilate(pedra.astype(np.float32), np.ones((3, 3))) != cv2.erode(pedra.astype(np.float32), np.ones((3, 3))))
-    img[borda] = img[borda] * 0.55 + np.array([140, 168, 192], np.float32) * 0.45
+    k = 3 if junta is None else max(3, int(round(junta[0] * ss)) | 1)
+    borda = (cv2.dilate(pedra.astype(np.float32), np.ones((k, k))) != cv2.erode(pedra.astype(np.float32), np.ones((k, k))))
+    if junta is None:
+        img[borda] = img[borda] * 0.55 + np.array([140, 168, 192], np.float32) * 0.45
+    else:
+        img[borda] = img[borda] * junta[1]
     # leve relevo dentro de cada pedra (o centro um pouco mais claro)
     dist = cv2.distanceTransform((~borda).astype(np.uint8), cv2.DIST_L2, 3)
     img *= (0.95 + 0.05 * np.clip(dist / (passo * 0.35), 0, 1))[..., None]
