@@ -566,6 +566,12 @@ Pente fino do Térreo da Casa E, item 11 (escolha do usuário: "use a bouclé cr
 - **Preenchimento:** o piso vem do deslocamento (`busca` x tamanho, nas `direcoes` quase verticais) que melhor continua o anel em volta. Ficam de fora os que caem sobre outra poltrona ou têm px a mais de `objeto` níveis do piso. A emenda é em gradiente (`cv2.seamlessClone`), e os px soltos viram a mediana 7x7.
 - **Bloco:** girado para o ponto, no tamanho do PDF, com a sombra curta (`sombra`). Os vincos da bouclé são clareados (`clarear`).
 
+## Mesas redondas da varanda: `retoque_terreo_casae.mesas`
+
+Pedido do usuário ("mesas e cadeiras para a varanda", com a foto da `_blocos` folha_07, bloco "mesa_redonda_6_couro"). `MESAS_VARANDA["pecas"]` traz bloco, centro (pt), altura (m) e giro de cada conjunto do PDF.
+- **Retocado (`mesas_varanda`, item 59):** a mancha do conjunto do motor (o que foge da luz do piso, ligado ao centro, até `alcance` x altura), com `folga` e o disco da sombra, sai. O buraco recebe o Bege Bahia da biblioteca nos parâmetros de `BEGE` (o do item 43), sob a luz larga do piso limpo em volta (`luz_m`), emendado com `cv2.seamlessClone`. O bloco entra com a sombra curta.
+- **Final de 3840 px:** só redesenha o bloco por cima (`limpar=False`).
+
 ## Título da folha: `retoque_terreo_casae.titulo_folha`
 
 O texto do título ("0. TÉRREO / ESC.:1:50") não entra nas bases, mas o sublinhado dele, uma linha do PDF sem camada logo abaixo do canto tracejado do lote, pode sobrar. `titulo_folha` volta ao branco a faixa da linha (pt do PDF em `TITULO["linhas"]`, folga de 2 px), só nos px claros, e deixa o tracejado do lote. Para as outras casas, basta achar a linha logo abaixo do título no PDF delas.

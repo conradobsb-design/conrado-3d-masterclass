@@ -7,7 +7,9 @@ várias opções. quero que você escolha dentro do que está nos pdfs base das 
 usarmos." O Pinterest não abre desta sessão (proxy 403 / DNS); as folhas que chegaram como arquivo estão em
 `originais/` (folha_01 a folha_05). A folha_06 é a foto de uma banqueta de madeira e linho que o usuário mandou no
 pente fino do Térreo da Casa E ("referencia de banqueta pra ser utilizada e inserida na biblioteca"): o bloco
-"banqueta_linho", usado nas 5 banquetas da ilha gourmet (item 56 do `retoque_terreo_casae.py`).
+"banqueta_linho", usado nas 5 banquetas da ilha gourmet (item 56 do `retoque_terreo_casae.py`). A folha_07 é a foto de
+uma mesa redonda de madeira com 6 cadeiras de couro ("mesas e cadeiras para a varanda"), em fundo cinza em degradê
+(fundo "cinza": o que não tem cor é fundo; "preencher": o disco cinza do centro da mesa entra).
 
 O que entra (`blocos.json`): só as peças que têm correspondente no mobiliário dos PDFs base, conferido nas camadas
 ARQ_MOBILIÁRIO, ARQ_LAYOUT HUMANIZAÇÃO, ARQ_LOUÇAS E METAIS e ARQ_MARCENARIA das 12 plantas: sofás orgânicos e
@@ -65,6 +67,10 @@ def _frente(crop, fundo, certo=None):
         estrito = ((mn >= 236) & (sat <= 6)) | (np.abs(c - 229).max(2) <= 4)
         sombra = np.zeros_like(estrito)
         forte = (sat >= 14) | (mx <= 200)
+    elif fundo == "cinza":          # fundo cinza em degradê (foto de estúdio): o que não tem cor é fundo ou sombra
+        estrito = sat <= 6
+        sombra = sat <= 10
+        forte = sat >= 20
     else:
         b = np.array(fundo, np.int16)
         B = int(b.max())
@@ -118,6 +124,9 @@ def recortar(b):
         pts = cv2.findNonZero(corpo)
         if pts is not None:
             cv2.fillConvexPoly(fg, cv2.convexHull(pts), 1)
+    if b.get("preencher"):       # peça com miolo sem cor (o disco cinza no centro da mesa): todos os furos entram
+        from scipy import ndimage
+        fg = ndimage.binary_fill_holes(fg).astype(np.uint8)
     furos = (1 - fg).astype(np.uint8)
     n, lab, st, _ = cv2.connectedComponentsWithStats(furos, connectivity=4)
     for i in range(1, n):

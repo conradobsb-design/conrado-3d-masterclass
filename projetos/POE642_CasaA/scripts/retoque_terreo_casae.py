@@ -236,6 +236,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
 58. Poltronas do living e da varanda (pente fino, item 11; usuário: "use a bouclé creme no living e a palhinha na
     varanda"): as 8 do motor saem (com a sombra, o piso emendado em gradiente) e entram os blocos da biblioteca,
     virados para a mesa, no tamanho do PDF.
+59. Mesas redondas da varanda (usuário: "mesas e cadeiras para a varanda", com uma foto que entrou na biblioteca): os
+    dois conjuntos do motor saem (o Bege Bahia da biblioteca no lugar, emendado em gradiente) e entra a mesa de madeira
+    com 6 cadeiras de couro, no centro e na altura dos conjuntos do PDF.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2830,6 +2833,87 @@ def poltronas_sociais(out, A):
     return poltronas(out, p2r)
 
 
+# mesas redondas da varanda (item 59; pedido do usuário depois do pente fino, com uma foto: "mesas e cadeiras para a
+# varanda"). A foto entrou na biblioteca (`_blocos`, folha_07, "mesa_redonda_6_couro": mesa de madeira com tampo
+# central cinza e 6 cadeiras de couro, na mesma disposição das do PDF: uma em cima, uma embaixo e quatro nas
+# diagonais). Os dois conjuntos do motor (mesa clara com vaso e cadeiras brancas) saem: a mancha deles (o que foge da
+# luz do piso em volta, ligado ao centro, até "alcance" x a altura do conjunto) com "folga" px e a sombra ("sombra_motor"
+# x altura, para baixo e à esquerda); o buraco recebe o Bege Bahia da biblioteca no tom do item 43 ("forca", semente
+# e tom de BEGE), sob a luz larga do piso em volta, emendado em gradiente (cv2.seamlessClone). O bloco entra no centro e
+# na altura do conjunto do PDF ("pecas": bloco, centro em pt, altura em m, giro em graus; o segundo girado 180° para o
+# tampo cinza variar), com a sombra curta, e é redesenhado na final de 3840 px, nítido.
+MESAS_VARANDA = {"pecas": [("mesa_redonda_6_couro", (1223.1, 1114.3), 2.4, 0),
+                           ("mesa_redonda_6_couro", (1223.0, 1281.3), 2.4, 180)],
+                 "alcance": 0.65, "foge": 12, "folga": 3, "sombra_motor": 0.07, "luz_m": 1.0,
+                 "sombra": {"dx": -0.04, "dy": 0.04, "desfoque": 0.04, "opacidade": 0.35}}
+
+
+def mesas(out, p2x, limpar=True):
+    sys.path[:0] = [str(RAIZ / "_blocos"), str(RAIZ / "_texturas")]
+    import blocos
+    from texturas import textura
+    from texturas_escala import nconv
+    q = MESAS_VARANDA
+    (a, b), (c, d) = p2x(0, 0), p2x(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    img = out.astype(np.float32)
+    H, W = out.shape[:2]
+    yy, xx = np.mgrid[0:H, 0:W]
+    pecas = [(bid, np.float32(p2x(*cen)), alt * px_m, giro) for bid, cen, alt, giro in q["pecas"]]
+    if limpar:
+        L0 = img.mean(axis=2)
+        mascaras = []
+        for _, cen, h, _ in pecas:
+            dist = np.hypot(xx - cen[0], yy - cen[1])
+            anel = (dist > q["alcance"] * h) & (dist < q["alcance"] * h + 12)
+            piso = np.median(L0[anel])
+            foge = (dist < q["alcance"] * h) & (np.abs(L0 - piso) > q["foge"])
+            n, lab = cv2.connectedComponents(foge.astype(np.uint8), connectivity=8)
+            ids = np.unique(lab[dist < 0.15 * h])
+            blob = np.isin(lab, ids[ids > 0])
+            r = np.hypot(xx[blob] - cen[0], yy[blob] - cen[1]).max() + q["folga"]
+            s = q["sombra_motor"] * h
+            mascaras.append((dist < r) | (np.hypot(xx - cen[0] + s, yy - cen[1] - s) < r))
+        todas = np.logical_or.reduce(mascaras)
+        # o Bege Bahia da biblioteca, como no item 43, sob a luz larga do piso limpo em volta
+        perto = cv2.dilate(todas.astype(np.uint8), np.ones((41, 41), np.uint8)).astype(bool) & ~todas
+        limpo = perto & (np.abs(L0 - np.median(L0[perto])) < 20)
+        luz = nconv(img, limpo.astype(np.float32), q["luz_m"] * px_m)
+        ys, xs = np.nonzero(todas)
+        y0, y1, x0, x1 = ys.min() - 4, ys.max() + 5, xs.min() - 4, xs.max() + 5
+        T = textura("bege_bahia", px_m, y1 - y0, x1 - x0, semente=BEGE["semente"]).astype(np.float32)
+        det = cv2.GaussianBlur(T, (0, 0), BEGE["suavizar"]) / np.maximum(
+            cv2.GaussianBlur(T, (0, 0), BEGE["sig_m"] * px_m), 1)
+        fonte = img.copy()
+        fonte[y0:y1, x0:x1] = luz[y0:y1, x0:x1] * (1 + BEGE["forca"] * (det - 1))
+        for m in mascaras:
+            mm = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)) * 255
+            bx, by, bw, bh = cv2.boundingRect(mm)
+            img = cv2.seamlessClone(np.clip(fonte, 0, 255).astype(np.uint8), np.clip(img, 0, 255).astype(np.uint8),
+                                    mm, (bx + bw // 2, by + bh // 2), cv2.NORMAL_CLONE).astype(np.float32)
+    for bid, cen, h, giro in pecas:
+        cor, al = blocos.bloco(bid, 100)
+        esc = h / al.shape[0]
+        hh, ww = al.shape
+        lado = int(np.ceil(max(hh, ww) * esc * 1.5)) + 4
+        M = cv2.getRotationMatrix2D((ww / 2, hh / 2), float(giro), esc)
+        M[0, 2] += lado / 2 - ww / 2
+        M[1, 2] += lado / 2 - hh / 2
+        c2 = cv2.warpAffine(cor * al[..., None], M, (lado, lado), flags=cv2.INTER_AREA)
+        a2 = cv2.warpAffine(al, M, (lado, lado), flags=cv2.INTER_AREA)
+        c2 = c2 / np.maximum(a2, 1e-4)[..., None]
+        sombra = q["sombra"] if limpar else {**q["sombra"], "opacidade": 0.0}
+        pousar_planta(img, c2, a2, float(cen[0]), float(cen[1]), h, sombra)
+    print(f"    {len(pecas)} mesas redondas de madeira com 6 cadeiras de couro (biblioteca: mesa_redonda_6_couro)"
+          + ("" if limpar else ", redesenhadas por cima"))
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def mesas_varanda(out, A):
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    return mesas(out, p2r)
+
+
 # esquadrias finas (item 55; pente fino de 20/10, item 8, usuário: "portas vidros e janelas mais delicados e finos?").
 # O motor desenhou caixilhos largos e brancos, com duas ou três linhas, nas janelas, nos vidros da fachada e nas folhas.
 # No PDF, tudo está na ARQ_PAREDE: os brancos finos (até 12,5 pt de espessura e 15 pt ou mais de comprimento; fora as
@@ -3204,6 +3288,8 @@ def final_rotulos(out, referencia=None):
     final = cooktops(final, p2q)
     print("    [58] poltronas redesenhadas na final (nítidas):")
     final = poltronas(final, p2q, limpar=False)
+    print("    [59] mesas da varanda redesenhadas na final (nítidas):")
+    final = mesas(final, p2q, limpar=False)
     rot = [r for r in R1.rotulos_pdf(pg) if not any(f in r[0] for f in q["fora"])]
     granito = np.abs(chapada.astype(int) - np.array(ARCOS["granito"])).max(axis=2) <= 6
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
@@ -3325,6 +3411,8 @@ def main():
     out = cooktops_ilhas(out, A)
     print("[58] poltronas do living e da varanda: blocos da biblioteca (pente fino, item 11)")
     out = poltronas_sociais(out, A)
+    print("[59] mesas redondas da varanda: madeira e couro, da referência do usuário")
+    out = mesas_varanda(out, A)
     print("[53] vegetação do gramado: árvores, arbustos e palmeiras da referência no tamanho real (pente fino, item 7)")
     out = vegetacao(out, A)
     print("[50] granito menos escuro (opção B) e sem os pontos brancos grandes (pente fino, item 6)")

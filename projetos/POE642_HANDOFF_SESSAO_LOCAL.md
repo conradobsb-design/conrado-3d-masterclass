@@ -625,6 +625,14 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **A nova entra** virada para a mesa, com a sombra curta, e na final de 3840 px é redesenhada por cima, nítida.
     - **Orientação:** o usuário perguntou: "as poltronas estão viradas para fora?". Estavam: nas bouclé eu tinha invertido a frente do bloco (na folha, o encosto fica em cima). Corrigido; as de palhinha já estavam certas.
     - **Conferência:** só os três grupos de poltronas mudaram. Antes e depois: `renders/POE642_CasaE_PH_Terreo_poltronas_antes_depois.jpg`.
+  59. mesas redondas da varanda (pedido do usuário depois do pente fino, com uma foto: "mesas e cadeiras para a varanda"). A foto é de uma mesa redonda de madeira com tampo central cinza e 6 cadeiras de couro marrom, na mesma disposição das do PDF: uma em cima, uma embaixo e quatro nas diagonais.
+    - **Biblioteca:** entrou como `_blocos/originais/folha_07_mesa_redonda_couro.jpg`, bloco "mesa_redonda_6_couro" (2,4 m). A foto tem fundo cinza em degradê, e por isso entraram dois modos novos no `blocos.recortar`: fundo "cinza" (o que não tem cor é fundo) e "preencher" (o disco cinza do centro entra). A cartela foi refeita.
+    - **Feito (`mesas`):**
+      - os dois conjuntos do motor (mesa clara com vaso e cadeiras brancas) saem, com a sombra;
+      - o buraco recebe o Bege Bahia da biblioteca no tom do item 43, sob a luz do piso em volta, emendado em gradiente;
+      - entram os blocos no centro e na altura dos conjuntos do PDF, com sombra curta; o segundo é girado 180° para o tampo cinza variar;
+      - na final, os conjuntos são redesenhados, nítidos.
+    - **Conferência:** só a faixa das duas mesas mudou. Antes e depois, com a referência: `renders/POE642_CasaE_PH_Terreo_mesas_varanda_antes_depois.jpg`.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";
