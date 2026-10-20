@@ -435,6 +435,10 @@ Retoques sem IA no render v1 (fundo branco), no quadro do render; as posições 
 - **Torneira de piso da banheira (item 13):** `torneira_banheira` ajusta uma elipse ao branco da banheira do render (maior que a do PDF), leva a base da torneira do PDF (ARQ_LOUÇAS E METAIS) à mesma posição relativa ao contorno, e desenha em 8x a base redonda, a bica em diagonal e a alavanca no cromo das cubas, com a sombra curta das placas de teto.
 - **Nomes e áreas dos ambientes (item 14):** `rotulos_pdf` lê no PDF cada nome de ambiente e as linhas logo abaixo ("A: 17 m" e o "2" sobrescrito), com o texto, o corpo e a origem de cada linha; `rotulos_ambientes` escreve cada linha igual ao PDF, na posição do PDF (só os que caem sobre móvel vão ao piso livre mais próximo, em `ROTULOS["ajustes"]`, autorizado pelo usuário), no corpo do PDF (8 pt e 5,3 pt) levado à escala da imagem e 30% maior (`ROTULOS["escala"]`, com as linhas afastando na mesma escala, em volta do centro do bloco), em Inter Regular, desenhada em 4x e reduzida, em preto; no granito marrom (máscara `granito`), em cinza. O script salva também `_sem_rotulos.png`, que vai à montagem; lá os rótulos são escritos de novo na resolução da prancha.
 
+- **Pente fino de 20/10/26:**
+  - item 1, R3: `ARCOS["sem_arco"]`, os arcos não entram mais e fica a folha da pivotante; a floreira usa o Térreo aprovado de 15/10 (`TERREO_FLOREIRA`);
+  - item 16, quartzito dos banhos: `quartzito_referencia`. Nas áreas de quartzito da base chapada, a parte pêssego de cada px vai ao tom da foto do quadro de 19/10. A fração vem do R − B contra o do piso, então sombras acompanham e as bordas de louças e vidros não ganham halo. Depois, `retexturizar` aplica a chapa da biblioteca na escala, só na luz (sem a faixa bege da foto), no piso limpo.
+
 ```bash
 python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \
     --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_1Pavimento_v1_retocado

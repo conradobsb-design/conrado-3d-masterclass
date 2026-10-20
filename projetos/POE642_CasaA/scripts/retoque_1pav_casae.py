@@ -62,6 +62,12 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_erros.
     (texto, posição do PDF, corpo do PDF 30% maior), em Inter Regular preta; os seis que caem sobre móvel
     vão ao piso livre mais próximo (autorizado pelo usuário). Sai também `_sem_rotulos.png`.
 
+Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_pente_fino_mapa.jpg):
+- item 1, R3: o item 6 deixa de desenhar os arcos (ARCOS["sem_arco"]); a floreira (item 1 de 16/10) passa a vir do
+  Térreo aprovado de 15/10 (TERREO_FLOREIRA), de onde ela saiu;
+- item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
+  parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
+
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_1pav_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png \\
       --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_1Pavimento_v1_retocado
@@ -1010,6 +1016,52 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, a
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
+# é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
+# quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
+# saíram no pêssego da legenda (#EAD4BF). Nas áreas de quartzito da base chapada:
+# - o tom: a parte pêssego de cada px vai ao tom da foto. A fração de piso de cada px vem da cor pêssego (R - B, contra a
+#   do piso): no piso, ela é 1, e numa sombra ela cai junto com o R - B, de modo que a troca acompanha a luz; na borda
+#   suavizada de louças, vidros, placas e metais (mistura de branco com pêssego), só a parte pêssego muda (uma razão
+#   de cor igual para todos deixava um halo azulado nessas bordas);
+# - o desenho: a chapa da biblioteca, só na luz (sem a cor: o tom pedido é entre o branco e o cinza, e a foto tem uma
+#   faixa bege), na escala do render, no piso limpo (fora dos traços e objetos medidos antes da troca de tom: o vidro
+#   dos boxes, que é quase do tom novo, fica)
+QUARTZITO = {"cor_chapada": (191, 212, 234), "tol": 6, "folga": 2, "tom": (211, 215, 221), "fracao_max": 1.2,
+             "forca": 1.0, "semente": 1, "sig_m": 0.25, "tracos": 10}
+
+
+def quartzito_referencia(out, A):
+    from texturas_escala import retexturizar, nconv, textura
+    q = QUARTZITO
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    qz = np.abs(chapada.astype(np.int32) - np.array(q["cor_chapada"])).max(axis=2) <= q["tol"]
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    im = out.astype(np.float32)
+    # os traços e objetos, medidos no pêssego (antes da troca de tom)
+    L = nconv(im, qz.astype(np.float32), 0.25 * px_m)
+    tracos = cv2.dilate((np.abs(im - L).max(axis=2) > q["tracos"]).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    piso = qz & ~tracos
+    pessego = im[piso].mean(axis=0)
+    # a fração de piso de cada px (pela cor pêssego), numa faixa um pouco maior que a da chapada (cantos junto às paredes)
+    area = cv2.dilate(qz.astype(np.uint8), np.ones((2 * q["folga"] + 1,) * 2, np.uint8)) > 0
+    croma = (im[..., 2] - im[..., 0]) / (pessego[2] - pessego[0])
+    fr = np.clip(croma, 0, q["fracao_max"]) * area
+    im = im + fr[..., None] * (np.float32(q["tom"]) - pessego)
+    out = np.clip(im, 0, 255).astype(np.uint8)
+
+    def chapa(h, w):
+        T = textura("quartzito_aura", px_m, h, w, semente=q["semente"]).astype(np.float32)
+        return np.repeat(T.mean(axis=2, keepdims=True), 3, axis=2)
+    out, npx = retexturizar(out, piso, "quartzito_aura", px_m, forca=q["forca"], sig_m=q["sig_m"], pronta=chapa,
+                            cor=q["tom"])
+    print(f"    quartzito: {int((fr > 0).sum())} px no tom da foto; {npx} px no desenho da chapa, a {px_m:.2f} px/m")
+    return out
+
+
 # item 9: shaft (pedido do usuário: "preciso da marcação em x para sinalizar o shaft ... em cor cinza").
 # O PDF tem um shaft dentro da parede grossa de cima da suíte master: o retângulo e o X tracejado da
 # DOC_LINHAS E PROJEÇÕES (10 segmentos), que somem no preto da parede. Entram em cinza, finos, só
@@ -1073,6 +1125,8 @@ def main():
     out = torneira_banheira(out, p2r)
     print("[9] shaft: X em cinza na parede")
     out = shaft(out, pg, p2r)
+    print("[16] quartzito dos banhos como a referência (o tom e a chapa da foto)")
+    out = quartzito_referencia(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     # sem rótulos: a imagem que vai à montagem com o Térreo esmaecido (os rótulos são escritos de novo na

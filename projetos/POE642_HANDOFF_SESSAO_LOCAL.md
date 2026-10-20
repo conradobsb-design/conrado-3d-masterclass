@@ -790,6 +790,11 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Como:** os vazios são o cinza (74) da base v3, fechados e com o X preenchido, com 3 px de folga (`VAZIOS`). O peso vem do branco do render (de 205 a 245), e o Térreo é multiplicado pelo tom do render. Assim, o X tracejado, o guarda-corpo de vidro e a folha da pivotante P1 ficam por cima, como num papel transparente.
     - **Conferência:** nas três montagens e nas três pranchas, só os dois vazios mudaram; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_vazios_nevoados_antes_depois.jpg`.
+  - **Item 16, quartzito dos banhos como a referência, feito.** O usuário indicou a referência: "quartzito dos banhos está no quadro de referências já enviado". É a foto do quadro de 19/10, `_texturas/originais/quartzito_aura.jpg` (chapa de 3,00 m, branco-acinzentada, RGB ~221, 215, 211). Os cinco banhos tinham saído no pêssego da legenda (#EAD4BF). Feito em `retoque_1pav_casae.quartzito_referencia`, nas áreas de quartzito da base chapada:
+    - **o tom:** a parte pêssego de cada px vai ao tom da foto. A fração vem do R − B do px contra o do piso: as sombras acompanham, e as bordas de louças, vidros, placas e metais não ganham halo. Uma razão de cor única, testada antes, deixava um halo azulado nessas bordas;
+    - **o desenho:** a chapa da biblioteca, na escala (31,1 px/m), só na luz. A foto tem uma faixa bege, e o tom pedido é entre o branco e o cinza. Entra só no piso limpo, fora dos traços medidos antes da troca de tom (o vidro dos boxes fica).
+    - **Conferência:** no retocado, mudaram só os cinco banhos; nas montagens e nas pranchas, só as quatro áreas dos banhos (os 3 e 4 juntos); rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_quartzito_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 
