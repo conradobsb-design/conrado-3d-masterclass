@@ -641,6 +641,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
       - o bloco entra no centro da caixa do PDF, girado 90° (cabeceiras em cima e embaixo), com sombra curta;
       - na final, a mesa é redesenhada, nítida.
     - **Conferência:** só a área da mesa mudou. Antes e depois: `renders/POE642_CasaE_PH_Terreo_mesa_jantar_antes_depois.jpg`.
+  61. prancha do Térreo (pedido do usuário: "siga para a prancha do Térreo"). Refeita pelo `rodape_entrega.py --no-quadro` (comando no README dos scripts, em "Pranchas de entrega") com a imagem final atual: itens 44 a 60, o pente fino inteiro, mais as mesas da varanda e a mesa de jantar.
+    - **Conferência:** a área da imagem é a final, px a px (diferença 0). O rodapé e os três arquivos de rodapé ficaram idênticos. A prancha anterior era a do item 43.
+    - **Imagens:** prancha `entrega/POE642_CasaE_PH_Terreo_entrega.png` (3840 × 2600 px). Antes e depois: `renders/POE642_CasaE_PH_Terreo_prancha_antes_depois.jpg`.
+    - **Ainda não estão na prancha:** os carros SUV bronze (R12, só na Casa E), que aguardam o arquivo da foto do usuário. Os três PDFs e as montagens do 1º Pavimento (que usam o Térreo como contexto) são o próximo passo.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";

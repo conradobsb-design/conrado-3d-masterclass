@@ -128,6 +128,7 @@ python pdf_entrega.py --config ../../POE642_CasaC/config_bases.json      # Subso
 C=../../POE642_CasaE
 python rodape_entrega.py --config $C/config_bases.json --no-quadro --render Subsolo=$C/renders/POE642_CasaE_PH_Subsolo_v1_final.png
 python rodape_entrega.py --config $C/config_bases.json --no-quadro --render Terreo=$C/renders/POE642_CasaE_PH_Terreo_v1_final.png
+# (Térreo refeito em 20/10/26 com o pente fino inteiro, itens 44 a 60 do handoff; os carros SUV bronze entram depois)
 python rodape_entrega.py --config $C/config_bases.json --no-quadro --sufixo _pb --render 1Pavimento=$C/renders/POE642_CasaE_PH_1Pavimento_v1_final_pb.png
 python rodape_entrega.py --config $C/config_bases.json --no-quadro --sufixo _linhas --render 1Pavimento=$C/renders/POE642_CasaE_PH_1Pavimento_v1_final_linhas.png
 python pdf_entrega.py --config $C/config_bases.json --prancha 1Pavimento=$C/entrega/POE642_CasaE_PH_1Pavimento_entrega_pb.png \
