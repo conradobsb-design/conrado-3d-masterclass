@@ -1927,9 +1927,8 @@ def bege_referencia(out, A):
 # do Térreo marcam bordas de três coberturas (esquema em renders/POE642_CasaE_PH_Terreo_projecoes_esquema.jpg):
 # - o L, a laje baixa do espaço gourmet + varanda (fachada posterior): a borda de cima e a esquerda do gourmet (ARQ_
 #   ELEMENTOS FIXOS, do PDF do Térreo), a do topo da piscina até a varanda, a esquerda da varanda e a de baixo, até a
-#   parede da suíte 3 (o contorno da varanda e da suíte 3 do 1º Pavimento, no mesmo quadro, com o dente de 10 cm):
-#   os 4 pilares da varanda (EST - Pilar) ficam por dentro (usuário: "os pilares da varanda precisam estar internos a
-#   linha"; o da sala, em x = 1421, ficava fora quando a linha parava na fachada da sala, x = 1380);
+#   fachada da sala (o contorno da varanda do 1º Pavimento, no mesmo quadro, com o dente de 10 cm da suíte 3); os
+#   pilares da varanda ficam por dentro (o quarto pilar do PDF, em x = 1421, é o de dentro da sala);
 # - a laje da garagem (fachada frontal): a linha do PDF em cima da garagem, a lateral direita junto aos brises e a
 #   borda de baixo, voltada para o acesso de veículos;
 # - a faixa de cima: a borda de cima da circulação até a garagem.
@@ -1937,7 +1936,7 @@ def bege_referencia(out, A):
 PROJECOES = {"ativo": True,
              "linhas": {"L: laje do espaço gourmet + varanda": [(1372.9, 518.6), (697.6, 518.6), (697.6, 1090.3),
                                                                  (983.4, 1090.3), (983.4, 1694.1), (1204.5, 1694.1),
-                                                                 (1204.5, 1688.5), (1537.3, 1688.5)],
+                                                                 (1204.5, 1688.5), (1380.0, 1688.5)],
                         "laje da garagem": [(1992.5, 687.8), (2763.5, 687.8), (2763.5, 1090.3), (2207.9, 1090.3)],
                         "faixa de cima": [(1372.9, 516.3), (2763.5, 516.3), (2763.5, 687.8)]},
              "traco_pt": 8.5, "vao_pt": 4.25, "larg_px": 0.55, "cor": (150, 151, 150), "forca": 0.85, "parede": 45}
