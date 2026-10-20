@@ -182,6 +182,10 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     do lugar e as sombras das plantas, no tom verde do render (escolha do usuário, opção B). Plantas e pisos ficam.
 43. Bege Bahia (R1): como no Subsolo, os pontinhos escuros do motor saem e o desenho da biblioteca entra, na escala,
     no tom da foto de referência, com a luz do lugar (varanda, deck, blocos, pisantes e WC DCE 1).
+44. Projeções da cobertura (R8, R9; aguardando a confirmação do esquema pelo usuário, `PROJECOES["ativo"]`):
+    tracejado cinza fino no L da laje baixa do espaço gourmet + varanda, na laje da garagem (com a linha do PDF e a
+    lateral junto aos brises) e na faixa de cima, as bordas das 7 notas "PROJ. COBERTURA" do PDF; menos nas paredes
+    pretas.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1915,6 +1919,57 @@ def bege_referencia(out, A):
     return out
 
 
+# projeções da cobertura (item 44, R8 e R9; usuário, 20/10/26: "quero que você desenhe um tracejado cinza fino sobre
+# essas bordas (pode usar a varanda do primeiro pavimento como referência), inclusive junto aos brises da garagem, para
+# marcar a projeção. na garagem tem uma linha no PDF. na varanda, existem os escritos da 'PROJ. COBERTURA' fazendo o
+# contorno, passando do espaço gourmet banho do espaço gourmet. essa projeção faz um L"; com duas fotos: a fachada
+# posterior, "o L fica na varanda + espaço gourmet", e a frontal, com a garagem). As 7 notas "PROJ. COBERTURA" do PDF
+# do Térreo marcam bordas de três coberturas (esquema em renders/POE642_CasaE_PH_Terreo_projecoes_esquema.jpg):
+# - o L, a laje baixa do espaço gourmet + varanda (fachada posterior): a borda de cima e a esquerda do gourmet (ARQ_
+#   ELEMENTOS FIXOS, do PDF do Térreo), a do topo da piscina até a varanda, a esquerda da varanda e a de baixo, até a
+#   fachada da sala (o contorno da varanda do 1º Pavimento, no mesmo quadro, com o dente de 10 cm da suíte 3);
+# - a laje da garagem (fachada frontal): a linha do PDF em cima da garagem, a lateral direita junto aos brises e a
+#   borda de baixo, voltada para o acesso de veículos;
+# - a faixa de cima: a borda de cima da circulação até a garagem.
+# Tracejado cinza fino por cima de tudo, menos nas paredes pretas (onde o traço some).
+PROJECOES = {"ativo": False,
+             "linhas": {"L: laje do espaço gourmet + varanda": [(1372.9, 518.6), (697.6, 518.6), (697.6, 1090.3),
+                                                                 (983.4, 1090.3), (983.4, 1694.1), (1204.5, 1694.1),
+                                                                 (1204.5, 1688.5), (1380.0, 1688.5)],
+                        "laje da garagem": [(1992.5, 687.8), (2763.5, 687.8), (2763.5, 1090.3), (2207.9, 1090.3)],
+                        "faixa de cima": [(1372.9, 516.3), (2763.5, 516.3), (2763.5, 687.8)]},
+             "traco_pt": 8.5, "vao_pt": 4.25, "larg_px": 0.55, "cor": (150, 151, 150), "forca": 0.85, "parede": 45}
+
+
+def projecoes(out, A):
+    q = PROJECOES
+    if not q["ativo"]:
+        print("    projeções da cobertura: aguardando a confirmação do esquema (PROJECOES['ativo'])")
+        return out
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    h, w = out.shape[:2]
+    m = np.zeros((h * SS, w * SS), np.uint8)
+    lw = max(1, int(round(q["larg_px"] * SS)))
+    n = 0
+    for pts in q["linhas"].values():
+        for (ax, ay), (bx, by) in zip(pts[:-1], pts[1:]):
+            comp = np.hypot(bx - ax, by - ay)
+            t = 0.0
+            while t < comp:
+                t1 = min(comp, t + q["traco_pt"])
+                u = p2r(ax + (bx - ax) * t / comp, ay + (by - ay) * t / comp)
+                v = p2r(ax + (bx - ax) * t1 / comp, ay + (by - ay) * t1 / comp)
+                cv2.line(m, (int(round(u[0] * SS)), int(round(u[1] * SS))), (int(round(v[0] * SS)), int(round(v[1] * SS))),
+                         255, lw, cv2.LINE_AA)
+                n += 1
+                t = t1 + q["vao_pt"]
+    a = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * q["forca"]
+    a *= (out.astype(np.float32).mean(axis=2) >= q["parede"])          # nas paredes pretas o traço some
+    out[:] = np.clip(out * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None], 0, 255).astype(np.uint8)
+    print(f"    projeções da cobertura: {len(q['linhas'])} linhas, {n} traços")
+    return out
+
+
 # paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
 # canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
 PAISAGISMO = {
@@ -2222,6 +2277,8 @@ def main():
     out = grama_referencia(out, A)
     print("[43] Bege Bahia como a referência (R1)")
     out = bege_referencia(out, A)
+    print("[44] projeções da cobertura em tracejado cinza fino (R8, R9)")
+    out = projecoes(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
