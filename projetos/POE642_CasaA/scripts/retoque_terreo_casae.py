@@ -170,8 +170,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
 39. Escadas com linhas e o triângulo de orientação (R14), como no Subsolo: o sombreamento dos itens 18 e 21
     sai (fica o travertino limpo) e entram, na geometria do PDF, o bocel em linha suave e a sombra curta no
     degrau de baixo; na interna (sobe da direita para a esquerda), depois do corte, a escada esmaecida e
-    tracejada; o triângulo no início de cada uma (à direita, apontando para a esquerda). A externa do alto
-    desce da direita para a esquerda (o "D" do PDF), como o usuário pediu no item 21.
+    tracejada; o triângulo no início de cada uma, apontando para o percurso. A externa do alto desce da
+    esquerda para a direita (usuário: "pode inverter"; fica sobre a do Subsolo, que sobe da direita para a
+    esquerda), contra o "D" do PDF; o triângulo dela fica à esquerda.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1706,7 +1707,8 @@ def sem_arcos(out, A):
 # baixo; depois do corte, a escada esmaecida, com os bocéis e o contorno tracejados (a projeção); o triângulo cheio no
 # início do percurso, apontando para ele. Geometria do PDF (ARQ_ESCADAS E RAMPAS, pt): a caixa, os bocéis de dentro e
 # o corte. Sentidos (usuário): a interna sobe da direita para a esquerda (o "S" do PDF à direita; corte depois do 7º
-# degrau, o resto tracejado, como no PDF); a externa do alto desce da direita para a esquerda (o "D" à direita).
+# degrau, o resto tracejado, como no PDF); a externa do alto desce da esquerda para a direita (usuário, 20/10/26: "pode
+# inverter"; ela fica sobre a do Subsolo, que sobe da direita para a esquerda: o mesmo lance, contra o "D" do PDF).
 ESCADA_LINHAS = {"bocel": 0.80, "bocel_pt": 0.55, "sombra": (0.16, 5.67), "esmaecer": 0.8,
                  "tracejado": (160, 160, 164), "tracejado_px": 0.5, "traco_pt": 5.7, "vao_pt": 2.8,
                  "triangulo": {"base_pt": 13.6, "altura_pt": 14.7, "recuo_pt": 5.67, "cor": (88, 88, 92)},
@@ -1714,10 +1716,10 @@ ESCADA_LINHAS = {"bocel": 0.80, "bocel_pt": 0.55, "sombra": (0.16, 5.67), "esmae
                      {"nome": "interna, sobe da direita para a esquerda", "pdf": (1659.2, 1138.5, 1984.0, 1221.4),
                       "bocels": [1677.9 + 17.0 * k for k in range(18)], "baixo": "direita", "inicio": "direita",
                       "corte": [(1840.5, 1138.5), (1859.3, 1176.2), (1863.1, 1183.8), (1882.2, 1222.0)]},
-                     {"nome": "externa do alto, desce da direita para a esquerda", "pdf": (972.0, 617.0, 1262.9, 685.0),
+                     {"nome": "externa do alto, desce da esquerda para a direita", "pdf": (972.0, 617.0, 1262.9, 685.0),
                       "bocels": [989.0, 1006.1, 1023.1, 1040.1, 1057.1, 1074.1, 1091.1, 1108.1, 1125.1, 1142.1,
                                  1159.1, 1176.1, 1193.1, 1210.1, 1227.2, 1244.2],
-                      "baixo": "esquerda", "inicio": "direita", "corte": None}]}
+                      "baixo": "direita", "inicio": "esquerda", "corte": None}]}
 
 
 def escada_linhas(out, A, e):
