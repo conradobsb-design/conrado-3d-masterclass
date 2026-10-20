@@ -645,6 +645,12 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Conferência:** a área da imagem é a final, px a px (diferença 0). O rodapé e os três arquivos de rodapé ficaram idênticos. A prancha anterior era a do item 43.
     - **Imagens:** prancha `entrega/POE642_CasaE_PH_Terreo_entrega.png` (3840 × 2600 px). Antes e depois: `renders/POE642_CasaE_PH_Terreo_prancha_antes_depois.jpg`.
     - **Ainda não estão na prancha:** os carros SUV bronze (R12, só na Casa E), que aguardam o arquivo da foto do usuário. Os três PDFs e as montagens do 1º Pavimento (que usam o Térreo como contexto) são o próximo passo.
+  62. escada que desce, esmaecida a partir da diagonal (usuário, olhando a prancha: "Faltou o esmaecimento parcial da escada que desce. A partir da linha diagonal discriminada no PDF base"). É a externa do alto, que desce da esquerda para a direita (item 39).
+    - **A diagonal:** o PDF do Térreo não tem linha de corte nessa escada (só a seta e o "D"); quem tem é o PDF do Subsolo, no mesmo lance e na mesma caixa (972 a 1263 pt): entre o 7º e o 8º degrau contados da esquerda, de (1073,8; 616,4) a (1108,1; 685,0). No Subsolo, o trecho à esquerda dela (o de cima) está esmaecido e tracejado; no Térreo, o inverso.
+    - **Feito (`escada_linhas`, opções novas `viva`, `apos` e `esmaecer` por escada):** viva à esquerda da diagonal (o trecho de cima, no Térreo, com o triângulo). Depois dela, já no Subsolo, a escada fica esmaecida, com os bocéis e as sombras. Não há tracejado, pois o trecho fica por baixo e não é projeção. A linha de corte não é desenhada, como nas outras escadas.
+    - **Intensidade:** o 0,8 da interna, sem o tracejado, quase não aparece no travertino claro. Testei 0,8, 0,6, 0,45 e 0,3 e fiquei com 0,45: o esmaecimento fica claro e os degraus continuam legíveis.
+    - **Conferência:** no retocado, na final e na prancha, mudou só a escada (110 × 46 px no retocado, 214 × 90 na final); rodapé igual.
+    - **Imagens:** prancha refeita. Antes e depois: `renders/POE642_CasaE_PH_Terreo_escada_desce_esmaecida_antes_depois.jpg`.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";

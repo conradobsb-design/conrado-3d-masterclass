@@ -172,7 +172,10 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     degrau de baixo; na interna (sobe da direita para a esquerda), depois do corte, a escada esmaecida e
     tracejada; o triângulo no início de cada uma, apontando para o percurso. A externa do alto desce da
     esquerda para a direita (usuário: "pode inverter"; fica sobre a do Subsolo, que sobe da direita para a
-    esquerda), contra o "D" do PDF; o triângulo dela fica à esquerda.
+    esquerda), contra o "D" do PDF; o triângulo dela fica à esquerda. Ela também é cortada (usuário: "faltou o
+    esmaecimento parcial da escada que desce, a partir da linha diagonal discriminada no PDF base"): o corte é o do
+    PDF do Subsolo, no mesmo lance; viva até ele (o trecho de cima) e, depois, esmaecida (0,45), com os bocéis e as
+    sombras, sem tracejado, pois fica por baixo.
 40. Rótulos (R6 e R7): no granito Marrom Tabaco, em branco (antes, cinza 150); nenhum sobre objeto (conferidos os
     29; o do louceiro fica sobre a marcenaria, que é o próprio ambiente, sem piso livre).
 41. Carros (R12): alinhados, do mesmo tamanho e da mesma cor. Com `R12_CARROS`, o item 26 apaga os três
@@ -1868,10 +1871,18 @@ ESCADA_LINHAS = {"bocel": 0.80, "bocel_pt": 0.55, "sombra": (0.16, 5.67), "esmae
                      {"nome": "interna, sobe da direita para a esquerda", "pdf": (1659.2, 1138.5, 1984.0, 1221.4),
                       "bocels": [1677.9 + 17.0 * k for k in range(18)], "baixo": "direita", "inicio": "direita",
                       "corte": [(1840.5, 1138.5), (1859.3, 1176.2), (1863.1, 1183.8), (1882.2, 1222.0)]},
+                     # o corte (usuário, 20/10/26: "faltou o esmaecimento parcial da escada que desce, a partir da
+                     # linha diagonal discriminada no PDF base"): o PDF do Térreo não o tem; é o do PDF do Subsolo,
+                     # no mesmo lance (entre o 7º e o 8º degrau, da esquerda). Viva à esquerda (o trecho de cima, no
+                     # Térreo); depois do corte, já no Subsolo, esmaecida com os bocéis e as sombras (fica por baixo:
+                     # não é projeção, sem tracejado). Sem o tracejado, o 0,8 da interna não aparece no travertino
+                     # quase branco: aqui, 0,45 (testados 0,8, 0,6, 0,45 e 0,3)
                      {"nome": "externa do alto, desce da esquerda para a direita", "pdf": (972.0, 617.0, 1262.9, 685.0),
                       "bocels": [989.0, 1006.1, 1023.1, 1040.1, 1057.1, 1074.1, 1091.1, 1108.1, 1125.1, 1142.1,
                                  1159.1, 1176.1, 1193.1, 1210.1, 1227.2, 1244.2],
-                      "baixo": "direita", "inicio": "esquerda", "corte": None}]}
+                      "baixo": "direita", "inicio": "esquerda",
+                      "corte": [(1073.8, 616.4), (1089.2, 647.2), (1093.0, 654.8), (1108.1, 685.0)],
+                      "viva": "esquerda", "apos": "esmaecida", "esmaecer": 0.45}]}
 
 
 def escada_linhas(out, A, e):
@@ -1895,7 +1906,10 @@ def escada_linhas(out, A, e):
         return poli([(fx0, ey0), (fx1, ey0), (fx1, ey1), (fx0, ey1)])
     reg = out[y0:y1, x0:x1].astype(np.float32)
     esc = faixa(ex0, ex1)
-    viva = esc if e["corte"] is None else poli(e["corte"] + [(ex1, ey1), (ex1, ey0)])
+    lado = ex0 if e.get("viva") == "esquerda" else ex1
+    viva = esc if e["corte"] is None else poli(e["corte"] + [(lado, ey1), (lado, ey0)])
+    # depois do corte: "tracejada" (a projeção, acima do corte) ou "esmaecida" (abaixo dele, com os bocéis e as sombras)
+    tracejada = e.get("apos", "tracejada") == "tracejada"
     bocels = [ex0] + list(e["bocels"]) + [ex1]
     # o lado de baixo de cada bocel (a sombra): à direita se o pé da escada está à direita; nada além do pé
     sinal = 1 if e["baixo"] == "direita" else -1
@@ -1909,10 +1923,11 @@ def escada_linhas(out, A, e):
         for f in np.linspace(0, 1, 9)[:-1]:
             fa, fb = xb + sinal * alcance * f, xb + sinal * alcance * (f + 1 / 8)
             fator *= 1 - forca * (1 - f - 1 / 16) ** 1.6 * faixa(min(fa, fb), max(fa, fb))
-    reg *= (1 - (1 - fator) * viva)[..., None]
+    reg *= (1 - (1 - fator) * (viva if tracejada else esc))[..., None]
     if e["corte"] is not None:
         apos = np.clip(esc - viva, 0, 1)[..., None]
-        reg = reg * (1 - apos) + (255 - (255 - reg) * q["esmaecer"]) * apos
+        reg = reg * (1 - apos) + (255 - (255 - reg) * e.get("esmaecer", q["esmaecer"])) * apos
+    if e["corte"] is not None and tracejada:
         m = np.zeros((h * SS, w * SS), np.uint8)
         lw = max(1, int(round(q["tracejado_px"] * SS)))
 
@@ -1943,7 +1958,8 @@ def escada_linhas(out, A, e):
     reg = reg * (1 - tri[..., None]) + np.float32(t["cor"]) * tri[..., None]
     out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
     print(f"    escada {e['nome']}: {len(bocels) - 1} pisos com os bocéis em linha suave e a sombra curta" +
-          ("" if e["corte"] is None else "; depois do corte, esmaecida e tracejada") + "; triângulo no início")
+          ("" if e["corte"] is None else "; depois do corte, esmaecida" + (" e tracejada" if tracejada else "")) +
+          "; triângulo no início")
     return out
 
 
