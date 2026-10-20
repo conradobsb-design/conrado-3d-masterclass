@@ -876,6 +876,38 @@ Pedido do usuário (19/10/26): "vamos inserir as referências de imagem das text
   - **porta_giro:** folha branca fina aberta a 90°, sem arco. Decisão do usuário (19/10/26): "remover os arcos, escadas com linhas".
   - **Escadas com linhas (mesma decisão):** o bocel em linha cinza suave, como na referência.
 
+## Biblioteca de blocos · todas as casas
+
+Pedido do usuário (20/10/26), com um pin do Pinterest: "adicione esse https://br.pinterest.com/pin/653022015002943564/ à nossa biblioteca de blocos a serem utilizados e oferecidos, dentro do escopo do projeto das casas. temos várias opções. quero que você escolha dentro do que está nos pdfs base das casas. e encontre uma cortina para usarmos." O Pinterest não abre desta sessão (proxy 403, DNS), e o usuário mandou as folhas como imagem.
+
+- **Pasta:** `projetos/_blocos/`, a mesma para as cinco casas.
+  - `originais/`: as 5 folhas que chegaram como arquivo (`folha_01_cozinha`, `folha_02_estar_madeira`, `folha_03_banho_jantar`, `folha_04_sofas_organicos`, `folha_05_externo_plantas`).
+  - `blocos.json`: cada bloco com a folha, a caixa em px, a medida real, a categoria e onde ele entra nos PDFs; o que ficou de fora e por quê.
+  - `blocos.py`: recorta tudo, desenha a cortina e faz a cartela (`python3 blocos.py`).
+  - `recortes/`: 60 blocos em PNG com transparência, na resolução da folha, mais as duas cortinas.
+  - `cartela_blocos.jpg`: os blocos por categoria, na medida real, 2 x a escala da prancha (60 px/m).
+- **Escolha:** só entram peças que têm correspondente no mobiliário dos PDFs base, conferido nas camadas ARQ_MOBILIÁRIO, ARQ_LAYOUT HUMANIZAÇÃO, ARQ_LOUÇAS E METAIS e ARQ_MARCENARIA das 12 plantas:
+  - **estar:** sofás orgânicos, curvos e retos, poltronas (em X e de leitura), mesas de centro e laterais, um tapete curvo e um estar com tapete;
+  - **jantar e ilha:** mesas de 8, 6 e oval de 6, mesa redonda de 4 (nos PDFs, 6 lugares), ilha com banquetas, banqueta;
+  - **cozinha:** cooktops de inox (4, 5 e 5 bocas de 90 cm, como os eletrodomésticos) e pretos para o gourmet, cubas de inox e de granito;
+  - **banho:** vasos sanitários, cubas de apoio, bancada com cuba de pedra, banheira oval (banho master do 1º Pav. da Casa E);
+  - **escritório:** escrivaninhas e aparador; **externo:** mesa de teca de 8, mesa redonda de teca, poltrona de rattan, sofá de 2 lugares; **paisagismo:** 9 plantas e jardineiras.
+  - **Extras** (oferecidos, não estão nos PDFs): três guarda-sóis e um sofá de couro caramelo.
+- **Fora:**
+  - o banco de teca, que tem a marca d'água "dreamstime" (banco de imagens);
+  - a bancada gourmet de inox (o layout é o do PDF e já está nos renders);
+  - o sofá e as poltronas rosa (fora da paleta);
+  - coifas, geladeira, petiscos e cafés (não aparecem em planta);
+  - a grama (a aprovada é a opção B).
+- **Recorte (sem IA generativa):** o fundo da folha (branco, cinza 232 ou o xadrez de "PNG falso") ligado à borda da caixa e os bolsões de fundo liso entre mesa e cadeiras são fundo certo; a sombra da foto ligada a ele, fundo provável (o bloco sai sem sombra e recebe a do render); o GrabCut do OpenCV decide o resto pela cor e pelas bordas. Nas louças e pedras brancas como o fundo, o contorno vem da envoltória convexa (`convexo`) ou de uma área marcada como peça (`certo_ret`, `certo_elipse`). Conferido sobre fundo escuro, verde e claro.
+- **Para aplicar:** `bloco(id, px_por_m)` devolve cor e alfa na medida real; a medida do JSON se ajusta ao bloco do PDF na hora de aplicar.
+- **Cortina:** nenhuma folha traz cortina, e nos PDFs ela é a linha ondulada junto aos vidros (quartos do 1º Pav. A e E, Térreo B). Por isso é desenhada em `cortina(comp_m, px_por_m, aberta=False)`:
+  - o trilho em linha cinza fina junto ao vidro;
+  - o tecido de linho cru (RGB 233, 227, 215) em prega wave de 14 cm de passo e 3,5 cm de amplitude, com luz nas cristas e uma sombra leve para dentro;
+  - `aberta=True`: o tecido franzido em dois maços nas pontas (18% do vão cada) e só o trilho no meio.
+- **Folhas que faltam:** as 6 folhas mandadas no meio da execução chegaram só como imagem na conversa, não como arquivo, e não dá para recortá-las. Estão nelas as camas com criados, o sofá em L, o guarda-roupa, as máquinas de lavar, os carros e o cooktop de 4 bocas preto. Basta reenviá-las numa mensagem nova.
+- **Estado:** nada aplicado aos renders. A cartela aguarda a aprovação do usuário.
+
 ## Casa A · conferência item a item com o PDF
 
 Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do render da casa A, conforme fizemos com a casa E. Pegar o PDF da casa A e rever item a item com o render."

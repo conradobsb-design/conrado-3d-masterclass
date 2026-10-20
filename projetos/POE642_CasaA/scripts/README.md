@@ -486,6 +486,13 @@ python3 retoque_subsolo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Subs
 
 `retexturizar(out, mascara, nome, px_por_m, forca=0.6)` troca o desenho do piso na máscara pelo da biblioteca `_texturas`, na escala do render. A luz e a cor do lugar ficam (média local do piso, sem traços nem objetos), e os riscos claros do motor viram piso. Segue a regra R1 de `POE642_REGRAS.md`. Usado no Subsolo da Casa E (item 24 do `retoque_subsolo_casae.py`: Bege Bahia e travertino).
 
+## Biblioteca de blocos e cortina: `_blocos/blocos.py`
+
+`python3 blocos.py` (de `projetos/_blocos/`) recorta os blocos de `blocos.json` das folhas em `originais/` (PNG com transparência em `recortes/`), desenha a cortina e faz `cartela_blocos.jpg`.
+- `bloco(id, px_por_m)`: cor e alfa do bloco na medida real, para pousar no render.
+- `cortina(comp_m, px_por_m, aberta=False)`: a cortina de linho vista de cima, na horizontal (o trilho do lado do vidro, o tecido em ondas, a sombra para dentro).
+- Ainda não usada em nenhum retoque (aguarda a aprovação da cartela).
+
 ## Nomes e áreas da Casa A: `rotulos_casaa.py`
 
 Os rótulos do PDF de cada pavimento da Casa A (`_pdfs_cliente/642 - <PAVIMENTO> - CASA A.pdf`), pela regra da Casa E (`retoque_1pav_casae.rotulos_ambientes`). A imagem aprovada (2000 px) vai ao quadro comum em 3840 px (`rodape_entrega.no_quadro_comum`), e os rótulos são escritos nessa resolução. O granito, onde o texto fica cinza, é achado na própria imagem (`GRANITO`). As notas que não são ambientes ficam fora (`FORA`). Os desvios de cada pavimento estão em `PAVIMENTOS[...]["ajustes"]`, no mesmo formato da Casa E.
