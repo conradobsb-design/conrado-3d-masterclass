@@ -220,8 +220,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     de 19/10 no tamanho real, com sombra; a grama da referência entra por baixo; as folhas do motor que passavam do
     verde (sobre a pedra portuguesa do acesso e os pisantes) saem. Nada sai do verde.
 54. Jardim de inverno (pente fino, item 7; usuário: "precisamos alterar também o jardim de inverno interno da casa E"):
-    palmeiras e arbustos da referência no tamanho real sobre forração, no lugar das folhagens do motor; as copas saem
-    um pouco da floreira (item 19) e as flores tropicais ficam.
+    bananeiras, comigo-ninguém-pode, arbustos e plantas com flores da biblioteca de blocos, no tamanho real, em duas
+    fileiras sobre forração, no lugar das folhagens do motor; as copas saem um pouco da floreira (item 19) e as flores
+    tropicais ficam.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1115,15 +1116,18 @@ def escada(out, q):
 # uma borda irregular entre o mínimo e o máximo) e as flores (o centro da estrelítzia no render, o
 # raio do recorte, onde entra na floreira e o tom: o laranja do render ou girado para outra cor).
 # Plantas (item 54; pente fino de 20/10, item 7, usuário: "precisamos alterar também o jardim de inverno interno da
-# casa E"): as folhagens do motor (folhas de costela-de-adão de ~1 m numa floreira de 5,7 x 1,25 m) dão lugar às
-# palmeiras e arbustos da planta de referência no tamanho real, como no gramado (item 53), sobre uma forração
-# ("forracao": o desenho da grama da biblioteca nesse tom BGR); o maior que cabe primeiro, com a copa até a borda
-# irregular (nunca sobre a escada), as menores por baixo. As flores ficam por cima.
+# casa E"): as folhagens do motor (folhas de costela-de-adão de ~1 m numa floreira de 5,7 x 1,25 m) dão lugar às plantas
+# tropicais da biblioteca de blocos (_blocos; as da planta de referência, com 26 px/m, ficavam borradas nos 39 px da
+# floreira), no tamanho real ("plantas": diâmetro em m): em duas fileiras desencontradas ("passo" e "fileira", px), na
+# ordem de "ciclo", giradas e com +-10% de tamanho, as maiores por baixo, sobre uma forração escura ("forracao": o
+# desenho da grama da biblioteca nesse tom BGR, com o contraste aumentado). As copas saem só até a borda irregular
+# (nunca sobre a escada); as flores tropicais ficam por cima.
 JARDIM_FORA = {
     "lados": (1.5, 3.5), "baixo": (3.0, 6.5), "semente": 642,
-    "plantas": [("palmeira_1", 1.4), ("palmeira_3", 1.1), ("palmeira_2", 1.1), ("arbusto_1", 0.9),
-                ("arbusto_3", 0.9)],
-    "folga_copa": 0.8, "afastar": 0.75, "forracao": (62, 104, 80),
+    "plantas": {"bananeira": 1.3, "dieffenbachia": 0.95, "arbusto": 0.8, "planta_flores": 0.7},
+    "ciclo": ["bananeira", "dieffenbachia", "planta_flores", "arbusto", "dieffenbachia", "bananeira",
+              "planta_flores", "dieffenbachia", "arbusto"],
+    "passo": 15.5, "fileira": 7, "forracao": (44, 74, 56), "contraste": 1.6,
     "flores": {"fonte": [((1671, 540), 9), ((1773, 605), 9), ((1582, 905), 9), ((1440, 722), 8)],
                "pos": [((1002, 557), 0, None), ((1046, 571), 1, "vermelho"), ((1089, 554), 2, None),
                        ((1121, 572), 3, "rosa"), ((1143, 556), 0, "amarelo")],
@@ -1132,6 +1136,7 @@ JARDIM_FORA = {
 
 
 def jardim_flores(out, orig, A):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
     from texturas import textura, CONFIG as CFG_TEX
     q = JARDIM_FORA
     j = JARDIM
@@ -1159,34 +1164,39 @@ def jardim_flores(out, orig, A):
     miolo = (ys > fy0 + 1.5) & (ys < fy1 - 1.5) & (xs > fx0 + 1.5) & (xs < fx1 - 1.5)
     faixa = pode & ~miolo
     suave = np.clip(folga / 2.0, 0, 1)
-    # item 54: forração no miolo da floreira (a borda escura do item 3 fica) e as plantas da referência por cima
+    # item 54: forração no miolo da floreira (a borda escura do item 3 fica) e as plantas da biblioteca por cima
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
     cur = out[wy0:wy1, wx0:wx1].astype(np.float32)
     _, p2r, _ = pdf_cadeia(A, out.shape)
     (a0, b0), (c0, d0) = p2r(0, 0), p2r(56.69, 0)
     px_m = float(np.hypot(c0 - a0, d0 - b0))
     T = textura("grama", px_m, h, w, semente=q["semente"]).astype(np.float32)
+    det = 1 + q["contraste"] * (T / T.reshape(-1, 3).mean(axis=0) - 1)
     camada = cur.copy()
-    camada[miolo] = (T / T.reshape(-1, 3).mean(axis=0) * np.float32(q["forracao"]))[miolo]
-    permitido = dentro | pode
-    dv = cv2.distanceTransform(permitido.astype(np.uint8), cv2.DIST_L2, 5)
+    camada[miolo] = (det * np.float32(q["forracao"]))[miolo]
     postas = []
-    for nome, dm in q["plantas"]:
-        r = dm * px_m / 2
-        cand = np.argwhere(dentro & (dv >= q["folga_copa"] * r))
-        rng.shuffle(cand)
-        for y, x in cand:
-            if all(np.hypot(x - px, y - py) >= q["afastar"] * (r + pr) for px, py, pr, _ in postas):
-                postas.append((x, y, r, nome))
+    for i, x in enumerate(np.arange(fx0 + 12, fx1 - 6, q["passo"])):
+        y = (fy0 + fy1) / 2 + (q["fileira"] if i % 2 else -q["fileira"]) + rng.uniform(-2, 2)
+        postas.append((x + rng.uniform(-3, 3) - wx0, y - wy0, q["ciclo"][i % len(q["ciclo"])]))
     sombra = json.loads(CFG_TEX.read_text())["vegetacao"]["sombra"]
     alfa = np.zeros((h, w), np.float32)
-    for x, y, r, nome in sorted(postas, key=lambda t: t[2]):
-        cor, al, dm = sprite_referencia(nome, px_m)
-        esc = 2 * r / (dm * px_m)
-        cor = cv2.resize(cor, None, fx=esc, fy=esc, interpolation=cv2.INTER_LINEAR)
-        al = cv2.resize(al, None, fx=esc, fy=esc, interpolation=cv2.INTER_LINEAR)
-        pousar_planta(camada, cor, al, x, y, dm * px_m * esc, sombra)
+    for x, y, nome in sorted(postas, key=lambda t: -q["plantas"][t[2]]):
+        cor, al = blocos.bloco(nome, px_m)
+        cor = np.asarray(cor, np.float32)
+        al = np.clip((np.asarray(al, np.float32) - 0.4) / 0.5, 0, 1)      # sem o fio claro do recorte
+        larg = next(b["largura_m"] for b in blocos.CFG["blocos"] if b["id"] == nome)
+        esc = q["plantas"][nome] / larg * rng.uniform(0.9, 1.1)
+        hh, ww = al.shape
+        M = cv2.getRotationMatrix2D((ww / 2, hh / 2), rng.uniform(0, 360), esc)
+        lado = int(np.ceil(max(hh, ww) * esc * 1.45))
+        M[0, 2] += lado / 2 - ww / 2
+        M[1, 2] += lado / 2 - hh / 2
+        cor, al = cv2.warpAffine(cor, M, (lado, lado)), cv2.warpAffine(al, M, (lado, lado))
+        d_px = q["plantas"][nome] * px_m
+        pousar_planta(camada, cor, al, x, y, d_px, sombra)
         so = np.zeros((h, w, 3), np.float32)
-        pousar_planta(so, np.ones_like(cor), al, x, y, dm * px_m * esc, {**sombra, "opacidade": 0.0})
+        pousar_planta(so, np.ones_like(cor), al, x, y, d_px, {**sombra, "opacidade": 0.0})
         alfa = np.maximum(alfa, so[..., 0])
     # fora da floreira, só as copas (com a borda irregular e o degradê de 2 px); a sombra é desenhada: curta,
     # embaixo e à esquerda das copas que saem, só no travertino
@@ -1220,7 +1230,7 @@ def jardim_flores(out, orig, A):
         im = cv2.warpAffine(img, M, forma[::-1], flags=cv2.INTER_AREA)
         al = cv2.warpAffine(flor, M, forma[::-1], flags=cv2.INTER_AREA)[..., None]
         out[:] = np.clip(out * (1 - al) + im * al, 0, 255).astype(np.uint8)
-    print(f"    jardim de inverno: {len(postas)} plantas da referência sobre forração, as copas um pouco para fora "
+    print(f"    jardim de inverno: {len(postas)} plantas da biblioteca sobre forração, as copas um pouco para fora "
           f"(sem a escada), e {len(fq['pos'])} flores tropicais")
     return out
 
@@ -2007,6 +2017,7 @@ VEGETACAO = {"catalogo": [("arvore_1", 4.5, 1.0), ("arvore_3", 3.4, 1.0), ("palm
 def sprite_referencia(nome, px_m):
     """A planta da referência na escala do render, sem o anel escuro na borda da copa (raio > 0,7 r): ali o alfa cai
     onde o px é bem mais escuro que a copa."""
+    sys.path.insert(0, str(RAIZ / "_texturas"))
     from texturas import planta, CONFIG as CFG_TEX
     cfg = json.loads(CFG_TEX.read_text())
     cor, a = planta(nome, px_m)
@@ -2100,6 +2111,7 @@ def restos_fora_do_verde(img, chapada, verde, px_m):
 
 
 def vegetacao(out, A):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
     from texturas_escala import mascara_grama, nconv
     from texturas import textura, CONFIG as CFG_TEX
     q, g = VEGETACAO, GRAMA
