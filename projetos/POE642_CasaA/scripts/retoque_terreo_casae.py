@@ -167,6 +167,11 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     12 (e o da folha pequena do hall, item 24), desenhados pelo próprio script: deixam de ser desenhados; o
     arco escuro do motor (DCE) segue saindo. No travertino e no Bege Bahia, os arcos do motor saem pelo
     `arcos.remover_arcos`, só nos arcos fora do granito, com o tracejado do PDF que os cruza protegido.
+39. Escadas com linhas e o triângulo de orientação (R14), como no Subsolo: o sombreamento dos itens 18 e 21
+    sai (fica o travertino limpo) e entram, na geometria do PDF, o bocel em linha suave e a sombra curta no
+    degrau de baixo; na interna (sobe da direita para a esquerda), depois do corte, a escada esmaecida e
+    tracejada; o triângulo no início de cada uma (à direita, apontando para a esquerda). A externa do alto
+    desce da direita para a esquerda (o "D" do PDF), como o usuário pediu no item 21.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1019,6 +1024,8 @@ ESCADAS = [
     {"nome": "externa (desce da direita para a esquerda)", "x": (599.6, 758.1), "n": 17, "linhas": (212, 248),
      "fonte": (612, 990), "baixo": "esquerda", "fim_sombra": 591},
 ]
+# com a R14 (item 39), o sombreamento dos itens 18 e 21 sai: fica só o travertino limpo, e as linhas vêm depois
+R14_ESCADAS = True
 ESCADA = {"escurece": 0.10, "sombra": (0.18, 2.0)}   # o mais baixo 10% mais escuro; força e decaimento
 
 
@@ -1028,6 +1035,9 @@ def escada(out, q):
     xi0, xi1 = int(np.floor(xa)), int(np.ceil(xb))
     f0, c0 = q["fonte"]
     out[y0:y1, xi0:xi1] = out[f0:f0 + (y1 - y0), c0:c0 + (xi1 - xi0)]
+    if R14_ESCADAS:
+        print(f"    escada {q['nome']}: travertino limpo, sem linhas (as da R14 vêm no item 39)")
+        return out
     passo = (xb - xa) / q["n"]
     forca, dec = ESCADA["sombra"]
     direita = q["baixo"] == "direita"
@@ -1691,6 +1701,98 @@ def sem_arcos(out, A):
                          proteger=prot.astype(bool))
 
 
+# escadas com linhas e o triângulo de orientação (item 39, R14), como no Subsolo da mesma casa e na referência
+# (_texturas/elementos.py): em cada bocel uma linha suave (20% mais escura) e, logo depois, a sombra curta no degrau de
+# baixo; depois do corte, a escada esmaecida, com os bocéis e o contorno tracejados (a projeção); o triângulo cheio no
+# início do percurso, apontando para ele. Geometria do PDF (ARQ_ESCADAS E RAMPAS, pt): a caixa, os bocéis de dentro e
+# o corte. Sentidos (usuário): a interna sobe da direita para a esquerda (o "S" do PDF à direita; corte depois do 7º
+# degrau, o resto tracejado, como no PDF); a externa do alto desce da direita para a esquerda (o "D" à direita).
+ESCADA_LINHAS = {"bocel": 0.80, "bocel_pt": 0.55, "sombra": (0.16, 5.67), "esmaecer": 0.8,
+                 "tracejado": (160, 160, 164), "tracejado_px": 0.5, "traco_pt": 5.7, "vao_pt": 2.8,
+                 "triangulo": {"base_pt": 13.6, "altura_pt": 14.7, "recuo_pt": 5.67, "cor": (88, 88, 92)},
+                 "escadas": [
+                     {"nome": "interna, sobe da direita para a esquerda", "pdf": (1659.2, 1138.5, 1984.0, 1221.4),
+                      "bocels": [1677.9 + 17.0 * k for k in range(18)], "baixo": "direita", "inicio": "direita",
+                      "corte": [(1840.5, 1138.5), (1859.3, 1176.2), (1863.1, 1183.8), (1882.2, 1222.0)]},
+                     {"nome": "externa do alto, desce da direita para a esquerda", "pdf": (972.0, 617.0, 1262.9, 685.0),
+                      "bocels": [989.0, 1006.1, 1023.1, 1040.1, 1057.1, 1074.1, 1091.1, 1108.1, 1125.1, 1142.1,
+                                 1159.1, 1176.1, 1193.1, 1210.1, 1227.2, 1244.2],
+                      "baixo": "esquerda", "inicio": "direita", "corte": None}]}
+
+
+def escada_linhas(out, A, e):
+    q = ESCADA_LINHAS
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    ex0, ey0, ex1, ey1 = e["pdf"]
+    (a, b), (c, d) = p2r(ex0 - 4, ey0 - 4), p2r(ex1 + 4, ey1 + 4)
+    x0, y0, x1, y1 = int(np.floor(a)), int(np.floor(b)), int(np.ceil(c)) + 1, int(np.ceil(d)) + 1
+    h, w = y1 - y0, x1 - x0
+
+    def P(x, y):
+        u, v = p2r(x, y)
+        return (u - x0) * SS, (v - y0) * SS
+
+    def poli(pts):
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        cv2.fillPoly(m, [np.int32(np.round([P(x, y) for x, y in pts]))], 255)
+        return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+    def faixa(fx0, fx1):
+        return poli([(fx0, ey0), (fx1, ey0), (fx1, ey1), (fx0, ey1)])
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    esc = faixa(ex0, ex1)
+    viva = esc if e["corte"] is None else poli(e["corte"] + [(ex1, ey1), (ex1, ey0)])
+    bocels = [ex0] + list(e["bocels"]) + [ex1]
+    # o lado de baixo de cada bocel (a sombra): à direita se o pé da escada está à direita; nada além do pé
+    sinal = 1 if e["baixo"] == "direita" else -1
+    pe = ex1 if e["baixo"] == "direita" else ex0
+    fator = np.ones((h, w), np.float32)
+    forca, alcance = q["sombra"]
+    for xb in bocels:
+        fator *= 1 - (1 - q["bocel"]) * faixa(xb - q["bocel_pt"] / 2, xb + q["bocel_pt"] / 2)
+        if xb == pe:
+            continue
+        for f in np.linspace(0, 1, 9)[:-1]:
+            fa, fb = xb + sinal * alcance * f, xb + sinal * alcance * (f + 1 / 8)
+            fator *= 1 - forca * (1 - f - 1 / 16) ** 1.6 * faixa(min(fa, fb), max(fa, fb))
+    reg *= (1 - (1 - fator) * viva)[..., None]
+    if e["corte"] is not None:
+        apos = np.clip(esc - viva, 0, 1)[..., None]
+        reg = reg * (1 - apos) + (255 - (255 - reg) * q["esmaecer"]) * apos
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        lw = max(1, int(round(q["tracejado_px"] * SS)))
+
+        def tracejar(pa, pb):
+            comp = np.hypot(pb[0] - pa[0], pb[1] - pa[1])
+            t = 0.0
+            while t < comp:
+                t1 = min(comp, t + q["traco_pt"])
+                u = P(pa[0] + (pb[0] - pa[0]) * t / comp, pa[1] + (pb[1] - pa[1]) * t / comp)
+                v = P(pa[0] + (pb[0] - pa[0]) * t1 / comp, pa[1] + (pb[1] - pa[1]) * t1 / comp)
+                cv2.line(m, (int(round(u[0])), int(round(u[1]))), (int(round(v[0])), int(round(v[1]))), 255, lw,
+                         cv2.LINE_AA)
+                t = t1 + q["vao_pt"]
+        for xb in bocels:
+            tracejar((xb, ey0), (xb, ey1))
+        tracejar((ex0, ey0), (ex1, ey0))
+        tracejar((ex0, ey1), (ex1, ey1))
+        tr = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * apos[..., 0]
+        reg = reg * (1 - tr[..., None]) + np.float32(q["tracejado"]) * tr[..., None]
+    # o triângulo no início do percurso, apontando para o outro lado
+    t = q["triangulo"]
+    yc = (ey0 + ey1) / 2
+    if e["inicio"] == "direita":
+        xb, xp = ex1 - t["recuo_pt"], ex1 - t["recuo_pt"] - t["altura_pt"]
+    else:
+        xb, xp = ex0 + t["recuo_pt"], ex0 + t["recuo_pt"] + t["altura_pt"]
+    tri = poli([(xp, yc), (xb, yc - t["base_pt"] / 2), (xb, yc + t["base_pt"] / 2)])
+    reg = reg * (1 - tri[..., None]) + np.float32(t["cor"]) * tri[..., None]
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    escada {e['nome']}: {len(bocels) - 1} pisos com os bocéis em linha suave e a sombra curta" +
+          ("" if e["corte"] is None else "; depois do corte, esmaecida e tracejada") + "; triângulo no início")
+    return out
+
+
 # paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
 # canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
 PAISAGISMO = {
@@ -1989,6 +2091,9 @@ def main():
     out = box_gourmet(out, A)
     print("[38] portas sem os arcos (R3): no granito, o item 12 já não os desenha; no travertino, os do motor saem")
     out = sem_arcos(out, A)
+    print("[39] escadas com linhas e o triângulo de orientação (R14)")
+    for e in ESCADA_LINHAS["escadas"]:
+        out = escada_linhas(out, A, e)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
