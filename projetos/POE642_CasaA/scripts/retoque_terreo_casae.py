@@ -180,6 +180,8 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     4,70 x 1,85 m (carroceria, sem os retrovisores), sem giro, com a sombra curta.
 42. Grama (R1, R4): o grão de carpete do motor vira o desenho da grama da referência, na escala, com a luz larga
     do lugar e as sombras das plantas, no tom verde do render (escolha do usuário, opção B). Plantas e pisos ficam.
+43. Bege Bahia (R1): como no Subsolo, os pontinhos escuros do motor saem e o desenho da biblioteca entra, na escala,
+    no tom da foto de referência, com a luz do lugar (varanda, deck, blocos, pisantes e WC DCE 1).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1877,6 +1879,42 @@ def grama_referencia(out, A):
     return out
 
 
+# Bege Bahia como a referência (item 43, R1; usuário, 20/10/26, no Subsolo: "A REPRESENTAÇÃO DO MARMORE BEGE BAHIA
+# CONFORME A REFERENCIA DEFINIDA ESTÁ ADEQUADA?"). No Térreo ele estava rosado e claro (RGB 232, 217, 203; a foto, 230,
+# 211, 186), em placas grandes com veios brancos soltos e pontinhos escuros do motor. Como no Subsolo da mesma casa: os
+# pontinhos escuros pequenos (até 4 px, 14 abaixo da luz em volta) viram a luz do lugar; depois, o desenho da
+# biblioteca entra inteiro, na escala, no tom da foto, com a luz do lugar (as sombras dos móveis ficam). Varanda, deck,
+# blocos e degraus da esquerda, pisantes e WC DCE 1 (o #E8E8E8 da base chapada). O travertino fica: é o travertino
+# aprovado da casa (o do Subsolo vem dele).
+BEGE = {"cor_chapada": (232, 232, 232), "tol": 6, "forca": 1.0, "semente": 1, "sig_m": 0.25, "tom": (186, 211, 230),
+        "suavizar": 0.4, "pontos": {"limiar": 14, "area": 10, "lado": 4, "sig": 4.0}}
+
+
+def bege_referencia(out, A):
+    from texturas_escala import retexturizar, nconv
+    q = BEGE
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    bege = np.abs(chapada.astype(np.int32) - np.array(q["cor_chapada"])).max(axis=2) <= q["tol"]
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    pq = q["pontos"]
+    im = out.astype(np.float32)
+    m = cv2.erode(bege.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    L = nconv(im, m.astype(np.float32), pq["sig"])
+    n, lab, st, _ = cv2.connectedComponentsWithStats((m & ((L - im).max(axis=2) > pq["limiar"])).astype(np.uint8), 8)
+    pontos = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= pq["area"]
+                           and max(st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT]) <= pq["lado"]])
+    pontos = cv2.dilate(pontos.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & m
+    out[pontos] = np.clip(L[pontos], 0, 255).astype(np.uint8)
+    out, npx = retexturizar(out, bege, "bege_bahia", px_m, forca=q["forca"], semente=q["semente"], sig_m=q["sig_m"],
+                            cor=q["tom"], suavizar=q["suavizar"])
+    print(f"    Bege Bahia: {int(pontos.sum())} px de pontinhos escuros fora; {npx} px no desenho da biblioteca, "
+          f"a {px_m:.2f} px/m, no tom da foto")
+    return out
+
+
 # paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
 # canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
 PAISAGISMO = {
@@ -2182,6 +2220,8 @@ def main():
         out = escada_linhas(out, A, e)
     print("[42] grama na escala da referência (R1, R4), no tom do render")
     out = grama_referencia(out, A)
+    print("[43] Bege Bahia como a referência (R1)")
+    out = bege_referencia(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
