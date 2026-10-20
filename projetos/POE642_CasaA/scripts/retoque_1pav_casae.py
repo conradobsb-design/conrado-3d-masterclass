@@ -914,6 +914,9 @@ ROTULOS = {"fonte": "Regular", "ss": 4,
                        # na ponta da banheira; logo abaixo (8) ainda encostava nela (usuário, 20/10/26: "O escrito do
                        # banho master não pode ficar sobre a banheira"): no meio do piso livre entre ela e o box
                        ("BANHO MASTER", (961.0, 302.1), (0, 35)),
+                       # colado no vaso, logo acima (usuário, 20/10/26: "afasta um pouco o rótulo do sanitário"): no
+                       # meio do piso livre até a parede de baixo, com a folga do banho 4 até o vaso dele (~15 px de 3840)
+                       ("BANHO 3", (785.1, 659.4), (0, 7)),
                        ("SALA ÍNTIMA", (949.1, 670.9), (-13, 0)),       # no braço do sofá: à esquerda
                        ("CLOSET 2", (1192.8, 319.8), (4, 0)),           # na borda do armário: à direita
                        ("CLOSET 3", (873.5, 655.2), (-5, 0)),           # na borda do armário: à esquerda

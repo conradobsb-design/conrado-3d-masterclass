@@ -795,6 +795,9 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **o desenho:** a chapa da biblioteca, na escala (31,1 px/m), só na luz. A foto tem uma faixa bege, e o tom pedido é entre o branco e o cinza. Entra só no piso limpo, fora dos traços medidos antes da troca de tom (o vidro dos boxes fica).
     - **Conferência:** no retocado, mudaram só os cinco banhos; nas montagens e nas pranchas, só as quatro áreas dos banhos (os 3 e 4 juntos); rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_quartzito_antes_depois.jpg`.
+  - **Rótulo do banho 3 (feito; usuário: "afasta um pouco o rótulo do sanitário").** Estava colado no vaso, logo acima dele: o vaso terminava em y ≈ 1253 e o texto começava em 1256, na final de 3840 px. Em `ROTULOS["ajustes"]` entrou ("BANHO 3", (785,1; 659,4), (0, 7)). O rótulo foi para o meio do piso livre até a parede de baixo (texto de 1269 a 1290), com a folga que o do banho 4 tem do vaso dele (~15 px).
+    - **Conferência:** só o rótulo mudou, no retocado com rótulos, nas montagens e nas pranchas; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_rotulo_banho3_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 
