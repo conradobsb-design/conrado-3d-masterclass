@@ -555,7 +555,13 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - A: RGB 104, 77, 66 (+25%);
     - B: RGB 124, 95, 81 (+50%);
     - C: o tom da biblioteca, RGB 151, 119, 100. Nessa opção, os rótulos brancos sobre o granito perdem contraste.
-    - Imagens: `renders/POE642_CasaE_PH_Terreo_granito_opcoes.jpg` (cozinha e serviço) e `..._opcoes_inteira.jpg`. Aguardando a escolha.
+    - Imagens: `renders/POE642_CasaE_PH_Terreo_granito_opcoes.jpg` (cozinha e serviço) e `..._opcoes_inteira.jpg`.
+    - **Escolha do usuário: "opção B, sem pontos os grandes brancos".** Feito no retocado, antes das projeções (`granito_tom`).
+      - **Pontos:** os claros do motor (mais de 10 níveis acima da mediana de 7 px em volta, até 40 px e 8 × 8 px) viram a mediana em volta: 6.141 pontos.
+      - **Proteções:** os traços cinza neutros (as folhas de porta), as linhas da DOC_LINHAS E PROJEÇÕES e as bordas de objetos (retrovisores) ficam, a 2 px. O primeiro teste apagava trechos do X tracejado da área descoberta; com as linhas do PDF desenhadas como máscara, ele ficou inteiro.
+      - **Tom:** ganho por canal de RGB 82, 58, 51 a 124, 95, 81 (na final, mediana 124, 94, 80), só nos px de granito.
+      - **Correção junto:** o granito mais claro passou a passar no teste de caramelo da pedra portuguesa (item 47), na borda do acesso, e mudava a luz relativa do acesso inteiro. A máscara da pedra agora exclui o granito da base.
+      - **Conferência:** no retocado e na final, tudo o que mudou está no granito (0 px fora no retocado, 1 px na final). Regra da seção 3 atualizada. Antes e depois: `renders/POE642_CasaE_PH_Terreo_granito_antes_depois.jpg`.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";

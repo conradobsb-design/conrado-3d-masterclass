@@ -507,6 +507,14 @@ No Térreo da Casa E (item 47) entra no retocado e de novo na final de 3840 px, 
 
 O "2" sobrescrito do "A: ... m²" fica logo depois do fim do "A: ... m", medido na Inter (`textlength`), com a folga `ROTULOS["folga_m2"]` (7% do corpo da linha), na altura do PDF. Antes ele ficava na posição do PDF e, como a Inter tem outras larguras, encostava no "m" ou se afastava dele. A rotina é a mesma de todos os pavimentos e casas: os que ainda não foram refeitos passam a sair assim quando rodarem de novo.
 
+## Granito menos escuro e sem pontos: `retoque_terreo_casae.granito_tom`
+
+Age só no granito da base chapada, nos px de granito: perto do marrom no croma e de 40% a 150% da luminosidade mediana. Carros, inox, móveis, paredes, rótulos e traços ficam, e as sombras acompanham o tom.
+1. **Pontos:** os claros do motor, mais de 10 níveis acima da mediana de 7 px em volta, em manchas de até 40 px e 8 × 8 px, viram a mediana em volta, com a borda suave. Ficam protegidos os px a 2 px de cinza neutro (folhas de porta), das linhas do PDF da DOC_LINHAS E PROJEÇÕES (o X tracejado, desenhado como máscara) e de fora do granito.
+2. **Tom:** ganho por canal da mediana atual ao alvo (`GRANITO_TOM["alvo"]`, a opção B: RGB 124, 95, 81), com o peso do granito.
+
+Roda antes das projeções, para não tocar o tracejado delas. A máscara da pedra portuguesa (item 47) exclui o granito da base: mais claro, ele passava pelo teste de caramelo na borda do acesso.
+
 ## Título da folha: `retoque_terreo_casae.titulo_folha`
 
 O texto do título ("0. TÉRREO / ESC.:1:50") não entra nas bases, mas o sublinhado dele, uma linha do PDF sem camada logo abaixo do canto tracejado do lote, pode sobrar. `titulo_folha` volta ao branco a faixa da linha (pt do PDF em `TITULO["linhas"]`, folga de 2 px), só nos px claros, e deixa o tracejado do lote. Para as outras casas, basta achar a linha logo abaixo do título no PDF delas.

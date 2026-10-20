@@ -207,6 +207,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
 49. "m²" dos rótulos (pente fino de 20/10, item 5): o "2" sobrescrito logo depois do "m" medido na Inter, com a mesma
     folga em todos (`retoque_1pav_casae.ROTULOS["folga_m2"]`), na altura do PDF; antes ele ficava na posição do PDF e
     encostava no "m" (números largos) ou se afastava ("7,11"). Só a imagem final muda.
+50. Granito menos escuro e sem os pontos brancos grandes (pente fino de 20/10, item 6; escolha do usuário: "opção B, sem
+    pontos os grandes brancos"): os pontos claros do motor viram a mediana em volta (os traços cinza, as linhas do PDF e
+    as bordas de objetos ficam) e o tom vai de RGB 83, 59, 52 a 124, 95, 81, só nos px de granito. Antes das projeções.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -2106,7 +2109,8 @@ def mascara_pedra(img, chapada, folga, caramelo=True):
     cor = (r > g + 18) & (g > b + 12) & (im.mean(axis=2) > 95)
     planta = cv2.dilate(((g >= r - 8) | (im.mean(axis=2) < 90)).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
     k = 2 * folga + 1
-    area = cv2.dilate(cm.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & ~planta
+    granito = np.abs(chapada.astype(np.int32) - np.array(ARCOS["granito"])).max(axis=2) <= ARCOS["tol"]
+    area = cv2.dilate(cm.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & ~planta & ~granito
     return area & cor if caramelo else area & cm
 
 
@@ -2161,6 +2165,69 @@ def titulo_folha(out, A):
         reg[claro] = q["branco"]
         n += int(claro.sum())
     print(f"    sublinhado do título da folha: {n} px de volta ao branco")
+    return out
+
+
+# granito menos escuro e sem os pontos brancos grandes (item 50; pente fino de 20/10, item 6). Pedido do usuário: "o piso
+# marrom menos escuro?"; das três opções (renders/POE642_CasaE_PH_Terreo_granito_opcoes.jpg), "opção B, sem pontos os
+# grandes brancos". Só no granito da base chapada, nos px de granito: perto do marrom no croma e de 40% a 150% da
+# luminosidade mediana (carros, inox, móveis, paredes e traços ficam; as sombras acompanham).
+# 1. Pontos: os claros do motor (mais de 10 níveis acima da mediana de 7 px em volta), em manchas de até 40 px e 8 x 8
+#    px, viram a mediana em volta, com a borda suave. Ficam de fora os traços cinza neutros (o X tracejado, as folhas
+#    das portas), as linhas do PDF da DOC_LINHAS E PROJEÇÕES (desenhadas como máscara) e o que encosta em objeto
+#    (retrovisores, bordas): tudo a 2 px de px neutro, de linha do PDF ou de fora do granito.
+# 2. Tom: ganho por canal da mediana atual (RGB ~83, 59, 52) à da opção B (RGB 124, 95, 81), com o peso do granito.
+# Vem antes das projeções (item 44), para o tracejado delas não ser tocado.
+GRANITO_TOM = {"alvo": (81, 95, 124), "croma": (6, 12), "luz": (0.40, 1.50), "pontos": {"limiar": 10, "area": 40,
+               "lado": 8, "mediana": 7, "neutro": 6, "folga": 2, "fonte": 9,
+                                                                       "camada": "DOC_LINHAS E PROJEÇÕES"}}
+
+
+def granito_tom(out, A):
+    q = GRANITO_TOM
+    g = granito_render(out.shape[:2], A).astype(bool)
+    lab = cv2.cvtColor(out, cv2.COLOR_BGR2LAB).astype(np.float32)
+    L = lab[..., 0]
+    med = np.median(lab[g], axis=0)
+    dc = np.hypot(lab[..., 1] - med[1], lab[..., 2] - med[2])
+    c0, c1 = q["croma"]
+    l0, l1 = q["luz"]
+    w = (np.clip((c1 - dc) / (c1 - c0), 0, 1) * np.clip((L - l0 * med[0]) / (0.08 * med[0]), 0, 1)
+         * np.clip((l1 * med[0] - L) / (0.10 * med[0]), 0, 1) * g)
+    # 1. pontos claros
+    pq = q["pontos"]
+    Lm = cv2.cvtColor(cv2.medianBlur(out, pq["mediana"]), cv2.COLOR_BGR2LAB)[..., 0].astype(np.float32)
+    neutro = (np.hypot(lab[..., 1] - 128, lab[..., 2] - 128) < pq["neutro"]) & (L > 50)
+    k = 2 * pq["folga"] + 1
+    linhas = np.zeros(g.shape, np.uint8)                          # os traços do PDF (o X tracejado e afins)
+    pg, p2r, _ = pdf_cadeia(A, out.shape)
+    for d in pg.get_drawings():
+        if d.get("layer") != pq["camada"] or d["type"] != "s":
+            continue
+        for it in d["items"]:
+            if it[0] == "l":
+                (ax, ay), (bx, by) = p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)
+                cv2.line(linhas, (int(round(ax)), int(round(ay))), (int(round(bx)), int(round(by))), 1, 1)
+    protegido = cv2.dilate((neutro | (w < 0.05) & ~((L - Lm) > pq["limiar"]) | linhas.astype(bool)).astype(np.uint8),
+                           np.ones((k, k), np.uint8)).astype(bool) | ~g
+    claro = ((L - Lm) > pq["limiar"]) & g
+    n, lb, st, _ = cv2.connectedComponentsWithStats(claro.astype(np.uint8), 8)
+    tocam = np.unique(lb[protegido & claro])
+    ok = np.zeros(n, bool)
+    ok[1:] = (st[1:, 4] <= pq["area"]) & (st[1:, 2] <= pq["lado"]) & (st[1:, 3] <= pq["lado"])
+    ok[tocam] = False
+    pontos = ok[lb]
+    al = np.maximum(cv2.GaussianBlur(cv2.dilate(pontos.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(np.float32),
+                                     (0, 0), 0.7), pontos)[..., None] * g[..., None]
+    fonte = cv2.medianBlur(out, pq["fonte"]).astype(np.float32)
+    im = out.astype(np.float32) * (1 - al) + fonte * al
+    # 2. tom
+    cur = np.median(im[g & (w > 0.9)], axis=0)
+    ganho = np.float32(q["alvo"]) / cur
+    im = im * (1 + w[..., None] * (ganho - 1))
+    out[:] = np.clip(im, 0, 255).astype(np.uint8)
+    print(f"    granito: {int(ok.sum())} pontos claros fora ({int(pontos.sum())} px); tom de RGB "
+          f"{tuple(int(v) for v in cur[::-1])} para {tuple(q['alvo'][::-1])} (opção B)")
     return out
 
 
@@ -2474,6 +2541,8 @@ def main():
     out = grama_referencia(out, A)
     print("[43] Bege Bahia como a referência (R1)")
     out = bege_referencia(out, A)
+    print("[50] granito menos escuro (opção B) e sem os pontos brancos grandes (pente fino, item 6)")
+    out = granito_tom(out, A)
     print("[44] projeções da cobertura em tracejado cinza fino (R8, R9)")
     out = projecoes(out, A)
     print("[46] cortinas de linho: escritório e living (pente fino, itens 1 e 2)")
