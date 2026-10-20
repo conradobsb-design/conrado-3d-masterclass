@@ -193,6 +193,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     brancos do motor saem e os dois panos ficam nos trechos do PDF (a meia distância). Living, vidro da varanda (pedido do
     usuário, "Representar a cortina"; o PDF não traz): o trilho por dentro das quatro folhas escalonadas, da parede até a
     fachada de baixo, e o pano fechado no vão todo.
+    Living, fachada de baixo (item 2 do pente fino: "corrija as cortinas aqui também"): o zigue-zague cinza e os tracinhos
+    do motor saem; o trilho vai do trilho do vidro da varanda (fecha o L no canto) até a parede da direita, logo acima
+    das quatro folhas escalonadas, e os dois panos ficam nos trechos do PDF (ARQ_MOBILIÁRIO), a meia distância.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1978,34 +1981,50 @@ def projecoes(out, A):
     return out
 
 
-# cortinas (item 46; pente fino de 20/10, item 1), com a cortina de linho da biblioteca (`_blocos/blocos.py`, aprovada
-# em 20/10): o trilho de parede a parede (usuário: "trilhos da cortina tem que ser de fora a fora. somente a cortina pode
-# estar a meia distancia, totalmente recolhida ou totalmente fechada"), do lado do vidro, e o pano por dentro.
+# cortinas (item 46; pente fino de 20/10, itens 1 e 2), com a cortina de linho da biblioteca (`_blocos/blocos.py`,
+# aprovada em 20/10): o trilho de parede a parede (usuário: "trilhos da cortina tem que ser de fora a fora. somente a
+# cortina pode estar a meia distancia, totalmente recolhida ou totalmente fechada"), do lado do vidro, e o pano por dentro.
 # - Escritório: no PDF (ARQ_LOUÇAS E METAIS) a cortina é a linha ondulada junto à janela da direita, em dois trechos (a
 #   meia distância); o motor fez só tracinhos brancos ali. A faixa dos tracinhos volta ao travertino (as mesmas colunas,
 #   do vão entre os dois trechos, espelhado) e os panos entram nos trechos do PDF, com o eixo do tecido na linha do PDF.
 # - Living, vidro da esquerda (para a varanda): o PDF não traz cortina; o usuário marcou o vidro inteiro ("Representar a
 #   cortina"). Quatro folhas de correr escalonadas (a de baixo chega a x = 1385,9 pt): o trilho logo por dentro delas,
-#   da parede de cima até a linha do trilho da fachada de baixo, e o pano fechado no vão todo.
+#   da parede de cima até o trilho da fachada de baixo, e o pano fechado no vão todo.
+# - Living, fachada de baixo (item 2: "corrija as cortinas aqui também"): no PDF (ARQ_MOBILIÁRIO) dois trechos de linha
+#   ondulada (a meia distância); o motor fez um zigue-zague cinza no primeiro e tracinhos no segundo, que saem (as
+#   linhas logo acima, espelhadas: o veio do travertino corre na vertical). As quatro folhas de baixo são escalonadas (a
+#   da direita sobe até y = 1694,1 pt): o trilho fica logo acima delas (y = 1693,3 pt), do trilho do vidro da varanda
+#   até a parede da direita, e o eixo do tecido 1 pt acima da linha do PDF.
+# Em cada conjunto, `trilho` é (eixo do tecido, início, fim), em pt: com o vidro à direita ou à esquerda, o eixo é um x e
+# o início e o fim são y; com o vidro embaixo ou em cima, o contrário. `panos`: (início, fim) de cada pano.
 CORTINAS = {"conjuntos": [
-    {"nome": "escritório", "vidro": "direita", "trilho": (2225.0, 1098.8, 1354.0),   # pt: x do eixo, y das paredes
-     "panos": [(1099.4, 1201.0), (1257.5, 1347.8)]},                                  # pt: os trechos do PDF
-    {"nome": "living, vidro da varanda", "vidro": "esquerda", "trilho": (1393.7, 1090.3, 1694.4),
-     "panos": [(1091.5, 1686.0)]}],
+    {"nome": "escritório", "vidro": "direita", "trilho": (2225.0, 1098.8, 1354.0),
+     "panos": [(1099.4, 1201.0), (1257.5, 1347.8)]},
+    {"nome": "living, vidro da varanda", "vidro": "esquerda", "trilho": (1393.7, 1090.3, 1693.3),
+     "panos": [(1091.5, 1685.5)]},
+    {"nome": "living, fachada de baixo", "vidro": "baixo", "trilho": (1689.6, 1390.0, 1870.1),
+     "panos": [(1397.0, 1560.3), (1702.8, 1869.5)]}],
     "limpar": {"faixa": (1284, 1290), "fonte": (534, 556), "linhas": [(475, 533), (557, 615)], "parede": 60},
+    "limpar_faixas": [(828, 925, 798, 802), (1000, 1092, 798, 801)],   # px: x0, x1, y0, y1 (fachada de baixo)
     "px_por_m": 31.09}
 
 
-def pousar_cortina(out, cor, a, xc, y0, px_m, k, vidro="direita"):
-    """Põe a cortina (horizontal, trilho em cima) na vertical, com o trilho do lado do vidro: o eixo do tecido em xc, a
-    partir de y0 (px do render, com fração; a peça vem a px_m x k px/m e é reduzida aqui)."""
-    giro = cv2.ROTATE_90_CLOCKWISE if vidro == "direita" else cv2.ROTATE_90_COUNTERCLOCKWISE
-    cor, a = cv2.rotate(cor, giro), cv2.rotate(a, giro)
+def pousar_cortina(out, cor, a, eixo, inicio, k, vidro="direita"):
+    """Põe a cortina (horizontal, trilho em cima) com o trilho do lado do vidro: o eixo do tecido em `eixo` (um x, com o
+    vidro à direita ou à esquerda; um y, com ele embaixo ou em cima), a partir de `inicio` (px do render, com fração; a
+    peça vem a k vezes a escala do render e é reduzida aqui)."""
+    if vidro in ("direita", "esquerda"):
+        giro = cv2.ROTATE_90_CLOCKWISE if vidro == "direita" else cv2.ROTATE_90_COUNTERCLOCKWISE
+        cor, a = cv2.rotate(cor, giro), cv2.rotate(a, giro)
+        x_esq, y_cima = eixo * k - a.shape[1] / 2, inicio * k     # o eixo do tecido fica no meio da peça (0,085 m)
+    else:
+        if vidro == "baixo":
+            cor, a = cv2.flip(cor, 0), cv2.flip(a, 0)
+        x_esq, y_cima = inicio * k, eixo * k - a.shape[0] / 2
     h, w = a.shape
-    x_esq = xc * k - w / 2                                        # o eixo do tecido fica no meio da peça (0,085 m)
-    X0, Y0 = int(np.floor(x_esq / k)) - 1, int(np.floor(y0)) - 1
+    X0, Y0 = int(np.floor(x_esq / k)) - 1, int(np.floor(y_cima / k)) - 1
     W, H = w // k + 4, h // k + 4
-    dx, dy = int(round(x_esq - X0 * k)), int(round((y0 - Y0) * k))
+    dx, dy = int(round(x_esq - X0 * k)), int(round(y_cima - Y0 * k))
     pre = np.zeros((H * k, W * k, 3), np.float32)
     al = np.zeros((H * k, W * k), np.float32)
     pre[dy:dy + h, dx:dx + w] = cor * a[..., None]
@@ -2029,16 +2048,26 @@ def cortinas(out, A):
     for r0, r1 in lp["linhas"]:                                   # a parede preta em volta fica
         piso = out[r0:r1, xa:xb].astype(np.float32).mean(axis=2) > lp["parede"]
         out[r0:r1, xa:xb][piso] = tira[:r1 - r0][piso]
+    for x0, x1, y0, y1 in q["limpar_faixas"]:                     # zigue-zague e tracinhos da fachada de baixo
+        acima = out[y0 - 2:y0, x0:x1].copy()
+        espelho = np.concatenate([acima[::-1], acima] * ((y1 - y0) // 4 + 1))
+        out[y0:y1, x0:x1] = espelho[:y1 - y0]
     k, px_m = 8, q["px_por_m"]
+
+    def r(eixo, t, vertical):                                    # pt -> px: (eixo, posição ao longo do trilho)
+        x, y = p2r(eixo, t) if vertical else p2r(t, eixo)
+        return (x, y) if vertical else (y, x)
+
     for c in q["conjuntos"]:
-        xp, tp0, tp1 = c["trilho"]
-        (xc, y0), (_, y1) = p2r(xp, tp0), p2r(xp, tp1)
-        cor, a = blocos.cortina((y1 - y0) / px_m, px_m * k, com_pano=False)
-        pousar_cortina(out, cor, a, xc, y0, px_m, k, c["vidro"])
-        for yp0, yp1 in c["panos"]:
-            (xc, y0), (_, y1) = p2r(xp, yp0), p2r(xp, yp1)
-            cor, a = blocos.cortina((y1 - y0) / px_m, px_m * k, com_trilho=False)
-            pousar_cortina(out, cor, a, xc, y0, px_m, k, c["vidro"])
+        vertical = c["vidro"] in ("direita", "esquerda")
+        ep, tp0, tp1 = c["trilho"]
+        (e, t0), (_, t1) = r(ep, tp0, vertical), r(ep, tp1, vertical)
+        cor, a = blocos.cortina((t1 - t0) / px_m, px_m * k, com_pano=False)
+        pousar_cortina(out, cor, a, e, t0, k, c["vidro"])
+        for pp0, pp1 in c["panos"]:
+            (e, t0), (_, t1) = r(ep, pp0, vertical), r(ep, pp1, vertical)
+            cor, a = blocos.cortina((t1 - t0) / px_m, px_m * k, com_trilho=False)
+            pousar_cortina(out, cor, a, e, t0, k, c["vidro"])
         print(f"    {c['nome']}: trilho de parede a parede e {len(c['panos'])} pano(s) de linho")
     return out
 
@@ -2352,7 +2381,7 @@ def main():
     out = bege_referencia(out, A)
     print("[44] projeções da cobertura em tracejado cinza fino (R8, R9)")
     out = projecoes(out, A)
-    print("[46] cortinas de linho: escritório e vidro da varanda no living (pente fino, item 1)")
+    print("[46] cortinas de linho: escritório e living (pente fino, itens 1 e 2)")
     out = cortinas(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
