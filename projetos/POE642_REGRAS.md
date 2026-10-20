@@ -139,7 +139,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
     - criados redondos de madeira com abajur branco.
   - Cama de solteiro: faixa bordô atravessada sobre o edredom branco.
 - **Tapetes:** só onde o PDF tem, no contorno do PDF. Área de estar não vira jantar. Arranjos e vasos só onde o PDF indica.
-- **Cortinas:** em linho off-white, traço fino.
+- **Cortinas:** em linho off-white, traço fino. O bloco é o de `_blocos/blocos.py` (`cortina`), aprovado em 20/10.
+  - **[20/10] Trilho de fora a fora:** sempre de parede a parede. Só o pano muda: a meia distância (como no PDF), todo recolhido ou todo fechado. Usuário: "trilhos da cortina tem que ser de fora a fora. somente a cortina pode estar a meia distancia, totalmente recolhida ou totalmente fechada".
 
 ## 9. Estrutura, projeções e brises
 

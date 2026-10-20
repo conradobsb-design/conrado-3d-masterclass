@@ -143,10 +143,13 @@ def bloco(bid, px_m):
     return cor, a
 
 
-def cortina(comp_m, px_m, aberta=False, cor=LINHO, passo_m=0.14, amp_m=0.035, esp_m=0.022, mac0=0.18):
+def cortina(comp_m, px_m, aberta=False, cor=LINHO, passo_m=0.14, amp_m=0.035, esp_m=0.022, mac0=0.18,
+            com_pano=True, com_trilho=True):
     """A cortina vista de cima, na horizontal: o trilho em cima (lado do vidro), o tecido em ondas (prega wave) e a
     sombra para baixo (lado de dentro). Aberta, o tecido fica franzido em dois maços nas pontas, com as pregas mais
-    fechadas e fundas e o miolo do maço cheio de tecido. Devolve (BGR float32, alfa 0 a 1)."""
+    fechadas e fundas e o miolo do maço cheio de tecido. `com_pano=False` dá só o trilho e `com_trilho=False` só o pano:
+    o trilho vai sempre de parede a parede (usuário, 20/10/26: "trilhos da cortina tem que ser de fora a fora. somente
+    a cortina pode estar a meia distancia, totalmente recolhida ou totalmente fechada"). Devolve (BGR float32, alfa)."""
     k = px_m * SS
     prof_m = 0.17
     W, H = max(1, round(comp_m * k)), max(1, round(prof_m * k))
@@ -166,13 +169,13 @@ def cortina(comp_m, px_m, aberta=False, cor=LINHO, passo_m=0.14, amp_m=0.035, es
     yc = y_c + amp * k * np.sin(fase)
     incl = amp * k * np.cos(fase) * 2 * np.pi / (lam * k)
     meia = 0.5 * esp_m * k * np.sqrt(1 + incl ** 2)
-    tecido = np.clip(meia + 0.5 - np.abs(Y - yc), 0, 1) * (tem > 0.01)
+    tecido = np.clip(meia + 0.5 - np.abs(Y - yc), 0, 1) * (tem > 0.01) * float(com_pano)
     if aberta:                                         # o miolo franzido: tecido cheio entre as dobras
         miolo = np.clip(amp * k * 0.75 + 0.5 - np.abs(Y - y_c), 0, 1) * tem
-        tecido = np.maximum(tecido, miolo * 0.92)
+        tecido = np.maximum(tecido, miolo * 0.92 * float(com_pano))
     luz = 0.80 + 0.20 * (0.5 + 0.5 * np.cos(fase + 0.9))  # cristas viradas para a luz mais claras
     luz = cv2.GaussianBlur(luz.astype(np.float32), (0, 0), 0.004 * k)
-    trilho = np.clip(0.008 * k + 0.5 - np.abs(Y - y_tr), 0, 1) * 0.85
+    trilho = np.clip(0.008 * k + 0.5 - np.abs(Y - y_tr), 0, 1) * 0.85 * float(com_trilho)
     sombra = cv2.GaussianBlur(np.roll(tecido, round(0.02 * k), axis=0), (0, 0), 0.014 * k) * 0.30
     cor_t = np.array(cor, np.float32) * luz[..., None]
     rgb = cor_t * tecido[..., None] + np.array(TRILHO, np.float32) * (trilho * (1 - tecido))[..., None]

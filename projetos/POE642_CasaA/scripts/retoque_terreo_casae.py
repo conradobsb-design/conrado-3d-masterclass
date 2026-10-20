@@ -186,6 +186,13 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
     tracejado cinza fino no L da laje baixa do espaço gourmet + varanda, na laje da garagem (com a linha do PDF e a
     lateral junto aos brises) e na faixa de cima, as bordas das 7 notas "PROJ. COBERTURA" do PDF; menos nas paredes
     pretas.
+45. Soleiras e vidros conferidos com o PDF (R13): sem mudança.
+46. Cortinas de linho (pente fino de 20/10, item 1), com o bloco da biblioteca (`_blocos/blocos.py`): o trilho de
+    parede a parede, do lado do vidro, e o pano por dentro (usuário: "trilhos da cortina tem que ser de fora a fora.
+    somente a cortina pode estar a meia distancia, totalmente recolhida ou totalmente fechada"). Escritório: os tracinhos
+    brancos do motor saem e os dois panos ficam nos trechos do PDF (a meia distância). Living, vidro da varanda (pedido do
+    usuário, "Representar a cortina"; o PDF não traz): o trilho por dentro das quatro folhas escalonadas, da parede até a
+    fachada de baixo, e o pano fechado no vão todo.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1971,6 +1978,71 @@ def projecoes(out, A):
     return out
 
 
+# cortinas (item 46; pente fino de 20/10, item 1), com a cortina de linho da biblioteca (`_blocos/blocos.py`, aprovada
+# em 20/10): o trilho de parede a parede (usuário: "trilhos da cortina tem que ser de fora a fora. somente a cortina pode
+# estar a meia distancia, totalmente recolhida ou totalmente fechada"), do lado do vidro, e o pano por dentro.
+# - Escritório: no PDF (ARQ_LOUÇAS E METAIS) a cortina é a linha ondulada junto à janela da direita, em dois trechos (a
+#   meia distância); o motor fez só tracinhos brancos ali. A faixa dos tracinhos volta ao travertino (as mesmas colunas,
+#   do vão entre os dois trechos, espelhado) e os panos entram nos trechos do PDF, com o eixo do tecido na linha do PDF.
+# - Living, vidro da esquerda (para a varanda): o PDF não traz cortina; o usuário marcou o vidro inteiro ("Representar a
+#   cortina"). Quatro folhas de correr escalonadas (a de baixo chega a x = 1385,9 pt): o trilho logo por dentro delas,
+#   da parede de cima até a linha do trilho da fachada de baixo, e o pano fechado no vão todo.
+CORTINAS = {"conjuntos": [
+    {"nome": "escritório", "vidro": "direita", "trilho": (2225.0, 1098.8, 1354.0),   # pt: x do eixo, y das paredes
+     "panos": [(1099.4, 1201.0), (1257.5, 1347.8)]},                                  # pt: os trechos do PDF
+    {"nome": "living, vidro da varanda", "vidro": "esquerda", "trilho": (1393.7, 1090.3, 1694.4),
+     "panos": [(1091.5, 1686.0)]}],
+    "limpar": {"faixa": (1284, 1290), "fonte": (534, 556), "linhas": [(475, 533), (557, 615)], "parede": 60},
+    "px_por_m": 31.09}
+
+
+def pousar_cortina(out, cor, a, xc, y0, px_m, k, vidro="direita"):
+    """Põe a cortina (horizontal, trilho em cima) na vertical, com o trilho do lado do vidro: o eixo do tecido em xc, a
+    partir de y0 (px do render, com fração; a peça vem a px_m x k px/m e é reduzida aqui)."""
+    giro = cv2.ROTATE_90_CLOCKWISE if vidro == "direita" else cv2.ROTATE_90_COUNTERCLOCKWISE
+    cor, a = cv2.rotate(cor, giro), cv2.rotate(a, giro)
+    h, w = a.shape
+    x_esq = xc * k - w / 2                                        # o eixo do tecido fica no meio da peça (0,085 m)
+    X0, Y0 = int(np.floor(x_esq / k)) - 1, int(np.floor(y0)) - 1
+    W, H = w // k + 4, h // k + 4
+    dx, dy = int(round(x_esq - X0 * k)), int(round((y0 - Y0) * k))
+    pre = np.zeros((H * k, W * k, 3), np.float32)
+    al = np.zeros((H * k, W * k), np.float32)
+    pre[dy:dy + h, dx:dx + w] = cor * a[..., None]
+    al[dy:dy + h, dx:dx + w] = a
+    pre = cv2.resize(pre, (W, H), interpolation=cv2.INTER_AREA)
+    al = cv2.resize(al, (W, H), interpolation=cv2.INTER_AREA)
+    reg = out[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
+    out[Y0:Y0 + H, X0:X0 + W] = np.clip(pre + reg * (1 - al[..., None]), 0, 255).astype(np.uint8)
+
+
+def cortinas(out, A):
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    q = CORTINAS
+    _, p2r, _ = pdf_cadeia(A, out.shape)
+    lp = q["limpar"]                                              # os tracinhos do motor no escritório
+    xa, xb = lp["faixa"]
+    ya, yb = lp["fonte"]
+    fonte = out[ya:yb, xa:xb].copy()
+    tira = np.concatenate([fonte, fonte[::-1]] * 4)
+    for r0, r1 in lp["linhas"]:                                   # a parede preta em volta fica
+        piso = out[r0:r1, xa:xb].astype(np.float32).mean(axis=2) > lp["parede"]
+        out[r0:r1, xa:xb][piso] = tira[:r1 - r0][piso]
+    k, px_m = 8, q["px_por_m"]
+    for c in q["conjuntos"]:
+        xp, tp0, tp1 = c["trilho"]
+        (xc, y0), (_, y1) = p2r(xp, tp0), p2r(xp, tp1)
+        cor, a = blocos.cortina((y1 - y0) / px_m, px_m * k, com_pano=False)
+        pousar_cortina(out, cor, a, xc, y0, px_m, k, c["vidro"])
+        for yp0, yp1 in c["panos"]:
+            (xc, y0), (_, y1) = p2r(xp, yp0), p2r(xp, yp1)
+            cor, a = blocos.cortina((y1 - y0) / px_m, px_m * k, com_trilho=False)
+            pousar_cortina(out, cor, a, xc, y0, px_m, k, c["vidro"])
+        print(f"    {c['nome']}: trilho de parede a parede e {len(c['panos'])} pano(s) de linho")
+    return out
+
+
 # paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
 # canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
 PAISAGISMO = {
@@ -2280,6 +2352,8 @@ def main():
     out = bege_referencia(out, A)
     print("[44] projeções da cobertura em tracejado cinza fino (R8, R9)")
     out = projecoes(out, A)
+    print("[46] cortinas de linho: escritório e vidro da varanda no living (pente fino, item 1)")
+    out = cortinas(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
