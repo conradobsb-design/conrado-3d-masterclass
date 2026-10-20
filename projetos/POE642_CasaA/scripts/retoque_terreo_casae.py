@@ -155,6 +155,14 @@ Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_erros.jpg)
     usuário: sem eles parecia vazia): a grade das peças ondulada pela refração, a rede de cáusticas
     do próprio render mais suave (só clareia) e um brilho difuso na diagonal. Na piscina, na prainha e
     no spa (a mancha da água na base chapada); o degrau do spa é desenhado depois (item 30).
+36. Nomes e áreas dos ambientes, na imagem final (`salvar_final`).
+
+Regras de 19 e 20/10 (POE642_REGRAS.md), um item por vez, depois do retocado aprovado (itens 1 a 35). A
+imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e o resto fica igual, px a px.
+37. Box do banho gourmet (R5: "representar o boxe no banho gourmet, pois não está representado"): no PDF
+    é de correr, com duas folhas (a fixa, junto à parede de baixo, e a de correr, por dentro); o vão fica
+    em cima. O traço escuro do motor, de parede a parede, sai; as folhas entram como no box da
+    referência: linha clara de vidro, sem montantes, borda cinza do lado do chuveiro e sombra suave.
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/retoque_terreo_casae.py POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_render.webp \
@@ -1598,6 +1606,40 @@ def vidros_piscina(out):
     return out
 
 
+# box do banho gourmet (item 37, R5: "representar o boxe no banho gourmet, pois não está representado"):
+# no PDF o box é de correr, com duas folhas de vidro (ARQ_LOUÇAS E METAIS): a fixa, junto à parede de baixo,
+# e a de correr, por dentro, sobrepostas no meio; o vão fica em cima. O motor fez só um traço escuro de
+# parede a parede, que sai (a coluna vira a do granito 2 px à direita, com a mesma textura). As folhas
+# entram no desenho do box da referência (_texturas/elementos.py): linha clara de vidro, fina, sem
+# montantes nem pontos, com a borda cinza do lado do chuveiro e a sombra suave no piso do box. Na escala
+# do render (0,55 px/pt) o vidro de 1 cm teria 0,3 px: cada folha vai com 0,8 px, no eixo dela.
+BOX_GOURMET = {"folhas": [(1104.4, 736.9, 1105.0, 784.1), (1105.3, 725.0, 1105.8, 772.3)],   # pt do PDF
+               "traco": (673, 254, 303), "fonte_dx": 2,      # px: coluna e linhas do traço do motor
+               "vidro": (226, 229, 230), "larg": 0.8, "borda": (150, 153, 155), "larg_borda": 0.3,
+               "sombra": {"dx": -1.2, "sigma": 1.0, "forca": 0.22}}
+
+
+def box_gourmet(out, A):
+    q = BOX_GOURMET
+    forma = out.shape[:2]
+    x, y0, y1 = q["traco"]
+    out[y0:y1, x] = out[y0:y1, x + q["fonte_dx"]]
+    _, p2r, _ = pdf_cadeia(A, forma)
+    for fx0, fy0, fx1, fy1 in q["folhas"]:
+        (a, b), (c, d) = p2r(fx0, fy0), p2r(fx1, fy1)
+        xc = (a + c) / 2
+        s = q["sombra"]
+        sm = cv2.GaussianBlur(linha_aa(forma, [(xc + s["dx"], b), (xc + s["dx"], d)], q["larg"]), (0, 0), s["sigma"])
+        out[:] = np.clip(out * (1 - s["forca"] * sm)[..., None], 0, 255).astype(np.uint8)
+        al = linha_aa(forma, [(xc, b), (xc, d)], q["larg"])[..., None]
+        out[:] = np.clip(out * (1 - al) + np.float32(q["vidro"]) * al, 0, 255).astype(np.uint8)
+        xb = xc - q["larg"] / 2
+        al = linha_aa(forma, [(xb, b), (xb, d)], q["larg_borda"])[..., None]
+        out[:] = np.clip(out * (1 - al) + np.float32(q["borda"]) * al, 0, 255).astype(np.uint8)
+    print(f"    banho gourmet: traço do motor apagado; box de correr com {len(q['folhas'])} folhas do PDF")
+    return out
+
+
 # paisagismo abaixo das escadas (item 32): a grama de referência e os canteiros (fonte; espelhar;
 # canto de cima à esquerda no destino; lados em que o trecho corta a touceira), como na Casa D
 PAISAGISMO = {
@@ -1773,15 +1815,16 @@ ROTULOS = {"fora": ("PROJ.", "TÉRREO"),
 FINAL = {"largura": 3840}
 
 
-def final_rotulos(out):
+def final_rotulos(out, referencia=None):
     from PIL import Image
     import retoque_1pav_casae as R1
     from opcoes_1pav_casae import quadro_pdf
     from rodape_entrega import no_quadro_comum
     q = ROTULOS
     W = FINAL["largura"]
+    ref = None if referencia is None else Image.fromarray(cv2.cvtColor(referencia, cv2.COLOR_BGR2RGB))
     final = cv2.cvtColor(np.asarray(no_quadro_comum(Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)), BASE,
-                                                    "Terreo", W)), cv2.COLOR_RGB2BGR)
+                                                    "Terreo", W, referencia=ref)), cv2.COLOR_RGB2BGR)
     H = final.shape[0]
     cfg = json.loads(CONFIG.read_text())
     pg = pymupdf.open(PDF)[cfg["pavimentos"]["Terreo"]["pagina"]]
@@ -1795,9 +1838,9 @@ def final_rotulos(out):
     return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=W / 2000, granito=granito, ajustes=q["ajustes"])
 
 
-def salvar_final(out, saida, nome):
+def salvar_final(out, saida, nome, referencia=None):
     print("[36] imagem final no quadro comum, com os nomes e áreas dos ambientes")
-    final = final_rotulos(out)
+    final = final_rotulos(out, referencia)
     saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(saida / f"{nome}.png"), final)
     cv2.imwrite(str(saida / f"{nome}_preview.jpg"),
@@ -1888,6 +1931,11 @@ def main():
     out = banco_varanda(out, orig)
     print("[19] jardim de inverno: um pouco para fora, com flores")
     out = jardim_flores(out, orig)
+    # o alinhamento da imagem final é medido no retocado aprovado (itens 1 a 35): os itens das regras novas
+    # (19 e 20/10) não mudam o afim, e o resto da imagem final fica igual, px a px
+    aprovado = out.copy()
+    print("[37] banho gourmet: box de vidro de correr (R5)")
+    out = box_gourmet(out, A)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     cv2.imwrite(str(args.saida / f"{args.nome}.png"), out)
@@ -1895,7 +1943,7 @@ def main():
     cv2.imwrite(str(args.saida / f"{args.nome}_camada.png"), np.dstack([out, alfa]))
     cv2.imwrite(str(args.saida / f"{args.nome}_previa.jpg"), out, [cv2.IMWRITE_JPEG_QUALITY, 88])
     print(f"[fim] {args.saida / (args.nome + '.png')}; {int((alfa > 0).sum())} px alterados")
-    salvar_final(out, args.saida, args.nome.replace("_retocado", "_final"))
+    salvar_final(out, args.saida, args.nome.replace("_retocado", "_final"), referencia=aprovado)
 
 
 if __name__ == "__main__":
