@@ -659,6 +659,15 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **As duas plantas novas (`"sem_fundo_claro"`):** o recorte delas tinha o fundo branco da foto no vão do meio e o vaso de terracota da costela, e os dois saem do alfa (aparece a forração escura). Na comigo-ninguém-pode isso furaria as listras claras, e ela não entra.
     - **Conferência:** no recorte do jardim, os px quentes passaram de 2.495 a 2. No retocado, na final e na prancha, só o jardim mudou (3 trechos dentro da floreira); rodapé igual.
     - **Imagens:** prancha refeita. Antes e depois: `renders/POE642_CasaE_PH_Terreo_jardim_so_verde_antes_depois.jpg`.
+  64. montagens do 1º Pavimento e os três PDFs (usuário: "siga com as montagens do 1º Pavimento e os PDFs"), com o Térreo do pente fino (itens 44 a 63). O `opcoes_1pav_casae.py` refez as três opções; comandos no README dos scripts, em "Pranchas de entrega".
+    - **P&B e nublado:** o contexto é o retocado novo do Térreo, realinhado com 73 pontos (erro mediano 0,72 px). Mudou só o entorno, e o 1º Pavimento por cima ficou igual.
+    - **Linhas:** o contexto é o PDF e não mudou. Mudaram só os 22 "²" dos rótulos, pela rotina comum do item 49 (o "2" logo depois do "m"), que vale para os outros pavimentos quando são refeitos; o mesmo vale nas outras duas opções.
+    - **Pranchas `entrega/POE642_CasaE_PH_1Pavimento_entrega_{pb,linhas,nublado}.png`:** a área da imagem é a montagem, px a px; rodapé igual.
+    - **PDFs `entrega/POE642_CasaE_Plantas_Humanizadas_opcao_{PB,Linhas,Nublado}.pdf`:** 3 páginas A3 cada (Subsolo, Térreo e o 1º Pavimento da opção), iguais px a px às pranchas; 18,9, 17,7 e 20,2 MB.
+    - **Antes e depois das montagens:** `renders/POE642_CasaE_PH_1Pavimento_montagens_antes_depois.jpg`.
+    - **Ainda pendentes:**
+      - a prancha do Subsolo, que é a mesma: o terreno hachurado dela ainda vem do Térreo de antes do pente fino (tarefa: refazê-lo a partir da final do Térreo);
+      - os carros SUV bronze, que aguardam o arquivo da foto.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";
