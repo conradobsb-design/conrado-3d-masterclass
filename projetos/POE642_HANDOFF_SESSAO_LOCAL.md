@@ -743,6 +743,34 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Para os próximos 1º Pavimentos:** `entorno_esmaecido.py --nublado`.
   - **Depois da escolha do cliente:** rodar o `rodape_entrega.py` da opção escolhida sem `--sufixo` (gera `..._PH_1Pavimento_entrega.png`) e o `pdf_entrega.py` sem `--prancha`/`--nome` (gera `POE642_CasaE_Plantas_Humanizadas.pdf`). Comandos no README dos scripts, em "Pranchas de entrega".
 
+- **Pente fino pelas regras (20/10/26).** Pedido do usuário: "Vamos às alterações no primeiro pavimento da casa E. Adotar as regras que elencamos." A imagem final nublada (a opção padrão, seção 11 do `POE642_REGRAS.md`), com o Térreo do pente fino em volta, foi conferida trecho a trecho contra as regras e o PDF (`_pdfs_cliente/642 - 1º PAVIMENTO - CASA E.pdf`). Nada foi retocado ainda.
+  - **Conforme:**
+    - rótulos: o do banho master já está fora da banheira (R7), nenhum fica sobre objeto, e o "m²" segue a regra de 20/10;
+    - vazios brancos com o X e o guarda-corpo de vidro;
+    - shaft da suíte master;
+    - brises em bronze;
+    - bancos no pé das camas;
+    - torneira de piso da banheira;
+    - cubas e copinha;
+    - entorno nublado;
+    - não há pilares nem projeções de cobertura no PDF deste pavimento (sem camada EST - Pilar).
+  - **Mapa numerado** (`renders/POE642_CasaE_PH_1Pavimento_pente_fino_mapa.jpg`), aguardando a confirmação do usuário:
+    1. arcos das portas (R3): o item 6 de 16/10 desenhou os 12 arcos do PDF; saem todos, e também o da porta pivotante P1 vista pelo vazio do hall e o da porta pequena junto ao vazio. Ficam as folhas e os batentes;
+    2. escada (R14 e "escadas com linhas"): o motor desenhou ~10 degraus, e o PDF tem 19 mais o patamar (o 20). Ela desce da esquerda para a direita (o "D" do PDF à esquerda; é o mesmo lance da interna do Térreo, que sobe da direita para a esquerda). Leva os bocéis em linha suave com a sombra curta e o triângulo no topo (à esquerda), apontando para a direita. No PDF ela é toda viva, sem corte;
+    3. boxes com folha contínua (R10): nos banhos 1 e 2 o vidro vai só até o meio; nos banhos 3 e 4 falta o trecho junto às paredes; no banho master a linha está falhada. O vidro fino vai de parede a parede, como no PDF;
+    4. banhos 3 e 4: os chuveiros são discos redondos, e o PDF tem a ducha quadrada de parede, com o braço saindo da parede entre os banhos. Os vasos parecem uma peça só atravessando a parede; o PDF tem dois suspensos, costas com costas, cada um no seu banho (regra do vaso: tampo fechado, volume, sombra curta);
+    5. guarda-roupas com cabides (R11): os armários do closet master (dois) e dos closets 1 a 4. A rouparia fica em marcenaria areia;
+    6. projeções em tracejado (R8, camada DOC_LINHAS E PROJEÇÕES): o shaft estreito entre o elevador e a rouparia (no render, uma faixa de marcenaria), o retângulo com X da rouparia e os X rasos no fundo do box e do vaso do banho master;
+    7. porta de correr da rouparia (P10): no render há só duas peças cinza nos batentes; entra a folha de correr do PDF;
+    8. soleiras (R13): nas portas dos banhos, o PDF deixa o vão em branco entre os batentes (há soleira); nas portas das suítes o vinílico atravessa (não há). A conferência é porta a porta, no item;
+    9. esquadrias finas (como o item 8 do pente fino do Térreo): as janelas dos banhos 1 a 4 (E23), da sala íntima (E17 e E20) e do vazio do hall (E8 e E9) estão em caixilho cinza grosso;
+    10. cortinas: os 10 trechos do PDF estão em zigue-zague branco; entram com o bloco de linho da biblioteca e o trilho de fora a fora (regra de 20/10);
+    11. vinílico na escala (R4): as réguas do render têm ~35 a 40 cm; a referência tem ~20 cm, claras, em tons alternados. O tom vai em opções (o #A8784F escolhido em 16/10 ou o claro da referência);
+    12. Bege Bahia das três varandas como a referência (seção 18), como o item 43 do Térreo;
+    13. floreira do banho master: tem uma flor laranja; fica só o verde, como o jardim de inverno do Térreo (pedido de 20/10);
+    14. a plantinha sobre o aparador da sala íntima não está no PDF ("nada inventado"): sai. A do canto, junto ao vazio, está no PDF e fica.
+  - **No fim:** o nublado vira a opção única (seção 16). A prancha sai sem sufixo, e o PDF único `POE642_CasaE_Plantas_Humanizadas.pdf`.
+
 ## Casa E · Subsolo
 
 - **PDF:** `_pdfs_cliente/642 - SUBSOLO - CASA E.pdf` (recebido em 16/10/26; mesma folha 3370 × 2384 pt e mesmo enquadramento: o elevador cai a 2 pt do elevador do Térreo). Pavimento `Subsolo` na `POE642_CasaE/config_bases.json` (curvas de nível ocultas).
