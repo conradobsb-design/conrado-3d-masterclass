@@ -474,6 +474,10 @@ python3 retoque_subsolo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Subs
 - **`so_folha=True`:** só protege a reta de uma ponta se houver folha nela (porta dupla).
 - **Onde é usado:** Térreo da Casa A (`ajustes_casaa.sem_arcos`) e Subsolo da Casa E (item 22 do `retoque_subsolo_casae.py`).
 
+## Texturas na escala: `texturas_escala.py`
+
+`retexturizar(out, mascara, nome, px_por_m, forca=0.6)` troca o desenho do piso na máscara pelo da biblioteca `_texturas`, na escala do render. A luz e a cor do lugar ficam (média local do piso, sem traços nem objetos), e os riscos claros do motor viram piso. Segue a regra R1 de `POE642_REGRAS.md`. Usado no Subsolo da Casa E (item 24 do `retoque_subsolo_casae.py`: Bege Bahia e travertino).
+
 ## Nomes e áreas da Casa A: `rotulos_casaa.py`
 
 Os rótulos do PDF de cada pavimento da Casa A (`_pdfs_cliente/642 - <PAVIMENTO> - CASA A.pdf`), pela regra da Casa E (`retoque_1pav_casae.rotulos_ambientes`). A imagem aprovada (2000 px) vai ao quadro comum em 3840 px (`rodape_entrega.no_quadro_comum`), e os rótulos são escritos nessa resolução. O granito, onde o texto fica cinza, é achado na própria imagem (`GRANITO`). As notas que não são ambientes ficam fora (`FORA`). Os desvios de cada pavimento estão em `PAVIMENTOS[...]["ajustes"]`, no mesmo formato da Casa E.

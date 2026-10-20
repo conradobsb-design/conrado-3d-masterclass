@@ -1283,6 +1283,33 @@ def escada_r14(out, pg, p2r, tex):
     return out
 
 
+# item 24 (R1, regra do usuário de 19/10/26: "textura, imprescindível que seja representada na escala"). Medido no
+# render (31,1 px/m): o vinílico da academia tem réguas de ~20 a 25 cm e o granito, grão fino (já na escala); o Bege
+# Bahia (circulação, depósito, casa de máquinas da direita, WC DCE 2) estava em manchas de 0,5 a 1 m, com riscos
+# claros do motor, e o travertino (sauna, antessala, vestiário), em estrias verticais que liam como madeira. Os dois
+# passam ao desenho da biblioteca (`_texturas`), na escala do render, com a luz e a cor do lugar
+# (`texturas_escala.retexturizar`). A escada (o travertino da base v3, item 23) fica.
+TEXTURAS = {"materiais": [("bege_bahia", (232, 232, 232), 0.6, 1), ("travertino", (202, 217, 220), 0.6, 3)],
+            "janela_pdf": (690, 510, 1850, 1160), "tol": 3}
+
+
+def texturas_na_escala(out, p2r, chapada):
+    from texturas_escala import retexturizar
+    q = TEXTURAS
+    (a, b), (c, d) = p2r(0, 0), p2r(56.6929, 0)               # 1 m no PDF (1:50)
+    px_m = float(np.hypot(c - a, d - b))
+    jan = np.zeros(out.shape[:2], bool)
+    x0, y0, x1, y1 = caixa_pdf(p2r, *q["janela_pdf"])
+    jan[y0:y1, x0:x1] = True
+    ex0, ey0, ex1, ey1 = caixa_pdf(p2r, *ESCADA_R14["pdf"], folga=2)
+    jan[ey0:ey1, ex0:ex1] = False
+    for nome, leg, forca, semente in q["materiais"]:
+        m = jan & (np.abs(chapada.astype(int) - leg).max(axis=2) <= q["tol"])
+        out, n = retexturizar(out, m, nome, px_m, forca=forca, semente=semente)
+        print(f"    {nome}: {n} px no desenho da biblioteca, a {px_m:.1f} px/m")
+    return out
+
+
 # item 18 (pedido do usuário, 16/10/26): "vamos adicionar os nomes e áreas, conforme regras que adotamos
 # anteriormente para o 1º pavimento da casa E". A regra do 1º Pavimento (`retoque_1pav_casae.rotulos_ambientes`):
 # cada linha do rótulo do PDF entra igual (o nome e "A: 12,65 m²"), na posição do PDF, no corpo do PDF 30%
@@ -1427,6 +1454,8 @@ def main():
         print("[22] portas sem os arcos (R3)")
         from arcos import remover_arcos
         out = remover_arcos(out, pg, p2r, camadas=ARCOS["camadas"], so_folha=True)
+        print("[24] Bege Bahia e travertino com o desenho da biblioteca, na escala (R1)")
+        out = texturas_na_escala(out, p2r, chapada)
         print("[23] escada com linhas e o triângulo de orientação (R14)")
         out = escada_r14(out, pg, p2r, tex)
 
