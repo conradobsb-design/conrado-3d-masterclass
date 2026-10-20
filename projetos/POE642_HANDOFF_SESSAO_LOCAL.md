@@ -651,6 +651,14 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Intensidade:** o 0,8 da interna, sem o tracejado, quase não aparece no travertino claro. Testei 0,8, 0,6, 0,45 e 0,3 e fiquei com 0,45: o esmaecimento fica claro e os degraus continuam legíveis.
     - **Conferência:** no retocado, na final e na prancha, mudou só a escada (110 × 46 px no retocado, 214 × 90 na final); rodapé igual.
     - **Imagens:** prancha refeita. Antes e depois: `renders/POE642_CasaE_PH_Terreo_escada_desce_esmaecida_antes_depois.jpg`.
+  63. jardim de inverno só no verde (usuário: "No jardim de inverno remova as cores quentes. Mantenha apenas o verde"). Os quentes vinham de três fontes:
+    - as 5 flores tropicais (laranja, vermelha, rosa e amarela);
+    - a planta com flores rosa da biblioteca (57% de px quentes);
+    - o arbusto amarelo-oliva.
+    - **Feito (`jardim_flores`, `JARDIM_FORA["so_verde"]`):** as flores não entram. Nas mesmas posições (mesma semente), a planta com flores virou a costela-de-adão (0,7 m) e o arbusto, a planta de folhas largas (0,8 m); bananeiras e comigo-ninguém-pode ficam.
+    - **As duas plantas novas (`"sem_fundo_claro"`):** o recorte delas tinha o fundo branco da foto no vão do meio e o vaso de terracota da costela, e os dois saem do alfa (aparece a forração escura). Na comigo-ninguém-pode isso furaria as listras claras, e ela não entra.
+    - **Conferência:** no recorte do jardim, os px quentes passaram de 2.495 a 2. No retocado, na final e na prancha, só o jardim mudou (3 trechos dentro da floreira); rodapé igual.
+    - **Imagens:** prancha refeita. Antes e depois: `renders/POE642_CasaE_PH_Terreo_jardim_so_verde_antes_depois.jpg`.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";

@@ -225,7 +225,9 @@ imagem final passa a ser alinhada no aprovado: um item novo não muda o afim, e 
 54. Jardim de inverno (pente fino, item 7; usuário: "precisamos alterar também o jardim de inverno interno da casa E"):
     bananeiras, comigo-ninguém-pode, arbustos e plantas com flores da biblioteca de blocos, no tamanho real, em duas
     fileiras sobre forração, no lugar das folhagens do motor; as copas saem um pouco da floreira (item 19) e as flores
-    tropicais ficam.
+    tropicais ficam. Depois, só o verde (usuário: "No jardim de inverno remova as cores quentes. Mantenha apenas o
+    verde"): sem as flores tropicais; a planta com flores e o arbusto viram a costela-de-adão e a planta de folhas
+    largas, sem o fundo branco da foto nem o vaso de terracota.
 55. Esquadrias finas (pente fino, item 8; usuário: "portas vidros e janelas mais delicados e finos?"): os caixilhos
     largos e brancos do motor saem e os vidros, as folhas de porta e os caixilhos da ARQ_PAREDE entram pelo PDF, na
     espessura do desenho, com traço cinza fino; peitoril em Bege Bahia onde há vidro no vão.
@@ -1144,11 +1146,18 @@ def escada(out, q):
 # ordem de "ciclo", giradas e com +-10% de tamanho, as maiores por baixo, sobre uma forração escura ("forracao": o
 # desenho da grama da biblioteca nesse tom BGR, com o contraste aumentado). As copas saem só até a borda irregular
 # (nunca sobre a escada); as flores tropicais ficam por cima.
+# Só o verde (usuário, 20/10/26: "No jardim de inverno remova as cores quentes. Mantenha apenas o verde"): com
+# "so_verde", as flores tropicais não entram, e as plantas quentes da biblioteca dão lugar a folhagens só verdes, nas
+# mesmas posições: a planta com flores rosa (57% de px quentes) vira a costela-de-adão, e o arbusto amarelo-oliva, a
+# planta de folhas largas (0% de px quentes). Nas duas, o fundo branco da foto que o recorte guardou (o vão do meio
+# da de folhas largas, os furos da costela) sai do alfa ("sem_fundo_claro": claro e sem cor), e com ele o vaso de
+# terracota da costela (os px quentes); na comigo-ninguém-pode isso furaria as listras claras, e ela fica como estava.
 JARDIM_FORA = {
-    "lados": (1.5, 3.5), "baixo": (3.0, 6.5), "semente": 642,
-    "plantas": {"bananeira": 1.3, "dieffenbachia": 0.95, "arbusto": 0.8, "planta_flores": 0.7},
-    "ciclo": ["bananeira", "dieffenbachia", "planta_flores", "arbusto", "dieffenbachia", "bananeira",
-              "planta_flores", "dieffenbachia", "arbusto"],
+    "lados": (1.5, 3.5), "baixo": (3.0, 6.5), "semente": 642, "so_verde": True,
+    "plantas": {"bananeira": 1.3, "dieffenbachia": 0.95, "planta_folhas_largas": 0.8, "costela_de_adao": 0.7},
+    "ciclo": ["bananeira", "dieffenbachia", "costela_de_adao", "planta_folhas_largas", "dieffenbachia", "bananeira",
+              "costela_de_adao", "dieffenbachia", "planta_folhas_largas"],
+    "sem_fundo_claro": ("planta_folhas_largas", "costela_de_adao"),
     "passo": 15.5, "fileira": 7, "forracao": (44, 74, 56), "contraste": 1.6,
     "flores": {"fonte": [((1671, 540), 9), ((1773, 605), 9), ((1582, 905), 9), ((1440, 722), 8)],
                "pos": [((1002, 557), 0, None), ((1046, 571), 1, "vermelho"), ((1089, 554), 2, None),
@@ -1207,6 +1216,11 @@ def jardim_flores(out, orig, A):
         cor, al = blocos.bloco(nome, px_m)
         cor = np.asarray(cor, np.float32)
         al = np.clip((np.asarray(al, np.float32) - 0.4) / 0.5, 0, 1)      # sem o fio claro do recorte
+        if nome in q["sem_fundo_claro"]:
+            hsv = cv2.cvtColor(np.clip(cor, 0, 255).astype(np.uint8), cv2.COLOR_BGR2HSV).astype(np.float32)
+            al *= 1 - np.clip((hsv[..., 2] - 195) / 25, 0, 1) * np.clip((50 - hsv[..., 1]) / 20, 0, 1)
+            quente = ((hsv[..., 0] < 28) | (hsv[..., 0] > 140)).astype(np.float32) * np.clip((hsv[..., 1] - 30) / 20, 0, 1)
+            al *= 1 - cv2.GaussianBlur(quente, (0, 0), 1.0)
         larg = next(b["largura_m"] for b in blocos.CFG["blocos"] if b["id"] == nome)
         esc = q["plantas"][nome] / larg * rng.uniform(0.9, 1.1)
         hh, ww = al.shape
@@ -1232,7 +1246,8 @@ def jardim_flores(out, orig, A):
     # flores: o laranja da estrelítzia (pétalas e bico), recortado com borda suave e girado de matiz
     fq = q["flores"]
     forma = out.shape[:2]
-    for (px, py), i, cor in fq["pos"]:
+    flores = [] if q.get("so_verde") else fq["pos"]
+    for (px, py), i, cor in flores:
         (sx, sy), sr = fq["fonte"][i]
         rec = orig[sy - sr:sy + sr + 1, sx - sr:sx + sr + 1]
         hsv = cv2.cvtColor(rec, cv2.COLOR_BGR2HSV).astype(np.float32)
@@ -1253,7 +1268,7 @@ def jardim_flores(out, orig, A):
         al = cv2.warpAffine(flor, M, forma[::-1], flags=cv2.INTER_AREA)[..., None]
         out[:] = np.clip(out * (1 - al) + im * al, 0, 255).astype(np.uint8)
     print(f"    jardim de inverno: {len(postas)} plantas da biblioteca sobre forração, as copas um pouco para fora "
-          f"(sem a escada), e {len(fq['pos'])} flores tropicais")
+          f"(sem a escada), e {len(flores)} flores tropicais" + (" (só o verde)" if q.get("so_verde") else ""))
     return out
 
 
