@@ -2425,7 +2425,10 @@ ROTULOS = {"fora": ("PROJ.", "TÉRREO"),
                        # o lavabo é uma faixa estreita entre o banco e a parede: o nome em duas linhas, no meio dela
                        ("LAVABO GOURMET", (552.4, 291.3), (-5.5, 0), {"quebra": ["LAVABO", "GOURMET"]}),
                        # o jardim interno é todo planta: no verde escuro o preto e o cinza somem; fica em branco
-                       ("JARDIM", (1059.5, 562.8), (0, 0), {"cor": (250, 250, 250)})]}
+                       ("JARDIM", (1059.5, 562.8), (0, 0), {"cor": (250, 250, 250)}),
+                       # sobre a moldura da prateleira em U (usuário, 20/10/26: "o rótulo não pode estar sobre objeto.
+                       # nesse caso, escreva no piso, dentro da adega"): centrado no piso livre dentro do U
+                       ("ADEGA", (1117.7, 409.5), (0, 6.4))]}
 FINAL = {"largura": 3840}
 
 
