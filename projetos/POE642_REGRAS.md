@@ -35,6 +35,12 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **Mesmo quadro em todos os pavimentos:** mesma escala e mesma posição. O elevador de um pavimento cai sobre o do outro. Nunca aproximar, recortar ou centralizar a planta. A final sai em 3840 × 2160.
 - **Luz:** chapada, clara e uniforme. Todo objeto inserido leva uma sombra curta, com a luz do alto à direita (sombra para baixo e à esquerda). Sombras longas e duras de parede saem.
 
+- **[21/10] Atenção às escalas** (usuário, no pente fino da Casa B: "ATENÇÃO ÀS ESCALAS"). Em todo pente fino, as escalas são medidas primeiro e vêm no topo da lista:
+  - o quadro: os px/m da prancha pelo PDF (~60 px/m em 3840 px) e o elevador de um pavimento sobre o do outro;
+  - cada piso da prancha ao lado do da biblioteca na mesma escala (`texturas.textura`), com uma régua de 1 m;
+  - a vegetação folha a folha, com a régua (costela-de-adão até ~0,9 m, por exemplo);
+  - móveis, louças e carros sobre o contorno do PDF; os carros em 4,70 × 1,85 m (R12).
+
 - **[21/10] Paredes pretas no contorno do PDF** (usuário: "revise todas as paredes e deixe-as em perfeito estado"): as paredes e os pilares são os preenchimentos da ARQ_PAREDE, em preto, com bordas retas e cantos nítidos, sem falhas dentro nem sobras para fora.
 
 ## 3. Materiais e texturas (biblioteca `_texturas/`)

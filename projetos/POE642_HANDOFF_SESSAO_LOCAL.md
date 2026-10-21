@@ -238,7 +238,7 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 - **Depois do render:** `elementos_do_render.py` (móveis, carros, louças e as touceiras de plantas) e `acabamentos_finais.py`, como no Subsolo.
 
 **Próximos passos:**
-- **Pente fino pelas regras (21/10/26):** ver a seção "Casa B · pente fino pelas regras", no fim; a lista (24 itens no Térreo, 11 no Subsolo) aguarda a confirmação do usuário.
+- **Pente fino pelas regras (21/10/26):** ver a seção "Casa B · pente fino pelas regras", no fim; a lista (25 itens no Térreo e 12 no Subsolo, com as escalas primeiro) aguarda a confirmação do usuário.
 1. **Casa B entregue** (Subsolo e Térreo, pranchas e PDF). Falta só a resposta do usuário sobre a peça branca comprida abaixo do lavatório gourmet, do lado de fora; com ela, retocar a imagem final do Térreo e refazer a prancha e o PDF:
    `python rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final.png --render Terreo=../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_v4_retocado.png && python pdf_entrega.py --config ../../POE642_CasaB/config_bases.json`
 2. **Opcional, mais nitidez nos objetos:** passar o render num upscaler de IA (Higgsfield `upscale_image`) antes do `elementos_do_render.py`. Isso gasta créditos, então só com autorização.
@@ -1901,45 +1901,52 @@ Pedido do usuário: "SEGUIMOS PARA A CASA B" (a ordem da seção 17 das regras: 
 - **Como foi conferido:** o PDF de cada pavimento, renderizado a 1,2 px/pt, foi levado ao quadro da prancha pelo alinhamento das paredes (ECC afim): prancha ≈ PDF × 0,878 + (126,5; −238), igual nos dois pavimentos. Lado a lado, trecho a trecho, e com as camadas DOC_LINHAS E PROJEÇÕES, ARQ_ELEMENTOS FIXOS, EST_PILAR e ARQ_ESCADAS E RAMPAS desenhadas por cima da prancha.
 - **Mapas:** `conferencia_casab.py` (em `POE642_CasaA/scripts/`), com os itens em `PENTE_FINO` (pontos em px da prancha de 3840): `POE642_CasaB/renders/POE642_CasaB_PH_{Subsolo,Terreo}_pente_fino_mapa.jpg`.
 - **Leitura das escadas no PDF:** as duas escadas externas aparecem nos dois PDFs, com "S" no Subsolo e "D" no Térreo. A de 6 degraus liga a ducha (embaixo) à pedra grande (em cima); a de 9 degraus liga o deck em L ao lado da piscina (embaixo, no nível da ducha, sem degrau entre eles) à varanda (em cima).
-- **Térreo (24 itens):**
-  1. rótulos novos (seção 12): 37 ambientes com nome e área, mais o elevador; brancos no granito (R6); nenhum sobre objeto (R7: SUÍTE 3, PRAINHA e LAVABO caem sobre a cama, a espreguiçadeira e a bancada). A confirmar: o "SUÍTE 2 · 15,71 m²" solto atrás da suíte master (proposta: não entra) e o banho da suíte master, que no PDF se chama "SUÍTE MASTER · 13,7 m²";
-  2. portas sem arcos (R3): as ~25 de giro e a pivotante do hall, com a folha até a ponta do PDF;
-  3. as duas escadas com linhas e triângulo (R14): no Térreo, as duas descem (triângulo no topo);
-  4. carros prata, alinhados e iguais (R12; hoje branco, prata e grafite);
-  5. os 2 pilares redondos da EST_PILAR no bloco do motorista, em preto (R8; hoje não aparecem);
-  6. o X tracejado do jardim de inverno por cima das plantas (R8); sai o X que o motor desenhou no hall interno, em volta do pufe;
-  7. os portões em zigue-zague da ARQ_ELEMENTOS FIXOS (jardim do hall e área descoberta, os dois para a garagem). A confirmar se são portões ou brises, e a cor;
-  8. armários até o teto sem a diagonal (closet master, suítes 1, 2 e 3);
-  9. eletrodomésticos em inox (os quadrados sem diagonal da cozinha e o "Ref." do gourmet);
-  10. cooktops com as 5 bocas do PDF (gourmet e ilha da cozinha);
-  11. adega com a prateleira de vinhos (hoje um banco bege);
-  12. sala íntima: a bancada clara com cuba do PDF (hoje um móvel de madeira com um enfeite);
-  13. elevador com a porta e a soleira em inox; proposta: a cabine do Subsolo, como nas Casas C, D e E;
-  14. portas, vidros e janelas finos;
-  15. cortinas de linho com trilho de parede a parede (suíte master, sala íntima, suítes 1, 2 e 3);
-  16. granito marrom da referência (hoje RGB ~90, 60, 58; a referência é ~118, 89, 69);
-  17. pedra portuguesa em leque, no tom da foto (hoje caramelo em trama);
-  18. travertino com o veio na horizontal (hoje na vertical);
-  19. grama e madeira da referência (R4): o deck já tem réguas de ~19 cm, mas o tom é avermelhado (~170, 114, 86); a confirmar a troca do tom (também na ducha do Subsolo);
-  20. vegetação da biblioteca, no tamanho real, só dentro do lote (a do motor passa do muro e do lote);
-  21. paredes pretas no contorno do PDF (seção 2, 21/10);
-  22. soleiras (R13), porta a porta;
-  23. pedidos de 21/10 na Casa A, a confirmar para a Casa B: roupa de cama, quartzito Carrara, boxes com as folhas contínuas e banquetas de linho;
-  24. a peça branca comprida abaixo do lavatório gourmet (pendente desde a entrega): a confirmar o que é.
-  - **Conformes:** piscina em Barlavento com o spa e a prainha, mesas redondas e estar da varanda, living e jantar (10 lugares), pufe do hall, suítes com os bancos e os criados do PDF, banhos (bacias, cubas, chuveiros), louceiro, despensa, tanques, banco em L de bronze no deck, pisantes, shafts com o X, réguas do deck na escala.
-- **Subsolo (11 itens):**
+- **"ATENÇÃO ÀS ESCALAS" (usuário, depois do primeiro mapa):** a conferência foi refeita medindo as escalas, que passaram para o topo das listas.
+  - **Quadro:** 59,7 px/m nos dois pavimentos (o PDF a 1:50); o elevador do Subsolo cai sobre o do Térreo.
+  - **Pisos:** cada piso da prancha foi posto ao lado do da biblioteca na mesma escala (`texturas.textura`, trechos de 1,5 × 1,5 m, com régua de 1 m). Folha: `POE642_CasaB/renders/POE642_CasaB_PH_escalas_conferencia.jpg` (`conferencia_casab.py --escalas`).
+  - **Vegetação:** medida folha a folha com a régua de 1 m.
+  - **Móveis, louças e carros:** os contornos do PDF (ARQ_MOBILIÁRIO, ARQ_LAYOUT HUMANIZAÇÃO, ARQ_LOUÇAS E METAIS, ARQ_BANCADAS, marcenaria e elementos fixos) foram desenhados por cima da prancha: camas, bancos, criados, sofás, poltronas, mesas, cadeiras, bacias, cubas, tanques, espreguiçadeiras e aparelhos da academia batem com o PDF. Os carros são o bloco do PDF, de ~4,4 × 1,8 m.
+- **Térreo (25 itens):**
+  1. vegetação de 1,5 a 3 vezes o tamanho real: costela-de-adão com folhas de ~1,5 m (a real chega a ~0,9 m), samambaias com frondes de ~2,6 m, estrelícias com a flor de ~1,2 m, leques de palmeira de ~2,2 m no jardim de inverno; e passa do muro e do lote. Entram as plantas da biblioteca no tamanho real, só dentro do lote;
+  2. pedra portuguesa: hoje uma trama regular de quadrinhos de ~15 cm, em caramelo; a pedra é de 6 a 8 cm, em leque, no tom da foto;
+  3. granito marrom: hoje quase liso, com estrias verticais, sem grão e mais escuro (~90, 60, 58); a referência tem nuvens e lascas, em ~118, 89, 69;
+  4. travertino: hoje estrias verticais contínuas de vários metros; a placa é de 1,20 m, com veios horizontais de 5 a 20 cm;
+  5. vinílico (suítes, closet, sala íntima, circulação): hoje liso, sem réguas; as réguas são de ~20 cm, claras, em tons alternados (R4);
+  6. grama (grão miúdo e mais clara que a referência, que tem manchas de 0,5 a 1 m) e o tom do deck (as réguas já estão na escala, ~19 cm; o tom é avermelhado). A confirmar a troca do tom do deck, também na ducha do Subsolo;
+  7. carros prata, alinhados, de 4,70 × 1,85 m (R12; hoje o bloco do PDF, de ~4,4 × 1,8 m, em três cores);
+  8. rótulos novos (seção 12): 37 ambientes com nome e área, mais o elevador; brancos no granito (R6); nenhum sobre objeto (R7: SUÍTE 3, PRAINHA e LAVABO caem sobre a cama, a espreguiçadeira e a bancada). A confirmar: o "SUÍTE 2 · 15,71 m²" solto atrás da suíte master (proposta: não entra) e o banho da suíte master, que no PDF se chama "SUÍTE MASTER · 13,7 m²";
+  9. portas sem arcos (R3): as ~25 de giro e a pivotante do hall, com a folha até a ponta do PDF;
+  10. as duas escadas com linhas e triângulo (R14): no Térreo, as duas descem (triângulo no topo);
+  11. os 2 pilares redondos da EST_PILAR no bloco do motorista, em preto (R8; hoje não aparecem);
+  12. o X tracejado do jardim de inverno por cima das plantas (R8); sai o X que o motor desenhou no hall interno, em volta do pufe;
+  13. os portões em zigue-zague da ARQ_ELEMENTOS FIXOS (jardim do hall e área descoberta, os dois para a garagem). A confirmar se são portões ou brises, e a cor;
+  14. armários até o teto sem a diagonal (closet master, suítes 1, 2 e 3);
+  15. eletrodomésticos em inox (os quadrados sem diagonal da cozinha e o "Ref." do gourmet);
+  16. cooktops com as 5 bocas do PDF (gourmet e ilha da cozinha);
+  17. adega com a prateleira de vinhos (hoje um banco bege);
+  18. sala íntima: a bancada clara com cuba do PDF (hoje um móvel de madeira com um enfeite);
+  19. elevador com a porta e a soleira em inox; proposta: a cabine do Subsolo, como nas Casas C, D e E;
+  20. portas, vidros e janelas finos;
+  21. cortinas de linho com trilho de parede a parede (suíte master, sala íntima, suítes 1, 2 e 3);
+  22. paredes pretas no contorno do PDF (seção 2, 21/10);
+  23. soleiras (R13), porta a porta;
+  24. pedidos de 21/10 na Casa A, a confirmar para a Casa B: roupa de cama, quartzito Carrara, boxes com as folhas contínuas e banquetas de linho;
+  25. a peça branca comprida abaixo do lavatório gourmet (pendente desde a entrega): a confirmar o que é.
+  - **Conformes:** o quadro; camas, bancos, criados, sofás, poltronas, mesas e cadeiras, bacias, cubas, tanques e espreguiçadeiras no contorno do PDF; réguas do deck (~19 cm); piscina em Barlavento com o spa e a prainha; pufe do hall; banco em L de bronze no deck; pisantes; shafts com o X.
+- **Subsolo (12 itens):**
   1. só o Subsolo, com o resto do terreno hachurado (R2). A confirmar o que fica em cor cheia; proposta: a ducha, o deck em L e o início das duas escadas (o nível do Subsolo); a pedra grande e as pedras da esquerda, no nível do Térreo, vão para a hachura (hoje a pedra grande está em cor cheia, decisão de 14/10);
-  2. escada de 6 degraus: sobe da ducha para a pedra grande, triângulo no 1º degrau junto à ducha;
-  3. escada de 9 degraus: sobe do deck em L, triângulo no 1º degrau, cheia até o corte (depende do item 1);
-  4. portas sem arcos (R3): as 4 do PDF;
-  5. vidros finos: a parede de vidro entre a garagem e a academia, os vidros da sauna e o box do BH serviço;
-  6. Bege Bahia como a referência (seção 18) na garagem, nas circulações e no BH serviço (hoje rosado, com riscos brancos);
-  7. travertino com o veio na horizontal (depósito, sauna e banco, BH sauna, pedra grande);
-  8. rótulos novos: 9 ambientes mais o elevador; o "BH SERVIÇO" do PDF cai sobre a bacia (R7);
-  9. soleiras (R13);
-  10. paredes pretas no contorno do PDF;
-  11. os 2 pilares da EST_PILAR caem no terreno, sob o bloco do motorista; proposta: não desenhar no Subsolo. A confirmar.
-  - **Conformes:** academia (aparelhos do PDF, vinílico da Casa A), elevador com a cabine, shaft com o X, armário ao lado do elevador sem diagonal, banco da sauna em dois níveis, louças e chuveiros, garagem sem carros (o PDF não tem; decisão do usuário).
+  2. Bege Bahia: hoje liso e rosado, sem as nuvens de 10 a 20 cm da placa de 0,60 m (seção 18), com riscos brancos na garagem; na garagem, nas circulações e no BH serviço;
+  3. travertino: hoje estrias verticais de vários metros; placa de 1,20 m, veios horizontais (depósito, sauna e banco, BH sauna, pedra grande);
+  4. academia: piso (~20 cm) e aparelhos na escala do PDF, mas com retângulos de piso de outro tom em volta das bicicletas e do supino (sobras da colagem);
+  5. escada de 6 degraus: sobe da ducha para a pedra grande, triângulo no 1º degrau junto à ducha;
+  6. escada de 9 degraus: sobe do deck em L, triângulo no 1º degrau, cheia até o corte (depende do item 1);
+  7. portas sem arcos (R3): as 4 do PDF;
+  8. vidros finos: a parede de vidro entre a garagem e a academia, os vidros da sauna e o box do BH serviço;
+  9. rótulos novos: 9 ambientes mais o elevador; o "BH SERVIÇO" do PDF cai sobre a bacia (R7);
+  10. soleiras (R13);
+  11. paredes pretas no contorno do PDF;
+  12. os 2 pilares da EST_PILAR caem no terreno, sob o bloco do motorista; proposta: não desenhar no Subsolo. A confirmar.
+  - **Conformes:** o quadro; réguas da ducha (~18 cm); esteiras, bicicletas e supino no tamanho do PDF; elevador com a cabine, shaft com o X, armário ao lado do elevador sem diagonal, banco da sauna em dois níveis, louças e chuveiros, garagem sem carros (o PDF não tem; decisão do usuário).
 - **Ordem proposta:** o Térreo primeiro, porque o lote hachurado do Subsolo sai do Térreo final (como nas Casas A e E). A imagem final do Térreo da Casa B é o render retocado (`renders/POE642_CasaB_PH_Terreo_v4_retocado_barlavento.png`, 2000 × 1116), e a do Subsolo, a final em 6905 px; os retoques vão precisar de um `ajustes_casab.py` próprio, que reaproveita as rotinas da Casa A.
 
 ## Casas A a D · Barlavento nas piscinas

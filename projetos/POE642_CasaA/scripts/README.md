@@ -660,7 +660,10 @@ O mesmo mapa do pente fino pelas regras (21/10/26), sobre as pranchas de entrega
 ```bash
 python3 conferencia_casab.py            # -> ../../POE642_CasaB/renders/POE642_CasaB_PH_{Subsolo,Terreo}_pente_fino_mapa.jpg
 python3 conferencia_casab.py Terreo
+python3 conferencia_casab.py --escalas  # -> ../../POE642_CasaB/renders/POE642_CasaB_PH_escalas_conferencia.jpg
 ```
+
+**Escalas (usuário, 21/10/26: "ATENÇÃO ÀS ESCALAS"):** os itens de escala vêm primeiro em `PENTE_FINO`. Com `--escalas`, sai a folha de conferência: cada piso da prancha (`ESCALA_PISOS`, trechos de 1,5 × 1,5 m sem móveis) ao lado do da biblioteca na mesma escala (`_texturas/texturas.textura` a 59,7 px/m), ampliados 6 vezes, e a vegetação (`ESCALA_VEGETACAO`) com uma régua de 1 m. Os itens de `PENTE_FINO` com número `None` são notas sem marca no mapa (os conformes).
 
 Para conferir, o PDF (renderizado a 1,2 px/pt) foi levado ao quadro da prancha pelo alinhamento das paredes (`cv2.findTransformECC`, afim): prancha ≈ PDF × 0,878 + (126,5; −238), nos dois pavimentos.
 
