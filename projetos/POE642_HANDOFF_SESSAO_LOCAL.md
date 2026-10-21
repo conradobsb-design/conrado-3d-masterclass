@@ -1806,6 +1806,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** o mesmo da Casa E: nas áreas de vinílico da base chapada, só no que é piso no render, réguas de 20 cm, 1,2 a 1,8 m, em tons alternados, com o veio do próprio render, na luz do lugar; o escurecido sobe 70% do caminho até a mediana. As folhas das portas do PDF ficam (sem isso, a da suíte 3 para o closet sumia). Roda logo depois dos itens 2 e 3, antes dos móveis (4 a 10), que são postos sobre o piso novo.
   - **Conferência:** na imagem com ajustes e na prancha, só as quatro suítes e os closets (6 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_vinilico_antes_depois.jpg`.
+- **1º Pavimento, item 12, Bege Bahia das quatro varandas, feito** (`ajustes_casaa.bege_varandas_1pav`, config `BEGE_VARANDAS_1PAV`).
+  - **Antes:** bege claro e rosado, com veios grandes de mármore, nas varandas das suítes 3, 2, master e 1.
+  - **Como:** a rotina do item 9 do Térreo (`bege_na_referencia`): o desenho da biblioteca, na escala, no tom da foto (RGB 230, 211, 186), com a luz do lugar; os caixilhos e a linha do guarda-corpo ficam. O tom saiu igual ao do Bege do Térreo. As varandas são escolhidas por um ponto em cada uma, porque o hall da caracol e o quarto e o banho de serviço têm o mesmo cinza na base.
+  - **Conferência:** na imagem com ajustes e na prancha, só as quatro varandas (4 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_bege_varandas_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

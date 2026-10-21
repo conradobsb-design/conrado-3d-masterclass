@@ -163,6 +163,8 @@ pode seguir pela ordem proposta"):
   1º Pavimento, pente fino 11 (R4): vinílico na escala, como no 1º Pavimento da Casa E (réguas de 20 cm, 1,2 a 1,8 m,
      em tons alternados, com o veio do render, e o escurecido mais claro), nas áreas de vinílico da base chapada, só no
      que é piso; as folhas das portas do PDF ficam. Roda logo depois dos itens 2 e 3, antes dos móveis.
+  1º Pavimento, pente fino 12 (seção 18): o Bege Bahia das quatro varandas (suítes 3, 2, master e 1) no desenho e no
+     tom da referência, com a rotina do Térreo (item 9, `bege_na_referencia`), para os dois pavimentos ficarem iguais.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -4186,6 +4188,39 @@ def vinilico_1pav(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 12: o Bege Bahia das quatro varandas como a referência (seção
+# 18; R1: a foto de referência, nublada, quente, com o contraste dela). O motor fez as varandas das suítes 3, 2, master e
+# 1 num bege claro e rosado com veios grandes de mármore (RGB ~227, 210, 200). Como o Térreo da Casa A (item 9,
+# `bege_na_referencia`, com os números do item 43 do Térreo da Casa E, `retoque_terreo_casae.BEGE`), para as duas
+# ficarem iguais: os pontinhos escuros pequenos do motor viram a luz do lugar; o desenho da biblioteca entra inteiro, na
+# escala, no tom da foto (RGB 230, 211, 186), com a luz do lugar; o que foge da luz (os caixilhos, a linha do
+# guarda-corpo) fica, e o anel em volta vai ao piso novo de perto. As áreas são as manchas do #E8E8E8 da base chapada que
+# contêm os pontos `sementes` (px), uma por varanda: o hall da caracol, o quarto e o banho de serviço têm a mesma cor na
+# base e não são varanda. A mancha é fechada em 5 x 5 onde o render é piso claro, como no Térreo.
+BEGE_VARANDAS_1PAV = {"cor_base": (232, 232, 232), "tol": 6, "fechar": 5, "claro": 150,
+                      "sementes": [(817, 240), (820, 540), (675, 740), (1400, 700)]}   # suítes 3, 2, master e 1
+
+
+def bege_varandas_1pav(out):
+    q = BEGE_VARANDAS_1PAV
+    _, p2r = pdf_pavimento("1Pavimento")
+    b2 = base_terreo(out.shape[:2], "1Pavimento").astype(np.int32)
+    m = (np.abs(b2 - np.array(q["cor_base"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
+    ids = sorted({int(lab[y, x]) for x, y in q["sementes"]} - {0})
+    bege = np.isin(lab, ids)
+    im = out.astype(np.float32)
+    claro = (im.mean(axis=2) >= q["claro"]) & ~((im[..., 1] > im[..., 2] + 4) & (im[..., 1] > im[..., 0] + 12))
+    k = np.ones((q["fechar"], q["fechar"]), np.uint8)
+    bege |= cv2.morphologyEx(bege.astype(np.uint8), cv2.MORPH_CLOSE, k).astype(bool) & claro
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                  # 1 m na escala 1:50 = 56,69 pt
+    px_m = float(np.hypot(c - a, d - b))
+    out, npt, npx, nanel = bege_na_referencia(out, bege, px_m)
+    print(f"    Bege Bahia das {len(ids)} varandas: {npt} px de pontinhos escuros fora; {npx} px no desenho da "
+          f"biblioteca, a {px_m:.2f} px/m, no tom da foto; {nanel} px do anel em volta dos objetos")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -5530,6 +5565,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          banheira_1pav),
                         ("pf10", "pente fino 10: cortinas de linho da biblioteca nas quatro suítes, com o trilho de parede "
                          "a parede", cortinas_1pav),
+                        ("pf12", "pente fino 12 (seção 18): Bege Bahia das quatro varandas como a referência, como o do "
+                         "Térreo", bege_varandas_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 
