@@ -154,6 +154,9 @@ pode seguir pela ordem proposta"):
      o quadrado e a sombra saem (o vinílico da mesma linha, ao lado) e entram os círculos na madeira do quadrado.
   1º Pavimento, pente fino 8: no quarto de serviço, a faixa com dois quadrados do motor sai e entram a cama de solteiro
      e o criado-mudo do PDF, os da suíte 1 (mesmas medidas no PDF) espelhados na vertical, com a sombra curta.
+  1º Pavimento, pente fino 9: no banho master, a banheira retangular do motor sai (o piso limpo do banho, tecido, na luz
+     de cada linha) e entram a banheira oval da biblioteca de blocos, no retângulo da elipse do PDF, e a torneira de piso
+     do PDF na ponta da esquerda (base redonda e bica em cromo), as duas com a sombra curta.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3899,6 +3902,116 @@ def quarto_servico_1pav(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 9: a banheira do banho master (item 7 da conferência de 19/10;
+# seção 6: "banheira: com a torneira de piso, quando o PDF tem"). No PDF, a banheira é oval (95,5 x 50,7 pt, 1,68 x
+# 0,89 m) e tem a torneira de piso na ponta da esquerda (a base redonda junto à borda e a bica entrando na banheira);
+# o motor a fez retangular de cantos arredondados, sem a torneira. A banheira do motor e a sombra dela saem (o piso
+# tecido de um trecho limpo do próprio banho, à direita, na luz do lugar) e entram a banheira oval da biblioteca de
+# blocos (`_blocos/blocos.py`, "banheira_oval", a do banho master da Casa E) no retângulo da elipse do PDF e a torneira
+# de piso no cromo dos chuveiros aprovados, como a da Casa E (retoque_1pav_casae.torneira_banheira), as duas com a
+# sombra curta dos bancos.
+BANHEIRA_1PAV = {"oval": (1217.0, 1625.1, 1312.5, 1675.8),                   # pt: a elipse do PDF
+                 "apagar": (739, 764, 800, 799),                              # px: a banheira do motor e a sombra
+                 "fonte_piso": (801, 765, 829, 812),                          # px: piso limpo do banho, à direita
+                 "torneira": {"base": (1210.2, 1650.4), "raio_pt": 3.5, "bica": (1226.6, 1650.4), "larg_bica_pt": 1.47},
+                 "faixa_luz": 6, "sigma_luz": 3.0,                             # a luz, linha a linha
+                 "corpo": (29 / 134, 41 / 134), "cols_torneira": (86 / 231, 143 / 231),  # no recorte da biblioteca
+                 "verde": 8, "feather": 0.8}
+
+
+def banheira_1pav(out):
+    import sys
+    from retoque_bege_bahia_terreo import quilting
+    from retoque_1pav_casae import sombra
+    from retoque_terreo_casae import BANCO_VARANDA, SS
+    from retoque_terreo_casac import CROMO, CROMO_CLARO, CROMO_ESCURO
+    sys.path.insert(0, str(CASA.parent / "_blocos"))
+    from blocos import bloco
+    q = BANHEIRA_1PAV
+    _, p2r = pdf_pavimento("1Pavimento")
+    s = BANCO_VARANDA["sombra"]
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    k = px_m / 56.69                                                          # px por pt
+    # 1. a banheira do motor e a sombra saem: o piso limpo do banho, tecido, linha a linha na luz do trecho limpo ao
+    # lado (o piso clareia de cima para baixo); a planta da floreira fica e a borda da caixa se funde com o piso
+    ax0, ay0, ax1, ay1 = q["apagar"]
+    fx0, fy0, fx1, fy1 = q["fonte_piso"]
+    f = out[fy0:fy1, fx0:fx1].astype(np.float32)
+    fontes = [np.ascontiguousarray(v) for v in (f, f[:, ::-1], f[::-1, :], f[::-1, ::-1])]
+    h, w = ay1 - ay0, ax1 - ax0
+    piso = quilting(fontes, h, w, p=12, sobra=4, candidatos=300, rng=np.random.default_rng(653))[:h, :w]
+    luz = cv2.GaussianBlur(out[ay0:ay1, fx0:fx0 + q["faixa_luz"]].astype(np.float32).mean(axis=1)[:, None, :],
+                           (0, 0), sigmaX=0.1, sigmaY=q["sigma_luz"])[:, 0, :]
+    lp = cv2.GaussianBlur(piso.mean(axis=1)[:, None, :], (0, 0), sigmaX=0.1, sigmaY=q["sigma_luz"])[:, 0, :]
+    piso = piso / lp[:, None, :] * luz[:, None, :]
+    reg = out[ay0:ay1, ax0:ax1].astype(np.float32)
+    verde = (reg[..., 1] - reg[..., 2] > q["verde"]) & (reg[..., 1] - reg[..., 0] > q["verde"])
+    m = (~cv2.dilate(verde.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)).astype(np.float32)
+    al = cv2.GaussianBlur(np.pad(m, 3), (0, 0), q["feather"])[3:-3, 3:-3] * m
+    out[ay0:ay1, ax0:ax1] = np.clip(np.round(reg * (1 - al[..., None]) + piso * al[..., None]), 0, 255).astype(np.uint8)
+    # 2. a banheira oval da biblioteca, só o corpo (a torneira de bancada do recorte e o ladrão saem: a borda é refeita
+    # na horizontal entre as colunas de fora e o contorno de cima espelha o de baixo), no retângulo da elipse do PDF
+    (u0, v0), (u1, v1) = p2r(*q["oval"][:2]), p2r(*q["oval"][2:])
+    cor, alfa = bloco("banheira_oval", px_m * SS)
+    H, W = alfa.shape
+    (r0, rl), (c0, c1) = q["corpo"], q["cols_torneira"]
+    r0, rl, c0, c1 = int(round(r0 * H)), int(round(rl * H)), int(round(c0 * W)), int(round(c1 * W))
+    for r in range(r0, rl):
+        tt = np.linspace(0, 1, c1 - c0 + 1)[1:-1, None]
+        cor[r, c0 + 1:c1] = cor[r, c0] * (1 - tt) + cor[r, c1] * tt
+    cor, alfa = cor[r0:], alfa[r0:]
+    alfa = np.minimum(alfa, alfa[::-1])
+    tw, th = int(round((u1 - u0) * SS)), int(round((v1 - v0) * SS))
+    cor = cv2.resize(cor * alfa[..., None], (tw, th), interpolation=cv2.INTER_AREA)
+    alfa = cv2.resize(alfa, (tw, th), interpolation=cv2.INTER_AREA)
+    x0, y0, x1, y1 = int(np.floor(u0)) - 4, int(np.floor(v0)) - 4, int(np.ceil(u1)) + 4, int(np.ceil(v1)) + 4
+    grande = np.zeros(((y1 - y0) * SS, (x1 - x0) * SS, 3), np.float32)
+    ag = np.zeros(grande.shape[:2], np.float32)
+    ox, oy = int(round((u0 - x0) * SS)), int(round((v0 - y0) * SS))
+    grande[oy:oy + th, ox:ox + tw] = cor
+    ag[oy:oy + th, ox:ox + tw] = alfa
+    pre = cv2.resize(grande, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+    a_ = cv2.resize(ag, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+    out = sombra(out, a_, (x0, y0, x1, y1), s["desloc"], s["sigma"], s["forca"])
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(np.round(reg * (1 - a_[..., None]) + pre), 0, 255).astype(np.uint8)
+    # 3. a torneira de piso: a base redonda e a bica, no cromo dos chuveiros aprovados
+    t = q["torneira"]
+    bx, by = p2r(*t["base"])
+    px_, py_ = p2r(*t["bica"])
+    r = t["raio_pt"] * k
+    x0, y0, x1, y1 = int(bx - r) - 4, int(by - r) - 4, int(px_) + 5, int(by + r) + 5
+    hh, ww = y1 - y0, x1 - x0
+    cor = np.zeros((hh * SS, ww * SS, 3), np.float32)
+    al = np.zeros((hh * SS, ww * SS), np.float32)
+
+    def pt(x, y):
+        return int(round((x - x0) * SS)), int(round((y - y0) * SS))
+
+    def pinta(desenho, c):
+        mm = np.zeros(al.shape, np.uint8)
+        desenho(mm)
+        cor[mm > 0] = c
+        al[mm > 0] = 1
+    lb = t["larg_bica_pt"] * k
+    pinta(lambda mm: cv2.line(mm, pt(bx, by), pt(px_, py_), 255, max(1, int(round(lb * SS)))), CROMO_ESCURO)
+    pinta(lambda mm: cv2.line(mm, pt(bx, by), pt(px_, py_), 255, max(1, int(round(0.6 * lb * SS)))), CROMO)
+    pinta(lambda mm: cv2.line(mm, pt(bx, by - 0.15 * lb), pt(px_ - 0.3, py_ - 0.15 * lb), 255,
+                              max(1, int(round(0.22 * lb * SS)))), CROMO_CLARO)
+    pinta(lambda mm: cv2.circle(mm, pt(bx, by), int(round(r * SS)), 255, -1), CROMO_ESCURO)
+    pinta(lambda mm: cv2.circle(mm, pt(bx, by), int(round(0.82 * r * SS)), 255, -1), CROMO)
+    pinta(lambda mm: cv2.circle(mm, pt(bx - 0.3 * r, by - 0.3 * r), int(round(0.35 * r * SS)), 255, -1), CROMO_CLARO)
+    a_ = cv2.resize(al, (ww, hh), interpolation=cv2.INTER_AREA)
+    c_ = cv2.resize(cor * al[..., None], (ww, hh), interpolation=cv2.INTER_AREA)
+    out = sombra(out, a_, (x0, y0, x1, y1), s["desloc"], s["sigma"], s["forca"])
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(np.round(reg * (1 - a_[..., None]) + c_), 0, 255).astype(np.uint8)
+    print(f"    banheira oval da biblioteca em ({u0:.1f}, {v0:.1f}) a ({u1:.1f}, {v1:.1f}) px (a do motor fora); "
+          f"torneira de piso em ({bx:.1f}, {by:.1f}) px, com a bica até ({px_:.1f}, {py_:.1f})")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -5237,6 +5350,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          criados_1pav),
                         ("pf8", "pente fino 8: quarto de serviço com a cama de solteiro e o criado-mudo do PDF, no lugar da "
                          "faixa com dois quadrados", quarto_servico_1pav),
+                  ("pf9", "pente fino 9: banheira oval do banho master com a torneira de piso, como no PDF",
+                   banheira_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 

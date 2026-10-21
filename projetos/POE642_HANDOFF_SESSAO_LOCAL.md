@@ -1791,6 +1791,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** a faixa e o risco saem (o vinílico limpo da mesma linha, espelhado); entram a cama e o criado-mudo da suíte 1 (mesmas medidas no PDF), espelhados na vertical, no retângulo do PDF, com a sombra curta. O rótulo do quarto continua no piso livre.
   - **Conferência:** na imagem com ajustes e na prancha, só o quarto de serviço (1 região); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_quarto_servico_antes_depois.jpg`.
+- **1º Pavimento, item 9, banheira do banho master, feito** (`ajustes_casaa.banheira_1pav`, config `BANHEIRA_1PAV`).
+  - **Antes:** banheira retangular de cantos arredondados, com sombra, sem torneira; no PDF, oval (1,68 x 0,89 m) com a torneira de piso na ponta da esquerda.
+  - **Como:** a banheira do motor e a sombra saem (o piso limpo do banho, à direita, tecido e ajustado à luz de cada linha; as folhas da floreira ficam); entra a banheira oval da biblioteca de blocos (a da Casa E, só o corpo, sem a torneira de bancada do recorte) no retângulo da elipse do PDF, e a torneira de piso do PDF em cromo (base redonda e bica entrando na banheira), as duas com a sombra curta.
+  - **Conferência:** na imagem com ajustes e na prancha, só a banheira (1 região); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_banheira_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
