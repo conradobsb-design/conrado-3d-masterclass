@@ -401,7 +401,8 @@ def bancada_cuba(out, p2r, bancada, cuba, torneira, parede):
 
 def vaso(out, pg, p2r, caixa, parede):
     """Vaso visto de cima no contorno do PDF (ARQ_LOUÇAS E METAIS, o polígono da caixa dada), como os
-    aprovados nas outras casas: louça com volume, contorno fino, sombra curta e o tampo fechado."""
+    aprovados nas outras casas: louça com volume, contorno fino, sombra curta e o tampo fechado. parede: o lado
+    da parede ("direita", "esquerda", "cima" ou "baixo"), onde fica a dobradiça do tampo."""
     q = VASO
     corpo = next(d for d in pg.get_drawings() if d.get("layer") == "ARQ_LOUÇAS E METAIS" and d["type"] == "f"
                  and max(abs(d["rect"].x0 - caixa[0]), abs(d["rect"].y0 - caixa[1]), abs(d["rect"].x1 - caixa[2]),
@@ -421,12 +422,20 @@ def vaso(out, pg, p2r, caixa, parede):
     tl.contorno(m, 0.35, LOUCA_CONTORNO)
     k = int(2 * q["recuo"] * 0.5483 * SS) + 1
     tampo = cv2.erode(m, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
-    xd = caixa[2] - q["dobradica"] if parede == "direita" else caixa[0] + q["dobradica"]
-    xs_pt = tl.pt(xd, caixa[1])[0]
-    if parede == "direita":
-        tampo[:, int(xs_pt):] = 0
-    else:
-        tampo[:, :int(xs_pt)] = 0
+    if parede in ("direita", "esquerda"):
+        xd = caixa[2] - q["dobradica"] if parede == "direita" else caixa[0] + q["dobradica"]
+        xs_pt = tl.pt(xd, caixa[1])[0]
+        if parede == "direita":
+            tampo[:, int(xs_pt):] = 0
+        else:
+            tampo[:, :int(xs_pt)] = 0
+    else:                                   # "cima" ou "baixo" (1º Pavimento, banhos 3 e 4)
+        yd = caixa[3] - q["dobradica"] if parede == "baixo" else caixa[1] + q["dobradica"]
+        ys_pt = tl.pt(caixa[0], yd)[1]
+        if parede == "baixo":
+            tampo[int(ys_pt):, :] = 0
+        else:
+            tampo[:int(ys_pt), :] = 0
     tl.sombra(tampo, dx=-0.25, dy=0.3, sigma=0.4, forca=0.18)
     dt = cv2.distanceTransform(tampo, cv2.DIST_L2, 5) / SS
     borda, alcance = q["volume_tampo"]

@@ -75,6 +75,8 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
   parede do render protegida na limpeza e as folhas em branco com contorno fino;
 - item 11, vinílico na escala (VINILICO): réguas de 20 cm desenhadas com o veio do próprio vinílico do render, na luz e
   no tom do lugar, e o vinílico escurecido mais claro;
+- item 4, banhos 3 e 4 (BANHOS_34): sem os discos, os registros e a cápsula do motor; os dois nichos, as duchas
+  quadradas com o braço da parede do meio e os dois vasos suspensos, costas com costas, do PDF, como no Subsolo;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -1474,6 +1476,90 @@ def vinilico_escala(out, A, p2r):
     return out
 
 
+# item 4 do pente fino de 20/10/26: banhos 3 e 4. O motor fez as duchas como discos redondos, com registros soltos até
+# a parede, e o vaso como uma cápsula só, atravessando a parede entre os dois banhos (mais comprida que o vaso do PDF);
+# a parede ficou com um bloco cinza no lugar dos dois nichos. No PDF (ARQ_LOUÇAS E METAIS): em cada banho, a ducha
+# quadrada com o braço saindo da parede entre eles, e dois vasos suspensos, costas com costas, cada um no seu banho.
+# - depois do quartzito (`banhos34_limpar`): o disco, os registros e a cápsula saem. Fica a luz do piso em volta
+#   (convolução normalizada, sem paredes nem peças), com o desenho da chapa do piso logo ao lado, na mesma coluna,
+#   longe da parede do meio. Antes do quartzito, a média do piso dele mudava e mexia no tom dos outros banhos;
+# - em seguida (`banhos34_pecas`): os dois nichos do PDF na parede (o miolo da parede em preto entre eles), e
+#   as peças como as aprovadas no Subsolo da Casa E (`retoque_subsolo_casae.chuveiro` e `vaso`): ducha quadrada (a placa
+#   da Casa A), braço cromado e canopla; vaso em louça com volume, contorno fino, sombra curta e o tampo fechado, com a
+#   dobradiça junto à parede.
+BANHOS_34 = {"limpar": [((1235.0, 1336.0, 1256.0, 1371.0), -1), ((1235.0, 1382.3, 1256.0, 1417.0), 1),
+                        ((1289.0, 1330.0, 1321.0, 1371.0), -1), ((1289.0, 1382.3, 1321.0, 1424.0), 1)],
+             "pecas": [((1239.6, 1343.5, 1250.8, 1354.8), (1244.5, 1348.0, 1245.9, 1370.4),
+                        (1243.5, 1370.4, 1246.9, 1371.0)),
+                       ((1239.7, 1398.5, 1250.9, 1409.7), (1244.6, 1382.9, 1246.0, 1405.3),
+                        (1243.6, 1382.3, 1247.0, 1382.9))],
+             "vasos": [((1295.2, 1341.9, 1315.2, 1371.0), "baixo"), ((1294.9, 1382.3, 1314.9, 1411.4), "cima")],
+             "nichos": [(1233.9, 1371.0, 1256.4, 1376.2), (1233.9, 1377.8, 1256.4, 1382.3)],
+             "escuro": 60, "fuga": 25, "sig_px": 3.0, "nicho_tom": 0.93, "nicho_borda": (128, 131, 133)}
+
+
+def banhos34_limpar(out, p2r):
+    q = BANHOS_34
+    im = out.astype(np.float32)
+    # as paredes (o escuro grosso; os pontos escuros dos registros do motor saem com as peças)
+    escuro = cv2.morphologyEx((im.max(axis=2) < q["escuro"]).astype(np.uint8), cv2.MORPH_OPEN,
+                              np.ones((3, 3), np.uint8))
+    escuro = cv2.dilate(escuro, np.ones((3, 3), np.uint8)).astype(bool)
+    m = np.zeros(escuro.shape, bool)
+    caixas = []
+    for r, dy_pt in q["limpar"]:
+        (a, b), (c, d) = p2r(r[0], r[1]), p2r(r[2], r[3])
+        x0, y0, x1, y1 = int(np.floor(a)), int(np.floor(b)), int(np.ceil(c)), int(np.ceil(d))
+        m[y0:y1, x0:x1] = True
+        caixas.append((x0, y0, x1, y1, int(round(dy_pt * (y1 - y0 + 2)))))
+    m &= ~escuro
+    # o piso em volta: fora as peças, as paredes, o nicho cinza, as bancadas e o vidro do box (o que foge do tom)
+    ok = ~cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~escuro
+    ys, xs = np.nonzero(m)
+    jan = np.zeros_like(ok)
+    jan[max(0, ys.min() - 25):ys.max() + 25, max(0, xs.min() - 25):xs.max() + 25] = True
+    tom = np.median(im[ok & jan], axis=0)
+    ok &= np.abs(im - tom).max(axis=2) <= q["fuga"]
+    okf = ok.astype(np.float32)
+
+    def luz(s):
+        w = cv2.GaussianBlur(okf, (0, 0), s)
+        return cv2.GaussianBlur(im * okf[..., None], (0, 0), s) / np.maximum(w, 1e-6)[..., None], w
+    # longe de qualquer piso limpo (o meio da cápsula, junto ao nicho), a luz vem de mais longe
+    L, w = luz(q["sig_px"])
+    L2, _ = luz(3 * q["sig_px"])
+    perto = np.clip(w / 0.05, 0, 1)[..., None]
+    L = L * perto + L2 * (1 - perto)
+    # o desenho da chapa vem do piso logo ao lado, longe da parede do meio (a mesma coluna), na luz do lugar
+    novo = im.copy()
+    for x0, y0, x1, y1, dy in caixas:
+        alvo = m[y0:y1, x0:x1]
+        dono = im[y0 + dy:y1 + dy, x0:x1]
+        limpo = ok[y0 + dy:y1 + dy, x0:x1]
+        det = np.where(limpo[..., None], dono / np.maximum(L[y0 + dy:y1 + dy, x0:x1], 1), 1)
+        novo[y0:y1, x0:x1][alvo] = (L[y0:y1, x0:x1] * det)[alvo]
+    print(f"    banhos 3 e 4: {int(m.sum())} px de discos, registros e da cápsula do vaso viram o quartzito ao lado")
+    return np.clip(novo, 0, 255).astype(np.uint8)
+
+
+def banhos34_pecas(out, pg, p2r):
+    import retoque_subsolo_casae as Sb
+    q = BANHOS_34
+    tl = Sb.Tela(out, p2r, (q["nichos"][0][0], q["nichos"][0][1], q["nichos"][1][2], q["nichos"][1][3]))
+    tl.pintar(tl.ret((q["nichos"][0][0], q["nichos"][0][1], q["nichos"][1][2], q["nichos"][1][3])), (12, 12, 15))
+    for r in q["nichos"]:
+        m = tl.ret(r)
+        tl.pintar(m, tuple(q["nicho_tom"] * c for c in QUARTZITO["tom"]))
+        tl.contorno(m, 0.3, q["nicho_borda"])
+    out = tl.gravar()
+    for ducha, braco, canopla in q["pecas"]:
+        out = Sb.chuveiro(out, p2r, ducha, braco, canopla)
+    for caixa, parede in q["vasos"]:
+        out = Sb.vaso(out, pg, p2r, caixa, parede)
+    print("    banhos 3 e 4: os dois nichos, as duchas quadradas com o braço da parede e os dois vasos do PDF")
+    return out
+
+
 # item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
 # é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
 # quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
@@ -1590,6 +1676,9 @@ def main():
     out = shaft(out, pg, p2r)
     print("[pente fino 16] quartzito dos banhos como a referência (o tom e a chapa da foto)")
     out = quartzito_referencia(out, A)
+    print("[pente fino 4] banhos 3 e 4: discos, registros e a cápsula do vaso saem; nichos, duchas e vasos do PDF")
+    out = banhos34_limpar(out, p2r)
+    out = banhos34_pecas(out, pg, p2r)
     print("[pente fino 9 e 7] portas, janelas e vidros finos, pelo PDF")
     out = esquadrias_1pav(out, pg, p2r)
     print("[pente fino 3] boxes em folha contínua, de parede a parede (R10)")

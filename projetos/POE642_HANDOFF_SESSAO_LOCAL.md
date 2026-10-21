@@ -841,6 +841,16 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Clarear o escurecido:** onde a luz larga do piso (~1 m) fica abaixo da mediana (119), ela sobe 70% do caminho, em todo o vinílico, com o que está sobre ele (até +20%). Isso vale para o closet master, a rouparia, os closets 1 e 2 e a circulação junto a eles. Com metade do caminho, testada antes, a mudança mal aparecia (+4 níveis no closet master).
     - **Conferência:** no retocado sem rótulos, só o vinílico mudou (fora dele, 55 px da limpeza da porta da rouparia, que espelha o piso novo). Os outros passos saem iguais (mesmos registros de bancos, cortinas e esquadrias). Nas montagens e nas pranchas, só a área do vinílico; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_vinilico_antes_depois.jpg`.
+  - **Item 4, chuveiros e vasos dos banhos 3 e 4, feito** (usuário: "Siga pelo item 4"; `retoque_1pav_casae.banhos34_limpar` e `banhos34_pecas`, config `BANHOS_34`, logo depois do quartzito).
+    - **O render:** as duchas eram discos redondos, com registros soltos até a parede. O vaso era uma cápsula só, atravessando a parede entre os banhos e ~4 px mais comprida que o vaso do PDF de cada lado. A parede tinha um bloco cinza inteiro no lugar dos dois nichos.
+    - **O PDF (ARQ_LOUÇAS E METAIS):** em cada banho, a ducha quadrada com o braço saindo da parede do meio (canopla na face dela) e um vaso suspenso, costas com costas com o do outro banho. Na parede, dois nichos (ARQ_PAREDE em branco), um de cada lado, com o miolo da parede entre eles.
+    - **A limpeza:** os discos, os registros e a cápsula saem. Fica a luz do piso em volta (sem paredes, nicho, bancadas e o vidro do box; longe de piso limpo, a luz vem de mais longe), com o desenho da chapa do quartzito logo ao lado, na mesma coluna, longe da parede do meio. Limpar antes do quartzito (o primeiro teste) mudava a média do piso dele e mexia de leve no tom dos outros banhos.
+    - **As peças, como as aprovadas no Subsolo da Casa E:**
+      - os dois nichos no tom do quartzito, um pouco mais escuro, com contorno fino, e o miolo da parede em preto;
+      - `retoque_subsolo_casae.chuveiro`: a ducha quadrada (a placa da Casa A), o braço cromado e a canopla;
+      - `retoque_subsolo_casae.vaso`: louça com volume, contorno fino, sombra curta e o tampo fechado. Ele ganhou a dobradiça junto à parede de cima ou de baixo ("cima"/"baixo"); o Subsolo segue igual.
+    - **Conferência:** no retocado sem rótulos, nas montagens e nas pranchas, só as duas áreas (duchas com nichos, e vasos) mudaram; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_banhos34_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 
