@@ -61,6 +61,9 @@ PAVIMENTOS = {
                # notas do PDF que entram mesmo estando em FORA (pedidos do usuário, 19/10/26: "representar e gerar o
                # rótulo da claraboia"; "trazer o rótulo do shaft")
                "incluir": ("PROJ. CLARABOIA", "SHAFT"),
+               # o granito da referência (pente fino 10, 21/10/26) é mais claro, RGB ~118, 89, 69 com lascas claras: com
+               # o limite de 95 os rótulos da garagem, da despensa e do motorista saíam em cinza
+               "granito_lum_max": 125,
                "ajustes": [
                    # a garagem é toda carro: no corpo do PDF, no vão entre o primeiro e o segundo carro
                    ("GARAGEM", (1265.1, 771.7), (-40.6, 0), 1.0),
@@ -104,11 +107,11 @@ PAVIMENTOS = {
 }
 
 
-def granito(img):
+def granito(img, lum_max=None):
     q = GRANITO
     f = cv2.GaussianBlur(img.astype(np.float32), (0, 0), q["sigma"])
     lum = f.mean(axis=2)
-    return (lum < q["lum_max"]) & (f[..., 2] - f[..., 0] > q["quente_min"]) & (f[..., 2] >= f[..., 1])
+    return (lum < (lum_max or q["lum_max"])) & (f[..., 2] - f[..., 0] > q["quente_min"]) & (f[..., 2] >= f[..., 1])
 
 
 def no_quadro_fixo(render, aprovada, base_png, chave):
@@ -152,7 +155,7 @@ def final_rotulos(chave):
     rot = [r for r in R1.rotulos_pdf(pg) if r[0] in q.get("incluir", ()) or not any(f in r[0] for f in FORA)]
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
     # R6 (19/10/26; pente fino da Casa A, 21/10/26): no granito marrom, os rótulos em branco (eram cinza 150)
-    return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=LARGURA / 2000, granito=granito(final),
+    return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=LARGURA / 2000, granito=granito(final, q.get("granito_lum_max")),
                                 ajustes=q["ajustes"], cor_granito=R1.ROTULOS["branco"])
 
 

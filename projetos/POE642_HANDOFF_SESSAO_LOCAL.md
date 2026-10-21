@@ -1598,6 +1598,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Ordem:** antes das escadas externas (item 1), que desenham os bocéis por cima, e dos vidros (item 5), que levam o piso de cada lado para o vão do hall.
   - **Conferência:** na imagem com ajustes e na prancha, só o Bege Bahia; rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_bege_antes_depois.jpg`.
+- **Térreo, item 10, granito marrom (seção 3), feito** (`ajustes_casaa.granito_referencia_a`, config `GRANITO_A`, depois do deck). O granito do render estava quase preto (RGB ~88, 65, 60), com a grade de manchas que o motor repete e pontos claros.
+  - **Como:** a rotina do granito do Térreo da Casa E (`retoque_terreo_casae.granito_tom`, com as constantes de lá, `GRANITO_TOM`). Saem os pontos claros pequenos do motor (621) e a grade de manchas de média escala (longe de objetos e paredes; as sombras ficam). Entra o desenho e o tom da referência do usuário (`fontes_procedurais.granito_referencia`, base RGB ~118, 89, 69), com a luz do lugar (`texturas_escala.trocar_granito`). Os traços do PDF e os cinza neutros ficam, com a troca de tom na fração de granito que têm. O peso de granito (cor e luz perto da mediana) deixa de fora armários, inox, bancadas, carros, portas e a caracol.
+  - **Mancha:** o #BFA79E da base, com os traços finos fechados e os buracos de até 20 mil px preenchidos. Os carros do PDF são buracos maiores que os carros da R12, e o anel entre os dois ficava escuro, no tom antigo, em volta do terceiro carro.
+  - **Rótulos:** no `rotulos_casaa.py`, o limite de luz do granito passa a valer por pavimento; no Térreo, 125 (`granito_lum_max`). Com o granito mais claro, o limite de 95 deixava os rótulos da garagem, da despensa e do motorista em cinza; agora voltam ao branco (R6). Subsolo e 1º Pavimento seguem com 95.
+  - **Conferência:** na imagem com ajustes e na prancha, só o granito (cozinha, área gourmet, área de serviço, despensa, gás, garagem e motorista) e os rótulos sobre ele; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_granito_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

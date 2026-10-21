@@ -99,6 +99,8 @@ pode seguir pela ordem proposta"):
      batia), no tom dela, com a luz e as sombras do lugar.
   Térreo 9. Bege Bahia como a referência (o desenho e o tom da foto, na escala), como o item 43 da Casa E: entorno
      da piscina, pátio, hall externo, pisantes e degraus das escadas externas.
+  Térreo 10. Granito marrom no desenho e no tom da referência do usuário, pela rotina do granito do Térreo da Casa
+     E (pontos claros e a grade de manchas fora); os rótulos sobre ele seguem brancos (limite de luz do Térreo, 125).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3279,6 +3281,89 @@ def bege_referencia_a(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 10: granito marrom (seção 3: "desenho e tom da referência do usuário",
+# base RGB ~118, 89, 69). O do render estava quase preto (RGB ~85, 62, 57), com a grade de manchas que o motor repete e
+# pontos claros. Como o granito do Térreo da Casa E (retoque_terreo_casae.granito_tom, com as constantes de lá,
+# GRANITO_TOM), na mancha do granito da base (#BFA79E, com os traços finos fechados e os buracos de até 20 mil px
+# preenchidos: os carros do PDF são buracos maiores que os carros da R12, e o anel entre os dois ficava no tom antigo,
+# escuro, em volta do terceiro carro; os carros e os móveis ficam de fora pelo peso de granito):
+# 1. pontos claros pequenos do motor saem (a mediana de 13 px), longe dos traços do PDF (DOC_LINHAS E PROJEÇÕES), dos
+#    cinza neutros e do que não é granito;
+# 2. a grade de manchas de média escala (~3 cm a ~1 m) sai, longe de objetos e paredes (as sombras ficam);
+# 3. o desenho e o tom da referência (fontes_procedurais.granito_referencia), com a luz do lugar
+#    (texturas_escala.trocar_granito); os traços do PDF e os cinza neutros ficam, com a troca de tom na fração de granito
+#    que têm. O peso de granito (cor e luz perto da mediana) deixa de fora os objetos: armários, inox, bancadas, carros,
+#    portas, a caracol.
+GRANITO_A = {"cor_base": (158, 167, 191), "tol": 6, "buraco_max": 20000}
+
+
+def granito_referencia_a(out):
+    from retoque_terreo_casae import GRANITO_TOM
+    from texturas_escala import nconv, trocar_granito
+    q = GRANITO_TOM
+    pg, p2r = pdf_pavimento("Terreo")
+    forma = out.shape[:2]
+    b2 = base_terreo(forma).astype(np.int32)
+    g = (np.abs(b2 - np.array(GRANITO_A["cor_base"])).max(axis=2) <= GRANITO_A["tol"]).astype(np.uint8)
+    g = cv2.morphologyEx(g, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8)).astype(bool)   # fecha os traços finos
+    n, lb, st, _ = cv2.connectedComponentsWithStats((~g).astype(np.uint8), 4)
+    borda = np.unique(np.concatenate([lb[0], lb[-1], lb[:, 0], lb[:, -1]]))
+    g |= np.isin(lb, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= GRANITO_A["buraco_max"] and i not in borda])
+    lab = cv2.cvtColor(out, cv2.COLOR_BGR2LAB).astype(np.float32)
+    L = lab[..., 0]
+    med = np.median(lab[g], axis=0)
+    dc = np.hypot(lab[..., 1] - med[1], lab[..., 2] - med[2])
+    c0, c1 = q["croma"]
+    l0, l1 = q["luz"]
+    w = (np.clip((c1 - dc) / (c1 - c0), 0, 1) * np.clip((L - l0 * med[0]) / (0.08 * med[0]), 0, 1)
+         * np.clip((l1 * med[0] - L) / (0.10 * med[0]), 0, 1) * g)
+    # 1. pontos claros
+    pq = q["pontos"]
+    Lm = cv2.cvtColor(cv2.medianBlur(out, pq["mediana"]), cv2.COLOR_BGR2LAB)[..., 0].astype(np.float32)
+    neutro = (np.hypot(lab[..., 1] - 128, lab[..., 2] - 128) < pq["neutro"]) & (L > 50)
+    k = 2 * pq["folga"] + 1
+    linhas = np.zeros(forma, np.uint8)                            # os traços do PDF
+    for d in pg.get_drawings():
+        if d.get("layer") != pq["camada"] or d["type"] != "s":
+            continue
+        for it in d["items"]:
+            if it[0] == "l":
+                (ax, ay), (bx, by) = p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)
+                cv2.line(linhas, (int(round(ax)), int(round(ay))), (int(round(bx)), int(round(by))), 1, 1)
+    protegido = cv2.dilate((neutro | (w < 0.05) & ~((L - Lm) > pq["limiar"]) | linhas.astype(bool)).astype(np.uint8),
+                           np.ones((k, k), np.uint8)).astype(bool) | ~g
+    claro = ((L - Lm) > pq["limiar"]) & g
+    n, lb, st, _ = cv2.connectedComponentsWithStats(claro.astype(np.uint8), 8)
+    tocam = np.unique(lb[protegido & claro])
+    ok = np.zeros(n, bool)
+    ok[1:] = (st[1:, 4] <= pq["area"]) & (st[1:, 2] <= pq["lado"]) & (st[1:, 3] <= pq["lado"])
+    ok[tocam] = False
+    pontos = ok[lb]
+    al = np.maximum(cv2.GaussianBlur(cv2.dilate(pontos.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(np.float32),
+                                     (0, 0), 0.7), pontos)[..., None] * g[..., None]
+    fonte = cv2.medianBlur(out, pq["fonte"]).astype(np.float32)
+    im = out.astype(np.float32) * (1 - al) + fonte * al
+    # 2. manchas de média escala (a grade que o motor repete no granito)
+    mq = q["manchas"]
+    croma0 = np.hypot(lab[..., 1] - 128, lab[..., 2] - 128)
+    puro = (g & (L > l0 * med[0]) & (L < l1 * med[0]) & (croma0 > 5)).astype(np.uint8)
+    dist = cv2.distanceTransform(cv2.erode(puro, np.ones((3, 3), np.uint8)), cv2.DIST_L2, 3)
+    a0, a1 = mq["longe"]
+    longe = np.clip((dist - a0) / (a1 - a0), 0, 1) * puro
+    pf = puro.astype(np.float32)
+    curto = nconv(im, pf, mq["sig_curto"]).mean(axis=2)
+    largo = nconv(im, pf, mq["sig_largo"]).mean(axis=2)
+    im = im * (1 + (mq["forca"] * longe * (largo / np.maximum(curto, 1) - 1)))[..., None]
+    # 3. o desenho e o tom da referência do usuário, com a luz do lugar
+    linhas_d = cv2.dilate(linhas, np.ones((3, 3), np.uint8)).astype(bool)
+    (a, b), (c, d_) = p2r(0, 0), p2r(56.69, 0)                 # 1 m na escala 1:50 = 56,69 pt
+    px_m = float(np.hypot(c - a, d_ - b))
+    res, npx = trocar_granito(np.clip(im, 0, 255).astype(np.uint8), w, px_m, protegido=neutro | linhas_d)
+    print(f"    granito: {int(ok.sum())} pontos claros fora ({int(pontos.sum())} px); {npx} px no granito da "
+          f"referência, a {px_m:.2f} px/m (antes, mediana RGB {tuple(int(v) for v in np.median(out[g], axis=0)[::-1])})")
+    return res
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 5: vidros finos (seções 4 e 18). O motor fez dois "tubos" cinza grossos
 # com nós escuros (montantes):
 # - entre a varanda e as salas: no PDF (ARQ_PAREDE) são quatro portas de vidro de correr, cada uma com duas folhas de
@@ -3410,6 +3495,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      "sombra de móvel baixo; o braço da bancada dos tanques em quartzo", armarios_teto),
                     ("pf7", "pente fino 7 (R1, R4): grama na escala da referência, no tom do render", grama_escala),
                     ("pf8", "pente fino 8 (R4): deck na madeira da referência, régua a régua", deck_referencia),
+                    ("pf10", "pente fino 10: granito marrom no desenho e no tom da referência do usuário",
+                     granito_referencia_a),
                     ("pf5", "pente fino 5: vidros finos (varanda e salas; o vão do hall sem o tubo)", vidros_finos),
                     # as projeções por cima de tudo: o último item do Térreo
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a)]}
