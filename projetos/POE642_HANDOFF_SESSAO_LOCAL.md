@@ -1823,6 +1823,14 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Ordem:** o Bege Bahia das varandas (item 12) passou para logo depois do vinílico (resultado igual), e este item roda antes das cortinas (item 10), como na Casa E. Os tracinhos das cortinas saem antes do espelho. Na limpeza deles, o tom do vinílico passou a ser a mediana da faixa: com o vidro novo numa beirada e a poltrona na outra, a faixa da cortina de cima da suíte 2 saía cinza.
   - **Conferência:** na imagem com ajustes e na prancha, só as quatro fachadas (5 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_vidros_antes_depois.jpg`.
+- **1º Pavimento, item 15, soleiras (R13), feito** (`ajustes_casaa.soleiras_1pav`, config `SOLEIRAS_1PAV`).
+  - **Conferência porta a porta** (folha de recortes do PDF, da base e do render, e a cor do próprio PDF no meio de cada vão):
+    - **sem soleira:** as 11 portas de giro (o piso de um dos lados atravessa o vão) e o elevador (no 1º Pavimento o travertino do hall vai até a cabine; a seção 4 pede soleira de inox no elevador, mas pela R13 só entra onde o PDF tem);
+    - **com soleira:** a porta de correr da saleta para o quarto de serviço (o vão branco, com a folha dentro); o motor fez uma caixa clara ocupando o vão;
+    - **janelas, não portas:** os vãos brancos do banho 3 (parede de fora) e do banho de serviço (parede da varanda) ficam como estão.
+  - **Como:** o vão em Bege Bahia na escala, com as faces da parede em cinza fino (`desenhar_soleiras`), e a folha de correr fina por cima, no retângulo do PDF.
+  - **Conferência:** na imagem com ajustes e na prancha, só a porta da saleta (1 região); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_soleiras_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

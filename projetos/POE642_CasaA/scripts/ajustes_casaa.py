@@ -171,6 +171,8 @@ pode seguir pela ordem proposta"):
   1º Pavimento, pente fino 14 (seções 4 e 18): nas fachadas das suítes, o "tubo" branco do motor sai e entram as portas
      de vidro de correr do PDF, finas, em dois planos, como os vidros do Térreo (item 5); antes das cortinas (item 10),
      como na Casa E, e depois do Bege Bahia das varandas (item 12, que agora roda logo depois do vinílico).
+  1º Pavimento, pente fino 15 (R13): soleiras porta a porta; só a porta de correr da saleta para o quarto de serviço
+     tem o vão branco no PDF: Bege Bahia na escala, com as faces da parede em cinza fino e a folha fina por cima.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -4180,6 +4182,52 @@ def vidros_1pav(out):
           f"para dentro) e redesenhadas finas em {len(VIDROS_1PAV['zonas'])} zonas")
     return np.clip(img, 0, 255).astype(np.uint8)
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 15: soleiras (R13: a soleira é o vão da porta na espessura da
+# parede deixado em branco no PDF, entre os batentes; onde o piso de um dos lados atravessa o vão, não há). Conferidas
+# porta a porta, numa folha de recortes do PDF, da base e do render, e pela cor do próprio PDF no meio de cada vão:
+# - sem soleira: as 11 portas de giro (os arcos do item 2: o travertino da circulação, o vinílico das suítes ou o cinza
+#   do quarto de serviço e da saleta atravessam o vão) e o elevador (no 1º Pavimento, o travertino do hall vai até a
+#   cabine; no Subsolo, não). Nada a mudar;
+# - com soleira (o vão branco da ARQ_PAREDE, com a folha de correr dentro): a porta de correr da saleta para o quarto
+#   de serviço. O motor fez uma caixa clara ocupando o vão;
+# - os vãos brancos do banho 3 (na parede de fora, para o Térreo) e do banho de serviço (na parede da varanda) são
+#   janelas de correr (0,76 e 0,56 m), não portas: ficam como o motor as fez, como as dos banhos 1 e 2;
+# - a seção 4 pede soleira em inox escovado na porta do elevador, mas no PDF do 1º Pavimento o travertino do hall
+#   atravessa o vão (R13: só onde o PDF tem): fica sem.
+# Desenho das soleiras do Térreo e do Subsolo (`desenhar_soleiras`): o vão exato do PDF em Bege Bahia na escala, no tom
+# da referência, com as faces da parede em cinza fino. Por cima, a folha de correr no retângulo do PDF (`fora`), fina:
+# clara (`folha`), com o contorno no cinza das faces (a do motor, deixada como estava, tinha um ponto preto na ponta).
+SOLEIRAS_1PAV = {"pdf": [(1751.9, 1639.1, 1808.6, 1647.6)],    # saleta para o quarto de serviço
+                 "fora": [(1753.1, 1641.7, 1807.5, 1644.5)],   # a folha de correr
+                 "folha": (236, 237, 238),
+                 "forca": 0.5, "linha": (150, 152, 154), "linha_px": 0.4, "ss": 8, "semente": 7}
+
+
+def soleiras_1pav(out):
+    q = SOLEIRAS_1PAV
+    out = desenhar_soleiras(out, "1Pavimento", q)
+    _, p2r = pdf_pavimento("1Pavimento")
+    k = q["ss"]
+    for r in q["fora"]:                                       # a folha de correr, fina, por cima da soleira
+        (x0, y0), (x1, y1) = p2r(r[0], r[1]), p2r(r[2], r[3])
+        X0, Y0, X1, Y1 = int(np.floor(x0)) - 1, int(np.floor(y0)) - 1, int(np.ceil(x1)) + 2, int(np.ceil(y1)) + 2
+        h, w = Y1 - Y0, X1 - X0
+        u0, v0, u1, v1 = [int(round(c * k)) for c in (x0 - X0, y0 - Y0, x1 - X0, y1 - Y0)]
+        m = np.zeros((h * k, w * k), np.uint8)
+        m[v0:v1, u0:u1] = 255
+        e = max(1, int(round(q["linha_px"] * k)))
+        f = np.zeros_like(m)
+        cv2.rectangle(f, (u0, v0), (u1 - 1, v1 - 1), 255, e)
+        al = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        fl = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        reg = reg * (1 - al) + np.float32(q["folha"]) * al
+        reg = reg * (1 - fl) + np.float32(q["linha"]) * fl
+        out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print("    1 soleira de Bege Bahia no vão branco do PDF (saleta), com a folha de correr fina por cima; nas 11 portas "
+          "de giro e no elevador o piso atravessa o vão; os vãos brancos dos banhos 3 e de serviço são janelas")
+    return out
+
 # Pente fino pelas regras (21/10/26), 1º Pavimento, item 11: vinílico na escala (R4: "Vinílico: réguas de ~20 cm,
 # claras, em tons alternados"). O motor fez réguas de ~40 cm. Como no 1º Pavimento da Casa E
 # (`retoque_1pav_casae.vinilico_escala`, item 11 de lá, com os mesmos números, `VINILICO`): nas áreas de vinílico da base
@@ -5722,6 +5770,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          "finas, em dois planos, como no PDF (antes das cortinas, como na Casa E)", vidros_1pav),
                         ("pf10", "pente fino 10: cortinas de linho da biblioteca nas quatro suítes, com o trilho de parede "
                          "a parede", cortinas_1pav),
+                        ("pf15", "pente fino 15 (R13): soleira no vão branco do PDF (porta de correr da saleta)",
+                         soleiras_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 
