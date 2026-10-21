@@ -1855,6 +1855,14 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** a rotina das camas do 1º Pavimento virou `pousar_camas(out, pavimento, config)`, usada pelos dois. Na cama do motorista, a cabeceira fica em cima, contra a parede; o colchão é o retângulo da cama do PDF menos a borda de 1,7 pt, sem a busca da moldura (a cama ali foi desenhada por nós no retângulo do PDF).
   - **Conferência:** no Térreo, só a cama (1 região) na imagem com ajustes e na prancha; rodapé igual. O 1º Pavimento, refeito com o Térreo novo (ajustes, final e prancha), ficou idêntico pixel a pixel (a refatoração não mudou as seis camas, e a cama do motorista não aparece no Térreo nublado da prancha do 1º Pavimento). Pranchas e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_cama_motorista_antes_depois.jpg`.
+- **Quartzito Carrara nas ilhas e bancadas, nos três pavimentos, feito** (pedido do usuário, 21/10/26; `ajustes_casaa.carrara_bancadas`, config `CARRARA_BANCADAS`, chave `carrara` em cada pavimento; a pedra em `fontes_procedurais.quartzito_carrara`).
+  - **A pedra:** feita por código (não há foto do Carrara na biblioteca), como o granito da referência: branca levemente acinzentada, com nuvens cinza muito suaves e veios cinza esfumados, ondulados, de largura variável, que somem e voltam; na escala (veios principais a cada ~30 cm, secundários a cada ~9 cm), ao longo do lado maior de cada peça.
+  - **Onde:** as peças da ARQ_BANCADAS do PDF, menos os peitoris (estreitos). Térreo: ilha gourmet, ilha e bancada da cozinha, lavatório, bancada dos tanques, lavabo e banho do motorista. 1º Pavimento: as bancadas dos banhos e a da cuba redonda na circulação, junto ao quarto de serviço. Subsolo: banhos feminino, masculino e de serviço.
+  - **O que fica:** a luz do lugar (sombras curtas, a sombra junto às paredes, a cuba esculpida do lavabo) e, por cima, cubas, torneiras, inox, cooktops e as linhas da área molhada.
+  - **Conferência:** só as bancadas mudam nos três pavimentos; rodapés iguais. Pranchas e PDF refeitos.
+  - **A decidir com o usuário:** no PDF, a ilha gourmet do Térreo tem um cooktop de 5 bocas que o render não desenhou; ficou o Carrara, como no resto da ilha.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_carrara_antes_depois.jpg`, `..._1Pavimento_carrara_antes_depois.jpg` e `..._Subsolo_carrara_antes_depois.jpg`.
+- **Pedidos na fila (21/10/26), um por vez, nesta ordem:** ilha da cozinha (banquetas, ilha e cooktop novos); boxes dos chuveiros com folhas contínuas; paredes pretas revistas em todos os pavimentos; bordas do acesso de veículos; traços verticais de juntas antigas na varanda; quarto do motorista (rótulo maior e embaixo, cama menos branca, pezeira).
 
 ## Casas A a D · Barlavento nas piscinas
 

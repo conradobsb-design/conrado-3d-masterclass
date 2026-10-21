@@ -60,6 +60,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   | listrado | deck de madeira |
 
 - **Bancadas:** em quartzo claro com desenho de pedra (gourmet e cozinha), nunca madeira.
+  - **[21/10] Casa A: ilhas e bancadas em quartzito Carrara** (usuário: "use o quartzito Carrara nas ilhas e bancadas"): branco levemente acinzentado com veios cinza esfumados, na escala, em todas as peças da ARQ_BANCADAS (gourmet, cozinha, lavabo, lavatório, banhos), com cubas, torneiras, inox e cooktops por cima.
 - **Bancos de sauna:** na pedra do próprio piso, com linha fina e sombra discreta entre os níveis.
 
 ## 4. Portas, janelas, vidros e soleiras

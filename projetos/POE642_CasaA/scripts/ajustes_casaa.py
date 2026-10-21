@@ -73,6 +73,9 @@ Itens:
      torneira, as folhas de vidro do box e o chuveiro, no lugar dos blocos lilás do motor.
   Térreo, cama do motorista (usuário, 21/10/26: "aplique a mesma roupa de cama"): a roupa de cama da biblioteca,
      como nas camas do 1º Pavimento (`cama_motorista`, pela mesma `pousar_camas`), logo depois dos itens 11 e 12.
+  Todos os pavimentos, quartzito Carrara (usuário, 21/10/26: "use o quartzito Carrara nas ilhas e bancadas"): nas
+     peças da ARQ_BANCADAS do PDF (`carrara_bancadas`), o Carrara feito por código
+     (`fontes_procedurais.quartzito_carrara`), na escala, com a luz do lugar; cubas, torneiras, inox e cooktops ficam.
   Térreo, carros (pedido do usuário, 19/10/26): cada carro numa cor (branco perolado, grafite, azul-marinho, a
      paleta da Casa D) e os três levemente desalinhados, como na Casa E.
   Térreo, sem arcos (decisão do usuário, 19/10/26, com as plantas de referência dos elementos: "remover os arcos,
@@ -4102,6 +4105,127 @@ def cama_motorista(out):
     print("    motorista: a roupa de cama da referência na cama de solteiro (cabeceira em cima)")
     return out
 
+# Pedido do usuário (21/10/26): "USE O QUARTZITO CARRARA NAS ILHAS E BANCADAS". Em cada pavimento, as ilhas e as
+# bancadas são os preenchimentos brancos da ARQ_BANCADAS do PDF (os cinza, menores, ficam de fora), menos as peças
+# estreitas (os peitoris das janelas, que estão na mesma camada: lado menor abaixo de `lado_min` m). Na pedra de cada
+# peça entra o quartzito Carrara (`fontes_procedurais.quartzito_carrara`, na escala), com os veios ao longo do lado
+# maior; a luz do lugar (as sombras curtas, a sombra junto às paredes, a cuba esculpida) fica, pela luz desfocada da
+# pedra antiga. É pedra o que está perto do tom dela, em Lab, com o claro-escuro pesando menos que a cor, e o mais claro
+# menos que o mais escuro (os traços). O tom da pedra é o claro-escuro mais frequente da peça abaixo do branco da louça
+# (nas bancadas pequenas, a cuba chega quase à borda e puxava a mediana). O resto fica por cima: o inox, o cooktop, as
+# linhas da área molhada e a louça. Nas peças da ARQ_LOUÇAS E METAIS do PDF (com o que os traços fecham), o teste é
+# mais estrito, com o claro-escuro pesando inteiro: a pedra em volta das cubas do render (2 a 3 px fora das do PDF) e
+# onde o PDF tem uma peça que o render não desenhou (o cooktop da ilha gourmet do Térreo) vira Carrara. O miolo das
+# cubas (o que os traços fecham, longe da borda da peça ou sobre uma louça do PDF, mais claro que a pedra) fica.
+CARRARA_BANCADAS = {"camada": "ARQ_BANCADAS", "objetos": "ARQ_LOUÇAS E METAIS", "lado_min": 0.30, "fechado_max": 400,
+                    "folga": 2, "dist": (9.0, 17.0), "dist_objeto": (5.0, 9.0), "peso_l": (0.6, 0.3), "peso_cor": 1.5, "louca_l": 238, "miolo_max": 0.35, "miolo_dl": 4, "sigma_luz": 2.5,
+                    "luz": (0.72, 1.06), "semente": 700}
+
+
+def carrara_bancadas(out, pavimento):
+    import fontes_procedurais as F
+    q = CARRARA_BANCADAS
+    pg, p2r = pdf_pavimento(pavimento)
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    ss = 4
+    h, w = out.shape[:2]
+    branco = np.zeros((h * ss, w * ss), np.uint8)
+    cinza = np.zeros_like(branco)
+    obj = np.zeros_like(branco)
+    for dr in pg.get_drawings():
+        cam = dr.get("layer")
+        if cam == q["camada"] and dr["type"] == "f":
+            alvo = branco if dr["fill"][0] > 0.9 else cinza
+            for cm in caminhos_pdf(dr, p2r):
+                cv2.fillPoly(alvo, [np.int32(np.round(cm * ss))], 255)
+        elif cam == q["objetos"]:
+            for cm in caminhos_pdf(dr, p2r):
+                pts = np.int32(np.round(cm * ss))
+                if dr["type"] == "f":
+                    cv2.fillPoly(obj, [pts], 255)
+                else:
+                    cv2.polylines(obj, [pts], False, 255, ss)
+    alfa = cv2.resize(cv2.subtract(branco, cinza).astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    obj = cv2.resize(obj, (w, h), interpolation=cv2.INTER_AREA) > 0
+    n, lab, st, _ = cv2.connectedComponentsWithStats((~obj).astype(np.uint8), 4)   # o que os traços fecham
+    obj |= np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= q["fechado_max"]])
+    k = 2 * q["folga"] + 1
+    obj = cv2.dilate(obj.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    obj_largo = cv2.dilate(obj.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    Lab = cv2.cvtColor(out, cv2.COLOR_BGR2LAB).astype(np.float32)
+    L = Lab[..., 0]
+    res = out.astype(np.float32)
+    n, lab, st, _ = cv2.connectedComponentsWithStats((alfa > 0.5).astype(np.uint8), 8)
+    pecas = 0
+    for i in range(1, n):
+        x, y, cw, ch, area = st[i]
+        comp = lab == i
+        (_, _), (r1, r2), _ = cv2.minAreaRect(np.argwhere(comp)[:, ::-1].astype(np.float32))
+        if min(r1, r2) < q["lado_min"] * px_m:
+            continue
+        x0, y0, x1, y1 = max(0, x - 2), max(0, y - 2), min(w, x + cw + 2), min(h, y + ch + 2)
+        reg = (slice(y0, y1), slice(x0, x1))
+        dentro = cv2.dilate(comp.astype(np.uint8), np.ones((3, 3), np.uint8))[reg].astype(bool)
+        a_ = alfa[reg] * dentro
+        # o tom da pedra: o claro-escuro mais frequente da peça abaixo do branco da louça (as cubas, nas bancadas
+        # pequenas, chegam quase à borda e puxavam a mediana), e a mediana do que fica perto dele
+        nucleo = cv2.erode(comp.astype(np.uint8), np.ones((3, 3), np.uint8))[reg].astype(bool) & ~obj[reg]
+        if nucleo.sum() < 10:
+            continue
+        Lv = Lab[reg][..., 0][nucleo]
+        hist = np.convolve(np.histogram(Lv, bins=q["louca_l"] // 4, range=(0, q["louca_l"]))[0], [1, 2, 1], "same")
+        moda = (np.argmax(hist) + 0.5) * 4
+        perto = nucleo & (np.abs(Lab[reg][..., 0] - moda) < 6)
+        ref = np.median(Lab[reg][perto], axis=0)
+        dif = Lab[reg] - ref
+        cor2 = (q["peso_cor"] * dif[..., 1]) ** 2 + (q["peso_cor"] * dif[..., 2]) ** 2
+        pl = np.where(dif[..., 0] < 0, q["peso_l"][0], q["peso_l"][1])   # o mais escuro (traços) pesa mais
+        dist = np.sqrt((pl * dif[..., 0]) ** 2 + cor2)
+        estrito = np.sqrt(dif[..., 0] ** 2 + cor2)
+        d0, d1 = q["dist"]
+        e0, e1 = q["dist_objeto"]
+        pedra = np.where(obj[reg], np.clip((e1 - estrito) / (e1 - e0), 0, 1),
+                         np.clip((d1 - dist) / (d1 - d0), 0, 1)) * a_
+        # o miolo das cubas: o que os traços fecham, longe da borda da peça ou sobre uma louça do PDF, e é mais claro
+        # que a pedra (a louça) fica; o que é do tom dela (o miolo da área molhada) é pedra
+        nl, lb, sl, _ = cv2.connectedComponentsWithStats(((pedra >= 0.5) & dentro).astype(np.uint8), connectivity=4)
+        borda_peca = dentro & ~cv2.erode(dentro.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        toca = set(np.unique(lb[borda_peca]))
+        louca_pdf = set(np.unique(lb[obj_largo[reg]]))
+        for j in range(1, nl):
+            if sl[j, cv2.CC_STAT_AREA] > q["miolo_max"] * dentro.sum() or \
+                    min(sl[j, cv2.CC_STAT_WIDTH], sl[j, cv2.CC_STAT_HEIGHT]) < 3 or (j in toca and j not in louca_pdf):
+                continue
+            mj = lb == j
+            if Lab[reg][..., 0][mj].mean() > ref[0] + q["miolo_dl"]:
+                pedra[mj] = 0
+        m = (pedra > 0.5).astype(np.float32)
+        s = q["sigma_luz"]
+        luz = cv2.GaussianBlur(L[reg] * m, (0, 0), s) / np.maximum(cv2.GaussianBlur(m, (0, 0), s), 1e-4)
+        luz = np.clip(luz / ref[0], *q["luz"])
+        ang = 0.0 if cw >= ch else 90.0
+        tex = F.quartzito_carrara(y1 - y0, x1 - x0, px_m, ang, semente=q["semente"] + i)
+        novo = tex * luz[..., None]
+        res[reg] = res[reg] * (1 - pedra[..., None]) + novo * pedra[..., None]
+        pecas += 1
+    out[:] = np.clip(np.round(res), 0, 255).astype(np.uint8)
+    print(f"    Carrara: quartzito Carrara em {pecas} ilhas e bancadas (ARQ_BANCADAS)")
+    return out
+
+
+def carrara_subsolo(out):
+    return carrara_bancadas(out, "Subsolo")
+
+
+def carrara_terreo(out):
+    return carrara_bancadas(out, "Terreo")
+
+
+def carrara_1pav(out):
+    return carrara_bancadas(out, "1Pavimento")
+
+
 # Pente fino pelas regras (21/10/26), 1º Pavimento, item 9: a banheira do banho master (item 7 da conferência de 19/10;
 # seção 6: "banheira: com a torneira de piso, quando o PDF tem"). No PDF, a banheira é oval (95,5 x 50,7 pt, 1,68 x
 # 0,89 m) e tem a torneira de piso na ponta da esquerda (a base redonda junto à borda e a bica entrando na banheira);
@@ -5931,6 +6055,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                       projecoes_subsolo),
                      ("pf9", "pente fino 9 (R13): soleiras nos dois vãos brancos do PDF (academia-hall e elevador)",
                       soleiras_subsolo),
+                     ("carrara", "quartzito Carrara nas bancadas (usuário, 21/10/26)", carrara_subsolo),
                      ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",
                       so_subsolo)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
@@ -5971,6 +6096,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf14", "pente fino 14: escritório com a cadeira de escritório do PDF em cima", escritorio_cadeira),
                     ("pf15", "pente fino 15: banho da varanda com o chuveiro e o box do PDF, sem a bacia", banho_varanda),
                     ("pf16", "pente fino 16 (R13): soleiras nos quatro vãos brancos do PDF", soleiras_a),
+                    ("carrara", "quartzito Carrara nas ilhas e bancadas (usuário, 21/10/26)", carrara_terreo),
                     # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",
@@ -6005,6 +6131,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          "a parede", cortinas_1pav),
                         ("pf15", "pente fino 15 (R13): soleira no vão branco do PDF (porta de correr da saleta)",
                          soleiras_1pav),
+                        ("carrara", "quartzito Carrara nas bancadas (usuário, 21/10/26)", carrara_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 

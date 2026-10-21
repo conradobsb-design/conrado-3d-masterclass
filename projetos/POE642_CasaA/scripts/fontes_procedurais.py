@@ -15,6 +15,10 @@ trechos de renders que o texturizar_base.py usa; ele tece e amplia para a base.
 - quartzito Aura (Casa E, banhos do 1º Pavimento; a cor pêssego claro #EAD4BF da legenda do
   cliente): placas de 90 x 90 cm com variação sutil de tom, nuvens suaves e veios finos e fluidos
   (claros e alguns dourados), juntas finas um pouco mais escuras.
+- quartzito Carrara (Casa A, ilhas e bancadas, pedido do usuário de 21/10/26): `quartzito_carrara` devolve a pedra na
+  escala do render, branca levemente acinzentada, com nuvens cinza muito suaves e os veios cinza esfumados (os
+  principais de ~5 mm, com halo, a cada ~30 cm; os secundários de ~1,5 mm, a cada ~9 cm), ondulados, de largura
+  variável, sumindo e voltando, no sentido pedido (o lado maior da bancada).
 
 Uso (da pasta projetos/):
   python3 POE642_CasaA/scripts/fontes_procedurais.py POE642_CasaE/bases/fontes
@@ -205,3 +209,53 @@ def granito_referencia(alto, largo, px_por_m, ss=4, semente=642):
     img = cv2.GaussianBlur(img, (0, 0), q["suave"])
     return cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
 
+
+
+# Quartzito Carrara (usuário, 21/10/26: "USE O QUARTZITO CARRARA NAS ILHAS E BANCADAS"; sem foto: o desenho é
+# reproduzido por código, como o do granito). Fundo branco levemente acinzentado com nuvens cinza muito suaves e os
+# veios cinza esfumados do Carrara: os principais (cinza médio, ~5 mm, com o halo esfumado de ~1,5 cm), a cada ~30 cm,
+# ondulados e de largura variável; os secundários finos (~1,5 mm, mais claros), a cada ~9 cm, num ângulo um pouco
+# diferente; os dois somem e voltam ao longo do comprimento, como na pedra. Correm no sentido de `angulo` (graus; 0 = ao
+# longo da largura). Um tom abaixo do branco da louça, para as cubas brancas se destacarem.
+CARRARA = {"base": (228, 231, 232), "veio": (148, 150, 154),        # BGR
+           "nuvem": (0.30, 0.012), "mancha": (0.08, 0.010),          # (escala em m, amplitude)
+           # (período m, largura m, força, halo m, força do halo, ondulação m, escala da ondulação m, giro em graus,
+           #  escala em m dos trechos que somem)
+           "veios": [(0.30, 0.005, 0.55, 0.015, 0.10, 0.17, 0.45, 0, 0.30),
+                     (0.09, 0.0015, 0.25, 0.0, 0.0, 0.06, 0.18, 14, 0.15)],
+           "aparece": (0.2, 0.9), "espessura": 0.5}   # os trechos visíveis (base, ganho) e a variação da largura
+
+
+def quartzito_carrara(alto, largo, px_por_m, angulo=0.0, ss=4, semente=642):
+    """O quartzito Carrara, BGR float32 (alto x largo), na escala px_por_m, com os veios no sentido de `angulo`."""
+    q = CARRARA
+    rng = np.random.default_rng(semente)
+    H, W = alto * ss, largo * ss
+    k = px_por_m * ss                                          # px (em ss) por metro
+
+    def campo(esc_m):
+        # normalizado pelo desvio teórico do ruído branco desfocado (2·√π·σ), e não pelo do recorte: numa bancada
+        # pequena, a nuvem de 30 cm é quase constante, e dividir pelo desvio dela estourava o claro-escuro
+        s = max(0.5, esc_m * k)
+        return cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), s) * (2 * np.sqrt(np.pi) * s)
+    img = np.empty((H, W, 3), np.float32)
+    img[:] = np.float32(q["base"])
+    img *= (1 + q["nuvem"][1] * campo(q["nuvem"][0]) + q["mancha"][1] * campo(q["mancha"][0]))[..., None]
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32) / k        # m
+    tinta = np.zeros((H, W), np.float32)
+    for per, larg, forca, halo, f_halo, ond, esc, giro, some in q["veios"]:
+        a = np.deg2rad(angulo + giro)
+        t = -xx * np.sin(a) + yy * np.cos(a)                   # m, através dos veios
+        t = t + ond * campo(esc) + 0.4 * ond * campo(esc / 3)
+        u = t / per + rng.uniform()
+        d = np.abs(u - np.round(u)) * per                     # m até o veio mais perto
+        lg = larg * np.clip(1 + q["espessura"] * campo(some / 2), 0.3, 2.0)   # a largura varia ao longo do veio
+        sig = np.maximum(lg / 2, 0.6 / k)                      # no mínimo 0,6 px (em ss)
+        v = forca * np.minimum(1.0, lg / 2 / sig) * np.exp(-0.5 * (d / sig) ** 2)
+        if halo:
+            v = v + f_halo * np.exp(-0.5 * (d / halo) ** 2)
+        b0, g = q["aparece"]
+        v *= np.clip(b0 + g * campo(some), 0, 1)              # os trechos em que o veio some
+        tinta = 1 - (1 - tinta) * (1 - np.clip(v, 0, 1))
+    img = img * (1 - tinta[..., None]) + np.float32(q["veio"]) * tinta[..., None]
+    return cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
