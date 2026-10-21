@@ -638,7 +638,7 @@ python3 conferencia_casaa.py --pente-fino   # -> ../renders/POE642_CasaA_PH_<Pav
 
 ## Ajustes da Casa A depois da conferência: `ajustes_casaa.py`
 
-Os itens da conferência corrigidos, um por vez, na imagem aprovada (2000 px). Saída `../renders/<imagem aprovada>_ajustes.png` (+ `_camada.png`), que o `rotulos_casaa.py` usa no lugar da aprovada. O alinhamento ao quadro comum continua vindo da imagem aprovada (`PAVIMENTOS[...]["aprovada"]`, `no_quadro_fixo`), para que só os trechos ajustados mudem na prancha. O PDF de cada pavimento chega à imagem pelo quadro comum e pelo afim `AFIM_QR` do pavimento (`pdf_pavimento`). Depois: `rotulos_casaa.py`, `rodape_entrega.py --no-quadro` e `pdf_entrega.py`.
+Os itens da conferência (e, desde 21/10/26, os do pente fino pelas regras, com o prefixo `pf` em `ITENS`) corrigidos, um por vez, na imagem aprovada (2000 px). Saída `../renders/<imagem aprovada>_ajustes.png` (+ `_camada.png`), que o `rotulos_casaa.py` usa no lugar da aprovada. O alinhamento ao quadro comum continua vindo da imagem aprovada (`PAVIMENTOS[...]["aprovada"]`, `no_quadro_fixo`), para que só os trechos ajustados mudem na prancha. O PDF de cada pavimento chega à imagem pelo quadro comum e pelo afim `AFIM_QR` do pavimento (`pdf_pavimento`). Depois: `rotulos_casaa.py`, `rodape_entrega.py --no-quadro` e `pdf_entrega.py`.
 
 ```bash
 python3 ajustes_casaa.py Subsolo      # itens 1 a 13: chuveiro e vidro do banho de serviço; banco da sauna; escada; portas de vidro da academia; janelas; traço da circulação; juntas; cubas; boxes; divisória dos banhos; Bege Bahia; bancada do banho de serviço; gramado junto à escada (roda na ordem 1, 2, 7, 11, 3 a 10, 12, 13)
@@ -649,6 +649,9 @@ python3 rotulos_casaa.py Terreo
 python3 rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png
 python3 pdf_entrega.py
 ```
+
+**Pente fino pelas regras, Térreo (21/10/26):**
+- item 1, escadas (R14): `escada_interna` e `caracol` ganharam a R14 (`ESCADA_INT["r14"]`, `CARACOL["r14"]`: linha suave nos bocéis cheios, esmaecidos tracejados, sem a linha de corte, triângulo no degrau 1); `escadas_externas_r14` faz a do deck para o Subsolo (os traços escuros do motor saem por mediana; `retoque_terreo_casae.escada_linhas` com o corte do PDF do Subsolo) e a larga (o L de cada bloco do ARQ_CONTRAPISO sobre o de baixo, com a linha e a sombra curta; triângulo no degrau 12). Funções comuns da R14: `R14`, `r14_linha`, `r14_tracejado`, `r14_poligono`, `r14_triangulo`.
 
 ## Acabamentos finais: `acabamentos_finais.py`
 

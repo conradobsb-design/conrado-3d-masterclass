@@ -77,6 +77,13 @@ Itens:
      escadas com linhas"): os arcos de todas as portas saem (os do motor e os desenhados nos itens acima); as folhas
      ficam. Na porta camarão da varanda, sai também o cinza que o motor pôs entre cada folha e o arco.
 
+Pente fino pelas regras (POE642_REGRAS.md; mapas do conferencia_casaa.py --pente-fino; usuário, 21/10/26: "confirmado,
+pode seguir pela ordem proposta"):
+  Térreo 1. Escadas com linhas e triângulo (R14, seção 5): a interna em U e a caracol com a linha suave nos bocéis dos
+     degraus cheios, os esmaecidos tracejados, sem a linha de corte e com o triângulo no degrau 1; a do deck para o
+     Subsolo sem os traços escuros do motor, viva até o corte e esmaecida depois, com o triângulo de descida no topo; a
+     larga, do deck ao pátio, com o bocel de cada bloco e o triângulo no degrau 12.
+
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
   python3 ajustes_casaa.py Terreo      # -> ../renders/POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png
@@ -1322,6 +1329,60 @@ def portoes(out):
 #   madeira por fora, cheio; a sombra curta da escada no granito;
 # - degraus 8 em diante: os mesmos pisos, esmaecidos (misturados ao granito), com os espelhos em traço claro;
 # - o pilar central, em metal.
+# R14 e seção 5 das regras (pente fino de 21/10/26, item 1 do Térreo): em cada bocel, uma linha cinza suave e a
+# sombra curta no degrau de baixo; depois do corte, os bocéis tracejados (a projeção); a linha de corte não é desenhada;
+# o triângulo de orientação no início (24 x 26 cm, cinza-escuro, a 10 cm). Os números das escadas aprovadas da Casa E
+# (retoque_terreo_casae.ESCADA_LINHAS), em pt do PDF.
+R14 = {"bocel": 0.80, "bocel_pt": 0.55, "sombra": (0.16, 5.67), "tracejado": (160, 160, 164), "tracejado_px": 0.5,
+       "traco_pt": 5.7, "vao_pt": 2.8, "triangulo": {"base_pt": 13.6, "altura_pt": 14.7, "recuo_pt": 5.67,
+                                                      "cor": (88, 88, 92)}}
+
+
+def r14_tracejado(forma, pts, k_pt, larg_px, ss=8):
+    """Máscara (0 a 1, no quadro `forma`) de uma polilinha tracejada no passo da R14 (traço e vão em pt; k_pt: px por
+    pt), desenhada em ss x e reduzida."""
+    q = R14
+    h, w = forma
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    lw = max(1, int(round(larg_px * ss)))
+    for (xa, ya), (xb, yb) in zip(pts[:-1], pts[1:]):
+        comp = np.hypot(xb - xa, yb - ya)
+        t = 0.0
+        while t < comp:
+            t1 = min(comp, t + q["traco_pt"] * k_pt)
+            u = (xa + (xb - xa) * t / comp, ya + (yb - ya) * t / comp)
+            v = (xa + (xb - xa) * t1 / comp, ya + (yb - ya) * t1 / comp)
+            cv2.line(m, (int(round(u[0] * ss)), int(round(u[1] * ss))), (int(round(v[0] * ss)), int(round(v[1] * ss))),
+                     255, lw, cv2.LINE_AA)
+            t = t1 + q["vao_pt"] * k_pt
+    return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+
+def r14_poligono(forma, pts, ss=8):
+    h, w = forma
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    cv2.fillPoly(m, [np.int32(np.round(np.float64(pts) * ss))], 255, cv2.LINE_AA)
+    return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+
+def r14_linha(forma, pts, larg_px, ss=8):
+    h, w = forma
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    cv2.polylines(m, [np.int32(np.round(np.float64(pts) * ss))], False, 255, max(1, int(round(larg_px * ss))),
+                  cv2.LINE_AA)
+    return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+
+def r14_triangulo(forma, base, direcao, k_pt, escala=1.0):
+    """O triângulo de orientação: a base centrada em `base` (px), a ponta na `direcao` (vetor unitário)."""
+    t = R14["triangulo"]
+    bx, by = base
+    dx, dy = direcao
+    alt, meia = t["altura_pt"] * k_pt * escala, t["base_pt"] * k_pt * escala / 2
+    pts = [(bx + dx * alt, by + dy * alt), (bx - dy * meia, by + dx * meia), (bx + dy * meia, by - dx * meia)]
+    return r14_poligono(forma, pts)
+
+
 CARACOL = {"centro": (1756.4, 1718.5), "r_corrimao": (50.5, 53.4), "r_piso": 50.5, "r_pilar": 4.0,   # pt do PDF
            "angulos": [0.0, 18.0, 36.4, 55.2, 74.2, 93.3, 112.5, 131.4],      # os raios cheios do PDF (graus)
            "fontes_granito": [(960, 786, 1010, 846)],    # trecho limpo do granito, à esquerda da escada (px)
@@ -1329,7 +1390,11 @@ CARACOL = {"centro": (1756.4, 1718.5), "r_corrimao": (50.5, 53.4), "r_piso": 50.
            "tom": (0.86, 1.0), "espelho": (0.35, 2.2),     # degrau 1 a 7; sombra do espelho: força e alcance (px)
            "esmaecer": 0.22, "espelho_esm": ((170, 170, 170), 0.25),
            "corrimao": ((52, 92, 138), (30, 50, 70)), "pilar": (88, 90, 92),
-           "sombra": (-1.0, 1.0, 1.2, 0.35)}
+           "sombra": (-1.0, 1.0, 1.2, 0.35),
+           # R14 (21/10/26): linha suave nos espelhos dos degraus cheios, os espelhos esmaecidos tracejados e o
+           # triângulo no degrau 1, apontando para a subida (anti-horário). No degrau de 18° o triângulo da regra não
+           # cabe: entra a 70%, a 38 pt do centro
+           "r14": {"triangulo_r_pt": 38.0, "triangulo_escala": 0.7, "tracejado_forca": 0.55}}
 
 
 def caracol(out):
@@ -1394,11 +1459,21 @@ def caracol(out):
     e = q["esmaecer"]
     a_esm = (na_escada * (1 - red(vis_ss)))[..., None] * e
     reg = reg * (1 - a_esm) + piso * a_esm
-    cor_e, larg_e = q["espelho_esm"]
-    for t in bordas[nvis:-1]:
-        lin = (np.abs(((T_ss - t + 180) % 360) - 180) * np.pi / 180 * R_ss < larg_e / 2) & (R_ss > rn) & (R_ss <= Rp)
-        al = red(lin)[..., None] * 0.45
-        reg = reg * (1 - al) + np.float32(cor_e) * al
+    if "r14" in q:
+        # R14: os espelhos acima do corte tracejados (a projeção), no cinza e no traço das escadas da Casa E
+        tr = np.zeros((h, w), np.float32)
+        for t in bordas[nvis:-1]:
+            ca, sa = np.cos(np.radians(t)), -np.sin(np.radians(t))
+            tr = np.maximum(tr, r14_tracejado((h, w), [(cx - x0 + ca * rn, cy - y0 + sa * rn),
+                                                       (cx - x0 + ca * Rp, cy - y0 + sa * Rp)], k, R14["tracejado_px"]))
+        tr *= q["r14"]["tracejado_forca"]                     # no granito escuro, o cinza claro inteiro marcava demais
+        reg = reg * (1 - tr[..., None]) + np.float32(R14["tracejado"]) * tr[..., None]
+    else:
+        cor_e, larg_e = q["espelho_esm"]
+        for t in bordas[nvis:-1]:
+            lin = (np.abs(((T_ss - t + 180) % 360) - 180) * np.pi / 180 * R_ss < larg_e / 2) & (R_ss > rn) & (R_ss <= Rp)
+            al = red(lin)[..., None] * 0.45
+            reg = reg * (1 - al) + np.float32(cor_e) * al
     # 3. a parte cheia: a sombra curta da escada no granito, os pisos com o sombreamento de subida, o corrimão
     sdx, sdy, ssig, sf = q["sombra"]
     m = red(vis_ss & (R_ss <= Rc1))
@@ -1416,6 +1491,24 @@ def caracol(out):
         fator = np.where(dentro, f, fator)
     a_vis = (red(vis_ss & (R_ss > rn) & (R_ss <= Rp)))[..., None]
     reg = reg * (1 - a_vis) + piso * red(np.where(vis_ss, fator, 1))[..., None] * a_vis
+    if "r14" in q:
+        # R14: a linha suave em cada bocel dos degraus cheios (o espelho do degrau de baixo e o início, no 0°)
+        lb = np.zeros((h, w), np.float32)
+        for t in ang[:-1]:
+            ca, sa = np.cos(np.radians(t)), -np.sin(np.radians(t))
+            lb = np.maximum(lb, r14_linha((h, w), [(cx - x0 + ca * rn, cy - y0 + sa * rn),
+                                                   (cx - x0 + ca * Rp, cy - y0 + sa * Rp)], R14["bocel_pt"] * k))
+        reg *= (1 - (1 - R14["bocel"]) * lb)[..., None]
+        # o triângulo no degrau 1, apontando para a subida (anti-horário: o sentido de theta crescente)
+        tm = np.radians((ang[0] + ang[1]) / 2)
+        rt = q["r14"]["triangulo_r_pt"] * k
+        esc = q["r14"]["triangulo_escala"]
+        alt = R14["triangulo"]["altura_pt"] * k * esc
+        dirc = (-np.sin(tm), -np.cos(tm))
+        t0 = np.radians(ang[0]) + (np.radians(ang[1] - ang[0]) * rt - alt) / 2 / rt     # centrado no degrau
+        base = (cx - x0 + np.cos(t0) * rt, cy - y0 - np.sin(t0) * rt)
+        tri = r14_triangulo((h, w), base, dirc, k, esc)
+        reg = reg * (1 - tri[..., None]) + np.float32(R14["triangulo"]["cor"]) * tri[..., None]
     corr = vis_ss & (R_ss > Rc0) & (R_ss <= Rc1)
     reg = reg * (1 - red(corr)[..., None]) + np.float32(q["corrimao"][0]) * red(corr)[..., None]
     borda = vis_ss & (np.abs(R_ss - Rc1) < 0.25)
@@ -2117,7 +2210,11 @@ ESCADA_INT = {
     "fonte_piso": (1137, 330, 1177, 450),                     # px: travertino limpo
     "piso": (186, 198, 217),                                  # BGR: o travertino dos degraus do render
     "tom": (0.86, 1.0), "espelho": (0.35, 2.2), "esmaecer": 0.30, "espelho_esm": ((170, 170, 170), 0.35),
-    "parede": (0.22, 2.5), "sombra": (-1.0, 1.0, 1.2, 0.35), "corte": ((90, 92, 94), 0.5)}
+    "parede": (0.22, 2.5), "sombra": (-1.0, 1.0, 1.2, 0.35), "corte": ((90, 92, 94), 0.5),
+    # R14 (21/10/26): a linha suave em cada bocel dos degraus cheios, os bocéis esmaecidos tracejados, sem a linha de
+    # corte (seção 5: "a linha de corte não é desenhada") e o triângulo no degrau 1 (o "S" do PDF), apontando para a
+    # direita, a subida
+    "r14": True}
 
 
 def escada_interna(out):
@@ -2206,29 +2303,59 @@ def escada_interna(out):
     som = cv2.GaussianBlur(cv2.warpAffine(cheio, np.float32([[1, 0, dx], [0, 1, dy]]), (w, h)), (0, 0), sig)
     reg *= (1 - frc * som * (1 - cheio))[..., None]
     reg = reg * (1 - cheio[..., None]) + piso * fator[..., None] * cheio[..., None]
+    if q.get("r14"):
+        kpt = p2r(q["lanco1"][0] + 100, q["lanco1"][1])[0] - p2r(*q["lanco1"][:2])[0]
+        kpt /= 100                                            # px por pt
+        _, ly0, _, ly1 = q["lanco1"]
+        lb = np.zeros((h, w), np.float32)
+        for x in [q["lanco1"][0]] + q["espelhos"][:n - 1]:
+            (ax, ay), (bx, by) = p2r(x, ly0), p2r(x, ly1)
+            lb = np.maximum(lb, r14_linha((h, w), [(ax - X0, ay - Y0), (bx - X0, by - Y0)], R14["bocel_pt"] * kpt))
+        reg *= (1 - (1 - R14["bocel"]) * lb * cheio)[..., None]
+        bx, by = p2r(q["lanco1"][0] + R14["triangulo"]["recuo_pt"], (ly0 + ly1) / 2)
+        tri = r14_triangulo((h, w), (bx - X0, by - Y0), (1.0, 0.0), kpt)
+        reg = reg * (1 - tri[..., None]) + np.float32(R14["triangulo"]["cor"]) * tri[..., None]
 
     # 3. do 8º em diante, esmaecido sobre o gramado, com os espelhos e o contorno claros
     k_ = q["esmaecer"]
     reg = reg * (1 - k_ * esm[..., None]) + piso * k_ * esm[..., None]
-    cor, frc = q["espelho_esm"]
-    traco = np.zeros(forma, np.float32)
-    for lanco in ("lanco1", "lanco2"):
-        _, y0, _, y1 = q[lanco]
-        for x in q["espelhos"] + [q["lanco1"][2]]:
-            traco = np.maximum(traco, linha_aa(forma, [p2r(x, y0), p2r(x, y1)], 0.5))
-    for k in ("lanco1", "lanco2", "patamar"):
-        x0, y0, x1, y1 = q[k]
-        traco = np.maximum(traco, linha_aa(forma, [p2r(x0, y0), p2r(x1, y0), p2r(x1, y1), p2r(x0, y1)], 0.5, fechada=True))
-    traco = traco[Y0:Y1, X0:X1] * (esm > 0.5)
-    reg = reg * (1 - frc * traco[..., None]) + np.float32(cor) * frc * traco[..., None]
+    if q.get("r14"):
+        # R14: os bocéis e o contorno do trecho esmaecido tracejados (a projeção); a linha de corte não é desenhada
+        def local(x, y):
+            u, v = p2r(x, y)
+            return u - X0, v - Y0
+        traco = np.zeros((h, w), np.float32)
+        for lanco in ("lanco1", "lanco2"):
+            _, y0, _, y1 = q[lanco]
+            for x in q["espelhos"] + [q["lanco1"][2]]:
+                traco = np.maximum(traco, r14_tracejado((h, w), [local(x, y0), local(x, y1)], kpt, R14["tracejado_px"]))
+        for k in ("lanco1", "lanco2", "patamar"):
+            x0, y0, x1, y1 = q[k]
+            traco = np.maximum(traco, r14_tracejado((h, w), [local(x0, y0), local(x1, y0), local(x1, y1),
+                                                             local(x0, y1), local(x0, y0)], kpt, R14["tracejado_px"]))
+        traco *= esm > 0.5
+        reg = reg * (1 - traco[..., None]) + np.float32(R14["tracejado"]) * traco[..., None]
+    else:
+        cor, frc = q["espelho_esm"]
+        traco = np.zeros(forma, np.float32)
+        for lanco in ("lanco1", "lanco2"):
+            _, y0, _, y1 = q[lanco]
+            for x in q["espelhos"] + [q["lanco1"][2]]:
+                traco = np.maximum(traco, linha_aa(forma, [p2r(x, y0), p2r(x, y1)], 0.5))
+        for k in ("lanco1", "lanco2", "patamar"):
+            x0, y0, x1, y1 = q[k]
+            traco = np.maximum(traco, linha_aa(forma, [p2r(x0, y0), p2r(x1, y0), p2r(x1, y1), p2r(x0, y1)], 0.5,
+                                               fechada=True))
+        traco = traco[Y0:Y1, X0:X1] * (esm > 0.5)
+        reg = reg * (1 - frc * traco[..., None]) + np.float32(cor) * frc * traco[..., None]
 
-    # 4. a linha de corte
-    cor, larg = q["corte"]
-    lc = np.zeros(forma, np.float32)
-    for c in corte:
-        lc = np.maximum(lc, linha_aa(forma, c, larg))
-    lc = lc[Y0:Y1, X0:X1][..., None]
-    reg = reg * (1 - lc) + np.float32(cor) * lc
+        # 4. a linha de corte
+        cor, larg = q["corte"]
+        lc = np.zeros(forma, np.float32)
+        for c in corte:
+            lc = np.maximum(lc, linha_aa(forma, c, larg))
+        lc = lc[Y0:Y1, X0:X1][..., None]
+        reg = reg * (1 - lc) + np.float32(cor) * lc
     out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
     print(f"    escada interna: degraus 1 a {n} cheios até o corte, o resto esmaecido ({k_:.0%}) sobre o gramado "
           f"aprovado; sem a barreira do motor")
@@ -2612,6 +2739,96 @@ def rejuntes(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
+# U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
+# - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
+#   cada 17 pt, de 737,1 a 907,2 pt, e a escada de 1230,9 a 1299,0 pt. O motor desenhou os bocéis e uma linha no meio em
+#   traço escuro, que saem (mediana na horizontal e na vertical, só dentro da escada). Entram os bocéis em linha suave
+#   com a sombra curta (retoque_terreo_casae.escada_linhas, a da escada externa do Térreo da Casa E): viva do deck até o
+#   corte do PDF do Subsolo (a diagonal no 9º degrau, prolongada até a borda de cima) e, depois dele, já no Subsolo,
+#   esmaecida, sem tracejado (0,65: com o 0,45 da Casa E, no Bege Bahia, ficava uma mancha branca); o triângulo no
+#   topo, junto ao deck, apontando para a descida.
+# - A larga, do deck ao pátio da piscina (degraus 12 a 19): sete blocos desencontrados do ARQ_CONTRAPISO, cada um por
+#   cima do anterior, e o pátio. Sobe do deck (usuário, 21/10/26: confirmado). O bocel de cada degrau é o L (a borda da
+#   esquerda e a de baixo) do bloco de cima, na parte que fica sobre o de baixo; nele, a linha suave e a sombra curta no
+#   degrau de baixo. O triângulo no degrau 12, no meio da faixa à mostra, apontando para a direita (o próximo degrau).
+ESCADA_DECK = {"nome": "do deck para o Subsolo, desce da esquerda para a direita",
+               "pdf": (737.1, 1230.9, 907.2, 1299.0), "bocels": [754.1 + 17.0 * k for k in range(9)],
+               "baixo": "direita", "inicio": "esquerda", "corte": [(754.1, 1230.9), (788.2, 1299.0)],
+               "viva": "esquerda", "apos": "esmaecida", "esmaecer": 0.65, "mediana": (7, 5)}
+ESCADA_LARGA = {"blocos": [(640.8, 666.8, 714.5, 794.4), (674.8, 632.8, 748.5, 771.7), (708.8, 564.8, 782.5, 754.7),
+                           (742.8, 576.1, 816.5, 740.5), (776.8, 553.4, 844.8, 726.4), (822.2, 576.1, 867.5, 715.0),
+                           (861.9, 544.9, 907.2, 703.7)],
+                "patio": (907.2, 544.9, 960.0, 703.7)}      # o pátio (degrau 19), à direita do último bloco
+
+
+def escadas_externas_r14(out):
+    from retoque_terreo_casae import escada_linhas
+    _, p2r = pdf_pavimento("Terreo")
+    kpt = (p2r(1000, 1000)[0] - p2r(900, 1000)[0]) / 100       # px por pt
+
+    # 1. do deck para o Subsolo: os traços escuros do motor saem e entram os bocéis da R14
+    e = ESCADA_DECK
+    ex0, ey0, ex1, ey1 = e["pdf"]
+    (a, b), (c, d) = p2r(ex0, ey0), p2r(ex1, ey1)
+    x0, y0, x1, y1 = int(np.floor(a)), int(np.floor(b)), int(np.ceil(c)), int(np.ceil(d))
+    mx, my = e["mediana"]
+    reg = out[y0 - my:y1 + my, x0 - mx:x1 + mx]
+    lim = np.empty_like(reg)
+    for ch in range(3):                                         # mediana em x (os bocéis), depois em y (a linha do meio)
+        c_ = reg[..., ch].astype(np.float32)
+        hx = np.stack([np.roll(c_, k, axis=1) for k in range(-(mx // 2), mx // 2 + 1)]).astype(np.float32)
+        c_ = np.median(hx, axis=0)
+        hy = np.stack([np.roll(c_, k, axis=0) for k in range(-(my // 2), my // 2 + 1)])
+        lim[..., ch] = np.clip(np.median(hy, axis=0), 0, 255).astype(np.uint8)
+    out[y0:y1, x0:x1] = lim[my:my + (y1 - y0), mx:mx + (x1 - x0)]
+    out = escada_linhas(out, None, e, p2r=p2r)
+
+    # 2. a larga: os bocéis dos blocos (o L do bloco de cima sobre o de baixo) e o triângulo no degrau 12
+    q = R14
+    blocos = ESCADA_LARGA["blocos"] + [ESCADA_LARGA["patio"]]
+    pts = [p2r(x, y) for bl in blocos for x, y in ((bl[0], bl[1]), (bl[2], bl[3]))]
+    X0, Y0 = int(min(p[0] for p in pts)) - 8, int(min(p[1] for p in pts)) - 8
+    X1, Y1 = int(max(p[0] for p in pts)) + 8, int(max(p[1] for p in pts)) + 8
+    forma = (Y1 - Y0, X1 - X0)
+
+    def loc(x, y):
+        u, v = p2r(x, y)
+        return u - X0, v - Y0
+
+    def ret(bl):
+        bx0, by0, bx1, by1 = bl
+        return r14_poligono(forma, [loc(bx0, by0), loc(bx1, by0), loc(bx1, by1), loc(bx0, by1)])
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    forca, alcance = q["sombra"]
+    fator = np.ones(forma, np.float32)
+    mascaras = [ret(bl) for bl in blocos]
+    for i in range(1, len(blocos)):
+        cima, baixo = blocos[i], blocos[i - 1]
+        # a parte do degrau de baixo que fica à mostra (sem os blocos de cima)
+        visivel = mascaras[i - 1].copy()
+        for m in mascaras[i:]:
+            visivel *= 1 - m
+        ya, yb = max(cima[1], baixo[1]), min(cima[3], baixo[3])
+        lin = [loc(cima[0], ya), loc(cima[0], yb)]
+        if baixo[1] < cima[3] < baixo[3]:
+            lin.append(loc(min(cima[2], baixo[2]), cima[3]))
+            lin = [lin[0], loc(cima[0], cima[3]), lin[2]]
+        lb = r14_linha(forma, lin, q["bocel_pt"] * kpt)
+        fator *= 1 - (1 - q["bocel"]) * lb
+        # a sombra curta no degrau de baixo, junto ao L (para a esquerda e para baixo)
+        dist = cv2.distanceTransform((mascaras[i] < 0.5).astype(np.uint8), cv2.DIST_L2, 5)
+        som = forca * np.clip(1 - dist / (alcance * kpt), 0, 1) ** 1.6
+        fator *= 1 - som * visivel
+    reg *= fator[..., None]
+    a0, b0, a1_, b1 = blocos[0]
+    tri = r14_triangulo(forma, loc(a0 + q["triangulo"]["recuo_pt"], (b0 + b1) / 2), (1.0, 0.0), kpt)
+    reg = reg * (1 - tri[..., None]) + np.float32(q["triangulo"]["cor"]) * tri[..., None]
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    escada larga: {len(blocos) - 1} bocéis em linha suave com a sombra curta; triângulo no degrau 12")
+    return out
+
+
 # A ordem da lista é a de execução: o piso do depósito sem juntas (7) e o Bege Bahia (11) vêm antes da escada (3),
 # para a sombra do último espelho cair no Bege Bahia, e antes dos itens que apagam traços em espelho (4 e 6), para
 # o piso de cada lado já ser o Bege Bahia.
@@ -2647,7 +2864,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("escada_interna", "escada interna: cheia até o corte, esmaecida depois; o jardim em volta", escada_interna),
                     ("11-12", "motorista: a cama, a bancada com a cuba, o box e o chuveiro", motorista),
                     ("carros", "garagem: cada carro numa cor e os três levemente desalinhados", carros_a),
-                    ("sem_arcos", "portas sem os arcos (as folhas ficam); porta camarão sem o cinza", sem_arcos)]}
+                    ("sem_arcos", "portas sem os arcos (as folhas ficam); porta camarão sem o cinza", sem_arcos),
+                    ("pf1", "pente fino 1 (R14): escadas do deck e larga com linhas e triângulo", escadas_externas_r14)]}
 
 
 def main():

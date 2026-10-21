@@ -1549,6 +1549,13 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
 - **Térreo, item 2, rótulos brancos no granito (R6), feito.** No `rotulos_casaa.py`, `cor_granito=R1.ROTULOS["branco"]`, a cor da Casa E, e o Q. MOTORISTA (cor dada no ajuste) também em branco. Junto, o "²" logo depois do "m" em todos os 28 rótulos. Feito antes do item 1, porque toda nova rodada dos rótulos muda os "²".
   - **Conferência:** na imagem com ajustes, nada; na prancha, só os rótulos (4.721 px em 25 regiões: os 8 do granito inteiros e os "²" dos outros); rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_rotulos_granito_antes_depois.jpg`.
+- **Térreo, item 1, escadas com linhas e triângulo (R14, seção 5), feito** (`ajustes_casaa.py`):
+  - **Interna em U** (`ESCADA_INT["r14"]`): nos degraus 1 a 7, a linha suave em cada bocel (a da Casa E: 20% mais escuro em 0,55 pt), com a sombra de subida que já havia; do 8º em diante, os bocéis e o contorno tracejados (a projeção, no traço da Casa E); a linha de corte deixa de ser desenhada (seção 5); o triângulo no degrau 1 (o "S" do PDF), apontando para a direita.
+  - **Caracol** (`CARACOL["r14"]`): a linha suave nos bocéis dos degraus 1 a 7; os espelhos acima do corte tracejados, a 55% no granito escuro (o cinza claro inteiro marcava demais); o triângulo no degrau 1, apontando para a subida (anti-horário), a 70% do tamanho da regra, porque o degrau de 18° não o comporta inteiro.
+  - **Do deck para o Subsolo** (`ESCADA_DECK`, em `escadas_externas_r14`): no Térreo o PDF marca "D" junto ao deck. Os bocéis e a linha do meio, que o motor fez em traço escuro, saem (mediana de 7 px em x e de 5 px em y, só dentro da escada, de 1230,9 a 1299,0 pt). Entram os bocéis em linha suave com a sombra curta, viva do deck até o corte do PDF do Subsolo (a diagonal no 9º degrau, prolongada) e esmaecida depois (0,65; com o 0,45 da Casa E ficava uma mancha branca no Bege Bahia), e o triângulo no topo, apontando para a descida.
+  - **Larga, do deck ao pátio** (`ESCADA_LARGA`): os sete blocos desencontrados do ARQ_CONTRAPISO (degraus 12 a 18) e o pátio (19). O bocel de cada degrau é o L do bloco de cima sobre o de baixo, com a linha suave e a sombra curta; o triângulo no degrau 12, apontando para a direita (sobe do deck, como confirmado).
+  - **Conferência:** na imagem com ajustes e na prancha, só as quatro escadas mudaram; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_escadas_r14_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
