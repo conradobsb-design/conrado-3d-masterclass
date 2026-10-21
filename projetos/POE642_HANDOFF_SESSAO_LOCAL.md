@@ -1568,6 +1568,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Ficam:** os X do pavimento superior na varanda, o pergolado e a claraboia, que já estavam no render.
   - **Conferência:** na imagem com ajustes, só as linhas das projeções; rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_projecoes_antes_depois.jpg`.
+- **Térreo, item 5, vidros finos (seções 4 e 18), feito** (`ajustes_casaa.vidros_finos`, config `VIDROS_A`, antes das projeções). O motor fez dois "tubos" cinza grossos, com nós escuros (montantes).
+  - **Entre a varanda e as salas:** no PDF (ARQ_PAREDE) são quatro portas de vidro de correr, cada uma com duas folhas de 1,4 pt lado a lado, em dois planos (585,8 a 1269,5 pt). O tubo sai (`esquadria_limpar` da Casa E: cada coluna da faixa recebe o piso do seu lado, em espelho, com os X tracejados da varanda continuando) e as 15 peças brancas do PDF entram finas, como o item 8 do pente fino do Térreo da Casa E (`esquadria_desenhar`: o vidro claro e o contorno fino; os batentes em quadradinhos).
+  - **Entre o hall interno e o externo:** entre os dois batentes o PDF não tem vidro; é o vão da porta pivotante, com a folha aberta. O tubo sai e o piso de cada lado continua (o travertino do hall interno e o Bege Bahia do externo); os batentes ficam.
+  - **Conferência:** na imagem com ajustes e na prancha, só os dois trechos; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_vidros_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

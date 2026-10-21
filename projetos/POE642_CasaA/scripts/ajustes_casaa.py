@@ -85,6 +85,8 @@ pode seguir pela ordem proposta"):
      larga, do deck ao pátio, com o bocel de cada bloco e o triângulo no degrau 12.
   Térreo 4. Projeções (R8, R9): a da cobertura (o L da laje, na ARQ_CONTRAPISO) e a da laje superior (na área de
      serviço) em tracejado cinza fino, por cima de tudo menos das paredes, como na Casa E.
+  Térreo 5. Vidros finos (seções 4 e 18): entre a varanda e as salas, as quatro portas de correr do PDF, em dois planos,
+     no lugar do tubo cinza com montantes; no vão da pivotante do hall, o tubo sai e o piso continua.
   Térreo 3. Carros (R12): prata, alinhados e iguais, de 4,70 x 1,85 m, no lugar das três cores e do desalinhamento
      de 19/10; o modelo é o carro branco do render, levado ao prata do carro da Casa E.
 
@@ -2886,6 +2888,49 @@ def escadas_externas_r14(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 5: vidros finos (seções 4 e 18). O motor fez dois "tubos" cinza grossos
+# com nós escuros (montantes):
+# - entre a varanda e as salas: no PDF (ARQ_PAREDE) são quatro portas de vidro de correr, cada uma com duas folhas de
+#   1,4 pt lado a lado (dois planos), de 585,8 a 1269,5 pt. O tubo sai (esquadria_limpar da Casa E: cada coluna da faixa
+#   recebe o piso do seu lado, em espelho) e as folhas entram como o item 8 do pente fino do Térreo da Casa E
+#   (esquadria_desenhar: o vidro claro e o contorno fino do PDF);
+# - entre o hall interno e o externo: entre os dois batentes o PDF não tem vidro (é o vão da porta pivotante, com a folha
+#   aberta): o tubo sai e o piso de cada lado continua; os batentes ficam.
+VIDROS_A = {"desenhar": [(1655.6, 585.8, 1661.2, 1269.5)],      # pt: as quatro portas de correr da varanda
+            "so_limpar": [(2198.4, 839.7, 2211.7, 1026.8)]}      # pt: o vão da pivotante, entre os batentes
+
+
+def vidros_finos(out):
+    import sys
+    import retoque_terreo_casae as T
+    sys.path.insert(0, str(CASA.parent / "_texturas"))
+    from texturas import textura
+    pg, p2r = pdf_pavimento("Terreo")
+    px_m = p2r(56.69, 0)[0] - p2r(0, 0)[0]
+    D = pg.get_drawings()
+    par = [d for d in D if d.get("layer") == "ARQ_PAREDE"]
+    img = out.astype(np.float32)
+    n = 0
+    for z in VIDROS_A["desenhar"] + VIDROS_A["so_limpar"]:
+        for d in par:
+            r = d["rect"]
+            if d["type"] == "f" and d["fill"] and min(d["fill"]) >= 0.9 and min(r.width, r.height) <= 3.2 and \
+                    z[0] - 0.5 <= r.x0 and r.x1 <= z[2] + 0.5 and z[1] - 0.5 <= r.y0 and r.y1 <= z[3] + 0.5:
+                T.esquadria_limpar(img, r, p2r)
+                n += 1
+    for z in VIDROS_A["so_limpar"]:
+        T.esquadria_limpar(img, pymupdf_rect(z), p2r)
+    for z in VIDROS_A["desenhar"]:
+        T.esquadria_desenhar(img, z, par, p2r, px_m, textura)
+    print(f"    vidros finos: {n} folhas do PDF limpas e redesenhadas (varanda); o vão do hall sem o tubo do motor")
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def pymupdf_rect(z):
+    import pymupdf
+    return pymupdf.Rect(*z)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 4: as projeções em tracejado bem visível, por cima (R8, R9). No PDF da
 # Casa A, a da cobertura está na ARQ_CONTRAPISO, em tracejado (as notas "PROJ. COBERTURA"): o L da laje, de 1290 a 2381
 # pt em x e de 511 a 1815 pt em y, com o braço de baixo indo até 1038 pt (a partir de 1344 pt), e a linha de 1290 pt
@@ -2968,6 +3013,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      "carro e desalinhados)", carros_a),
                     ("sem_arcos", "portas sem os arcos (as folhas ficam); porta camarão sem o cinza", sem_arcos),
                     ("pf1", "pente fino 1 (R14): escadas do deck e larga com linhas e triângulo", escadas_externas_r14),
+                    ("pf5", "pente fino 5: vidros finos (varanda e salas; o vão do hall sem o tubo)", vidros_finos),
                     # as projeções por cima de tudo: o último item do Térreo
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a)]}
 
