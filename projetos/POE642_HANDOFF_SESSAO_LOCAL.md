@@ -851,6 +851,13 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
       - `retoque_subsolo_casae.vaso`: louça com volume, contorno fino, sombra curta e o tampo fechado. Ele ganhou a dobradiça junto à parede de cima ou de baixo ("cima"/"baixo"); o Subsolo segue igual.
     - **Conferência:** no retocado sem rótulos, nas montagens e nas pranchas, só as duas áreas (duchas com nichos, e vasos) mudaram; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_banhos34_antes_depois.jpg`.
+  - **Pedido do usuário depois do item 4 (21/10/26):** "siga por todos os itens, sem me perguntar. se precisar pausar ou alterar algo, eu te aviso." Os itens restantes seguem na ordem do mapa, um commit por item, cada um com o antes e depois, as pranchas e os PDFs refeitos.
+  - **Item 5, guarda-roupas com cabides (R11), feito** (`retoque_1pav_casae.guarda_roupas`, config `GUARDA_ROUPAS`, depois das esquadrias). O motor tinha feito caixas lisas de marcenaria.
+    - **Onde:** no closet master (dois armários retos) e nos closets 1 a 4 (em L). Cada trecho reto do PDF é o retângulo de uma diagonal da ARQ_LAYOUT HUMANIZAÇÃO; os em L são dois trechos. São 10 trechos.
+    - **Como:** `_texturas/elementos.guarda_roupa` (a referência de 19/10: visto de cima, aberto; moldura branca fina com contorno cinza; miolo cinza-claro, mais escuro junto às portas; cabides a cada ~12 cm), no tamanho do PDF, em 4x. As portas ficam do lado comprido que encosta no vinílico do closet.
+    - **Ficam em marcenaria:** a rouparia, o armário da copinha e o do banho master (R11 vale só para guarda-roupa).
+    - **Conferência:** no retocado, nas montagens e nas pranchas, só as três áreas dos closets mudaram; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_guarda_roupas_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 

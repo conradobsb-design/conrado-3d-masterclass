@@ -77,6 +77,8 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
   no tom do lugar, e o vinílico escurecido mais claro;
 - item 4, banhos 3 e 4 (BANHOS_34): sem os discos, os registros e a cápsula do motor; os dois nichos, as duchas
   quadradas com o braço da parede do meio e os dois vasos suspensos, costas com costas, do PDF, como no Subsolo;
+- item 5, guarda-roupas com cabides (GUARDA_ROUPAS, R11): o closet master e os closets 1 a 4, abertos, vistos de cima,
+  com as portas do lado do closet;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -1560,6 +1562,60 @@ def banhos34_pecas(out, pg, p2r):
     return out
 
 
+# item 5 do pente fino de 20/10/26: guarda-roupas com cabides (R11) no closet master (dois) e nos closets 1 a 4. O
+# motor fez caixas lisas de marcenaria. Cada trecho reto do PDF (ARQ_LAYOUT HUMANIZAÇÃO: o retângulo de cada diagonal;
+# os em L são dois trechos) recebe o `_texturas/elementos.guarda_roupa` (visto de cima, aberto: moldura branca fina
+# com contorno cinza, miolo cinza-claro, mais escuro junto às portas, e cabides em traços cinza a cada ~12 cm), no
+# tamanho do PDF, em 4x, com as portas do lado do vinílico do closet (o lado comprido que encosta nele). A rouparia, o
+# armário da copinha e o do banho master ficam em marcenaria (R11 é só para guarda-roupa).
+GUARDA_ROUPAS = {"pecas": [(1738.0, 761.5, 1984.0, 795.5), (1738.0, 863.6, 1984.0, 897.6),       # closet master
+                           (1992.5, 764.4, 2026.5, 866.4), (2026.5, 764.4, 2111.6, 798.4),       # closet 2
+                           (1992.5, 1113.0, 2026.5, 1215.1), (2026.5, 1113.0, 2111.6, 1147.0),   # closet 1
+                           (1411.4, 1339.8, 1530.5, 1371.0), (1496.4, 1285.9, 1530.5, 1339.8),   # closet 4
+                           (1411.4, 1382.3, 1530.5, 1413.5), (1496.4, 1413.5, 1530.5, 1467.4)],  # closet 3
+                 "ss": 4, "semente": 11}
+
+
+def guarda_roupas(out, A, p2r):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from elementos import guarda_roupa
+    q = GUARDA_ROUPAS
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    vin = (np.abs(chapada.astype(np.int32) - np.array(VINILICO["cor_chapada"])).max(axis=2) <= VINILICO["tol"])
+    vin = vin.astype(np.float32)
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    S = q["ss"]
+    im = out.astype(np.float32)
+    lados = []
+    for i, (x0, y0, x1, y1) in enumerate(q["pecas"]):
+        (u0, v0), (u1, v1) = p2r(x0, y0), p2r(x1, y1)
+        i0, j0, i1, j1 = int(round(u0)), int(round(v0)), int(round(u1)), int(round(v1))
+        if (x1 - x0) >= (y1 - y0):
+            lado = {"baixo": vin[j1 + 1:j1 + 4, i0 + 2:i1 - 2].mean(), "cima": vin[j0 - 4:j0 - 1, i0 + 2:i1 - 2].mean()}
+        else:
+            lado = {"direita": vin[j0 + 2:j1 - 2, i1 + 1:i1 + 4].mean(), "esquerda": vin[j0 + 2:j1 - 2, i0 - 4:i0 - 1].mean()}
+        lado = max(lado, key=lado.get)
+        lados.append(lado)
+        comp, prof = max(x1 - x0, y1 - y0) / 56.69, min(x1 - x0, y1 - y0) / 56.69
+        cor, alfa = guarda_roupa(comp, prof, px_m * S, semente=q["semente"] + i)
+        k = {"baixo": 0, "direita": 1, "cima": 2, "esquerda": 3}[lado]
+        cor, alfa = np.ascontiguousarray(np.rot90(cor, k)), np.ascontiguousarray(np.rot90(alfa, k))
+        X0, Y0, X1, Y1 = int(np.floor(u0)), int(np.floor(v0)), int(np.ceil(u1)), int(np.ceil(v1))
+        tw, th = int(round((u1 - u0) * S)), int(round((v1 - v0) * S))
+        ox, oy = int(round((u0 - X0) * S)), int(round((v0 - Y0) * S))
+        grande = np.zeros(((Y1 - Y0) * S, (X1 - X0) * S, 3), np.float32)
+        ag = np.zeros(grande.shape[:2], np.float32)
+        grande[oy:oy + th, ox:ox + tw] = cv2.resize(cor, (tw, th), interpolation=cv2.INTER_AREA)
+        ag[oy:oy + th, ox:ox + tw] = cv2.resize(alfa, (tw, th), interpolation=cv2.INTER_AREA)
+        cr = cv2.resize(grande, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
+        ar = cv2.resize(ag, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)[..., None]
+        im[Y0:Y1, X0:X1] = im[Y0:Y1, X0:X1] * (1 - ar) + cr
+    print(f"    {len(q['pecas'])} trechos de guarda-roupa com cabides (portas: {', '.join(lados)})")
+    return np.clip(im, 0, 255).astype(np.uint8)
+
+
 # item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
 # é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
 # quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
@@ -1681,6 +1737,8 @@ def main():
     out = banhos34_pecas(out, pg, p2r)
     print("[pente fino 9 e 7] portas, janelas e vidros finos, pelo PDF")
     out = esquadrias_1pav(out, pg, p2r)
+    print("[pente fino 5] guarda-roupas com cabides nos closets (R11)")
+    out = guarda_roupas(out, A, p2r)
     print("[pente fino 3] boxes em folha contínua, de parede a parede (R10)")
     out = boxes_continuos(out, p2r)
 
