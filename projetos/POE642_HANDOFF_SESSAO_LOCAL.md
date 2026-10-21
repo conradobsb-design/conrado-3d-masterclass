@@ -1650,6 +1650,9 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_soleiras_antes_depois.jpg`.
 - **Térreo do pente fino fechado (21/10/26):** os 16 itens do mapa estão feitos. O próximo é o Subsolo (10 itens), cujo terreno hachurado sai do Térreo final, e depois o 1º Pavimento (16 itens).
 - **Pergunta do usuário durante o item 16 (21/10/26):** "O piso marrom granito será atualizado? A madeira do deck também precisa estar na escala, ok?". Os dois já estavam feitos: o granito no item 10 (desenho e tom da referência, na escala) e o deck no item 8 (réguas de ~20 cm da referência). Os antes e depois foram reenviados. O Subsolo (hachurado) e o 1º Pavimento (nublado) herdam os dois do Térreo final.
+- **Subsolo do pente fino (usuário, 21/10/26: "pode seguir com o Subsolo").** O ciclo é o mesmo do Térreo (`ajustes_casaa.py Subsolo`, `rotulos_casaa.py Subsolo`, prancha e PDF).
+- **Subsolo, item 10, o "²" dos rótulos, feito primeiro.** A prancha do Subsolo ainda não tinha passado pela rotina comum dos rótulos de 20/10 (o "²" logo depois do "m"; antes ele encostava no "m"). Rodado o ciclo sem nenhuma mudança de código: a imagem com ajustes saiu igual px a px, e na prancha mudaram só os 8 rótulos com área (o elevador não tem); rodapé igual. Com isso, a base dos outros nove itens fica limpa.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_m2_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
