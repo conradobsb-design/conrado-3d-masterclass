@@ -1781,6 +1781,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Rótulos (R7):** "SUÍTE 3" e "SUÍTE 2" caíam sobre os bancos novos; foram ao piso livre mais próximo (o da 3 abaixo do banco, no tapete; o da 2 à direita da cama).
   - **Conferência:** na imagem com ajustes, só os cinco bancos; na prancha, os bancos e os dois rótulos; rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_bancos_antes_depois.jpg`.
+- **1º Pavimento, item 7, criados-mudos da suíte 3, feito** (`ajustes_casaa.criados_1pav`, config `CRIADOS_1PAV`).
+  - **Antes:** quadrados de ~45 cm em madeira clara, com sombra forte; no PDF, redondos de 60 cm.
+  - **Como:** o quadrado e a sombra saem (cada linha recebe o vinílico limpo da mesma linha, ao lado, espelhado: as réguas correm na horizontal); entram os círculos do PDF na madeira do próprio quadrado, com contorno na mesma madeira mais escura e a sombra curta dos bancos.
+  - **Conferência:** na imagem com ajustes e na prancha, só os dois criados-mudos (2 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_criados_mudos_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
