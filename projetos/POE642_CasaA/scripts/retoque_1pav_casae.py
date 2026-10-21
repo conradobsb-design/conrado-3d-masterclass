@@ -86,6 +86,8 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
 - item 12, Bege Bahia das três varandas como a referência (VARANDAS_BEGE): o desenho e o tom da foto, com os vasos e as
   plantas por cima e a sombra deles no piso;
 - item 13, floreira do banho master só no verde (FLOREIRA["quente"]): as flores laranja saem do recorte do Térreo;
+- item 14, sem a plantinha do aparador da sala íntima (APARADOR): ela não está no PDF; o tampo é refeito linha a
+  linha entre o tampo limpo dos dois lados. A planta do canto, junto ao vazio, fica;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -1804,6 +1806,22 @@ def varandas_bege(out, A, p2r):
     return np.clip(novo, 0, 255).astype(np.uint8)
 
 
+# item 14 do pente fino de 20/10/26: a plantinha sobre o aparador da sala íntima não está no PDF ("nada inventado"):
+# sai. A da varanda, junto ao vazio, está no PDF e fica. O tampo do aparador (marcenaria lisa, com o veio na
+# horizontal) é refeito em cada linha pela interpolação entre o tampo limpo dos dois lados da planta (px do render).
+APARADOR = {"planta": (988, 734, 1008, 746)}
+
+
+def aparador_sem_planta(out):
+    x0, y0, x1, y1 = APARADOR["planta"]
+    im = out.astype(np.float32)
+    esq, dir_ = im[y0:y1, x0 - 1], im[y0:y1, x1]
+    t = ((np.arange(x0, x1) - (x0 - 1)) / (x1 - (x0 - 1)))[None, :, None]
+    im[y0:y1, x0:x1] = esq[:, None] * (1 - t) + dir_[:, None] * t
+    print(f"    aparador da sala íntima sem a plantinha: ({x0}, {y0}) a ({x1}, {y1})")
+    return np.clip(im, 0, 255).astype(np.uint8)
+
+
 # item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
 # é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
 # quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
@@ -1935,6 +1953,8 @@ def main():
     out = boxes_continuos(out, p2r)
     print("[pente fino 6] projeções em tracejado: shaft, rouparia e banho master (R8)")
     out = projecoes_1pav(out, pg, p2r)
+    print("[pente fino 14] sem a plantinha do aparador da sala íntima")
+    out = aparador_sem_planta(out)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     # sem rótulos: a imagem que vai à montagem com o Térreo esmaecido (os rótulos são escritos de novo na

@@ -889,6 +889,10 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - **Item 13, floreira do banho master só no verde, feito** (`retoque_1pav_casae.floreira`). A floreira vem do jardim do Térreo aprovado de 15/10 (`TERREO_FLOREIRA`, que fica, porque a escada também copia dele). Antes de pousar, as flores laranja e vermelhas saem: os 46 px quentes (R mais de 25 acima de G e de B), com 1 px de folga, são preenchidos pela folhagem em volta (`cv2.inpaint`). É o mesmo pedido do jardim de inverno do Térreo (20/10).
     - **Conferência:** no retocado, nas montagens e nas pranchas, só a floreira mudou; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_floreira_verde_antes_depois.jpg`.
+  - **Item 14, sem a plantinha do aparador da sala íntima, feito** (`retoque_1pav_casae.aparador_sem_planta`, config `APARADOR`, depois das projeções). A plantinha (e a sombra dela no tampo) fica num retângulo de 20 × 12 px do render (x 988 a 1008, y 734 a 746). O tampo é liso, com o veio na horizontal: cada linha é a interpolação entre o px limpo logo à esquerda e o logo à direita, na mesma linha. A borda escura do aparador e a parede abaixo não mudam. A planta do canto, junto ao vazio, está no PDF e fica.
+    - **Primeira versão descartada:** o retângulo de 16 px ainda pegava a sombra da planta nos dois lados, e o tampo ficava com uma mancha um pouco mais escura. Ele cresceu 1 px à esquerda e 3 px à direita.
+    - **Conferência:** no retocado, nas montagens e nas pranchas, só o tampo do aparador mudou; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_aparador_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 
