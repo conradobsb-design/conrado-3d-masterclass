@@ -1886,7 +1886,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **O quê:** os tracinhos verticais que sobraram da grade de juntas do motor (no anel em volta dos tracejados das projeções, dos móveis e das portas de vidro, onde o item dos rejuntes não mexeu) voltam ao piso, linha a linha, com o travertino dos dois lados; os veios horizontais continuam. As linhas do PDF ficam.
   - **Conferência:** só pontos do travertino mudam (varanda, salas, hall); rodapé igual; o 1º Pavimento muda só no Térreo nublado. Pranchas e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_juntas_antes_depois.jpg`.
-- **Pedidos na fila (21/10/26), um por vez, nesta ordem:** quarto do motorista (rótulo maior e embaixo, cama menos branca, pezeira).
+- **Térreo, quarto do motorista, feito** (pedido do usuário, 21/10/26; `_texturas/elementos.ROUPA_CAMA["motorista"]`, `ajustes_casaa.CAMA_MOTORISTA`, e o ajuste do rótulo no `rotulos_casaa`).
+  - **Cama:** o edredom em linho claro (o lençol e a dobra junto aos travesseiros continuam brancos), e a peseira bordô nos pés da cama, com dobras e o pesponto claro junto às bordas (antes, uma faixa no meio do edredom branco).
+  - **Rótulo:** "Q. MOTORISTA / A: 7,4 m²" maior (corpo 1,2, como os outros, em vez de 0,8) e no piso livre abaixo da cama, centrado no quarto.
+  - **Conferência:** só a cama e o rótulo mudam no Térreo; o 1º Pavimento fica idêntico; rodapé igual. Prancha e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_quarto_motorista_antes_depois.jpg`.
+- **Fila de 21/10/26 concluída.** As 6 camas do 1º Pavimento continuam com a faixa bordô no meio (as de solteiro) e o edredom branco; podem receber o mesmo tratamento do motorista, se o usuário quiser.
 
 ## Casas A a D · Barlavento nas piscinas
 

@@ -261,6 +261,11 @@ ROUPA_CAMA = {"branco": (244, 244, 246), "cinza": (214, 213, 216), "bordo": (85,
                         "manta": (0.58, 0.83)},           # x em m (travesseiros e dobra) e em fração do comprimento (manta)
               "solteiro": {"cinza": (0.05, 0.45), "bordo": (0.30, 0.56), "bordo_larg": 0.78, "dobra": (0.60, 0.78),
                            "manta": (0.60, 0.74)},
+              # o quarto do motorista (usuário, 21/10/26: "melhore o aspecto da cama, pois está tudo muito brancão. E
+              # melhore o local da pezeira e seu aspecto"): o edredom em linho claro (o lençol e a dobra ficam brancos),
+              # e a peseira bordô nos pés da cama, com o pesponto claro junto às bordas e as dobras
+              "motorista": {"cinza": (0.05, 0.45), "bordo": (0.30, 0.56), "bordo_larg": 0.78, "dobra": (0.60, 0.78),
+                            "manta": (0.79, 0.95), "edredom": (212, 221, 228), "pesponto": (0.025, 0.004, 0.35)},
               "borda": (0.07, 0.07), "rugas": (0.012, 0.007), "travesseiro_raio": 0.05, "travesseiro_volume": 0.16,
               "sombra": (0.03, 0.012, 0.22), "dobras_manta": 0.16}
 
@@ -286,9 +291,13 @@ def roupa_de_cama(comp_m, larg_m, px_m, tipo="casal", semente=1):
     luz *= 1 - 0.5 * bf * np.exp(-(comp_m - X) / bl)
     r1, r2 = q["rugas"]
     luz *= 1 + r1 * _ruido(H, W, 0.18 * k, rng) + r2 * _ruido(H, W, 0.05 * k, rng)
-    cor = np.float32(q["branco"]) * luz[..., None]
-    # a dobra do lençol: um pouco mais clara, com a sombra fina da borda virada sobre o edredom
     d0, d1 = p["dobra"]
+    # o lençol (sob os travesseiros e na dobra) em branco; o edredom, depois da dobra, no tom do tipo (o branco, se não
+    # houver), com a passagem suave
+    ed = np.float32(p.get("edredom", q["branco"]))
+    t_ed = np.clip((X - d1) / 0.01 + 0.5, 0, 1)[..., None]
+    cor = (np.float32(q["branco"]) * (1 - t_ed) + ed * t_ed) * luz[..., None]
+    # a dobra do lençol: um pouco mais clara, com a sombra fina da borda virada sobre o edredom
     na_dobra = (X >= d0) & (X < d1)
     cor = np.where(na_dobra[..., None], cor * 1.012, cor)
     som = 1 - 0.10 * np.exp(-np.clip(X - d1, 0, None) / 0.025) * (X >= d1)
@@ -307,6 +316,10 @@ def roupa_de_cama(comp_m, larg_m, px_m, tipo="casal", semente=1):
     cor_m = np.float32(q["bordo"]) * tecido[..., None] * (1 - 0.5 * bf * np.exp(-np.minimum(Y, larg_m - Y) / bl))[..., None]
     sombra_m = 1 - 0.18 * (np.exp(-np.clip(X - m1, 0, None) / 0.02) * (X >= m1) +
                            np.exp(-np.clip(m0 - X, 0, None) / 0.012) * (X < m0))
+    if "pesponto" in p:                                    # o pesponto claro junto às duas bordas da peseira
+        dp, lp, fp = p["pesponto"]
+        ps = np.exp(-((np.minimum(np.abs(X - m0), np.abs(X - m1)) - dp) / lp) ** 2)
+        cor_m = cor_m * (1 - fp * ps[..., None]) + np.float32(q["branco"]) * 0.8 * fp * ps[..., None]
     cor *= sombra_m[..., None]
     cor = cor * (1 - na_manta[..., None]) + cor_m * na_manta[..., None]
     # 3. os travesseiros: os cinza junto à cabeceira e os bordô na frente, com volume e a sombra curta

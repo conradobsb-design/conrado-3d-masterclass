@@ -92,6 +92,10 @@ Itens:
   Térreo, juntas verticais (usuário, 21/10/26: "remover traços na vertical que anteriormente denotavam juntas"):
      os pedaços das juntas do motor que ficaram no anel em volta dos traços e dos móveis (`juntas_verticais`) voltam
      ao piso, linha a linha, entre o travertino dos dois lados.
+  Térreo, quarto do motorista (usuário, 21/10/26: "escreva o rótulo maior e na parte de baixo (...) melhore o aspecto
+     da cama, pois está tudo muito brancão. E melhore o local da pezeira e seu aspecto"): a roupa de cama no tipo
+     "motorista" (edredom em linho claro, a peseira bordô nos pés, com pesponto) e o rótulo abaixo da cama, maior
+     (`rotulos_casaa`).
   Térreo, carros (pedido do usuário, 19/10/26): cada carro numa cor (branco perolado, grafite, azul-marinho, a
      paleta da Casa D) e os três levemente desalinhados, como na Casa E.
   Térreo, sem arcos (decisão do usuário, 19/10/26, com as plantas de referência dos elementos: "remover os arcos,
@@ -4112,13 +4116,16 @@ def camas_1pav(out):
 # do quarto do motorista, no Térreo (a do item 11, com o edredom de ponta dobrada e o travesseiro no desenho do PDF).
 # O colchão é o retângulo da cama do item 11 (`MOTORISTA["cama"]`) menos a borda, a mesma do 1º Pavimento; a cama ali
 # foi desenhada por nós no retângulo do PDF, então sem a busca da moldura. A cabeceira fica em cima, contra a parede.
-CAMA_MOTORISTA = {"camas": [("quarto do motorista", MOTORISTA["cama"], "cima", "solteiro")],
+# Depois (usuário, 21/10/26: "melhore o aspecto da cama, pois está tudo muito brancão. E melhore o local da pezeira e
+# seu aspecto"): o tipo "motorista" da roupa de cama, com o edredom em linho claro e a peseira bordô nos pés, com pesponto.
+CAMA_MOTORISTA = {"camas": [("quarto do motorista", MOTORISTA["cama"], "cima", "motorista")],
                   "borda": CAMAS_1PAV["borda"], "ss": CAMAS_1PAV["ss"], "moldura": False, "semente": 31}
 
 
 def cama_motorista(out):
     out = pousar_camas(out, "Terreo", CAMA_MOTORISTA)
-    print("    motorista: a roupa de cama da referência na cama de solteiro (cabeceira em cima)")
+    print("    motorista: a roupa de cama na cama de solteiro (cabeceira em cima), edredom em linho claro e a peseira "
+          "nos pés")
     return out
 
 # Pedido do usuário (21/10/26): "USE O QUARTZITO CARRARA NAS ILHAS E BANCADAS". Em cada pavimento, as ilhas e as

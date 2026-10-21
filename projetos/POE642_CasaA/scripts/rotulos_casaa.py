@@ -77,7 +77,9 @@ PAVIMENTOS = {
                    # errado"): ao lado da cama, como no PDF, no piso livre entre a cama e o armário (~26 px), um pouco
                    # menor que o PDF (a Inter é mais larga); no granito (a caixa do texto pega a cama, então a cor vai dada)
                    # R6 (pente fino de 21/10/26): no granito, em branco
-                   ("Q. MOTORISTA", (1281.4, 632.7), (6.2, -0.2), {"cor": R1.ROTULOS["branco"], "corpo": 0.8}),
+                   # depois (usuário, 21/10/26: "escreva o rótulo maior e na parte de baixo, onde tem um espaço maior"):
+                   # no piso livre abaixo da cama, entre ela e a parede de baixo, no corpo dos outros rótulos
+                   ("Q. MOTORISTA", (1281.4, 632.7), (-1.4, 26.3), {"cor": R1.ROTULOS["branco"], "corpo": 1.2}),
                    # banhos e despensa estreitos: no corpo do PDF, no piso livre entre as peças
                    # o banho do motorista ganhou o arco da porta em cinza (ajustes, portas no granito): o rótulo sobe
                    # e vai à esquerda, entre o vaso e o arco, um pouco menor, para o arco não cortar o texto
