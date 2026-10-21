@@ -83,6 +83,8 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
   retângulo com X da rouparia e os X rasos do fundo do banho master;
 - item 8, soleiras (SOLEIRAS_1P, R13): nos vãos brancos do PDF (banhos 1 a 4, banho master e rouparia), em Bege
   Bahia, com as faces da parede em cinza fino; nas suítes o vinílico atravessa;
+- item 12, Bege Bahia das três varandas como a referência (VARANDAS_BEGE): o desenho e o tom da foto, com os vasos e as
+  plantas por cima e a sombra deles no piso;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -1730,6 +1732,71 @@ def soleiras_1pav(out, p2r):
     return out
 
 
+# item 12 do pente fino de 20/10/26: o Bege Bahia das três varandas (a comprida da fachada da esquerda e as das suítes
+# 2 e 1) como a referência (seção 18 das regras: a foto na escala, desenho em nuvens visível, no contraste dela, tom
+# quente ~230, 211, 186), como o item 43 do Térreo (`retoque_terreo_casae.bege_referencia`, os mesmos parâmetros): o
+# desenho da biblioteca entra inteiro, na escala, no tom da foto, com a luz do lugar. Os vasos de planta e as peças de
+# fachada ficam (o que sai da cor do piso ou fica bem mais claro, com os vãos entre as folhas); a sombra deles e os
+# pontinhos e riscos do motor são piso (no Térreo, a sombra ficava de fora e, aqui, virava um halo do tom antigo em
+# volta dos vasos); na borda dos objetos, o próprio px vai ao tom e ao desenho. Áreas: o #E8E8E8 da base chapada, só as varandas (a
+# bancada da copinha, do mesmo material, fica como no item 4 de 16/10). Roda logo no começo, para as soleiras das
+# fachadas (item 10 de 16/10), tecidas do Bege Bahia da varanda, saírem no novo.
+VARANDAS_BEGE = {"cor_chapada": (232, 232, 232), "tol": 6, "area_min": 300, "claro": 25, "matiz": 0.15,
+                 "objeto_min": 15, "buraco_max": 60}
+
+
+def varandas_bege(out, A, p2r):
+    from texturas_escala import nconv, textura
+    import retoque_terreo_casae as T
+    q, qt = VARANDAS_BEGE, T.BEGE
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    bege = (np.abs(chapada.astype(np.int32) - np.array(q["cor_chapada"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(bege, connectivity=8)
+    (ca, cb), (cc, cd) = p2r(*COPINHA["bancada_pdf"][:2]), p2r(*COPINHA["bancada_pdf"][2:])
+    manter = [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_min"]
+              and not (st[i, 0] < cc + 3 and st[i, 0] + st[i, 2] > ca - 3 and st[i, 1] < cd + 3
+                       and st[i, 1] + st[i, 3] > cb - 3)]
+    m = cv2.erode(np.isin(lab, manter).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    sig = qt["sig_m"] * px_m
+    im = out.astype(np.float32)
+    # os objetos (os vasos de planta, as plantas, peças de fachada): o que sai da cor do piso (outra proporção entre R, G
+    # e B: a sombra escurece sem mudar a cor e fica como piso) ou fica bem mais claro; com os vãos entre as folhas
+    # (fechados e preenchidos). Os pontinhos e riscos pequenos do motor são piso
+    lum = im.mean(axis=2) + 1
+    rb, gb = (im[..., 2] - im[..., 0]) / lum, (im[..., 1] - im[..., 0]) / lum
+    frb, fgb = np.median(rb[m]), np.median(gb[m])
+    cor = ((np.abs(rb - frb) > q["matiz"]) | (np.abs(gb - fgb) > q["matiz"]) | (im[..., 1] > im[..., 2] + 2)) & m
+    L0 = nconv(im, (m & ~cor).astype(np.float32), sig)        # a luz do piso, sem as plantas (que a escureciam)
+    obj = cor | (((im - L0).max(axis=2) > q["claro"]) & m)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(obj.astype(np.uint8), connectivity=8)
+    obj = ((st[:, cv2.CC_STAT_AREA] >= q["objeto_min"])[lab] & (lab > 0)).astype(np.uint8)
+    obj = cv2.morphologyEx(obj, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    buracos = ndimage.binary_fill_holes(obj) & ~obj.astype(bool)          # os vãos entre as folhas; os grandes
+    n, lab, st, _ = cv2.connectedComponentsWithStats(buracos.astype(np.uint8), connectivity=4)  # (entre vasos) são piso
+    obj = (obj.astype(bool) | ((st[:, cv2.CC_STAT_AREA] <= q["buraco_max"])[lab] & (lab > 0))) & m
+    piso = m & ~cv2.dilate(obj.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    anel = m & ~piso & ~obj
+    # o tom: a luz do lugar levada ao tom da foto; na borda dos objetos, o próprio px no tom (a mistura com a borda)
+    ganho = np.float32(qt["tom"]) / im[piso].mean(axis=0)
+    L = nconv(im, piso.astype(np.float32), sig) * ganho
+    L[anel] = im[anel] * ganho
+    novo = im.copy()
+    piso = piso | anel
+    ys, xs = np.nonzero(piso)
+    y0, x0, y1, x1 = ys.min(), xs.min(), ys.max() + 1, xs.max() + 1
+    Tx = textura("bege_bahia", px_m, y1 - y0, x1 - x0, semente=qt["semente"]).astype(np.float32)
+    det = cv2.GaussianBlur(Tx, (0, 0), qt["suavizar"]) / np.maximum(cv2.GaussianBlur(Tx, (0, 0), sig), 1)
+    tex = L[y0:y1, x0:x1] * (1 + qt["forca"] * (det - 1))
+    al = (cv2.GaussianBlur(piso.astype(np.float32), (0, 0), 0.7) * piso)[y0:y1, x0:x1, None]
+    novo[y0:y1, x0:x1] = novo[y0:y1, x0:x1] * (1 - al) + tex * al
+    print(f"    Bege Bahia das varandas ({len(manter)} áreas): {int(piso.sum())} px no desenho da biblioteca, "
+          f"a {px_m:.2f} px/m, no tom da foto; {int(obj.sum())} px de objetos ficam")
+    return np.clip(novo, 0, 255).astype(np.uint8)
+
+
 # item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
 # é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
 # quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
@@ -1823,6 +1890,8 @@ def main():
     pg, p2r, r2p = pdf_cadeia(A, out.shape)
     print("[pente fino 11] vinílico na escala: réguas de 20 cm, como a referência (R4)")
     out = vinilico_escala(out, A, p2r)
+    print("[pente fino 12] Bege Bahia das varandas como a referência")
+    out = varandas_bege(out, A, p2r)
     print("[4] copinha: bancada em Bege Bahia e cuba redonda")
     out = copinha(out, p2r)
     print("[pente fino 2] escada com linhas, triângulo no topo e esmaecida depois do corte do Térreo (R14)")

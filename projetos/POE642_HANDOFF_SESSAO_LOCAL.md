@@ -873,6 +873,19 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Como, igual ao Térreo e ao Subsolo da casa:** o vão exato do PDF em Bege Bahia na escala (o desenho da biblioteca, no tom da referência), com as duas faces da parede (os lados compridos) em traço cinza fino. A folha da P11, embutida dentro do vão, fica por cima.
     - **Conferência:** no retocado, nas montagens e nas pranchas, só os sete vãos mudaram; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_soleiras_antes_depois.jpg`.
+  - **Item 12, Bege Bahia das três varandas como a referência, feito** (`retoque_1pav_casae.varandas_bege`, config `VARANDAS_BEGE`, logo depois do vinílico). As três varandas são a comprida da fachada da esquerda e as das suítes 2 e 1. Antes, o Bege Bahia era claro, quase liso, com pontinhos do motor (RGB ~231, 222, 211).
+    - **Como (seção 18 e item 43 do Térreo):** o desenho da biblioteca entra inteiro, na escala, no tom da foto (~230, 211, 186), com os parâmetros do Térreo e a luz do lugar.
+    - **O que fica e o que vira piso:**
+      - ficam os vasos, as plantas e as peças de fachada: o que sai da cor do piso (outra proporção entre R, G e B) ou fica bem mais claro, com os vãos pequenos entre as folhas;
+      - a sombra deles (escurece sem mudar a cor) e os pontinhos do motor viram piso;
+      - na borda dos objetos, o próprio px vai ao tom e ao desenho.
+    - **Testes descartados:**
+      - o `bege_referencia` do Térreo como estava deixava a sombra dos vasos de fora, com um halo do tom antigo em volta;
+      - a luz medida com as plantas dentro marcava como objeto o piso claro em volta delas;
+      - um limiar de cor estreito marcava a sombra rosada dos vasos de terracota.
+    - **Junto:** a bancada da copinha (o item 4 de 16/10 tece o Bege Bahia dela da varanda) e as soleiras das fachadas das suítes (item 10 de 16/10, do mesmo Bege Bahia) seguem o novo.
+    - **Conferência:** no retocado, nas montagens e nas pranchas, mudaram as três varandas, a bancada da copinha e as soleiras das fachadas dos banhos 3 e 4; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_bege_varandas_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 
