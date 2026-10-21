@@ -666,7 +666,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **PDFs `entrega/POE642_CasaE_Plantas_Humanizadas_opcao_{PB,Linhas,Nublado}.pdf`:** 3 páginas A3 cada (Subsolo, Térreo e o 1º Pavimento da opção), iguais px a px às pranchas; 18,9, 17,7 e 20,2 MB.
     - **Antes e depois das montagens:** `renders/POE642_CasaE_PH_1Pavimento_montagens_antes_depois.jpg`.
     - **Ainda pendentes:**
-      - a prancha do Subsolo, que é a mesma: o terreno hachurado dela ainda vem do Térreo de antes do pente fino (tarefa: refazê-lo a partir da final do Térreo);
+      - a prancha do Subsolo, que é a mesma: o terreno hachurado dela ainda vem do Térreo de antes do pente fino (tarefa: refazê-lo a partir da final do Térreo; feito em 21/10/26, item 29 do Subsolo);
       - os carros SUV bronze, que aguardam o arquivo da foto.
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
@@ -1102,6 +1102,11 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   28. **Visor em folha contínua (usuário, 20/10/26: "ESSE VIDRO É UMA FOLHA CONTINUA. TALVEZ ESSES PONTOS PRETOS PODEM DAR A IMPRESSÃO DE QUE SÃO VÁRIAS FOLHAS"):** saem os montantes do visor (`PISCINA_CLIENTE["montantes"] = False`). Fica a folha de vidro com os perfis em grafite dos dois lados.
       - Na prancha, só os 7 pontos mudaram. A prancha e os três PDFs foram refeitos.
       - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_visor_folha_continua_antes_depois.jpg`.
+  29. **Terreno hachurado a partir do Térreo final (usuário, 21/10/26: "siga com o terreno hachurado do Subsolo"):** a tarefa deixada no item 64 do Térreo. O lote da hachura (`HACHURA["terreo"]`) já lia `renders/POE642_CasaE_PH_Terreo_v1_final.png`, mas a imagem final do Subsolo não tinha sido refeita depois do pente fino do Térreo.
+      - **Fontes fixas:** a escada (`ESCADA`) e o travertino (`TEXTURAS`) tiram trechos do retocado do Térreo, que também mudou no pente fino. Passaram a ler o Térreo aprovado de 15/10 (`TERREO_APROVADO`, `renders/POE642_CasaE_PH_Terreo_v1_retocado_aprovado.png`), que é igual px a px ao retocado que o Subsolo usou até aqui. Com isso, o retocado do Subsolo sai idêntico (0 px).
+      - **O que mudou na final:** a borda direita do lote, que acompanha o Térreo final (uns 3 px, x ≈ 3452 a 3462, y ≈ 388 a 611), e o "²" dos 12 rótulos, que agora sai logo depois do "m" pela rotina comum do item 49 do Térreo (antes encostava no "m"). O resto da hachura não muda: o lote é o contorno do que não é branco no Térreo, e o pente fino mexeu dentro dele.
+      - **Conferência:** na prancha, 862 px em 18 regiões; a área da imagem é a final, px a px; rodapé igual. A prancha do Subsolo e o PDF único foram refeitos.
+      - **Antes/depois:** `renders/POE642_CasaE_PH_Subsolo_terreno_terreo_final_antes_depois.jpg`.
       - **Regra:** vidro em folha contínua no PDF é desenhado sem montantes.
 - **Entrega (16/10/26, depois da aprovação do usuário: "prancha e o PDF. aprovado."):** a casa passa a ter três pavimentos, na ordem da Casa A (Subsolo, Térreo, 1º Pavimento).
   - **Config:** o Subsolo entrou na chave `entrega` da `POE642_CasaE/config_bases.json` (título "SUBSOLO", linha 0 do quadro de áreas, base `POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png`). O Térreo passou à linha 1 e o 1º Pavimento à linha 2. O quadro de áreas tem os três "NÃO INFORMADO", sem total. Em `pdf.ordem`: Subsolo, Térreo e 1º Pavimento; título "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)".

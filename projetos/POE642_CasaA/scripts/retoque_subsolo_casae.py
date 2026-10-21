@@ -8,6 +8,9 @@ quadro do render, como no Térreo e no 1º Pavimento.
 Itens (o mapa está em POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_erros.jpg): ver ITENS e o
 handoff (POE642_HANDOFF_SESSAO_LOCAL.md, "Casa E · Subsolo").
 
+Fontes no Térreo: o terreno hachurado (HACHURA) sai do Térreo final, e a escada e o travertino, do Térreo aprovado
+de 15/10 (TERREO_APROVADO), fixo desde 21/10/26 (item 29), para o pente fino do Térreo não mudar o Subsolo.
+
 Uso (da pasta POE642_CasaA/scripts/):
   python3 retoque_subsolo_casae.py ../../POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_render.webp \\
       --saida ../../POE642_CasaE/renders --nome POE642_CasaE_PH_Subsolo_v1_retocado
@@ -229,7 +232,10 @@ def circulacao_deposito(out, A, pg, p2r, chapada, tex):
 # do Térreo: sem linhas, com o sombreamento de descida da direita para a esquerda). O trecho dela vem do
 # Térreo retocado, levado ao quadro deste render pelas duas bases (Térreo e Subsolo têm o mesmo quadro);
 # a sombra curta do primeiro espelho cai na circulação, à esquerda, como no Térreo.
-ESCADA = {"terreo": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado.png",
+# Desde 21/10/26: o Térreo é o aprovado de 15/10 (o retocado que o Subsolo usou até aqui, igual px a px), porque o
+# retocado do Térreo mudou no pente fino; só o terreno hachurado (HACHURA) passa a vir do Térreo final.
+TERREO_APROVADO = RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado_aprovado.png"
+ESCADA = {"terreo": TERREO_APROVADO,
           "base_terreo": RAIZ / "POE642_CasaE/bases/POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png",
           "pdf": (972.0, 617.0, 1262.9, 685.0),          # os degraus (ARQ_ESCADAS E RAMPAS)
           "sombra": (0.18, 2.0), "alcance": 8}           # do 1º espelho: força, decaimento e alcance (px)
@@ -1019,7 +1025,8 @@ def sombras_longas(out, p2r, chapada):
 # R2 (regra nova do usuário, 19/10/26, para todas as casas: "Quando representar a planta de subsolo, mostrar somente o
 # subsolo com o restante do terreno hachurado"; hachura escolhida por ele: diagonais finas a 45°, cinza-claro). Fora da
 # pegada do Subsolo, no lugar das linhas do Térreo (item 17), o terreno do lote hachurado. O lote é o do Térreo
-# aprovado, no mesmo quadro: tudo o que não é branco nele (gramado, casa, muros), fechado e com os furos preenchidos.
+# final, no mesmo quadro: tudo o que não é branco nele (gramado, casa, muros), fechado e com os furos preenchidos.
+# Item 29 (21/10/26): refeito com o Térreo final do pente fino (muda só a borda direita do lote).
 # Fora do lote, o branco, com as linhas tracejadas da base (as do PDF).
 QUADRO = {"largura": 3840}
 HACHURA = {"terreo": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_final.png",
@@ -1316,7 +1323,7 @@ def escada_r14(out, pg, p2r, tex):
 # (nome, cor da legenda na base chapada, força, semente, raio da luz do lugar em m, fonte, tom BGR, suavização)
 TEXTURAS = {"materiais": [("bege_bahia", (232, 232, 232), 1.0, 1, 0.25, None, (186, 211, 230), 0.4),
                           ("travertino", (202, 217, 220), 1.4, 3, 1.0, "terreo", None, 0.8)],
-            "terreo": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_retocado.png",
+            "terreo": TERREO_APROVADO,
             "terreo_trechos": [(1000, 600, 1160, 690), (830, 610, 990, 665)],     # px do Térreo retocado (sala)
             "janela_pdf": (690, 510, 1850, 1160), "tol": 3}
 
