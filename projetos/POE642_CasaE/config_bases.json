@@ -1127,7 +1127,7 @@
  "entrega": {
   "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
   "_areas": "Áreas não informadas (usuário, 15/10/26): Térreo 'NÃO INFORMADO', sem linha de total, como na Casa D. 1º Pavimento (16/10/26) e Subsolo (16/10/26): também 'NÃO INFORMADO' (os PDFs trazem só as áreas dos ambientes, não a do pavimento). Ordem do quadro e do PDF como na Casa A: Subsolo, Térreo, 1º Pavimento.",
-  "_confirmado": "Endereço (Lotes 17, Unidade E) confirmado pelo usuário em 15/10/26; norte o mesmo das Casas A, B, C e D. Subsolo, Térreo e 1º Pavimento (o Subsolo entrou em 16/10/26, depois da aprovação da imagem final). O 1º Pavimento tem duas opções para o cliente (entorno em P&B ou só com as linhas do PDF): pranchas com sufixo _pb e _linhas e um PDF para cada opção.",
+  "_confirmado": "Endereço (Lotes 17, Unidade E) confirmado pelo usuário em 15/10/26; norte o mesmo das Casas A, B, C e D. Subsolo, Térreo e 1º Pavimento (o Subsolo entrou em 16/10/26, depois da aprovação da imagem final). O 1º Pavimento tem duas opções para o cliente (entorno em P&B ou só com as linhas do PDF): pranchas com sufixo _pb e _linhas e um PDF para cada opção. Depois veio a terceira, nublado (19/10/26), e, em 21/10/26, no fim do pente fino, o nublado virou a opção única: prancha sem sufixo e o PDF único (pdf.nome); as opções ficam no histórico.",
   "casa": "CASA E",
   "prefixo": "POE642_CasaE",
   "pasta_bases": "bases",

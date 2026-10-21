@@ -141,6 +141,10 @@ python opcoes_1pav_casae.py --opcao nublado
 python rodape_entrega.py --config $C/config_bases.json --no-quadro --sufixo _nublado --render 1Pavimento=$C/renders/POE642_CasaE_PH_1Pavimento_v1_final_nublado.png
 python pdf_entrega.py --config $C/config_bases.json --prancha 1Pavimento=$C/entrega/POE642_CasaE_PH_1Pavimento_entrega_nublado.png \
     --nome POE642_CasaE_Plantas_Humanizadas_opcao_Nublado.pdf --titulo "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento) · opção nublado"
+# desde 21/10/26, fim do pente fino: o nublado é a opção única (seção 16 das regras); as opções acima ficam no histórico
+python opcoes_1pav_casae.py      # -> renders/POE642_CasaE_PH_1Pavimento_v1_final.png, sem sufixo
+python rodape_entrega.py --config $C/config_bases.json --no-quadro --render 1Pavimento=$C/renders/POE642_CasaE_PH_1Pavimento_v1_final.png
+python pdf_entrega.py --config $C/config_bases.json      # -> entrega/POE642_CasaE_Plantas_Humanizadas.pdf
 ```
 
 ## Prévia de texturas: `texturizar_base.py`
@@ -472,10 +476,11 @@ Desde 20/10/26 (pente fino do 1º Pavimento, item 1, sem os arcos):
 O `entorno_esmaecido.py` foi dividido em `contexto_render` (o entorno a partir de um render) e `sobrepor` (pegada, sobreposição integral, tracejado do lote), com o `compor` de antes por cima dos dois.
 
 ```bash
-python3 opcoes_1pav_casae.py      # -> POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final_{pb,linhas}.png (+ _preview.jpg)
+python3 opcoes_1pav_casae.py      # -> POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final.png (+ _preview.jpg), o nublado
+python3 opcoes_1pav_casae.py --opcao pb --opcao linhas   # as opções antigas: ..._v1_final_{pb,linhas}.png
 ```
 
-As duas viram pranchas e PDFs de entrega com `rodape_entrega.py --no-quadro --sufixo _pb` / `_linhas` e `pdf_entrega.py --prancha` (comandos em "Pranchas de entrega").
+As opções viraram pranchas e PDFs de entrega com `rodape_entrega.py --no-quadro --sufixo _pb` / `_linhas` / `_nublado` e `pdf_entrega.py --prancha`. Desde 21/10/26 (fim do pente fino, seção 16 das regras), o nublado é a opção única: sem `--opcao`, sai só ele, sem sufixo, e vira a prancha `..._1Pavimento_entrega.png` e o PDF único `POE642_CasaE_Plantas_Humanizadas.pdf` (comandos em "Pranchas de entrega"). Os arquivos das opções ficam no histórico do git.
 
 ## Retoque do Subsolo da Casa E: `retoque_subsolo_casae.py`
 

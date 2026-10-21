@@ -893,6 +893,12 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Primeira versão descartada:** o retângulo de 16 px ainda pegava a sombra da planta nos dois lados, e o tampo ficava com uma mancha um pouco mais escura. Ele cresceu 1 px à esquerda e 3 px à direita.
     - **Conferência:** no retocado, nas montagens e nas pranchas, só o tampo do aparador mudou; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_aparador_antes_depois.jpg`.
+  - **No fim do pente fino, o nublado como opção única (seção 16), feito (21/10/26).** Como previsto na regra 13 ("depois da escolha, regerar sem sufixo") e na tabela da seção 15 ("os arquivos das opções ficam no histórico"):
+    - **`opcoes_1pav_casae.py`:** sem `--opcao`, faz só o nublado e grava `renders/POE642_CasaE_PH_1Pavimento_v1_final.png` (e `_preview.jpg`), sem sufixo, como o Subsolo e o Térreo. O P&B e as linhas ainda saem quando pedidos (`--opcao pb`, `--opcao linhas`), com o sufixo.
+    - **Prancha:** `entrega/POE642_CasaE_PH_1Pavimento_entrega.png`, pelo `rodape_entrega.py --no-quadro` sem `--sufixo`.
+    - **PDF único:** `entrega/POE642_CasaE_Plantas_Humanizadas.pdf` (20,5 MB, 3 páginas A3: Subsolo, Térreo e 1º Pavimento), pelo `pdf_entrega.py` só com a config (nome e título da `entrega.pdf`).
+    - **Saíram da pasta (ficam no histórico do git):** as pranchas `..._1Pavimento_entrega_{pb,linhas,nublado}.png`, os PDFs `..._opcao_{PB,Linhas,Nublado}.pdf` e as montagens `renders/..._1Pavimento_v1_final_{pb,linhas,nublado}.png` (com as prévias).
+    - **Conferência:** a imagem final e a prancha são iguais, px a px, às do nublado depois do item 14; as três páginas do PDF único têm as mesmas imagens do PDF da opção nublado (muda só o título nos metadados).
 
 ## Casa E · Subsolo
 
@@ -1102,6 +1108,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - **Pranchas (3840 × 2600 px):** `entrega/POE642_CasaE_PH_Subsolo_entrega.png`, nova. A imagem final, já no quadro comum e com os rótulos, entra com `--no-quadro`, sem realinhar. A do Térreo (realinhada com 128 pontos, erro mediano 0,78 px) e as duas do 1º Pavimento (`_pb` e `_linhas`) foram refeitas só pelo rodapé novo, com a linha do Subsolo no quadro de áreas. Rodapés `entrega/POE642_CasaE_rodape_{Subsolo,Terreo,1Pavimento}.png`.
   - **PDFs (3 páginas A3: Subsolo, Térreo e 1º Pavimento):** `entrega/POE642_CasaE_Plantas_Humanizadas_opcao_PB.pdf` (20,6 MB) e `..._opcao_Linhas.pdf` (18,6 MB). Só a página do 1º Pavimento muda entre as duas opções. Comandos no README dos scripts, em "Pranchas de entrega".
   - **Depois da escolha do cliente** (o 1º Pavimento continua em duas opções): como no 1º Pavimento, rodar o `rodape_entrega.py` da opção escolhida sem `--sufixo` e o `pdf_entrega.py` sem `--prancha`/`--nome`; sai `POE642_CasaE_Plantas_Humanizadas.pdf` com os três pavimentos.
+  - **Feito em 21/10/26:** o nublado virou a opção única (seção 16 das regras); a entrega é `entrega/POE642_CasaE_Plantas_Humanizadas.pdf`, com a prancha `..._1Pavimento_entrega.png` (ver "Casa E · 1º Pavimento", no fim do pente fino).
 
 ## Casa A · nomes e áreas dos ambientes
 

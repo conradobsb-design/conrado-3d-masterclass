@@ -22,9 +22,13 @@ Desde 20/10/26 (pente fino do 1º Pavimento): o alinhamento do 1º Pavimento vem
 e o setor branco da porta pequena à direita do vazio do hall mostra o entorno (SETOR_PORTA, R3); os vazios mostram o
 Térreo de baixo, nevoado, com o X e o vidro por cima (nevoar_vazios).
 
+Desde 21/10/26, no fim do pente fino: o nublado é a opção única (seção 16 das regras) e sai sem sufixo,
+POE642_CasaE_PH_1Pavimento_v1_final.png, como o Subsolo e o Térreo. As opções P&B e linhas ficam no histórico e
+saem só quando pedidas (`--opcao pb`, `--opcao linhas`), com o sufixo.
+
 Uso (da pasta POE642_CasaA/scripts/):
-  python3 opcoes_1pav_casae.py                 # as três opções
-  python3 opcoes_1pav_casae.py --opcao nublado # só uma
+  python3 opcoes_1pav_casae.py                 # o nublado (a imagem final)
+  python3 opcoes_1pav_casae.py --opcao pb --opcao linhas   # as opções antigas, com sufixo
 """
 import argparse
 import json
@@ -128,7 +132,7 @@ def main():
     ap.add_argument("--largura", type=int, default=3840)
     ap.add_argument("--saida", type=Path, default=CASA / "renders")
     ap.add_argument("--opcao", action="append", choices=["pb", "linhas", "nublado"], default=None,
-                    help="só estas opções (pode repetir; padrão: todas)")
+                    help="só estas opções (pode repetir; padrão: o nublado, a opção única desde 21/10/26)")
     args = ap.parse_args()
     W = args.largura
     base = cv2.imread(str(BASE_CIMA))
@@ -155,7 +159,7 @@ def main():
         "linhas": ("Térreo só com as linhas do PDF", lambda: contexto_linhas(W, H)),
         "nublado": ("Térreo nublado, com a cor dele", lambda: contexto_render(TERREO, BASE_TERREO, W, **NUBLADO)),
     }
-    opcoes = {k: v for k, v in opcoes.items() if not args.opcao or k in args.opcao}
+    opcoes = {k: v for k, v in opcoes.items() if k in (args.opcao or ["nublado"])}
     args.saida.mkdir(parents=True, exist_ok=True)
     for chave, (desc, contexto) in opcoes.items():
         print(f"[{chave}] {desc}")
@@ -164,7 +168,8 @@ def main():
         out[sy0:sy1, sx0:sx1][arco] = np.clip(t[sy0:sy1, sx0:sx1][arco], 0, 255).astype(np.uint8)
         out = nevoar_vazios(out, t, cima, vazios)
         out = R.rotulos_ambientes(out, rot, p2q, escala_desvio=W / 2000)
-        nome = args.saida / f"POE642_CasaE_PH_1Pavimento_v1_final_{chave}.png"
+        nome = args.saida / ("POE642_CasaE_PH_1Pavimento_v1_final.png" if chave == "nublado"
+                             else f"POE642_CasaE_PH_1Pavimento_v1_final_{chave}.png")
         cv2.imwrite(str(nome), out)
         cv2.imwrite(str(nome.with_name(nome.stem + "_preview.jpg")),
                     cv2.resize(out, (2000, round(2000 * H / W)), interpolation=cv2.INTER_AREA),
