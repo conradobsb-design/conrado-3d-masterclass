@@ -667,6 +667,29 @@ python3 conferencia_casab.py --escalas  # -> ../../POE642_CasaB/renders/POE642_C
 
 Para conferir, o PDF (renderizado a 1,2 px/pt) foi levado ao quadro da prancha pelo alinhamento das paredes (`cv2.findTransformECC`, afim): prancha ≈ PDF × 0,878 + (126,5; −238), nos dois pavimentos.
 
+## Ajustes da Casa B pelo pente fino: `ajustes_casab.py`
+
+Os itens dos mapas do pente fino da Casa B (25 no Térreo, 12 no Subsolo), um por vez, sem IA, na imagem de partida de cada pavimento (Térreo: o render retocado de 2000 px; Subsolo: a final de 6905 px reduzida a 2000). Reaproveita as rotinas aprovadas do pente fino da Casa A (`ajustes_casaa.py`):
+- `contexto()` aponta as duas (`rotulos_casaa` e `ajustes_casaa`) para a Casa B: o PDF, a config, as imagens aprovadas, o afim do quadro (`AFIM_QR_B`) e a base chapada da legenda B (v2);
+- os dicionários de parâmetros recebem as coordenadas e as cores da Casa B: o gramado é o verde da legenda (`gramado_plantas_b`), o granito é #5A4232 e o vinílico, #C8A27C;
+- `chave_como` deixa uma rotina que lê um pavimento fixo ("1Pavimento", "Terreo") ler outro;
+- as peças sem rotina na Casa A ganharam rotina própria: os jardins (`canteiro`), a bancada da sala íntima, a adega, os cooktops, os portões, as cortinas em ondinhas, as camas deitadas, as soleiras automáticas (`vaos_brancos`), as escadas do Subsolo em cor cheia e a pegada do Subsolo.
+
+A ordem está em `ITENS`. Cada item grava um antes/depois (`renders/POE642_CasaB_PH_<Pavimento>_<item>_antes_depois.jpg`), e as etapas ficam em cache (`$TMPDIR/poe642_casab_etapas`). `--final` monta a imagem de 3840 px no quadro comum:
+- no Térreo, com a pedra portuguesa redesenhada pela máscara;
+- no Subsolo, com o que não mudou vindo da imagem de 6905 px e o terreno hachurado a partir do Térreo final;
+- nos dois, com os rótulos, os desvios da R7 em `PAVIMENTOS_B[...]["ajustes"]`.
+
+```bash
+python3 ajustes_casab.py Terreo                 # todos os itens (ou --ate <item>, --de <item>)
+python3 ajustes_casab.py Terreo --final         # -> ../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_final_rotulos.png
+python3 ajustes_casab.py Subsolo && python3 ajustes_casab.py Subsolo --final
+python3 rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --no-quadro \
+    --render Terreo=../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_final_rotulos.png \
+    --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final_rotulos.png
+python3 pdf_entrega.py --config ../../POE642_CasaB/config_bases.json
+```
+
 ## Ajustes da Casa A depois da conferência: `ajustes_casaa.py`
 
 Os itens da conferência (e, desde 21/10/26, os do pente fino pelas regras, com o prefixo `pf` em `ITENS`) corrigidos, um por vez, na imagem aprovada (2000 px). Saída `../renders/<imagem aprovada>_ajustes.png` (+ `_camada.png`), que o `rotulos_casaa.py` usa no lugar da aprovada. O alinhamento ao quadro comum continua vindo da imagem aprovada (`PAVIMENTOS[...]["aprovada"]`, `no_quadro_fixo`), para que só os trechos ajustados mudem na prancha. O PDF de cada pavimento chega à imagem pelo quadro comum e pelo afim `AFIM_QR` do pavimento (`pdf_pavimento`). Depois: `rotulos_casaa.py`, `rodape_entrega.py --no-quadro` e `pdf_entrega.py`.
