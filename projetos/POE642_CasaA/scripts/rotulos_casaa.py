@@ -48,6 +48,9 @@ PAVIMENTOS = {
                 "aprovada": "renders/POE642_CasaA_PH_Subsolo_final.png",
                 "pdf": "642 - SUBSOLO - CASA A.pdf",
                 "sem_tela": "bases/POE642_CasaA_BASE_Subsolo_v4.png",
+                # R2 (pente fino 1 do Subsolo, 21/10/26): a pegada do ajuste vai ao quadro e, fora dela, o lote do Térreo
+                # final hachurado (ajustes_casaa.subsolo_hachurado)
+                "pegada": "renders/POE642_CasaA_PH_Subsolo_pegada_mascara.png",
                 # (nome, centro do rótulo do PDF no quadro final em px de 2000, desvio em px de 2000[, opções])
                 "ajustes": [
                     # o piso de cima do banho é o box (o chuveiro e o vidro entraram nos ajustes): no corpo do PDF,
@@ -152,8 +155,11 @@ def final_rotulos(chave):
     cfg = json.loads(CONFIG.read_text())
     base = (CONFIG.parent / cfg["entrega"]["pasta_bases"] / cfg["entrega"]["pavimentos"][chave]["base"]).resolve()
     render = Image.open(CASA / q["render"]).convert("RGB")
-    pedra = None
-    if "pedra" in q:
+    pedra = pegada = None
+    if "pegada" in q:
+        final, pegada = no_quadro_fixo(render, Image.open(CASA / q["aprovada"]).convert("RGB"), base, chave,
+                                       mascara=cv2.imread(str(CASA / q["pegada"]), cv2.IMREAD_GRAYSCALE))
+    elif "pedra" in q:
         final, pedra = no_quadro_fixo(render, Image.open(CASA / q["aprovada"]).convert("RGB"), base, chave,
                                       mascara=cv2.imread(str(CASA / q["pedra"]), cv2.IMREAD_GRAYSCALE))
     elif "aprovada" in q:
@@ -164,6 +170,10 @@ def final_rotulos(chave):
     at, lt = cv2.imread(str(base), cv2.IMREAD_GRAYSCALE).shape
     hb, wb = cv2.imread(str(CASA / q["sem_tela"]), cv2.IMREAD_GRAYSCALE).shape
     p2q = quadro_pdf(pg, cfg, lt, at, wb, hb, LARGURA)
+    if pegada is not None:
+        import ajustes_casaa as AJ
+        (a, b), (c, d) = p2q(0, 0), p2q(56.69, 0)
+        final = AJ.subsolo_hachurado(final, pegada.astype(np.float32) / 255, float(np.hypot(c - a, d - b)))
     if pedra is not None:
         # a pedra portuguesa desenhada de novo nos 3840 px (pente fino 11 do Térreo), na máscara do ajuste levada ao
         # quadro (só o miolo dela: a borda interpolada fica com a pedra do ajuste)

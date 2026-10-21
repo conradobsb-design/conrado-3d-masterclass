@@ -114,6 +114,8 @@ pode seguir pela ordem proposta"):
      chuveiro de parede e as duas folhas de vidro do box do PDF, como no banho de serviço do Subsolo.
   Térreo 16. Soleiras (R13): nos quatro vãos brancos do PDF (escritório, lavabo, gás e jardim), Bege Bahia na escala
      com as faces da parede em cinza fino; nas outras nove portas o piso atravessa o vão, e nada muda.
+  Subsolo, pente fino 1 (R2): só o Subsolo (os pisos e as paredes do PDF, a escada do deck e o gramado); o Térreo em
+     volta sai, e a pegada vai para uma máscara; na final, o rotulos_casaa.py hachura o lote do Térreo final fora dela.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -2823,6 +2825,99 @@ def rejuntes(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), Subsolo, item 1: só o Subsolo, com o resto do terreno hachurado (R2, seção 11). A
+# imagem do Subsolo trazia, esmaecidos, o deck, a piscina, o spa, a escada larga e as espreguiçadeiras do Térreo (o PDF
+# do Subsolo os desenha em cinza). Fica só o Subsolo, a pegada: os pisos e as paredes dele no PDF (as peças cheias da
+# ARQ_CONTRAPISO e da ARQ_PAREDE dentro da caixa do Subsolo; as do Térreo ficam à esquerda e acima dela), com a
+# circulação externa; a escada do deck (ARQ_ESCADAS E RAMPAS); e o gramado abaixo dela (item 13 de 19/10; confirmado em
+# 21/10: o gramado fica). O resto vira branco; na faixa de 2 px em volta da pegada, só o preto das paredes fica (o
+# traço do render passa um pouco do PDF). A pegada vai para `SUBSOLO_R2["mascara"]`; na final, o rotulos_casaa.py a leva
+# ao quadro pelo mesmo afim da imagem e chama `subsolo_hachurado`: o lote do Térreo final (o que não é branco nele, no
+# mesmo quadro, fechado e sem furos) em diagonais finas a 45° (/), cinza 198, a cada 0,40 m, com traço de 1,3 px e o
+# contorno do lote em cinza fino (165), como no Subsolo da Casa E (`retoque_subsolo_casae.contexto_hachura`).
+SUBSOLO_R2 = {"caixa_pt": (900.0, 1040.0, 2400.0, 1800.0), "camadas": ("ARQ_CONTRAPISO", "ARQ_PAREDE"),
+              "escada": "ARQ_ESCADAS E RAMPAS", "ss": 4, "fechar": 5, "anel": 2, "parede": 100,
+              "mascara": CASA / "renders/POE642_CasaA_PH_Subsolo_pegada_mascara.png",
+              "terreo": CASA / "renders/POE642_CasaA_PH_Terreo_final_rotulos.png",
+              "hachura": {"passo_m": 0.40, "largura_px": 1.3, "cor": (198, 198, 198), "contorno_px": 1.6,
+                          "cor_contorno": (165, 165, 165)}}
+
+
+def so_subsolo(out):
+    from scipy import ndimage
+    q = SUBSOLO_R2
+    pg, p2r = pdf_pavimento("Subsolo")
+    H, W = out.shape[:2]
+    k = q["ss"]
+    m = np.zeros((H * k, W * k), np.uint8)
+    cx0, cy0, cx1, cy1 = q["caixa_pt"]
+    n = 0
+    ex, ey = [], []
+    for d in pg.get_drawings():
+        r = d["rect"]
+        if d.get("layer") == q["escada"]:
+            ex += [r.x0, r.x1]
+            ey += [r.y0, r.y1]
+        elif (d.get("layer") in q["camadas"] and d["type"] in ("f", "fs") and cx0 <= r.x0 and r.x1 <= cx1
+              and cy0 <= r.y0 and r.y1 <= cy1):
+            for c in caminhos_pdf(d, p2r):
+                cv2.fillPoly(m, [np.int32(np.round(c * k))], 255)
+            n += 1
+    # a escada do deck: a caixa das linhas dela
+    (ax, ay), (bx, by) = p2r(min(ex), min(ey)), p2r(max(ex), max(ey))
+    cv2.rectangle(m, (int(round(ax * k)), int(round(ay * k))), (int(round(bx * k)), int(round(by * k))), 255, -1)
+    peg = cv2.resize(m.astype(np.float32) / 255, (W, H), interpolation=cv2.INTER_AREA)
+    # o gramado abaixo da escada (item 13): o verde da caixa dele
+    gx0, gy0, gx1, gy1 = GRAMADO_ESCADA["caixa"]
+    reg = out[gy0:gy1, gx0:gx1].astype(np.int32)
+    verde = (reg[..., 1] > reg[..., 2] + 8) & (reg[..., 1] > reg[..., 0] + 8)
+    verde = ndimage.binary_fill_holes(cv2.morphologyEx(verde.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8)))
+    peg[gy0:gy1, gx0:gx1] = np.maximum(peg[gy0:gy1, gx0:gx1], verde)
+    # as costuras entre o gramado, a escada e a circulação (o px de borda do render, de 1 a 2 px) ficam na pegada
+    f = q["fechar"]
+    peg = np.maximum(peg, cv2.morphologyEx((peg > 0.5).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((f, f), np.uint8)))
+    # em volta da pegada, o preto das paredes do render fica
+    a = q["anel"]
+    perto = cv2.dilate((peg > 0.5).astype(np.uint8), np.ones((2 * a + 1, 2 * a + 1), np.uint8)).astype(bool)
+    parede = perto & (out.astype(np.float32).mean(axis=2) < q["parede"])
+    peg = np.maximum(peg, parede)
+    img = out.astype(np.float32) * peg[..., None] + 255 * (1 - peg[..., None])
+    cv2.imwrite(str(q["mascara"]), np.round(peg * 255).astype(np.uint8))
+    fora = (peg < 0.5) & (out.min(axis=2) < 245)
+    print(f"    só o Subsolo (R2): {n} peças do PDF na pegada, mais a escada do deck e o gramado ({int(verde.sum())} px); "
+          f"{int(fora.sum())} px do Térreo em volta viram branco; pegada em {q['mascara'].name}")
+    return np.clip(np.round(img), 0, 255).astype(np.uint8)
+
+
+def subsolo_hachurado(final, pegada, px_m):
+    """Na final do Subsolo (no quadro comum): fora da pegada (0 a 1, no quadro), o lote do Térreo final hachurado."""
+    from scipy import ndimage
+    q = SUBSOLO_R2
+    h = q["hachura"]
+    H, W = final.shape[:2]
+    t = cv2.imread(str(q["terreo"]))
+    if t.shape[:2] != (H, W):
+        t = cv2.resize(t, (W, H), interpolation=cv2.INTER_AREA)
+    nb = cv2.morphologyEx((t.min(axis=2) < 235).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((15, 15), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(nb, connectivity=8)
+    lote = ndimage.binary_fill_holes(lab == 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA])))
+    s = h["passo_m"] * px_m
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    fr = np.mod((xx + yy) / np.sqrt(2), s)
+    dist = np.minimum(fr, s - fr)
+    a = np.clip(h["largura_px"] / 2 + 0.5 - dist, 0, 1) * lote
+    fundo = np.full((H, W, 3), 255, np.float32)
+    fundo = fundo * (1 - a[..., None]) + np.float32(h["cor"]) * a[..., None]
+    borda = lote & ~cv2.erode(lote.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    k = max(1, int(round(h["contorno_px"])))
+    borda = cv2.dilate(borda.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & lote
+    fundo[borda] = h["cor_contorno"]
+    p = np.clip(pegada, 0, 1)[..., None]
+    out = final.astype(np.float32) * p + fundo * (1 - p)
+    print(f"    terreno hachurado (R2): lote do Térreo final em {100 * lote.mean():.1f}% do quadro, diagonais a cada {s:.1f} px")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -4065,7 +4160,9 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("9", "boxes de vidro: ducha ao lado da sauna e banho feminino", boxes),
                      ("10", "divisória entre os banhos: peça clara do PDF, não parede", divisoria),
                      ("12", "banho de serviço: bancada e cuba nas medidas do PDF", bancada_servico),
-                     ("13", "gramado depois do último degrau da escada do deck", gramado_escada)],
+                     ("13", "gramado depois do último degrau da escada do deck", gramado_escada),
+                     ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",
+                      so_subsolo)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
                     ("2", "sala de estar: o sofá curvo do PDF, a poltrona da direita e a mesinha", sala_estar),
                     ("rejuntes", "piso interno sem os rejuntes: o travertino contínuo", rejuntes),

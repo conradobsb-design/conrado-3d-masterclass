@@ -669,6 +669,10 @@ python3 pdf_entrega.py
 - item 15, banho da varanda: `BANHO_VARANDA` e `banho_varanda`. A bacia do motor e a faixa pontilhada do trilho saem (o piso de cada coluna entre as linhas de cima e de baixo; no lugar da bacia, o piso da mesma linha à esquerda, no tom de cada coluna). Entram as duas folhas do box e o chuveiro de parede do PDF com `retoque_subsolo_casae.vidro_box` e `chuveiro`, como no banho de serviço do Subsolo.
 - item 16, soleiras (R13): `SOLEIRAS_A` e `soleiras_a`. As 13 portas de giro conferidas contra o vão branco do PDF; nos quatro que têm soleira (escritório, lavabo, gás e jardim), o vão exato em Bege Bahia na escala, no tom do item 9, com as faces da parede em cinza fino, como as soleiras do Térreo da Casa E. Nas outras nove, o piso atravessa o vão, e nada muda.
 
+**Pente fino pelas regras, Subsolo (21/10/26):**
+- item 10, o "²" dos rótulos: só o ciclo, sem mudança de código (o Subsolo ainda não tinha passado pela rotina comum dos rótulos de 20/10).
+- item 1, só o Subsolo com o terreno hachurado (R2): `SUBSOLO_R2`, `so_subsolo` (o último item do Subsolo) e `subsolo_hachurado`. No ajuste, a pegada do Subsolo (as peças cheias da ARQ_CONTRAPISO e da ARQ_PAREDE na caixa do Subsolo, a escada do deck e o gramado do item 13) fica e o resto vira branco; a máscara vai para `renders/POE642_CasaA_PH_Subsolo_pegada_mascara.png`. Na final, o `rotulos_casaa.py` (chave `pegada`) a leva ao quadro e hachura, fora dela, o lote do Térreo final (`renders/POE642_CasaA_PH_Terreo_final_rotulos.png`), como `retoque_subsolo_casae.contexto_hachura`. O Subsolo depende da final do Térreo.
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:
