@@ -95,6 +95,8 @@ pode seguir pela ordem proposta"):
   Térreo 7. Grama na escala da referência (R1, R4), no tom do render, como o item 42 do Térreo da Casa E: o gramado é
      o branco da base dentro do lote; as plantas e os tracejados do motor (afastamento, cobertura) ficam; o jardim
      interno da escada também.
+  Térreo 8. Deck na madeira da referência (R4): régua a régua, das réguas da foto (~20 cm, a escala do render já
+     batia), no tom dela, com a luz e as sombras do lugar.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3069,19 +3071,24 @@ GRAMA_A = {"lote": (150, 77, 1807, 1007), "branco": 250, "mancha": 10000, "verde
            "traco": {"media": 41, "limiar": 5, "comprimento": 80, "largura": 3, "borda": 8, "pontas": 40}, "semente": 5}
 
 
-def grama_escala(out):
+def base_terreo(forma):
+    """A base do Térreo (a chapada da entrega), levada à imagem aprovada pelo quadro comum."""
     import json
     import rotulos_casaa as A
-    from texturas_escala import mascara_grama, trocar_grama
-    q = GRAMA_A
-    _, p2r = pdf_pavimento("Terreo")
-    forma = out.shape[:2]
     cfg = json.loads(A.CONFIG.read_text())
     base = cv2.imread(str((A.CONFIG.parent / cfg["entrega"]["pasta_bases"] /
                            cfg["entrega"]["pavimentos"]["Terreo"]["base"]).resolve()))
     b2 = cv2.resize(base, (2000, round(base.shape[0] * 2000 / base.shape[1])), interpolation=cv2.INTER_NEAREST)
-    b2 = cv2.warpAffine(b2, np.float32(AFIM_QR["Terreo"]), (forma[1], forma[0]), flags=cv2.INTER_NEAREST,
-                        borderValue=(255, 255, 255))
+    return cv2.warpAffine(b2, np.float32(AFIM_QR["Terreo"]), (forma[1], forma[0]), flags=cv2.INTER_NEAREST,
+                          borderValue=(255, 255, 255))
+
+
+def grama_escala(out):
+    from texturas_escala import mascara_grama, trocar_grama
+    q = GRAMA_A
+    _, p2r = pdf_pavimento("Terreo")
+    forma = out.shape[:2]
+    b2 = base_terreo(forma)
     im = out.astype(np.float32)
     b, g, r = im[..., 0], im[..., 1], im[..., 2]
     verde = (g > r + 4) & (g > b + 12) & (im.mean(axis=2) < q["verde_max"])
@@ -3136,6 +3143,79 @@ def grama_escala(out):
     print(f"    grama da referência a {px_m:.2f} px/m em {npx} px; plantas fora: {int(planta.sum())} px "
           f"({int(folhas.sum())} junto às bordas); tracejados do motor que ficam: {int(traco.sum())} px")
     return out
+
+
+# Pente fino pelas regras (21/10/26), Térreo, item 8: deck de madeira (R4: "representar a escala da madeira conforme
+# modelo referência"). O motor fez as réguas num marrom avermelhado (RGB ~170, 124, 93), com as juntas fundas; a madeira
+# passa à da referência (_texturas/madeira.jpg: o deck da piscina da planta de referência, RGB ~188, 157, 130, réguas
+# contínuas, de juntas finas). A escala já batia: medidas por FFT, as réguas da referência têm ~20 cm (5,12 px a 26
+# px/m; os "~15 cm" da nota da biblioteca e das regras estavam errados) e as do render, ~19 cm. O deck é a mancha da
+# madeira da base (#AE8863, com o traço das réguas, #8C6A4A). Régua a régua, deitadas como no PDF, em 4x: cada régua do
+# deck é uma régua inteira da foto (de uma junta à seguinte), sorteada, com deslocamento e espelho ao acaso, na largura
+# da referência; sem quilting (as emendas dos retalhos liam como faixas atravessando as réguas). A luz larga do lugar
+# e as sombras (dos degraus, da borda da piscina) ficam, como na grama (item 7).
+DECK_A = {"cores": [(99, 136, 174), (74, 106, 140)], "tol": 6, "fonte": "_texturas/madeira.jpg", "fonte_px_m": 26,
+          "regua_px": 5.12, "ss": 4, "sig_luz_m": 1.5, "sig_sombra_m": 0.25, "sombra_limiar": 0.93, "semente": 8}
+
+
+def deck_referencia(out):
+    from texturas_escala import nconv
+    q = DECK_A
+    _, p2r = pdf_pavimento("Terreo")
+    forma = out.shape[:2]
+    b2 = base_terreo(forma).astype(np.int32)
+    m = np.zeros(forma, np.uint8)
+    for c in q["cores"]:
+        m |= (np.abs(b2 - np.array(c)).max(axis=2) <= q["tol"]).astype(np.uint8)
+    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m, 4)
+    i = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+    deck = lab == i
+    x0, y0, w, h = (int(v) for v in st[i, :4])
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                  # 1 m na escala 1:50 = 56,69 pt
+    px_m = float(np.hypot(c - a, d - b))
+    # a foto da referência na escala, em 4x, com as réguas deitadas; as juntas são os mínimos de luz, um por régua
+    K = q["ss"]
+    f = px_m / q["fonte_px_m"] * K
+    ref = cv2.imread(str(CASA.parent / q["fonte"])).astype(np.float32)
+    R = cv2.rotate(cv2.resize(ref, (round(ref.shape[1] * f), round(ref.shape[0] * f)), interpolation=cv2.INTER_CUBIC),
+                   cv2.ROTATE_90_COUNTERCLOCKWISE)
+    lin = R.mean(axis=(1, 2))
+    P = q["regua_px"] * f
+    juntas = [int(np.argmin(lin[:int(P) + 1]))]
+    while juntas[-1] + 2 * P < len(lin):
+        a_, b_ = int(round(juntas[-1] + P - P / 3)), int(round(juntas[-1] + P + P / 3))
+        juntas.append(a_ + int(np.argmin(lin[a_:b_ + 1])))
+    juntas = [j for j in juntas if j + P + 1 <= len(lin)]          # só réguas inteiras
+    rng = np.random.default_rng(q["semente"])
+    H, W = h * K, w * K
+    T = np.zeros((H, W, 3), np.float32)
+    y = -rng.uniform(0, P)
+    while y < H:
+        b0, b1 = int(round(y)), int(round(y + P))
+        tira = R[juntas[rng.integers(len(juntas))]:][:b1 - b0]
+        if rng.random() < 0.5:
+            tira = tira[:, ::-1]
+        off = int(rng.integers(0, R.shape[1] - W + 1))
+        tira = tira[:, off:off + W]
+        s0, s1 = max(0, -b0), min(b1, H) - b0
+        if s1 > s0:
+            T[b0 + s0:b0 + s1] = tira[s0:s1]
+        y += P
+    T = cv2.resize(T, (w, h), interpolation=cv2.INTER_AREA)
+    # a luz larga do lugar (só a do deck) e as sombras, no tom da referência
+    im = out.astype(np.float32)
+    mf = deck.astype(np.float32)
+    Lg = nconv(im, mf, q["sig_luz_m"] * px_m)
+    Lc = nconv(im, mf, q["sig_sombra_m"] * px_m)
+    sombra = np.minimum(1.0, ((Lc.mean(axis=2) + 1) / (Lg.mean(axis=2) + 1)) / q["sombra_limiar"])
+    luz = Lg / Lg[deck].mean(axis=0)
+    novo = im.copy()
+    novo[y0:y0 + h, x0:x0 + w] = (luz * sombra[..., None])[y0:y0 + h, x0:x0 + w] * T
+    alfa = (cv2.GaussianBlur(mf, (0, 0), 0.7) * mf)[..., None]
+    print(f"    deck: {int(deck.sum())} px na madeira da referência, {len(juntas)} réguas da foto, a {px_m:.2f} px/m "
+          f"(régua de {q['regua_px'] / q['fonte_px_m'] * 100:.0f} cm)")
+    return np.clip(im * (1 - alfa) + novo * alfa, 0, 255).astype(np.uint8)
 
 
 # Pente fino pelas regras (21/10/26), Térreo, item 5: vidros finos (seções 4 e 18). O motor fez dois "tubos" cinza grossos
@@ -3266,6 +3346,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf6", "pente fino 6: armários até o teto em marcenaria areia com veio, sem a diagonal e sem a "
                      "sombra de móvel baixo; o braço da bancada dos tanques em quartzo", armarios_teto),
                     ("pf7", "pente fino 7 (R1, R4): grama na escala da referência, no tom do render", grama_escala),
+                    ("pf8", "pente fino 8 (R4): deck na madeira da referência, régua a régua", deck_referencia),
                     ("pf5", "pente fino 5: vidros finos (varanda e salas; o vão do hall sem o tubo)", vidros_finos),
                     # as projeções por cima de tudo: o último item do Térreo
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a)]}

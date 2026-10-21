@@ -88,7 +88,7 @@
       ],
       "arquivo": "madeira.jpg",
       "direcional": true,
-      "nota": "o deck da piscina da referência: réguas de ~15 cm (4 px a 26 px/m), contínuas, na vertical da imagem",
+      "nota": "o deck da piscina da referência: réguas de ~20 cm (5,12 px a 26 px/m, medidas por FFT em 21/10/26; antes estava ~15 cm, conta errada), contínuas, na vertical da imagem",
       "amostra": {
         "px_por_m": 26,
         "lado_m": 10,

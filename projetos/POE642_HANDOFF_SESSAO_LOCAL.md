@@ -1166,7 +1166,7 @@ Pedido do usuário (19/10/26): "vamos inserir as referências de imagem das text
   - A referência é uma planta humanizada de outra casa (`_texturas/originais/referencia_planta.webp`).
   - **Escala medida nela mesma: 26 px/m.** A cama king (1,93 x 2,03 m) tem 50 x 53 px; o sedã (4,55 m), 118 px; a picape grande (6,0 m), 158 px; a porta (0,85 m), 22 px. É quase a escala dos renders (a Casa A em 2000 px tem 31,45 px/m).
   - As texturas saem de recortes limpos, sem móveis, sombra ou tapete. As caixas estão em `texturas.json`, e a cartela as marca na miniatura.
-    - **madeira:** o deck da piscina, réguas de ~15 cm;
+    - **madeira:** o deck da piscina, réguas de ~15 cm (**[21/10] medidas de novo: ~20 cm**, 5,12 px a 26 px/m);
     - **vinílico:** o piso dos quartos (quatro trechos), réguas de ~20 cm, mais claras e de tons alternados;
     - **grama:** o gramado fora da sombra das árvores.
   - A amostra de cada uma é tecida na escala da própria referência (10 a 12 m de lado, retalhos de ~50 cm): a foto tem pouca resolução, e ampliá-la só borraria. Madeira e vinílico têm as réguas na vertical da imagem; para aplicar, girar conforme o ambiente.
@@ -1586,6 +1586,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Tracejados:** os do motor sobre a grama ficam: o afastamento obrigatório, em traço escuro (até 21 px fora da linha do PDF), e trechos da projeção da cobertura (a 2 px da do item 4). São achados no próprio render como linhas retas, finas e longas, escuras, a mais de 8 px da borda do gramado (junto às bordas, a sombra dos pisos e dos muros dava linhas falsas) e longe das plantas. Ficam seis (o afastamento em x 257 e 1711 e em y 854, em dois trechos, e a cobertura em x 1388 e y 147), com contraste de 16 a 22, contra 6 a 9 das falsas. Cada um segue mais 40 px nas pontas, e os px do traço voltam depois da troca. As projeções do item 4 continuam por cima.
   - **Conferência:** na imagem com ajustes e na prancha, só o gramado (483 mil px de grama nova); plantas, pisos, deck, pedra portuguesa e o jardim interno ficaram; rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_grama_antes_depois.jpg`.
+- **Térreo, item 8, deck de madeira (R4), feito** (`ajustes_casaa.deck_referencia`, config `DECK_A`, depois da grama). O motor fez as réguas num marrom avermelhado (RGB ~170, 124, 93), com as juntas fundas. A madeira passa à da referência (`_texturas/madeira.jpg`, o deck da piscina da planta de referência: RGB ~188, 157, 130, réguas contínuas, de juntas finas).
+  - **Escala:** já batia. Medidas por FFT, as réguas da referência têm ~20 cm (5,12 px a 26 px/m) e as do render, ~19 cm. Os "~15 cm" da nota da biblioteca, das regras e do mapa do pente fino eram uma conta errada; as três notas foram corrigidas (com a data), e vale a régua da referência, como diz a R4.
+  - **Como:** o deck é a mancha da madeira da base (#AE8863, com o traço das réguas, #8C6A4A). Régua a régua, deitadas como no PDF, em 4x: cada régua do deck é uma régua inteira da foto (de uma junta à seguinte; são 7), sorteada, com deslocamento e espelho ao acaso, na largura da referência. Sem quilting: as emendas dos retalhos (`textura("madeira")`) liam como faixas atravessando as réguas. A luz larga do lugar e as sombras (dos degraus, da borda da piscina) ficam, como na grama.
+  - **Conferência:** na imagem com ajustes e na prancha, só o deck; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_deck_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

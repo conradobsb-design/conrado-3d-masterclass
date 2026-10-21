@@ -44,7 +44,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Pedra portuguesa (pedras de 6 a 8 cm), só no acesso de veículos. **[20/10]** No desenho e no tom da foto de referência (`_texturas/originais/pedra_portuguesa.webp`): assentada em leque, com juntas claras de areia, em bege, cinza e rosado (usuário: "opção 1, tom da foto"; substitui o caramelo). Na escala da planta é desenhada por código (`texturas_escala.pedra_portuguesa_leque`), porque a foto ampliada perde o leque.
   - Granito marrom (mais liso e menos escuro que a foto, sem excesso de pontos claros). **[20/10]** Sem os pontos brancos grandes do motor ("opção B, sem pontos os grandes brancos") e sem a grade de manchas repetida. **Desenho e tom da referência do usuário** ("use essa referencia de granito marrom"): base marrom quente (RGB ~118, 89, 69) com nuvens suaves e lascas de agregado de vários tamanhos, em tons de marrom, creme, cinza e quase preto (`fontes_procedurais.granito_referencia`; a foto veio só na conversa, e o desenho foi reproduzido por código).
 - **[19/10] R4. Madeira e grama na escala da referência**, com textura: `referencia_planta.webp`, medida em 26 px/m.
-  - Madeira de deck: réguas de ~15 cm.
+  - Madeira de deck: réguas de ~15 cm. **[21/10] Medida de novo (FFT da foto): ~20 cm** (5,12 px a 26 px/m; os ~15 cm vinham de uma conta errada). Vale a régua da referência, como diz a R4.
   - Vinílico: réguas de ~20 cm, claras, em tons alternados.
   - Grama: verde médio com manchas suaves de 0,5 a 1 m.
   - A madeira nunca é laranja.
