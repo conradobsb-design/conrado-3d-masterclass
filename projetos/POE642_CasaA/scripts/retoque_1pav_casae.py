@@ -79,6 +79,8 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
   quadradas com o braço da parede do meio e os dois vasos suspensos, costas com costas, do PDF, como no Subsolo;
 - item 5, guarda-roupas com cabides (GUARDA_ROUPAS, R11): o closet master e os closets 1 a 4, abertos, vistos de cima,
   com as portas do lado do closet;
+- item 6, projeções em tracejado (PROJECOES_1P, R8): o shaft entre o elevador e a rouparia (vão branco com o X), o
+  retângulo com X da rouparia e os X rasos do fundo do banho master;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -1616,6 +1618,54 @@ def guarda_roupas(out, A, p2r):
     return np.clip(im, 0, 255).astype(np.uint8)
 
 
+# item 6 do pente fino de 20/10/26: projeções em tracejado (R8: "projeções ... shaft com X ... em tracejado bem
+# visível"). Os traços da DOC_LINHAS E PROJEÇÕES que o motor apagou, desenhados como no PDF, por cima de tudo menos das
+# paredes pretas, no traço das projeções do Térreo (0,6 px, força 0,85):
+# - o shaft estreito entre o elevador e a rouparia: no PDF, um vão entre duas paredes, com o X; o motor fez ali uma
+#   faixa de marcenaria. O vão fica branco, como os vazios, com o X em cinza médio, como o deles;
+# - o retângulo com X na rouparia, sobre o vinílico: em cinza claro (o cinza médio sumia na madeira);
+# - os X rasos no fundo do banho master (sobre o vaso e o box), sobre o quartzito: em cinza médio.
+PROJECOES_1P = {"camada": "DOC_LINHAS E PROJEÇÕES",
+                "vao_branco": (1833.0, 906.1, 1848.7, 996.8), "branco": 250, "escuro": 60,
+                "grupos": [((1832.5, 905.5, 1849.0, 997.5), (147, 147, 147)),          # shaft
+                           ((1886.0, 943.0, 1933.5, 990.0), (226, 226, 226)),          # rouparia
+                           ((1538.5, 974.0, 1608.0, 997.5), (150, 150, 150)),          # banho master: vaso
+                           ((1615.0, 974.0, 1726.5, 997.5), (150, 150, 150))],         # banho master: box
+                "largura": 0.6, "forca": 0.85, "parede": 40}
+
+
+def projecoes_1pav(out, pg, p2r):
+    q = PROJECOES_1P
+    im = out.astype(np.float32)
+    (a, b), (c, d) = p2r(*q["vao_branco"][:2]), p2r(*q["vao_branco"][2:])
+    x0, y0, x1, y1 = int(round(a)), int(round(b)), int(round(c)), int(round(d))
+    reg = im[y0:y1, x0:x1]
+    vao = reg.max(axis=2) > q["escuro"]
+    reg[vao] = q["branco"]
+    tracos = [dd for dd in pg.get_drawings() if dd.get("layer") == q["camada"]]
+    n = 0
+    for caixa, cor in q["grupos"]:
+        cx = pymupdf.Rect(*caixa)
+        segs = [(p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)) for dd in tracos if dd["rect"] in cx
+                for it in dd["items"] if it[0] == "l"]
+        pts = np.array([p for sg in segs for p in sg])
+        X0, Y0 = np.floor(pts.min(axis=0)).astype(int) - 3
+        X1, Y1 = np.ceil(pts.max(axis=0)).astype(int) + 4
+        h, w = Y1 - Y0, X1 - X0
+        f = np.zeros((h * SS, w * SS), np.uint8)
+        for (ax, ay), (bx, by) in segs:
+            cv2.line(f, (int(round((ax - X0) * SS)), int(round((ay - Y0) * SS))),
+                     (int(round((bx - X0) * SS)), int(round((by - Y0) * SS))), 255,
+                     max(1, int(round(q["largura"] * SS))), cv2.LINE_AA)
+        al = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * q["forca"]
+        reg = im[Y0:Y1, X0:X1]
+        al *= reg.mean(axis=2) >= q["parede"]
+        im[Y0:Y1, X0:X1] = reg * (1 - al[..., None]) + np.float32(cor) * al[..., None]
+        n += len(segs)
+    print(f"    projeções: o vão do shaft em branco ({int(vao.sum())} px) e {n} traços do PDF em {len(q['grupos'])} grupos")
+    return np.clip(im, 0, 255).astype(np.uint8)
+
+
 # item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
 # é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
 # quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
@@ -1741,6 +1791,8 @@ def main():
     out = guarda_roupas(out, A, p2r)
     print("[pente fino 3] boxes em folha contínua, de parede a parede (R10)")
     out = boxes_continuos(out, p2r)
+    print("[pente fino 6] projeções em tracejado: shaft, rouparia e banho master (R8)")
+    out = projecoes_1pav(out, pg, p2r)
 
     args.saida.mkdir(parents=True, exist_ok=True)
     # sem rótulos: a imagem que vai à montagem com o Térreo esmaecido (os rótulos são escritos de novo na

@@ -858,6 +858,12 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Ficam em marcenaria:** a rouparia, o armário da copinha e o do banho master (R11 vale só para guarda-roupa).
     - **Conferência:** no retocado, nas montagens e nas pranchas, só as três áreas dos closets mudaram; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_guarda_roupas_antes_depois.jpg`.
+  - **Item 6, projeções em tracejado (R8), feito** (`retoque_1pav_casae.projecoes_1pav`, config `PROJECOES_1P`, depois dos boxes). Os traços da DOC_LINHAS E PROJEÇÕES que o motor apagou voltam como no PDF. Ficam por cima de tudo, menos das paredes pretas, no traço das projeções do Térreo (0,6 px, força 0,85).
+    - **Shaft entre o elevador e a rouparia:** no PDF, um vão entre duas paredes, com o X; o motor tinha feito ali uma faixa de marcenaria. O vão fica branco, como os vazios, com o X em cinza médio (147).
+    - **Rouparia:** o retângulo com X, sobre o vinílico, em cinza claro (226); o cinza médio sumia na madeira. O rótulo da rouparia fica dentro dele, como no PDF.
+    - **Banho master:** os X rasos no fundo, sobre o vaso e o box, em cinza médio (150) sobre o quartzito.
+    - **Conferência:** no retocado, nas montagens e nas pranchas, só as três áreas mudaram; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_projecoes_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 
