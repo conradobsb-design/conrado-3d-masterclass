@@ -50,7 +50,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Vinílico: réguas de ~20 cm, claras, em tons alternados.
   - Grama: verde médio com manchas suaves de 0,5 a 1 m.
   - A madeira nunca é laranja.
-- **Pisos contínuos:** sem rejuntes nem juntas marcadas.
+- **Pisos contínuos:** sem rejuntes nem juntas marcadas. **[21/10]** Nem pedaços delas: nenhum traço vertical (ou horizontal) que denotava junta, nem junto aos tracejados e aos móveis (usuário: "deixe a imagem limpa, sem esses traços que não representam nada").
 - **Legenda de cores das bases (entre casas):**
 
   | Cor da base | Material |

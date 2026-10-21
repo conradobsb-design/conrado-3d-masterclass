@@ -89,6 +89,9 @@ Itens:
   Térreo, bordas do acesso (usuário, 21/10/26: "melhorar o acabamento das bordas desse acesso"): na final, a pedra
      portuguesa junto à grama segue o contorno vetorial do PDF (`acesso_alfa`, `pedra_final`), liso, com a linha fina
      do limite, sem a franja clara sobre a grama.
+  Térreo, juntas verticais (usuário, 21/10/26: "remover traços na vertical que anteriormente denotavam juntas"):
+     os pedaços das juntas do motor que ficaram no anel em volta dos traços e dos móveis (`juntas_verticais`) voltam
+     ao piso, linha a linha, entre o travertino dos dois lados.
   Térreo, carros (pedido do usuário, 19/10/26): cada carro numa cor (branco perolado, grafite, azul-marinho, a
      paleta da Casa D) e os três levemente desalinhados, como na Casa E.
   Térreo, sem arcos (decisão do usuário, 19/10/26, com as plantas de referência dos elementos: "remover os arcos,
@@ -4599,6 +4602,97 @@ def paredes_1pav(out):
     return paredes_perfeitas(out, "1Pavimento")
 
 
+# Pedido do usuário (21/10/26), com a varanda do Térreo: "REMOVER TRAÇOS NA VERTICAL QUE ANTERIORMENTE DENOTAVAM
+# JUNTAS. DEIXE A IMAGEM LIMPA, SEM ESSES TRAÇOS QUE NÃO REPRESENTAM NADA". O item dos rejuntes (19/10) deixou o piso
+# original num anel de 7 px em volta dos traços desenhados e dos móveis; ali ficaram pedaços das juntas verticais do
+# motor (tracinhos de 1 a 2 px de largura e 6 a 60 px de altura, cruzando os tracejados das projeções, junto aos
+# móveis e às portas de vidro). No travertino da legenda (o mesmo dos rejuntes, sem a escada interna):
+# - é junta o px de piso (pela cor, como nos rejuntes) mais escuro (ou mais claro) que os dois vizinhos a 2 ou 3 px na
+#   horizontal, em `destoa` níveis ou mais, os dois também piso (numa borda de móvel, o px fica entre os dois), numa
+#   coluna de `altura` px ou
+#   mais (abertura vertical), fora das linhas do PDF (todos os traços, com 1 px de folga: o vidro das portas de correr,
+#   os tracejados, as folhas);
+# - a junta (com o antialias, 1 px para cada lado, e as pontas na folga do traço do PDF, entre dois pedaços dela) vira,
+#   linha a linha, a reta entre o piso logo à esquerda e logo à direita (se um dos lados não é piso, o outro): os veios
+#   do travertino correm na horizontal e continuam.
+JUNTAS_VERTICAIS = {"destoa": 3, "altura": 6, "folga_pdf": 1}
+
+
+def juntas_verticais(out):
+    import json
+    import rotulos_casaa as R
+    q, qr = JUNTAS_VERTICAIS, REJUNTES
+    cfg = json.loads(R.CONFIG.read_text())
+    base = cv2.imread(str((R.CONFIG.parent / cfg["entrega"]["pasta_bases"] /
+                           cfg["entrega"]["pavimentos"]["Terreo"]["base"]).resolve()))
+    b2 = cv2.resize(base, (2000, round(base.shape[0] * 2000 / base.shape[1])), interpolation=cv2.INTER_NEAREST)
+    trav = (np.abs(b2.astype(int) - qr["legenda"]).max(axis=2) <= qr["tol"]).astype(np.uint8)
+    T = cv2.warpAffine(trav, np.float32(AFIM_QR["Terreo"]), (out.shape[1], out.shape[0]),
+                       flags=cv2.INTER_NEAREST).astype(bool)
+    T = cv2.morphologyEx(T.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8)).astype(bool)   # sem os traços
+    for x0, y0, x1, y1 in qr["fora"]:
+        T[y0:y1, x0:x1] = False
+    rf = out.astype(np.float32)
+    L = rf.mean(axis=2)
+    sat, quente = rf.max(axis=2) - rf.min(axis=2), rf[..., 2] - rf[..., 0]
+    pp = qr["piso"]
+    piso = (L >= pp["L"][0]) & (L <= pp["L"][1]) & (quente >= pp["quente"][0]) & (quente <= pp["quente"][1]) & \
+        (sat >= pp["sat"][0]) & (sat <= pp["sat"][1])
+    # as linhas do PDF (todos os traços), com folga
+    pg, p2r = pdf_pavimento("Terreo")
+    ss = 4
+    h, w = out.shape[:2]
+    lm = np.zeros((h * ss, w * ss), np.uint8)
+    for d in pg.get_drawings():
+        if d["type"] in ("s", "fs"):
+            for cm in caminhos_pdf(d, p2r):
+                cv2.polylines(lm, [np.int32(np.round(cm * ss))], False, 255, ss)
+    nucleo = cv2.resize(lm, (w, h), interpolation=cv2.INTER_AREA) > 127   # o traço do PDF em si
+    k = 2 * q["folga_pdf"] + 1
+    pdf = cv2.dilate((cv2.resize(lm, (w, h), interpolation=cv2.INTER_AREA) > 0).astype(np.uint8),
+                     np.ones((k, k), np.uint8)).astype(bool)
+    cand = np.zeros((h, w), np.uint8)
+    for s in (2, 3):
+        a, b = np.roll(L, s, axis=1), np.roll(L, -s, axis=1)
+        ok = np.roll(piso, s, axis=1) & np.roll(piso, -s, axis=1)
+        # mais escuro (ou mais claro) que os dois lados: numa borda de móvel, o px fica entre os dois
+        cand |= (ok & ((L < np.minimum(a, b) - q["destoa"]) | (L > np.maximum(a, b) + q["destoa"]))).astype(np.uint8)
+    cand &= (T & ~pdf).astype(np.uint8)
+    # a altura medida atravessando as linhas do PDF (o tracejado das projeções corta os tracinhos em dois)
+    junta = cv2.morphologyEx(cand | (pdf & T).astype(np.uint8), cv2.MORPH_OPEN,
+                             np.ones((q["altura"], 1), np.uint8)) & cand
+    # as pontas junto ao traço do PDF (na folga dele), entre dois pedaços da junta, também; e o antialias
+    junta = cv2.morphologyEx(junta, cv2.MORPH_CLOSE, np.ones((7, 1), np.uint8))
+    junta = cv2.dilate(junta, np.ones((1, 3), np.uint8)).astype(bool) & ~nucleo
+    # linha a linha, a reta entre o piso logo à esquerda e logo à direita
+    img = rf.copy()
+    ys, xs = np.nonzero(junta)
+    feitos = 0
+    for y in np.unique(ys):
+        linha = junta[y]
+        x = 0
+        while x < w:
+            if not linha[x]:
+                x += 1
+                continue
+            x0 = x
+            while x < w and linha[x]:
+                x += 1
+            e, d_ = x0 - 1, x                                          # os vizinhos de fora da junta
+            if e < 0 or d_ >= w:
+                continue
+            pe, pd = piso[y, e] and not nucleo[y, e], piso[y, d_] and not nucleo[y, d_]
+            if not (pe or pd):                                         # nenhum lado é piso: fica
+                continue
+            ce, cd = (rf[y, e] if pe else rf[y, d_]), (rf[y, d_] if pd else rf[y, e])
+            for i, xx in enumerate(range(x0, x)):
+                f = (i + 1) / (x - x0 + 1)
+                img[y, xx] = ce * (1 - f) + cd * f
+            feitos += x - x0
+    print(f"    juntas: {feitos} px de juntas verticais antigas no travertino de volta ao piso")
+    return np.clip(np.round(img), 0, 255).astype(np.uint8)
+
+
 def carrara_subsolo(out):
     return carrara_bancadas(out, "Subsolo")
 
@@ -6556,6 +6650,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("boxes", "boxes com as duas folhas de vidro do PDF contínuas (usuário, 21/10/26)", boxes_terreo),
                     ("paredes", "paredes pretas no contorno do PDF, sem falhas e sem sobras (usuário, 21/10/26)",
                      paredes_terreo),
+                    ("juntas", "sem os traços verticais das juntas antigas no travertino (usuário, 21/10/26)",
+                     juntas_verticais),
                     # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",

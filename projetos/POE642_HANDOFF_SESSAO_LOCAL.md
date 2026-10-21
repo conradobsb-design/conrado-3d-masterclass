@@ -1882,7 +1882,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **O quê:** junto à grama, a borda da pedra portuguesa segue o contorno vetorial do PDF, com a curva lisa e a linha cinza fina do limite; a franja clara de pedra sobre a grama e os degraus da máscara ampliada sumiram. Junto ao muro do lote e à garagem, como estava.
   - **Conferência:** só o acesso muda na prancha do Térreo (e no Térreo nublado do 1º Pavimento); rodapés iguais. Pranchas e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_acesso_bordas_antes_depois.jpg`.
-- **Pedidos na fila (21/10/26), um por vez, nesta ordem:** traços verticais de juntas antigas na varanda; quarto do motorista (rótulo maior e embaixo, cama menos branca, pezeira).
+- **Térreo, sem os traços verticais das juntas antigas, feito** (pedido do usuário, 21/10/26; `ajustes_casaa.juntas_verticais`, config `JUNTAS_VERTICAIS`, chave `juntas`).
+  - **O quê:** os tracinhos verticais que sobraram da grade de juntas do motor (no anel em volta dos tracejados das projeções, dos móveis e das portas de vidro, onde o item dos rejuntes não mexeu) voltam ao piso, linha a linha, com o travertino dos dois lados; os veios horizontais continuam. As linhas do PDF ficam.
+  - **Conferência:** só pontos do travertino mudam (varanda, salas, hall); rodapé igual; o 1º Pavimento muda só no Térreo nublado. Pranchas e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_juntas_antes_depois.jpg`.
+- **Pedidos na fila (21/10/26), um por vez, nesta ordem:** quarto do motorista (rótulo maior e embaixo, cama menos branca, pezeira).
 
 ## Casas A a D · Barlavento nas piscinas
 
