@@ -1769,6 +1769,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** o guarda-roupa da biblioteca (`elementos.guarda_roupa`), aberto, visto de cima, com os cabides e o cabideiro de metal, no tamanho do PDF, com as portas do lado do closet; os tons da Casa E (bege dentro, ocre na borda), como confirmado pelo usuário em 21/10.
   - **Conferência:** na imagem com ajustes e na prancha, só os quatro closets (4 regiões); os rótulos não mudam; rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_guarda_roupas_antes_depois.jpg`.
+- **1º Pavimento, item 5, armários até o teto (seção 7), feito** (`ajustes_casaa.armarios_1pav`, config `ARMARIOS_1PAV`).
+  - **Onde:** os dois retângulos com diagonal da DOC_LINHAS E PROJEÇÕES que não são guarda-roupa: na circulação, sob o banho 3 (o motor o fez bege liso, com a sombra de móvel baixo no vinílico), e no quarto de serviço (em madeira, com a diagonal).
+  - **Como:** a rotina do Térreo (item 6), generalizada em `armarios_ate_o_teto(out, chave, q)`; o Térreo sai igual px a px. A sombra do motor sai do piso nas faces livres, a marcenaria areia aprovada entra com o veio no comprido, sem a diagonal, e o contorno fino fica nas faces livres.
+  - **Sala íntima:** o mapa citava um armário ali, mas o PDF não tem retângulo com diagonal; o painel de madeira junto à parede é o da TV (no PDF, o retângulo branco com a TV) e ficou como está.
+  - **Conferência:** na imagem com ajustes e na prancha, só os dois armários (2 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_armarios_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

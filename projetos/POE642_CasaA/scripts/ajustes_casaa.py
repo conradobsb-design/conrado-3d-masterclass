@@ -144,6 +144,9 @@ pode seguir pela ordem proposta"):
      bocéis tracejados, sem a linha de percurso e sem o corte.
   1º Pavimento, pente fino 4 (R11): guarda-roupas abertos com cabides nos closets 3, 2, master e 1, nos retângulos com
      diagonal da DOC_LINHAS, como na Casa E (bege dentro, ocre na borda, cabideiro de metal), portas do lado do closet.
+  1º Pavimento, pente fino 5 (seção 7): os armários até o teto da circulação e do quarto de serviço (os outros dois
+     retângulos com diagonal da DOC_LINHAS) em marcenaria areia com o veio, sem a diagonal e sem a sombra de móvel
+     baixo, pela rotina do Térreo (armarios_ate_o_teto; o Térreo sai igual px a px).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3687,6 +3690,28 @@ def guarda_roupas_1pav(out):
     return np.clip(im, 0, 255).astype(np.uint8)
 
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 5: armários até o teto (seção 7: "marcenaria areia com veio,
+# sem a diagonal e sem sombra de móvel baixo"). No PDF do 1º Pavimento, os retângulos com diagonal da DOC_LINHAS E
+# PROJEÇÕES que não são guarda-roupa são dois: o da circulação, sob o banho 3 (de parede a parede, até o guarda-corpo da
+# escada), e o do quarto de serviço, junto à parede do banho de serviço. O motor fez o da circulação em bege liso, com
+# a sombra de móvel baixo no vinílico, e o do quarto de serviço em madeira, com a diagonal. Entram como os do Térreo
+# (item 6, armarios_ate_o_teto): a marcenaria areia aprovada com o veio no comprido, no retângulo do PDF, menos as
+# paredes; a sombra do motor sai do piso nas faces livres; contorno fino nelas. Na sala íntima o PDF não tem retângulo
+# com diagonal: o painel de madeira é o da TV (o retângulo branco do PDF, com a TV) e fica.
+ARMARIOS_1PAV = {"pecas": [("circulação, sob o banho 3", (1811.5, 700.8, 2012.7, 729.2), ["baixo", "direita"]),
+                           ("quarto de serviço", (1890.8, 1491.7, 1924.8, 1639.1), ["esquerda"])],
+                 "pisos": [((1811.5, 700.8, 2012.7, 729.2), "baixo", (0, 0)),
+                           ((1890.8, 1491.7, 1924.8, 1639.1), "esquerda", (0, 0))],
+                 # a fonte, o contorno e os limites da sombra: os do Térreo (ARMARIOS_A)
+                 "fonte": ("POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v4.png",
+                           (1128, 740, 1143, 797)),
+                 "contorno": (70, 72, 74), "larg_contorno": 0.4, "faixa": 14, "parede": 35, "traco": (0.45, 1.12)}
+
+
+def armarios_1pav(out):
+    return armarios_ate_o_teto(out, "1Pavimento", ARMARIOS_1PAV)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -3812,10 +3837,16 @@ ARMARIOS_A = {"pecas": [("cozinha, junto à parede de cima", (1666.9, 1287.6, 19
 
 
 def armarios_teto(out):
+    return armarios_ate_o_teto(out, "Terreo", ARMARIOS_A)
+
+
+def armarios_ate_o_teto(out, chave, q):
+    """Os armários até o teto de `q` (ARMARIOS_A, do Térreo; ARMARIOS_1PAV): a sombra de móvel baixo do motor sai do
+    piso, face a face; a marcenaria areia com o veio entra no retângulo do PDF, com o contorno nas faces livres; e, se
+    houver `bancada`, o braço da bancada dos tanques no quartzo."""
     from retoque_subsolo_casae import Tela, SOMBRA, QUARTZO
     import retoque_terreo_casae as T
-    q = ARMARIOS_A
-    _, p2r = pdf_pavimento("Terreo")
+    _, p2r = pdf_pavimento(chave)
     forma = out.shape[:2]
     orig = out.astype(np.float32)
     Y = orig.mean(axis=2)
@@ -3827,7 +3858,7 @@ def armarios_teto(out):
         return float(a), float(b), float(c), float(d)
 
     ocupado = np.zeros(forma, bool)
-    for r in [p[1] for p in q["pecas"]] + [q["bancada"]]:
+    for r in [p[1] for p in q["pecas"]] + ([q["bancada"]] if "bancada" in q else []):
         x0, y0, x1, y1 = px(r)                              # só os px inteiros da peça: o da face é piso
         ocupado[int(np.ceil(y0)):int(np.floor(y1)), int(np.ceil(x0)):int(np.floor(x1))] = True
 
@@ -3894,13 +3925,14 @@ def armarios_teto(out):
         img[alvo] = v
 
     # 2. o braço da bancada dos tanques, no quartzo
-    out = np.clip(np.round(img), 0, 255).astype(np.uint8)
-    tl = Tela(out, p2r, q["bancada"])
-    m = tl.ret(q["bancada"])
-    tl.sombra(m, **SOMBRA)
-    tl.pintar(m, QUARTZO)
-    tl.contorno(m, 0.35, (150, 153, 155))
-    img = tl.gravar().astype(np.float32)
+    if "bancada" in q:
+        out = np.clip(np.round(img), 0, 255).astype(np.uint8)
+        tl = Tela(out, p2r, q["bancada"])
+        m = tl.ret(q["bancada"])
+        tl.sombra(m, **SOMBRA)
+        tl.pintar(m, QUARTZO)
+        tl.contorno(m, 0.35, (150, 153, 155))
+        img = tl.gravar().astype(np.float32)
 
     # 3. a marcenaria areia com o veio, no retângulo do PDF, menos as paredes; contorno nas faces livres
     arq, (fx0, fy0, fx1, fy1) = q["fonte"]
@@ -5010,6 +5042,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          "nos bocéis e o triângulo da descida", escadas_1pav),
                         ("pf4", "pente fino 4 (R11): guarda-roupas com cabides nos closets 3, 2, master e 1 (bege dentro, "
                          "ocre na borda, cabideiro)", guarda_roupas_1pav),
+                        ("pf5", "pente fino 5 (seção 7): armários até o teto da circulação e do quarto de serviço em "
+                         "marcenaria areia, sem a diagonal e sem a sombra de móvel baixo", armarios_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 
