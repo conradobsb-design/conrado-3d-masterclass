@@ -103,6 +103,9 @@ pode seguir pela ordem proposta"):
      E (pontos claros e a grade de manchas fora); os rótulos sobre ele seguem brancos (limite de luz do Térreo, 125).
   Térreo 11. Pedra portuguesa em leque, no tom da foto (o item 47 da Casa E), onde ainda é o caramelo do motor, com as
      linhas da DOC_LINHAS do PDF por cima; redesenhada na final de 3840 px pelo rotulos_casaa.py (pedra_final).
+  Térreo 12. Vegetação da biblioteca no tamanho real, só dentro do lote (a opção A do item 53 da Casa E): as folhas
+     do motor que passavam do lote e sobre os pisos saem (o material da base ao lado, o branco de fora, o perfil do
+     muro), a grama do item 7 entra sob as manchas e as plantas da referência, com a copa dentro do verde.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3089,10 +3092,10 @@ def base_terreo(forma):
                           borderValue=(255, 255, 255))
 
 
-def grama_escala(out):
-    from texturas_escala import mascara_grama, trocar_grama
+def gramado_plantas(out):
+    """O gramado (o branco da base dentro do lote, em manchas grandes e verdes), a grama e as plantas dele (item 7)."""
+    from texturas_escala import mascara_grama
     q = GRAMA_A
-    _, p2r = pdf_pavimento("Terreo")
     forma = out.shape[:2]
     b2 = base_terreo(forma)
     im = out.astype(np.float32)
@@ -3120,6 +3123,15 @@ def grama_escala(out):
     folhas = gramado & (dist <= q["borda"]) & perto & ((est >= q["est_lim"]) | (Y >= 120))
     planta |= folhas
     grama &= ~planta
+    return gramado, grama, planta, folhas, dist, Y
+
+
+def grama_escala(out):
+    from texturas_escala import trocar_grama
+    q = GRAMA_A
+    _, p2r = pdf_pavimento("Terreo")
+    forma = out.shape[:2]
+    gramado, grama, planta, folhas, dist, Y = gramado_plantas(out)
     # os tracejados do motor: linhas finas, longas e escuras, achadas no render
     t = q["traco"]
     livre = gramado & (dist > t["borda"]) & ~cv2.dilate(planta.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
@@ -3149,6 +3161,203 @@ def grama_escala(out):
     print(f"    grama da referência a {px_m:.2f} px/m em {npx} px; plantas fora: {int(planta.sum())} px "
           f"({int(folhas.sum())} junto às bordas); tracejados do motor que ficam: {int(traco.sum())} px")
     return out
+
+
+# Pente fino pelas regras (21/10/26), Térreo, item 12: vegetação (seção 10; R1, R4). As folhagens do motor estão fora
+# de escala (folhas de 1 a 1,3 m) e passam do lote nos quatro cantos (sobre o muro e no branco de fora) e da pedra do
+# acesso. Como a opção A do Térreo da Casa E (item 53 de lá: retoque_terreo_casae.VEGETACAO, sprite_referencia e
+# pousar_planta), nas manchas de planta do gramado (as do item 7, achadas na imagem aprovada), só as de vegetação de
+# verdade: as cinco grandes, dos quatro cantos e do jardim lateral (as pequenas, de até 600 px, são sombra de parede
+# e de degrau, e ficam):
+# - folhas fora do verde: as verdes ligadas às manchas por px verdes (uma parede, um caixilho ou a água cortam a
+#   ligação; a rotina de restos da Casa E pegava a borda do spa, o caixilho do escritório e um vaso dentro da sala).
+#   Sobre os pisos, elas e a sombra delas (3 px em volta) e, a até 1,3 m das manchas, os fragmentos de folha e as
+#   sombras soltas (na pedra, o que não é o caramelo do motor; no Bege Bahia, o cinza ou o verde, fora os traços finos
+#   da base no mesmo cinza, como o contorno dos carros, e a sombra junto às paredes da casa; as linhas da DOC_LINHAS
+#   ficam) viram o mesmo material da base copiado de 12 a 24 px ao lado, como na Casa E (na pedra, o caramelo, que o item 11 troca; o inpaint misturava a grama e deixava uma faixa
+#   suja na curva da pedra; os px de cor rara da base, como a borda da curva, ganham o material mais próximo); fora do
+#   lote, o branco de fora; sobre o muro (as linhas pretas de cima, de baixo e da esquerda,
+#   de 145 a 1807,6 px), o perfil da própria linha num trecho limpo;
+# - grama: a do item 7 sob as manchas, com o mesmo desenho (a mesma textura, no mesmo recorte e semente: sem emenda) e
+#   a luz larga da grama em volta;
+# - plantas: as árvores, arbustos e palmeiras da planta de referência (_texturas/vegetacao), no tamanho real, o maior
+#   que cabe primeiro, com a copa dentro do verde: nada sai do lote nem dos pisos.
+# A floreira do lavabo (JARDIM, 4,79 m²) e o jardim interno da escada não são do gramado e ficam.
+VEG_A = {"mancha_min": 5000, "perto": 121, "muro": {"cima": ((66, 82), (700, 1000)), "baixo": ((1002, 1018), (700, 1100)),
+                                                  "esquerda": ((139, 155), (430, 560))},
+         "muro_x": (144, 1808), "muro_y": (71, 1013), "linha_lum": 232, "desvio": 15, "branco": 250, "sombra": 7,
+         "escuro": 60, "alcance": 81, "pedra_base": (85, 138, 185), "bege_base": (232, 232, 232), "bege_quente": 25,
+         "bege_abrir": 5, "preto": 40, "junto_parede": 13}
+
+
+def copiar_material(img, alvo, base, evitar, desl=(12, 24)):
+    """Os px de `alvo` recebem o mesmo material da base copiado de 12 a 24 px ao lado (como restos_fora_do_verde da
+    Casa E), de px que não estão em `evitar`; o que sobra, a mediana do material com inpaint."""
+    H, W = alvo.shape
+    ch = base.astype(np.int32)
+    chave = ch[..., 0] * 65536 + ch[..., 1] * 256 + ch[..., 2]
+    # os px a refazer com cor rara na base (os traços e o antialias das bordas) ganham o material mais próximo; o branco
+    # da base (gramado e fora do lote) não é piso. As fontes ficam com a cor da base delas
+    ks, ns = np.unique(chave, return_counts=True)
+    maior = np.isin(chave, ks[ns >= 500]) & (chave != 255 * 65536 + 255 * 256 + 255)
+    _, lbl = cv2.distanceTransformWithLabels((~maior).astype(np.uint8), cv2.DIST_L2, 5, labelType=cv2.DIST_LABEL_PIXEL)
+    chave_alvo = np.where(maior, chave, chave[maior][lbl - 1])
+    a, b = desl
+    passos = [(-a, 0), (0, -a), (0, a), (a, 0), (-b, 0), (0, -b), (0, b), (b, 0), (-a, -a), (-a, a), (a, -a), (a, a)]
+    # fonte só de piso de verdade: nem o branco de fora do lote (a base passa 1 a 2 px do render na borda) nem o preto
+    real = (img.min(axis=2) < 240) & (img.mean(axis=2) > 60)
+    for c in np.unique(chave_alvo[alvo]):
+        m = alvo & (chave_alvo == c)
+        sao = (chave == c) & ~alvo & ~evitar & real
+        if not sao.any():
+            continue
+        falta = m.copy()
+        for dy, dx in passos:
+            ys, xs = np.nonzero(falta)
+            sy, sx = np.clip(ys + dy, 0, H - 1), np.clip(xs + dx, 0, W - 1)
+            v = sao[sy, sx]
+            img[ys[v], xs[v]] = img[sy[v], sx[v]]
+            falta[ys[v], xs[v]] = False
+        if falta.any():
+            fundo = img.copy()
+            fundo[~sao & ~(m & ~falta)] = np.median(img[sao], axis=0)
+            img[falta] = cv2.inpaint(np.clip(fundo, 0, 255).astype(np.uint8), falta.astype(np.uint8), 3,
+                                     cv2.INPAINT_TELEA)[falta]
+    return img
+
+
+def vegetacao_a(out):
+    import json
+    import sys
+    from retoque_terreo_casae import VEGETACAO, sprite_referencia, pousar_planta
+    from texturas_escala import nconv
+    sys.path.insert(0, str(CASA.parent / "_texturas"))
+    from texturas import textura, CONFIG as CFG_TEX
+    q, ve = VEG_A, VEGETACAO
+    _, p2r = pdf_pavimento("Terreo")
+    forma = out.shape[:2]
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                  # 1 m na escala 1:50 = 56,69 pt
+    px_m = float(np.hypot(c - a, d - b))
+    aprovada = cv2.imread(str(APROVADAS["Terreo"]))
+    gramado, grama0, planta, _, _, _ = gramado_plantas(aprovada)
+    verde = gramado.copy()
+    n, lab, st, _ = cv2.connectedComponentsWithStats((planta & verde).astype(np.uint8), 8)
+    planta = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["mancha_min"]])
+    img = out.astype(np.float32)
+    # o muro (as linhas pretas do lote) e o retângulo dele
+    mx0, mx1 = q["muro_x"]
+    my0, my1 = q["muro_y"]
+    dentro = np.zeros(forma, bool)
+    dentro[my0:my1, mx0:mx1] = True
+    ap = aprovada.astype(np.float32)
+    linha = np.zeros(forma, bool)
+    alvo = np.full(img.shape, 255, np.float32)
+    for lado, ((t0, t1), (s0, s1)) in q["muro"].items():
+        if lado == "esquerda":
+            perfil = np.median(ap[s0:s1, t0:t1], axis=0)               # (colunas, 3)
+            for j, col in enumerate(range(t0, t1)):
+                if perfil[j].mean() < q["linha_lum"]:
+                    linha[my0:my1, col] = True
+                    alvo[my0:my1, col] = np.minimum(alvo[my0:my1, col], perfil[j])
+        else:
+            perfil = np.median(ap[t0:t1, s0:s1], axis=1)               # (linhas, 3)
+            for j, row in enumerate(range(t0, t1)):
+                if perfil[j].mean() < q["linha_lum"]:
+                    linha[row, mx0:mx1] = True
+                    alvo[row, mx0:mx1] = np.minimum(alvo[row, mx0:mx1], perfil[j])
+    linha &= ~verde
+    # as folhas fora do verde: verdes e ligadas às manchas por px verdes
+    bb, gg, rr = img[..., 0], img[..., 1], img[..., 2]
+    cor_folha = (gg > rr + 4) & (gg > bb + 12)
+    semente = cv2.dilate(planta.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    n, lab = cv2.connectedComponents((cor_folha & (~verde | semente)).astype(np.uint8), connectivity=8)
+    folha = np.isin(lab, np.unique(lab[semente & (lab > 0)])) & ~verde
+    perto = cv2.dilate(planta.astype(np.uint8), np.ones((q["perto"], q["perto"]), np.uint8)).astype(bool)
+    k = q["sombra"]
+    em_volta = cv2.dilate(folha.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    piso = em_volta & dentro & ~linha & ~verde & (img.mean(axis=2) > q["escuro"])
+    b2 = base_terreo(forma)
+    k = q["alcance"]
+    alcance = cv2.dilate(planta.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & dentro & ~linha & ~verde
+    lum = img.mean(axis=2)
+    caramelo = (rr > gg + 18) & (gg > bb + 12) & (lum > 95)
+    pg_, _ = pdf_pavimento("Terreo")
+    tracos = np.zeros(forma, np.uint8)                             # as linhas da DOC_LINHAS ficam
+    for d_ in pg_.get_drawings():
+        if d_.get("layer") == PEDRA_A["linhas"]["camada"] and d_["type"] == "s":
+            for it in d_["items"]:
+                if it[0] == "l":
+                    (ax, ay), (bx_, by_) = p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)
+                    cv2.line(tracos, (int(round(ax)), int(round(ay))), (int(round(bx_)), int(round(by_))), 1, 1)
+    tracos = cv2.dilate(tracos, np.ones((5, 5), np.uint8)).astype(bool)
+    pedra_b = cv2.dilate((np.abs(b2.astype(np.int32) - np.array(q["pedra_base"])).max(axis=2) <= 6).astype(np.uint8),
+                         np.ones((5, 5), np.uint8)).astype(bool)
+    na_pedra = alcance & pedra_b & ~caramelo & ~tracos
+    # o Bege Bahia é o piso, não os traços finos da base no mesmo cinza (o contorno dos carros): a abertura os tira
+    bege_b = cv2.morphologyEx((np.abs(b2.astype(np.int32) - np.array(q["bege_base"])).max(axis=2) <= 6).astype(np.uint8),
+                              cv2.MORPH_OPEN, np.ones((q["bege_abrir"],) * 2, np.uint8)).astype(bool)
+    # a sombra das paredes da casa no Bege Bahia (a faixa junto à parede, embaixo dos pisantes) é da parede, e fica
+    parede = cv2.morphologyEx((img.max(axis=2) < q["preto"]).astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    parede = parede.astype(bool) & ~cv2.dilate(linha.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    k = q["junto_parede"]
+    junto = cv2.dilate(parede.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    no_bege = alcance & bege_b & ~tracos & ~junto & (cor_folha | (rr - bb < q["bege_quente"]))
+    piso |= na_pedra | no_bege
+    img = copiar_material(img, piso, b2, piso | verde | cor_folha)
+    muro = linha & perto & (np.abs(img - alvo).max(axis=2) > q["desvio"])
+    fora = ~dentro & ~linha & perto & (img.min(axis=2) < q["branco"])
+    img[muro] = alvo[muro]
+    img[fora] = 255
+    # grama nova sob as manchas: o desenho do item 7 (a mesma textura, recorte e semente), na luz da grama em volta
+    ys, xs = np.nonzero(grama0)
+    bx0, by0, bx1, by1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
+    T = cv2.GaussianBlur(textura("grama", px_m, by1 - by0, bx1 - bx0, semente=GRAMA_A["semente"]).astype(np.float32),
+                         (0, 0), 0.6)
+    refazer = cv2.dilate(planta.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & verde
+    Lg = nconv(img, (verde & ~refazer).astype(np.float32), 1.5 * px_m)
+    novo = img.copy()
+    novo[by0:by1, bx0:bx1] = Lg[by0:by1, bx0:bx1] * (T / T.reshape(-1, 3).mean(axis=0))
+    al = (cv2.GaussianBlur(refazer.astype(np.float32), (0, 0), 0.8) * verde)[..., None]
+    img = img * (1 - al) + novo * al
+    # as plantas, mancha por mancha: o maior que cabe primeiro, com a copa dentro do verde
+    sombra = json.loads(CFG_TEX.read_text())["vegetacao"]["sombra"]
+    dv = cv2.distanceTransform(verde.astype(np.uint8), cv2.DIST_L2, 5)
+    rng = np.random.default_rng(ve["semente"])
+    n, lab = cv2.connectedComponents(planta.astype(np.uint8))
+    postas = []
+    for i in range(1, n):
+        m = lab == i
+        ocup = np.zeros(forma, np.uint8)
+        for nome, dm, chance in ve["catalogo"]:
+            r = dm * px_m / 2
+            cand = np.argwhere(m & (dv >= ve["folga_copa"] * r))
+            rng.shuffle(cand)
+            for y, x in cand:
+                if ocup[y, x] or rng.random() > chance:
+                    continue
+                if any(np.hypot(x - px, y - py) < ve["afastar"] * (r + pr) for px, py, pr, _ in postas):
+                    continue
+                postas.append((x, y, r, nome))
+                cv2.circle(ocup, (int(x), int(y)), int(r * 0.8), 1, -1)
+    fundo = img.copy()
+    cache = {}
+    for x, y, r, nome in sorted(postas, key=lambda t: t[2]):            # as menores por baixo
+        if nome not in cache:
+            cache[nome] = sprite_referencia(nome, px_m)
+        cor, a_, dm = cache[nome]
+        esc = 2 * r / (dm * px_m) * float(rng.uniform(*ve["escala"]))
+        cor_e = cv2.resize(cor, None, fx=esc, fy=esc, interpolation=cv2.INTER_LINEAR)
+        a_e = cv2.resize(a_, None, fx=esc, fy=esc, interpolation=cv2.INTER_LINEAR)
+        pousar_planta(fundo, cor_e, a_e, x, y, dm * px_m * esc, sombra)
+    al = cv2.GaussianBlur(verde.astype(np.float32), (0, 0), 0.7)[..., None]
+    img = img * (1 - al) + fundo * al
+    tipos = {}
+    for *_, nome in postas:
+        tipos[nome] = tipos.get(nome, 0) + 1
+    print(f"    folhas sobre os pisos: {int(piso.sum())} px; fora do lote: {int(fora.sum())} px; muro refeito: "
+          f"{int(muro.sum())} px; grama refeita: {int(refazer.sum())} px; {len(postas)} plantas da referência em "
+          f"{n - 1} manchas ({', '.join(f'{k} {v}' for k, v in sorted(tipos.items()))})")
+    return np.clip(img, 0, 255).astype(np.uint8)
 
 
 # Pente fino pelas regras (21/10/26), Térreo, item 8: deck de madeira (R4: "representar a escala da madeira conforme
@@ -3585,6 +3794,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf6", "pente fino 6: armários até o teto em marcenaria areia com veio, sem a diagonal e sem a "
                      "sombra de móvel baixo; o braço da bancada dos tanques em quartzo", armarios_teto),
                     ("pf7", "pente fino 7 (R1, R4): grama na escala da referência, no tom do render", grama_escala),
+                    ("pf12", "pente fino 12: vegetação da biblioteca no tamanho real, só dentro do lote", vegetacao_a),
                     ("pf8", "pente fino 8 (R4): deck na madeira da referência, régua a régua", deck_referencia),
                     ("pf10", "pente fino 10: granito marrom no desenho e no tom da referência do usuário",
                      granito_referencia_a),

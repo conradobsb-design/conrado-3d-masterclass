@@ -1611,6 +1611,16 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Na final:** como na Casa E, as pedras são desenhadas de novo nos 3840 px, onde as de 7 cm têm ~4 px e se leem (no ajuste de 2000 px, ~2 px). A máscara do ajuste (`renders/POE642_CasaA_PH_Terreo_pedra_mascara.png`) vai ao quadro pelo mesmo afim da imagem (`rotulos_casaa.no_quadro_fixo(..., mascara=)`), e `pedra_final` desenha nela as pedras e as linhas, antes dos rótulos.
   - **Conferência:** na imagem com ajustes e na prancha, só a pedra; rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_pedra_antes_depois.jpg`.
+- **Térreo, item 12, vegetação (seção 10; R1, R4), feito** (`ajustes_casaa.vegetacao_a`, config `VEG_A`, depois da grama). As folhagens do motor estavam fora de escala (folhas de 1 a 1,3 m) e passavam do lote nos quatro cantos (sobre o muro e no branco de fora) e sobre a pedra do acesso.
+  - **Como:** a opção A do Térreo da Casa E (item 53 de lá: `retoque_terreo_casae.VEGETACAO`, `sprite_referencia` e `pousar_planta`). As árvores, arbustos e palmeiras da planta de referência (`_texturas/vegetacao`) entram no tamanho real, o maior que cabe primeiro, com a copa dentro do verde: nada sai do lote nem dos pisos. São 77 plantas nas cinco manchas grandes.
+  - **Manchas:** as de planta do gramado do item 7 (`gramado_plantas`, achadas na imagem aprovada), só as de 5 mil px ou mais: os quatro cantos e o jardim lateral. As pequenas, de até 600 px, são sombra de parede e de degrau e ficam.
+  - **Folhas fora do verde:** só as verdes ligadas às manchas por px verdes. Uma parede, um caixilho ou a água cortam a ligação; a rotina de restos da Casa E pegava a borda do spa, o caixilho do escritório e um vaso dentro da sala.
+  - **Sobre os pisos:** as folhas e a sombra delas (3 px em volta) e, a até 1,3 m das manchas, os fragmentos de folha e as sombras soltas viram o material da base copiado de 12 a 24 px ao lado (`copiar_material`, como na Casa E). Na pedra, o que não é o caramelo do motor (o item 11 o troca depois); no Bege Bahia, o cinza ou o verde, fora os traços finos da base no mesmo cinza (o contorno dos carros ficava pontilhado) e a sombra das paredes da casa, a até 6 px delas (a faixa embaixo de um pisante virava bege num trecho só). O inpaint misturava a grama e deixava uma faixa suja na curva da pedra. As linhas da DOC_LINHAS (os pisantes, o afastamento) ficam.
+  - **Lote:** fora dele, o branco de fora; sobre o muro (as linhas pretas de cima, de baixo e da esquerda), o perfil da própria linha num trecho limpo.
+  - **Grama:** a do item 7 sob as manchas, com o mesmo desenho (a mesma textura, recorte e semente: sem emenda) e a luz larga da grama em volta.
+  - **Ficam:** a floreira do lavabo (JARDIM, 4,79 m²) e o jardim interno da escada, que não são do gramado.
+  - **Conferência:** na imagem com ajustes e na prancha, só a vegetação e o que estava em volta dela (os pisos, o muro e o branco de fora); rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_vegetacao_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
