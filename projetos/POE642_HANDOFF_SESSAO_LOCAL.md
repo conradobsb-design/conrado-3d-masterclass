@@ -1801,6 +1801,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** os tracinhos saem (o vinílico das beiradas, na mesma linha); entram o pano de linho da biblioteca em cada um dos 8 trechos do PDF (a meia distância, como lá) e o trilho de parede a parede do lado do vidro, um por suíte, como no 1º Pavimento da Casa E.
   - **Conferência:** na imagem com ajustes e na prancha, só as quatro fachadas das suítes (4 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_cortinas_antes_depois.jpg`.
+- **1º Pavimento, item 11, vinílico na escala (R4), feito** (`ajustes_casaa.vinilico_1pav`, com `VINILICO` e `reguas_vinilico` da Casa E).
+  - **Antes:** réguas de ~40 cm.
+  - **Como:** o mesmo da Casa E: nas áreas de vinílico da base chapada, só no que é piso no render, réguas de 20 cm, 1,2 a 1,8 m, em tons alternados, com o veio do próprio render, na luz do lugar; o escurecido sobe 70% do caminho até a mediana. As folhas das portas do PDF ficam (sem isso, a da suíte 3 para o closet sumia). Roda logo depois dos itens 2 e 3, antes dos móveis (4 a 10), que são postos sobre o piso novo.
+  - **Conferência:** na imagem com ajustes e na prancha, só as quatro suítes e os closets (6 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_vinilico_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

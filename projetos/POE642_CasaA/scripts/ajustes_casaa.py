@@ -160,6 +160,9 @@ pode seguir pela ordem proposta"):
   1º Pavimento, pente fino 10: nas quatro suítes, os tracinhos escuros do motor no lugar das cortinas saem e entram a
      cortina de linho da biblioteca (`_blocos/blocos.cortina`) em cada trecho de linha ondulada do PDF e o trilho de
      parede a parede, do lado do vidro, como no 1º Pavimento da Casa E.
+  1º Pavimento, pente fino 11 (R4): vinílico na escala, como no 1º Pavimento da Casa E (réguas de 20 cm, 1,2 a 1,8 m,
+     em tons alternados, com o veio do render, e o escurecido mais claro), nas áreas de vinílico da base chapada, só no
+     que é piso; as folhas das portas do PDF ficam. Roda logo depois dos itens 2 e 3, antes dos móveis.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -4106,6 +4109,83 @@ def cortinas_1pav(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 11: vinílico na escala (R4: "Vinílico: réguas de ~20 cm,
+# claras, em tons alternados"). O motor fez réguas de ~40 cm. Como no 1º Pavimento da Casa E
+# (`retoque_1pav_casae.vinilico_escala`, item 11 de lá, com os mesmos números, `VINILICO`): nas áreas de vinílico da base
+# chapada da entrega (o mesmo laranja da legenda, levado à imagem pelo quadro comum, `base_terreo`), só no que é piso no
+# render (os objetos no tom da madeira saem por fugir da luz do piso; a sombra fica como piso), as réguas de 20 cm,
+# 1,2 a 1,8 m, em fiadas com as juntas desencontradas, cada uma num tom, com o veio do próprio vinílico do render, na
+# luz do lugar; e o vinílico escurecido sobe 70% do caminho até a luz mediana. Roda logo depois das portas e das
+# escadas (itens 2 e 3), antes dos móveis dos itens 4 a 10, como na Casa E, onde vinha antes dos outros passos. As folhas
+# das portas (os brancos compridos da ARQ_PAREDE, como no item 2; o motor as fez em traço duplo fino, no tom da madeira)
+# ficam fora do piso, com `folga_folha` px.
+VINILICO_1PAV = {"folga_folha": 2}
+
+
+def vinilico_1pav(out):
+    from retoque_1pav_casae import VINILICO, reguas_vinilico
+    q = VINILICO
+    chapada = base_terreo(out.shape[:2], "1Pavimento")
+    vin = (np.abs(chapada.astype(np.int32) - np.array(q["cor_chapada"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    vin = cv2.morphologyEx(vin, cv2.MORPH_CLOSE, np.ones((q["fechar"], 1), np.uint8)) > 0
+    pg, p2r = pdf_pavimento("1Pavimento")
+    H, W = out.shape[:2]
+    sa, bf = SEM_ARCOS_SUB, SEM_ARCOS_1PAV
+    k = sa["ss"]
+    fl = np.zeros((H * k, W * k), np.uint8)
+    for d in pg.get_drawings():
+        if d.get("layer") == sa["camada"] and d["type"] == "f" and d.get("fill") and min(d["fill"]) > 0.9:
+            for c in caminhos_pdf(d, p2r):
+                w, h = np.ptp(c[:, 0]), np.ptp(c[:, 1])
+                if max(w, h) >= max(bf["folha_comprida"] * min(w, h), bf["folha_min"]):
+                    cv2.fillPoly(fl, [np.int32(np.round(c * k))], 255)
+    f = 2 * VINILICO_1PAV["folga_folha"] + 1
+    folhas = cv2.dilate((cv2.resize(fl, (W, H), interpolation=cv2.INTER_AREA) > 0).astype(np.uint8),
+                        np.ones((f, f), np.uint8)) > 0
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    im = out.astype(np.float32)
+    lum, croma = im.mean(axis=2), im[..., 2] - im[..., 0]
+    piso = vin & (croma >= q["croma_min"]) & (lum >= q["lum"][0]) & (lum <= q["lum"][1]) & ~folhas
+    sx, sy = q["sig_ao_longo_m"] * px_m, q["sig_atravessando_m"] * px_m
+
+    def luz(m):
+        mf = m.astype(np.float32)
+        return (cv2.GaussianBlur(im * mf[..., None], (0, 0), sigmaX=sx, sigmaY=sy)
+                / np.maximum(cv2.GaussianBlur(mf, (0, 0), sigmaX=sx, sigmaY=sy), 1e-4)[..., None])
+    L0 = luz(piso)
+    razao = im / np.maximum(L0, 1)
+    fora = ((im - L0).max(axis=2) > q["claro"]) | (((L0 - im).max(axis=2) > q["escuro"])
+                                                  & (razao.max(axis=2) - razao.min(axis=2) > q["matiz"]))
+    n, lab, st, _ = cv2.connectedComponentsWithStats((fora & piso).astype(np.uint8), connectivity=8)
+    fora = (st[:, cv2.CC_STAT_AREA] >= q["objeto_min"])[lab] & (lab > 0)
+    piso &= ~cv2.dilate(fora.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    piso = cv2.morphologyEx(piso.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)) > 0
+    mf = piso.astype(np.float32)
+    L = luz(piso)
+    vs, vy = q["veio_sig"]                                                   # o veio: o detalhe fino ao longo das réguas
+    veio = lum / np.maximum(cv2.GaussianBlur(lum, (0, 0), sigmaX=vs, sigmaY=vy), 1)
+    limpo = cv2.erode(piso.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    ys, xs = np.nonzero(piso)
+    y0, x0, y1, x1 = ys.min(), xs.min(), ys.max() + 1, xs.max() + 1
+    D = reguas_vinilico(y1 - y0, x1 - x0, px_m, veio, limpo, np.random.default_rng(q["semente"]))
+    novo = im.copy()
+    novo[y0:y1, x0:x1] = L[y0:y1, x0:x1] * D[..., None]
+    al = (cv2.GaussianBlur(mf, (0, 0), 0.7) * piso)[..., None]
+    novo = im * (1 - al) + novo * al
+    sg = q["clarear_sig_m"] * px_m                                           # o escurecido sobe parte do caminho
+    Lg = cv2.GaussianBlur(lum * mf, (0, 0), sg) / np.maximum(cv2.GaussianBlur(mf, (0, 0), sg), 1e-4)
+    ref = float(np.median(Lg[piso]))
+    g = 1 + q["clarear"] * np.maximum(0, ref - Lg) / np.maximum(Lg, 1)
+    av = cv2.GaussianBlur(vin.astype(np.float32), (0, 0), 1.0)
+    novo *= (1 + (g - 1) * av)[..., None]
+    out = np.clip(novo, 0, 255).astype(np.uint8)
+    print(f"    vinílico: {int(piso.sum())} px em réguas de {100 * q['regua_m']:.0f} cm, a {px_m:.2f} px/m (fora "
+          f"{int((folhas & vin).sum())} px das folhas das portas); o escurecido sobe {100 * q['clarear']:.0f}% do "
+          f"caminho até a luz mediana ({ref:.0f}), até +{100 * (g[vin].max() - 1):.0f}%")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -5434,6 +5514,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
          "1Pavimento": [("pf2", "pente fino 2 (R3): portas sem os arcos (as folhas ficam)", sem_arcos_1pav),
                         ("pf3", "pente fino 3 (R14 e seção 5): a escada em U e a caracol da saleta com a linha suave "
                          "nos bocéis e o triângulo da descida", escadas_1pav),
+                        ("pf11", "pente fino 11 (R4): vinílico na escala, réguas de 20 cm em tons alternados, como na "
+                         "Casa E (antes dos móveis dos itens 4 a 10)", vinilico_1pav),
                         ("pf4", "pente fino 4 (R11): guarda-roupas com cabides nos closets 3, 2, master e 1 (bege dentro, "
                          "ocre na borda, cabideiro)", guarda_roupas_1pav),
                         ("pf5", "pente fino 5 (seção 7): armários até o teto da circulação e do quarto de serviço em "
@@ -5444,10 +5526,10 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          criados_1pav),
                         ("pf8", "pente fino 8: quarto de serviço com a cama de solteiro e o criado-mudo do PDF, no lugar da "
                          "faixa com dois quadrados", quarto_servico_1pav),
-                  ("pf9", "pente fino 9: banheira oval do banho master com a torneira de piso, como no PDF",
-                   banheira_1pav),
-                  ("pf10", "pente fino 10: cortinas de linho da biblioteca nas quatro suítes, com o trilho de parede a "
-                   "parede", cortinas_1pav),
+                        ("pf9", "pente fino 9: banheira oval do banho master com a torneira de piso, como no PDF",
+                         banheira_1pav),
+                        ("pf10", "pente fino 10: cortinas de linho da biblioteca nas quatro suítes, com o trilho de parede "
+                         "a parede", cortinas_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 
