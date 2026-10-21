@@ -1716,6 +1716,17 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
     - A borda de 1 a 2 px junto às paredes e aos objetos vai ao piso novo de perto, como no item 6.
   - **Conferência:** na imagem com ajustes e na prancha, só o hall, a sauna com a antessala e os banhos; rodapé igual. Prancha do Subsolo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_travertino_antes_depois.jpg`.
+- **Subsolo, item 8, shafts e projeções (R8), feito** (`ajustes_casaa.projecoes_subsolo`, config `PROJECOES_SUB`), como as projeções do 1º Pavimento da Casa E.
+  - **Shafts:**
+    - Antes: os dois junto ao elevador (o de cima, largo, e o da direita, estreito) estavam cheios, de marrom e de cinza, com o X contínuo.
+    - Agora: o vão branco, como no PDF, com o X tracejado nos traços do próprio PDF (DOC_LINHAS E PROJEÇÕES), em cinza médio.
+    - O retângulo do PDF é arredondado para dentro, e clareia tudo que não é parede preta, inclusive a borda escura do render junto à parede. Com o retângulo arredondado ao px mais perto, a parede ganhava um dente branco de 1 px; com o X pintado sobre a borda escura, o canto ficava com um traço escuro. Por isso o X entra só no branco.
+    - O elevador fica como está: o mapa não o apontou.
+  - **Retângulos da DOC_LINHAS (confirmados em 21/10: "em traço cinza fino, como no PDF"):**
+    - São três: junto às paredes de cima e da direita do depósito (0,5 e 0,7 m de fundo) e junto à parede de baixo da academia (3,5 x 0,4 m).
+    - Entram em traço contínuo de 0,6 px, como no PDF: cinza médio no Bege Bahia do depósito; cinza claro na madeira da academia, onde o cinza médio sumia (como na rouparia da Casa E). Nas paredes pretas, o traço some.
+  - **Conferência:** na imagem com ajustes e na prancha, só os shafts e os retângulos; rodapé igual. Prancha do Subsolo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_projecoes_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

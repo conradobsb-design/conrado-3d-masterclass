@@ -127,6 +127,8 @@ pode seguir pela ordem proposta"):
      escala, e no tom da foto (RGB 230, 211, 186), com a luz do lugar, pela rotina do item 9 do Térreo.
   Subsolo, pente fino 7: o travertino aprovado do Térreo (veio horizontal, sem rejuntes), na escala, no hall, na
      sauna com a antessala e nos banhos, com a luz do lugar; os objetos ficam, e os boxes e o banco são redesenhados.
+  Subsolo, pente fino 8 (R8): os dois shafts brancos, com o X tracejado do PDF em cinza médio, e os três retângulos
+     da DOC_LINHAS E PROJEÇÕES (depósito e academia) em traço cinza fino.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3235,6 +3237,62 @@ def travertino_subsolo(out):
     return banco_sauna(out)
 
 
+# Pente fino pelas regras (21/10/26), Subsolo, item 8: shafts e projeções (R8), da DOC_LINHAS E PROJEÇÕES do PDF, como
+# as projeções do 1º Pavimento da Casa E (retoque_1pav_casae.projecoes_1pav).
+# - Os dois shafts junto ao elevador (o de cima, largo, e o da direita, estreito): o motor os encheu, de marrom e de
+#   cinza, com o X contínuo. O vão fica branco (o que não é parede preta, no retângulo de dentro do PDF arredondado
+#   para dentro: a borda escura do render junto à parede também clareia, e a parede não ganha dente branco), e o X
+#   entra tracejado, nos traços do próprio PDF, em cinza médio, só no branco. O elevador fica como está.
+# - Os três retângulos que o motor não desenhou (usuário, 21/10/26: confirmado, "em traço cinza fino, como no PDF"):
+#   junto às paredes de cima e da direita do depósito (0,5 e 0,7 m de fundo) e junto à parede de baixo da academia
+#   (3,5 x 0,4 m). Traço contínuo, como no PDF: cinza médio no Bege Bahia do depósito e cinza claro na madeira da
+#   academia (o cinza médio sumia nela, como na rouparia da Casa E). Nas paredes pretas, o traço some.
+PROJECOES_SUB = {"camada": "DOC_LINHAS E PROJEÇÕES", "branco": 250, "escuro": 30,
+                 "vaos": [(2021.2, 1230.9, 2143.1, 1276.3), (2114.8, 1287.6, 2143.1, 1372.7)],   # pt: os dois shafts
+                 # caixa (pt), cor e se o traço fica só no vão branco
+                 "grupos": [((2020.5, 1230.0, 2144.0, 1277.0), (147, 147, 147), True),     # shaft de cima
+                            ((2114.0, 1287.0, 2144.0, 1373.5), (147, 147, 147), True),     # shaft da direita
+                            ((1156.0, 1060.0, 1656.5, 1220.5), (150, 150, 150), False),    # depósito: cima e direita
+                            ((1377.0, 1627.0, 1577.0, 1651.0), (226, 226, 226), False)],   # academia: embaixo
+                 "largura": 0.6, "forca": 0.85, "parede": 40}
+
+
+def projecoes_subsolo(out):
+    import pymupdf
+    q = PROJECOES_SUB
+    pg, p2r = pdf_pavimento("Subsolo")
+    im = out.astype(np.float32)
+    branco = np.zeros(out.shape[:2], bool)
+    for v in q["vaos"]:
+        (a, b), (c, d) = p2r(*v[:2]), p2r(*v[2:])
+        x0, y0, x1, y1 = int(np.ceil(a)), int(np.ceil(b)), int(np.floor(c)), int(np.floor(d))
+        branco[y0:y1, x0:x1] = im[y0:y1, x0:x1].mean(axis=2) > q["escuro"]
+    im[branco] = q["branco"]
+    tracos = [dd for dd in pg.get_drawings() if dd.get("layer") == q["camada"]]
+    n = 0
+    for caixa, cor, no_vao in q["grupos"]:
+        cx = pymupdf.Rect(*caixa)
+        segs = [(p2r(it[1].x, it[1].y), p2r(it[2].x, it[2].y)) for dd in tracos if dd["rect"] in cx
+                for it in dd["items"] if it[0] == "l"]
+        pts = np.array([pt for sg in segs for pt in sg])
+        X0, Y0 = np.floor(pts.min(axis=0)).astype(int) - 3
+        X1, Y1 = np.ceil(pts.max(axis=0)).astype(int) + 4
+        h, w = Y1 - Y0, X1 - X0
+        f = np.zeros((h * SS_E, w * SS_E), np.uint8)
+        for (ax, ay), (bx, by) in segs:
+            cv2.line(f, (int(round((ax - X0) * SS_E)), int(round((ay - Y0) * SS_E))),
+                     (int(round((bx - X0) * SS_E)), int(round((by - Y0) * SS_E))), 255,
+                     max(1, int(round(q["largura"] * SS_E))), cv2.LINE_AA)
+        al = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * q["forca"]
+        reg = im[Y0:Y1, X0:X1]
+        al *= branco[Y0:Y1, X0:X1] if no_vao else reg.mean(axis=2) >= q["parede"]
+        im[Y0:Y1, X0:X1] = reg * (1 - al[..., None]) + np.float32(cor) * al[..., None]
+        n += len(segs)
+    print(f"    projeções: os vãos dos dois shafts em branco ({int(branco.sum())} px) e {n} traços do PDF em {len(q['grupos'])} grupos "
+          f"(o X tracejado dos shafts e os retângulos do depósito e da academia)")
+    return np.clip(im, 0, 255).astype(np.uint8)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -4495,6 +4553,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                       travertino_subsolo),
                      ("pf5", "pente fino 5: porta de correr da circulação, folhas das portas de giro, janela do "
                       "depósito e vidro da sauna, finos", vidros_subsolo),
+                     ("pf8", "pente fino 8 (R8): shafts brancos com o X tracejado e os retângulos da DOC_LINHAS",
+                      projecoes_subsolo),
                      ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",
                       so_subsolo)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
