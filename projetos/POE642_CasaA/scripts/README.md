@@ -629,7 +629,10 @@ As divergências entre as imagens aprovadas da Casa A e os PDFs do cliente, em `
 
 ```bash
 python3 conferencia_casaa.py            # -> ../renders/POE642_CasaA_PH_{Terreo,1Pavimento,Subsolo}_conferencia.jpg
+python3 conferencia_casaa.py --pente-fino   # -> ../renders/POE642_CasaA_PH_<Pavimento>_pente_fino_mapa.jpg
 ```
+
+**Pente fino pelas regras (21/10/26):** com `--pente-fino`, o mapa sai sobre a prancha atual (a final com os rótulos, já no quadro comum), com os itens de `PENTE_FINO` e o recorte de `RECORTE_PF`, como o pente fino da Casa E. Os pontos vêm da geometria do PDF levada ao quadro comum (`opcoes_1pav_casae.quadro_pdf`).
 
 ## Ajustes da Casa A depois da conferência: `ajustes_casaa.py`
 

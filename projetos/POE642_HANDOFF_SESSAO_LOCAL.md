@@ -1491,6 +1491,60 @@ Pedido do usuário (19/10/26): "vamos fazer a conferência de item a item do ren
   - Mais pedidos (19/10/26): "vamos melhorar a representação da escada. não há uma barreira de subida. precisamos representar a parte colorida até o 7 degrau, onde tem a linha em diagonal. sendo esmaecida a partir desse degrau, pois já está na região do 1º pavimento. e a área verde ao redor precisa ter um aspecto melhor"; "trazer o rótulo do shaft". E ainda: "representar a cama no quarto do motorista. representar a cuba e bancada da pia corretamente no banho do motorista. representar o box e o chuveiro adequadamente. o rótulo do quarto do motorista está no local errado. o arco da porta de entrada do banho do motorista está imperceptível, devendo ser em cinza, como de regra" (o arco já foi, nas portas no granito); "mude as cores, deixe cada carro com uma única cor e deixe os carros desalinhados".
   - Pedidos seguintes do usuário (19/10/26): "melhorar a representação dessa escada caracol. somente uma parte será representada, sendo a outra esmaecida [...] onde o arco está em destaque"; "melhorar a representação dos arcos e portas. lembrando que os arcos das portas no marrom granito são em cinza, com traço fino"; "eletrodomésticos em inox"; "melhore a representação da área molhada e divisoria da bancada" (gourmet); "melhore as representações das pias e bancada, com a área molhada bem representada. além disso, preciso de aspecto de bancada de pedra na cozinha"; "melhorar a representação dessa área. não é mesa de jantar. área de estar" (item 3); "melhorar cuba e sua posição e tamanho. representar a bancada da cuba. representar o sanitário. representar e gerar o rótulo da claraboia" (lavabo); "melhorar a representação da porta pivotante, mostrando-a até o hall externo com seus respectivos arcos".
 
+## Casa A · pente fino pelas regras (21/10/26)
+
+Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa E, Casa A, Casa B, Casa C, Casa D). Cada prancha atual foi conferida trecho a trecho contra o PDF e as regras (`POE642_REGRAS.md`, com a seção 16, o inventário). Os mapas numerados saem do `conferencia_casaa.py --pente-fino`: `renders/POE642_CasaA_PH_{Subsolo,Terreo,1Pavimento}_pente_fino_mapa.jpg`. Nada foi retocado ainda; a lista aguarda a confirmação do usuário (seção 1 das regras).
+
+- **Subsolo (10 itens):**
+  1. só o Subsolo, com o resto do terreno hachurado (R2): saem o deck, a piscina, o spa, a escada larga e as espreguiçadeiras, que são do Térreo;
+  2. o gramado abaixo da escada do deck (item 13 de 19/10): a proposta é que fique, com a grama da referência. A confirmar;
+  3. escada do deck, 11 degraus (R14): sobe da circulação (o "S" do PDF); linhas nos bocéis, triângulo no 1º degrau apontando para a esquerda, degraus 9 a 11 esmaecidos e tracejados;
+  4. portas sem arcos (R3): as 5 do PDF;
+  5. portas, vidros e janelas finos: a porta de vidro de correr da circulação interna (hoje um traço preto grosso), a janela entre o depósito e a academia, os vidros da sauna sem montantes e a folha da porta do depósito;
+  6. Bege Bahia como a referência (seção 18) na circulação externa, na interna e no depósito;
+  7. travertino na escala: o do Térreo da Casa A, no hall, na sauna, na antessala e nos banhos;
+  8. shafts brancos com o X tracejado; os três retângulos da DOC_LINHAS E PROJEÇÕES que faltam (paredes de cima e da direita do depósito, parede de baixo da academia). A confirmar o que são;
+  9. soleiras (R13), porta a porta;
+  10. o "²" dos 9 rótulos pela regra de 20/10.
+  - **Conformes:** academia (réguas de ~20 cm e os aparelhos do PDF), banho de serviço, cubas, divisória, boxes, banco da sauna; não há pilares no PDF.
+- **Térreo (16 itens):**
+  1. as quatro escadas com linhas e triângulo (R14): a interna em U, a caracol, a larga do deck (degraus 12 a 19; o sentido a confirmar, proposta: sobe do deck) e a do deck para o Subsolo (desce);
+  2. rótulos em branco no granito (R6) e o "²";
+  3. carros prata, alinhados e iguais (R12);
+  4. projeções da cobertura, do pergolado e da laje superior em tracejado bem visível (R8, R9);
+  5. vidros finos: o da varanda para as salas e o do hall (hoje um tubo cinza com montantes);
+  6. armários até o teto em marcenaria areia, sem a diagonal (cozinha, área de serviço, quarto do motorista);
+  7. grama na escala da referência;
+  8. deck de madeira em réguas de ~15 cm, na madeira da referência;
+  9. Bege Bahia como a referência (entorno da piscina, pátio, hall externo, pisantes);
+  10. granito marrom no desenho e no tom da referência;
+  11. pedra portuguesa em leque, no tom da foto;
+  12. vegetação da biblioteca, no tamanho real, só dentro do lote (a do motor está fora de escala e passa do lote);
+  13. a mesa de jantar oval (item 4 da conferência de 19/10);
+  14. o escritório com a cadeira de escritório em cima e as duas de visita embaixo (item 6);
+  15. o banho da varanda com o chuveiro e o box no lugar da bacia (item 7);
+  16. soleiras (R13), porta a porta.
+  - **Conformes:** pilares, portas sem arcos (feito em 19/10; o item 10 da conferência deixa de valer), sala de estar, estar sob a projeção, lavabo, bancadas, inox, tanques, jardim, motorista, piscina em Barlavento.
+- **1º Pavimento (16 itens):**
+  1. o Térreo nublado em volta (seção 11), com a final do Térreo depois do pente fino;
+  2. portas sem arcos (R3): os 11 do PDF;
+  3. escadas (R14): a em U desce daqui, com o triângulo no topo (degrau 20); a caracol, só o trecho do pavimento cheio, com o triângulo;
+  4. guarda-roupas com cabides (R11) nos closets 3, 2, 1 e master. A cor a confirmar (proposta: a da Casa E, bege dentro, ocre na borda e o cabideiro);
+  5. armários até o teto em marcenaria areia (circulação, sala íntima, quarto de serviço);
+  6. bancos ao pé das camas nas suítes 3, 2, master e 1 (itens 2 a 5 da conferência);
+  7. criados-mudos redondos na suíte 3 (item 1);
+  8. cama de solteiro e criado-mudo no quarto de serviço (item 6);
+  9. banheira oval no banho master (item 7);
+  10. cortinas de linho da biblioteca, com o trilho de parede a parede, nas quatro suítes;
+  11. vinílico na escala da referência;
+  12. Bege Bahia das quatro varandas como a referência;
+  13. projeções da cobertura e do pergolado em tracejado;
+  14. portas de vidro de correr finas, em dois planos, das suítes para as varandas;
+  15. soleiras (R13), porta a porta;
+  16. o "²" dos 22 rótulos.
+  - **Conformes:** vazios brancos com o X, sala íntima, banhos, rótulos fora dos objetos.
+- **Ordem proposta:** Térreo, Subsolo e 1º Pavimento, porque o terreno hachurado do Subsolo e o entorno nublado do 1º Pavimento saem do Térreo final.
+
 ## Casas A a D · Barlavento nas piscinas
 
 Pedido do usuário (15/10/26), depois do item 35 da Casa E: as piscinas das Casas A, B, C e D no mesmo revestimento Barlavento, com os mesmos efeitos de água, e as pranchas e os PDFs refeitos.
