@@ -886,6 +886,9 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Junto:** a bancada da copinha (o item 4 de 16/10 tece o Bege Bahia dela da varanda) e as soleiras das fachadas das suítes (item 10 de 16/10, do mesmo Bege Bahia) seguem o novo.
     - **Conferência:** no retocado, nas montagens e nas pranchas, mudaram as três varandas, a bancada da copinha e as soleiras das fachadas dos banhos 3 e 4; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_bege_varandas_antes_depois.jpg`.
+  - **Item 13, floreira do banho master só no verde, feito** (`retoque_1pav_casae.floreira`). A floreira vem do jardim do Térreo aprovado de 15/10 (`TERREO_FLOREIRA`, que fica, porque a escada também copia dele). Antes de pousar, as flores laranja e vermelhas saem: os 46 px quentes (R mais de 25 acima de G e de B), com 1 px de folga, são preenchidos pela folhagem em volta (`cv2.inpaint`). É o mesmo pedido do jardim de inverno do Térreo (20/10).
+    - **Conferência:** no retocado, nas montagens e nas pranchas, só a floreira mudou; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_floreira_verde_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 

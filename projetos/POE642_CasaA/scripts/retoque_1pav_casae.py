@@ -85,6 +85,7 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
   Bahia, com as faces da parede em cinza fino; nas suítes o vinílico atravessa;
 - item 12, Bege Bahia das três varandas como a referência (VARANDAS_BEGE): o desenho e o tom da foto, com os vasos e as
   plantas por cima e a sombra deles no piso;
+- item 13, floreira do banho master só no verde (FLOREIRA["quente"]): as flores laranja saem do recorte do Térreo;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -184,7 +185,7 @@ def sombra(out, mascara, ret, desloc=(-1.0, 1.0), sigma=0.8, forca=0.3):
 
 # item 1: floreira do banho master (prévia de 1800 px: as três plantas do PDF, 807,3 a 823,4 x 239,6 a
 # 284,7); a fonte é um trecho do jardim interno do Térreo aprovado (render de 2000 px), girado
-FLOREIRA = {"vis": (807.3, 239.6, 823.4, 284.7), "fonte": (1048, 550, 1094, 566), "borda": 0.7,
+FLOREIRA = {"vis": (807.3, 239.6, 823.4, 284.7), "fonte": (1048, 550, 1094, 566), "borda": 0.7, "quente": 25,
             "sombra": {"desloc": (-0.8, 1.2), "sigma": 1.0, "forca": 0.25},
             "contorno": ((88, 92, 96), 0.45)}       # borda da floreira em traço fino, como no Térreo
 
@@ -195,6 +196,12 @@ def floreira(out, A):
     w, h = x1 - x0, y1 - y0
     fx0, fy0, fx1, fy1 = q["fonte"]
     t = cv2.imread(str(TERREO_FLOREIRA))[fy0:fy1, fx0:fx1]
+    # pente fino de 20/10, item 13: só o verde (como o jardim de inverno do Térreo, pedido de 20/10). As flores
+    # laranja e vermelhas (o quente: R bem acima de G e de B) saem, preenchidas pela folhagem em volta
+    ti = t.astype(np.int32)
+    quente = ((ti[..., 2] - ti[..., 1] > q["quente"]) & (ti[..., 2] - ti[..., 0] > q["quente"])).astype(np.uint8)
+    quente = cv2.dilate(quente, np.ones((3, 3), np.uint8))
+    t = cv2.inpaint(np.ascontiguousarray(t), quente, 3, cv2.INPAINT_TELEA)
     t = np.rot90(t, -1)                                   # a faixa do jardim passa a correr na vertical
     rx0, ry0 = int(np.floor(x0)) - 3, int(np.floor(y0)) - 3
     rx1, ry1 = int(np.ceil(x1)) + 4, int(np.ceil(y1)) + 4

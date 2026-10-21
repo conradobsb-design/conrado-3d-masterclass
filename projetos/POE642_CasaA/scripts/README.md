@@ -447,6 +447,7 @@ Retoques sem IA no render v1 (fundo branco), no quadro do render; as posições 
   - item 6, projeções (R8): `projecoes_1pav` desenha os traços da DOC_LINHAS E PROJEÇÕES do shaft entre o elevador e a rouparia (com o vão em branco, como os vazios), da rouparia (em cinza claro, sobre a madeira) e do fundo do banho master, por cima de tudo menos das paredes;
   - item 8, soleiras (R13): `soleiras_1pav` faz, nos sete vãos brancos do PDF (banhos 1 a 4, P11 e P13 do banho master, rouparia), a soleira do Térreo (Bege Bahia na escala, faces da parede em cinza fino); nas suítes o vinílico atravessa e não há soleira;
   - item 12, Bege Bahia das varandas: `varandas_bege` põe o desenho da biblioteca no tom da foto (seção 18), na luz do lugar, só no piso das três varandas (os vasos, as plantas e as peças de fachada ficam; a sombra deles é piso), logo no começo, para a copinha e as soleiras das fachadas saírem no mesmo Bege Bahia;
+  - item 13, floreira só no verde: `floreira` tira as flores (o quente do recorte do Térreo aprovado) com `cv2.inpaint` antes de pousar;
   - item 16, quartzito dos banhos: `quartzito_referencia`. Nas áreas de quartzito da base chapada, a parte pêssego de cada px vai ao tom da foto do quadro de 19/10. A fração vem do R − B contra o do piso, então sombras acompanham e as bordas de louças e vidros não ganham halo. Depois, `retexturizar` aplica a chapa da biblioteca na escala, só na luz (sem a faixa bege da foto), no piso limpo.
 
 ```bash
