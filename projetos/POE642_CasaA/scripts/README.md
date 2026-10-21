@@ -655,6 +655,7 @@ python3 pdf_entrega.py
 - item 3, carros (R12): `CARROS_A["r12"]` e `carros_r12_a`: os três carros saem como antes e o carro branco do render, levado ao prata do carro da Casa E (quantis de luminância e o tom levemente frio), entra a 4,70 x 1,85 m no centro de cada carro do PDF, alinhados na mesma linha.
 - item 4, projeções (R8, R9): `PROJECOES_A` e `projecoes_a`, o último item do Térreo: o L da cobertura (o tracejado da ARQ_CONTRAPISO) e a laje superior em volta da caracol (DOC_LINHAS E PROJEÇÕES), no traço das projeções do Térreo da Casa E, por cima de tudo menos das paredes.
 - item 5, vidros finos: `VIDROS_A` e `vidros_finos`, com as funções do item 8 do pente fino do Térreo da Casa E (`retoque_terreo_casae.esquadria_limpar` e `esquadria_desenhar`) e a cadeia PDF -> imagem da Casa A: as quatro portas de correr entre a varanda e as salas, em dois planos; no vão da pivotante do hall, só a limpeza.
+- item 6, armários até o teto: `ARMARIOS_A` e `armarios_teto`. Os quatro retângulos com diagonal do PDF na marcenaria areia com o veio de um armário aprovado da Casa D (no comprido de cada peça, espelhado até cobrir), sem a diagonal, menos as paredes pretas do render; contorno fino nas faces livres, como na Casa E; a sombra de móvel baixo sai do granito face a face (perfil contra o patamar, como na Casa D). O braço da bancada dos tanques (ARQ_BANCADAS), também lilás, entra no quartzo.
 
 ## Acabamentos finais: `acabamentos_finais.py`
 

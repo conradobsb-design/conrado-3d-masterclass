@@ -89,6 +89,9 @@ pode seguir pela ordem proposta"):
      no lugar do tubo cinza com montantes; no vão da pivotante do hall, o tubo sai e o piso continua.
   Térreo 3. Carros (R12): prata, alinhados e iguais, de 4,70 x 1,85 m, no lugar das três cores e do desalinhamento
      de 19/10; o modelo é o carro branco do render, levado ao prata do carro da Casa E.
+  Térreo 6. Armários até o teto (seção 7): os quatro do PDF (cozinha, área de serviço, motorista) na marcenaria
+     areia com veio dos armários da Casa D, sem a diagonal e sem a sombra de móvel baixo no granito, com o contorno
+     fino nas faces livres; o braço da bancada dos tanques, que também estava lilás, em quartzo.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -2888,6 +2891,155 @@ def escadas_externas_r14(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 6: armários até o teto (seção 7: "marcenaria areia com veio, sem a
+# diagonal e sem sombra de móvel baixo"). No PDF da Casa A são os quatro retângulos com diagonal da DOC_LINHAS E
+# PROJEÇÕES: na cozinha, junto à parede de cima e ao lado dos eletrodomésticos; na área de serviço; no quarto do
+# motorista. O motor os fez em lilás, com a diagonal desenhada, e jogou no granito a sombra de móvel baixo (6 a 8 px:
+# embaixo do da cozinha, à esquerda e embaixo do do motorista; à direita do dos eletrodomésticos, um traço preto).
+# Entram como os armários até o teto aprovados da Casa D (que são o tom areia do painel da Casa C com o veio do próprio
+# render): o trecho liso de um deles, com o veio no comprido de cada peça (espelhado até cobrir), sem a diagonal, no
+# retângulo do PDF, menos as paredes pretas do render (a da esquerda do armário da cozinha está 3,5 px mais grossa
+# que no PDF e fica); contorno fino nas faces livres, como os armários da cozinha da Casa E (linha de 0,4 px na face
+# do PDF; a borda escurecida da Casa D, que lá era sobre o vinílico, no granito escuro virava uma faixa intermediária
+# e a borda parecia borrada). A sombra sai do granito como na
+# Casa D: em cada face com piso, o perfil (por canal, mediana ao longo da face) contra o patamar logo depois dela; as
+# linhas que não são sombra (o traço preto do motor ou a sobra lilás de meio px além do PDF) repetem a linha seguinte,
+# já sem sombra. Na área de serviço, o braço da bancada dos tanques acima do armário (ARQ_BANCADAS: a peça branca de
+# 1499,6 a 1530,8 pt) também estava lilás, como um armário: entra no quartzo da bancada, como a dos tanques.
+ARMARIOS_A = {"pecas": [("cozinha, junto à parede de cima", (1666.9, 1287.6, 1922.0, 1321.6), ["baixo"]),
+                        ("cozinha, ao lado dos eletrodomésticos", (1766.1, 1556.9, 1825.6, 1596.6),
+                         ["cima", "direita", "esquerda"]),
+                        ("área de serviço", (1499.6, 1690.1, 1530.8, 1744.0), ["cima", "direita"]),
+                        ("quarto do motorista", (2250.8, 1287.6, 2284.8, 1389.7), ["esquerda", "baixo"])],
+              # faces com piso: (retângulo em pt, lado, px a mais em cada ponta ao longo da face, com a sombra
+              # sumindo: a do motorista desce além do canto de baixo e entra à esquerda dele)
+              "pisos": [((1666.9, 1287.6, 1922.0, 1321.6), "baixo", (0, 0)),
+                        ((1766.1, 1556.9, 1825.6, 1596.6), "cima", (0, 0)),
+                        ((1766.1, 1556.9, 1825.6, 1596.6), "direita", (0, 0)),
+                        ((1499.6, 1690.1, 1530.8, 1744.0), "direita", (0, 0)),
+                        ((1499.6, 1642.5, 1530.8, 1690.1), "direita", (0, 0)),     # o braço, abaixo dos tanques
+                        ((2250.8, 1287.6, 2284.8, 1389.7), "esquerda", (0, 5)),
+                        ((2250.8, 1287.6, 2284.8, 1389.7), "baixo", (5, 0))],
+              "bancada": (1499.6, 1605.1, 1530.8, 1690.1),
+              "fonte": ("POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v4.png", (1128, 740, 1143, 797)),
+              "contorno": (70, 72, 74), "larg_contorno": 0.4, "faixa": 14, "parede": 35, "traco": (0.45, 1.12)}
+
+
+def armarios_teto(out):
+    from retoque_subsolo_casae import Tela, SOMBRA, QUARTZO
+    import retoque_terreo_casae as T
+    q = ARMARIOS_A
+    _, p2r = pdf_pavimento("Terreo")
+    forma = out.shape[:2]
+    orig = out.astype(np.float32)
+    Y = orig.mean(axis=2)
+    # parede: o preto grosso do render (a abertura tira os traços de 1 px do motor)
+    parede = cv2.morphologyEx((Y < q["parede"]).astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)) > 0
+
+    def px(r):
+        (a, b), (c, d) = p2r(r[0], r[1]), p2r(r[2], r[3])
+        return float(a), float(b), float(c), float(d)
+
+    ocupado = np.zeros(forma, bool)
+    for r in [p[1] for p in q["pecas"]] + [q["bancada"]]:
+        x0, y0, x1, y1 = px(r)                              # só os px inteiros da peça: o da face é piso
+        ocupado[int(np.ceil(y0)):int(np.floor(y1)), int(np.ceil(x0)):int(np.floor(x1))] = True
+
+    # 1. a sombra do motor no granito, face a face
+    D = q["faixa"]
+    S = np.ones(orig.shape, np.float32)
+    copias = []
+    for r, lado, (e0, e1) in q["pisos"]:
+        x0, y0, x1, y1 = px(r)
+        # borda (coordenada da face), passo para fora e o trecho ao longo da face (a, b)
+        if lado in ("cima", "baixo"):
+            borda, passo, a, b = (y0, -1, x0, x1) if lado == "cima" else (y1, 1, x0, x1)
+        else:
+            borda, passo, a, b = (x0, -1, y0, y1) if lado == "esquerda" else (x1, 1, y0, y1)
+        k0 = int(np.floor(borda))                          # a linha (ou coluna) que contém a face
+        if passo == -1 and borda == k0:
+            k0 -= 1
+        ia, ib = int(np.floor(a)), int(np.ceil(b))
+        ea, eb = ia - e0, ib + e1
+
+        def linha(k, i0, i1):
+            c = k0 + passo * k
+            if lado in ("cima", "baixo"):
+                return (c, slice(i0, i1))
+            return (slice(i0, i1), c)
+
+        perfil = np.full((D, 3), np.nan, np.float32)
+        for k in range(D):
+            ix = linha(k, ia + 2, ib - 2)
+            ok = ~parede[ix] & ~ocupado[ix]
+            if ok.sum() >= 3:
+                perfil[k] = np.median(orig[ix][ok], axis=0)
+        lum = perfil.mean(axis=1)
+        # patamar: onde o piso para de clarear (cresce menos de 2% nas 3 linhas seguintes)
+        dp = next((d for d in range(2, D - 3) if np.nanmax(lum[d + 1:d + 4]) - lum[d] < 0.02 * lum[d]), D - 3)
+        ref = np.nanmedian(perfil[dp:dp + 3], axis=0)
+        razao = perfil / ref
+        valida = [k >= 1 and q["traco"][0] <= razao[k].mean() <= q["traco"][1] for k in range(D)]
+        peso = np.ones(eb - ea, np.float32)                # a sombra some nas pontas estendidas
+        if e0:
+            peso[:e0] = (np.arange(e0) + 1) / (e0 + 1)
+        if e1:
+            peso[-e1:] = (np.arange(e1, 0, -1)) / (e1 + 1)
+        for k in range(1, dp):
+            if not valida[k]:
+                continue
+            s = np.minimum(razao[k], 1.0)
+            f = 1 - (1 - s[None]) * peso[:, None]
+            ix = linha(k, ea, eb)
+            ok = ~parede[ix] & ~ocupado[ix]
+            alvo = S[ix]
+            alvo[ok] = np.minimum(alvo[ok], f[ok])
+            S[ix] = alvo
+        # linhas que não são sombra (a da face, o traço preto, a sobra lilás): a primeira válida, já sem sombra
+        kv = next(k for k in range(1, D) if valida[k])
+        copias += [(linha(k, ea, eb), linha(kv, ea, eb)) for k in range(kv)]
+        print(f"    {lado} de {x0:.0f},{y0:.0f}: sombra de {dp} px (até {1 - np.nanmin(razao[1:dp].mean(axis=1)):.0%}), "
+              f"{kv} linha(s) de borda repetida(s)")
+    img = orig / S
+    for alvo, fonte in copias:
+        ok = ~parede[alvo] & ~ocupado[alvo]
+        v = img[alvo]
+        v[ok] = img[fonte][ok]
+        img[alvo] = v
+
+    # 2. o braço da bancada dos tanques, no quartzo
+    out = np.clip(np.round(img), 0, 255).astype(np.uint8)
+    tl = Tela(out, p2r, q["bancada"])
+    m = tl.ret(q["bancada"])
+    tl.sombra(m, **SOMBRA)
+    tl.pintar(m, QUARTZO)
+    tl.contorno(m, 0.35, (150, 153, 155))
+    img = tl.gravar().astype(np.float32)
+
+    # 3. a marcenaria areia com o veio, no retângulo do PDF, menos as paredes; contorno nas faces livres
+    arq, (fx0, fy0, fx1, fy1) = q["fonte"]
+    madeira = cv2.imread(str(CASA.parent / arq))[fy0:fy1, fx0:fx1].astype(np.float32)     # veio vertical
+    for nome, r, livres in q["pecas"]:
+        x0, y0, x1, y1 = px(r)
+        X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
+        h, w = Y1 - Y0, X1 - X0
+        t = cv2.rotate(madeira, cv2.ROTATE_90_CLOCKWISE) if w > h else madeira            # veio no comprido
+        t = np.concatenate([t, t[::-1]] * (h // (2 * t.shape[0]) + 1), axis=0)[:h]
+        t = np.concatenate([t, t[:, ::-1]] * (w // (2 * t.shape[1]) + 1), axis=1)[:, :w]
+        cantos = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+        alfa = T.poligono_aa(forma, cantos)[Y0:Y1, X0:X1] * ~parede[Y0:Y1, X0:X1]
+        reg = img[Y0:Y1, X0:X1]
+        img[Y0:Y1, X0:X1] = reg * (1 - alfa[..., None]) + t * alfa[..., None]
+        faces = {"cima": [(x0, y0), (x1, y0)], "baixo": [(x0, y1), (x1, y1)],
+                 "esquerda": [(x0, y0), (x0, y1)], "direita": [(x1, y0), (x1, y1)]}
+        for lado in livres:
+            a_ = T.linha_aa(forma, faces[lado], q["larg_contorno"])[..., None]
+            img = img * (1 - a_) + np.float32(q["contorno"]) * a_
+        print(f"    {nome}: {w}x{h} px em marcenaria areia, veio {'deitado' if w > h else 'em pé'}; "
+              f"contorno: {', '.join(livres)}")
+    return np.clip(np.round(img), 0, 255).astype(np.uint8)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 5: vidros finos (seções 4 e 18). O motor fez dois "tubos" cinza grossos
 # com nós escuros (montantes):
 # - entre a varanda e as salas: no PDF (ARQ_PAREDE) são quatro portas de vidro de correr, cada uma com duas folhas de
@@ -3013,6 +3165,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      "carro e desalinhados)", carros_a),
                     ("sem_arcos", "portas sem os arcos (as folhas ficam); porta camarão sem o cinza", sem_arcos),
                     ("pf1", "pente fino 1 (R14): escadas do deck e larga com linhas e triângulo", escadas_externas_r14),
+                    ("pf6", "pente fino 6: armários até o teto em marcenaria areia com veio, sem a diagonal e sem a "
+                     "sombra de móvel baixo; o braço da bancada dos tanques em quartzo", armarios_teto),
                     ("pf5", "pente fino 5: vidros finos (varanda e salas; o vão do hall sem o tubo)", vidros_finos),
                     # as projeções por cima de tudo: o último item do Térreo
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a)]}
