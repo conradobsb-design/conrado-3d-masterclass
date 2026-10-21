@@ -1727,6 +1727,19 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
     - Entram em traço contínuo de 0,6 px, como no PDF: cinza médio no Bege Bahia do depósito; cinza claro na madeira da academia, onde o cinza médio sumia (como na rouparia da Casa E). Nas paredes pretas, o traço some.
   - **Conferência:** na imagem com ajustes e na prancha, só os shafts e os retângulos; rodapé igual. Prancha do Subsolo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_projecoes_antes_depois.jpg`.
+- **Subsolo, item 9, soleiras (R13), feito** (`ajustes_casaa.soleiras_subsolo`, config `SOLEIRAS_SUB`). Conferidas as 10 portas no PDF (o vão na espessura da parede: branco entre os batentes é soleira; com o piso de um dos lados atravessando, não).
+  - **Sem soleira (como já estavam):**
+    - banho de serviço: o Barlavento entra no vão;
+    - depósito e porta de correr da circulação: o piso da circulação;
+    - sauna: o travertino;
+    - banhos feminino e masculino: a madeira da academia e o travertino se encontram no vão;
+    - academia para a circulação: o piso da circulação vai até a madeira.
+  - **Com soleira (o vão branco no PDF):**
+    - academia para o hall: o vão inteiro, de 1655,55 a 1666,89 pt, com as duas folhas de vidro de correr por cima. O render tinha ali uma faixa clara lisa entre a madeira e as folhas. As folhas e os batentes (item 4 de 19/10) ficam;
+    - elevador: o vão entre o hall e a cabine, de 2012,72 a 2021,22 pt. O render tinha o travertino antigo.
+  - **Desenho:** o das soleiras do Térreo (item 16): Bege Bahia na escala, no tom da referência, com as faces da parede em cinza fino. A rotina virou `desenhar_soleiras`, comum aos dois pavimentos, com a opção de deixar de fora o que fica por cima do vão; o Térreo sai igual px a px.
+  - **Conferência:** na imagem com ajustes e na prancha, só os dois vãos; rodapé igual. Prancha do Subsolo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_soleiras_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

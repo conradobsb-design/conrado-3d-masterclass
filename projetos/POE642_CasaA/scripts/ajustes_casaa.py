@@ -129,6 +129,8 @@ pode seguir pela ordem proposta"):
      sauna com a antessala e nos banhos, com a luz do lugar; os objetos ficam, e os boxes e o banco são redesenhados.
   Subsolo, pente fino 8 (R8): os dois shafts brancos, com o X tracejado do PDF em cinza médio, e os três retângulos
      da DOC_LINHAS E PROJEÇÕES (depósito e academia) em traço cinza fino.
+  Subsolo, pente fino 9 (R13): soleiras de Bege Bahia nos dois vãos brancos do PDF (academia para o hall, com as
+     folhas de vidro por cima, e elevador); nas outras portas o piso atravessa o vão.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3293,6 +3295,30 @@ def projecoes_subsolo(out):
     return np.clip(im, 0, 255).astype(np.uint8)
 
 
+# Pente fino pelas regras (21/10/26), Subsolo, item 9: soleiras (R13), porta a porta no PDF (o vão na espessura da
+# parede: branco, entre os batentes, é soleira; com o piso de um dos lados atravessando, não). Sem soleira, como já
+# estavam: o banho de serviço (o Barlavento entra no vão), o depósito e a porta de correr da circulação (o piso da
+# circulação), a sauna (o travertino), os banhos feminino e masculino (a madeira da academia e o travertino se encontram
+# no vão) e a academia para a circulação (o piso da circulação até a madeira). Com soleira (o vão branco no PDF):
+# - academia para o hall: o vão inteiro (de 1655,55 a 1666,89 pt), com as duas folhas de vidro de correr por cima; o
+#   render tinha uma faixa clara lisa entre a madeira e as folhas. As folhas e os batentes (item 4 de 19/10) ficam;
+# - elevador: o vão entre o hall e a cabine (de 2012,72 a 2021,22 pt); o render tinha o travertino antigo.
+# Desenho das soleiras do Térreo (item 16, desenhar_soleiras): Bege Bahia na escala, no tom da referência, com as faces
+# da parede em cinza fino.
+SOLEIRAS_SUB = {"pdf": [(1655.55, 1232.34, 1666.89, 1371.24),     # academia para o hall
+                        (2012.72, 1311.71, 2021.22, 1348.56)],    # elevador
+                "fora": [f for lado in PORTAS_ACADEMIA["lados"] if lado["nome"] == "do hall"
+                         for f in lado["folhas"] + lado["batentes"]],
+                "forca": 0.5, "linha": (150, 152, 154), "linha_px": 0.4, "ss": 8, "semente": 7}
+
+
+def soleiras_subsolo(out):
+    out = desenhar_soleiras(out, "Subsolo", SOLEIRAS_SUB)
+    print("    2 soleiras de Bege Bahia nos vãos brancos do PDF (academia para o hall, com as folhas de vidro por cima, e "
+          "elevador), com as faces da parede em cinza fino; nas outras 8 portas o piso atravessa o vão")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -4447,12 +4473,21 @@ SOLEIRAS_A = {"pdf": [(2106.3, 733.3, 2114.8, 787.5),     # escritório
 
 
 def soleiras_a(out):
+    out = desenhar_soleiras(out, "Terreo", SOLEIRAS_A)
+    print(f"    {len(SOLEIRAS_A['pdf'])} soleiras de Bege Bahia nos vãos brancos do PDF (escritório, lavabo, gás e jardim), "
+          f"com as faces da parede em cinza fino; nas outras 9 portas o piso atravessa o vão")
+    return out
+
+
+def desenhar_soleiras(out, chave, q):
+    """Soleiras de Bege Bahia na escala, no tom do Bege Bahia da referência, nos vãos q["pdf"] (pt) do pavimento, com
+    as faces da parede (os lados compridos) em cinza fino; o que estiver em q["fora"] (pt: folhas de vidro e batentes
+    por cima do vão) fica."""
     import sys
     sys.path.insert(0, str(CASA.parent / "_texturas"))
     from texturas import textura
     from retoque_terreo_casae import BEGE
-    q = SOLEIRAS_A
-    _, p2r = pdf_pavimento("Terreo")
+    _, p2r = pdf_pavimento(chave)
     (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                  # 1 m na escala 1:50 = 56,69 pt
     px_m = float(np.hypot(c - a, d - b))
     k = q["ss"]
@@ -4464,6 +4499,10 @@ def soleiras_a(out):
         u0, v0, u1, v1 = (int(round((x0 - X0) * k)), int(round((y0 - Y0) * k)), int(round((x1 - X0) * k)),
                           int(round((y1 - Y0) * k)))
         m[v0:v1, u0:u1] = 255
+        for fr in q.get("fora", []):
+            (fa, fb), (fc, fd) = p2r(fr[0], fr[1]), p2r(fr[2], fr[3])
+            m[int(round((fb - Y0) * k)):int(round((fd - Y0) * k)),
+              int(round((fa - X0) * k)):int(round((fc - X0) * k))] = 0
         f = np.zeros_like(m)
         e = max(1, int(round(q["linha_px"] * k)))
         if (x1 - x0) >= (y1 - y0):                                # faces da parede: os lados compridos
@@ -4480,8 +4519,6 @@ def soleiras_a(out):
         reg = reg * (1 - al) + T * al
         reg = reg * (1 - fl) + np.float32(q["linha"]) * fl
         out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
-    print(f"    {len(q['pdf'])} soleiras de Bege Bahia nos vãos brancos do PDF (escritório, lavabo, gás e jardim), com as "
-          f"faces da parede em cinza fino; nas outras 9 portas o piso atravessa o vão")
     return out
 
 
@@ -4555,6 +4592,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                       "depósito e vidro da sauna, finos", vidros_subsolo),
                      ("pf8", "pente fino 8 (R8): shafts brancos com o X tracejado e os retângulos da DOC_LINHAS",
                       projecoes_subsolo),
+                     ("pf9", "pente fino 9 (R13): soleiras nos dois vãos brancos do PDF (academia-hall e elevador)",
+                      soleiras_subsolo),
                      ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",
                       so_subsolo)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
