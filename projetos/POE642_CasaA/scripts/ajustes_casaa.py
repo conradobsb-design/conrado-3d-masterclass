@@ -168,6 +168,9 @@ pode seguir pela ordem proposta"):
   1º Pavimento, pente fino 13 (R8, R9): as projeções da cobertura (os dois contornos da ARQ_CONTRAPISO) e do pergolado
      (a grade da ARQ_PERGOLADO) em tracejado, no traço das projeções do Térreo; como caem quase todas fora da pegada,
      sobre o Térreo nublado, entram na final (`projecoes_1pav_final`, chamada por `rotulos_casaa.final_imagem`).
+  1º Pavimento, pente fino 14 (seções 4 e 18): nas fachadas das suítes, o "tubo" branco do motor sai e entram as portas
+     de vidro de correr do PDF, finas, em dois planos, como os vidros do Térreo (item 5); antes das cortinas (item 10),
+     como na Casa E, e depois do Bege Bahia das varandas (item 12, que agora roda logo depois do vinílico).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -4030,8 +4033,9 @@ def banheira_1pav(out):
 # (`retoque_1pav_casae.cortinas_linho`):
 # - os tracinhos saem (`limpar`): numa faixa de 9 px no eixo de cada trecho, do começo ao fim dele (com folga), cada linha
 #   recebe o vinílico das duas beiradas da faixa, ligado em linha reta (as réguas correm na horizontal), só onde o piso
-#   está mais escuro que isso; a beirada fora do tom do vinílico do trecho (a poltrona da suíte 2, o caixilho da suíte 1)
-#   dá lugar à outra; a parede e o caixilho (a 7 px do eixo) ficam;
+#   está mais escuro que isso; a beirada fora do tom do vinílico do trecho (a mediana da faixa; a poltrona da suíte 2,
+#   o caixilho da suíte 1, o vidro do item 14) dá lugar à outra, e sem beirada no tom a linha fica; a parede e o
+#   caixilho (a 7 px do eixo) ficam;
 # - o pano da biblioteca em cada trecho do PDF (eixo do tecido no eixo da linha, na mesma extensão: a meia distância) e,
 #   em cada suíte, o trilho de parede a parede, do lado do vidro (à esquerda nas suítes 3, 2 e master; à direita na 1).
 #   O fim do trilho é a parede preta numa coluna "dentro" px para dentro do quarto; os trilhos do mesmo lado que se
@@ -4040,22 +4044,23 @@ CORTINAS_1PAV = {"limpar": {"meia": 4, "linhas": (-5, 8), "escuro": 20, "parede"
                  "vidro_direita_pt": 2000, "parede": 55, "seguidos": 3, "busca_m": 6.0, "dentro": 3, "ss": 8}
 
 
-def cortinas_1pav(out):
-    import sys
+def trechos_cortina_1pav():
+    """Os trechos de cortina do PDF: (lado do vidro, eixo x, y de cima, y de baixo), em px da imagem."""
     from retoque_1pav_casae import trechos_cortina
-    from retoque_terreo_casae import pousar_cortina
-    sys.path.insert(0, str(CASA.parent / "_blocos"))
-    import blocos
     q = CORTINAS_1PAV
     pg, p2r = pdf_pavimento("1Pavimento")
-    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
-    px_m = float(np.hypot(c - a, d - b))
     trechos = []
     for pts in trechos_cortina(pg):
         xe = float(np.median(pts[:, 0]))                     # o eixo do tecido (as ondas são verticais nas fachadas)
         (ex, ey0), (_, ey1) = p2r(xe, float(pts[:, 1].min())), p2r(xe, float(pts[:, 1].max()))
         trechos.append(("direita" if xe > q["vidro_direita_pt"] else "esquerda", ex, ey0, ey1))
-    # 1. os tracinhos do motor saem
+    return trechos
+
+
+def tracinhos_cortina(out, trechos):
+    """Os tracinhos escuros do motor no lugar das cortinas saem (o passo 1 do item 10; o item 14 o chama antes de
+    espelhar o piso para as portas de vidro). Devolve os px limpos."""
+    q = CORTINAS_1PAV
     lp = q["limpar"]
     limpos = 0
     for _, ex, ey0, ey1 in trechos:
@@ -4066,7 +4071,8 @@ def cortinas_1pav(out):
         esq = np.median(out[r0:r1, c0 - 2:c0].astype(np.float32), axis=1)
         dir_ = np.median(out[r0:r1, c1:c1 + 2].astype(np.float32), axis=1)
         le, ld = esq.mean(axis=1), dir_.mean(axis=1)
-        ref = float(np.median(np.r_[le, ld]))                                 # o tom do vinílico no trecho
+        ref = float(np.median(reg.mean(axis=2)))       # o tom do vinílico no trecho: a mediana da faixa (os tracinhos
+                                                       # são poucos; as beiradas podem ser o vidro e a poltrona)
         ok_e, ok_d = np.abs(le - ref) < lp["difere"], np.abs(ld - ref) < lp["difere"]
         esq, dir_ = (np.where(ok_e[:, None], esq, dir_),                       # uma beirada fora do piso (móvel,
                      np.where(ok_d[:, None], dir_, esq))                       # caixilho): vale a outra
@@ -4079,6 +4085,21 @@ def cortinas_1pav(out):
         al = (cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.5) * m)[..., None]
         out[r0:r1, c0:c1] = np.clip(np.round(reg * (1 - al) + liso * al), 0, 255).astype(np.uint8)
         limpos += int(m.sum())
+    return limpos
+
+
+def cortinas_1pav(out):
+    import sys
+    from retoque_terreo_casae import pousar_cortina
+    sys.path.insert(0, str(CASA.parent / "_blocos"))
+    import blocos
+    q = CORTINAS_1PAV
+    pg, p2r = pdf_pavimento("1Pavimento")
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    trechos = trechos_cortina_1pav()
+    # 1. os tracinhos do motor saem (com o item 14 antes, já saíram: aqui não sobra nada)
+    limpos = tracinhos_cortina(out, trechos)
     # 2. os panos nos trechos do PDF e os trilhos de parede a parede
     k = q["ss"]
     busca = int(q["busca_m"] * px_m)
@@ -4113,6 +4134,51 @@ def cortinas_1pav(out):
                                                                      for v, ex, t0, t1 in unidos))
     return out
 
+
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 14: as portas de vidro de correr das suítes para as varandas,
+# finas, em dois planos (seções 4 e 18). No PDF (ARQ_PAREDE), cada fachada tem dois planos de folhas de correr (cada folha
+# em duas lâminas de 1,4 pt lado a lado, com as peças de 2,8 x 4,5 pt nas pontas): o de fora, junto à varanda, e o de
+# dentro, a ~3 px; na master, o plano de fora segue pela frente do banho master. O motor fez em cada fachada um "tubo"
+# branco de ~8 px com contorno cinza. Como os vidros do Térreo (item 5, `vidros_finos`): o tubo sai (`esquadria_limpar`
+# da Casa E, folha a folha: cada coluna da faixa recebe o piso do seu lado, em espelho; o escuro da parede não serve de
+# fonte) e as peças do PDF entram finas (`esquadria_desenhar`: o vidro claro e o contorno fino). A limpeza vai do plano
+# de fora para o de dentro (`vidro`: o lado da varanda), para o espelho do plano de fora não levar o tubo: entre os
+# planos fica o Bege Bahia da varanda; e, antes dela, os tracinhos das cortinas saem (`tracinhos_cortina`, o passo 1
+# do item 10), para o espelho do plano de dentro não os copiar. Na suíte 1 os dois planos são zonas separadas: a
+# janela do banho 1 (no alinhamento do plano de dentro, mais acima) não entra. As janelas dos banhos 1 e 2 e a da
+# escada ficam como estão. Roda depois do Bege Bahia das varandas (item 12) e antes das cortinas (item 10), como na
+# Casa E (as fachadas antes das cortinas de linho).
+VIDROS_1PAV = {"zonas": [((1389.1, 561.4, 1406.1, 783.6), "esquerda"),        # suíte 3
+                         ((1389.1, 1177.2, 1406.1, 1370.4), "esquerda"),       # suíte 2
+                         ((1151.0, 1394.8, 1168.0, 1772.9), "esquerda"),       # suíte master e banho master
+                         ((2301.9, 1289.9, 2307.5, 1693.5), "direita"),        # suíte 1, plano de fora (em L)
+                         ((2290.5, 1491.6, 2296.2, 1693.5), "direita")]}       # suíte 1, plano de dentro
+
+
+def vidros_1pav(out):
+    import sys
+    import retoque_terreo_casae as T
+    sys.path.insert(0, str(CASA.parent / "_texturas"))
+    from texturas import textura
+    pg, p2r = pdf_pavimento("1Pavimento")
+    px_m = p2r(56.69, 0)[0] - p2r(0, 0)[0]
+    limpos = tracinhos_cortina(out, trechos_cortina_1pav())
+    par = [d for d in pg.get_drawings() if d.get("layer") == "ARQ_PAREDE"]
+    img = out.astype(np.float32)
+    n = 0
+    for z, vidro in VIDROS_1PAV["zonas"]:
+        folhas = [d["rect"] for d in par
+                  if d["type"] == "f" and d["fill"] and min(d["fill"]) >= 0.9 and min(d["rect"].width, d["rect"].height)
+                  <= 3.2 and z[0] - 0.5 <= d["rect"].x0 and d["rect"].x1 <= z[2] + 0.5 and z[1] - 0.5 <= d["rect"].y0
+                  and d["rect"].y1 <= z[3] + 0.5]
+        for r in sorted(folhas, key=lambda r: r.x0 if vidro == "esquerda" else -r.x1):   # de fora para dentro
+            T.esquadria_limpar(img, r, p2r)
+        n += len(folhas)
+    for z, _ in VIDROS_1PAV["zonas"]:
+        T.esquadria_desenhar(img, z, par, p2r, px_m, textura)
+    print(f"    vidros das suítes: {limpos} px de tracinhos das cortinas fora antes; {n} peças do PDF limpas (de fora "
+          f"para dentro) e redesenhadas finas em {len(VIDROS_1PAV['zonas'])} zonas")
+    return np.clip(img, 0, 255).astype(np.uint8)
 
 # Pente fino pelas regras (21/10/26), 1º Pavimento, item 11: vinílico na escala (R4: "Vinílico: réguas de ~20 cm,
 # claras, em tons alternados"). O motor fez réguas de ~40 cm. Como no 1º Pavimento da Casa E
@@ -5638,6 +5704,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          "nos bocéis e o triângulo da descida", escadas_1pav),
                         ("pf11", "pente fino 11 (R4): vinílico na escala, réguas de 20 cm em tons alternados, como na "
                          "Casa E (antes dos móveis dos itens 4 a 10)", vinilico_1pav),
+                        ("pf12", "pente fino 12 (seção 18): Bege Bahia das quatro varandas como a referência, como o do "
+                         "Térreo", bege_varandas_1pav),
                         ("pf4", "pente fino 4 (R11): guarda-roupas com cabides nos closets 3, 2, master e 1 (bege dentro, "
                          "ocre na borda, cabideiro)", guarda_roupas_1pav),
                         ("pf5", "pente fino 5 (seção 7): armários até o teto da circulação e do quarto de serviço em "
@@ -5650,10 +5718,10 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          "faixa com dois quadrados", quarto_servico_1pav),
                         ("pf9", "pente fino 9: banheira oval do banho master com a torneira de piso, como no PDF",
                          banheira_1pav),
+                        ("pf14", "pente fino 14 (seções 4 e 18): portas de vidro de correr das suítes para as varandas, "
+                         "finas, em dois planos, como no PDF (antes das cortinas, como na Casa E)", vidros_1pav),
                         ("pf10", "pente fino 10: cortinas de linho da biblioteca nas quatro suítes, com o trilho de parede "
                          "a parede", cortinas_1pav),
-                        ("pf12", "pente fino 12 (seção 18): Bege Bahia das quatro varandas como a referência, como o do "
-                         "Térreo", bege_varandas_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 

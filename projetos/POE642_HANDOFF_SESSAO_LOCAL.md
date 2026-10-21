@@ -1817,6 +1817,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** as retas saem do PDF e entram em tracejado, no traço das projeções do Térreo (8,5 pt de traço, 4,25 de vão, cinza 150), por cima do Térreo nublado e do pavimento, menos nas paredes pretas. Entram na final porque quase tudo cai fora da pegada do pavimento.
   - **Conferência:** a imagem com ajustes não muda; na prancha, só as linhas das projeções (10 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_projecoes_antes_depois.jpg`.
+- **1º Pavimento, item 14, portas de vidro de correr finas, feito** (`ajustes_casaa.vidros_1pav`, config `VIDROS_1PAV`).
+  - **Antes:** em cada fachada de suíte, um "tubo" branco de ~8 px com contorno cinza; no PDF, dois planos de folhas de correr finas (o de fora junto à varanda e o de dentro).
+  - **Como:** os vidros do Térreo (item 5): o tubo sai (o piso de cada lado, em espelho, do plano de fora para o de dentro; entre os planos fica o Bege Bahia da varanda) e as peças do PDF entram finas. Na master, o plano de fora segue pela frente do banho master. Ficam como estão as janelas dos banhos 1 e 2 e a da escada.
+  - **Ordem:** o Bege Bahia das varandas (item 12) passou para logo depois do vinílico (resultado igual), e este item roda antes das cortinas (item 10), como na Casa E. Os tracinhos das cortinas saem antes do espelho. Na limpeza deles, o tom do vinílico passou a ser a mediana da faixa: com o vidro novo numa beirada e a poltrona na outra, a faixa da cortina de cima da suíte 2 saía cinza.
+  - **Conferência:** na imagem com ajustes e na prancha, só as quatro fachadas (5 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_vidros_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
