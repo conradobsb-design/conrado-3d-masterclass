@@ -125,6 +125,8 @@ pode seguir pela ordem proposta"):
      cima da sauna em folha contínua, sem o montante (seção 18).
   Subsolo, pente fino 6: o Bege Bahia da circulação externa, da interna e do depósito no desenho da biblioteca, na
      escala, e no tom da foto (RGB 230, 211, 186), com a luz do lugar, pela rotina do item 9 do Térreo.
+  Subsolo, pente fino 7: o travertino aprovado do Térreo (veio horizontal, sem rejuntes), na escala, no hall, na
+     sauna com a antessala e nos banhos, com a luz do lugar; os objetos ficam, e os boxes e o banco são redesenhados.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3133,6 +3135,106 @@ def bege_subsolo(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), Subsolo, item 7: travertino na escala (R1 e seção 18). No hall, os veios do motor
+# estavam na vertical, com riscos escuros; na sauna, na antessala e nos banhos, em faixas largas. Entra o travertino
+# aprovado do Térreo da Casa A (veio horizontal, sem rejuntes), na mesma escala (os dois pavimentos estão no mesmo
+# quadro: 31,1 e 31,5 px/m), como o Subsolo da Casa E (retoque_subsolo_casae.texturas_na_escala): trechos limpos do
+# Térreo com os ajustes (a circulação junto ao jardim e a passagem abaixo do escritório), tecidos por image quilting
+# com os espelhos que mantêm o veio na horizontal, e o desenho inteiro deles entra (força 1,4) sobre a luz do lugar
+# (raio de 1 m, que tira o desenho antigo). A máscara é o travertino da base de entrega do Subsolo (#DCD9CA), nas
+# manchas do hall, da sauna com a antessala e dos dois banhos (o pátio, da mesma cor na base, é Bege Bahia desde o
+# item 11 de 19/10), sem as portas de vidro entre a academia e o hall. Os traços finos da base (os arcos e as folhas
+# das portas do PDF, 1 a 2 px) são fechados (3 x 3), e entra a faixa da sauna junto ao vidro da esquerda, que na base
+# ficou na cor do pátio (#E4E4E4); no render, a sauna é toda travertino.
+# Os objetos saem da máscara pelo PDF, e não pela luz: com o critério de retexturizar (fugir da luz do lugar), os
+# riscos escuros do motor também ficavam, e o piso saía em retalhos. Saem: os traços e as peças da ARQ_LOUÇAS E METAIS
+# e da ARQ_BANCADAS (cubas, vasos, chuveiros, ralos), com o que eles fecham; a divisória dos banhos (item 10); o branco
+# das louças do render que toca as louças do PDF (a borda de cima dos vasos passa 1 a 2 px do PDF; os pontos claros do
+# tampo do banco ficam fora); tudo com 1 px de folga. A borda de 1 a 2 px que fica no desenho antigo (junto às paredes
+# e aos objetos) vai ao piso novo de perto, como no item 6. Os vidros dos boxes (item 9) e a borda do banco da sauna
+# (item 2) não ficam protegidos: guardavam, na faixa deles, a sombra antiga junto às paredes, que lia como um risco
+# escuro. O piso troca por baixo, e os dois são redesenhados por cima, com as mesmas rotinas (vidro_box e
+# banco_sauna). Roda antes do item 5 (as folhas das portas entram por cima).
+TRAV_SUB = {"cor_base": (0xCA, 0xD9, 0xDC), "tol": 6, "x_min": 620, "area_min": 1000,
+            "fora": [(972, 545, 982, 628)],                       # px: as portas de vidro da academia para o hall
+            "fechar": 3, "incluir": [(625, 786, 645, 827)],       # px: a faixa da sauna junto ao vidro da esquerda
+            "fonte": CASA / "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png",
+            "trechos": [(1142, 318, 1174, 488), (1188, 358, 1288, 430)],   # px do Térreo com os ajustes
+            "forca": 1.4, "sig_m": 1.0, "p": 24, "sobra": 8, "candidatos": 400, "semente": 654,
+            "camadas": ["ARQ_LOUÇAS E METAIS", "ARQ_BANCADAS"], "fechado_max": 600,   # px: o que os traços fecham
+            # pt: os vidros dos boxes na ARQ_LOUÇAS E METAIS (da ducha, com o tracejado que segue até a parede, e do
+            # banho feminino), redesenhados depois
+            "redesenhados": [(1190.0, 1717.0, 1275.0, 1725.0), (1430.0, 1660.0, 1439.0, 1740.0)],
+            "branco": 228, "branco_min": 40, "folga": 1, "borda": {"sig": 1.5, "peso": 0.15}}
+
+
+def travertino_subsolo(out):
+    from retoque_bege_bahia_terreo import quilting
+    from texturas_escala import retexturizar
+    q = TRAV_SUB
+    bb = base_terreo(out.shape[:2], "Subsolo").astype(np.int32)
+    trav = (np.abs(bb - np.array(q["cor_base"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(trav, 8)
+    m = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_min"]
+                      and st[i, cv2.CC_STAT_LEFT] >= q["x_min"]])
+    k = q["fechar"]
+    m = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((k, k), np.uint8)).astype(bool)
+    for x0, y0, x1, y1 in q["incluir"]:
+        m[y0:y1, x0:x1] = True
+    for x0, y0, x1, y1 in q["fora"]:
+        m[y0:y1, x0:x1] = False
+    pg, p2r = pdf_pavimento("Subsolo")
+    ss = 4
+    obj = np.zeros((out.shape[0] * ss, out.shape[1] * ss), np.uint8)
+    for d in pg.get_drawings():
+        r = d["rect"]
+        if d.get("layer") in q["camadas"] and not any(r.x0 >= a and r.y0 >= b and r.x1 <= c and r.y1 <= e
+                                                      for a, b, c, e in q["redesenhados"]):
+            for c in caminhos_pdf(d, p2r):
+                pts = np.int32(np.round(c * ss))
+                if d["type"] == "f":
+                    cv2.fillPoly(obj, [pts], 255)
+                else:
+                    cv2.polylines(obj, [pts], False, 255, ss)
+    r = DIVISORIA["caixa"]
+    (x0, y0), (x1, y1) = p2r(r[0], r[1]), p2r(r[2], r[3])
+    cv2.rectangle(obj, (int(x0 * ss), int(y0 * ss)), (int(np.ceil(x1 * ss)), int(np.ceil(y1 * ss))), 255, -1)
+    obj = cv2.resize(obj, out.shape[1::-1], interpolation=cv2.INTER_AREA) > 0
+    louca = obj.copy()
+    n, lab, st, _ = cv2.connectedComponentsWithStats((~obj).astype(np.uint8), 4)   # o que os traços fecham
+    obj |= np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= q["fechado_max"]])
+    n, lab, st, _ = cv2.connectedComponentsWithStats((out.astype(np.float32).mean(axis=2) >= q["branco"]).astype(np.uint8))
+    perto = cv2.dilate(louca.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    obj |= np.isin(lab, [i for i in np.unique(lab[perto]) if i and st[i, cv2.CC_STAT_AREA] >= q["branco_min"]])
+    k = 2 * q["folga"] + 1
+    obj = cv2.dilate(obj.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    m &= ~obj
+    terreo = cv2.imread(str(q["fonte"])).astype(np.float32)
+    fontes = [terreo[y0:y1, x0:x1] for x0, y0, x1, y1 in q["trechos"]]
+    fontes += [f[:, ::-1] for f in fontes] + [f[::-1] for f in fontes]     # espelhos: o veio fica na horizontal
+
+    def do_terreo(h, w):
+        return quilting(fontes, h, w, p=q["p"], sobra=q["sobra"], candidatos=q["candidatos"],
+                        rng=np.random.default_rng(q["semente"]))[:h, :w]
+    from texturas_escala import nconv
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    antes = out
+    out, npx = retexturizar(out, m, "travertino", px_m, forca=q["forca"], sig_m=q["sig_m"], pronta=do_terreo,
+                            fugir=False)
+    b = q["borda"]
+    novo = (out != antes).any(axis=2) & m
+    resto = m & ~novo & (cv2.GaussianBlur(novo.astype(np.float32), (0, 0), b["sig"]) >= b["peso"])
+    out[resto] = np.clip(nconv(out.astype(np.float32), novo.astype(np.float32), b["sig"])[resto], 0, 255).astype(np.uint8)
+    print(f"    travertino do hall, da sauna com a antessala e dos banhos: {npx} px no travertino do Térreo, "
+          f"a {px_m:.2f} px/m, e {int(resto.sum())} px da borda; os objetos ficam; por cima, de novo:")
+    from retoque_subsolo_casae import vidro_box
+    for f in [f for b in BOXES for f in b["folhas"]]:
+        out = vidro_box(out, p2r, f)
+    print(f"    os {sum(len(b['folhas']) for b in BOXES)} vidros dos boxes (item 9)")
+    return banco_sauna(out)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -3398,15 +3500,15 @@ GRAMA_A = {"lote": (150, 77, 1807, 1007), "branco": 250, "mancha": 10000, "verde
            "traco": {"media": 41, "limiar": 5, "comprimento": 80, "largura": 3, "borda": 8, "pontas": 40}, "semente": 5}
 
 
-def base_terreo(forma):
-    """A base do Térreo (a chapada da entrega), levada à imagem aprovada pelo quadro comum."""
+def base_terreo(forma, chave="Terreo"):
+    """A base do pavimento (a chapada da entrega), levada à imagem aprovada pelo quadro comum."""
     import json
     import rotulos_casaa as A
     cfg = json.loads(A.CONFIG.read_text())
     base = cv2.imread(str((A.CONFIG.parent / cfg["entrega"]["pasta_bases"] /
-                           cfg["entrega"]["pavimentos"]["Terreo"]["base"]).resolve()))
+                           cfg["entrega"]["pavimentos"][chave]["base"]).resolve()))
     b2 = cv2.resize(base, (2000, round(base.shape[0] * 2000 / base.shape[1])), interpolation=cv2.INTER_NEAREST)
-    return cv2.warpAffine(b2, np.float32(AFIM_QR["Terreo"]), (forma[1], forma[0]), flags=cv2.INTER_NEAREST,
+    return cv2.warpAffine(b2, np.float32(AFIM_QR[chave]), (forma[1], forma[0]), flags=cv2.INTER_NEAREST,
                           borderValue=(255, 255, 255))
 
 
@@ -4389,6 +4491,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("pf3", "pente fino 3 (R14): escada do deck com a linha nos bocéis, o trecho depois do corte "
                       "tracejado e o triângulo", escada_deck_subsolo),
                      ("pf6", "pente fino 6: Bege Bahia da referência, na escala e no tom da foto", bege_subsolo),
+                     ("pf7", "pente fino 7: travertino do Térreo no hall, na sauna, na antessala e nos banhos",
+                      travertino_subsolo),
                      ("pf5", "pente fino 5: porta de correr da circulação, folhas das portas de giro, janela do "
                       "depósito e vidro da sauna, finos", vidros_subsolo),
                      ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",

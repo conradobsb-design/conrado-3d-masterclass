@@ -28,18 +28,21 @@ def nconv(img, m, sig):
 
 
 def retexturizar(out, mascara, nome, px_por_m, forca=0.6, sig_m=0.25, semente=1, pronta=None, cor=None,
-                 suavizar=0.8):
+                 suavizar=0.8, fugir=True):
     """pronta: em vez da textura da biblioteca, uma função (alto, largo) -> textura BGR já na escala (ex.: o mesmo piso
     aprovado de outro pavimento da casa); o desenho inteiro dela entra (dividido pela média), não só o detalhe.
     cor: o tom médio do material (BGR); a luz do lugar é levada a ele, mantendo as variações de luz (sombras, cantos).
-    suavizar: o desfoque do desenho (px), para o grão abaixo de 1 px não virar ruído."""
+    suavizar: o desfoque do desenho (px), para o grão abaixo de 1 px não virar ruído.
+    fugir: False quando os objetos já saíram da máscara: todo o piso dela troca, os riscos escuros do motor também."""
     im = out.astype(np.float32)
     m = cv2.erode(mascara.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
     sig = sig_m * px_por_m
-    L = nconv(im, m.astype(np.float32), sig)
-    nao = ((L - im).max(axis=2) > 12) | ((im - L).max(axis=2) > 30)
-    nao = cv2.dilate(nao.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
-    piso = m & ~nao
+    piso = m
+    if fugir:
+        L = nconv(im, m.astype(np.float32), sig)
+        nao = ((L - im).max(axis=2) > 12) | ((im - L).max(axis=2) > 30)
+        nao = cv2.dilate(nao.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+        piso = m & ~nao
     if not piso.any():
         return out, 0
     L = nconv(im, piso.astype(np.float32), sig)

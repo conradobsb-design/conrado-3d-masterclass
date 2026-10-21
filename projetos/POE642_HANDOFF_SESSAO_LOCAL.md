@@ -1702,6 +1702,20 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Código:** a rotina do Térreo virou `bege_na_referencia`, usada pelos dois pavimentos; a máscara do item 11 virou `bege_mascaras`. Conferido: o Térreo e o item 11 saem iguais px a px.
   - **Conferência:** na imagem com ajustes e na prancha, só as três áreas de Bege Bahia; rodapé igual. Prancha do Subsolo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_bege_referencia_antes_depois.jpg`.
+- **Subsolo, item 7, travertino na escala (R1 e seção 18), feito** (`ajustes_casaa.travertino_subsolo`, config `TRAV_SUB`).
+  - **Antes:** no hall, os veios do motor estavam na vertical, com riscos escuros; na sauna, na antessala e nos banhos, em faixas largas.
+  - **Agora:** o travertino aprovado do Térreo da Casa A (veio horizontal, sem rejuntes), na mesma escala (31,1 px/m no Subsolo, 31,5 no Térreo, o mesmo quadro), com a luz do lugar. É o caminho do Subsolo da Casa E.
+  - **Fonte:** dois trechos limpos do Térreo com os ajustes (a circulação junto ao jardim e a passagem abaixo do escritório), tecidos por image quilting, com os espelhos que mantêm o veio na horizontal. O desenho inteiro entra (força 1,4) sobre a luz do lugar (raio de 1 m, que tira o desenho antigo).
+  - **Máscara:**
+    - O travertino da base de entrega do Subsolo (#DCD9CA) no hall, na sauna com a antessala e nos dois banhos. O pátio, da mesma cor na base, é Bege Bahia desde o item 11 de 19/10 e fica de fora, assim como as portas de vidro entre a academia e o hall.
+    - Os arcos e as folhas das portas, que furam a base, são fechados (3 x 3). Entra a faixa da sauna junto ao vidro da esquerda, que na base ficou na cor do pátio; no render, a sauna é toda travertino.
+  - **Objetos:**
+    - Saem da máscara pelo PDF, e não pela luz: as louças e bancadas (cubas, vasos, chuveiros, ralos), a divisória dos banhos e o branco dos vasos que toca as louças do PDF.
+    - Primeiro tentei o critério de sempre (o que foge da luz do lugar fica): os riscos escuros do motor também fugiam, e o piso saiu em retalhos. Por isso `texturas_escala.retexturizar` ganhou a opção `fugir=False`; o padrão continua o de antes, e as outras casas não mudam.
+    - Os vidros dos boxes e a borda do banco da sauna não ficam protegidos: na faixa deles ficava a sombra antiga junto às paredes, que lia como risco escuro. O piso troca por baixo, e os dois são redesenhados por cima, com as rotinas dos itens 9 e 2.
+    - A borda de 1 a 2 px junto às paredes e aos objetos vai ao piso novo de perto, como no item 6.
+  - **Conferência:** na imagem com ajustes e na prancha, só o hall, a sauna com a antessala e os banhos; rodapé igual. Prancha do Subsolo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_travertino_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
