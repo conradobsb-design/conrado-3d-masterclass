@@ -1763,6 +1763,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Caracol da saleta:** pelo PDF, o "D" e a seta ficam no degrau junto ao 0° e apontam para baixo: desce no sentido horário. O trecho cheio do render (o quarto de 0,6° a 93,1°, cinco degraus em madeira) fica, sem os riscos escuros do motor, com os bocéis do PDF em linha suave e a sombra curta do lado horário, e o triângulo (a 70%, como no Térreo) no degrau do "D". No resto, o branco limpo, sem a linha de percurso e sem o símbolo do corte (seção 5: "a linha de corte não é desenhada"), com os 14 bocéis tracejados da R14. **A confirmar:** a leitura do sentido e do trecho cheio veio do "D" e da seta do PDF; se o trecho cheio for outro (os degraus logo abaixo da laje, 20 em diante, no sentido horário a partir do 0°), basta trocar `CARACOL_1PAV["cheio"]`.
   - **Conferência:** na imagem com ajustes e na prancha, só as duas escadas (2 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_escadas_antes_depois.jpg`.
+- **1º Pavimento, item 4, guarda-roupas com cabides (R11), feito** (`ajustes_casaa.guarda_roupas_1pav`, config `GUARDA_ROUPAS_1PAV`).
+  - **Antes:** o motor fez armários de madeira com riscos escuros nos quatro closets.
+  - **Onde:** os retângulos com diagonal da DOC_LINHAS E PROJEÇÕES no PDF: closet 3 e closet 1 em L, closet 2 em L, closet master em U (nove trechos). Os da circulação e do quarto de serviço são armários até o teto (item 5) e ficaram fora.
+  - **Como:** o guarda-roupa da biblioteca (`elementos.guarda_roupa`), aberto, visto de cima, com os cabides e o cabideiro de metal, no tamanho do PDF, com as portas do lado do closet; os tons da Casa E (bege dentro, ocre na borda), como confirmado pelo usuário em 21/10.
+  - **Conferência:** na imagem com ajustes e na prancha, só os quatro closets (4 regiões); os rótulos não mudam; rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_guarda_roupas_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

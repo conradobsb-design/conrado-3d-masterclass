@@ -142,6 +142,8 @@ pode seguir pela ordem proposta"):
      com a linha suave e a sombra curta em cada bocel e o triângulo no degrau 19, para a descida; na caracol da saleta,
      o trecho cheio com os bocéis suaves e o triângulo no degrau do "D" (sentido horário), o resto em branco com os
      bocéis tracejados, sem a linha de percurso e sem o corte.
+  1º Pavimento, pente fino 4 (R11): guarda-roupas abertos com cabides nos closets 3, 2, master e 1, nos retângulos com
+     diagonal da DOC_LINHAS, como na Casa E (bege dentro, ocre na borda, cabideiro de metal), portas do lado do closet.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3634,6 +3636,57 @@ def escadas_1pav(out):
     return caracol_1pav(escada_u_1pav(out))
 
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 4: guarda-roupas com cabides (R11) nos closets 3, 2, 1 e
+# master. O motor fez armários de madeira com riscos. No PDF, cada guarda-roupa é um retângulo com a diagonal da
+# DOC_LINHAS E PROJEÇÕES (os em L e o em U do closet master são dois e três trechos, o canto num deles). Cada trecho
+# recebe o `_texturas/elementos.guarda_roupa` como no 1º Pavimento da Casa E (retoque_1pav_casae.guarda_roupas, item 5
+# de 20/10): visto de cima, aberto, no tamanho do PDF, desenhado em 4x, com as portas do lado do closet; os tons da Casa
+# E (usuário, 21/10: confirmado), bege dentro e ocre na borda, e o cabideiro de metal de lateral a lateral. Os
+# retângulos com diagonal da circulação e do quarto de serviço são armários até o teto (item 5) e ficam fora.
+GUARDA_ROUPAS_1PAV = {"pecas": [((1664.1, 579.0, 1698.1, 692.3), "direita"), ((1698.1, 579.0, 1825.6, 613.0), "baixo"),
+                                # closet 3; closet 2
+                                ((1598.9, 1072.2, 1729.3, 1106.2), "baixo"), ((1729.3, 1072.2, 1763.3, 1276.3), "esquerda"),
+                                # closet master
+                                ((1539.3, 1483.3, 1686.7, 1517.4), "baixo"), ((1652.7, 1517.4, 1686.7, 1775.2), "esquerda"),
+                                ((1536.5, 1741.2, 1652.7, 1775.2), "cima"),
+                                # closet 1
+                                ((2021.2, 1381.2, 2055.2, 1483.2), "direita"), ((2055.2, 1381.2, 2174.3, 1415.2), "baixo")],
+                      "ss": 4, "semente": 31}
+
+
+def guarda_roupas_1pav(out):
+    import sys
+    sys.path.insert(0, str(CASA.parent / "_texturas"))
+    from elementos import guarda_roupa
+    from retoque_1pav_casae import GUARDA_ROUPAS
+    q = GUARDA_ROUPAS_1PAV
+    _, p2r = pdf_pavimento("1Pavimento")
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                  # 1 m na escala 1:50 = 56,69 pt
+    px_m = float(np.hypot(c - a, d - b))
+    S = q["ss"]
+    im = out.astype(np.float32)
+    for i, ((x0, y0, x1, y1), lado) in enumerate(q["pecas"]):
+        (u0, v0), (u1, v1) = p2r(x0, y0), p2r(x1, y1)
+        comp, prof = max(x1 - x0, y1 - y0) / 56.69, min(x1 - x0, y1 - y0) / 56.69
+        cor, alfa = guarda_roupa(comp, prof, px_m * S, semente=q["semente"] + i, miolo=GUARDA_ROUPAS["miolo"],
+                                 moldura=GUARDA_ROUPAS["moldura"], barra=True)
+        k = {"baixo": 0, "direita": 1, "cima": 2, "esquerda": 3}[lado]
+        cor, alfa = np.ascontiguousarray(np.rot90(cor, k)), np.ascontiguousarray(np.rot90(alfa, k))
+        X0, Y0, X1, Y1 = int(np.floor(u0)), int(np.floor(v0)), int(np.ceil(u1)), int(np.ceil(v1))
+        tw, th = int(round((u1 - u0) * S)), int(round((v1 - v0) * S))
+        ox, oy = int(round((u0 - X0) * S)), int(round((v0 - Y0) * S))
+        grande = np.zeros(((Y1 - Y0) * S, (X1 - X0) * S, 3), np.float32)
+        ag = np.zeros(grande.shape[:2], np.float32)
+        grande[oy:oy + th, ox:ox + tw] = cv2.resize(cor, (tw, th), interpolation=cv2.INTER_AREA)
+        ag[oy:oy + th, ox:ox + tw] = cv2.resize(alfa, (tw, th), interpolation=cv2.INTER_AREA)
+        cr = cv2.resize(grande, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
+        ar = cv2.resize(ag, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)[..., None]
+        im[Y0:Y1, X0:X1] = im[Y0:Y1, X0:X1] * (1 - ar) + cr
+    print(f"    {len(q['pecas'])} trechos de guarda-roupa com cabides nos closets 3, 2, master e 1 (bege dentro, ocre "
+          f"na borda, cabideiro de metal)")
+    return np.clip(im, 0, 255).astype(np.uint8)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -4955,6 +5008,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
          "1Pavimento": [("pf2", "pente fino 2 (R3): portas sem os arcos (as folhas ficam)", sem_arcos_1pav),
                         ("pf3", "pente fino 3 (R14 e seção 5): a escada em U e a caracol da saleta com a linha suave "
                          "nos bocéis e o triângulo da descida", escadas_1pav),
+                        ("pf4", "pente fino 4 (R11): guarda-roupas com cabides nos closets 3, 2, master e 1 (bege dentro, "
+                         "ocre na borda, cabideiro)", guarda_roupas_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 
