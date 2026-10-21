@@ -88,20 +88,23 @@ def trocar_grama(out, mascara, px_por_m, cor=None, semente=1, sig_luz_m=1.5, sig
     return np.clip(im * (1 - a) + novo * a, 0, 255).astype(np.uint8), int(mascara.sum())
 
 
-def mascara_grama(out, gramado, croma=None):
+def mascara_grama(out, gramado, croma=None, est_lim=9, lum=(35, 102), verde_max=115):
     """A grama de verdade dentro do gramado da base (`gramado`, bool): sem as plantas e com a borda junto aos pisos.
     - plantas: o que não é grama (cor fora da da grama, escuro, claro ou com folhagem), em manchas de 120 px ou mais,
       só a mais de 4 px da borda do gramado (junto aos pisos a cor e a folhagem são falsas), fechadas (17 px) e com os
       vãos pequenos entre folhas (< 1500 px) incluídos;
     - grama: os px verdes no tom da grama, com a vizinhança medida só nos px verdes (a borda dos pisos não conta), até
       3 px fora do gramado da base; os buracos pequenos (< 120 px) no meio dela entram.
-    croma: a cromaticidade (b, r) da grama; sem ela, a mediana dos px verdes do gramado."""
+    croma: a cromaticidade (b, r) da grama; sem ela, a mediana dos px verdes do gramado.
+    est_lim, lum e verde_max (os números da Casa E): o desenho mínimo de folha (energia de 1 a 3 px), a faixa de
+    luminância da grama e a luminância máxima do verde; a Casa A, de grama mais clara e plantas verde-sálvia (cor perto
+    da grama), usa est_lim 4, lum (35, 125) e verde_max 130."""
     from scipy import ndimage
     gramD = cv2.dilate(gramado.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
     im = out.astype(np.float32)
     b, g, r = im[..., 0], im[..., 1], im[..., 2]
     Y = im.mean(axis=2)
-    verde = (g > r + 4) & (g > b + 12) & (Y < 115)
+    verde = (g > r + 4) & (g > b + 12) & (Y < verde_max)
     s0 = im.sum(axis=2) + 1
     if croma is None:
         sel = gramado & verde
@@ -110,7 +113,7 @@ def mascara_grama(out, gramado, croma=None):
     s = f.sum(axis=2) + 1
     d = np.hypot(f[..., 0] / s - croma[0], f[..., 2] / s - croma[1])
     est = cv2.GaussianBlur(np.abs(cv2.GaussianBlur(Y, (0, 0), 1.0) - cv2.GaussianBlur(Y, (0, 0), 3.0)), (0, 0), 1.5)
-    folha = (d >= 0.03) | (f.mean(axis=2) <= 35) | (f.mean(axis=2) >= 140) | (est >= 9)
+    folha = (d >= 0.03) | (f.mean(axis=2) <= 35) | (f.mean(axis=2) >= 140) | (est >= est_lim)
     longe = cv2.distanceTransform(gramado.astype(np.uint8), cv2.DIST_L2, 5) > 4
     nao = cv2.morphologyEx((gramado & folha & longe).astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
     n, lab, st, _ = cv2.connectedComponentsWithStats(nao, 8)
@@ -127,7 +130,7 @@ def mascara_grama(out, gramado, croma=None):
     sv = fv.sum(axis=2) + 1
     dv = np.hypot(fv[..., 0] / sv - croma[0], fv[..., 2] / sv - croma[1])
     Lv = fv.mean(axis=2)
-    grama = verde & (dv < 0.03) & (Lv > 35) & (Lv < 102) & gramD & ~planta
+    grama = verde & (dv < 0.03) & (Lv > lum[0]) & (Lv < lum[1]) & gramD & ~planta
     inv = gramado & ~grama & ~planta
     n, lab, st, _ = cv2.connectedComponentsWithStats(inv.astype(np.uint8), 8)
     grama |= np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] < 120])

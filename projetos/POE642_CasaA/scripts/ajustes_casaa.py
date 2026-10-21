@@ -92,6 +92,9 @@ pode seguir pela ordem proposta"):
   Térreo 6. Armários até o teto (seção 7): os quatro do PDF (cozinha, área de serviço, motorista) na marcenaria
      areia com veio dos armários da Casa D, sem a diagonal e sem a sombra de móvel baixo no granito, com o contorno
      fino nas faces livres; o braço da bancada dos tanques, que também estava lilás, em quartzo.
+  Térreo 7. Grama na escala da referência (R1, R4), no tom do render, como o item 42 do Térreo da Casa E: o gramado é
+     o branco da base dentro do lote; as plantas e os tracejados do motor (afastamento, cobertura) ficam; o jardim
+     interno da escada também.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3040,6 +3043,101 @@ def armarios_teto(out):
     return np.clip(np.round(img), 0, 255).astype(np.uint8)
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 7: grama na escala da referência (R1 e R4), no tom do render, como o
+# item 42 do Térreo da Casa E (a opção B, escolhida lá: o desenho da grama da biblioteca, na escala, no verde do próprio
+# render, com a luz larga do lugar e as sombras das plantas; texturas_escala.mascara_grama e trocar_grama). A grama do
+# motor tem grão fino de carpete e manchas fora de escala.
+# - Gramado: a base da Casa A tem o lote em branco (o gramado é do motor). Vale o branco da base (levada à imagem pelo
+#   quadro comum), dentro do lote (do muro de cima ao de baixo; da linha preta da esquerda até onde o verde acaba, à
+#   direita), em manchas grandes e verdes no render (os brancos dos móveis, dos carros e da floreira do lavabo ficam
+#   de fora). O jardim interno da escada fica: a escada esmaecida está desenhada sobre a grama dele.
+# - Plantas: as da Casa A são verde-sálvia, de cor perto da da grama; o que as separa é o desenho das folhas (energia
+#   de 1 a 3 px em torno de 5, contra 1,7 na grama): mascara_grama com est_lim 4 e a faixa de luz da grama mais clara
+#   (35 a 125). Junto às bordas do gramado (onde mascara_grama não procura planta, por causa da mistura de cor com o
+#   piso) as folhas que encostam numa planta também ficam.
+# - Os tracejados do motor sobre a grama ficam (o afastamento obrigatório, em traço escuro, fora até 21 px da linha do
+#   PDF; e trechos da projeção da cobertura, 2 px fora da do item 4): linhas retas, finas e longas, achadas no próprio
+#   render (na média de 41 px ao longo da linha, 5 abaixo da vizinhança, em trechos de 80 px ou mais e até 3 de
+#   largura), a mais de 8 px da borda do gramado (junto às bordas, a sombra dos pisos e dos muros dava linhas falsas)
+#   e longe das plantas; cada linha segue mais 40 px nas pontas (a média de 41 px não as alcança), na grama; os px do
+#   traço voltam depois da troca. Só os escuros: as projeções do item 4 (cinza claro) são
+#   desenhadas depois, por cima, e as linhas claras achadas na grama do motor eram do grão dela. Ficam seis: o
+#   afastamento em x 257 e 1711 e em y 854 (dois trechos), e a cobertura em x 1388 e y 147 (contraste de 16 a 22,
+#   contra 6 a 9 das falsas).
+GRAMA_A = {"lote": (150, 77, 1807, 1007), "branco": 250, "mancha": 10000, "verde_min": 0.5,
+           "amostra": (650, 85, 1050, 150), "est_lim": 4, "lum": (35, 125), "verde_max": 130, "borda": 6, "perto": 13,
+           "traco": {"media": 41, "limiar": 5, "comprimento": 80, "largura": 3, "borda": 8, "pontas": 40}, "semente": 5}
+
+
+def grama_escala(out):
+    import json
+    import rotulos_casaa as A
+    from texturas_escala import mascara_grama, trocar_grama
+    q = GRAMA_A
+    _, p2r = pdf_pavimento("Terreo")
+    forma = out.shape[:2]
+    cfg = json.loads(A.CONFIG.read_text())
+    base = cv2.imread(str((A.CONFIG.parent / cfg["entrega"]["pasta_bases"] /
+                           cfg["entrega"]["pavimentos"]["Terreo"]["base"]).resolve()))
+    b2 = cv2.resize(base, (2000, round(base.shape[0] * 2000 / base.shape[1])), interpolation=cv2.INTER_NEAREST)
+    b2 = cv2.warpAffine(b2, np.float32(AFIM_QR["Terreo"]), (forma[1], forma[0]), flags=cv2.INTER_NEAREST,
+                        borderValue=(255, 255, 255))
+    im = out.astype(np.float32)
+    b, g, r = im[..., 0], im[..., 1], im[..., 2]
+    verde = (g > r + 4) & (g > b + 12) & (im.mean(axis=2) < q["verde_max"])
+    branco = cv2.morphologyEx((b2.min(axis=2) >= q["branco"]).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    x0, y0, x1, y1 = q["lote"]
+    lote = np.zeros(forma, np.uint8)
+    lote[y0:y1, x0:x1] = 1
+    n, lab, st, _ = cv2.connectedComponentsWithStats(branco & lote, 4)
+    gramado = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["mancha"]
+                            and verde[lab == i].mean() >= q["verde_min"]])
+    a0, b0, a1, b1 = q["amostra"]
+    am = cv2.GaussianBlur(im, (0, 0), 1.5)[b0:b1, a0:a1].reshape(-1, 3)
+    soma = am.sum(axis=1) + 1
+    croma = (float(np.median(am[:, 0] / soma)), float(np.median(am[:, 2] / soma)))
+    grama, planta = mascara_grama(out, gramado, croma=croma, est_lim=q["est_lim"], lum=q["lum"],
+                                  verde_max=q["verde_max"])
+    # junto às bordas do gramado: as folhas que encostam numa planta
+    Y = im.mean(axis=2)
+    est = cv2.GaussianBlur(np.abs(cv2.GaussianBlur(Y, (0, 0), 1.0) - cv2.GaussianBlur(Y, (0, 0), 3.0)), (0, 0), 1.5)
+    dist = cv2.distanceTransform(gramado.astype(np.uint8), cv2.DIST_L2, 5)
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (q["perto"], q["perto"]))
+    perto = cv2.dilate(planta.astype(np.uint8), k).astype(bool)
+    folhas = gramado & (dist <= q["borda"]) & perto & ((est >= q["est_lim"]) | (Y >= 120))
+    planta |= folhas
+    grama &= ~planta
+    # os tracejados do motor: linhas finas, longas e escuras, achadas no render
+    t = q["traco"]
+    livre = gramado & (dist > t["borda"]) & ~cv2.dilate(planta.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
+    D = Y - cv2.GaussianBlur(Y, (0, 0), 2.0)
+    w = livre.astype(np.float32)
+    traco = np.zeros(forma, bool)
+    Dm = np.where(livre, -D, 0)
+    for kk, eixo in (((1, t["media"]), 1), ((t["media"], 1), 0)):
+        Dd = cv2.blur(Dm, kk) / np.maximum(cv2.blur(w, kk), 1e-3)
+        C = Dd - 0.5 * (np.roll(Dd, 2, eixo) + np.roll(Dd, -2, eixo))
+        n, lab, st, _ = cv2.connectedComponentsWithStats(((C > t["limiar"]) & livre).astype(np.uint8), 8)
+        for i in range(1, n):
+            comp, larg = (st[i, 3], st[i, 2]) if eixo == 1 else (st[i, 2], st[i, 3])
+            if comp >= t["comprimento"] and larg <= t["largura"]:
+                x, y, ww, hh = st[i, :4]
+                e = t["pontas"]
+                y0_, y1_, x0_, x1_ = (max(y - e, 0), y + hh + e, x, x + ww) if eixo == 1 else (y, y + hh, max(x - e, 0), x + ww + e)
+                faixa = np.zeros(forma, bool)
+                faixa[y0_:y1_, x0_:x1_] = True
+                traco |= faixa & gramado & ~planta & (-D > t["limiar"])
+                print(f"    tracejado do motor: x {x}, y {y}, {ww} x {hh} px")
+    (a, b_), (c, d) = p2r(0, 0), p2r(56.69, 0)                  # 1 m na escala 1:50 = 56,69 pt
+    px_m = float(np.hypot(c - a, d - b_))
+    orig = out.copy()
+    out, npx = trocar_grama(out, grama, px_m, cor=None, semente=q["semente"])
+    out[traco] = orig[traco]
+    print(f"    grama da referência a {px_m:.2f} px/m em {npx} px; plantas fora: {int(planta.sum())} px "
+          f"({int(folhas.sum())} junto às bordas); tracejados do motor que ficam: {int(traco.sum())} px")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 5: vidros finos (seções 4 e 18). O motor fez dois "tubos" cinza grossos
 # com nós escuros (montantes):
 # - entre a varanda e as salas: no PDF (ARQ_PAREDE) são quatro portas de vidro de correr, cada uma com duas folhas de
@@ -3167,6 +3265,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf1", "pente fino 1 (R14): escadas do deck e larga com linhas e triângulo", escadas_externas_r14),
                     ("pf6", "pente fino 6: armários até o teto em marcenaria areia com veio, sem a diagonal e sem a "
                      "sombra de móvel baixo; o braço da bancada dos tanques em quartzo", armarios_teto),
+                    ("pf7", "pente fino 7 (R1, R4): grama na escala da referência, no tom do render", grama_escala),
                     ("pf5", "pente fino 5: vidros finos (varanda e salas; o vão do hall sem o tubo)", vidros_finos),
                     # as projeções por cima de tudo: o último item do Térreo
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a)]}
