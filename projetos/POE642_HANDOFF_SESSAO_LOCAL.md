@@ -867,6 +867,12 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
   - **Pedido do usuário depois do item 6 (21/10/26):** "o tom dos armários guarda-roupas, pode ser bege dentro e na borda o ocre". O `elementos.guarda_roupa` ganhou `miolo` e `moldura` (BGR; sem eles, o cinza da referência, como antes), e `GUARDA_ROUPAS` passou a pedir bege no miolo (RGB 228, 212, 191) e ocre na moldura (RGB 196, 148, 88). O usuário perguntou qual é a referência de guarda-roupa da biblioteca (a planta do duplex de 19/10, `_texturas/originais/referencia_elementos_*.png`, linha 1 de `_texturas/cartela_elementos.jpg`; as imagens foram mostradas). Depois pediu "aplique o bege e o ocre e siga com os itens" e, antes da rodada, "tem uma barra metallica no meio do armario para prender o cabide". O `guarda_roupa` ganhou `barra` (o cabideiro: tubo de ~2 cm no meio da profundidade, de lateral a lateral, borda escura, brilho no meio e a sombra curta, por cima dos cabides), ligado no 1º Pavimento.
     - **Conferência:** no retocado, nas montagens e nas pranchas, só os guarda-roupas mudaram; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_guarda_roupas_tons_antes_depois.jpg`.
+  - **Item 8, soleiras (R13), feito** (`retoque_1pav_casae.soleiras_1pav`, config `SOLEIRAS_1P`, depois das esquadrias). As portas foram conferidas uma a uma no PDF: o vão entre os dois batentes da ARQ_PAREDE e o que a base tem dentro dele.
+    - **Com soleira (vão branco):** os banhos 1 a 4, o banho master (a porta embutida da suíte master, P11, e a do closet master, P13) e a rouparia (P10). São sete.
+    - **Sem soleira:** as portas das suítes, onde o vinílico atravessa o vão, e a P12 do banho master, onde atravessa o quartzito.
+    - **Como, igual ao Térreo e ao Subsolo da casa:** o vão exato do PDF em Bege Bahia na escala (o desenho da biblioteca, no tom da referência), com as duas faces da parede (os lados compridos) em traço cinza fino. A folha da P11, embutida dentro do vão, fica por cima.
+    - **Conferência:** no retocado, nas montagens e nas pranchas, só os sete vãos mudaram; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_soleiras_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 

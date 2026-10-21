@@ -81,6 +81,8 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
   com as portas do lado do closet;
 - item 6, projeções em tracejado (PROJECOES_1P, R8): o shaft entre o elevador e a rouparia (vão branco com o X), o
   retângulo com X da rouparia e os X rasos do fundo do banho master;
+- item 8, soleiras (SOLEIRAS_1P, R13): nos vãos brancos do PDF (banhos 1 a 4, banho master e rouparia), em Bege
+  Bahia, com as faces da parede em cinza fino; nas suítes o vinílico atravessa;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -1670,6 +1672,64 @@ def projecoes_1pav(out, pg, p2r):
     return np.clip(im, 0, 255).astype(np.uint8)
 
 
+# item 8 do pente fino de 20/10/26: soleiras (R13: "a soleira é o vão da porta na espessura da parede deixado em
+# branco, entre os batentes; onde o piso de um dos lados atravessa o vão, não há soleira"). Conferidas porta a porta no
+# PDF (o vão entre os dois batentes da ARQ_PAREDE, e o que a base tem dentro dele): nas portas dos banhos 1 a 4, do
+# banho master (a embutida, P11, e a do closet master, P13) e da rouparia (P10), o vão é branco: há soleira; nas das
+# suítes, o vinílico atravessa, e na P12 do banho master, o quartzito: não há. Cada soleira, como no Térreo e no
+# Subsolo da casa: o vão exato do PDF em Bege Bahia na escala (o desenho da biblioteca, no tom da referência), com as
+# duas faces da parede (os lados compridos) em traço cinza fino; a folha embutida da P11, dentro do vão, fica por cima.
+SOLEIRAS_1P = {"pdf": [(2111.6, 811.7, 2120.1, 861.6),     # banho 2
+                       (2111.6, 1160.4, 2120.1, 1210.3),   # banho 1
+                       (1402.9, 1290.8, 1411.4, 1335.0),   # banho 4
+                       (1402.9, 1418.3, 1411.4, 1462.5),   # banho 3
+                       (1726.1, 795.7, 1734.6, 863.7),     # banho master / closet master (P13)
+                       (1524.8, 797.5, 1539.0, 865.6),     # suíte master / banho master (P11, embutida)
+                       (1878.7, 996.8, 1926.3, 1005.3)],   # rouparia (P10)
+               "folha_dentro": [(1530.7, 806.0, 1533.0, 868.4)]}   # a folha da P11, por cima da soleira
+
+
+def soleiras_1pav(out, p2r):
+    import retoque_terreo_casae as T
+    q, qt = SOLEIRAS_1P, T.SOLEIRAS
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    k = SS
+    for r in q["pdf"]:
+        (x0, y0), (x1, y1) = p2r(r[0], r[1]), p2r(r[2], r[3])
+        X0, Y0, X1, Y1 = int(np.floor(x0)) - 1, int(np.floor(y0)) - 1, int(np.ceil(x1)) + 2, int(np.ceil(y1)) + 2
+        h, w = Y1 - Y0, X1 - X0
+        m = np.zeros((h * k, w * k), np.uint8)
+        u0, v0, u1, v1 = (int(round((x0 - X0) * k)), int(round((y0 - Y0) * k)), int(round((x1 - X0) * k)),
+                          int(round((y1 - Y0) * k)))
+        m[v0:v1, u0:u1] = 255
+        f = np.zeros_like(m)
+        e = max(1, int(round(qt["linha_px"] * k)))
+        if (x1 - x0) >= (y1 - y0):
+            f[v0:v0 + e, u0:u1] = 255
+            f[v1 - e:v1, u0:u1] = 255
+        else:
+            f[v0:v1, u0:u0 + e] = 255
+            f[v0:v1, u1 - e:u1] = 255
+        for fr in q["folha_dentro"]:
+            (fa, fb), (fc, fd) = p2r(fr[0], fr[1]), p2r(fr[2], fr[3])
+            ia, ib = int(round((fa - X0) * k)) - 1, int(round((fb - Y0) * k))
+            ic, id_ = int(round((fc - X0) * k)) + 1, int(round((fd - Y0) * k))
+            m[max(0, ib):max(0, id_), max(0, ia):max(0, ic)] = 0
+        al = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        fl = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        Tx = textura("bege_bahia", px_m, h, w, semente=qt["semente"]).astype(np.float32)
+        Tx = (1 + qt["forca"] * (Tx / Tx.reshape(-1, 3).mean(axis=0) - 1)) * np.float32(T.BEGE["tom"])
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        reg = reg * (1 - al) + Tx * al
+        reg = reg * (1 - fl) + np.float32(qt["linha"]) * fl
+        out[Y0:Y1, X0:X1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    {len(q['pdf'])} soleiras de Bege Bahia no vão branco do PDF, com as faces da parede em cinza fino")
+    return out
+
+
 # item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
 # é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
 # quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
@@ -1791,6 +1851,8 @@ def main():
     out = banhos34_pecas(out, pg, p2r)
     print("[pente fino 9 e 7] portas, janelas e vidros finos, pelo PDF")
     out = esquadrias_1pav(out, pg, p2r)
+    print("[pente fino 8] soleiras no vão branco do PDF (R13)")
+    out = soleiras_1pav(out, p2r)
     print("[pente fino 5] guarda-roupas com cabides nos closets (R11)")
     out = guarda_roupas(out, A, p2r)
     print("[pente fino 3] boxes em folha contínua, de parede a parede (R10)")
