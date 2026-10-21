@@ -76,6 +76,10 @@ Itens:
   Todos os pavimentos, quartzito Carrara (usuário, 21/10/26: "use o quartzito Carrara nas ilhas e bancadas"): nas
      peças da ARQ_BANCADAS do PDF (`carrara_bancadas`), o Carrara feito por código
      (`fontes_procedurais.quartzito_carrara`), na escala, com a luz do lugar; cubas, torneiras, inox e cooktops ficam.
+  Térreo, ilha da cozinha (usuário, 21/10/26: "troque as banquetas, melhore a representação da ilha e troque o
+     cooktop"): as banquetas e o cooktop do motor saem antes do Carrara (`ilha_cozinha_limpar`); depois dele entram o
+     contorno da ilha e das laterais em cascata do PDF, o cooktop de inox de 5 bocas e as 3 banquetas de madeira e linho
+     da biblioteca (`ilha_cozinha_pecas`), redesenhados nítidos na final (`ilha_cozinha_final`, pelo rotulos_casaa).
   Térreo, carros (pedido do usuário, 19/10/26): cada carro numa cor (branco perolado, grafite, azul-marinho, a
      paleta da Casa D) e os três levemente desalinhados, como na Casa E.
   Térreo, sem arcos (decisão do usuário, 19/10/26, com as plantas de referência dos elementos: "remover os arcos,
@@ -4214,6 +4218,146 @@ def carrara_bancadas(out, pavimento):
     return out
 
 
+# Pedido do usuário (21/10/26), com a ilha da cozinha do Térreo: "TROQUE AS BANQUETAS, MELHORE A REPRESENTAÇÃO DA ILHA
+# E TROQUE O COOKTOP". No PDF (ARQ_BANCADAS, ARQ_LOUÇAS E METAIS e ARQ_LAYOUT HUMANIZAÇÃO), a ilha tem 1,90 x 1,20 m,
+# com as duas laterais em cascata (as faixas de 4 cm das pontas), o cooktop de 5 bocas (0,88 x 0,50 m, as bocas do lado
+# de quem cozinha) e três banquetas redondas de 40 cm no lado de cima, metade sob o tampo. O motor fez três manchas
+# brancas e um cooktop de contorno rosado. Em duas etapas, em volta do Carrara (que texturiza o tampo entre elas):
+# - antes (`ilha_cozinha_limpar`): a faixa das banquetas volta ao granito (o piso logo acima, `fonte_dy` px, com a borda
+#   suave) e o cooktop do motor volta à pedra da ilha (a mediana dela, até a borda do tampo);
+# - depois (`ilha_cozinha_pecas`): o contorno fino do tampo e das duas laterais em cascata; o cooktop da biblioteca
+#   (`_blocos`, "cooktop_inox_5_90", o mesmo da Casa E: na altura do PDF, até 10% de alongamento, centrado, com os
+#   botões embaixo, do lado de quem cozinha, e o anel azul da chama em inox); e as três banquetas da referência
+#   ("banqueta_linho", madeira clara e linho cru, como as da ilha gourmet da Casa E), no tamanho e no centro das do PDF,
+#   de frente para a ilha (o bloco girado de 180°: a frente do assento sob o tampo), com a sombra curta da biblioteca,
+#   só fora do tampo. Na final de 3840 px, o contorno, o cooktop e as banquetas são redesenhados (`ilha_cozinha_final`),
+#   para saírem nítidos (12 px por banqueta no ajuste).
+ILHA_COZINHA = {"ilha": (1717.9, 1409.5, 1825.6, 1477.5),               # pt
+                "laterais": [1720.2, 1823.4],                             # pt: a face de dentro das laterais em cascata
+                "cooktop": (1746.8, 1446.4, 1796.7, 1474.7),
+                "banquetas": [(1740.6, 1403.85), (1774.6, 1403.85), (1808.65, 1403.85)], "banqueta_d": 22.6,
+                "bloco_banqueta": "banqueta_linho", "bloco_cooktop": "cooktop_inox_5_90", "esticar": 1.10, "azul": 18,
+                "faixa": 15, "folga": 3, "fonte_dy": 17, "margem_cooktop": 2.5,   # px no ajuste
+                "contorno": ((126, 126, 128), 0.6, 0.5), "lateral": ((168, 168, 171), 0.5, 0.45)}   # (BGR, força, px)
+
+
+def ilha_cozinha_limpar(out):
+    q = ILHA_COZINHA
+    _, p2r = pdf_pavimento("Terreo")
+    (ix0, iy0), (ix1, iy1) = p2r(*q["ilha"][:2]), p2r(*q["ilha"][2:])
+    img = out.astype(np.float32)
+    # a faixa das banquetas volta ao granito: o piso logo acima, com a borda suave, só fora do tampo
+    Y1 = int(np.floor(iy0)) + 1
+    Y0, X0, X1 = Y1 - q["faixa"], int(np.floor(ix0)) - q["folga"], int(np.ceil(ix1)) + q["folga"]
+    dy = q["fonte_dy"]
+    limpo = img.copy()
+    limpo[Y0:Y1, X0:X1] = img[Y0 - dy:Y1 - dy, X0:X1]
+    m = np.zeros(out.shape[:2], np.float32)
+    m[Y0:Y1, X0:X1] = 1
+    a = cv2.GaussianBlur(m, (0, 0), 0.7) * np.clip(iy0 - (np.arange(out.shape[0]) + 0.5) + 0.5, 0, 1)[:, None]
+    img = img * (1 - a[..., None]) + limpo * a[..., None]
+    # o cooktop do motor volta à pedra da ilha (a mediana do tampo fora dele), até a borda do tampo
+    (cx0, cy0), (cx1, cy1) = p2r(*q["cooktop"][:2]), p2r(*q["cooktop"][2:])
+    g = q["margem_cooktop"]
+    tampo = np.zeros(out.shape[:2], bool)
+    tampo[int(np.ceil(iy0)) + 1:int(np.floor(iy1)) - 1, int(np.ceil(ix0)) + 1:int(np.floor(ix1)) - 1] = True
+    ck = np.zeros(out.shape[:2], np.float32)
+    ck[int(np.floor(cy0 - g)):int(np.ceil(cy1 + g)), int(np.floor(cx0 - g)):int(np.ceil(cx1 + g))] = 1
+    pedra = np.median(img[tampo & (ck == 0)], axis=0)
+    ck = cv2.GaussianBlur(ck, (0, 0), 0.5) * tampo
+    img = img * (1 - ck[..., None]) + pedra * ck[..., None]
+    print("    ilha da cozinha: as banquetas e o cooktop do motor fora (o granito e a pedra da ilha)")
+    return np.clip(np.round(img), 0, 255).astype(np.uint8)
+
+
+def desenhar_ilha(img, p2x, sombras=True):
+    """O contorno da ilha e das laterais, o cooktop e as banquetas em img (float32), com p2x (pt -> px desse quadro)."""
+    import json
+    import sys
+    sys.path[:0] = [str(CASA.parent / "_blocos"), str(CASA.parent / "_texturas")]
+    import blocos
+    from texturas import CONFIG as CFG_TEX
+    from retoque_terreo_casae import pousar_planta
+    q = ILHA_COZINHA
+    (ix0, iy0), (ix1, iy1) = p2x(*q["ilha"][:2]), p2x(*q["ilha"][2:])
+    (a, b), (c, d) = p2x(0, 0), p2x(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    e = px_m / 31.45                                                  # 1 no ajuste
+    h, w = img.shape[:2]
+    k = 8
+
+    def traco(pts_lista, cor, forca, larg):
+        x0 = int(min(p[0] for pts in pts_lista for p in pts)) - 3
+        y0 = int(min(p[1] for pts in pts_lista for p in pts)) - 3
+        x1 = int(max(p[0] for pts in pts_lista for p in pts)) + 4
+        y1 = int(max(p[1] for pts in pts_lista for p in pts)) + 4
+        m = np.zeros(((y1 - y0) * k, (x1 - x0) * k), np.uint8)
+        for pts in pts_lista:
+            P = np.int32(np.round((np.float64(pts) - [x0, y0]) * k))
+            cv2.polylines(m, [P], len(pts) > 2, 255, max(1, round(larg * e * k)), cv2.LINE_AA)
+        al = cv2.resize(m.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)[..., None] * forca
+        img[y0:y1, x0:x1] = img[y0:y1, x0:x1] * (1 - al) + np.float32(cor) * al
+    # 1. o contorno fino do tampo e a face de dentro das duas laterais em cascata
+    traco([[(ix0, iy0), (ix1, iy0), (ix1, iy1), (ix0, iy1)]], *q["contorno"])
+    traco([[p2x(x, q["ilha"][1]), p2x(x, q["ilha"][3])] for x in q["laterais"]], *q["lateral"])
+    # 2. o cooktop da biblioteca: na altura do PDF, até `esticar` na largura, centrado, botões embaixo
+    rgba = cv2.imread(str(CASA.parent / "_blocos" / "recortes" / f"{q['bloco_cooktop']}.png"),
+                      cv2.IMREAD_UNCHANGED)
+    cor0 = rgba[..., :3].astype(np.float32)
+    azul = np.clip((cor0[..., 0] - cor0[..., 2] - q["azul"]) / 20, 0, 1)[..., None]
+    cor0 = cor0 * (1 - azul) + cor0.mean(axis=2, keepdims=True) * azul
+    a0 = rgba[..., 3].astype(np.float32) / 255
+    (x0, y0), (x1, y1) = p2x(*q["cooktop"][:2]), p2x(*q["cooktop"][2:])
+    H = y1 - y0
+    W = min(x1 - x0, H * rgba.shape[1] / rgba.shape[0] * q["esticar"])
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    Wi, Hi = int(np.ceil(W)) + 2, int(np.ceil(H)) + 2
+    fx, fy = np.floor(cx - W / 2) - 1, np.floor(cy - H / 2) - 1
+    M = cv2.getAffineTransform(np.float32([(0, 0), (rgba.shape[1], 0), (0, rgba.shape[0])]),
+                               np.float32([((cx - W / 2 - fx) * k, (cy - H / 2 - fy) * k),
+                                           ((cx + W / 2 - fx) * k, (cy - H / 2 - fy) * k),
+                                           ((cx - W / 2 - fx) * k, (cy + H / 2 - fy) * k)]))
+    c1 = cv2.resize(cv2.warpAffine(cor0 * a0[..., None], M, (Wi * k, Hi * k), flags=cv2.INTER_AREA), (Wi, Hi),
+                    interpolation=cv2.INTER_AREA)
+    a1 = cv2.resize(cv2.warpAffine(a0, M, (Wi * k, Hi * k), flags=cv2.INTER_AREA), (Wi, Hi),
+                    interpolation=cv2.INTER_AREA)[..., None]
+    fx, fy = int(fx), int(fy)
+    img[fy:fy + Hi, fx:fx + Wi] = img[fy:fy + Hi, fx:fx + Wi] * (1 - a1) + c1
+    # 3. as banquetas: no tamanho e no centro das do PDF, de frente para a ilha, só fora do tampo
+    d_px = q["banqueta_d"] * px_m / 56.69
+    larg_m = next(b["largura_m"] for b in blocos.CFG["blocos"] if b["id"] == q["bloco_banqueta"])
+    cor, al = blocos.bloco(q["bloco_banqueta"], d_px / larg_m)
+    cor, al = cv2.rotate(cor, cv2.ROTATE_180), cv2.rotate(al, cv2.ROTATE_180)
+    sombra = json.loads(CFG_TEX.read_text())["vegetacao"]["sombra"]
+    if not sombras:
+        sombra = dict(sombra, opacidade=0.0)
+    camada = img.copy()
+    hb, wb = al.shape
+    for bx, by in q["banquetas"]:
+        cx, cy = p2x(bx, by)
+        fx, fy = np.floor(cx - wb / 2), np.floor(cy - hb / 2)
+        M = np.float32([[1, 0, cx - wb / 2 - fx], [0, 1, cy - hb / 2 - fy]])
+        c2 = cv2.warpAffine(cor, M, (wb + 1, hb + 1), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+        a2 = cv2.warpAffine(al, M, (wb + 1, hb + 1), flags=cv2.INTER_LINEAR)
+        pousar_planta(camada, c2, a2, fx + (wb + 1) / 2, fy + (hb + 1) / 2, d_px, sombra)
+    fora = np.clip(iy0 - (np.arange(h, dtype=np.float32) + 0.5) + 0.5, 0, 1)[:, None, None]
+    return img * (1 - fora) + camada * fora
+
+
+def ilha_cozinha_pecas(out):
+    _, p2r = pdf_pavimento("Terreo")
+    img = desenhar_ilha(out.astype(np.float32), p2r)
+    print("    ilha da cozinha: contorno e laterais em cascata, o cooktop de 5 bocas e as 3 banquetas da biblioteca")
+    return np.clip(np.round(img), 0, 255).astype(np.uint8)
+
+
+def ilha_cozinha_final(final, p2q):
+    """Na final de 3840 px: o contorno, o cooktop e as banquetas redesenhados por cima (sem as sombras, que vêm do
+    ajuste ampliado)."""
+    print("    ilha da cozinha redesenhada na final")
+    return np.clip(np.round(desenhar_ilha(final.astype(np.float32), p2q, sombras=False)), 0, 255).astype(np.uint8)
+
+
 def carrara_subsolo(out):
     return carrara_bancadas(out, "Subsolo")
 
@@ -6096,7 +6240,11 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf14", "pente fino 14: escritório com a cadeira de escritório do PDF em cima", escritorio_cadeira),
                     ("pf15", "pente fino 15: banho da varanda com o chuveiro e o box do PDF, sem a bacia", banho_varanda),
                     ("pf16", "pente fino 16 (R13): soleiras nos quatro vãos brancos do PDF", soleiras_a),
+                    ("ilha_limpar", "ilha da cozinha (usuário, 21/10/26): banquetas e cooktop do motor fora",
+                     ilha_cozinha_limpar),
                     ("carrara", "quartzito Carrara nas ilhas e bancadas (usuário, 21/10/26)", carrara_terreo),
+                    ("ilha_pecas", "ilha da cozinha (usuário, 21/10/26): contorno e laterais, cooktop e banquetas da "
+                     "biblioteca", ilha_cozinha_pecas),
                     # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",

@@ -1862,7 +1862,14 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Conferência:** só as bancadas mudam nos três pavimentos; rodapés iguais. Pranchas e PDF refeitos.
   - **A decidir com o usuário:** no PDF, a ilha gourmet do Térreo tem um cooktop de 5 bocas que o render não desenhou; ficou o Carrara, como no resto da ilha.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_carrara_antes_depois.jpg`, `..._1Pavimento_carrara_antes_depois.jpg` e `..._Subsolo_carrara_antes_depois.jpg`.
-- **Pedidos na fila (21/10/26), um por vez, nesta ordem:** ilha da cozinha (banquetas, ilha e cooktop novos); boxes dos chuveiros com folhas contínuas; paredes pretas revistas em todos os pavimentos; bordas do acesso de veículos; traços verticais de juntas antigas na varanda; quarto do motorista (rótulo maior e embaixo, cama menos branca, pezeira).
+- **Térreo, ilha da cozinha, feito** (pedido do usuário, 21/10/26: "troque as banquetas, melhore a representação da ilha e troque o cooktop"; `ajustes_casaa.ilha_cozinha_limpar` antes do Carrara e `ilha_cozinha_pecas` depois, config `ILHA_COZINHA`; na final, `ilha_cozinha_final`).
+  - **Banquetas:** as três manchas brancas do motor saem (o granito volta) e entram três banquetas de madeira e linho da biblioteca (a referência da ilha gourmet da Casa E), no tamanho e no centro das do PDF (0,40 m), de frente para a ilha, metade sob o tampo, com sombra curta.
+  - **Cooktop:** o do motor sai e entra o de inox de 5 bocas da biblioteca (o do PDF: 0,88 x 0,50 m), com os botões do lado de quem cozinha.
+  - **Ilha:** Carrara, com o contorno fino e as duas laterais em cascata do PDF marcadas.
+  - **Final:** contorno, cooktop e banquetas redesenhados nítidos na prancha de 3840 px.
+  - **Conferência:** só a ilha muda no Térreo (1 região); o 1º Pavimento fica idêntico; rodapé igual. Pranchas e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_ilha_cozinha_antes_depois.jpg`.
+- **Pedidos na fila (21/10/26), um por vez, nesta ordem:** boxes dos chuveiros com folhas contínuas; paredes pretas revistas em todos os pavimentos; bordas do acesso de veículos; traços verticais de juntas antigas na varanda; quarto do motorista (rótulo maior e embaixo, cama menos branca, pezeira).
 
 ## Casas A a D · Barlavento nas piscinas
 

@@ -272,6 +272,10 @@ def final_imagem(chave):
         (a, b), (c, d) = p2q(0, 0), p2q(56.69, 0)
         print("    pedra portuguesa redesenhada na final:")
         final = AJ.pedra_final(final, pedra > 200, float(np.hypot(c - a, d - b)), p2q, LARGURA / 2000)
+    if chave == "Terreo":
+        # a ilha da cozinha (pedido de 21/10/26): o contorno, o cooktop e as banquetas redesenhados nos 3840 px
+        import ajustes_casaa as AJ
+        final = AJ.ilha_cozinha_final(final, p2q)
     if nublado is not None:
         print("    o Térreo final, sem rótulos, no quadro:")
         final = tracejado_lote(nublar(final, nublado, final_imagem("Terreo")[0], janelas, troca), pg, p2q)
