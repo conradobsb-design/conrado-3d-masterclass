@@ -864,6 +864,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Banho master:** os X rasos no fundo, sobre o vaso e o box, em cinza médio (150) sobre o quartzito.
     - **Conferência:** no retocado, nas montagens e nas pranchas, só as três áreas mudaram; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_projecoes_antes_depois.jpg`.
+  - **Pedido do usuário depois do item 6 (21/10/26):** "o tom dos armários guarda-roupas, pode ser bege dentro e na borda o ocre". O `elementos.guarda_roupa` ganhou `miolo` e `moldura` (BGR; sem eles, o cinza da referência, como antes), e `GUARDA_ROUPAS` passou a pedir bege no miolo (RGB 228, 212, 191) e ocre na moldura (RGB 196, 148, 88). **Ainda não aplicado:** o usuário interrompeu a rodada para perguntar qual é a referência de guarda-roupa da biblioteca (a planta do duplex de 19/10, `_texturas/originais/referencia_elementos_*.png`, linha 1 de `_texturas/cartela_elementos.jpg`). O retocado, as montagens, as pranchas e os PDFs seguem com os guarda-roupas em cinza até a resposta dele.
 
 ## Casa E · Subsolo
 

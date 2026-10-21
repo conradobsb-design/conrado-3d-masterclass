@@ -66,8 +66,9 @@ def _contorno(t, x0, y0, x1, y1, cor, e):
     _retangulo(t, x1 - e, y0, x1, y1, cor)
 
 
-def guarda_roupa(comp_m, prof_m, px_m, semente=1):
-    """Comprimento na horizontal, portas embaixo (y maior)."""
+def guarda_roupa(comp_m, prof_m, px_m, semente=1, miolo=None, moldura=None):
+    """Comprimento na horizontal, portas embaixo (y maior). miolo e moldura (BGR): os tons do fundo e da moldura (o
+    fundo leva o mesmo sombreado e os cabides; o contorno é a moldura mais escura); sem eles, o cinza da referência."""
     rng = np.random.default_rng(semente)
     W, H = _px(comp_m, px_m), _px(prof_m, px_m)
     k = px_m * SS
@@ -85,13 +86,16 @@ def guarda_roupa(comp_m, prof_m, px_m, semente=1):
         perfil = np.exp(-0.5 * ((xs - x) / sig) ** 2)
         t[y0:y1] -= (rng.uniform(38, 52) * perfil)[..., None]
         x += rng.uniform(0.10, 0.14) * k
+    if miolo is not None:
+        t = t / 216 * np.asarray(miolo, np.float32)
     # moldura: laterais e fundo finos, as portas uma faixa branca de 2,5 cm; contorno cinza
     e = 0.02 * k
-    _retangulo(t, 0, h - 0.025 * k, w, h, (238, 238, 240))
-    _retangulo(t, 0, 0, e, h, (234, 234, 236))
-    _retangulo(t, w - e, 0, w, h, (234, 234, 236))
-    _retangulo(t, 0, 0, w, e * 0.6, (226, 226, 228))
-    _contorno(t, 0, 0, w, h, (160, 160, 162), max(1, 0.006 * k))
+    cor = (lambda f: tuple(f * c for c in moldura)) if moldura is not None else None
+    _retangulo(t, 0, h - 0.025 * k, w, h, cor(1.0) if cor else (238, 238, 240))
+    _retangulo(t, 0, 0, e, h, cor(0.98) if cor else (234, 234, 236))
+    _retangulo(t, w - e, 0, w, h, cor(0.98) if cor else (234, 234, 236))
+    _retangulo(t, 0, 0, w, e * 0.6, cor(0.95) if cor else (226, 226, 228))
+    _contorno(t, 0, 0, w, h, cor(0.68) if cor else (160, 160, 162), max(1, 0.006 * k))
     return _reduz(t, W, H), np.ones((H, W), np.float32)
 
 

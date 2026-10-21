@@ -1569,13 +1569,15 @@ def banhos34_pecas(out, pg, p2r):
 # os em L são dois trechos) recebe o `_texturas/elementos.guarda_roupa` (visto de cima, aberto: moldura branca fina
 # com contorno cinza, miolo cinza-claro, mais escuro junto às portas, e cabides em traços cinza a cada ~12 cm), no
 # tamanho do PDF, em 4x, com as portas do lado do vinílico do closet (o lado comprido que encosta nele). A rouparia, o
-# armário da copinha e o do banho master ficam em marcenaria (R11 é só para guarda-roupa).
+# armário da copinha e o do banho master ficam em marcenaria (R11 é só para guarda-roupa). Os tons (usuário, 21/10: "o
+# tom dos armários guarda-roupas, pode ser bege dentro e na borda o ocre"): o miolo em bege, a moldura em ocre.
 GUARDA_ROUPAS = {"pecas": [(1738.0, 761.5, 1984.0, 795.5), (1738.0, 863.6, 1984.0, 897.6),       # closet master
                            (1992.5, 764.4, 2026.5, 866.4), (2026.5, 764.4, 2111.6, 798.4),       # closet 2
                            (1992.5, 1113.0, 2026.5, 1215.1), (2026.5, 1113.0, 2111.6, 1147.0),   # closet 1
                            (1411.4, 1339.8, 1530.5, 1371.0), (1496.4, 1285.9, 1530.5, 1339.8),   # closet 4
                            (1411.4, 1382.3, 1530.5, 1413.5), (1496.4, 1413.5, 1530.5, 1467.4)],  # closet 3
-                 "ss": 4, "semente": 11}
+                 "ss": 4, "semente": 11,
+                 "miolo": (191, 212, 228), "moldura": (88, 148, 196)}   # BGR: bege dentro, ocre na borda (21/10)
 
 
 def guarda_roupas(out, A, p2r):
@@ -1601,7 +1603,7 @@ def guarda_roupas(out, A, p2r):
         lado = max(lado, key=lado.get)
         lados.append(lado)
         comp, prof = max(x1 - x0, y1 - y0) / 56.69, min(x1 - x0, y1 - y0) / 56.69
-        cor, alfa = guarda_roupa(comp, prof, px_m * S, semente=q["semente"] + i)
+        cor, alfa = guarda_roupa(comp, prof, px_m * S, semente=q["semente"] + i, miolo=q["miolo"], moldura=q["moldura"])
         k = {"baixo": 0, "direita": 1, "cima": 2, "esquerda": 3}[lado]
         cor, alfa = np.ascontiguousarray(np.rot90(cor, k)), np.ascontiguousarray(np.rot90(alfa, k))
         X0, Y0, X1, Y1 = int(np.floor(u0)), int(np.floor(v0)), int(np.ceil(u1)), int(np.ceil(v1))
