@@ -152,8 +152,8 @@ PENTE_FINO = {
         (12, "Vegetação (seção 10): a do motor tem folhas de 1 a 1,3 m, fora de escala, e passa do lote nos cantos; "
              "troca pelas plantas da biblioteca, no tamanho real, só dentro do lote e fora dos pisos (como a opção A "
              "do Térreo da Casa E)", [(220, 130), (1700, 140), (230, 930), (1720, 700)]),
-        (13, "Sala de jantar (item 4 da conferência de 19/10): a mesa do PDF é oval, com 10 cadeiras; a do render é "
-             "retangular", [(1050, 506)]),
+        (13, "Sala de jantar (item 4 da conferência de 19/10): a mesa do PDF é oval, com 8 cadeiras (corrigido em "
+             "21/10: dizia 10); a do render é retangular chanfrada, com as mesmas 8", [(1050, 506)]),
         (14, "Escritório (item 6 da conferência de 19/10): no PDF, a cadeira de escritório em cima da mesa e as duas "
              "de visita embaixo; o render pôs duas em cima e duas embaixo", [(1289, 233)]),
         (15, "Banho da varanda (item 7 da conferência de 19/10): no PDF, o vaso em cima e o chuveiro com o box embaixo; "

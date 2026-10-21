@@ -1621,6 +1621,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Ficam:** a floreira do lavabo (JARDIM, 4,79 m²) e o jardim interno da escada, que não são do gramado.
   - **Conferência:** na imagem com ajustes e na prancha, só a vegetação e o que estava em volta dela (os pisos, o muro e o branco de fora); rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_vegetacao_antes_depois.jpg`.
+- **Térreo, item 13, mesa de jantar oval (item 4 da conferência de 19/10), feito** (`ajustes_casaa.mesa_oval`, config `MESA_A`, depois dos vidros). O tampo do PDF (ARQ_MARCENARIA, a peça branca de 1717,9 a 1888,0 x 1123,2 a 1191,2 pt) é oval, de pontas em semicírculo, com 3,00 x 1,20 m. O do motor era retangular chanfrado e menor (2,86 x 1,08 m).
+  - **Cadeiras:** o PDF tem 8 (3 de cada lado e uma em cada cabeceira), e não 10, como dizia o mapa do pente fino (texto corrigido em `conferencia_casaa.py`; a imagem do mapa fica a de 21/10). As 8 do render já estão onde o PDF as põe e ficam.
+  - **Tampo:** refeito no contorno do PDF, em 8x, com a madeira do próprio render estendida linha a linha em espelho (o veio corre no comprido). Fica por cima da frente das cadeiras, como no PDF (1 a 3 px).
+  - **Piso e sombra:** onde o tampo velho cobria e o novo não cobre, o piso vem do entorno. A sombra curta da mesa no piso (a do motor, medida em volta: deslocada -3, +2 px, desfoque de 3 px, força 0,5) passa do contorno velho ao novo pela razão entre as duas; nas cadeiras, nada muda.
+  - **Conferência:** na imagem com ajustes e na prancha, só a mesa e a sombra dela; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_mesa_jantar_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

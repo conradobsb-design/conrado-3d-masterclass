@@ -106,6 +106,8 @@ pode seguir pela ordem proposta"):
   Térreo 12. Vegetação da biblioteca no tamanho real, só dentro do lote (a opção A do item 53 da Casa E): as folhas
      do motor que passavam do lote e sobre os pisos saem (o material da base ao lado, o branco de fora, o perfil do
      muro), a grama do item 7 entra sob as manchas e as plantas da referência, com a copa dentro do verde.
+  Térreo 13. Mesa de jantar oval (item 4 da conferência de 19/10): o tampo no contorno do PDF (3,00 x 1,20 m), com a
+     madeira do render; as 8 cadeiras do render ficam; a sombra curta acompanha o contorno novo.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3707,6 +3709,97 @@ def pymupdf_rect(z):
     return pymupdf.Rect(*z)
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 13: sala de jantar (item 4 da conferência de 19/10). O tampo do PDF
+# (ARQ_MARCENARIA, peça branca de 1717,9 a 1888,0 x 1123,2 a 1191,2 pt) é oval, de pontas em semicírculo, com 3,00 x
+# 1,20 m; o do motor é retangular chanfrado e menor (2,86 x 1,08 m). As 8 cadeiras do render (3 de cada lado e uma em
+# cada cabeceira) já estão onde o PDF as põe e ficam (o mapa do pente fino dizia 10; o PDF tem 8). O tampo é refeito
+# no contorno do PDF, em 8x: a madeira do próprio render, estendida linha a linha em espelho (o veio corre no
+# comprido), por cima da frente das cadeiras, como no PDF. O piso que o tampo velho cobria e o novo não cobre vem do
+# entorno (inpaint), e a sombra curta da mesa no piso (a do motor: deslocada -3, +2 px, desfoque de 3 px, força 0,5)
+# passa do contorno velho ao novo pela razão entre as duas; as cadeiras do PDF ficam como estão.
+MESA_A = {"camada": "ARQ_MARCENARIA", "caixa": (1717.9, 1123.2, 1888.0, 1191.2), "cadeiras": (1690, 1095, 1915, 1222),
+          "folga": 14, "nucleo": 7, "anel": (15, 31), "sombra": {"dx": -3, "dy": 2, "desfoque": 3.0, "forca": 0.5}}
+
+
+def mesa_oval(out):
+    q = MESA_A
+    pg, p2r = pdf_pavimento("Terreo")
+    forma = out.shape[:2]
+    D = pg.get_drawings()
+    x0, y0, x1, y1 = q["caixa"]
+    tampo = next(d for d in D if d.get("layer") == q["camada"] and d["type"] == "f"
+                 and max(abs(d["rect"].x0 - x0), abs(d["rect"].y0 - y0), abs(d["rect"].x1 - x1),
+                         abs(d["rect"].y1 - y1)) < 1)
+    al = r14_poligono(forma, np.vstack(caminhos_pdf(tampo, p2r)))
+    c0, c1, c2, c3 = q["cadeiras"]
+    cad = np.zeros(forma, np.float32)
+    for d in D:
+        r = d["rect"]
+        if (d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO" and d["type"] == "f" and d.get("fill") and min(d["fill"]) > 0.9
+                and c0 <= r.x0 and r.x1 <= c2 and c1 <= r.y0 and r.y1 <= c3):
+            cad = np.maximum(cad, r14_poligono(forma, np.vstack(caminhos_pdf(d, p2r))))
+    cad = cv2.dilate((cad > 0.05).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    img = out.astype(np.float32)
+    ys, xs = np.nonzero(al > 0)
+    g = q["folga"]
+    by0, by1, bx0, bx1 = ys.min() - g, ys.max() + g + 1, xs.min() - g, xs.max() + g + 1
+    # o tampo do motor: a madeira (R - B bem acima do piso), ligada ao centro
+    rb = img[..., 2] - img[..., 0]
+    k = q["nucleo"]
+    nucleo = cv2.erode((al > 0.99).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    um = (al > 0).astype(np.uint8)
+    a_, b_ = q["anel"]
+    anel = (cv2.dilate(um, np.ones((b_, b_), np.uint8)) & ~cv2.dilate(um, np.ones((a_, a_), np.uint8))).astype(bool)
+    anel &= ~cad
+    madeira, piso = np.median(rb[nucleo]), np.median(rb[anel])
+    ao = np.clip((rb - piso) / (madeira - piso), 0, 1)
+    n, lab = cv2.connectedComponents((ao > 0.3).astype(np.uint8))
+    cy, cx = np.argwhere(nucleo).mean(axis=0).astype(int)
+    perto = cv2.dilate((lab == lab[cy, cx]).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    ao = np.where(perto, ao, 0).astype(np.float32)
+    # a madeira nova: cada linha da madeira do motor estendida em espelho até a caixa; as linhas de fora, em espelho
+    cheio = cv2.erode((ao > 0.97).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    T = np.zeros((by1 - by0, bx1 - bx0, 3), np.float32)
+    boas = []
+    for y in range(by0, by1):
+        xs_ = np.nonzero(cheio[y, bx0:bx1])[0]
+        if len(xs_) < 10:
+            continue
+        lin = img[y, bx0 + xs_.min():bx0 + xs_.max() + 1]
+        esq, dir_ = xs_.min(), bx1 - bx0 - 1 - xs_.max()
+        while esq > 0 or dir_ > 0:                                     # o espelho pode precisar de mais de uma volta
+            e, d_ = min(esq, len(lin) - 1), min(dir_, len(lin) - 1)
+            lin = np.pad(lin, ((e, d_), (0, 0)), mode="reflect")
+            esq, dir_ = esq - e, dir_ - d_
+        T[y - by0] = lin
+        boas.append(y - by0)
+    t0, t1 = min(boas), max(boas)
+    for y in range(t0, t1 + 1):                                        # um veio claro pode ficar fora do núcleo
+        if y not in boas:
+            T[y] = T[min(boas, key=lambda b: abs(b - y))]
+    for y in range(t0):
+        T[y] = T[min(t1, 2 * t0 - y)]
+    for y in range(t1 + 1, len(T)):
+        T[y] = T[max(t0, 2 * t1 - y)]
+    # o piso sem o tampo velho, e a sombra do contorno velho trocada pela do novo
+    buraco = cv2.dilate((ao > 0.02).astype(np.uint8), np.ones((3, 3), np.uint8))
+    piso_img = cv2.inpaint(np.clip(img, 0, 255).astype(np.uint8), buraco, 3, cv2.INPAINT_TELEA).astype(np.float32)
+    s = q["sombra"]
+
+    def sombra(m):
+        return 1 - s["forca"] * cv2.GaussianBlur(np.roll(m, (s["dy"], s["dx"]), axis=(0, 1)), (0, 0), s["desfoque"])
+    razao = (sombra(al) / sombra(ao))[..., None]
+    fundo = np.where(buraco[..., None] > 0, piso_img, img) * razao
+    fundo = np.where(cad[..., None], img, fundo)
+    novo = img.copy()
+    novo[by0:by1, bx0:bx1] = fundo[by0:by1, bx0:bx1]
+    A = al[by0:by1, bx0:bx1, None]
+    novo[by0:by1, bx0:bx1] = T * A + novo[by0:by1, bx0:bx1] * (1 - A)
+    print(f"    mesa de jantar oval do PDF: {(x1 - x0) / 56.69:.2f} x {(y1 - y0) / 56.69:.2f} m (a do motor, "
+          f"{int((ao > 0.5).sum())} px; a nova, {int((al > 0.5).sum())} px); 8 cadeiras do render")
+    return np.clip(novo, 0, 255).astype(np.uint8)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 4: as projeções em tracejado bem visível, por cima (R8, R9). No PDF da
 # Casa A, a da cobertura está na ARQ_CONTRAPISO, em tracejado (as notas "PROJ. COBERTURA"): o L da laje, de 1290 a 2381
 # pt em x e de 511 a 1815 pt em y, com o braço de baixo indo até 1038 pt (a partir de 1344 pt), e a linha de 1290 pt
@@ -3799,6 +3892,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf10", "pente fino 10: granito marrom no desenho e no tom da referência do usuário",
                      granito_referencia_a),
                     ("pf5", "pente fino 5: vidros finos (varanda e salas; o vão do hall sem o tubo)", vidros_finos),
+                    ("pf13", "pente fino 13: mesa de jantar oval, no contorno do PDF", mesa_oval),
                     # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",
