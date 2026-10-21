@@ -815,6 +815,12 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Conferência:** no retocado, nas montagens e nas pranchas, só as linhas dos cinco boxes mudaram; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_boxes_antes_depois.jpg`.
   - **Carros (Térreo):** a foto do SUV chegou de novo só na conversa (sem arquivo na pasta de imagens recebidas); continua pendente.
+  - **Item 10, cortinas como no Térreo, feito** (usuário: "representar as cortinas da mesma forma que fizemos no terreo"). O item 7 de 16/10 (as ondas do PDF em zigue-zague branco) deu lugar à cortina de linho da biblioteca (`_blocos/blocos.cortina`), posta com o `pousar_cortina` do Térreo (`retoque_1pav_casae.cortinas_linho`, config `CORTINAS_LINHO`):
+    - **panos:** em cada um dos 10 trechos de linha ondulada do PDF (ARQ_LOUÇAS E METAIS), na mesma extensão (a meia distância, como no PDF), com o eixo do tecido no eixo da linha do PDF;
+    - **trilhos:** um por quarto, de parede a parede, do lado do vidro (regra de 20/10), 5 ao todo: suítes master, 4 e 3 na fachada da esquerda; 2 e 1 na da direita. O fim do trilho é a parede preta do render, procurada numa coluna 3 px para dentro do quarto. No eixo do tecido, colado ao vidro, o montante escuro de uma folha de correr parava a busca no meio da suíte 2. Os trilhos do mesmo lado que se sobrepõem viram um só.
+    - **Conferência:** no retocado, nas montagens e nas pranchas, só as faixas das cortinas mudaram, mais uma sombra fraca da cortina antiga (até 6 níveis) junto ao criado-mudo da suíte 2; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_cortinas_antes_depois.jpg`.
+  - **Pedido do usuário durante o item 10 (21/10/26):** "melhorar as representações de portas e janelas e vidros". São os itens 9 (esquadrias finas) e 7 (porta de correr da rouparia), os próximos.
 
 ## Casa E · Subsolo
 

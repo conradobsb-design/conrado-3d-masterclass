@@ -68,6 +68,8 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
 - item 2, escada (R14): o travertino limpo do Térreo aprovado na caixa do PDF e as linhas do `escada_linhas` do Térreo
   (19 pisos, triângulo no topo apontando a descida, esmaecida depois do corte do Térreo, como a escada que desce de lá);
 - item 3, boxes em folha contínua de parede a parede (BOXES): o traço do motor sai e entra o vidro do box do Térreo;
+- item 10, cortinas como no Térreo (CORTINAS_LINHO): a cortina de linho da biblioteca nos 10 trechos do PDF, no lugar
+  das ondas do item 7, com o trilho de parede a parede em cada quarto;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -519,6 +521,84 @@ def cortinas(out, pg, p2r):
         reg = out[y0:y1, x0:x1].astype(np.float32)
         out[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None], 0, 255).astype(np.uint8)
     print(f"    {len(trechos)} trechos de cortina ({len(arcos)} arcos do PDF)")
+    return out
+
+
+# item 10 do pente fino de 20/10/26: cortinas como no Térreo (usuário: "representar as cortinas da mesma forma que fizemos
+# no terreo"). O item 7 (as ondas do PDF em zigue-zague branco) dá lugar à cortina de linho da biblioteca
+# (`_blocos/blocos.cortina`, aprovada em 20/10), posta com o `pousar_cortina` do Térreo: em cada um dos 10 trechos de linha
+# ondulada do PDF, o pano (com o eixo do tecido no eixo da linha do PDF, na mesma extensão: a meia distância, como lá) e,
+# em cada quarto, o trilho de parede a parede, do lado do vidro (regra de 20/10: "trilhos da cortina tem que ser de fora
+# a fora"). O fim do trilho é a parede preta do render ao longo da cortina, numa coluna "dentro" px para dentro do quarto
+# ("parede": média abaixo disso, em "seguidos" px); os trilhos do mesmo lado que se sobrepõem viram um só. O vidro fica à esquerda na fachada da esquerda e à direita na da direita.
+CORTINAS_LINHO = {"parede": 55, "seguidos": 3, "busca_m": 6.0, "dentro": 3}
+
+
+def trechos_cortina(pg):
+    """Os trechos de linha ondulada do PDF (arcos que se tocam), cada um como os pontos de controle em pt."""
+    q = CORTINAS
+    arcos = [d for d in pg.get_drawings() if d.get("layer") == q["camada"] and d.get("color") == (0.0, 0.0, 0.0)
+             and abs((d.get("width") or 0) - q["traco_pdf"]) < 0.01]
+    trechos = []
+    for d in arcos:
+        b = pymupdf.Rect(d["rect"]) + (-1.5, -1.5, 1.5, 1.5)
+        for t in trechos:
+            if any(b.intersects(e["rect"]) for e in t):
+                t.append(d)
+                break
+        else:
+            trechos.append([d])
+    out = []
+    for t in trechos:
+        pts = np.array([(v.x, v.y) for d in t for it in d["items"] for v in it[1:] if hasattr(v, "x")])
+        out.append(pts)
+    return out
+
+
+def cortinas_linho(out, pg, p2r):
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    from retoque_terreo_casae import pousar_cortina
+    q = CORTINAS_LINHO
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    k = 8
+    busca = int(q["busca_m"] * px_m)
+    panos, trilhos = [], []
+    for pts in trechos_cortina(pg):
+        xe = float(np.median(pts[:, 0]))                     # o eixo do tecido (as ondas são verticais nas fachadas)
+        (ex, ey0), (_, ey1) = p2r(xe, float(pts[:, 1].min())), p2r(xe, float(pts[:, 1].max()))
+        vidro = "esquerda" if xe < 1700 else "direita"
+        # a coluna da busca, um pouco para dentro do quarto: no eixo do tecido, colado ao vidro, os montantes escuros das
+        # folhas de correr paravam a busca antes da parede
+        dentro = int(round(ex)) + (q["dentro"] if vidro == "esquerda" else -q["dentro"])
+        escuro = out[:, dentro].astype(np.float32).mean(axis=1) < q["parede"]
+
+        def ate_parede(y, passo):
+            n = 0
+            for yy in range(int(round(y)), int(round(y)) + passo * busca, passo):
+                n = n + 1 if escuro[yy] else 0
+                if n >= q["seguidos"]:
+                    return yy - passo * (q["seguidos"] - 1) - passo * 0.5
+            return y
+        panos.append((vidro, ex, ey0, ey1))
+        trilhos.append([vidro, ex, ate_parede((ey0 + ey1) / 2, -1), ate_parede((ey0 + ey1) / 2, +1)])
+    # o trilho de cada quarto: os do mesmo lado que se sobrepõem viram um só, de parede a parede (a busca de um pano pode
+    # parar antes, num objeto escuro junto à fachada)
+    unidos = []
+    for v, ex, t0, t1 in sorted(trilhos, key=lambda t: (t[0], t[2])):
+        if unidos and unidos[-1][0] == v and t0 < unidos[-1][3] - 2:
+            unidos[-1][2], unidos[-1][3] = min(unidos[-1][2], t0), max(unidos[-1][3], t1)
+        else:
+            unidos.append([v, ex, t0, t1])
+    for v, ex, t0, t1 in unidos:
+        cor, al = blocos.cortina((t1 - t0) / px_m, px_m * k, com_pano=False)
+        pousar_cortina(out, cor, al, ex, t0, k, v)
+    for v, ex, ey0, ey1 in panos:
+        cor, al = blocos.cortina((ey1 - ey0) / px_m, px_m * k, com_trilho=False)
+        pousar_cortina(out, cor, al, ex, ey0, k, v)
+    print(f"    {len(panos)} panos de linho nos trechos do PDF e {len(unidos)} trilhos de parede a parede: "
+          + ", ".join(f"{v} y {t0:.0f} a {t1:.0f}" for v, _, t0, t1 in unidos))
     return out
 
 
@@ -1219,7 +1299,8 @@ def main():
     print("[7] cortinas nas janelas das suítes")
     print("[10] fachadas das suítes: brises de bronze e portas de correr de vidro finas")
     out = fachadas(out, pg, p2r)
-    out = cortinas(out, pg, p2r)
+    # pente fino de 20/10, item 10: a cortina de linho da biblioteca, como no Térreo, no lugar das ondas do item 7
+    out = cortinas_linho(out, pg, p2r)
     print("[11] cubas dos banhos no lugar do PDF")
     out = cubas_banhos(out, orig)
     print("[12] bancos em bege no pé das camas")
