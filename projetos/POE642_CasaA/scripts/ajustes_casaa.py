@@ -177,6 +177,10 @@ pode seguir pela ordem proposta"):
      Térreo), na abertura da caracol e nos degraus 1 a 7 da escada em U (do Térreo), o Térreo nublado entra na final
      (máscaras de `TERREO_1PAV`, gravadas em `so_1pavimento`); a caracol com os degraus dentro do anel (52 pt, do PDF),
      sem o branco, e os bocéis do resto em traço suave sobre o nublado.
+  1º Pavimento, cobre-leitos (usuário, 21/10/26: "precisamos humanizar os cobre-leitos (...) adote das referências da
+     biblioteca"): nas seis camas, o desenho técnico do PDF dá lugar à roupa de cama da referência da biblioteca
+     (`_texturas/elementos.roupa_de_cama`), logo depois da cama do quarto de serviço (item 8). O colchão é o retângulo
+     do PDF; nos lados e nos pés, a borda vem da moldura do render (1 a 5 px do PDF), para não cobri-la nem deixar fresta.
   1º Pavimento, pente fino 15 (R13): soleiras porta a porta; só a porta de correr da saleta para o quarto de serviço
      tem o vão branco no PDF: Bege Bahia na escala, com as faces da parede em cinza fino e a folha fina por cima.
 
@@ -3986,6 +3990,95 @@ def quarto_servico_1pav(out):
     return out
 
 
+# Pedido do usuário (21/10/26): "PRECISAMOS HUMANIZAR OS COBRELEITOS. AS CAMAS ESTÃO AINDA COM O DESENHO TÉCNICO DO
+# PDF. PRECISAMOS MELHORAR A REPRESENTAÇÃO. ADOTE DAS REFERENCIAS DA BIBLIOTECA." As seis camas do 1º Pavimento (casal
+# nas suítes 3, 2 e master; solteiro nas duas da suíte 1 e no quarto de serviço) tinham o desenho do PDF: o retângulo
+# branco, o contorno dos travesseiros e a dobra em triângulo. O colchão de cada uma (o retângulo do PDF, menos a borda da
+# cama, `borda` pt) recebe a roupa de cama da referência da biblioteca (`_texturas/elementos.roupa_de_cama`, a da
+# linha 5 da cartela de elementos: lençol e edredom brancos, travesseiros cinza-claros e bordô, a dobra do lençol e a
+# manta bordô na metade dos pés; no solteiro, a faixa bordô), com a cabeceira do lado dos travesseiros do PDF.
+CAMAS_1PAV = {"camas": [("suíte 3", (1474.1, 551.7, 1592.1, 675.9), "cima", "casal"),
+                        ("suíte 2", (1499.1, 1257.0, 1612.5, 1370.4), "baixo", "casal"),
+                        ("master", (1250.2, 1482.6, 1368.1, 1606.8), "baixo", "casal"),
+                        ("suíte 1, esquerda", (2071.1, 1604.0, 2127.8, 1717.3), "baixo", "solteiro"),
+                        ("suíte 1, direita", (2170.3, 1604.0, 2227.0, 1717.3), "baixo", "solteiro"),
+                        ("quarto de serviço", (1696.4, 1492.8, 1753.1, 1606.2), "cima", "solteiro")],
+              "borda": 1.7, "ss": 4, "busca": (4, 7), "claro": 0.8, "escuro": 190}
+
+
+def borda_da_cama(L, pos, ini, fim, vertical, dentro, q):
+    """A borda do colchão no render, perto da do PDF (pos, px): a linha mais escura da moldura num raio de `busca` px
+    (o menor; o maior só se a moldura não aparece nele, como nos pés da cama da suíte 3, 5 px mais comprida no render)
+    e, dela para dentro, o primeiro claro (a `claro` do caminho entre a linha e o colchão; nos pés da suíte 3, a
+    moldura é dupla). None se não aparece (a cabeceira contra a parede, os pés sem linha)."""
+    a, b = int(ini + 0.2 * (fim - ini)), int(fim - 0.2 * (fim - ini))
+    base = int(round(pos))
+    for raio in q["busca"]:
+        offs = range(-raio, raio + 1)
+        prof = np.array([L[a:b, base + d].mean() if vertical else L[base + d, a:b].mean() for d in offs])
+        j = int(np.argmin(prof))
+        if prof[j] <= q["escuro"]:
+            break
+    else:
+        return None
+    claro = prof[j] + q["claro"] * (prof[-1 if dentro > 0 else 0] - prof[j])
+    while 0 <= j + dentro < len(prof) and prof[j] < claro:
+        j += dentro
+    if prof[j] < claro:
+        return None
+    return base + offs[j] + (0 if dentro > 0 else 1)
+
+
+def camas_1pav(out):
+    import sys
+    sys.path.insert(0, str(CASA.parent / "_texturas"))
+    import elementos
+    q = CAMAS_1PAV
+    _, p2r = pdf_pavimento("1Pavimento")
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    k = q["ss"]
+    L = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    for i, (nome, r, cab, tipo) in enumerate(q["camas"]):
+        e = q["borda"]
+        (u0, v0), (u1, v1) = p2r(r[0] + e, r[1] + e), p2r(r[2] - e, r[3] - e)
+        # o render desloca as camas 1 a 2 px do PDF: nos lados e nos pés, a borda vem da moldura do render
+        (U0, V0), (U1, V1) = p2r(*r[:2]), p2r(*r[2:])
+        lados = {"esq": (U0, V0, V1, True, 1), "dir": (U1, V0, V1, True, -1),
+                 "cima": (V0, U0, U1, False, 1), "baixo": (V1, U0, U1, False, -1)}
+        lados.pop(cab)
+        for lado, (pos, ini, fim, vert, dentro) in lados.items():
+            b_ = borda_da_cama(L, pos, ini, fim, vert, dentro, q)
+            atual = {"esq": u0, "dir": u1, "cima": v0, "baixo": v1}[lado]
+            if b_ is not None and abs(b_ - atual) <= q["busca"][-1]:
+                if lado == "esq": u0 = b_
+                elif lado == "dir": u1 = b_
+                elif lado == "cima": v0 = b_
+                else: v1 = b_
+        comp, larg = (v1 - v0) / px_m, (u1 - u0) / px_m          # as camas do 1º Pavimento estão em pé
+        cor, al = elementos.roupa_de_cama(comp, larg, px_m * k, tipo, semente=11 + i)
+        giro = cv2.ROTATE_90_CLOCKWISE if cab == "cima" else cv2.ROTATE_90_COUNTERCLOCKWISE
+        cor, al = cv2.rotate(cor, giro), cv2.rotate(al, giro)
+        if cab == "cima":                                        # o giro horário põe a cabeceira em cima, espelhada
+            cor, al = cor[:, ::-1], al[:, ::-1]
+        X0, Y0 = int(np.floor(u0)) - 1, int(np.floor(v0)) - 1
+        X1, Y1 = int(np.ceil(u1)) + 2, int(np.ceil(v1)) + 2
+        tw, th = int(round((u1 - u0) * k)), int(round((v1 - v0) * k))
+        cor = cv2.resize(cor * al[..., None], (tw, th), interpolation=cv2.INTER_AREA)
+        al = cv2.resize(al, (tw, th), interpolation=cv2.INTER_AREA)
+        g = np.zeros(((Y1 - Y0) * k, (X1 - X0) * k, 3), np.float32)
+        ga = np.zeros(g.shape[:2], np.float32)
+        ox, oy = int(round((u0 - X0) * k)), int(round((v0 - Y0) * k))
+        g[oy:oy + th, ox:ox + tw] = cor
+        ga[oy:oy + th, ox:ox + tw] = al
+        pre = cv2.resize(g, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
+        a_ = cv2.resize(ga, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a_[..., None]) + pre), 0, 255).astype(np.uint8)
+    print(f"    camas: a roupa de cama da referência nas {len(q['camas'])} camas ("
+          + "; ".join(f"{n}, {t}" for n, _, _, t in q["camas"]) + ")")
+    return out
+
 # Pente fino pelas regras (21/10/26), 1º Pavimento, item 9: a banheira do banho master (item 7 da conferência de 19/10;
 # seção 6: "banheira: com a torneira de piso, quando o PDF tem"). No PDF, a banheira é oval (95,5 x 50,7 pt, 1,68 x
 # 0,89 m) e tem a torneira de piso na ponta da esquerda (a base redonda junto à borda e a bica entrando na banheira);
@@ -5875,6 +5968,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          criados_1pav),
                         ("pf8", "pente fino 8: quarto de serviço com a cama de solteiro e o criado-mudo do PDF, no lugar da "
                          "faixa com dois quadrados", quarto_servico_1pav),
+                        ("cl", "cobre-leitos (usuário, 21/10/26): a roupa de cama da referência da biblioteca nas seis "
+                         "camas, no lugar do desenho técnico do PDF", camas_1pav),
                         ("pf9", "pente fino 9: banheira oval do banho master com a torneira de piso, como no PDF",
                          banheira_1pav),
                         ("pf14", "pente fino 14 (seções 4 e 18): portas de vidro de correr das suítes para as varandas, "

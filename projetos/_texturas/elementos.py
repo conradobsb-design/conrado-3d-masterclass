@@ -23,7 +23,8 @@ O que se vê nelas, e como cada função desenha (em metros, na escala do render
   largura, a 10 cm do início, com a ponta no sentido do percurso: subida, no 1º degrau, para quem sobe a partir do
   pavimento; descida, no topo, para quem desce (`escada(..., triangulo="sobe" | "desce")`).
 - Roupa de cama, como mais uma opção (usuário, 19/10/26, com a mesma planta: "use as referencias de roupa de cama.
-  como mais uma opção. ainda não aplique"): só a referência, na cartela, sem função de desenho ainda. Na cama de
+  como mais uma opção. ainda não aplique"): a referência, na cartela; desenhada e aplicada em 21/10/26
+  (`roupa_de_cama`, nas camas do 1º Pavimento da Casa A: "PRECISAMOS HUMANIZAR OS COBRELEITOS"). Na cama de
   casal, lençol e edredom brancos com a dobra branca junto aos travesseiros, uma manta bordô (RGB ~118, 81, 85)
   atravessada na metade dos pés, com dobras suaves, dois travesseiros bordô na frente de dois cinza-claros e os
   criados redondos de madeira com abajur branco; na de solteiro, a cama de madeira com o criado embutido, o
@@ -247,6 +248,105 @@ def porta_giro(larg_m, px_m, arco=False):
     return _reduz(t, W, H), _reduz(a, W, H)
 
 
+# Roupa de cama (usuário, 21/10/26: "PRECISAMOS HUMANIZAR OS COBRELEITOS. AS CAMAS ESTÃO AINDA COM O DESENHO TÉCNICO DO
+# PDF. PRECISAMOS MELHORAR A REPRESENTAÇÃO. ADOTE DAS REFERENCIAS DA BIBLIOTECA."): a da referência (linha 5 da cartela,
+# a opção guardada em 19/10), com as cores medidas nela. Na horizontal, a cabeceira à esquerda (x = 0), em metros:
+# - casal: o lençol e o edredom brancos, com leves dobras e as bordas um pouco mais escuras (o edredom caindo); dois
+#   travesseiros cinza-claros junto à cabeceira e dois bordô na frente, com volume e a sombra curta no lençol; a dobra
+#   do lençol virada sobre o edredom logo depois deles, com a sombra fina da borda; a manta bordô atravessada na metade
+#   dos pés, com as dobras (faixas mais claras e mais escuras no sentido da largura) e a sombra curta nas duas bordas;
+# - solteiro: o mesmo, com um travesseiro cinza e um bordô na frente, e uma faixa bordô atravessada no lugar da manta.
+ROUPA_CAMA = {"branco": (244, 244, 246), "cinza": (214, 213, 216), "bordo": (85, 81, 118),     # BGR (RGB 118, 81, 85)
+              "casal": {"cinza": (0.05, 0.47), "bordo": (0.33, 0.61), "bordo_larg": 0.78, "dobra": (0.62, 0.84),
+                        "manta": (0.58, 0.83)},           # x em m (travesseiros e dobra) e em fração do comprimento (manta)
+              "solteiro": {"cinza": (0.05, 0.45), "bordo": (0.30, 0.56), "bordo_larg": 0.78, "dobra": (0.60, 0.78),
+                           "manta": (0.60, 0.74)},
+              "borda": (0.07, 0.07), "rugas": (0.012, 0.007), "travesseiro_raio": 0.05, "travesseiro_volume": 0.16,
+              "sombra": (0.03, 0.012, 0.22), "dobras_manta": 0.16}
+
+
+def _ruido(h, w, sig, rng):
+    n = cv2.GaussianBlur(rng.standard_normal((h, w)).astype(np.float32), (0, 0), max(sig, 0.5))
+    return n / (n.std() + 1e-6)
+
+
+def roupa_de_cama(comp_m, larg_m, px_m, tipo="casal", semente=1):
+    """O colchão visto de cima com a roupa de cama da referência, comp_m (da cabeceira, à esquerda, aos pés) por larg_m.
+    Devolve (BGR float32, alfa 0 a 1)."""
+    q, p = ROUPA_CAMA, ROUPA_CAMA[tipo]
+    rng = np.random.default_rng(semente)
+    k = px_m * SS
+    W, H = max(4, round(comp_m * k)), max(4, round(larg_m * k))
+    X = (np.arange(W)[None, :] + 0.5) / k                  # m, ao longo do comprimento
+    Y = (np.arange(H)[:, None] + 0.5) / k                  # m, ao longo da largura
+    # 1. o lençol e o edredom: branco, com as bordas caindo e rugas suaves
+    luz = np.ones((H, W), np.float32)
+    bl, bf = q["borda"]
+    luz *= 1 - bf * np.exp(-np.minimum(Y, larg_m - Y) / bl)
+    luz *= 1 - 0.5 * bf * np.exp(-(comp_m - X) / bl)
+    r1, r2 = q["rugas"]
+    luz *= 1 + r1 * _ruido(H, W, 0.18 * k, rng) + r2 * _ruido(H, W, 0.05 * k, rng)
+    cor = np.float32(q["branco"]) * luz[..., None]
+    # a dobra do lençol: um pouco mais clara, com a sombra fina da borda virada sobre o edredom
+    d0, d1 = p["dobra"]
+    na_dobra = (X >= d0) & (X < d1)
+    cor = np.where(na_dobra[..., None], cor * 1.012, cor)
+    som = 1 - 0.10 * np.exp(-np.clip(X - d1, 0, None) / 0.025) * (X >= d1)
+    cor *= som[..., None]
+    linha = np.exp(-((X - d1) / 0.006) ** 2)
+    cor = cor * (1 - 0.25 * linha[..., None]) + np.float32(q["branco"]) * 0.75 * 0.25 * linha[..., None]
+    # 2. a manta (casal) ou a faixa (solteiro) bordô, atravessada
+    m0, m1 = p["manta"][0] * comp_m, p["manta"][1] * comp_m
+    na_manta = ((X >= m0) & (X < m1)).astype(np.float32)
+    dob = np.zeros((1, W), np.float32)
+    for _ in range(5):                                     # dobras no sentido da largura
+        c = rng.uniform(m0, m1)
+        dob += rng.uniform(-1, 1) * np.exp(-((X - c) / rng.uniform(0.02, 0.06)) ** 2)
+    tecido = 1 + q["dobras_manta"] * dob + 0.03 * _ruido(H, W, 0.03 * k, rng)
+    tecido *= 1 - 0.12 * np.exp(-np.minimum(np.abs(X - m0), np.abs(X - m1)) / 0.015)
+    cor_m = np.float32(q["bordo"]) * tecido[..., None] * (1 - 0.5 * bf * np.exp(-np.minimum(Y, larg_m - Y) / bl))[..., None]
+    sombra_m = 1 - 0.18 * (np.exp(-np.clip(X - m1, 0, None) / 0.02) * (X >= m1) +
+                           np.exp(-np.clip(m0 - X, 0, None) / 0.012) * (X < m0))
+    cor *= sombra_m[..., None]
+    cor = cor * (1 - na_manta[..., None]) + cor_m * na_manta[..., None]
+    # 3. os travesseiros: os cinza junto à cabeceira e os bordô na frente, com volume e a sombra curta
+    sx, sy, sf = q["sombra"]
+    rt, vol = q["travesseiro_raio"], q["travesseiro_volume"]
+
+    def travesseiros(xa, xb, larg_um, n, cor_t):
+        nonlocal cor
+        m = np.zeros((H, W), np.uint8)
+        livre = larg_m - 0.08
+        for i in range(n):
+            ym = 0.04 + livre * (i + 0.5) / n
+            ya, yb = ym - larg_um / 2, ym + larg_um / 2
+            cv2.rectangle(m, (round(xa * k + rt * k), round(ya * k)), (round(xb * k - rt * k), round(yb * k)), 255, -1)
+            cv2.rectangle(m, (round(xa * k), round(ya * k + rt * k)), (round(xb * k), round(yb * k - rt * k)), 255, -1)
+            for cx_, cy_ in ((xa + rt, ya + rt), (xb - rt, ya + rt), (xa + rt, yb - rt), (xb - rt, yb - rt)):
+                cv2.circle(m, (round(cx_ * k), round(cy_ * k)), round(rt * k), 255, -1, cv2.LINE_AA)
+        a = m.astype(np.float32) / 255
+        som = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, sx * k], [0, 1, sy * k]]), (W, H)), (0, 0), 0.015 * k)
+        cor *= (1 - sf * som * (1 - a))[..., None]
+        dist = cv2.distanceTransform(m, cv2.DIST_L2, 5) / k
+        forma = 1 - vol * np.exp(-dist / 0.035) + 0.04 * np.exp(-((dist - dist.max() * 0.7) / 0.05) ** 2)
+        tex = forma * (1 + 0.008 * _ruido(H, W, 0.03 * k, rng))
+        cor = cor * (1 - a[..., None]) + np.float32(cor_t) * tex[..., None] * a[..., None]
+
+    n = 2 if tipo == "casal" else 1
+    larg_c = (larg_m - 0.08) / n - 0.04
+    travesseiros(*p["cinza"], larg_c, n, q["cinza"])
+    travesseiros(*p["bordo"], larg_c * p["bordo_larg"], n, q["bordo"])
+    # o colchão: alfa cheio, com os cantos levemente arredondados
+    a = np.zeros((H, W), np.uint8)
+    rc = round(0.03 * k)
+    cv2.rectangle(a, (rc, 0), (W - 1 - rc, H - 1), 255, -1)
+    cv2.rectangle(a, (0, rc), (W - 1, H - 1 - rc), 255, -1)
+    for cx_, cy_ in ((rc, rc), (W - 1 - rc, rc), (rc, H - 1 - rc), (W - 1 - rc, H - 1 - rc)):
+        cv2.circle(a, (cx_, cy_), rc, 255, -1, cv2.LINE_AA)
+    Wr, Hr = max(1, round(comp_m * px_m)), max(1, round(larg_m * px_m))
+    return _reduz(np.clip(cor, 0, 255), Wr, Hr), _reduz(a.astype(np.float32) / 255, Wr, Hr)
+
+
 def cartela():
     import sys
     sys.path.insert(0, str(AQUI.parent / "POE642_CasaA" / "scripts"))
@@ -281,6 +381,11 @@ def cartela():
     escadas[es.shape[0] + 20:] = ed
     bx = sobre_piso(*box(1.2, 2.5, 1.5, px_m))
     pc = sobre_piso(*porta_correr(2.4, px_m))
+    rc = sobre_piso(*roupa_de_cama(2.1, 2.0, px_m, "casal"))
+    rs = cv2.rotate(sobre_piso(*roupa_de_cama(2.0, 0.95, px_m, "solteiro", semente=2)), cv2.ROTATE_90_COUNTERCLOCKWISE)
+    camas = np.full((max(rc.shape[0], rs.shape[0]), rc.shape[1] + 30 + rs.shape[1], 3), 255, np.float32)
+    camas[:rc.shape[0], :rc.shape[1]] = rc
+    camas[:rs.shape[0], rc.shape[1] + 30:] = rs
     pg = sobre_piso(*porta_giro(0.8, px_m))
     portas = np.full((max(pc.shape[0], pg.shape[0]), pc.shape[1] + 30 + pg.shape[1], 3), 255, np.float32)
     portas[:pc.shape[0], :pc.shape[1]] = pc
@@ -297,8 +402,9 @@ def cartela():
         ("4. Portas  ·  referência (porta de correr do terraço; janela de correr do quarto)  |  as nossas: de "
          "correr de 2,40 m e de giro de 0,80 m (sem arco), e ampliadas 2 x",
          [caber(inf[122:142, 142:212], 120), caber(sup[224:240, 180:245], 120), portas, amp(portas)]),
-        ("5. Roupa de cama (opção, ainda não aplicada)  ·  referência: cama de casal da suíte e de solteiro do quarto",
-         [caber(sup[24:118, 30:122]), caber(sup[134:232, 170:213])]),
+        ("5. Roupa de cama  ·  referência (cama de casal da suíte; de solteiro do quarto)  |  a nossa, 2,10 x 2,00 m e "
+         "2,00 x 0,95 m, e ampliadas 2 x (nas camas do 1º Pavimento da Casa A)",
+         [caber(sup[24:118, 30:122]), caber(sup[134:232, 170:213]), camas, amp(camas)]),
     ]
     blocos = []
     for titulo, pecas in linhas:

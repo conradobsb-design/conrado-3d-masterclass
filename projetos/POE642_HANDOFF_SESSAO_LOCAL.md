@@ -1846,6 +1846,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como entra:** nas caixas dos vazios, do poço e da caracol, o que é cinza neutro claro (o branco e os traços) multiplica o Térreo nublado; nos degraus 1 a 7, o Térreo nublado entra inteiro.
   - **Conferência:** na imagem com ajustes, só a caracol; na prancha, os vazios, o poço da escada, a caracol e os traços em volta; rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_terreo_nublado_antes_depois.jpg`.
+- **1º Pavimento, cobre-leitos humanizados, feito** (`ajustes_casaa.camas_1pav`, config `CAMAS_1PAV`, chave `cl`; a roupa de cama em `_texturas/elementos.roupa_de_cama`).
+  - **O quê:** nas seis camas (casal nas suítes 3, 2 e master; solteiro nas duas da suíte 1 e no quarto de serviço), o desenho técnico do PDF (retângulo branco, contorno dos travesseiros, dobra em triângulo) dá lugar à roupa de cama da referência da biblioteca (linha 5 da cartela de elementos): lençol e edredom brancos, travesseiros cinza-claros com os bordô na frente, a dobra do lençol e a manta bordô na metade dos pés (no solteiro, a faixa bordô). A cabeceira fica do lado dos travesseiros do PDF.
+  - **Encaixe:** o colchão é o retângulo do PDF; nos lados e nos pés, a borda segue a moldura do render (deslocada 1 a 2 px do PDF; na suíte 3, os pés 5 px além), para não cobrir a moldura nem deixar fresta.
+  - **Conferência:** na imagem com ajustes e na prancha, só as seis camas (6 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos. A cartela de elementos (`_texturas/cartela_elementos.jpg`) mostra, na linha 5, a nossa ao lado da referência.
+  - **Fora deste item:** a cama de solteiro do quarto do motorista, no Térreo, continua como foi desenhada (item 115); pode receber a mesma roupa de cama, se o usuário quiser.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_cobre_leitos_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
