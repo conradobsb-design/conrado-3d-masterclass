@@ -1740,6 +1740,7 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Desenho:** o das soleiras do Térreo (item 16): Bege Bahia na escala, no tom da referência, com as faces da parede em cinza fino. A rotina virou `desenhar_soleiras`, comum aos dois pavimentos, com a opção de deixar de fora o que fica por cima do vão; o Térreo sai igual px a px.
   - **Conferência:** na imagem com ajustes e na prancha, só os dois vãos; rodapé igual. Prancha do Subsolo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_soleiras_antes_depois.jpg`.
+- **Subsolo do pente fino fechado (21/10/26):** os 10 itens do mapa estão feitos. O próximo é o 1º Pavimento (16 itens), cujo entorno nublado sai do Térreo final.
 
 ## Casas A a D · Barlavento nas piscinas
 
