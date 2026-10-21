@@ -1691,6 +1691,17 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Vidros da sauna (folha contínua, seção 18):** o de cima tinha um montante (duas marcas escuras a um terço) e os dois trechos em tons diferentes. Em cada linha do vidro, entra a mediana do trecho. O da esquerda já era contínuo.
   - **Conferência:** na imagem com ajustes, só as 5 regiões (1.319 px); na prancha, as mesmas; rodapé igual. Prancha do Subsolo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_portas_vidros_antes_depois.jpg`.
+- **Subsolo, item 6, Bege Bahia como a referência (seção 18), feito** (`ajustes_casaa.bege_subsolo`, config `BEGE_SUB`).
+  - **Antes:** a circulação externa, a interna e o depósito estavam no Bege Bahia do 1º Pavimento (item 11 de 19/10): rosados, com veios grandes, fora de escala.
+  - **Agora:** o desenho da biblioteca, na escala do render (31,07 px/m), e o tom da foto (RGB 230, 211, 186), com a luz do lugar. É a mesma rotina e são as mesmas constantes do item 9 do Térreo e do Subsolo da Casa E.
+  - **Como:**
+    - A máscara é a do item 11 (as três áreas, sem paredes, vidros, janela e folhas), sem o verde do gramado.
+    - Os pontinhos escuros do motor saem antes da troca, e o anel em volta do que foge da luz vai ao piso novo depois. Sem isso, os pontinhos e a borda ficavam no rosado antigo, que lia como cinza no tom novo.
+    - A borda de 1 a 2 px junto às paredes, ao vidro da sauna e ao gramado também vai ao piso novo de perto, só onde é claramente piso; as quinas meio parede ficam.
+    - Roda antes do item 5: a porta de correr e as folhas entram por cima do piso novo.
+  - **Código:** a rotina do Térreo virou `bege_na_referencia`, usada pelos dois pavimentos; a máscara do item 11 virou `bege_mascaras`. Conferido: o Térreo e o item 11 saem iguais px a px.
+  - **Conferência:** na imagem com ajustes e na prancha, só as três áreas de Bege Bahia; rodapé igual. Prancha do Subsolo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_bege_referencia_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

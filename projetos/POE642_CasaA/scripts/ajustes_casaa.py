@@ -123,6 +123,8 @@ pode seguir pela ordem proposta"):
   Subsolo, pente fino 5: a porta de correr da circulação em duas folhas de vidro desencontradas (sem o traço preto),
      as 5 folhas de giro brancas e finas (R3), a janela entre o depósito e a academia em vidro claro e o vidro de
      cima da sauna em folha contínua, sem o montante (seção 18).
+  Subsolo, pente fino 6: o Bege Bahia da circulação externa, da interna e do depósito no desenho da biblioteca, na
+     escala, e no tom da foto (RGB 230, 211, 186), com a luz do lugar, pela rotina do item 9 do Térreo.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -691,14 +693,14 @@ BEGE = {
     "sombra": (0.86, 6)}                     # escurecimento máximo e suavização da luz (px)
 
 
-def bege_bahia(out):
+def bege_mascaras(out):
+    """As três áreas do Bege Bahia: nome, caixa (px), semente e a máscara do piso na caixa (lida de `out` na hora)."""
     q = BEGE
     folhas = [f for lado in PORTAS_ACADEMIA["lados"] if "circulação" in lado["nome"] for f in lado["folhas"]]
     _, p2r = pdf_pavimento("Subsolo")
     lim = [(p2r(f[0], f[1])[1], p2r(f[2], f[3])[1], p2r(f[0], f[1])[0]) for f in folhas]   # y0, y1, x da folha
     for nome, (x0, y0, x1, y1), semente in q["areas"]:
-        reg = out[y0:y1, x0:x1].astype(np.float32)
-        lum = reg.mean(axis=2)
+        lum = out[y0:y1, x0:x1].astype(np.float32).mean(axis=2)
         m = (lum >= q["piso"][0]) & (lum <= q["piso"][1])
         ys, xs = np.mgrid[y0:y1, x0:x1]
         for a, b, c, d in q["fora"]:
@@ -710,6 +712,15 @@ def bege_bahia(out):
                 xmax[k] = fx
             m &= xs + 0.5 <= xmax[:, None]
         m = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_OPEN, np.ones((2, 2), np.uint8)).astype(bool)
+        yield nome, (x0, y0, x1, y1), semente, m
+
+
+def bege_bahia(out):
+    q = BEGE
+    for nome, (x0, y0, x1, y1), semente, m in bege_mascaras(out):
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        lum = reg.mean(axis=2)
+        ys, xs = np.mgrid[y0:y1, x0:x1]
         mf = m.astype(np.float32)
         lum_m = cv2.medianBlur(np.clip(lum, 0, 255).astype(np.uint8), 7).astype(np.float32)
         sig = q["sombra"][1]
@@ -3082,6 +3093,46 @@ def vidros_subsolo(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), Subsolo, item 6: Bege Bahia como a referência (seção 18). A circulação externa, a
+# interna e o depósito estavam no Bege Bahia do 1º Pavimento (item 11 de 19/10), rosados, com veios grandes, fora de
+# escala. Entram o desenho da biblioteca (`_texturas`, na escala do render) e o tom da foto (RGB 230, 211, 186), com a
+# luz do lugar, pela rotina do item 9 do Térreo (bege_na_referencia: as constantes de retoque_terreo_casae.BEGE, as do
+# Subsolo da Casa E; os pontinhos escuros do motor saem antes, e o anel em volta do que foge da luz vai ao piso novo
+# depois; sem isso, os pontinhos ficavam no rosado antigo, cinza no tom novo). A máscara é a do item 11
+# (bege_mascaras), sem o verde do gramado junto à borda da circulação externa (com 1 px de folga). A borda de 1 a 2 px
+# da máscara, que retexturizar não troca (junto às paredes, ao vidro da sauna e ao gramado), vai ao piso novo de perto,
+# só onde é claramente piso (as quinas meio parede ficam). Roda antes do item 5: as folhas e a porta de correr entram
+# por cima, e os trechos espelhados dele já vêm do piso novo.
+BEGE_SUB = {"verde": (4, 12), "folga_verde": 3,    # G acima de R e de B (como em bege_referencia_a); dilatação (px)
+            "borda": {"claro": 170, "sig": 1.5, "peso": 0.15}}   # piso claro; raio e peso mínimo do piso novo perto
+
+
+def bege_subsolo(out):
+    q = BEGE_SUB
+    m = np.zeros(out.shape[:2], bool)
+    for _, (x0, y0, x1, y1), _, mm in bege_mascaras(out):
+        m[y0:y1, x0:x1] |= mm
+    im = out.astype(np.int32)
+    verde = (im[..., 1] > im[..., 2] + q["verde"][0]) & (im[..., 1] > im[..., 0] + q["verde"][1])
+    k = q["folga_verde"]
+    m &= ~cv2.dilate(verde.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    _, p2r = pdf_pavimento("Subsolo")
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                  # 1 m na escala 1:50 = 56,69 pt
+    px_m = float(np.hypot(c - a, d - b))
+    from texturas_escala import nconv
+    antes = out
+    out, npt, npx, nanel = bege_na_referencia(out, m, px_m)
+    b = q["borda"]
+    novo = (out != antes).any(axis=2) & m
+    resto = m & ~novo & (antes.astype(np.float32).mean(axis=2) >= b["claro"])
+    resto &= cv2.GaussianBlur(novo.astype(np.float32), (0, 0), b["sig"]) >= b["peso"]
+    out[resto] = np.clip(nconv(out.astype(np.float32), novo.astype(np.float32), b["sig"])[resto], 0, 255).astype(np.uint8)
+    print(f"    Bege Bahia da circulação externa, da interna e do depósito: {npt} px de pontinhos escuros fora; {npx} px "
+          f"no desenho da biblioteca, a {px_m:.2f} px/m, no tom da foto; {nanel} px do anel em volta dos objetos e "
+          f"{int(resto.sum())} px da borda")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -3717,9 +3768,7 @@ BEGE_A = {"cor_base": (232, 232, 232), "tol": 6, "mancha_min": 500, "fechar": 5,
 
 
 def bege_referencia_a(out):
-    from retoque_terreo_casae import BEGE
-    from texturas_escala import retexturizar, nconv
-    q, e = BEGE_A, BEGE
+    q = BEGE_A
     _, p2r = pdf_pavimento("Terreo")
     forma = out.shape[:2]
     b2 = base_terreo(forma).astype(np.int32)
@@ -3732,6 +3781,19 @@ def bege_referencia_a(out):
     bege |= cv2.morphologyEx(bege.astype(np.uint8), cv2.MORPH_CLOSE, k).astype(bool) & claro
     (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                  # 1 m na escala 1:50 = 56,69 pt
     px_m = float(np.hypot(c - a, d - b))
+    out, npt, npx, nanel = bege_na_referencia(out, bege, px_m)
+    print(f"    Bege Bahia: {npt} px de pontinhos escuros fora; {npx} px no desenho da biblioteca, "
+          f"a {px_m:.2f} px/m, no tom da foto; {nanel} px do anel em volta dos objetos")
+    return out
+
+
+def bege_na_referencia(out, bege, px_m):
+    """O Bege Bahia da máscara no desenho da biblioteca e no tom da foto (retoque_terreo_casae.BEGE), com a luz do
+    lugar: antes, os pontinhos escuros do motor viram a luz em volta; depois, o anel que retexturizar deixa em volta do
+    que foge da luz vai ao piso novo de perto. Devolve a imagem e os px de pontinhos, de piso novo e de anel."""
+    from retoque_terreo_casae import BEGE as e
+    from texturas_escala import retexturizar, nconv
+    im = out.astype(np.float32)
     pq = e["pontos"]
     mm = cv2.erode(bege.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
     L = nconv(im, mm.astype(np.float32), pq["sig"])
@@ -3754,9 +3816,7 @@ def bege_referencia_a(out):
     perto = nconv(out.astype(np.float32), novo, 1.5)
     anel &= cv2.GaussianBlur(novo, (0, 0), 1.5) >= 0.15          # só com piso novo bastante em volta
     out[anel] = np.clip(perto[anel], 0, 255).astype(np.uint8)
-    print(f"    Bege Bahia: {int(pontos.sum())} px de pontinhos escuros fora; {npx} px no desenho da biblioteca, "
-          f"a {px_m:.2f} px/m, no tom da foto; {int(anel.sum())} px do anel em volta dos objetos")
-    return out
+    return out, int(pontos.sum()), npx, int(anel.sum())
 
 
 # Pente fino pelas regras (21/10/26), Térreo, item 10: granito marrom (seção 3: "desenho e tom da referência do usuário",
@@ -4328,6 +4388,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("pf4", "pente fino 4 (R3): portas sem os arcos (as folhas ficam)", sem_arcos_subsolo),
                      ("pf3", "pente fino 3 (R14): escada do deck com a linha nos bocéis, o trecho depois do corte "
                       "tracejado e o triângulo", escada_deck_subsolo),
+                     ("pf6", "pente fino 6: Bege Bahia da referência, na escala e no tom da foto", bege_subsolo),
                      ("pf5", "pente fino 5: porta de correr da circulação, folhas das portas de giro, janela do "
                       "depósito e vidro da sauna, finos", vidros_subsolo),
                      ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",
