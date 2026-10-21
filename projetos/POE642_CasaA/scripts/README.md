@@ -672,6 +672,7 @@ python3 pdf_entrega.py
 **Pente fino pelas regras, Subsolo (21/10/26):**
 - item 10, o "²" dos rótulos: só o ciclo, sem mudança de código (o Subsolo ainda não tinha passado pela rotina comum dos rótulos de 20/10).
 - item 1, só o Subsolo com o terreno hachurado (R2): `SUBSOLO_R2`, `so_subsolo` (o último item do Subsolo) e `subsolo_hachurado`. No ajuste, a pegada do Subsolo (as peças cheias da ARQ_CONTRAPISO e da ARQ_PAREDE na caixa do Subsolo, a escada do deck e o gramado do item 13) fica e o resto vira branco; a máscara vai para `renders/POE642_CasaA_PH_Subsolo_pegada_mascara.png`. Na final, o `rotulos_casaa.py` (chave `pegada`) a leva ao quadro e hachura, fora dela, o lote do Térreo final (`renders/POE642_CasaA_PH_Terreo_final_rotulos.png`), como `retoque_subsolo_casae.contexto_hachura`. O Subsolo depende da final do Térreo.
+- item 2, gramado: `GRAMADO_ESCADA["fonte"]` passa do Térreo aprovado ao Térreo com os ajustes (a grama da referência do item 7 do Térreo), com a mancha verde da fonte fechada e preenchida (as folhas claras da referência não passam no teste de verde). O Subsolo depende também dos ajustes do Térreo.
 
 ## Acabamentos finais: `acabamentos_finais.py`
 

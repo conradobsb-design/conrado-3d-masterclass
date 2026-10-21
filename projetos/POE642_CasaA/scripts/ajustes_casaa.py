@@ -37,7 +37,7 @@ Itens:
   Subsolo 12. Banho de serviço (pedido do usuário, 19/10/26): a bancada da pia e a cuba, nas medidas do PDF, no
      padrão das cubas aprovadas.
   Subsolo 13. Escada do deck (pedido do usuário, 19/10/26): abaixo dela, entre o deck e a circulação, o gramado do
-     Térreo, no lugar do branco.
+     Térreo, no lugar do branco (pente fino 2, 21/10/26: o do Térreo com os ajustes, na grama da referência).
   Térreo 1. Pilares (pedido do usuário, 19/10/26): os três redondos da varanda e o quadrado junto ao gourmet,
      em marrom no render, no preto das paredes e na geometria do PDF, como o pilar do Térreo da Casa E.
   Térreo 2. Sala de estar (pedido do usuário, 19/10/26): o sofá curvo do PDF acompanhando o tapete pela esquerda,
@@ -788,15 +788,19 @@ def bancada_servico(out):
 # próprio Térreo aprovado, no mesmo lugar (as duas imagens vão ao quadro comum, e o afim de uma à outra passa por ele),
 # na cor dele, só onde o Subsolo está em branco: da escada até a parede de baixo do Subsolo, da borda esquerda do
 # deck esmaecido até a circulação. A borda com o branco é suave (a parte branca de cada px).
+# Pente fino pelas regras (21/10/26), Subsolo, item 2 (confirmado: o gramado fica): a fonte passa do Térreo aprovado
+# (a grama de carpete do motor) ao Térreo com os ajustes do pente fino, onde ali é a grama da referência na escala
+# (item 7 do Térreo; sem plantas nesse trecho). O Subsolo passa a depender dos ajustes do Térreo.
 GRAMADO_ESCADA = {"caixa": (376, 584, 575, 849),    # px da imagem do Subsolo: x0, y0, x1, y1
-                  "branco": (230, 250)}             # rampa da borda: mínimo do px de 230 (nada) a 250 (tudo)
+                  "branco": (230, 250),             # rampa da borda: mínimo do px de 230 (nada) a 250 (tudo)
+                  "fonte": CASA / "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png"}
 
 
 def gramado_escada(out):
     q = GRAMADO_ESCADA
     m = lambda k: np.vstack([np.float64(AFIM_QR[k]), [0, 0, 1]])
     s2t = m("Terreo") @ np.linalg.inv(m("Subsolo"))          # px do Subsolo -> px do Térreo
-    terreo = cv2.imread(str(APROVADAS["Terreo"]))
+    terreo = cv2.imread(str(q["fonte"]))
     x0, y0, x1, y1 = q["caixa"]
     gx, gy = np.meshgrid(np.arange(x0, x1, dtype=np.float32), np.arange(y0, y1, dtype=np.float32))
     mx = (s2t[0, 0] * gx + s2t[0, 1] * gy + s2t[0, 2]).astype(np.float32)
@@ -806,6 +810,9 @@ def gramado_escada(out):
     lo, hi = q["branco"]
     a = np.clip((reg.min(axis=2) - lo) / (hi - lo), 0, 1)
     verde = (grama[..., 1] > grama[..., 2] + 8) & (grama[..., 1] > grama[..., 0] + 8)
+    # a grama da referência (pente fino 2) tem folhas claras que não passam no verde: a mancha inteira, fechada
+    from scipy import ndimage
+    verde = ndimage.binary_fill_holes(cv2.morphologyEx(verde.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((7, 7), np.uint8)))
     a *= cv2.GaussianBlur(verde.astype(np.float32), (0, 0), 0.7)
     out[y0:y1, x0:x1] = np.clip(np.round(reg * (1 - a[..., None]) + grama * a[..., None]), 0, 255).astype(np.uint8)
     # na emenda com a circulação sobrava o px claro da borda dela (contra o branco): vira a média dos dois lados

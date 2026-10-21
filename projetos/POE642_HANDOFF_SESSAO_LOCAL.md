@@ -1660,6 +1660,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Dependência:** a hachura lê a final do Térreo; refazer o Subsolo depois de mexer no contorno do Térreo.
   - **Conferência:** na imagem com ajustes, só o contexto do Térreo (e o px claro da borda de fora da parede do hall e do elevador); na prancha, o fundo hachurado em volta do Subsolo, que ficou igual; rodapé igual. Prancha do Subsolo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_hachurado_antes_depois.jpg`.
+- **Subsolo, item 2, gramado na grama da referência, feito** (`ajustes_casaa.gramado_escada`, `GRAMADO_ESCADA["fonte"]`). Confirmado em 21/10: o gramado abaixo da escada do deck fica. Ele vinha do Térreo aprovado, na grama de carpete do motor; a fonte passa ao Térreo com os ajustes do pente fino, onde esse trecho é a grama da referência na escala (item 7 do Térreo; sem plantas ali), no mesmo lugar e pelo mesmo afim.
+  - A grama da referência tem folhas claras que não passavam no teste de verde e ficavam brancas: a mancha verde da fonte é fechada (7 x 7) e preenchida antes da cópia.
+  - **Dependência:** o Subsolo passa a ler `POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png`; rodar o Térreo antes.
+  - **Conferência:** na imagem com ajustes e na prancha, só o gramado; rodapé igual. Prancha do Subsolo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_gramado_referencia_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
