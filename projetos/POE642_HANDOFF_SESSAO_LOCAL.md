@@ -667,7 +667,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Antes e depois das montagens:** `renders/POE642_CasaE_PH_1Pavimento_montagens_antes_depois.jpg`.
     - **Ainda pendentes:**
       - a prancha do Subsolo, que é a mesma: o terreno hachurado dela ainda vem do Térreo de antes do pente fino (tarefa: refazê-lo a partir da final do Térreo; feito em 21/10/26, item 29 do Subsolo);
-      - os carros SUV bronze, que aguardam o arquivo da foto.
+      - os carros SUV bronze, que aguardam o arquivo da foto (cancelado em 21/10/26: "Mantenha os carros. Não vamos alterar mais."; ficam os prata da R12).
     - **Conferência do item 1:** no retocado e na final, mudaram só as duas faixas (escritório e vidro da varanda). A prancha e os PDFs ficam para o fim da lista (pedido do usuário: "ainda não precisa ir pra o PDF"). Antes e depois: `renders/POE642_CasaE_PH_Terreo_cortinas_antes_depois.jpg`.
     - **Novos pedidos do usuário durante o item (20/10/26):** entram na lista do pente fino, depois dos itens 2 a 5. Para fazer um por vez:
       - "o piso marrom menos escuro?";
@@ -814,7 +814,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Feito (`retoque_1pav_casae.boxes_continuos`, config `BOXES`):** o traço do motor sai. Numa faixa de 2,5 px em volta do eixo do PDF, cada px que foge da média dos dois lados (a 5 px) vira essa média. Depois entra o vidro do box do banho gourmet do Térreo: a linha clara fina (226, 229, 230; 0,8 px), sem montantes nem marcas no meio (regra de 20/10: folha contínua), com a borda cinza fina e a sombra suave do lado do chuveiro. O passo roda depois do quartzito.
     - **Conferência:** no retocado, nas montagens e nas pranchas, só as linhas dos cinco boxes mudaram; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_boxes_antes_depois.jpg`.
-  - **Carros (Térreo):** a foto do SUV chegou de novo só na conversa (sem arquivo na pasta de imagens recebidas); continua pendente.
+  - **Carros (Térreo):** a foto do SUV chegou de novo só na conversa (sem arquivo na pasta de imagens recebidas); continua pendente. Cancelado em 21/10/26 (usuário: "Mantenha os carros. Não vamos alterar mais.").
   - **Item 10, cortinas como no Térreo, feito** (usuário: "representar as cortinas da mesma forma que fizemos no terreo"). O item 7 de 16/10 (as ondas do PDF em zigue-zague branco) deu lugar à cortina de linho da biblioteca (`_blocos/blocos.cortina`), posta com o `pousar_cortina` do Térreo (`retoque_1pav_casae.cortinas_linho`, config `CORTINAS_LINHO`):
     - **panos:** em cada um dos 10 trechos de linha ondulada do PDF (ARQ_LOUÇAS E METAIS), na mesma extensão (a meia distância, como no PDF), com o eixo do tecido no eixo da linha do PDF;
     - **trilhos:** um por quarto, de parede a parede, do lado do vidro (regra de 20/10), 5 ao todo: suítes master, 4 e 3 na fachada da esquerda; 2 e 1 na da direita. O fim do trilho é a parede preta do render, procurada numa coluna 3 px para dentro do quarto. No eixo do tecido, colado ao vidro, o montante escuro de uma folha de correr parava a busca no meio da suíte 2. Os trilhos do mesmo lado que se sobrepõem viram um só.
