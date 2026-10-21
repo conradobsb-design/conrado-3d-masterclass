@@ -1634,6 +1634,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Visto de passagem, fora do item:** junto à poltrona do canto, o PDF tem duas mesinhas redondas de 30 cm, sobrepostas; o render, uma só, maior. Fica como está.
   - **Conferência:** na imagem com ajustes e na prancha, só a faixa acima da mesa do escritório; rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_escritorio_antes_depois.jpg`.
+- **Térreo, item 15, banho da varanda (item 7 da conferência de 19/10; seção 6), feito** (`ajustes_casaa.banho_varanda`, config `BANHO_VARANDA`, depois do escritório). No PDF (ARQ_LOUÇAS E METAIS), o vaso fica em cima (o render já o tem) e, embaixo, o box: duas folhas de vidro de correr desencontradas, da parede da esquerda até 0,87 m, com o trilho tracejado; e o chuveiro de parede, na parede da direita: a ducha quadrada de 20 cm, o braço e a canopla. O motor pôs uma bacia branca arredondada no lugar do chuveiro e fez o trilho como uma faixa pontilhada, sem o vidro.
+  - **Saem:** a faixa pontilhada (cada coluna entre o piso logo acima e logo abaixo dela, com o grão do piso abaixo) e a bacia, com a sombra. No lugar da bacia, cada linha recebe o piso da mesma linha mais à esquerda, no tom de cada coluna; a sombra junto à parede da direita fica.
+  - **Entram,** como no banho de serviço do Subsolo (item 1 de 19/10): as duas folhas do box (`vidro_box`, 1,3 pt cada, empilhadas) e o chuveiro (`chuveiro`: a placa da Casa A, o braço cromado do centro da ducha à parede e a canopla), nas medidas do PDF.
+  - **Conferência:** na imagem com ajustes e na prancha, só o box e o chuveiro do banho da varanda; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_banho_varanda_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

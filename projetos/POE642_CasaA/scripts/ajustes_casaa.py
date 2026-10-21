@@ -110,6 +110,8 @@ pode seguir pela ordem proposta"):
      madeira do render; as 8 cadeiras do render ficam; a sombra curta acompanha o contorno novo.
   Térreo 14. Escritório (item 6 da conferência de 19/10): as duas cadeiras do motor em cima da mesa saem e entra a
      cadeira de escritório do PDF, em grafite, com o assento sob o tampo; as duas de visita, embaixo, ficam.
+  Térreo 15. Banho da varanda (item 7 da conferência de 19/10): a bacia e a faixa pontilhada do motor saem; entram o
+     chuveiro de parede e as duas folhas de vidro do box do PDF, como no banho de serviço do Subsolo.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3897,6 +3899,51 @@ def escritorio_cadeira(out):
     return np.clip(np.round(img), 0, 255).astype(np.uint8)
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 15: banho da varanda (item 7 da conferência de 19/10; seção 6). No
+# PDF (ARQ_LOUÇAS E METAIS), o vaso fica em cima (o render já o tem) e, embaixo, o box: duas folhas de vidro de correr
+# desencontradas, da parede da esquerda até 0,87 m, com o trilho tracejado; e o chuveiro de parede, na parede da
+# direita (a ducha quadrada de 20 cm, o braço e a canopla). O motor pôs uma bacia branca arredondada no lugar do
+# chuveiro e fez o trilho como uma faixa pontilhada, sem o vidro. Como o banho de serviço do Subsolo (item 1 de 19/10):
+# - a faixa pontilhada sai: cada coluna entre o piso logo acima e logo abaixo dela, com o grão do piso abaixo;
+# - a bacia sai, com a sombra: cada linha recebe o piso da mesma linha mais à esquerda (da esquerda para a direita,
+#   o já refeito serve de fonte), no tom de cada coluna (a sombra junto à parede da direita fica);
+# - entram as duas folhas do box (vidro_box, 1,3 pt cada, empilhadas como no Subsolo) e o chuveiro (chuveiro: a placa
+#   da Casa A, o braço cromado do centro da ducha à parede e a canopla).
+BANHO_VARANDA = {"faixa": (853, 812, 894, 818), "bacia": (873, 823, 894, 839), "desl": 17, "limpas": (4, 3),   # px
+                 "ducha": (1463.7, 1737.3, 1474.9, 1748.5), "braco": (1469.3, 1742.2, 1490.5, 1743.6),
+                 "canopla": (1490.5, 1741.2, 1491.1, 1744.6),
+                 "vidros": [(1415.8, 1711.6, 1454.9, 1712.9), (1426.0, 1712.9, 1465.1, 1714.2)]}
+
+
+def banho_varanda(out):
+    from retoque_subsolo_casae import chuveiro, vidro_box
+    q = BANHO_VARANDA
+    _, p2r = pdf_pavimento("Terreo")
+    img = out.astype(np.float32)
+    # a faixa pontilhada: cada coluna entre a linha de cima e a de baixo, com o grão das linhas logo abaixo
+    x0, y0, x1, y1 = q["faixa"]
+    t = ((np.arange(y0, y1) - (y0 - 1)) / (y1 - (y0 - 1)))[:, None, None]
+    base = img[y0 - 1][None, x0:x1] * (1 - t) + img[y1][None, x0:x1] * t
+    g = img[y1 + 1:y1 + 1 + (y1 - y0), x0:x1]
+    img[y0:y1, x0:x1] = base + (g - cv2.GaussianBlur(g, (0, 0), 2))
+    # a bacia e a sombra dela: o piso da mesma linha à esquerda, no tom de cada coluna (medido nas linhas limpas)
+    x0, y0, x1, y1 = q["bacia"]
+    d = q["desl"]
+    a, b = q["limpas"]
+    limpas = np.r_[y0 - a:y0, y1:y1 + b]
+    for x in range(x0, x1):
+        tom = img[limpas, x].mean(axis=0) / np.maximum(img[limpas, x - d].mean(axis=0), 1)
+        img[y0:y1, x] = img[y0:y1, x - d] * tom
+    out = np.clip(np.round(img), 0, 255).astype(np.uint8)
+    for r in q["vidros"]:
+        out = vidro_box(out, p2r, r)
+    out = chuveiro(out, p2r, q["ducha"], q["braco"], q["canopla"])
+    (x0, y0), (x1, y1) = p2r(*q["ducha"][:2]), p2r(*q["ducha"][2:])
+    print(f"    banho da varanda: a bacia e a faixa pontilhada do motor saem; o chuveiro na parede da direita (ducha em x "
+          f"{x0:.1f}-{x1:.1f}, y {y0:.1f}-{y1:.1f} px) e as duas folhas de vidro do box")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 4: as projeções em tracejado bem visível, por cima (R8, R9). No PDF da
 # Casa A, a da cobertura está na ARQ_CONTRAPISO, em tracejado (as notas "PROJ. COBERTURA"): o L da laje, de 1290 a 2381
 # pt em x e de 511 a 1815 pt em y, com o braço de baixo indo até 1038 pt (a partir de 1344 pt), e a linha de 1290 pt
@@ -3991,6 +4038,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf5", "pente fino 5: vidros finos (varanda e salas; o vão do hall sem o tubo)", vidros_finos),
                     ("pf13", "pente fino 13: mesa de jantar oval, no contorno do PDF", mesa_oval),
                     ("pf14", "pente fino 14: escritório com a cadeira de escritório do PDF em cima", escritorio_cadeira),
+                    ("pf15", "pente fino 15: banho da varanda com o chuveiro e o box do PDF, sem a bacia", banho_varanda),
                     # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",
