@@ -66,9 +66,11 @@ def _contorno(t, x0, y0, x1, y1, cor, e):
     _retangulo(t, x1 - e, y0, x1, y1, cor)
 
 
-def guarda_roupa(comp_m, prof_m, px_m, semente=1, miolo=None, moldura=None):
+def guarda_roupa(comp_m, prof_m, px_m, semente=1, miolo=None, moldura=None, barra=False):
     """Comprimento na horizontal, portas embaixo (y maior). miolo e moldura (BGR): os tons do fundo e da moldura (o
-    fundo leva o mesmo sombreado e os cabides; o contorno é a moldura mais escura); sem eles, o cinza da referência."""
+    fundo leva o mesmo sombreado e os cabides; o contorno é a moldura mais escura); sem eles, o cinza da referência.
+    barra: o cabideiro, a barra metálica no meio da profundidade, de lateral a lateral, por cima dos cabides
+    (usuário, 21/10/26: "tem uma barra metallica no meio do armario para prender o cabide")."""
     rng = np.random.default_rng(semente)
     W, H = _px(comp_m, px_m), _px(prof_m, px_m)
     k = px_m * SS
@@ -88,6 +90,16 @@ def guarda_roupa(comp_m, prof_m, px_m, semente=1, miolo=None, moldura=None):
         x += rng.uniform(0.10, 0.14) * k
     if miolo is not None:
         t = t / 216 * np.asarray(miolo, np.float32)
+    if barra:
+        # tubo de ~2 cm: borda escura, brilho no meio, e a sombra curta embaixo
+        yc, r = 0.5 * h, 0.010 * k
+        yy2 = (np.arange(h)[:, None] - yc) / r
+        perfil = np.clip(1 - yy2 ** 2, 0, 1)
+        sombra = np.exp(-0.5 * ((np.arange(h)[:, None] - yc - 1.6 * r) / (0.8 * r)) ** 2) * 0.22
+        t *= (1 - sombra)[..., None]
+        tubo = (perfil > 0)[..., None]
+        metal = (110 + 120 * np.clip(1 - np.abs(yy2 + 0.3) * 1.4, 0, 1))[..., None] * np.ones((1, 1, 3), np.float32)
+        t = np.where(tubo, metal * np.ones((1, w, 1), np.float32), t)
     # moldura: laterais e fundo finos, as portas uma faixa branca de 2,5 cm; contorno cinza
     e = 0.02 * k
     cor = (lambda f: tuple(f * c for c in moldura)) if moldura is not None else None
