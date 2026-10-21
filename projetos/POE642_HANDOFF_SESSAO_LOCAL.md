@@ -1627,6 +1627,13 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Piso e sombra:** onde o tampo velho cobria e o novo não cobre, o piso vem do entorno. A sombra curta da mesa no piso (a do motor, medida em volta: deslocada -3, +2 px, desfoque de 3 px, força 0,5) passa do contorno velho ao novo pela razão entre as duas; nas cadeiras, nada muda.
   - **Conferência:** na imagem com ajustes e na prancha, só a mesa e a sombra dela; rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_mesa_jantar_antes_depois.jpg`.
+- **Térreo, item 14, escritório (item 6 da conferência de 19/10), feito** (`ajustes_casaa.escritorio_cadeira`, config `ESCRITORIO_A`, depois da mesa de jantar). No PDF (ARQ_LAYOUT HUMANIZAÇÃO), a mesa tem a cadeira de escritório em cima, no centro, com o assento metido sob o tampo, e as duas de visita embaixo. O motor pôs duas cadeiras iguais em cima e duas embaixo.
+  - **As de cima saem**, com as sombras. O travertino corre em faixas horizontais: cada linha volta entre o piso logo à esquerda e logo à direita dela, com o grão de um trecho limpo do escritório.
+  - **A cadeira de escritório** entra no contorno do PDF (0,62 x 0,59 m), peça a peça: o assento, a faixa do encosto e os dois braços. É grafite, com o volume e o vinco das poltronas do estar sob a projeção e a sombra curta delas, e o tampo da mesa fica por cima. O pino atrás do encosto e as alavancas dos lados (1 a 2 px nesta escala) ficaram de fora: na primeira prova, liam como as alças de uma panela.
+  - **As de baixo ficam:** já estão no lugar das duas de visita do PDF. No PDF elas abrem 10° para cada lado; no render, ficam retas.
+  - **Visto de passagem, fora do item:** junto à poltrona do canto, o PDF tem duas mesinhas redondas de 30 cm, sobrepostas; o render, uma só, maior. Fica como está.
+  - **Conferência:** na imagem com ajustes e na prancha, só a faixa acima da mesa do escritório; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_escritorio_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

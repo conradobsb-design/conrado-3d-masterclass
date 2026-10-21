@@ -108,6 +108,8 @@ pode seguir pela ordem proposta"):
      muro), a grama do item 7 entra sob as manchas e as plantas da referência, com a copa dentro do verde.
   Térreo 13. Mesa de jantar oval (item 4 da conferência de 19/10): o tampo no contorno do PDF (3,00 x 1,20 m), com a
      madeira do render; as 8 cadeiras do render ficam; a sombra curta acompanha o contorno novo.
+  Térreo 14. Escritório (item 6 da conferência de 19/10): as duas cadeiras do motor em cima da mesa saem e entra a
+     cadeira de escritório do PDF, em grafite, com o assento sob o tampo; as duas de visita, embaixo, ficam.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3800,6 +3802,101 @@ def mesa_oval(out):
     return np.clip(novo, 0, 255).astype(np.uint8)
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 14: escritório (item 6 da conferência de 19/10). No PDF (ARQ_LAYOUT
+# HUMANIZAÇÃO), a mesa tem a cadeira de escritório em cima, no centro, com o assento metido sob o tampo, e as duas de
+# visita embaixo; o motor pôs duas cadeiras iguais em cima e duas embaixo. As de baixo ficam. As duas de cima saem com
+# as sombras: o piso volta linha a linha (o travertino corre em faixas horizontais), entre o piso logo à esquerda e
+# logo à direita da mesma linha, com o grão de um trecho limpo do escritório. A cadeira de escritório entra no contorno
+# do PDF, peça a peça (o assento, a faixa do encosto e os dois braços), em grafite, com o volume e o vinco das
+# poltronas do estar sob a projeção e a sombra curta delas; o tampo da mesa fica por cima. O pino atrás do encosto e
+# as alavancas dos lados, de 1 a 2 px nesta escala, saem (liam como as alças de uma panela).
+ESCRITORIO_A = {"apagar": (1271, 201, 1332, 215), "lado": 8, "grao": (1255, 262, 1316, 276),   # px
+                "mesa": (2171.5, 630.0, 2284.8, 675.3),                                          # pt
+                "assento": [(2210.6, 607.6, 2228.2, 641.0), (2228.2, 607.6, 2245.7, 641.0)],
+                "encosto": [(2215.6, 611.3, 2228.2, 617.2), (2228.2, 611.3, 2240.7, 617.2)],
+                "bracos": [(2212.3, 618.1, 2216.9, 635.0), (2239.4, 618.1, 2244.0, 635.0)],
+                "recorte": (2212.3, 611.3, 2244.0, 641.0),       # pt: o assento sem o pino do encosto e as alavancas
+                "cores": {"assento": (104, 107, 112), "encosto": (78, 80, 85), "bracos": (58, 60, 64)},
+                "volume": (0.72, 2.0), "vinco": (52, 54, 58, 0.3), "folga": 6,
+                "sombra": [(-1.4, 1.4, 2.0, 0.30), (0, 0, 0.9, 0.14)]}
+
+
+def escritorio_cadeira(out):
+    q = ESCRITORIO_A
+    pg, p2r = pdf_pavimento("Terreo")
+    D = pg.get_drawings()
+    img = out.astype(np.float32)
+    # 1. as duas cadeiras do motor saem: cada linha entre o piso dos dois lados, com o grão de um trecho limpo
+    x0, y0, x1, y1 = q["apagar"]
+    k = q["lado"]
+    esq = img[y0:y1, x0 - k:x0].mean(axis=1)
+    dir_ = img[y0:y1, x1:x1 + k].mean(axis=1)
+    t = ((np.arange(x0, x1) - (x0 - k / 2)) / (x1 + k / 2 - (x0 - k / 2)))[None, :, None]
+    base = esq[:, None] * (1 - t) + dir_[:, None] * t
+    gx0, gy0, gx1, gy1 = q["grao"]
+    g = img[gy0:gy1, gx0:gx1]
+    grao = g - cv2.GaussianBlur(g, (0, 0), 3)
+    img[y0:y1, x0:x1] = base + grao[:y1 - y0, :x1 - x0]
+    forma = out.shape[:2]
+    mx0, my0, mx1, my1 = q["mesa"]
+    mesa = r14_poligono(forma, [p2r(mx0, my0), p2r(mx1, my0), p2r(mx1, my1), p2r(mx0, my1)])
+    img[y0:y1, x0:x1] = img[y0:y1, x0:x1] * (1 - mesa[y0:y1, x0:x1, None]) + \
+        out[y0:y1, x0:x1].astype(np.float32) * mesa[y0:y1, x0:x1, None]
+    # 2. a cadeira de escritório do PDF, peça a peça, em 8x
+    def peca(caixa):
+        return next(d for d in D if d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO" and d["type"] == "f"
+                    and max(abs(d["rect"].x0 - caixa[0]), abs(d["rect"].y0 - caixa[1]), abs(d["rect"].x1 - caixa[2]),
+                            abs(d["rect"].y1 - caixa[3])) < 0.3)
+    partes = {n: [np.vstack(caminhos_pdf(peca(c), p2r)) for c in q[n]] for n in ("assento", "encosto", "bracos")}
+    rx0, ry0, rx1, ry1 = q["recorte"]
+    (ax, ay), (bx, by) = p2r(rx0, ry0), p2r(rx1, ry1)
+    todos = np.vstack([c for v in partes.values() for c in v])
+    f = q["folga"]
+    X0, Y0 = (np.floor(todos.min(axis=0)) - f).astype(int)
+    X1, Y1 = (np.ceil(todos.max(axis=0)) + f).astype(int)
+    w, h, SS = X1 - X0, Y1 - Y0, SS_E
+
+    def tela(polis, recortar=False):
+        m = np.zeros((h * SS, w * SS), np.uint8)
+        for c in polis:
+            cv2.fillPoly(m, [np.int32(np.round((c - (X0, Y0)) * SS))], 255, cv2.LINE_AA)
+        if recortar:
+            r = np.zeros_like(m)
+            cv2.rectangle(r, tuple(np.int32(np.round((np.float64((ax, ay)) - (X0, Y0)) * SS))),
+                          tuple(np.int32(np.round((np.float64((bx, by)) - (X0, Y0)) * SS))), 255, -1)
+            m &= r
+        return m
+
+    def red(m):
+        return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    livre = 1 - mesa[Y0:Y1, X0:X1]                                      # o tampo fica por cima
+    reg = img[Y0:Y1, X0:X1]
+    corpo = tela(partes["assento"], True) | tela(partes["encosto"] + partes["bracos"])
+    for dx, dy, sig, forca in q["sombra"]:
+        sm = cv2.warpAffine(corpo.astype(np.float32) / 255, np.float32([[1, 0, dx * SS], [0, 1, dy * SS]]),
+                            (w * SS, h * SS))
+        sm = cv2.resize(cv2.GaussianBlur(sm, (0, 0), sig * SS), (w, h), interpolation=cv2.INTER_AREA)
+        reg *= (1 - forca * sm * (1 - red(corpo)) * livre)[..., None]
+    v0, raio = q["volume"]
+    *cor_v, larg = q["vinco"]
+    for nome in ("assento", "encosto", "bracos"):
+        for m in ([tela(partes[nome], nome == "assento")] if nome != "bracos" else [tela([c]) for c in partes[nome]]):
+            dist = cv2.distanceTransform(m, cv2.DIST_L2, 5) / SS
+            u = np.clip(dist / raio, 0, 1)
+            tom = v0 + (1 - v0) * u * u * (3 - 2 * u)
+            cor = cv2.resize(np.float32(q["cores"][nome])[None, None] * tom[..., None] * (m[..., None] / 255.0),
+                             (w, h), interpolation=cv2.INTER_AREA)
+            a = red(m) * livre
+            reg = reg * (1 - a[..., None]) + cor * livre[..., None]
+            kk = max(1, int(round(larg * SS)))
+            borda = red(m & ~cv2.erode(m, np.ones((kk, kk), np.uint8))) * livre
+            reg = reg * (1 - borda[..., None]) + np.float32(cor_v) * borda[..., None]
+    img[Y0:Y1, X0:X1] = reg
+    print(f"    escritório: as duas cadeiras do motor em cima da mesa saem; a cadeira de escritório do PDF entra "
+          f"(x {todos[:, 0].min():.1f} a {todos[:, 0].max():.1f}, y {todos[:, 1].min():.1f} a {todos[:, 1].max():.1f} px)")
+    return np.clip(np.round(img), 0, 255).astype(np.uint8)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 4: as projeções em tracejado bem visível, por cima (R8, R9). No PDF da
 # Casa A, a da cobertura está na ARQ_CONTRAPISO, em tracejado (as notas "PROJ. COBERTURA"): o L da laje, de 1290 a 2381
 # pt em x e de 511 a 1815 pt em y, com o braço de baixo indo até 1038 pt (a partir de 1344 pt), e a linha de 1290 pt
@@ -3893,6 +3990,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      granito_referencia_a),
                     ("pf5", "pente fino 5: vidros finos (varanda e salas; o vão do hall sem o tubo)", vidros_finos),
                     ("pf13", "pente fino 13: mesa de jantar oval, no contorno do PDF", mesa_oval),
+                    ("pf14", "pente fino 14: escritório com a cadeira de escritório do PDF em cima", escritorio_cadeira),
                     # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",
