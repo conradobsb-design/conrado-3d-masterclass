@@ -83,6 +83,8 @@ pode seguir pela ordem proposta"):
      degraus cheios, os esmaecidos tracejados, sem a linha de corte e com o triângulo no degrau 1; a do deck para o
      Subsolo sem os traços escuros do motor, viva até o corte e esmaecida depois, com o triângulo de descida no topo; a
      larga, do deck ao pátio, com o bocel de cada bloco e o triângulo no degrau 12.
+  Térreo 4. Projeções (R8, R9): a da cobertura (o L da laje, na ARQ_CONTRAPISO) e a da laje superior (na área de
+     serviço) em tracejado cinza fino, por cima de tudo menos das paredes, como na Casa E.
   Térreo 3. Carros (R12): prata, alinhados e iguais, de 4,70 x 1,85 m, no lugar das três cores e do desalinhamento
      de 19/10; o modelo é o carro branco do render, levado ao prata do carro da Casa E.
 
@@ -2884,6 +2886,50 @@ def escadas_externas_r14(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 4: as projeções em tracejado bem visível, por cima (R8, R9). No PDF da
+# Casa A, a da cobertura está na ARQ_CONTRAPISO, em tracejado (as notas "PROJ. COBERTURA"): o L da laje, de 1290 a 2381
+# pt em x e de 511 a 1815 pt em y, com o braço de baixo indo até 1038 pt (a partir de 1344 pt), e a linha de 1290 pt
+# descendo até 1860 pt. A da laje superior ("PROJ. DA LAJE SUPERIOR", na área de serviço, em volta da caracol) está na
+# DOC_LINHAS E PROJEÇÕES. O motor só tinha trechos sobre a grama; no piso, no granito e na pedra não aparecia. Entram no
+# traço das projeções do Térreo da Casa E (8,5 pt de traço, 4,25 de vão, 0,55 px, cinza 150, força 0,85), por cima de
+# tudo, menos das paredes pretas. As do pavimento superior (os X da varanda), do pergolado e da claraboia já estão no
+# render e ficam.
+PROJECOES_A = {"linhas": {"cobertura, esquerda": [(1290.0, 511.0), (1290.0, 1860.0)],
+                          "cobertura, em cima": [(1290.0, 511.0), (2381.0, 511.0)],
+                          "cobertura, direita": [(2381.0, 511.0), (2381.0, 1815.0)],
+                          "cobertura, embaixo": [(2381.0, 1815.0), (1038.0, 1815.0), (1038.0, 1344.0), (1290.0, 1344.0)],
+                          "laje superior": [(1695.0, 1775.0), (1695.0, 1648.0), (1758.0, 1648.0), (1758.0, 1718.0),
+                                            (1817.0, 1718.0)]},
+               "traco_pt": 8.5, "vao_pt": 4.25, "larg_px": 0.55, "cor": (150, 151, 150), "forca": 0.85, "parede": 45}
+
+
+def projecoes_a(out):
+    q = PROJECOES_A
+    _, p2r = pdf_pavimento("Terreo")
+    h, w = out.shape[:2]
+    SS_ = 8
+    m = np.zeros((h * SS_, w * SS_), np.uint8)
+    lw = max(1, int(round(q["larg_px"] * SS_)))
+    n = 0
+    for pts in q["linhas"].values():
+        for (ax, ay), (bx, by) in zip(pts[:-1], pts[1:]):
+            comp = np.hypot(bx - ax, by - ay)
+            t = 0.0
+            while t < comp:
+                t1 = min(comp, t + q["traco_pt"])
+                u = p2r(ax + (bx - ax) * t / comp, ay + (by - ay) * t / comp)
+                v = p2r(ax + (bx - ax) * t1 / comp, ay + (by - ay) * t1 / comp)
+                cv2.line(m, (int(round(u[0] * SS_)), int(round(u[1] * SS_))),
+                         (int(round(v[0] * SS_)), int(round(v[1] * SS_))), 255, lw, cv2.LINE_AA)
+                n += 1
+                t = t1 + q["vao_pt"]
+    a = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * q["forca"]
+    a *= (out.astype(np.float32).mean(axis=2) >= q["parede"])          # nas paredes pretas o traço some
+    out[:] = np.clip(out * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None], 0, 255).astype(np.uint8)
+    print(f"    projeções: {len(q['linhas'])} linhas (cobertura e laje superior), {n} traços")
+    return out
+
+
 # A ordem da lista é a de execução: o piso do depósito sem juntas (7) e o Bege Bahia (11) vêm antes da escada (3),
 # para a sombra do último espelho cair no Bege Bahia, e antes dos itens que apagam traços em espelho (4 e 6), para
 # o piso de cada lado já ser o Bege Bahia.
@@ -2921,7 +2967,9 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("carros", "garagem: os carros prata, alinhados e iguais (R12, pente fino 3; antes, uma cor por "
                      "carro e desalinhados)", carros_a),
                     ("sem_arcos", "portas sem os arcos (as folhas ficam); porta camarão sem o cinza", sem_arcos),
-                    ("pf1", "pente fino 1 (R14): escadas do deck e larga com linhas e triângulo", escadas_externas_r14)]}
+                    ("pf1", "pente fino 1 (R14): escadas do deck e larga com linhas e triângulo", escadas_externas_r14),
+                    # as projeções por cima de tudo: o último item do Térreo
+                    ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a)]}
 
 
 def main():

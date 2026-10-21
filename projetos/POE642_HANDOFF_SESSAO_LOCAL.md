@@ -1562,6 +1562,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Escala e posição:** 4,70 m de comprimento e 1,85 m de carroceria (148 x 58 px; o modelo tinha 141 x 54), sem giro, no centro de cada carro do PDF (ARQ_LAYOUT HUMANIZAÇÃO: x 2028,6, 2186,7 e 2347,2 pt), os três na mesma linha (y 1637,3 pt, a média dos três), com a sombra curta.
   - **Conferência:** na imagem com ajustes, só os três carros; na prancha, os carros (o rótulo GARAGEM continua livre entre o primeiro e o segundo); rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_carros_r12_antes_depois.jpg`.
+- **Térreo, item 4, projeções (R8, R9), feito** (`ajustes_casaa.projecoes_a`, config `PROJECOES_A`, o último item do Térreo, para ficar por cima de tudo).
+  - **Onde estão no PDF da Casa A:** as das notas "PROJ. COBERTURA" estão na ARQ_CONTRAPISO, em tracejado: o L da laje, de 1290 a 2381 pt em x e de 511 a 1815 pt em y, com o braço de baixo até 1038 pt (a partir de 1344 pt) e a linha de 1290 pt descendo até 1860 pt. A "PROJ. DA LAJE SUPERIOR" está na DOC_LINHAS E PROJEÇÕES, em volta da caracol. O retângulo grande da DOC_LINHAS (pt 303 a 2965 x 539 a 1787) é o afastamento obrigatório, e as linhas de fora são a divisa: não são projeções e ficam como o motor fez.
+  - **Como:** no traço das projeções do Térreo da Casa E (8,5 pt de traço, 4,25 de vão, 0,55 px, cinza 150, força 0,85), por cima de tudo, menos das paredes pretas. Antes só havia trechos sobre a grama.
+  - **Ficam:** os X do pavimento superior na varanda, o pergolado e a claraboia, que já estavam no render.
+  - **Conferência:** na imagem com ajustes, só as linhas das projeções; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_projecoes_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
