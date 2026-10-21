@@ -1831,6 +1831,9 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** o vão em Bege Bahia na escala, com as faces da parede em cinza fino (`desenhar_soleiras`), e a folha de correr fina por cima, no retângulo do PDF.
   - **Conferência:** na imagem com ajustes e na prancha, só a porta da saleta (1 região); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_soleiras_antes_depois.jpg`.
+- **1º Pavimento, item 16, o "²" dos 22 rótulos, conferido.** A regra de 20/10 (o "2" sobrescrito logo depois do "m") está na rotina compartilhada dos rótulos e roda em todo ciclo: os 22 rótulos (o elevador sem área) já saem certos na prancha. Nada a mudar.
+- **1º Pavimento do pente fino fechado (21/10/26):** os 16 itens do mapa estão feitos. Ordem de execução na lista `ITENS["1Pavimento"]`: pf2, pf3, pf11, pf12, pf4 a pf9, pf14, pf10, pf15 e pf1; a projeção (pf13) entra na final, no `rotulos_casaa.py`.
+  - **Fora do mapa, a decidir com o usuário:** as janelas dos banhos 1, 2, 3 e de serviço, a da escada e o vidro da saleta e do quarto de serviço para fora (na fachada de baixo) continuam como o motor fez, em "tubo" claro. O mapa pedia só as portas das suítes (item 14); pela seção 4 ("vidros e janelas finos e elegantes"), podem passar pela mesma rotina.
 
 ## Casas A a D · Barlavento nas piscinas
 
