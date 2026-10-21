@@ -653,6 +653,17 @@ python3 conferencia_casaa.py --pente-fino   # -> ../renders/POE642_CasaA_PH_<Pav
 
 **Pente fino pelas regras (21/10/26):** com `--pente-fino`, o mapa sai sobre a prancha atual (a final com os rótulos, já no quadro comum), com os itens de `PENTE_FINO` e o recorte de `RECORTE_PF`, como o pente fino da Casa E. Os pontos vêm da geometria do PDF levada ao quadro comum (`opcoes_1pav_casae.quadro_pdf`).
 
+## Pente fino da Casa B: `conferencia_casab.py`
+
+O mesmo mapa do pente fino pelas regras (21/10/26), sobre as pranchas de entrega da Casa B (`POE642_CasaB/entrega/POE642_CasaB_PH_<Pavimento>_entrega.png`). Os itens ficam em `PENTE_FINO`, com os pontos em px da prancha de 3840, e o recorte em `RECORTE`. A legenda e o desenho são os do `conferencia_casaa.py` (`fonte`, `quebrar`, `VERMELHO`).
+
+```bash
+python3 conferencia_casab.py            # -> ../../POE642_CasaB/renders/POE642_CasaB_PH_{Subsolo,Terreo}_pente_fino_mapa.jpg
+python3 conferencia_casab.py Terreo
+```
+
+Para conferir, o PDF (renderizado a 1,2 px/pt) foi levado ao quadro da prancha pelo alinhamento das paredes (`cv2.findTransformECC`, afim): prancha ≈ PDF × 0,878 + (126,5; −238), nos dois pavimentos.
+
 ## Ajustes da Casa A depois da conferência: `ajustes_casaa.py`
 
 Os itens da conferência (e, desde 21/10/26, os do pente fino pelas regras, com o prefixo `pf` em `ITENS`) corrigidos, um por vez, na imagem aprovada (2000 px). Saída `../renders/<imagem aprovada>_ajustes.png` (+ `_camada.png`), que o `rotulos_casaa.py` usa no lugar da aprovada. O alinhamento ao quadro comum continua vindo da imagem aprovada (`PAVIMENTOS[...]["aprovada"]`, `no_quadro_fixo`), para que só os trechos ajustados mudem na prancha. O PDF de cada pavimento chega à imagem pelo quadro comum e pelo afim `AFIM_QR` do pavimento (`pdf_pavimento`). Depois: `rotulos_casaa.py`, `rodape_entrega.py --no-quadro` e `pdf_entrega.py`.
