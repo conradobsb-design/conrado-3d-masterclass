@@ -1591,6 +1591,13 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** o deck é a mancha da madeira da base (#AE8863, com o traço das réguas, #8C6A4A). Régua a régua, deitadas como no PDF, em 4x: cada régua do deck é uma régua inteira da foto (de uma junta à seguinte; são 7), sorteada, com deslocamento e espelho ao acaso, na largura da referência. Sem quilting: as emendas dos retalhos (`textura("madeira")`) liam como faixas atravessando as réguas. A luz larga do lugar e as sombras (dos degraus, da borda da piscina) ficam, como na grama.
   - **Conferência:** na imagem com ajustes e na prancha, só o deck; rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_deck_antes_depois.jpg`.
+- **Térreo, item 9, Bege Bahia como a referência (seção 18), feito** (`ajustes_casaa.bege_referencia_a`, config `BEGE_A`, antes das escadas externas). O entorno da piscina, o pátio de cima, a faixa junto aos brises, o hall externo, os cinco pisantes e os degraus das escadas externas (o #E8E8E8 da base) estavam no Bege Bahia das varandas do 1º Pavimento, claro e rosado (RGB ~225, 209, 198).
+  - **Como:** o item 43 do Térreo da Casa E, com os números de lá (`retoque_terreo_casae.BEGE`). Os pontinhos escuros pequenos do motor viram a luz do lugar; depois o desenho da biblioteca entra inteiro, na escala (31,46 px/m), no tom da foto (RGB 230, 211, 186), com a luz do lugar. As sombras dos móveis ficam; o que foge da luz (móveis, portas, traços) fica como está.
+  - **Mancha:** o #E8E8E8 da base, sem os riscos finos (os contornos dos carros), fechada em 5 x 5 onde o render é piso claro. As linhas da base (o arco e a folha da pivotante no hall externo) recortavam a mancha, e o arco ficava no tom antigo. A grama entre os pisantes não entra.
+  - **Anel:** o `retexturizar` deixa um anel de 2 px no tom antigo em volta do que foge da luz. Ele vira o piso novo de perto (média só do piso novo, sem a cor do objeto), e só onde há piso novo bastante em volta (sem isso, os cantos estreitos ficavam pretos).
+  - **Ordem:** antes das escadas externas (item 1), que desenham os bocéis por cima, e dos vidros (item 5), que levam o piso de cada lado para o vão do hall.
+  - **Conferência:** na imagem com ajustes e na prancha, só o Bege Bahia; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_bege_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

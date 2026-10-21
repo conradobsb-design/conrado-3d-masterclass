@@ -97,6 +97,8 @@ pode seguir pela ordem proposta"):
      interno da escada também.
   Térreo 8. Deck na madeira da referência (R4): régua a régua, das réguas da foto (~20 cm, a escala do render já
      batia), no tom dela, com a luz e as sombras do lugar.
+  Térreo 9. Bege Bahia como a referência (o desenho e o tom da foto, na escala), como o item 43 da Casa E: entorno
+     da piscina, pátio, hall externo, pisantes e degraus das escadas externas.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3218,6 +3220,65 @@ def deck_referencia(out):
     return np.clip(im * (1 - alfa) + novo * alfa, 0, 255).astype(np.uint8)
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 9: Bege Bahia como a referência (seção 18; R1; a regra de 20/10 do
+# Subsolo: a foto de referência, nublada, quente, com o contraste dela). O entorno da piscina, o pátio de cima, a faixa
+# junto aos brises, o hall externo, os pisantes e os degraus das escadas externas (o #E8E8E8 da base) estavam no Bege
+# Bahia das varandas do 1º Pavimento, claro e rosado (RGB ~225, 209, 198). Como o item 43 do Térreo da Casa E, com os
+# números de lá (retoque_terreo_casae.BEGE): os pontinhos escuros pequenos do motor viram a luz do lugar; depois, o
+# desenho da biblioteca entra inteiro, na escala, no tom da foto (RGB 230, 211, 186), com a luz do lugar (as sombras
+# dos móveis ficam; o que foge dela, móveis, portas e traços, fica como está). A mancha é a do #E8E8E8 da base, sem os
+# riscos finos (os contornos dos carros na garagem), fechada em 5 x 5 onde o render é piso claro (as linhas da base, como
+# o arco e a folha da pivotante no hall externo, a recortavam, e o arco ficava no tom antigo; a grama entre os pisantes
+# não entra). O anel de 2 px que retexturizar deixa no tom antigo em volta do que foge da luz (a folha da pivotante,
+# as espreguiçadeiras, os traços) vira o piso novo de perto (média só do piso novo, sem a cor do objeto). Antes das
+# escadas externas (item 1), que desenham os bocéis por cima, e dos vidros (item 5), que levam o piso de cada lado para
+# o vão do hall.
+BEGE_A = {"cor_base": (232, 232, 232), "tol": 6, "mancha_min": 500, "fechar": 5, "claro": 150}
+
+
+def bege_referencia_a(out):
+    from retoque_terreo_casae import BEGE
+    from texturas_escala import retexturizar, nconv
+    q, e = BEGE_A, BEGE
+    _, p2r = pdf_pavimento("Terreo")
+    forma = out.shape[:2]
+    b2 = base_terreo(forma).astype(np.int32)
+    m = (np.abs(b2 - np.array(q["cor_base"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
+    bege = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["mancha_min"]])
+    im = out.astype(np.float32)
+    claro = (im.mean(axis=2) >= q["claro"]) & ~((im[..., 1] > im[..., 2] + 4) & (im[..., 1] > im[..., 0] + 12))
+    k = np.ones((q["fechar"], q["fechar"]), np.uint8)
+    bege |= cv2.morphologyEx(bege.astype(np.uint8), cv2.MORPH_CLOSE, k).astype(bool) & claro
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                  # 1 m na escala 1:50 = 56,69 pt
+    px_m = float(np.hypot(c - a, d - b))
+    pq = e["pontos"]
+    mm = cv2.erode(bege.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    L = nconv(im, mm.astype(np.float32), pq["sig"])
+    n, lab, st, _ = cv2.connectedComponentsWithStats((mm & ((L - im).max(axis=2) > pq["limiar"])).astype(np.uint8), 8)
+    pontos = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= pq["area"]
+                           and max(st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT]) <= pq["lado"]])
+    pontos = cv2.dilate(pontos.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & mm
+    out = out.copy()
+    out[pontos] = np.clip(L[pontos], 0, 255).astype(np.uint8)
+    # o piso que retexturizar troca e o anel que ele deixa em volta do que foge da luz (os mesmos critérios dele)
+    i2 = out.astype(np.float32)
+    m2 = cv2.erode(bege.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    L2 = nconv(i2, m2.astype(np.float32), e["sig_m"] * px_m)
+    foge = ((L2 - i2).max(axis=2) > 12) | ((i2 - L2).max(axis=2) > 30)
+    folga = cv2.dilate(foge.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    anel = m2 & folga & ~foge
+    out, npx = retexturizar(out, bege, "bege_bahia", px_m, forca=e["forca"], semente=e["semente"], sig_m=e["sig_m"],
+                            cor=e["tom"], suavizar=e["suavizar"])
+    novo = (m2 & ~folga).astype(np.float32)
+    perto = nconv(out.astype(np.float32), novo, 1.5)
+    anel &= cv2.GaussianBlur(novo, (0, 0), 1.5) >= 0.15          # só com piso novo bastante em volta
+    out[anel] = np.clip(perto[anel], 0, 255).astype(np.uint8)
+    print(f"    Bege Bahia: {int(pontos.sum())} px de pontinhos escuros fora; {npx} px no desenho da biblioteca, "
+          f"a {px_m:.2f} px/m, no tom da foto; {int(anel.sum())} px do anel em volta dos objetos")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 5: vidros finos (seções 4 e 18). O motor fez dois "tubos" cinza grossos
 # com nós escuros (montantes):
 # - entre a varanda e as salas: no PDF (ARQ_PAREDE) são quatro portas de vidro de correr, cada uma com duas folhas de
@@ -3342,6 +3403,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("carros", "garagem: os carros prata, alinhados e iguais (R12, pente fino 3; antes, uma cor por "
                      "carro e desalinhados)", carros_a),
                     ("sem_arcos", "portas sem os arcos (as folhas ficam); porta camarão sem o cinza", sem_arcos),
+                    ("pf9", "pente fino 9: Bege Bahia como a referência (desenho e tom da foto, na escala)",
+                     bege_referencia_a),
                     ("pf1", "pente fino 1 (R14): escadas do deck e larga com linhas e triângulo", escadas_externas_r14),
                     ("pf6", "pente fino 6: armários até o teto em marcenaria areia com veio, sem a diagonal e sem a "
                      "sombra de móvel baixo; o braço da bancada dos tanques em quartzo", armarios_teto),
