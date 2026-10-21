@@ -623,6 +623,8 @@ python3 rotulos_casaa.py Terreo       # -> ../renders/POE642_CasaA_PH_Terreo_fin
 python3 rotulos_casaa.py 1Pavimento   # -> ../renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png
 ```
 
+Desde o pente fino de 21/10/26 (item 2 do Térreo), os rótulos no granito marrom saem em branco (R6, `cor_granito=R1.ROTULOS["branco"]`; antes, cinza 150), e o "²" logo depois do "m", pela rotina comum (regra de 20/10).
+
 ## Conferência da Casa A com o PDF: `conferencia_casaa.py`
 
 As divergências entre as imagens aprovadas da Casa A e os PDFs do cliente, em `ITENS` (pontos em px de 2000 do quadro comum), e o mapa numerado de cada pavimento, com a legenda em Inter (acentos corretos).

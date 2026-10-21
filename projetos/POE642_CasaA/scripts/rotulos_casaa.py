@@ -4,7 +4,8 @@
 Pedido do usuário (18/10/26): "vamos fazer os ajustes nas plantas da casa A", os mesmos que a Casa E recebeu:
 os nomes e as áreas dos ambientes, como no 1º Pavimento, no Subsolo e no Térreo da Casa E
 (`retoque_1pav_casae.rotulos_ambientes`). Cada linha do rótulo do PDF entra igual (o nome e "A: 15,25 m²"), na
-posição do PDF, no corpo do PDF 30% maior, em Inter Regular preta; no granito marrom, cinza (150); os que caem
+posição do PDF, no corpo do PDF 30% maior, em Inter Regular preta; no granito marrom, branca (R6; até 21/10/26,
+cinza 150); os que caem
 sobre móvel ou peça vão ao piso livre mais próximo. Os PDFs são os do Drive que geraram as bases da Casa A,
 em `_pdfs_cliente/642 - <PAVIMENTO> - CASA A.pdf`. Ficam fora as notas que não são ambientes (projeções,
 shafts, afastamentos, divisa, muros, acessos) e o título da folha.
@@ -67,7 +68,8 @@ PAVIMENTOS = {
                    # o quarto do motorista (pedido do usuário, 19/10/26: "o rótulo do quarto do motorista está no local
                    # errado"): ao lado da cama, como no PDF, no piso livre entre a cama e o armário (~26 px), um pouco
                    # menor que o PDF (a Inter é mais larga); no granito (a caixa do texto pega a cama, então a cor vai dada)
-                   ("Q. MOTORISTA", (1281.4, 632.7), (6.2, -0.2), {"cor": (150, 150, 150), "corpo": 0.8}),
+                   # R6 (pente fino de 21/10/26): no granito, em branco
+                   ("Q. MOTORISTA", (1281.4, 632.7), (6.2, -0.2), {"cor": R1.ROTULOS["branco"], "corpo": 0.8}),
                    # banhos e despensa estreitos: no corpo do PDF, no piso livre entre as peças
                    # o banho do motorista ganhou o arco da porta em cinza (ajustes, portas no granito): o rótulo sobe
                    # e vai à esquerda, entre o vaso e o arco, um pouco menor, para o arco não cortar o texto
@@ -149,8 +151,9 @@ def final_rotulos(chave):
     p2q = quadro_pdf(pg, cfg, lt, at, wb, hb, LARGURA)
     rot = [r for r in R1.rotulos_pdf(pg) if r[0] in q.get("incluir", ()) or not any(f in r[0] for f in FORA)]
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
+    # R6 (19/10/26; pente fino da Casa A, 21/10/26): no granito marrom, os rótulos em branco (eram cinza 150)
     return R1.rotulos_ambientes(final, rot, p2q, escala_desvio=LARGURA / 2000, granito=granito(final),
-                                ajustes=q["ajustes"])
+                                ajustes=q["ajustes"], cor_granito=R1.ROTULOS["branco"])
 
 
 def main():

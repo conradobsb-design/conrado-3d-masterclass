@@ -1544,6 +1544,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   16. o "²" dos 22 rótulos.
   - **Conformes:** vazios brancos com o X, sala íntima, banhos, rótulos fora dos objetos.
 - **Ordem proposta:** Térreo, Subsolo e 1º Pavimento, porque o terreno hachurado do Subsolo e o entorno nublado do 1º Pavimento saem do Térreo final.
+- **Confirmação (21/10/26):** "confirmado, pode seguir pela ordem proposta". As quatro propostas valem: o gramado do Subsolo fica; os retângulos da DOC_LINHAS entram em traço cinza fino, como no PDF; a escada larga do Térreo sobe do deck (triângulo no degrau 12); os guarda-roupas do 1º Pavimento como na Casa E (bege dentro, ocre na borda, cabideiro).
+- **Ciclo de cada item:** `ajustes_casaa.py <Pavimento>`, `rotulos_casaa.py <Pavimento>`, `rodape_entrega.py --no-quadro --render <Pavimento>=...` e `pdf_entrega.py`; conferência nos ajustes e na prancha (só a região do item muda, rodapé igual). Antes de começar, o ciclo foi rodado sem mudança: os ajustes saíram iguais, px a px, e na prancha mudaram só os "²" (rotina de 20/10).
+- **Térreo, item 2, rótulos brancos no granito (R6), feito.** No `rotulos_casaa.py`, `cor_granito=R1.ROTULOS["branco"]`, a cor da Casa E, e o Q. MOTORISTA (cor dada no ajuste) também em branco. Junto, o "²" logo depois do "m" em todos os 28 rótulos. Feito antes do item 1, porque toda nova rodada dos rótulos muda os "²".
+  - **Conferência:** na imagem com ajustes, nada; na prancha, só os rótulos (4.721 px em 25 regiões: os 8 do granito inteiros e os "²" dos outros); rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_rotulos_granito_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
