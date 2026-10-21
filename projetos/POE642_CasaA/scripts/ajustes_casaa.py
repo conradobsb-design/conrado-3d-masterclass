@@ -157,6 +157,9 @@ pode seguir pela ordem proposta"):
   1º Pavimento, pente fino 9: no banho master, a banheira retangular do motor sai (o piso limpo do banho, tecido, na luz
      de cada linha) e entram a banheira oval da biblioteca de blocos, no retângulo da elipse do PDF, e a torneira de piso
      do PDF na ponta da esquerda (base redonda e bica em cromo), as duas com a sombra curta.
+  1º Pavimento, pente fino 10: nas quatro suítes, os tracinhos escuros do motor no lugar das cortinas saem e entram a
+     cortina de linho da biblioteca (`_blocos/blocos.cortina`) em cada trecho de linha ondulada do PDF e o trilho de
+     parede a parede, do lado do vidro, como no 1º Pavimento da Casa E.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -4012,6 +4015,97 @@ def banheira_1pav(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 10: cortinas de linho nas quatro suítes (seção 8: "em linho
+# off-white, traço fino. O bloco é o de `_blocos/blocos.py` (`cortina`)"; [20/10] "trilhos da cortina tem que ser de
+# fora a fora"). No PDF, cada suíte tem dois trechos de linha ondulada (ARQ_LOUÇAS E METAIS, 0,85 pt) junto às portas de
+# vidro; o motor os fez como uma coluna de tracinhos escuros no vinílico. Como no 1º Pavimento da Casa E
+# (`retoque_1pav_casae.cortinas_linho`):
+# - os tracinhos saem (`limpar`): numa faixa de 9 px no eixo de cada trecho, do começo ao fim dele (com folga), cada linha
+#   recebe o vinílico das duas beiradas da faixa, ligado em linha reta (as réguas correm na horizontal), só onde o piso
+#   está mais escuro que isso; a beirada fora do tom do vinílico do trecho (a poltrona da suíte 2, o caixilho da suíte 1)
+#   dá lugar à outra; a parede e o caixilho (a 7 px do eixo) ficam;
+# - o pano da biblioteca em cada trecho do PDF (eixo do tecido no eixo da linha, na mesma extensão: a meia distância) e,
+#   em cada suíte, o trilho de parede a parede, do lado do vidro (à esquerda nas suítes 3, 2 e master; à direita na 1).
+#   O fim do trilho é a parede preta numa coluna "dentro" px para dentro do quarto; os trilhos do mesmo lado que se
+#   sobrepõem viram um só.
+CORTINAS_1PAV = {"limpar": {"meia": 4, "linhas": (-5, 8), "escuro": 20, "parede": 40, "difere": 25},
+                 "vidro_direita_pt": 2000, "parede": 55, "seguidos": 3, "busca_m": 6.0, "dentro": 3, "ss": 8}
+
+
+def cortinas_1pav(out):
+    import sys
+    from retoque_1pav_casae import trechos_cortina
+    from retoque_terreo_casae import pousar_cortina
+    sys.path.insert(0, str(CASA.parent / "_blocos"))
+    import blocos
+    q = CORTINAS_1PAV
+    pg, p2r = pdf_pavimento("1Pavimento")
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    trechos = []
+    for pts in trechos_cortina(pg):
+        xe = float(np.median(pts[:, 0]))                     # o eixo do tecido (as ondas são verticais nas fachadas)
+        (ex, ey0), (_, ey1) = p2r(xe, float(pts[:, 1].min())), p2r(xe, float(pts[:, 1].max()))
+        trechos.append(("direita" if xe > q["vidro_direita_pt"] else "esquerda", ex, ey0, ey1))
+    # 1. os tracinhos do motor saem
+    lp = q["limpar"]
+    limpos = 0
+    for _, ex, ey0, ey1 in trechos:
+        cc = int(round(ex))
+        c0, c1 = cc - lp["meia"], cc + lp["meia"] + 1
+        r0, r1 = int(np.floor(ey0)) + lp["linhas"][0], int(np.ceil(ey1)) + lp["linhas"][1]
+        reg = out[r0:r1, c0:c1].astype(np.float32)
+        esq = np.median(out[r0:r1, c0 - 2:c0].astype(np.float32), axis=1)
+        dir_ = np.median(out[r0:r1, c1:c1 + 2].astype(np.float32), axis=1)
+        le, ld = esq.mean(axis=1), dir_.mean(axis=1)
+        ref = float(np.median(np.r_[le, ld]))                                 # o tom do vinílico no trecho
+        ok_e, ok_d = np.abs(le - ref) < lp["difere"], np.abs(ld - ref) < lp["difere"]
+        esq, dir_ = (np.where(ok_e[:, None], esq, dir_),                       # uma beirada fora do piso (móvel,
+                     np.where(ok_d[:, None], dir_, esq))                       # caixilho): vale a outra
+        tt = ((np.arange(c1 - c0) + 0.5) / (c1 - c0))[None, :, None]
+        liso = esq[:, None, :] * (1 - tt) + dir_[:, None, :] * tt
+        L = reg.mean(axis=2)
+        m = (L < liso.mean(axis=2) - lp["escuro"]) & (L > lp["parede"]) & (ok_e | ok_d)[:, None]
+        m = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        m &= ~cv2.dilate((L <= lp["parede"]).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        al = (cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.5) * m)[..., None]
+        out[r0:r1, c0:c1] = np.clip(np.round(reg * (1 - al) + liso * al), 0, 255).astype(np.uint8)
+        limpos += int(m.sum())
+    # 2. os panos nos trechos do PDF e os trilhos de parede a parede
+    k = q["ss"]
+    busca = int(q["busca_m"] * px_m)
+    trilhos = []
+    for vidro, ex, ey0, ey1 in trechos:
+        # a coluna da busca, um pouco para dentro do quarto (no eixo, colado ao vidro, o caixilho pararia a busca)
+        dentro = int(round(ex)) + (q["dentro"] if vidro == "esquerda" else -q["dentro"])
+        escuro = out[:, dentro].astype(np.float32).mean(axis=1) < q["parede"]
+
+        def ate_parede(y, passo):
+            n = 0
+            for yy in range(int(round(y)), int(round(y)) + passo * busca, passo):
+                n = n + 1 if escuro[yy] else 0
+                if n >= q["seguidos"]:
+                    return yy - passo * (q["seguidos"] - 1) - passo * 0.5
+            return y
+        trilhos.append([vidro, ex, ate_parede((ey0 + ey1) / 2, -1), ate_parede((ey0 + ey1) / 2, +1)])
+    unidos = []
+    for v, ex, t0, t1 in sorted(trilhos, key=lambda t: (t[0], t[2])):
+        if unidos and unidos[-1][0] == v and t0 < unidos[-1][3] - 2:
+            unidos[-1][2], unidos[-1][3] = min(unidos[-1][2], t0), max(unidos[-1][3], t1)
+        else:
+            unidos.append([v, ex, t0, t1])
+    for v, ex, t0, t1 in unidos:
+        cor, al = blocos.cortina((t1 - t0) / px_m, px_m * k, com_pano=False)
+        pousar_cortina(out, cor, al, ex, t0, k, v)
+    for v, ex, ey0, ey1 in trechos:
+        cor, al = blocos.cortina((ey1 - ey0) / px_m, px_m * k, com_trilho=False)
+        pousar_cortina(out, cor, al, ex, ey0, k, v)
+    print(f"    {limpos} px de tracinhos do motor fora; {len(trechos)} panos de linho nos trechos do PDF e "
+          f"{len(unidos)} trilhos de parede a parede: " + ", ".join(f"{v} x {ex:.0f}, y {t0:.0f} a {t1:.0f}"
+                                                                     for v, ex, t0, t1 in unidos))
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -5352,6 +5446,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          "faixa com dois quadrados", quarto_servico_1pav),
                   ("pf9", "pente fino 9: banheira oval do banho master com a torneira de piso, como no PDF",
                    banheira_1pav),
+                  ("pf10", "pente fino 10: cortinas de linho da biblioteca nas quatro suítes, com o trilho de parede a "
+                   "parede", cortinas_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 

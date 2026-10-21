@@ -1796,6 +1796,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** a banheira do motor e a sombra saem (o piso limpo do banho, à direita, tecido e ajustado à luz de cada linha; as folhas da floreira ficam); entra a banheira oval da biblioteca de blocos (a da Casa E, só o corpo, sem a torneira de bancada do recorte) no retângulo da elipse do PDF, e a torneira de piso do PDF em cromo (base redonda e bica entrando na banheira), as duas com a sombra curta.
   - **Conferência:** na imagem com ajustes e na prancha, só a banheira (1 região); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_banheira_antes_depois.jpg`.
+- **1º Pavimento, item 10, cortinas de linho, feito** (`ajustes_casaa.cortinas_1pav`, config `CORTINAS_1PAV`).
+  - **Antes:** nas quatro suítes, uma coluna de tracinhos escuros no vinílico, no lugar das linhas onduladas do PDF; sem trilho.
+  - **Como:** os tracinhos saem (o vinílico das beiradas, na mesma linha); entram o pano de linho da biblioteca em cada um dos 8 trechos do PDF (a meia distância, como lá) e o trilho de parede a parede do lado do vidro, um por suíte, como no 1º Pavimento da Casa E.
+  - **Conferência:** na imagem com ajustes e na prancha, só as quatro fachadas das suítes (4 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_cortinas_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
