@@ -1834,6 +1834,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
 - **1º Pavimento, item 16, o "²" dos 22 rótulos, conferido.** A regra de 20/10 (o "2" sobrescrito logo depois do "m") está na rotina compartilhada dos rótulos e roda em todo ciclo: os 22 rótulos (o elevador sem área) já saem certos na prancha. Nada a mudar.
 - **1º Pavimento do pente fino fechado (21/10/26):** os 16 itens do mapa estão feitos. Ordem de execução na lista `ITENS["1Pavimento"]`: pf2, pf3, pf11, pf12, pf4 a pf9, pf14, pf10, pf15 e pf1; a projeção (pf13) entra na final, no `rotulos_casaa.py`.
   - **Fora do mapa, a decidir com o usuário:** as janelas dos banhos 1, 2, 3 e de serviço, a da escada e o vidro da saleta e do quarto de serviço para fora (na fachada de baixo) continuam como o motor fez, em "tubo" claro. O mapa pedia só as portas das suítes (item 14); pela seção 4 ("vidros e janelas finos e elegantes"), podem passar pela mesma rotina.
+- **Pedidos do usuário depois do pente fino (21/10/26):** "pode fazer as janelas finas também"; mostrar o Térreo nublado nos vazios, na faixa branca entre os lances da escada em U (o jardim do Térreo) e no trecho da escada que é do Térreo; a caracol sem o branco (o trecho do 1º Pavimento cheio, o resto nublado, os degraus dentro do círculo); e os cobre-leitos humanizados com as referências da biblioteca.
+- **1º Pavimento, janelas finas (complemento do item 14), feito** (`ajustes_casaa.janelas_1pav`, config `JANELAS_1PAV`, pf14b).
+  - **Como:** a mesma rotina das portas: em cada vão branco da janela, as peças finas do PDF saem (de fora para dentro) e o vão é redesenhado: vidro claro, caixilho de alumínio, peitoril em pedra e os batentes em quadradinhos. Banhos 3, 2, 1 e de serviço, a janela da escada e o vidro da fachada de baixo (saleta e quarto de serviço); no banho 2, também o vidro do plano de fora.
+  - **Conferência:** na imagem com ajustes e na prancha, só as sete janelas (6 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_janelas_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

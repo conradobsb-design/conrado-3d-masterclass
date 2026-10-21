@@ -171,6 +171,8 @@ pode seguir pela ordem proposta"):
   1º Pavimento, pente fino 14 (seções 4 e 18): nas fachadas das suítes, o "tubo" branco do motor sai e entram as portas
      de vidro de correr do PDF, finas, em dois planos, como os vidros do Térreo (item 5); antes das cortinas (item 10),
      como na Casa E, e depois do Bege Bahia das varandas (item 12, que agora roda logo depois do vinílico).
+  1º Pavimento, pente fino 14, complemento (usuário, 21/10/26: "pode fazer as janelas finas também"): as janelas dos
+     banhos 3, 2, 1 e de serviço, a da escada e o vidro da fachada de baixo (saleta e quarto de serviço) pela mesma rotina.
   1º Pavimento, pente fino 15 (R13): soleiras porta a porta; só a porta de correr da saleta para o quarto de serviço
      tem o vão branco no PDF: Bege Bahia na escala, com as faces da parede em cinza fino e a folha fina por cima.
 
@@ -4182,6 +4184,49 @@ def vidros_1pav(out):
           f"para dentro) e redesenhadas finas em {len(VIDROS_1PAV['zonas'])} zonas")
     return np.clip(img, 0, 255).astype(np.uint8)
 
+
+# Complemento do item 14 (usuário, 21/10/26: "pode fazer as janelas finas também"): as janelas e o vidro de fora que
+# ficaram como o motor fez, em "tubo" claro, passam pela mesma rotina (seção 4: "vidros e janelas finos e elegantes";
+# o vidro claro com a linha central, o caixilho de alumínio, o peitoril em pedra e os retornos da parede em preto). Cada
+# zona é o vão branco da ARQ_PAREDE da janela: as peças brancas finas saem (`esquadria_limpar`, de fora para dentro) e
+# o vão é redesenhado (`esquadria_desenhar`). Os banhos 3, 2, 1 e de serviço, a janela da escada e o vidro da fachada de
+# baixo (saleta e quarto de serviço, duas folhas em dois planos); no banho 2, também o vidro do plano de fora da
+# fachada, que passa pela frente dele. As duas linhas no alto, à direita, ficam: estão dentro de um vazio, não são
+# janela.
+JANELAS_1PAV = {"zonas": [((1950.4, 567.6, 1995.7, 579.0), "cima"),        # banho 3 (para fora)
+                          ((1400.4, 1100.5, 1411.8, 1145.9), "esquerda"),  # banho 2
+                          ((1394.8, 1083.0, 1397.6, 1181.8), "esquerda"),  # banho 2, o vidro do plano de fora
+                          ((2284.8, 1296.1, 2296.2, 1341.5), "direita"),   # banho 1
+                          ((1978.7, 1718.5, 2012.7, 1729.8), "baixo"),     # banho de serviço
+                          ((2284.8, 1094.9, 2296.2, 1253.6), "direita"),   # escada
+                          ((1695.2, 1775.2, 1907.8, 1786.5), "baixo")]}    # saleta e quarto de serviço, fachada de baixo
+
+
+def janelas_1pav(out):
+    import sys
+    import retoque_terreo_casae as T
+    sys.path.insert(0, str(CASA.parent / "_texturas"))
+    from texturas import textura
+    pg, p2r = pdf_pavimento("1Pavimento")
+    px_m = p2r(56.69, 0)[0] - p2r(0, 0)[0]
+    par = [d for d in pg.get_drawings() if d.get("layer") == "ARQ_PAREDE"]
+    img = out.astype(np.float32)
+    fora = {"esquerda": lambda r: r.x0, "direita": lambda r: -r.x1, "cima": lambda r: r.y0, "baixo": lambda r: -r.y1}
+    n = 0
+    for z, lado in JANELAS_1PAV["zonas"]:
+        pecas = [d["rect"] for d in par
+                 if d["type"] == "f" and d["fill"] and min(d["fill"]) >= 0.9 and min(d["rect"].width, d["rect"].height)
+                 <= 3.2 and z[0] - 0.5 <= d["rect"].x0 and d["rect"].x1 <= z[2] + 0.5 and z[1] - 0.5 <= d["rect"].y0
+                 and d["rect"].y1 <= z[3] + 0.5]
+        for r in sorted(pecas, key=fora[lado]):                   # de fora para dentro
+            T.esquadria_limpar(img, r, p2r)
+        n += len(pecas)
+    for z, _ in JANELAS_1PAV["zonas"]:
+        T.esquadria_desenhar(img, z, par, p2r, px_m, textura)
+    print(f"    janelas: {n} peças do PDF limpas e redesenhadas finas em {len(JANELAS_1PAV['zonas'])} vãos (banhos 3, 2, "
+          f"1 e de serviço, escada e fachada de baixo)")
+    return np.clip(img, 0, 255).astype(np.uint8)
+
 # Pente fino pelas regras (21/10/26), 1º Pavimento, item 15: soleiras (R13: a soleira é o vão da porta na espessura da
 # parede deixado em branco no PDF, entre os batentes; onde o piso de um dos lados atravessa o vão, não há). Conferidas
 # porta a porta, numa folha de recortes do PDF, da base e do render, e pela cor do próprio PDF no meio de cada vão:
@@ -5768,6 +5813,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          banheira_1pav),
                         ("pf14", "pente fino 14 (seções 4 e 18): portas de vidro de correr das suítes para as varandas, "
                          "finas, em dois planos, como no PDF (antes das cortinas, como na Casa E)", vidros_1pav),
+                        ("pf14b", "pente fino 14, complemento: as janelas finas (banhos 3, 2, 1 e de serviço, escada e "
+                         "o vidro da fachada de baixo)", janelas_1pav),
                         ("pf10", "pente fino 10: cortinas de linho da biblioteca nas quatro suítes, com o trilho de parede "
                          "a parede", cortinas_1pav),
                         ("pf15", "pente fino 15 (R13): soleira no vão branco do PDF (porta de correr da saleta)",
