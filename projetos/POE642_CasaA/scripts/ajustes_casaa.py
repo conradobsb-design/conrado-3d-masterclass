@@ -71,6 +71,8 @@ Itens:
      sombreamento de subida, sem linhas; do 8º em diante esmaecida; o jardim em volta no gramado aprovado.
   Térreo 11 e 12. Motorista (pedido do usuário, 19/10/26): a cama de solteiro, a bancada com a cuba de apoio e a
      torneira, as folhas de vidro do box e o chuveiro, no lugar dos blocos lilás do motor.
+  Térreo, cama do motorista (usuário, 21/10/26: "aplique a mesma roupa de cama"): a roupa de cama da biblioteca,
+     como nas camas do 1º Pavimento (`cama_motorista`, pela mesma `pousar_camas`), logo depois dos itens 11 e 12.
   Térreo, carros (pedido do usuário, 19/10/26): cada carro numa cor (branco perolado, grafite, azul-marinho, a
      paleta da Casa D) e os três levemente desalinhados, como na Casa E.
   Térreo, sem arcos (decisão do usuário, 19/10/26, com as plantas de referência dos elementos: "remover os arcos,
@@ -4003,7 +4005,7 @@ CAMAS_1PAV = {"camas": [("suíte 3", (1474.1, 551.7, 1592.1, 675.9), "cima", "ca
                         ("suíte 1, esquerda", (2071.1, 1604.0, 2127.8, 1717.3), "baixo", "solteiro"),
                         ("suíte 1, direita", (2170.3, 1604.0, 2227.0, 1717.3), "baixo", "solteiro"),
                         ("quarto de serviço", (1696.4, 1492.8, 1753.1, 1606.2), "cima", "solteiro")],
-              "borda": 1.7, "ss": 4, "busca": (4, 7), "claro": 0.8, "escuro": 190}
+              "borda": 1.7, "ss": 4, "busca": (4, 7), "claro": 0.8, "escuro": 190, "moldura": True, "semente": 11}
 
 
 def borda_da_cama(L, pos, ini, fim, vertical, dentro, q):
@@ -4029,12 +4031,13 @@ def borda_da_cama(L, pos, ini, fim, vertical, dentro, q):
     return base + offs[j] + (0 if dentro > 0 else 1)
 
 
-def camas_1pav(out):
+def pousar_camas(out, pavimento, q):
+    """A roupa de cama da biblioteca em cada cama de q["camas"] (nome, retângulo do PDF em pt, lado da cabeceira, tipo),
+    em pé na planta. Com q["moldura"], a borda dos lados e dos pés vem da moldura do render (`borda_da_cama`)."""
     import sys
     sys.path.insert(0, str(CASA.parent / "_texturas"))
     import elementos
-    q = CAMAS_1PAV
-    _, p2r = pdf_pavimento("1Pavimento")
+    _, p2r = pdf_pavimento(pavimento)
     (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
     px_m = float(np.hypot(c - a, d - b))
     k = q["ss"]
@@ -4045,7 +4048,7 @@ def camas_1pav(out):
         # o render desloca as camas 1 a 2 px do PDF: nos lados e nos pés, a borda vem da moldura do render
         (U0, V0), (U1, V1) = p2r(*r[:2]), p2r(*r[2:])
         lados = {"esq": (U0, V0, V1, True, 1), "dir": (U1, V0, V1, True, -1),
-                 "cima": (V0, U0, U1, False, 1), "baixo": (V1, U0, U1, False, -1)}
+                 "cima": (V0, U0, U1, False, 1), "baixo": (V1, U0, U1, False, -1)} if q["moldura"] else {cab: None}
         lados.pop(cab)
         for lado, (pos, ini, fim, vert, dentro) in lados.items():
             b_ = borda_da_cama(L, pos, ini, fim, vert, dentro, q)
@@ -4055,8 +4058,8 @@ def camas_1pav(out):
                 elif lado == "dir": u1 = b_
                 elif lado == "cima": v0 = b_
                 else: v1 = b_
-        comp, larg = (v1 - v0) / px_m, (u1 - u0) / px_m          # as camas do 1º Pavimento estão em pé
-        cor, al = elementos.roupa_de_cama(comp, larg, px_m * k, tipo, semente=11 + i)
+        comp, larg = (v1 - v0) / px_m, (u1 - u0) / px_m          # as camas estão em pé na planta
+        cor, al = elementos.roupa_de_cama(comp, larg, px_m * k, tipo, semente=q["semente"] + i)
         giro = cv2.ROTATE_90_CLOCKWISE if cab == "cima" else cv2.ROTATE_90_COUNTERCLOCKWISE
         cor, al = cv2.rotate(cor, giro), cv2.rotate(al, giro)
         if cab == "cima":                                        # o giro horário põe a cabeceira em cima, espelhada
@@ -4075,8 +4078,28 @@ def camas_1pav(out):
         a_ = cv2.resize(ga, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
         reg = out[Y0:Y1, X0:X1].astype(np.float32)
         out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a_[..., None]) + pre), 0, 255).astype(np.uint8)
+    return out
+
+
+def camas_1pav(out):
+    q = CAMAS_1PAV
+    out = pousar_camas(out, "1Pavimento", q)
     print(f"    camas: a roupa de cama da referência nas {len(q['camas'])} camas ("
           + "; ".join(f"{n}, {t}" for n, _, _, t in q["camas"]) + ")")
+    return out
+
+
+# Pedido do usuário (21/10/26), depois das camas do 1º Pavimento: "APLIQUE A MESMA ROUPA DE CAMA" na cama de solteiro
+# do quarto do motorista, no Térreo (a do item 11, com o edredom de ponta dobrada e o travesseiro no desenho do PDF).
+# O colchão é o retângulo da cama do item 11 (`MOTORISTA["cama"]`) menos a borda, a mesma do 1º Pavimento; a cama ali
+# foi desenhada por nós no retângulo do PDF, então sem a busca da moldura. A cabeceira fica em cima, contra a parede.
+CAMA_MOTORISTA = {"camas": [("quarto do motorista", MOTORISTA["cama"], "cima", "solteiro")],
+                  "borda": CAMAS_1PAV["borda"], "ss": CAMAS_1PAV["ss"], "moldura": False, "semente": 31}
+
+
+def cama_motorista(out):
+    out = pousar_camas(out, "Terreo", CAMA_MOTORISTA)
+    print("    motorista: a roupa de cama da referência na cama de solteiro (cabeceira em cima)")
     return out
 
 # Pente fino pelas regras (21/10/26), 1º Pavimento, item 9: a banheira do banho master (item 7 da conferência de 19/10;
@@ -5928,6 +5951,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pivotante", "porta pivotante: a folha até o hall externo e o arco pequeno", pivotante),
                     ("escada_interna", "escada interna: cheia até o corte, esmaecida depois; o jardim em volta", escada_interna),
                     ("11-12", "motorista: a cama, a bancada com a cuba, o box e o chuveiro", motorista),
+                    ("cl", "cobre-leito (usuário, 21/10/26): a roupa de cama da biblioteca na cama do motorista, "
+                     "como no 1º Pavimento", cama_motorista),
                     ("carros", "garagem: os carros prata, alinhados e iguais (R12, pente fino 3; antes, uma cor por "
                      "carro e desalinhados)", carros_a),
                     ("sem_arcos", "portas sem os arcos (as folhas ficam); porta camarão sem o cinza", sem_arcos),

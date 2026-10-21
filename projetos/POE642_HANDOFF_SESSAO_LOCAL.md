@@ -1850,8 +1850,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **O quê:** nas seis camas (casal nas suítes 3, 2 e master; solteiro nas duas da suíte 1 e no quarto de serviço), o desenho técnico do PDF (retângulo branco, contorno dos travesseiros, dobra em triângulo) dá lugar à roupa de cama da referência da biblioteca (linha 5 da cartela de elementos): lençol e edredom brancos, travesseiros cinza-claros com os bordô na frente, a dobra do lençol e a manta bordô na metade dos pés (no solteiro, a faixa bordô). A cabeceira fica do lado dos travesseiros do PDF.
   - **Encaixe:** o colchão é o retângulo do PDF; nos lados e nos pés, a borda segue a moldura do render (deslocada 1 a 2 px do PDF; na suíte 3, os pés 5 px além), para não cobrir a moldura nem deixar fresta.
   - **Conferência:** na imagem com ajustes e na prancha, só as seis camas (6 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos. A cartela de elementos (`_texturas/cartela_elementos.jpg`) mostra, na linha 5, a nossa ao lado da referência.
-  - **Fora deste item:** a cama de solteiro do quarto do motorista, no Térreo, continua como foi desenhada (item 115); pode receber a mesma roupa de cama, se o usuário quiser.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_cobre_leitos_antes_depois.jpg`.
+- **Térreo, cama do motorista com a mesma roupa de cama, feito** (pedido do usuário, 21/10/26: "aplique a mesma roupa de cama"; `ajustes_casaa.cama_motorista`, config `CAMA_MOTORISTA`, chave `cl` do Térreo, logo depois dos itens 11 e 12).
+  - **Como:** a rotina das camas do 1º Pavimento virou `pousar_camas(out, pavimento, config)`, usada pelos dois. Na cama do motorista, a cabeceira fica em cima, contra a parede; o colchão é o retângulo da cama do PDF menos a borda de 1,7 pt, sem a busca da moldura (a cama ali foi desenhada por nós no retângulo do PDF).
+  - **Conferência:** no Térreo, só a cama (1 região) na imagem com ajustes e na prancha; rodapé igual. O 1º Pavimento, refeito com o Térreo novo (ajustes, final e prancha), ficou idêntico pixel a pixel (a refatoração não mudou as seis camas, e a cama do motorista não aparece no Térreo nublado da prancha do 1º Pavimento). Pranchas e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_cama_motorista_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
