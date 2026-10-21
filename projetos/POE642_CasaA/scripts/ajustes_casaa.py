@@ -120,6 +120,9 @@ pode seguir pela ordem proposta"):
   Subsolo, pente fino 3 (R14): a escada do deck com a linha suave e a sombra curta nos bocéis, o trecho depois do corte
      esmaecido e tracejado e o triângulo no 1º degrau, apontando para a subida.
   Subsolo, pente fino 4 (R3): os 5 arcos de porta saem (o traço do arco do PDF, por inpaint); as folhas ficam.
+  Subsolo, pente fino 5: a porta de correr da circulação em duas folhas de vidro desencontradas (sem o traço preto),
+     as 5 folhas de giro brancas e finas (R3), a janela entre o depósito e a academia em vidro claro e o vidro de
+     cima da sauna em folha contínua, sem o montante (seção 18).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -2984,6 +2987,101 @@ def escada_deck_subsolo(out):
     return escada_linhas(np.clip(np.round(img), 0, 255).astype(np.uint8), None, e, p2r=p2r)
 
 
+# Pente fino pelas regras (21/10/26), Subsolo, item 5: portas, vidros e janelas finos (seções 4 e 18).
+# - Circulação interna para a externa: o motor fez a porta de correr como um traço preto grosso, com um degrau no meio.
+#   No PDF (ARQ_PAREDE) são duas folhas de vidro de 2,83 pt desencontradas (a da esquerda mais para fora), com as pontas
+#   brancas. O traço sai com a sombra dele (numa faixa de 6 px, a metade de cima recebe o Bege Bahia de cima em espelho
+#   e a de baixo, o de baixo) e entram as folhas no vidro das portas da academia: claras, com a linha do meio e as pontas
+#   em alumínio; a borda, de 0,25 px de cada lado (na madeira da academia basta 1/8), para a folha ler no Bege Bahia.
+# - Folhas das portas de giro (R3: brancas, finas, com contorno fino): a do depósito era um bloco cinza de ~5 px logo
+#   abaixo da folha do PDF (sai: o piso de cima, em espelho); as do banho de serviço, da sauna e dos banhos feminino e
+#   masculino eram um traço escuro de 1 a 3 px (sai: cada lado do traço recebe o piso do seu lado, em espelho; no banho
+#   de serviço, a parede está 2 px abaixo, e o traço recebe só o piso de baixo). Entram as folhas do PDF (2,27 pt, com
+#   as pontas), brancas, com o contorno de 0,25 px de cada lado, pelo mesmo motivo.
+# - Janela entre o depósito e a academia: o vão no meio da parede (de 1156,66 a 1224,69 pt) estava cinza-escuro; entra
+#   o vidro claro, com a borda fina e a linha do meio. A parede em volta fica preta.
+# - Vidros da sauna (folha contínua, seção 18): o de cima tinha um montante (duas marcas escuras a um terço) e os dois
+#   trechos em tons diferentes; em cada linha do vidro entra a mediana do trecho. O da esquerda já é contínuo.
+VIDROS_SUB = {
+    "correr": {"faixa": (626, 694, 537, 540, 543),   # px: colunas x0..x1 e linhas y0..ym..y1 (exclusivos); paredes fora
+               "borda": 0.6,
+               "folhas": [(1018.89, 1217.88, 1082.67, 1220.72), (1080.40, 1215.05, 1144.18, 1217.88)],
+               "pontas": [(1017.76, 1217.88, 1018.89, 1220.72), (1082.67, 1217.88, 1083.81, 1220.72),
+                          (1079.27, 1215.05, 1080.40, 1217.88), (1144.18, 1215.05, 1145.32, 1217.88)]},
+    "giro": {"contorno": 0.6,
+             # porta, folha do PDF (pt), faixa do traço do motor (px, como em espelhar_faixa: ao longo do traço, de a0
+             # a a1, e através dele, de b0 a bm do lado de antes e de bm a b1 do de depois; exclusivos) e se o traço é
+             # em pé (a faixa vai na transposta); o depósito tem o bloco (px: x0, y0, x1, y1), que recebe o piso de cima
+             "folhas": [("do banho de serviço", (969.57, 1208.81, 1009.25, 1211.08), (590, 620, 537, 537, 539), False),
+                        ("do depósito", (1156.66, 1197.33, 1207.68, 1199.60), (701, 735, 529, 535, 535), False),
+                        ("da sauna", (1196.34, 1710.54, 1236.03, 1712.81), (723, 743, 811, 812, 813), False),
+                        ("do banho feminino", (1301.22, 1664.62, 1303.49, 1715.65), (786, 813, 779, 781, 782), True),
+                        ("do banho masculino", (1644.78, 1664.62, 1647.05, 1715.65), (786, 813, 968, 970, 971), True)]},
+    "janela": (1156.66, 1213.91, 1224.69, 1219.58),
+    "sauna": (626, 782, 692, 786),                # px: x0, y0, x1, y1 (exclusivos) do vidro de cima, entre os caixilhos
+    "montante": (652, 660)}                       # px: colunas das duas marcas, fora da mediana
+
+
+def vidro_fino(tl, r, borda=None):
+    """Folha de vidro do PDF como as portas da academia: clara, com a linha do meio no comprido e a borda fina."""
+    pa = PORTAS_ACADEMIA
+    m = tl.ret(r)
+    tl.pintar(m, pa["vidro"])
+    if r[2] - r[0] > r[3] - r[1]:
+        ym = (r[1] + r[3]) / 2
+        tl.pintar(m & tl.ret((r[0], ym - 0.25, r[2], ym + 0.25)), pa["meio"][0])
+    else:
+        xm = (r[0] + r[2]) / 2
+        tl.pintar(m & tl.ret((xm - 0.25, r[1], xm + 0.25, r[3])), pa["meio"][0])
+    tl.contorno(m, borda or pa["borda"][1], pa["borda"][0])
+
+
+def espelhar_faixa(out, a0, a1, b0, bm, b1):
+    """Apaga um traço horizontal: nas colunas a0..a1, as linhas b0..bm recebem o piso de cima em espelho e as
+    linhas bm..b1, o de baixo (exclusivos). Na transposta, um traço em pé."""
+    out[b0:bm, a0:a1] = out[2 * b0 - bm:b0, a0:a1][::-1]
+    out[bm:b1, a0:a1] = out[b1:2 * b1 - bm, a0:a1][::-1]
+    return (a1 - a0) * (b1 - b0)
+
+
+def vidros_subsolo(out):
+    from retoque_subsolo_casae import Tela, PORTA
+    q, pa = VIDROS_SUB, PORTAS_ACADEMIA
+    _, p2r = pdf_pavimento("Subsolo")
+    c = q["correr"]
+    n = espelhar_faixa(out, *c["faixa"])
+    tl = Tela(out, p2r, [f(v) for f, v in zip((min, min, max, max), zip(*(c["folhas"] + c["pontas"])))])
+    for r in c["pontas"]:
+        m = tl.ret(r)
+        tl.pintar(m, pa["aluminio"])
+        tl.contorno(m, pa["borda"][1], pa["borda"][0])
+    for r in c["folhas"]:
+        vidro_fino(tl, r, c["borda"])
+    out = tl.gravar()
+    print(f"    porta de correr da circulação: traço preto apagado ({n} px, o Bege Bahia de cada "
+          f"lado), 2 folhas de vidro desencontradas e 4 pontas do PDF")
+    g = q["giro"]
+    for nome, f, faixa, em_pe in g["folhas"]:
+        n = espelhar_faixa(out.transpose(1, 0, 2) if em_pe else out, *faixa)
+        tl = Tela(out, p2r, f)
+        m = tl.ret(f)
+        tl.pintar(m, PORTA["folha"])
+        tl.contorno(m, g["contorno"], PORTA["contorno"])
+        out = tl.gravar()
+        print(f"    porta {nome}: {'bloco cinza' if 'depósito' in nome else 'traço escuro'} fora ({n} px) e a folha do "
+              f"PDF, branca e fina")
+    tl = Tela(out, p2r, q["janela"])
+    vidro_fino(tl, q["janela"])
+    out = tl.gravar()
+    print("    janela entre o depósito e a academia: o vão do PDF em vidro claro")
+    x0, y0, x1, y1 = q["sauna"]
+    a, b = q["montante"]
+    trecho = np.concatenate([out[y0:y1, x0:a], out[y0:y1, b:x1]], axis=1).astype(np.float32)
+    out[y0:y1, x0:x1] = np.round(np.median(trecho, axis=1))[:, None].astype(np.uint8)
+    print(f"    vidro de cima da sauna: folha contínua, sem o montante (x {x0} a {x1 - 1}, y {y0} a {y1 - 1} px)")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -4230,6 +4328,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("pf4", "pente fino 4 (R3): portas sem os arcos (as folhas ficam)", sem_arcos_subsolo),
                      ("pf3", "pente fino 3 (R14): escada do deck com a linha nos bocéis, o trecho depois do corte "
                       "tracejado e o triângulo", escada_deck_subsolo),
+                     ("pf5", "pente fino 5: porta de correr da circulação, folhas das portas de giro, janela do "
+                      "depósito e vidro da sauna, finos", vidros_subsolo),
                      ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",
                       so_subsolo)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),

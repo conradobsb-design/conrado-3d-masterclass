@@ -1675,6 +1675,22 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** aqui os arcos do render são traços de 1 px. A rotina do Térreo (`arcos.remover_arcos`, que refaz uma faixa de ±3 px com a textura do piso ao lado) quebrava a grade da pastilha do banho de serviço e deixava uma mancha na sauna. Sai só o traço: o arco do PDF numa faixa de 4 px (1057 px), refeito por inpaint de raio 2. A grade da pastilha e o travertino continuam por cima dele (com 3 px sobrava um resto do arco junto à folha do banho de serviço).
   - **Conferência:** na imagem com ajustes e na prancha, só os 5 arcos; rodapé igual. Prancha do Subsolo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_sem_arcos_antes_depois.jpg`.
+- **Subsolo, item 5, portas, vidros e janelas finos (seções 4 e 18), feito** (`ajustes_casaa.vidros_subsolo`, config `VIDROS_SUB`).
+  - **Porta de correr entre a circulação interna e a externa:**
+    - Antes: o motor a fez como um traço preto grosso, com um degrau no meio.
+    - No PDF (ARQ_PAREDE): duas folhas de vidro de 2,83 pt desencontradas, com as pontas brancas.
+    - O traço sai com a sombra dele: numa faixa de 6 px, a metade de cima recebe o Bege Bahia de cima em espelho, e a de baixo, o de baixo.
+    - Entram as duas folhas no vidro das portas da academia (claras, com a linha do meio), com as pontas em alumínio.
+    - A borda das folhas fica com 0,25 px de cada lado. Com a de 1/8 px das portas da academia, a folha some no Bege Bahia; na madeira da academia, aquela basta.
+  - **Folhas das portas de giro (R3: brancas, finas, com contorno fino):**
+    - O item 5 do mapa citava só a do depósito, um bloco cinza de ~5 px logo abaixo da folha do PDF.
+    - Na conferência, as outras quatro também estavam fora da R3: as do banho de serviço, da sauna e dos banhos feminino e masculino eram um traço escuro de 1 a 3 px. Entram junto, porque o item 4 já pedia "folhas finas e brancas".
+    - O bloco e os traços saem pela mesma faixa espelhada (no banho de serviço, a parede fica 2 px abaixo, e o traço recebe só o piso de baixo).
+    - Entram as folhas do PDF (2,27 pt, com as pontas), brancas (a folha das Casas D e E), com o contorno de 0,25 px de cada lado, pelo mesmo motivo da porta de correr.
+  - **Janela entre o depósito e a academia:** o vão no meio da parede (de 1156,66 a 1224,69 pt) estava cinza-escuro; entra o vidro claro, com a borda fina e a linha do meio. A parede em volta fica preta.
+  - **Vidros da sauna (folha contínua, seção 18):** o de cima tinha um montante (duas marcas escuras a um terço) e os dois trechos em tons diferentes. Em cada linha do vidro, entra a mediana do trecho. O da esquerda já era contínuo.
+  - **Conferência:** na imagem com ajustes, só as 5 regiões (1.319 px); na prancha, as mesmas; rodapé igual. Prancha do Subsolo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_portas_vidros_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
