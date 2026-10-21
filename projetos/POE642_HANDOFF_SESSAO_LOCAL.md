@@ -1878,7 +1878,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **O quê:** as paredes são repintadas no contorno exato do PDF (os preenchimentos cinza da ARQ_PAREDE, paredes e pilares), pretas, com bordas retas e cantos nítidos; as falhas do motor (a grama dentro da parede da garagem do Térreo e outras) somem, e o preto que sobrava para fora (pontas tortas, pés) volta ao piso ou à grama em volta.
   - **Conferência:** no Térreo, as paredes e, por tabela, o assentamento da pedra portuguesa do acesso (redesenhada depois, com o muro do lote ao lado mudado); no Subsolo e no 1º Pavimento, só as paredes. Janelas, vãos e portas intactos. Rodapés iguais. Pranchas e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_paredes_antes_depois.jpg`, `..._1Pavimento_paredes_antes_depois.jpg` e `..._Subsolo_paredes_antes_depois.jpg`.
-- **Pedidos na fila (21/10/26), um por vez, nesta ordem:** bordas do acesso de veículos; traços verticais de juntas antigas na varanda; quarto do motorista (rótulo maior e embaixo, cama menos branca, pezeira).
+- **Térreo, bordas do acesso de veículos, feito** (pedido do usuário, 21/10/26; `ajustes_casaa.pedra_final`, `acesso_alfa`, config `ACESSO_BORDA`, na final).
+  - **O quê:** junto à grama, a borda da pedra portuguesa segue o contorno vetorial do PDF, com a curva lisa e a linha cinza fina do limite; a franja clara de pedra sobre a grama e os degraus da máscara ampliada sumiram. Junto ao muro do lote e à garagem, como estava.
+  - **Conferência:** só o acesso muda na prancha do Térreo (e no Térreo nublado do 1º Pavimento); rodapés iguais. Pranchas e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_acesso_bordas_antes_depois.jpg`.
+- **Pedidos na fila (21/10/26), um por vez, nesta ordem:** traços verticais de juntas antigas na varanda; quarto do motorista (rótulo maior e embaixo, cama menos branca, pezeira).
 
 ## Casas A a D · Barlavento nas piscinas
 

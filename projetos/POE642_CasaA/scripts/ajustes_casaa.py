@@ -86,6 +86,9 @@ Itens:
   Todos os pavimentos, paredes (usuário, 21/10/26: "melhorar o acabamento das paredes em preto. revise todas as
      paredes"): o preto que sobra para fora das paredes do PDF sai e as paredes são repintadas no contorno exato dos
      preenchimentos cinza da ARQ_PAREDE (`paredes_perfeitas`), sem falhas, com bordas retas e cantos nítidos.
+  Térreo, bordas do acesso (usuário, 21/10/26: "melhorar o acabamento das bordas desse acesso"): na final, a pedra
+     portuguesa junto à grama segue o contorno vetorial do PDF (`acesso_alfa`, `pedra_final`), liso, com a linha fina
+     do limite, sem a franja clara sobre a grama.
   Térreo, carros (pedido do usuário, 19/10/26): cada carro numa cor (branco perolado, grafite, azul-marinho, a
      paleta da Casa D) e os três levemente desalinhados, como na Casa E.
   Térreo, sem arcos (decisão do usuário, 19/10/26, com as plantas de referência dos elementos: "remover os arcos,
@@ -6014,10 +6017,74 @@ def pedra_leque(out):
     return linhas_sobre_pedra(out, m, p2r, 1.0)
 
 
+# Pedido do usuário (21/10/26), com a curva do acesso de veículos: "MELHORAR O ACABAMENTO DAS BORDAS DESSE ACESSO". Na
+# final, a pedra era redesenhada na máscara do ajuste ampliada, binária: a borda saía em degraus de ~2 px, com as
+# pedras cortadas secas e uma franja clara da pedra do ajuste sobre a grama. A borda passa a ser o contorno do acesso no
+# PDF (os preenchimentos da ARQ_CONTRAPISO no tom 0,89, com a curva), desenhado em 4 x e reduzido, numa faixa de
+# `faixa` px do ajuste, onde o acesso encosta na grama; no resto (por dentro, junto às paredes e ao granito), a máscara
+# do ajuste (as plantas ficam fora). Na faixa, do lado de fora, o que ainda
+# é pedra (r acima de g) volta à grama em volta (cv2.inpaint); a pedra nova entra com a cobertura do contorno, e o limite
+# ganha a linha cinza fina do PDF (`linha`).
+ACESSO_BORDA = {"camada": "ARQ_CONTRAPISO", "tom": 0.89, "faixa": 2.0, "linha": ((118, 120, 116), 0.45, 0.5)}
+
+
+def acesso_alfa(p2x, forma, ss=4):
+    """A cobertura (0 a 1) do acesso de veículos do PDF, em forma (h, w), com p2x (pt -> px)."""
+    q = ACESSO_BORDA
+    pg, _ = pdf_pavimento("Terreo")
+    h, w = forma
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    contornos = []
+    for d in pg.get_drawings():
+        if d.get("layer") == q["camada"] and d["type"] == "f" and d["fill"] and abs(d["fill"][0] - q["tom"]) < 0.01:
+            for cm in caminhos_pdf(d, p2x):
+                P = np.int32(np.round(cm * ss))
+                cv2.fillPoly(m, [P], 255)
+                contornos.append(cm)
+    return cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255, contornos
+
+
 def pedra_final(final, mascara, px_m, p2q, escala):
     """Na final de 3840 px (rotulos_casaa): as pedras e as linhas desenhadas de novo na máscara do ajuste levada ao
-    quadro (p2q: pt -> px do quadro; escala: px do quadro por px do ajuste)."""
-    return linhas_sobre_pedra(trocar_pedra_a(final, mascara, px_m, franja=False), mascara, p2q, escala)
+    quadro (p2q: pt -> px do quadro; escala: px do quadro por px do ajuste), com a borda no contorno do PDF."""
+    q = ACESSO_BORDA
+    h, w = final.shape[:2]
+    poly, contornos = acesso_alfa(p2q, (h, w))
+    # só o acesso: o tom 0,89 da ARQ_CONTRAPISO também é de outros pisos; fica o que encosta na máscara do ajuste
+    perto = cv2.dilate(mascara.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(np.float32)
+    poly *= perto
+    contornos = [c for c in contornos if perto[np.clip(np.int32(c[:, 1]), 0, h - 1),
+                                               np.clip(np.int32(c[:, 0]), 0, w - 1)].mean() > 0.5]
+    k = 2 * int(np.ceil(q["faixa"] * escala)) + 1
+    dentro = (poly > 0.5).astype(np.uint8)
+    faixa = (cv2.dilate(dentro, np.ones((k, k), np.uint8)) & ~cv2.erode(dentro, np.ones((k, k), np.uint8))).astype(bool)
+    # o contorno do PDF só junto à grama; junto às paredes e aos outros pisos fica a máscara do ajuste (o contorno do PDF
+    # para ~1 px antes do muro do lote e deixava uma linha clara)
+    img = final.astype(np.float32)
+    verde = cv2.dilate(((img[..., 1] > img[..., 2] + 2) & (poly < 0.5)).astype(np.uint8),
+                       np.ones((k + 2, k + 2), np.uint8)).astype(bool)
+    A = np.where(faixa & verde, poly, mascara.astype(np.float32))
+    # do lado de fora, na faixa junto à grama, o que ainda é pedra (r acima de g) volta à grama em volta (junto ao
+    # granito da garagem, que também tem r acima de g, nada muda)
+    fora = faixa & (poly < 0.5) & (img[..., 2] > img[..., 1] + 4) & verde
+    fundo = cv2.inpaint(final, ((fora | (poly > 0.02)) * 255).astype(np.uint8), 4, cv2.INPAINT_TELEA)
+    base = final.copy()
+    base[fora] = fundo[fora]
+    pedra = trocar_pedra_a(base.copy(), A > 0.02, px_m, franja=False)
+    out = base.astype(np.float32) * (1 - A[..., None]) + pedra.astype(np.float32) * A[..., None]
+    # a linha cinza fina do limite, como no PDF (só onde o acesso encosta na grama: fora dele, verde)
+    cor, forca, larg = q["linha"]
+    kk = 8
+    lm = np.zeros((h * kk, w * kk), np.uint8)
+    for cm in contornos:
+        cv2.polylines(lm, [np.int32(np.round(cm * kk))], True, 255, max(1, round(larg * escala * kk)), cv2.LINE_AA)
+    la = cv2.resize(lm, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+    la *= forca * verde.astype(np.float32)
+    out = out * (1 - la[..., None]) + np.float32(cor) * la[..., None]
+    out = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    print(f"    acesso: borda no contorno do PDF ({int(faixa.sum())} px de faixa; {int(fora.sum())} px de franja de "
+          "pedra sobre a grama de volta à grama)")
+    return linhas_sobre_pedra(out, A > 0.5, p2q, escala)
 
 
 # Pente fino pelas regras (21/10/26), Térreo, item 5: vidros finos (seções 4 e 18). O motor fez dois "tubos" cinza grossos
