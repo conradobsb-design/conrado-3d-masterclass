@@ -1786,6 +1786,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** o quadrado e a sombra saem (cada linha recebe o vinílico limpo da mesma linha, ao lado, espelhado: as réguas correm na horizontal); entram os círculos do PDF na madeira do próprio quadrado, com contorno na mesma madeira mais escura e a sombra curta dos bancos.
   - **Conferência:** na imagem com ajustes e na prancha, só os dois criados-mudos (2 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_criados_mudos_antes_depois.jpg`.
+- **1º Pavimento, item 8, quarto de serviço, feito** (`ajustes_casaa.quarto_servico_1pav`, config `QUARTO_SERV_1PAV`).
+  - **Antes:** uma faixa clara junto à parede com dois quadrados brancos, e um risco no piso; no PDF, a cama de solteiro e o criado-mudo.
+  - **Como:** a faixa e o risco saem (o vinílico limpo da mesma linha, espelhado); entram a cama e o criado-mudo da suíte 1 (mesmas medidas no PDF), espelhados na vertical, no retângulo do PDF, com a sombra curta. O rótulo do quarto continua no piso livre.
+  - **Conferência:** na imagem com ajustes e na prancha, só o quarto de serviço (1 região); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_quarto_servico_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

@@ -152,6 +152,8 @@ pode seguir pela ordem proposta"):
      3 e 2, que caíam sobre eles, vão ao piso livre (rotulos_casaa).
   1º Pavimento, pente fino 7: os criados-mudos da suíte 3 redondos, de 60 cm, como no PDF (os do motor eram quadrados):
      o quadrado e a sombra saem (o vinílico da mesma linha, ao lado) e entram os círculos na madeira do quadrado.
+  1º Pavimento, pente fino 8: no quarto de serviço, a faixa com dois quadrados do motor sai e entram a cama de solteiro
+     e o criado-mudo do PDF, os da suíte 1 (mesmas medidas no PDF) espelhados na vertical, com a sombra curta.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3846,6 +3848,57 @@ def criados_1pav(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 8: o quarto de serviço (item 6 da conferência de 19/10). No
+# PDF (ARQ_LAYOUT HUMANIZAÇÃO), a cama de solteiro junto à parede da esquerda, com a cabeceira em cima, e o criado-mudo
+# à direita dela, junto à parede de cima; o motor fez ali uma faixa clara com dois quadrados brancos e um risco no piso,
+# abaixo de onde vai o criado-mudo. A faixa e o risco saem (cada linha recebe o vinílico limpo da mesma linha, à
+# direita, espelhado) e entram a cama e o criado-mudo da suíte 1, que no
+# PDF têm as mesmas medidas (cama de 56,7 x 113,4 pt; criado-mudo de 31,2 x 22,7 pt): a cama da direita e o criado-mudo
+# do meio, da imagem aprovada, espelhados na vertical (lá a cabeceira é embaixo; a dobra do edredom fica à direita,
+# como no PDF), no retângulo do PDF, com a sombra curta dos bancos (BANCO_VARANDA).
+QUARTO_SERV_1PAV = {"faixas": [((1006, 692, 1029, 773), (1030, 1048)),   # px: a faixa do motor e o piso limpo à direita
+                               ((1044, 698, 1048, 723), (1048, 1056))],  # o risco do motor abaixo do criado-mudo
+                    "pecas": [("cama de solteiro", (1696.4, 1492.8, 1753.1, 1606.2), (2170.3, 1604.0, 2227.0, 1717.3)),
+                              ("criado-mudo", (1757.6, 1494.5, 1788.8, 1517.2), (2133.5, 1693.5, 2164.7, 1716.2))],
+                    "parede": 60}
+
+
+def quarto_servico_1pav(out):
+    from retoque_1pav_casae import sombra
+    from retoque_terreo_casae import BANCO_VARANDA
+    q = QUARTO_SERV_1PAV
+    _, p2r = pdf_pavimento("1Pavimento")
+    s = BANCO_VARANDA["sombra"]
+    # 1. a faixa e o risco do motor saem: o vinílico limpo da mesma linha, à direita, espelhado até cobrir; a parede
+    # fica
+    for (ax0, ay0, ax1, ay1), (fx0, fx1) in q["faixas"]:
+        fonte = out[ay0:ay1, fx0:fx1]
+        fonte = np.concatenate([fonte[:, ::-1], fonte] * ((ax1 - ax0) // (2 * fonte.shape[1]) + 1), axis=1)
+        piso = fonte[:, -(ax1 - ax0):]                       # o pedaço que encosta no piso de origem
+        reg = out[ay0:ay1, ax0:ax1]
+        parede = reg.astype(np.float32).mean(axis=2) < q["parede"]
+        reg[~parede] = piso[~parede]
+    # 2. a cama e o criado-mudo da suíte 1, da imagem aprovada, espelhados na vertical, no retângulo do PDF
+    aprovada = cv2.imread(str(APROVADAS["1Pavimento"]))
+    for nome, dst, src in q["pecas"]:
+        (du0, dv0), (du1, dv1) = p2r(*dst[:2]), p2r(*dst[2:])
+        (su0, sv0), (su1, sv1) = p2r(*src[:2]), p2r(*src[2:])
+        x0, y0, x1, y1 = int(np.floor(du0)) - 4, int(np.floor(dv0)) - 4, int(np.ceil(du1)) + 4, int(np.ceil(dv1)) + 4
+        h, w = y1 - y0, x1 - x0
+        # do local (x, y) ao da fonte: x + (su0 - du0); de cabeça para baixo, sv0 + (dv1 - y)
+        M = np.float32([[1, 0, x0 + su0 - du0], [0, -1, sv0 + dv1 - y0 - 1]])
+        peca = cv2.warpAffine(aprovada, M, (w, h), flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP,
+                              borderMode=cv2.BORDER_REFLECT).astype(np.float32)
+        alfa = r14_poligono((h, w), [(du0 - x0, dv0 - y0), (du1 - x0, dv0 - y0), (du1 - x0, dv1 - y0),
+                                     (du0 - x0, dv1 - y0)])
+        out = sombra(out, alfa, (x0, y0, x1, y1), s["desloc"], s["sigma"], s["forca"])
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        out[y0:y1, x0:x1] = np.clip(np.round(reg * (1 - alfa[..., None]) + peca * alfa[..., None]), 0,
+                                    255).astype(np.uint8)
+        print(f"    {nome}: ({du0:.1f}, {dv0:.1f}) a ({du1:.1f}, {dv1:.1f}) px, a da suíte 1 espelhada na vertical")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -5182,6 +5235,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          "e 1, como na Casa E", bancos_1pav),
                         ("pf7", "pente fino 7: criados-mudos redondos da suíte 3, como no PDF (os do motor eram quadrados)",
                          criados_1pav),
+                        ("pf8", "pente fino 8: quarto de serviço com a cama de solteiro e o criado-mudo do PDF, no lugar da "
+                         "faixa com dois quadrados", quarto_servico_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 
