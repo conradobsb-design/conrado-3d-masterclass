@@ -112,6 +112,8 @@ pode seguir pela ordem proposta"):
      cadeira de escritório do PDF, em grafite, com o assento sob o tampo; as duas de visita, embaixo, ficam.
   Térreo 15. Banho da varanda (item 7 da conferência de 19/10): a bacia e a faixa pontilhada do motor saem; entram o
      chuveiro de parede e as duas folhas de vidro do box do PDF, como no banho de serviço do Subsolo.
+  Térreo 16. Soleiras (R13): nos quatro vãos brancos do PDF (escritório, lavabo, gás e jardim), Bege Bahia na escala
+     com as faces da parede em cinza fino; nas outras nove portas o piso atravessa o vão, e nada muda.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3944,6 +3946,66 @@ def banho_varanda(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 16: soleiras (R13: "representar onde o PDF tem, e não acrescentar
+# onde não tem"). No PDF, a soleira é o vão da porta na espessura da parede deixado em branco, entre os batentes; onde o
+# piso de um dos lados atravessa o vão, não há soleira. As 13 portas de giro do PDF (os arcos da ARQ_PAREDE, fora a
+# porta camarão), conferidas uma a uma:
+# - com soleira no PDF (4): o escritório e o lavabo (o vão branco da ARQ_PAREDE; no render o travertino atravessa),
+#   o gás, porta de duas folhas (o vão branco; no render, o granito do item do gás de 19/10 vinha até a face de fora,
+#   com a última linha do trecho copiado escura) e o jardim, para a área descoberta (o vão sem parede, branco; no
+#   render, uma faixa clara e outra branca);
+# - sem soleira (9): as portas da área de serviço, da despensa, do motorista, da garagem, a do banho da varanda, a do
+#   WC, a pivotante do hall e as duas do outro lado da garagem, onde o piso de um dos lados atravessa o vão (no render,
+#   também). Nada a mudar.
+# Os quatro vãos ficam como as soleiras do Térreo da Casa E (item 52 de lá): o vão exato do PDF em Bege Bahia na
+# escala (o desenho da biblioteca, no tom do item 9), com as duas faces da parede (os lados compridos) em traço cinza
+# fino.
+SOLEIRAS_A = {"pdf": [(2106.3, 733.3, 2114.8, 787.5),     # escritório
+                      (2028.0, 715.0, 2082.2, 723.5),     # lavabo
+                      (1499.6, 1778.0, 1559.2, 1786.5),   # gás (duas folhas)
+                      (1491.1, 1811.2, 1499.6, 1856.5)],  # jardim, para a área descoberta
+              "forca": 0.5, "linha": (150, 152, 154), "linha_px": 0.4, "ss": 8, "semente": 7}
+
+
+def soleiras_a(out):
+    import sys
+    sys.path.insert(0, str(CASA.parent / "_texturas"))
+    from texturas import textura
+    from retoque_terreo_casae import BEGE
+    q = SOLEIRAS_A
+    _, p2r = pdf_pavimento("Terreo")
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)                  # 1 m na escala 1:50 = 56,69 pt
+    px_m = float(np.hypot(c - a, d - b))
+    k = q["ss"]
+    for r in q["pdf"]:
+        (x0, y0), (x1, y1) = p2r(r[0], r[1]), p2r(r[2], r[3])
+        X0, Y0, X1, Y1 = int(np.floor(x0)) - 1, int(np.floor(y0)) - 1, int(np.ceil(x1)) + 2, int(np.ceil(y1)) + 2
+        h, w = Y1 - Y0, X1 - X0
+        m = np.zeros((h * k, w * k), np.uint8)
+        u0, v0, u1, v1 = (int(round((x0 - X0) * k)), int(round((y0 - Y0) * k)), int(round((x1 - X0) * k)),
+                          int(round((y1 - Y0) * k)))
+        m[v0:v1, u0:u1] = 255
+        f = np.zeros_like(m)
+        e = max(1, int(round(q["linha_px"] * k)))
+        if (x1 - x0) >= (y1 - y0):                                # faces da parede: os lados compridos
+            f[v0:v0 + e, u0:u1] = 255
+            f[v1 - e:v1, u0:u1] = 255
+        else:
+            f[v0:v1, u0:u0 + e] = 255
+            f[v0:v1, u1 - e:u1] = 255
+        al = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        fl = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        T = textura("bege_bahia", px_m, h, w, semente=q["semente"]).astype(np.float32)
+        T = (1 + q["forca"] * (T / T.reshape(-1, 3).mean(axis=0) - 1)) * np.float32(BEGE["tom"])
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        reg = reg * (1 - al) + T * al
+        reg = reg * (1 - fl) + np.float32(q["linha"]) * fl
+        out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    {len(q['pdf'])} soleiras de Bege Bahia nos vãos brancos do PDF (escritório, lavabo, gás e jardim), com as "
+          f"faces da parede em cinza fino; nas outras 9 portas o piso atravessa o vão")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 4: as projeções em tracejado bem visível, por cima (R8, R9). No PDF da
 # Casa A, a da cobertura está na ARQ_CONTRAPISO, em tracejado (as notas "PROJ. COBERTURA"): o L da laje, de 1290 a 2381
 # pt em x e de 511 a 1815 pt em y, com o braço de baixo indo até 1038 pt (a partir de 1344 pt), e a linha de 1290 pt
@@ -4039,6 +4101,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf13", "pente fino 13: mesa de jantar oval, no contorno do PDF", mesa_oval),
                     ("pf14", "pente fino 14: escritório com a cadeira de escritório do PDF em cima", escritorio_cadeira),
                     ("pf15", "pente fino 15: banho da varanda com o chuveiro e o box do PDF, sem a bacia", banho_varanda),
+                    ("pf16", "pente fino 16 (R13): soleiras nos quatro vãos brancos do PDF", soleiras_a),
                     # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",

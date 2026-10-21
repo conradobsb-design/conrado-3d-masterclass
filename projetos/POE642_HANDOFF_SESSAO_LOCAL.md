@@ -1639,6 +1639,17 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Entram,** como no banho de serviço do Subsolo (item 1 de 19/10): as duas folhas do box (`vidro_box`, 1,3 pt cada, empilhadas) e o chuveiro (`chuveiro`: a placa da Casa A, o braço cromado do centro da ducha à parede e a canopla), nas medidas do PDF.
   - **Conferência:** na imagem com ajustes e na prancha, só o box e o chuveiro do banho da varanda; rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_banho_varanda_antes_depois.jpg`.
+- **Térreo, item 16, soleiras (R13), feito** (`ajustes_casaa.soleiras_a`, config `SOLEIRAS_A`, depois do banho da varanda). As 13 portas de giro do PDF (os arcos da ARQ_PAREDE, fora a porta camarão) foram conferidas uma a uma, numa folha de recortes do PDF ao lado do render. A soleira é o vão da porta na espessura da parede deixado em branco no PDF; onde o piso de um dos lados atravessa o vão, não há.
+  - **Com soleira no PDF (4):**
+    - escritório e lavabo: o vão branco da ARQ_PAREDE; no render, o travertino atravessava;
+    - gás, porta de duas folhas: o vão branco; no render, o granito do item do gás de 19/10 vinha até a face de fora, com a última linha do trecho copiado escura (não era soleira de propósito);
+    - jardim, para a área descoberta: o vão sem parede, branco; no render, uma faixa clara e outra branca.
+  - **Sem soleira (9):** área de serviço, despensa, motorista, banho da varanda, WC, pivotante do hall e as três da garagem e da área de serviço. O piso de um dos lados atravessa o vão no PDF e no render: nada a mudar.
+  - **Como:** igual às soleiras do Térreo da Casa E (item 52 de lá): o vão exato do PDF em Bege Bahia na escala (o desenho da biblioteca, no tom do item 9), com as duas faces da parede (os lados compridos) em traço cinza fino.
+  - **Conferência:** na imagem com ajustes e na prancha, só os quatro vãos; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_soleiras_antes_depois.jpg`.
+- **Térreo do pente fino fechado (21/10/26):** os 16 itens do mapa estão feitos. O próximo é o Subsolo (10 itens), cujo terreno hachurado sai do Térreo final, e depois o 1º Pavimento (16 itens).
+- **Pergunta do usuário durante o item 16 (21/10/26):** "O piso marrom granito será atualizado? A madeira do deck também precisa estar na escala, ok?". Os dois já estavam feitos: o granito no item 10 (desenho e tom da referência, na escala) e o deck no item 8 (réguas de ~20 cm da referência). Os antes e depois foram reenviados. O Subsolo (hachurado) e o 1º Pavimento (nublado) herdam os dois do Térreo final.
 
 ## Casas A a D · Barlavento nas piscinas
 
