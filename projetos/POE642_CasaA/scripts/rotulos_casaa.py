@@ -106,6 +106,10 @@ PAVIMENTOS = {
                    # pente fino 13 (R8, R9): as projeções da cobertura e do pergolado do PDF em tracejado, por cima do
                    # nublado (ajustes_casaa.projecoes_1pav_final)
                    "projecoes": True,
+                   # pedido de 21/10/26: o Térreo nublado também dentro da pegada (ajustes_casaa.TERREO_1PAV): nos
+                   # vazios, no poço da escada em U e na abertura da caracol, onde é branco; nos degraus 1 a 7, tudo
+                   "terreo": ["renders/POE642_CasaA_PH_1Pavimento_terreo_janelas_mascara.png",
+                              "renders/POE642_CasaA_PH_1Pavimento_terreo_troca_mascara.png"],
                    "pdf": "642 - 1º PAVIMENTO - CASA A.pdf",
                    "sem_tela": "bases/POE642_CasaA_BASE_1Pavimento_v3.png",
                    "ajustes": [
@@ -130,7 +134,7 @@ def granito(img, lum_max=None):
     return (lum < (lum_max or q["lum_max"])) & (f[..., 2] - f[..., 0] > q["quente_min"]) & (f[..., 2] >= f[..., 1])
 
 
-def no_quadro_fixo(render, aprovada, base_png, chave, mascara=None):
+def no_quadro_fixo(render, aprovada, base_png, chave, mascara=None, extras=()):
     """Como `rodape_entrega.no_quadro_comum`, mas o afim vem da imagem aprovada e é aplicado à ajustada: o SIFT
     na imagem ajustada achava um afim um pouco diferente e a prancha inteira mudava por reamostragem. Com `mascara`
     (uint8, no tamanho da ajustada), devolve também ela levada ao quadro pelo mesmo afim."""
@@ -157,13 +161,19 @@ def no_quadro_fixo(render, aprovada, base_png, chave, mascara=None):
                          borderValue=(255, 255, 255))
     if mascara is None:
         return img
-    mq = cv2.resize(mascara, (W, round(mascara.shape[0] * W / mascara.shape[1])), interpolation=cv2.INTER_LINEAR)
-    return img, cv2.warpAffine(mq, Ai, (W, H), flags=cv2.INTER_LINEAR, borderValue=0)
+    def levar(m):
+        mq = cv2.resize(m, (W, round(m.shape[0] * W / m.shape[1])), interpolation=cv2.INTER_LINEAR)
+        return cv2.warpAffine(mq, Ai, (W, H), flags=cv2.INTER_LINEAR, borderValue=0)
+    if extras:                                    # outras máscaras do ajuste, pelo mesmo afim
+        return img, levar(mascara), [levar(m) for m in extras]
+    return img, levar(mascara)
 
 
-def nublar(final, peg, terreo):
+def nublar(final, peg, terreo, janelas=None, troca=None):
     """O Térreo (no mesmo quadro) nublado fora da pegada do pavimento de cima, como `entorno_esmaecido.sobrepor`
-    com o `NUBLADO` dos 1º Pavimentos: 70% de branco, 80% da saturação e um leve desfoque; a pegada, inteira."""
+    com o `NUBLADO` dos 1º Pavimentos: 70% de branco, 80% da saturação e um leve desfoque; a pegada, inteira, menos
+    (`ajustes_casaa.TERREO_1PAV`): nas `janelas`, o que é cinza neutro claro multiplica o Térreo nublado (o branco
+    vira ele; os traços ficam por cima) e, na `troca`, ele entra inteiro."""
     from entorno_esmaecido import NUBLADO
     t = cv2.GaussianBlur(terreo.astype(np.float32), (0, 0), NUBLADO["desfoque"] * terreo.shape[1] / 3840)
     cinza = t.mean(axis=2, keepdims=True)
@@ -172,7 +182,27 @@ def nublar(final, peg, terreo):
     pg = peg > 127
     a = np.maximum(cv2.GaussianBlur(pg.astype(np.float32), (0, 0), 1.0), pg)[..., None]
     print(f"    entorno: o Térreo final nublado fora da pegada do pavimento ({100 * pg.mean():.1f}% do quadro)")
-    return np.clip(final.astype(np.float32) * a + t * (1 - a), 0, 255).astype(np.uint8)
+    comp = final.astype(np.float32)
+    if janelas is not None:
+        # nas janelas, o que é cinza neutro claro (o branco e os traços sobre ele) multiplica o Térreo nublado: o
+        # branco vira o nublado e o traço fica por cima, mais escuro, sem halo; o que tem cor (degraus, piso) fica
+        q = JANELA
+        lum, croma = comp.mean(axis=2), comp.max(axis=2) - comp.min(axis=2)
+        neutro = np.clip((lum - q["lum"][0]) / q["lum"][1], 0, 1) * np.clip((q["croma"][0] - croma) / q["croma"][1], 0, 1)
+        mw = (janelas.astype(np.float32) / 255 * neutro)[..., None]
+        comp = comp * (1 - mw) + t * np.clip(comp / q["branco"], 0, 1) * mw
+        if troca is not None:
+            tr = (troca.astype(np.float32) / 255)[..., None]
+            comp = comp * (1 - tr) + t * tr
+        print(f"    o Térreo nublado também dentro da pegada: {int((mw[..., 0] > 0.5).sum())} px de branco e traço "
+              f"(vazios, poço da escada, abertura da caracol) e {int((tr[..., 0] > 0.5).sum()) if troca is not None else 0} "
+              f"px dos degraus 1 a 7 da escada em U")
+    return np.clip(comp * a + t * (1 - a), 0, 255).astype(np.uint8)
+
+
+# as janelas para o Térreo nublado: o que é cinza neutro claro (luz acima de 120, chegando a 1 em 140; cor abaixo de
+# 14, chegando a 1 em 8) multiplica o nublado pela sua luz relativa ao branco (250)
+JANELA = {"lum": (120, 20), "croma": (14, 6), "branco": 250.0}
 
 
 # as linhas tracejadas do lote do pavimento de cima, por cima do Térreo nublado (como em `entorno_esmaecido.sobrepor`; na
@@ -207,7 +237,14 @@ def final_imagem(chave):
     base = (CONFIG.parent / cfg["entrega"]["pasta_bases"] / cfg["entrega"]["pavimentos"][chave]["base"]).resolve()
     render = Image.open(CASA / q["render"]).convert("RGB")
     pedra = pegada = nublado = None
-    if "nublado" in q:
+    janelas = troca = None
+    if "nublado" in q and "terreo" in q:
+        # pedido de 21/10/26: o Térreo nublado também nos vazios, no poço da escada, na caracol e nos degraus 1 a 7
+        final, nublado, (janelas, troca) = no_quadro_fixo(
+            render, Image.open(CASA / q["aprovada"]).convert("RGB"), base, chave,
+            mascara=cv2.imread(str(CASA / q["nublado"]), cv2.IMREAD_GRAYSCALE),
+            extras=[cv2.imread(str(CASA / m), cv2.IMREAD_GRAYSCALE) for m in q["terreo"]])
+    elif "nublado" in q:
         final, nublado = no_quadro_fixo(render, Image.open(CASA / q["aprovada"]).convert("RGB"), base, chave,
                                         mascara=cv2.imread(str(CASA / q["nublado"]), cv2.IMREAD_GRAYSCALE))
     elif "pegada" in q:
@@ -237,7 +274,7 @@ def final_imagem(chave):
         final = AJ.pedra_final(final, pedra > 200, float(np.hypot(c - a, d - b)), p2q, LARGURA / 2000)
     if nublado is not None:
         print("    o Térreo final, sem rótulos, no quadro:")
-        final = tracejado_lote(nublar(final, nublado, final_imagem("Terreo")[0]), pg, p2q)
+        final = tracejado_lote(nublar(final, nublado, final_imagem("Terreo")[0], janelas, troca), pg, p2q)
         if q.get("projecoes"):
             # pente fino 13 do 1º Pavimento (R8, R9): a cobertura e o pergolado em tracejado, por cima do nublado
             import ajustes_casaa as AJ

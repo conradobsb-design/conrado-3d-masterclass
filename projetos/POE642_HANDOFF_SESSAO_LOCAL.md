@@ -1839,6 +1839,13 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** a mesma rotina das portas: em cada vão branco da janela, as peças finas do PDF saem (de fora para dentro) e o vão é redesenhado: vidro claro, caixilho de alumínio, peitoril em pedra e os batentes em quadradinhos. Banhos 3, 2, 1 e de serviço, a janela da escada e o vidro da fachada de baixo (saleta e quarto de serviço); no banho 2, também o vidro do plano de fora.
   - **Conferência:** na imagem com ajustes e na prancha, só as sete janelas (6 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_janelas_antes_depois.jpg`.
+- **1º Pavimento, o Térreo nublado por dentro e a caracol, feito** (`ajustes_casaa.TERREO_1PAV`, máscaras gravadas no `so_1pavimento`; na final, `rotulos_casaa.nublar`; a caracol em `ajustes_casaa.caracol_1pav`).
+  - **Vazios:** o branco dá lugar às salas do Térreo, nubladas; o X tracejado fica por cima.
+  - **Escada em U:** a faixa entre os lances e as de cima e de baixo mostram o jardim do Térreo, nublado; os degraus 1 a 7 (até a diagonal do corte do Térreo) mostram os degraus coloridos do Térreo, nublados; do corte em diante, os do 1º Pavimento.
+  - **Caracol:** o trecho cheio do 1º Pavimento (o quarto de 0,6° a 93,1°) para no anel do corrimão, a 52 pt como no PDF (a madeira do motor passava do círculo); por fora do anel, nesse quarto, o travertino da chegada. O resto do círculo e a abertura em volta mostram o Térreo nublado (a caracol do Térreo, com o trecho cheio de lá), com os bocéis em traço suave, para ler como escada.
+  - **Como entra:** nas caixas dos vazios, do poço e da caracol, o que é cinza neutro claro (o branco e os traços) multiplica o Térreo nublado; nos degraus 1 a 7, o Térreo nublado entra inteiro.
+  - **Conferência:** na imagem com ajustes, só a caracol; na prancha, os vazios, o poço da escada, a caracol e os traços em volta; rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_terreo_nublado_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
