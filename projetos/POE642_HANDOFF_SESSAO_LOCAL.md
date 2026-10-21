@@ -1665,6 +1665,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Dependência:** o Subsolo passa a ler `POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png`; rodar o Térreo antes.
   - **Conferência:** na imagem com ajustes e na prancha, só o gramado; rodapé igual. Prancha do Subsolo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_gramado_referencia_antes_depois.jpg`.
+- **Subsolo, item 3, escada do deck (R14, seção 5), feito** (`ajustes_casaa.escada_deck_subsolo`, config `ESCADA_DECK_SUB`). No PDF do Subsolo, a escada sobe da circulação (o "S"), da direita para a esquerda, até o deck. O corte é a diagonal da ARQ_ESCADAS E RAMPAS (de 754,1; 1230,9 a 788,2; 1299,0 pt), e o trecho depois dele, junto ao deck (os degraus 9 a 11), é a projeção, tracejada no PDF.
+  - **Degraus do Subsolo:** os do item 3 de 19/10 (no creme da escada, com a textura do Bege Bahia) perdem a sombra de espelho (`ESCADA["sombra"]` vai a 0), que lia como linha. Ganham a linha suave em cada bocel, com a sombra curta: `retoque_terreo_casae.escada_linhas`, a mesma rotina e os mesmos bocéis (a cada 17 pt) da escada no Térreo.
+  - **Depois do corte:** o creme esmaecido e liso (as linhas antigas saem), com os bocéis e o contorno tracejados por cima.
+  - **Triângulo:** no 1º degrau, junto à circulação, apontando para a esquerda (a subida).
+  - **Conferência:** na imagem com ajustes e na prancha, só a escada; rodapé igual. Prancha do Subsolo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_escada_r14_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

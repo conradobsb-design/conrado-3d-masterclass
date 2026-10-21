@@ -116,6 +116,9 @@ pode seguir pela ordem proposta"):
      com as faces da parede em cinza fino; nas outras nove portas o piso atravessa o vão, e nada muda.
   Subsolo, pente fino 1 (R2): só o Subsolo (os pisos e as paredes do PDF, a escada do deck e o gramado); o Térreo em
      volta sai, e a pegada vai para uma máscara; na final, o rotulos_casaa.py hachura o lote do Térreo final fora dela.
+  Subsolo, pente fino 2: o gramado abaixo da escada do deck na grama da referência (do Térreo com os ajustes).
+  Subsolo, pente fino 3 (R14): a escada do deck com a linha suave e a sombra curta nos bocéis, o trecho depois do corte
+     esmaecido e tracejado e o triângulo no 1º degrau, apontando para a subida.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -226,7 +229,9 @@ ESCADA = {"diagonal": ((480.67, 547.29), (499.44, 584.88)),
           # em que o travertino da base (#DCD9CA) saiu nesta imagem (ganho por canal 1,017; 1,001; 1,044, BGR)
           "cor": (183, 205, 226),
           "escurecer": 0.06,                 # do degrau de cima ao de baixo
-          "sombra": (0.25, 2.5)}             # força e alcance (px), à direita de cada espelho
+          # força e alcance (px), à direita de cada espelho; R14 (pente fino 3, 21/10/26): a sombra passa à linha suave e
+          # à sombra curta da `escada_linhas` (escada_deck_subsolo), como a mesma escada no Térreo
+          "sombra": (0.0, 2.5)}
 
 
 def escada(out):
@@ -2925,6 +2930,32 @@ def subsolo_hachurado(final, pegada, px_m):
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
+# Pente fino pelas regras (21/10/26), Subsolo, item 3: a escada do deck (R14, seção 5). No PDF do Subsolo ela sobe da
+# circulação (o "S"), da direita para a esquerda, até o deck; o corte é a diagonal da ARQ_ESCADAS E RAMPAS (de 754,1;
+# 1230,9 a 788,2; 1299,0 pt), e o trecho depois dele (os degraus 9 a 11, junto ao deck) é a projeção, tracejada. Os
+# degraus do Subsolo (item 3 de 19/10, no creme da escada com a textura do Bege Bahia) perdem a sombra de espelho, que
+# lia como linha, e ganham a linha suave em cada bocel com a sombra curta (`retoque_terreo_casae.escada_linhas`, a mesma
+# rotina e os mesmos bocéis da escada no Térreo); depois do corte, o creme esmaecido e liso (as linhas antigas saem),
+# com os bocéis e o contorno tracejados por cima; o triângulo no 1º degrau, junto à circulação, apontando para a
+# esquerda (a subida).
+ESCADA_DECK_SUB = {"nome": "do deck, no Subsolo: sobe da circulação, da direita para a esquerda",
+                   "pdf": (737.1, 1230.9, 907.2, 1299.0), "bocels": [754.1 + 17.0 * k for k in range(9)],
+                   "baixo": "direita", "inicio": "direita", "corte": [(754.1, 1230.9), (788.2, 1299.0)],
+                   "viva": "direita", "apos": "tracejada", "esmaecer": 1.0, "esmaecido": 0.45}
+
+
+def escada_deck_subsolo(out):
+    from retoque_terreo_casae import escada_linhas
+    e = ESCADA_DECK_SUB
+    _, p2r = pdf_pavimento("Subsolo")
+    ex0, ey0, ex1, ey1 = e["pdf"]
+    (c0, c1) = e["corte"]
+    apos = r14_poligono(out.shape[:2], [p2r(*c0), p2r(*c1), p2r(ex0, ey1), p2r(ex0, ey0)])[..., None]
+    cor = 255 - (255 - np.float32(ESCADA["cor"])) * e["esmaecido"]
+    img = out.astype(np.float32) * (1 - apos) + cor * apos
+    return escada_linhas(np.clip(np.round(img), 0, 255).astype(np.uint8), None, e, p2r=p2r)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -4168,6 +4199,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("10", "divisória entre os banhos: peça clara do PDF, não parede", divisoria),
                      ("12", "banho de serviço: bancada e cuba nas medidas do PDF", bancada_servico),
                      ("13", "gramado depois do último degrau da escada do deck", gramado_escada),
+                     ("pf3", "pente fino 3 (R14): escada do deck com a linha nos bocéis, o trecho depois do corte "
+                      "tracejado e o triângulo", escada_deck_subsolo),
                      ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",
                       so_subsolo)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
