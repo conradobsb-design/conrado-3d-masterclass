@@ -100,6 +100,9 @@ PAVIMENTOS = {
                    ("SHAFT", (1233.4, 606.7), (0, 0), 0.85)]},
     "1Pavimento": {"render": "renders/POE642_CasaA_PH_1Pavimento_v7_final2_ajustes.png",   # com os ajustes (pente fino)
                    "aprovada": "renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+                   # seção 11 (pente fino 1 do 1º Pavimento, 21/10/26): a pegada do ajuste vai ao quadro e, fora dela,
+                   # o Térreo final (sem rótulos) nublado, como o `entorno_esmaecido.py --nublado` da Casa E
+                   "nublado": "renders/POE642_CasaA_PH_1Pavimento_pegada_mascara.png",
                    "pdf": "642 - 1º PAVIMENTO - CASA A.pdf",
                    "sem_tela": "bases/POE642_CasaA_BASE_1Pavimento_v3.png",
                    "ajustes": [
@@ -151,13 +154,56 @@ def no_quadro_fixo(render, aprovada, base_png, chave, mascara=None):
     return img, cv2.warpAffine(mq, Ai, (W, H), flags=cv2.INTER_LINEAR, borderValue=0)
 
 
-def final_rotulos(chave):
+def nublar(final, peg, terreo):
+    """O Térreo (no mesmo quadro) nublado fora da pegada do pavimento de cima, como `entorno_esmaecido.sobrepor`
+    com o `NUBLADO` dos 1º Pavimentos: 70% de branco, 80% da saturação e um leve desfoque; a pegada, inteira."""
+    from entorno_esmaecido import NUBLADO
+    t = cv2.GaussianBlur(terreo.astype(np.float32), (0, 0), NUBLADO["desfoque"] * terreo.shape[1] / 3840)
+    cinza = t.mean(axis=2, keepdims=True)
+    t = cinza + (t - cinza) * NUBLADO["saturacao"]
+    t = 255 - (255 - t) * (1 - NUBLADO["clarear"])
+    pg = peg > 127
+    a = np.maximum(cv2.GaussianBlur(pg.astype(np.float32), (0, 0), 1.0), pg)[..., None]
+    print(f"    entorno: o Térreo final nublado fora da pegada do pavimento ({100 * pg.mean():.1f}% do quadro)")
+    return np.clip(final.astype(np.float32) * a + t * (1 - a), 0, 255).astype(np.uint8)
+
+
+# as linhas tracejadas do lote do pavimento de cima, por cima do Térreo nublado (como em `entorno_esmaecido.sobrepor`; na
+# Casa A elas vêm do PDF: no render estavam quase brancas e sumiam no nublado): os traços de 0,85 pt da camada sem nome
+# (os de 1,13 pt, as divisas dos vizinhos, o render não tinha)
+LOTE = {"camada": "", "largura_pt": 0.85, "cor": (140, 140, 140), "larg_px": 1.2, "forca": 0.85, "ss": 4}
+
+
+def tracejado_lote(final, pg, p2q):
+    q = LOTE
+    H, W = final.shape[:2]
+    k = q["ss"]
+    m = np.zeros((H * k, W * k), np.uint8)
+    n = 0
+    for d in pg.get_drawings():
+        if d.get("layer") == q["camada"] and d["type"] == "s" and abs((d.get("width") or 0) - q["largura_pt"]) < 0.05:
+            for it in d["items"]:
+                if it[0] == "l":
+                    (ax, ay), (bx, by) = p2q(it[1].x, it[1].y), p2q(it[2].x, it[2].y)
+                    cv2.line(m, (int(round(ax * k)), int(round(ay * k))), (int(round(bx * k)), int(round(by * k))), 255,
+                             max(1, int(round(q["larg_px"] * k))), cv2.LINE_AA)
+                    n += 1
+    a = cv2.resize(m.astype(np.float32) / 255, (W, H), interpolation=cv2.INTER_AREA)[..., None] * q["forca"]
+    print(f"    as linhas tracejadas do lote por cima ({n} traços do PDF)")
+    return np.clip(final * (1 - a) + np.float32(q["cor"]) * a, 0, 255).astype(np.uint8)
+
+
+def final_imagem(chave):
+    """A imagem do pavimento no quadro comum em 3840 px, sem os rótulos, e a página do PDF e o pt -> quadro."""
     q = PAVIMENTOS[chave]
     cfg = json.loads(CONFIG.read_text())
     base = (CONFIG.parent / cfg["entrega"]["pasta_bases"] / cfg["entrega"]["pavimentos"][chave]["base"]).resolve()
     render = Image.open(CASA / q["render"]).convert("RGB")
-    pedra = pegada = None
-    if "pegada" in q:
+    pedra = pegada = nublado = None
+    if "nublado" in q:
+        final, nublado = no_quadro_fixo(render, Image.open(CASA / q["aprovada"]).convert("RGB"), base, chave,
+                                        mascara=cv2.imread(str(CASA / q["nublado"]), cv2.IMREAD_GRAYSCALE))
+    elif "pegada" in q:
         final, pegada = no_quadro_fixo(render, Image.open(CASA / q["aprovada"]).convert("RGB"), base, chave,
                                        mascara=cv2.imread(str(CASA / q["pegada"]), cv2.IMREAD_GRAYSCALE))
     elif "pedra" in q:
@@ -182,6 +228,15 @@ def final_rotulos(chave):
         (a, b), (c, d) = p2q(0, 0), p2q(56.69, 0)
         print("    pedra portuguesa redesenhada na final:")
         final = AJ.pedra_final(final, pedra > 200, float(np.hypot(c - a, d - b)), p2q, LARGURA / 2000)
+    if nublado is not None:
+        print("    o Térreo final, sem rótulos, no quadro:")
+        final = tracejado_lote(nublar(final, nublado, final_imagem("Terreo")[0]), pg, p2q)
+    return final, pg, p2q
+
+
+def final_rotulos(chave):
+    q = PAVIMENTOS[chave]
+    final, pg, p2q = final_imagem(chave)
     rot = [r for r in R1.rotulos_pdf(pg) if r[0] in q.get("incluir", ()) or not any(f in r[0] for f in FORA)]
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
     # R6 (19/10/26; pente fino da Casa A, 21/10/26): no granito marrom, os rótulos em branco (eram cinza 150)

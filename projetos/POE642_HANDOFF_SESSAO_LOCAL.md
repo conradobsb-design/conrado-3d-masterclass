@@ -1744,6 +1744,14 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
 - **1º Pavimento do pente fino.** O 1º Pavimento ainda não tinha a cadeia de ajustes (a prancha lia direto o render `v7_final2`). Passa a ter a mesma dos outros dois: `ajustes_casaa.py 1Pavimento` (a aprovada é a `v7_final2`), saída `renders/POE642_CasaA_PH_1Pavimento_v7_final2_ajustes.png`, que o `rotulos_casaa.py` lê, com o afim do quadro vindo da aprovada. O afim quadro -> imagem (`AFIM_QR["1Pavimento"]`) foi medido como os outros (107 pontos, 0,4 px; o mesmo cálculo reproduz o do Subsolo).
 - **1º Pavimento, item 16, o "²" dos rótulos, feito primeiro.** Sem mudança de código: a imagem com ajustes saiu igual à aprovada, e na prancha mudaram só os 21 "²" (agora logo depois do "m"); rodapé igual. Com isso, a cadeia nova fica conferida: a prancha não mudou fora dos rótulos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_m2_antes_depois.jpg`.
+- **1º Pavimento, item 1, o Térreo nublado em volta (seção 11), feito** (`ajustes_casaa.so_1pavimento`, config `PEGADA_1PAV`; no `rotulos_casaa.py`, a chave `nublado`).
+  - **Antes:** o entorno era o do motor, quase apagado (o deck, a piscina e os pisantes em traço claro).
+  - **Pegada (no ajuste):** sai do próprio render aprovado, como no `entorno_esmaecido.pegada` da Casa E: o que tem cor cheia (algum canal abaixo de 215), em manchas grandes, fechado e sem furos (os vazios com o X e a escada entram), 17,6% do quadro. O PDF do 1º Pavimento não serve para isso: traz o Térreo nas mesmas camadas. Fora da pegada, branco; a máscara vai para `renders/POE642_CasaA_PH_1Pavimento_pegada_mascara.png`.
+  - **Na final (3840 px):** fora da pegada, o Térreo final sem rótulos, no mesmo quadro, nublado como o `entorno_esmaecido.py --nublado` (70% de branco, 80% da saturação, desfoque leve); o 1º Pavimento por cima, integralmente.
+  - **Linhas do lote:** como na referência da Casa E, as linhas tracejadas do lote do 1º Pavimento continuam por cima. Vêm do PDF (os traços de 0,85 pt da camada sem nome), em cinza 140: no render estavam quase brancas e sumiam no nublado. As divisas dos vizinhos (1,13 pt), que o render não tinha, ficam fora. A projeção da cobertura é o item 13.
+  - **Dependência:** o 1º Pavimento passa a ler a final do Térreo; refazer o 1º Pavimento depois de mexer no Térreo.
+  - **Conferência:** na prancha, só o entorno muda; rodapé igual. Prancha do 1º Pavimento e PDF refeitos (o PDF foi de 16,8 a 19,9 MB, pelo desenho do Térreo em volta).
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_nublado_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

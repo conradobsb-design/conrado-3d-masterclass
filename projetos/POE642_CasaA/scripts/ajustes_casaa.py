@@ -133,6 +133,8 @@ pode seguir pela ordem proposta"):
      folhas de vidro por cima, e elevador); nas outras portas o piso atravessa o vão.
   1º Pavimento (pente fino pelas regras, 21/10/26): a imagem aprovada é a v7_final2, com o afim do quadro AFIM_QR
      medido como o dos outros (107 pontos, 0,4 px); o item 16 (o "²" dos rótulos) é só o ciclo.
+  1º Pavimento, pente fino 1 (seção 11): a pegada do pavimento (pelo render: o que tem cor cheia, fechado e sem furos)
+     vai à máscara, e fora dela, branco; na final, o Térreo final sem rótulos entra nublado em volta (rotulos_casaa).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3324,6 +3326,35 @@ def soleiras_subsolo(out):
     return out
 
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 1: o Térreo nublado em volta (seção 11: 70% de branco, 80% da
+# saturação, desfoque leve, com a final do Térreo depois do pente fino; o 1º Pavimento por cima, integralmente). Hoje o
+# entorno é o do motor, quase apagado. A pegada do pavimento sai do próprio render aprovado, como em
+# `entorno_esmaecido.pegada`: o que tem cor cheia (algum canal abaixo de 215; o contexto do motor, o deck, a piscina e os
+# pisantes, está quase branco), em manchas grandes, fechado (9 x 9) e com os furos preenchidos (os vazios com o X, a
+# escada), aberto (5 x 5). O PDF do 1º Pavimento não serve: traz o Térreo nas mesmas camadas. Fora da pegada, branco
+# no ajuste; a máscara vai a `renders/POE642_CasaA_PH_1Pavimento_pegada_mascara.png`, e na final (`rotulos_casaa.py`,
+# chave `nublado`) o Térreo final, sem rótulos, entra nublado fora dela. Roda por último.
+PEGADA_1PAV = {"claro": 215, "mancha_min": 5000, "fechar": 9, "abrir": 5,
+               "mascara": CASA / "renders/POE642_CasaA_PH_1Pavimento_pegada_mascara.png"}
+
+
+def so_1pavimento(out):
+    from scipy import ndimage
+    q = PEGADA_1PAV
+    ap = cv2.imread(str(APROVADAS["1Pavimento"]))
+    nb = (ap.min(axis=2) < q["claro"]).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(nb, connectivity=8)
+    grandes = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > q["mancha_min"]]).astype(np.uint8)
+    peg = ndimage.binary_fill_holes(cv2.morphologyEx(grandes, cv2.MORPH_CLOSE, np.ones((q["fechar"],) * 2, np.uint8)))
+    peg = cv2.morphologyEx(peg.astype(np.uint8), cv2.MORPH_OPEN, np.ones((q["abrir"],) * 2, np.uint8)) > 0
+    cv2.imwrite(str(q["mascara"]), (peg * 255).astype(np.uint8))
+    fora = ~peg & (out.min(axis=2) < 255)
+    out[~peg] = 255
+    print(f"    pegada do 1º Pavimento: {100 * peg.mean():.1f}% da imagem; {int(fora.sum())} px do contexto do motor "
+          f"viram branco (o Térreo nublado entra na final); máscara em {q['mascara'].name}")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -4641,8 +4672,9 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",
                      pedra_leque)],
-         # 1º Pavimento: o pente fino pelas regras (21/10/26); o item 16 (o "²" dos rótulos) é só o ciclo
-         "1Pavimento": []}
+         # 1º Pavimento: o pente fino pelas regras (21/10/26); o item 16 (o "²" dos rótulos) foi só o ciclo
+         "1Pavimento": [("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
+                         so_1pavimento)]}
 
 
 def main():
