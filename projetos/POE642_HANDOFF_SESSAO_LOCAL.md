@@ -821,6 +821,19 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Conferência:** no retocado, nas montagens e nas pranchas, só as faixas das cortinas mudaram, mais uma sombra fraca da cortina antiga (até 6 níveis) junto ao criado-mudo da suíte 2; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_cortinas_antes_depois.jpg`.
   - **Pedido do usuário durante o item 10 (21/10/26):** "melhorar as representações de portas e janelas e vidros". São os itens 9 (esquadrias finas) e 7 (porta de correr da rouparia), os próximos.
+  - **Itens 9 e 7, portas, janelas e vidros finos, feitos** (`retoque_1pav_casae.esquadrias_1pav`, config `ESQUADRIAS_1P`, depois do quartzito e antes dos boxes). É o item 8 do pente fino do Térreo: os brancos finos da ARQ_PAREDE de cada zona (vidros, folhas e caixilhos) são limpos e redesenhados pelo PDF com o `esquadria_desenhar` do Térreo. São 36 peças em 21 esquadrias:
+    - **janelas:** banho master (E24, junto à floreira), banhos 2 e 1 (E23), sala íntima (E17 e E20) e vazio do hall (E8 e E9). O caixilho cinza grosso do motor dá lugar ao peitoril em Bege Bahia, ao caixilho em alumínio claro e ao vidro fino;
+    - **portas de giro** (suítes, banhos e closet master): a folha na espessura do PDF, em branco suave com contorno fino, no estilo aprovado no Subsolo da Casa E (folha 236, contorno 96 a 0,35 px). O cinza do Térreo sumia no quartzito claro;
+    - **portas de correr:** a embutida do banho master (P11), a do closet master (P13; o retângulo azulado do motor entre as folhas saiu) e a da rouparia (P10, item 7: o render tinha só duas peças cinza nos batentes).
+    - **Ficam:** as fachadas das suítes (item 10 de 16/10), a folha da pivotante do vazio, as portas do elevador (inox) e os retângulos brancos das paredes dos banhos.
+    - **A limpeza (`esquadria_limpar_1p`), com quatro ajustes em relação ao Térreo:**
+      - parede é só o escuro grosso que não é verde (as paredes do render puxam para o marrom; o verde e os pontos escuros das floreiras viravam manchas brancas);
+      - a parede do render fora do retângulo do PDF fica (a faixa de 3 px comia a face da parede junto às folhas e toda a parede da porta embutida);
+      - do lado de uma parede, vem o piso mais perto do outro lado (o espelhado de longe era mais claro e virava uma faixa branca junto à parede);
+      - faixa e fonte por zona: 1 px para fora nas E23, para não apagar o brise de madeira da fachada; 1 px para dentro no vazio do hall, para não espelhar o X tracejado; o vão da P13 no quartzito do banho.
+    - **Conferência:** no retocado sem rótulos, nas montagens e nas pranchas, só as 18 áreas das esquadrias mudaram; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_esquadrias_antes_depois.jpg`.
+  - **Pedido do usuário durante os itens 9 e 7 (21/10/26):** "precisamos corrigir a escala do vinílico". É o item 11, o próximo.
 
 ## Casa E · Subsolo
 

@@ -70,6 +70,9 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
 - item 3, boxes em folha contínua de parede a parede (BOXES): o traço do motor sai e entra o vidro do box do Térreo;
 - item 10, cortinas como no Térreo (CORTINAS_LINHO): a cortina de linho da biblioteca nos 10 trechos do PDF, no lugar
   das ondas do item 7, com o trilho de parede a parede em cada quarto;
+- itens 9 e 7, portas, janelas e vidros finos (ESQUADRIAS_1P): como o item 8 do pente fino do Térreo, nas janelas dos
+  banhos, da sala íntima e do vazio do hall, nas folhas das portas e nas portas de correr (a da rouparia, item 7), com a
+  parede do render protegida na limpeza e as folhas em branco com contorno fino;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -1197,6 +1200,155 @@ def boxes_continuos(out, p2r):
     return out
 
 
+# itens 9 e 7 do pente fino de 20/10/26: portas, janelas e vidros finos (usuário, 21/10: "melhorar as representações de
+# portas e janelas e vidros"), como o item 8 do pente fino do Térreo (`retoque_terreo_casae.esquadria_desenhar`): os
+# brancos finos da ARQ_PAREDE de cada zona abaixo (vidros, folhas e caixilhos) são limpos numa faixa de 3 px
+# (`esquadria_limpar_1p`, com a parede do render protegida; opções por zona: "faixa" de cada lado, "fonte" de um lado
+# só, "vao" para as peças largas e "extra" para limpar antes) e redesenhados pelo PDF, em 8x: paredes em preto,
+# peitoril em Bege Bahia onde há vidro no vão, caixilho em alumínio claro, vidro no vidro aprovado, os traços do PDF em
+# cinza médio fino; por fim, as folhas (1,6 a 2,5 pt) em branco suave com contorno fino, como as portas do Subsolo da
+# Casa E. Entram as janelas com caixilho largo e cinza do motor (banho master, banhos 1 e 2, sala íntima e vazio do
+# hall), as folhas das portas de giro (suítes, banhos e closet master), as portas de correr do banho master (embutida)
+# e do closet master, e a da rouparia (item 7: o render tinha só duas peças cinza nos batentes). Ficam as fachadas das
+# suítes, refeitas em 16/10 (item 10), a folha da pivotante do vazio (item 6), as portas do elevador e os retângulos
+# brancos nas paredes dos banhos.
+ESQUADRIAS_1P = {"zonas": [("janela do banho master (E24)", (1529.0, 653.0, 1538.0, 722.0)),
+                           ("janela do banho 2 (E23)", (2306.0, 786.0, 2317.0, 845.0), {"faixa": (3, 1)}),
+                           ("janela do banho 1 (E23)", (2306.0, 1134.0, 2317.0, 1194.0), {"faixa": (3, 1)}),
+                           ("janela da sala íntima (E17)", (1538.0, 1593.0, 1620.0, 1605.0)),
+                           ("janela da sala íntima (E20)", (1886.0, 1696.0, 1985.0, 1710.0)),
+                           ("janelas do vazio do hall (E8 e E9)", (2086.0, 1646.0, 2243.0, 1735.0), {"faixa": (1, 3)}),
+                           ("porta do closet master (P13)", (1725.0, 783.0, 1738.0, 876.0),
+                            {"vao": {"faixa": (3, 0), "fonte": "antes"},
+                             "extra": [((1734.6, 816.5, 1743.5, 843.0), (0, 1), "depois")]}),
+                           ("portas do banho master (P11 e P12)", (1529.0, 805.0, 1547.0, 961.0)),
+                           ("portas dos banhos 2 e 1", (2119.0, 858.0, 2172.0, 1212.0)),
+                           ("portas das suítes", (1478.0, 1057.0, 1532.0, 1484.0)),
+                           ("portas das suítes 2 e 1", (1991.0, 1085.0, 2045.0, 1448.0)),
+                           ("portas dos banhos 4 e 3", (1356.0, 1289.0, 1404.0, 1464.0)),
+                           ("porta de correr da rouparia (P10)", (1877.0, 993.0, 1941.0, 1006.0))],
+                 "tol": 0.5, "verde_max": 10,
+                 "folha": (236, 237, 236), "contorno": (96, 98, 100), "larg_contorno": 0.35}
+
+
+def esquadria_limpar_1p(img, r, p2r, parede, faixa, fonte=None):
+    """Como `retoque_terreo_casae.esquadria_limpar` (o piso logo fora da faixa, espelhado), com quatro ajustes para o
+    1º Pavimento: parede é só o escuro grosso que não é verde (o das floreiras vale como fonte; os pontos e traços
+    escuros finos, do motor e das floreiras, não são parede); do lado de
+    uma parede, vem o piso mais perto do outro lado, não o espelhado (o de longe era mais claro e virava uma faixa
+    branca junto à parede); a parede do render fora do retângulo do PDF fica (a faixa comia a face da parede junto às
+    folhas e na porta embutida); e a faixa pode ser
+    diferente de cada lado (antes, depois), para não apagar o brise de madeira junto à fachada, e vir de um lado só
+    (`fonte`), para o vão da porta ficar no piso de um dos cômodos."""
+    (u0, v0), (u1, v1) = p2r(r.x0, r.y0), p2r(r.x1, r.y1)
+    fa, fb = faixa
+    hor = (u1 - u0) >= (v1 - v0)
+    if hor:
+        X0, X1, Y0, Y1 = int(np.floor(u0)), int(np.ceil(u1)), int(np.floor(v0)) - fa, int(np.ceil(v1)) + fb
+        meio = (v0 + v1) / 2
+        for y in range(Y0, Y1):
+            antes = fonte == "antes" or (fonte is None and y < meio)
+            a, b = (2 * Y0 - y - 1, Y1 + y - Y0) if antes else (2 * Y1 - y - 1, Y0 - Y1 + y)
+            novo = np.where(parede[a, X0:X1, None], img[b, X0:X1], img[a, X0:X1])
+            f = parede[y, X0:X1] & (y + 1 <= v0 + 0.25 or y >= v1 - 0.25)
+            img[y, X0:X1] = np.where(f[:, None], img[y, X0:X1], novo)
+    else:
+        X0, X1, Y0, Y1 = int(np.floor(u0)) - fa, int(np.ceil(u1)) + fb, int(np.floor(v0)), int(np.ceil(v1))
+        meio = (u0 + u1) / 2
+        for x in range(X0, X1):
+            antes = fonte == "antes" or (fonte is None and x < meio)
+            a, b = (2 * X0 - x - 1, X1 + x - X0) if antes else (2 * X1 - x - 1, X0 - X1 + x)
+            novo = np.where(parede[Y0:Y1, a, None], img[Y0:Y1, b], img[Y0:Y1, a])
+            f = parede[Y0:Y1, x] & (x + 1 <= u0 + 0.25 or x >= u1 - 0.25)
+            img[Y0:Y1, x] = np.where(f[:, None], img[Y0:Y1, x], novo)
+
+
+def esquadrias_1pav(out, pg, p2r):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    import retoque_terreo_casae as T
+    q, qt = ESQUADRIAS_1P, T.ESQUADRIAS
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    D = pg.get_drawings()
+    par = [d for d in D if d.get("layer") == "ARQ_PAREDE"]
+    t = q["tol"]
+    el = []
+    for d in par:
+        if d["type"] != "f" or not d["fill"] or min(d["fill"]) < 0.9:
+            continue
+        r = d["rect"]
+        if max(r.width, r.height) < qt["comprimento_min"] or min(r.width, r.height) > qt["espessura_max"]:
+            continue
+        if any(z0 - t <= r.x0 and r.x1 <= z2 + t and z1 - t <= r.y0 and r.y1 <= z3 + t
+               for _, (z0, z1, z2, z3), *_ in q["zonas"]):
+            el.append(r)
+    # grupos: vizinhos da mesma direção (como no Térreo)
+    pai = list(range(len(el)))
+
+    def raiz(i):
+        while pai[i] != i:
+            pai[i] = pai[pai[i]]
+            i = pai[i]
+        return i
+    j = qt["junta"]
+    for i, ra in enumerate(el):
+        for k in range(i + 1, len(el)):
+            rb = el[k]
+            if ((ra.width >= ra.height) == (rb.width >= rb.height) and ra.x0 - j <= rb.x1 and rb.x0 - j <= ra.x1
+                    and ra.y0 - j <= rb.y1 and rb.y0 - j <= ra.y1):
+                pai[raiz(i)] = raiz(k)
+    grupos = {}
+    for i, r in enumerate(el):
+        grupos.setdefault(raiz(i), []).append(r)
+    img = out.astype(np.float32)
+    # parede: o escuro grosso que não é verde (as paredes do render puxam para o marrom; as floreiras, para o verde)
+    verde = img[..., 1] - np.maximum(img[..., 0], img[..., 2])
+    parede = ((img.mean(axis=2) < qt["escuro"]) & (verde < q["verde_max"])).astype(np.uint8)
+    parede = cv2.morphologyEx(parede, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)) > 0
+
+    def opcoes(r):
+        for _, (z0, z1, z2, z3), *o in q["zonas"]:
+            if z0 - t <= r.x0 and r.x1 <= z2 + t and z1 - t <= r.y0 and r.y1 <= z3 + t:
+                o = o[0] if o else {}
+                return {**o, **o.get("vao", {})} if min(r.width, r.height) > 3.2 else o
+        return {}
+    padrao = (qt["faixa_px"],) * 2
+    for _, _, *o in q["zonas"]:
+        for ret, faixa, fonte in (o[0].get("extra", []) if o else []):
+            esquadria_limpar_1p(img, pymupdf.Rect(*ret), p2r, parede, faixa, fonte)
+    zonas = []
+    for rs in grupos.values():
+        for r in rs:
+            o = opcoes(r)
+            esquadria_limpar_1p(img, r, p2r, parede, o.get("faixa", padrao), o.get("fonte"))
+        zonas.append((min(r.x0 for r in rs), min(r.y0 for r in rs), max(r.x1 for r in rs), max(r.y1 for r in rs)))
+    for z in zonas:
+        T.esquadria_desenhar(img, z, par, p2r, px_m, textura)
+    # as folhas, como as portas do Subsolo: branco suave, com contorno fino mais escuro que o dos vidros (no quartzito
+    # claro, a folha no cinza do Térreo sumia)
+    nf = 0
+    for r in el:
+        if not 1.6 < min(r.width, r.height) < 2.5:
+            continue
+        (u0, v0), (u1, v1) = p2r(r.x0, r.y0), p2r(r.x1, r.y1)
+        J0, K0, J1, K1 = int(u0) - 2, int(v0) - 2, int(np.ceil(u1)) + 2, int(np.ceil(v1)) + 2
+        h, w = K1 - K0, J1 - J0
+        f = np.zeros((h * SS, w * SS), np.uint8)
+        p0 = (round((u0 - J0) * SS), round((v0 - K0) * SS))
+        p1 = (round((u1 - J0) * SS), round((v1 - K0) * SS))
+        reg = img[K0:K1, J0:J1]
+        for larg, cor in ((-1, q["folha"]), (max(1, round(q["larg_contorno"] * SS)), q["contorno"])):
+            f[:] = 0
+            cv2.rectangle(f, p0, p1, 255, larg)
+            a = cv2.resize(f.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+            reg = reg * (1 - a) + np.float32(cor) * a
+        img[K0:K1, J0:J1] = reg
+        nf += 1
+    print(f"    {len(el)} vidros, folhas e caixilhos do PDF em {len(zonas)} esquadrias, finos; {nf} folhas em branco")
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
 # item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
 # é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
 # quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
@@ -1311,6 +1463,8 @@ def main():
     out = shaft(out, pg, p2r)
     print("[pente fino 16] quartzito dos banhos como a referência (o tom e a chapa da foto)")
     out = quartzito_referencia(out, A)
+    print("[pente fino 9 e 7] portas, janelas e vidros finos, pelo PDF")
+    out = esquadrias_1pav(out, pg, p2r)
     print("[pente fino 3] boxes em folha contínua, de parede a parede (R10)")
     out = boxes_continuos(out, p2r)
 
