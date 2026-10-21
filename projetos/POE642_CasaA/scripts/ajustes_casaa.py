@@ -83,6 +83,9 @@ Itens:
   Todos os pavimentos, boxes (usuário, 21/10/26: "boxes dos chuveiros com folhas contínuas"): nos 10 boxes, o vidro
      antigo sai e entram as duas folhas de correr do PDF inteiras, com a sombra fina ao lado, e o trilho em tracejado
      no vão até a parede (`boxes_continuos`, pelas folhas e pelo tracejado da ARQ_LOUÇAS E METAIS: `folhas_box`).
+  Todos os pavimentos, paredes (usuário, 21/10/26: "melhorar o acabamento das paredes em preto. revise todas as
+     paredes"): o preto que sobra para fora das paredes do PDF sai e as paredes são repintadas no contorno exato dos
+     preenchimentos cinza da ARQ_PAREDE (`paredes_perfeitas`), sem falhas, com bordas retas e cantos nítidos.
   Térreo, carros (pedido do usuário, 19/10/26): cada carro numa cor (branco perolado, grafite, azul-marinho, a
      paleta da Casa D) e os três levemente desalinhados, como na Casa E.
   Térreo, sem arcos (decisão do usuário, 19/10/26, com as plantas de referência dos elementos: "remover os arcos,
@@ -4541,6 +4544,58 @@ def boxes_1pav(out):
     return boxes_continuos(out, "1Pavimento")
 
 
+# Pedido do usuário (21/10/26), com um trecho do jardim do Térreo ao lado da garagem: "MELHORAR O ACABAMENTO DAS PAREDES
+# EM PRETO. REVISE TODAS AS PAREDES E DEIXE-AS EM PERFEITO ESTADO". O motor desenhou as paredes pretas com falhas (na
+# parede da direita da garagem do Térreo, a grama aparecia em três trechos), pontas tortas e sobras para fora (os pés e
+# os cantos, 1 a 3 px). As paredes do PDF são os preenchimentos cinza da ARQ_PAREDE (as paredes e os pilares; as
+# janelas e as portas são vãos). Em cada pavimento, por último (antes do `so_...`; no Térreo, antes das projeções):
+# - o preto que sobra para fora das paredes do PDF (mais escuro que `escuro`, a até `perto` px delas, onde a parede do
+#   PDF cobre menos de 15%) volta ao que está em volta (cv2.inpaint, sem tirar cor da parede: ela entra na máscara);
+# - as paredes do PDF são repintadas no preto das paredes do render (`cor`), no contorno exato, desenhado em 4 x e
+#   reduzido (bordas retas, cantos nítidos, sem falhas).
+PAREDES_PDF = {"camada": "ARQ_PAREDE", "escuro": 60, "perto": 4, "cor": (6, 6, 6), "raio": 3}
+
+
+def paredes_perfeitas(out, pavimento):
+    q = PAREDES_PDF
+    pg, p2r = pdf_pavimento(pavimento)
+    ss = 4
+    h, w = out.shape[:2]
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    for d in pg.get_drawings():
+        if d.get("layer") == q["camada"] and d["type"] == "f" and d["fill"][0] < 0.5:
+            for cm in caminhos_pdf(d, p2r):
+                cv2.fillPoly(m, [np.int32(np.round(cm * ss))], 255)
+    al = cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+    L = out.astype(np.float32).mean(axis=2)
+    k = 2 * q["perto"] + 1
+    perto = cv2.dilate((al > 0.5).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    sobra = (L < q["escuro"]) & (al < 0.15) & perto
+    # o preto de fora volta ao que está em volta, sem tirar cor da parede (ela também entra na máscara)
+    mascara = (sobra | (al > 0.05)).astype(np.uint8) * 255
+    limpo = cv2.inpaint(out, mascara, q["raio"], cv2.INPAINT_TELEA)
+    img = out.astype(np.float32)
+    img[sobra] = limpo[sobra]
+    # as paredes do PDF, no preto das paredes, com a borda do desenho em 4 x
+    img = img * (1 - al[..., None]) + np.float32(q["cor"]) * al[..., None]
+    falhas = int(((al > 0.9) & (L > 70)).sum())
+    print(f"    paredes: o contorno do PDF em preto ({int((al > 0.5).sum())} px; {falhas} px de falhas preenchidos, "
+          f"{int(sobra.sum())} px de sobras para fora tirados)")
+    return np.clip(np.round(img), 0, 255).astype(np.uint8)
+
+
+def paredes_subsolo(out):
+    return paredes_perfeitas(out, "Subsolo")
+
+
+def paredes_terreo(out):
+    return paredes_perfeitas(out, "Terreo")
+
+
+def paredes_1pav(out):
+    return paredes_perfeitas(out, "1Pavimento")
+
+
 def carrara_subsolo(out):
     return carrara_bancadas(out, "Subsolo")
 
@@ -6384,6 +6439,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                       soleiras_subsolo),
                      ("carrara", "quartzito Carrara nas bancadas (usuário, 21/10/26)", carrara_subsolo),
                      ("boxes", "boxes com as duas folhas de vidro do PDF contínuas (usuário, 21/10/26)", boxes_subsolo),
+                     ("paredes", "paredes pretas no contorno do PDF, sem falhas e sem sobras (usuário, 21/10/26)",
+                      paredes_subsolo),
                      ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",
                       so_subsolo)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
@@ -6430,6 +6487,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("ilha_pecas", "ilha da cozinha (usuário, 21/10/26): contorno e laterais, cooktop e banquetas da "
                      "biblioteca", ilha_cozinha_pecas),
                     ("boxes", "boxes com as duas folhas de vidro do PDF contínuas (usuário, 21/10/26)", boxes_terreo),
+                    ("paredes", "paredes pretas no contorno do PDF, sem falhas e sem sobras (usuário, 21/10/26)",
+                     paredes_terreo),
                     # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",
@@ -6466,6 +6525,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          soleiras_1pav),
                         ("carrara", "quartzito Carrara nas bancadas (usuário, 21/10/26)", carrara_1pav),
                         ("boxes", "boxes com as duas folhas de vidro do PDF contínuas (usuário, 21/10/26)", boxes_1pav),
+                        ("paredes", "paredes pretas no contorno do PDF, sem falhas e sem sobras (usuário, 21/10/26)",
+                         paredes_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 
