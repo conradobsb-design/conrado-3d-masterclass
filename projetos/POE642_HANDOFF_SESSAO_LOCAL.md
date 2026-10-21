@@ -1811,6 +1811,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Como:** a rotina do item 9 do Térreo (`bege_na_referencia`): o desenho da biblioteca, na escala, no tom da foto (RGB 230, 211, 186), com a luz do lugar; os caixilhos e a linha do guarda-corpo ficam. O tom saiu igual ao do Bege do Térreo. As varandas são escolhidas por um ponto em cada uma, porque o hall da caracol e o quarto e o banho de serviço têm o mesmo cinza na base.
   - **Conferência:** na imagem com ajustes e na prancha, só as quatro varandas (4 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_bege_varandas_antes_depois.jpg`.
+- **1º Pavimento, item 13, projeções da cobertura e do pergolado (R8, R9), feito** (`ajustes_casaa.projecoes_1pav_final`, config `PROJECOES_1PAV`, chamada na final por `rotulos_casaa.final_imagem`).
+  - **Antes:** o motor não as desenhou; o pergolado só aparecia no Térreo nublado.
+  - **No PDF:** a cobertura na ARQ_CONTRAPISO, em dois contornos fechados tracejados (o de fora é o L do Térreo; o de dentro, 34 pt para dentro), com dois trechos curtos entre eles à direita; o pergolado na ARQ_PERGOLADO, a grade de vigas de 20 cm à esquerda da suíte 2.
+  - **Como:** as retas saem do PDF e entram em tracejado, no traço das projeções do Térreo (8,5 pt de traço, 4,25 de vão, cinza 150), por cima do Térreo nublado e do pavimento, menos nas paredes pretas. Entram na final porque quase tudo cai fora da pegada do pavimento.
+  - **Conferência:** a imagem com ajustes não muda; na prancha, só as linhas das projeções (10 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_projecoes_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

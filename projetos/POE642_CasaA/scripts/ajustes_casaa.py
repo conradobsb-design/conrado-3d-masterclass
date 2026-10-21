@@ -165,6 +165,9 @@ pode seguir pela ordem proposta"):
      que é piso; as folhas das portas do PDF ficam. Roda logo depois dos itens 2 e 3, antes dos móveis.
   1º Pavimento, pente fino 12 (seção 18): o Bege Bahia das quatro varandas (suítes 3, 2, master e 1) no desenho e no
      tom da referência, com a rotina do Térreo (item 9, `bege_na_referencia`), para os dois pavimentos ficarem iguais.
+  1º Pavimento, pente fino 13 (R8, R9): as projeções da cobertura (os dois contornos da ARQ_CONTRAPISO) e do pergolado
+     (a grade da ARQ_PERGOLADO) em tracejado, no traço das projeções do Térreo; como caem quase todas fora da pegada,
+     sobre o Térreo nublado, entram na final (`projecoes_1pav_final`, chamada por `rotulos_casaa.final_imagem`).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -4219,6 +4222,90 @@ def bege_varandas_1pav(out):
     print(f"    Bege Bahia das {len(ids)} varandas: {npt} px de pontinhos escuros fora; {npx} px no desenho da "
           f"biblioteca, a {px_m:.2f} px/m, no tom da foto; {nanel} px do anel em volta dos objetos")
     return out
+
+
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 13: as projeções da cobertura e do pergolado em tracejado bem
+# visível, por cima (R8, R9). No PDF do 1º Pavimento, as duas estão em tracejado (traços de 5,67 pt): a da cobertura na
+# ARQ_CONTRAPISO, em preto (notas "PROJ. COBERTURA"), em dois contornos fechados, o de fora (o L do Térreo: 1290 a 2381
+# pt em x e 511 a 1815 pt em y, com o braço de baixo até 1038 pt a partir de 1344 pt) e o de dentro, 34 pt para dentro
+# (o beiral), e dois trechos curtos entre eles, à direita; a do pergolado na ARQ_PERGOLADO (notas "PROJ. PERGOLADO"), a
+# grade de vigas de 20 cm à esquerda da suíte 2. O motor não as desenhou, e quase tudo cai fora da pegada do
+# pavimento, sobre o Térreo nublado: por isso entram na final (`rotulos_casaa.final_imagem`, depois do nublado e do
+# tracejado do lote), no quadro de 3840 px. As linhas saem do próprio PDF: os traços curtos de cada camada, juntados
+# por reta (a mesma coordenada, em pé ou deitados) enquanto o vão entre eles for curto, só as retas com `min_tracos`
+# traços ou mais (os soltos são de outros desenhos). Desenho no traço das projeções do Térreo (item 4, `PROJECOES_A`:
+# 8,5 pt de traço, 4,25 de vão, 0,55 px na escala do ajuste, cinza 150, força 0,85), menos nas paredes pretas.
+PROJECOES_1PAV = {"camadas": [("ARQ_CONTRAPISO", (0.0, 0.0, 0.0)), ("ARQ_PERGOLADO", None)],
+                  "traco_max_pt": 12.0, "junta_pt": 6.0, "min_tracos": 5}
+
+
+def retas_tracejadas(pg, camada, cor, traco_max, junta, min_tracos):
+    """As retas (pt) que os traços curtos de uma camada do PDF formam: em pé ou deitados, na mesma coordenada, juntados
+    enquanto o vão for de até `junta` pt; só as com `min_tracos` traços ou mais."""
+    grupos = {}
+    for d in pg.get_drawings():
+        if d.get("layer") != camada or d["type"] != "s" or (cor is not None and d.get("color") != cor):
+            continue
+        for it in d["items"]:
+            if it[0] != "l":
+                continue
+            (ax, ay), (bx, by) = (it[1].x, it[1].y), (it[2].x, it[2].y)
+            if np.hypot(bx - ax, by - ay) > traco_max:
+                continue
+            if abs(ay - by) < 0.05:
+                grupos.setdefault(("h", round(ay, 1)), []).append((min(ax, bx), max(ax, bx)))
+            elif abs(ax - bx) < 0.05:
+                grupos.setdefault(("v", round(ax, 1)), []).append((min(ay, by), max(ay, by)))
+    retas = []
+    for (sentido, c), ts in grupos.items():
+        ts.sort()
+        corrida = [list(ts[0]), 1]
+        for t0, t1 in ts[1:] + [(np.inf, np.inf)]:
+            if t0 - corrida[0][1] <= junta:
+                corrida[0][1] = max(corrida[0][1], t1)
+                corrida[1] += 1
+                continue
+            if corrida[1] >= min_tracos:
+                (u0, u1) = corrida[0]
+                retas.append([(u0, c), (u1, c)] if sentido == "h" else [(c, u0), (c, u1)])
+            corrida = [[t0, t1], 1]
+    return retas
+
+
+def tracejar(forma, retas, p2x, traco_pt, vao_pt, larg_px, ss=8):
+    """Máscara (0 a 1, no quadro `forma`) das retas em pt, refeitas em tracejado de `traco_pt` e `vao_pt`; p2x leva
+    pt ao quadro."""
+    h, w = forma
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    lw = max(1, int(round(larg_px * ss)))
+    n = 0
+    for (ax, ay), (bx, by) in retas:
+        comp = np.hypot(bx - ax, by - ay)
+        t = 0.0
+        while t < comp:
+            t1 = min(comp, t + traco_pt)
+            u = p2x(ax + (bx - ax) * t / comp, ay + (by - ay) * t / comp)
+            v = p2x(ax + (bx - ax) * t1 / comp, ay + (by - ay) * t1 / comp)
+            cv2.line(m, (int(round(u[0] * ss)), int(round(u[1] * ss))), (int(round(v[0] * ss)), int(round(v[1] * ss))),
+                     255, lw, cv2.LINE_AA)
+            n += 1
+            t = t1 + vao_pt
+    return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA), n
+
+
+def projecoes_1pav_final(final, pg, p2q, escala):
+    """Na final do 1º Pavimento (quadro de 3840 px; `escala`: px do quadro por px do ajuste): a cobertura e o pergolado
+    em tracejado, por cima do Térreo nublado e do pavimento, menos nas paredes pretas."""
+    q, e = PROJECOES_1PAV, PROJECOES_A
+    retas, nomes = [], []
+    for camada, cor in q["camadas"]:
+        r = retas_tracejadas(pg, camada, cor, q["traco_max_pt"], q["junta_pt"], q["min_tracos"])
+        retas += r
+        nomes.append(f"{len(r)} da {camada}")
+    a, n = tracejar(final.shape[:2], retas, p2q, e["traco_pt"], e["vao_pt"], e["larg_px"] * escala)
+    a *= e["forca"] * (final.astype(np.float32).mean(axis=2) >= e["parede"])     # nas paredes pretas o traço some
+    print(f"    projeções da cobertura e do pergolado: {len(retas)} retas do PDF ({', '.join(nomes)}), {n} traços")
+    return np.clip(final * (1 - a[..., None]) + np.float32(e["cor"]) * a[..., None], 0, 255).astype(np.uint8)
 
 
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em

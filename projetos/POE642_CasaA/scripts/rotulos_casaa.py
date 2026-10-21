@@ -103,6 +103,9 @@ PAVIMENTOS = {
                    # seção 11 (pente fino 1 do 1º Pavimento, 21/10/26): a pegada do ajuste vai ao quadro e, fora dela,
                    # o Térreo final (sem rótulos) nublado, como o `entorno_esmaecido.py --nublado` da Casa E
                    "nublado": "renders/POE642_CasaA_PH_1Pavimento_pegada_mascara.png",
+                   # pente fino 13 (R8, R9): as projeções da cobertura e do pergolado do PDF em tracejado, por cima do
+                   # nublado (ajustes_casaa.projecoes_1pav_final)
+                   "projecoes": True,
                    "pdf": "642 - 1º PAVIMENTO - CASA A.pdf",
                    "sem_tela": "bases/POE642_CasaA_BASE_1Pavimento_v3.png",
                    "ajustes": [
@@ -235,6 +238,10 @@ def final_imagem(chave):
     if nublado is not None:
         print("    o Térreo final, sem rótulos, no quadro:")
         final = tracejado_lote(nublar(final, nublado, final_imagem("Terreo")[0]), pg, p2q)
+        if q.get("projecoes"):
+            # pente fino 13 do 1º Pavimento (R8, R9): a cobertura e o pergolado em tracejado, por cima do nublado
+            import ajustes_casaa as AJ
+            final = AJ.projecoes_1pav_final(final, pg, p2q, LARGURA / 2000)
     return final, pg, p2q
 
 
