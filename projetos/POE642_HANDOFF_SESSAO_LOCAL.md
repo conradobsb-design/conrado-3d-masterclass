@@ -1556,6 +1556,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Larga, do deck ao pátio** (`ESCADA_LARGA`): os sete blocos desencontrados do ARQ_CONTRAPISO (degraus 12 a 18) e o pátio (19). O bocel de cada degrau é o L do bloco de cima sobre o de baixo, com a linha suave e a sombra curta; o triângulo no degrau 12, apontando para a direita (sobe do deck, como confirmado).
   - **Conferência:** na imagem com ajustes e na prancha, só as quatro escadas mudaram; rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_escadas_r14_antes_depois.jpg`.
+- **Térreo, item 3, carros (R12), feito** (`ajustes_casaa.carros_a` com `CARROS_A["r12"]`, função `carros_r12_a`). Substitui o pedido de 19/10 (cada carro numa cor e desalinhados), como na Casa E.
+  - Os três carros saem como antes (o granito tecido dos vãos, na luz do lugar).
+  - **Modelo:** o carro da esquerda do render (o branco). A luminância dele vai aos quantis do carro prata do Térreo da Casa E (5, 25, 50, 75 e 95%: 63, 101, 163, 189 e 214), no tom dele, um cinza levemente frio; as lanternas ficam.
+  - **Escala e posição:** 4,70 m de comprimento e 1,85 m de carroceria (148 x 58 px; o modelo tinha 141 x 54), sem giro, no centro de cada carro do PDF (ARQ_LAYOUT HUMANIZAÇÃO: x 2028,6, 2186,7 e 2347,2 pt), os três na mesma linha (y 1637,3 pt, a média dos três), com a sombra curta.
+  - **Conferência:** na imagem com ajustes, só os três carros; na prancha, os carros (o rótulo GARAGEM continua livre entre o primeiro e o segundo); rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_carros_r12_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

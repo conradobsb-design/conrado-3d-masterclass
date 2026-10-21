@@ -83,6 +83,8 @@ pode seguir pela ordem proposta"):
      degraus cheios, os esmaecidos tracejados, sem a linha de corte e com o triângulo no degrau 1; a do deck para o
      Subsolo sem os traços escuros do motor, viva até o corte e esmaecida depois, com o triângulo de descida no topo; a
      larga, do deck ao pátio, com o bocel de cada bloco e o triângulo no degrau 12.
+  Térreo 3. Carros (R12): prata, alinhados e iguais, de 4,70 x 1,85 m, no lugar das três cores e do desalinhamento
+     de 19/10; o modelo é o carro branco do render, levado ao prata do carro da Casa E.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -2514,7 +2516,16 @@ CARROS_A = {
     "lum_carro": 95.0, "fecho": 9, "reflexo": 0.6, "cor_lum": (70.0, 140.0),
     "lanterna": (70, 140),                                    # R - B (e R - G) e R mínimos: só luz vermelha ou âmbar
     "folga": 31, "x_max": 1410,                               # o que sai: o carro e a sombra dele (até o jardim)
-    "sombra": {"desloc": (-2.0, 2.0), "sigma": 1.5, "forca": 0.4}}
+    "sombra": {"desloc": (-2.0, 2.0), "sigma": 1.5, "forca": 0.4},
+    # R12 (pente fino de 21/10/26, item 3 do Térreo; regra de 19/10: "todos os carros de todas as plantas devem estar
+    # alinhados, serem do mesmo tamanho e da mesma cor", prata, 4,70 x 1,85 m, igual nas cinco casas). Substitui as cores
+    # e o desalinhamento acima. O modelo é o carro da esquerda do render (o branco), levado ao prata da Casa E pela
+    # luminância (os quantis do carro prata do Térreo da Casa E, retocado) e ao tom dela (cinza um pouco frio), sem as
+    # lanternas; na escala de 4,70 m de comprimento e 1,85 m de carroceria (sem os retrovisores), sem giro, no centro
+    # de cada carro do PDF (ARQ_LAYOUT HUMANIZAÇÃO), os três na mesma linha (a média dos três centros em y).
+    "r12": {"modelo": 0, "comprimento_m": 4.70, "largura_m": 1.85, "faixa_largura": (0.35, 0.85),
+            "centros_pdf": [(2028.6, 1637.3), (2186.7, 1637.3), (2347.2, 1637.3)],
+            "quantis": ((5, 25, 50, 75, 95), (63.0, 101.0, 163.0, 189.0, 214.0)), "tom": (0.988, 0.994, 1.018)}}
 
 
 def carros_a(out):
@@ -2578,6 +2589,8 @@ def carros_a(out):
     novo_g[wy0:wy1, wx0:wx1] = tex[:wy1 - wy0, :wx1 - wx0] * campo[wy0:wy1, wx0:wx1]
     a = (cv2.GaussianBlur(apaga.astype(np.float32), (0, 0), 1.0) * apaga)[..., None]
     out[:] = np.clip(out * (1 - a) + novo_g * a, 0, 255).astype(np.uint8)
+    if "r12" in q:
+        return carros_r12_a(out, reg, silhuetas[q["r12"]["modelo"]])
     # 3. e entram no lugar novo, com o giro leve e a sombra curta
     h, w = Y.shape
     s = q["sombra"]
@@ -2594,6 +2607,48 @@ def carros_a(out):
         a = np.clip(alfa, 0, 1)[..., None]
         out[wy0:wy1, wx0:wx1] = np.clip(r * (1 - a) + img * a, 0, 255).astype(np.uint8)
     print(f"    garagem: {len(silhuetas)} carros, cada um numa cor, com deslocamento e giro leves")
+    return out
+
+
+def carros_r12_a(out, orig, sil):
+    """Os carros da R12: o modelo (o carro branco do render, levado ao prata) na escala de 4,70 x 1,85 m, no centro
+    de cada carro do PDF, alinhados. orig: a janela da garagem antes de tudo (BGR, float); sil: a silhueta do modelo."""
+    q, r = CARROS_A, CARROS_A["r12"]
+    wx0, wy0, wx1, wy1 = q["janela"]
+    h, w = wy1 - wy0, wx1 - wx0
+    _, p2r = pdf_pavimento("Terreo")
+    px_m = p2r(56.69, 0)[0] - p2r(0, 0)[0]                     # 1 m na escala 1:50 = 56,69 pt
+    # o prata: a luminância do modelo levada aos quantis do carro prata da Casa E, no tom dele; as lanternas ficam
+    Y = orig.mean(axis=2)
+    lanterna = (orig[..., 2] - orig[..., 0] > q["lanterna"][0]) & (orig[..., 2] > q["lanterna"][1]) & \
+        (orig[..., 2] - orig[..., 1] > q["lanterna"][0])
+    pq, alvo = r["quantis"]
+    fonte = np.percentile(Y[sil & ~lanterna], pq)
+    Yn = np.interp(Y, fonte, alvo)
+    prata = np.where((sil & ~lanterna)[..., None], Yn[..., None] * np.float32(r["tom"]), orig)
+    ys, xs = np.nonzero(sil)
+    y0, y1 = ys.min(), ys.max() + 1
+    comp = y1 - y0
+    f0, f1 = r["faixa_largura"]
+    larguras = sil[int(y0 + f0 * comp):int(y0 + f1 * comp)].sum(axis=1)
+    larg = float(np.median(larguras[larguras > 0]))             # a carroceria, sem os retrovisores
+    sx, sy = r["largura_m"] * px_m / larg, r["comprimento_m"] * px_m / comp
+    cx, cy = float(xs.mean()), (y0 + y1) / 2
+    s = q["sombra"]
+    alfa0 = cv2.GaussianBlur(sil.astype(np.float32), (0, 0), 0.5)
+    for px, py in r["centros_pdf"]:
+        tx, ty = p2r(px, py)
+        M = np.float32([[sx, 0, tx - wx0 - sx * cx], [0, sy, ty - wy0 - sy * cy]])
+        alfa = cv2.warpAffine(alfa0, M, (w, h), flags=cv2.INTER_LINEAR)
+        img = cv2.warpAffine(prata, M, (w, h), flags=cv2.INTER_CUBIC)
+        S = np.float32([[1, 0, s["desloc"][0]], [0, 1, s["desloc"][1]]])
+        sb = cv2.GaussianBlur(cv2.warpAffine(alfa, S, (w, h)), (0, 0), s["sigma"]) * (1 - alfa)
+        reg = out[wy0:wy1, wx0:wx1].astype(np.float32) * (1 - s["forca"] * sb)[..., None]
+        al = np.clip(alfa, 0, 1)[..., None]
+        out[wy0:wy1, wx0:wx1] = np.clip(reg * (1 - al) + img * al, 0, 255).astype(np.uint8)
+    print(f"    garagem (R12): {len(r['centros_pdf'])} carros prata iguais, de {r['comprimento_m']:.2f} x "
+          f"{r['largura_m']:.2f} m ({comp * sy:.0f} x {larg * sx:.0f} px; modelo de {comp} x {larg:.0f} px), "
+          f"alinhados nos centros do PDF")
     return out
 
 
@@ -2863,7 +2918,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pivotante", "porta pivotante: a folha até o hall externo e o arco pequeno", pivotante),
                     ("escada_interna", "escada interna: cheia até o corte, esmaecida depois; o jardim em volta", escada_interna),
                     ("11-12", "motorista: a cama, a bancada com a cuba, o box e o chuveiro", motorista),
-                    ("carros", "garagem: cada carro numa cor e os três levemente desalinhados", carros_a),
+                    ("carros", "garagem: os carros prata, alinhados e iguais (R12, pente fino 3; antes, uma cor por "
+                     "carro e desalinhados)", carros_a),
                     ("sem_arcos", "portas sem os arcos (as folhas ficam); porta camarão sem o cinza", sem_arcos),
                     ("pf1", "pente fino 1 (R14): escadas do deck e larga com linhas e triângulo", escadas_externas_r14)]}
 
