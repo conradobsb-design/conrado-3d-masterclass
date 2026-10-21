@@ -834,6 +834,13 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
     - **Conferência:** no retocado sem rótulos, nas montagens e nas pranchas, só as 18 áreas das esquadrias mudaram; rodapé igual. Pranchas e PDFs refeitos.
     - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_esquadrias_antes_depois.jpg`.
   - **Pedido do usuário durante os itens 9 e 7 (21/10/26):** "precisamos corrigir a escala do vinílico". É o item 11, o próximo.
+  - **Item 11, vinílico na escala (R4), feito** (`retoque_1pav_casae.vinilico_escala`, config `VINILICO`, logo depois da cadeia do PDF, antes dos outros passos). O motor fez réguas de ~40 cm; agora são de 20 cm, como na referência. No meio do item, o usuário pediu: "clareia um pouquinho o vinílico onde está escurecido".
+    - **Onde:** nas áreas de vinílico da base chapada (as linhas da hachura do PDF fechadas), só no que é piso no render: o marrom do vinílico, fora tapetes e móveis claros. Os objetos no tom da madeira (mesinhas, almofadas, criados) saem por fugir da luz do piso: mais claros, ou mais escuros com outra cor. A sombra escurece sem mudar a cor e fica como piso; os nós e riscos pequenos do motor também.
+    - **A luz:** a média do piso, mais larga atravessando as réguas (o tom de cada régua velha sai) que ao longo delas. O tom do render fica (#A8784F, escolhido em 16/10).
+    - **As réguas (`reguas_vinilico`, em 4x):** 20 cm de largura, 1,2 a 1,8 m de comprimento, em fiadas com as juntas de topo desencontradas. Cada régua tem um tom (claro ou escuro, de 1,5 a 4,5%) e o veio do próprio vinílico do render: o detalhe fino ao longo das réguas, de um trecho limpo, sem junta velha no meio. As juntas são linhas finas. O vinílico da biblioteca (da referência, de 26 px/m) foi testado antes; na escala do render, ele ficava borrado e em blocos.
+    - **Clarear o escurecido:** onde a luz larga do piso (~1 m) fica abaixo da mediana (119), ela sobe 70% do caminho, em todo o vinílico, com o que está sobre ele (até +20%). Isso vale para o closet master, a rouparia, os closets 1 e 2 e a circulação junto a eles. Com metade do caminho, testada antes, a mudança mal aparecia (+4 níveis no closet master).
+    - **Conferência:** no retocado sem rótulos, só o vinílico mudou (fora dele, 55 px da limpeza da porta da rouparia, que espelha o piso novo). Os outros passos saem iguais (mesmos registros de bancos, cortinas e esquadrias). Nas montagens e nas pranchas, só a área do vinílico; rodapé igual. Pranchas e PDFs refeitos.
+    - **Antes e depois:** `renders/POE642_CasaE_PH_1Pavimento_vinilico_antes_depois.jpg`.
 
 ## Casa E · Subsolo
 

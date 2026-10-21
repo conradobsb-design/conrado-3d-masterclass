@@ -73,6 +73,8 @@ Pente fino pelas regras (20/10/26; o mapa está em POE642_CasaE/renders/POE642_C
 - itens 9 e 7, portas, janelas e vidros finos (ESQUADRIAS_1P): como o item 8 do pente fino do Térreo, nas janelas dos
   banhos, da sala íntima e do vazio do hall, nas folhas das portas e nas portas de correr (a da rouparia, item 7), com a
   parede do render protegida na limpeza e as folhas em branco com contorno fino;
+- item 11, vinílico na escala (VINILICO): réguas de 20 cm desenhadas com o veio do próprio vinílico do render, na luz e
+  no tom do lugar, e o vinílico escurecido mais claro;
 - item 16, quartzito dos banhos como a referência do quadro de 19/10 (`_texturas/originais/quartzito_aura.jpg`): a
   parte pêssego de cada px vai ao tom da foto, e a chapa da biblioteca entra na escala, só na luz (QUARTZITO).
 
@@ -1349,6 +1351,129 @@ def esquadrias_1pav(out, pg, p2r):
     return np.clip(img, 0, 255).astype(np.uint8)
 
 
+# item 11 do pente fino de 20/10/26: vinílico na escala (usuário, 21/10: "precisamos corrigir a escala do vinílico"; R4:
+# réguas de ~20 cm, em tons alternados, como na planta de referência). O motor fez réguas de ~40 cm. Nas áreas de
+# vinílico da base chapada (as linhas da hachura do PDF fechadas), só no que é piso no render:
+# - piso: o marrom do vinílico (fora tapetes e móveis claros); os objetos no tom da madeira (mesinhas, almofadas) saem
+#   por fugir da luz do piso: mais claros, ou mais escuros com outra cor (a sombra escurece sem mudar a cor e fica);
+#   os nós e riscos pequenos do motor ficam como piso;
+# - a luz do lugar: a média do piso, mais larga atravessando as réguas (o tom de cada régua velha sai) que ao longo
+#   delas; o tom do render fica (#A8784F, escolhido em 16/10);
+# - as réguas, desenhadas em 4x (`reguas_vinilico`): 20 cm de largura, 1,2 a 1,8 m de comprimento, em fiadas com as
+#   juntas de topo desencontradas, cada uma num tom (claro ou escuro, alternando), com o veio do próprio vinílico do
+#   render (o detalhe fino ao longo das réguas, de um trecho limpo, sem junta velha no meio) e as juntas em linha fina.
+#   O vinílico da biblioteca (da referência, de 26 px/m) ficava borrado e em blocos na escala do render.
+# - por fim (usuário, 21/10: "clareia um pouquinho o vinílico onde está escurecido"): onde a luz larga do piso fica
+#   abaixo da mediana, ela sobe 70% do caminho.
+VINILICO = {"cor_chapada": (79, 120, 168), "tol": 6, "fechar": 5, "croma_min": 30, "lum": (50, 215),
+            "claro": 25, "escuro": 32, "matiz": 0.10, "objeto_min": 30,
+            "sig_ao_longo_m": 0.25, "sig_atravessando_m": 0.45,
+            "regua_m": 0.20, "comprimento_m": (1.2, 1.8), "tom": (0.015, 0.045), "junta": 0.95, "junta_larg": 0.4,
+            "veio_sig": (8.0, 1.5), "veio_forca": 1.0, "costura": 0.95, "ss": 4, "semente": 3,
+            "clarear": 0.7, "clarear_sig_m": 1.0}
+
+
+def reguas_vinilico(h, w, px_m, veio, limpo, rng):
+    """O desenho do vinílico (média 1), h x w px: fiadas horizontais de réguas, em 4x e reduzido."""
+    q = VINILICO
+    k = q["ss"]
+    larg = q["regua_m"] * px_m
+    D = np.ones((h * k, w * k), np.float32)
+    J = np.ones_like(D)
+    hj = int(np.ceil(larg)) + 2
+    ys, xs = np.nonzero(limpo)
+    jl = max(1, int(round(q["junta_larg"] * k)))
+
+    def colar(dst, pedaco, b0, a0):
+        sb, sa = max(0, -b0), max(0, -a0)
+        b0, a0 = max(0, b0), max(0, a0)
+        hh, ww = min(dst.shape[0] - b0, pedaco.shape[0] - sb), min(dst.shape[1] - a0, pedaco.shape[1] - sa)
+        if hh > 0 and ww > 0:
+            dst[b0:b0 + hh, a0:a0 + ww] = pedaco[sb:sb + hh, sa:sa + ww]
+
+    y = -rng.uniform(0, larg)
+    while y < h:
+        x = -rng.uniform(0, q["comprimento_m"][1] * px_m)
+        b0, b1 = int(round(y * k)), int(round((y + larg) * k))
+        while x < w:
+            comp = rng.uniform(*q["comprimento_m"]) * px_m
+            a0, a1 = int(round(x * k)), int(round((x + comp) * k))
+            cl = int(np.ceil(comp)) + 2
+            jan = None
+            for _ in range(400):
+                i = rng.integers(len(ys))
+                cy, cx = ys[i], xs[i]
+                if cy + hj > limpo.shape[0] or cx + cl > limpo.shape[1] or not limpo[cy:cy + hj, cx:cx + cl].all():
+                    continue
+                cand = veio[cy:cy + hj, cx:cx + cl]
+                if cand.mean(axis=1).min() > q["costura"]:
+                    jan = cand
+                    break
+            if jan is None:
+                jan = np.ones((hj, cl), np.float32)
+            tom = 1 + rng.choice((-1, 1)) * rng.uniform(*q["tom"])
+            pedaco = cv2.resize(jan, (cl * k, hj * k), interpolation=cv2.INTER_CUBIC)[k:k + b1 - b0, k:k + a1 - a0]
+            colar(D, tom * (1 + q["veio_forca"] * (pedaco - 1)), b0, a0)
+            colar(J, np.full((b1 - b0, jl), q["junta"], np.float32), b0, a0)
+            x += comp
+        colar(J, np.full((jl, w * k), q["junta"], np.float32), b0, 0)
+        y += larg
+    return cv2.resize(D * J, (w, h), interpolation=cv2.INTER_AREA)
+
+
+def vinilico_escala(out, A, p2r):
+    q = VINILICO
+    chapada = cv2.resize(cv2.imread(str(BASE_CHAPADA)), out.shape[1::-1], interpolation=cv2.INTER_NEAREST)
+    chapada = cv2.warpAffine(chapada, A, out.shape[1::-1], flags=cv2.INTER_NEAREST, borderValue=(255, 255, 255))
+    vin = (np.abs(chapada.astype(np.int32) - np.array(q["cor_chapada"])).max(axis=2) <= q["tol"]).astype(np.uint8)
+    vin = cv2.morphologyEx(vin, cv2.MORPH_CLOSE, np.ones((q["fechar"], 1), np.uint8)) > 0
+    (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
+    px_m = float(np.hypot(c - a, d - b))
+    im = out.astype(np.float32)
+    lum, croma = im.mean(axis=2), im[..., 2] - im[..., 0]
+    piso = vin & (croma >= q["croma_min"]) & (lum >= q["lum"][0]) & (lum <= q["lum"][1])
+    sx, sy = q["sig_ao_longo_m"] * px_m, q["sig_atravessando_m"] * px_m
+
+    def luz(m):
+        mf = m.astype(np.float32)
+        return (cv2.GaussianBlur(im * mf[..., None], (0, 0), sigmaX=sx, sigmaY=sy)
+                / np.maximum(cv2.GaussianBlur(mf, (0, 0), sigmaX=sx, sigmaY=sy), 1e-4)[..., None])
+    L0 = luz(piso)
+    razao = im / np.maximum(L0, 1)
+    fora = ((im - L0).max(axis=2) > q["claro"]) | (((L0 - im).max(axis=2) > q["escuro"])
+                                                  & (razao.max(axis=2) - razao.min(axis=2) > q["matiz"]))
+    n, lab, st, _ = cv2.connectedComponentsWithStats((fora & piso).astype(np.uint8), connectivity=8)
+    fora = (st[:, cv2.CC_STAT_AREA] >= q["objeto_min"])[lab] & (lab > 0)
+    piso &= ~cv2.dilate(fora.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    piso = cv2.morphologyEx(piso.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)) > 0
+    mf = piso.astype(np.float32)
+    L = luz(piso)
+    # o veio: o detalhe fino do vinílico do render, ao longo das réguas
+    vs, vy = q["veio_sig"]
+    veio = lum / np.maximum(cv2.GaussianBlur(lum, (0, 0), sigmaX=vs, sigmaY=vy), 1)
+    limpo = cv2.erode(piso.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    ys, xs = np.nonzero(piso)
+    y0, x0, y1, x1 = ys.min(), xs.min(), ys.max() + 1, xs.max() + 1
+    D = reguas_vinilico(y1 - y0, x1 - x0, px_m, veio, limpo, np.random.default_rng(q["semente"]))
+    novo = im.copy()
+    novo[y0:y1, x0:x1] = L[y0:y1, x0:x1] * D[..., None]
+    al = (cv2.GaussianBlur(mf, (0, 0), 0.7) * piso)[..., None]
+    novo = im * (1 - al) + novo * al
+    # onde o piso está escurecido (closet master, rouparia, closets 1 e 2, a circulação junto a eles), a luz larga
+    # (~1 m) sobe parte do caminho até a mediana do piso, em todo o vinílico (com o que está sobre ele)
+    sg = q["clarear_sig_m"] * px_m
+    Lg = cv2.GaussianBlur(lum * mf, (0, 0), sg) / np.maximum(cv2.GaussianBlur(mf, (0, 0), sg), 1e-4)
+    ref = float(np.median(Lg[piso]))
+    g = 1 + q["clarear"] * np.maximum(0, ref - Lg) / np.maximum(Lg, 1)
+    av = cv2.GaussianBlur(vin.astype(np.float32), (0, 0), 1.0)
+    novo *= (1 + (g - 1) * av)[..., None]
+    out = np.clip(novo, 0, 255).astype(np.uint8)
+    print(f"    vinílico: {int(piso.sum())} px em réguas de {100 * q['regua_m']:.0f} cm, a {px_m:.2f} px/m; "
+          f"o escurecido sobe {100 * q['clarear']:.0f}% do caminho até a luz mediana ({ref:.0f}), até "
+          f"+{100 * (g[vin].max() - 1):.0f}%")
+    return out
+
+
 # item 16 do pente fino de 20/10/26: quartzito dos banhos como a referência (usuário: "Textura do quartzito está errada -
 # é um tom mais entre o branco e o cinza"; "quartzito dos banhos está no quadro de referências já enviado": a foto do
 # quadro de 19/10, `_texturas/originais/quartzito_aura.jpg`, chapa de 3,00 m, RGB ~221, 215, 211). Os cinco banhos
@@ -1440,6 +1565,8 @@ def main():
     print("[2] banho master: dois chuveiros de teto")
     out = chuveiros(out, A)
     pg, p2r, r2p = pdf_cadeia(A, out.shape)
+    print("[pente fino 11] vinílico na escala: réguas de 20 cm, como a referência (R4)")
+    out = vinilico_escala(out, A, p2r)
     print("[4] copinha: bancada em Bege Bahia e cuba redonda")
     out = copinha(out, p2r)
     print("[pente fino 2] escada com linhas, triângulo no topo e esmaecida depois do corte do Térreo (R14)")
