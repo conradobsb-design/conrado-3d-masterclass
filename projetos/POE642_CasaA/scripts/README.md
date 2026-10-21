@@ -681,6 +681,10 @@ python3 pdf_entrega.py
 - item 8, shafts e projeções (R8): `PROJECOES_SUB` e `projecoes_subsolo`, depois do item 5, como `retoque_1pav_casae.projecoes_1pav`. Nos dois shafts, o retângulo de dentro do PDF, arredondado para dentro, fica branco onde não é parede preta (luminância acima de 30), e o X entra com os traços tracejados do próprio PDF (DOC_LINHAS E PROJEÇÕES), em cinza médio, só no branco. Os três retângulos da mesma camada (junto às paredes de cima e da direita do depósito e à de baixo da academia) entram em traço contínuo de 0,6 px: cinza médio no Bege Bahia, cinza claro na madeira. O elevador fica como está.
 - item 9, soleiras (R13): `SOLEIRAS_SUB` e `soleiras_subsolo`, com `desenhar_soleiras` (extraída de `soleiras_a`, que sai igual px a px, e agora com `fora`: o que fica por cima do vão). Conferidas as 10 portas no PDF: só dois vãos são brancos, o da academia para o hall (com as folhas de vidro e os batentes do item 4 de 19/10 por cima, em `fora`) e o do elevador. Nas outras oito, o piso atravessa o vão.
 
+**Pente fino pelas regras, 1º Pavimento (21/10/26):**
+- a cadeia de ajustes, como a dos outros pavimentos: a imagem aprovada é `renders/POE642_CasaA_PH_1Pavimento_v7_final2.png` (`APROVADAS`), a saída `..._v7_final2_ajustes.png`, que o `rotulos_casaa.py` lê (chave `aprovada` para o afim do quadro). O afim quadro -> imagem (`AFIM_QR["1Pavimento"]`) foi medido como os outros (SIFT entre a base de entrega reduzida a 2000 px e a imagem: 107 pontos, 0,4 px; o mesmo cálculo reproduz o do Subsolo).
+- item 16, o "²" dos rótulos: só o ciclo, sem mudança de código; na prancha mudam só os 21 "²".
+
 ## Acabamentos finais: `acabamentos_finais.py`
 
 Roda depois do `elementos_do_render.py`. Onde o render não trouxe objeto, ficam na imagem símbolos técnicos do PDF. Este script os troca por objetos vistos de cima, sem IA, nas posições exatas do PDF:

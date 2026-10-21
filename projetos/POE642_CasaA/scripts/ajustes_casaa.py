@@ -131,9 +131,12 @@ pode seguir pela ordem proposta"):
      da DOC_LINHAS E PROJEÇÕES (depósito e academia) em traço cinza fino.
   Subsolo, pente fino 9 (R13): soleiras de Bege Bahia nos dois vãos brancos do PDF (academia para o hall, com as
      folhas de vidro por cima, e elevador); nas outras portas o piso atravessa o vão.
+  1º Pavimento (pente fino pelas regras, 21/10/26): a imagem aprovada é a v7_final2, com o afim do quadro AFIM_QR
+     medido como o dos outros (107 pontos, 0,4 px); o item 16 (o "²" dos rótulos) é só o ciclo.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
+  python3 ajustes_casaa.py 1Pavimento  # -> ../renders/POE642_CasaA_PH_1Pavimento_v7_final2_ajustes.png (+ _camada.png)
   python3 ajustes_casaa.py Terreo      # -> ../renders/POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png
 """
 import argparse
@@ -145,7 +148,8 @@ import numpy as np
 AQUI = Path(__file__).resolve().parent
 CASA = AQUI.parent
 APROVADAS = {"Subsolo": CASA / "renders/POE642_CasaA_PH_Subsolo_final.png",
-             "Terreo": CASA / "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png"}
+             "Terreo": CASA / "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png",
+             "1Pavimento": CASA / "renders/POE642_CasaA_PH_1Pavimento_v7_final2.png"}
 
 # Subsolo 2: o banco da sauna, em px da imagem aprovada (2000 x 1116). As faces de dentro das paredes da
 # esquerda, da direita e de baixo foram medidas na imagem (625,0; 717,5; 845,3); a borda do banco é a linha do
@@ -312,7 +316,8 @@ CHUVEIRO_SERV = {"ducha": (933.2, 1086.4, 944.4, 1097.6),    # centro (938,8; 10
                  "vidros": [(929.9, 1121.8, 971.6, 1123.2), (940.6, 1123.2, 982.3, 1124.6)]}
 # quadro comum (2000 px) -> imagem aprovada de cada pavimento (SIFT entre a base e a imagem, no quadro comum)
 AFIM_QR = {"Subsolo": ((0.99911, -0.000617, 1.542), (0.000113, 0.99973, -3.617)),     # o do banco e da escada
-           "Terreo": ((1.01177, -0.000681, 0.608099), (-0.000652, 1.009677, -7.747429))}  # 45 pontos, 0,6 px
+           "Terreo": ((1.01177, -0.000681, 0.608099), (-0.000652, 1.009677, -7.747429)),  # 45 pontos, 0,6 px
+           "1Pavimento": ((1.010503, 0.001585, -0.902751), (0.000002, 1.007922, -7.520426))}  # 107 pontos, 0,4 px
 
 
 def pdf_pavimento(chave):
@@ -4635,7 +4640,9 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",
-                     pedra_leque)]}
+                     pedra_leque)],
+         # 1º Pavimento: o pente fino pelas regras (21/10/26); o item 16 (o "²" dos rótulos) é só o ciclo
+         "1Pavimento": []}
 
 
 def main():

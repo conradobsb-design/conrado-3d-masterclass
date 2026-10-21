@@ -98,7 +98,8 @@ PAVIMENTOS = {
                    ("PROJ. CLARABOIA", (1192.2, 204.2), (0, 4), {"corpo": 1.0, "quebra": ["PROJ.", "CLARABOIA"]}),
                    # o shaft ao lado do elevador tem ~15 px de largura: no corpo do PDF um pouco menor, para caber
                    ("SHAFT", (1233.4, 606.7), (0, 0), 0.85)]},
-    "1Pavimento": {"render": "renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+    "1Pavimento": {"render": "renders/POE642_CasaA_PH_1Pavimento_v7_final2_ajustes.png",   # com os ajustes (pente fino)
+                   "aprovada": "renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
                    "pdf": "642 - 1º PAVIMENTO - CASA A.pdf",
                    "sem_tela": "bases/POE642_CasaA_BASE_1Pavimento_v3.png",
                    "ajustes": [

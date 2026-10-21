@@ -1741,6 +1741,9 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Conferência:** na imagem com ajustes e na prancha, só os dois vãos; rodapé igual. Prancha do Subsolo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_soleiras_antes_depois.jpg`.
 - **Subsolo do pente fino fechado (21/10/26):** os 10 itens do mapa estão feitos. O próximo é o 1º Pavimento (16 itens), cujo entorno nublado sai do Térreo final.
+- **1º Pavimento do pente fino.** O 1º Pavimento ainda não tinha a cadeia de ajustes (a prancha lia direto o render `v7_final2`). Passa a ter a mesma dos outros dois: `ajustes_casaa.py 1Pavimento` (a aprovada é a `v7_final2`), saída `renders/POE642_CasaA_PH_1Pavimento_v7_final2_ajustes.png`, que o `rotulos_casaa.py` lê, com o afim do quadro vindo da aprovada. O afim quadro -> imagem (`AFIM_QR["1Pavimento"]`) foi medido como os outros (107 pontos, 0,4 px; o mesmo cálculo reproduz o do Subsolo).
+- **1º Pavimento, item 16, o "²" dos rótulos, feito primeiro.** Sem mudança de código: a imagem com ajustes saiu igual à aprovada, e na prancha mudaram só os 21 "²" (agora logo depois do "m"); rodapé igual. Com isso, a cadeia nova fica conferida: a prancha não mudou fora dos rótulos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_m2_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
