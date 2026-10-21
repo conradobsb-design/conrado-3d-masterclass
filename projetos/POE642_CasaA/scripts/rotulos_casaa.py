@@ -64,6 +64,8 @@ PAVIMENTOS = {
                # o granito da referência (pente fino 10, 21/10/26) é mais claro, RGB ~118, 89, 69 com lascas claras: com
                # o limite de 95 os rótulos da garagem, da despensa e do motorista saíam em cinza
                "granito_lum_max": 125,
+               # a máscara da pedra portuguesa do ajuste (pente fino 11): as pedras são desenhadas de novo na final
+               "pedra": "renders/POE642_CasaA_PH_Terreo_pedra_mascara.png",
                "ajustes": [
                    # a garagem é toda carro: no corpo do PDF, no vão entre o primeiro e o segundo carro
                    ("GARAGEM", (1265.1, 771.7), (-40.6, 0), 1.0),
@@ -114,9 +116,10 @@ def granito(img, lum_max=None):
     return (lum < (lum_max or q["lum_max"])) & (f[..., 2] - f[..., 0] > q["quente_min"]) & (f[..., 2] >= f[..., 1])
 
 
-def no_quadro_fixo(render, aprovada, base_png, chave):
+def no_quadro_fixo(render, aprovada, base_png, chave, mascara=None):
     """Como `rodape_entrega.no_quadro_comum`, mas o afim vem da imagem aprovada e é aplicado à ajustada: o SIFT
-    na imagem ajustada achava um afim um pouco diferente e a prancha inteira mudava por reamostragem."""
+    na imagem ajustada achava um afim um pouco diferente e a prancha inteira mudava por reamostragem. Com `mascara`
+    (uint8, no tamanho da ajustada), devolve também ela levada ao quadro pelo mesmo afim."""
     base = cv2.imread(str(base_png))
     W = LARGURA
     H = round(base.shape[0] * W / base.shape[1])
@@ -135,8 +138,13 @@ def no_quadro_fixo(render, aprovada, base_png, chave):
     dst = np.float32([k2[m.trainIdx].pt for m in bons])
     A, inl = cv2.estimateAffine2D(src, dst, ransacReprojThreshold=2.5)
     print(f"    {chave}: afim da imagem aprovada ({int(inl.sum())} pontos), aplicado à imagem com ajustes")
-    return cv2.warpAffine(aj, cv2.invertAffineTransform(A), (W, H), flags=cv2.INTER_CUBIC,
-                          borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
+    Ai = cv2.invertAffineTransform(A)
+    img = cv2.warpAffine(aj, Ai, (W, H), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_CONSTANT,
+                         borderValue=(255, 255, 255))
+    if mascara is None:
+        return img
+    mq = cv2.resize(mascara, (W, round(mascara.shape[0] * W / mascara.shape[1])), interpolation=cv2.INTER_LINEAR)
+    return img, cv2.warpAffine(mq, Ai, (W, H), flags=cv2.INTER_LINEAR, borderValue=0)
 
 
 def final_rotulos(chave):
@@ -144,7 +152,11 @@ def final_rotulos(chave):
     cfg = json.loads(CONFIG.read_text())
     base = (CONFIG.parent / cfg["entrega"]["pasta_bases"] / cfg["entrega"]["pavimentos"][chave]["base"]).resolve()
     render = Image.open(CASA / q["render"]).convert("RGB")
-    if "aprovada" in q:
+    pedra = None
+    if "pedra" in q:
+        final, pedra = no_quadro_fixo(render, Image.open(CASA / q["aprovada"]).convert("RGB"), base, chave,
+                                      mascara=cv2.imread(str(CASA / q["pedra"]), cv2.IMREAD_GRAYSCALE))
+    elif "aprovada" in q:
         final = no_quadro_fixo(render, Image.open(CASA / q["aprovada"]).convert("RGB"), base, chave)
     else:
         final = cv2.cvtColor(np.asarray(no_quadro_comum(render, base, chave, LARGURA)), cv2.COLOR_RGB2BGR)
@@ -152,6 +164,13 @@ def final_rotulos(chave):
     at, lt = cv2.imread(str(base), cv2.IMREAD_GRAYSCALE).shape
     hb, wb = cv2.imread(str(CASA / q["sem_tela"]), cv2.IMREAD_GRAYSCALE).shape
     p2q = quadro_pdf(pg, cfg, lt, at, wb, hb, LARGURA)
+    if pedra is not None:
+        # a pedra portuguesa desenhada de novo nos 3840 px (pente fino 11 do Térreo), na máscara do ajuste levada ao
+        # quadro (só o miolo dela: a borda interpolada fica com a pedra do ajuste)
+        import ajustes_casaa as AJ
+        (a, b), (c, d) = p2q(0, 0), p2q(56.69, 0)
+        print("    pedra portuguesa redesenhada na final:")
+        final = AJ.pedra_final(final, pedra > 200, float(np.hypot(c - a, d - b)), p2q, LARGURA / 2000)
     rot = [r for r in R1.rotulos_pdf(pg) if r[0] in q.get("incluir", ()) or not any(f in r[0] for f in FORA)]
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
     # R6 (19/10/26; pente fino da Casa A, 21/10/26): no granito marrom, os rótulos em branco (eram cinza 150)

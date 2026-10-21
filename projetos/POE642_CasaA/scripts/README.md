@@ -625,6 +625,7 @@ python3 rotulos_casaa.py 1Pavimento   # -> ../renders/POE642_CasaA_PH_1Pavimento
 
 Desde o pente fino de 21/10/26 (item 2 do Térreo), os rótulos no granito marrom saem em branco (R6, `cor_granito=R1.ROTULOS["branco"]`; antes, cinza 150), e o "²" logo depois do "m", pela rotina comum (regra de 20/10).
 O granito é achado na imagem pela luz (desfocada) baixa e o tom quente (`GRANITO`, luz até 95). No Térreo o limite é 125 (`PAVIMENTOS["Terreo"]["granito_lum_max"]`): o granito da referência (item 10 do pente fino) é mais claro, e com 95 os rótulos da garagem, da despensa e do motorista saíam cinza.
+No Térreo, a pedra portuguesa é desenhada de novo na final (`PAVIMENTOS["Terreo"]["pedra"]`, item 11 do pente fino): a máscara gravada pelo `ajustes_casaa.pedra_leque` vai ao quadro pelo mesmo afim da imagem (`no_quadro_fixo(..., mascara=)`), e `ajustes_casaa.pedra_final` desenha nela as pedras de 7 cm (~4 px a 59,7 px/m) e as linhas da DOC_LINHAS do PDF, antes dos rótulos.
 
 ## Conferência da Casa A com o PDF: `conferencia_casaa.py`
 
@@ -661,6 +662,7 @@ python3 pdf_entrega.py
 - item 8, deck: `DECK_A` e `deck_referencia`. A madeira da referência (`_texturas/madeira.jpg`), régua a régua (cada régua do deck é uma régua inteira da foto, sorteada, deslocada e espelhada ao acaso, na largura de ~20 cm da referência), deitada, com a luz larga e as sombras do lugar; o deck é a mancha da madeira da base (`base_terreo`, a base levada à imagem, usada também pela grama).
 - item 9, Bege Bahia: `BEGE_A` e `bege_referencia_a`, como o item 43 do Térreo da Casa E (`retoque_terreo_casae.BEGE`; pontinhos escuros fora e `texturas_escala.retexturizar` no tom da foto), no #E8E8E8 da base (fechado onde o render é piso claro); o anel que o `retexturizar` deixa em volta dos objetos vira o piso novo de perto. Roda antes das escadas externas.
 - item 10, granito marrom: `GRANITO_A` e `granito_referencia_a`, a rotina do granito do Térreo da Casa E (`retoque_terreo_casae.granito_tom`, constantes `GRANITO_TOM`): pontos claros fora, a grade de manchas do motor fora e o desenho e o tom da referência do usuário (`texturas_escala.trocar_granito`), na mancha do granito da base (#BFA79E, traços fechados e buracos de até 20 mil px preenchidos, para o anel entre os carros do PDF e os da R12 entrar).
+- item 11, pedra portuguesa: `PEDRA_A`, `pedra_leque` (o último item do Térreo) e `pedra_final` (chamada pelo `rotulos_casaa.py` na final). O item 47 do Térreo da Casa E (`retoque_terreo_casae.PEDRA`, `texturas_escala.trocar_pedra_portuguesa`, fonte "leque", com a franja da borda), na pedra da base (#B98A55, com folga) onde o px ainda é o caramelo do motor; as linhas da DOC_LINHAS E PROJEÇÕES (o X da área descoberta, o afastamento) entram por cima em cinza-escuro fino (`linhas_sobre_pedra`). A máscara vai para `renders/POE642_CasaA_PH_Terreo_pedra_mascara.png`.
 
 ## Acabamentos finais: `acabamentos_finais.py`
 

@@ -1604,6 +1604,13 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Rótulos:** no `rotulos_casaa.py`, o limite de luz do granito passa a valer por pavimento; no Térreo, 125 (`granito_lum_max`). Com o granito mais claro, o limite de 95 deixava os rótulos da garagem, da despensa e do motorista em cinza; agora voltam ao branco (R6). Subsolo e 1º Pavimento seguem com 95.
   - **Conferência:** na imagem com ajustes e na prancha, só o granito (cozinha, área gourmet, área de serviço, despensa, gás, garagem e motorista) e os rótulos sobre ele; rodapé igual. Prancha do Térreo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_granito_antes_depois.jpg`.
+- **Térreo, item 11, pedra portuguesa (seção 3), feito** (`ajustes_casaa.pedra_leque`, config `PEDRA_A`, o último item do Térreo; e `pedra_final`, na final). O motor fez pedras caramelo de 12 a 15 cm no acesso de veículos e na área de serviço descoberta.
+  - **Como:** o item 47 do Térreo da Casa E, com as constantes de lá (`retoque_terreo_casae.PEDRA`) e `texturas_escala.trocar_pedra_portuguesa`, fonte "leque". São pedras de 7 cm assentadas em leque, com juntas claras e as cores sorteadas das pedras da foto, sobre a luz relativa e as sombras do lugar. A franja da borda (caramelo misturado com a grama) recebe a troca de tom.
+  - **Área:** a pedra da base (#B98A55, com folga), só onde o px ainda é o caramelo do motor. As plantas, os portões, as folhas do gás e a projeção da cobertura ficam; por isso o item vem depois das projeções.
+  - **Linhas:** os traços que o motor fez sobre o caramelo (o X tracejado da área descoberta e o afastamento) saíam com ele. Entram as linhas da DOC_LINHAS E PROJEÇÕES do PDF por cima da pedra nova, em cinza-escuro fino, tracejadas como no PDF.
+  - **Na final:** como na Casa E, as pedras são desenhadas de novo nos 3840 px, onde as de 7 cm têm ~4 px e se leem (no ajuste de 2000 px, ~2 px). A máscara do ajuste (`renders/POE642_CasaA_PH_Terreo_pedra_mascara.png`) vai ao quadro pelo mesmo afim da imagem (`rotulos_casaa.no_quadro_fixo(..., mascara=)`), e `pedra_final` desenha nela as pedras e as linhas, antes dos rótulos.
+  - **Conferência:** na imagem com ajustes e na prancha, só a pedra; rodapé igual. Prancha do Térreo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_pedra_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

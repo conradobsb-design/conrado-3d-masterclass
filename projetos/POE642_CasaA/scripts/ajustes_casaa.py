@@ -101,6 +101,8 @@ pode seguir pela ordem proposta"):
      da piscina, pátio, hall externo, pisantes e degraus das escadas externas.
   Térreo 10. Granito marrom no desenho e no tom da referência do usuário, pela rotina do granito do Térreo da Casa
      E (pontos claros e a grade de manchas fora); os rótulos sobre ele seguem brancos (limite de luz do Térreo, 125).
+  Térreo 11. Pedra portuguesa em leque, no tom da foto (o item 47 da Casa E), onde ainda é o caramelo do motor, com as
+     linhas da DOC_LINHAS do PDF por cima; redesenhada na final de 3840 px pelo rotulos_casaa.py (pedra_final).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3364,6 +3366,95 @@ def granito_referencia_a(out):
     return res
 
 
+# Pente fino pelas regras (21/10/26), Térreo, item 11: pedra portuguesa (seção 3: "pedras de 6 a 8 cm", no desenho e
+# no tom da foto de referência, escolha do usuário de 20/10: "opção 1, tom da foto"). O motor fez pedras caramelo de 12 a
+# 15 cm no acesso de veículos e na área de serviço descoberta. Como o item 47 do Térreo da Casa E (com as constantes de
+# lá, retoque_terreo_casae.PEDRA, e texturas_escala.trocar_pedra_portuguesa, fonte "leque"): as pedras de 7 cm
+# assentadas em leque, com as juntas claras e as cores sorteadas das pedras da foto, sobre a luz relativa e as sombras
+# do lugar; a franja da borda (caramelo misturado com a grama) recebe a troca de tom na fração de caramelo que tem.
+# Área: a pedra da base (#B98A55, com folga), só onde o px ainda é o caramelo do motor: as plantas, os portões, as
+# folhas do gás e a projeção da cobertura ficam. Por isso este é o último item do Térreo, depois das projeções. Os
+# traços que o motor fez sobre o caramelo (o X tracejado da área descoberta e o afastamento) saíam com ele; entram as
+# linhas da DOC_LINHAS E PROJEÇÕES do PDF por cima da pedra nova, em cinza-escuro fino, tracejadas como no PDF. A
+# máscara vai para `PEDRA_A["mascara"]`: na final de 3840 px o rotulos_casaa.py a leva pelo mesmo afim da imagem e as
+# pedras e as linhas são desenhadas de novo (pedra_final), para se lerem (no ajuste de 2000 px as pedras têm ~2 px).
+PEDRA_A = {"cor_base": (85, 138, 185), "tol": 6, "folga": 3, "granito_base": (158, 167, 191),
+           "mascara": CASA / "renders/POE642_CasaA_PH_Terreo_pedra_mascara.png",
+           "linhas": {"camada": "DOC_LINHAS E PROJEÇÕES", "cor": (88, 88, 90), "larg_px": 0.5, "forca": 0.8}}
+
+
+def linhas_sobre_pedra(img, mascara, p2x, escala):
+    """As linhas da DOC_LINHAS E PROJEÇÕES do PDF (p2x: pt -> px da imagem) por cima da pedra (só na máscara, com 2 px
+    de folga), em cinza-escuro fino; `escala`: px da imagem por px do ajuste de 2000."""
+    q = PEDRA_A["linhas"]
+    pg, _ = pdf_pavimento("Terreo")
+    h, w = img.shape[:2]
+    k = 8
+    tela = np.zeros((h * k, w * k), np.uint8)
+    lw = max(1, int(round(q["larg_px"] * escala * k)))
+    for d in pg.get_drawings():
+        if d.get("layer") != q["camada"] or d["type"] != "s":
+            continue
+        for it in d["items"]:
+            if it[0] == "l":
+                a, b = p2x(it[1].x, it[1].y), p2x(it[2].x, it[2].y)
+                cv2.line(tela, (int(round(a[0] * k)), int(round(a[1] * k))), (int(round(b[0] * k)), int(round(b[1] * k))),
+                         255, lw, cv2.LINE_AA)
+    al = cv2.resize(tela.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    folga = max(3, int(round(2 * escala)) * 2 + 1)
+    al *= cv2.dilate(mascara.astype(np.uint8), np.ones((folga, folga), np.uint8)) * q["forca"]
+    out = img.astype(np.float32) * (1 - al[..., None]) + np.float32(q["cor"]) * al[..., None]
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def trocar_pedra_a(img, m, px_m, franja):
+    """A pedra da foto, em leque, na máscara m (as constantes do item 47 da Casa E); com `franja`, a borda que mistura o
+    caramelo do motor com a grama ou a parede recebe a troca de tom na fração de caramelo que tem (r - g)."""
+    from retoque_terreo_casae import PEDRA
+    from texturas_escala import trocar_pedra_portuguesa
+    q = PEDRA
+    antes = img.astype(np.float32)
+    caramelo = np.median(antes[m], axis=0)
+    img, n = trocar_pedra_portuguesa(img, m, px_m, pedra_cm=q["pedra_cm"], semente=q["semente"], junta=q["junta"],
+                                     contraste=q["contraste"], fonte=q["fonte"])
+    f = 0
+    if franja:
+        pedra = np.median(img[m].astype(np.float32), axis=0)
+        borda = cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~m
+        rg = antes[..., 2] - antes[..., 1]
+        frac = np.clip((rg + 23) / (caramelo[2] - caramelo[1] + 23), 0, 1) * borda
+        img = np.clip(img.astype(np.float32) + frac[..., None] * (pedra - caramelo), 0, 255).astype(np.uint8)
+        f = int((frac > 0.05).sum())
+    print(f"    pedra portuguesa ({q['fonte']}): {n} px, pedras de {q['pedra_cm']:.0f} cm a {px_m:.2f} px/m; "
+          f"franja da borda: {f} px")
+    return img
+
+
+def pedra_leque(out):
+    q = PEDRA_A
+    _, p2r = pdf_pavimento("Terreo")
+    forma = out.shape[:2]
+    b2 = base_terreo(forma).astype(np.int32)
+    cm = np.abs(b2 - np.array(q["cor_base"])).max(axis=2) <= q["tol"]
+    granito = np.abs(b2 - np.array(q["granito_base"])).max(axis=2) <= q["tol"]
+    im = out.astype(np.int32)
+    b, g, r = im[..., 0], im[..., 1], im[..., 2]
+    caramelo = (r > g + 18) & (g > b + 12) & (im.mean(axis=2) > 95)
+    planta = cv2.dilate(((g >= r - 8) | (im.mean(axis=2) < 90)).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    k = 2 * q["folga"] + 1
+    m = cv2.dilate(cm.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & ~planta & ~granito & caramelo
+    cv2.imwrite(str(q["mascara"]), m.astype(np.uint8) * 255)
+    (a, b_), (c, d) = p2r(0, 0), p2r(56.69, 0)                 # 1 m na escala 1:50 = 56,69 pt
+    out = trocar_pedra_a(out, m, float(np.hypot(c - a, d - b_)), franja=True)
+    return linhas_sobre_pedra(out, m, p2r, 1.0)
+
+
+def pedra_final(final, mascara, px_m, p2q, escala):
+    """Na final de 3840 px (rotulos_casaa): as pedras e as linhas desenhadas de novo na máscara do ajuste levada ao
+    quadro (p2q: pt -> px do quadro; escala: px do quadro por px do ajuste)."""
+    return linhas_sobre_pedra(trocar_pedra_a(final, mascara, px_m, franja=False), mascara, p2q, escala)
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 5: vidros finos (seções 4 e 18). O motor fez dois "tubos" cinza grossos
 # com nós escuros (montantes):
 # - entre a varanda e as salas: no PDF (ARQ_PAREDE) são quatro portas de vidro de correr, cada uma com duas folhas de
@@ -3498,8 +3589,10 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf10", "pente fino 10: granito marrom no desenho e no tom da referência do usuário",
                      granito_referencia_a),
                     ("pf5", "pente fino 5: vidros finos (varanda e salas; o vão do hall sem o tubo)", vidros_finos),
-                    # as projeções por cima de tudo: o último item do Térreo
-                    ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a)]}
+                    # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
+                    ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
+                    ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",
+                     pedra_leque)]}
 
 
 def main():
