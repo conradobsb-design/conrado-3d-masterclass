@@ -119,6 +119,7 @@ pode seguir pela ordem proposta"):
   Subsolo, pente fino 2: o gramado abaixo da escada do deck na grama da referência (do Térreo com os ajustes).
   Subsolo, pente fino 3 (R14): a escada do deck com a linha suave e a sombra curta nos bocéis, o trecho depois do corte
      esmaecido e tracejado e o triângulo no 1º degrau, apontando para a subida.
+  Subsolo, pente fino 4 (R3): os 5 arcos de porta saem (o traço do arco do PDF, por inpaint); as folhas ficam.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -2930,6 +2931,33 @@ def subsolo_hachurado(final, pegada, px_m):
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
+# Pente fino pelas regras (21/10/26), Subsolo, item 4: portas sem arcos (R3). Os 5 arcos de porta do PDF do Subsolo (as
+# curvas da ARQ_PAREDE: depósito, banho de serviço, sauna e banhos feminino e masculino) saem; as folhas e os batentes
+# ficam. Aqui os arcos do render são traços de 1 px; a rotina do Térreo (arcos.remover_arcos, que refaz uma faixa de
+# ±3 px com a textura do piso ao lado) quebrava a grade da pastilha do banho de serviço e deixava uma mancha na sauna.
+# Sai só o traço: o arco do PDF numa faixa de 4 px, refeito por inpaint de raio curto (a grade da pastilha e o
+# travertino continuam por cima dele).
+SEM_ARCOS_SUB = {"camada": "ARQ_PAREDE", "largura_px": 4.0, "raio": 2, "ss": 8, "limiar": 40}
+
+
+def sem_arcos_subsolo(out):
+    q = SEM_ARCOS_SUB
+    pg, p2r = pdf_pavimento("Subsolo")
+    H, W = out.shape[:2]
+    k = q["ss"]
+    m = np.zeros((H * k, W * k), np.uint8)
+    n = 0
+    for d in pg.get_drawings():
+        if d.get("layer") == q["camada"] and d["type"] == "s" and any(it[0] == "c" for it in d["items"]):
+            for c in caminhos_pdf(d, p2r, 24):
+                cv2.polylines(m, [np.int32(np.round(c * k))], False, 255, int(q["largura_px"] * k), cv2.LINE_AA)
+            n += 1
+    traco = cv2.resize(m, (W, H), interpolation=cv2.INTER_AREA) > q["limiar"]
+    out = cv2.inpaint(out, traco.astype(np.uint8), q["raio"], cv2.INPAINT_TELEA)
+    print(f"    portas sem arcos: {n} arcos do PDF fora ({int(traco.sum())} px, inpaint de raio {q['raio']})")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Subsolo, item 3: a escada do deck (R14, seção 5). No PDF do Subsolo ela sobe da
 # circulação (o "S"), da direita para a esquerda, até o deck; o corte é a diagonal da ARQ_ESCADAS E RAMPAS (de 754,1;
 # 1230,9 a 788,2; 1299,0 pt), e o trecho depois dele (os degraus 9 a 11, junto ao deck) é a projeção, tracejada. Os
@@ -4199,6 +4227,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("10", "divisória entre os banhos: peça clara do PDF, não parede", divisoria),
                      ("12", "banho de serviço: bancada e cuba nas medidas do PDF", bancada_servico),
                      ("13", "gramado depois do último degrau da escada do deck", gramado_escada),
+                     ("pf4", "pente fino 4 (R3): portas sem os arcos (as folhas ficam)", sem_arcos_subsolo),
                      ("pf3", "pente fino 3 (R14): escada do deck com a linha nos bocéis, o trecho depois do corte "
                       "tracejado e o triângulo", escada_deck_subsolo),
                      ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",

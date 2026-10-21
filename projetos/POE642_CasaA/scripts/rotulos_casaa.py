@@ -56,7 +56,7 @@ PAVIMENTOS = {
                     # o piso de cima do banho é o box (o chuveiro e o vidro entraram nos ajustes): no corpo do PDF,
                     # à direita da ducha, dentro do box (o resto do banho é vaso, bancada e o arco da porta)
                     ("BANHO SERV.", (605.5, 513.0), (-4.5, -39), 1.0),
-                    ("BANHO MASC.", (926.4, 809.0), (-2, 0))]},          # encostado no arco da porta
+                    ("BANHO MASC.", (926.4, 809.0), (-2, 0))]},          # encostava no arco da porta (sem arco desde o pente fino 4)
     "Terreo": {"render": "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png",   # com os ajustes
                "aprovada": "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png",
                "pdf": "642 - TÉRREO - CASA A.pdf",

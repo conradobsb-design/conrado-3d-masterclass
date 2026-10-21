@@ -1671,6 +1671,10 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Triângulo:** no 1º degrau, junto à circulação, apontando para a esquerda (a subida).
   - **Conferência:** na imagem com ajustes e na prancha, só a escada; rodapé igual. Prancha do Subsolo e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_escada_r14_antes_depois.jpg`.
+- **Subsolo, item 4, portas sem arcos (R3), feito** (`ajustes_casaa.sem_arcos_subsolo`, config `SEM_ARCOS_SUB`). Os 5 arcos de porta do PDF do Subsolo (as curvas da ARQ_PAREDE: depósito, banho de serviço, sauna e banhos feminino e masculino) saem; as folhas e os batentes ficam.
+  - **Como:** aqui os arcos do render são traços de 1 px. A rotina do Térreo (`arcos.remover_arcos`, que refaz uma faixa de ±3 px com a textura do piso ao lado) quebrava a grade da pastilha do banho de serviço e deixava uma mancha na sauna. Sai só o traço: o arco do PDF numa faixa de 4 px (1057 px), refeito por inpaint de raio 2. A grade da pastilha e o travertino continuam por cima dele (com 3 px sobrava um resto do arco junto à folha do banho de serviço).
+  - **Conferência:** na imagem com ajustes e na prancha, só os 5 arcos; rodapé igual. Prancha do Subsolo e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_sem_arcos_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
