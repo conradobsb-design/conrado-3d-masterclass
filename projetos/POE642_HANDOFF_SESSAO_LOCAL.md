@@ -1775,6 +1775,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Sala íntima:** o mapa citava um armário ali, mas o PDF não tem retângulo com diagonal; o painel de madeira junto à parede é o da TV (no PDF, o retângulo branco com a TV) e ficou como está.
   - **Conferência:** na imagem com ajustes e na prancha, só os dois armários (2 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_armarios_antes_depois.jpg`.
+- **1º Pavimento, item 6, bancos ao pé das camas (seção 8), feito** (`ajustes_casaa.bancos_1pav`, config `BANCOS_1PAV`).
+  - **Onde:** os bancos do PDF (ARQ_LAYOUT HUMANIZAÇÃO): um no pé de cada cama de casal (suítes 3, 2 e master) e dois banquinhos no pé das camas de solteiro da suíte 1. O motor não desenhou nenhum.
+  - **Como:** como os da Casa E (item 12 de lá): no pé da cama do render, a 1 px, na largura e altura do PDF, estofados em bege com a mesma almofada (o assento do sofá do render da Casa E), trama fina, contorno bege escuro e a sombra curta do banco do Térreo.
+  - **Rótulos (R7):** "SUÍTE 3" e "SUÍTE 2" caíam sobre os bancos novos; foram ao piso livre mais próximo (o da 3 abaixo do banco, no tapete; o da 2 à direita da cama).
+  - **Conferência:** na imagem com ajustes, só os cinco bancos; na prancha, os bancos e os dois rótulos; rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_bancos_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 

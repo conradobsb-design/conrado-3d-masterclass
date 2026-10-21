@@ -106,8 +106,12 @@ PAVIMENTOS = {
                    "pdf": "642 - 1º PAVIMENTO - CASA A.pdf",
                    "sem_tela": "bases/POE642_CasaA_BASE_1Pavimento_v3.png",
                    "ajustes": [
-                       ("SUÍTE 3", (904.1, 237.3), (1, 28.7)),             # na cama: no tapete, abaixo dela
-                       ("SUÍTE 2", (932.9, 575.9), (-12.9, -20.9)),        # na cama: no tapete, acima dela
+                       # na cama: no piso livre abaixo do tapete (o tapete abaixo da cama ficou com o banco do pente
+                       # fino 6), entre ele e a bancada, à direita do pufe
+                       ("SUÍTE 3", (904.1, 237.3), (7.9, 39.7)),
+                       # na cama: no piso livre à direita dela, antes do guarda-roupa do closet (acima, no tapete,
+                       # ficou o banco do pente fino 6)
+                       ("SUÍTE 2", (932.9, 575.9), (60.1, 4.1)),
                        ("SUÍTE MASTER", (837.0, 695.9), (25, -13.9)),      # no pufe: no piso acima dele, fora do tapete
                        ("SALA ÍNTIMA", (1083.4, 552.2), (0, -20.7)),       # na mesa de centro: entre ela e o sofá
                        ("B. SERVIÇO", (1142.1, 779.6), (5.3, -10.6)),      # o "m²" caía no vaso: no piso livre de cima

@@ -147,6 +147,9 @@ pode seguir pela ordem proposta"):
   1º Pavimento, pente fino 5 (seção 7): os armários até o teto da circulação e do quarto de serviço (os outros dois
      retângulos com diagonal da DOC_LINHAS) em marcenaria areia com o veio, sem a diagonal e sem a sombra de móvel
      baixo, pela rotina do Térreo (armarios_ate_o_teto; o Térreo sai igual px a px).
+  1º Pavimento, pente fino 6 (seção 8): os bancos do PDF ao pé das camas (suítes 3, 2 e master; os dois banquinhos das
+     camas de solteiro da suíte 1), estofados em bege como os da Casa E, no pé da cama do render; os rótulos das suítes
+     3 e 2, que caíam sobre eles, vão ao piso livre (rotulos_casaa).
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3712,6 +3715,81 @@ def armarios_1pav(out):
     return armarios_ate_o_teto(out, "1Pavimento", ARMARIOS_1PAV)
 
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 6: bancos ao pé das camas (itens 2 a 5 da conferência de
+# 19/10; seção 8). O PDF (ARQ_LAYOUT HUMANIZAÇÃO) tem um banco no pé de cada cama de casal (suítes 3 e 2 e master; na 3
+# o pé é embaixo, nas outras em cima) e um banquinho no pé de cada cama de solteiro da suíte 1; o motor não desenhou
+# nenhum. Entram como os bancos do 1º Pavimento da Casa E (retoque_1pav_casae.bancos_camas, item 12): cada banco no pé
+# da cama do render (a primeira queda de luz depois do edredom, na coluna do meio), a 1 px dela, na largura e na altura
+# do PDF; estofado bege, com a almofada da Casa E (o assento do meio do sofá do render dela, normalizado, uma almofada a
+# cada 1,7 vez a altura do banco), a trama fina, o contorno bege escuro e a sombra curta do banco do Térreo.
+BANCOS_1PAV = {"bancos": [  # (banco, cama, o banco abaixo da cama?), em pt do PDF
+    ("suíte 3", (1487.7, 678.7, 1578.5, 701.4), (1474.1, 551.7, 1592.1, 675.9), True),
+    ("suíte 2", (1510.4, 1233.2, 1601.1, 1255.9), (1499.1, 1257.0, 1612.5, 1370.4), False),
+    ("suíte master", (1263.8, 1457.1, 1354.5, 1479.8), (1250.2, 1482.6, 1368.1, 1606.8), False),
+    ("suíte 1, cama da esquerda", (2073.9, 1584.1, 2125.0, 1601.1), (2071.1, 1604.0, 2127.8, 1717.3), False),
+    ("suíte 1, cama da direita", (2173.2, 1584.1, 2224.2, 1601.1), (2170.3, 1604.0, 2227.0, 1717.3), False)],
+    "almofada": ("POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_render.png", (1001, 633, 1034, 654))}
+
+
+def bancos_1pav(out):
+    from retoque_1pav_casae import BANCOS, sombra
+    from retoque_terreo_casae import BANCO_VARANDA, colar, linha_aa, SS
+    q, qe, bv = BANCOS_1PAV, BANCOS, BANCO_VARANDA
+    _, p2r = pdf_pavimento("1Pavimento")
+    arq, (fx0, fy0, fx1, fy1) = q["almofada"]
+    almofada = cv2.imread(str(CASA.parent / arq))[fy0:fy1, fx0:fx1].astype(np.float32)
+    almofada = 1 + qe["relevo"] * (almofada / almofada.reshape(-1, 3).mean(axis=0) - 1)
+    L = out.astype(np.float32).mean(axis=2)
+    forma = out.shape[:2]
+    rng = np.random.default_rng(qe["semente"])
+    for nome, B, cama, abaixo in q["bancos"]:
+        (bx0, by0), (bx1, by1) = p2r(*B[:2]), p2r(*B[2:])
+        alt = by1 - by0
+        xc = int(round((bx0 + bx1) / 2))
+        col = L[:, xc - 3:xc + 4].mean(axis=1)
+        # pé da cama no render: a primeira queda depois do edredom (abaixo de 88% dele), no mínimo local logo depois
+        passo = 1 if abaixo else -1
+        ya = int(round(p2r(cama[0], cama[3] if abaixo else cama[1])[1])) - 4 * passo
+        edredom = col[ya]
+        y = ya
+        while abs(y - ya) < qe["busca"] and col[y] > 0.88 * edredom:
+            y += passo
+        janela = [y + k * passo for k in range(4)]
+        pe = janela[int(np.argmin([col[v] for v in janela]))]
+        if abaixo:
+            by0 = pe + qe["folga"]
+            by1 = by0 + alt
+        else:
+            by1 = pe - qe["folga"] + 1
+            by0 = by1 - alt
+        ret = (bx0, by0, bx1, by1)
+        x0, y0 = int(np.floor(bx0)) - 4, int(np.floor(by0)) - 4
+        x1, y1 = int(np.ceil(bx1)) + 4, int(np.ceil(by1)) + 4
+        m = np.zeros(((y1 - y0) * SS, (x1 - x0) * SS), np.uint8)
+        cv2.rectangle(m, (int(round((bx0 - x0) * SS)), int(round((by0 - y0) * SS))),
+                      (int(round((bx1 - x0) * SS)) - 1, int(round((by1 - y0) * SS)) - 1), 255, -1)
+        mm = cv2.resize(m.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+        s = bv["sombra"]
+        out = sombra(out, mm, (x0, y0, x1, y1), s["desloc"], s["sigma"], s["forca"])
+        hh, ww = int(np.ceil(alt)) * SS, int(np.ceil(bx1 - bx0)) * SS
+        secoes = max(1, int(round((bx1 - bx0) / (qe["proporcao"] * alt))))
+        cortes = np.linspace(0, ww, secoes + 1).astype(int)
+        peca = np.concatenate([cv2.resize(almofada, (int(b_ - a_), hh), interpolation=cv2.INTER_CUBIC)
+                               for a_, b_ in zip(cortes[:-1], cortes[1:])], axis=1)
+        amp, sig = qe["trama"]
+        trama = cv2.GaussianBlur(rng.normal(0, 1, (hh, ww)).astype(np.float32), (0, 0), sig * SS)
+        trama = 1 + amp * trama / max(trama.std(), 1e-6)
+        peca = np.clip(peca * trama[..., None] * np.float32(qe["bege"]), 0, 255)
+        peca = cv2.resize(peca, (ww // SS, hh // SS), interpolation=cv2.INTER_AREA)
+        out = colar(out, peca, ret)
+        a_ = linha_aa(forma, [(bx0, by0), (bx1, by0), (bx1, by1), (bx0, by1)], qe["larg_contorno"],
+                      fechada=True)[..., None]
+        out[:] = np.clip(out * (1 - a_) + np.float32(qe["contorno"]) * a_, 0, 255).astype(np.uint8)
+        print(f"    banco da {nome}: ({bx0:.1f}, {by0:.1f}) a ({bx1:.1f}, {by1:.1f}) px, {secoes} almofada(s); "
+              f"pé da cama do render em {pe}")
+    return out
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -5044,6 +5122,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                          "ocre na borda, cabideiro)", guarda_roupas_1pav),
                         ("pf5", "pente fino 5 (seção 7): armários até o teto da circulação e do quarto de serviço em "
                          "marcenaria areia, sem a diagonal e sem a sombra de móvel baixo", armarios_1pav),
+                        ("pf6", "pente fino 6 (seção 8): bancos estofados em bege ao pé das camas das suítes 3, 2, master "
+                         "e 1, como na Casa E", bancos_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 
