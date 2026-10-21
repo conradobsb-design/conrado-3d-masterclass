@@ -135,6 +135,9 @@ pode seguir pela ordem proposta"):
      medido como o dos outros (107 pontos, 0,4 px); o item 16 (o "²" dos rótulos) é só o ciclo.
   1º Pavimento, pente fino 1 (seção 11): a pegada do pavimento (pelo render: o que tem cor cheia, fechado e sem furos)
      vai à máscara, e fora dela, branco; na final, o Térreo final sem rótulos entra nublado em volta (rotulos_casaa).
+  1º Pavimento, pente fino 2 (R3): os 11 arcos do PDF saem como os do Subsolo, sem puxar a parede, as linhas retas
+     nem o piso mais claro ao lado; uma segunda passada tira o arco do render fora do lugar do PDF (e o toco que chega
+     à ponta da folha), com as folhas, os batentes e a borda das bancadas intactos. O Subsolo sai igual px a px.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -2968,20 +2971,92 @@ SEM_ARCOS_SUB = {"camada": "ARQ_PAREDE", "largura_px": 4.0, "raio": 2, "ss": 8, 
 
 
 def sem_arcos_subsolo(out):
+    return sem_arcos_pdf(out, "Subsolo")
+
+
+def inpaint_sem_parede(out, m, raio, parede):
+    """Inpaint que não puxa o preto da parede: os pixels de `parede` na vizinhança da máscara entram como desconhecidos
+    (não servem de fonte) e voltam como estavam; o que é da máscara fora da parede se refaz só com o piso."""
+    viz = cv2.dilate(m.astype(np.uint8), np.ones((2 * raio + 5, 2 * raio + 5), np.uint8)) > 0
+    r = cv2.inpaint(out, ((m > 0) | (parede & viz)).astype(np.uint8), raio, cv2.INPAINT_TELEA)
+    sel = (m > 0) & ~parede
+    out = out.copy()
+    out[sel] = r[sel]
+    return out
+
+
+def sem_arcos_pdf(out, chave, busca=None):
+    """Os arcos de porta do PDF (as curvas da ARQ_PAREDE) saem: o traço numa faixa de 4 px, refeito por inpaint. Com
+    `busca`, o inpaint não puxa a parede, as linhas retas do desenho nem o piso mais claro ao lado
+    (`inpaint_sem_parede`), e uma segunda passada numa faixa mais larga refaz o que ainda é mais escuro que o piso em
+    volta (o arco do render fora do lugar do PDF), longe das paredes e dos batentes do PDF; junto às folhas (os brancos
+    compridos da ARQ_PAREDE), tudo menos a linha da folha (o escuro em fio no sentido dela): sai o toco do arco que
+    chega à ponta."""
     q = SEM_ARCOS_SUB
-    pg, p2r = pdf_pavimento("Subsolo")
+    pg, p2r = pdf_pavimento(chave)
     H, W = out.shape[:2]
     k = q["ss"]
     m = np.zeros((H * k, W * k), np.uint8)
-    n = 0
+    arcos = []
     for d in pg.get_drawings():
         if d.get("layer") == q["camada"] and d["type"] == "s" and any(it[0] == "c" for it in d["items"]):
-            for c in caminhos_pdf(d, p2r, 24):
+            cs = caminhos_pdf(d, p2r, 24)
+            for c in cs:
                 cv2.polylines(m, [np.int32(np.round(c * k))], False, 255, int(q["largura_px"] * k), cv2.LINE_AA)
-            n += 1
+            arcos.append(cs)
+    n = len(arcos)
     traco = cv2.resize(m, (W, H), interpolation=cv2.INTER_AREA) > q["limiar"]
-    out = cv2.inpaint(out, traco.astype(np.uint8), q["raio"], cv2.INPAINT_TELEA)
-    print(f"    portas sem arcos: {n} arcos do PDF fora ({int(traco.sum())} px, inpaint de raio {q['raio']})")
+    if busca is None:
+        out = cv2.inpaint(out, traco.astype(np.uint8), q["raio"], cv2.INPAINT_TELEA)
+        print(f"    portas sem arcos: {n} arcos do PDF fora ({int(traco.sum())} px, inpaint de raio {q['raio']})")
+        return out
+    # o que fica e não serve de fonte: a parede (com folga), as linhas retas do desenho (o escuro em fio de n_f px ou
+    # mais, em pé ou deitado: a borda da bancada, as folhas, os trilhos) que o arco cruza ou toca, e, na faixa de cada
+    # arco, o outro piso mais claro (o arco no vinílico da suíte junto ao piso claro da circulação)
+    L = out.astype(np.float32).mean(axis=2)
+    kp, n_f, t = 2 * busca["folga_parede"] + 1, busca["fio"], busca["outro_piso"]
+    parede = cv2.dilate((L < busca["parede"]).astype(np.uint8), np.ones((kp, kp), np.uint8)) > 0
+    med = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 9).astype(np.float32)
+    escuro = (L < med - busca["escuro"]).astype(np.uint8)
+    fios = (cv2.morphologyEx(escuro, cv2.MORPH_OPEN, np.ones((1, n_f), np.uint8)) |
+            cv2.morphologyEx(escuro, cv2.MORPH_OPEN, np.ones((n_f, 1), np.uint8))) > 0
+    faixa, piso = np.zeros((H, W), bool), np.zeros((H, W), np.float32)
+    for cs in arcos:                        # o piso de cada arco: a mediana da faixa dele, fora do traço e das linhas
+        f = np.zeros((H, W), np.uint8)
+        for c in cs:
+            cv2.polylines(f, [np.int32(np.round(c))], False, 255, busca["faixa"])
+        f = f > 0
+        livre = f & ~traco & ~parede & ~fios
+        piso[f] = np.median(L[livre if livre.any() else f])
+        faixa |= f
+    fixo = parede | fios | (faixa & (L > piso + t))
+    out = inpaint_sem_parede(out, traco, q["raio"], fixo)
+    print(f"    portas sem arcos: {n} arcos do PDF fora ({int((traco & ~fixo).sum())} px, inpaint de raio {q['raio']}, "
+          f"sem puxar a parede, as linhas retas de {n_f} px ou mais nem o outro piso)")
+    batentes = np.zeros((H * k, W * k), np.uint8)
+    folhas = {0: np.zeros((H * k, W * k), np.uint8), 1: np.zeros((H * k, W * k), np.uint8)}   # 0: em pé; 1: deitadas
+    for d in pg.get_drawings():
+        if d.get("layer") == q["camada"] and d["type"] == "f" and d.get("fill") and min(d["fill"]) > 0.9:
+            for c in caminhos_pdf(d, p2r):
+                w, h = np.ptp(c[:, 0]), np.ptp(c[:, 1])
+                folha = max(w, h) >= max(busca["folha_comprida"] * min(w, h), busca["folha_min"])
+                alvo = folhas[int(w > h)] if folha else batentes
+                cv2.fillPoly(alvo, [np.int32(np.round(c * k))], 255)
+    perto = lambda z, f: cv2.dilate((cv2.resize(z, (W, H), interpolation=cv2.INTER_AREA) > 0).astype(np.uint8),
+                                    np.ones((2 * f + 1, 2 * f + 1), np.uint8)) > 0
+    L = out.astype(np.float32).mean(axis=2)
+    med = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 9).astype(np.float32)
+    escuro = L < med - busca["escuro"]
+    n_l = busca["linha_folha"]
+    linha = np.zeros((H, W), bool)          # a linha da folha: o escuro em fio de n_l px ou mais, no sentido da folha
+    for deitada, z in folhas.items():
+        fio = np.ones((1, n_l) if deitada else (n_l, 1), np.uint8)
+        linha |= cv2.morphologyEx((escuro & perto(z, busca["folga_folha"])).astype(np.uint8), cv2.MORPH_OPEN, fio) > 0
+    resto = faixa & escuro & ~perto(batentes, busca["folga_batente"]) & ~linha & ~fixo
+    resto = (cv2.dilate(resto.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0) & ~linha
+    out = inpaint_sem_parede(out, resto, q["raio"], fixo)
+    print(f"    segunda passada: {int((resto & ~fixo).sum())} px do arco do render fora do lugar do PDF (faixa de "
+          f"{busca['faixa']} px; junto às folhas, fica só a linha delas)")
     return out
 
 
@@ -3353,6 +3428,28 @@ def so_1pavimento(out):
     print(f"    pegada do 1º Pavimento: {100 * peg.mean():.1f}% da imagem; {int(fora.sum())} px do contexto do motor "
           f"viram branco (o Térreo nublado entra na final); máscara em {q['mascara'].name}")
     return out
+
+
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 2: portas sem arcos (R3). Os 11 arcos do PDF (as curvas da
+# ARQ_PAREDE) estão no render como traços escuros de 1 px; saem como os do Subsolo (item 4, sem_arcos_pdf: o traço numa
+# faixa de 4 px, refeito por inpaint de raio 2, com o vinílico e o Bege Bahia continuando por cima), com três cuidados:
+# - o inpaint não puxa a parede (o preto do batente virava mancha no banho 3), as linhas retas do desenho que o arco
+#   cruza ou toca (o escuro em fio de 15 px ou mais: a borda da bancada do banho 2, as folhas) nem, na faixa de cada
+#   arco, o piso 30 mais claro que o dele (a circulação clara entrava como um dente no vinílico da suíte);
+# - alguns arcos do render passam 2 a 3 px para dentro do arco do PDF (o do banho 3 ficava como um arco claro): uma
+#   segunda passada, numa faixa de 9 px, refaz o que ainda é mais escuro que o piso em volta (8 abaixo da mediana de
+#   9 px), a mais de 2 px dos batentes do PDF e de 1 px das paredes;
+# - junto às folhas do PDF (os brancos de 12 px ou mais, 3 vezes mais compridos que largos), a até 4 px (as folhas do
+#   render também passam até 3 px do PDF), fica só a linha da folha (o escuro em fio de 7 px no sentido dela); sai o
+#   toco do arco que chega à ponta (2 a 3 px de largura, em pé numa folha deitada).
+# As folhas, já finas e com o contorno, e os batentes ficam.
+SEM_ARCOS_1PAV = {"faixa": 9, "escuro": 8, "parede": 60, "folga_folha": 4, "folga_batente": 2, "folga_parede": 1,
+                  "folha_comprida": 3, "folha_min": 12, "linha_folha": 7, "fio": 15,
+                  "outro_piso": 30}
+
+
+def sem_arcos_1pav(out):
+    return sem_arcos_pdf(out, "1Pavimento", SEM_ARCOS_1PAV)
 
 
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
@@ -4673,7 +4770,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",
                      pedra_leque)],
          # 1º Pavimento: o pente fino pelas regras (21/10/26); o item 16 (o "²" dos rótulos) foi só o ciclo
-         "1Pavimento": [("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
+         "1Pavimento": [("pf2", "pente fino 2 (R3): portas sem os arcos (as folhas ficam)", sem_arcos_1pav),
+                        ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 
 

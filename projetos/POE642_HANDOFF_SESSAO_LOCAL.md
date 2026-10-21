@@ -1752,6 +1752,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Dependência:** o 1º Pavimento passa a ler a final do Térreo; refazer o 1º Pavimento depois de mexer no Térreo.
   - **Conferência:** na prancha, só o entorno muda; rodapé igual. Prancha do 1º Pavimento e PDF refeitos (o PDF foi de 16,8 a 19,9 MB, pelo desenho do Térreo em volta).
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_nublado_antes_depois.jpg`.
+- **1º Pavimento, item 2, portas sem arcos (R3), feito** (`ajustes_casaa.sem_arcos_1pav`, config `SEM_ARCOS_1PAV`). Os 11 arcos de porta do PDF (as curvas da ARQ_PAREDE) saem; as folhas, os batentes e a borda das bancadas ficam.
+  - **Rotina:** a do Subsolo (item 4), generalizada em `sem_arcos_pdf(out, chave, busca)`: o arco do PDF numa faixa de 4 px, refeito por inpaint de raio 2. Com `busca` (só o 1º Pavimento; o Subsolo sai igual px a px), o inpaint (`inpaint_sem_parede`) não usa nem muda a parede, as linhas retas do desenho (o escuro em fio de 15 px ou mais) e, na faixa de cada arco, o piso bem mais claro que o dele.
+  - **Segunda passada:** alguns arcos do render passam 2 a 3 px para dentro do arco do PDF (o do banho 3 ficava como um arco claro); numa faixa de 9 px, sai o que ainda é mais escuro que o piso em volta, longe das paredes e dos batentes do PDF. Junto às folhas do PDF, fica só a linha da folha (o escuro em fio no sentido dela), e sai o toco do arco que chega à ponta.
+  - **O que foi corrigido no caminho:** a mancha preta junto ao batente do banho 3 (o inpaint puxava a parede), o toco do arco na ponta da folha do banho 3, a borda da bancada do banho 2 cortada onde o arco a cruzava e o dente da circulação clara no vinílico da suíte 1.
+  - **Conferência:** na imagem com ajustes e na prancha, só as 11 portas (11 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_sem_arcos_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
