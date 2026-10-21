@@ -80,6 +80,9 @@ Itens:
      cooktop"): as banquetas e o cooktop do motor saem antes do Carrara (`ilha_cozinha_limpar`); depois dele entram o
      contorno da ilha e das laterais em cascata do PDF, o cooktop de inox de 5 bocas e as 3 banquetas de madeira e linho
      da biblioteca (`ilha_cozinha_pecas`), redesenhados nítidos na final (`ilha_cozinha_final`, pelo rotulos_casaa).
+  Todos os pavimentos, boxes (usuário, 21/10/26: "boxes dos chuveiros com folhas contínuas"): nos 10 boxes, o vidro
+     antigo sai e entram as duas folhas de correr do PDF inteiras, com a sombra fina ao lado, e o trilho em tracejado
+     no vão até a parede (`boxes_continuos`, pelas folhas e pelo tracejado da ARQ_LOUÇAS E METAIS: `folhas_box`).
   Térreo, carros (pedido do usuário, 19/10/26): cada carro numa cor (branco perolado, grafite, azul-marinho, a
      paleta da Casa D) e os três levemente desalinhados, como na Casa E.
   Térreo, sem arcos (decisão do usuário, 19/10/26, com as plantas de referência dos elementos: "remover os arcos,
@@ -4358,6 +4361,186 @@ def ilha_cozinha_final(final, p2q):
     return np.clip(np.round(desenhar_ilha(final.astype(np.float32), p2q, sombras=False)), 0, 255).astype(np.uint8)
 
 
+# Pedido do usuário (21/10/26): "BOXES DOS CHUVEIROS COM FOLHAS CONTINUAS". No PDF (ARQ_LOUÇAS E METAIS), cada um dos
+# 10 boxes da casa (3 no Subsolo, 2 no Térreo, 5 no 1º Pavimento) é de correr: duas folhas de vidro desencontradas,
+# cada uma um par de traços finos (0,21 pt) paralelos, a ~0,55 pt um do outro, de 30 pt ou mais; e, no vão de passagem,
+# o trilho em tracejado (traços de até 10 pt na linha do meio) até a parede. No 1º Pavimento o vidro era o do motor
+# (quase sumindo nos banhos 1 e de serviço; no master, com falhas e um trecho escuro no meio; 2 a 3 px fora do PDF; e
+# uma linha cheia, com um degrau, no vão); no Subsolo e no Térreo, o nosso (`vidro_box`), de antes, sem o trilho. O
+# traço antigo volta ao piso, nas folhas e no vão, cada trecho por si (`limpar_linha`): a faixa do PDF e as linhas de px
+# perto dela (até `folga` px entre uma e outra), até `busca` px da linha do meio, que destoam (mais de `destoa` níveis, no mesmo sentido) do piso a 2 px
+# dos dois lados em `fracao` do comprimento ou mais (a borda de um vaso junto ao box, mais curta, não conta), com o
+# antialias. Cada px que foge mais de `difere` níveis da reta entre o piso dos dois lados vira essa
+# reta, sem tocar nas paredes (as manchas abaixo de `parede` com `parede_min` px ou mais) nem onde os dois lados não
+# são o mesmo piso (mais de `lados` níveis: a planta junto ao box do master), nem nas louças do PDF (os preenchimentos
+# da ARQ_LOUÇAS E METAIS, com `louca_folga` px: os vasos junto aos boxes do 1º Pavimento). Entram as duas folhas inteiras, como no
+# PDF, com o vidro aprovado (`vidro_box`: vidro claro com as bordas finas) e a sombra cinza fina ao lado (regra da seção
+# 4), do lado oposto à luz (embaixo nas horizontais, à esquerda nas verticais); e o trilho em tracejado cinza fino no
+# vão, nos traços do PDF.
+BOXES_CONTINUOS = {"camada": "ARQ_LOUÇAS E METAIS", "largura": 0.21, "comp_min": 30.0, "par": (0.3, 0.8),
+                   "busca": 7, "destoa": 4, "fracao": 0.6, "folga": 4, "difere": 6, "parede": 60, "parede_min": 40, "lados": 30, "louca_folga": 2,
+                   "traco": (0.2, 10.0), "junto": 1.6, "trilho_pt": 0.6, "trilho_cor": (150, 150, 152),
+                   "trilho_forca": 0.85, "sombra_pt": 0.9, "sombra_cor": (150, 150, 152), "sombra_forca": 0.45}
+
+
+def folhas_box(pg):
+    """Os boxes do PDF: para cada um, as duas folhas de vidro ((x0, y0, x1, y1) em pt, os pares de traços finos) e os
+    trechos do trilho em tracejado no vão (de, até, em pt, ao longo do box), em volta da linha do meio."""
+    q = BOXES_CONTINUOS
+    tracos, curtos = set(), []
+    for d in pg.get_drawings():
+        if d.get("layer") != q["camada"] or d["type"] != "s" or abs((d.get("width") or 0) - q["largura"]) > 0.02:
+            continue
+        for it in d["items"]:
+            if it[0] != "l":
+                continue
+            a, b = it[1], it[2]
+            for o, c, s, e in (("h", a.y, a.x, b.x), ("v", a.x, a.y, b.y)):
+                if abs((a.y - b.y) if o == "h" else (a.x - b.x)) < 0.05:
+                    s, e = min(s, e), max(s, e)
+                    if e - s >= q["comp_min"]:
+                        tracos.add((o, round(c, 2), round(s, 2), round(e, 2)))
+                    elif q["traco"][0] < e - s < q["traco"][1]:
+                        curtos.append((o, c, s, e))
+    tracos = sorted(tracos)
+    folhas = []
+    for i, (o, c, s, e) in enumerate(tracos):
+        for o2, c2, s2, e2 in tracos[i + 1:]:
+            if o2 == o and q["par"][0] <= abs(c2 - c) <= q["par"][1] and abs(s2 - s) < 0.5 and abs(e2 - e) < 0.5:
+                folhas.append((o, (min(c, c2) + max(c, c2)) / 2, (s, min(c, c2), e, max(c, c2)) if o == "h" else
+                               (min(c, c2), s, max(c, c2), e)))
+    boxes, usadas = [], set()
+    for i, (o, c, f) in enumerate(folhas):
+        if i in usadas:
+            continue
+        j = min((j for j in range(len(folhas)) if j != i and j not in usadas and folhas[j][0] == o),
+                key=lambda j: abs(folhas[j][1] - c))
+        usadas |= {i, j}
+        f2 = folhas[j][2]
+        k0, k1 = (0, 2) if o == "h" else (1, 3)
+        u0, u1 = min(f[k0], f2[k0]), max(f[k1], f2[k1])
+        meio = (c + folhas[j][1]) / 2
+        trilho = sorted({(round(s, 1), round(min(e, u0), 1)) if s < u0 - 0.3 else (round(max(s, u1), 1), round(e, 1))
+                         for o3, c3, s, e in curtos
+                         if o3 == o and abs(c3 - meio) < q["junto"] and (s < u0 - 0.3 or e > u1 + 0.3)})
+        juntos = []                                                    # os traços das linhas do trilho, juntados
+        for s, e in trilho:
+            if juntos and s <= juntos[-1][1] + 0.1:
+                juntos[-1] = (juntos[-1][0], max(juntos[-1][1], e))
+            else:
+                juntos.append((s, e))
+        boxes.append({"hor": o == "h", "meio": meio, "folhas": [f, f2], "span": (u0, u1), "trilho": juntos})
+    return boxes
+
+
+def limpar_linha(img, L, p2r, box, s0_pt, s1_pt, q, louca=None):
+    """Leva ao piso o traço antigo ao longo do box entre s0_pt e s1_pt (pt): as linhas de px a até `busca` px da linha
+    do meio que destoam do piso ao lado, e a faixa do PDF, com o antialias."""
+    hor = box["hor"]
+    a = p2r(s0_pt, box["meio"]) if hor else p2r(box["meio"], s0_pt)
+    b = p2r(s1_pt, box["meio"]) if hor else p2r(box["meio"], s1_pt)
+    T = img if hor else img.transpose(1, 0, 2)                       # nas verticais, troca x e y
+    LT = L if hor else L.T
+    MT = None if louca is None else (louca if hor else louca.T)
+    s0, s1 = (int(np.floor(a[0])), int(np.ceil(b[0]))) if hor else (int(np.floor(a[1])), int(np.ceil(b[1])))
+    if s1 - s0 < 2:
+        return
+    cm = int(round(a[1] if hor else a[0]))
+    # o traço antigo: as linhas de px que destoam do piso a 2 px dos dois lados, no mesmo sentido, em `fracao` do
+    # comprimento ou mais (a borda de um vaso junto ao box, mais curta, não conta), coladas à faixa do PDF
+    def traco(r):
+        viz = (LT[r - 2, s0:s1] + LT[r + 2, s0:s1]) / 2
+        dv = LT[r, s0:s1] - viz
+        return max((dv > q["destoa"]).mean(), (dv < -q["destoa"]).mean()) >= q["fracao"]
+    g0, g1 = cm - 1, cm + 1
+    for r in range(cm - 2, cm - q["busca"] - 1, -1):                 # até `folga` px entre as linhas do traço
+        if g0 - r > q["folga"] + 1:
+            break
+        if traco(r):
+            g0 = r
+    for r in range(cm + 2, cm + q["busca"] + 1):
+        if r - g1 > q["folga"] + 1:
+            break
+        if traco(r):
+            g1 = r
+    for g0, g1 in [(g0, g1)]:
+        a0, b0 = g0 - 1, g1 + 1                                       # o antialias
+        A_, B_ = T[a0 - 1, s0:s1].copy(), T[b0 + 1, s0:s1].copy()
+        ok_lados = (LT[a0 - 1, s0:s1] > q["parede"]) & (LT[b0 + 1, s0:s1] > q["parede"]) & \
+            (np.abs(A_ - B_).max(axis=1) < q["lados"])               # os dois lados no mesmo piso (não a planta)
+        for r in range(a0, b0 + 1):
+            tt = (r - (a0 - 1)) / (b0 + 2 - a0)
+            fundo = A_ * (1 - tt) + B_ * tt
+            reg = T[r, s0:s1]
+            troca = ok_lados & (LT[r, s0:s1] > q["parede"]) & (np.abs(reg - fundo).max(axis=1) > q["difere"])
+            if MT is not None:
+                troca &= ~MT[r, s0:s1]                                # as louças do PDF (os vasos junto ao box) ficam
+            reg[troca] = fundo[troca]
+
+
+def boxes_continuos(out, pavimento):
+    from retoque_subsolo_casae import vidro_box, Tela
+    q = BOXES_CONTINUOS
+    pg, p2r = pdf_pavimento(pavimento)
+    boxes = folhas_box(pg)
+    img = out.astype(np.float32)
+    # as louças do PDF (preenchimentos da ARQ_LOUÇAS E METAIS: vasos, cubas), com `louca_folga` px, ficam intactas
+    ss = 4
+    lm = np.zeros((out.shape[0] * ss, out.shape[1] * ss), np.uint8)
+    for d in pg.get_drawings():
+        if d.get("layer") == q["camada"] and d["type"] == "f":
+            for cm in caminhos_pdf(d, p2r):
+                cv2.fillPoly(lm, [np.int32(np.round(cm * ss))], 255)
+    k = 2 * q["louca_folga"] + 1
+    louca = cv2.dilate((cv2.resize(lm, out.shape[1::-1], interpolation=cv2.INTER_AREA) > 0).astype(np.uint8),
+                       np.ones((k, k), np.uint8)).astype(bool)
+
+    def sem_parede(Lx):
+        # a parede: as manchas escuras grandes (o trecho escuro do vidro do motor, no master, é pequeno e sai)
+        n, lb, st, _ = cv2.connectedComponentsWithStats((Lx < q["parede"]).astype(np.uint8), 8)
+        grande = np.isin(lb, [k for k in range(1, n) if st[k, cv2.CC_STAT_AREA] >= q["parede_min"]])
+        return np.where(grande, 0.0, np.maximum(Lx, q["parede"] + 1))
+    for box in boxes:
+        u0, u1 = box["span"]
+        trechos = [(u0, u1)]                                          # as folhas e o vão, cada um com o seu perfil
+        if box["trilho"]:
+            v0, v1 = min(s for s, _ in box["trilho"]), max(e for _, e in box["trilho"])
+            trechos += [(v0, u0)] if v1 <= u0 else [(u1, v1)]
+        for s0, s1 in trechos:
+            limpar_linha(img, sem_parede(img.mean(axis=2)), p2r, box, s0, s1, q, louca)
+    out = np.clip(np.round(img), 0, 255).astype(np.uint8)
+    for box in boxes:
+        # o trilho em tracejado cinza fino no vão, na linha do meio, como no PDF
+        for s, e in box["trilho"]:
+            r = (s, box["meio"] - q["trilho_pt"] / 2, e, box["meio"] + q["trilho_pt"] / 2) if box["hor"] else \
+                (box["meio"] - q["trilho_pt"] / 2, s, box["meio"] + q["trilho_pt"] / 2, e)
+            tl = Tela(out, p2r, r)
+            tl.pintar(tl.ret(r), q["trilho_cor"], q["trilho_forca"])
+            out = tl.gravar()
+        for f in box["folhas"]:
+            # a sombra cinza fina ao lado (a luz do alto à direita: embaixo nas horizontais, à esquerda nas verticais)
+            d = q["sombra_pt"]
+            s = (f[0], f[3], f[2], f[3] + d) if box["hor"] else (f[0] - d, f[1], f[0], f[3])
+            tl = Tela(out, p2r, s)
+            tl.pintar(tl.ret(s), q["sombra_cor"], q["sombra_forca"])
+            out = tl.gravar()
+            out = vidro_box(out, p2r, f)
+    print(f"    boxes: {len(boxes)} boxes com as duas folhas de vidro do PDF inteiras e o trilho tracejado no vão")
+    return out
+
+
+def boxes_subsolo(out):
+    return boxes_continuos(out, "Subsolo")
+
+
+def boxes_terreo(out):
+    return boxes_continuos(out, "Terreo")
+
+
+def boxes_1pav(out):
+    return boxes_continuos(out, "1Pavimento")
+
+
 def carrara_subsolo(out):
     return carrara_bancadas(out, "Subsolo")
 
@@ -6200,6 +6383,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      ("pf9", "pente fino 9 (R13): soleiras nos dois vãos brancos do PDF (academia-hall e elevador)",
                       soleiras_subsolo),
                      ("carrara", "quartzito Carrara nas bancadas (usuário, 21/10/26)", carrara_subsolo),
+                     ("boxes", "boxes com as duas folhas de vidro do PDF contínuas (usuário, 21/10/26)", boxes_subsolo),
                      ("pf1", "pente fino 1 (R2): só o Subsolo; o Térreo em volta sai (o terreno é hachurado na final)",
                       so_subsolo)],
          "Terreo": [("1", "pilares da varanda e do gourmet em preto, como as paredes", pilares),
@@ -6245,6 +6429,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                     ("carrara", "quartzito Carrara nas ilhas e bancadas (usuário, 21/10/26)", carrara_terreo),
                     ("ilha_pecas", "ilha da cozinha (usuário, 21/10/26): contorno e laterais, cooktop e banquetas da "
                      "biblioteca", ilha_cozinha_pecas),
+                    ("boxes", "boxes com as duas folhas de vidro do PDF contínuas (usuário, 21/10/26)", boxes_terreo),
                     # as projeções por cima de tudo (a pedra, depois, só troca o caramelo do motor)
                     ("pf4", "pente fino 4 (R8, R9): projeções da cobertura e da laje superior em tracejado", projecoes_a),
                     ("pf11", "pente fino 11: pedra portuguesa em leque, no tom da foto (redesenhada na final)",
@@ -6280,6 +6465,7 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                         ("pf15", "pente fino 15 (R13): soleira no vão branco do PDF (porta de correr da saleta)",
                          soleiras_1pav),
                         ("carrara", "quartzito Carrara nas bancadas (usuário, 21/10/26)", carrara_1pav),
+                        ("boxes", "boxes com as duas folhas de vidro do PDF contínuas (usuário, 21/10/26)", boxes_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 

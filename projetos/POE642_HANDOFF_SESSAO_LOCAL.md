@@ -1869,7 +1869,12 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **Final:** contorno, cooktop e banquetas redesenhados nítidos na prancha de 3840 px.
   - **Conferência:** só a ilha muda no Térreo (1 região); o 1º Pavimento fica idêntico; rodapé igual. Pranchas e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_ilha_cozinha_antes_depois.jpg`.
-- **Pedidos na fila (21/10/26), um por vez, nesta ordem:** boxes dos chuveiros com folhas contínuas; paredes pretas revistas em todos os pavimentos; bordas do acesso de veículos; traços verticais de juntas antigas na varanda; quarto do motorista (rótulo maior e embaixo, cama menos branca, pezeira).
+- **Boxes dos chuveiros com folhas contínuas, nos três pavimentos, feito** (pedido do usuário, 21/10/26; `ajustes_casaa.boxes_continuos`, config `BOXES_CONTINUOS`, chave `boxes` em cada pavimento).
+  - **O quê:** nos 10 boxes da casa (3 no Subsolo, 2 no Térreo, 5 no 1º Pavimento), as duas folhas de vidro de correr do PDF, inteiras e contínuas, com a sombra cinza fina ao lado, e o trilho em tracejado no vão até a parede, como no PDF.
+  - **O que saiu:** o vidro do render no 1º Pavimento (falhado, quase sumindo nos banhos 1 e de serviço, com um trecho escuro e uma linha com degrau no master, 2 a 3 px fora do PDF) e os restos de vidros antigos no Subsolo e no Térreo; o piso volta pelo piso dos dois lados, sem tocar nas paredes, nos vasos e na planta do master.
+  - **Conferência:** só os boxes mudam (2 regiões no Térreo, 5 no Subsolo, com o trilho comprido da ducha, e 5 no 1º Pavimento); rodapés iguais. Pranchas e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_boxes_antes_depois.jpg`, `..._Subsolo_boxes_antes_depois.jpg` e `..._Terreo_boxes_antes_depois.jpg`.
+- **Pedidos na fila (21/10/26), um por vez, nesta ordem:** paredes pretas revistas em todos os pavimentos; bordas do acesso de veículos; traços verticais de juntas antigas na varanda; quarto do motorista (rótulo maior e embaixo, cama menos branca, pezeira).
 
 ## Casas A a D · Barlavento nas piscinas
 

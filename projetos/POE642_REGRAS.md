@@ -103,6 +103,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - o vidro como linha fina clara com sombra cinza ao lado;
   - no box de correr, duas folhas finas desencontradas.
 - **[19/10] R10.** Folha contínua também no 1º Pavimento da Casa E, onde o box está incompleto.
+- **[21/10] Boxes de correr com as folhas contínuas** (usuário: "boxes dos chuveiros com folhas contínuas"): as duas folhas do PDF inteiras, de parede a parede como no PDF, sem falhas nem trechos escuros, com a sombra fina ao lado; no vão de passagem, o trilho em tracejado cinza fino até a parede, como no PDF.
 - **Chuveiro:** cada banho com o tipo e a parede do PDF.
   - Teto: placa quadrada de ~30 cm, ou disco cinza a ~35 cm da parede.
   - Parede: ducha quadrada de ~20 cm com braço cromado e canopla.
