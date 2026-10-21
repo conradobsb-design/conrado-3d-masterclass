@@ -138,6 +138,10 @@ pode seguir pela ordem proposta"):
   1º Pavimento, pente fino 2 (R3): os 11 arcos do PDF saem como os do Subsolo, sem puxar a parede, as linhas retas
      nem o piso mais claro ao lado; uma segunda passada tira o arco do render fora do lugar do PDF (e o toco que chega
      à ponta da folha), com as folhas, os batentes e a borda das bancadas intactos. O Subsolo sai igual px a px.
+  1º Pavimento, pente fino 3 (R14 e seção 5): a escada em U (desce daqui, inteira) no travertino da escada do Térreo,
+     com a linha suave e a sombra curta em cada bocel e o triângulo no degrau 19, para a descida; na caracol da saleta,
+     o trecho cheio com os bocéis suaves e o triângulo no degrau do "D" (sentido horário), o resto em branco com os
+     bocéis tracejados, sem a linha de percurso e sem o corte.
 
 Uso (da pasta POE642_CasaA/scripts/):
   python3 ajustes_casaa.py Subsolo     # -> ../renders/POE642_CasaA_PH_Subsolo_final_ajustes.png (+ _camada.png)
@@ -3452,6 +3456,184 @@ def sem_arcos_1pav(out):
     return sem_arcos_pdf(out, "1Pavimento", SEM_ARCOS_1PAV)
 
 
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 3: a escada em U (R14 e seção 5). No PDF do 1º Pavimento ela
+# desce daqui (o "D", junto ao degrau 20, que é o piso da circulação), inteira e sem linha de corte: o lance de baixo
+# desce da esquerda para a direita (degraus 19 a 11), o patamar (10) e o lance de cima volta da direita para a
+# esquerda (9 a 1) até o Térreo. O motor fez os bocéis, a linha de percurso com a volta no patamar e as pontas de seta
+# em traço cinza-escuro. Entra o que o Térreo tem na mesma escada (ESCADA_INT): o travertino dos degraus, tecido do
+# trecho limpo do hall do Térreo aprovado, na cor dos degraus; em cada bocel, a linha suave e a sombra curta no degrau
+# de baixo (R14, o mesmo das escadas do Térreo); o bocel do degrau 11 faz sombra no patamar, e o degrau 1 do lance de
+# cima, junto ao guarda-corpo, fica sem linha. O triângulo no degrau 19 (o topo), apontando para a descida (para a
+# direita). O contorno da escada e o vão entre os lances ficam; a ponta de seta e o "D" do motor, junto ao
+# guarda-corpo, saem.
+ESCADA_U_1PAV = {"lanco1": (2021.22, 1094.86, 2174.3, 1162.89), "lanco2": (2019.52, 1185.57, 2174.3, 1253.6),
+                 "patamar": (2174.3, 1094.86, 2242.33, 1253.6),                  # pt
+                 "bocels": [2038.23, 2055.24, 2072.25, 2089.26, 2106.26, 2123.27, 2140.28, 2157.29, 2174.3],
+                 "marcas": [(2021.22, 1128.87), (2019.52, 1219.58)],             # pt: a seta e o "D" do percurso
+                 "marca_r_px": 3.5, "marca_escuro": 20, "fio_px": 15,
+                 "contorno": ((132, 138, 147), 0.9)}     # BGR e largura (px): o cinza do contorno do render, limpo
+
+
+def escada_u_1pav(out):
+    from retoque_bege_bahia_terreo import quilting
+    q, qt = ESCADA_U_1PAV, ESCADA_INT
+    _, p2r = pdf_pavimento("1Pavimento")
+    (a, b), (c, d) = p2r(q["lanco2"][0] - 6, q["lanco1"][1] - 6), p2r(q["patamar"][2] + 6, q["lanco2"][3] + 6)
+    X0, Y0, X1, Y1 = int(a), int(b), int(c) + 1, int(d) + 1
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    h, w = reg.shape[:2]
+    kpt = (p2r(q["lanco1"][0] + 100, q["lanco1"][1])[0] - p2r(*q["lanco1"][:2])[0]) / 100      # px por pt
+
+    def local(x, y):
+        u, v = p2r(x, y)
+        return u - X0, v - Y0
+
+    def ret(x0, y0, x1, y1):
+        return r14_poligono((h, w), [local(x0, y0), local(x1, y0), local(x1, y1), local(x0, y1)])
+    escada = np.maximum.reduce([ret(*q[k]) for k in ("lanco1", "lanco2", "patamar")])
+    # o travertino da escada do Térreo: o mesmo trecho, o mesmo tecido e a mesma cor
+    fx0, fy0, fx1, fy1 = qt["fonte_piso"]
+    f = cv2.imread(str(APROVADAS["Terreo"]))[fy0:fy1, fx0:fx1].astype(np.float32)
+    f = f / cv2.GaussianBlur(f, (0, 0), 8)
+    fontes = [np.ascontiguousarray(v) for v in (f, f[:, ::-1], f[::-1, :], f[::-1, ::-1])]
+    piso = quilting(fontes, h, w, p=24, sobra=8, candidatos=300, rng=np.random.default_rng(651))[:h, :w]
+    piso = piso * np.float32(qt["piso"])
+    # cada bocel: a linha suave e a sombra curta no degrau de baixo (+1: à direita; -1: à esquerda)
+    fator = np.ones((h, w), np.float32)
+    forca, alcance = R14["sombra"]
+    _, a1, _, b1 = q["lanco1"]
+    x2, a2, _, b2 = q["lanco2"]
+    for xs, ya, yb, sinal in (([x2] + q["bocels"], a2, b2, 1), (q["bocels"], a1, b1, -1)):
+        for xb in xs:
+            meia = R14["bocel_pt"] / 2
+            fator *= 1 - (1 - R14["bocel"]) * ret(xb - meia, ya, xb + meia, yb)
+            for t in np.linspace(0, 1, 9)[:-1]:
+                fa, fb = xb + sinal * alcance * t, xb + sinal * alcance * (t + 1 / 8)
+                fator *= 1 - forca * (1 - t - 1 / 16) ** 1.6 * ret(min(fa, fb), ya, max(fa, fb), yb)
+    # a ponta de seta e o "D" do motor que sobram fora da escada, junto ao guarda-corpo, saem antes; o guarda-corpo (o
+    # escuro em fio vertical) fica e não serve de fonte (a ponta de seta está sobre ele)
+    L = reg.mean(axis=2)
+    med = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 9).astype(np.float32)
+    escuro = L < med - q["marca_escuro"]
+    guarda = cv2.morphologyEx(escuro.astype(np.uint8), cv2.MORPH_OPEN, np.ones((q["fio_px"], 1), np.uint8)) > 0
+    yy, xx = np.mgrid[0:h, 0:w] + 0.5
+    perto = np.zeros((h, w), bool)
+    for x, y in q["marcas"]:
+        u, v = local(x, y)
+        perto |= np.hypot(xx - u, yy - v) <= q["marca_r_px"]
+    marca = perto & (escada < 0.99) & escuro & ~guarda
+    reg = inpaint_sem_parede(reg.astype(np.uint8), marca, 2, guarda).astype(np.float32)
+    reg = reg * (1 - escada[..., None]) + piso * fator[..., None] * escada[..., None]
+    # o contorno da escada e do vão entre os lances, limpo, no cinza do contorno do render
+    x1, _, x3, _ = q["patamar"][0], 0, q["patamar"][2], 0
+    cor, larg = q["contorno"]
+    cont = np.zeros((h, w), np.float32)
+    for pts in ([(q["lanco1"][0], a1), (x3, a1), (x3, b2), (x2, b2)],
+                [(q["lanco1"][0], b1), (x1, b1), (x1, a2), (x2, a2)]):
+        cont = np.maximum(cont, r14_linha((h, w), [local(*p) for p in pts], larg))
+    reg = reg * (1 - cont[..., None]) + np.float32(cor) * cont[..., None]
+    # o triângulo no degrau 19, a 10 cm do início, apontando para a descida
+    base = local(x2 + R14["triangulo"]["recuo_pt"], (a2 + b2) / 2)
+    tri = r14_triangulo((h, w), base, (1.0, 0.0), kpt)
+    reg = reg * (1 - tri[..., None]) + np.float32(R14["triangulo"]["cor"]) * tri[..., None]
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    escada em U: travertino do Térreo, {len(q['bocels']) * 2} bocéis com a linha suave e a sombra curta; "
+          f"triângulo no degrau 19, para a descida; {int(marca.sum())} px da seta e do \"D\" do motor fora")
+    return out
+
+
+# Pente fino pelas regras (21/10/26), 1º Pavimento, item 3: a caracol da saleta (R14 e seção 5: "na caracol, só o
+# trecho do pavimento fica cheio"). No PDF do 1º Pavimento, o "D" e a seta ficam no degrau junto ao 0° (à direita do
+# pilar), apontando para baixo: desce no sentido horário. O render já tem o trecho cheio (o quarto de 0,6° a 93,1°, em
+# madeira, cinco degraus) e o resto branco, com os raios do motor (cheios até 130°, tracejados depois), a linha de
+# percurso e o símbolo do corte. Entra:
+# - no trecho cheio: os riscos escuros do motor saem (a madeira por cima, por inpaint) e, em cada bocel (os raios do
+#   PDF a 19,1°, 37,6°, 56,1° e 74,6°), a linha suave e a sombra curta no degrau de baixo (o do sentido horário), com
+#   os números da escada em U (R14: 0,16 em 10 cm); o triângulo no degrau do "D", a 70% e a 38 pt do centro, como na
+#   caracol do Térreo (o da regra não cabe no degrau de 18,5°), apontando para a descida;
+# - no resto: o branco limpo (sem a linha de percurso e sem o corte: "a linha de corte não é desenhada") e os bocéis
+#   tracejados (a projeção), nos raios do PDF, no cinza e no traço da R14.
+# As guardas (a 0° e a 93,1°), o anel do corrimão, o pilar e o contorno do trecho cheio ficam.
+CARACOL_1PAV = {"centro": (1756.4, 1718.5), "r_pilar": 4.0, "r_cheio": 55.5, "r_vazio": 51.3,      # pt
+                "cheio": [0.6, 19.1, 37.6, 56.1, 74.6, 93.1],             # graus: as bordas dos degraus cheios
+                "tracejados": [111.6, 129.7, 147.6, 164.9, 182.6, 200.4, 218.4, 236.0, 253.5, 270.9, 288.4, 305.9,
+                               323.4, 341.4],                                # graus: os bocéis do resto, do PDF
+                "guarda_px": 1.8, "escuro": 8, "branco": (250, 250, 250),
+                "triangulo_r_pt": 38.0, "triangulo_escala": 0.7}
+
+
+def caracol_1pav(out):
+    q = CARACOL_1PAV
+    _, p2r = pdf_pavimento("1Pavimento")
+    cx, cy = p2r(*q["centro"])
+    k = (p2r(q["centro"][0] + 100, q["centro"][1])[0] - cx) / 100                 # px por pt
+    rn, Rc, Rv = q["r_pilar"] * k, q["r_cheio"] * k, q["r_vazio"] * k
+    X0, Y0 = int(cx - Rc - 4), int(cy - Rc - 4)
+    X1, Y1 = int(cx + Rc + 5), int(cy + Rc + 5)
+    reg = out[Y0:Y1, X0:X1].copy()
+    h, w = reg.shape[:2]
+    ox, oy = cx - X0, cy - Y0
+    yy, xx = np.mgrid[0:h, 0:w] + 0.5
+    rr = np.hypot(xx - ox, yy - oy)
+    th = np.degrees(np.arctan2(oy - yy, xx - ox)) % 360
+    t0, t1 = q["cheio"][0], q["cheio"][-1]
+
+    guardas = np.zeros((h, w), bool)                      # as duas semirretas (0° e 93,1°), fora do pilar
+    for t in (0.0, t1):
+        c, s = np.cos(np.radians(t)), np.sin(np.radians(t))
+        guardas |= (np.abs((xx - ox) * s + (yy - oy) * c) < q["guarda_px"]) & ((xx - ox) * c - (yy - oy) * s > 0)
+    guardas &= rr > rn
+    # 1. o trecho cheio: os riscos escuros saem, a madeira por cima
+    cheio = (th > t0) & (th < t1) & (rr > rn + 1) & (rr < Rc - 1) & ~guardas
+    L = reg.astype(np.float32).mean(axis=2)
+    med = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 9).astype(np.float32)
+    madeira = np.median(L[cheio & (L > np.percentile(L[cheio], 50))])
+    riscos = cheio & (L < madeira - q["escuro"])
+    reg = inpaint_sem_parede(reg, riscos, 2, guardas)
+    # 2. o resto: o branco limpo, com os bocéis tracejados
+    vazio = ~((th >= t0 - 1) & (th <= t1 + 1)) & (rr > rn + 1.5) & (rr < Rv) & ~guardas
+    reg[vazio] = q["branco"]
+    tr = np.zeros((h, w), np.float32)
+    for t in q["tracejados"]:
+        c, s = np.cos(np.radians(t)), -np.sin(np.radians(t))
+        tr = np.maximum(tr, r14_tracejado((h, w), [(ox + c * (rn + 1), oy + s * (rn + 1)), (ox + c * Rv, oy + s * Rv)],
+                                          k, R14["tracejado_px"]))
+    tr *= vazio
+    reg = reg.astype(np.float32)
+    reg = reg * (1 - tr[..., None]) + np.float32(R14["tracejado"]) * tr[..., None]
+    # 3. os bocéis do trecho cheio: a linha suave e a sombra curta no degrau de baixo (sentido horário)
+    forca, alc = R14["sombra"]
+    alc *= k
+    fator = np.ones((h, w), np.float32)
+    lb = np.zeros((h, w), np.float32)
+    for t in q["cheio"][1:-1]:
+        c, s = np.cos(np.radians(t)), -np.sin(np.radians(t))
+        lb = np.maximum(lb, r14_linha((h, w), [(ox + c * rn, oy + s * rn), (ox + c * Rc, oy + s * Rc)],
+                                      R14["bocel_pt"] * k))
+        dist = (t - th) * np.pi / 180 * rr                  # px até o bocel, do lado horário
+        fator *= np.where((dist >= 0) & (th > t0), 1 - forca * np.clip(1 - dist / alc, 0, 1) ** 1.6, 1)
+    fator *= 1 - (1 - R14["bocel"]) * lb
+    no_cheio = ((th > t0) & (th < t1) & (rr > rn) & (rr < Rc) & ~guardas).astype(np.float32)
+    reg *= (1 - (1 - fator) * no_cheio)[..., None]
+    # 4. o triângulo no degrau do "D", apontando para a descida (sentido horário: theta decrescente)
+    a, b = q["cheio"][0], q["cheio"][1]
+    rt, esc = q["triangulo_r_pt"] * k, q["triangulo_escala"]
+    alt = R14["triangulo"]["altura_pt"] * k * esc
+    tb = np.radians(b) - (np.radians(b - a) * rt - alt) / 2 / rt                     # a base, centrada no degrau
+    tm = np.radians((a + b) / 2)
+    tri = r14_triangulo((h, w), (ox + np.cos(tb) * rt, oy - np.sin(tb) * rt), (np.sin(tm), np.cos(tm)), k, esc)
+    reg = reg * (1 - tri[..., None]) + np.float32(R14["triangulo"]["cor"]) * tri[..., None]
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    caracol da saleta: {int(riscos.sum())} px de riscos fora do trecho cheio ({len(q['cheio']) - 1} degraus, "
+          f"{len(q['cheio']) - 2} bocéis com a linha suave e a sombra curta); o resto em branco com "
+          f"{len(q['tracejados'])} bocéis tracejados; triângulo no degrau do \"D\", para a descida")
+    return out
+
+
+def escadas_1pav(out):
+    return caracol_1pav(escada_u_1pav(out))
+
+
 # Pente fino pelas regras (21/10/26), Térreo, item 1: as escadas com linhas e o triângulo (R14 e seção 5). A interna em
 # U e a caracol ganharam a R14 nas suas funções (ESCADA_INT["r14"], CARACOL["r14"]); aqui ficam as duas externas.
 # - Do deck para o Subsolo (degraus 1 a 11, sob o spa): no PDF do Térreo, o "D" à esquerda, junto ao deck; os bocéis a
@@ -4771,6 +4953,8 @@ ITENS = {"Subsolo": [("1", "banho de serviço: o chuveiro e o vidro do box", chu
                      pedra_leque)],
          # 1º Pavimento: o pente fino pelas regras (21/10/26); o item 16 (o "²" dos rótulos) foi só o ciclo
          "1Pavimento": [("pf2", "pente fino 2 (R3): portas sem os arcos (as folhas ficam)", sem_arcos_1pav),
+                        ("pf3", "pente fino 3 (R14 e seção 5): a escada em U e a caracol da saleta com a linha suave "
+                         "nos bocéis e o triângulo da descida", escadas_1pav),
                         ("pf1", "pente fino 1 (seção 11): só o 1º Pavimento; o Térreo nublado entra em volta na final",
                          so_1pavimento)]}
 

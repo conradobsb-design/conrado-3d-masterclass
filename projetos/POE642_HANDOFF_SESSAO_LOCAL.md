@@ -1758,6 +1758,11 @@ Pedido do usuário: "siga com a Casa A" (a ordem da seção 17 das regras: Casa 
   - **O que foi corrigido no caminho:** a mancha preta junto ao batente do banho 3 (o inpaint puxava a parede), o toco do arco na ponta da folha do banho 3, a borda da bancada do banho 2 cortada onde o arco a cruzava e o dente da circulação clara no vinílico da suíte 1.
   - **Conferência:** na imagem com ajustes e na prancha, só as 11 portas (11 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
   - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_sem_arcos_antes_depois.jpg`.
+- **1º Pavimento, item 3, escadas (R14 e seção 5), feito** (`ajustes_casaa.escadas_1pav`: `escada_u_1pav` e `caracol_1pav`).
+  - **Escada em U:** no PDF ela desce daqui (o "D" no degrau 20, o piso da circulação), inteira e sem corte. O motor fez os bocéis, a linha de percurso com a volta no patamar e as pontas de seta em cinza-escuro. Entram o travertino da mesma escada no Térreo (mesmo trecho e mesma cor), a linha suave e a sombra curta de 10 cm em cada bocel (lance de baixo descendo para a direita, lance de cima para a esquerda, a sombra do degrau 11 no patamar), o contorno limpo e o triângulo no degrau 19, apontando para a descida. A seta e o "D" do motor saem; o guarda-corpo fica.
+  - **Caracol da saleta:** pelo PDF, o "D" e a seta ficam no degrau junto ao 0° e apontam para baixo: desce no sentido horário. O trecho cheio do render (o quarto de 0,6° a 93,1°, cinco degraus em madeira) fica, sem os riscos escuros do motor, com os bocéis do PDF em linha suave e a sombra curta do lado horário, e o triângulo (a 70%, como no Térreo) no degrau do "D". No resto, o branco limpo, sem a linha de percurso e sem o símbolo do corte (seção 5: "a linha de corte não é desenhada"), com os 14 bocéis tracejados da R14. **A confirmar:** a leitura do sentido e do trecho cheio veio do "D" e da seta do PDF; se o trecho cheio for outro (os degraus logo abaixo da laje, 20 em diante, no sentido horário a partir do 0°), basta trocar `CARACOL_1PAV["cheio"]`.
+  - **Conferência:** na imagem com ajustes e na prancha, só as duas escadas (2 regiões); rodapé igual. Prancha do 1º Pavimento e PDF refeitos.
+  - **Antes e depois:** `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_escadas_antes_depois.jpg`.
 
 ## Casas A a D · Barlavento nas piscinas
 
