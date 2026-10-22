@@ -1326,12 +1326,61 @@ def degraus_bege(Q, img, escadas):
     return out
 
 
+# A pedra grande e as lajes que descem dela (usuário, 22/10/26, apontando a área à esquerda do deck: "AQUI SÃO
+# DEGRAUS"): no PDF são 7 blocos retangulares de pedra (ARQ_CONTRAPISO, os de 4 lados nesta caixa) sobrepostos em
+# cascata: o patamar no alto da escada de 6 degraus e as 6 lajes em volta dele. A legenda os dava como travertino, e a
+# imagem saía um piso liso só. Agora cada bloco é uma peça de Bege Bahia (a foto da biblioteca, uma semente e um tom
+# levemente diferente por peça), como os degraus das escadas, na ordem de pintura do PDF: o bloco de cima leva a linha
+# fina do bocel no contorno e deixa a sombra curta para baixo e à esquerda (a luz do alto à direita) no de baixo e na
+# grama. Roda antes da escada de 6 degraus, que começa sobre a borda do patamar.
+BLOCOS_F = {"caixa_pt": (150.0, 780.0, 520.0, 1170.0), "pedra": "bege_bahia", "semente": 780, "ss": 4, "tom": 0.025,
+            "bocel": 0.78, "bocel_m": 0.012, "sombra": {"dist_m": 0.05, "sig_m": 0.04, "forca": 0.32}}
+
+
+def degraus_blocos(Q, img):
+    sys.path.insert(0, str(B.RAIZ / "_texturas"))
+    from texturas import textura
+    q, k = BLOCOS_F, BLOCOS_F["ss"]
+    cx0, cy0, cx1, cy1 = q["caixa_pt"]
+    blocos = sorted([d for d in Q.desenhos if d.get("layer") == "ARQ_CONTRAPISO" and d["type"] == "f" and d.get("fill")
+                     and len(d["items"]) == 4 and cx0 <= d["rect"].x0 and d["rect"].x1 <= cx1 and cy0 <= d["rect"].y0
+                     and d["rect"].y1 <= cy1], key=lambda d: d.get("seqno", 0))
+    X0, Y0, X1, Y1 = ret_q(Q, q["caixa_pt"])
+    w, h = X1 - X0, Y1 - Y0
+    out = img.astype(np.float32)
+    reg = out[Y0:Y1, X0:X1]
+    rng = np.random.default_rng(q["semente"])
+    s = q["sombra"]
+    d_ = s["dist_m"] * Q.px_m * k
+    lb = max(1, int(round(q["bocel_m"] * Q.px_m * k)))
+
+    def reduzir(a):
+        return cv2.resize(a.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+    for i, d in enumerate(blocos):
+        m = np.zeros((h * k, w * k), np.uint8)
+        cv2.fillPoly(m, [np.int32(np.round((c - (X0, Y0)) * k)) for c in Q.caminhos(d) if len(c) >= 3], 255)
+        mf = m.astype(np.float32) / 255
+        a = reduzir(mf)
+        sb = reduzir(cv2.GaussianBlur(cv2.warpAffine(mf, np.float32([[1, 0, -d_], [0, 1, d_]]), (w * k, h * k)),
+                                      (0, 0), s["sig_m"] * Q.px_m * k)) * s["forca"]
+        reg *= (1 - sb * (1 - a))[..., None]
+        tex = textura(q["pedra"], Q.px_m, h, w, semente=q["semente"] + i).astype(np.float32)
+        tex *= 1 + q["tom"] * rng.uniform(-1, 1)
+        reg[:] = reg * (1 - a[..., None]) + tex * a[..., None]
+        anel = m & ~cv2.erode(m, np.ones((lb, lb), np.uint8))
+        reg *= (1 - (1 - q["bocel"]) * reduzir(anel / 255.0))[..., None]
+    print(f"    degraus em blocos: os {len(blocos)} blocos de pedra do PDF à esquerda do deck em Bege Bahia, cada um com "
+          f"o bocel e a sombra curta sobre o de baixo")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 def escadas_projecoes(Q, img):
     out = np.ascontiguousarray(img.copy())
     with em_quadro(Q):
         pa = AJ.PROJECOES_A
         AJ.PROJECOES_A = dict(pa, larg_px=pa["larg_px"] * Q.W / 2000)
         try:
+            out = degraus_blocos(Q, out)                                  # a pedra grande e as lajes em cascata
             out = degraus_bege(Q, out, B.ESCADAS_T)                     # as duas do Térreo: a de 6 e a de 9 degraus
             out, n = B.linhas_pdf(out, "Terreo", B.PROJ_T["zonas"], B.PROJ_T["camada"])
         finally:

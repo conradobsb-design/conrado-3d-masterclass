@@ -110,6 +110,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Subida: no 1º degrau, apontando para cima. Descida: no topo, apontando para baixo.
   - Substitui a seta. Fica sem texto.
 - **[22/10] Casa B: degraus em Bege Bahia** (usuário: "e os degraus em pedra bege Bahia na lateral esquerda da imagem???"): as escadas externas da esquerda (a de 6 degraus, da pedra grande para a ducha, nos dois pavimentos, e a de 9, da varanda para o deck em L, no Térreo) nos degraus exatos do PDF (ARQ_ESCADAS E RAMPAS), na foto do Bege Bahia da biblioteca, no tom e no contraste dela, com as linhas e o triângulo por cima. Sem filtro de mediana sobre a pedra (borrava).
+  - **[22/10] Degraus em blocos** (usuário, apontando a área à esquerda do deck: "aqui são degraus"): a pedra grande e as 6 lajes em volta dela são blocos de pedra sobrepostos em cascata no PDF (ARQ_CONTRAPISO), não um piso liso. Cada bloco é uma peça de Bege Bahia, como os degraus das escadas, e tem o próprio contorno em linha fina de bocel. O bloco que o PDF desenha por cima deixa a sombra curta (para baixo e à esquerda) no de baixo e na grama. O contorno de cada bloco é o do PDF, mesmo onde a legenda pintava outro material (o canto do deck sob a pedra grande).
 - **Escada que passa de pavimento:** cheia até a linha de corte do PDF e esmaecida depois, com os bocéis pontilhados (a projeção) e o corrimão fino. A linha de corte não é desenhada. Na caracol, só o trecho do pavimento fica cheio.
 - Função: `_texturas/elementos.py` → `escada(..., triangulo="sobe" | "desce")`.
 
