@@ -246,6 +246,8 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 
 ## 6b. Casa C — em andamento
 
+**Agora (22/10/26):** os mapas do pente fino pelas regras aguardam a confirmação do usuário (seção "Casa C · pente fino pelas regras", no fim).
+
 **Subsolo (definido pelo usuário em 14/10/26):**
 - **Vinílico da Casa A:** academia (laranja #CC9966).
 - **Travertino:** varanda do subsolo, sauna, ducha e BH da academia (oliva #BAB596); banco da sauna em dois tons mais escuros, como na Casa B.
@@ -2154,6 +2156,50 @@ Os pedidos que vieram depois, item a item:
   - **O problema:** as cortinas eram desenhadas na etapa `biblioteca`, antes das esquadrias. A limpeza das esquadrias espelha o piso de junto do vidro sobre a faixa dele e levava a cortina junto: duas fileiras de ondas na sala íntima e ondas cruzadas na suíte 1, na master e na suíte 3. As ondinhas do PDF que marcam o pano também vinham riscadas de leve no piso, e o espelho as copiava para junto do vidro.
   - **Agora:** antes das esquadrias, as ondinhas do PDF saem do piso (`ondas_fora`); a cortina passou para a etapa `cortinas`, logo depois das esquadrias. Cada janela tem um pano só, sobre o piso limpo, nas 10 cortinas do Térreo.
   - **Antes e depois:** enviado na conversa (`AD8_cortinas.jpg`, da sala íntima, das suítes 1 e 2, da master e da suíte 3).
+
+## Casa C · pente fino pelas regras (22/10/26)
+
+Pedido do usuário: "Casa C" (a ordem da seção 17 das regras: Casa E, Casa A, Casa B, Casa C, Casa D). As duas pranchas de entrega atuais (`POE642_CasaC/entrega/POE642_CasaC_PH_{Subsolo,Terreo}_entrega.png`) foram conferidas trecho a trecho contra os PDFs do cliente e o `POE642_REGRAS.md` (com a seção 16, o inventário: C · Subsolo e C · Térreo), com as escalas primeiro. Nada foi retocado ainda; a lista aguarda a confirmação do usuário (seção 1 das regras).
+
+- **Como foi conferido:** o PDF de cada pavimento vai ao quadro da prancha pela cadeia das bases (`opcoes_1pav_casae.quadro_pdf`, com a config da Casa C): 59,7 px/m, as paredes do PDF caem sobre as da prancha e o elevador do Subsolo sobre o do Térreo. Lado a lado, trecho a trecho, e com as camadas DOC_LINHAS E PROJEÇÕES, ARQ_ELEMENTOS FIXOS, ARQ_PAISAGISMO e ARQ_ESCADAS E RAMPAS desenhadas por cima. O PDF da Casa C não tem a EST_PILAR.
+- **Mapas e escalas:** `conferencia_casac.py` (em `POE642_CasaA/scripts/`), com os itens em `PENTE_FINO`: `POE642_CasaC/renders/POE642_CasaC_PH_{Subsolo,Terreo}_pente_fino_mapa.jpg`; a folha das escalas (pisos da prancha ao lado dos da biblioteca, trechos de 1,5 × 1,5 m com régua de 1 m, e a vegetação) em `POE642_CasaC/renders/POE642_CasaC_PH_escalas_conferencia.jpg` (`--escalas`).
+- **Leitura das escadas no PDF:** degraus largos numerados de 1 (junto ao pátio) a 10 (junto ao caminho) e a escada estreita de 11 a 21 até o deck. O Térreo tem o "D" no degrau 21 (desce do deck); o Subsolo tem o "S" no degrau 11.
+- **Térreo (23 itens):**
+  1. vegetação grande demais (leques de palmeira de ~2 m, folhas de costela-de-adão de ~1 m);
+  2. pedra portuguesa: pedras arredondadas regulares de ~10 a 12 cm, em caramelo; a pedra é de 6 a 8 cm, em leque;
+  3. granito marrom quase liso e escuro (~82, 61, 55; a referência ~118, 89, 69, com nuvens e lascas);
+  4. travertino com estrias verticais contínuas (o da biblioteca, veios horizontais de 5 a 20 cm);
+  5. vinílico liso, sem réguas (réguas de ~20 cm);
+  6. Bege Bahia liso e rosado (~229, 212, 198), sem as nuvens nem o tom quente (~230, 211, 186);
+  7. grama de grão miúdo e clara; deck avermelhado (troca do tom como na Casa B);
+  8. carros prata, alinhados, de 4,70 × 1,85 m (hoje ~4,47 × 1,91 m, em três cores);
+  9. a final refeita em 3840 px como a da Casa B (`final3840_casac.py`), guardando as decisões de 14/10 (itens 1 a 25);
+  10. rótulos: os 46 ambientes e o elevador; no PDF, SUÍTE MASTER, QUARTO 1 e QUARTO 3 caem sobre a cama e GOURMET sobre a bancada;
+  11. portas sem arcos (25 de giro, os portões da área descoberta e a pivotante);
+  12. escadas com linhas e triângulo (a estreita desce do deck, triângulo junto ao deck apontando para a esquerda; os largos descem do caminho para o pátio, triângulo no 10 apontando para cima);
+  13. guarda-corpos de vidro da ARQ_ELEMENTOS FIXOS, hoje ausentes: o L da varanda master (7,2 m em cima, 9,7 m à esquerda), a borda da varanda dos quartos (6,3 m) e a da varanda 1 (2,9 m);
+  14. **a confirmar:** o L junto ao deck é floreira em L no PDF (ARQ_PAISAGISMO, mureta de ~10 cm); hoje é o banco de bronze da Casa B, posto por analogia em 14/10;
+  15. projeções tracejadas: claraboias da varanda master e dos closets master 1 e 2, os X dos jardins de inverno e da área descoberta, os armários da DOC_LINHAS conferidos um a um;
+  16. jardins (inverno 1 e 2, jardim 1) só verdes, plantas na escala, sem passar dos vidros e paredes;
+  17. as 7 cortinas do PDF em linho, um pano por janela;
+  18. esquadrias finas (portas de correr das varandas e da suíte master, janelas da cozinha e da área descoberta);
+  19. todas as bacias com tampa e cubas brancas;
+  20. tapete da sala TV no contorno do PDF;
+  21. paredes pretas no contorno do PDF;
+  22. soleiras (R13), a do elevador em inox;
+  23. banquetas da ilha sob o tampo e box no granito em cinza claro (regras de 22/10); **a confirmar:** bancadas em pedra areia humanizada, como na Casa B.
+- **Subsolo (13 itens):**
+  1. R2 com a hachura do lote do Térreo final; **a confirmar** o que fica em cor cheia (proposta: Subsolo, pátio, degraus largos e caminho, o cinza cheio do PDF do Subsolo);
+  2. a 4. Bege Bahia, travertino e vinílico na escala;
+  5. floreira junto à sauna: as folhas passam por cima dos degraus largos;
+  6. escadas (R14): **a confirmar** o triângulo no degrau 1 (largos, sobe do pátio) e no 11 (estreita, esmaecida);
+  7. as 3 portas sem arcos;
+  8. vidros finos (parede da academia e porta da sauna);
+  9. rótulos (5 ambientes e o elevador);
+  10. bacia com tampa;
+  11. soleiras;
+  12. paredes;
+  13. a final refeita em 3840 px.
 
 ## Casas A a D · Barlavento nas piscinas
 
