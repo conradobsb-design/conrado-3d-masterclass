@@ -236,26 +236,82 @@ def ret_q(Q, r):
     return int(np.floor(min(a, c))), int(np.floor(min(b, d))), int(np.ceil(max(a, c))), int(np.ceil(max(b, d)))
 
 
+# Os arcos das portas (R3: sem arcos) estão na base chapada como linha tracejada (usuário, 22/10/26, na porta da suíte 3:
+# "TEM UM ERRO NESSA PORTA"): as pintas escuras ao longo do arco que saiu. Duas causas: o preto do traço fica fora do
+# piso (para não cobrir as paredes), e ali ficava o render; e os px de antialias do traço sobre o vinílico, marrom-escuros
+# (45, 68, 91), caem na tolerância do granito (50, 66, 90) e viravam granito. Agora: os arcos do PDF (os traços de 0,57
+# pt da ARQ_PAREDE só de curvas, num quadrado de 20 a 70 pt), com `largura_px` de folga, entram no piso em volta; e em
+# cada material saem as manchas soltas (`SOLTOS_F`: menos de `area_px` e a mais de `folga_px` de uma mancha grande do
+# mesmo material) que outro piso cobre no fechamento: são antialias de traço com a cor de outro piso, não piso.
+ARCOS_F = {"camada": "ARQ_PAREDE", "larg_pdf": 0.57, "lado_pt": (20.0, 70.0), "largura_px": 4}
+SOLTOS_F = {"area_px": 40, "folga_px": 2}
+
+
+def soltos(m):
+    """As manchas soltas de `m` (bool)."""
+    q = SOLTOS_F
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+    grande = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_px"]])
+    k = 2 * q["folga_px"] + 1
+    perto = cv2.dilate(grande.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    return m & ~grande & ~perto
+
+
+def arcos_porta(Q):
+    q = ARCOS_F
+    m = np.zeros((Q.H, Q.W), np.uint8)
+    n = 0
+    for d in Q.desenhos:
+        r = d["rect"]
+        if d.get("layer") == q["camada"] and d["type"] == "s" and abs((d.get("width") or 0) - q["larg_pdf"]) < 0.02 \
+                and d["items"] and all(it[0] == "c" for it in d["items"]) \
+                and q["lado_pt"][0] < max(r.width, r.height) < q["lado_pt"][1] and abs(r.width - r.height) < 3:
+            for c in Q.caminhos(d):
+                cv2.polylines(m, [np.int32(np.round(c))], False, 1, q["largura_px"])
+            n += 1
+    return m.astype(bool), n
+
+
 def pisos(Q, img, incluir=None, dentro=None):
     """incluir: {nome do piso: [retângulos em pt]} onde o branco da base (uma peça que sai, como os carros) também é
     aquele piso. dentro: só nesta máscara (a pegada do Subsolo)."""
     out = img.astype(np.float32)
     incluir = incluir or {}
     branco = Q.cor([(255, 255, 255)], tol=3)
-    for i, (nome, cores, k, tex, forca, sig) in enumerate(PISOS[Q.chave]):
+    arcos, n_arcos = arcos_porta(Q)
+    preto = Q.cor([(17, 17, 17), (0, 0, 0)], tol=20) & ~arcos         # as paredes; o traço dos arcos é do piso
+    print(f"    arcos das portas: {n_arcos} do PDF, no piso em volta (sem restos do arco do render)")
+    mascaras, soltas = [], []
+    for nome, cores, k, *_ in PISOS[Q.chave]:
         m = Q.cor(cores, tol=6)
+        soltas.append(soltos(m))
         for r in incluir.get(nome, []):
             x0, y0, x1, y1 = ret_q(Q, r)
             m[y0:y1, x0:x1] |= branco[y0:y1, x0:x1]
         if k:
-            m = fechar(m, k) & ~Q.cor([(17, 17, 17), (0, 0, 0)], tol=20)   # as linhas finas da base, não as paredes
+            m = fechar(m, k) & ~preto                  # as linhas finas da base, não as paredes
         if dentro is not None:
             m &= dentro
+        mascaras.append(m)
+    n_soltos = 0
+    for i, (nome, cores, k, tex, forca, sig) in enumerate(PISOS[Q.chave]):
+        m = mascaras[i]
         if not m.any():
             continue
+        # a mancha solta só sai onde outro piso a cobre no fechamento (o antialias do arco sobre o vinílico); junto a
+        # uma peça (o carro sobre a pedra portuguesa) ela fica, porque ali não há outro piso
+        outros = np.zeros_like(m)
+        for j, mj in enumerate(mascaras):
+            if j != i:
+                outros |= mj
+        solto = soltas[i] & outros
+        n_soltos += int(solto.sum())
+        # a textura na máscara inteira (o mesmo desenho de sempre); só não é pousada nas manchas soltas
         novo = piso_textura(Q, out, m, tex, forca, sig, 700 + i)
-        out = pousar(out, novo, m, suave=0.5)
+        out = pousar(out, novo, m & ~solto, suave=0.5)
         print(f"    piso {nome}: {int(m.sum())} px, a {Q.px_m:.1f} px/m")
+    print(f"    {n_soltos} px de manchas soltas da legenda (antialias de traço com a cor de outro piso) ficam com o piso "
+          f"em volta")
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
@@ -1726,7 +1782,11 @@ def alfa_canteiros(Q):
 # E a faixa entre a borda do sofá (1802,8 pt) e a porta, da parede ao pé do sofá, em travertino, como no PDF ("DEPOIS
 # TRAVERTINO, JÁ PROXIMO AO BRAÇO DO SOFÁ"): o render deixava ali o tecido do sofá, que parecia ir até a porta. O tom
 # vem do travertino logo abaixo, entre o tapete e a porta (`ref_pt`); o da legenda em volta é o jardim de inverno.
-ESQUADRIAS_F = {"de_volta_pt": {"Terreo": [(1795.0, 929.68, 1808.6, 1037.97), (1795.0, 1037.97, 1807.67, 1113.94)]},
+# Também a faixa logo abaixo da folha aberta da porta da suíte 3 (usuário: "TEM UM ERRO NESSA PORTA"): o espelho da
+# folha (911,9 a 914,1 pt) pegava o topo do guarda-roupa, 7 px abaixo, e o copiava sob a folha (o bege com a borda ocre).
+# Começa a 0,6 pt da face do batente (2108,1 pt): a coluna dele é a do batente que as esquadrias redesenham.
+ESQUADRIAS_F = {"de_volta_pt": {"Terreo": [(1795.0, 929.68, 1808.6, 1037.97), (1795.0, 1037.97, 1807.67, 1113.94),
+                                           (2108.7, 914.85, 2159.2, 921.0)]},
                 "travertino_pt": {"Terreo": [(1803.85, 929.68, 1808.6, 1037.97), (1803.85, 1037.97, 1807.67, 1052.0)]},
                 "ref_pt": {"Terreo": (1793.0, 1058.0, 1806.5, 1108.0)}}
 
@@ -1743,8 +1803,8 @@ def esquadrias_terreo(Q, img):
     rs = ESQUADRIAS_F["de_volta_pt"].get(Q.chave, [])
     af = np.max([ret_aa_q(Q, r) for r in rs], axis=0) if rs else np.zeros_like(ac)
     print(f"    canteiros: {int((mudou & (ac > 0.5)).sum())} px que o espelho dos vidros mudou dentro dos jardins voltam "
-          f"ao que eram; junto às portas de correr do jardim de inverno, {int((mudou & (af > 0.5)).sum())} px (a borda "
-          f"do sofá copiada)")
+          f"ao que eram; junto às portas de correr do jardim de inverno e sob a folha da porta da suíte 3, "
+          f"{int((mudou & (af > 0.5)).sum())} px (a borda do sofá e o topo do guarda-roupa copiados)")
     a = np.maximum(ac, af)[..., None]
     out = out * (1 - a) + img.astype(np.float32) * a
     rs = ESQUADRIAS_F["travertino_pt"].get(Q.chave, [])

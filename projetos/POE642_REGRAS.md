@@ -83,6 +83,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 
 - **[19/10] R3. Nunca mostrar o arco da porta.**
   - Porta de giro: só a folha (branca, fina, na espessura do PDF, com contorno fino) e o batente.
+  - [22/10] Nem resto do arco: onde ele estava, o piso segue limpo, sem pintas (usuário, na porta da suíte 3 da Casa B: "tem um erro nessa porta"). E a limpeza em volta da folha não copia o móvel vizinho para junto dela (lá, uma lasca do guarda-roupa sob a folha aberta).
   - Porta camarão: só as folhas em zigue-zague, sem o setor pintado.
 - **Porta de correr** (referência de 19/10): caixilho em faixa branca de 5 cm com contorno cinza, folhas em duas linhas sobrepostas e batentes em quadradinhos brancos. Portas de vidro de correr em dois planos, como no PDF.
 - **Pivotante:** a folha até a ponta do PDF, passando para o outro hall.
