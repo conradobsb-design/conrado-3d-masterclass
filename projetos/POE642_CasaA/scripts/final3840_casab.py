@@ -734,7 +734,9 @@ class em_quadro:
 # As 4 banquetas da bancada gourmet: no PDF são os círculos da ARQ_LAYOUT HUMANIZAÇÃO (só traço) nesta caixa (pt). Os
 # círculos ficam fora das peças do PDF (sairiam como aros transparentes por cima da pedra) e as `banqueta_linho` da
 # biblioteca (0,40 m, viradas para a bancada) pousam no centro de cada um, com a sombra curta das peças (os `centros`
-# da `BANQUETAS_B` são px do render de 2000 e não valem no quadro).
+# da `BANQUETAS_B` são px do render de 2000 e não valem no quadro). Elas entram por baixo do tampo (usuário, 22/10/26:
+# "AS BANQUETAS DEVEM APARECER PARCIALMENTE, ATRÁS DA BANCADA"): a pedra da ARQ_BANCADAS cobre a parte delas que fica
+# sob ela, e a sombra não cai sobre o tampo.
 BANQUETAS_PT = (1135.0, 1455.0, 1315.0, 1492.0)
 
 
@@ -764,6 +766,7 @@ def banquetas(Q, img):
     h, w = al.shape
     d_ = s["dist_m"] * Q.px_m
     out = img.astype(np.float32)
+    tampo = Q.preencher(lambda d: d.get("layer") == "ARQ_BANCADAS" and d.get("fill"), fs=False)
     cs = centros_banquetas(Q)
     for cx, cy in cs:
         # a peça em posição subpixel (translação pura), num recorte com folga para a sombra
@@ -771,15 +774,17 @@ def banquetas(Q, img):
         X0, Y0 = int(cx - w / 2) - f, int(cy - h / 2) - f
         Wr, Hr = w + 2 * f, h + 2 * f
         Mt = np.float32([[1, 0, cx - w / 2 - X0], [0, 1, cy - h / 2 - Y0]])
+        livre = 1 - tampo[Y0:Y0 + Hr, X0:X0 + Wr]                   # o que o tampo não cobre
         a = cv2.warpAffine(al, Mt, (Wr, Hr), flags=cv2.INTER_LINEAR)
         c = cv2.warpAffine(cor.astype(np.float32), Mt, (Wr, Hr), flags=cv2.INTER_LINEAR)
         sb = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, -d_], [0, 1, d_]]), (Wr, Hr)), (0, 0),
-                              s["sig_m"] * Q.px_m) * s["forca"]
+                              s["sig_m"] * Q.px_m) * s["forca"] * livre
+        a = a * livre
         reg = out[Y0:Y0 + Hr, X0:X0 + Wr]
         reg *= (1 - sb * (1 - a))[..., None]
         out[Y0:Y0 + Hr, X0:X0 + Wr] = reg * (1 - a[..., None]) + c * a[..., None]
     print(f"    bancada gourmet: {len(cs)} banquetas de linho da biblioteca ({q['d_m']:.2f} m) nos círculos do PDF, "
-          f"com a sombra curta das peças")
+          f"com a sombra curta das peças, entrando sob o tampo")
     return np.clip(out, 0, 255).astype(np.uint8)
 
 

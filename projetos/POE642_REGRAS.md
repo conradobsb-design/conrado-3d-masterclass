@@ -161,6 +161,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
     - travesseiros bordô na frente dos cinza-claros;
     - criados redondos de madeira com abajur branco.
   - Cama de solteiro: faixa bordô atravessada sobre o edredom branco.
+- **[22/10] Banquetas sob o tampo** (usuário, na Casa B: "as banquetas devem aparecer parcialmente, atrás da bancada"): nas ilhas e bancadas com banquetas, a pedra cobre a parte da banqueta que fica sob o tampo (aparecem o encosto e a frente do assento); a sombra da banqueta não cai sobre a pedra.
 - **Tapetes:** só onde o PDF tem, no contorno do PDF. Área de estar não vira jantar. Arranjos e vasos só onde o PDF indica.
 - **Cortinas:** em linho off-white, traço fino. O bloco é o de `_blocos/blocos.py` (`cortina`), aprovado em 20/10.
   - **[20/10] Trilho de fora a fora:** sempre de parede a parede. Só o pano muda: a meia distância (como no PDF), todo recolhido ou todo fechado. Usuário: "trilhos da cortina tem que ser de fora a fora. somente a cortina pode estar a meia distancia, totalmente recolhida ou totalmente fechada".

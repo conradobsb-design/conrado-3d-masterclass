@@ -739,7 +739,7 @@ Pedido do usuário (22/10/26): "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGAST
   - planta em vaso, que vira a planta da biblioteca;
   - o resto é objeto.
   Todas levam volume na borda, sombra curta para baixo e à esquerda e o traço fino do PDF; as hachuras densas ficam mais leves.
-  As louças são lisas (sem a trama do tecido), com o traço mais leve (o aro de dentro da cuba, quase só o tom). A bacia (a louça dentro de outra, com 40 a 95% da área dela) é achada pela geometria, porque o aro é pintado depois e a cobre; ela leva a sombra interna do lado da luz e o fundo um tom abaixo. As banquetas da bancada gourmet são as `banqueta_linho` da biblioteca nos círculos do PDF (`BANQUETAS_PT`, `centros_banquetas`).
+  As louças são lisas (sem a trama do tecido), com o traço mais leve (o aro de dentro da cuba, quase só o tom). A bacia (a louça dentro de outra, com 40 a 95% da área dela) é achada pela geometria, porque o aro é pintado depois e a cobre; ela leva a sombra interna do lado da luz e o fundo um tom abaixo. As banquetas da bancada gourmet são as `banqueta_linho` da biblioteca nos círculos do PDF (`BANQUETAS_PT`, `centros_banquetas`), entrando sob o tampo (a pedra cobre a parte delas que fica sob a bancada).
 - **Rótulos** (`rotulos`, `ROTULOS_F`):
   - a caixa exata do texto (`_caixa_texto`, medida em cada opção de corpo e de quebra) procura, em até 3 m do ponto do PDF, o lugar livre mais perto, sempre dentro do seu ambiente e sem tocar objeto nem outro rótulo;
   - onde não cabe, quebra em duas linhas e depois desce o corpo (o corpo cheio vale mais que a distância, `corpo_custo`);
