@@ -1363,8 +1363,18 @@ PAREDES_F = {"cor": (8, 8, 8), "camadas": ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS"),
              # o guarda-corpo de vidro em L da varanda da suíte master (usuário, 22/10/26: "FALTOU A REPRESENTAÇÃO DO
              # GUARDA-CORPO EM L DA VARANDA EM VIDRO"): no PDF, as lâminas brancas de 2 cm da ARQ_ELEMENTOS FIXOS na
              # borda do travertino (pt), que nenhuma etapa desenhava; entram como os vidros das esquadrias (o vidro
-             # claro, as duas faces em linha fina, o brilho no meio), com 2,4 px no mínimo para aparecer, e a sombra curta
-             "guarda_corpo": {"pt": {"Terreo": [(732.77, 489.75, 1054.22, 490.88), (732.77, 489.75, 733.91, 941.02)]},
+             # claro, as duas faces em linha fina, o brilho no meio), com 2,4 px no mínimo para aparecer, e a sombra curta.
+             # Depois (usuário: "NO GUARDA CORPO, TEM UMA FALHA LOGO PERTO DA DOBRA, NA QUINA, E ESTÁ FALTANDO O FECHAMENTO
+             # DESSE GUARDA CORPO NO LADO DIREITO"): entra a terceira lâmina do PDF, em pé à direita, da quina até a
+             # parede (527,16 pt); cada lâmina passa `ponta_px` das pontas, para as quinas fecharem sem dente; e no lábio
+             # do travertino por fora do vidro da esquerda (`labio_pt`, os 2,3 pt da laje além do vidro, da face de cima
+             # do vidro até 25 pt abaixo da quina: em cima a legenda não tem o lábio, a grama encosta no vidro; mais
+             # abaixo, junto ao deck, as juntas das tábuas não podem virar lábio), os px escuros da legenda junto à
+             # quina (`labio_dif` abaixo da mediana da coluna) ficam no tom do lábio.
+             "guarda_corpo": {"pt": {"Terreo": [(732.77, 489.75, 1054.22, 490.88), (732.77, 489.75, 733.91, 941.02),
+                                                (1053.09, 489.75, 1054.22, 527.16)]},
+                              "labio_pt": {"Terreo": [(730.51, 489.75, 732.77, 515.0)]}, "labio_dif": 40,
+                              "ponta_px": 0.6,
                               "vidro": (226, 219, 206), "alfa": 0.95, "contorno": (96, 100, 104), "larg_min_px": 2.4,
                               "linha_px": 0.6, "brilho": 0.5, "sombra": 0.18}}
 
@@ -1414,6 +1424,14 @@ def guarda_corpo(Q, img):
     q, ss = PAREDES_F["guarda_corpo"], 8
     rs = q["pt"].get(Q.chave, [])
     out = img.astype(np.float32)
+    for r in q["labio_pt"].get(Q.chave, []):                # o lábio do travertino por fora do vidro, sem falha
+        X0, Y0, X1, Y1 = ret_q(Q, r)
+        for x in range(X0, X1):
+            col = out[Y0:Y1, x]
+            lum = col.mean(axis=1)
+            ruim = lum < np.median(lum) - q["labio_dif"]
+            if ruim.any() and (~ruim).any():
+                col[ruim] = np.median(col[~ruim], axis=0)
     for r in rs:
         (x0, y0), (x1, y1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
         deitado = x1 - x0 > y1 - y0
@@ -1423,6 +1441,10 @@ def guarda_corpo(Q, img):
         if not deitado and x1 - x0 < q["larg_min_px"]:
             c_ = (x0 + x1) / 2
             x0, x1 = c_ - q["larg_min_px"] / 2, c_ + q["larg_min_px"] / 2
+        if deitado:                                          # as pontas passam um pouco, para as quinas fecharem
+            x0, x1 = x0 - q["ponta_px"], x1 + q["ponta_px"]
+        else:
+            y0, y1 = y0 - q["ponta_px"], y1 + q["ponta_px"]
         X0, Y0, X1, Y1 = int(x0) - 3, int(y0) - 3, int(np.ceil(x1)) + 4, int(np.ceil(y1)) + 4
         w, h = X1 - X0, Y1 - Y0
         m = np.zeros((h * ss, w * ss), np.uint8)
@@ -1473,6 +1495,7 @@ def paredes(Q, img):
             cv2.rectangle(m, (round(x0 * ss), round(y0 * ss)), (round(x1 * ss) - 1, round(y1 * ss) - 1), 255, -1)
         a = np.maximum(a, cv2.resize(m, (Q.W, Q.H), interpolation=cv2.INTER_AREA).astype(np.float32) / 255)
     out = img.astype(np.float32)
+    out, ng = guarda_corpo(Q, out)                           # antes do preto: a ponta que encosta na parede fica sob ele
     out = out * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None]
     # pilares: os redondos (usuário, 22/10/26: "EXISTEM DOIS PILARES REPRESENTADOS POR BOLAS. PRECISAMOS DEIXAR EM
     # CINZA PARA DESTACÁ-LOS"), em cinza médio com o contorno escuro fino; os retangulares, pretos como as paredes
@@ -1505,7 +1528,6 @@ def paredes(Q, img):
             out[Y0:Y0 + 64, X0:X0 + 64] = out[Y0:Y0 + 64, X0:X0 + 64] * (1 - af) + np.float32(q["cor"]) * af
         n += 1
     out = brises(Q, out, bs)
-    out, ng = guarda_corpo(Q, out)
     print(f"    paredes pretas no contorno do PDF; {len(muros)} muros na sequência de portas de correr; {n} pilares (os "
           f"redondos em cinza, com o contorno fino); {len(bs)} brises em grafite; {ng} trechos de guarda-corpo de vidro")
     return np.clip(out, 0, 255).astype(np.uint8)
@@ -1612,8 +1634,12 @@ def plantas_do_gramado():
 # Os dois jardins (usuário, 22/10/26). O de inverno: "TEMOS VIDRO EM CIMA E EMBAIXO E PORTAS DE VIDRO NA LATERAL ESQUERDA.
 # NOTE QUE O PISO EM TRAVERTINO ESTÁ PRESENTE NAS BORDAS. SEM CORES QUENTES, APENAS VERDE"; o do hall: "VAMOS MELHORAR
 # AS BORDAS DO TRAVERTINO [...] NA PARTE DE BAIXO DO JARDIM, PRECISAMOS DO TRAVERTINO E OS BRISES BEM DESENHADOS".
-# - Jardim de inverno: a sala do PDF (o travertino da ARQ_CONTRAPISO entre os vidros, a parede e a porta de correr) em
-#   travertino, e o canteiro recuado `borda_m` dele; antes, o canteiro ia até o vidro de baixo e passava por cima dele.
+# - Jardim de inverno (refeito; usuário: "NÃO HÁ ESSA MOLDURA DE TRAVERTINO. É SOMENTE NA LATERAL ESQUERDA. TEM FOLHAS
+#   DE VIDRO EM CIMA E EMBAIXO. SENDO EM CIMA RENTE AO VINILICO. NA LATERAL ESQUERDA, TEMOS AS DUAS FOLHAS DE VIDRO DE
+#   CORRER E DEPOIS TRAVERTINO, JÁ PROXIMO AO BRAÇO DO SOFÁ E RENTE AO TAPETE"): o canteiro é a sala inteira, sem borda,
+#   do vidro de cima (o da ARQ_PAREDE, encostado no vinílico) ao vidro de baixo e da parede da direita às folhas de
+#   correr (a de dentro até 1042,5 pt, a de fora daí para baixo), e as plantas não passam dele. O travertino fica só do
+#   lado de fora das portas, na sala, entre elas, o braço do sofá e o tapete (o piso da legenda, como já estava).
 # - Jardim do hall: o canteiro no retângulo exato entre a parede, o vidro e a linha do travertino (antes, a mancha do
 #   verde da legenda, com as plantas saindo dela), e a faixa de baixo, até a pedra portuguesa, em travertino, sob os
 #   brises (que a etapa `paredes` desenha).
@@ -1625,7 +1651,10 @@ JARDINS_F = {
     "forracao": {"nomes": ["arbusto_1", "arbusto_2", "arbusto_3"], "d_m": (0.40, 0.55), "passo_m": 0.32, "tom": 0.92},
     # a faixa do hall logo abaixo do vidro de baixo: dois borrões escuros do render, sem nada no PDF, voltam a travertino
     "limpar_pt": [(1816.18, 1122.6, 2006.1, 1132.0)],
-    "inverno": {"sala_pt": (1816.18, 929.68, 2006.1, 1113.94), "borda_m": 0.30, "transbordo_m": 0.03, "semente": 21,
+    # o canteiro: a sala, entre a face de baixo do vidro de cima e a de cima do vidro de baixo, e as faixas até as
+    # folhas de correr (a de dentro, de 968,8 a 1042,5 pt; a de fora, de 1042,5 a 1111,67 pt); as plantas, na primeira
+    "inverno": {"canteiro_pt": [(1816.18, 925.15, 2006.1, 1115.07), (1813.34, 968.8, 1816.18, 1111.67),
+                                (1810.51, 1042.5, 1813.34, 1111.67)], "transbordo_m": 0.0, "semente": 21,
                 "plantas": [("costela_de_adao", 0.95, (0.25, 0.25), 0), ("planta_folhas_largas", 0.90, (0.75, 0.22), 90),
                             ("palmeira_2", 1.30, (0.50, 0.52), 0), ("planta_folhas_largas", 0.85, (0.24, 0.78), 180),
                             ("costela_de_adao", 0.90, (0.77, 0.80), 270), ("palmeira_3", 0.80, (0.52, 0.88), 0),
@@ -1667,31 +1696,47 @@ def travertino_em(Q, img, a, semente):
     return out
 
 
+def alfa_canteiros(Q):
+    """Os dois jardins de `JARDINS_F` (0 a 1, no quadro): o de inverno, a sala inteira até os vidros e as folhas de
+    correr, e o do hall."""
+    q = JARDINS_F
+    return np.max([ret_aa_q(Q, r) for r in q["inverno"]["canteiro_pt"] + [q["hall"]["canteiro_pt"]]], axis=0)
+
+
+def esquadrias_terreo(Q, img):
+    """As esquadrias da final (`ondas_fora` e o espelho das ajustes) e, por cima, os canteiros como estavam: o espelho
+    da faixa de cada vidro (`esquadria_limpar`) troca o px escuro de um lado pelo do outro (para não copiar parede
+    preta), e nas folhagens escuras junto ao vidro isso trazia o vinílico e o travertino para dentro do jardim, em
+    pintas. Os vidros e as folhas ficam fora dos canteiros, então nada deles se perde."""
+    out = B.esquadrias_final(ondas_fora(Q, img), Q.chave, Q.pg, Q.p2q, Q.px_m)
+    a = alfa_canteiros(Q)[..., None]
+    n = int(((np.abs(out.astype(np.int16) - img.astype(np.int16)).max(axis=2) > 12) & (a[..., 0] > 0.5)).sum())
+    print(f"    canteiros: {n} px que o espelho dos vidros mudou dentro dos jardins voltam ao que eram")
+    return np.clip(out * (1 - a) + img.astype(np.float32) * a, 0, 255).astype(np.uint8)
+
+
 def jardins(Q, img):
     q = JARDINS_F
     out = img.astype(np.float32)
     comum = {"terra": q["terra"], "terra_ruido": q["terra_ruido"], "forracao": q["forracao"]}
-    # o jardim de inverno: a sala em travertino, o canteiro recuado da borda
+    # o jardim de inverno: o canteiro na sala inteira, dos vidros às folhas de correr, sem borda de travertino
     ji = q["inverno"]
-    out = travertino_em(Q, out, ret_aa_q(Q, ji["sala_pt"]), 741)
     for i, r in enumerate(q["limpar_pt"]):
         out = travertino_em(Q, out, ret_aa_q(Q, r), 750 + i)
-    b = ji["borda_m"] * 56.69
-    sx0, sy0, sx1, sy1 = ji["sala_pt"]
-    cant = (sx0 + b, sy0 + b, sx1 - b, sy1 - b)
+    a_ji = np.max([ret_aa_q(Q, r) for r in ji["canteiro_pt"]], axis=0)
     # o jardim do hall: a faixa dos brises em travertino; o canteiro no retângulo do PDF
     jh = q["hall"]
     out = travertino_em(Q, out, ret_aa_q(Q, jh["faixa_pt"]), 742)
     out = np.clip(out, 0, 255).astype(np.uint8)
     with em_quadro(Q):
-        for nome, r, cfg in (("jardim de inverno", cant, ji), ("jardim de 4,62 m² do hall", jh["canteiro_pt"], jh)):
-            a = ret_aa_q(Q, r)
+        for nome, a, r, cfg in (("jardim de inverno", a_ji, ji["canteiro_pt"][0], ji),
+                                ("jardim de 4,62 m² do hall", ret_aa_q(Q, jh["canteiro_pt"]), jh["canteiro_pt"], jh)):
             x0, y0, x1, y1 = ret_q(Q, r)
             out = B.canteiro(out, a, (x0, y0, x1, y1), dict(comum, plantas=cfg["plantas"],
                                                            transbordo_m=cfg["transbordo_m"], semente=cfg["semente"]),
                              Q.px_m, nome)
-    print(f"    jardins: a sala do jardim de inverno em travertino, com o canteiro a {ji['borda_m']:.2f} m dos vidros; "
-          f"a faixa dos brises do jardim do hall em travertino; só plantas verdes")
+    print("    jardins: o de inverno na sala inteira, dos vidros às folhas de correr, sem borda de travertino; "
+          "a faixa dos brises do jardim do hall em travertino; só plantas verdes")
     return out
 
 
@@ -1970,7 +2015,7 @@ def passos_terreo(Q, ini, M, t):
         ("boxes", lambda im: boxes_granito(Q, im)),
         ("paredes", lambda im: paredes(Q, im)),
         ("soleiras", lambda im: soleiras(Q, im)),
-        ("esquadrias", lambda im: B.esquadrias_final(ondas_fora(Q, im), chave, Q.pg, Q.p2q, Q.px_m)),
+        ("esquadrias", lambda im: esquadrias_terreo(Q, im)),
         ("cortinas", lambda im: cortinas(Q, im)),
         ("escadas", lambda im: escadas_projecoes(Q, im)),
         ("cobertura", lambda im: B.cobertura_final(im, Q.pg, Q.p2q)),
