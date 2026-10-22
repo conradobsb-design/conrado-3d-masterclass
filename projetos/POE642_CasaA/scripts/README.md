@@ -676,6 +676,15 @@ python3 conferencia_casac.py            # -> ../../POE642_CasaC/renders/POE642_C
 python3 conferencia_casac.py --escalas  # -> ../../POE642_CasaC/renders/POE642_CasaC_PH_escalas_conferencia.jpg
 ```
 
+## Pente fino da Casa D: `conferencia_casad.py`
+
+O mesmo mapa (22/10/26), sobre as pranchas de entrega da Casa D (`POE642_CasaD/entrega/POE642_CasaD_PH_<Pavimento>_entrega.png`), com as escalas primeiro. Itens em `PENTE_FINO`, recorte em `RECORTE`, folha das escalas em `ESCALA_PISOS` e `ESCALA_VEGETACAO`, como nos das Casas B e C. O PDF vai ao quadro da prancha pela cadeia das bases (`opcoes_1pav_casae.quadro_pdf`, config da Casa D, 59,7 px/m).
+
+```bash
+python3 conferencia_casad.py            # -> ../../POE642_CasaD/renders/POE642_CasaD_PH_{Subsolo,Terreo}_pente_fino_mapa.jpg
+python3 conferencia_casad.py --escalas  # -> ../../POE642_CasaD/renders/POE642_CasaD_PH_escalas_conferencia.jpg
+```
+
 ## Ajustes da Casa B pelo pente fino: `ajustes_casab.py`
 
 Os itens dos mapas do pente fino da Casa B (25 no Térreo, 12 no Subsolo), um por vez, sem IA, na imagem de partida de cada pavimento (Térreo: o render retocado de 2000 px; Subsolo: a final de 6905 px reduzida a 2000). Reaproveita as rotinas aprovadas do pente fino da Casa A (`ajustes_casaa.py`):

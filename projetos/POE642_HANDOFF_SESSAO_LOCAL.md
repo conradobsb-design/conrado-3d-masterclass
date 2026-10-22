@@ -339,6 +339,8 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 
 ## Casa D · Térreo
 
+**Agora (22/10/26):** os mapas do pente fino pelas regras aguardam a confirmação do usuário (seção "Casa D · pente fino pelas regras", no fim).
+
 - **PDF:** `_pdfs_cliente/642 - TÉRREO - CASA D.pdf` (mesma folha, recorte e enquadramento das Casas A, B e C). Config em `POE642_CasaD/config_bases.json`.
 - **Cores do PDF:** oliva #BAB596 (living, jantar, hall, adega, lavabo), laranja #CC9966 (suítes, sala íntima, circulações, quarto de serviço), terracota #995F4C (cozinha, gourmet, banho gourmet, despensa, louceiro, serviço, área descoberta, garagem e acesso de veículos), cinza #E4E4E4 (varanda gourmet, piscina, escadas, deck lateral), piscina azul. Os banhos são brancos com hachura (sem polígono de piso).
 - **Materiais (definidos pelo usuário em 15/10/26, como na Casa C):** travertino no oliva; vinílico no laranja; Granito Marrom Tabaco em todo o terracota, inclusive a garagem e o acesso de veículos (o usuário pediu o acesso igual à garagem, sem pedra portuguesa); Bege Bahia no cinza, nos banhos, na escada branca junto às suítes e nos pisantes; grama no entorno; floreira nos dois jardins.
@@ -2266,6 +2268,48 @@ python3 rodape_entrega.py --config ../../POE642_CasaC/config_bases.json --no-qua
     --render Subsolo=../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_final_rotulos.png
 python3 pdf_entrega.py --config ../../POE642_CasaC/config_bases.json
 ```
+
+## Casa D · pente fino pelas regras (22/10/26)
+
+Pedido do usuário: "Casa D" (a última da ordem da seção 17 das regras: Casa E, Casa A, Casa B, Casa C, Casa D). As duas pranchas de entrega atuais (`POE642_CasaD/entrega/POE642_CasaD_PH_{Subsolo,Terreo}_entrega.png`, de 15/10) foram conferidas trecho a trecho contra os PDFs do cliente e o `POE642_REGRAS.md`, com as escalas primeiro. Nada foi retocado ainda; a lista aguarda a confirmação do usuário (seção 1 das regras).
+
+- **Como foi conferido:** o PDF de cada pavimento vai ao quadro da prancha pela cadeia das bases (`opcoes_1pav_casae.quadro_pdf`, config da Casa D): 59,7 px/m; as paredes do PDF caem sobre as da prancha e o elevador do Subsolo sobre o do Térreo. Lado a lado, trecho a trecho, e com as camadas DOC_LINHAS E PROJEÇÕES, ARQ_ELEMENTOS FIXOS, EST_LAJE e ARQ_ESCADAS E RAMPAS desenhadas por cima. O PDF da Casa D não tem a EST_PILAR.
+- **Mapas e escalas:** `conferencia_casad.py` (em `POE642_CasaA/scripts/`), com os itens em `PENTE_FINO`: `POE642_CasaD/renders/POE642_CasaD_PH_{Subsolo,Terreo}_pente_fino_mapa.jpg` e a folha das escalas `POE642_CasaD/renders/POE642_CasaD_PH_escalas_conferencia.jpg` (`--escalas`).
+- **O que o PDF tem e a prancha não mostra:** 12 panos de cortina (ondas da ARQ_LOUÇAS E METAIS); os brises de ripas da ARQ_ELEMENTOS FIXOS (dos dois lados da porta pivotante do hall, na lateral direita da garagem, na lateral da suíte 3 / escritório e em duas faixas da fachada de baixo), com o tracejado da cobertura ao lado; os guarda-corpos de vidro em volta do vão da escada e na borda do terraço da piscina; os X tracejados do banho master e do jardim do lavabo (DOC_LINHAS); 22 arcos de porta no Térreo e 10 no Subsolo a tirar; os rótulos (33 ambientes e o elevador no Térreo, 6 e o elevador no Subsolo).
+- **Leitura da escada:** a de 16 degraus junto à suíte master sobe do Subsolo ("S" no degrau 1, junto ao pátio, numerada de 1 a 16 da esquerda para a direita; no Subsolo, cheia até a marca de corte no degrau 7). No Térreo é a chegada: triângulo no degrau 16 apontando para a esquerda; no Subsolo, no degrau 1 apontando para a direita.
+- **Térreo (23 itens):**
+  1. vegetação grande demais (leques de ~2 m), avançando ~2,5 m pelo gramado junto à suíte 3;
+  2. **a confirmar:** granito no desenho e no tom da referência das outras casas (~118, 89, 69) ou no Marrom Tabaco de 15/10 (~90, 66, 50); hoje escuro (~75, 56, 49) com pontos brancos, e o do Subsolo em outro tom;
+  3. travertino com estrias verticais contínuas;
+  4. vinílico em réguas largas e lisas (réguas de ~20 cm, deitadas como no PDF);
+  5. Bege Bahia liso e rosado com riscos brancos;
+  6. grama clara e de grão miúdo;
+  7. carros em três cores (15/10) e de ~4,3 a 5,1 m: prata, alinhados, 4,70 × 1,85 m (R12);
+  8. a final refeita em 3840 px como as das Casas B e C, guardando as decisões de 15/10;
+  9. rótulos (GARAGEM cai sobre o carro do meio no PDF);
+  10. portas sem arcos (22);
+  11. escada de 16 degraus com linhas e triângulo;
+  12. blocos em cascata à esquerda da piscina em Bege Bahia, com contorno e sombra; **a confirmar:** o triângulo descendo;
+  13. guarda-corpos de vidro (vão da escada e borda do terraço);
+  14. brises de ripas com o tracejado da cobertura; **a confirmar:** a cor (madeira ou grafite);
+  15. projeções tracejadas (os X do banho master e do jardim do lavabo, os da garagem e da área descoberta mais visíveis);
+  16. jardins da sala íntima e do lavabo só verdes, plantas na escala;
+  17. as 12 cortinas;
+  18. esquadrias finas;
+  19. bacias com tampa e cubas brancas (as da cozinha e do serviço hoje em inox);
+  20. paredes pretas;
+  21. soleiras (R13) e a do elevador em inox;
+  22. banquetas sob o tampo e box do banho gourmet em cinza claro; **a confirmar:** bancadas em pedra areia, como nas Casas B e C;
+  23. **a confirmar:** camas e bancos do render (como na Casa C) ou a roupa de cama da biblioteca.
+- **Subsolo (10 itens):**
+  1. R2 com a hachura do lote do Térreo final, em cor cheia o Subsolo e o pátio; **a confirmar:** a área verde de 15/10 fica verde ou entra na hachura;
+  2. a 4. Bege Bahia, vinílico e granito na escala (o granito igual ao do Térreo);
+  5. escada com linhas, cheia até o degrau 7 e esmaecida depois, triângulo no degrau 1;
+  6. as 10 portas sem arcos;
+  7. rótulos (6 ambientes e o elevador);
+  8. soleiras;
+  9. paredes;
+  10. a final refeita em 3840 px.
 
 ## Casas A a D · Barlavento nas piscinas
 
