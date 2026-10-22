@@ -164,6 +164,9 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
     - travesseiros bordô na frente dos cinza-claros;
     - criados redondos de madeira com abajur branco.
   - Cama de solteiro: faixa bordô atravessada sobre o edredom branco.
+- **[22/10] Móveis humanizados sem perder as características** (usuário, na Casa B, no estar da varanda gourmet: "vamos humanizar esses mobiliários, sem que eles percam as características"): a forma, a cor e o lugar de cada peça são os do PDF. Os estofados ganham volume de almofada e trama de tecido, o traço técnico fica leve e a madeira, com o veio.
+- **[22/10] Cama da suíte com o cobre-leito e o banco** (usuário: "vamos representar melhor essa cama e seu cobre-leito. Está faltando o banco que está acima da cama"): a cama segue a silhueta do PDF, com o cobre-leito (matelassê, dobrado em rolo junto aos travesseiros e caindo dos lados como no PDF), os travesseiros, as almofadas e a peseira. Toda peça do PDF entra, mesmo em camada trocada (o banco estava na DOC_TEXTOS).
+- **[22/10] Desenho sobre a mesa** (usuário: "preciso do desenho sobre a mesa"): o desenho do tampo do PDF (anel, painéis, peça de centro) aparece por cima da mesa, em linha fina nítida, nunca apagado como hachura.
 - **[22/10] Banquetas sob o tampo** (usuário, na Casa B: "as banquetas devem aparecer parcialmente, atrás da bancada"): nas ilhas e bancadas com banquetas, a pedra cobre a parte da banqueta que fica sob o tampo (aparecem o encosto e a frente do assento); a sombra da banqueta não cai sobre a pedra.
 - **Tapetes:** só onde o PDF tem, no contorno do PDF. Área de estar não vira jantar. Arranjos e vasos só onde o PDF indica.
 - **Cortinas:** em linho off-white, traço fino. O bloco é o de `_blocos/blocos.py` (`cortina`), aprovado em 20/10.
@@ -183,6 +186,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Casa E: madeira no Térreo, bronze no 1º Pavimento;
   - Casa E 1º Pavimento, fachada das suítes em três camadas: cortina, porta de vidro de correr e brise na face externa.
 - **Vazios (pé-direito duplo):** brancos, com o X em cinza médio.
+- **[22/10] Guarda-corpo de vidro** (usuário, na Casa B: "faltou a representação do guarda-corpo em L da varanda em vidro"): todo guarda-corpo do PDF aparece, como os vidros das esquadrias (vidro claro, as duas faces em linha fina), com a sombra curta.
+- **[22/10] Muro na sequência da porta de correr** (usuário: "na sequência das portas de correr, existe muro (em preto)"): o trecho fino que segue a porta de correr até o muro de divisa é muro, em preto.
 
 ## 10. Área externa
 
@@ -190,6 +195,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Árvores, arbustos e palmeiras da biblioteca (`_texturas/vegetacao/`), no tamanho real, com a sombra.
   - Canteiros com touceiras.
   - Jardim de inverno com as plantas saindo levemente da floreira.
+  - **[22/10] Jardins: só verde e travertino na borda** (usuário, na Casa B: "temos vidro em cima e embaixo e portas de vidro na lateral esquerda. Note que o piso em travertino está presente nas bordas. Sem cores quentes, apenas verde"; e "vamos melhorar as bordas do travertino [...] na parte de baixo do jardim, precisamos do travertino e os brises bem desenhados"): o canteiro não passa por cima de vidro, porta ou piso. No jardim de inverno, o piso da sala é travertino e o canteiro fica recuado dele (0,30 m). No jardim do hall, o canteiro vai até a linha do travertino, com a borda limpa, e a faixa sob os brises é travertino. Só plantas verdes, sem flores nem folhagem creme, e o chão do canteiro verde-escuro, sem terra marrom à mostra. Os brises vão nítidos, em grafite, com a sombra curta.
 - **Grama:** a da referência, na escala (R4).
 - **[22/10] Casa B: banco em L do deck em bronze fosco** (usuário: "o banco em L do deck é em bronze fosco"): cor chapada de bronze (RGB ~104, 84, 62), escovado bem leve no sentido de cada braço, a quina do lado da luz um pouco mais clara e a do outro lado um pouco mais escura, contorno fino e sombra curta no deck. Não é madeira.
 - **Piscinas:**

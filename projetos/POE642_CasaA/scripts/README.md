@@ -716,15 +716,18 @@ Pedido do usuário (22/10/26): "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGAST
 - **Etapas do Térreo** (`passos_terreo`):
   - `pisos`: cada material na máscara da legenda, com a textura da biblioteca na escala;
   - `bordas`: grama e piso;
-  - `vegetacao`: as plantas da biblioteca nos lugares do gramado;
+  - `vegetacao`: as plantas da biblioteca nos lugares do gramado; a floreira; e os dois jardins (`jardins`, `JARDINS_F`):
+    - o de inverno: a sala do PDF (o travertino entre os vidros, a parede e a porta de correr) em travertino (`travertino_em`, no tom do travertino em volta), com o canteiro recuado `borda_m` (0,30 m);
+    - o do hall: o canteiro no retângulo do PDF (sem transbordo, a borda limpa contra o travertino) e a faixa de baixo, sob os brises, em travertino;
+    - nos dois, só plantas verdes da biblioteca, a forração mais fechada e o chão em verde-escuro; a faixa sob o vidro de baixo do jardim de inverno volta a travertino (`limpar_pt`);
   - `bancadas`;
-  - `pecas`: os móveis, os tapetes e as louças pelo desenho do PDF;
-  - `tampas`: a tampa fechada em todos os vasos sanitários (`tampas_vasos`, `TAMPAS_F`). Os vasos são o "D" branco da ARQ_LOUÇAS E METAIS de 0,45 a 0,62 x 0,30 a 0,42 m sem outra louça dentro (`vasos_sanitarios`; o centro de massa puxado para o lado reto separa o vaso das cubas e das máquinas e dá o lado da parede). A tampa é o contorno recuado 1,2 cm, da dobradiça (17% do comprimento a partir da parede) à frente, em louça branca com volume, o traço das louças e a sombra curta sobre o aro; também no Subsolo;
-  - `biblioteca`: guarda-roupas, camas, cooktops, banquetas, inox, adega e elevador, pelas rotinas dos ajustes dentro de `em_quadro`, que as faz desenhar no quadro;
+  - `pecas`: os móveis, os tapetes e as louças pelo desenho do PDF; nas zonas de `PECAS["humanizar"]` (o estar da varanda gourmet), os estofados com volume de almofada, a trama do bouclé e o traço mais leve, e a madeira com o veio mais marcado;
+  - `tampas`: o desenho do tampo da mesa redonda do hall interno (`desenho_mesa`, `MESA_HALL_F`: as linhas do PDF por cima, nítidas, com relevo leve); e a tampa fechada em todos os vasos sanitários (`tampas_vasos`, `TAMPAS_F`). Os vasos são o "D" branco da ARQ_LOUÇAS E METAIS de 0,45 a 0,62 x 0,30 a 0,42 m sem outra louça dentro (`vasos_sanitarios`; o centro de massa puxado para o lado reto separa o vaso das cubas e das máquinas e dá o lado da parede). A tampa é o contorno recuado 1,2 cm, da dobradiça (17% do comprimento a partir da parede) à frente, em louça branca com volume, o traço das louças e a sombra curta sobre o aro; também no Subsolo;
+  - `biblioteca`: guarda-roupas, camas, cooktops, banquetas, inox, adega e elevador, pelas rotinas dos ajustes dentro de `em_quadro`, que as faz desenhar no quadro; depois, a cama da suíte master e o banco aos pés dela (`cama_master`, `CAMA_MASTER_F`): da silhueta do PDF, por faixas, a placa, o lençol, os travesseiros, as almofadas bordô, o rolo e o cobre-leito em matelassê com a peseira; o banco, que no PDF está na camada DOC_TEXTOS, estofado em linho greige com as costuras e os rolos;
   - `carros`;
   - `deck`: o banco em L, em bronze fosco (`BANCO_DECK`), e o chuveiro;
   - `boxes`: nos banhos de granito, o vidro do box em faixa cinza-clara (`boxes_granito`, `vidros_box`, `BOXES_F`);
-  - `paredes`: as pretas, e os pilares redondos em cinza;
+  - `paredes`: as pretas, e os pilares redondos em cinza; os muros na sequência das portas de correr da área de serviço descoberta (`PAREDES_F["muros_pt"]`); os brises do jardim do hall em grafite, com a aresta clara, o contorno e a sombra (`brises`); o guarda-corpo de vidro em L da varanda da suíte master (`guarda_corpo`);
   - `soleiras`: os vãos brancos de porta do PDF (`ajustes_casab.vaos_brancos`), cada um ajustado às faces e às pontas das paredes do PDF (`_soleira_no_pdf`, em 8 x), em Bege Bahia nítido com as faces em cinza fino (`SOLEIRAS_F`); também no Subsolo;
   - `esquadrias`: antes, as ondinhas do PDF que marcam as cortinas saem do piso (`ondas_fora`, `ONDAS_F`): perto do traço do PDF (`ajustes_casab.onda_cortina_b`), o px que destoa da mediana do piso da mesma linha toma o valor dela (a parede preta fica). Sem isso, o espelho das esquadrias levava as ondas para junto do vidro;
   - `cortinas`: as de linho da biblioteca (`ajustes_casab.cortinas_b`), depois das esquadrias: desenhadas antes, o espelho das esquadrias as copiava e saíam duplicadas;
