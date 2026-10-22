@@ -724,10 +724,10 @@ Pedido do usuário (22/10/26): "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGAST
   - `deck`: o banco em L e o chuveiro;
   - `paredes`: as pretas, e os pilares redondos em cinza;
   - `esquadrias`;
-  - `escadas`: as duas escadas e as projeções;
+  - `escadas`: as duas escadas (os degraus do PDF em Bege Bahia, `degraus_bege`, com as linhas da R14) e as projeções;
   - `cobertura`;
   - `rotulos`.
-- **Etapas do Subsolo** (`passos_subsolo`), as mesmas onde cabem: `pisos` (só na pegada), `bancadas`, `pecas`, `biblioteca` (o chuveiro da ducha), `paredes`, `esquadrias`, `escadas`, `hachura` (o terreno hachurado, a partir do Térreo final: rode o Térreo antes) e `rotulos`.
+- **Etapas do Subsolo** (`passos_subsolo`), as mesmas onde cabem: `pisos` (só na pegada), `bancadas`, `sauna` (os bancos em travertino, `bancos_sauna`, `SAUNA_F`), `pecas`, `biblioteca` (o chuveiro da ducha), `paredes`, `esquadrias`, `escadas` (a de 6 degraus em Bege Bahia), `hachura` (o terreno hachurado, a partir do Térreo final: rode o Térreo antes) e `rotulos`.
 - **Bancadas** (pedido de 22/10: "troque o cinza das bancadas pelo tom areia", "cubas em branco", "preciso que as pedras estejam humanizadas"):
   - a pedra é a foto do Bege Bahia da biblioteca, na escala e levada ao tom areia (`BANCADAS_F`: `tom`, `contraste`), em toda peça da ARQ_BANCADAS;
   - as cubas da ARQ_BANCADAS (`cubas_bancada`: o retângulo com o aro fino nos quatro lados) são louça branca, com a bacia de cantos arredondados e a sombra interna; as da ARQ_LOUÇAS (cozinha, gourmet e bar) também saem brancas (`TERREO["inox_pt"]` vazio).
@@ -739,7 +739,11 @@ Pedido do usuário (22/10/26): "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGAST
   - o resto é objeto.
   Todas levam volume na borda, sombra curta para baixo e à esquerda e o traço fino do PDF; as hachuras densas ficam mais leves.
   As louças são lisas (sem a trama do tecido), com o traço mais leve (o aro de dentro da cuba, quase só o tom). A bacia (a louça dentro de outra, com 40 a 95% da área dela) é achada pela geometria, porque o aro é pintado depois e a cobre; ela leva a sombra interna do lado da luz e o fundo um tom abaixo. As banquetas da bancada gourmet são as `banqueta_linho` da biblioteca nos círculos do PDF (`BANQUETAS_PT`, `centros_banquetas`).
-- **Rótulos** (`rotulos`, `ROTULOS_F`): a caixa exata do texto procura, em até 3 m do ponto do PDF, o lugar livre mais perto, dentro do próprio ambiente (paredes e portas do PDF fecham os ambientes) e sem tocar objeto nem outro rótulo. Onde não cabe, quebra em duas linhas e depois desce o corpo; o texto leva um halo suave.
+- **Rótulos** (`rotulos`, `ROTULOS_F`):
+  - a caixa exata do texto (`_caixa_texto`, medida em cada opção de corpo e de quebra) procura, em até 3 m do ponto do PDF, o lugar livre mais perto, sempre dentro do seu ambiente e sem tocar objeto nem outro rótulo;
+  - onde não cabe, quebra em duas linhas e depois desce o corpo (o corpo cheio vale mais que a distância, `corpo_custo`);
+  - `ambientes_rotulos`: as paredes escuras do PDF, com os vãos entre trechos alinhados fechados até `vao_max_m` (portas e passagens); a região livre com mais de um ponto do PDF é repartida pela distância andando por dentro;
+  - sem halo: o texto é preto ou branco pelo fundo (`cor_do_fundo`, luminância relativa do WCAG); os jardins, em branco.
 - **Cache de etapas:** `<$POE642_CACHE ou a pasta temporária>/poe642_casab_etapas/final3840/<Pavimento>_<etapa>.png`. `--de <etapa>` recomeça daquela etapa com a anterior do cache.
 
 ```bash

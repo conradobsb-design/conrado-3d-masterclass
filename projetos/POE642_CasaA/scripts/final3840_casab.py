@@ -566,7 +566,8 @@ def bancadas(Q, img):
     sys.path.insert(0, str(B.RAIZ / "_texturas"))
     from texturas import textura
     q = BANCADAS_F
-    a = Q.preencher(lambda d: d.get("layer") == "ARQ_BANCADAS" and d.get("fill"), fs=False)
+    a = Q.preencher(lambda d: d.get("layer") == "ARQ_BANCADAS" and d.get("fill") and not no_banco_sauna(Q, d["rect"]),
+                    fs=False)
     n, lab, st, _ = cv2.connectedComponentsWithStats((a > 0.5).astype(np.uint8), 8)
     out = img.astype(np.float32)
     pecas = 0
@@ -639,6 +640,63 @@ def bancadas(Q, img):
     print(f"    bancadas: {pecas} peças em {q['pedra']} no tom areia, a {Q.px_m:.1f} px/m, com o contorno do PDF; "
           f"{len(cubas)} cubas em louça branca")
     return np.clip(out, 0, 255).astype(np.uint8)
+
+
+# Os bancos da sauna em travertino (usuário, 22/10/26: "AS PEDRAS DA SAUNA, EM FORMA DE BANCOS, SÃO EM TRAVERTINE"). No
+# PDF do Subsolo, o retângulo bege da ARQ_CONTRAPISO (2,95 x 1,00 m) com os dois níveis: o de trás, junto à parede (a peça
+# de 0,50 m da ARQ_BANCADAS, que sai das bancadas), e o da frente; a tira de 4 cm entre os dois é o espelho. O travertino
+# da biblioteca, com o veio ao longo dos bancos e no tom do piso da sauna, logo à frente (seção 3: "na pedra do próprio
+# piso, com linha fina e sombra discreta entre os níveis"): o nível de trás um pouco mais claro, a linha fina no espelho
+# e na frente, e a sombra discreta no nível da frente, junto ao espelho.
+SAUNA_F = {"Subsolo": {"pt": (798.5, 895.7, 965.8, 952.4), "espelho_pt": (924.0, 926.3),
+                       "piso_pt": (805.0, 875.0, 960.0, 892.0)},
+           "alto": 1.04, "baixo": 1.0, "linha": (118, 124, 130), "larg_px": 0.9, "forca_linha": 0.75,
+           "sombra": {"larg_m": 0.05, "forca": 0.12}, "veio": 1.6, "semente": 733}
+
+
+def no_banco_sauna(Q, r):
+    q = SAUNA_F.get(Q.chave)
+    return bool(q) and q["pt"][0] - 0.5 <= r.x0 and r.x1 <= q["pt"][2] + 0.5 and q["pt"][1] - 0.5 <= r.y0 \
+        and r.y1 <= q["pt"][3] + 0.5
+
+
+def bancos_sauna(Q, img):
+    sys.path.insert(0, str(B.RAIZ / "_texturas"))
+    from texturas import textura
+    from retoque_terreo_casae import linha_aa
+    q, b = SAUNA_F, SAUNA_F[Q.chave]
+    a = Q.preencher(lambda d: d.get("layer") == "ARQ_CONTRAPISO" and d.get("fill") and
+                    all(abs(v - w) < 0.5 for v, w in zip((d["rect"].x0, d["rect"].y0, d["rect"].x1, d["rect"].y1),
+                                                         b["pt"])), fs=False)
+    x0, y0, x1, y1 = ret_q(Q, b["pt"])
+    x0, y0, x1, y1 = x0 - 2, y0 - 2, x1 + 2, y1 + 2
+    px0, py0, px1, py1 = ret_q(Q, b["piso_pt"])
+    cor = np.median(img[py0:py1, px0:px1].reshape(-1, 3).astype(np.float32), axis=0)   # o travertino do piso
+    T = textura("travertino", Q.px_m, y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32)
+    det = cv2.GaussianBlur(T, (0, 0), 0.6) / np.maximum(cv2.GaussianBlur(T, (0, 0), 3.0 * Q.px_m), 1)
+    T = cor * (1 + q["veio"] * (det - 1))                              # o veio na força do piso (`piso_textura`)
+    ye0 = Q.p2q(b["pt"][0], b["espelho_pt"][0])[1] - y0
+    ye1 = Q.p2q(b["pt"][0], b["espelho_pt"][1])[1] - y0
+    yy = np.arange(y1 - y0, dtype=np.float32)[:, None]
+    fator = np.where(yy >= ye1, q["alto"], q["baixo"])                 # o nível de trás, um pouco mais claro
+    s = q["sombra"]                                                    # e a sombra discreta na frente do espelho
+    fator = fator * np.where(yy < ye0, 1 - s["forca"] * np.exp(-(ye0 - yy) / (s["larg_m"] * Q.px_m)), 1.0)
+    novo = T * fator[..., None]
+    reg = img[y0:y1, x0:x1].astype(np.float32)
+    al = a[y0:y1, x0:x1, None]
+    reg = reg * (1 - al) + novo * al
+    # a linha fina no espelho (meio da tira) e na frente do banco
+    ym = (ye0 + ye1) / 2
+    yf = Q.p2q(b["pt"][0], b["pt"][1])[1] - y0
+    xa, xb = Q.p2q(b["pt"][0], 0)[0] - x0, Q.p2q(b["pt"][2], 0)[0] - x0
+    ln = np.maximum(linha_aa(reg.shape[:2], [(xa, ym), (xb, ym)], q["larg_px"]),
+                    linha_aa(reg.shape[:2], [(xa, yf), (xb, yf)], q["larg_px"]))[..., None] * q["forca_linha"]
+    reg = reg * (1 - ln) + np.float32(q["linha"]) * ln
+    out = img.copy()
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    sauna: os bancos ({b['pt'][2] - b['pt'][0]:.0f} x {b['pt'][3] - b['pt'][1]:.0f} pt) no travertino da "
+          f"biblioteca, no tom do piso, com o espelho em linha fina e a sombra discreta")
+    return out
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -926,13 +984,40 @@ BORDAS_GRAMA = (80, 145, 110)
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 8. As escadas (R14), as projeções, o chuveiro do deck e o banco do deck
+# Os degraus em Bege Bahia (usuário, 22/10/26: "E OS DEGRAUS EM PEDRA BEGE BAHIA NA LATERAL ESQUERDA DA IMAGEM???"): as
+# duas escadas externas da esquerda (a de 6 degraus, da pedra grande para a ducha, e a de 9, da varanda para o deck em L),
+# nos degraus exatos do PDF (os preenchimentos da ARQ_ESCADAS E RAMPAS), na foto do Bege Bahia da biblioteca, no tom e no
+# contraste dela (regra da seção 18); por cima, as linhas da R14 (bocéis, sombra curta e o triângulo). Sai a mediana de
+# antes (`escadas_b`), que limpava os degraus do motor e borrava a pedra.
+DEGRAUS_F = {"pedra": "bege_bahia", "semente": 760}
+
+
+def degraus_bege(Q, img, escadas):
+    sys.path.insert(0, str(B.RAIZ / "_texturas"))
+    from texturas import textura
+    from retoque_terreo_casae import escada_linhas
+    a = Q.preencher(lambda d: d.get("layer") == "ARQ_ESCADAS E RAMPAS" and d.get("fill"), fs=False)
+    out = img.astype(np.float32)
+    for k, e in enumerate(escadas):
+        x0, y0, x1, y1 = ret_q(Q, e["pdf"])
+        x0, y0, x1, y1 = x0 - 2, y0 - 2, x1 + 2, y1 + 2
+        al = a[y0:y1, x0:x1, None]
+        tex = textura(DEGRAUS_F["pedra"], Q.px_m, y1 - y0, x1 - x0, semente=DEGRAUS_F["semente"] + k).astype(np.float32)
+        out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - al) + tex * al
+    out = np.clip(out, 0, 255).astype(np.uint8)
+    for e in escadas:
+        out = escada_linhas(out, None, e, p2r=Q.p2q)
+    print(f"    {len(escadas)} escada(s) nos degraus do PDF em Bege Bahia, com as linhas da R14")
+    return out
+
+
 def escadas_projecoes(Q, img):
     out = np.ascontiguousarray(img.copy())
     with em_quadro(Q):
         pa = AJ.PROJECOES_A
         AJ.PROJECOES_A = dict(pa, larg_px=pa["larg_px"] * Q.W / 2000)
         try:
-            out = B.escadas_b(out, "Terreo", B.ESCADAS_T)               # as duas do Térreo: a de 6 e a de 9 degraus
+            out = degraus_bege(Q, out, B.ESCADAS_T)                     # as duas do Térreo: a de 6 e a de 9 degraus
             out, n = B.linhas_pdf(out, "Terreo", B.PROJ_T["zonas"], B.PROJ_T["camada"])
         finally:
             AJ.PROJECOES_A = pa
@@ -1042,22 +1127,13 @@ def passos_subsolo(Q, ini):
         return chuveiro(np.ascontiguousarray(im.copy()), Q.p2q, c["ducha"], c["braco"], c["canopla"])
 
     def escadas_s(im):
-        # a escada de 6 degraus (a de 9 é do Térreo e fica na hachura): o travertino da biblioteca na caixa do PDF e as
-        # linhas da R14 (`retoque_terreo_casae.escada_linhas`), no quadro da prancha
-        from retoque_terreo_casae import escada_linhas
-        out = np.ascontiguousarray(im.copy())
-        for e in B.ESCADAS_S[:1]:
-            x0, y0, x1, y1 = ret_q(Q, e["pdf"])
-            m = np.zeros((Q.H, Q.W), bool)
-            m[y0:y1, x0:x1] = True
-            novo = piso_textura(Q, out, m, "travertino", 1.6, 3.0, 731)
-            out = np.clip(pousar(out.astype(np.float32), novo, m, suave=0), 0, 255).astype(np.uint8)
-            out = escada_linhas(out, None, e, p2r=Q.p2q)
-        print("    escada de 6 degraus do Subsolo: travertino da biblioteca e as linhas da R14, no quadro da prancha")
-        return out
+        # a escada de 6 degraus (a de 9 é do Térreo e fica na hachura): os degraus do PDF em Bege Bahia e as linhas da
+        # R14 (`retoque_terreo_casae.escada_linhas`), no quadro da prancha
+        return degraus_bege(Q, np.ascontiguousarray(im.copy()), B.ESCADAS_S[:1])
     return [
         ("pisos", lambda im: pisos(Q, im, dentro=dentro)),
         ("bancadas", lambda im: bancadas(Q, im)),
+        ("sauna", lambda im: bancos_sauna(Q, im)),
         ("pecas", lambda im: pecas_pdf(Q, im, ini, fora=[c["ducha"]] and [(c["ducha"][0] - 3, c["ducha"][1] - 3,
                                                                           c["canopla"][2] + 3, c["ducha"][3] + 3)])),
         ("biblioteca", biblioteca_s),
@@ -1093,15 +1169,64 @@ def passos_terreo(Q, ini, M, t):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# 9. Os rótulos (usuário, 22/10/26: "MELHORE OS RÓTULOS E NÃO OS SOBREPONHA OS OBJETOS"): cada um no lugar livre mais
-# perto do ponto do PDF, sem tocar móvel, tapete, louça, bancada, parede, esquadria, escada nem outro rótulo, dentro de
-# `raio_m`; as opções de corpo, quebra e cor dos ajustes à mão continuam valendo. O texto ganha um halo suave do tom do
-# fundo (mais claro sob o preto), que o separa da textura sem desenhar caixa.
-ROTULOS_F = {"raio_m": 3.0, "passo_px": 2, "folga_px": 2, "halo": (3.0, 0.45), "fechar_portas_m": 0.45,
+# 9. Os rótulos (usuário, 22/10/26: "MELHORE OS RÓTULOS E NÃO OS SOBREPONHA OS OBJETOS"; depois: "RÓTULOS NÃO PODEM TER
+# SOMBRA. USE A COR PRETA OU BRANCA, A DEPENDER DO FUNDO. E OS RÓTULOS DEVEM ESTAR DENTRO DE SEUS RESPECTIVOS
+# AMBIENTES"): cada um no lugar livre mais perto do ponto do PDF, sem tocar móvel, tapete, louça, bancada, parede,
+# esquadria, escada nem outro rótulo, dentro de `raio_m` e sempre dentro do seu ambiente; as opções de corpo e quebra
+# dos ajustes à mão continuam valendo. Sem halo nem sombra: o texto é preto ou branco, o que contrasta mais com o fundo
+# (a luminância relativa do fundo da caixa, pela conta do WCAG).
+ROTULOS_F = {"raio_m": 3.0, "passo_px": 2, "folga_px": 2,
              "corpos": (1.0, 0.85, 0.72, 0.62),     # o corpo cai (fração do da regra) onde o texto não cabe livre
-             "livres": ("JARDIM DE INVERNO", "JARDIM"),          # os jardins: o texto vai em branco sobre as plantas
+             "livres": ("JARDIM DE INVERNO", "JARDIM"),          # os jardins: o texto vai sobre as plantas, em branco
+             "corpo_custo": 2000,          # o custo de descer o corpo (x a fração): o corpo cheio vale mais que a distância
              "obstaculos": ("ARQ_MOBILIÁRIO", "ARQ_LAYOUT HUMANIZAÇÃO", "ARQ_LOUÇAS E METAIS", "ARQ - Marcenaria",
-                            "ARQ_BANCADAS", "ARQ_PAREDE", "ARQ_ESCADAS E RAMPAS", "ARQ_ELEMENTOS FIXOS", "EST_PILAR")}
+                            "ARQ_BANCADAS", "ARQ_PAREDE", "ARQ_ESCADAS E RAMPAS", "ARQ_ELEMENTOS FIXOS", "EST_PILAR"),
+             # os ambientes: as paredes do PDF (os preenchimentos escuros), com os vãos entre trechos alinhados (portas e
+             # passagens) fechados até `vao_max_m`; parede é o trecho de até `parede_max_m` de espessura
+             "vao_max_m": 2.0, "parede_max_m": 0.40,
+             "preto": (20, 20, 20), "branco": (250, 250, 250)}
+
+
+def ambientes_rotulos(Q, ancoras, f=2):
+    """O ambiente de cada rótulo (imagem int32: i + 1 no ambiente do ponto i, 0 nas paredes). As paredes são os
+    preenchimentos escuros da ARQ_PAREDE, dos elementos fixos e dos pilares; os vãos entre dois trechos de parede
+    alinhados (a porta, a passagem sem porta, como a da circulação do Subsolo para a garagem) fecham até `vao_max_m`.
+    Vidros, folhas de porta e boxes não dividem o ambiente (antes, a folha aberta e o vidro do box cortavam o banho ao
+    meio). Cada região livre é repartida entre os pontos do PDF que caem nela, pela distância andando por dentro."""
+    q = ROTULOS_F
+    par = (Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS", "EST_PILAR") and d.get("fill")
+                       and max(d["fill"]) < 0.6, ss=1) > 0.3).astype(np.uint8)
+    t = int(round(q["parede_max_m"] * Q.px_m))
+    k = int(round(q["vao_max_m"] * Q.px_m))
+    deitada = par & (1 - cv2.morphologyEx(par, cv2.MORPH_OPEN, np.ones((t + 1, 1), np.uint8)))   # fina na vertical
+    em_pe = par & (1 - cv2.morphologyEx(par, cv2.MORPH_OPEN, np.ones((1, t + 1), np.uint8)))     # fina na horizontal
+    vaos = cv2.morphologyEx(deitada, cv2.MORPH_CLOSE, np.ones((1, k), np.uint8)) | \
+        cv2.morphologyEx(em_pe, cv2.MORPH_CLOSE, np.ones((k, 1), np.uint8))
+    barreira = cv2.dilate(par | vaos, np.ones((3, 3), np.uint8))
+    # a repartição: as frentes saem de cada ponto ao mesmo tempo, pelo livre (em 1/f da resolução)
+    livre = cv2.resize((1 - barreira).astype(np.float32), (Q.W // f, Q.H // f), interpolation=cv2.INTER_AREA) > 0.99
+    lab = np.zeros(livre.shape, np.int32)
+    ys, xs = np.nonzero(livre)
+    for i, (x, y) in enumerate(ancoras):
+        j = int(np.argmin((xs - x / f) ** 2 + (ys - y / f) ** 2))      # o ponto (ou o livre mais perto dele)
+        lab[ys[j], xs[j]] = i + 1
+    cruz = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
+    while True:
+        viz = cv2.dilate(lab.astype(np.float32), cruz).astype(np.int32)
+        novo = (lab == 0) & livre & (viz > 0)
+        if not novo.any():
+            break
+        lab[novo] = viz[novo]
+    return cv2.resize(lab, (Q.W, Q.H), interpolation=cv2.INTER_NEAREST)
+
+
+def cor_do_fundo(img, x0, y0, x1, y1):
+    """Preto ou branco, o que contrasta mais com o fundo da caixa (luminância relativa, WCAG)."""
+    q = ROTULOS_F
+    reg = img[max(0, y0):y1, max(0, x0):x1].reshape(-1, 3).astype(np.float32) / 255
+    c = np.where(reg <= 0.04045, reg / 12.92, ((reg + 0.055) / 1.055) ** 2.4)
+    lum = float((0.0722 * c[:, 0] + 0.7152 * c[:, 1] + 0.2126 * c[:, 2]).mean())   # BGR
+    return q["preto"] if (lum + 0.05) / 0.05 >= 1.05 / (lum + 0.05) else q["branco"]
 
 
 def _caixa_texto(Q, rot1, opc):
@@ -1118,7 +1243,10 @@ def _caixa_texto(Q, rot1, opc):
         a, b = Q.p2q(x, y)
         return a - X0, b - Y0
     esc = Q.W / 2000
-    aj = [(nome, ((cx - X0) / esc, (cy - Y0) / esc), (0.0, 0.0), opc)]
+    # o centro do ajuste vai em px de 2000 da tela (a `rotulos_ambientes` o compara na largura da imagem que recebe);
+    # na escala da prancha, as opções (corpo, quebra) não casavam e a caixa saía sempre a do corpo padrão
+    et = tela.shape[1] / 2000
+    aj = [(nome, ((cx - X0) / et, (cy - Y0) / et), (0.0, 0.0), opc)]
     t = R1.rotulos_ambientes(tela, [rot1], p2l, escala_desvio=esc, ajustes=aj)
     ys, xs = np.nonzero(np.abs(t.astype(int) - 128).max(axis=2) > 3)
     if not len(xs):
@@ -1128,8 +1256,8 @@ def _caixa_texto(Q, rot1, opc):
 
 def rotulos(Q, img, rot, ajustes_manuais, granito=None):
     """Cada rótulo no lugar livre mais perto do ponto do PDF: a caixa exata do texto não pode tocar objeto nenhum, nem
-    outro rótulo, e fica dentro do ambiente (as portas fechadas por `fechar_portas_m`); onde não há lugar, o corpo cai
-    (até 72% do da regra) e, por fim, fica onde toca menos."""
+    outro rótulo, e fica dentro do seu ambiente (`ambientes_rotulos`); onde não há lugar, o corpo cai (até 62% do da
+    regra) e, por fim, fica onde toca menos, mas sempre dentro do ambiente. A cor é a do fundo (`cor_do_fundo`)."""
     import retoque_1pav_casae as R1
     q = ROTULOS_F
     obst = Q.preencher(lambda d: d.get("layer") in q["obstaculos"], ss=2, fs=True) > 0.05
@@ -1143,16 +1271,7 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
     obst = cv2.dilate(obst.astype(np.uint8), np.ones((k, k), np.uint8))
     I_obst = cv2.integral(obst)
     # os ambientes: o que não é parede, esquadria nem porta (os arcos e as folhas do PDF fecham as portas)
-    barreira = (Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS", "EST_PILAR"),
-                            ss=1) > 0.3).astype(np.uint8)
-    for d in Q.desenhos:
-        if d.get("layer") in ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS") and d["type"] in ("s", "fs"):
-            for c in Q.caminhos(d):
-                cv2.polylines(barreira, [np.int32(np.round(c))], False, 1, 2)
-    barreira = cv2.dilate(barreira, np.ones((3, 3), np.uint8))
-    n_amb, amb = cv2.connectedComponents((1 - barreira).astype(np.uint8), connectivity=4)
-    _, mais_perto = cv2.distanceTransformWithLabels(barreira, cv2.DIST_L2, 5, labelType=cv2.DIST_LABEL_PIXEL)
-    livres_yx = np.argwhere(barreira == 0)                         # na ordem dos rótulos do distanceTransform
+    amb = ambientes_rotulos(Q, [Q.p2q(r[2][0], r[2][1]) for r in rot])
     esc = Q.W / 2000
 
     def soma(I, x0, y0, x1, y1):
@@ -1163,7 +1282,7 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
     ocupado = np.zeros((Q.H, Q.W), np.uint8)
     novos = []
     R = int(q["raio_m"] * Q.px_m)
-    for rot1 in rot:
+    for i_rot, rot1 in enumerate(rot):
         nome, linhas, (pcx, pcy), caixa = rot1
         cx, cy = Q.p2q(pcx, pcy)
         opc = {}
@@ -1171,15 +1290,9 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
             if n == nome and np.hypot(cx - axx * esc, cy - ayy * esc) < 25 * esc:
                 opc = dict(extra[0]) if extra and isinstance(extra[0], dict) else ({"corpo": extra[0]} if extra else {})
         if nome in q["livres"]:
-            novos.append((nome, (cx / esc, cy / esc), (0.0, 0.0), opc))
+            novos.append((nome, (cx / esc, cy / esc), (0.0, 0.0), dict(opc, cor=q["branco"])))   # sobre as plantas
             continue
-        # o ambiente do rótulo: o do ponto do PDF (ou o mais perto dele)
-        yy, xx = int(round(cy)), int(round(cx))
-        a_id = amb[yy, xx]
-        if a_id == 0:                                              # o ponto caiu numa linha: o ambiente mais perto
-            py_, px2 = livres_yx[mais_perto[yy, xx] - 1]
-            a_id = amb[py_, px2]
-        dentro = (amb == a_id).astype(np.uint8) if a_id else np.ones((Q.H, Q.W), np.uint8)
+        dentro = (amb == i_rot + 1).astype(np.uint8)                # o ambiente do rótulo (`ambientes_rotulos`)
         I_dentro = cv2.integral(dentro)
         I_ocup = cv2.integral(ocupado)
         melhor = None
@@ -1205,21 +1318,25 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
                     fora_amb = w * h - soma(I_dentro, x0_, y0_, x1_, y1_)
                     toca = soma(I_obst, x0_, y0_, x1_, y1_)
                     sobre = soma(I_ocup, x0_, y0_, x1_, y1_)
-                    custo = (10 ** 7 if sobre else 0) + 10 ** 5 * fora_amb + 100 * toca + r_ + 400 * (1 - fc)
+                    custo = (10 ** 9 if sobre else 0) + 10 ** 7 * fora_amb + 100 * toca + r_ + \
+                        q["corpo_custo"] * (1 - fc)
                     if melhor is None or custo < melhor[0]:
                         melhor = (custo, dx, dy, (x0_, y0_, x1_, y1_), o2, toca, fora_amb)
-                if melhor[5] == 0 and melhor[6] == 0 and melhor[0] < 10 ** 5:
+                if melhor[5] == 0 and melhor[6] == 0 and melhor[0] < 10 ** 7:
                     break
             if melhor[5] == 0 and melhor[6] == 0:
                 break
         custo, dx, dy, (x0_, y0_, x1_, y1_), o2, toca, fora_amb = melhor
         ocupado[max(0, y0_ - 6):y1_ + 6, max(0, x0_ - 6):x1_ + 6] = 1
+        o2 = dict(o2, cor=cor_do_fundo(img, x0_, y0_, x1_, y1_))      # preto ou branco, pelo fundo
         novos.append((nome, (cx / esc, cy / esc), (dx / esc, dy / esc), o2))
         if toca or fora_amb:
             print(f"    rótulo {nome}: sem lugar totalmente livre (toca {toca} px; fora do ambiente {fora_amb} px)")
     out = R1.rotulos_ambientes(img, rot, Q.p2q, escala_desvio=esc, granito=granito, ajustes=novos,
-                               cor_granito=R1.ROTULOS["branco"], halo=q["halo"])
-    print(f"    {len(rot)} rótulos no lugar livre mais perto do PDF, dentro do ambiente, com o halo suave")
+                               cor_granito=R1.ROTULOS["branco"], halo=None)
+    nb = sum(1 for n in novos if n[3].get("cor") == q["branco"])
+    print(f"    {len(rot)} rótulos no lugar livre mais perto do PDF, dentro do ambiente, sem halo: "
+          f"{len(rot) - nb} pretos e {nb} brancos, pelo fundo")
     return out
 
 

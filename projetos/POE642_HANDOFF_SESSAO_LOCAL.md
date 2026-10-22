@@ -2122,6 +2122,20 @@ Os pedidos que vieram depois, item a item:
   - **A regra nova da cuba na ARQ_BANCADAS:** é o retângulo com o aro fino nos quatro lados. A peça de pedra entre as duas cubas do lavatório gourmet, que antes saía branca, volta a ser pedra, e a peça solta de 0,51 × 0,48 m junto ao louceiro também.
 - **Imagens:** `POE642_CasaB/renders/POE642_CasaB_PH_{Terreo,Subsolo}_final_rotulos.png`. Pranchas e PDF refeitos. Os antes/depois estão nos `AD2_*.jpg` enviados na conversa.
 - **"INVERTA O LADO DO COOKTOP PARA QUE OS BOTÕES FIQUEM VIRADOS PARA O OUTRO LADO"** (a ilha da cozinha): o cooktop de 5 bocas fica em pé, girado a 270° (`COOKTOPS_B`, era 90°), com os botões para a direita; o do gourmet não muda. Prancha do Térreo e PDF refeitos.
+- **"RÓTULOS NÃO PODEM TER SOMBRA. USE A COR PRETA OU BRANCA, A DEPENDER DO FUNDO. E OS RÓTULOS DEVEM ESTAR DENTRO DE SEUS RESPECTIVOS AMBIENTES":**
+  - **Cor:** sai o halo, e cada rótulo é preto ou branco pelo fundo da caixa (luminância relativa): 26 pretos e 12 brancos no Térreo (granito, jardins), 10 pretos no Subsolo.
+  - **Ambientes:** antes eram as regiões entre todas as linhas do PDF. A passagem sem porta da circulação do Subsolo juntava a circulação à garagem, e o rótulo saía metade na garagem. A folha de porta e o vidro do box cortavam o banho gourmet ao meio. Agora:
+    - as paredes escuras definem os ambientes, com os vãos alinhados fechados até 2 m;
+    - as áreas abertas são repartidas entre os pontos do PDF.
+  - **Erro achado:** a medida da caixa do texto ignorava o corpo e a quebra; o centro da opção era comparado na largura errada. Por isso os rótulos de banho saíam por cima da parede em vez de quebrar em duas linhas. Corrigido, os 48 rótulos ficam dentro dos ambientes.
+  - **Ainda encosta:** a circulação de 1,16 m² do Subsolo encosta 1 px numa peça.
+- **"AS PEDRAS DA SAUNA, EM FORMA DE BANCOS, SÃO EM TRAVERTINE":**
+  - os dois níveis do banco (o retângulo da ARQ_CONTRAPISO; o de trás saiu da pedra das bancadas) no travertino da biblioteca, no tom e no veio do piso da sauna;
+  - o nível de trás um pouco mais claro, o espelho e a frente em linha fina, e a sombra discreta junto ao espelho.
+- **"E OS DEGRAUS EM PEDRA BEGE BAHIA NA LATERAL ESQUERDA DA IMAGEM???":**
+  - as escadas externas da esquerda em Bege Bahia, nos degraus do PDF: a de 6 degraus nos dois pavimentos e a de 9 no Térreo;
+  - as linhas e o triângulo vão por cima;
+  - a mediana que limpava os degraus (e borrava a pedra) saiu.
 
 ## Casas A a D · Barlavento nas piscinas
 
