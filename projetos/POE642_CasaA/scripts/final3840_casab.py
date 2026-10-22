@@ -503,6 +503,87 @@ def plantas_em_vaso(Q, img, plantas):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# Os vasos sanitários com a tampa fechada (usuário, 22/10/26: "TODOS OS SANITÁRIOS PRECISAM TER A SUA RESPECTIVA
+# TAMPA"): no PDF, os vasos suspensos são o "D" branco da ARQ_LOUÇAS E METAIS (0,51 x 0,35 m, com a abertura e o ralo
+# à mostra; os de 0,55 x 0,38 m já trazem a tampa, em traço). O "D" se separa das cubas e das máquinas pela forma: o
+# centro de massa fica puxado para o lado reto, o da parede. Em todos, a tampa entra igual: o contorno do vaso recuado
+# `recuo_m`, da linha da dobradiça (`dobradica`, fração do comprimento a partir da parede, logo à frente dos
+# parafusos) até a frente, em louça branca com volume suave, o traço fino das louças e a sombra curta sobre o aro.
+TAMPAS_F = {"longo_m": (0.45, 0.62), "curto_m": (0.30, 0.42), "assimetria": 0.02, "dobradica": 0.17,
+            "recuo_m": 0.012, "ss": 8, "volume": (0.94, 0.05), "traco": 0.55,
+            "sombra": {"dx_m": -0.006, "dy_m": 0.008, "sig_m": 0.006, "forca": 0.25}}
+
+
+def vasos_sanitarios(Q):
+    """Os vasos do PDF: (desenho, lado da parede: "esq", "dir", "cima" ou "baixo")."""
+    q = TAMPAS_F
+    ls = [d for d in Q.desenhos if d.get("layer") == "ARQ_LOUÇAS E METAIS" and d["type"] in ("f", "fs")]
+    vasos = []
+    for d in ls:
+        r = d["rect"]
+        curto, longo = sorted((r.width / 56.69, r.height / 56.69))
+        if not (q["longo_m"][0] <= longo <= q["longo_m"][1] and q["curto_m"][0] <= curto <= q["curto_m"][1]):
+            continue
+        if any(e is not d and r.contains(e["rect"]) and e["rect"].width * e["rect"].height > 0.15 * r.width * r.height
+               for e in ls):                                                     # a cuba, com a bacia dentro
+            continue
+        pts = np.vstack([c for c in Q.caminhos(d) if len(c) >= 3]).astype(np.float32)
+        m = cv2.moments(pts)
+        (x0, y0), (x1, y1) = Q.p2q(r.x0, r.y0), Q.p2q(r.x1, r.y1)
+        deitado = x1 - x0 > y1 - y0
+        desvio = (m["m10"] / m["m00"] - (x0 + x1) / 2 if deitado else m["m01"] / m["m00"] - (y0 + y1) / 2) \
+            / max(x1 - x0, y1 - y0)
+        if abs(desvio) >= q["assimetria"]:
+            vasos.append((d, ("esq" if desvio < 0 else "dir") if deitado else ("cima" if desvio < 0 else "baixo")))
+    return vasos
+
+
+def tampas_vasos(Q, img):
+    q, k = TAMPAS_F, TAMPAS_F["ss"]
+    t = PECAS["traco"]
+    out = img.astype(np.float32)
+    vasos = vasos_sanitarios(Q)
+    for d, lado in vasos:
+        r = d["rect"]
+        (x0, y0), (x1, y1) = Q.p2q(r.x0, r.y0), Q.p2q(r.x1, r.y1)
+        X0, Y0, X1, Y1 = int(x0) - 3, int(y0) - 3, int(np.ceil(x1)) + 4, int(np.ceil(y1)) + 4
+        w, h = X1 - X0, Y1 - Y0
+        corpo = np.zeros((h * k, w * k), np.uint8)
+        cv2.fillPoly(corpo, [np.int32(np.round((c - (X0, Y0)) * k)) for c in Q.caminhos(d) if len(c) >= 3], 255)
+        rc = max(1, int(round(q["recuo_m"] * Q.px_m * k)))
+        tampa = cv2.erode(corpo, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * rc + 1,) * 2))
+        f = q["dobradica"]                                    # a linha da dobradiça: a tampa só da frente dela
+        if lado == "esq":
+            tampa[:, :int(round((x0 + f * (x1 - x0) - X0) * k))] = 0
+        elif lado == "dir":
+            tampa[:, int(round((x1 - f * (x1 - x0) - X0) * k)):] = 0
+        elif lado == "cima":
+            tampa[:int(round((y0 + f * (y1 - y0) - Y0) * k))] = 0
+        else:
+            tampa[int(round((y1 - f * (y1 - y0) - Y0) * k)):] = 0
+
+        def reduzir(a):
+            return cv2.resize(a.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+        a_c, a_t = reduzir(corpo / 255.0), reduzir(tampa / 255.0)
+        reg = out[Y0:Y1, X0:X1]
+        s = q["sombra"]                                       # a sombra curta da tampa sobre o aro do vaso
+        M = np.float32([[1, 0, s["dx_m"] * Q.px_m * k], [0, 1, s["dy_m"] * Q.px_m * k]])
+        sb = reduzir(cv2.GaussianBlur(cv2.warpAffine(tampa / 255.0, M, (w * k, h * k)), (0, 0),
+                                      s["sig_m"] * Q.px_m * k))
+        reg *= (1 - s["forca"] * sb * (1 - a_t) * a_c)[..., None]
+        v0, vl = q["volume"]                                  # louça branca, um tom abaixo junto à borda
+        dist = cv2.distanceTransform(tampa, cv2.DIST_L2, 5) / (Q.px_m * k)
+        tom = (v0 + (1 - v0) * np.clip(dist / vl, 0, 1)) * (tampa / 255.0)
+        cor = np.float32(PECAS["louca"]["ceramica"])
+        reg[:] = reg * (1 - a_t[..., None]) + reduzir(tom)[..., None] * cor
+        lt = max(1, int(round(t["larg_px"] * k)))             # o traço fino das louças no contorno da tampa
+        anel = tampa & ~cv2.erode(tampa, np.ones((lt, lt), np.uint8))
+        a_l = np.clip(reduzir(anel / 255.0) * 1.4, 0, 1) * q["traco"]
+        reg[:] = reg * (1 - a_l[..., None]) + np.float32(t["cor"]) * a_l[..., None]
+    print(f"    vasos: a tampa fechada nos {len(vasos)} vasos sanitários do PDF, da dobradiça à frente")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # 3. As bancadas em pedra tom areia, humanizada, no contorno do PDF (usuário, 22/10/26: "TROQUE O CINZA DAS BANCADAS PELO
 # TOM AREIA", "CUBAS EM BRANCO", "PRECISO QUE AS PEDRAS ESTEJAM HUMANIZADAS"): a foto do Bege Bahia da biblioteca (a
@@ -1381,6 +1462,7 @@ def passos_subsolo(Q, ini):
         ("sauna", lambda im: bancos_sauna(Q, im)),
         ("pecas", lambda im: pecas_pdf(Q, im, ini, fora=[c["ducha"]] and [(c["ducha"][0] - 3, c["ducha"][1] - 3,
                                                                           c["canopla"][2] + 3, c["ducha"][3] + 3)])),
+        ("tampas", lambda im: tampas_vasos(Q, im)),
         ("biblioteca", biblioteca_s),
         ("paredes", lambda im: paredes(Q, im)),
         ("soleiras", lambda im: soleiras(Q, im)),
@@ -1401,6 +1483,7 @@ def passos_terreo(Q, ini, M, t):
         ("bancadas", lambda im: bancadas(Q, im)),
         ("pecas", lambda im: pecas_pdf(Q, im, ini, fora=t["carros_pt"] + [t["chuveiro_deck_pt"], BANQUETAS_PT],
                                       camas=[c[1] for c in B.CAMAS_B["camas"]], inox=t["inox_pt"])),
+        ("tampas", lambda im: tampas_vasos(Q, im)),
         ("biblioteca", lambda im: biblioteca(Q, im)),
         ("carros", lambda im: carros(Q, im, M)),
         ("deck", lambda im: deck_detalhes(Q, im)),

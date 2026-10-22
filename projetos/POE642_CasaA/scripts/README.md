@@ -719,6 +719,7 @@ Pedido do usuário (22/10/26): "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGAST
   - `vegetacao`: as plantas da biblioteca nos lugares do gramado;
   - `bancadas`;
   - `pecas`: os móveis, os tapetes e as louças pelo desenho do PDF;
+  - `tampas`: a tampa fechada em todos os vasos sanitários (`tampas_vasos`, `TAMPAS_F`). Os vasos são o "D" branco da ARQ_LOUÇAS E METAIS de 0,45 a 0,62 x 0,30 a 0,42 m sem outra louça dentro (`vasos_sanitarios`; o centro de massa puxado para o lado reto separa o vaso das cubas e das máquinas e dá o lado da parede). A tampa é o contorno recuado 1,2 cm, da dobradiça (17% do comprimento a partir da parede) à frente, em louça branca com volume, o traço das louças e a sombra curta sobre o aro; também no Subsolo;
   - `biblioteca`: guarda-roupas, camas, cooktops, banquetas, inox, adega e elevador, pelas rotinas dos ajustes dentro de `em_quadro`, que as faz desenhar no quadro;
   - `carros`;
   - `deck`: o banco em L, em bronze fosco (`BANCO_DECK`), e o chuveiro;
@@ -730,7 +731,7 @@ Pedido do usuário (22/10/26): "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGAST
   - `escadas`: as duas escadas (os degraus do PDF em Bege Bahia, `degraus_bege`, com as linhas da R14) e as projeções;
   - `cobertura`;
   - `rotulos`.
-- **Etapas do Subsolo** (`passos_subsolo`), as mesmas onde cabem: `pisos` (só na pegada), `bancadas`, `sauna` (os bancos em travertino, `bancos_sauna`, `SAUNA_F`), `pecas`, `biblioteca` (o chuveiro da ducha), `paredes`, `esquadrias`, `escadas` (a de 6 degraus em Bege Bahia), `hachura` (o terreno hachurado, a partir do Térreo final: rode o Térreo antes) e `rotulos`.
+- **Etapas do Subsolo** (`passos_subsolo`), as mesmas onde cabem: `pisos` (só na pegada), `bancadas`, `sauna` (os bancos em travertino, `bancos_sauna`, `SAUNA_F`), `pecas`, `tampas`, `biblioteca` (o chuveiro da ducha), `paredes`, `esquadrias`, `escadas` (a de 6 degraus em Bege Bahia), `hachura` (o terreno hachurado, a partir do Térreo final: rode o Térreo antes) e `rotulos`.
 - **Bancadas** (pedido de 22/10: "troque o cinza das bancadas pelo tom areia", "cubas em branco", "preciso que as pedras estejam humanizadas"):
   - a pedra é a foto do Bege Bahia da biblioteca, na escala e levada ao tom areia (`BANCADAS_F`: `tom`, `contraste`), em toda peça da ARQ_BANCADAS;
   - as cubas da ARQ_BANCADAS (`cubas_bancada`: o retângulo com o aro fino nos quatro lados) são louça branca, com a bacia de cantos arredondados e a sombra interna; as da ARQ_LOUÇAS (cozinha, gourmet e bar) também saem brancas (`TERREO["inox_pt"]` vazio).

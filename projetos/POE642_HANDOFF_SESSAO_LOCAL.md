@@ -2159,6 +2159,10 @@ Os pedidos que vieram depois, item a item:
 
 Pedido do usuário (15/10/26), depois do item 35 da Casa E: as piscinas das Casas A, B, C e D no mesmo revestimento Barlavento, com os mesmos efeitos de água, e as pranchas e os PDFs refeitos.
 
+- **"TODOS OS SANITÁRIOS PRECISAM TER A SUA RESPECTIVA TAMPA":**
+  - **O problema:** 9 dos 12 vasos (os suspensos de 0,51 x 0,35 m do PDF, nos banhos das suítes, no lavabo, nos dois BH. gourmet e num banho do Subsolo) saíam abertos, com a abertura e o ralo à mostra. Os 3 de 0,55 x 0,38 m (BH serviço, BH motorista e o serviço do Subsolo) já tinham a tampa no PDF, mas só em traço.
+  - **Agora:** etapa `tampas`, logo depois das peças, nos dois pavimentos. Os 12 vasos levam a mesma tampa fechada: da dobradiça à frente, recuada do contorno (fica o aro fino), em louça branca com volume, traço fino e a sombra curta sobre o aro. Só os vasos mudaram na imagem.
+  - **Antes e depois:** enviado na conversa (`AD9_tampas_vasos.jpg`).
 - **Script:** `scripts/piscinas_barlavento.py`. Usa os números aprovados na Casa E (cor da água BGR 214, 222, 172; sombra curta só junto às bordas; refração de ~1 px; cáusticas do render suavizadas; brilho difuso na diagonal) e a mesma pedra (`fontes_procedurais.barlavento`).
 - **Água:** achada pela cor do próprio render (azulada, B acima de R), em manchas grandes. Ficam por cima, como estavam: bordas, espreguiçadeiras (Casa B, sem o halo claro da sombra antiga) e os tracejados de projeção (Casa A). O contorno escuro de 1 px junto às bordas entra na água, para não sobrar em entalhes.
 - **Degraus e contornos internos:** as linhas do projeto dentro da água, tiradas da base chapada da casa alinhada ao render (SIFT + afim) e reduzidas por área (as linhas de 1 px da base não somem na redução). Marcadas de leve, numa linha fina: degrau da prainha e anel do spa (A); faixa junto ao deck e anel do spa (B); os três degraus da prainha e o anel do spa (C); o degrau duplo da prainha e o anel duplo do spa (D).
