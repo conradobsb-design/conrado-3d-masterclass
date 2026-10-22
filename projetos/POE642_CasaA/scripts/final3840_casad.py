@@ -159,10 +159,22 @@ PROJECOES_CLARAS_D = [(2371.7, 549.3, 2922.4, 672.7), (2409.7, 981.3, 2879.7, 10
 COBERTURA_D = [(2371.7, 615.8, 2912.9, 672.7)]
 PROJECOES_TRACO_D = {"pisos": {"cor": (92, 92, 94), "forca": 0.9, "larg": 1.4},
                      "claras": {"cor": (214, 214, 212), "forca": 0.95, "larg": 1.4}}
-# As peças do PDF que ficam como no render aprovado (preenchidas depois de ver a final)
-FORA_PECAS_D = []
-# os dois vasos do hall, junto aos brises: as plantas do render
-VASOS_D = [(2117.6, 1089.9, 2186.9, 1153.8), (2117.7, 1299.9, 2187.0, 1363.8)]
+# As peças do PDF que ficam como no render aprovado: o estar da suíte 3 (no PDF da Casa D, o sofá está na INS_INSTALAÇÕES
+# HIDRÁULICAS e a mesa de centro na DOC_LINHAS; só o tapete, da ARQ_LAYOUT, entrava, e cobria os dois)
+FORA_PECAS_D = [(2060.0, 1495.0, 2256.0, 1640.0)]
+# os dois vasos do hall, junto aos brises, e a planta sobre a bancada gourmet (objetos de 15/10, item 22): as plantas do
+# render (no PDF, a da bancada é um contorno de traço)
+VASOS_D = [(2117.6, 1089.9, 2186.9, 1153.8), (2117.7, 1299.9, 2187.0, 1363.8), (1276.9, 681.3, 1315.9, 715.5)]
+# As cubas que o PDF da Casa D desenha sem o aro (seção 6, todas em louça branca): as duas do banho master (retângulos
+# soltos na bancada), a do lavabo (só a torneira no PDF; a bacia no lugar da do render) e a do WC DCE (de parede, só
+# contorno). Entram com as outras, pela rotina das cubas das bancadas.
+CUBAS_EXTRA_D = {"Terreo": [(656.6, 1717.6, 685.0, 1740.7), (709.6, 1717.6, 738.0, 1740.7),
+                            (2332.8, 1382.0, 2349.9, 1414.3), (2150.0, 759.9, 2166.6, 783.2)]}
+_cubas_bancada_b = F.cubas_bancada
+
+
+def cubas_bancada_d(Q):
+    return sorted(set(_cubas_bancada_b(Q)) | set(CUBAS_EXTRA_D.get(Q.chave, [])))
 NAO_TAPETE_D = []
 # As esquadrias: na piscina, na prainha e no spa, as paredes da ARQ_PAREDE são brancas e finas como vidro (a base já as
 # tirava, `zonas_excluidas` da config); não são esquadria (como na Casa C)
@@ -185,6 +197,27 @@ JARDINS_D = {
           ("costela_de_adao", 0.80, (0.73, 0.52), 270), ("planta_folhas_largas", 0.70, (0.88, 0.45), 90),
           ("arbusto_1", 0.55, (0.96, 0.55), 0)])]}
 FLOREIRA_COR = (58, 122, 79)
+# A vegetação do gramado (item 1): as plantas da biblioteca no tamanho real, nos lugares das do render, só nos dois
+# cantos da esquerda, junto à piscina e junto à suíte 3. O achado das plantas do render (px do render de 2000) pegava
+# também a sombra junto ao muro de cima e os X tracejados na grama abaixo da garagem (fileiras de palmeiras que o render
+# não tem); essas caixas saem. Junto à suíte 3, só as plantas até 1,8 m, a até ~1,5 m da parede (as árvores de 4 m
+# avançavam pelo gramado, como os leques do motor).
+VEGETACAO_D = {"fora_render": [(400, 0, 2000, 125), (1370, 380, 2000, 520), (1395, 600, 2000, 1116)],
+               "suite3_render": (1290, 600, 2000, 1116), "d_max_m": 1.8}
+_plantas_do_gramado = F.plantas_do_gramado
+
+
+def plantas_do_gramado_d():
+    q = VEGETACAO_D
+    sx0, sy0, sx1, sy1 = q["suite3_render"]
+    out = []
+    for x, y, nome, d_m in _plantas_do_gramado():
+        if any(a <= x < c and b <= y < e for a, b, c, e in q["fora_render"]):
+            continue
+        if sx0 <= x < sx1 and sy0 <= y < sy1 and d_m > q["d_max_m"]:
+            continue
+        out.append((x, y, nome, d_m))
+    return out
 # A escada de 16 degraus junto à suíte master (item 11, R14; resposta 3): sobe do Subsolo, numerada de 1 a 16 da
 # esquerda para a direita (o "D" do PDF junto ao 16). No Térreo é a chegada: os pisos em Bege Bahia (a legenda), em cada
 # bocel a linha cinza suave e a sombra de ~10 cm no degrau de baixo (à esquerda); o triângulo no degrau 16, apontando
@@ -224,6 +257,9 @@ def contexto_d():
                        guarda_corpo=dict(F.PAREDES_F["guarda_corpo"], pt={"Terreo": GUARDA_CORPOS_D}, labio_pt={}))
     F.ESQUADRIAS_F = {"de_volta_pt": {}, "travertino_pt": {}, "ref_pt": {}}
     F.alfa_canteiros = alfa_canteiros_d
+    F.plantas_do_gramado = plantas_do_gramado_d
+    F.cubas_bancada = cubas_bancada_d
+    C.jardins_c = jardins_d
     F.ROTULOS_F = dict(F.ROTULOS_F, livres=("JARDIM",), textos={}, pontos={})
     F.BLOCOS_F = BLOCOS_D
     B.CARROS_B = CARROS_D
@@ -248,6 +284,21 @@ def contexto_d():
 # A vegetação e os jardins (as rotinas da Casa C com os canteiros da Casa D)
 def alfa_canteiros_d(Q):
     return C.alfa_canteiros_c(Q)
+
+
+_jardins_c = C.jardins_c
+
+
+def jardins_d(Q, img):
+    """Os canteiros pela rotina da Casa C; os dois da Casa D dão para o gramado (o da sala íntima embaixo, o do lavabo
+    à direita), e a limpeza das folhas do motor fora do canteiro tomava a grama por folha e a trocava por manchas
+    cinza. Fora dos canteiros, a grama e o traço preto da legenda voltam como estavam."""
+    out = _jardins_c(Q, img)
+    dentro = cv2.dilate((alfa_canteiros_d(Q) > 0.02).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    volta = Q.cor([F.BORDAS_GRAMA, (0, 0, 0)], tol=6) & ~dentro
+    out[volta] = img[volta]
+    print(f"    jardins: {int(volta.sum())} px de grama e de traço em volta dos canteiros de volta ao que eram")
+    return out
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -421,8 +472,8 @@ def passos_terreo_d(Q, ini, M):
         ("vegetacao", lambda im: C.vegetacao_c(Q, im, M)),
         ("bancadas", lambda im: C.bancadas_c(Q, im)),
         ("pecas", lambda im: C.pecas_c(Q, im, ini, fora, camas + NAO_TAPETE_D)),
-        ("tampas", lambda im: C.pecas_do_render(Q, C.camas_render(Q, F.tampas_vasos(Q, im), ini), ini, VASOS_D,
-                                                C.verde, "hall: os dois vasos junto aos brises")),
+        ("tampas", lambda im: C.pecas_do_render(Q, C.camas_render(Q, F.tampas_vasos(Q, C.restos_piso(
+            Q, im, ini, FORA_PECAS_D)), ini), ini, VASOS_D, C.verde, "hall e gourmet: as plantas em vaso")),
         ("biblioteca", lambda im: biblioteca_d(Q, im)),
         ("carros", lambda im: F.carros(Q, im, M)),
         ("boxes", lambda im: F.boxes_granito(Q, im)),
