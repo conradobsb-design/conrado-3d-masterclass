@@ -1,0 +1,774 @@
+{
+  "_sobre": "Parâmetros do gerar_bases.py. Zonas em coordenadas de uma visualização de 1800 px de largura da base final: [x0, y0, x1, y1].",
+  "layer_parede": "ARQ_PAREDE",
+  "cinza_parede": 0.357,
+  "cinza_parede_qualquer_layer": false,
+  "tolerancia_cor": 0.012,
+  "recorte": [
+    0.035,
+    0.095,
+    0.975,
+    0.955
+  ],
+  "largura_px": 6000,
+  "largura_visualizacao": 1800,
+  "saida_16x9": true,
+  "layers_ocultas": [],
+  "vidro": {
+    "espessura_max_pt": 4.0,
+    "comprimento_min_pt": 12.0,
+    "razao_min": 4.0,
+    "tolerancia_arco_pt": 1.5,
+    "tolerancia_raio": 0.3,
+    "largura_min_px": 6,
+    "contorno_px": 2
+  },
+  "pavimentos": {
+    "Terreo": {
+      "pagina": 0,
+      "rotacao": 0,
+      "faixas_y_excluidas": [
+        [
+          null,
+          100
+        ],
+        [
+          1030,
+          null
+        ]
+      ],
+      "zonas_excluidas": {
+        "bancada gourmet": [
+          655,
+          680,
+          822,
+          782
+        ],
+        "ilha da cozinha": [
+          900,
+          678,
+          978,
+          702
+        ],
+        "folha da porta principal": [
+          1092,
+          362,
+          1192,
+          378
+        ],
+        "gradil esquerdo do corredor de servico": [
+          772,
+          885,
+          792,
+          1040
+        ],
+        "gradil direito do corredor de servico": [
+          888,
+          885,
+          906,
+          1040
+        ],
+        "brises da varanda gourmet": {
+          "bbox": [
+            498,
+            645,
+            548,
+            875
+          ],
+          "pintar": "#2B2B2B"
+        }
+      },
+      "reforcar_linhas": [
+        {
+          "nome": "pergolado (projeção tracejada)",
+          "layer": "ARQ_PERGOLADO",
+          "cor": "#4D4D4D",
+          "largura_px": 3
+        }
+      ],
+      "legenda": {
+        "_sobre": "Deixa cada material numa cor única da legenda do prompt (travertino #DCD9CA, granito #BFA79F, madeira #AE8863, Bege Bahia #E8E8E8, piscina #DFF6FE, pedra portuguesa #B98A55, jardim #6E9150).",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "acesso de veículos e corredor de serviço → pedra portuguesa",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              775,
+              700,
+              1720,
+              1050
+            ],
+            "para": "#B98A55"
+          },
+          {
+            "nome": "jardim da escada principal → verde",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "bbox_vis": [
+              1120,
+              500,
+              1190,
+              580
+            ],
+            "modo": "neutros",
+            "proteger_layers": [
+              "ARQ_PAREDE",
+              "ARQ_ELEMENTOS FIXOS",
+              "ARQ_ESCADAS E RAMPAS"
+            ],
+            "para": "#6E9150",
+            "cor_linha": "#557A3D"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ],
+          [
+            "#E4E4E4",
+            "#E8E8E8"
+          ]
+        ],
+        "hachuras": [
+          {
+            "nome": "deck de madeira (parte de cima)",
+            "bbox_vis": [
+              254,
+              270,
+              452,
+              570
+            ],
+            "vao_vis": 5,
+            "limiar_linha": 230,
+            "para": "#AE8863",
+            "cor_linha": "#8C6A4A"
+          },
+          {
+            "nome": "deck de madeira (faixa de baixo, sem a escada)",
+            "bbox_vis": [
+              254,
+              560,
+              351,
+              612
+            ],
+            "vao_vis": 5,
+            "limiar_linha": 230,
+            "para": "#AE8863",
+            "cor_linha": "#8C6A4A"
+          },
+          {
+            "nome": "escada abaixo do deck do spa → Bege Bahia",
+            "bbox_vis": [
+              351,
+              568,
+              452,
+              612
+            ],
+            "vao_vis": 12,
+            "linhas": "verticais",
+            "limiar_linha": 230,
+            "para": "#E8E8E8"
+          }
+        ]
+      }
+    },
+    "1Pavimento": {
+      "pagina": 0,
+      "rotacao": 0,
+      "layers_ocultas": [
+        "ARQ_TERRENO PLANEJADO"
+      ],
+      "_layers_ocultas": "Curvas de nível e linha do lote saem, como no Subsolo: fundo todo branco.",
+      "faixas_y_excluidas": [
+        [
+          null,
+          100
+        ],
+        [
+          1030,
+          null
+        ]
+      ],
+      "zonas_excluidas": {},
+      "eixo_janela_max_pt": 20,
+      "_eixo_janela_max_pt": "Nas janelinhas dos banhos, o traço de eixo (ARQ_PAREDE, ~14 pt) atravessa a caixa da janela. Como vidro, ele virava um '+' na parede, e o motor desenhava ali um registro ou um chuveiro de parede (render da v6: banho 3, banho master e banho de serviço).",
+      "reforcar_linhas": [
+        {
+          "nome": "pergolado (projeção tracejada)",
+          "layer": "ARQ_PERGOLADO",
+          "cor": "#4D4D4D",
+          "largura_px": 3
+        }
+      ],
+      "legenda": {
+        "_sobre": "Cores da legenda do prompt do 1º Pavimento: travertino #DCD9CA (circulação, sala íntima, banhos e a escada em U), madeira #A8784F (suítes e closets; o #CC9966 do PDF puxava para o laranja), Bege Bahia #E8E8E8 (varandas e bloco de serviço: quarto de serviço, banho de serviço e saleta da escada caracol), armários #CBB89E (painéis brancos com diagonal), vazios #4A4A4A com o X claro. Escada caracol: só o quarto que chega a este piso em Bege Bahia #D8CDB4; o resto do círculo esmaece.",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "bloco de serviço → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.878,
+              0.878,
+              0.878
+            ],
+            "cor_render": "#DFDFDF",
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "varanda da suíte 3 → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              770.1,
+              243.4,
+              790.1,
+              263.4
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "varanda da suíte 2 → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              694.5,
+              552.6,
+              714.5,
+              572.6
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "varanda da suíte master → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              544.7,
+              758.8,
+              564.7,
+              778.8
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "varanda da suíte 1 → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              1185.7,
+              731.4,
+              1205.7,
+              751.4
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "armários (painéis brancos com diagonal) → areia",
+            "layer": "DOC_LINHAS E PROJEÇÕES",
+            "preenchimento_pdf": [
+              1.0,
+              1.0,
+              1.0
+            ],
+            "cor_render": "#FFFFFF",
+            "para": "#CBB89E"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ],
+          [
+            "#CC9966",
+            "#A8784F"
+          ],
+          [
+            "#DDDACB",
+            "#DCD9CA"
+          ]
+        ],
+        "retangulos": [
+          {
+            "nome": "vazio de pé-direito duplo (esquerda)",
+            "bbox_vis": [
+              678,
+              329,
+              872,
+              475
+            ],
+            "so_branco": true,
+            "para": "#4A4A4A",
+            "cor_linha": "#BDBDBD"
+          },
+          {
+            "nome": "vazio de pé-direito duplo (direita)",
+            "bbox_vis": [
+              882,
+              329,
+              1029,
+              475
+            ],
+            "so_branco": true,
+            "para": "#4A4A4A",
+            "cor_linha": "#BDBDBD"
+          },
+          {
+            "nome": "vazios em volta da escada (jardim do Térreo embaixo)",
+            "bbox_vis": [
+              1080,
+              481,
+              1231,
+              597
+            ],
+            "so_branco": true,
+            "para": "#4A4A4A"
+          },
+          {
+            "nome": "saleta da caracol: abertura branca em volta do círculo → Bege Bahia (lado esquerdo)",
+            "bbox_vis": [
+              896.7,
+              808.2,
+              930.6,
+              877.6
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "saleta da caracol: abertura branca em volta do círculo → Bege Bahia (embaixo à direita)",
+            "bbox_vis": [
+              930.6,
+              847.4,
+              964.8,
+              877.6
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "varanda da suíte 1 sem as linhas tracejadas do Térreo",
+            "bbox_vis": [
+              1245.8,
+              598.9,
+              1357.0,
+              883.8
+            ],
+            "so_branco": true,
+            "para": "#E8E8E8",
+            "cor_linha": "#E8E8E8"
+          },
+          {
+            "nome": "chuveiro de teto do banho 3: borda",
+            "bbox_vis": [
+              1053.96,
+              227.64,
+              1063.62,
+              237.3
+            ],
+            "para": "#8C8C8C"
+          },
+          {
+            "nome": "chuveiro de teto do banho 3: placa",
+            "bbox_vis": [
+              1054.89,
+              228.57,
+              1062.69,
+              236.37
+            ],
+            "para": "#C4C4C4"
+          },
+          {
+            "nome": "chuveiro de teto do banho master (esquerda): borda",
+            "bbox_vis": [
+              627.37,
+              857.35,
+              637.03,
+              867.01
+            ],
+            "para": "#8C8C8C"
+          },
+          {
+            "nome": "chuveiro de teto do banho master (esquerda): placa",
+            "bbox_vis": [
+              628.3,
+              858.28,
+              636.1,
+              866.08
+            ],
+            "para": "#C4C4C4"
+          },
+          {
+            "nome": "chuveiro de teto do banho master (direita): borda",
+            "bbox_vis": [
+              666.02,
+              857.35,
+              675.68,
+              867.01
+            ],
+            "para": "#8C8C8C"
+          },
+          {
+            "nome": "chuveiro de teto do banho master (direita): placa",
+            "bbox_vis": [
+              666.95,
+              858.28,
+              674.75,
+              866.08
+            ],
+            "para": "#C4C4C4"
+          }
+        ],
+        "setores": [
+          {
+            "nome": "trecho da escada caracol que chega a este piso → Bege Bahia",
+            "centro_vis": [
+              930.7,
+              847.2
+            ],
+            "raio_vis": 30.0,
+            "quadrante": "sup_dir",
+            "para": "#D8CDB4",
+            "cor_linha": "#8F8574"
+          }
+        ],
+        "_retangulos_v3": "Base v3: (1) a abertura branca em volta da caracol vira piso Bege Bahia, e só os 3/4 do círculo ficam brancos; no render da v6 o motor deixou branca a saleta inteira e o quarto de serviço. (2) Na varanda da suíte 1, as duas linhas tracejadas do Térreo saem; no render da v6 elas dividiram a varanda numa faixa de pedra e um resto cinza. (3) Os três chuveiros de teto viram placas quadradas de 30 cm, cinza-aço com borda escura, no mesmo centro do símbolo do PDF (20 cm); no render da v6 eles saíram redondos e com braço, como chuveiro de parede."
+      },
+      "esmaecer": {
+        "_sobre": "Fica com a cor cheia só o 1º Pavimento (blocos com paredes, varandas, vazios e hall da escada). O entorno do Térreo (piscina, ofurô, deck, degraus, deck da piscina, placas de pedestres, pergolado) clareia.",
+        "clarear": 0.55,
+        "manter_bbox_vis": [
+          [
+            678,
+            175,
+            1138,
+            331
+          ],
+          [
+            678,
+            328,
+            1083,
+            600
+          ],
+          [
+            1076,
+            474,
+            1240,
+            600
+          ],
+          [
+            1228,
+            474,
+            1364,
+            494
+          ],
+          [
+            678,
+            470,
+            1240,
+            889
+          ],
+          [
+            519,
+            648,
+            681,
+            889
+          ],
+          [
+            1236,
+            594,
+            1363,
+            889
+          ]
+        ],
+        "clarear_circulos": [
+          {
+            "centro_vis": [
+              930.7,
+              847.2
+            ],
+            "raio_vis": 31.5,
+            "exceto_quadrante": "sup_dir",
+            "clarear": 0.8,
+            "_clarear": "O trecho da caracol que é do piso de baixo clareia 80% (mais que o entorno), para ler como branco: no render da v5 o motor coloriu esses 3/4 e deixou branco o quarto deste piso."
+          }
+        ]
+      }
+    },
+    "Subsolo": {
+      "pagina": 0,
+      "rotacao": 0,
+      "faixas_y_excluidas": [
+        [
+          null,
+          100
+        ],
+        [
+          1030,
+          null
+        ]
+      ],
+      "layers_ocultas": [
+        "ARQ_TERRENO PLANEJADO"
+      ],
+      "_layers_ocultas": "Curvas de nível e linha do lote: no render o motor tingiu o lote de bege-acinzentado. Sem elas, o fundo fica todo branco.",
+      "zonas_excluidas": {
+        "folha da porta do banho de serviço": [
+          484,
+          555,
+          506,
+          563
+        ],
+        "folha da porta da circulação para o depósito": [
+          590,
+          548,
+          619,
+          556
+        ]
+      },
+      "ocultar_layers_zonas": {
+        "DOC_LINHAS E PROJEÇÕES": [
+          [
+            588,
+            471,
+            877,
+            567
+          ],
+          [
+            712,
+            793,
+            832,
+            812
+          ]
+        ]
+      },
+      "_ocultar_layers_zonas": "Projeções dentro do depósito e junto à parede de baixo da academia: no render elas viraram uma sauna e um banco. Os X do elevador e dos shafts, na mesma layer, ficam.",
+      "legenda": {
+        "_sobre": "Cores da legenda do prompt do Subsolo: travertino #DCD9CA (hall, sauna, banhos fem. e masc. e o pátio de acesso à academia), Bege Bahia #E8E8E8 (circulação e depósito) e #D8CDB4, um creme mais forte, na escada que desce do deck para o pátio da academia, para ela não parecer esmaecida, Barlavento #B7CFC9 (banho de serviço), madeira da academia como no PDF (piscina e ofurô ficam esmaecidos pelo passo 7).",
+        "tolerancia_px": 10,
+        "poligonos": [
+          {
+            "nome": "circulação e depósito → Bege Bahia",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.878,
+              0.878,
+              0.878
+            ],
+            "cor_render": "#DFDFDF",
+            "bbox_vis": [
+              700,
+              500,
+              900,
+              540
+            ],
+            "para": "#E8E8E8"
+          },
+          {
+            "nome": "banho de serviço → Barlavento",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.878,
+              0.878,
+              0.878
+            ],
+            "cor_render": "#C7DFE6",
+            "bbox_vis": [
+              470,
+              505,
+              500,
+              535
+            ],
+            "para": "#B7CFC9"
+          },
+          {
+            "nome": "pátio de acesso à academia → travertino",
+            "layer": "ARQ_CONTRAPISO",
+            "preenchimento_pdf": [
+              0.894,
+              0.894,
+              0.894
+            ],
+            "cor_render": "#E4E4E4",
+            "bbox_vis": [
+              505,
+              700,
+              535,
+              750
+            ],
+            "para": "#DCD9CA"
+          }
+        ],
+        "trocas_cor": [
+          [
+            "#BAB596",
+            "#DCD9CA"
+          ]
+        ],
+        "retangulos": [
+          {
+            "nome": "escada que desce do deck para o pátio da academia → Bege Bahia (creme forte)",
+            "bbox_vis": [
+              361.4,
+              570.7,
+              450.0,
+              609.7
+            ],
+            "para": "#D8CDB4",
+            "linhas_layer": "ARQ_ESCADAS E RAMPAS",
+            "cor_linha": "#8F8574"
+          }
+        ]
+      },
+      "esmaecer": {
+        "_sobre": "Fica com a cor cheia o subsolo (os três blocos com paredes), o pátio de acesso à academia e a escada que desce do deck até ele. O resto (piscina, ofurô, deck de madeira, degraus escalonados, deck da piscina, terreno) clareia.",
+        "clarear": 0.55,
+        "manter_bbox_vis": [
+          [
+            454,
+            466.5,
+            884,
+            574
+          ],
+          [
+            586,
+            567,
+            884,
+            821
+          ],
+          [
+            507,
+            808,
+            884,
+            890
+          ],
+          [
+            875,
+            565,
+            1161,
+            662
+          ],
+          [
+            361,
+            570,
+            450.5,
+            610.5
+          ],
+          [
+            446,
+            562,
+            592,
+            888
+          ]
+        ]
+      }
+    }
+  },
+  "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede.",
+  "entrega": {
+    "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
+    "casa": "CASA A",
+    "prefixo": "POE642_CasaA",
+    "pasta_bases": "../bases",
+    "pasta_entrega": "../entrega",
+    "_largura_prancha": "3840 px desde os nomes e áreas (18/10/26): as imagens com rótulos estão no quadro comum em 3840 px, como nas outras casas (em 2000 px o rótulo não se lia).",
+    "largura_prancha": 3840,
+    "pavimentos": {
+      "Subsolo": {
+        "titulo": "SUBSOLO",
+        "linha_area": 0,
+        "base": "POE642_CasaA_BASE_Subsolo_v4_16x9.png"
+      },
+      "Terreo": {
+        "titulo": "TÉRREO",
+        "linha_area": 1,
+        "base": "POE642_CasaA_BASE_Terreo_v6_16x9.png"
+      },
+      "1Pavimento": {
+        "titulo": "1º PAVIMENTO",
+        "linha_area": 2,
+        "base": "POE642_CasaA_BASE_1Pavimento_v3_16x9.png"
+      }
+    },
+    "areas": [
+      [
+        "SUBSOLO",
+        "160,40 m²"
+      ],
+      [
+        "TÉRREO",
+        "427,40 m²"
+      ],
+      [
+        "1º PAVIMENTO",
+        "263,25 m²"
+      ],
+      [
+        "TOTAL",
+        "851,05 m²"
+      ]
+    ],
+    "projeto": [
+      [
+        "CLIENTE",
+        "PAULO OCTÁVIO"
+      ],
+      [
+        "ENDEREÇO",
+        "ML 10 – CONJUNTO 02, LOTES 17, UNIDADE A"
+      ],
+      [
+        "PROJETO",
+        "CASA A · UNIDADE AUTÔNOMA \"A\""
+      ],
+      [
+        "DATA INICIAL",
+        "14/10/26"
+      ]
+    ],
+    "pdf": {
+      "nome": "POE642_CasaA_Plantas_Humanizadas.pdf",
+      "ordem": [
+        "Subsolo",
+        "Terreo",
+        "1Pavimento"
+      ],
+      "titulo": "Casa A – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)",
+      "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade A",
+      "palavras": "planta humanizada, layout, Casa A"
+    }
+  }
+}

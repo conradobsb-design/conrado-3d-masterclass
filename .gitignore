@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# PDFs do cliente (POE 642), ficam só na máquina local
+projetos/_pdfs_cliente/
+__pycache__/

@@ -1,0 +1,295 @@
+#!/usr/bin/env python3
+"""Fontes de textura geradas por código, para materiais sem render aprovado de onde tirar o trecho.
+
+Saem na escala dos renders (folha inteira com 2000 px de largura: ~3,2 cm por px), como os
+trechos de renders que o texturizar_base.py usa; ele tece e amplia para a base.
+
+- pedra portuguesa caramelo (Casa E, acesso de veículos): pedrinhas de ~6,5 cm em tons de caramelo,
+  ocre e creme, com juntas finas de areia; desenhadas em 4 x (diagrama de Voronoi) e reduzidas;
+- bronze fosco (Casa E, bancos): bronze escuro com escovado fino e manchas suaves;
+- Barlavento (Portobello, linha que reproduz a pedra hijau, peças de 14,5 x 14,5 cm; Casa E,
+  piscinas, pedido do usuário): `barlavento` devolve a textura relativa (média 1) de uma área já
+  no tamanho do render: peças de tons verde-acinzentados e azulados alternados (variação sutil), grão
+  fino dentro de cada peça e juntas finas um pouco mais escuras, sem manchas; o retoque multiplica
+  pela cor da água e pela luz;
+- quartzito Aura (Casa E, banhos do 1º Pavimento; a cor pêssego claro #EAD4BF da legenda do
+  cliente): placas de 90 x 90 cm com variação sutil de tom, nuvens suaves e veios finos e fluidos
+  (claros e alguns dourados), juntas finas um pouco mais escuras.
+- quartzito Carrara (Casa A, ilhas e bancadas, pedido do usuário de 21/10/26): `quartzito_carrara` devolve a pedra na
+  escala do render, branca levemente acinzentada, com nuvens cinza muito suaves e os veios cinza esfumados (os
+  principais de ~5 mm, com halo, a cada ~30 cm; os secundários de ~1,5 mm, a cada ~9 cm), ondulados, de largura
+  variável, sumindo e voltando, no sentido pedido (o lado maior da bancada).
+
+Uso (da pasta projetos/):
+  python3 POE642_CasaA/scripts/fontes_procedurais.py POE642_CasaE/bases/fontes
+"""
+import sys
+from pathlib import Path
+
+import cv2
+import numpy as np
+
+CM_POR_PX = 3.2          # escala dos renders (2000 px de largura)
+
+
+def pedra_portuguesa(lado=420, pedra_cm=6.5, ss=4, semente=642, cm_por_px=CM_POR_PX, junta=None):
+    """junta: None, as juntas finas de areia clara (base v3); ou (largura em px da imagem, fator de escurecimento), para
+    a pedra se ler na imagem final, onde cada pedra tem poucos px."""
+    rng = np.random.default_rng(semente)
+    n = lado * ss
+    passo = pedra_cm / cm_por_px * ss                     # px (em ss) entre centros de pedras
+    gx, gy = np.meshgrid(np.arange(0, n + passo, passo), np.arange(0, n + passo, passo))
+    pts = np.stack([gx.ravel(), gy.ravel()], 1) + rng.uniform(-0.42, 0.42, (gx.size, 2)) * passo
+    # Voronoi: a pedra de cada px é o centro mais próximo (via rótulos de distância)
+    marcas = np.zeros((n, n), np.int32)
+    dentro = (pts[:, 0] >= 0) & (pts[:, 0] < n) & (pts[:, 1] >= 0) & (pts[:, 1] < n)
+    pts = pts[dentro]
+    sementes = np.ones((n, n), np.uint8)
+    for i, (x, y) in enumerate(pts.astype(int)):
+        sementes[y, x] = 0
+        marcas[y, x] = i + 1
+    _, lab = cv2.distanceTransformWithLabels(sementes, cv2.DIST_L2, 5, labelType=cv2.DIST_LABEL_PIXEL)
+    ys, xs = np.nonzero(sementes == 0)
+    idx = np.zeros(lab.max() + 1, np.int32)
+    idx[lab[ys, xs]] = marcas[ys, xs]
+    pedra = idx[lab]
+    # cor de cada pedra: caramelo com variação, algumas ocre mais escuras e algumas creme
+    paleta = np.array([[98, 148, 194], [78, 120, 166], [118, 166, 206], [150, 188, 216], [88, 136, 184]], np.float32)  # BGR
+    pesos = np.array([0.42, 0.2, 0.18, 0.06, 0.14])
+    escolha = rng.choice(len(paleta), size=len(pts) + 1, p=pesos)
+    cores = paleta[escolha] * rng.uniform(0.94, 1.05, (len(pts) + 1, 1))
+    img = cores[pedra]
+    # juntas: a borda de cada pedra, em areia clara
+    k = 3 if junta is None else max(3, int(round(junta[0] * ss)) | 1)
+    borda = (cv2.dilate(pedra.astype(np.float32), np.ones((k, k))) != cv2.erode(pedra.astype(np.float32), np.ones((k, k))))
+    if junta is None:
+        img[borda] = img[borda] * 0.55 + np.array([140, 168, 192], np.float32) * 0.45
+    else:
+        img[borda] = img[borda] * junta[1]
+    # leve relevo dentro de cada pedra (o centro um pouco mais claro)
+    dist = cv2.distanceTransform((~borda).astype(np.uint8), cv2.DIST_L2, 3)
+    img *= (0.95 + 0.05 * np.clip(dist / (passo * 0.35), 0, 1))[..., None]
+    return cv2.resize(np.clip(img, 0, 255).astype(np.uint8), (lado, lado), interpolation=cv2.INTER_AREA)
+
+
+def bronze_fosco(lado=240, semente=642):
+    rng = np.random.default_rng(semente)
+    base = np.array([74, 96, 118], np.float32)                 # BGR de #76604A
+    escovado = cv2.GaussianBlur(rng.normal(0, 1, (lado, lado)).astype(np.float32), (0, 0), sigmaX=6, sigmaY=0.5)
+    manchas = cv2.GaussianBlur(rng.normal(0, 1, (lado, lado)).astype(np.float32), (0, 0), 18)
+    f = 1 + 0.015 * escovado / (escovado.std() + 1e-6) + 0.035 * manchas / (manchas.std() + 1e-6)
+    return np.clip(base[None, None, :] * f[..., None], 0, 255).astype(np.uint8)
+
+
+def barlavento(alto, largo, cm_por_px=CM_POR_PX, peca_cm=14.5, ss=8, semente=642):
+    """Textura relativa (BGR, média 1) do Barlavento Caribbean visto sob a água, no tamanho alto x
+    largo (px do render): grade de peças de peca_cm, cada uma num tom da pedra hijau (verde-acinzentado
+    a azulado), com o grão fino da pedra e as juntas finas um pouco mais escuras."""
+    rng = np.random.default_rng(semente)
+    lado = peca_cm / cm_por_px * ss                       # px (em ss) por peça
+    H, W = alto * ss, largo * ss
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    i, j = (yy // lado).astype(np.int32), (xx // lado).astype(np.int32)
+    ni, nj = int(i.max()) + 1, int(j.max()) + 1
+    # tons da hijau (BGR, relativos): verde-acinzentado, verde, azulado e um mais claro
+    paleta = np.array([[1.00, 1.00, 1.00], [0.98, 1.005, 0.985], [1.02, 0.995, 0.96], [1.015, 1.02, 1.02],
+                       [0.985, 0.985, 1.005]], np.float32)
+    pesos = np.array([0.34, 0.24, 0.2, 0.12, 0.1])
+    tom = paleta[rng.choice(len(paleta), size=(ni, nj), p=pesos)] * rng.uniform(0.975, 1.025, (ni, nj, 1)).astype(np.float32)
+    img = tom[i, j]
+    # mesclado da pedra: só o grão fino dentro da peça (sem manchas grandes nem pintas escuras: o
+    # usuário achou que davam aspecto de sujo)
+    for sigma, amp in ((0.18 * lado, 0.02), (0.06 * lado, 0.02)):
+        r = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), sigma)
+        img *= (1 + amp * r / max(float(r.std()), 1e-6))[..., None]
+    # juntas: 6% da peça em cada borda
+    fy, fx = (yy % lado) / lado, (xx % lado) / lado
+    junta = (np.minimum(np.minimum(fy, 1 - fy), np.minimum(fx, 1 - fx)) < 0.06)
+    img[junta] *= 0.94
+    img = cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
+    return img / img.reshape(-1, 3).mean(axis=0)
+
+
+def quartzito_aura(lado=420, placa_cm=90.0, ss=4, semente=642):
+    rng = np.random.default_rng(semente)
+    n = lado * ss
+    base = np.array([191, 212, 234], np.float32)               # BGR de #EAD4BF
+    passo = placa_cm / CM_POR_PX * ss
+    yy, xx = np.mgrid[0:n, 0:n].astype(np.float32)
+    i, j = (yy // passo).astype(np.int32), (xx // passo).astype(np.int32)
+    tom = rng.uniform(0.99, 1.01, (int(i.max()) + 1, int(j.max()) + 1)).astype(np.float32)
+    f = tom[i, j]
+    nuvem = cv2.GaussianBlur(rng.normal(0, 1, (n, n)).astype(np.float32), (0, 0), 0.9 * passo)
+    f = f * (1 + 0.010 * nuvem / max(float(nuvem.std()), 1e-6))
+    # veios: faixas finas de um campo ondulado (direção de ~30 graus, deformado por ruído suave)
+    ruido = cv2.GaussianBlur(rng.normal(0, 1, (n, n)).astype(np.float32), (0, 0), 1.2 * passo)
+    ruido /= max(float(ruido.std()), 1e-6)
+    campo = (-xx * np.sin(0.52) + yy * np.cos(0.52)) / (1.3 * passo) + 0.55 * ruido
+    veio = np.exp(-((np.abs(np.sin(np.pi * campo))) / 0.03) ** 2)
+    claro = veio * (cv2.GaussianBlur(rng.normal(0, 1, (n, n)).astype(np.float32), (0, 0), 0.25 * passo) > -0.2)
+    img = base[None, None, :] * f[..., None]
+    img = img + claro[..., None] * np.float32([14, 12, 9])                    # veios claros, creme
+    dourado = veio * (cv2.GaussianBlur(rng.normal(0, 1, (n, n)).astype(np.float32), (0, 0), 0.25 * passo) > 1.1)
+    img = img * (1 - 0.06 * dourado[..., None] * np.float32([1.6, 1.0, 0.4]))  # alguns dourados
+    # juntas finas entre as placas (~0,6 cm)
+    fy, fx = (yy % passo), (xx % passo)
+    junta = np.minimum(np.minimum(fy, passo - fy), np.minimum(fx, passo - fx)) < 0.1 * ss
+    img[junta] *= 0.93
+    img = cv2.resize(img, (lado, lado), interpolation=cv2.INTER_AREA)
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def em_2000(img):
+    """Repete a fonte até 2000 px de largura: o texturizar_base.py lê a escala de cada arquivo pela
+    largura (a de um render inteiro), e o trecho usado é o primeiro ladrilho (bbox 0, 0, lado, lado)."""
+    return np.tile(img, (1, -(-2000 // img.shape[1]), 1))[:, :2000]
+
+
+def main():
+    saida = Path(sys.argv[1] if len(sys.argv) > 1 else ".")
+    saida.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(saida / "pedra_portuguesa_caramelo.png"), em_2000(pedra_portuguesa()))
+    cv2.imwrite(str(saida / "bronze_fosco.png"), em_2000(bronze_fosco()))
+    cv2.imwrite(str(saida / "quartzito_aura.png"), em_2000(quartzito_aura()))
+    print(saida / "pedra_portuguesa_caramelo.png", saida / "bronze_fosco.png", saida / "quartzito_aura.png")
+
+
+if __name__ == "__main__":
+    main()
+
+
+# granito marrom da referência do usuário (20/10/26, "use essa referencia de granito marrom"; a foto veio só na conversa,
+# sem arquivo: o desenho é reproduzido por código). Base marrom quente com nuvens suaves e lascas de agregado de vários
+# tamanhos (muitas de 2 a 8 mm, algumas de 1 a 3 cm e raras de 3 a 6 cm), em creme, bege, chocolate, ferrugem, cinza e
+# quase preto. A foto tem ~60 cm de largura (estimado pelas lascas).
+GRANITO_REF = {"base": (68, 88, 118),                       # BGR, o marrom da base
+               "nuvem": (0.15, 0.045), "mancha": (0.03, 0.02),  # (escala em m, amplitude) das nuvens e do mosqueado
+               "lascas": [  # (densidade por m², diâmetro mín. e máx. em mm)
+                   (3200, 2, 7), (320, 7, 22), (22, 22, 55)],
+               # a maioria em tons de marrom perto da base (mais escuros e mais claros), menos as claras e as escuras
+               "cores": [((50, 66, 92), 0.24), ((92, 112, 140), 0.18), ((176, 188, 204), 0.17), ((140, 156, 176), 0.10),
+                         ((44, 62, 108), 0.10), ((104, 108, 112), 0.11), ((36, 40, 46), 0.10)],
+               "suave": 0.45}                                  # desfoque das lascas (px em ss)
+
+
+def granito_referencia(alto, largo, px_por_m, ss=4, semente=642):
+    """O granito marrom da referência, BGR float32 (alto x largo), na escala px_por_m."""
+    q = GRANITO_REF
+    rng = np.random.default_rng(semente)
+    H, W = alto * ss, largo * ss
+    k = px_por_m * ss                                          # px (em ss) por metro
+
+    def ruido(esc_m, amp):
+        n = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), max(0.5, esc_m * k))
+        return 1 + amp * n / (n.std() + 1e-6)
+    img = np.empty((H, W, 3), np.float32)
+    img[:] = np.float32(q["base"])
+    img *= (ruido(*q["nuvem"]) * ruido(*q["mancha"]))[..., None]
+    cores = np.float32([c for c, _ in q["cores"]])
+    pesos = np.float32([w for _, w in q["cores"]])
+    pesos /= pesos.sum()
+    area_m2 = (H / k) * (W / k)
+    for dens, d0, d1 in q["lascas"]:
+        n = rng.poisson(dens * area_m2)
+        diam = np.exp(rng.uniform(np.log(d0), np.log(d1), n)) / 1000 * k   # px (em ss)
+        cx, cy = rng.uniform(0, W, n), rng.uniform(0, H, n)
+        cor = cores[rng.choice(len(cores), n, p=pesos)] * rng.uniform(0.9, 1.08, (n, 1))
+        peq = diam < 1.6
+        # as menores: um px (em ss), com a força pela área
+        xs, ys = cx[peq].astype(int), cy[peq].astype(int)
+        f = np.clip((diam[peq] / 1.6) ** 2, 0.15, 1)[:, None]
+        img[ys, xs] = img[ys, xs] * (1 - f) + cor[peq] * f
+        # as maiores: polígonos irregulares
+        for x, y, d, c in zip(cx[~peq], cy[~peq], diam[~peq], cor[~peq]):
+            m = rng.integers(6, 10)
+            ang = np.sort(rng.uniform(0, 2 * np.pi, m))
+            r = d / 2 * rng.uniform(0.72, 1.0, m)
+            pts = np.stack([x + r * np.cos(ang), y + r * np.sin(ang) * rng.uniform(0.6, 1.0)], 1)
+            cv2.fillPoly(img, [np.round(pts * 4).astype(np.int32)], tuple(float(v) for v in c), cv2.LINE_AA, shift=2)
+    img = cv2.GaussianBlur(img, (0, 0), q["suave"])
+    return cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
+
+
+
+# Quartzito Carrara (usuário, 21/10/26: "USE O QUARTZITO CARRARA NAS ILHAS E BANCADAS"; sem foto: o desenho é
+# reproduzido por código, como o do granito). Fundo branco levemente acinzentado com nuvens cinza muito suaves e os
+# veios cinza esfumados do Carrara: os principais (cinza médio, ~5 mm, com o halo esfumado de ~1,5 cm), a cada ~30 cm,
+# ondulados e de largura variável; os secundários finos (~1,5 mm, mais claros), a cada ~9 cm, num ângulo um pouco
+# diferente; os dois somem e voltam ao longo do comprimento, como na pedra. Correm no sentido de `angulo` (graus; 0 = ao
+# longo da largura). Um tom abaixo do branco da louça, para as cubas brancas se destacarem.
+CARRARA = {"base": (228, 231, 232), "veio": (148, 150, 154),        # BGR
+           "nuvem": (0.30, 0.012), "mancha": (0.08, 0.010),          # (escala em m, amplitude)
+           # (período m, largura m, força, halo m, força do halo, ondulação m, escala da ondulação m, giro em graus,
+           #  escala em m dos trechos que somem)
+           "veios": [(0.30, 0.005, 0.55, 0.015, 0.10, 0.17, 0.45, 0, 0.30),
+                     (0.09, 0.0015, 0.25, 0.0, 0.0, 0.06, 0.18, 14, 0.15)],
+           "aparece": (0.2, 0.9), "espessura": 0.5}   # os trechos visíveis (base, ganho) e a variação da largura
+
+
+def quartzito_carrara(alto, largo, px_por_m, angulo=0.0, ss=4, semente=642):
+    """O quartzito Carrara, BGR float32 (alto x largo), na escala px_por_m, com os veios no sentido de `angulo`."""
+    q = CARRARA
+    rng = np.random.default_rng(semente)
+    H, W = alto * ss, largo * ss
+    k = px_por_m * ss                                          # px (em ss) por metro
+
+    def campo(esc_m):
+        # normalizado pelo desvio teórico do ruído branco desfocado (2·√π·σ), e não pelo do recorte: numa bancada
+        # pequena, a nuvem de 30 cm é quase constante, e dividir pelo desvio dela estourava o claro-escuro
+        s = max(0.5, esc_m * k)
+        return cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), s) * (2 * np.sqrt(np.pi) * s)
+    img = np.empty((H, W, 3), np.float32)
+    img[:] = np.float32(q["base"])
+    img *= (1 + q["nuvem"][1] * campo(q["nuvem"][0]) + q["mancha"][1] * campo(q["mancha"][0]))[..., None]
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32) / k        # m
+    tinta = np.zeros((H, W), np.float32)
+    for per, larg, forca, halo, f_halo, ond, esc, giro, some in q["veios"]:
+        a = np.deg2rad(angulo + giro)
+        t = -xx * np.sin(a) + yy * np.cos(a)                   # m, através dos veios
+        t = t + ond * campo(esc) + 0.4 * ond * campo(esc / 3)
+        u = t / per + rng.uniform()
+        d = np.abs(u - np.round(u)) * per                     # m até o veio mais perto
+        lg = larg * np.clip(1 + q["espessura"] * campo(some / 2), 0.3, 2.0)   # a largura varia ao longo do veio
+        sig = np.maximum(lg / 2, 0.6 / k)                      # no mínimo 0,6 px (em ss)
+        v = forca * np.minimum(1.0, lg / 2 / sig) * np.exp(-0.5 * (d / sig) ** 2)
+        if halo:
+            v = v + f_halo * np.exp(-0.5 * (d / halo) ** 2)
+        b0, g = q["aparece"]
+        v *= np.clip(b0 + g * campo(some), 0, 1)              # os trechos em que o veio some
+        tinta = 1 - (1 - tinta) * (1 - np.clip(v, 0, 1))
+    img = img * (1 - tinta[..., None]) + np.float32(q["veio"]) * tinta[..., None]
+    return cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
+
+
+# Pedido do usuário (22/10/26), nas bancadas da Casa B: "ESSE CARRARA NÃO ESTÁ BOM. VAMOS UTILIZAR UMA PEDRA FINA E TOM
+# SÓBRIO". Um quartzo de grão fino em cinza quente (fendi), sem veios: o tom de fundo com uma nuvem bem leve (30 cm) e o
+# grão de 1 a 3 mm, mais escuro e mais claro, que na escala da prancha vira só uma textura miúda.
+PEDRA_FINA = {"base": (164, 170, 177),                                 # BGR (RGB 177, 170, 164)
+              "nuvem": (0.30, 0.008), "mancha": (0.06, 0.005),         # (escala em m, amplitude)
+              "grao": [(0.0015, 0.04, (128, 132, 137)), (0.0025, 0.02, (198, 202, 206)), (0.003, 0.008, (104, 108, 112))],
+              #         (raio m, fração da área, cor BGR)
+              "forca_grao": (0.25, 0.45), "desfoque_px": 0.6}   # opacidade do grão; desfoque final (px na escala)
+
+
+def pedra_fina(alto, largo, px_por_m, angulo=0.0, ss=4, semente=642):
+    """A pedra fina de tom sóbrio, BGR float32 (alto x largo), na escala px_por_m (sem direção: `angulo` não muda)."""
+    q = PEDRA_FINA
+    rng = np.random.default_rng(semente)
+    H, W = alto * ss, largo * ss
+    k = px_por_m * ss
+
+    def campo(esc_m):
+        s = max(0.5, esc_m * k)
+        return cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), s) * (2 * np.sqrt(np.pi) * s)
+    img = np.empty((H, W, 3), np.float32)
+    img[:] = np.float32(q["base"])
+    img *= (1 + q["nuvem"][1] * campo(q["nuvem"][0]) + q["mancha"][1] * campo(q["mancha"][0]))[..., None]
+    for raio, frac, cor in q["grao"]:
+        r = max(0.6, raio * k)
+        n = int(frac * H * W / (np.pi * r * r))
+        m = np.zeros((H, W), np.float32)
+        m[rng.integers(0, H, n), rng.integers(0, W, n)] = 1.0
+        m = np.clip(cv2.GaussianBlur(m, (0, 0), r) * (2 * np.pi * r * r), 0, 1) * rng.uniform(*q["forca_grao"])
+        img = img * (1 - m[..., None]) + np.float32(cor) * m[..., None]
+    img = cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
+    return cv2.GaussianBlur(img, (0, 0), q["desfoque_px"]) if q["desfoque_px"] else img
