@@ -690,7 +690,7 @@ Pedidos de 22/10/26, além dos itens do mapa:
 - **Térreo:**
   - guarda-roupas com cabides da R11 (`guarda_roupas_terreo`), no lugar da marcenaria;
   - riscos do motor nos pisos fora (`riscos_terreo`: escuros finos ou pontuais, longe das linhas e dos objetos do PDF, por inpaint).
-- **Nos dois pavimentos:** pedra fina de tom sóbrio nas ilhas e bancadas (`pedra_bancadas`: `carrara_bancadas` com `fontes_procedurais.pedra_fina`).
+- **Nos dois pavimentos:** as ilhas e bancadas passaram pela pedra fina de tom sóbrio (`pedra_bancadas`: `carrara_bancadas` com `fontes_procedurais.pedra_fina`); na final de 3840 px (`final3840_casab.py`), elas são agora a pedra tom areia humanizada, com as cubas brancas.
 - **Subsolo:**
   - o deck em L e a escada de 9 degraus vão para a hachura (não são do Subsolo);
   - o chuveiro na ducha (`chuveiro_ducha`);
@@ -699,12 +699,54 @@ Pedidos de 22/10/26, além dos itens do mapa:
 
 ```bash
 python3 ajustes_casab.py Terreo                 # todos os itens (ou --ate <item>, --de <item>)
-python3 ajustes_casab.py Terreo --final         # -> ../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_final_rotulos.png
+python3 ajustes_casab.py Terreo --final         # = final3840_casab.py Terreo (seção seguinte)
 python3 ajustes_casab.py Subsolo && python3 ajustes_casab.py Subsolo --final
 python3 rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --no-quadro \
     --render Terreo=../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_final_rotulos.png \
     --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final_rotulos.png
 python3 pdf_entrega.py --config ../../POE642_CasaB/config_bases.json
+```
+
+## A final da Casa B em 3840 px: `final3840_casab.py`
+
+Pedido do usuário (22/10/26): "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGASTADAS E MAL DESENHADAS. PRECISO QUE REVISE ITEM A ITEM E DEIXE A IMAGEM COM OS CONTORNOS PERFEITOS". O que os ajustes desenhavam em 2000 px e a final ampliava saía mole, então a final passou a ser desenhada direto no quadro da prancha (3840 × 2160, ~59,7 px/m), pelo PDF (vetor) e pela base chapada da legenda (6905 px, reduzida por vizinho: as máscaras de material ficam exatas). `ajustes_casab.py --final` chama este módulo.
+
+- `Quadro(chave)`: o PDF e o seu mapeamento para o quadro (`p2q`; `p2q2000` para os rótulos), a escala, a base chapada e as máscaras (`cor`, `preencher` com antialias, `caminhos`).
+- `afim_render`: o afim do render de 2000 px para o quadro (SIFT, como o `no_quadro_fixo`; em cache), de onde saem as cores dos móveis e o lugar das plantas e dos carros.
+- **Etapas do Térreo** (`passos_terreo`):
+  - `pisos`: cada material na máscara da legenda, com a textura da biblioteca na escala;
+  - `bordas`: grama e piso;
+  - `vegetacao`: as plantas da biblioteca nos lugares do gramado;
+  - `bancadas`;
+  - `pecas`: os móveis, os tapetes e as louças pelo desenho do PDF;
+  - `biblioteca`: guarda-roupas, camas, cortinas, cooktops, banquetas, inox, adega e elevador, pelas rotinas dos ajustes dentro de `em_quadro`, que as faz desenhar no quadro;
+  - `carros`;
+  - `deck`: o banco em L e o chuveiro;
+  - `paredes`: as pretas, e os pilares redondos em cinza;
+  - `esquadrias`;
+  - `escadas`: as duas escadas e as projeções;
+  - `cobertura`;
+  - `rotulos`.
+- **Etapas do Subsolo** (`passos_subsolo`), as mesmas onde cabem: `pisos` (só na pegada), `bancadas`, `pecas`, `biblioteca` (o chuveiro da ducha), `paredes`, `esquadrias`, `escadas`, `hachura` (o terreno hachurado, a partir do Térreo final: rode o Térreo antes) e `rotulos`.
+- **Bancadas** (pedido de 22/10: "troque o cinza das bancadas pelo tom areia", "cubas em branco", "preciso que as pedras estejam humanizadas"):
+  - a pedra é a foto do Bege Bahia da biblioteca, na escala e levada ao tom areia (`BANCADAS_F`: `tom`, `contraste`), em toda peça da ARQ_BANCADAS;
+  - as cubas da ARQ_BANCADAS (`cubas_bancada`: o retângulo com o aro fino nos quatro lados) são louça branca, com a bacia de cantos arredondados e a sombra interna; as da ARQ_LOUÇAS (cozinha, gourmet e bar) também saem brancas (`TERREO["inox_pt"]` vazio).
+- **Peças do PDF** (`pecas_pdf`): na ordem de pintura do PDF, com o mapa de quem está por cima, então só aparece o traço que fica por cima. A cor é a mediana do render no miolo da peça. Cada peça tem um tipo:
+  - tapete: grande e simples;
+  - louça branca, ou metal nos detalhes miúdos;
+  - madeira, com veio;
+  - planta em vaso, que vira a planta da biblioteca;
+  - o resto é objeto.
+  Todas levam volume na borda, sombra curta para baixo e à esquerda e o traço fino do PDF; as hachuras densas ficam mais leves.
+  As louças são lisas (sem a trama do tecido), com o traço mais leve (o aro de dentro da cuba, quase só o tom). A bacia (a louça dentro de outra, com 40 a 95% da área dela) é achada pela geometria, porque o aro é pintado depois e a cobre; ela leva a sombra interna do lado da luz e o fundo um tom abaixo. As banquetas da bancada gourmet são as `banqueta_linho` da biblioteca nos círculos do PDF (`BANQUETAS_PT`, `centros_banquetas`).
+- **Rótulos** (`rotulos`, `ROTULOS_F`): a caixa exata do texto procura, em até 3 m do ponto do PDF, o lugar livre mais perto, dentro do próprio ambiente (paredes e portas do PDF fecham os ambientes) e sem tocar objeto nem outro rótulo. Onde não cabe, quebra em duas linhas e depois desce o corpo; o texto leva um halo suave.
+- **Cache de etapas:** `<$POE642_CACHE ou a pasta temporária>/poe642_casab_etapas/final3840/<Pavimento>_<etapa>.png`. `--de <etapa>` recomeça daquela etapa com a anterior do cache.
+
+```bash
+python3 final3840_casab.py Terreo                  # -> ../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_final_rotulos.png
+python3 final3840_casab.py Subsolo                 # depois do Térreo (a hachura vem dele)
+python3 final3840_casab.py Terreo --de bancadas    # refaz só dali em diante
+# depois, rodape_entrega.py e pdf_entrega.py como acima
 ```
 
 ## Ajustes da Casa A depois da conferência: `ajustes_casaa.py`

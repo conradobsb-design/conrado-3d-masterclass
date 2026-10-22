@@ -41,6 +41,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - a vegetação folha a folha, com a régua (costela-de-adão até ~0,9 m, por exemplo);
   - móveis, louças e carros sobre o contorno do PDF; os carros em 4,70 × 1,85 m (R12).
 
+- **[22/10] Tudo desenhado na resolução da prancha** (usuário, na Casa B: "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGASTADAS E MAL DESENHADAS. PRECISO QUE REVISE ITEM A ITEM E DEIXE A IMAGEM COM OS CONTORNOS PERFEITOS"): nada é desenhado em 2000 px e ampliado para 3840, porque a ampliação borra. Pisos, grama, árvores, móveis, louças, bancadas, peças da biblioteca, paredes, esquadrias, escadas e rótulos são redesenhados direto no quadro da prancha (~60 px/m), pelo PDF (que é vetor) e pela base chapada da legenda. As texturas são sempre reduzidas da amostra (nunca ampliadas) e não levam desfoque. Na Casa B: `final3840_casab.py`.
+
 - **[21/10] Paredes pretas no contorno do PDF** (usuário: "revise todas as paredes e deixe-as em perfeito estado"): as paredes e os pilares são os preenchimentos da ARQ_PAREDE, em preto, com bordas retas e cantos nítidos, sem falhas dentro nem sobras para fora.
 
 ## 3. Materiais e texturas (biblioteca `_texturas/`)
@@ -69,7 +71,11 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 
 - **Bancadas:** em quartzo claro com desenho de pedra (gourmet e cozinha), nunca madeira.
   - **[21/10] Casa A: ilhas e bancadas em quartzito Carrara** (usuário: "use o quartzito Carrara nas ilhas e bancadas"): branco levemente acinzentado com veios cinza esfumados, na escala, em todas as peças da ARQ_BANCADAS (gourmet, cozinha, lavabo, lavatório, banhos), com cubas, torneiras, inox e cooktops por cima.
-  - **[22/10] Casa B: pedra fina de tom sóbrio, não Carrara** (usuário: "esse Carrara não está bom. Vamos utilizar uma pedra fina e tom sóbrio"): quartzo de grão miúdo em cinza quente (RGB ~170, 164, 158), sem veios, em todas as ilhas e bancadas da ARQ_BANCADAS do Térreo e do Subsolo, com cubas, torneiras, inox e cooktops por cima (`fontes_procedurais.pedra_fina`).
+  - **[22/10] Casa B: pedra tom areia, humanizada** (usuário: "troque o cinza das bancadas pelo tom areia" e "preciso que as pedras estejam humanizadas"; antes, no mesmo dia, "esse Carrara não está bom. Vamos utilizar uma pedra fina e tom sóbrio" tinha levado a um quartzo cinza de grão miúdo, que saiu):
+    - a foto do Bege Bahia da biblioteca (`_texturas/bege_bahia.jpg`, a placa real com as nuvens de 10 a 20 cm), na escala da prancha, com as nuvens um pouco mais calmas (80% do contraste) e levada ao tom areia (RGB ~233, 217, 198);
+    - em toda peça da ARQ_BANCADAS: as brancas, as bege (a cuba esculpida e o banco da sauna do Subsolo) e os frisos escuros;
+    - borda com volume leve (3 cm), o contorno fino do PDF em cinza quente e nada de desfoque (a pedra não borra);
+    - por cima: cubas brancas (seção 6), torneiras, cooktops e banquetas.
 - **Bancos de sauna:** na pedra do próprio piso, com linha fina e sombra discreta entre os níveis.
 
 ## 4. Portas, janelas, vidros e soleiras
@@ -118,6 +124,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Parede: ducha quadrada de ~20 cm com braço cromado e canopla.
 - **Vaso sanitário:** branco, com volume, contorno fino, sombra curta e tampo fechado (suspenso, quando o PDF indica).
 - **Cuba e torneira:** na posição, no tamanho e do lado do PDF.
+  - **[22/10] Cubas em branco** (usuário, na Casa B: "melhore as representações de cubas, pias, tanques" e "cubas em branco"): todas as cubas em louça branca, também as da cozinha, do gourmet e do bar (antes em inox), e os tanques. A bacia tem cantos arredondados, recuada do aro, com a sombra interna do lado da luz (em cima e à direita); o aro duplo do PDF vira um contorno fino só; sombra curta na pedra. Torneiras, válvulas e ralos em metal.
+  - **Como ler a cuba no PDF:** na ARQ_LOUÇAS E METAIS, os preenchimentos pequenos (as duas bordas encaixadas); na ARQ_BANCADAS, o retângulo com o aro fino (tiras de até 3,5 cm) encostado nos quatro lados. A peça de pedra entre duas cubas não tem aro em todos os lados e fica em pedra.
 - **Área molhada da bancada:** demarcada em traço cinza fino.
 - **Banheira:** com a torneira de piso, quando o PDF tem.
 
@@ -139,6 +147,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 ## 8. Quartos e mobiliário
 
 - **Nada inventado:** só o que o PDF tem ("Nothing is added"). Sai o que o motor inventa.
+- **[22/10] Móveis pelo desenho do PDF** (Casa B, "MOBÍLIAS DESGASTADAS E MAL DESENHADAS"): cada peça das camadas ARQ_MOBILIÁRIO, ARQ_LAYOUT HUMANIZAÇÃO, ARQ_LOUÇAS E METAIS e ARQ - Marcenaria é redesenhada no contorno exato do PDF, na ordem de pintura dele (o que está por cima cobre o de baixo), com a cor do material tirada do render, volume suave junto à borda, veio na madeira, trama leve no tecido, o traço fino do PDF e a sombra curta. As peças da biblioteca (camas, guarda-roupas, cooktops, banquetas, cortinas, inox, adega, carros, plantas em vaso) vão por cima, no lugar do PDF.
 - **Camas:** no comprimento do PDF.
 - **Banco no pé da cama:** estofado bege, com textura de estofado.
 - **Roupa de cama, como mais uma opção (ainda não aplicar):**
@@ -157,6 +166,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 
 - **[19/10] R8. Destacar os pilares e as projeções.**
   - Pilares em preto, como as paredes, na geometria do PDF (EST - Pilar).
+  - **[22/10] Pilares redondos em cinza** (usuário, na Casa B: "existem dois pilares representados por bolas. Precisamos deixar em cinza para destacá-los"): cinza médio (RGB ~130, 128, 128) com o contorno escuro fino. Os retangulares seguem pretos.
   - Projeções (DOC_LINHAS E PROJEÇÕES, cobertura, claraboia, shaft com X, áreas descobertas) em tracejado bem visível.
   - Exemplo do usuário: na Casa A faltaram as projeções dos brises.
   - **[22/10] Procurar a cobertura também fora da DOC_LINHAS** (usuário, na Casa B: "e onde estão as projeções de cobertura?"): no PDF da Casa B, a cobertura da entrada (a pérgola entre o jardim do hall e a garagem) é um tracejado da ARQ_PAREDE (traços de 5,7 pt). Ela entra na final, nos traços do próprio PDF, em cinza escuro e fino.
@@ -204,6 +214,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - **[19/10] R6.** Branca sobre o granito marrom.
   - Branca também sobre verde escuro (jardins).
 - **[19/10] R7. Proibido rótulo sobre objeto** (banheira, cama, móvel, bancada, louça). O rótulo vai para o piso livre mais próximo. Exemplo do usuário: o "BANHO MASTER" sobre a banheira na Casa E.
+  - **[22/10] Como posicionar** (usuário, na Casa B: "melhore os rótulos e não os sobreponha os objetos"): a caixa exata do texto procura, em anéis de até 3 m em volta do ponto do PDF, o lugar livre mais perto, sem tocar móvel, tapete, louça, bancada, parede, esquadria, escada nem outro rótulo, e dentro do próprio ambiente (o ambiente é fechado pelas paredes e pelas portas do PDF). Onde não cabe, quebra em duas linhas e depois desce o corpo (0,85, 0,72, 0,62). O texto leva um halo suave do tom do fundo, que o separa da textura sem desenhar caixa.
 - **Notas que não entram:** projeções de cobertura, floreira, muros e título da folha. Entram, quando pedido, o shaft e a claraboia.
 - **Resolução:** os rótulos são escritos na final em 3840 px.
 - **Todas as casas têm rótulos** (escolha do usuário em 19/10): as Casas B, C e D passam a ter nome e área, com as mesmas regras de A e E.
@@ -235,6 +246,9 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 | Escadas só com sombreamento, sem linhas | **Com linha suave no bocel** |
 | Escada sem seta nem símbolo de sentido | **Triângulo de orientação no início** (R14) |
 | Rótulo cinza (150) sobre o granito | **Branco** (R6) |
+| Casa B: bancadas em pedra fina cinza de tom sóbrio (antes, Carrara) | **Pedra tom areia, humanizada** (Bege Bahia da biblioteca) |
+| Cubas da cozinha, do gourmet e do bar em inox | **Todas as cubas em louça branca** |
+| Pilares redondos em preto | **Em cinza, com o contorno fino** (os retangulares seguem pretos) |
 | Carros cada um numa cor, levemente desalinhados (Casas A, D e E) | **Alinhados, mesmo tamanho, mesma cor** (R12) |
 | Subsolo com o Térreo em volta (esmaecido na Casa B; linhas do PDF do Térreo na Casa E; deck esmaecido na Casa A) | **Só o subsolo, terreno hachurado** (R2) |
 | 1º Pavimento da Casa E em opções P&B e linhas | **Nublado** como padrão (os arquivos das opções ficam no histórico) |

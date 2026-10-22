@@ -2159,10 +2159,12 @@ def main():
     ap.add_argument("pavimento", choices=list(PAVIMENTOS_B))
     ap.add_argument("--ate", default=None, help="para depois deste item")
     ap.add_argument("--de", default=None, help="recomeça deste item, com a etapa anterior do cache")
-    ap.add_argument("--final", action="store_true", help="a imagem final no quadro de 3840 px, com os rótulos")
+    ap.add_argument("--final", action="store_true", help="a imagem final no quadro de 3840 px, com os rótulos "
+                    "(desde 22/10/26, toda redesenhada na resolução da prancha: `final3840_casab.py`)")
     args = ap.parse_args()
     if args.final:
-        final_casab(args.pavimento)
+        from final3840_casab import final_3840
+        final_3840(args.pavimento, de=args.de)
     else:
         rodar(args.pavimento, args.ate, args.de)
 

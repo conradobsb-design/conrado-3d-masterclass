@@ -1971,7 +1971,7 @@ Pedido do usuário: "PERCORRA TODOS OS AJUSTES DE TODAS AS PLANTAS DA CASA B, SE
 - **Térreo 8:** o "SUÍTE 2 · 15,71 m²" solto não entra; o banho da suíte master vira "BANHO MASTER · 13,7 m²".
 - **Térreo 13:** são portões, em alumínio.
 - **Térreo 19:** o elevador recebe a cabine do Subsolo.
-- **Térreo 24:** entram os pedidos da Casa A (roupa de cama, boxes contínuos e banquetas de linho); o Carrara deu lugar, em 22/10, à pedra fina de tom sóbrio.
+- **Térreo 24:** entram os pedidos da Casa A (roupa de cama, boxes contínuos e banquetas de linho); o Carrara deu lugar, em 22/10, à pedra fina de tom sóbrio e, no mesmo dia, à pedra tom areia humanizada, com as cubas brancas (seção da final em 3840 px, abaixo).
 - **Térreo 25:** a peça branca é uma floreira (caixa de paredes finas de 9 cm, com 40 cm de miolo).
 - **Subsolo 1:** em cor cheia, a ducha e a escada de 6 degraus; o deck em L, a escada de 9 (desde 22/10, a pedido), a pedra grande e as pedras da esquerda vão para a hachura.
 - **Subsolo 12:** os pilares não são desenhados no Subsolo.
@@ -2000,7 +2000,7 @@ Pedido do usuário: "PERCORRA TODOS OS AJUSTES DE TODAS AS PLANTAS DA CASA B, SE
 - **14:** 10 trechos de guarda-roupa com cabides (R11; closet master em U; suítes 1, 2 e 3), sem a diagonal (em 21/10 eram marcenaria areia; trocado a pedido em 22/10).
 - **15:** três quadrados em inox na cozinha e o refrigerador do gourmet.
 - **18:** a bancada da sala íntima com a cuba.
-- **24, bancadas:** 18 ilhas e bancadas na pedra fina de tom sóbrio (em 21/10 eram quartzito Carrara; trocado a pedido em 22/10).
+- **24, bancadas:** 18 ilhas e bancadas (em 21/10, quartzito Carrara; em 22/10, pedra fina de tom sóbrio e depois pedra tom areia humanizada, com as cubas brancas).
 - **16:** cooktops de 5 bocas.
 - **17:** a adega com a prateleira, 3 nichos e 36 garrafas.
 - **19:** o elevador com a cabine.
@@ -2078,6 +2078,49 @@ Pedidos do usuário vistos nas pranchas, todos feitos sem IA no `ajustes_casab.p
   - "esse contorno preto da bancada está grosseiro": o contorno grosso do motor sai e entra o contorno fino do PDF;
   - "diminua a fonte para caber o rótulo": "CIRCULAÇÃO" em corpo 0,8.
 - **Térreo, "escrito mais abaixo no piso, não pode estar no tapete":** "SALA ÍNTIMA" desce para o vinílico, fora do tapete.
+
+### Casa B · a final refeita em 3840 px (22/10/26)
+
+Pedido do usuário, vendo a prancha do Térreo: "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGASTADAS E MAL DESENHADAS. PRECISO QUE REVISE ITEM A ITEM E DEIXE A IMAGEM COM OS CONTORNOS PERFEITOS".
+- **A causa:** tudo o que os ajustes desenhavam em 2000 px (grama, árvores, texturas, móveis do motor, louças, peças da biblioteca) a final ampliava para 3840 px, e a ampliação borrava.
+- **A solução:** a final passa a ser desenhada direto no quadro da prancha (~59,7 px/m), pelo PDF (que é vetor) e pela base chapada da legenda, no módulo novo `scripts/final3840_casab.py`. O `ajustes_casab.py --final` chama esse módulo.
+- **Pisos e grama:** na máscara exata da legenda, com a textura da biblioteca reduzida da amostra, sem desfoque.
+- **Vegetação:** as mesmas plantas da biblioteca, nos mesmos lugares.
+- **Móveis, tapetes e louças:** redesenhados pelo próprio desenho do PDF (ARQ_MOBILIÁRIO, ARQ_LAYOUT HUMANIZAÇÃO, ARQ_LOUÇAS E METAIS e ARQ - Marcenaria), na ordem de pintura dele, com:
+  - a cor do material tirada do render;
+  - volume suave na borda;
+  - veio na madeira;
+  - o traço fino do PDF;
+  - a sombra curta.
+- **Peças da biblioteca:** guarda-roupas, camas, cortinas, cooktops, inox, adega, elevador e carros, desenhados no quadro.
+
+Os pedidos que vieram depois, item a item:
+- **"EXISTEM DOIS PILARES REPRESENTADOS POR BOLAS. PRECISAMOS DEIXAR EM CINZA PARA DESTACÁ-LOS":** os dois pilares redondos da EST_PILAR (na varanda) em cinza médio, com o contorno escuro fino; os retangulares seguem pretos.
+- **"MELHORE OS RÓTULOS E NÃO OS SOBREPONHA OS OBJETOS":** cada rótulo vai para o lugar livre mais perto do ponto do PDF, dentro do próprio ambiente e sem tocar objeto, parede, esquadria, escada nem outro rótulo. Onde não cabe, quebra em duas linhas e depois desce o corpo. O texto leva um halo suave do tom do fundo.
+  - Nos banhos pequenos (lavabo, BH serviço, BH motorista e os dois banhos gourmet), no menor corpo, o rótulo ainda encosta um pouco nas peças: não há piso livre do tamanho do texto.
+- **"MELHORE AS REPRESENTAÇÕES DE CUBAS, PIAS, TANQUES. ALÉM DISSO, NÃO PERMITA QUE A PEDRA FIQUE BORRADA":** as louças do PDF em louça (cerâmica branca, com a bacia funda e a sombra interna do lado da luz); os detalhes miúdos em metal; a pedra das bancadas sem desfoque.
+- **"MELHORE A REPRESENTAÇÃO DO CHUVEIRO. MELHORE O CONTORNO DO PISO DE MADEIRA":**
+  - o chuveiro do deck em cromado, no lugar do PDF;
+  - o banco em L do deck em réguas, um tom abaixo do deck, com o contorno fino e a sombra;
+  - o deck no contorno exato da legenda.
+- **"REMOVA BORRÕES DO PISO E OS BORRÕES NOS DEGRAUS":**
+  - os pisos refeitos na escala da prancha;
+  - as duas escadas do Térreo, a de 6 e a de 9 degraus (da varanda para o deck em L), com os bocéis em linha suave, a sombra curta e o triângulo no início.
+- **As banquetas da bancada gourmet:**
+  - as `banqueta_linho` estavam sendo postas pelos números de 2000 px e caíam no pé da escada de 6 degraus;
+  - agora vão nos centros dos quatro círculos do PDF (ARQ_LAYOUT HUMANIZAÇÃO), com a sombra curta das peças;
+  - os círculos do PDF não saem mais como aros transparentes sobre a pedra.
+- **"TROQUE O CINZA DAS BANCADAS PELO TOM AREIA" / "CUBAS EM BRANCO" / "PRECISO QUE AS PEDRAS ESTEJAM HUMANIZADAS":**
+  - a pedra cinza sai. Entra a foto do Bege Bahia da biblioteca (a placa real, com as nuvens de 10 a 20 cm), na escala da prancha, com 80% do contraste e levada ao tom areia (RGB ~233, 217, 198).
+  - A pedra vai em toda peça da ARQ_BANCADAS, nos dois pavimentos (18 peças no Térreo, 3 no Subsolo):
+    - as bancadas brancas do PDF;
+    - as peças bege do Subsolo (a bancada da cuba esculpida e o banco da sauna, que antes mostravam o render);
+    - a peça estreita de 10 cm do banho master.
+  - **Cubas:** todas em louça branca, com a bacia de cantos arredondados, a sombra interna, um contorno fino só (sem o aro duplo do PDF) e a sombra curta na pedra:
+    - as da cozinha, do gourmet e do bar, que estavam em inox; nessas, a bacia (pintada no PDF por baixo do aro) ganhou a sombra interna pela geometria, e o aro duplo ficou leve;
+    - as cubas da ARQ_BANCADAS: as compridas, que a regra antiga perdia (lavabo, banho 2 e banho 3), e a cuba esculpida do Subsolo.
+  - **A regra nova da cuba na ARQ_BANCADAS:** é o retângulo com o aro fino nos quatro lados. A peça de pedra entre as duas cubas do lavatório gourmet, que antes saía branca, volta a ser pedra, e a peça solta de 0,51 × 0,48 m junto ao louceiro também.
+- **Imagens:** `POE642_CasaB/renders/POE642_CasaB_PH_{Terreo,Subsolo}_final_rotulos.png`. Pranchas e PDF refeitos. Os antes/depois estão nos `AD2_*.jpg` enviados na conversa.
 
 ## Casas A a D · Barlavento nas piscinas
 

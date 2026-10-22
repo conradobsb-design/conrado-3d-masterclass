@@ -1062,13 +1062,16 @@ def rotulos_pdf(pg):
     return juntos
 
 
-def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, ajustes=None, cor_granito=None):
+def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, ajustes=None, cor_granito=None,
+                      halo=None):
     """Escreve os rótulos do PDF na imagem (BGR), no corpo do PDF levado à escala dela (pdf2img leva um
     ponto do PDF à imagem); granito: máscara (bool, no quadro da imagem) do granito marrom, onde o texto
     fica cinza; ajustes: os desvios de outro pavimento (o padrão é o deste). Cada ajuste é (nome, centro em
     px de 2000, desvio em px de 2000[, opções]); as opções são o corpo (um número) ou um dicionário com
     "corpo", "quebra" (o nome em mais linhas, cada uma centrada no nome do PDF, para ambiente estreito) e
-    "cor"."""
+    "cor".
+    halo: (raio em px, força) de um halo suave do tom do fundo, mais claro sob o texto escuro e mais escuro sob o
+    branco, que separa o texto da textura do piso sem desenhar caixa (desligado por padrão)."""
     from PIL import Image, ImageDraw, ImageFont
     from rodape_entrega import FONTES
     q = ROTULOS
@@ -1122,6 +1125,12 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, a
         a = np.asarray(tela.resize((x1 - x0, y1 - y0), Image.LANCZOS), np.float32)[..., None] / 255
         no_granito = granito is not None and granito[max(y0, 0):y1, max(x0, 0):x1].mean() > 0.5
         cor = np.float32(opc.get("cor", (cor_granito or q["cor_granito"]) if no_granito else q["cor"]))
+        if halo:
+            r_, f_ = halo
+            k_ = 2 * int(np.ceil(r_)) + 1
+            hl = cv2.GaussianBlur(cv2.dilate(a[..., 0], np.ones((k_, k_), np.uint8)), (0, 0), r_ / 2)[..., None]
+            alvo = 255.0 if cor.mean() < 128 else 0.0
+            out[y0:y1, x0:x1] += (alvo - out[y0:y1, x0:x1]) * hl * f_
         out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + cor * a
     return np.clip(out, 0, 255).astype(np.uint8)
 
