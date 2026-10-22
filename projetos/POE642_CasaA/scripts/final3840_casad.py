@@ -474,9 +474,15 @@ ESCADA_S = dict(ESCADA_T, nome="de 16 degraus, do pátio ao terraço", inicio="e
                 corte=[(785.0, 1415.5), (801.4, 1445.7), (809.9, 1445.7), (796.9, 1453.2), (805.4, 1453.2),
                        (821.5, 1483.5)])
 # Os aparelhos da academia (esteiras, bicicletas e supinos) ficam os da final aprovada de 15/10: pelo PDF saíam
-# silhuetas cinza chapadas, sem a lona da esteira nem as barras dos supinos (no tamanho do PDF, já conferido)
-FORA_PECAS_S = [(676.9, 1593.7, 1317.8, 1854.8)]
+# silhuetas cinza chapadas, sem a lona da esteira nem as barras dos supinos (no tamanho do PDF, já conferido). Uma
+# caixa por grupo (as bicicletas, as esteiras e os supinos): numa caixa só, a sauna e o vestiário entravam junto e o
+# Bege Bahia quase neutro da final antiga voltava por cima do novo
+FORA_PECAS_S = [(672.1, 1636.5, 743.3, 1721.9), (957.0, 1622.2, 1075.6, 1726.7), (1203.8, 1598.5, 1298.8, 1864.3)]
 # A cama do DCE 1 fica a da final aprovada (resposta 5, "Os do render")
+# A bancada do vestiário com a cuba: no PDF do Subsolo são só traços (a ARQ_BANCADAS sem preenchimento e a cuba sem
+# louça), e saíam o contorno e o piso por dentro; ficam as da final aprovada (a cuba em louça branca na pedra, item 37
+# de 15/10)
+CUBA_VESTIARIO_S = [(924.0, 1816.5, 952.5, 1857.0)]
 CAMAS_S = {"borda": 1.7, "ss": 4, "semente": 41, "camas": [("DCE 1", (846.0, 1203.9, 902.7, 1317.3), "baixo",
                                                              "solteiro")]}
 
@@ -510,8 +516,10 @@ def passos_subsolo_d(Q, ini):
     return [
         ("pisos", lambda im: F.pisos(Q, im, dentro=dentro)),
         ("bancadas", lambda im: C.bancadas_c(Q, im)),
-        ("pecas", lambda im: F.pecas_pdf(Q, im, ini, fora=FORA_PECAS_S + camas, camas=camas)),
-        ("aparelhos", lambda im: C.pecas_do_render(Q, im, ini, FORA_PECAS_S, C.neutro, "academia: os aparelhos")),
+        ("pecas", lambda im: F.pecas_pdf(Q, im, ini, fora=FORA_PECAS_S + CUBA_VESTIARIO_S + camas, camas=camas)),
+        ("aparelhos", lambda im: C.pecas_do_render(
+            Q, C.pecas_do_render(Q, im, ini, FORA_PECAS_S, C.neutro, "academia: os aparelhos"), ini, CUBA_VESTIARIO_S,
+            lambda reg: np.ones(reg.shape[:2], bool), "vestiário: a bancada com a cuba branca")),
         ("tampas", lambda im: C.camas_render(Q, F.tampas_vasos(Q, im), ini)),
         ("paredes", lambda im: F.paredes(Q, im)),
         ("soleiras", lambda im: C.soleira_elevador(Q, F.soleiras(Q, im))),
