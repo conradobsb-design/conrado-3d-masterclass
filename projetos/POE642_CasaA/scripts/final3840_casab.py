@@ -1849,13 +1849,14 @@ def degraus_bege(Q, img, escadas):
 # levemente diferente por peça), como os degraus das escadas, na ordem de pintura do PDF: o bloco de cima leva a linha
 # fina do bocel no contorno e deixa a sombra curta para baixo e à esquerda (a luz do alto à direita) no de baixo e na
 # grama. Roda antes da escada de 6 degraus, que começa sobre a borda do patamar.
-# E o triângulo da R14 descendo na laje da direita, a que sai da pedra grande para a grama junto ao deck (usuário,
-# 22/10/26: "ADICIONE O TRIANGULO DESCENDO NESSE DEGRAU"): no início dela, junto à borda de cima (975 pt), apontando
-# para baixo, no tamanho e na cor dos triângulos das escadas (`retoque_terreo_casae.ESCADA_LINHAS["triangulo"]`).
-# Cada um: (x do eixo, y da borda de onde começa, em pt; o sentido).
+# E o triângulo da R14 descendo do deck para a laje da direita, a que sai da pedra grande para a grama junto ao deck
+# (usuário, 22/10/26: "ADICIONE O TRIANGULO DESCENDO NESSE DEGRAU"; depois, com o lugar marcado na imagem: "O
+# TRIÂNGULO É ONDE EU APONTEI"): no deck, com a ponta junto à borda direita da laje (447 pt), a 1097,7 pt de altura,
+# apontando para ela (para a esquerda), no tamanho e na cor dos triângulos das escadas
+# (`retoque_terreo_casae.ESCADA_LINHAS["triangulo"]`). Cada um: (x, y da ponta, em pt; o sentido para onde aponta).
 BLOCOS_F = {"caixa_pt": (150.0, 780.0, 520.0, 1170.0), "pedra": "bege_bahia", "semente": 780, "ss": 4, "tom": 0.025,
             "bocel": 0.78, "bocel_m": 0.012, "sombra": {"dist_m": 0.05, "sig_m": 0.04, "forca": 0.32},
-            "triangulos_pt": [(430.0, 975.0, "baixo")]}
+            "triangulos_pt": [(448.5, 1097.7, "esquerda")]}
 
 
 def degraus_blocos(Q, img):
@@ -1892,16 +1893,17 @@ def degraus_blocos(Q, img):
         reg *= (1 - (1 - q["bocel"]) * reduzir(anel / 255.0))[..., None]
     from retoque_terreo_casae import ESCADA_LINHAS
     t = ESCADA_LINHAS["triangulo"]
-    for xc, yb, sentido in q["triangulos_pt"]:
-        sg = 1 if sentido == "baixo" else -1
-        ya = yb + sg * t["recuo_pt"]
-        pts = [(xc - t["base_pt"] / 2, ya), (xc + t["base_pt"] / 2, ya), (xc, ya + sg * t["altura_pt"])]
+    for xp, yp, sentido in q["triangulos_pt"]:
+        dx, dy = {"esquerda": (-1, 0), "direita": (1, 0), "cima": (0, -1), "baixo": (0, 1)}[sentido]
+        xa, ya = xp - dx * t["altura_pt"], yp - dy * t["altura_pt"]          # o meio da base, atrás da ponta
+        b = t["base_pt"] / 2
+        pts = [(xp, yp), (xa - dy * b, ya - dx * b), (xa + dy * b, ya + dx * b)]
         m = np.zeros((h * k, w * k), np.uint8)
         cv2.fillPoly(m, [np.int32(np.round([(np.array(Q.p2q(x, y)) - (X0, Y0)) * k for x, y in pts]))], 255)
         tri = reduzir(m / 255.0)[..., None]
         reg[:] = reg * (1 - tri) + np.float32(t["cor"]) * tri
     print(f"    degraus em blocos: os {len(blocos)} blocos de pedra do PDF à esquerda do deck em Bege Bahia, cada um com "
-          f"o bocel e a sombra curta sobre o de baixo; {len(q['triangulos_pt'])} triângulo(s) da R14 descendo")
+          f"o bocel e a sombra curta sobre o de baixo; {len(q['triangulos_pt'])} triângulo(s) da R14 descendo do deck para a laje")
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
