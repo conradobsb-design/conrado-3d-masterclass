@@ -287,6 +287,11 @@ PECAS = {
                   # a sombra um pouco maior das peças, e o vinco: sob cada traço do PDF nos estofados, a sombra suave
                   # da dobra do tecido (o desenho das almofadas e das poltronas fica, mas em relevo)
                   "sombra": {"dist_m": 0.06, "sig_m": 0.045, "forca": 0.12}, "vinco": 0.18, "vinco_sig_px": 1.0},
+    # as marcações técnicas sobre os tampos (usuário, 22/10/26, na mesa de jantar do living: "REMOVA ESSAS MARCAÇÕES
+    # TÉCNICAS SOBRE O TAMPO DA MESA"): no PDF, os cantos tracejados em laranja da ARQ_MOBILIÁRIO (na mesa de jantar,
+    # no aparador abaixo dela e nas mesas redondas da varanda, que já vêm da biblioteca) não entram; nem as duas
+    # elipses da ARQ_LAYOUT HUMANIZAÇÃO no meio da mesa de jantar (`fora_pt`)
+    "marcas": {"cores": [(0.97, 0.27, 0.03)], "fora_pt": {"Terreo": [(1625.0, 1298.0, 1662.0, 1325.0)]}},
 }
 
 
@@ -313,8 +318,12 @@ def pecas_pdf(Q, img, amostra, fora=(), camas=(), inox=(), ss=None):
         r = d["rect"]
         return d["type"] == "s" and abs((d.get("width") or 0) - 0.85) < 0.05 and any(it[0] == "c" for it in d["items"]) \
             and 4.0 < max(r.width, r.height) < 8.0 and min(r.width, r.height) < 3.5
+    def marca(d):
+        cor = d.get("color")
+        return (cor is not None and any(max(abs(a - b) for a, b in zip(cor, c)) < 0.02 for c in q["marcas"]["cores"])) \
+            or dentro(d["rect"], q["marcas"]["fora_pt"].get(Q.chave, []))
     ds = [d for d in Q.desenhos if d.get("layer") in CAMADAS_PECAS and not dentro(d["rect"], fora)
-          and not onda_cortina(d)]
+          and not onda_cortina(d) and not marca(d)]
     ds.sort(key=lambda d: d.get("seqno", 0))
     # 1. o mapa de quem está por cima (o índice do último preenchimento em cada px) e o dos traços
     topo = np.full((H * ss, W * ss), -1, np.int32)
@@ -1675,18 +1684,22 @@ def ret_aa_q(Q, r, ss=8):
     return cv2.resize(m, (Q.W, Q.H), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
 
 
-def travertino_em(Q, img, a, semente):
+def travertino_em(Q, img, a, semente, ref_pt=None):
     """O travertino da biblioteca em `a` (0 a 1), no tom do travertino da legenda em volta (a mediana dele a até
-    `ref_m`): ali dentro o render tinha plantas, então a luz do lugar não serve."""
+    `ref_m`): ali dentro o render tinha plantas, então a luz do lugar não serve. Com `ref_pt` (retângulo em pt), o tom
+    é a mediana da imagem ali (quando o travertino da legenda em volta é outra coisa, como o jardim de inverno)."""
     sys.path.insert(0, str(B.RAIZ / "_texturas"))
     from texturas import textura
     q = JARDINS_F["travertino"]
     m = a > 0.01
     ys, xs = np.nonzero(m)
     y0, x0, y1, x1 = ys.min(), xs.min(), ys.max() + 1, xs.max() + 1
-    k = 2 * int(q["ref_m"] * Q.px_m) + 1
-    trav = Q.cor([c for n, cs, *_ in PISOS["Terreo"] if n == "travertino" for c in cs])
-    ref = trav & ~m & cv2.dilate(m.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    if ref_pt is not None:
+        ref = ret_aa_q(Q, ref_pt) > 0.99
+    else:
+        k = 2 * int(q["ref_m"] * Q.px_m) + 1
+        trav = Q.cor([c for n, cs, *_ in PISOS["Terreo"] if n == "travertino" for c in cs])
+        ref = trav & ~m & cv2.dilate(m.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
     L = np.median(img[ref].reshape(-1, 3), axis=0).astype(np.float32)
     T = textura("travertino", Q.px_m, y1 - y0, x1 - x0, semente=semente).astype(np.float32)
     det = cv2.GaussianBlur(T, (0, 0), 0.6) / np.maximum(cv2.GaussianBlur(T, (0, 0), 3.0 * Q.px_m), 1)
@@ -1703,16 +1716,43 @@ def alfa_canteiros(Q):
     return np.max([ret_aa_q(Q, r) for r in q["inverno"]["canteiro_pt"] + [q["hall"]["canteiro_pt"]]], axis=0)
 
 
+# O que volta como estava depois do espelho das esquadrias, além dos canteiros (pt). Usuário, 22/10/26, sobre o sofá do
+# living junto às portas de correr do jardim de inverno: "TEM DUAS LINHAS EM DESTAQUE. UMA DELAS SERIA UMA LINHA SUAVE
+# DO BRAÇO DO SOFÁ, QUE TERMINA ANTES. E A LINHA DA DIREITA NÃO EXISTE": a faixa do espelho das folhas de correr
+# (~5 px de cada lado) pegava a borda do sofá, a 5 px da porta, e a copiava junto à porta (a linha da direita), levava
+# a linha de baixo do braço até a porta e apagava o fim da borda junto à folha de baixo. Volta a faixa entre o sofá e a
+# porta: até a face da porta (1807,67 pt) junto à folha de fora (de 1037,97 pt para baixo) e até 1808,6 pt em cima,
+# onde o trilho de fora está vazio (o piso segue até a folha de dentro).
+# E a faixa entre a borda do sofá (1802,8 pt) e a porta, da parede ao pé do sofá, em travertino, como no PDF ("DEPOIS
+# TRAVERTINO, JÁ PROXIMO AO BRAÇO DO SOFÁ"): o render deixava ali o tecido do sofá, que parecia ir até a porta. O tom
+# vem do travertino logo abaixo, entre o tapete e a porta (`ref_pt`); o da legenda em volta é o jardim de inverno.
+ESQUADRIAS_F = {"de_volta_pt": {"Terreo": [(1795.0, 929.68, 1808.6, 1037.97), (1795.0, 1037.97, 1807.67, 1113.94)]},
+                "travertino_pt": {"Terreo": [(1803.85, 929.68, 1808.6, 1037.97), (1803.85, 1037.97, 1807.67, 1052.0)]},
+                "ref_pt": {"Terreo": (1793.0, 1058.0, 1806.5, 1108.0)}}
+
+
 def esquadrias_terreo(Q, img):
-    """As esquadrias da final (`ondas_fora` e o espelho das ajustes) e, por cima, os canteiros como estavam: o espelho
-    da faixa de cada vidro (`esquadria_limpar`) troca o px escuro de um lado pelo do outro (para não copiar parede
-    preta), e nas folhagens escuras junto ao vidro isso trazia o vinílico e o travertino para dentro do jardim, em
-    pintas. Os vidros e as folhas ficam fora dos canteiros, então nada deles se perde."""
+    """As esquadrias da final (`ondas_fora` e o espelho das ajustes) e, por cima, os canteiros e as faixas de
+    `ESQUADRIAS_F` como estavam: o espelho da faixa de cada vidro (`esquadria_limpar`) troca o px escuro de um lado
+    pelo do outro (para não copiar parede preta), e nas folhagens escuras junto ao vidro isso trazia o vinílico e o
+    travertino para dentro do jardim, em pintas; junto ao sofá do living, copiava a borda dele. Os vidros e as folhas
+    ficam fora dessas áreas, então nada deles se perde."""
     out = B.esquadrias_final(ondas_fora(Q, img), Q.chave, Q.pg, Q.p2q, Q.px_m)
-    a = alfa_canteiros(Q)[..., None]
-    n = int(((np.abs(out.astype(np.int16) - img.astype(np.int16)).max(axis=2) > 12) & (a[..., 0] > 0.5)).sum())
-    print(f"    canteiros: {n} px que o espelho dos vidros mudou dentro dos jardins voltam ao que eram")
-    return np.clip(out * (1 - a) + img.astype(np.float32) * a, 0, 255).astype(np.uint8)
+    mudou = np.abs(out.astype(np.int16) - img.astype(np.int16)).max(axis=2) > 12
+    ac = alfa_canteiros(Q)
+    rs = ESQUADRIAS_F["de_volta_pt"].get(Q.chave, [])
+    af = np.max([ret_aa_q(Q, r) for r in rs], axis=0) if rs else np.zeros_like(ac)
+    print(f"    canteiros: {int((mudou & (ac > 0.5)).sum())} px que o espelho dos vidros mudou dentro dos jardins voltam "
+          f"ao que eram; junto às portas de correr do jardim de inverno, {int((mudou & (af > 0.5)).sum())} px (a borda "
+          f"do sofá copiada)")
+    a = np.maximum(ac, af)[..., None]
+    out = out * (1 - a) + img.astype(np.float32) * a
+    rs = ESQUADRIAS_F["travertino_pt"].get(Q.chave, [])
+    if rs:
+        out = travertino_em(Q, out, np.max([ret_aa_q(Q, r) for r in rs], axis=0), 760,
+                            ref_pt=ESQUADRIAS_F["ref_pt"][Q.chave])
+        print("    a faixa entre o sofá do living e as portas de correr do jardim de inverno em travertino")
+    return np.clip(out, 0, 255).astype(np.uint8)
 
 
 def jardins(Q, img):
@@ -1809,8 +1849,13 @@ def degraus_bege(Q, img, escadas):
 # levemente diferente por peça), como os degraus das escadas, na ordem de pintura do PDF: o bloco de cima leva a linha
 # fina do bocel no contorno e deixa a sombra curta para baixo e à esquerda (a luz do alto à direita) no de baixo e na
 # grama. Roda antes da escada de 6 degraus, que começa sobre a borda do patamar.
+# E o triângulo da R14 descendo na laje da direita, a que sai da pedra grande para a grama junto ao deck (usuário,
+# 22/10/26: "ADICIONE O TRIANGULO DESCENDO NESSE DEGRAU"): no início dela, junto à borda de cima (975 pt), apontando
+# para baixo, no tamanho e na cor dos triângulos das escadas (`retoque_terreo_casae.ESCADA_LINHAS["triangulo"]`).
+# Cada um: (x do eixo, y da borda de onde começa, em pt; o sentido).
 BLOCOS_F = {"caixa_pt": (150.0, 780.0, 520.0, 1170.0), "pedra": "bege_bahia", "semente": 780, "ss": 4, "tom": 0.025,
-            "bocel": 0.78, "bocel_m": 0.012, "sombra": {"dist_m": 0.05, "sig_m": 0.04, "forca": 0.32}}
+            "bocel": 0.78, "bocel_m": 0.012, "sombra": {"dist_m": 0.05, "sig_m": 0.04, "forca": 0.32},
+            "triangulos_pt": [(430.0, 975.0, "baixo")]}
 
 
 def degraus_blocos(Q, img):
@@ -1845,8 +1890,18 @@ def degraus_blocos(Q, img):
         reg[:] = reg * (1 - a[..., None]) + tex * a[..., None]
         anel = m & ~cv2.erode(m, np.ones((lb, lb), np.uint8))
         reg *= (1 - (1 - q["bocel"]) * reduzir(anel / 255.0))[..., None]
+    from retoque_terreo_casae import ESCADA_LINHAS
+    t = ESCADA_LINHAS["triangulo"]
+    for xc, yb, sentido in q["triangulos_pt"]:
+        sg = 1 if sentido == "baixo" else -1
+        ya = yb + sg * t["recuo_pt"]
+        pts = [(xc - t["base_pt"] / 2, ya), (xc + t["base_pt"] / 2, ya), (xc, ya + sg * t["altura_pt"])]
+        m = np.zeros((h * k, w * k), np.uint8)
+        cv2.fillPoly(m, [np.int32(np.round([(np.array(Q.p2q(x, y)) - (X0, Y0)) * k for x, y in pts]))], 255)
+        tri = reduzir(m / 255.0)[..., None]
+        reg[:] = reg * (1 - tri) + np.float32(t["cor"]) * tri
     print(f"    degraus em blocos: os {len(blocos)} blocos de pedra do PDF à esquerda do deck em Bege Bahia, cada um com "
-          f"o bocel e a sombra curta sobre o de baixo")
+          f"o bocel e a sombra curta sobre o de baixo; {len(q['triangulos_pt'])} triângulo(s) da R14 descendo")
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
