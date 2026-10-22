@@ -246,7 +246,7 @@ python texturizar_base.py Terreo ../../POE642_CasaB/bases/POE642_CasaB_BASE_Terr
 
 ## 6b. Casa C — em andamento
 
-**Agora (22/10/26):** os mapas do pente fino pelas regras aguardam a confirmação do usuário (seção "Casa C · pente fino pelas regras", no fim).
+**Agora (22/10/26):** as finais do Térreo e do Subsolo refeitas em 3840 px com os itens do pente fino e as respostas do usuário (`final3840_casac.py`; seção "Casa C · a final refeita em 3840 px", no fim). Pranchas e PDF refeitos.
 
 **Subsolo (definido pelo usuário em 14/10/26):**
 - **Vinílico da Casa A:** academia (laranja #CC9966).
@@ -2200,6 +2200,58 @@ Pedido do usuário: "Casa C" (a ordem da seção 17 das regras: Casa E, Casa A, 
   11. soleiras;
   12. paredes;
   13. a final refeita em 3840 px.
+
+### Casa C · a final refeita em 3840 px (22/10/26)
+
+Respostas do usuário às perguntas dos mapas: "1. BANCO EM BRONZE FOSCO; 2. OK; 3. DE ACORDO; 4. PEDRA AREIA; 5. EM 3840 PX". Ou seja:
+- o L junto ao deck fica banco em bronze fosco;
+- no Subsolo, em cor cheia o Subsolo, o pátio, os degraus largos e o caminho, e o resto do lote na hachura do Térreo final;
+- os triângulos das escadas como propostos;
+- bancadas e ilhas em pedra areia com cubas brancas, como na Casa B;
+- as duas finais refeitas em 3840 px, guardando as decisões de 14/10.
+
+Depois, vendo a final do Térreo: "PODE MANTER O JOGO DE CAMA QUE ESTAVA ANTES." e "MANTENHA OS BANCOS QUE ESTAVAM EM FRENTE AS CAMAS TAMBÉM": as camas e os bancos ao pé delas voltam a ser os do render aprovado, sem a roupa de cama da biblioteca.
+
+- **Como:** módulo novo `scripts/final3840_casac.py`. A Casa C tem a mesma folha, o mesmo recorte, a mesma escala e as mesmas cores de legenda da Casa B, então ele usa o motor do `final3840_casab.py` como está e só troca o que é da casa (`contexto_c`): pastas, config, PDF, base chapada, o render aprovado de 14/10 como partida e as coordenadas em pt do PDF da Casa C. Comandos no README dos scripts ("A final da Casa C em 3840 px").
+- **Térreo, item a item:**
+  1. vegetação da biblioteca no tamanho real, nos lugares das plantas do render;
+  2. a 7. pisos da biblioteca na escala: pedra portuguesa, granito, travertino, vinílico, Bege Bahia, grama e deck (granito, Bege Bahia e grama no tom das finais da Casa B);
+  8. os 3 carros prata, alinhados, no retângulo do PDF;
+  9. tudo desenhado no quadro da prancha;
+  10. 47 rótulos, pretos nos pisos claros e brancos no granito e nos jardins, fora dos objetos;
+  11. sem arcos: os 30 do PDF, inclusive o da pivotante do hall (2,1 m, maior que o limite do motor da Casa B) e os das portas dos boxes dos BH master 1 e 2, que o PDF da Casa C desenha na ARQ_BANCADAS;
+  12. as duas escadas com a linha suave nos bocéis, a sombra curta e o triângulo: a estreita junto ao deck, apontando para a esquerda; os largos no degrau 10, apontando para cima;
+  13. os 4 guarda-corpos de vidro da ARQ_ELEMENTOS FIXOS;
+  14. o banco em L em bronze fosco;
+  15. projeções em tracejado: claraboia, closets e o X do BH master 2 em cinza escuro; os X dos jardins e da área descoberta em cinza claro;
+  16. jardim de inverno, jardim de inverno 2 e jardim 1 só verdes, no canteiro do PDF;
+  17. cortinas de linho nos 8 trechos de ondas do PDF (2 na suíte master e 2 em cada quarto; o mapa contava 7), com os trilhos de parede a parede;
+  18. esquadrias finas;
+  19. tampa em todas as bacias e cubas brancas;
+  20. tapete da sala TV (o conjunto da sala TV fica o do render, ver abaixo);
+  21. paredes pretas no contorno do PDF;
+  22. soleiras nos vãos brancos do PDF;
+  23. banquetas da ilha sob o tampo, cooktops de 5 bocas, guarda-roupas com cabides e bancadas em pedra areia.
+- **O que fica como no render aprovado** (as peças do PDF saíam piores que o render):
+  - os dois conjuntos do estar e a sala TV: no PDF, o tapete orgânico do estar é um desenho de 210 traços que cobria o sofá curvo, e as poltronas e os sofás são só contorno (o sofá da sala TV saía sem as almofadas);
+  - as banquetas sob o braço da bancada gourmet (decisão de 14/10, item 9);
+  - as camas e os bancos (pedido do usuário).
+- **Piscina:** no deck, na piscina, na prainha e no spa, as paredes estruturais da ARQ_PAREDE são brancas e finas como vidro; com as bordas de fora e o vidro da borda infinita, o motor as tomava por uma esquadria do tamanho da piscina e clareava os degraus da prainha. A zona fica fora das esquadrias (`VIDROS_FORA_C`), e o vidro da borda infinita é o do render, fino.
+- **Lavabo junto à adega:** a faixa de 1,6 × 0,6 m junto à parede de cima sai em granito: o PDF a pinta com o preenchimento da cozinha e da gourmet, e a legenda também (o render a fazia em madeira).
+- **Fora do lote:** as marcas muito claras abaixo do lote vêm do render aprovado e já estavam na entrega anterior; ficaram como estavam.
+- **Subsolo:** em andamento (a final roda depois do Térreo, porque a hachura vem dele).
+- **Imagens:** `POE642_CasaC/renders/POE642_CasaC_PH_{Terreo,Subsolo}_final_rotulos.png`; pranchas `entrega/POE642_CasaC_PH_{Terreo,Subsolo}_entrega.png` e o PDF `entrega/POE642_CasaC_Plantas_Humanizadas.pdf`. Antes e depois enviados na conversa.
+
+**Para refazer** (da pasta `POE642_CasaA/scripts/`; as etapas ficam em cache em `$TMPDIR/poe642_casac_etapas`, e `--de <etapa>` recomeça dali):
+
+```
+python3 final3840_casac.py Terreo
+python3 final3840_casac.py Subsolo      # depois do Térreo: a hachura vem do Térreo final
+python3 rodape_entrega.py --config ../../POE642_CasaC/config_bases.json --no-quadro \
+    --render Terreo=../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png \
+    --render Subsolo=../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_final_rotulos.png
+python3 pdf_entrega.py --config ../../POE642_CasaC/config_bases.json
+```
 
 ## Casas A a D · Barlavento nas piscinas
 

@@ -771,6 +771,32 @@ python3 final3840_casab.py Terreo --de bancadas    # refaz só dali em diante
 # depois, rodape_entrega.py e pdf_entrega.py como acima
 ```
 
+## A final da Casa C em 3840 px: `final3840_casac.py`
+
+Pedido do usuário (22/10/26), às perguntas dos mapas do pente fino da Casa C: "1. BANCO EM BRONZE FOSCO; 2. OK; 3. DE ACORDO; 4. PEDRA AREIA; 5. EM 3840 PX". A Casa C tem a mesma folha, o mesmo recorte, a mesma escala e as mesmas cores de legenda da Casa B, então a final usa o motor do `final3840_casab.py` (e o dos `ajustes_casab.py`) como está. `contexto_c()` aponta os dois módulos para a Casa C e troca o que é da casa:
+- **Pastas e fontes:** a config, o PDF, a base chapada (v2 16x9) e o render retocado e aprovado de 14/10 (`PAVIMENTOS_C`), levado ao quadro (`quadro_inicial_c`, em cache); o afim do render (`AFIM_QR_C`).
+- **Pisos** (`PISOS_C`, `piso_textura_c`): os da legenda da Casa C, e o granito, o Bege Bahia e a grama levados ao tom das finais da Casa B (`TONS_C`: a mediana da textura na máscara vai ao tom).
+- **Arcos das portas** (`arcos_porta_c`, `ARCOS_C`, R3): os da ARQ_PAREDE de 15 a 130 pt (entra a pivotante do hall, de 121,9 pt) e os das portas dos boxes dos BH master 1 e 2, que o PDF da Casa C desenha na ARQ_BANCADAS: 30 no Térreo e 3 no Subsolo, no piso em volta.
+- **Peças do PDF** (`pecas_c`): os tapetes grandes por baixo dos móveis (`tapetes_por_baixo`); ficam como no render (`FORA_PECAS_C`) as banquetas sob o braço da bancada gourmet (decisão de 14/10), os dois conjuntos do estar e a sala TV (no PDF, o tapete orgânico é um desenho de 210 traços que cobria o sofá curvo, e as poltronas e os sofás são só contorno); o aparador comprido da circulação não é tapete (`NAO_TAPETE_C`).
+- **Camas e bancos** (usuário: "PODE MANTER O JOGO DE CAMA QUE ESTAVA ANTES." e "MANTENHA OS BANCOS QUE ESTAVAM EM FRENTE AS CAMAS TAMBÉM"): os do render aprovado, colados sobre a final com a sombra curta (`camas_render`, `CAMAS_C`, `BANCOS_C`).
+- **Biblioteca:** guarda-roupas com cabides (`GUARDA_ROUPAS_C`, 11 peças), cooktops de 5 bocas (`COOKTOPS_C`), as 4 banquetas de linho da ilha sob o tampo (`banquetas_c`, `BANQUETAS_C`), carros prata alinhados (`CARROS_C`, nos retângulos do PDF, `CARROS_PT`).
+- **Bancadas** (`bancadas_c`): a pedra areia e as cubas brancas da Casa B, sem os arcos das portas dos boxes que estão na ARQ_BANCADAS.
+- **Deck:** o banco em L em bronze fosco (o `BANCO_DECK` da Casa B) e o chuveiro (`CHUVEIRO_C`).
+- **Jardins** (`jardins_c`, `JARDINS_C`, `alfa_canteiros_c`): jardim de inverno, jardim de inverno 2 e jardim 1, só verdes, no canteiro do PDF.
+- **Guarda-corpos de vidro** (`GUARDA_CORPOS_C`): as 4 lâminas da ARQ_ELEMENTOS FIXOS.
+- **Projeções** (`PROJECOES_C`, `PROJECOES_JARDINS_C`, `PROJECOES_TRACO_C`): claraboia, closets e o X do BH master 2 em cinza escuro sobre os pisos claros; os X dos jardins e da área descoberta em cinza claro sobre o verde e o granito.
+- **Esquadrias** (`VIDROS_FORA_C`): no deck, na piscina, na prainha e no spa, as paredes estruturais da ARQ_PAREDE são brancas e finas como vidro e não são esquadria; com as bordas de fora e o vidro da borda infinita, formavam uma esquadria do tamanho da piscina, e o redesenho clareava os degraus da prainha. A zona fica fora; o vidro da borda infinita é o do render.
+- **Escadas** (`escadas_c`, `degraus_linhas`, R14): no Térreo, os degraus largos (`DEGRAUS_LARGOS_T`, triângulo no 10 apontando para cima) e a estreita (`ESCADA_ESTREITA_T`, triângulo junto ao deck apontando para a esquerda); no Subsolo (`escadas_s`), os largos com o triângulo no 1 apontando para baixo (`DEGRAUS_LARGOS_S`) e a estreita esmaecida com o triângulo no 11 apontando para a direita (`TRIANGULO_ESTREITA_S`).
+- **Subsolo** (`passos_subsolo_c`): pisos só na pegada (`pegada_subsolo`: o Subsolo, o pátio, os degraus largos e o caminho, e a escada estreita esmaecida), a floreira junto à sauna (`floreira_s`, `FLOREIRA_S`), os bancos da sauna em travertino (`bancos_sauna_c`, `SAUNA_C`), e o resto do lote na hachura do Térreo final (`AJ.subsolo_hachurado`).
+- **Cache de etapas:** `<$POE642_CACHE ou a pasta temporária>/poe642_casac_etapas/final3840/<Pavimento>_<etapa>.png`.
+
+```bash
+python3 final3840_casac.py Terreo               # -> ../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png
+python3 final3840_casac.py Subsolo              # depois do Térreo (a hachura vem dele)
+python3 final3840_casac.py Terreo --de pecas    # refaz só dali em diante; --ate <etapa> para nela
+# depois, rodape_entrega.py --no-quadro e pdf_entrega.py, com a config da Casa C
+```
+
 ## Ajustes da Casa A depois da conferência: `ajustes_casaa.py`
 
 Os itens da conferência (e, desde 21/10/26, os do pente fino pelas regras, com o prefixo `pf` em `ITENS`) corrigidos, um por vez, na imagem aprovada (2000 px). Saída `../renders/<imagem aprovada>_ajustes.png` (+ `_camada.png`), que o `rotulos_casaa.py` usa no lugar da aprovada. O alinhamento ao quadro comum continua vindo da imagem aprovada (`PAVIMENTOS[...]["aprovada"]`, `no_quadro_fixo`), para que só os trechos ajustados mudem na prancha. O PDF de cada pavimento chega à imagem pelo quadro comum e pelo afim `AFIM_QR` do pavimento (`pdf_pavimento`). Depois: `rotulos_casaa.py`, `rodape_entrega.py --no-quadro` e `pdf_entrega.py`.

@@ -41,7 +41,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - a vegetação folha a folha, com a régua (costela-de-adão até ~0,9 m, por exemplo);
   - móveis, louças e carros sobre o contorno do PDF; os carros em 4,70 × 1,85 m (R12).
 
-- **[22/10] Tudo desenhado na resolução da prancha** (usuário, na Casa B: "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGASTADAS E MAL DESENHADAS. PRECISO QUE REVISE ITEM A ITEM E DEIXE A IMAGEM COM OS CONTORNOS PERFEITOS"): nada é desenhado em 2000 px e ampliado para 3840, porque a ampliação borra. Pisos, grama, árvores, móveis, louças, bancadas, peças da biblioteca, paredes, esquadrias, escadas e rótulos são redesenhados direto no quadro da prancha (~60 px/m), pelo PDF (que é vetor) e pela base chapada da legenda. As texturas são sempre reduzidas da amostra (nunca ampliadas) e não levam desfoque. Na Casa B: `final3840_casab.py`.
+- **[22/10] Tudo desenhado na resolução da prancha** (usuário, na Casa B: "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGASTADAS E MAL DESENHADAS. PRECISO QUE REVISE ITEM A ITEM E DEIXE A IMAGEM COM OS CONTORNOS PERFEITOS"): nada é desenhado em 2000 px e ampliado para 3840, porque a ampliação borra. Pisos, grama, árvores, móveis, louças, bancadas, peças da biblioteca, paredes, esquadrias, escadas e rótulos são redesenhados direto no quadro da prancha (~60 px/m), pelo PDF (que é vetor) e pela base chapada da legenda. As texturas são sempre reduzidas da amostra (nunca ampliadas) e não levam desfoque. Na Casa B: `final3840_casab.py`; na Casa C (usuário: "EM 3840 PX"), `final3840_casac.py`, o mesmo motor com os parâmetros da casa.
 
 - **[21/10] Paredes pretas no contorno do PDF** (usuário: "revise todas as paredes e deixe-as em perfeito estado"): as paredes e os pilares são os preenchimentos da ARQ_PAREDE, em preto, com bordas retas e cantos nítidos, sem falhas dentro nem sobras para fora.
 
@@ -84,6 +84,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **[19/10] R3. Nunca mostrar o arco da porta.**
   - Porta de giro: só a folha (branca, fina, na espessura do PDF, com contorno fino) e o batente.
   - [22/10] Nem resto do arco: onde ele estava, o piso segue limpo, sem pintas (usuário, na porta da suíte 3 da Casa B: "tem um erro nessa porta"). E a limpeza em volta da folha não copia o móvel vizinho para junto dela (lá, uma lasca do guarda-roupa sob a folha aberta).
+  - [22/10] Todos os arcos do PDF, de qualquer tamanho e em qualquer camada: na Casa C, o da pivotante do hall tem 2,1 m de raio, e os das portas dos boxes dos banhos master estão na ARQ_BANCADAS.
   - Porta camarão: só as folhas em zigue-zague, sem o setor pintado.
 - **Porta de correr** (referência de 19/10): caixilho em faixa branca de 5 cm com contorno cinza, folhas em duas linhas sobrepostas e batentes em quadradinhos brancos. Portas de vidro de correr em dois planos, como no PDF.
 - **Pivotante:** a folha até a ponta do PDF, passando para o outro hall.
@@ -260,6 +261,12 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **[19/10] R7. Casa E · 1º Pavimento:** o rótulo do banho master sai de cima da banheira.
 - **[19/10] R8. Casa A:** faltam as projeções dos brises.
 - **[22/10] Casa B · Térreo:** o rótulo da prainha fica abaixo das duas espreguiçadeiras (usuário: "o rótulo da prainha pode ficar abaixo das duas espreguiçadeiras").
+- **[22/10] Casa C** (respostas do usuário aos mapas do pente fino: "1. BANCO EM BRONZE FOSCO; 2. OK; 3. DE ACORDO; 4. PEDRA AREIA; 5. EM 3840 PX"):
+  - **Térreo:** o L junto ao deck é banco em bronze fosco, como o da Casa B (no PDF, a ARQ_PAISAGISMO desenha uma floreira).
+  - **Subsolo (R2):** em cor cheia o Subsolo, o pátio, os degraus largos e o caminho (o cinza cheio do PDF do Subsolo); o resto do lote do Térreo final na hachura.
+  - **Escadas (R14):** no Térreo, a estreita desce do deck (triângulo junto ao deck, apontando para a esquerda) e os degraus largos descem do caminho para o pátio (triângulo no degrau 10, apontando para cima); no Subsolo, os largos com o triângulo no degrau 1 (para baixo) e a estreita esmaecida com o triângulo no 11 (para a direita).
+  - **Bancadas e ilhas** em pedra areia humanizada, com as cubas brancas, como na Casa B.
+  - **Camas e bancos do render aprovado** (usuário: "PODE MANTER O JOGO DE CAMA QUE ESTAVA ANTES." e "MANTENHA OS BANCOS QUE ESTAVAM EM FRENTE AS CAMAS TAMBÉM"): na Casa C, as camas com a roupa de cama e os bancos ao pé delas ficam como no render aprovado de 14/10, sem a roupa de cama da biblioteca.
 
 ## 15. Regras substituídas (não usar mais)
 
