@@ -267,6 +267,13 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - **Escadas (R14):** no Térreo, a estreita desce do deck (triângulo junto ao deck, apontando para a esquerda) e os degraus largos descem do caminho para o pátio (triângulo no degrau 10, apontando para cima); no Subsolo, os largos com o triângulo no degrau 1 (para baixo) e a estreita esmaecida com o triângulo no 11 (para a direita).
   - **Bancadas e ilhas** em pedra areia humanizada, com as cubas brancas, como na Casa B.
   - **Camas e bancos do render aprovado** (usuário: "PODE MANTER O JOGO DE CAMA QUE ESTAVA ANTES." e "MANTENHA OS BANCOS QUE ESTAVAM EM FRENTE AS CAMAS TAMBÉM"): na Casa C, as camas com a roupa de cama e os bancos ao pé delas ficam como no render aprovado de 14/10, sem a roupa de cama da biblioteca.
+- **[22/10] Casa D** (respostas do usuário aos mapas do pente fino: "1. Igual ao das outras casas 2. Em Madeira 3. Sim, para os 3 4. Areia 5. Os do render 6. Hachura"):
+  - **Granito igual ao das outras casas:** o tom e o desenho do granito de referência (o das Casas B e C, RGB ~118, 89, 69), não o Marrom Tabaco escuro da entrega de 14/10; vale também para o acesso de veículos.
+  - **Brises em madeira** (os ripados do hall, da garagem, da suíte 3 e das fachadas de baixo), com o veio no sentido da ripa, o traço fino e a sombra curta.
+  - **Escadas com o triângulo (R14), as três:** no Térreo, a de 16 degraus com o triângulo no degrau 16 (à direita), apontando para a esquerda; no Subsolo, cheia até o corte (degrau 7) e esmaecida depois, com o triângulo no degrau 1, apontando para a direita; os blocos em cascata à esquerda da piscina, com o triângulo apontando para a esquerda, para onde descem.
+  - **Bancadas e ilhas** em pedra areia humanizada, com as cubas brancas, como nas Casas B e C.
+  - **Camas e bancos do render aprovado**, como na Casa C.
+  - **Subsolo (R2):** em cor cheia só o Subsolo e o pátio (o contorno da laje do Subsolo, EST_LAJE); a faixa verde entra na hachura com o resto do lote do Térreo final.
 
 ## 15. Regras substituídas (não usar mais)
 

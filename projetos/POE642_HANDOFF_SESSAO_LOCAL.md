@@ -339,7 +339,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 
 ## Casa D · Térreo
 
-**Agora (22/10/26):** os mapas do pente fino pelas regras aguardam a confirmação do usuário (seção "Casa D · pente fino pelas regras", no fim).
+**Agora (22/10/26):** o usuário respondeu aos mapas do pente fino (seção "Casa D · pente fino pelas regras", no fim); a final em 3840 px pelo motor das Casas B e C (`final3840_casad.py`) está em andamento.
 
 - **PDF:** `_pdfs_cliente/642 - TÉRREO - CASA D.pdf` (mesma folha, recorte e enquadramento das Casas A, B e C). Config em `POE642_CasaD/config_bases.json`.
 - **Cores do PDF:** oliva #BAB596 (living, jantar, hall, adega, lavabo), laranja #CC9966 (suítes, sala íntima, circulações, quarto de serviço), terracota #995F4C (cozinha, gourmet, banho gourmet, despensa, louceiro, serviço, área descoberta, garagem e acesso de veículos), cinza #E4E4E4 (varanda gourmet, piscina, escadas, deck lateral), piscina azul. Os banhos são brancos com hachura (sem polígono de piso).
@@ -2310,6 +2310,7 @@ Pedido do usuário: "Casa D" (a última da ordem da seção 17 das regras: Casa 
   8. soleiras;
   9. paredes;
   10. a final refeita em 3840 px.
+- **Respostas do usuário (22/10):** "1. Igual ao das outras casas 2. Em Madeira 3. Sim, para os 3 4. Areia 5. Os do render 6. Hachura". Granito no tom e no desenho da referência (o das Casas B e C); brises em madeira; os três triângulos (escada do Térreo no degrau 16 para a esquerda, a do Subsolo no degrau 1 para a direita, os blocos para a esquerda); bancadas e ilhas em pedra areia; camas e bancos do render; no Subsolo, em cor cheia só o Subsolo e o pátio, e a faixa verde na hachura. Registradas na seção 14 das regras.
 
 ## Casas A a D · Barlavento nas piscinas
 
