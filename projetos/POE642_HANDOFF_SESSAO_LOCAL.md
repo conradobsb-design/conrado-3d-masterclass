@@ -2230,16 +2230,30 @@ Depois, vendo a final do Térreo: "PODE MANTER O JOGO DE CAMA QUE ESTAVA ANTES."
   19. tampa em todas as bacias e cubas brancas;
   20. tapete da sala TV (o conjunto da sala TV fica o do render, ver abaixo);
   21. paredes pretas no contorno do PDF;
-  22. soleiras nos vãos brancos do PDF;
+  22. soleiras nos vãos brancos do PDF; a do elevador em inox escovado, entre os batentes (no PDF não é vão branco, e ali ficava o travertino);
   23. banquetas da ilha sob o tampo, cooktops de 5 bocas, guarda-roupas com cabides e bancadas em pedra areia.
 - **O que fica como no render aprovado** (as peças do PDF saíam piores que o render):
   - os dois conjuntos do estar e a sala TV: no PDF, o tapete orgânico do estar é um desenho de 210 traços que cobria o sofá curvo, e as poltronas e os sofás são só contorno (o sofá da sala TV saía sem as almofadas);
   - as banquetas sob o braço da bancada gourmet (decisão de 14/10, item 9);
   - as camas e os bancos (pedido do usuário).
+  - os dois vasos junto ao sofá curvo do estar: a planta da biblioteca saía com manchas claras em volta; entram as folhas do render, com a sombra curta;
+  - nas zonas do estar e da sala TV, os pedacinhos de piso novo que entravam entre as linhas dos estofados (a legenda tem travertino ali) e davam pintas amareladas no sofá voltam ao render.
 - **Piscina:** no deck, na piscina, na prainha e no spa, as paredes estruturais da ARQ_PAREDE são brancas e finas como vidro; com as bordas de fora e o vidro da borda infinita, o motor as tomava por uma esquadria do tamanho da piscina e clareava os degraus da prainha. A zona fica fora das esquadrias (`VIDROS_FORA_C`), e o vidro da borda infinita é o do render, fino.
 - **Lavabo junto à adega:** a faixa de 1,6 × 0,6 m junto à parede de cima sai em granito: o PDF a pinta com o preenchimento da cozinha e da gourmet, e a legenda também (o render a fazia em madeira).
 - **Fora do lote:** as marcas muito claras abaixo do lote vêm do render aprovado e já estavam na entrega anterior; ficaram como estavam.
-- **Subsolo:** em andamento (a final roda depois do Térreo, porque a hachura vem dele).
+- **Subsolo, item a item:**
+  1. cor cheia no Subsolo, no pátio, nos degraus largos e no caminho (com a escada estreita esmaecida); o resto do lote do Térreo final na hachura;
+  2. a 4. Bege Bahia, travertino (veios horizontais) e vinílico (réguas deitadas) na escala;
+  5. floreira junto à sauna com as plantas da biblioteca, dentro do canteiro (nada sobre os degraus);
+  6. degraus largos em Bege Bahia, com a linha suave, a sombra curta e o triângulo no degrau 1 (para baixo); a estreita esmaecida, com o triângulo no 11 (para a direita);
+  7. as 3 portas sem arcos;
+  8. a parede de vidro da academia e a porta da sauna finas;
+  9. 6 rótulos: varanda subsolo, academia, depósito, sauna, BH academia e elevador (a VARANDA SUBSOLO saía junto com o título da folha, "-1. 1º SUBSOLO", no filtro por "SUBSOLO"; agora o filtro é o título exato);
+  10. a bacia do BH academia com a tampa e a cuba branca;
+  11. as 3 soleiras dos vãos brancos e a do elevador em inox escovado;
+  12. paredes pretas no contorno do PDF;
+  13. tudo no quadro da prancha; o banco da sauna em L, em dois níveis de travertino.
+  - **Os aparelhos da academia ficam os do render:** pelo PDF, as esteiras, as bicicletas e os supinos saíam como silhuetas cinza chapadas, sem a lona e sem as barras. Entram os px neutros do render sobre o vinílico novo, com a sombra curta.
 - **Imagens:** `POE642_CasaC/renders/POE642_CasaC_PH_{Terreo,Subsolo}_final_rotulos.png`; pranchas `entrega/POE642_CasaC_PH_{Terreo,Subsolo}_entrega.png` e o PDF `entrega/POE642_CasaC_Plantas_Humanizadas.pdf`. Antes e depois enviados na conversa.
 
 **Para refazer** (da pasta `POE642_CasaA/scripts/`; as etapas ficam em cache em `$TMPDIR/poe642_casac_etapas`, e `--de <etapa>` recomeça dali):

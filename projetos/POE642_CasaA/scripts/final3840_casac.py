@@ -166,6 +166,9 @@ PROJECOES_TRACO_C = {"pisos": {"cor": (92, 92, 94), "forca": 0.9, "larg": 1.4},
 # circulação, 8,5 x 0,7 m)
 FORA_PECAS_C = [(1070.0, 1312.0, 1342.0, 1345.0), (1880.0, 1495.0, 2130.0, 1746.0), (1490.0, 1490.0, 1880.0, 1760.0),
                 (1120.0, 885.0, 1370.0, 1098.0)]
+# os dois vasos junto ao sofá curvo do estar: as plantas do render (a da biblioteca saía com manchas claras em volta)
+VASOS_C = [(2055.0, 1672.0, 2156.0, 1780.0)]
+FORA_PECAS_C.extend(VASOS_C)
 NAO_TAPETE_C = [(1455.4, 863.9, 1937.3, 903.6)]
 # As esquadrias: no deck, no banco em L, na prainha, no spa e na piscina, as paredes estruturais da ARQ_PAREDE são
 # brancas e finas como vidro (a base já as tirava, `zonas_excluidas` da config); não são esquadria. A zona cobre também
@@ -246,6 +249,8 @@ def contexto_c():
     B.SOLEIRAS_B = dict(B.SOLEIRAS_B, sem=[])
     B.VIDROS_B = dict(B.VIDROS_B, fora=VIDROS_FORA_C)
     B.ROTULOS_FORA, B.ROTULOS_NOMES = [], []
+    # o título da folha do Subsolo é "-1. 1º SUBSOLO": o filtro por "SUBSOLO" levava junto a VARANDA SUBSOLO
+    A.FORA = tuple(f for f in A.FORA if f != "SUBSOLO") + ("1º SUBSOLO",)
     B.BORDAS = dict(B.BORDAS, pisos=list(B.BORDAS["pisos"]) + [(232, 232, 232)])
 
 
@@ -431,6 +436,100 @@ def camas_render(Q, img, ini):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+def pecas_do_render(Q, img, ini, rects, peca, texto):
+    """As peças do render aprovado nos retângulos `rects` (pt): os px de `peca` (a máscara do que, no render, é peça
+    e não piso), sobre o piso da final, com a sombra curta das peças. Nelas, a legenda pinta o piso por dentro do
+    contorno do PDF, e os pisos as cortavam."""
+    s = F.PECAS["sombra"]
+    out = img.astype(np.float32)
+    a = np.zeros((Q.H, Q.W), np.float32)
+    for r in rects:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        m = peca(ini[y0:y1, x0:x1].astype(np.int16)).astype(np.uint8)
+        m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+        n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
+        m = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= 40])
+        a[y0:y1, x0:x1] = np.maximum(a[y0:y1, x0:x1], cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.5))
+    d_ = s["dist_m"] * Q.px_m
+    sb = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, -d_], [0, 1, d_]]), (Q.W, Q.H)), (0, 0),
+                          s["sig_m"] * Q.px_m) * s["forca"]
+    out *= (1 - sb * (1 - a))[..., None]
+    out = out * (1 - a[..., None]) + ini.astype(np.float32) * a[..., None]
+    print(f"    {texto} do render aprovado ({int((a > 0.5).sum())} px), com a sombra curta")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def restos_piso(Q, img, ini, rects, area_max=400):
+    """Nas zonas que ficam como no render (`rects`, pt: o estar e a sala TV), o piso novo entrava em pedacinhos
+    soltos entre as linhas dos estofados (a legenda tem o travertino ali), em pintas amareladas sobre o sofá. O que
+    mudou em relação ao render em manchas de até `area_max` px volta a ser o render; o piso grande em volta fica."""
+    out = img.copy()
+    n_px = 0
+    for r in rects:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        mud = (np.abs(img[y0:y1, x0:x1].astype(np.int16) - ini[y0:y1, x0:x1].astype(np.int16)).max(axis=2) > 12)
+        n, lab, st, _ = cv2.connectedComponentsWithStats(mud.astype(np.uint8), 8)
+        m = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= area_max])
+        m = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & ~np.isin(
+            lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] > area_max])
+        out[y0:y1, x0:x1][m] = ini[y0:y1, x0:x1][m]
+        n_px += int(m.sum())
+    print(f"    estar e sala TV: {n_px} px de piso solto entre as linhas dos estofados voltam ao render")
+    return out
+
+
+def neutro(reg):
+    """O cinza, o preto e o cromado (o vinílico e o travertino são quentes)."""
+    return (reg.max(axis=2) - reg.min(axis=2)) < 28
+
+
+def verde(reg):
+    """As folhas: o verde (BGR: acima do vermelho) e o escuro em volta dele (as folhas na sombra), sem buracos; as
+    manchas escuras sem verde (os traços do sofá) ficam fora."""
+    from scipy import ndimage
+    v = reg[..., 1] > reg[..., 2] + 12
+    m = cv2.morphologyEx((v | (reg.mean(axis=2) < 170)).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
+    com_verde = np.unique(lab[v & (lab > 0)])
+    return ndimage.binary_fill_holes(np.isin(lab, com_verde))
+
+
+# A soleira do elevador em inox escovado (Térreo 22, Subsolo 11; seção 4 das regras): o vão da parede esquerda da
+# cabine, entre os batentes do PDF (pt). Não é vão branco do PDF (a etapa das soleiras não o pega): no Térreo ficava o
+# travertino e, no Subsolo, a soleira bege do render.
+SOLEIRA_ELEVADOR_C = {"pt": {"Terreo": (1553.7, 1035.3, 1562.2, 1072.1), "Subsolo": (1553.7, 1034.9, 1565.0, 1071.8)},
+                      "inox": (198, 199, 200), "escovado": 6.0, "brilho": 10.0, "linha": (128, 130, 132),
+                      "linha_px": 0.6, "semente": 61}
+
+
+def soleira_elevador(Q, img):
+    q = SOLEIRA_ELEVADOR_C
+    r = q["pt"][Q.chave]
+    x0, y0, x1, y1 = F.ret_q(Q, r)
+    x0, y0, x1, y1 = x0 - 2, y0 - 2, x1 + 2, y1 + 2
+    a = F.ret_aa_q(Q, r)[y0:y1, x0:x1]
+    h, w = a.shape
+    (u0, v0), (u1, v1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+    em_pe = (v1 - v0) >= (u1 - u0)
+    rng = np.random.default_rng(q["semente"])
+    n = w if em_pe else h
+    fio = cv2.GaussianBlur(rng.normal(0, 1, (1, n)).astype(np.float32), (0, 0), 0.7).ravel() * q["escovado"]
+    fio = fio[None, :] if em_pe else fio[:, None]
+    t = np.linspace(-1, 1, h if em_pe else w, dtype=np.float32)
+    luz = (-t * q["brilho"] / 2)[:, None] if em_pe else (-t * q["brilho"] / 2)[None, :]
+    inox = np.float32(q["inox"])[None, None, :] + (fio + luz)[..., None]
+    # as faces da parede, em linha cinza fina, nos lados compridos
+    e = q["linha_px"] / np.hypot(*(np.array(Q.p2q(1, 0)) - np.array(Q.p2q(0, 0))))
+    fl = np.maximum(F.ret_aa_q(Q, (r[0], r[1], r[0] + e, r[3]) if em_pe else (r[0], r[1], r[2], r[1] + e)),
+                    F.ret_aa_q(Q, (r[2] - e, r[1], r[2], r[3]) if em_pe else (r[0], r[3] - e, r[2], r[3])))[y0:y1, x0:x1]
+    out = img.astype(np.float32)
+    reg = out[y0:y1, x0:x1]
+    reg = reg * (1 - a[..., None]) + inox * a[..., None]
+    out[y0:y1, x0:x1] = reg * (1 - fl[..., None]) + np.float32(q["linha"]) * fl[..., None]
+    print("    soleira do elevador em inox escovado, entre os batentes do PDF")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 def biblioteca_c(Q, img):
     out = np.ascontiguousarray(img.copy())
     with F.em_quadro(Q):
@@ -535,13 +634,15 @@ def passos_terreo_c(Q, ini, M):
         ("vegetacao", lambda im: vegetacao_c(Q, im, M)),
         ("bancadas", lambda im: bancadas_c(Q, im)),
         ("pecas", lambda im: pecas_c(Q, im, ini, fora, camas + NAO_TAPETE_C)),
-        ("tampas", lambda im: camas_render(Q, F.tampas_vasos(Q, im), ini)),
+        ("tampas", lambda im: pecas_do_render(Q, camas_render(Q, F.tampas_vasos(Q, restos_piso(Q, im, ini, FORA_PECAS_C[1:4])),
+                                                             ini), ini, VASOS_C, verde,
+                                              "estar: os dois vasos junto ao sofá curvo")),
         ("biblioteca", lambda im: biblioteca_c(Q, im)),
         ("carros", lambda im: F.carros(Q, im, M)),
         ("deck", lambda im: F.deck_detalhes(Q, im)),
         ("boxes", lambda im: F.boxes_granito(Q, im)),
         ("paredes", lambda im: F.paredes(Q, im)),
-        ("soleiras", lambda im: F.soleiras(Q, im)),
+        ("soleiras", lambda im: soleira_elevador(Q, F.soleiras(Q, im))),
         ("esquadrias", lambda im: F.esquadrias_terreo(Q, im)),
         ("cortinas", lambda im: F.cortinas(Q, im)),
         ("escadas", lambda im: escadas_c(Q, im)),
@@ -591,6 +692,9 @@ TRIANGULO_ESTREITA_S = {"pt": (549.3, 1198.4, "direita"), "esmaecer": 0.5}
 # baixo (#C1BDA1); o travertino da biblioteca no tom do piso da sauna, 0,91 e 0,867 dele, com as arestas em linha fina
 SAUNA_C = {"pt": (549.6, 990.8, 651.7, 1138.9), "pecas": [((174, 198, 202), 0.91), ((161, 189, 193), 0.867)],
            "piso_px": (824, 760, 975, 880), "linha": (108, 121, 123), "larg_px": 0.7, "forca": 0.8, "semente": 733}
+# Os aparelhos da academia (esteiras, bicicletas e supinos) ficam os do render aprovado: pelo PDF saíam silhuetas
+# cinza chapadas, sem a lona da esteira nem as barras dos supinos (no tamanho do PDF, já conferido)
+FORA_PECAS_S = [(961.7, 511.3, 1360.5, 796.2)]
 # A floreira junto à sauna (item 5): só as plantas da biblioteca, dentro dela
 FLOREIRA_S = {"caixa": (672, 745, 688, 973), "semente": 31,
               "plantas": [("arbusto_1", 0.42, (0.5, 0.08), 0), ("arbusto_2", 0.40, (0.5, 0.25), 90),
@@ -698,10 +802,11 @@ def passos_subsolo_c(Q, ini):
         ("floreira", lambda im: floreira_s(Q, im)),
         ("bancadas", lambda im: bancadas_c(Q, im)),
         ("sauna", lambda im: bancos_sauna_c(Q, im)),
-        ("pecas", lambda im: F.pecas_pdf(Q, im, ini)),
+        ("pecas", lambda im: F.pecas_pdf(Q, im, ini, fora=FORA_PECAS_S)),
+        ("aparelhos", lambda im: pecas_do_render(Q, im, ini, FORA_PECAS_S, neutro, "academia: os aparelhos")),
         ("tampas", lambda im: F.tampas_vasos(Q, im)),
         ("paredes", lambda im: F.paredes(Q, im)),
-        ("soleiras", lambda im: F.soleiras(Q, im)),
+        ("soleiras", lambda im: soleira_elevador(Q, F.soleiras(Q, im))),
         ("esquadrias", lambda im: B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m)),
         ("escadas", lambda im: escadas_s(Q, im)),
         ("hachura", lambda im: AJ.subsolo_hachurado(im, peg, Q.px_m)),
