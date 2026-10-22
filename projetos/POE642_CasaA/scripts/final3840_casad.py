@@ -118,7 +118,9 @@ def piso_textura_d(Q, img, m, nome, forca, sig_m, semente):
 # Os carros (item 7, R12): os 3 do PDF (ARQ_LAYOUT HUMANIZAÇÃO; o da esquerda em duas metades), prata, alinhados (o
 # mesmo y) e do mesmo tamanho, 4,70 x 1,85 m. O modelo é o carro do meio do render (na janela em px do render de 2000).
 CARROS_PT = [(2414.4, 690.9, 2526.1, 943.2), (2572.5, 687.3, 2684.0, 935.3), (2727.0, 672.6, 2850.6, 960.2)]
-CARROS_D = dict(B.CARROS_B, janela=(1380, 235, 1660, 410), modelo=1, neutro=15,
+# O carro branco do meio do render é o modelo. O granito do render da Casa D é quase neutro (~51, 44, 48): o carro é o
+# que foge dele (mais de `foge` num canal), não o px neutro, que pegava o granito e juntava os três carros num só.
+CARROS_D = dict(B.CARROS_B, janela=(1468, 236, 1556, 400), foge=45,
                 centros_pdf=[(2470.2, 815.0), (2628.3, 815.0), (2788.8, 815.0)])
 # As camas e os bancos ao pé delas (item 23; resposta 5, "Os do render"): ficam como no render aprovado de 15/10; as
 # peças do PDF delas não entram e, depois das peças, o render volta no retângulo, com a sombra curta.
@@ -355,6 +357,55 @@ def biblioteca_d(Q, img):
     return out
 
 
+def carros_d(Q, img, M):
+    """Os 3 carros da R12 (prata, 4,70 x 1,85 m, alinhados), como `final3840_casab.carros`, com a silhueta do modelo
+    achada pelo que foge do granito em volta (a borda da janela)."""
+    from scipy import ndimage
+    q = CARROS_D
+    r = dict(AJ.CARROS_A["r12"], centros_pdf=q["centros_pdf"])
+    ap = cv2.imread(str(CASA_D / Q.q["aprovada"]))
+    wx0, wy0, wx1, wy1 = q["janela"]
+    reg = ap[wy0:wy1, wx0:wx1].astype(np.float32)
+    borda = np.concatenate([reg[:, :6].reshape(-1, 3), reg[:, -6:].reshape(-1, 3)])
+    car = np.abs(reg - np.median(borda, axis=0)).max(axis=2) > q["foge"]
+    m = cv2.morphologyEx(car.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m)
+    sil = ndimage.binary_fill_holes(lab == 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA])))
+    sil = cv2.erode(sil.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    qa = AJ.CARROS_A
+    Y = reg.mean(axis=2)
+    lanterna = (reg[..., 2] - reg[..., 0] > qa["lanterna"][0]) & (reg[..., 2] > qa["lanterna"][1]) & \
+        (reg[..., 2] - reg[..., 1] > qa["lanterna"][0])
+    pq, alvo = r["quantis"]
+    Yn = np.interp(Y, np.percentile(Y[sil & ~lanterna], pq), alvo)
+    prata = np.where((sil & ~lanterna)[..., None], Yn[..., None] * np.float32(r["tom"]), reg)
+    ys, xs = np.nonzero(sil)
+    y0, y1 = ys.min(), ys.max() + 1
+    comp = y1 - y0
+    f0, f1 = r["faixa_largura"]
+    larguras = sil[int(y0 + f0 * comp):int(y0 + f1 * comp)].sum(axis=1)
+    larg = float(np.median(larguras[larguras > 0]))
+    sx, sy = r["largura_m"] * Q.px_m / larg, r["comprimento_m"] * Q.px_m / comp
+    cx, cy = float(xs.mean()), (y0 + y1) / 2
+    alfa0 = cv2.GaussianBlur(sil.astype(np.float32), (0, 0), 0.6)
+    out = img.astype(np.float32)
+    for px_, py_ in r["centros_pdf"]:
+        tx, ty = Q.p2q(px_, py_)
+        Mw = np.float32([[sx, 0, tx - sx * cx], [0, sy, ty - sy * cy]])
+        a = cv2.warpAffine(alfa0, Mw, (Q.W, Q.H), flags=cv2.INTER_LINEAR)
+        c = cv2.warpAffine(prata, Mw, (Q.W, Q.H), flags=cv2.INTER_CUBIC)
+        c = cv2.addWeighted(c, 1.5, cv2.GaussianBlur(c, (0, 0), 1.2), -0.5, 0)
+        d_ = 0.08 * Q.px_m
+        sb = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, -d_], [0, 1, d_]]), (Q.W, Q.H)), (0, 0),
+                              0.06 * Q.px_m) * (1 - a) * 0.38
+        out *= (1 - sb)[..., None]
+        out = out * (1 - a[..., None]) + c * a[..., None]
+    print(f"    garagem (R12): {len(r['centros_pdf'])} carros prata de {r['comprimento_m']:.2f} x {r['largura_m']:.2f} m "
+          f"(o modelo: o carro branco do render), alinhados, com a borda limpa e a sombra curta")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # Os brises de ripas em madeira (item 14, resposta 2)
 def brises_pdf_d(Q):
@@ -475,7 +526,7 @@ def passos_terreo_d(Q, ini, M):
         ("tampas", lambda im: C.pecas_do_render(Q, C.camas_render(Q, F.tampas_vasos(Q, C.restos_piso(
             Q, im, ini, FORA_PECAS_D)), ini), ini, VASOS_D, C.verde, "hall e gourmet: as plantas em vaso")),
         ("biblioteca", lambda im: biblioteca_d(Q, im)),
-        ("carros", lambda im: F.carros(Q, im, M)),
+        ("carros", lambda im: carros_d(Q, im, M)),
         ("boxes", lambda im: F.boxes_granito(Q, im)),
         ("paredes", lambda im: paredes_d(Q, im)),
         ("soleiras", lambda im: C.soleira_elevador(Q, F.soleiras(Q, im))),
