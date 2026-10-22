@@ -874,6 +874,110 @@ def boxes_granito(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# As soleiras (R13; usuário, 22/10/26: "CORRIGIR AS SOLEIRAS"): as da final vinham dos ajustes de 2000 px, ampliadas,
+# moles, com a borda borrada e restos em volta. Agora, no quadro da prancha: os vãos de porta que o PDF deixa em branco
+# (`ajustes_casab.vaos_brancos`: o branco da legenda entre as paredes, junto à ponta de um arco de porta; onde o piso
+# atravessa o vão, não há soleira), cada um ajustado às faces e às pontas das paredes do PDF (o desenho vetorial, em
+# 8 x), em Bege Bahia na escala (a foto da biblioteca, no tom do Bege Bahia da referência), nítido, com as duas faces
+# da parede em traço cinza fino. As portas e os batentes vêm por cima, nas esquadrias.
+SOLEIRAS_F = {"ss": 8, "janela_pt": 14.0, "procura_m": 0.20, "forca": 0.5, "linha": (150, 152, 154), "linha_px": 0.6,
+              "folga_pt": 0.0, "semente": 7, "limpa_px": 3}
+
+
+def _soleira_no_pdf(Q, r):
+    """O vão r (pt, aproximado) ajustado às paredes do PDF: (x0, y0, x1, y1) no quadro, em px fracionários."""
+    q = SOLEIRAS_F
+    k = q["ss"]
+    hor = (r[2] - r[0]) >= (r[3] - r[1])
+    w0, h0, w1, h1 = ret_q(Q, (r[0] - q["janela_pt"], r[1] - q["janela_pt"], r[2] + q["janela_pt"],
+                               r[3] + q["janela_pt"]))
+    m = np.zeros(((h1 - h0) * k, (w1 - w0) * k), np.uint8)
+    for d in Q.desenhos:
+        if d.get("layer") in ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS", "EST_PILAR") and d["type"] in ("f", "fs") \
+                and d.get("fill") and max(d["fill"]) < 0.6:
+            rr = d["rect"]
+            if rr.x1 < r[0] - q["janela_pt"] or rr.x0 > r[2] + q["janela_pt"] or rr.y1 < r[1] - q["janela_pt"] \
+                    or rr.y0 > r[3] + q["janela_pt"]:
+                continue
+            for c in Q.caminhos(d):
+                if len(c) >= 3:
+                    cv2.fillPoly(m, [np.int32(np.round((c - (w0, h0)) * k))], 1)
+    (ax, ay), (bx, by) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+    cx, cy = ((ax + bx) / 2 - w0) * k, ((ay + by) / 2 - h0) * k
+    if not hor:                                                    # tudo como deitado; no fim, volta
+        m, cx, cy, ax, ay, bx, by = m.T, cy, cx, ay, ax, by, bx
+    L = (bx - ax) * k
+    pr = q["procura_m"] * Q.px_m * k
+    xl0, xl1 = int(max(0, cx - L / 2 - pr)), int(max(1, cx - L / 2 + pr / 4))
+    xr0, xr1 = int(min(m.shape[1] - 1, cx + L / 2 - pr / 4)), int(min(m.shape[1], cx + L / 2 + pr))
+    lin_e, lin_d = m[:, xl0:xl1].any(axis=1), m[:, xr0:xr1].any(axis=1)
+    # a faixa da parede só perto da espessura do vão (uma parede que chega de lado não a engrossa)
+    e_ = (by - ay) * k / 2 + 0.05 * Q.px_m * k
+    perto = np.zeros(m.shape[0], bool)
+    perto[max(0, int(cy - e_)):int(cy + e_) + 1] = True
+    lin_e, lin_d = lin_e & perto, lin_d & perto
+    faixa = lin_e & lin_d if (lin_e & lin_d).any() else (lin_e | lin_d)
+    linhas = np.nonzero(faixa)[0]
+    if not len(linhas):
+        return None
+    # a faixa contínua mais perto do centro do vão
+    cortes = np.split(linhas, np.nonzero(np.diff(linhas) > 1)[0] + 1)
+    faixa = min(cortes, key=lambda g: min(abs(g[0] - cy), abs(g[-1] - cy), 0 if g[0] <= cy <= g[-1] else 1e9))
+    t0, t1 = faixa[0], faixa[-1] + 1
+    meio = m[t0 + (t1 - t0) // 4:t1 - (t1 - t0) // 4 or t1]
+    col = meio.any(axis=0)
+    esq = np.nonzero(col[:int(cx)])[0]
+    dir_ = np.nonzero(col[int(cx):])[0]
+    x0 = (esq[-1] + 1) if len(esq) else cx - L / 2
+    x1 = (int(cx) + dir_[0]) if len(dir_) else cx + L / 2
+    if abs((x1 - x0) - L) > 0.35 * max(L, 1):                      # sem as duas pontas claras: fica o vão aproximado
+        x0, x1 = cx - L / 2, cx + L / 2
+    caixa = (x0 / k, t0 / k, x1 / k, t1 / k)
+    if not hor:
+        caixa = (caixa[1], caixa[0], caixa[3], caixa[2])
+    return caixa[0] + w0, caixa[1] + h0, caixa[2] + w0, caixa[3] + h0
+
+
+def soleiras(Q, img):
+    sys.path.insert(0, str(B.RAIZ / "_texturas"))
+    from texturas import textura
+    from retoque_terreo_casae import BEGE
+    q = SOLEIRAS_F
+    k = q["ss"]
+    vaos = B.vaos_brancos(Q.chave)
+    out = img.astype(np.float32)
+    feitas = []
+    for i, r in enumerate(vaos):
+        cx_ = _soleira_no_pdf(Q, r)
+        if cx_ is None:
+            continue
+        x0, y0, x1, y1 = cx_
+        X0, Y0, X1, Y1 = int(np.floor(x0)) - 2, int(np.floor(y0)) - 2, int(np.ceil(x1)) + 2, int(np.ceil(y1)) + 2
+        h, w = Y1 - Y0, X1 - X0
+        mk = np.zeros((h * k, w * k), np.uint8)
+        u0, v0, u1, v1 = (int(round((x0 - X0) * k)), int(round((y0 - Y0) * k)), int(round((x1 - X0) * k)),
+                          int(round((y1 - Y0) * k)))
+        mk[v0:v1, u0:u1] = 255
+        fk = np.zeros_like(mk)
+        e = max(1, int(round(q["linha_px"] * k)))
+        if (x1 - x0) >= (y1 - y0):                                 # as faces da parede: os lados compridos
+            fk[v0:v0 + e, u0:u1] = 255
+            fk[v1 - e:v1, u0:u1] = 255
+        else:
+            fk[v0:v1, u0:u0 + e] = 255
+            fk[v0:v1, u1 - e:u1] = 255
+        al = cv2.resize(mk.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        fl = cv2.resize(fk.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        T = textura("bege_bahia", Q.px_m, h, w, semente=q["semente"] + i).astype(np.float32)
+        T = (1 + q["forca"] * (T / T.reshape(-1, 3).mean(axis=0) - 1)) * np.float32(BEGE["tom"])
+        reg = out[Y0:Y1, X0:X1]
+        reg = reg * (1 - al) + T * al
+        out[Y0:Y1, X0:X1] = reg * (1 - fl) + np.float32(q["linha"]) * fl
+        feitas.append((x0, y0, x1, y1))
+    print(f"    soleiras: {len(feitas)} de {len(vaos)} vãos brancos do PDF, nas faces das paredes, em Bege Bahia nítido")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # 5. As paredes pretas e os pilares (os redondos em cinza)
 PAREDES_F = {"cor": (8, 8, 8), "camadas": ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS"),
@@ -1225,6 +1329,7 @@ def passos_subsolo(Q, ini):
                                                                           c["canopla"][2] + 3, c["ducha"][3] + 3)])),
         ("biblioteca", biblioteca_s),
         ("paredes", lambda im: paredes(Q, im)),
+        ("soleiras", lambda im: soleiras(Q, im)),
         ("esquadrias", lambda im: B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m)),
         ("escadas", escadas_s),
         ("hachura", lambda im: AJ.subsolo_hachurado(im, peg.astype(np.float32) / 255, Q.px_m)),
@@ -1247,6 +1352,7 @@ def passos_terreo(Q, ini, M, t):
         ("deck", lambda im: deck_detalhes(Q, im)),
         ("boxes", lambda im: boxes_granito(Q, im)),
         ("paredes", lambda im: paredes(Q, im)),
+        ("soleiras", lambda im: soleiras(Q, im)),
         ("esquadrias", lambda im: B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m)),
         ("escadas", lambda im: escadas_projecoes(Q, im)),
         ("cobertura", lambda im: B.cobertura_final(im, Q.pg, Q.p2q)),

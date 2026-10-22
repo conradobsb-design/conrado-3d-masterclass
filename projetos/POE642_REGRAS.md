@@ -95,6 +95,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **[19/10] R13. Soleiras:** representar onde o PDF tem, e não acrescentar onde não tem. As soleiras já desenhadas precisam ser conferidas contra o PDF (seção 16).
   - **Como ler no PDF:** a soleira é o vão da porta na espessura da parede deixado em branco, entre os batentes. Onde o piso de um dos lados atravessa o vão, não há soleira.
   - **Como desenhar:** Bege Bahia na escala, com as duas faces da parede em traço cinza fino (Casa E, Subsolo).
+  - **[22/10] Na resolução da prancha e nas faces das paredes** (usuário, na Casa B: "corrigir as soleiras"): a soleira é desenhada na final de 3840 px (nunca ampliada de 2000 px, que borrava), da ponta de uma parede à da outra e na espessura exata da parede do PDF (o desenho vetorial, a 8 x), nítida, com o Bege Bahia da biblioteca no tom da referência; as faces da parede em traço cinza fino; batentes e folhas por cima.
 - **Portões de correr** da área descoberta em alumínio. A porta do elevador em inox, com soleira em inox escovado.
 
 ## 5. Escadas
