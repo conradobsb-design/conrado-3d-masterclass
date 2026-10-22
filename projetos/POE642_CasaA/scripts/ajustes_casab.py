@@ -1571,8 +1571,10 @@ def adega_b(out):
 # Térreo 16: os cooktops do PDF (ARQ_LOUÇAS E METAIS, 0,88 x 0,50 m, 5 bocas): o da bancada gourmet, deitado, e o da ilha da
 # cozinha, em pé; o bloco de inox da biblioteca (cooktop_inox_5_90), como nas Casas A e E. Antes, o tampo em volta (o
 # retângulo e uma folga, onde o motor desenhou as bocas) volta ao quartzo do próprio tampo, ao lado.
+# o da ilha da cozinha em pé, com os botões para a direita (usuário, 22/10/26: "inverta o lado do cooktop para que os
+# botões fiquem virados para o outro lado"; com giro 90 eles ficavam à esquerda)
 COOKTOPS_B = [{"pt": (1168.1, 1506.8, 1217.9, 1535.1), "giro": 0},
-              {"pt": (1473.2, 1624.9, 1501.6, 1674.8), "giro": 90}]
+              {"pt": (1473.2, 1624.9, 1501.6, 1674.8), "giro": 270}]
 
 
 def cooktops_b(out):

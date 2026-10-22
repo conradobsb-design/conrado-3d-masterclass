@@ -2121,6 +2121,7 @@ Os pedidos que vieram depois, item a item:
     - as cubas da ARQ_BANCADAS: as compridas, que a regra antiga perdia (lavabo, banho 2 e banho 3), e a cuba esculpida do Subsolo.
   - **A regra nova da cuba na ARQ_BANCADAS:** é o retângulo com o aro fino nos quatro lados. A peça de pedra entre as duas cubas do lavatório gourmet, que antes saía branca, volta a ser pedra, e a peça solta de 0,51 × 0,48 m junto ao louceiro também.
 - **Imagens:** `POE642_CasaB/renders/POE642_CasaB_PH_{Terreo,Subsolo}_final_rotulos.png`. Pranchas e PDF refeitos. Os antes/depois estão nos `AD2_*.jpg` enviados na conversa.
+- **"INVERTA O LADO DO COOKTOP PARA QUE OS BOTÕES FIQUEM VIRADOS PARA O OUTRO LADO"** (a ilha da cozinha): o cooktop de 5 bocas fica em pé, girado a 270° (`COOKTOPS_B`, era 90°), com os botões para a direita; o do gourmet não muda. Prancha do Térreo e PDF refeitos.
 
 ## Casas A a D · Barlavento nas piscinas
 
