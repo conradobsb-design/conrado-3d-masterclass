@@ -2150,6 +2150,10 @@ Os pedidos que vieram depois, item a item:
   - **O problema:** a final de 3840 px não redesenhava as soleiras; ficavam as dos ajustes de 2000 px, ampliadas: moles, de borda borrada, com restos em volta (a do portão do hall com pontos e mancha; as da garagem para o serviço, brilhosas).
   - **Agora:** etapa `soleiras` nos dois pavimentos, nos 20 vãos brancos do Térreo e no do Subsolo (`vaos_brancos`). Cada soleira vai da ponta de uma parede à da outra, na espessura exata da parede do PDF, nítida, em Bege Bahia com as faces em cinza fino; batentes e folhas por cima.
 - **"PRECISO QUE OS BOXES DOS BANHOS ONDE TEM PISO MARROM GRANITO EM CINZA CLARO. TEM QUE ESTAR VISÍVEL":** no BH serviço e no BH motorista, o vidro do box sai como faixa cinza-clara contínua, de parede a parede (etapa `boxes`); antes, os traços do PDF sobre o granito davam uma linha escura que quase sumia.
+- **"CORRIJA A CORTINA QUE ESTÁ DUPLICADA"** (sala íntima):
+  - **O problema:** as cortinas eram desenhadas na etapa `biblioteca`, antes das esquadrias. A limpeza das esquadrias espelha o piso de junto do vidro sobre a faixa dele e levava a cortina junto: duas fileiras de ondas na sala íntima e ondas cruzadas na suíte 1, na master e na suíte 3. As ondinhas do PDF que marcam o pano também vinham riscadas de leve no piso, e o espelho as copiava para junto do vidro.
+  - **Agora:** antes das esquadrias, as ondinhas do PDF saem do piso (`ondas_fora`); a cortina passou para a etapa `cortinas`, logo depois das esquadrias. Cada janela tem um pano só, sobre o piso limpo, nas 10 cortinas do Térreo.
+  - **Antes e depois:** enviado na conversa (`AD8_cortinas.jpg`, da sala íntima, das suítes 1 e 2, da master e da suíte 3).
 
 ## Casas A a D · Barlavento nas piscinas
 

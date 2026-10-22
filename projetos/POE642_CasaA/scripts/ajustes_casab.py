@@ -856,6 +856,14 @@ def vidros_terreo(out):
 CORTINAS_B = {"traco": 0.85, "onda": (4.0, 8.0, 3.5), "vidro_x": 1500.0}
 
 
+def onda_cortina_b(d):
+    """Uma ondinha do pano de cortina no PDF (ARQ_LOUÇAS E METAIS, 0,85 pt, curva de ~2 x 6 pt)."""
+    q, r = CORTINAS_B, d["rect"]
+    return d.get("layer") == "ARQ_LOUÇAS E METAIS" and d["type"] == "s" and abs((d.get("width") or 0) - q["traco"]) < 0.05 \
+        and any(it[0] == "c" for it in d["items"]) and q["onda"][0] < max(r.width, r.height) < q["onda"][1] \
+        and min(r.width, r.height) < q["onda"][2]
+
+
 def trechos_cortina_b(chave):
     import pymupdf
     q = CORTINAS_B
@@ -863,9 +871,7 @@ def trechos_cortina_b(chave):
     seg = []
     for d in pg.get_drawings():
         r = d["rect"]
-        if d.get("layer") == "ARQ_LOUÇAS E METAIS" and d["type"] == "s" and abs((d.get("width") or 0) - q["traco"]) < 0.05 \
-                and any(it[0] == "c" for it in d["items"]) and q["onda"][0] < max(r.width, r.height) < q["onda"][1] \
-                and min(r.width, r.height) < q["onda"][2]:
+        if onda_cortina_b(d):
             seg.append((r.height > r.width, pymupdf.Rect(r)))
     grupos = []
     for v, r in seg:

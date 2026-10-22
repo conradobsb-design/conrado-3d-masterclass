@@ -719,13 +719,14 @@ Pedido do usuário (22/10/26): "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGAST
   - `vegetacao`: as plantas da biblioteca nos lugares do gramado;
   - `bancadas`;
   - `pecas`: os móveis, os tapetes e as louças pelo desenho do PDF;
-  - `biblioteca`: guarda-roupas, camas, cortinas, cooktops, banquetas, inox, adega e elevador, pelas rotinas dos ajustes dentro de `em_quadro`, que as faz desenhar no quadro;
+  - `biblioteca`: guarda-roupas, camas, cooktops, banquetas, inox, adega e elevador, pelas rotinas dos ajustes dentro de `em_quadro`, que as faz desenhar no quadro;
   - `carros`;
   - `deck`: o banco em L, em bronze fosco (`BANCO_DECK`), e o chuveiro;
   - `boxes`: nos banhos de granito, o vidro do box em faixa cinza-clara (`boxes_granito`, `vidros_box`, `BOXES_F`);
   - `paredes`: as pretas, e os pilares redondos em cinza;
   - `soleiras`: os vãos brancos de porta do PDF (`ajustes_casab.vaos_brancos`), cada um ajustado às faces e às pontas das paredes do PDF (`_soleira_no_pdf`, em 8 x), em Bege Bahia nítido com as faces em cinza fino (`SOLEIRAS_F`); também no Subsolo;
-  - `esquadrias`;
+  - `esquadrias`: antes, as ondinhas do PDF que marcam as cortinas saem do piso (`ondas_fora`, `ONDAS_F`): perto do traço do PDF (`ajustes_casab.onda_cortina_b`), o px que destoa da mediana do piso da mesma linha toma o valor dela (a parede preta fica). Sem isso, o espelho das esquadrias levava as ondas para junto do vidro;
+  - `cortinas`: as de linho da biblioteca (`ajustes_casab.cortinas_b`), depois das esquadrias: desenhadas antes, o espelho das esquadrias as copiava e saíam duplicadas;
   - `escadas`: as duas escadas (os degraus do PDF em Bege Bahia, `degraus_bege`, com as linhas da R14) e as projeções;
   - `cobertura`;
   - `rotulos`.

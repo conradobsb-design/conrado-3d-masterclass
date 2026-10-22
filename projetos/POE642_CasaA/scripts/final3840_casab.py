@@ -15,8 +15,8 @@ direto no quadro da prancha, pelo PDF (que é vetor) e pela base chapada da lege
 - os móveis, os tapetes e as louças, pelo próprio desenho do PDF, na ordem de pintura dele: cada peça no contorno exato,
   com a cor do material, volume suave, o traço fino e a sombra curta (luz do alto à direita);
 - as bancadas em pedra tom areia (a foto do Bege Bahia da biblioteca) com as cubas brancas; as peças da biblioteca
-  (camas, guarda-roupas, carros, cooktops, banquetas, inox, cortinas, adega, elevador); as paredes, os pilares, as
-  esquadrias, as escadas e as projeções;
+  (camas, guarda-roupas, carros, cooktops, banquetas, inox, adega, elevador); as paredes, os pilares, as esquadrias, as
+  cortinas (depois das esquadrias), as escadas e as projeções;
 - por fim, os rótulos, cada um no lugar livre mais perto do seu, sem tocar objeto nenhum.
 """
 import json
@@ -788,13 +788,67 @@ def banquetas(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# As cortinas vêm depois das esquadrias (usuário, 22/10/26: "CORRIJA A CORTINA QUE ESTÁ DUPLICADA"): a limpeza das
+# esquadrias espelha o piso de junto do vidro sobre a faixa dele, e a cortina, desenhada antes, ia junto; saía duplicada
+# (duas fileiras de ondas à esquerda da sala íntima e as ondas cruzadas à direita). Agora o espelho só leva o piso, e a
+# `cortinas_b` limpa os tracinhos da cortina antiga do render junto ao vidro antes de desenhar a da biblioteca.
+# As ondinhas do PDF que marcam o pano também vêm riscadas de leve no piso desde a base (a luz do render as trazia); o
+# espelho das esquadrias as levava para junto do vidro, entre o trilho e a cortina nova. Antes das esquadrias elas
+# saem (`ondas_fora`): perto do traço (pelos caminhos do PDF, com folga), o px que destoa da mediana do piso da mesma
+# linha (as réguas correm na horizontal nesses ambientes; a onda é minoria na janela) toma o valor dela. Piso é o
+# material da base chapada em volta do traço (os pisos têm cor; vidro, parede e móvel são cinza ou branco); a parede
+# preta onde o pano encosta fica (os pontinhos escuros da onda são soltos e saem).
+ONDAS_F = {"folga_px": 2, "faixa_px": 8, "janela_px": 12, "tol": 6, "cromia": 20, "destoa": 6, "parede": 50}
+
+
+def ondas_fora(Q, img):
+    q = ONDAS_F
+    m = np.zeros((Q.H, Q.W), np.uint8)
+    for d in Q.desenhos:
+        if B.onda_cortina_b(d):
+            for c in Q.caminhos(d):
+                cv2.polylines(m, [np.int32(np.round(c * 8))], False, 255, 1, cv2.LINE_8, shift=3)
+    m = cv2.dilate(m, np.ones((2 * q["folga_px"] + 1,) * 2, np.uint8)) > 0
+    with em_quadro(Q):
+        trechos = B.trechos_cortina_b(Q.chave)
+    out = img.copy()
+    f, j = q["faixa_px"], q["janela_px"]
+    n = 0
+    for o, _, ex, e0, e1 in trechos:
+        a0, a1, c0, c1 = int(e0) - f, int(np.ceil(e1)) + f + 1, int(ex) - f, int(np.ceil(ex)) + f + 1
+        y0, y1, x0, x1 = (a0, a1, c0 - j, c1 + j) if o == "v" else (c0, c1, a0 - j, a1 + j)
+        ch = Q.chapada[y0:y1, x0:x1].astype(np.int32)
+        cor = (ch.max(axis=2) - ch.min(axis=2)) > q["cromia"]
+        cores, conta = np.unique(ch[cor], axis=0, return_counts=True)
+        piso = np.abs(ch - cores[conta.argmax()]).max(axis=2) <= q["tol"]
+        reg = img[y0:y1, x0:x1].astype(np.int32)
+        um = np.ones((3, 3), np.uint8)
+        parede = cv2.dilate(cv2.morphologyEx((reg.mean(axis=2) < q["parede"]).astype(np.uint8), cv2.MORPH_OPEN, um), um)
+        mk = m[y0:y1, x0:x1] & cv2.dilate(piso.astype(np.uint8), um).astype(bool) & ~parede.astype(bool)
+        mk[:, :j], mk[:, -j:] = False, False
+        for yy, xx in zip(*np.nonzero(mk)):
+            v = piso[yy, xx - j:xx + j + 1]
+            if v.sum() >= 5:
+                ref = np.median(reg[yy, xx - j:xx + j + 1][v], axis=0)
+                if np.abs(reg[yy, xx] - ref).max() > q["destoa"]:
+                    out[y0 + yy, x0 + xx] = ref
+                    n += 1
+    print(f"    ondas do PDF: {n} px das {len(trechos)} cortinas voltam a ser piso antes do espelho das esquadrias")
+    return out
+
+
+def cortinas(Q, img):
+    with em_quadro(Q):
+        out = np.ascontiguousarray(B.cortinas_b(np.ascontiguousarray(img.copy()), Q.chave))
+    return out
+
+
 def biblioteca(Q, img):
     out = np.ascontiguousarray(img.copy())
     with em_quadro(Q):
         if Q.chave == "Terreo":
             out = B.guarda_roupas_terreo(out)
             out = B.camas_b(out, "Terreo", B.CAMAS_B)
-            out = np.ascontiguousarray(B.cortinas_b(np.ascontiguousarray(out), "Terreo"))
             out = B.cooktops_b(out)
             out = banquetas(Q, out)
             out = B.inox_terreo(out)
@@ -1353,7 +1407,8 @@ def passos_terreo(Q, ini, M, t):
         ("boxes", lambda im: boxes_granito(Q, im)),
         ("paredes", lambda im: paredes(Q, im)),
         ("soleiras", lambda im: soleiras(Q, im)),
-        ("esquadrias", lambda im: B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m)),
+        ("esquadrias", lambda im: B.esquadrias_final(ondas_fora(Q, im), chave, Q.pg, Q.p2q, Q.px_m)),
+        ("cortinas", lambda im: cortinas(Q, im)),
         ("escadas", lambda im: escadas_projecoes(Q, im)),
         ("cobertura", lambda im: B.cobertura_final(im, Q.pg, Q.p2q)),
         ("rotulos", lambda im: rotulos(Q, im, B.rotulos_casab(Q.pg, Q.p2q2000), Q.q["ajustes"],

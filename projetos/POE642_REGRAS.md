@@ -166,6 +166,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **Tapetes:** só onde o PDF tem, no contorno do PDF. Área de estar não vira jantar. Arranjos e vasos só onde o PDF indica.
 - **Cortinas:** em linho off-white, traço fino. O bloco é o de `_blocos/blocos.py` (`cortina`), aprovado em 20/10.
   - **[20/10] Trilho de fora a fora:** sempre de parede a parede. Só o pano muda: a meia distância (como no PDF), todo recolhido ou todo fechado. Usuário: "trilhos da cortina tem que ser de fora a fora. somente a cortina pode estar a meia distancia, totalmente recolhida ou totalmente fechada".
+  - **[22/10] Um pano só por janela** (usuário, na Casa B: "corrija a cortina que está duplicada"): a cortina entra depois das esquadrias. A limpeza das esquadrias espelha o piso de junto do vidro e copiava a cortina desenhada antes dela. Antes do espelho, as ondinhas do PDF que marcam o pano saem do piso, para não voltarem em segunda fileira.
 
 ## 9. Estrutura, projeções e brises
 
