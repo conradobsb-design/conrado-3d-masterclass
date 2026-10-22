@@ -678,7 +678,24 @@ Os itens dos mapas do pente fino da Casa B (25 no Térreo, 12 no Subsolo), um po
 A ordem está em `ITENS`. Cada item grava um antes/depois (`renders/POE642_CasaB_PH_<Pavimento>_<item>_antes_depois.jpg`), e as etapas ficam em cache (`$TMPDIR/poe642_casab_etapas`). `--final` monta a imagem de 3840 px no quadro comum:
 - no Térreo, com a pedra portuguesa redesenhada pela máscara;
 - no Subsolo, com o que não mudou vindo da imagem de 6905 px e o terreno hachurado a partir do Térreo final;
+- nos dois, refeitos na resolução da prancha (desde 22/10/26), porque o ajustado em 2000 px e ampliado engrossa:
+  - o travertino da biblioteca (`travertino_final` → `trocar_travertino`), na máscara da base chapada menos os objetos do PDF e as escadas (no Subsolo, só na pegada);
+  - as esquadrias (`esquadrias_final` → `esquadrias_pdf`, com a faixa de limpeza na escala);
+- só no Térreo:
+  - as bordas entre a grama e os pisos (`bordas_grama`: o contorno da legenda, liso, com a grama de um lado e o piso do outro);
+  - a cobertura da entrada (`cobertura_final`: o tracejado da ARQ_PAREDE, a pérgola entre o jardim do hall e a garagem);
 - nos dois, com os rótulos, os desvios da R7 em `PAVIMENTOS_B[...]["ajustes"]`.
+
+Pedidos de 22/10/26, além dos itens do mapa:
+- **Térreo:**
+  - guarda-roupas com cabides da R11 (`guarda_roupas_terreo`), no lugar da marcenaria;
+  - riscos do motor nos pisos fora (`riscos_terreo`: escuros finos ou pontuais, longe das linhas e dos objetos do PDF, por inpaint).
+- **Nos dois pavimentos:** pedra fina de tom sóbrio nas ilhas e bancadas (`pedra_bancadas`: `carrara_bancadas` com `fontes_procedurais.pedra_fina`).
+- **Subsolo:**
+  - o deck em L e a escada de 9 degraus vão para a hachura (não são do Subsolo);
+  - o chuveiro na ducha (`chuveiro_ducha`);
+  - as bancadas com o contorno fino do PDF (`bancadas_subsolo`);
+  - os riscos fora (`riscos_subsolo`).
 
 ```bash
 python3 ajustes_casab.py Terreo                 # todos os itens (ou --ate <item>, --de <item>)

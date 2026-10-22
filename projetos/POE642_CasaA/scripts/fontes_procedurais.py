@@ -259,3 +259,37 @@ def quartzito_carrara(alto, largo, px_por_m, angulo=0.0, ss=4, semente=642):
         tinta = 1 - (1 - tinta) * (1 - np.clip(v, 0, 1))
     img = img * (1 - tinta[..., None]) + np.float32(q["veio"]) * tinta[..., None]
     return cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
+
+
+# Pedido do usuário (22/10/26), nas bancadas da Casa B: "ESSE CARRARA NÃO ESTÁ BOM. VAMOS UTILIZAR UMA PEDRA FINA E TOM
+# SÓBRIO". Um quartzo de grão fino em cinza quente (fendi), sem veios: o tom de fundo com uma nuvem bem leve (30 cm) e o
+# grão de 1 a 3 mm, mais escuro e mais claro, que na escala da prancha vira só uma textura miúda.
+PEDRA_FINA = {"base": (164, 170, 177),                                 # BGR (RGB 177, 170, 164)
+              "nuvem": (0.30, 0.008), "mancha": (0.06, 0.005),         # (escala em m, amplitude)
+              "grao": [(0.0015, 0.04, (128, 132, 137)), (0.0025, 0.02, (198, 202, 206)), (0.003, 0.008, (104, 108, 112))],
+              #         (raio m, fração da área, cor BGR)
+              "forca_grao": (0.25, 0.45), "desfoque_px": 0.6}   # opacidade do grão; desfoque final (px na escala)
+
+
+def pedra_fina(alto, largo, px_por_m, angulo=0.0, ss=4, semente=642):
+    """A pedra fina de tom sóbrio, BGR float32 (alto x largo), na escala px_por_m (sem direção: `angulo` não muda)."""
+    q = PEDRA_FINA
+    rng = np.random.default_rng(semente)
+    H, W = alto * ss, largo * ss
+    k = px_por_m * ss
+
+    def campo(esc_m):
+        s = max(0.5, esc_m * k)
+        return cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), s) * (2 * np.sqrt(np.pi) * s)
+    img = np.empty((H, W, 3), np.float32)
+    img[:] = np.float32(q["base"])
+    img *= (1 + q["nuvem"][1] * campo(q["nuvem"][0]) + q["mancha"][1] * campo(q["mancha"][0]))[..., None]
+    for raio, frac, cor in q["grao"]:
+        r = max(0.6, raio * k)
+        n = int(frac * H * W / (np.pi * r * r))
+        m = np.zeros((H, W), np.float32)
+        m[rng.integers(0, H, n), rng.integers(0, W, n)] = 1.0
+        m = np.clip(cv2.GaussianBlur(m, (0, 0), r) * (2 * np.pi * r * r), 0, 1) * rng.uniform(*q["forca_grao"])
+        img = img * (1 - m[..., None]) + np.float32(cor) * m[..., None]
+    img = cv2.resize(img, (largo, alto), interpolation=cv2.INTER_AREA)
+    return cv2.GaussianBlur(img, (0, 0), q["desfoque_px"]) if q["desfoque_px"] else img

@@ -69,6 +69,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 
 - **Bancadas:** em quartzo claro com desenho de pedra (gourmet e cozinha), nunca madeira.
   - **[21/10] Casa A: ilhas e bancadas em quartzito Carrara** (usuário: "use o quartzito Carrara nas ilhas e bancadas"): branco levemente acinzentado com veios cinza esfumados, na escala, em todas as peças da ARQ_BANCADAS (gourmet, cozinha, lavabo, lavatório, banhos), com cubas, torneiras, inox e cooktops por cima.
+  - **[22/10] Casa B: pedra fina de tom sóbrio, não Carrara** (usuário: "esse Carrara não está bom. Vamos utilizar uma pedra fina e tom sóbrio"): quartzo de grão miúdo em cinza quente (RGB ~170, 164, 158), sem veios, em todas as ilhas e bancadas da ARQ_BANCADAS do Térreo e do Subsolo, com cubas, torneiras, inox e cooktops por cima (`fontes_procedurais.pedra_fina`).
 - **Bancos de sauna:** na pedra do próprio piso, com linha fina e sombra discreta entre os níveis.
 
 ## 4. Portas, janelas, vidros e soleiras
@@ -158,6 +159,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Pilares em preto, como as paredes, na geometria do PDF (EST - Pilar).
   - Projeções (DOC_LINHAS E PROJEÇÕES, cobertura, claraboia, shaft com X, áreas descobertas) em tracejado bem visível.
   - Exemplo do usuário: na Casa A faltaram as projeções dos brises.
+  - **[22/10] Procurar a cobertura também fora da DOC_LINHAS** (usuário, na Casa B: "e onde estão as projeções de cobertura?"): no PDF da Casa B, a cobertura da entrada (a pérgola entre o jardim do hall e a garagem) é um tracejado da ARQ_PAREDE (traços de 5,7 pt). Ela entra na final, nos traços do próprio PDF, em cinza escuro e fino.
 - **[19/10] R9. Brises com as projeções de cobertura:** junto dos brises, o tracejado da projeção da cobertura (beiral ou laje), na posição do PDF e por cima. Escolha do usuário em 19/10: "tracejado da cobertura".
 - **Brises:** na cor pedida para cada fachada:
   - Casa E: madeira no Térreo, bronze no 1º Pavimento;
@@ -277,5 +279,6 @@ O "x" marca o que cada regra exige em cada prancha já entregue.
 
 - **Bege Bahia:** segue a foto de referência na escala: desenho em nuvens visível, no contraste dela, e tom quente (RGB ~230, 211, 186). Substitui o "uniforme, quase liso, sem manchas".
 - **Travertino:** quando a foto da biblioteca perde os veios na escala do render, usa-se o travertino aprovado da própria casa (o do Térreo), na mesma escala, com os veios visíveis.
+  - **[22/10] Casa B:** o travertino é o da biblioteca (`_texturas/travertino.jpg`, tecido sem repetição), aplicado na final de 3840 px (59,7 px/m), onde os veios aparecem. Não pode haver riscos, emendas nem juntas: os traços verticais e as manchas do motor saem junto com o piso antigo (usuário: "melhore o aspecto do travertino. Remova os riscos").
 - **Escadas:** o sentido (de onde sobe) é o que o usuário define, mesmo quando o PDF indica outro. O triângulo fica no 1º degrau de quem sobe, apontando para a subida. A parte viva fica desse lado; a parte esmaecida e tracejada, depois do corte.
 - **Vidros em folha contínua:** sem montantes nem marcas no meio; só a folha com os perfis finos dos dois lados (os pontos escuros davam a impressão de várias folhas).

@@ -4145,8 +4145,10 @@ CARRARA_BANCADAS = {"camada": "ARQ_BANCADAS", "objetos": "ARQ_LOUÇAS E METAIS",
                     "luz": (0.72, 1.06), "semente": 700}
 
 
-def carrara_bancadas(out, pavimento):
+def carrara_bancadas(out, pavimento, pedra=None, nome="quartzito Carrara"):
+    """pedra: a função da textura (alto, largo, px_por_m, angulo, semente=); por padrão, o quartzito Carrara."""
     import fontes_procedurais as F
+    textura_pedra = pedra or F.quartzito_carrara
     q = CARRARA_BANCADAS
     pg, p2r = pdf_pavimento(pavimento)
     (a, b), (c, d) = p2r(0, 0), p2r(56.69, 0)
@@ -4228,12 +4230,12 @@ def carrara_bancadas(out, pavimento):
         luz = cv2.GaussianBlur(L[reg] * m, (0, 0), s) / np.maximum(cv2.GaussianBlur(m, (0, 0), s), 1e-4)
         luz = np.clip(luz / ref[0], *q["luz"])
         ang = 0.0 if cw >= ch else 90.0
-        tex = F.quartzito_carrara(y1 - y0, x1 - x0, px_m, ang, semente=q["semente"] + i)
+        tex = textura_pedra(y1 - y0, x1 - x0, px_m, ang, semente=q["semente"] + i)
         novo = tex * luz[..., None]
         res[reg] = res[reg] * (1 - pedra[..., None]) + novo * pedra[..., None]
         pecas += 1
     out[:] = np.clip(np.round(res), 0, 255).astype(np.uint8)
-    print(f"    Carrara: quartzito Carrara em {pecas} ilhas e bancadas (ARQ_BANCADAS)")
+    print(f"    {nome}: em {pecas} ilhas e bancadas (ARQ_BANCADAS)")
     return out
 
 

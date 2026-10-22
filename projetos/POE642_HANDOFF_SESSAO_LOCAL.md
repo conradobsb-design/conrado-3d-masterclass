@@ -1971,9 +1971,9 @@ Pedido do usuário: "PERCORRA TODOS OS AJUSTES DE TODAS AS PLANTAS DA CASA B, SE
 - **Térreo 8:** o "SUÍTE 2 · 15,71 m²" solto não entra; o banho da suíte master vira "BANHO MASTER · 13,7 m²".
 - **Térreo 13:** são portões, em alumínio.
 - **Térreo 19:** o elevador recebe a cabine do Subsolo.
-- **Térreo 24:** entram os quatro pedidos da Casa A (roupa de cama, Carrara, boxes contínuos e banquetas de linho).
+- **Térreo 24:** entram os pedidos da Casa A (roupa de cama, boxes contínuos e banquetas de linho); o Carrara deu lugar, em 22/10, à pedra fina de tom sóbrio.
 - **Térreo 25:** a peça branca é uma floreira (caixa de paredes finas de 9 cm, com 40 cm de miolo).
-- **Subsolo 1:** em cor cheia, a ducha, o deck em L e as duas escadas; a pedra grande (com o canto que passa sobre o deck em L) e as pedras da esquerda vão para a hachura.
+- **Subsolo 1:** em cor cheia, a ducha e a escada de 6 degraus; o deck em L, a escada de 9 (desde 22/10, a pedido), a pedra grande e as pedras da esquerda vão para a hachura.
 - **Subsolo 12:** os pilares não são desenhados no Subsolo.
 
 **Térreo, na ordem de execução:**
@@ -1997,10 +1997,10 @@ Pedido do usuário: "PERCORRA TODOS OS AJUSTES DE TODAS AS PLANTAS DA CASA B, SE
   - a de 9 degraus desce da varanda para o deck em L, com o triângulo à direita;
   - as setas do motor saem por mediana.
 - **11:** os 2 pilares da EST_PILAR em preto.
-- **14:** 10 trechos de armário (closet master em U; suítes 1, 2 e 3) em marcenaria areia, sem a diagonal.
+- **14:** 10 trechos de guarda-roupa com cabides (R11; closet master em U; suítes 1, 2 e 3), sem a diagonal (em 21/10 eram marcenaria areia; trocado a pedido em 22/10).
 - **15:** três quadrados em inox na cozinha e o refrigerador do gourmet.
 - **18:** a bancada da sala íntima com a cuba.
-- **24, Carrara:** 18 ilhas e bancadas em quartzito Carrara.
+- **24, bancadas:** 18 ilhas e bancadas na pedra fina de tom sóbrio (em 21/10 eram quartzito Carrara; trocado a pedido em 22/10).
 - **16:** cooktops de 5 bocas.
 - **17:** a adega com a prateleira, 3 nichos e 36 garrafas.
 - **19:** o elevador com a cabine.
@@ -2056,6 +2056,28 @@ python3 rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --no-qua
     --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final_rotulos.png
 python3 pdf_entrega.py --config ../../POE642_CasaB/config_bases.json
 ```
+
+### Casa B · pedidos de 22/10/26, depois do pente fino
+
+Pedidos do usuário vistos nas pranchas, todos feitos sem IA no `ajustes_casab.py`:
+- **"E OS GUARDA-ROUPAS?"** (Térreo 14, R11): os 10 trechos do closet master e das suítes 1, 2 e 3 são guarda-roupas com cabides (`elementos.guarda_roupa`, com as portas do lado do quarto), não marcenaria. A marcenaria areia fica para os armários de cozinha e serviço.
+- **"MELHORE O ASPECTO DO TRAVERTINO" / "REMOVA OS RISCOS":**
+  - o travertino é refeito na final de 3840 px (`travertino_final` → `trocar_travertino`), com a foto da biblioteca (`_texturas/travertino.jpg`, tecida sem repetição) na luz larga do lugar (3 m);
+  - a máscara é a da base chapada, menos os objetos e as escadas do PDF e o que foge da luz local (móveis, sombras, cortinas);
+  - as emendas, os traços verticais e as manchas do motor saem com o piso antigo;
+  - nos outros pisos, `riscos_terreo` e `riscos_subsolo` tiram por inpaint os riscos escuros finos ou pontuais, longe das linhas e dos objetos do PDF.
+- **"PORTAS, JANELAS E VIDRO MAIS FINO E ELEGANTES":** as esquadrias são redesenhadas na final de 3840 px (`esquadrias_final`), com a faixa de limpeza na escala; antes vinham de 2000 px e engrossavam na ampliação.
+- **"MELHORE ESSAS BORDAS":** as bordas entre a grama e os pisos do Térreo são refeitas na final (`bordas_grama`). O contorno vem da legenda (verde #6E9150), liso; numa faixa de 4 px, a grama que invadia o piso e o claro que sobrava na grama viram o material do seu lado, com a transição de 1 px.
+- **"E ONDE ESTÃO AS PROJEÇÕES DE COBERTURA?":**
+  - a cobertura da entrada (a pérgola entre o jardim de 4,62 m², o hall e a garagem: o contorno e as seis vigas) está no PDF da Casa B como tracejado da ARQ_PAREDE (traços de 5,7 pt), e não na DOC_LINHAS E PROJEÇÕES;
+  - entra na final (`cobertura_final`), nos traços do próprio PDF, em cinza escuro e fino, por cima de tudo menos das paredes.
+- **"ESSE CARRARA NÃO ESTÁ BOM. VAMOS UTILIZAR UMA PEDRA FINA E TOM SÓBRIO":** as 18 ilhas e bancadas do Térreo e as do Subsolo passam à pedra fina (`fontes_procedurais.pedra_fina`): quartzo de grão miúdo em cinza quente (RGB ~177, 170, 164), sem veios. Entra pelo mesmo `carrara_bancadas`, que ganhou o parâmetro `pedra`; a Casa A continua em Carrara.
+- **Subsolo:**
+  - "essa parte não faz parte do Subsolo": o deck em L e a escada de 9 degraus saem da pegada e vão para a hachura (ficam a ducha e a escada de 6);
+  - "cadê o chuveiro?": o chuveiro na ducha, na parede da sauna (o PDF não tem chuveiro ali);
+  - "esse contorno preto da bancada está grosseiro": o contorno grosso do motor sai e entra o contorno fino do PDF;
+  - "diminua a fonte para caber o rótulo": "CIRCULAÇÃO" em corpo 0,8.
+- **Térreo, "escrito mais abaixo no piso, não pode estar no tapete":** "SALA ÍNTIMA" desce para o vinílico, fora do tapete.
 
 ## Casas A a D · Barlavento nas piscinas
 

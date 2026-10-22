@@ -55,6 +55,7 @@ PAVIMENTOS_B = {
                            ("GARAGEM", (1332.2, 771.9), (0.0, 113.0)),                      # do carro do meio
                            ("BANHO 2", (1408.9, 237.9), (-6.0, 8.0)),                       # da bacia
                            ("QUARTO MOTORISTA", (1504.4, 764.4), (-8.0, 2.0)),              # da luminária
+                           ("SALA ÍNTIMA", (861.4, 263.5), (-9.0, 77.0)),                   # do tapete para o piso
                            ("JARDIM DE INVERNO", (1110.2, 429.8), (0.0, 0.0), {"cor": (255, 255, 255)}),
                            ("JARDIM", (1264.6, 642.3), (0.0, 0.0), {"cor": (255, 255, 255)})]},
     "Subsolo": {"render": "renders/POE642_CasaB_PH_Subsolo_ajustes.png",
@@ -63,7 +64,8 @@ PAVIMENTOS_B = {
                 "pdf": "642 - SUBSOLO - CASA B.pdf",
                 "sem_tela": "bases/POE642_CasaB_BASE_Subsolo_v3_texturas.png",
                 "chapada": "bases/POE642_CasaB_BASE_Subsolo_v2_16x9.png",
-                "ajustes": [("BH SERVIÇO", (741.0, 216.0), (-4.0, -15.0), {"corpo": 1.0, "quebra": ["BH", "SERVIÇO"]})]},   # da bacia (item 9)
+                "ajustes": [("BH SERVIÇO", (741.0, 216.0), (-4.0, -15.0), {"corpo": 1.0, "quebra": ["BH", "SERVIÇO"]}),
+                            ("CIRCULAÇÃO", (771.0, 181.5), (0.0, 0.0), {"corpo": 0.8})]},   # cabe na de 1,16 m²   # da bacia (item 9)
 }
 # quadro comum de 2000 px -> imagem de partida (SIFT da base 16:9 contra a imagem, como o rodape_entrega): o Térreo é o
 # render de 2000 x 1116, deslocado ~4,5 px; o Subsolo é o próprio quadro
@@ -512,14 +514,39 @@ def granito_terreo(out):
 # ficar na horizontal), na luz do lugar (`retexturizar`, com a força e o raio de lá). O piso é a mancha do travertino da
 # legenda (#DCD9CA), menos os objetos do PDF (paredes, louças, bancadas, móveis, com 2 px); o que foge da luz do lugar
 # (tapetes, móveis e sombras do render) fica.
-TRAV_B = {"cor_base": (202, 217, 220), "tol": 6, "area_min": 1000, "fechar": 3, "folga": 2, "forca": 1.4,
-          "sig_m": 1.0, "borda": {"sig": 1.5, "peso": 0.15}}
+TRAV_B = {"cor_base": (202, 217, 220), "tol": 6, "area_min": 1000, "fechar": 3, "folga": 2, "forca": 1.6,
+          "sig_m": 3.0, "sig_obj_m": 0.25, "foge": (22, 26), "obj_min_px": 40, "borda": {"sig": 1.5, "peso": 0.15}, "area_min_m2": 0.2}
+
+
+def trocar_travertino(img, trav, px_m, livre=None):
+    """O travertino da biblioteca (`_texturas`: a placa de 1,20 m com os veios horizontais e os poros, o tom da foto) na
+    máscara `trav`, na escala px_m, com a luz larga do lugar (TRAV_B["sig_m"]: as manchas e emendas de menos de ~3 m
+    saem) e o contraste dos veios em TRAV_B["forca"]. Ficam só os objetos que fogem bem do piso (móveis, tapetes,
+    sombras), em manchas: os riscos finos das emendas do desenho antigo entram no piso novo."""
+    from texturas_escala import retexturizar, nconv
+    q = TRAV_B
+    im = img.astype(np.float32)
+    L = nconv(im, trav.astype(np.float32), q["sig_obj_m"] * px_m)
+    foge = ((L - im).max(axis=2) > q["foge"][0]) | ((im - L).max(axis=2) > q["foge"][1])
+    foge = cv2.morphologyEx(foge.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(foge, 8)
+    obj = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["obj_min_px"] * (px_m / 31.1) ** 2])
+    if livre is not None:              # junto à grama, o halo e a borda borrada do motor não são objetos
+        obj &= ~livre
+    obj = cv2.dilate(obj.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    if livre is not None:
+        obj &= ~livre
+    piso = trav & ~obj
+    out, npx = retexturizar(img, piso, "travertino", px_m, forca=q["forca"], sig_m=q["sig_m"], fugir=False)
+    b = q["borda"]
+    novo = (out != img).any(axis=2) & piso
+    resto = piso & ~novo & (cv2.GaussianBlur(novo.astype(np.float32), (0, 0), b["sig"]) >= b["peso"])
+    out[resto] = np.clip(nconv(out.astype(np.float32), novo.astype(np.float32), b["sig"])[resto], 0, 255).astype(np.uint8)
+    return out, npx
 
 
 def travertino_b(out, chave):
-    from retoque_bege_bahia_terreo import quilting
-    from texturas_escala import retexturizar, nconv
-    q, t = TRAV_B, AJ.TRAV_SUB
+    q = TRAV_B
     H, W = out.shape[:2]
     bb = AJ.base_terreo((H, W), chave).astype(np.int32)
     trav = (np.abs(bb - np.array(q["cor_base"])).max(axis=2) <= q["tol"]).astype(np.uint8)
@@ -527,23 +554,11 @@ def travertino_b(out, chave):
     m = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_min"]])
     k = q["fechar"]
     m = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((k, k), np.uint8)).astype(bool)
-    m &= ~mascara_pdf(chave, (H, W), folga=q["folga"])
-    fonte = cv2.imread(str(t["fonte"])).astype(np.float32)
-    fontes = [fonte[y0:y1, x0:x1] for x0, y0, x1, y1 in t["trechos"]]
-    fontes += [f[:, ::-1] for f in fontes] + [f[::-1] for f in fontes]
-
-    def tecido(h, w):
-        return quilting(fontes, h, w, p=t["p"], sobra=t["sobra"], candidatos=t["candidatos"],
-                        rng=np.random.default_rng(t["semente"]))[:h, :w]
+    m &= ~mascara_pdf(chave, (H, W), camadas=OBJETOS_PDF + ("ARQ_ESCADAS E RAMPAS",), folga=q["folga"])
     px_m = px_por_m(chave)
-    antes = out
-    out, npx = retexturizar(out, m, "travertino", px_m, forca=q["forca"], sig_m=q["sig_m"], pronta=tecido, fugir=True)
-    b = q["borda"]
-    novo = (out != antes).any(axis=2) & m
-    resto = m & ~novo & (cv2.GaussianBlur(novo.astype(np.float32), (0, 0), b["sig"]) >= b["peso"])
-    out[resto] = np.clip(nconv(out.astype(np.float32), novo.astype(np.float32), b["sig"])[resto], 0, 255).astype(np.uint8)
-    print(f"    travertino: {npx} px no desenho do travertino aprovado (veio horizontal), a {px_m:.2f} px/m, e "
-          f"{int(resto.sum())} px da borda; ficam os objetos do PDF e o que foge da luz do lugar")
+    out, npx = trocar_travertino(out, m, px_m)
+    print(f"    travertino: {npx} px no travertino da biblioteca (placa de 1,20 m, veios horizontais, o tom da foto), "
+          f"a {px_m:.2f} px/m; ficam os objetos do PDF, as escadas e o que foge bem do piso")
     return out
 
 
@@ -714,27 +729,55 @@ def projecoes_terreo(out):
     return out
 
 
-# Térreo 14 (seção 7): os armários até o teto em marcenaria areia com o veio, sem a diagonal da DOC_LINHAS, com o
-# contorno fino nas faces livres (`ajustes_casaa.armarios_ate_o_teto`, a fonte de marcenaria da Casa D). As peças são os
-# trechos dos armários do PDF (ARQ_LAYOUT HUMANIZAÇÃO), cada um com a sua diagonal: o closet master em U, os armários em
-# L das suítes 1, 2 e 3 e o da suíte 1 junto à circulação. Sem perfil de sombra no piso (o render não fez sombra de móvel
-# baixo neles).
-ARMARIOS_B = dict(AJ.ARMARIOS_A, pisos=[], pecas=[
-    ("closet master, à esquerda", (1059.3, 773.8, 1096.2, 918.3), ["direita"]),
-    ("closet master, embaixo", (1059.3, 918.3, 1317.3, 952.4), ["cima"]),
-    ("closet master, à direita", (1317.3, 773.8, 1351.3, 952.4), ["esquerda"]),
-    ("suíte 1, em pé", (1617.8, 736.9, 1651.8, 807.8), ["direita"]),
-    ("suíte 1, deitado", (1617.8, 807.8, 1807.7, 844.6), ["cima"]),
-    ("suíte 1, junto à circulação", (1816.2, 816.3, 1932.4, 853.1), ["cima"]),
-    ("suíte 2, em pé", (2295.2, 538.5, 2332.1, 739.8), ["esquerda"]),
-    ("suíte 2, em cima", (2332.1, 538.5, 2391.6, 572.5), ["baixo"]),
-    ("suíte 3, em pé", (2108.1, 924.0, 2142.2, 1111.1), ["direita"]),
-    ("suíte 3, embaixo", (2142.2, 1079.9, 2278.2, 1111.1), ["cima"])])
-ARMARIOS_B.pop("bancada", None)
+# Térreo 14 (R11; usuário, 22/10/26: "E OS GUARDA-ROUPAS?"): os guarda-roupas das suítes e do closet master são
+# guarda-roupas com cabides, não armários até o teto (a marcenaria areia da seção 7 fica para os armários de cozinha e
+# serviço). No PDF, cada um é um trecho do ARQ_LAYOUT HUMANIZAÇÃO com a diagonal da DOC_LINHAS (o closet master em U,
+# os das suítes 1, 2 e 3 em L, mais o da suíte 1 junto à circulação). Cada trecho recebe o `_texturas/elementos.
+# guarda_roupa` como no 1º Pavimento da Casa A (`ajustes_casaa.guarda_roupas_1pav`): visto de cima, aberto, no tamanho
+# do PDF, em 4x, com as portas do lado do quarto; os tons aprovados (usuário, 21/10: bege dentro, ocre na borda,
+# `retoque_1pav_casae.GUARDA_ROUPAS`) e o cabideiro de metal de lateral a lateral. A diagonal some por baixo.
+GUARDA_ROUPAS_B = {"ss": 4, "semente": 51, "pecas": [      # (nome, trecho em pt, lado das portas)
+    ("closet master, à esquerda", (1059.3, 773.8, 1096.2, 918.3), "direita"),
+    ("closet master, embaixo", (1059.3, 918.3, 1317.3, 952.4), "cima"),
+    ("closet master, à direita", (1317.3, 773.8, 1351.3, 952.4), "esquerda"),
+    ("suíte 1, em pé", (1617.8, 736.9, 1651.8, 807.8), "direita"),
+    ("suíte 1, deitado", (1617.8, 807.8, 1807.7, 844.6), "cima"),
+    ("suíte 1, junto à circulação", (1816.2, 816.3, 1932.4, 853.1), "cima"),
+    ("suíte 2, em pé", (2295.2, 538.5, 2332.1, 739.8), "esquerda"),
+    ("suíte 2, em cima", (2332.1, 538.5, 2391.6, 572.5), "baixo"),
+    ("suíte 3, em pé", (2108.1, 924.0, 2142.2, 1111.1), "direita"),
+    ("suíte 3, embaixo", (2142.2, 1079.9, 2278.2, 1111.1), "cima")]}
 
 
-def armarios_terreo(out):
-    return AJ.armarios_ate_o_teto(out, "Terreo", ARMARIOS_B)
+def guarda_roupas_terreo(out):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from elementos import guarda_roupa
+    from retoque_1pav_casae import GUARDA_ROUPAS
+    q = GUARDA_ROUPAS_B
+    _, p2r = AJ.pdf_pavimento("Terreo")
+    px_m = px_por_m("Terreo")
+    S = q["ss"]
+    im = out.astype(np.float32)
+    for i, (_, (x0, y0, x1, y1), lado) in enumerate(q["pecas"]):
+        (u0, v0), (u1, v1) = p2r(x0, y0), p2r(x1, y1)
+        comp, prof = max(x1 - x0, y1 - y0) / 56.69, min(x1 - x0, y1 - y0) / 56.69
+        cor, alfa = guarda_roupa(comp, prof, px_m * S, semente=q["semente"] + i, miolo=GUARDA_ROUPAS["miolo"],
+                                 moldura=GUARDA_ROUPAS["moldura"], barra=True)
+        k = {"baixo": 0, "direita": 1, "cima": 2, "esquerda": 3}[lado]
+        cor, alfa = np.ascontiguousarray(np.rot90(cor, k)), np.ascontiguousarray(np.rot90(alfa, k))
+        X0, Y0, X1, Y1 = int(np.floor(u0)), int(np.floor(v0)), int(np.ceil(u1)), int(np.ceil(v1))
+        tw, th = int(round((u1 - u0) * S)), int(round((v1 - v0) * S))
+        ox, oy = int(round((u0 - X0) * S)), int(round((v0 - Y0) * S))
+        grande = np.zeros(((Y1 - Y0) * S, (X1 - X0) * S, 3), np.float32)
+        ag = np.zeros(grande.shape[:2], np.float32)
+        grande[oy:oy + th, ox:ox + tw] = cv2.resize(cor, (tw, th), interpolation=cv2.INTER_AREA)
+        ag[oy:oy + th, ox:ox + tw] = cv2.resize(alfa, (tw, th), interpolation=cv2.INTER_AREA)
+        cr = cv2.resize(grande, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
+        ar = cv2.resize(ag, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)[..., None]
+        im[Y0:Y1, X0:X1] = im[Y0:Y1, X0:X1] * (1 - ar) + cr
+    print(f"    {len(q['pecas'])} trechos de guarda-roupa com cabides (R11): closet master em U e suítes 1, 2 e 3 (bege "
+          f"dentro, ocre na borda, cabideiro de metal), sem a diagonal")
+    return np.clip(im, 0, 255).astype(np.uint8)
 
 
 # Térreo 15 (seção 7): os eletrodomésticos em inox (`ajustes_casaa.inox`, com o inox da Casa D): na cozinha, os três
@@ -754,19 +797,25 @@ def inox_terreo(out):
 # alumínio e o contorno fino). As zonas são os grupos de vidros do PDF (os brancos da ARQ_PAREDE de até 3,2 pt): as
 # janelas da suíte master, das suítes e dos banhos, a adega, o jardim do hall, as portas de correr; fora o elevador (item
 # 19) e os portões (item 13).
-VIDROS_B = {"fino": 3.2, "comp_min": 8.0, "junto": 3.0, "folga": 2.0,
+VIDROS_B = {"fino": 3.2, "comp_min": 8.0, "junto": 3.0, "folga": 2.0, "box": (1.6, 25.0),
             "fora": [(1515.0, 760.0, 1600.0, 860.0), (2090.0, 1430.0, 2335.0, 1465.0), (1895.0, 1700.0, 1990.0, 1835.0)]}
 
 
-def vidros_b(out, chave):
+def esquadrias_pdf(img, pg, p2x, px_m, caixas=False):
+    """O núcleo dos vidros finos (img float32, mudada no lugar): os vidros e folhas do PDF (os brancos da ARQ_PAREDE de até
+    3,2 pt; com `caixas`, também os vidros dos boxes, os brancos finos e compridos da ARQ_LOUÇAS E METAIS) limpos
+    (`esquadria_limpar`) e redesenhados finos por zona (`esquadria_desenhar`). Devolve (vidros, zonas)."""
     import retoque_terreo_casae as T
     sys.path.insert(0, str(RAIZ / "_texturas"))
     from texturas import textura
     import pymupdf
     q = VIDROS_B
-    pg, p2r = AJ.pdf_pavimento(chave)
-    px_m = px_por_m(chave)
-    par = [d for d in pg.get_drawings() if d.get("layer") == "ARQ_PAREDE"]
+    D = pg.get_drawings()
+    par = [d for d in D if d.get("layer") == "ARQ_PAREDE"]
+    if caixas:
+        par += [d for d in D if d.get("layer") == "ARQ_LOUÇAS E METAIS" and d["type"] == "f" and d.get("fill")
+                and min(d["fill"]) >= 0.9 and min(d["rect"].width, d["rect"].height) <= q["box"][0]
+                and max(d["rect"].width, d["rect"].height) >= q["box"][1]]
     finos = [d["rect"] for d in par if d["type"] == "f" and d["fill"] and min(d["fill"]) >= 0.9
              and min(d["rect"].width, d["rect"].height) <= q["fino"] and max(d["rect"].width, d["rect"].height)
              >= q["comp_min"] and not any(pymupdf.Rect(f).intersects(d["rect"]) for f in q["fora"])]
@@ -779,12 +828,18 @@ def vidros_b(out, chave):
             z |= o
             zonas.remove(o)
         zonas.append(z)
-    img = out.astype(np.float32)
     for r in finos:
-        T.esquadria_limpar(img, r, p2r)
+        T.esquadria_limpar(img, r, p2x)
     for z in zonas:
-        T.esquadria_desenhar(img, (z.x0, z.y0, z.x1, z.y1), par, p2r, px_m, textura)
-    print(f"    vidros finos: {len(finos)} vidros e folhas do PDF limpos e redesenhados em {len(zonas)} esquadrias")
+        T.esquadria_desenhar(img, (z.x0, z.y0, z.x1, z.y1), par, p2x, px_m, textura)
+    return len(finos), len(zonas)
+
+
+def vidros_b(out, chave):
+    pg, p2r = AJ.pdf_pavimento(chave)
+    img = out.astype(np.float32)
+    n, z = esquadrias_pdf(img, pg, p2r, px_por_m(chave), caixas=chave == "Subsolo")
+    print(f"    vidros finos: {n} vidros e folhas do PDF limpos e redesenhados em {z} esquadrias")
     return np.clip(img, 0, 255).astype(np.uint8)
 
 
@@ -942,8 +997,17 @@ def boxes_terreo(out):
     return AJ.boxes_continuos(out, "Terreo")
 
 
+# Térreo 24 e Subsolo (usuário, 22/10/26: "NÃO GOSTEI DESSE REVESTIMENTO DAS BANCADAS. ESSE CARRARA NÃO ESTÁ BOM.
+# VAMOS UTILIZAR UMA PEDRA FINA E TOM SÓBRIO"): nas ilhas e bancadas da ARQ_BANCADAS, no lugar do quartzito Carrara da
+# Casa A, a pedra fina de tom sóbrio (`fontes_procedurais.pedra_fina`: quartzo de grão miúdo em cinza quente, sem veios),
+# pelo mesmo `carrara_bancadas` (a luz do lugar, as cubas, o inox e o cooktop por cima).
+def pedra_bancadas(out, chave):
+    import fontes_procedurais as F
+    return AJ.carrara_bancadas(out, chave, pedra=F.pedra_fina, nome="pedra fina de tom sóbrio")
+
+
 def carrara_terreo(out):
-    return AJ.carrara_bancadas(out, "Terreo")
+    return pedra_bancadas(out, "Terreo")
 
 
 # Térreo 24 (pedido de 21/10 na Casa A): as banquetas de linho da biblioteca (`banqueta_linho`, 0,40 m, como na ilha da
@@ -1100,7 +1164,8 @@ def deck_subsolo(out):
     D = pg.get_drawings()
     for d in D:
         if d.get("layer") == "ARQ_CONTRAPISO" and d["type"] in ("f", "fs") and d.get("fill") and \
-                abs(d["fill"][0] - q["cinza"]) <= q["tol"] and d["rect"].x0 >= q["x_min_pt"]:
+                abs(d["fill"][0] - q["cinza"]) <= q["tol"] and d["rect"].x0 >= q["x_min_pt"] and \
+                d["rect"].y1 <= SUBSOLO_B["deck_l_y0_pt"] + 5:              # só a ducha (o deck em L é do Térreo)
             for c in AJ.caminhos_pdf(d, p2r):
                 cv2.fillPoly(m, [np.int32(np.round(c * k))], 255)
     for d in D:
@@ -1112,7 +1177,7 @@ def deck_subsolo(out):
                     cv2.fillPoly(m, [np.int32(np.round(c * k))], 0)
     deck = cv2.resize(m, (W, H), interpolation=cv2.INTER_AREA) > 127
     out, n = deck_madeira(out, deck, px_por_m("Subsolo"), luz_local=False)
-    print(f"    ducha e deck em L: {n} px na madeira da referência, em cor cheia (réguas de ~20 cm)")
+    print(f"    ducha: {n} px na madeira da referência, em cor cheia (réguas de ~20 cm)")
     return out
 
 
@@ -1142,7 +1207,7 @@ def escadas_subsolo(out):
     fonte = cv2.imread(str(t["fonte"])).astype(np.float32)
     fontes = [fonte[y0:y1, x0:x1] for x0, y0, x1, y1 in t["trechos"]]
     fontes += [f[:, ::-1] for f in fontes] + [f[::-1] for f in fontes]
-    for e in ESCADAS_S:
+    for e in ESCADAS_S[:1]:                  # a de 9 degraus é do Térreo (usuário, 22/10/26), fica na hachura
         (a, bb), (c, d) = p2r(e["pdf"][0], e["pdf"][1]), p2r(e["pdf"][2], e["pdf"][3])
         x0, y0, x1, y1 = int(np.floor(a)), int(np.floor(bb)), int(np.ceil(c)), int(np.ceil(d))
         T = quilting(fontes, y1 - y0, x1 - x0, p=t["p"], sobra=t["sobra"], candidatos=t["candidatos"],
@@ -1178,6 +1243,126 @@ def circulacao_subsolo(out):
     out[Y0:Y1, X0:X1] = np.clip(reg * (1 - al[..., None]) + T * al[..., None], 0, 255).astype(np.uint8)
     print(f"    circulação de 1,16 m²: {int((al > 0.5).sum())} px em Bege Bahia")
     return out
+
+
+# Subsolo (usuário, 22/10/26: "CADÊ O CHUVEIRO?"): a ducha sem o chuveiro (nem o PDF nem o render o têm). Entra o
+# chuveiro aprovado das Casas A e E (`retoque_subsolo_casae.chuveiro`: a ducha quadrada de 25 cm, o braço cromado e a
+# canopla), na parede preta da sauna, à direita do deck (a face da parede em x 787,2 pt), a 35 cm dela.
+CHUVEIRO_DUCHA = {"ducha": (760.3, 919.9, 774.5, 934.1), "braco": (767.4, 926.25, 787.2, 927.75),
+                  "canopla": (784.7, 924.0, 787.2, 930.0)}
+
+
+def chuveiro_ducha(out):
+    from retoque_subsolo_casae import chuveiro
+    q = CHUVEIRO_DUCHA
+    _, p2r = AJ.pdf_pavimento("Subsolo")
+    out = chuveiro(out, p2r, q["ducha"], q["braco"], q["canopla"])
+    print("    ducha: o chuveiro na parede da sauna (ducha quadrada, braço cromado e canopla)")
+    return out
+
+
+# Subsolo (usuário, 22/10/26: "ESSE CONTORNO PRETO DA BANCADA DA PIA ESTÁ GROSSEIRO"): as bancadas do PDF (ARQ_BANCADAS,
+# os brancos) na pedra fina de tom sóbrio, como no Térreo (item 24, `pedra_bancadas`), e o contorno grosso do motor fora: o
+# escuro na faixa de 3 px em volta da bancada (fora das paredes do PDF) volta ao piso por inpaint, o da borda de dentro
+# vai ao tom da bancada, e entra o contorno fino (0,5 px, cinza) no retângulo do PDF.
+BANCADA_FINA = {"faixa": 3, "escuro": 120, "contorno": (126, 126, 128), "larg": 0.5}
+
+
+def bancadas_finas(out, chave):
+    from retoque_terreo_casae import linha_aa
+    q = BANCADA_FINA
+    pg, p2r = AJ.pdf_pavimento(chave)
+    H, W = out.shape[:2]
+    out = pedra_bancadas(out, chave)
+    paredes = mascara_pdf(chave, (H, W), camadas=("ARQ_PAREDE",), folga=0)
+    img = out.astype(np.float32)
+    n = 0
+    for d in pg.get_drawings():
+        r = d["rect"]
+        if d.get("layer") != "ARQ_BANCADAS" or d["type"] != "f" or not d.get("fill") or min(d["fill"]) < 0.9 \
+                or min(r.width, r.height) < 8:
+            continue
+        x0, y0, x1, y1 = ret_px(p2r, (r.x0, r.y0, r.x1, r.y1))
+        dentro = ret_aa((H, W), (x0, y0, x1, y1)) > 0.5
+        f = q["faixa"]
+        anel = cv2.dilate(dentro.astype(np.uint8), np.ones((2 * f + 1,) * 2, np.uint8)).astype(bool) & ~dentro & ~paredes
+        borda = dentro & ~cv2.erode(dentro.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+        Y = img.mean(axis=2)
+        escuro_fora = anel & (Y < q["escuro"])
+        if escuro_fora.any():
+            img = cv2.inpaint(np.clip(img, 0, 255).astype(np.uint8),
+                              cv2.dilate(escuro_fora.astype(np.uint8), np.ones((3, 3), np.uint8)) & ~paredes.astype(np.uint8)
+                              & ~dentro.astype(np.uint8), 3, cv2.INPAINT_TELEA).astype(np.float32)
+        miolo = dentro & ~borda
+        if miolo.any():
+            med = np.median(img[miolo], axis=0)
+            esc = borda & (img.mean(axis=2) < q["escuro"])
+            img[esc] = med
+        c = linha_aa((H, W), [(x0, y0), (x1, y0), (x1, y1), (x0, y1)], q["larg"], fechada=True)
+        img = img * (1 - c[..., None]) + np.float32(q["contorno"]) * c[..., None]
+        n += 1
+    print(f"    {n} bancadas com o contorno fino do PDF (sem o contorno grosso do motor)")
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+def bancadas_subsolo(out):
+    return bancadas_finas(out, "Subsolo")
+
+
+# Térreo e Subsolo (usuário, 22/10/26: "REMOVA OS RISCOS EXISTENTES NA IMAGEM EM VÁRIOS PONTOS"): os riscos e
+# tracinhos escuros do motor nos pisos (travertino, vinílico, granito, Bege Bahia), que não estão no PDF: no piso da
+# legenda, fora dos objetos e das linhas do PDF (paredes, louças, bancadas, móveis, marcenaria, escadas e projeções, com
+# 3 px), o que é mais escuro que o piso em volta (a mediana de 9 px) e tem forma de risco (largura média de até 2,5 px,
+# ou um ponto de até 12 px) sai por inpaint.
+RISCOS = {"pisos": [(202, 217, 220), (124, 162, 200), (50, 66, 90), (232, 232, 232)], "tol": 6, "escuro": 14,
+          "largura": 2.5, "ponto": 12, "folga": 3,
+          "camadas": OBJETOS_PDF + ("ARQ_ESCADAS E RAMPAS", "DOC_LINHAS E PROJEÇÕES", "ARQ_REVESTIMENTOS")}
+
+
+def riscos_b(out, chave):
+    q = RISCOS
+    pg, p2r = AJ.pdf_pavimento(chave)
+    H, W = out.shape[:2]
+    b = AJ.base_terreo((H, W), chave).astype(np.int32)
+    piso = np.zeros((H, W), bool)
+    for c in q["pisos"]:
+        piso |= np.abs(b - np.array(c)).max(axis=2) <= q["tol"]
+    ss = 4
+    pdf = np.zeros((H * ss, W * ss), np.uint8)
+    for d in pg.get_drawings():
+        if d.get("layer") not in q["camadas"]:
+            continue
+        for c in AJ.caminhos_pdf(d, p2r):
+            pts = np.int32(np.round(np.float64(c) * ss))
+            if d["type"] in ("f", "fs") and len(c) >= 3:
+                cv2.fillPoly(pdf, [pts], 255)
+            if d["type"] in ("s", "fs"):
+                cv2.polylines(pdf, [pts], False, 255, ss)
+    k = 2 * q["folga"] + 1
+    pdf = cv2.dilate((cv2.resize(pdf, (W, H), interpolation=cv2.INTER_AREA) > 30).astype(np.uint8),
+                     np.ones((k, k), np.uint8)).astype(bool)
+    Y = out.astype(np.float32).mean(axis=2)
+    med = cv2.medianBlur(np.clip(Y, 0, 255).astype(np.uint8), 9).astype(np.float32)
+    cand = piso & ~pdf & (Y < med - q["escuro"]) & (Y > 40)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(cand.astype(np.uint8), 8)
+    risco = np.zeros((H, W), bool)
+    for i in range(1, n):
+        x, y, w, h, a = st[i]
+        if a <= q["ponto"] or a / max(w, h) <= q["largura"]:
+            risco[lab == i] = True
+    m = cv2.dilate(risco.astype(np.uint8), np.ones((3, 3), np.uint8)) & piso.astype(np.uint8) & ~pdf.astype(np.uint8)
+    out = cv2.inpaint(out, m, 2, cv2.INPAINT_TELEA)
+    print(f"    riscos do motor nos pisos: {int(risco.sum())} px em {int(len(np.unique(lab[risco])))} riscos e pontos, "
+          f"por inpaint (as linhas do PDF ficam)")
+    return out
+
+
+def riscos_terreo(out):
+    return riscos_b(out, "Terreo")
+
+
+def riscos_subsolo(out):
+    return riscos_b(out, "Subsolo")
 
 
 def sem_arcos_subsolo(out):
@@ -1472,6 +1657,7 @@ def pymupdf_rect(r):
 SUBSOLO_B = {"x_min_pt": 440.0, "camadas": ("ARQ_CONTRAPISO", "ARQ_PAREDE"), "escada6_pt": (516.0, 794.0, 604.0, 867.0),
              "escada9_pt": (728.8, 963.7, 917.6, 1071.4), "ss": 4, "fechar": 5, "anel": 2, "parede": 100,
              "incluir_pt": [(1254.9, 536.8, 1314.4, 591.6)],      # a circulação de 1,16 m², aberta em cima
+             "deck_l_y0_pt": 960.0,                                # o deck em L e a escada de 9 começam em y 963,7
              "mascara": CASA_B / "renders/POE642_CasaB_PH_Subsolo_pegada_mascara.png"}
 
 
@@ -1489,12 +1675,16 @@ def so_subsolo_b(out):
                 if len(c) >= 3:
                     cv2.fillPoly(m, [np.int32(np.round(c * k))], 255)
             n += 1
-    for r in (q["escada6_pt"], q["escada9_pt"], *q["incluir_pt"]):
+    for r in (q["escada6_pt"], *q["incluir_pt"]):
         (ax, ay), (bx, by) = p2r(r[0], r[1]), p2r(r[2], r[3])
         cv2.rectangle(m, (int(round(ax * k)), int(round(ay * k))), (int(round(bx * k)), int(round(by * k))), 255, -1)
-    # a pedra grande passa por cima do canto do deck em L (ela é do nível do Térreo): o canto sai da pegada
+    # usuário, 22/10/26 ("TENHO IMPRESSÃO QUE ESSA PARTE NÃO FAZ PARTE DO SUBSOLO"): o deck em L e a escada de 9
+    # degraus saem da pegada (vão para a hachura), como a pedra grande e as pedras da esquerda (nível do Térreo)
     for d in pg.get_drawings():
-        if d.get("layer") == "ARQ_CONTRAPISO" and d["type"] in ("f", "fs") and d["rect"].x0 < q["x_min_pt"]:
+        fora = (d.get("layer") == "ARQ_CONTRAPISO" and d["rect"].x0 < q["x_min_pt"]) or \
+            (d.get("layer") == "ARQ_CONTRAPISO" and d["rect"].y0 >= q["deck_l_y0_pt"]) or \
+            (d.get("layer") == "ARQ_ESCADAS E RAMPAS" and d["rect"].y0 >= q["deck_l_y0_pt"])
+        if fora and d["type"] in ("f", "fs"):
             for c in AJ.caminhos_pdf(d, p2r):
                 if len(c) >= 3:
                     cv2.fillPoly(m, [np.int32(np.round(c * k))], 0)
@@ -1608,10 +1798,11 @@ ITENS = {
         ("09", "item 9 (R3): portas sem os arcos", sem_arcos_terreo),
         ("10", "item 10 (R14): escadas com os bocéis, a sombra curta e o triângulo", escadas_terreo),
         ("11", "item 11 (R8): os dois pilares redondos em preto", pilares_terreo),
-        ("14", "item 14: armários até o teto em marcenaria areia, sem a diagonal", armarios_terreo),
+        ("14", "item 14 (R11): guarda-roupas com cabides nas suítes e no closet master, sem a diagonal",
+         guarda_roupas_terreo),
         ("15", "item 15: eletrodomésticos em inox na cozinha e o refrigerador do gourmet", inox_terreo),
         ("18", "item 18: a bancada da sala íntima com a cuba", bancada_sala_intima),
-        ("24a", "item 24: quartzito Carrara nas bancadas e na ilha", carrara_terreo),
+        ("24a", "item 24: pedra fina de tom sóbrio nas bancadas e nas ilhas", carrara_terreo),
         ("16", "item 16: cooktops de 5 bocas", cooktops_b),
         ("17", "item 17: a adega com a prateleira de vinhos", adega_b),
         ("19", "item 19: o elevador com a cabine", elevador_cabine),
@@ -1621,6 +1812,7 @@ ITENS = {
         ("21", "item 21: cortinas de linho com o trilho de parede a parede", cortinas_terreo),
         ("24c", "item 24: a roupa de cama da biblioteca nas camas", camas_terreo),
         ("24d", "item 24: boxes com as duas folhas de vidro contínuas", boxes_terreo),
+        ("riscos", "riscos e tracinhos do motor nos pisos (usuário, 22/10/26)", riscos_terreo),
         ("23", "item 23 (R13): soleiras nos vãos brancos do PDF", soleiras_terreo),
         ("22", "item 22: paredes pretas no contorno do PDF", paredes_terreo),
         ("12", "item 12 (R8): projeções do jardim de inverno por cima; sem o X do hall", projecoes_terreo),
@@ -1631,14 +1823,17 @@ ITENS = {
         ("02", "item 2: Bege Bahia da referência (garagem, circulações e BH serviço)", bege_subsolo_b),
         ("02b", "item 2: a circulação de 1,16 m² (branca no PDF) em Bege Bahia", circulacao_subsolo),
         ("04", "item 4: academia com o piso contínuo, em réguas de ~20 cm", vinilico_subsolo),
-        ("01a", "item 1: a ducha e o deck em L em cor cheia, na madeira da referência", deck_subsolo),
-        ("05-06", "itens 5 e 6 (R14): as escadas de 6 e 9 degraus em cor cheia, com os bocéis e o triângulo",
-         escadas_subsolo),
+        ("01a", "item 1: a ducha em cor cheia, na madeira da referência", deck_subsolo),
+        ("chuveiro", "a ducha com o chuveiro (usuário, 22/10/26)", chuveiro_ducha),
+        ("05", "item 5 (R14): a escada de 6 degraus em cor cheia, com os bocéis e o triângulo", escadas_subsolo),
+        ("bancadas", "bancadas na pedra fina de tom sóbrio, com o contorno fino do PDF (usuário, 22/10/26)", bancadas_subsolo),
         ("07", "item 7 (R3): portas sem os arcos", sem_arcos_subsolo),
         ("08", "item 8: portas, vidros e janelas finos", vidros_subsolo),
+        ("riscos", "riscos e tracinhos do motor nos pisos (usuário, 22/10/26)", riscos_subsolo),
         ("10", "item 10 (R13): soleiras nos vãos brancos do PDF", soleiras_subsolo),
         ("11", "item 11: paredes pretas no contorno do PDF", paredes_subsolo),
-        ("01b", "item 1 (R2): só o Subsolo; o resto do terreno sai (hachurado na final)", so_subsolo_b),
+        ("01b", "item 1 (R2): só o Subsolo (sem o deck em L e a escada de 9, do Térreo); o resto do terreno sai "
+         "(hachurado na final)", so_subsolo_b),
     ],
 }
 
@@ -1727,6 +1922,171 @@ def rotulos_casab(pg, p2q2000):
     return rot
 
 
+# Na final de 3840 px (usuário, 22/10/26: "MELHORAR O ASPECTO DO MARMORE TRAVERTINO"; "PORTAS, JANELAS E VIDRO MAIS
+# FINO E ELEGANTES"; "MELHORE ESSAS BORDAS"): o que foi ajustado nos 2000 px e ampliado engrossa e amolece. Três coisas
+# são refeitas na resolução da prancha, pelo PDF e pela base da legenda (que já estão no quadro comum):
+# - o travertino da biblioteca (`trocar_travertino`), sem manchas nem emendas;
+# - as bordas entre a grama e os pisos (`bordas_grama`): o contorno da legenda, liso, com a transição de 1 px; perto
+#   dele, o que é grama do lado do piso (e o claro do lado da grama) vira o material do seu lado;
+# - as esquadrias (`esquadrias_pdf`): vidros, folhas e caixilhos finos, com a faixa de limpeza na escala da prancha.
+def base_quadro(chave, forma, cores, tol=6, nearest=True):
+    """A máscara das cores da base chapada (6905 px, o quadro comum) na forma da final (nearest) ou a fração (área)."""
+    b = cv2.imread(str(CASA_B / PAVIMENTOS_B[chave]["chapada"])).astype(np.int32)
+    m = np.zeros(b.shape[:2], np.float32)
+    for c in cores:
+        m = np.maximum(m, (np.abs(b - np.array(c)).max(axis=2) <= tol).astype(np.float32))
+    H, W = forma
+    return cv2.resize(m, (W, H), interpolation=cv2.INTER_NEAREST if nearest else cv2.INTER_AREA)
+
+
+def objetos_quadro(pg, p2x, forma, camadas, folga, ss=2):
+    H, W = forma
+    obj = np.zeros((H * ss, W * ss), np.uint8)
+    for d in pg.get_drawings():
+        if d.get("layer") in camadas and d["type"] in ("f", "fs"):
+            for c in AJ.caminhos_pdf(d, p2x):
+                if len(c) >= 3:
+                    cv2.fillPoly(obj, [np.int32(np.round(np.float64(c) * ss))], 255)
+    obj = cv2.resize(obj, (W, H), interpolation=cv2.INTER_AREA) > 40
+    k = 2 * folga + 1
+    return cv2.dilate(obj.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+
+
+def travertino_final(final, chave, pg, p2q, px_m, dentro=None):
+    q = TRAV_B
+    H, W = final.shape[:2]
+    trav = base_quadro(chave, (H, W), [q["cor_base"]], q["tol"]) > 0.5
+    n, lab, st, _ = cv2.connectedComponentsWithStats(trav.astype(np.uint8), 8)
+    trav = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_min_m2"] * px_m ** 2])
+    trav &= ~objetos_quadro(pg, p2q, (H, W), OBJETOS_PDF + ("ARQ_ESCADAS E RAMPAS",), round(q["folga"] * W / 2000))
+    if dentro is not None:
+        trav &= dentro
+    f = BORDAS["faixa"] + 2
+    livre = cv2.dilate((base_quadro(chave, (H, W), [BORDAS["grama"]], BORDAS["tol"]) > 0.5).astype(np.uint8),
+                       np.ones((2 * f + 1,) * 2, np.uint8)).astype(bool) & trav
+    final, npx = trocar_travertino(final, trav, px_m, livre=livre)
+    print(f"    travertino da biblioteca refeito na final: {npx} px, a {px_m:.1f} px/m")
+    return final
+
+
+BORDAS = {"grama": (80, 145, 110), "tol": 10, "faixa": 4, "sig": 2.5,
+          # os pisos que encostam na grama, cada um com o seu tom de vizinhança (BGR da base chapada): travertino,
+          # deck, pedra portuguesa
+          "pisos": [(202, 217, 220), (85, 138, 185), (99, 136, 174), (211, 214, 214)], "tol_piso": 8,
+          "foge_piso": 18, "claro_grama": 45}
+
+
+def media_vizinha(im, m, sig):
+    """A média de `im` nos pixels de `m` em volta de cada pixel (raio sig), e, onde não há nenhum perto (os vãos
+    estreitos entre os pisantes), num raio 4 e 16 vezes maior."""
+    m = m.astype(np.float32)
+    out = None
+    for k in (1, 4, 16):
+        w = cv2.GaussianBlur(m, (0, 0), sig * k)
+        v = cv2.GaussianBlur(im * m[..., None], (0, 0), sig * k) / np.maximum(w, 1e-6)[..., None]
+        if out is None:
+            out, ok = v, w > 0.02
+        else:
+            out = np.where(ok[..., None], out, v)
+            ok |= w > 0.002
+    return out
+
+
+def bordas_grama(final, chave):
+    """Na faixa de `faixa` px em volta do contorno da grama da legenda: do lado da grama, o que não é grama (os pontos
+    claros, cinza ou pretos) vira a grama da vizinhança; do lado de cada piso, o que é verde ou foge do tom dele (o
+    halo e a transição borrada do motor) vira o piso da vizinhança. Na divisa, a fração de grama da legenda (1 a 2 px).
+    Paredes, jardins e o resto ficam como estão."""
+    q = BORDAS
+    H, W = final.shape[:2]
+    A_ = np.clip(base_quadro(chave, (H, W), [q["grama"]], q["tol"], nearest=False), 0, 1)
+    A_ = cv2.GaussianBlur(A_, (0, 0), 0.5)
+    duro = (A_ > 0.5).astype(np.uint8)
+    f = q["faixa"]
+    borda = cv2.morphologyEx(duro, cv2.MORPH_GRADIENT, np.ones((3, 3), np.uint8))
+    faixa = cv2.dilate(borda, np.ones((2 * f + 1,) * 2, np.uint8)).astype(bool)
+    im = final.astype(np.float32)
+    b, g, r = im[..., 0], im[..., 1], im[..., 2]
+    Y = im.mean(axis=2)
+    verde = (g > r + 4) & (g > b + 12)
+    lado_g = A_ > 0.5
+    sig = q["sig"] * W / 2000 * 2
+    G = media_vizinha(im, lado_g & ~faixa & verde, sig)
+    ruim_g = ~verde | (Y - G.mean(axis=2) > q["claro_grama"])
+    g_ok = np.where((lado_g & ~ruim_g)[..., None], im, G)
+    f_ok = im.copy()
+    piso_algum = np.zeros((H, W), bool)
+    for cor in q["pisos"]:
+        c = (base_quadro(chave, (H, W), [cor], q["tol_piso"]) > 0.5) & ~lado_g
+        if not (c & faixa).any():
+            continue
+        piso_algum |= c
+        Fc = media_vizinha(im, c & ~faixa & ~verde, sig)
+        ruim = c & faixa & (verde | (np.abs(im - Fc).max(axis=2) > q["foge_piso"]))
+        f_ok[ruim] = Fc[ruim]
+    novo = A_[..., None] * g_ok + (1 - A_[..., None]) * f_ok
+    proc = faixa & (lado_g | piso_algum)
+    out = np.where(proc[..., None], novo, im)
+    print(f"    bordas da grama: {int(proc.sum())} px na faixa do contorno da legenda "
+          f"({int((proc & lado_g & ruim_g).sum())} da grama e {int((proc & ~lado_g & (f_ok != im).any(axis=2)).sum())} "
+          f"dos pisos trocados)")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def esquadrias_final(final, chave, pg, p2q, px_m):
+    import retoque_terreo_casae as T
+    faixa = T.ESQUADRIAS["faixa_px"]
+    T.ESQUADRIAS["faixa_px"] = round(faixa * final.shape[1] / 2000)
+    try:
+        img = final.astype(np.float32)
+        n, z = esquadrias_pdf(img, pg, p2q, px_m, caixas=chave == "Subsolo")
+    finally:
+        T.ESQUADRIAS["faixa_px"] = faixa
+    print(f"    esquadrias refeitas na final: {n} vidros e folhas finos em {z} esquadrias")
+    return np.clip(img, 0, 255).astype(np.uint8)
+
+
+# Térreo (R8, R9; usuário, 22/10/26: "E ONDE ESTÃO AS PROJEÇÕES DE COBERTURA?"): a cobertura da entrada (a pérgola
+# entre o jardim de 4,62 m², o hall e a garagem) está no PDF da Casa B como tracejado da ARQ_PAREDE (traços de 5,7 pt,
+# 0,85 pt de espessura): o contorno e as seis vigas. Ela não está na DOC_LINHAS E PROJEÇÕES (item 12), e o motor não a
+# desenhou. Na final de 3840 px, os próprios traços do PDF da zona, em cinza escuro, finos e bem visíveis, por cima do
+# jardim, do piso e da grama (não sobre as paredes).
+COBERTURA_B = {"zona": (2090.0, 1335.0, 2600.0, 1460.0), "camada": "ARQ_PAREDE", "larg_pdf": 0.85, "traco_max": 6.0,
+               "cor": (86, 87, 86), "larg_px": 1.25, "forca": 0.9, "parede": 45, "ss": 4}
+
+
+def cobertura_final(final, pg, p2q):
+    q = COBERTURA_B
+    H, W = final.shape[:2]
+    S = q["ss"]
+    segs = []
+    for d in pg.get_drawings():
+        r = d["rect"]
+        z = q["zona"]
+        if d.get("layer") != q["camada"] or d["type"] != "s" or round(d.get("width") or 0, 2) != q["larg_pdf"] \
+                or min(r.width, r.height) > 0.3 or max(r.width, r.height) > q["traco_max"] \
+                or not (z[0] <= r.x0 and r.x1 <= z[2] and z[1] <= r.y0 and r.y1 <= z[3]):
+            continue
+        segs += [np.float64(c) for c in AJ.caminhos_pdf(d, p2q)]
+    if not segs:
+        return final
+    tudo = np.vstack(segs)
+    x0, y0 = np.floor(tudo.min(axis=0)).astype(int) - 3
+    x1, y1 = np.ceil(tudo.max(axis=0)).astype(int) + 3
+    x0, y0, x1, y1 = max(0, x0), max(0, y0), min(W, x1), min(H, y1)
+    m = np.zeros(((y1 - y0) * S, (x1 - x0) * S), np.uint8)
+    for c in segs:
+        cv2.polylines(m, [np.int32(np.round((c - (x0, y0)) * S))], False, 255, max(1, int(round(q["larg_px"] * S))),
+                      cv2.LINE_AA)
+    a = cv2.resize(m.astype(np.float32) / 255, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA) * q["forca"]
+    reg = final[y0:y1, x0:x1].astype(np.float32)
+    a *= reg.mean(axis=2) >= q["parede"]
+    final = final.copy()
+    final[y0:y1, x0:x1] = np.clip(reg * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None], 0, 255).astype(np.uint8)
+    print(f"    cobertura da entrada: {len(segs)} traços do tracejado do PDF (contorno e vigas da pérgola)")
+    return final
+
+
 def final_casab(chave, salvar=True):
     import pymupdf
     from PIL import Image
@@ -1757,8 +2117,12 @@ def final_casab(chave, salvar=True):
             m = cv2.imread(str(mq), cv2.IMREAD_GRAYSCALE)
             mfin = A.no_quadro_fixo(Image.fromarray(cv2.cvtColor(ajustes, cv2.COLOR_BGR2RGB)), aprovada, base, chave,
                                     mascara=m)[1]
+            final = travertino_final(final, chave, pg, p2q, px_m)
             final, n = trocar_pedra_portuguesa(final, mfin > 200, px_m, fonte="leque")
             print(f"    pedra portuguesa redesenhada na final: {n} px, a {px_m:.1f} px/m")
+        final = bordas_grama(final, chave)
+        final = esquadrias_final(final, chave, pg, p2q, px_m)
+        final = cobertura_final(final, pg, p2q)
     else:
         # o Subsolo: o que não mudou nos ajustes volta da imagem de 6905 px (mais nítida); o que mudou vem dos ajustes
         orig = cv2.imread(str(CASA_B / q["original"]))
@@ -1774,9 +2138,10 @@ def final_casab(chave, salvar=True):
         pq = CASA_B / "renders" / "POE642_CasaB_PH_Subsolo_pegada_mascara.png"
         # o terreno hachurado vem do Térreo final da Casa B (o lote dele, no mesmo quadro)
         AJ.SUBSOLO_R2 = dict(AJ.SUBSOLO_R2, terreo=CASA_B / "renders" / "POE642_CasaB_PH_Terreo_final_rotulos.png")
-        if pq.exists():
-            peg = cv2.resize(cv2.imread(str(pq), cv2.IMREAD_GRAYSCALE), (W, H), interpolation=cv2.INTER_LINEAR)
-            final = AJ.subsolo_hachurado(final, peg.astype(np.float32) / 255, px_m)
+        peg = cv2.resize(cv2.imread(str(pq), cv2.IMREAD_GRAYSCALE), (W, H), interpolation=cv2.INTER_LINEAR)
+        final = travertino_final(final, chave, pg, p2q, px_m, dentro=peg > 127)
+        final = esquadrias_final(final, chave, pg, p2q, px_m)
+        final = AJ.subsolo_hachurado(final, peg.astype(np.float32) / 255, px_m)
     rot = rotulos_casab(pg, p2q2)
     print(f"    {len(rot)} rótulos: " + ", ".join(r[0] for r in rot))
     final = R1.rotulos_ambientes(final, rot, p2q, escala_desvio=W / 2000,
