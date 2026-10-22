@@ -2136,6 +2136,16 @@ Os pedidos que vieram depois, item a item:
   - as escadas externas da esquerda em Bege Bahia, nos degraus do PDF: a de 6 degraus nos dois pavimentos e a de 9 no Térreo;
   - as linhas e o triângulo vão por cima;
   - a mediana que limpava os degraus (e borrava a pedra) saiu.
+- **"O BANCO EM L DO DECK É EM BRONZE FOSCO":** as réguas de madeira saem; o banco fica em bronze fosco (`BANCO_DECK`):
+  - a cor chapada do bronze, com um escovado bem leve ao longo de cada braço;
+  - a quina do lado da luz um pouco mais clara e a do outro lado um pouco mais escura;
+  - o contorno fino e a sombra curta no deck.
+- **"O RÓTULO DA PRAINHA PODE FICAR ABAIXO DAS DUAS ESPREGUIÇADEIRAS":** a busca do rótulo parte de um ponto abaixo da segunda espreguiçadeira (`ROTULOS_F["pontos"]`).
+- **"O RÓTULO DO BANHO GOURMET ESTÁ SOBRE O CHUVEIRO. PODE ESCREVER ASSIM 'BH. GOURMET', E NÃO PRECISA FICAR DENTRO DO BOX":**
+  - os dois rótulos passam a "BH. GOURMET" (`ROTULOS_F["textos"]`, no centro do nome do PDF);
+  - nenhum rótulo vai para dentro de um box: o vidro (`vidros_box`) divide o banho, e o lado da ducha do PDF (`duchas_box`) fica fora;
+  - o BH serviço do Térreo, cujo ponto no PDF cai dentro do box, passa ao piso seco do mesmo banho.
+- **"PRECISO QUE OS BOXES DOS BANHOS ONDE TEM PISO MARROM GRANITO EM CINZA CLARO. TEM QUE ESTAR VISÍVEL":** no BH serviço e no BH motorista, o vidro do box sai como faixa cinza-clara contínua, de parede a parede (etapa `boxes`); antes, os traços do PDF sobre o granito davam uma linha escura que quase sumia.
 
 ## Casas A a D · Barlavento nas piscinas
 

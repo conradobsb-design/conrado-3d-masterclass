@@ -798,6 +798,77 @@ def biblioteca(Q, img):
     return out
 
 
+# Os vidros dos boxes: no PDF, os grupos de traços retos e paralelos da ARQ_LOUÇAS E METAIS (as duas folhas de correr,
+# 7 ou mais traços a menos de 4 pt um do outro), de 0,75 m ou mais. Nos banhos de piso em granito marrom (BH serviço e
+# BH motorista), o vidro sai como faixa cinza-clara, bem visível (usuário, 22/10/26: "PRECISO QUE OS BOXES DOS BANHOS
+# ONDE TEM PISO MARROM GRANITO EM CINZA CLARO. TEM QUE ESTAR VISÍVEL"); nos pisos claros fica o vidro das peças.
+BOXES_F = {"junto_pt": 4.0, "n_min": 7, "comp_min_m": 0.75, "granito": (50, 66, 90), "granito_min": 0.3,
+           "cor": (204, 206, 208), "larg_extra_px": 1.2}
+
+
+def duchas_box(Q, boxes):
+    """O lado do chuveiro de cada box: o centro (pt) da ducha do PDF (o quadrado de ~20 cm da ARQ_LOUÇAS E METAIS) que
+    fica ao lado do vidro, a até 100 pt dele (ou None)."""
+    qs = [d["rect"] for d in Q.desenhos if d.get("layer") == "ARQ_LOUÇAS E METAIS" and d["type"] in ("f", "fs")
+          and 7 <= d["rect"].width <= 14 and 7 <= d["rect"].height <= 14 and abs(d["rect"].width - d["rect"].height) < 2]
+    out = []
+    for x0, y0, x1, y1, hor in boxes:
+        melhor = None
+        for r in qs:
+            cx, cy = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
+            d_ = abs(cy - (y0 + y1) / 2) if hor else abs(cx - (x0 + x1) / 2)
+            ao_lado = (x0 - 5 <= cx <= x1 + 5) if hor else (y0 - 5 <= cy <= y1 + 5)
+            if ao_lado and d_ < 100 and (melhor is None or d_ < melhor[0]):
+                melhor = (d_, (cx, cy))
+        out.append(melhor[1] if melhor else None)
+    return out
+
+
+def vidros_box(Q):
+    """Os vidros de box do PDF: [(x0, y0, x1, y1, deitado)] em pt."""
+    q = BOXES_F
+    ls = [d["rect"] for d in Q.desenhos if d.get("layer") == "ARQ_LOUÇAS E METAIS" and d["type"] == "s"
+          and len(d["items"]) == 1 and d["items"][0][0] == "l"
+          and ((d["rect"].width >= 20 and d["rect"].height < 0.3) or (d["rect"].height >= 20 and d["rect"].width < 0.3))]
+    grupos = []
+    for r in sorted(ls, key=lambda r: (r.height > r.width, r.y0, r.x0)):
+        hor = r.width > r.height
+        for g in grupos:
+            if g[5] != hor:
+                continue
+            if (hor and abs(r.y0 - g[6]) <= q["junto_pt"] and r.x0 <= g[2] + 2 and r.x1 >= g[0] - 2) or \
+                    (not hor and abs(r.x0 - g[6]) <= q["junto_pt"] and r.y0 <= g[3] + 2 and r.y1 >= g[1] - 2):
+                g[0], g[1], g[2], g[3] = min(g[0], r.x0), min(g[1], r.y0), max(g[2], r.x1), max(g[3], r.y1)
+                g[4] += 1
+                break
+        else:
+            grupos.append([r.x0, r.y0, r.x1, r.y1, 1, hor, r.y0 if hor else r.x0])
+    return [(g[0], g[1], g[2], g[3], g[5]) for g in grupos
+            if g[4] >= q["n_min"] and max(g[2] - g[0], g[3] - g[1]) >= q["comp_min_m"] * 56.69]
+
+
+def boxes_granito(Q, img):
+    from retoque_terreo_casae import linha_aa
+    q = BOXES_F
+    gran = Q.cor([q["granito"]], tol=8)
+    out = img.astype(np.float32)
+    n = 0
+    for x0, y0, x1, y1, hor in vidros_box(Q):
+        a0, b0, a1, b1 = ret_q(Q, (x0, y0, x1, y1))
+        if gran[b0 - 4:b1 + 5, a0 - 4:a1 + 5].mean() < q["granito_min"]:
+            continue
+        (ax, ay), (bx, by) = Q.p2q(x0, y0), Q.p2q(x1, y1)
+        if hor:
+            pts, larg = [(ax, (ay + by) / 2), (bx, (ay + by) / 2)], (by - ay) + q["larg_extra_px"]
+        else:
+            pts, larg = [((ax + bx) / 2, ay), ((ax + bx) / 2, by)], (bx - ax) + q["larg_extra_px"]
+        al = linha_aa((Q.H, Q.W), pts, larg)[..., None]
+        out = out * (1 - al) + np.float32(q["cor"]) * al
+        n += 1
+    print(f"    {n} vidros de box no granito em cinza claro")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # 5. As paredes pretas e os pilares (os redondos em cinza)
 PAREDES_F = {"cor": (8, 8, 8), "camadas": ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS"),
@@ -1027,13 +1098,17 @@ def escadas_projecoes(Q, img):
 
 CHUVEIRO_DECK = {"ducha": (690.8, 930.4, 702.0, 941.6), "braco": (695.6, 934.9, 697.1, 957.2),
                  "canopla": (693.6, 955.6, 699.2, 958.2)}
-BANCO_DECK = {"cor_base": (60, 90, 122), "tom": 0.86, "contorno": (70, 62, 54), "larg_px": 0.9}
+# O banco em L do deck em bronze fosco (usuário, 22/10/26: "O BANCO EM L DO DECK É EM BRONZE FOSCO"): a cor chapada do
+# bronze, escovado de leve no sentido de cada braço, a quina do lado da luz (em cima e à direita) um pouco mais clara e a
+# do outro lado um pouco mais escura, o contorno fino e a sombra curta no deck.
+BANCO_DECK = {"cor_base": (60, 90, 122), "bronze": (62, 84, 104), "escovado": 0.010, "quina": 0.10, "quina_px": 1.6,
+              "contorno": (40, 50, 60), "larg_px": 0.9}
 
 
 def deck_detalhes(Q, img):
     """O chuveiro do deck (usuário, 22/10/26: "MELHORE A REPRESENTAÇÃO DO CHUVEIRO"): a ducha quadrada, o braço e a
-    canopla do PDF, cromados (`retoque_subsolo_casae.chuveiro`). O banco em L do deck (a madeira mais escura da legenda):
-    as réguas ao longo de cada braço, um tom abaixo do deck, com o contorno fino e a sombra curta."""
+    canopla do PDF, cromados (`retoque_subsolo_casae.chuveiro`). O banco em L do deck (a madeira mais escura da legenda),
+    em bronze fosco (`BANCO_DECK`), com o contorno fino e a sombra curta."""
     from retoque_subsolo_casae import chuveiro
     q = BANCO_DECK
     out = img.copy()
@@ -1046,16 +1121,23 @@ def deck_detalhes(Q, img):
             if st[i, cv2.CC_STAT_AREA] < 200:
                 continue
             mi = lab == i
-            # cada braço do L: a faixa mais comprida na horizontal deita as réguas; a vertical, em pé
+            # cada braço do L: o escovado corre ao longo dele (na horizontal no braço deitado, na vertical no em pé)
             hor = cv2.morphologyEx(mi.astype(np.uint8), cv2.MORPH_OPEN, np.ones((1, int(1.0 * Q.px_m)), np.uint8)) > 0
-            ver = mi & ~hor
-            if hor.any():
-                t, _ = B.deck_madeira(out, hor, Q.px_m, semente=11, luz_local=False)
-                novo[hor] = t[hor] * q["tom"]
-            if ver.any():
-                tr = np.ascontiguousarray(out.transpose(1, 0, 2))
-                t, _ = B.deck_madeira(tr, np.ascontiguousarray(ver.T), Q.px_m, semente=12, luz_local=False)
-                novo[ver] = t.transpose(1, 0, 2)[ver] * q["tom"]
+            rng = np.random.default_rng(23)
+            ru = rng.normal(0, 1, (Q.H, Q.W)).astype(np.float32)
+            esc_h = cv2.GaussianBlur(ru, (0, 0), sigmaX=0.4 * Q.px_m, sigmaY=0.5)
+            esc_v = cv2.GaussianBlur(ru, (0, 0), sigmaX=0.5, sigmaY=0.4 * Q.px_m)
+            esc = np.where(hor, esc_h / max(esc_h.std(), 1e-6), esc_v / max(esc_v.std(), 1e-6))
+            f = 1 + q["escovado"] * esc
+            # a quina: mais clara do lado da luz (o vizinho de cima e da direita fora do banco), mais escura do outro
+            u8 = mi.astype(np.uint8)
+            k = max(1, int(round(q["quina_px"])))
+            luz = u8 & (1 - cv2.warpAffine(u8, np.float32([[1, 0, -k], [0, 1, k]]), (Q.W, Q.H)))
+            somb = u8 & (1 - cv2.warpAffine(u8, np.float32([[1, 0, k], [0, 1, -k]]), (Q.W, Q.H)))
+            f += q["quina"] * (cv2.GaussianBlur(luz.astype(np.float32), (0, 0), 0.6)
+                               - cv2.GaussianBlur(somb.astype(np.float32), (0, 0), 0.6))
+            novo[mi] = (np.float32(q["bronze"])[None, :] * f[mi][:, None])
+            del ru, esc_h, esc_v, esc
             # sombra curta no deck e o contorno fino
             a = mi.astype(np.float32)
             d_ = 0.03 * Q.px_m
@@ -1068,7 +1150,7 @@ def deck_detalhes(Q, img):
     c = CHUVEIRO_DECK
     if Q.chave == "Terreo":
         out = chuveiro(out, Q.p2q, c["ducha"], c["braco"], c["canopla"])
-    print("    deck: o banco em L em réguas, com o contorno e a sombra; o chuveiro cromado do PDF")
+    print("    deck: o banco em L em bronze fosco, com o contorno e a sombra; o chuveiro cromado do PDF")
     return out
 
 
@@ -1158,6 +1240,7 @@ def passos_terreo(Q, ini, M, t):
         ("biblioteca", lambda im: biblioteca(Q, im)),
         ("carros", lambda im: carros(Q, im, M)),
         ("deck", lambda im: deck_detalhes(Q, im)),
+        ("boxes", lambda im: boxes_granito(Q, im)),
         ("paredes", lambda im: paredes(Q, im)),
         ("esquadrias", lambda im: B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m)),
         ("escadas", lambda im: escadas_projecoes(Q, im)),
@@ -1184,15 +1267,22 @@ ROTULOS_F = {"raio_m": 3.0, "passo_px": 2, "folga_px": 2,
              # os ambientes: as paredes do PDF (os preenchimentos escuros), com os vãos entre trechos alinhados (portas e
              # passagens) fechados até `vao_max_m`; parede é o trecho de até `parede_max_m` de espessura
              "vao_max_m": 2.0, "parede_max_m": 0.40,
-             "preto": (20, 20, 20), "branco": (250, 250, 250)}
+             "preto": (20, 20, 20), "branco": (250, 250, 250),
+             # o nome escrito (usuário, 22/10/26: "PODE ESCREVER ASSIM 'BH. GOURMET', E NÃO PRECISA FICAR DENTRO DO
+             # BOX") e o ponto (pt) de onde a busca parte, no lugar do ponto do PDF ("O RÓTULO DA PRAINHA PODE FICAR
+             # ABAIXO DAS DUAS ESPREGUIÇADEIRAS")
+             "textos": {"BANHO GOURMET": "BH. GOURMET"},
+             "pontos": {"Terreo": {"PRAINHA": (816.8, 1470.0)}}}
 
 
 def ambientes_rotulos(Q, ancoras, f=2):
     """O ambiente de cada rótulo (imagem int32: i + 1 no ambiente do ponto i, 0 nas paredes). As paredes são os
     preenchimentos escuros da ARQ_PAREDE, dos elementos fixos e dos pilares; os vãos entre dois trechos de parede
     alinhados (a porta, a passagem sem porta, como a da circulação do Subsolo para a garagem) fecham até `vao_max_m`.
-    Vidros, folhas de porta e boxes não dividem o ambiente (antes, a folha aberta e o vidro do box cortavam o banho ao
-    meio). Cada região livre é repartida entre os pontos do PDF que caem nela, pela distância andando por dentro."""
+    Vidros e folhas de porta não dividem o ambiente (antes, a folha aberta cortava o banho ao meio); o vidro do box,
+    sim, e o lado do chuveiro (`duchas_box`) fica fora de todos os ambientes: o rótulo nunca vai para dentro do box
+    (o ponto do PDF que cai nele passa ao piso seco mais perto do mesmo banho). Cada região livre é repartida entre os
+    pontos do PDF que caem nela, pela distância andando por dentro."""
     q = ROTULOS_F
     par = (Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS", "EST_PILAR") and d.get("fill")
                        and max(d["fill"]) < 0.6, ss=1) > 0.3).astype(np.uint8)
@@ -1202,13 +1292,35 @@ def ambientes_rotulos(Q, ancoras, f=2):
     em_pe = par & (1 - cv2.morphologyEx(par, cv2.MORPH_OPEN, np.ones((1, t + 1), np.uint8)))     # fina na horizontal
     vaos = cv2.morphologyEx(deitada, cv2.MORPH_CLOSE, np.ones((1, k), np.uint8)) | \
         cv2.morphologyEx(em_pe, cv2.MORPH_CLOSE, np.ones((k, 1), np.uint8))
-    barreira = cv2.dilate(par | vaos, np.ones((3, 3), np.uint8))
+    boxes = vidros_box(Q)
+    box = np.zeros_like(par)
+    for x0, y0, x1, y1, _ in boxes:
+        a0, b0, a1, b1 = ret_q(Q, (x0, y0, x1, y1))
+        box[b0:b1 + 1, a0:a1 + 1] = 1
+    barreira = cv2.dilate(par | vaos | box, np.ones((3, 3), np.uint8))
+    sem_box = cv2.dilate(par | vaos, np.ones((3, 3), np.uint8))
     # a repartição: as frentes saem de cada ponto ao mesmo tempo, pelo livre (em 1/f da resolução)
-    livre = cv2.resize((1 - barreira).astype(np.float32), (Q.W // f, Q.H // f), interpolation=cv2.INTER_AREA) > 0.99
+    def reduz(b):
+        return cv2.resize((1 - b).astype(np.float32), (Q.W // f, Q.H // f), interpolation=cv2.INTER_AREA) > 0.99
+    livre, livre0 = reduz(barreira), reduz(sem_box)
+    _, comp = cv2.connectedComponents(livre.astype(np.uint8), connectivity=4)
+    _, comp0 = cv2.connectedComponents(livre0.astype(np.uint8), connectivity=4)
+    ly, lx = np.nonzero(livre)
+    for ducha in duchas_box(Q, boxes):                                 # o lado do chuveiro sai do livre
+        if ducha is None:
+            continue
+        dx_, dy_ = Q.p2q(*ducha)
+        j = int(np.argmin((lx - dx_ / f) ** 2 + (ly - dy_ / f) ** 2))
+        livre[comp == comp[ly[j], lx[j]]] = False
     lab = np.zeros(livre.shape, np.int32)
     ys, xs = np.nonzero(livre)
     for i, (x, y) in enumerate(ancoras):
-        j = int(np.argmin((xs - x / f) ** 2 + (ys - y / f) ** 2))      # o ponto (ou o livre mais perto dele)
+        # o ponto (ou o livre mais perto dele, de preferência no mesmo banho: o seco, se o ponto caiu no box)
+        y0_, x0_ = min(int(y / f), livre.shape[0] - 1), min(int(x / f), livre.shape[1] - 1)
+        c0 = comp0[y0_, x0_]
+        mesmo = comp0[ys, xs] == c0 if c0 else np.zeros(len(xs), bool)
+        cand = np.nonzero(mesmo)[0] if mesmo.any() else np.arange(len(xs))
+        j = cand[int(np.argmin((xs[cand] - x / f) ** 2 + (ys[cand] - y / f) ** 2))]
         lab[ys[j], xs[j]] = i + 1
     cruz = cv2.getStructuringElement(cv2.MORPH_CROSS, (3, 3))
     while True:
@@ -1218,6 +1330,24 @@ def ambientes_rotulos(Q, ancoras, f=2):
             break
         lab[novo] = viz[novo]
     return cv2.resize(lab, (Q.W, Q.H), interpolation=cv2.INTER_NEAREST)
+
+
+def textos_rotulos(rot):
+    """Os rótulos com o nome escrito de `ROTULOS_F["textos"]` (o nome da lista fica, para os ajustes), na mesma linha e
+    no mesmo centro do nome do PDF."""
+    from PIL import ImageFont
+    from rodape_entrega import FONTES
+    import retoque_1pav_casae as R1
+    f = ImageFont.truetype(str(FONTES / f"Inter-{R1.ROTULOS['fonte']}.otf"), 100)
+    novos = []
+    for nome, linhas, ponto, caixa in rot:
+        t = ROTULOS_F["textos"].get(nome)
+        if t and linhas and linhas[0][0] == nome:
+            texto, tam, (ox, oy) = linhas[0]
+            ox += (f.getlength(texto) - f.getlength(t)) * tam / 100 / 2
+            linhas = [(t, tam, (ox, oy))] + list(linhas[1:])
+        novos.append((nome, linhas, ponto, caixa))
+    return novos
 
 
 def cor_do_fundo(img, x0, y0, x1, y1):
@@ -1271,7 +1401,10 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
     obst = cv2.dilate(obst.astype(np.uint8), np.ones((k, k), np.uint8))
     I_obst = cv2.integral(obst)
     # os ambientes: o que não é parede, esquadria nem porta (os arcos e as folhas do PDF fecham as portas)
-    amb = ambientes_rotulos(Q, [Q.p2q(r[2][0], r[2][1]) for r in rot])
+    rot = textos_rotulos(rot)
+    pontos = q["pontos"].get(Q.chave, {})
+    busca = [Q.p2q(*pontos[r[0]]) if r[0] in pontos else Q.p2q(r[2][0], r[2][1]) for r in rot]
+    amb = ambientes_rotulos(Q, busca)
     esc = Q.W / 2000
 
     def soma(I, x0, y0, x1, y1):
@@ -1293,11 +1426,12 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
             novos.append((nome, (cx / esc, cy / esc), (0.0, 0.0), dict(opc, cor=q["branco"])))   # sobre as plantas
             continue
         dentro = (amb == i_rot + 1).astype(np.uint8)                # o ambiente do rótulo (`ambientes_rotulos`)
+        sx, sy = busca[i_rot][0] - cx, busca[i_rot][1] - cy          # de onde a busca parte (o ponto do PDF ou o pedido)
         I_dentro = cv2.integral(dentro)
         I_ocup = cv2.integral(ocupado)
         melhor = None
         corpo0 = opc.get("corpo", R1.ROTULOS["escala"])
-        palavras = nome.split()
+        palavras = rot1[1][0][0].split()                            # o nome escrito
         opcoes = []
         for fc in q["corpos"]:
             opcoes.append((fc, dict(opc, corpo=corpo0 * fc)))
@@ -1312,6 +1446,7 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
                 anel = [(0, 0)] if r_ == 0 else [(int(round(r_ * np.cos(t))), int(round(r_ * np.sin(t))))
                                                   for t in np.linspace(0, 2 * np.pi, max(8, int(2 * np.pi * r_ / 3)),
                                                                        endpoint=False)]
+                anel = [(int(round(sx)) + ax_, int(round(sy)) + ay_) for ax_, ay_ in anel]
                 for dx, dy in anel:
                     x0_, y0_ = int(round(cx + bx0 + dx)), int(round(cy + by0 + dy))
                     x1_, y1_ = x0_ + int(round(w)), y0_ + int(round(h))

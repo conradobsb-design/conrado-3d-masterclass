@@ -120,6 +120,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - o vidro como linha fina clara com sombra cinza ao lado;
   - no box de correr, duas folhas finas desencontradas.
 - **[19/10] R10.** Folha contínua também no 1º Pavimento da Casa E, onde o box está incompleto.
+- **[22/10] Box no granito em cinza claro** (usuário, na Casa B: "preciso que os boxes dos banhos onde tem piso marrom granito em cinza claro. Tem que estar visível"): nos banhos de piso em granito marrom (BH serviço e BH motorista), o vidro do box é uma faixa cinza-clara contínua, de parede a parede, bem visível; nos pisos claros, o vidro fica como está. No PDF, o box é o grupo de 7 ou mais traços paralelos da ARQ_LOUÇAS E METAIS, de 0,75 m ou mais.
 - **[21/10] Boxes de correr com as folhas contínuas** (usuário: "boxes dos chuveiros com folhas contínuas"): as duas folhas do PDF inteiras, de parede a parede como no PDF, sem falhas nem trechos escuros, com a sombra fina ao lado; no vão de passagem, o trilho em tracejado cinza fino até a parede, como no PDF.
 - **Chuveiro:** cada banho com o tipo e a parede do PDF.
   - Teto: placa quadrada de ~30 cm, ou disco cinza a ~35 cm da parede.
@@ -185,6 +186,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Canteiros com touceiras.
   - Jardim de inverno com as plantas saindo levemente da floreira.
 - **Grama:** a da referência, na escala (R4).
+- **[22/10] Casa B: banco em L do deck em bronze fosco** (usuário: "o banco em L do deck é em bronze fosco"): cor chapada de bronze (RGB ~104, 84, 62), escovado bem leve no sentido de cada braço, a quina do lado da luz um pouco mais clara e a do outro lado um pouco mais escura, contorno fino e sombra curta no deck. Não é madeira.
 - **Piscinas:**
   - revestimento Barlavento (Portobello, 14,5 cm, Caribbean), luz chapada, só a sombra curta das bordas;
   - sem bordas ou vidros inventados;
@@ -218,6 +220,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - **[22/10] Preto ou branco pelo fundo, sem sombra** (usuário, na Casa B: "rótulos não podem ter sombra. Use a cor preta ou branca, a depender do fundo"): o texto é preto ou branco, o que contrastar mais com o fundo da caixa do rótulo (a luminância relativa, pela conta do WCAG: preto nos pisos claros, branco no granito, nos pisos escuros e nos jardins). Nada de halo, sombra ou caixa.
 - **[19/10] R7. Proibido rótulo sobre objeto** (banheira, cama, móvel, bancada, louça). O rótulo vai para o piso livre mais próximo. Exemplo do usuário: o "BANHO MASTER" sobre a banheira na Casa E.
   - **[22/10] Como posicionar** (usuário, na Casa B: "melhore os rótulos e não os sobreponha os objetos" e "os rótulos devem estar dentro de seus respectivos ambientes"): a caixa exata do texto procura, em anéis de até 3 m em volta do ponto do PDF, o lugar livre mais perto, sem tocar móvel, tapete, louça, bancada, parede, esquadria, escada nem outro rótulo, e sempre dentro do seu ambiente. Onde não cabe, quebra em duas linhas e depois desce o corpo (0,85, 0,72, 0,62); o corpo cheio vale mais que a distância.
+  - **[22/10] Nunca dentro do box** (usuário, na Casa B: "o rótulo do banho gourmet está sobre o chuveiro [...] não precisa ficar dentro do box"): o vidro do box divide o banho, e o lado do chuveiro (o da ducha do PDF) fica fora do ambiente do rótulo; o ponto do PDF que cai dentro do box passa ao piso seco mais perto do mesmo banho.
+  - **[22/10] Nome abreviado quando pedido:** "BH. GOURMET" no lugar de "BANHO GOURMET" (Casa B), no centro do nome do PDF.
   - **O ambiente do rótulo:** as paredes do PDF (os preenchimentos escuros) com os vãos entre trechos de parede alinhados fechados até 2 m (as portas e as passagens sem porta, como a da circulação do Subsolo para a garagem); vidros, folhas de porta e boxes não dividem o ambiente. A região livre que tem mais de um ponto do PDF (as áreas abertas: living, hall, varanda) é repartida entre eles pela distância andando por dentro.
 - **Notas que não entram:** projeções de cobertura, floreira, muros e título da folha. Entram, quando pedido, o shaft e a claraboia.
 - **Resolução:** os rótulos são escritos na final em 3840 px.
@@ -241,6 +245,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **[19/10] R10. Casa E · 1º Pavimento:** completar o box, com folha contínua.
 - **[19/10] R7. Casa E · 1º Pavimento:** o rótulo do banho master sai de cima da banheira.
 - **[19/10] R8. Casa A:** faltam as projeções dos brises.
+- **[22/10] Casa B · Térreo:** o rótulo da prainha fica abaixo das duas espreguiçadeiras (usuário: "o rótulo da prainha pode ficar abaixo das duas espreguiçadeiras").
 
 ## 15. Regras substituídas (não usar mais)
 
@@ -256,6 +261,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 | Rótulo com halo suave do tom do fundo | **Sem halo nem sombra; preto ou branco pelo fundo** |
 | Casa B: bancos da sauna no material do render | **Travertino** (os dois níveis) |
 | Casa B: degraus das escadas externas em travertino | **Bege Bahia** |
+| Casa B: banco em L do deck em réguas de madeira | **Bronze fosco** |
+| Box de vidro em cinza escuro sobre o granito | **Cinza claro, visível** |
 | Carros cada um numa cor, levemente desalinhados (Casas A, D e E) | **Alinhados, mesmo tamanho, mesma cor** (R12) |
 | Subsolo com o Térreo em volta (esmaecido na Casa B; linhas do PDF do Térreo na Casa E; deck esmaecido na Casa A) | **Só o subsolo, terreno hachurado** (R2) |
 | 1º Pavimento da Casa E em opções P&B e linhas | **Nublado** como padrão (os arquivos das opções ficam no histórico) |

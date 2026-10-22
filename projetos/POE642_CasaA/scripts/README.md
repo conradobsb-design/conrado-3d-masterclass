@@ -721,7 +721,8 @@ Pedido do usuário (22/10/26): "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGAST
   - `pecas`: os móveis, os tapetes e as louças pelo desenho do PDF;
   - `biblioteca`: guarda-roupas, camas, cortinas, cooktops, banquetas, inox, adega e elevador, pelas rotinas dos ajustes dentro de `em_quadro`, que as faz desenhar no quadro;
   - `carros`;
-  - `deck`: o banco em L e o chuveiro;
+  - `deck`: o banco em L, em bronze fosco (`BANCO_DECK`), e o chuveiro;
+  - `boxes`: nos banhos de granito, o vidro do box em faixa cinza-clara (`boxes_granito`, `vidros_box`, `BOXES_F`);
   - `paredes`: as pretas, e os pilares redondos em cinza;
   - `esquadrias`;
   - `escadas`: as duas escadas (os degraus do PDF em Bege Bahia, `degraus_bege`, com as linhas da R14) e as projeções;
@@ -743,7 +744,9 @@ Pedido do usuário (22/10/26): "TEM MUITOS BORRÕES NA IMAGEM. MOBÍLIAS DESGAST
   - a caixa exata do texto (`_caixa_texto`, medida em cada opção de corpo e de quebra) procura, em até 3 m do ponto do PDF, o lugar livre mais perto, sempre dentro do seu ambiente e sem tocar objeto nem outro rótulo;
   - onde não cabe, quebra em duas linhas e depois desce o corpo (o corpo cheio vale mais que a distância, `corpo_custo`);
   - `ambientes_rotulos`: as paredes escuras do PDF, com os vãos entre trechos alinhados fechados até `vao_max_m` (portas e passagens); a região livre com mais de um ponto do PDF é repartida pela distância andando por dentro;
-  - sem halo: o texto é preto ou branco pelo fundo (`cor_do_fundo`, luminância relativa do WCAG); os jardins, em branco.
+  - sem halo: o texto é preto ou branco pelo fundo (`cor_do_fundo`, luminância relativa do WCAG); os jardins, em branco;
+  - o vidro do box divide o banho, e o lado do chuveiro (`duchas_box`: a ducha do PDF ao lado do vidro) fica fora de todo ambiente; o ponto que cai no box passa ao piso seco do mesmo banho;
+  - `ROTULOS_F["textos"]`: o nome escrito no lugar do do PDF ("BH. GOURMET"); `ROTULOS_F["pontos"]`: o ponto (pt) de onde a busca parte (a prainha, abaixo das espreguiçadeiras).
 - **Cache de etapas:** `<$POE642_CACHE ou a pasta temporária>/poe642_casab_etapas/final3840/<Pavimento>_<etapa>.png`. `--de <etapa>` recomeça daquela etapa com a anterior do cache.
 
 ```bash
