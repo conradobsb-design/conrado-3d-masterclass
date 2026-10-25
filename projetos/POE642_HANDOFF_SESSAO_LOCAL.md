@@ -339,7 +339,7 @@ python texturizar_base.py Subsolo ../../POE642_CasaC/bases/POE642_CasaC_BASE_Sub
 
 ## Casa D · Térreo
 
-**Agora (22/10/26):** o usuário respondeu aos mapas do pente fino (seção "Casa D · pente fino pelas regras", no fim); a final em 3840 px pelo motor das Casas B e C (`final3840_casad.py`) está em andamento.
+**Agora (25/10/26):** finais do Térreo e do Subsolo em 3840 px pelo motor das Casas B e C (`final3840_casad.py`), com as respostas do usuário aos mapas do pente fino; pranchas e PDF refeitos (seção "Casa D · final em 3840 px", no fim). Aguarda a revisão do usuário.
 
 - **PDF:** `_pdfs_cliente/642 - TÉRREO - CASA D.pdf` (mesma folha, recorte e enquadramento das Casas A, B e C). Config em `POE642_CasaD/config_bases.json`.
 - **Cores do PDF:** oliva #BAB596 (living, jantar, hall, adega, lavabo), laranja #CC9966 (suítes, sala íntima, circulações, quarto de serviço), terracota #995F4C (cozinha, gourmet, banho gourmet, despensa, louceiro, serviço, área descoberta, garagem e acesso de veículos), cinza #E4E4E4 (varanda gourmet, piscina, escadas, deck lateral), piscina azul. Os banhos são brancos com hachura (sem polígono de piso).
@@ -2311,6 +2311,37 @@ Pedido do usuário: "Casa D" (a última da ordem da seção 17 das regras: Casa 
   9. paredes;
   10. a final refeita em 3840 px.
 - **Respostas do usuário (22/10):** "1. Igual ao das outras casas 2. Em Madeira 3. Sim, para os 3 4. Areia 5. Os do render 6. Hachura". Granito no tom e no desenho da referência (o das Casas B e C); brises em madeira; os três triângulos (escada do Térreo no degrau 16 para a esquerda, a do Subsolo no degrau 1 para a direita, os blocos para a esquerda); bancadas e ilhas em pedra areia; camas e bancos do render; no Subsolo, em cor cheia só o Subsolo e o pátio, e a faixa verde na hachura. Registradas na seção 14 das regras.
+
+## Casa D · final em 3840 px (25/10/26)
+
+Os 23 itens do Térreo e os 10 do Subsolo do pente fino, com as respostas de 22/10, pelo motor das Casas B e C: `POE642_CasaA/scripts/final3840_casad.py` (detalhes no README, seção "A final da Casa D em 3840 px").
+
+- **Térreo:**
+  1. pisos da biblioteca na escala (travertino, vinílico, granito e Bege Bahia no tom da referência das Casas B e C, grama); o granito sem as manchas dos carros antigos;
+  2. vegetação da biblioteca no tamanho real, só nos cantos da esquerda, junto à piscina e junto à suíte 3 (sem as árvores de 4 m avançando no gramado);
+  3. jardins do lavabo e da sala íntima só verdes, com a grama em volta limpa;
+  4. 3 carros prata de 4,70 x 1,85 m, alinhados (modelo: o carro branco do render);
+  5. móveis, louças e bancadas pelo PDF, em pedra areia com as cubas brancas (também as do banho master, do lavabo e do WC DCE, que o PDF desenha sem o aro);
+  6. camas e bancos do render (suíte master, suítes 1 e 2, DCE); o estar da suíte 3, os vasos do hall e a planta da bancada gourmet do render;
+  7. cooktops de 5 bocas e 4 banquetas sob o tampo da ilha gourmet;
+  8. brises das 10 caixas da ARQ_ELEMENTOS FIXOS em madeira (1.186 ripas), guarda-corpos de vidro (terraço e vão da escada);
+  9. paredes pretas, soleiras e a do elevador em inox, esquadrias finas, 12 cortinas de linho;
+  10. escada de 16 degraus com as linhas e o triângulo no degrau 16 (para a esquerda), os 10 blocos em cascata em Bege Bahia com o triângulo no terraço (para a esquerda);
+  11. projeções em tracejado (X do banho master em cinza escuro; garagem, faixa abaixo dela, área descoberta e jardim do lavabo em cinza claro; a cobertura da garagem);
+  12. 34 rótulos dentro dos ambientes, sem tocar objeto (a SUÍTE MASTER saía para o terraço: parte do piso livre à direita da cama; a GARAGEM, do PDF sobre o carro do meio: parte da faixa de cima).
+- **Subsolo:** pisos na escala (Bege Bahia, vinílico, granito); aparelhos da academia, cama do DCE 1 e bancada do vestiário com a cuba branca da final aprovada; escada cheia até o corte do degrau 7 e esmaecida depois, triângulo no degrau 1 (para a direita); soleira do elevador em inox; 7 rótulos; em cor cheia só o Subsolo e o pátio, e o resto do lote (com a faixa verde) na hachura do Térreo final.
+- **Imagens:** `POE642_CasaD/renders/POE642_CasaD_PH_{Terreo,Subsolo}_final_rotulos.png`; pranchas `entrega/POE642_CasaD_PH_{Terreo,Subsolo}_entrega.png` e o PDF `entrega/POE642_CasaD_Plantas_Humanizadas.pdf`. Antes e depois enviados na conversa.
+
+**Para refazer** (da pasta `POE642_CasaA/scripts/`; as etapas ficam em cache em `$TMPDIR/poe642_casad_etapas`, e `--de <etapa>` recomeça dali):
+
+```
+python3 final3840_casad.py Terreo
+python3 final3840_casad.py Subsolo      # depois do Térreo: a hachura vem do Térreo final
+python3 rodape_entrega.py --config ../../POE642_CasaD/config_bases.json --no-quadro \
+    --render Terreo=../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_final_rotulos.png \
+    --render Subsolo=../../POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_final_rotulos.png
+python3 pdf_entrega.py --config ../../POE642_CasaD/config_bases.json
+```
 
 ## Casas A a D · Barlavento nas piscinas
 

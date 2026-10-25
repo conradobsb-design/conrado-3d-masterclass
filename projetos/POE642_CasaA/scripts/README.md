@@ -808,6 +808,34 @@ python3 final3840_casac.py Terreo --de pecas    # refaz só dali em diante; --at
 # depois, rodape_entrega.py --no-quadro e pdf_entrega.py, com a config da Casa C
 ```
 
+## A final da Casa D em 3840 px: `final3840_casad.py`
+
+Pedido do usuário (22/10/26), às perguntas dos mapas do pente fino da Casa D: "1. Igual ao das outras casas 2. Em Madeira 3. Sim, para os 3 4. Areia 5. Os do render 6. Hachura". A Casa D tem a mesma folha, o mesmo recorte, a mesma escala e as mesmas cores de legenda das Casas B e C: usa o motor do `final3840_casab.py` e as rotinas do `final3840_casac.py` (`C.`), que `contexto_d()` aponta para a Casa D. O que é da casa:
+- **Fontes:** o render retocado e aprovado do Térreo com o Barlavento (2000 px) e a final do Subsolo de 15/10 (3840 px), levados ao quadro (`PAVIMENTOS_D`, `AFIM_QR_D`).
+- **Pisos** (`PISOS_D`, `piso_textura_d`): travertino, vinílico, granito, Bege Bahia e grama no Térreo (sem deck nem pedra portuguesa; o acesso de veículos é granito); no tom das finais das Casas B e C (`TONS_D`: resposta 1). A luz do granito sai sem os carros do render (o grafite e o azul-marinho, quase no tom do granito, deixavam manchas escuras em volta dos carros novos).
+- **Carros** (`carros_d`, `CARROS_D`, R12): o carro branco do meio do render é o modelo, achado pelo que foge do granito em volta (o granito do render é quase neutro, e o filtro neutro das Casas B e C juntava os três carros); prata, 4,70 x 1,85 m, alinhados nos centros do PDF.
+- **Vegetação** (`plantas_do_gramado_d`, `VEGETACAO_D`, item 1): as plantas da biblioteca nos lugares das do render, só nos cantos da esquerda, junto à piscina e junto à suíte 3; saem as fileiras que o achado tirava da sombra do muro de cima e dos X tracejados na grama, e as árvores de 4 m junto à suíte 3.
+- **Jardins** (`jardins_d`, `JARDINS_D`): o do lavabo e o da sala íntima, só verdes; os dois dão para o gramado, e a grama e o traço em volta voltam como eram depois do canteiro (a limpeza das folhas do motor tomava a grama por folha).
+- **Peças:** camas e bancos do render (`CAMAS_D`, `BANCOS_D`, resposta 5); o estar da suíte 3 do render (`FORA_PECAS_D`: no PDF, o sofá está na INS_INSTALAÇÕES HIDRÁULICAS e a mesa na DOC_LINHAS, e o tapete os cobria); os vasos do hall e a planta da bancada gourmet do render (`VASOS_D`).
+- **Cubas** (`cubas_bancada_d`, `CUBAS_EXTRA_D`): as do banho master, do lavabo e do WC DCE, que o PDF desenha sem o aro, entram em louça branca com as outras. No Subsolo, a bancada do vestiário com a cuba vem da final aprovada (`CUBA_VESTIARIO_S`; no PDF, só traço).
+- **Biblioteca:** cooktops de 5 bocas (`COOKTOPS_D`) e as 4 banquetas da ilha gourmet sob o tampo (`banquetas_d`: no PDF da Casa D, desenhos de traço da ARQ_LOUÇAS E METAIS).
+- **Brises em madeira** (`brises_madeira`, `BRISES_D`, resposta 2): cada ripa da ARQ_ELEMENTOS FIXOS (preenchimento branco pequeno) na madeira da biblioteca, com o veio no comprimento, um tom por ripa, o contorno fino e a sombra curta, nas 10 caixas (garagem, hall, suíte master, suíte 3, fachada de baixo, gourmet).
+- **Guarda-corpos de vidro** (`GUARDA_CORPOS_D`): o L do terraço junto aos blocos e o vão da escada.
+- **Projeções** (`PROJECOES_D`, `PROJECOES_CLARAS_D`, `COBERTURA_D`): os X do banho master em cinza escuro; os da garagem, da faixa abaixo dela, da área descoberta e do jardim do lavabo, e a cobertura da garagem, em cinza claro.
+- **Escadas** (resposta 3): a de 16 degraus (`ESCADA_T`, triângulo no 16 para a esquerda; no Subsolo, `ESCADA_S`, cheia até o corte do degrau 7 e esmaecida depois, triângulo no 1 para a direita) e os 10 blocos em cascata (`BLOCOS_D`, `F.degraus_blocos`, triângulo no terraço para a esquerda).
+- **Rótulos:** os títulos das folhas são "0. TÉRREO" e "-1. 1º SUBSOLO" (`A.FORA`, para o DCE TÉRREO e o WC DCE TÉRREO ficarem); a SUÍTE MASTER e a GARAGEM partem de outro ponto (`ROTULOS_PONTOS_D`).
+- **Subsolo** (`passos_subsolo_d`): os aparelhos da academia do render, uma caixa por grupo (`FORA_PECAS_S`), a cama do DCE 1 do render (`CAMAS_S`) e, em cor cheia, só o Subsolo e o pátio (`pegada_subsolo`, sem os traços finos: o tracejado da laje fechava a faixa verde, que vai para a hachura, resposta 6).
+- **Cache de etapas:** `<$POE642_CACHE ou a pasta temporária>/poe642_casad_etapas/final3840/<Pavimento>_<etapa>.png`.
+
+```bash
+python3 final3840_casad.py Terreo               # -> ../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_final_rotulos.png
+python3 final3840_casad.py Subsolo              # depois do Térreo (a hachura vem dele)
+python3 rodape_entrega.py --config ../../POE642_CasaD/config_bases.json --no-quadro \
+    --render Terreo=../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_final_rotulos.png \
+    --render Subsolo=../../POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_final_rotulos.png
+python3 pdf_entrega.py --config ../../POE642_CasaD/config_bases.json
+```
+
 ## Ajustes da Casa A depois da conferência: `ajustes_casaa.py`
 
 Os itens da conferência (e, desde 21/10/26, os do pente fino pelas regras, com o prefixo `pf` em `ITENS`) corrigidos, um por vez, na imagem aprovada (2000 px). Saída `../renders/<imagem aprovada>_ajustes.png` (+ `_camada.png`), que o `rotulos_casaa.py` usa no lugar da aprovada. O alinhamento ao quadro comum continua vindo da imagem aprovada (`PAVIMENTOS[...]["aprovada"]`, `no_quadro_fixo`), para que só os trechos ajustados mudem na prancha. O PDF de cada pavimento chega à imagem pelo quadro comum e pelo afim `AFIM_QR` do pavimento (`pdf_pavimento`). Depois: `rotulos_casaa.py`, `rodape_entrega.py --no-quadro` e `pdf_entrega.py`.

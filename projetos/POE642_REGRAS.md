@@ -274,6 +274,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - **Bancadas e ilhas** em pedra areia humanizada, com as cubas brancas, como nas Casas B e C.
   - **Camas e bancos do render aprovado**, como na Casa C.
   - **Subsolo (R2):** em cor cheia só o Subsolo e o pátio (o contorno da laje do Subsolo, EST_LAJE); a faixa verde entra na hachura com o resto do lote do Térreo final.
+  - **[25/10] Na final em 3840 px** (`final3840_casad.py`): a vegetação do gramado só onde o render tinha plantas (os cantos da esquerda, junto à piscina e junto à suíte 3, sem árvores avançando no gramado); as cubas que o PDF desenha sem o aro (banho master, lavabo, WC DCE) também em louça branca; o estar da suíte 3 fica o do render (no PDF, o sofá e a mesa estão em camadas trocadas).
 
 ## 15. Regras substituídas (não usar mais)
 

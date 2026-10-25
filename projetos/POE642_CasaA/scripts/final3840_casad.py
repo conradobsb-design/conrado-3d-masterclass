@@ -230,7 +230,12 @@ ESCADA_T = {"nome": "de 16 degraus, do Subsolo ao terraço", "pdf": (676.9, 1415
 # os de 4 lados nesta caixa), cada um em Bege Bahia com o bocel e a sombra curta sobre o de baixo e na grama; o
 # triângulo da R14 (resposta 3) no terraço, com a ponta junto à borda do bloco mais alto, apontando para a esquerda,
 # para onde descem
-BLOCOS_D = dict(F.BLOCOS_F, caixa_pt=(300.0, 800.0, 610.0, 1280.0), triangulos_pt=[(604.0, 1108.0, "esquerda")])
+# (a caixa vai até 640 pt para o triângulo, que fica no terraço, à direita da ponta, caber inteiro)
+BLOCOS_D = dict(F.BLOCOS_F, caixa_pt=(300.0, 800.0, 640.0, 1280.0), triangulos_pt=[(604.0, 1108.0, "esquerda")])
+# Os rótulos que partem de outro ponto (pt), no lugar do ponto do PDF (R7): a SUÍTE MASTER (a fachada de cima é vidro
+# e brise, que não fecham o ambiente, e o rótulo ia para o terraço, fora da suíte; parte do piso livre à direita da
+# cama) e a GARAGEM (no PDF, sobre o carro do meio; parte da faixa de cima, entre o acesso e os carros)
+ROTULOS_PONTOS_D = {"Terreo": {"SUÍTE MASTER": (845.9, 1548.2), "GARAGEM": (2628.0, 640.0)}}
 # A soleira do elevador em inox escovado (Térreo 21, Subsolo 8; seção 4): o vão da parede direita da cabine, entre os
 # batentes do PDF (pt)
 SOLEIRA_ELEVADOR_D = dict(C.SOLEIRA_ELEVADOR_C, pt={"Terreo": (1246.6, 1424.0, 1255.2, 1463.7),
@@ -262,7 +267,7 @@ def contexto_d():
     F.plantas_do_gramado = plantas_do_gramado_d
     F.cubas_bancada = cubas_bancada_d
     C.jardins_c = jardins_d
-    F.ROTULOS_F = dict(F.ROTULOS_F, livres=("JARDIM",), textos={}, pontos={})
+    F.ROTULOS_F = dict(F.ROTULOS_F, livres=("JARDIM",), textos={}, pontos=ROTULOS_PONTOS_D)
     F.BLOCOS_F = BLOCOS_D
     B.CARROS_B = CARROS_D
     B.CAMAS_B = CAMAS_D
@@ -595,6 +600,9 @@ def pegada_subsolo(Q):
     hachura do Térreo final). 0 a 1, no quadro."""
     from scipy import ndimage
     nb = (Q.chapada.min(axis=2) < 250).astype(np.uint8)
+    # sem os traços finos (o tracejado do contorno da laje, que fechava a faixa verde junto com o pátio e a deixava
+    # dentro da pegada); as paredes e os pisos, largos, ficam
+    nb = cv2.morphologyEx(nb, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
     nb = cv2.morphologyEx(nb, cv2.MORPH_CLOSE, np.ones((7, 7), np.uint8))
     n, lab, st, _ = cv2.connectedComponentsWithStats(nb, 8)
     m = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= 2000])
