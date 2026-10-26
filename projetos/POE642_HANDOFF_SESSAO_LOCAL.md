@@ -2478,7 +2478,7 @@ python3 pdf_entrega.py
 
 ## Casa A · Térreo com a auditoria de 26/10 (final em 3840 px)
 
-**Pedido:** a lista do Térreo apresentada para o OK (o mapa `renders/POE642_CasaA_PH_Terreo_auditoria_2610.jpg` e a folha das texturas `_auditoria_2610/POE642_CasaA_Terreo_texturas_2610.jpg`). Respostas do usuário (26/10/26): no travertino, "B" (fica o de hoje); "e aplique a lista". **Aguardando o OK do usuário.**
+**Pedido:** a lista do Térreo apresentada para o OK (o mapa `renders/POE642_CasaA_PH_Terreo_auditoria_2610.jpg` e a folha das texturas `_auditoria_2610/POE642_CasaA_Terreo_texturas_2610.jpg`). Respostas do usuário (26/10/26): no travertino, "B" (fica o de hoje); "e aplique a lista". **Aprovado pelo usuário (com os pedidos seguintes e a limpeza dos contornos): "terreo aprovado".**
 
 **Como foi feito** (`POE642_CasaA/scripts/final3840_casaa_terreo.py`, com as rotinas do `final3840_casaa.py`): a final aprovada, sem os rótulos, no quadro de 3840 px (`rotulos_casaa.final_imagem("Terreo")`), redesenhada etapa por etapa:
 1. `granito`: o granito das Casas B a D (`fontes_procedurais.granito_referencia`) na cor malva da base chapada, só nos px que a final mostra como piso (os objetos ficam: carros, bancadas, armários, inox, a cama; as pintas claras do granito antigo não contam como objeto). A luz da final passa ao granito novo só onde escurece mais que o desenho da pedra antiga (as sombras dos carros e das bancadas ficam). O tracejado claro das projeções (a laje superior sobre a área de serviço) fica o da final.
