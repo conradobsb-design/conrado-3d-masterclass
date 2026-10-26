@@ -450,7 +450,7 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
   - o rótulo SHAFT do PDF junto ao elevador;
   - a linha que não existe no PDF, da janela da suíte 3 atravessando o banho 3, saiu (era o trilho da cortina da suíte 3, que passava pela parede fina do banho; agora o trilho para na primeira parede do PDF);
   - o piso de travertino no travertino bruto do Subsolo aprovado (E11), também nas faixas dos jardins e das esquadrias.
-- **Casa C · Subsolo (26/10, `POE642_CasaA/scripts/final3840_casac.py`, final em 3840 px; aguarda o OK do usuário, depois da limpeza):** a lista do mapa `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_auditoria_2610_v2.jpg`, aprovada ("ok, aplique a lista"), com as recomendações das duas perguntas:
+- **Casa C · Subsolo (26/10, `POE642_CasaA/scripts/final3840_casac.py`, final em 3840 px; aprovada pelo usuário, depois da limpeza: "Aprovado"):** a lista do mapa `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_auditoria_2610_v2.jpg`, aprovada ("ok, aplique a lista"), com as recomendações das duas perguntas:
   - paredes em cinza 80 (E10; não há pilares); o vão da janela da ducha do BH academia, que com a parede preta não aparecia, fica claro, como as janelas da Casa B;
   - o travertino da varanda, da sauna, da ducha e do BH academia no travertino bruto do Subsolo aprovado da Casa B, e os bancos da sauna no travertino bruto mais marcado, com os dois níveis e as arestas finas (E11);
   - os degraus largos (do pátio para o caminho) sem os bocéis e sem o triângulo, com o sombreamento de subida e o S no degrau 1, no lugar do triângulo (E3, E8; o PDF não marca o sentido ali);

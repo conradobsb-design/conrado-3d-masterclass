@@ -2709,3 +2709,32 @@ Sobravam, junto à floreira: pontinhos olivas nas bordas da mureta, pontinhos ve
 - `sem_verde_s`, depois das esquadrias, volta a mureta da floreira e o peitoril até o vidro (`vidro_pt`) inteiros à pedra clara (fora o canteiro e as paredes grossas), e o teste do verde pega também o verde acinzentado (a borda do canteiro, que a limpeza das esquadrias espelhava para o vão).
 
 Antes e depois: `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2610_limpeza_floreira_2_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa C refeitos. Aguarda o OK do Subsolo da Casa C.
+
+**Aprovado** (26/10/26): "Aprovado", depois da segunda limpeza. Subsolo da Casa C fechado: prancha do Subsolo e PDF (`POE642_CasaC/entrega/POE642_CasaC_Plantas_Humanizadas.pdf`) na versão final. Próxima planta: o Térreo da Casa C, com a lista apresentada antes de alterar.
+
+## Casa C · Térreo, auditoria para o OK (26/10/26)
+
+Pedido do usuário: "Aprovado" (o Subsolo da Casa C); a próxima planta, pela ordem, é o Térreo. Pela regra dele ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."), a lista foi apresentada sem alterar a imagem. O mapa numerado: `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_auditoria_2610_v2.jpg` (sobre a prancha atual; a v1 segue em `..._auditoria_2610.jpg`), feito com `auditoria_2610.mapa` e os itens trocados em memória.
+
+A conferência foi trecho a trecho, a final em cima e o PDF no mesmo quadro (suíte master e BH master 1 e 2, quartos 1 a 3 e BH 1 a 3, cozinha e serviço, garagem, quarto e BH externos, escadas e deck, gourmet e sala TV, elevador e jardins de inverno, sala de almoço, lavabo, adega e escritório, estar e hall, piscina e lavabos, pisantes), com as projeções da DOC_LINHAS E PROJEÇÕES postas sobre a final e com as letras do PDF (só um D, no degrau 21 da escada estreita).
+
+Conformes: E1 (soleiras), E6 (raios), E2 nos closets e nos quartos 1 a 3, os carros, os rótulos fora dos objetos (menos os itens 12 e 13), as escalas dos pisos (as da Casa B). O PDF do Térreo não tem pilares (nenhum EST_PILAR) nem SHAFT. As folhas abertas das portas em linha cinza fina seguem o padrão aprovado na Casa B.
+
+Os 16 itens:
+1. (E10) paredes pretas em cinza 80, com os muros do lote;
+2. (E11) o travertino liso de 22/10 (só as nuvens, com um veio solto no estar) no travertino bruto do Subsolo aprovado (varandas, BH master 1, sala TV, circulações, jantar, estar, hall, varanda gourmet, lavabos);
+3. (E4) a seta da entrada principal junto à porta pivotante do HALL DE ENTRADA (acesso pelos pisantes do leste), apontando para dentro;
+4. (E3, E8) degraus largos (1 a 10): sem as linhas e sem o triângulo, com o sombreamento de descida e o D no degrau de cima (o PDF não marca o sentido ali);
+5. (E3, E8) escada estreita (11 a 21, do deck ao caminho): sem as linhas e sem o triângulo, com o sombreamento e o D do PDF no degrau 21;
+6. (E5) os boxes em vidro contínuo com as faces e a sombra curta: BH master 1, BH master 2, BH 1, 2 e 3 e a ducha entre os lavabos; os do granito (BH serviço e BH externo) na faixa cinza-clara, como na Casa B;
+7. (E9) as bancadas claras sobre o travertino e o Bege Bahia com a borda e a sombra curta: BH master 1 e 2, BH 1, 2 e 3, lavabo, lavabos masc. e fem.;
+8. (pergunta) os materiais: hoje bancadas em pedra areia, cubas e vasos brancos; a ilha e as bancadas da cozinha e do gourmet em pedra areia. Recomendado, o padrão do Térreo aprovado da Casa B: lavabo com a cuba esculpida e a bancada em travertino bruto e o vaso marrom; lavabos masc. e fem. (da varanda gourmet) com as cubas esculpidas em granito marrom, a bancada em travertino bruto e os vasos marrons; BH 1, 2 e 3 e BH master 1 e 2 com a cuba e a bancada em travertino bruto e o vaso branco; BH serviço e BH externo (no granito) na pedra areia com as louças brancas; a ilha e as bancadas da cozinha e a bancada do gourmet em granito marrom no tom do piso, escurecido (86%);
+9. os chuveiros de teto (placa branca com o miolo cinza, parecem ralo) na placa cromada com os furinhos, como no Subsolo aprovado (BH master 1 e 2, BH 1, 2 e 3, ducha, BH serviço, BH externo, ducha do deck);
+10. a cabine do elevador, branca (do render), em aço, como no Subsolo aprovado;
+11. (E2) o armário cortado do quarto externo (só com a diagonal) com os cabides, como nos closets;
+12. (E7) o rótulo BH SERVIÇO, dentro da área do chuveiro e junto à placa, para o piso livre, em corpo menor;
+13. (E7) os X tracejados que passam por cima dos rótulos A. SERVIÇO DESCOBERTA, JARDIM DE INVERNO e JARDIM DE INVERNO 2 abrem embaixo do rótulo, como o do shaft na Casa B;
+14. (R8) a claraboia sobre o chuveiro e o vaso do BH master 1 (o retângulo tracejado com o X do PDF, 592,1 a 728,2 x 538,0 a 563,6 pt) não aparece: em cinza-escuro, como as dos closets;
+15. a linha fina que não existe no PDF atravessando o BH 2 e o BH 1 (y ≈ 338 px; aparece na etapa das cortinas: o trilho da cortina do quarto passando pelas paredes, o caso que a Casa B corrigiu em 26/10, depois da final de 22/10 da Casa C) sai;
+16. a faixa escura e borrada no alto do jardim de inverno, junto à parede do elevador, na mesma folhagem do resto do jardim.
+
