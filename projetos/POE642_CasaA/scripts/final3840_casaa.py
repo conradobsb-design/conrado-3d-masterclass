@@ -966,18 +966,21 @@ def paredes(Q, img):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# 7. A escada do deck para o pátio (E3, E8): sai o triângulo (R14); entram os traços da ARQ_ESCADAS E RAMPAS do PDF em
-# cinza-escuro (~85), mais marcados que o bocel de 19/10 (os degraus, o contorno, a linha de percurso com a bolinha no
-# degrau 1, a marca de corte e o tracejado depois dela), e o S do PDF (o sentido: sobe do pátio para o deck) em Inter
-# SemiBold, cinza quase preto, na origem do texto do PDF.
+# 7. A escada do deck para o pátio (E3, E8): sai o triângulo (R14) e fica o S do PDF (o sentido: sobe do pátio para o
+# deck) em Inter SemiBold, cinza quase preto, na origem do texto do PDF. Sem linhas (usuário, 26/10/26: "a escada e seus
+# degraus ainda estão representados de forma técnica, sem humanização. não precisa constar linhas, mas sim sombras
+# denotando que o sentido é de subida"; antes, os traços da ARQ_ESCADAS E RAMPAS em cinza 85): os degraus se marcam pelo
+# sombreamento de subida das escadas aprovadas da Casa A (a interna do jardim, a caracol): cada degrau um pouco mais
+# claro que o de baixo (do 1º, junto ao pátio, ao último, `tom`) e a sombra curta de cada espelho no degrau de baixo
+# (`espelho`); o espelho do 1º degrau deixa a mesma sombra no pátio (`patio`).
 # Os degraus em Bege Bahia (usuário, 26/10/26: "os degraus da escada que sobem são em mármore bege bahia"; eram o creme
 # chapado da legenda): a foto da biblioteca na escala, no tom das Casas B a D, cada degrau (de 17 pt, como no PDF) com o
 # tom um pouco diferente, como peças de pedra; depois da marca de corte do PDF (a diagonal) o trecho segue esmaecido como
 # antes (~62% para o branco).
 DEGRAUS_A = {"pt": (735.4, 1230.9, 907.2, 1299.0), "piso": 17.0, "corte": ((773.0, 1268.7), (788.4, 1299.5)),
-             "esmaecer": 0.62, "tom_degrau": 0.025, "forca": 0.85, "semente": 2680}
-ESCADA_A = {"camada": "ARQ_ESCADAS E RAMPAS", "caixa_pt": (733.0, 1228.0, 912.0, 1302.0), "cor": (85, 85, 85),
-            "larg_px": 0.9, "triangulo_q": (1052, 1078, 1088, 1110), "triangulo_lum": 125,
+             "esmaecer": 0.62, "tom_degrau": 0.02, "forca": 0.85, "semente": 2680,
+             "tom": (0.84, 1.0), "espelho": (0.34, 2.4), "patio": (0.30, 2.6)}   # (força, alcance em px)
+ESCADA_A = {"triangulo_q": (1052, 1078, 1088, 1110), "triangulo_lum": 125,
             "texto": "S", "origem": (914.0, 1267.6), "fonte": "Inter-SemiBold.otf", "corpo_px": 17, "cor_texto": (45, 45, 45)}
 
 
@@ -995,11 +998,28 @@ def degraus_bege(Q, img):
     tons = 1 + rng.uniform(-q["tom_degrau"], q["tom_degrau"], n)
     k = np.clip(((x1 - X) // q["piso"]).astype(int), 0, n - 1)           # o degrau 1 é o da direita
     T *= tons[k][..., None]
+    # o sombreamento de subida: o degrau 1 (o de baixo) o mais escuro; a sombra de cada espelho no degrau de baixo
+    t0, t1 = q["tom"]
+    f = t0 + (t1 - t0) * k / max(n - 1, 1)
+    fs, alc = q["espelho"]
+    borda = x1 - (k + 1) * q["piso"]                                       # o espelho do degrau de cima (à esquerda)
+    dist = (X - borda) * PT_PX
+    f = f * np.where(k < n - 1, 1 - fs * np.exp(-np.maximum(dist, 0) / alc), 1.0)
+    T *= f[..., None]
     (cx0, cy0), (cx1, cy1) = q["corte"]
     alem = X < cx0 + (cx1 - cx0) / (cy1 - cy0) * (Y - cy0)                 # à esquerda da diagonal do corte
     T = np.where(alem[..., None], T * (1 - q["esmaecer"]) + 255 * q["esmaecer"], T)
     tl.pintar_img(tl.ret(q["pt"]), T)
-    print(f"    escada: {n} degraus em Bege Bahia, esmaecidos depois do corte")
+    out = tl.gravar()
+    # a sombra do espelho do 1º degrau no pátio, à direita da escada
+    fp, ap = q["patio"]
+    r = (x1, y0, x1 + 4 * ap / PT_PX, y1)
+    tl = tela(out, Q, r, folga=1)
+    X, _ = tl.grade()
+    s_ = fp * np.exp(-np.maximum((X - x1) * PT_PX, 0) / ap) * (X >= x1)
+    a = tl.reduzir(tl.ret(r))
+    tl.reg *= (1 - s_ * a)[..., None]
+    print(f"    escada: {n} degraus em Bege Bahia, sem linhas, com o sombreamento de subida; esmaecidos depois do corte")
     return tl.gravar()
 
 
@@ -1014,22 +1034,6 @@ def escada(Q, img):
     tri = cv2.dilate(tri, np.ones((5, 5), np.uint8))
     out[y0:y1, x0:x1] = cv2.inpaint(reg, tri, 4, cv2.INPAINT_TELEA)
     out = degraus_bege(Q, out)
-    # os traços do PDF
-    tl = tela(out, Q, q["caixa_pt"], folga=6)
-    m = tl.vazia()
-    n = 0
-    cx0, cy0, cx1, cy1 = q["caixa_pt"]
-    for d in Q.desenhos:
-        if d.get("layer") != q["camada"] or d["type"] != "s":
-            continue
-        r = d["rect"]
-        if not (r.x0 >= cx0 and r.x1 <= cx1 and r.y0 >= cy0 and r.y1 <= cy1):
-            continue
-        for c in AJ.caminhos_pdf(d, tl.pt):
-            cv2.polylines(m, [np.int32(np.round(c))], False, 255, max(1, int(round(q["larg_px"] * 8))), cv2.LINE_AA)
-        n += 1
-    tl.pintar(m, q["cor"])
-    out = tl.gravar()
     # o S
     from rodape_entrega import FONTES
     fonte = ImageFont.truetype(str(FONTES / q["fonte"]), q["corpo_px"] * 4)
@@ -1041,7 +1045,7 @@ def escada(Q, img):
     a = np.asarray(tela_t.resize((W, H), Image.LANCZOS), np.float32)[..., None] / 255
     reg = out[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
     out[Y0:Y0 + H, X0:X0 + W] = np.clip(reg * (1 - a) + np.float32(q["cor_texto"]) * a, 0, 255).astype(np.uint8)
-    print(f"    escada: sem o triângulo; {n} traços do PDF em cinza {q['cor'][0]} e o {q['texto']} na origem do PDF")
+    print(f"    escada: sem o triângulo e sem linhas; o {q['texto']} na origem do PDF")
     return out
 
 

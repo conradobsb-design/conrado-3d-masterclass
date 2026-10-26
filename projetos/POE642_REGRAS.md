@@ -108,7 +108,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Em cada bocel, uma linha cinza suave e uma sombra de ~10 cm no degrau de baixo.
   - Nenhum traço preto.
   - Número de degraus igual ao PDF.
-- **[26/10] O triângulo da R14 dá lugar ao S/D** (seção 19), planta por planta com o OK do usuário: os traços da ARQ_ESCADAS E RAMPAS em cinza 85 (degraus, contorno, linha de percurso com a bolinha, marca de corte e tracejado depois dela) e a letra S ou D do PDF em Inter SemiBold de ~17 px, cinza quase preto (45), na origem do texto do PDF. Aplicado no Subsolo da Casa A.
+- **[26/10] O triângulo da R14 dá lugar ao S/D** (seção 19), planta por planta com o OK do usuário: a letra S ou D do PDF em Inter SemiBold de ~17 px, cinza quase preto (45), na origem do texto do PDF. Aplicado no Subsolo da Casa A.
+- **[26/10] Escadas humanizadas, sem linhas** (usuário, no Subsolo da Casa A: "a escada e seus degraus ainda estão representados de forma técnica, sem humanização. não precisa constar linhas, mas sim sombras denotando que o sentido é de subida"): os degraus na pedra deles (lá, Bege Bahia), sem os traços do PDF (nem degraus, nem contorno, nem linha de percurso, nem marca de corte, nem tracejado), marcados só pelo sombreamento das escadas aprovadas: cada degrau um pouco mais claro que o de baixo (de 0,84 a 1) e a sombra curta de cada espelho no degrau de baixo (e a do 1º degrau no piso). Depois do corte, o trecho esmaecido, como antes. Substitui os traços em cinza 85 que a primeira versão da E8 tinha posto.
 - **[19/10] R14. Triângulo de orientação no início da escada,** indicando o sentido, ora subida ora descida, conforme o pavimento. Usuário: "precisamos do triangulo como símbolo de orientação no inicio de escadas, indicando o sentido ora subida ora descida, a depender da situação".
   - Cheio, cinza-escuro, de 24 × 26 cm, no meio da largura e a 10 cm do início.
   - A ponta segue o sentido do percurso de quem chega por aquele pavimento.
@@ -297,7 +298,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 | Casa B: banco em L do deck em réguas de madeira | **Bronze fosco** |
 | Box de vidro em cinza escuro sobre o granito | **Cinza claro, visível** |
 | Paredes pretas | **Cinza 80** (E10, 26/10), planta por planta |
-| Triângulo de orientação nas escadas (R14) | **S/D do PDF com a linha de percurso; degraus em cinza 85** (E3, E8, 26/10), planta por planta |
+| Triângulo de orientação nas escadas (R14) | **S/D do PDF** (E3, 26/10), planta por planta |
+| Escadas com as linhas dos degraus (bocel de 19/10; traços do PDF em cinza 85 na primeira versão da E8) | **Sem linhas: degraus na pedra, com o sombreamento de subida ou descida** (26/10) |
 | Casa A · Subsolo: divisória entre os banhos feminino e masculino como divisória clara (item 94 de 19/10) | **Parede em cinza 80** (26/10) |
 | Casa A · Subsolo: banho de serviço em Barlavento | **Bege Bahia** (26/10) |
 | Carros cada um numa cor, levemente desalinhados (Casas A, D e E) | **Alinhados, mesmo tamanho, mesma cor** (R12) |
@@ -363,7 +365,7 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
 | E5 | "Representar os boxes." | Box em vidro contínuo e visível (R10), nunca só o tracejado do caimento. |
 | E6 | "Retirar a representação dos raios nas portas." | Sem arco (R3). |
 | E7 | "O nome do ambiente não deve ficar sobre os objetos; optar sempre por uma das cores, branco ou preto, para criar contraste." | R6 e R7. Também fora da área do chuveiro e sem encostar na linha do box nem na bancada. |
-| E8 | "Representar a escada de forma mais demarcada." | Linhas dos degraus do PDF em cinza-escuro (~85), mais marcadas que o bocel suave de 19/10. |
+| E8 | "Representar a escada de forma mais demarcada." | Os degraus demarcados pelo sombreamento (cada degrau um pouco mais claro que o de baixo e a sombra curta de cada espelho), sem linhas (usuário, 26/10: "não precisa constar linhas, mas sim sombras denotando que o sentido é de subida"; a proposta inicial eram as linhas do PDF em cinza 85). |
 | E9 | "Se a bancada e o piso forem da mesma cor, deixar a bancada mais marcada do que o piso." | Borda fina no tom escurecido da própria pedra e uma sombra curta. |
 | E10 | "Representar as paredes em planta com uma tonalidade de um cinza escuro e os pilares no preto para melhor contraste." | **Paredes em cinza 80 (RGB 80, 80, 80; resposta do usuário: "Qual cinza para as paredes: 50, 70 ou 90? Resposta: 80")** e pilares pretos, inclusive os redondos (substitui o pilar redondo cinza de 22/10). |
 | E11 | "Se atentar à escala das texturas de piso." | As mesmas texturas e escalas em todas as casas. |
@@ -389,5 +391,5 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
   - as portas de vidro de correr da academia (pergunta do usuário: "estão bem representadas?"; não estavam), redesenhadas pelo PDF na resolução da prancha: do pátio, 4 folhas em 2 planos com os montantes e os batentes; do hall, 2 folhas desencontradas sobre a soleira de Bege Bahia nítida; e o vidro fixo em L da sauna (usuário: "corrija essa falha ao final da esquadria"), com o caixilho e as linhas do PDF até a parede, sem riscos em volta (usuário: "remova os riscos do contorno do vidro que não fazem parte": o vão da parede sob o vidro vai sem as faces em cinza);
   - banhos feminino e masculino: bancada em travertino bruto, mais marcada que o piso (E9); cubas em granito marrom; vasos marrons; a divisória entre os dois vira parede em cinza 80 (substitui o item 94 de 19/10);
   - banho de serviço: bancada em granito marrom, cuba branca, louças e metais nítidos pelo PDF; o vaso fica branco (não foi pedido em marrom);
-  - paredes em cinza 80 (E10); a escada com os traços do PDF em cinza 85, a linha de percurso e o S (E3, E8), e os degraus em Bege Bahia (usuário: "os degraus da escada que sobem são em mármore bege bahia"; eram creme chapado), esmaecidos depois do corte; o rótulo do banho de serviço fora do box (E7).
+  - paredes em cinza 80 (E10); a escada com o S (E3), os degraus em Bege Bahia (usuário: "os degraus da escada que sobem são em mármore bege bahia"; eram creme chapado), sem linhas e com o sombreamento de subida (usuário: "não precisa constar linhas, mas sim sombras denotando que o sentido é de subida"), esmaecidos depois do corte; o rótulo do banho de serviço fora do box (E7).
 
