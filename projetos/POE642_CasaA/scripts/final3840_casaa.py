@@ -844,8 +844,11 @@ PORTAS_VIDRO = {
          "montante_pt": 0.6},
         # o vidro fixo em L da sauna (usuário, 26/10/26: "corrija essa falha ao final da esquadria"; o fim do vidro
         # junto à parede da esquerda saía esfumado, com um vão claro e um dente no canto da parede): o vão da parede
-        # em pedra (o branco do PDF), o vidro nos dois braços e os montantes do canto e das pontas, até a parede
+        # em pedra (o branco do PDF), o vidro nos dois braços e os montantes do canto e das pontas, até a parede. O vão
+        # vai sem as faces em cinza (usuário: "remova os riscos do contorno do vidro que não fazem parte"): o Bege
+        # Bahia do vão continua o do pátio, e o contorno é só o do caixilho
         {"nome": "da sauna (vidro fixo)", "soleiras": [(1009.3, 1656.1, 1145.3, 1664.6), (1009.3, 1664.6, 1017.8, 1735.5)],
+         "faces": False,
          "batentes": [(1013.8, 1660.7, 1018.6, 1665.5), (1143.3, 1660.7, 1145.3, 1663.5), (1013.8, 1733.5, 1016.6, 1735.5)],
          "folhas": [((1018.6, 1660.7, 1143.3, 1663.5), "x"), ((1013.8, 1665.5, 1016.6, 1733.5), "y")],
          "montante_pt": 0.0, "linhas": {"cor": (48, 50, 52), "faces_px": 0.9, "meio_px": 0.7, "largura_min_px": 4.8}},
@@ -855,9 +858,9 @@ PORTAS_VIDRO = {
     "soleira": {"forca": 0.5, "linha": (150, 152, 154), "linha_px": 0.5, "semente": 7}}
 
 
-def soleira_bege(Q, out, r):
+def soleira_bege(Q, out, r, faces=True):
     """A soleira de Bege Bahia (R13) na resolução da prancha: a foto da biblioteca no tom das Casas B a D, nítida, com as
-    faces da parede (os lados compridos) em cinza fino."""
+    faces da parede (os lados compridos) em cinza fino (`faces`)."""
     q = PORTAS_VIDRO["soleira"]
     sys.path.insert(0, str(A.RAIZ / "_texturas"))
     from texturas import textura
@@ -867,9 +870,9 @@ def soleira_bege(Q, out, r):
     tl.pintar_img(tl.ret(r), T)
     x0, y0, x1, y1 = r
     e = q["linha_px"] / PT_PX
-    faces = ((x0, y0, x0 + e, y1), (x1 - e, y0, x1, y1)) if (y1 - y0) >= (x1 - x0) else \
+    linhas = ((x0, y0, x0 + e, y1), (x1 - e, y0, x1, y1)) if (y1 - y0) >= (x1 - x0) else \
         ((x0, y0, x1, y0 + e), (x0, y1 - e, x1, y1))
-    for f in faces:
+    for f in (linhas if faces else ()):
         tl.pintar(tl.ret(f), q["linha"])
     return tl.gravar()
 
@@ -879,7 +882,7 @@ def portas_vidro(Q, img):
     out = np.ascontiguousarray(img.copy())
     for p in q["portas"]:
         for r in ([p["soleira"]] if "soleira" in p else []) + p.get("soleiras", []):
-            out = soleira_bege(Q, out, r)
+            out = soleira_bege(Q, out, r, faces=p.get("faces", True))
         if "linhas" in p:
             # o caixilho com a largura do vidro aprovado (no PDF são 5 cm, ~3 px, e as três linhas viravam um cinza só)
             lm = p["linhas"]["largura_min_px"] / PT_PX / 2
