@@ -43,6 +43,7 @@ FORA = ("PROJ.", "SHAFT", "FLOREIRA", "AFASTAMENTO", "DIVISA", "MURO", "LIMITE",
 GRANITO = {"lum_max": 95, "quente_min": 12, "sigma": 3}
 
 PAVIMENTOS = {
+    # Desde 26/10/26 a final do Subsolo com os rótulos sai do `final3840_casaa.py`, que parte da `final_imagem` daqui
     "Subsolo": {"render": "renders/POE642_CasaA_PH_Subsolo_final_ajustes.png",   # com os ajustes da conferência
                 # o alinhamento ao quadro comum vem sempre da imagem aprovada: os ajustes não mexem no resto
                 "aprovada": "renders/POE642_CasaA_PH_Subsolo_final.png",

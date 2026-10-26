@@ -3,7 +3,7 @@ _14/10/2026. Estado ao fim da sessão na nuvem. Branch: `claude/poe642-casa-a-ha
 
 **Regras de representação: `POE642_REGRAS.md` (consolidadas em 19/10/26). Elas valem mais que as decisões antigas registradas aqui.**
 
-**Agora (26/10/26):** o usuário mandou 11 especificações para todas as casas (`POE642_REGRAS.md`, seção 19) e pediu para apresentar as inconformidades antes de alterar. A auditoria das 12 plantas está pronta (seção "Auditoria das especificações de 26/10", no fim). Nenhuma imagem foi alterada: aguarda o OK do usuário.
+**Agora (26/10/26):** o usuário mandou 11 especificações para todas as casas (`POE642_REGRAS.md`, seção 19) e pediu para apresentar as inconformidades antes de alterar. A auditoria das 12 plantas está pronta (seção "Auditoria das especificações de 26/10", no fim). Respostas: paredes em cinza 80; o tapete conta como objeto para os rótulos; aprovação planta por planta. **Feito:** o Subsolo da Casa A, com os pedidos do usuário para ele e a auditoria (seção "Casa A · Subsolo com os pedidos de 26/10", no fim; `final3840_casaa.py`). **Próximo:** aguardar o OK do usuário no Subsolo da Casa A e seguir, planta por planta, com as outras 11.
 
 Este arquivo é o ponto de partida da sessão no computador. Ele resume o que já foi feito, as decisões do cliente, como o trabalho é feito, os comandos de cada script e o que falta. A sessão nova não traz o histórico da conversa: tudo o que importa está aqui e nos arquivos citados.
 
@@ -2439,3 +2439,34 @@ Pedido do usuário (26/10/26), as 11 especificações (E1 a E11) estão na seç�
   - se o tapete conta como objeto para os rótulos;
   - o OK por item ou por planta.
 
+## Casa A · Subsolo com os pedidos de 26/10 (final em 3840 px)
+
+Pedidos do usuário (26/10/26), além da auditoria:
+- "Subsolo da casa A: Melhore o aspecto do Mármore travertino bruto em suas respectivas áreas; Melhore a representação do banco em mármore travertino bruto da sauna; Note que você usou o travertino na área do elevador. Essa área ficou bem representada no mármore, mas deveria ter um elevador, assim como fizemos em outras casas; Melhore a representação dos chuveiros; Melhore a representação dos armários do depósito - em marcenaria; Melhore a representação das folhas contínuas dos boxes; E faça os ajustes da auditoria."
+- "Ainda para o subsolo da casa A: Cubas dos banhos de serviço em marrom granito: Mantem a bancada das cubas em mármore travertino bruto. Sanitarios em marrom, não branco. A parede que divide os banhos masculino e feminino deve ser representado como parede em cinza 80."
+- "Já o banho serviço tem piso em mármore bege bahia; cuba branca, bancada da cuba em marrom granito e chuveiro bem representado." e "louças de metais" (as louças e os metais do banho de serviço, nítidos).
+- Respostas às perguntas da auditoria: paredes em cinza 80; "O tapete conta como objeto, sim."; "vou aprovar planta por planta".
+
+Leitura: os "banhos de serviço" do primeiro pedido são os banhos feminino e masculino (os que têm as cubas na bancada de travertino); o banho de serviço tem o pedido próprio. O vaso do banho de serviço fica branco (não foi pedido em marrom).
+
+**Como foi feito** (`POE642_CasaA/scripts/final3840_casaa.py`, no motor das Casas B a D): a final aprovada, sem os rótulos, no quadro de 3840 px (`rotulos_casaa.final_imagem("Subsolo")`), redesenhada etapa por etapa pelo PDF e pela base chapada:
+1. `pisos`: travertino bruto (hall, sauna, antessala, banhos fem. e masc.) na escala das Casas B a D, no creme delas (a sauna da Casa B; o da Casa A estava rosado), com os veios horizontais e os poros; Bege Bahia (pátio, circulação, depósito e banho de serviço, que era Barlavento) no tom das Casas B a D; a madeira da academia nas réguas do vinílico das Casas B a D (E11), com os aparelhos da final e a sombra curta. As peças da ARQ_PAREDE que a final mostra (parede, vidro, batente) ficam; as que ela mostra como piso (as folhas de porta que a base tirou) viram piso. A soleira da academia para o hall fica.
+2. `banhos`: bancadas em travertino bruto mais marcado que o piso (E9: o desenho mais forte, o tom mais fundo, a borda no tom escurecido da pedra e a sombra curta); cubas em granito marrom (borda polida, bacia funda com a sombra por dentro, válvula); torneiras cromadas; vasos marrons; descargas; no banho de serviço, bancada em granito marrom (o polígono do PDF), cuba branca de semiencaixe, torneira, vaso branco; os três chuveiros (placa cromada de ~19 cm com os furinhos, braço e canopla; o do banho de serviço, de 7 cm no PDF, vira a placa das outras no mesmo centro); os boxes com as duas folhas contínuas do PDF (`AJ.folhas_box`), mais visíveis, e o trilho tracejado até a parede.
+3. `sauna`: o banco em travertino bruto, com a quina boleada na frente e a sombra de contato no piso.
+4. `elevador`: a cabine de aço (paredes, piso escovado com o brilho, painel, X fraco, corrimãos, folhas telescópicas à esquerda) e a soleira em inox no vão; o poço em volta em cinza.
+5. `deposito`: os dois armários da DOC_LINHAS em marcenaria (madeira natural, veio no comprido, módulos de ~55 cm, a linha da frente das portas, contorno e sombra).
+6. `paredes`: cinza 80 nos preenchimentos escuros da ARQ_PAREDE e na divisória dos banhos (agora parede; substitui o item 94 de 19/10), com a franja preta antiga refeita antes.
+7. `escada`: sem o triângulo; os traços da ARQ_ESCADAS E RAMPAS em cinza 85 e o S do PDF em Inter SemiBold.
+8. `rotulos`: `F.rotulos`, com os boxes da Casa A (as duas folhas e o trilho) e a divisória como parede; o BANHO SERV. vai para o piso seco, fora do box (E7).
+
+**Arquivos:** `renders/POE642_CasaA_PH_Subsolo_final_rotulos.png` (+ `_preview.jpg`), `entrega/POE642_CasaA_PH_Subsolo_entrega.png`, `entrega/POE642_CasaA_Plantas_Humanizadas.pdf`; antes e depois em `renders/POE642_CasaA_PH_Subsolo_2610_<item>_antes_depois.jpg` (planta, banhos_sauna, banho_servico, elevador_hall, deposito, academia, escada).
+
+**Atenção:** a final do Subsolo agora sai do `final3840_casaa.py`. Rodar `rotulos_casaa.py Subsolo` sobrescreveria a final com a versão antiga.
+
+**Comandos** (da pasta `POE642_CasaA/scripts/`; o cache das etapas fica em `$POE642_CACHE/poe642_casaa_etapas`):
+```bash
+python3 final3840_casaa.py --antes <final aprovada antes, PNG>   # a final, com os antes e depois
+python3 final3840_casaa.py --de banhos                            # recomeça de uma etapa
+python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png
+python3 pdf_entrega.py
+```

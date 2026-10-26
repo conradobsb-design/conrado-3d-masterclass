@@ -109,6 +109,7 @@ As três pranchas têm o mesmo tamanho e a planta no mesmo pixel, para que, vist
 
 ```bash
 # Casa A, desde os nomes e áreas (18/10/26): as imagens com rótulos já estão no quadro comum, em 3840 px
+# (o Subsolo, desde 26/10/26, sai do final3840_casaa.py: não rodar rotulos_casaa.py Subsolo, que voltaria à versão antiga)
 python rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png \
     --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png
 python pdf_entrega.py
@@ -954,3 +955,26 @@ python auditoria_2610.py D Terreo   # uma planta
 
 Saída: `POE642_Casa?/renders/POE642_Casa?_PH_<pav>_auditoria_2610.jpg`.
 
+## Subsolo da Casa A em 3840 px com os pedidos de 26/10 (`final3840_casaa.py`)
+
+Pedidos do usuário de 26/10/26 para o Subsolo da Casa A (travertino bruto, banco da sauna, cabine do elevador, chuveiros, armários do depósito em marcenaria, folhas contínuas dos boxes, os banhos feminino e masculino com as cubas em granito marrom, a bancada em travertino e os vasos marrons, a divisória entre eles como parede em cinza 80, o banho de serviço em Bege Bahia com a bancada em granito marrom e a cuba branca) e os ajustes da auditoria (E3, E7, E8, E9, E10 em cinza 80, E11). A final aprovada, sem os rótulos, no quadro de 3840 px (`rotulos_casaa.final_imagem`) é redesenhada etapa por etapa, pelo PDF e pela base chapada, com o motor das Casas B a D (`final3840_casab.py`, `retoque_subsolo_casae.py`):
+
+| Etapa | O que faz |
+|---|---|
+| `pisos` | travertino bruto (foto da biblioteca na escala, no creme das Casas B a D, veios e poros: `travertino_bruto`), Bege Bahia no tom das Casas B a D, a madeira da academia nas réguas do vinílico; as peças da ARQ_PAREDE que a final mostra ficam (`nao_piso`), a soleira da academia para o hall fica |
+| `banhos` | bancadas em travertino bruto (E9), cubas em granito marrom, torneiras, vasos marrons e descargas; no banho de serviço, bancada em granito marrom, cuba branca, vaso branco; os três chuveiros; os boxes (duas folhas do PDF e o trilho) |
+| `sauna` | o banco em travertino bruto, com a quina boleada e a sombra de contato |
+| `elevador` | a cabine de aço com os corrimãos e a porta telescópica, e a soleira em inox |
+| `deposito` | os dois armários da DOC_LINHAS em marcenaria, com os módulos das portas |
+| `paredes` | cinza 80 nas paredes do PDF e na divisória dos banhos |
+| `escada` | os traços da ARQ_ESCADAS E RAMPAS em cinza 85 e o S do PDF, sem o triângulo |
+| `rotulos` | `F.rotulos` com os boxes da Casa A e a divisória como parede; o BANHO SERV. no piso seco |
+
+```bash
+export POE642_CACHE=/caminho/do/cache                      # as etapas ficam em $POE642_CACHE/poe642_casaa_etapas
+python3 final3840_casaa.py                                 # a final: renders/POE642_CasaA_PH_Subsolo_final_rotulos.png
+python3 final3840_casaa.py --de banhos --ate paredes       # recomeça e para numa etapa (só grava a final no fim)
+python3 final3840_casaa.py --de rotulos --antes antes.png  # e os antes e depois: renders/..._Subsolo_2610_<item>_antes_depois.jpg
+python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png
+python3 pdf_entrega.py
+```

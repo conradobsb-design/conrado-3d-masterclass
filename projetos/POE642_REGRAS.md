@@ -2,7 +2,7 @@
 
 _Consolidado em 19/10/26, antes de começar as execuções. Este arquivo vale mais que o histórico (`POE642_HANDOFF_SESSAO_LOCAL.md`): quando uma regra daqui contradiz uma decisão antiga, vale a daqui. As regras novas de 19/10 estão marcadas com **[19/10]**, e as que elas substituem estão na seção 15._
 
-**[26/10] Especificações novas para todas as casas na seção 19.** Elas mudam o símbolo das escadas (S/D no lugar do triângulo da R14), a cor das paredes (cinza-escuro) e a dos pilares (preto). A aplicação aguarda o OK do usuário, planta por planta ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera.").
+**[26/10] Especificações novas para todas as casas na seção 19.** Elas mudam o símbolo das escadas (S/D no lugar do triângulo da R14), a cor das paredes (cinza 80, resposta do usuário) e a dos pilares (preto). A aplicação vai planta por planta, com o OK do usuário em cada uma ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."; "vou aprovar planta por planta"). A primeira foi o Subsolo da Casa A (seção 19, "Aplicação").
 
 Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de começar as execuções." Junto vieram 13 regras novas. Elas estão abaixo, cada uma no seu tema, com o número da lista do usuário (R1 a R13).
 
@@ -108,7 +108,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Em cada bocel, uma linha cinza suave e uma sombra de ~10 cm no degrau de baixo.
   - Nenhum traço preto.
   - Número de degraus igual ao PDF.
-- **[26/10] O triângulo da R14 dá lugar ao S/D** (seção 19, aguarda o OK do usuário).
+- **[26/10] O triângulo da R14 dá lugar ao S/D** (seção 19), planta por planta com o OK do usuário: os traços da ARQ_ESCADAS E RAMPAS em cinza 85 (degraus, contorno, linha de percurso com a bolinha, marca de corte e tracejado depois dela) e a letra S ou D do PDF em Inter SemiBold de ~17 px, cinza quase preto (45), na origem do texto do PDF. Aplicado no Subsolo da Casa A.
 - **[19/10] R14. Triângulo de orientação no início da escada,** indicando o sentido, ora subida ora descida, conforme o pavimento. Usuário: "precisamos do triangulo como símbolo de orientação no inicio de escadas, indicando o sentido ora subida ora descida, a depender da situação".
   - Cheio, cinza-escuro, de 24 × 26 cm, no meio da largura e a 10 cm do início.
   - A ponta segue o sentido do percurso de quem chega por aquele pavimento.
@@ -133,6 +133,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Teto: placa quadrada de ~30 cm, ou disco cinza a ~35 cm da parede.
   - Parede: ducha quadrada de ~20 cm com braço cromado e canopla.
 - **Vaso sanitário:** branco, com volume, contorno fino, sombra curta e tampo fechado (suspenso, quando o PDF indica).
+  - **[26/10] Casa A · Subsolo, banhos feminino e masculino:** vasos marrons ("Sanitarios em marrom, não branco") e cubas em granito marrom ("Cubas dos banhos de serviço em marrom granito"), com a bancada em travertino bruto. O banho de serviço segue com o vaso branco e a cuba branca na bancada de granito marrom.
   - **[22/10] Todos com a tampa** (usuário, na Casa B: "todos os sanitários precisam ter a sua respectiva tampa"): sem exceção, também onde o PDF desenha o vaso aberto (a abertura e o ralo à mostra). A tampa vai da linha da dobradiça, logo à frente dos parafusos, até a frente, recuada do contorno do vaso (fica o aro fino em volta), em louça branca com volume suave, o traço fino das louças e a sombra curta sobre o aro. Os vasos que já trazem a tampa no PDF levam a mesma, para ficarem iguais.
 - **Cuba e torneira:** na posição, no tamanho e do lado do PDF.
   - **[22/10] Cubas em branco** (usuário, na Casa B: "melhore as representações de cubas, pias, tanques" e "cubas em branco"): todas as cubas em louça branca, também as da cozinha, do gourmet e do bar (antes em inox), e os tanques. A bacia tem cantos arredondados, recuada do aro, com a sombra interna do lado da luz (em cima e à direita); o aro duplo do PDF vira um contorno fino só; sombra curta na pedra. Torneiras, válvulas e ralos em metal.
@@ -295,6 +296,10 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 | Casa B: degraus das escadas externas em travertino | **Bege Bahia** |
 | Casa B: banco em L do deck em réguas de madeira | **Bronze fosco** |
 | Box de vidro em cinza escuro sobre o granito | **Cinza claro, visível** |
+| Paredes pretas | **Cinza 80** (E10, 26/10), planta por planta |
+| Triângulo de orientação nas escadas (R14) | **S/D do PDF com a linha de percurso; degraus em cinza 85** (E3, E8, 26/10), planta por planta |
+| Casa A · Subsolo: divisória entre os banhos feminino e masculino como divisória clara (item 94 de 19/10) | **Parede em cinza 80** (26/10) |
+| Casa A · Subsolo: banho de serviço em Barlavento | **Bege Bahia** (26/10) |
 | Carros cada um numa cor, levemente desalinhados (Casas A, D e E) | **Alinhados, mesmo tamanho, mesma cor** (R12) |
 | Subsolo com o Térreo em volta (esmaecido na Casa B; linhas do PDF do Térreo na Casa E; deck esmaecido na Casa A) | **Só o subsolo, terreno hachurado** (R2) |
 | 1º Pavimento da Casa E em opções P&B e linhas | **Nublado** como padrão (os arquivos das opções ficam no histórico) |
@@ -360,7 +365,7 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
 | E7 | "O nome do ambiente não deve ficar sobre os objetos; optar sempre por uma das cores, branco ou preto, para criar contraste." | R6 e R7. Também fora da área do chuveiro e sem encostar na linha do box nem na bancada. |
 | E8 | "Representar a escada de forma mais demarcada." | Linhas dos degraus do PDF em cinza-escuro (~85), mais marcadas que o bocel suave de 19/10. |
 | E9 | "Se a bancada e o piso forem da mesma cor, deixar a bancada mais marcada do que o piso." | Borda fina no tom escurecido da própria pedra e uma sombra curta. |
-| E10 | "Representar as paredes em planta com uma tonalidade de um cinza escuro e os pilares no preto para melhor contraste." | Paredes cinza-escuro (proposta: RGB 70, 70, 70; opções 50 e 90 na prévia) e pilares pretos, inclusive os redondos (substitui o pilar redondo cinza de 22/10). |
+| E10 | "Representar as paredes em planta com uma tonalidade de um cinza escuro e os pilares no preto para melhor contraste." | **Paredes em cinza 80 (RGB 80, 80, 80; resposta do usuário: "Qual cinza para as paredes: 50, 70 ou 90? Resposta: 80")** e pilares pretos, inclusive os redondos (substitui o pilar redondo cinza de 22/10). |
 | E11 | "Se atentar à escala das texturas de piso." | As mesmas texturas e escalas em todas as casas. |
 
 **Auditoria de 26/10** (`POE642_CasaA/scripts/auditoria_2610.py`, que só aponta e não altera nenhuma imagem): os mapas numerados de cada planta estão em `POE642_Casa?/renders/POE642_Casa?_PH_<pav>_auditoria_2610.jpg`; a prévia do estilo proposto e a comparação das escalas, em `_auditoria_2610/`.
@@ -370,5 +375,18 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
 - **E2, E5, E7, E9:** os itens de cada planta estão nos mapas.
 - **E11:** as madeiras e o granito das Casas A e E (que vieram de renders de 2000 px) são mais largos e mais borrados que os das Casas B, C e D (réguas de ~10 a 12 cm, com as emendas). A proposta é levar A e E às texturas e escalas de B, C e D, já aprovadas.
 - **Fora das 11:** linha tracejada vertical que não existe no PDF atravessando a suíte master e o banho master do 1º Pavimento da Casa A.
-- **Perguntas ao usuário:** o tapete conta como objeto para os rótulos (A Térreo, sala de estar; A 1º Pav, sala íntima)? Qual tom de cinza para as paredes?
+- **Respostas do usuário:** paredes em cinza 80; "O tapete conta como objeto, sim" (o rótulo não fica sobre o tapete: A Térreo, sala de estar; A 1º Pav, sala íntima); "vou aprovar planta por planta".
+
+**Aplicação (planta por planta):**
+- **Casa A · Subsolo (26/10, `POE642_CasaA/scripts/final3840_casaa.py`, final refeita em 3840 px):** os pedidos do usuário para esta planta e a auditoria:
+  - travertino bruto no hall, na sauna com a antessala e nos banhos feminino e masculino, na escala das Casas B a D, no creme delas, com os veios horizontais e os poros (E11);
+  - Bege Bahia no pátio, na circulação, no depósito e no banho de serviço (que era Barlavento: "Já o banho serviço tem piso em mármore bege bahia");
+  - a madeira da academia nas réguas das Casas B a D (E11);
+  - o banco da sauna em travertino bruto, mais marcado, com a quina boleada e a sombra de contato;
+  - a cabine do elevador em aço, como nas Casas B a D, com a soleira em inox (no lugar do travertino);
+  - os chuveiros (placa cromada com os furinhos, braço e canopla) e os boxes (as duas folhas contínuas do PDF, mais visíveis, e o trilho no vão);
+  - os armários do depósito em marcenaria (os dois retângulos da DOC_LINHAS, até o teto, com os módulos das portas);
+  - banhos feminino e masculino: bancada em travertino bruto, mais marcada que o piso (E9); cubas em granito marrom; vasos marrons; a divisória entre os dois vira parede em cinza 80 (substitui o item 94 de 19/10);
+  - banho de serviço: bancada em granito marrom, cuba branca, louças e metais nítidos pelo PDF; o vaso fica branco (não foi pedido em marrom);
+  - paredes em cinza 80 (E10); a escada com os traços do PDF em cinza 85, a linha de percurso e o S (E3, E8); o rótulo do banho de serviço fora do box (E7).
 
