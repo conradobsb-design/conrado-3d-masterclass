@@ -2654,3 +2654,25 @@ A escada de 9 degraus, da varanda para o deck (`B.ESCADAS_S[1]`, com o D à dire
 Antes e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2610_granito_cozinha_gourmet_antes_depois.jpg` e `..._escada_travertino_antes_depois.jpg` (o antes de cada um é a final anterior ao pedido); `..._{planta,escadas,gourmet}_antes_depois.jpg` refeitos contra a final de antes da auditoria. Prancha do Térreo e PDF da Casa B refeitos. Aguarda o OK do Térreo.
 
 **Aprovado** (26/10/26): "térreo da casa B aprovado". Casa B fechada: Subsolo e Térreo aprovados, prancha dos dois e PDF (`POE642_CasaB/entrega/POE642_CasaB_Plantas_Humanizadas.pdf`) na versão final. Próxima planta: a que o usuário indicar (pela ordem, o Subsolo da Casa C), com a lista apresentada antes de alterar.
+
+## Casa C · Subsolo, auditoria para o OK (26/10/26)
+
+Pedido do usuário: "prossiga com o subsolo da casa C" (a Casa B está aprovada inteira: "subsolo da casa B aprovado" e "térreo da casa B aprovado"). Pela regra dele ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."), a lista foi apresentada sem alterar a imagem. O mapa numerado: `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_auditoria_2610_v2.jpg` (sobre a prancha atual; a v1 segue em `..._auditoria_2610.jpg`), feito com `auditoria_2610.mapa` e os itens trocados em memória.
+
+A conferência foi trecho a trecho, a final em cima e o PDF no mesmo quadro (sauna e BH academia, depósito, degraus largos, escada estreita, varanda, academia e elevador), e com os 7 rótulos do PDF. Os pisos pela base chapada: travertino na varanda, na sauna, na ducha e no BH academia; Bege Bahia no pátio, nos degraus largos, no caminho e no depósito; madeira na academia.
+
+Conformes: E1 (soleiras), E2 (não há armário cortado), E6 (sem raios), as escalas do Bege Bahia, da madeira e da hachura (as da Casa B), a floreira junto à sauna e os rótulos VARANDA SUBSOLO, ACADEMIA, DEPÓSITO e ELEVADOR. O PDF não tem SHAFT no Subsolo da Casa C.
+
+Os 12 itens:
+1. (E10) paredes pretas em cinza 80 (não há pilares);
+2. (E11) o travertino liso (a foto antiga, só com as nuvens) na varanda, na sauna, na ducha e no BH academia no travertino bruto do Subsolo aprovado da Casa B; os bancos da sauna no travertino bruto mais marcado;
+3. (E3, E8) degraus largos (pátio para o caminho, 1 a 10, com os dois em L): o triângulo vira S (o PDF não marca o sentido; vai no lugar do triângulo, subindo do pátio), sem as linhas, com o sombreamento de subida;
+4. (E3, E8) escada estreita (11 a 21, esmaecida desde 14/10): o triângulo vira o S do PDF no degrau 11, sem as linhas, com o sombreamento; saem os restos do render (o anel e o traço laranja no degrau 18, a diagonal fraca no 11, o pontinho no 19);
+5. (pergunta) a escada estreita depois da linha de corte do PDF (19 a 21): nevoar mais, com a diagonal, como a escada em U do 1º Pavimento da Casa A? Recomendado: sim;
+6. (E5) o box do BH academia (hoje só um tracejado cinza) em vidro contínuo, com as faces, a sombra curta e o trilho, como na Casa B;
+7. (E9) a bancada do BH academia (pedra areia sobre o travertino) com a borda e a sombra curta;
+8. (pergunta) os materiais do BH academia: hoje bancada areia, cuba branca e vaso branco. Recomendado: como o BH sauna da Casa B (bancada em granito marrom, cuba esculpida em travertino bruto, vaso marrom);
+9. (E7) o rótulo BH ACADEMIA encosta na linha do box (3 px), na parede da direita e quase no vaso: corpo menor, no piso livre;
+10. (E7) o rótulo SAUNA encosta no banco (3 px): no meio do piso livre;
+11. os chuveiros de teto da ducha e do BH academia (placa branca com miolo cinza, parecem ralo) em placa cromada com os furinhos, como nas Casas A e B;
+12. a cabine do elevador, branca, em aço, como nas Casas A e B.
