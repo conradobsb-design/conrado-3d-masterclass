@@ -222,6 +222,10 @@ NEUTRO = {"croma_max": 16, "fracao": 0.5}
 # a soleira de Bege Bahia da academia para o hall (pente fino de 21/10, R13; a do elevador vira inox, `ELEVADOR`)
 BANCADAS_FICAM = [(1008.1, 1082.1, 1013.8, 1099.1)]
 SOLEIRAS_FICAM = [(1655.55, 1232.34, 1666.89, 1371.24)]
+# um defeito da foto do Bege Bahia da biblioteca (uns tracinhos escuros, como de uma régua) que cai no piso do depósito,
+# logo abaixo do armário (usuário, 26/10/26: "sem linhas e marcações"): o trecho (px do quadro) recebe um trecho limpo
+# da mesma pedra ao lado (`desloc`, px), com a borda esfumada
+MARCAS_BEGE = [{"q": (1368, 906, 1396, 924), "desloc": (40, 0)}]
 APARELHOS = {"croma_max": 26, "lum_max": 95, "area_min": 60, "borda_px": 22, "sombra": (0.30, 1.4, 1.6)}   # força, dist, sigma
 PROJECAO_ACADEMIA = {"pt": (1377.8, 1627.8, 1576.2, 1650.4), "cor": (200, 210, 220), "larg_px": 1.4, "forca": 0.75}
 
@@ -375,6 +379,14 @@ def pisos(Q, img, ini):
             if p.get("tom") is not None:
                 novo = novo * (np.float32(p["tom"]) / np.maximum(np.median(novo[m], axis=0), 1.0))
         out = F.pousar(out, novo, m, suave=0)
+        if nome == "Bege Bahia":
+            for mk in MARCAS_BEGE:
+                x0, y0, x1, y1 = mk["q"]
+                dx, dy = mk["desloc"]
+                a = np.zeros((y1 - y0, x1 - x0), np.float32)
+                a[3:-3, 3:-3] = 1
+                a = (cv2.GaussianBlur(a, (0, 0), 1.5) * m[y0:y1, x0:x1])[..., None]
+                out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + out[y0 + dy:y1 + dy, x0 + dx:x1 + dx] * a
         if nome == "madeira":
             # a sombra curta dos aparelhos no piso novo e a projeção junto à parede de baixo
             f, dist, sig = APARELHOS["sombra"]
@@ -767,56 +779,38 @@ def elevador(Q, img):
 # ----------------------------------------------------------------------------------------------------------------------
 # 5. Os armários do depósito em marcenaria (pedido 5): os dois retângulos da DOC_LINHAS E PROJEÇÕES (o braço de cima,
 # de 0,50 m, junto à parede de cima, e o da direita, de 0,70 m, junto à parede da direita), até o teto, sem a diagonal
-# (como os armários até o teto da Casa A): a madeira natural com o veio no comprido de cada braço, os módulos das portas
-# (~55 cm) em traço fino, a linha da frente das portas a 2 cm da face livre, o contorno fino nas faces livres e a sombra
-# curta no Bege Bahia.
-DEPOSITO = {"pecas": [((1156.7, 1060.8, 1615.9, 1089.2), "h", "baixo"), ((1615.9, 1060.8, 1655.6, 1219.6), "v", "esquerda")],
-            "madeira": (112, 150, 190), "veio": 0.07, "tom_modulo": 0.035, "modulo_m": 0.55, "frente_m": 0.02,
-            "junta": (66, 88, 112), "junta_px": 0.55, "contorno": (52, 66, 82), "contorno_px": 0.6, "sombra": 0.32,
-            "semente": 2670}
+# (como os armários até o teto da Casa A), com a sombra curta no Bege Bahia. Em freijó (usuário, 26/10/26: "para o
+# armário do deposito use a madeira feijó", e "sem linhas e marcações"): o bege-dourado do freijó, com o veio reto e
+# fino no comprido de cada braço e as listras mais escuras dele, uma peça contínua, sem os módulos das portas, sem a
+# linha da frente e sem contorno (antes, uma madeira natural com os módulos de ~55 cm em traço fino).
+DEPOSITO = {"pecas": [((1156.7, 1060.8, 1615.9, 1089.2), "h"), ((1615.9, 1060.8, 1655.6, 1219.6), "v")],
+            "freijo": (112, 158, 201),                   # BGR: o bege-dourado do freijó (RGB ~201, 158, 112)
+            "veio": (0.05, 0.9, 0.004),                  # (amplitude, comprimento e largura em m): o fio fino e reto
+            "listras": (0.035, 2.0, 0.018),              # as listras mais escuras, longas
+            "nuvem": (0.02, 0.6, 0.25),                  # a variação larga da lâmina
+            "sombra": 0.32, "semente": 2670}
 
 
 def armarios_deposito(Q, img):
     q = DEPOSITO
     out = np.ascontiguousarray(img.copy())
     rng = np.random.default_rng(q["semente"])
-    for r, eixo, frente in q["pecas"]:
+    for r, eixo in q["pecas"]:
         tl = tela(out, Q, r, folga=6)
         m = tl.ret(r)
         sombra_q(tl, m, forca=q["sombra"], dist=1.4, sigma=1.4)
-        # o veio no comprido da peça
-        if eixo == "h":
-            v = cv2.GaussianBlur(rng.normal(0, 1, (tl.h, tl.w)).astype(np.float32), (0, 0), sigmaX=0.6 * Q.px_m,
-                                 sigmaY=0.012 * Q.px_m)
-        else:
-            v = cv2.GaussianBlur(rng.normal(0, 1, (tl.h, tl.w)).astype(np.float32), (0, 0), sigmaX=0.012 * Q.px_m,
-                                 sigmaY=0.6 * Q.px_m)
-        D = 1 + q["veio"] * v / max(v.std(), 1e-6)
-        # os módulos das portas, cada um no seu tom
-        X, Y = tl.grade()
-        x0, y0, x1, y1 = r
-        comp = (x1 - x0) if eixo == "h" else (y1 - y0)
-        n = max(1, int(round(comp / (q["modulo_m"] * 56.69))))
-        passo = comp / n
-        idx = np.clip(((X - x0) if eixo == "h" else (Y - y0)) // passo, 0, n - 1).astype(int)
-        tons = 1 + rng.uniform(-q["tom_modulo"], q["tom_modulo"], n)
-        D *= tons[idx]
-        tl.pintar_img(m, np.float32(q["madeira"]) * D[..., None])
-        juntas = tl.vazia()
-        for i in range(1, n):
-            a = (x0 if eixo == "h" else y0) + i * passo
-            p0, p1 = ((a, y0), (a, y1)) if eixo == "h" else ((x0, a), (x1, a))
-            cv2.line(juntas, tuple(int(v) for v in tl.pt(*p0)), tuple(int(v) for v in tl.pt(*p1)), 255,
-                     max(1, int(round(q["junta_px"] * 8))), cv2.LINE_AA)
-        # a linha da frente das portas, a 2 cm da face livre
-        fm = q["frente_m"] * 56.69
-        lf = {"baixo": ((x0, y1 - fm), (x1, y1 - fm)), "esquerda": ((x0 + fm, y0), (x0 + fm, y1))}[frente]
-        cv2.line(juntas, tuple(int(v) for v in tl.pt(*lf[0])), tuple(int(v) for v in tl.pt(*lf[1])), 255,
-                 max(1, int(round(q["junta_px"] * 8))), cv2.LINE_AA)
-        tl.pintar(juntas & m, q["junta"], 0.8)
-        tl.contorno(m, q["contorno_px"], q["contorno"])
+        D = np.ones((tl.h, tl.w), np.float32)
+        for amp, comp_m, larg_m in (q["veio"], q["listras"], q["nuvem"]):
+            sx, sy = (comp_m, larg_m) if eixo == "h" else (larg_m, comp_m)
+            v = cv2.GaussianBlur(rng.normal(0, 1, (tl.h, tl.w)).astype(np.float32), (0, 0),
+                                 sigmaX=max(0.3, sx * Q.px_m), sigmaY=max(0.3, sy * Q.px_m))
+            v = v / max(v.std(), 1e-6)
+            D *= 1 + amp * (np.minimum(v, 0) * 1.4 if comp_m == q["listras"][1] else v)   # as listras só escurecem
+        tl.pintar_img(m, np.float32(q["freijo"]) * D[..., None])
         out = tl.gravar()
-        print(f"    depósito: armário em marcenaria ({comp / 56.69:.2f} m, {n} módulos de porta)")
+        x0, y0, x1, y1 = r
+        print(f"    depósito: armário em freijó ({((x1 - x0) if eixo == 'h' else (y1 - y0)) / 56.69:.2f} m), "
+              "sem linhas nem marcações")
     return out
 
 

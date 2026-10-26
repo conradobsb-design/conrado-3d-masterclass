@@ -387,7 +387,7 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
   - o banco da sauna em travertino bruto, mais marcado, com a quina boleada e a sombra de contato;
   - a cabine do elevador em aço, como nas Casas B a D, com a soleira em inox (no lugar do travertino);
   - os chuveiros (placa cromada com os furinhos, braço e canopla) e os boxes (as duas folhas contínuas do PDF, mais visíveis, e o trilho no vão);
-  - os armários do depósito em marcenaria (os dois retângulos da DOC_LINHAS, até o teto, com os módulos das portas);
+  - os armários do depósito em freijó (usuário: "para o armário do deposito use a madeira feijó" e "sem linhas e marcações"): os dois retângulos da DOC_LINHAS, até o teto, uma peça contínua com o veio reto do freijó, sem módulos, sem linha da frente e sem contorno, só com a sombra curta;
   - as portas de vidro de correr da academia (pergunta do usuário: "estão bem representadas?"; não estavam), redesenhadas pelo PDF na resolução da prancha: do pátio, 4 folhas em 2 planos com os montantes e os batentes; do hall, 2 folhas desencontradas sobre a soleira de Bege Bahia nítida; e o vidro fixo em L da sauna (usuário: "corrija essa falha ao final da esquadria"), com o caixilho e as linhas do PDF até a parede, sem riscos em volta (usuário: "remova os riscos do contorno do vidro que não fazem parte": o vão da parede sob o vidro vai sem as faces em cinza);
   - banhos feminino e masculino: bancada em travertino bruto, mais marcada que o piso (E9); cubas em granito marrom; vasos marrons; a divisória entre os dois vira parede em cinza 80 (substitui o item 94 de 19/10);
   - banho de serviço: bancada em granito marrom, cuba branca, louças e metais nítidos pelo PDF; o vaso fica branco (não foi pedido em marrom);
