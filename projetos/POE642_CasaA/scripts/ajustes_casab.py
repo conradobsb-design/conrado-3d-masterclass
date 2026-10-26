@@ -1255,9 +1255,12 @@ def circulacao_subsolo(out):
 
 # Subsolo (usuário, 22/10/26: "CADÊ O CHUVEIRO?"): a ducha sem o chuveiro (nem o PDF nem o render o têm). Entra o
 # chuveiro aprovado das Casas A e E (`retoque_subsolo_casae.chuveiro`: a ducha quadrada de 25 cm, o braço cromado e a
-# canopla), na parede preta da sauna, à direita do deck (a face da parede em x 787,2 pt), a 35 cm dela.
-CHUVEIRO_DUCHA = {"ducha": (760.3, 919.9, 774.5, 934.1), "braco": (767.4, 926.25, 787.2, 927.75),
-                  "canopla": (784.7, 924.0, 787.2, 930.0)}
+# canopla). O lugar (usuário, 26/10/26: "corrija o local da ducha externa da planta do subsolo, conforme está na planta
+# do térreo"; antes, na parede da sauna, à direita do deck): o do chuveiro do deck no PDF do Térreo
+# (`final3840_casab.CHUVEIRO_DECK`; os dois PDFs têm as mesmas coordenadas), no meio do deck da ducha, com o braço até
+# a parede de baixo.
+CHUVEIRO_DUCHA = {"ducha": (690.8, 930.4, 702.0, 941.6), "braco": (695.6, 934.9, 697.1, 957.2),
+                  "canopla": (693.6, 955.6, 699.2, 958.2)}
 
 
 def chuveiro_ducha(out):
@@ -1265,7 +1268,7 @@ def chuveiro_ducha(out):
     q = CHUVEIRO_DUCHA
     _, p2r = AJ.pdf_pavimento("Subsolo")
     out = chuveiro(out, p2r, q["ducha"], q["braco"], q["canopla"])
-    print("    ducha: o chuveiro na parede da sauna (ducha quadrada, braço cromado e canopla)")
+    print("    ducha: o chuveiro no lugar do do Térreo (ducha quadrada, braço cromado e canopla)")
     return out
 
 
