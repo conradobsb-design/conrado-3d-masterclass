@@ -986,11 +986,12 @@ A lista do Térreo aprovada pelo usuário em 26/10/26 ("aplique a lista"; o trav
 
 | Etapa | O que faz |
 |---|---|
-| `granito` | o granito das Casas B a D na cor malva da base chapada, só no piso (os objetos, as sombras e o tracejado das projeções ficam); o banho do motorista em Bege Bahia |
-| `travertino` | o travertino bruto do Subsolo no piso de travertino da base, só no piso (os móveis, as sombras e o tracejado ficam) |
+| `granito` | o granito das Casas B a D na cor malva da base chapada, só no piso, até a borda dos objetos (sem folga; as pintas soltas do granito antigo são piso); as sombras e o tracejado das projeções ficam; o banho do motorista em Bege Bahia; a faixa em volta das bancadas refeitas em granito troca inteira |
+| `travertino` | o travertino bruto do Subsolo no piso de travertino da base, até a borda de cada móvel, px a px (`alfa_objetos`: mais claro, de outra cor ou muito escuro que o piso antigo é objeto; a sombra, mais escura e acinzentada, é piso e passa como luz; as manchas fracas e os restos rosados são piso); as peças cheias da base, as esquadrias e as portas ficam |
 | `motorista` | o armário do quarto com os cabides e o box do banho em vidro contínuo |
 | `loucas` | os vasos marrom-escuros (lavabo, WC, banho varanda); a bancada do lavatório em travertino bruto com a cuba esculpida em granito; a bancada do banho do motorista em granito mais escuro, cuba branca, chuveiro |
-| `ilha` | a ilha em U do gourmet em granito mais escuro, com a área molhada rebaixada e a cuba de inox |
+| `ilha` | a ilha em U do gourmet em granito mais escuro, com a área molhada rebaixada, o degrau do balcão e as laterais em cascata, a cuba de inox redesenhada (`cuba_inox`) e o cooktop de 5 bocas do PDF (`cooktop`) |
+| `cozinha` | a ilha e a bancada da pia da cozinha em granito mais escuro, com as laterais em cascata e o cooktop da ilha, a área molhada rebaixada e as duas cubas de inox |
 | `lavabo` | a borda e a sombra da bancada (E9) |
 | `paredes` | cinza 80 nas paredes do PDF; a linha preta dos muros do lote da própria final em cinza 80 |
 | `deck` | o lance do deck em Bege Bahia, sem linhas, com o sombreamento, esmaecido depois do corte; o D no degrau de cima |
@@ -1009,3 +1010,5 @@ python3 final3840_casaa_terreo.py --de rotulos --antes antes.png # e os antes e 
 python3 rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png
 python3 pdf_entrega.py
 ```
+
+Os antes e depois: os da 1ª lista (`planta`, `granito`, … `sala_estar`) contra a final aprovada antes da auditoria; os dos pedidos seguintes (`travertino`, `banhos_varanda`, `ilha_gourmet`, `banho_motorista`, `projecoes`) contra a versão deles; os da limpeza dos contornos (`contornos_moveis`, `contornos_estar`, `contornos_banhos`, `contornos_lavabo`, `contornos_hall`, `ilha_cooktop`, `cozinha_bancadas`) contra a versão anterior a ela (`antes_depois(..., chaves=[...])`).

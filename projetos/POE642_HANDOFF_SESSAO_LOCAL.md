@@ -2520,3 +2520,21 @@ python3 pdf_entrega.py
 
 **Antes e depois** (contra a versão anterior do Térreo): `renders/POE642_CasaA_PH_Terreo_2610_{travertino,banhos_varanda,ilha_gourmet,banho_motorista,projecoes}_antes_depois.jpg`; os de antes (planta, granito, …) seguem contra a final aprovada antes da auditoria.
 
+### Casa A · Térreo, limpeza dos contornos, cooktop da ilha gourmet e bancadas da cozinha (26/10/26)
+
+**Pedidos do usuário:** "faça uma limpeza em contornos. apareceram alguns erros em volta de pisos, bancadas, sanitários, cubas, etc. faça uma auditoria e corrija."; "Me parece que você removeu um cooktop da bancada da ilha da varanda gourmet."; "as bancadas em pedra da cozinha também são no granito marrom, levemente escurecido."
+
+**Auditoria (o que estava errado):** a troca do piso deixava uma folga de 2 a 4 px em volta de cada peça (o piso antigo, rosado, como um anel em volta dos móveis, das louças e das bancadas); os px de traço da base chapada (o antialias entre o piso e a peça) não entravam em nenhuma troca; o miolo branco da base (as louças refeitas) ficava fora da caixa a refazer (o fantasma do vaso antigo no banho varanda); a cuba de inox da ilha era recortada da final com a moldura branca do quartzito; o px da borda das bancadas refeitas levava o branco antigo; a luz do piso caía a zero nos px sem piso por perto (os pontos escuros na divisa dos halls); manchas fracas e restos rosados do render antigo eram tomados por objeto; e o agrupamento do tracejado partia as retas longas (os primeiros traços das diagonais ficavam rosados). O cooktop: o PDF tem um de 5 bocas no braço de cima da ilha em U, e a final aprovada nunca o mostrou.
+
+**Como foi corrigido** (`final3840_casaa_terreo.py`):
+- `travertino`: o piso troca até a borda de cada móvel, px a px (`alfa_objetos`); a sombra (mais escura e acinzentada) passa ao piso novo como luz; as manchas fracas são piso; as peças cheias da base (bancadas, armários), as esquadrias e as portas (`paredes_pdf`) ficam; os px de traço da base entram (`traco_chapada`); as caixas a refazer trocam inteiras, menos as paredes (`refazer`), com a luz do piso em volta; a textura é gerada com folga (`travertino_t(..., borda=8)`);
+- `granito`: os objetos sem folga (manchas claras ou neutras de 60 px ou mais, com os furos), as pintas soltas do granito antigo são piso; a faixa em volta das bancadas refeitas em granito troca inteira (`anel_bancadas`);
+- `nconv2`: nos px sem piso no raio, a luz de um raio maior;
+- `ilha`: o cooktop da biblioteca (`cooktop`, o mesmo da ilha da cozinha), a cuba de inox redesenhada (`cuba_inox`) e as linhas do degrau do balcão e das laterais em cascata (`linhas_pedra`);
+- `cozinha` (nova): a ilha e a bancada da pia em granito mais escuro, com o cooktop, as laterais, a área molhada e as duas cubas de inox;
+- `cadeias_tracejadas`: a distância à origem pela direção do próprio traço, com as faixas vizinhas juntas.
+
+**A confirmar com o usuário:** a bancada em L da área de serviço (com os tanques) continua em Carrara; o pedido falou só da cozinha.
+
+**Antes e depois** (contra a versão anterior): `renders/POE642_CasaA_PH_Terreo_2610_{contornos_moveis,contornos_estar,contornos_banhos,contornos_lavabo,contornos_hall,ilha_cooktop,cozinha_bancadas}_antes_depois.jpg`.
+

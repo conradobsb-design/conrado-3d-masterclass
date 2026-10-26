@@ -19,7 +19,10 @@ no piso do térreo"); os vasos do lavabo e dos banheiros da varanda gourmet em m
 esculpida em granito marrom e a bancada em travertino bruto mais marcado que o piso; o banho de serviço (o do motorista)
 com piso em Bege Bahia e a pia em granito marrom mais escuro; o rótulo do banho do motorista mais abaixo e centralizado;
 a ilha em U do gourmet em granito marrom mais escuro que o piso; as projeções tracejadas em preto nos fundos claros e em
-branco nos escuros.
+branco nos escuros. E depois: a limpeza dos contornos ("faça uma limpeza em contornos. apareceram alguns erros em volta
+de pisos, bancadas, sanitários, cubas"): o piso novo até a borda de cada peça, sem o anel do piso antigo; o cooktop do
+PDF na ilha em U ("Me parece que você removeu um cooktop"); a ilha e a pia da cozinha em granito marrom mais escuro
+("as bancadas em pedra da cozinha também são no granito marrom, levemente escurecido").
 
 A imagem de partida é a final aprovada do Térreo no quadro de 3840 px, sem os rótulos (`rotulos_casaa.final_imagem`).
 Cada item é redesenhado ali, pelo PDF (vetor) e pela base chapada da legenda, com as rotinas do `final3840_casaa.py`.
@@ -58,19 +61,38 @@ tela, sombra_q, ret_aa = FA.tela, FA.sombra_q, FA.ret_aa
 # pedra antiga (`limiar`): as sombras dos carros, das bancadas e das paredes ficam; as nuvens do granito antigo, não.
 # O tracejado claro das projeções (R8; a laje superior sobre a área de serviço, DOC_LINHAS E PROJEÇÕES) fica o da final:
 # os px junto aos traços do PDF mais claros que a pedra em volta (`proj_claro`) não trocam.
+# Os contornos (usuário, 26/10/26: "faça uma limpeza em contornos. apareceram alguns erros em volta de pisos, bancadas,
+# sanitários, cubas"): os objetos são as manchas claras ou neutras da final de verdade (`area_obj` px ou mais, px a px,
+# sem a folga de antes, que deixava um anel do granito antigo em volta de cada peça), com os furos de dentro; as pintas
+# soltas do granito antigo, mesmo juntas, são piso. As caixas a refazer (`refaz`) trocam inteiras, menos as paredes; e
+# a faixa de piso em volta das bancadas refeitas em granito (a ilha em U do gourmet, a ilha e a pia da cozinha: `anel_px`,
+# menos o lado das banquetas da ilha da cozinha) também, sem o brilho da borda do quartzito antigo.
 # O banho do motorista (usuário, 26/10/26: "Banho serviço: piso em mármore bege bahia, pedra pia em marrom granito
 # levemente escurecida"; no Térreo, o banho de serviço é o do motorista) recebe o Bege Bahia das Casas B a D no lugar do
 # granito, na mesma máscara e com a mesma luz (`bege`); a bancada e a cuba antigas (`refaz`) viram piso, e as peças novas
 # vêm na etapa `loucas`.
-GRANITO_T = {"chapada": (158, 167, 191), "fechar": 5, "sig_obj": 1.6, "lum_obj": 150, "croma_obj": 16,
-             "area_pinta": 40, "sig_luz": 1.4, "sig_base_m": 0.8, "limiar": 0.08, "proj_claro": 18,
+GRANITO_T = {"chapada": (158, 167, 191), "fechar": 5, "sig_obj": 0.6, "lum_obj": 150, "croma_obj": 16,
+             "area_obj": 60, "buraco_max": 600, "sig_luz": 1.4, "sig_base_m": 0.8, "limiar": 0.08, "proj_claro": 18,
              "semente": 2700, "bege": (2021.2, 1381.2, 2143.3, 1466.0),
-             "refaz": [(2103.6, 1381.2, 2143.3, 1410.6)], "refaz_px": 4, "bege_semente": 2705}
+             "refaz": [(2103.6, 1381.2, 2143.3, 1410.6)], "refaz_px": 6, "bege_semente": 2705, "anel_px": 3}
 
 
-def nconv2(a, m, sig):
-    """A média normalizada (só os px de m) de uma imagem de um canal."""
-    return cv2.GaussianBlur(a * m, (0, 0), sig) / np.maximum(cv2.GaussianBlur(m, (0, 0), sig), 1e-4)
+def nconv2(a, m, sig, onde=None, escalas=(2, 4, 8, 16)):
+    """A média normalizada (só os px de m) de uma imagem de um canal; nos px de `onde` sem px de m no raio sig (a borda
+    entre dois pisos, junto a uma peça), a de um raio maior (`escalas` vezes sig), em vez de zero."""
+    num, den = cv2.GaussianBlur(a * m, (0, 0), sig), cv2.GaussianBlur(m, (0, 0), sig)
+    out = num / np.maximum(den, 1e-4)
+    if onde is None:
+        return out
+    falta = (den < 0.05) & onde
+    for k in escalas:
+        if not falta.any():
+            break
+        num, den = cv2.GaussianBlur(a * m, (0, 0), sig * k), cv2.GaussianBlur(m, (0, 0), sig * k)
+        ok = falta & (den >= 0.05)
+        out[ok] = num[ok] / den[ok]
+        falta &= ~ok
+    return out
 
 
 def tracejado(Q):
@@ -94,6 +116,50 @@ def caixas(Q, rets, folga_px):
     return cv2.dilate((a > 0.02).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
 
 
+def refazer(Q, rets, folga_px):
+    """As caixas a refazer (pt), com a folga (px), sem as paredes (o escuro grosso da base chapada; os traços finos das
+    peças antigas saem junto)."""
+    escuro = (Q.chapada.max(axis=2) <= 60).astype(np.uint8)
+    parede = cv2.morphologyEx(escuro, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8)).astype(bool)
+    return caixas(Q, rets, folga_px) & ~parede
+
+
+def perto_de(m, px):
+    return cv2.dilate(m.astype(np.uint8), np.ones((2 * px + 1, 2 * px + 1), np.uint8)).astype(bool)
+
+
+def traco_chapada(Q, ch):
+    """Os px de traço da base chapada junto ao piso ch: as cores fora da paleta e o px entre o piso e uma peça branca (o
+    antialias dos traços do PDF, que não é nem piso nem peça e ficava com o px antigo)."""
+    if getattr(Q, "_raras", None) is None:
+        c = Q.chapada.astype(np.int32)
+        k = (c[..., 0] << 16) | (c[..., 1] << 8) | c[..., 2]
+        cores, n = np.unique(k, return_counts=True)
+        Q._raras = ~np.isin(k, cores[n >= 5000])
+    branco = np.all(Q.chapada == 255, axis=2)
+    entre = perto_de(branco, 1) & ~branco & (Q.chapada.max(axis=2) > 60)
+    return perto_de(ch, 1) & ~ch & (Q._raras | entre)
+
+
+def pecas_cheias(Q):
+    """As peças cheias da base chapada (os preenchimentos brancos do PDF: bancadas, armários; sem os contornos finos dos
+    móveis), que são objeto até a borda."""
+    if getattr(Q, "_cheias", None) is None:
+        Q._cheias = cv2.morphologyEx(np.all(Q.chapada == 255, axis=2).astype(np.uint8), cv2.MORPH_OPEN,
+                                     np.ones((5, 5), np.uint8)).astype(bool)
+    return Q._cheias
+
+
+def manchas(m, area_min, buraco_max):
+    """As manchas de m com area_min px ou mais, com os furos de dentro (até buraco_max px)."""
+    from scipy import ndimage
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+    g = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= area_min])
+    furo = ndimage.binary_fill_holes(g) & ~g
+    n, lab, st, _ = cv2.connectedComponentsWithStats(furo.astype(np.uint8), 8)
+    return g | np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= buraco_max])
+
+
 def bege_bahia(Q, h, w, semente):
     """O Bege Bahia das Casas B a D (a foto da biblioteca na escala, no tom delas), h x w x 3."""
     sys.path.insert(0, str(A.RAIZ / "_texturas"))
@@ -102,42 +168,58 @@ def bege_bahia(Q, h, w, semente):
     return T / T.reshape(-1, 3).mean(axis=0) * np.float32(FA.PISOS_A["Bege Bahia"]["tom"])
 
 
+def anel_bancadas(Q, px):
+    """A faixa da borda das bancadas refeitas em granito (a ilha em U, a ilha e a pia da cozinha): px para fora e 2 px
+    para dentro (o px da borda, que a pedra nova cobre só em parte, levava o branco do quartzito antigo), menos o lado
+    das banquetas da ilha da cozinha."""
+    m = np.zeros((Q.H, Q.W), np.uint8)
+    cv2.fillPoly(m, [np.int32(np.round([Q.p2q(x, y) for x, y in ILHA["poli"]]))], 1)
+    m = m.astype(bool)
+    r = caixas(Q, [COZINHA["pia"]], 0)
+    i = caixas(Q, [COZINHA["ilha"]], 0)
+    dentro = cv2.erode((m | r | i).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    i = perto_de(i, px)
+    i[:int(np.ceil(Q.p2q(0, COZINHA["ilha"][1])[1])), :] = False
+    return (perto_de(m | r, px) | i) & ~dentro
+
+
 def granito(Q, img):
     import fontes_procedurais as FP
     q = GRANITO_T
-    ch = np.all(Q.chapada == np.uint8(q["chapada"]), axis=2)
-    ch = F.fechar(ch, q["fechar"])
-    f = cv2.GaussianBlur(img.astype(np.float32), (0, 0), q["sig_obj"])
+    im = img.astype(np.float32)
+    ch = F.fechar(np.all(Q.chapada == np.uint8(q["chapada"]), axis=2), q["fechar"])
+    branco = np.all(Q.chapada == 255, axis=2) & perto_de(ch, 7)
+    traco = traco_chapada(Q, ch)
+    refaz = (refazer(Q, q["refaz"], q["refaz_px"]) & perto_de(ch, 7)) | (anel_bancadas(Q, q["anel_px"]) & perto_de(ch, 3))
+    onde = (ch | branco | refaz | traco) & (FA.paredes_pdf(Q) < 0.5)          # as esquadrias e as portas ficam
+    f = cv2.GaussianBlur(im, (0, 0), q["sig_obj"])
     lum, croma = f.mean(axis=2), f.max(axis=2) - f.min(axis=2)
-    obj = ch & ((lum > q["lum_obj"]) | (croma < q["croma_obj"]))
-    # as pintas claras do granito antigo não são objeto
-    n, lab, st, _ = cv2.connectedComponentsWithStats(obj.astype(np.uint8), 8)
-    obj = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_pinta"]])
-    obj = cv2.dilate(obj.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    obj = manchas(onde & ((lum > q["lum_obj"]) | (croma < q["croma_obj"])), q["area_obj"], q["buraco_max"])
+    obj |= branco & ~obj & (lum > q["lum_obj"] * 0.8)           # o resto claro dos objetos na base branca
+    obj |= pecas_cheias(Q) & ~refaz
     # o tracejado das projeções
-    L0 = img.astype(np.float32).mean(axis=2)
+    L0 = im.mean(axis=2)
     claro = L0 - cv2.medianBlur(np.clip(L0, 0, 255).astype(np.uint8), 9).astype(np.float32) > q["proj_claro"]
-    proj = ch & tracejado(Q) & claro
-    refaz = caixas(Q, q["refaz"], q["refaz_px"]) & ch
-    m = (ch & ~obj & ~cv2.dilate(proj.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)) | refaz
+    proj = perto_de(ch & tracejado(Q) & claro, 1)
+    m = (onde & ~obj & ~proj) | refaz
     # a luz: o que escurece além do desenho da pedra antiga (sombras), só com os px do granito
-    L = img.astype(np.float32).mean(axis=2)
-    mf = m.astype(np.float32)
-    perto = nconv2(L, mf, q["sig_luz"])
-    base = nconv2(L, mf, q["sig_base_m"] * Q.px_m)
+    mf = (m & ~refaz).astype(np.float32)
+    perto = nconv2(L0, mf, q["sig_luz"], onde=m)
+    base = nconv2(L0, mf, q["sig_base_m"] * Q.px_m)
     sh = np.clip(perto / np.maximum(base, 1) + q["limiar"], 0, 1)
-    sh[refaz] = 1.0
+    # nas caixas refeitas, a luz do piso em volta (a sombra das paredes e das peças, sem a da peça antiga)
+    sh[refaz] = np.clip(nconv2(L0, mf, 2.5, onde=refaz) / np.maximum(base, 1) + q["limiar"], 0, 1)[refaz]
     ys, xs = np.nonzero(m)
     y0, x0, y1, x1 = ys.min(), xs.min(), ys.max() + 1, xs.max() + 1
-    T = FP.granito_referencia(y1 - y0, x1 - x0, Q.px_m, semente=q["semente"]).astype(np.float32)
+    T = FP.granito_referencia(y1 - y0 + 16, x1 - x0 + 16, Q.px_m, semente=q["semente"]).astype(np.float32)[8:-8, 8:-8]
     # o banho do motorista em Bege Bahia
     bg = (ret_aa(Q, q["bege"]) > 0.5)[y0:y1, x0:x1]
     T = np.where(bg[..., None], bege_bahia(Q, y1 - y0, x1 - x0, q["bege_semente"]), T)
-    novo = img.astype(np.float32).copy()
+    novo = im.copy()
     novo[y0:y1, x0:x1] = T * sh[y0:y1, x0:x1, None]
-    out = F.pousar(img.astype(np.float32), novo, m, suave=0.6)
-    print(f"    granito das Casas B a D: {m.sum() / Q.px_m ** 2:.1f} m² de piso (os objetos ficam: "
-          f"{(ch & obj).sum() / Q.px_m ** 2:.1f} m²; o tracejado das projeções: {int(proj.sum())} px); o banho do "
+    out = F.pousar(im, novo, m, suave=0.6)
+    print(f"    granito das Casas B a D: {m.sum() / Q.px_m ** 2:.1f} m² de piso (os objetos ficam, sem folga: "
+          f"{(onde & obj).sum() / Q.px_m ** 2:.1f} m²; o tracejado das projeções: {int(proj.sum())} px); o banho do "
           f"motorista em Bege Bahia ({(bg & m[y0:y1, x0:x1]).sum() / Q.px_m ** 2:.1f} m²)")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
@@ -151,57 +233,101 @@ def granito(Q, img):
 #   (`claro`), de outra cor (`croma`) ou muito escuro (traços, pilares, vidros); as sombras (mais escuras, na mesma cor)
 #   são piso e passam ao travertino novo como luz, como no granito;
 # - o tracejado das projeções (mais escuro que o piso, junto aos traços do PDF) fica o da final;
-# - as louças e a bancada que são refeitas na etapa `loucas` (`refaz`) viram piso antes.
-TRAV_T = {"chapada": (202, 217, 220), "fechar": 3, "obj_px": 2, "sig_obj": 1.2, "claro": 0.06, "croma": 0.045,
-          "escuro": 0.45, "area_pinta": 40, "sig_luz": 1.0, "sig_base_m": 0.8, "limiar": 0.05, "proj_escuro": 0.93,
-          "sig_m": 3.0, "refaz": [(2077.1, 577.4, 2106.3, 597.5), (1293.9, 1734.0, 1323.0, 1754.0),
-                                   (1442.9, 1612.5, 1462.9, 1641.6), (1292.7, 1605.1, 1406.1, 1633.4)],
-          "refaz_px": 4, "semente": 2704}
+# - as louças e a bancada que são refeitas na etapa `loucas` (`refaz`) viram piso antes, inteiras (menos as paredes).
+# Os contornos (usuário, 26/10/26: "faça uma limpeza em contornos"): antes, os móveis levavam uma folga de 2 a 4 px do
+# piso antigo, rosado, em volta. Agora o piso troca até a borda de cada peça, px a px, pelo quanto o px foge do piso
+# antigo em volta (`alfa_objetos`): mais claro, de outra cor ou muito escuro é objeto; a sombra (mais escura e mais
+# acinzentada, como o render antigo a fazia) é piso e passa ao travertino novo como luz; os px da borda, meio objeto e
+# meio piso, misturam os dois. As manchas só um pouco mais claras que o piso, na mesma cor e sem px fortes (a luz do
+# render antigo e os restos rosados de peças que saíram, que no travertino novo viravam retângulos rosados), são piso. O miolo das peças cheias da base (bancadas, armários) é sempre objeto; os px de traço da
+# base (o antialias entre o piso e a peça, que não era nem um nem outro e ficava com o px antigo) entram na troca.
+TRAV_T = {"chapada": (202, 217, 220), "fechar": 3, "area_obj": 40, "sig_luz": 0.8, "sig_base_m": 0.8, "limiar": 0.05,
+          "proj_escuro": 0.93, "sig_m": 3.0, "refaz": [(2077.1, 577.4, 2106.3, 597.5), (1293.9, 1734.0, 1323.0, 1754.0),
+                                                       (1442.9, 1612.5, 1462.9, 1641.6),
+                                                       (1292.7, 1605.1, 1406.1, 1633.4)],
+          "refaz_px": 7, "semente": 2704,
+          # o quanto o px foge do piso antigo: (onde começa, onde já é objeto)
+          "alfa": {"croma": (0.015, 0.035), "claro": (1.03, 1.07), "escuro": (0.62, 0.50), "sig_px": 0.6,
+                   "zona_px": 3, "buraco_max": 600,
+                   # px forte (croma, claro, escuro); mancha fraca: até 2% de px fortes, 90% abaixo de croma e claro
+                   "forte": (0.05, 1.10, 0.55), "fraca": (0.02, 0.02, 1.09)}}
 
 
-def travertino_t(Q, h, w, semente):
-    """O travertino bruto do Subsolo aprovado (h x w x 3), no tom dele."""
+def travertino_t(Q, h, w, semente, borda=8):
+    """O travertino bruto do Subsolo aprovado (h x w x 3), no tom dele (gerado com `borda` px a mais em volta: na borda
+    da foto, os poros se juntavam numa fila escura)."""
     p = FA.PISOS_A["travertino"]
-    D = FA.travertino_bruto(Q, h, w, semente, forca=p["forca"], **FA.TRAVERTINO["piso"])
-    return np.float32(p["tom"]) * D[..., None]
+    D = FA.travertino_bruto(Q, h + 2 * borda, w + 2 * borda, semente, forca=p["forca"], **FA.TRAVERTINO["piso"])
+    return np.float32(p["tom"]) * D[borda:borda + h, borda:borda + w, None]
+
+
+def alfa_objetos(im, L, onde, area_min, z):
+    """O quanto cada px de `onde` é objeto (0: o piso antigo, com ou sem sombra; 1: objeto), pela cor dele contra a do
+    piso antigo em volta (L): mais claro, de outra cor ou muito escuro. Só junto às manchas de objeto de verdade
+    (area_min px ou mais, com os furos de dentro): as pintas e os veios soltos do piso antigo são piso."""
+    f = cv2.GaussianBlur(im, (0, 0), z["sig_px"])
+    lf = np.maximum(f.mean(axis=2), 1)
+    lL = np.maximum(L.mean(axis=2), 1)
+    r = lf / lL
+    c, cL = f / lf[..., None], L / lL[..., None]
+    cd = np.abs(c - cL).max(axis=2)
+    # mais escuro que o piso: a sombra do render antigo é também mais acinzentada (o tom do piso indo para o neutro)
+    v = cL - 1
+    t = np.clip(((c - 1) * v).sum(axis=2) / np.maximum((v * v).sum(axis=2), 1e-6), 0, 1)[..., None]
+    cd = np.where(r < 1, np.minimum(cd, np.abs(c - 1 - t * v).max(axis=2)), cd)
+    rampa = lambda x, a, b: np.clip((x - a) / (b - a), 0, 1)
+    w = np.maximum.reduce([rampa(cd, *z["croma"]), rampa(r, *z["claro"]), rampa(r, *z["escuro"])])
+    g = manchas(onde & (w > 0.5), area_min, z["buraco_max"])
+    # as manchas só um pouco mais claras que o piso, na mesma cor (a luz do render antigo, os restos rosados de peças
+    # antigas), sem px fortes, são piso
+    n, lab = cv2.connectedComponents(g.astype(np.uint8), connectivity=8)
+    cnt = np.maximum(np.bincount(lab.ravel(), minlength=n), 1)
+    fr = lambda x: np.bincount(lab.ravel(), weights=x.ravel().astype(np.float64), minlength=n) / cnt
+    f_forte = fr((cd > z["forte"][0]) | (r > z["forte"][1]) | (r < z["forte"][2]))
+    fraca = (f_forte <= z["fraca"][0]) & (fr(cd > z["fraca"][1]) <= 0.1) & (fr(r > z["fraca"][2]) <= 0.1)
+    fraca[0] = False
+    g &= ~fraca[lab]
+    a = np.where(onde & perto_de(g, z["zona_px"]), w, 0).astype(np.float32)
+    a[g & ((w <= 0.5) | ~perto_de(~g, 2))] = 1                   # os furos e o miolo das peças
+    return a
 
 
 def travertino(Q, img):
     q = TRAV_T
     im = img.astype(np.float32)
     ch = F.fechar(np.all(Q.chapada == np.uint8(q["chapada"]), axis=2), q["fechar"])
-    branco = np.all(Q.chapada == 255, axis=2) & cv2.dilate(ch.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
-    k = 2 * q["obj_px"] + 1
-    obj_ch = cv2.dilate(branco.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
-    # o tom do piso em volta e o que foge dele
-    L = F.luz_robusta(im, ch & ~obj_ch, 1.0 * Q.px_m)
-    f = cv2.GaussianBlur(im, (0, 0), q["sig_obj"])
-    lf, lL = np.maximum(f.mean(axis=2), 1), np.maximum(L.mean(axis=2), 1)
-    r = lf / lL
-    cd = np.abs(f / lf[..., None] - L / lL[..., None]).max(axis=2)
-    obj = ch & ((r > 1 + q["claro"]) | (cd > q["croma"]) | (r < q["escuro"]))
-    n, lab, st, _ = cv2.connectedComponentsWithStats(obj.astype(np.uint8), 8)
-    obj = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_pinta"]])
-    obj = cv2.dilate(obj.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
-    proj = ch & tracejado(Q) & (im.mean(axis=2) / lL < q["proj_escuro"])
-    proj = cv2.dilate(proj.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
-    refaz = caixas(Q, q["refaz"], q["refaz_px"]) & (ch | branco)
-    m = (ch & ~obj_ch & ~obj & ~proj) | refaz
-    # a luz: as sombras (o que escurece além do desenho da pedra antiga) e a luz larga do lugar
+    branco = np.all(Q.chapada == 255, axis=2) & perto_de(ch, 7)
+    # o traço junto ao granito é dele (a etapa do granito o troca), não do travertino; e a divisa dos dois pisos fica
+    gran = perto_de(np.all(Q.chapada == np.uint8(GRANITO_T["chapada"]), axis=2), 2)
+    cru = np.all(Q.chapada == np.uint8(q["chapada"]), axis=2)
+    refaz = refazer(Q, q["refaz"], q["refaz_px"]) | (anel_bancadas(Q, GRANITO_T["anel_px"]) & perto_de(ch, 3) & ~gran)
+    onde = (ch | branco | refaz | traco_chapada(Q, ch)) & (FA.paredes_pdf(Q) < 0.5)   # as esquadrias e as portas ficam
+    onde &= ~(gran & ~cru)
+    L = F.luz_robusta(im, ch & ~perto_de(branco, 2), 1.0 * Q.px_m)
     lum = im.mean(axis=2)
-    mf = (m & ~refaz).astype(np.float32)
-    perto = nconv2(lum, mf, q["sig_luz"])
+    a = alfa_objetos(im, L, onde, q["area_obj"], q["alfa"])
+    a[perto_de(ch & tracejado(Q) & (lum / np.maximum(L.mean(axis=2), 1) < q["proj_escuro"]), 1)] = 1
+    a[pecas_cheias(Q) & ~refaz] = 1
+    a[refaz] = 0
+    # a luz: as sombras (o que escurece além do desenho da pedra antiga, até a borda dos móveis) e a luz larga
+    limpo = onde & (a < 0.5) & ~refaz
+    mf = limpo.astype(np.float32)
+    perto = nconv2(lum, mf, q["sig_luz"], onde=onde)
     base = nconv2(lum, mf, q["sig_base_m"] * Q.px_m)
     larga = nconv2(lum, mf, q["sig_m"] * Q.px_m)
-    sh = np.clip(perto / np.maximum(base, 1) + q["limiar"], 0, 1) * larga / np.median(larga[m])
-    sh[refaz] = (larga / np.median(larga[m]))[refaz]
+    k = larga / np.median(larga[limpo])
+    sh = np.clip(perto / np.maximum(base, 1) + q["limiar"], 0, 1) * k
+    # nas caixas refeitas, a luz do piso em volta (a sombra das paredes e das peças, sem a da peça antiga)
+    sh[refaz] = (np.clip(nconv2(lum, mf, 2.5, onde=refaz) / np.maximum(base, 1) + q["limiar"], 0, 1) * k)[refaz]
+    m = onde & (a < 1)
     ys, xs = np.nonzero(m)
     y0, x0, y1, x1 = ys.min(), xs.min(), ys.max() + 1, xs.max() + 1
     novo = im.copy()
     novo[y0:y1, x0:x1] = travertino_t(Q, y1 - y0, x1 - x0, q["semente"]) * sh[y0:y1, x0:x1, None]
-    out = F.pousar(im, novo, m, suave=0.6)
-    print(f"    travertino bruto do Subsolo no piso: {m.sum() / Q.px_m ** 2:.1f} m² (os móveis e o que foge do tom "
-          f"do piso ficam: {((ch | branco) & ~m).sum() / Q.px_m ** 2:.1f} m²)")
+    a3 = np.where(m, a, 1)[..., None]
+    out = im * a3 + novo * (1 - a3)
+    print(f"    travertino bruto do Subsolo no piso: {(m & (a < 0.5)).sum() / Q.px_m ** 2:.1f} m², até a borda dos "
+          f"móveis (os móveis e o que foge do tom do piso ficam: {(onde & (a >= 0.5)).sum() / Q.px_m ** 2:.1f} m²)")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
@@ -346,18 +472,98 @@ def loucas(Q, img):
 # 3c. A ilha em U da varanda gourmet (usuário, 26/10/26: "pedra da ilha em U da varanda gourmet é marrom granito, igual
 # ao piso. deixe-a levemente escurecida para distinguir do piso"; era o quartzito Carrara de 21/10): o polígono da
 # ARQ_BANCADAS em granito marrom um pouco mais escuro que o piso do gourmet, com a borda no tom escurecido da pedra e a
-# sombra curta (E9); a área molhada da perna de baixo (o retângulo do PDF) rebaixada, um tom abaixo, com a borda; a cuba
-# de inox e a torneira ficam as da final (no lugar do PDF).
+# sombra curta (E9); a área molhada da perna de baixo (o retângulo do PDF) rebaixada, um tom abaixo, com a borda.
+# Depois (usuário, 26/10/26: "Me parece que você removeu um cooktop da bancada da ilha da varanda gourmet"; o PDF tem o
+# cooktop de 5 bocas no braço de cima, que a final aprovada não mostrava; e a limpeza dos contornos):
+# - o cooktop de inox de 5 bocas da biblioteca, o mesmo da ilha da cozinha, no retângulo do PDF, com os botões embaixo,
+#   do lado de quem cozinha (`cooktop`);
+# - a cuba de inox redesenhada no PDF (`cuba_inox`: a aba, a bacia com a sombra das bordas de cima e da direita, a
+#   válvula) e a torneira cromada, no lugar da recortada da final (que trazia a moldura branca do quartzito antigo);
+# - as linhas finas da pedra do PDF no tom da borda: o degrau do balcão das banquetas no braço de cima e as laterais em
+#   cascata das pontas (`linhas`).
 ILHA = {"poli": [(1281.4, 1596.6), (1281.4, 1432.2), (1556.3, 1432.2), (1556.3, 1488.9), (1315.4, 1488.9),
                  (1315.4, 1556.9), (1556.3, 1556.9), (1556.3, 1596.6)],
-        "molhada": (1443.5, 1559.2, 1554.1, 1593.8), "cuba": (1492.8, 1564.3, 1534.8, 1589.2),
-        "torneira": (1514.5, 1579.3, 1516.2, 1591.7), "escurecer": 0.86, "molhada_esc": 0.80, "borda": 0.62,
-        "larg": 0.6, "sombra": 0.34, "semente": 2708}
+        "molhada": (1443.5, 1559.2, 1554.1, 1593.8),
+        "cuba": {"cuba": (1492.8, 1564.3, 1534.8, 1589.2), "bacia": (1494.3, 1565.7, 1533.4, 1587.7),
+                 "torneira": (1514.5, 1579.3, 1516.2, 1590.4), "base": (1515.35, 1590.6, 1.4)},
+        "cooktop": (1409.5, 1458.8, 1459.4, 1487.2),
+        "linhas": [((1282.5, 1451.45), (1554.1, 1451.45)), ((1283.05, 1452.1), (1283.05, 1596.6)),
+                   ((1555.2, 1432.2), (1555.2, 1488.9))],
+        "escurecer": 0.86, "molhada_esc": 0.80, "borda": 0.62, "larg": 0.6, "sombra": 0.34, "linha_px": 0.9,
+        "linha": 0.70, "semente": 2708}
+INOX = {"aba": (196, 199, 202), "bacia": (176, 180, 184), "sombra": (0.30, 2.0), "contorno": (128, 132, 136),
+        "larg": 0.4}
+COOKTOP = {"bloco": "cooktop_inox_5_90", "esticar": 1.10, "azul": 18}
+
+
+def cuba_inox(Q, out, c):
+    """A cuba de inox de embutir: a aba fina, a bacia com a sombra das bordas de cima e da direita por dentro (a luz
+    vem do alto à direita), a válvula cromada; e a torneira."""
+    q = INOX
+    tl = tela(out, Q, c["cuba"], folga=4)
+    m = tl.ret(c["cuba"], 1.0)
+    tl.pintar(m, q["aba"])
+    b = tl.ret(c["bacia"], 1.6)
+    dist = cv2.distanceTransform(b, cv2.DIST_L2, 5) / 8
+    X, Y = tl.grade()
+    x0, y0, x1, y1 = c["bacia"]
+    lado = np.clip(((X - x0) / (x1 - x0) + (y1 - Y) / (y1 - y0)) / 2, 0, 1)
+    f, alc = q["sombra"]
+    d_out = cv2.resize(dist.astype(np.float32), (tl.w, tl.h), interpolation=cv2.INTER_AREA)
+    prof = 1 - f * np.clip(1 - d_out / alc, 0, 1) * (0.35 + 0.65 * lado)
+    tl.pintar_img(b, np.float32(q["bacia"]) * prof[..., None])
+    tl.contorno(b, q["larg"], q["contorno"])
+    tl.contorno(m, q["larg"], q["contorno"])
+    v = tl.vazia()
+    cx, cy = tl.pt((x0 + x1) / 2, (y0 + y1) / 2)
+    cv2.circle(v, (int(cx), int(cy)), int(1.3 * PT_PX * 8), 255, -1, cv2.LINE_AA)
+    tl.pintar(v, FA.CROMO["meio"])
+    tl.contorno(v, 0.3, FA.CROMO["contorno"])
+    out = tl.gravar()
+    return FA.torneira(Q, out, c["torneira"], c["base"])
+
+
+def cooktop(Q, out, r):
+    """O cooktop de inox de 5 bocas da biblioteca (o da ilha da cozinha, `ajustes_casaa.desenhar_ilha`): na altura do
+    retângulo do PDF, até `esticar` na largura, centrado, os botões embaixo; o anel azul da chama em inox."""
+    q = COOKTOP
+    rgba = cv2.imread(str(A.RAIZ / "_blocos" / "recortes" / f"{q['bloco']}.png"), cv2.IMREAD_UNCHANGED)
+    cor0 = rgba[..., :3].astype(np.float32)
+    azul = np.clip((cor0[..., 0] - cor0[..., 2] - q["azul"]) / 20, 0, 1)[..., None]
+    cor0 = cor0 * (1 - azul) + cor0.mean(axis=2, keepdims=True) * azul
+    a0 = rgba[..., 3].astype(np.float32) / 255
+    (x0, y0), (x1, y1) = Q.p2q(*r[:2]), Q.p2q(*r[2:])
+    H = y1 - y0
+    W = min(x1 - x0, H * rgba.shape[1] / rgba.shape[0] * q["esticar"])
+    cx, cy, k = (x0 + x1) / 2, (y0 + y1) / 2, 8
+    Wi, Hi = int(np.ceil(W)) + 2, int(np.ceil(H)) + 2
+    fx, fy = np.floor(cx - W / 2) - 1, np.floor(cy - H / 2) - 1
+    M = cv2.getAffineTransform(np.float32([(0, 0), (rgba.shape[1], 0), (0, rgba.shape[0])]),
+                               np.float32([((cx - W / 2 - fx) * k, (cy - H / 2 - fy) * k),
+                                           ((cx + W / 2 - fx) * k, (cy - H / 2 - fy) * k),
+                                           ((cx - W / 2 - fx) * k, (cy + H / 2 - fy) * k)]))
+    c1 = cv2.resize(cv2.warpAffine(cor0 * a0[..., None], M, (Wi * k, Hi * k), flags=cv2.INTER_AREA), (Wi, Hi),
+                    interpolation=cv2.INTER_AREA)
+    a1 = cv2.resize(cv2.warpAffine(a0, M, (Wi * k, Hi * k), flags=cv2.INTER_AREA), (Wi, Hi),
+                    interpolation=cv2.INTER_AREA)[..., None]
+    fx, fy = int(fx), int(fy)
+    reg = out[fy:fy + Hi, fx:fx + Wi].astype(np.float32)
+    out[fy:fy + Hi, fx:fx + Wi] = np.clip(reg * (1 - a1) + c1, 0, 255).astype(np.uint8)
+    return out
+
+
+def linhas_pedra(Q, out, linhas, larg_px, mult):
+    """As linhas finas da pedra do PDF (degraus, laterais em cascata) no tom escurecido da própria pedra."""
+    for a, b in linhas:
+        tl = tela(out, Q, (min(a[0], b[0]), min(a[1], b[1]), max(a[0], b[0]), max(a[1], b[1])), folga=3)
+        m = tl.linha([a, b], larg_px)
+        tl.pintar_img(m, tl.reg * mult)
+        out = tl.gravar()
+    return out
 
 
 def ilha(Q, img):
     q = ILHA
-    antes = img.copy()
     xs, ys = [p[0] for p in q["poli"]], [p[1] for p in q["poli"]]
     caixa = (min(xs), min(ys), max(xs), max(ys))
     out = FA.bancada_pedra(Q, np.ascontiguousarray(img.copy()), caixa,
@@ -365,11 +571,47 @@ def ilha(Q, img):
                            q["sombra"], poli=q["poli"])
     out = FA.bancada_pedra(Q, out, q["molhada"], lambda tl: FA._granito(Q, tl, q["semente"] + 1) * q["molhada_esc"],
                            q["borda"], q["larg"], 0.0)
-    # a cuba de inox e a torneira da final
-    a = np.maximum(ret_aa(Q, q["cuba"]), ret_aa(Q, q["torneira"]))[..., None]
-    out = np.clip(out.astype(np.float32) * (1 - a) + antes.astype(np.float32) * a, 0, 255).astype(np.uint8)
+    out = linhas_pedra(Q, out, q["linhas"], q["linha_px"], q["linha"])
+    out = cuba_inox(Q, out, q["cuba"])
+    out = cooktop(Q, out, q["cooktop"])
     print("    ilha em U do gourmet: granito marrom um pouco mais escuro que o piso, com a borda e a sombra; a área "
-          "molhada rebaixada; a cuba de inox e a torneira da final")
+          "molhada rebaixada; o degrau do balcão e as laterais em cascata; a cuba de inox e a torneira; o cooktop de "
+          "5 bocas do PDF")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# 3d. As bancadas de pedra da cozinha (usuário, 26/10/26: "as bancadas em pedra da cozinha também são no granito marrom,
+# levemente escurecido"; eram o quartzito Carrara de 21/10), como a ilha do gourmet:
+# - a ilha (1,90 x 1,20 m) em granito um pouco mais escuro que o piso, com a borda e a sombra curta, as laterais em
+#   cascata das pontas no tom da borda, e o cooktop de 5 bocas da biblioteca redesenhado por cima (as banquetas, fora do
+#   tampo, ficam);
+# - a bancada da pia, na parede da direita, no mesmo granito, com a área molhada rebaixada (um tom abaixo) e as duas
+#   cubas de inox com as torneiras redesenhadas no PDF.
+COZINHA = {"ilha": (1717.9, 1409.5, 1825.6, 1477.5), "cooktop": (1746.8, 1446.4, 1796.7, 1474.7),
+           "laterais": [((1720.2, 1409.5), (1720.2, 1477.5)), ((1823.4, 1409.5), (1823.4, 1477.5))],
+           "pia": (1888.0, 1395.3, 1922.0, 1670.3), "molhada": (1890.3, 1477.5, 1922.0, 1615.3),
+           "cubas": [{"cuba": (1892.0, 1484.9, 1916.9, 1521.2), "bacia": (1893.4, 1486.3, 1915.5, 1519.8),
+                      "torneira": (1908.6, 1501.4, 1919.7, 1502.6), "base": (1919.6, 1502.0, 1.3)},
+                     {"cuba": (1892.0, 1530.3, 1916.9, 1566.5), "bacia": (1893.4, 1531.7, 1915.5, 1565.1),
+                      "torneira": (1908.6, 1546.8, 1919.7, 1548.0), "base": (1919.6, 1547.4, 1.3)}],
+           "semente": 2710}
+
+
+def cozinha(Q, img):
+    q, i = COZINHA, ILHA
+    pedra = lambda s, k: (lambda tl: FA._granito(Q, tl, s) * k)
+    out = FA.bancada_pedra(Q, np.ascontiguousarray(img.copy()), q["ilha"], pedra(q["semente"], i["escurecer"]),
+                           i["borda"], i["larg"], i["sombra"])
+    out = linhas_pedra(Q, out, q["laterais"], i["linha_px"], i["linha"])
+    out = cooktop(Q, out, q["cooktop"])
+    out = FA.bancada_pedra(Q, out, q["pia"], pedra(q["semente"] + 1, i["escurecer"]), i["borda"], i["larg"],
+                           i["sombra"])
+    out = FA.bancada_pedra(Q, out, q["molhada"], pedra(q["semente"] + 2, i["molhada_esc"]), i["borda"], i["larg"], 0.0)
+    for c in q["cubas"]:
+        out = cuba_inox(Q, out, c)
+    print("    cozinha: a ilha e a bancada da pia em granito marrom um pouco mais escuro que o piso, com a borda e a "
+          "sombra; as laterais em cascata e o cooktop da ilha; a área molhada rebaixada e as duas cubas de inox")
     return out
 
 
@@ -634,7 +876,8 @@ PROJ = {"max_doc_pt": 900, "fora_q": [(2250, 1100, 2395, 1215)], "larg_px": 1.5,
 
 def cadeias_tracejadas(Q, camadas, min_n=4, min_ext=40, max_cob=0.9):
     """As linhas tracejadas do PDF: os traços retos colineares (mesma direção, a cada 0,5°, e mesma distância à origem,
-    a cada 0,5 pt) em cadeias com vãos (a cobertura do traço no comprimento até `max_cob`)."""
+    pela direção do próprio traço, a 1 pt; as faixas vizinhas juntas, para a reta longa não se partir no arredondamento)
+    em cadeias com vãos (a cobertura do traço no comprimento até `max_cob`)."""
     from collections import defaultdict
     grupos = defaultdict(list)
     for d in Q.desenhos:
@@ -646,13 +889,26 @@ def cadeias_tracejadas(Q, camadas, min_n=4, min_ext=40, max_cob=0.9):
             x0, y0, x1, y1 = it[1].x, it[1].y, it[2].x, it[2].y
             if np.hypot(x1 - x0, y1 - y0) < 0.5:
                 continue
-            a = round((np.degrees(np.arctan2(y1 - y0, x1 - x0)) % 180) * 2) / 2 % 180
-            t = np.radians(a)
-            off = -np.sin(t) * x0 + np.cos(t) * y0
+            g = np.degrees(np.arctan2(y1 - y0, x1 - x0)) % 180
+            a = round(g * 2) / 2 % 180
+            t = np.radians(g)
+            off = -np.sin(t) * (x0 + x1) / 2 + np.cos(t) * (y0 + y1) / 2
             u0, u1 = sorted((np.cos(t) * x0 + np.sin(t) * y0, np.cos(t) * x1 + np.sin(t) * y1))
-            grupos[(d.get("layer"), a, round(off * 2) / 2)].append((u0, u1, (x0, y0, x1, y1)))
+            grupos[(d.get("layer"), a, int(round(off)))].append((u0, u1, (x0, y0, x1, y1)))
+    # as faixas vizinhas (1 pt) da mesma direção numa só
+    juntos, feito = {}, set()
+    for k in sorted(grupos):
+        if k in feito:
+            continue
+        cam, a, o = k
+        v, j = [], o
+        while (cam, a, j) in grupos:
+            v += grupos[(cam, a, j)]
+            feito.add((cam, a, j))
+            j += 1
+        juntos[(cam, a, (o + j - 1) / 2)] = v
     out = []
-    for k, v in grupos.items():
+    for k, v in juntos.items():
         v.sort()
         med = np.median([b - a for a, b, _ in v])
         g = [v[0]]
@@ -773,6 +1029,7 @@ def passos_terreo(Q, ini):
         ("motorista", lambda im: motorista(Q, im)),
         ("loucas", lambda im: loucas(Q, im)),
         ("ilha", lambda im: ilha(Q, im)),
+        ("cozinha", lambda im: cozinha(Q, im)),
         ("lavabo", lambda im: lavabo(Q, im)),
         ("paredes", lambda im: paredes(Q, im)),
         ("deck", lambda im: deck(Q, im)),
@@ -794,11 +1051,18 @@ ANTES_DEPOIS = {"planta": (700, 300, 3420, 1980), "granito": (1450, 1100, 2750, 
                 # os pedidos seguintes de 26/10 (o travertino bruto, as louças, as bancadas, a ilha, as projeções)
                 "travertino": (1860, 330, 2640, 880), "banhos_varanda": (1440, 1380, 1720, 1700),
                 "ilha_gourmet": (1440, 1200, 1860, 1520), "banho_motorista": (2240, 1180, 2420, 1330),
-                "projecoes": (1150, 560, 2200, 1250)}
+                "projecoes": (1150, 560, 2200, 1250),
+                # a limpeza dos contornos, o cooktop da ilha gourmet e as bancadas da cozinha em granito
+                "contornos_moveis": (1560, 1000, 1760, 1160), "contornos_estar": (1880, 380, 2120, 560),
+                "contornos_banhos": (1470, 1440, 1700, 1620), "contornos_lavabo": (2280, 380, 2370, 530),
+                "contornos_hall": (2380, 600, 2520, 760), "ilha_cooktop": (1440, 1240, 1800, 1480),
+                "cozinha_bancadas": (1900, 1220, 2180, 1530)}
 
 
-def antes_depois(antes, depois, max_lado=1800):
+def antes_depois(antes, depois, max_lado=1800, chaves=None):
     for nome, (x0, y0, x1, y1) in ANTES_DEPOIS.items():
+        if chaves is not None and nome not in chaves:
+            continue
         a, d = antes[y0:y1, x0:x1], depois[y0:y1, x0:x1]
         lado = (x1 - x0) <= (y1 - y0) * 1.3
         junto = np.hstack([a, np.full((a.shape[0], 12, 3), 255, np.uint8), d]) if lado else \
