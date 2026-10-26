@@ -966,8 +966,8 @@ Pedidos do usuário de 26/10/26 para o Subsolo da Casa A (travertino bruto, banc
 | `sauna` | o banco em travertino bruto, com a quina boleada e a sombra de contato |
 | `elevador` | a cabine de aço com os corrimãos e a porta telescópica, e a soleira em inox |
 | `deposito` | os dois armários da DOC_LINHAS em freijó, contínuos, sem linhas nem marcações, com a sombra curta |
-| `portas` | as portas de vidro de correr da academia pelo PDF: do pátio, 4 folhas em 2 planos com os montantes e os batentes; do hall, 2 folhas sobre a soleira de Bege Bahia refeita; o vidro fixo em L da sauna, com o caixilho e as linhas do PDF, até a parede |
-| `paredes` | cinza 80 nas paredes do PDF e na divisória dos banhos |
+| `portas` | as portas de vidro de correr da academia pelo PDF: do pátio, 4 folhas em 2 planos com os montantes e os batentes; do hall, 2 folhas sobre a soleira de Bege Bahia refeita; o vidro fixo em L da sauna, com o caixilho e as linhas do PDF, até a parede; a porta de giro da sauna (a folha aberta para a antessala, no estilo do vidro fixo, e os batentes brancos; sem o arco) |
+| `paredes` | cinza 80 nas paredes do PDF e na divisória dos banhos; na porta da sauna, o vão entre o batente e a parede entra como parede (`encostos`) |
 | `escada` | os degraus em Bege Bahia, sem linhas, com o sombreamento de subida (esmaecidos depois do corte), e o S do PDF, sem o triângulo |
 | `rotulos` | `F.rotulos` com os boxes da Casa A e a divisória como parede; o BANHO SERV. no piso seco |
 

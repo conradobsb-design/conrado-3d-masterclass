@@ -843,9 +843,19 @@ PORTAS_VIDRO = {
         # Bahia do vão continua o do pátio, e o contorno é só o do caixilho
         {"nome": "da sauna (vidro fixo)", "soleiras": [(1009.3, 1656.1, 1145.3, 1664.6), (1009.3, 1664.6, 1017.8, 1735.5)],
          "faces": False,
-         "batentes": [(1013.8, 1660.7, 1018.6, 1665.5), (1143.3, 1660.7, 1145.3, 1663.5), (1013.8, 1733.5, 1016.6, 1735.5)],
+         "batentes": [],
+         "postes": [(1013.8, 1660.7, 1018.6, 1665.5), (1143.3, 1660.7, 1145.3, 1663.5), (1013.8, 1733.5, 1016.6, 1735.5)],
          "folhas": [((1018.6, 1660.7, 1143.3, 1663.5), "x"), ((1013.8, 1665.5, 1016.6, 1733.5), "y")],
          "montante_pt": 0.0, "linhas": {"cor": (48, 50, 52), "faces_px": 0.9, "meio_px": 0.7, "largura_min_px": 4.8}},
+        # a porta de giro da sauna (usuário, 26/10/26: "faltou a representação da porta da sauna"; já faltava na final
+        # aprovada): no vão da parede entre a sauna e a antessala, aberta para a antessala, como no PDF; pela R3, só a
+        # folha (no caixilho do vidro da sauna, com a linha do vidro) e os batentes em quadradinhos brancos, sem o arco
+        {"nome": "da sauna (giro)",
+         "batentes": [(1187.8, 1671.7, 1196.3, 1673.7), (1186.7, 1668.6, 1187.8, 1672.6), (1196.3, 1669.2, 1197.5, 1673.1),
+                      (1187.8, 1712.2, 1196.3, 1714.2), (1186.7, 1713.4, 1187.8, 1717.3), (1196.3, 1712.8, 1197.5, 1716.8)],
+         "postes": [(1196.3, 1710.5, 1202.0, 1712.8), (1230.4, 1710.5, 1236.0, 1712.8)],
+         "folhas": [((1202.0, 1710.5, 1230.4, 1712.8), "x")],
+         "montante_pt": 0.0, "linhas": {"cor": (48, 50, 52), "faces_px": 0.8, "meio_px": 0.6, "largura_min_px": 4.0}},
     ],
     "aluminio": (232, 234, 235), "vidro": (204, 200, 190), "contorno": (88, 91, 94), "contorno_px": 0.4,
     "batente": (240, 241, 242), "batente_contorno": (120, 123, 126), "sombra": 0.22,
@@ -890,10 +900,11 @@ def portas_vidro(Q, img):
                     c = (y0 + y1) / 2
                     y0, y1 = min(y0, c - lm), max(y1, c + lm)
                 return (x0, y0, x1, y1)
-            p = dict(p, folhas=[(largo(r, e), e) for r, e in p["folhas"]], batentes=[largo(b, "xy") for b in p["batentes"]])
-        caixa = tuple(f(v) for f, v in zip((min, min, max, max), zip(*([r for r, _ in p["folhas"]] + p["batentes"]))))
+            p = dict(p, folhas=[(largo(r, e), e) for r, e in p["folhas"]], postes=[largo(b, "xy") for b in p.get("postes", [])])
+        caixa = tuple(f(v) for f, v in zip((min, min, max, max),
+                                           zip(*([r for r, _ in p["folhas"]] + p["batentes"] + p.get("postes", [])))))
         tl = tela(out, Q, caixa, folga=5)
-        for b in p["batentes"]:
+        for b in p["batentes"] + p.get("postes", []):
             m = tl.ret(b)
             tl.pintar(m, q["batente"])
             tl.contorno(m, p["linhas"]["faces_px"] if "linhas" in p else q["contorno_px"],
@@ -923,8 +934,8 @@ def portas_vidro(Q, img):
                 tl.pintar(tl.ret((x0 + k, ym - w, x1 - k, ym + w)), q["vidro"])
             tl.contorno(m, q["contorno_px"], q["contorno"])
         out = tl.gravar()
-        print(f"    porta de correr {p['nome']}: {len(p['folhas'])} folhas de vidro nos planos do PDF e "
-              f"{len(p['batentes'])} batentes ou montantes" +
+        print(f"    porta {p['nome']}: {len(p['folhas'])} folhas de vidro nos planos do PDF e "
+              f"{len(p['batentes']) + len(p.get('postes', []))} batentes ou montantes" +
               (", sobre a soleira de Bege Bahia refeita" if "soleira" in p or "soleiras" in p else ""))
     return out
 
@@ -934,16 +945,19 @@ def portas_vidro(Q, img):
 # entre os banhos feminino e masculino entra como parede (pedido de 26/10: "deve ser representado como parede em cinza
 # 80"; até aqui era uma divisória clara, item 94 de 19/10). Antes, o preto das paredes antigas que passa do PDF (a franja
 # de 1 a 3 px) é refeito com o que está em volta, para a borda nova não sair com um fio preto. Pilares: no Subsolo da
-# Casa A não há pilar solto (os da EST - Pilar estão dentro das paredes).
+# Casa A não há pilar solto (os da EST - Pilar estão dentro das paredes). Na porta da sauna, o vão de ~1,4 pt entre cada
+# batente e a ponta da parede (no PDF, o traço da parede encosta no batente) era preto na final e sairia borrado da
+# franja refeita: entra como parede (`encostos`), e o batente branco encosta no cinza.
 PAREDES_A = {"cor": (80, 80, 80), "divisoria": (1490.0, 1664.6, 1500.8, 1775.2), "escuro": 48, "croma": 12,
-             "folga_px": 3}
+             "folga_px": 3, "encostos": [(1187.8, 1670.3, 1196.3, 1671.7), (1187.8, 1714.2, 1196.3, 1715.6)]}
 
 
 def paredes(Q, img):
     q = PAREDES_A
     a = Q.preencher(lambda d: d.get("layer") == "ARQ_PAREDE" and d.get("fill") is not None and max(d["fill"]) < 0.5,
                     ss=4)
-    a = np.maximum(a, ret_aa(Q, q["divisoria"]))
+    for r in [q["divisoria"]] + q["encostos"]:
+        a = np.maximum(a, ret_aa(Q, r))
     k = 2 * q["folga_px"] + 1
     perto = cv2.dilate((a > 0.02).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
     im = img.astype(np.int16)
@@ -1117,7 +1131,7 @@ def passos_subsolo(Q, ini):
 # O antes e o depois de cada pedido (a final aprovada até aqui, com os rótulos, e a nova), recortes no quadro (px)
 ANTES_DEPOIS = {"planta": (860, 820, 2420, 1680), "banhos_sauna": (1180, 1490, 1900, 1660),
                 "porta_patio": (1300, 1040, 1400, 1530), "porta_hall": (1840, 1040, 1920, 1235),
-                "vidro_sauna": (1180, 1490, 1400, 1640),
+                "vidro_sauna": (1180, 1490, 1400, 1640), "porta_sauna": (1340, 1490, 1460, 1600),
                 "banho_servico": (1080, 850, 1350, 1070), "elevador_hall": (1860, 1040, 2400, 1235),
                 "deposito": (1330, 855, 1890, 1065), "academia": (1340, 1055, 1890, 1520),
                 "escada": (880, 1040, 1110, 1150)}
