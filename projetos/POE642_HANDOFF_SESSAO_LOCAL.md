@@ -2631,3 +2631,14 @@ Os 13 itens:
 11. a linha vertical fina que não existe no PDF, da janela da suíte 3 atravessando o banho 3 (x ≈ 2639 px);
 12. o travertino do piso no travertino bruto do Subsolo aprovado;
 13. (pergunta) os materiais dos banhos do Térreo: hoje cubas brancas na bancada areia e vasos brancos (22/10). Mantém ou segue algum padrão?
+
+### Térreo da Casa B, a lista aplicada (26/10/26)
+
+Respostas do usuário: "ok, aplique a lista. pilares em preto" e os banhos ("lavabo: cuba esculpida e pedra da bancada da pia em marmore travertino bruto. Sanitário em marrom; banhos varanda gourmet: cubas esculpidas em marrom granito, pedra da bancada da pia em marmore travertino bruto, sanitários em marrom; banho 1, 2 e 3 e banho master - cuba e pedra da pia em marmore travertino bruto, sanitario branco"). Final refeita inteira (`final3840_casab.py Terreo --de pisos`), depois `--de esquadrias`; o Subsolo rodado de novo da hachura sai igual ao aprovado (0 px diferentes).
+
+Os 12 itens e os banhos estão nas REGRAS (seção 19, Casa B · Térreo, e seção 6). Na conferência, três acertos além da lista:
+- o trilho da cortina da suíte 3 parava só depois de 6 px seguidos de parede, e a parede do banho 3 tem 4 px ali: a linha "que não existe no PDF" era ele; agora para no 1º px de parede do PDF;
+- com a parede em cinza 80, a limpeza da faixa do vidro (que subia o limiar de parede para 95) passava a tratar o granito marrom como parede e manchava o piso junto às portas do motorista e do depósito; no Térreo a parede é reconhecida pela cor;
+- no PDF, a linha da cobertura (ARQ_BANCADAS, traços de 5,7 pt) corre também sobre o vidro da porta de correr do living: sai, pela R8; os X dos dois shafts pequenos (diagonais de 36 a 39 pt) entraram baixando o mínimo das cadeias para 30 pt; o X do shaft do elevador abre embaixo do rótulo.
+
+Antes e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2610_{planta,escadas,banho_master,banho_1,banho_2,suite3_banho3,lavabo,gourmet,entrada,motorista,shafts,jardim_inverno,living}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa B refeitos. Aguarda o OK do Térreo.

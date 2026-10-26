@@ -896,7 +896,7 @@ def trechos_cortina_b(chave):
     return sorted(trechos, key=lambda t: (t[0], t[2], t[3]))
 
 
-def cortinas_b(out, chave):
+def cortinas_b(out, chave, paredes=None):
     from retoque_terreo_casae import pousar_cortina
     sys.path.insert(0, str(RAIZ / "_blocos"))
     import blocos
@@ -913,10 +913,15 @@ def cortinas_b(out, chave):
         limpos += AJ.tracinhos_cortina(img, [(v, ex, e0, e1)])
         dentro = int(round(ex)) + (q["dentro"] if v == "esquerda" else -q["dentro"])
         escuro = img[:, dentro].astype(np.float32).mean(axis=1) < q["parede"]
+        # as paredes do PDF (máscara no quadro, de qualquer cor): o trilho para no 1º px delas (a parede fina, de 4 px,
+        # não chega aos `seguidos` e o trilho a atravessava)
+        pq = (paredes if o == "v" else paredes.T)[:, dentro] if paredes is not None else None
 
         def ate_parede(y, passo):
             n = 0
             for yy in range(int(round(y)), int(round(y)) + passo * busca, passo):
+                if pq is not None and pq[yy]:
+                    return yy - passo * 0.5
                 n = n + 1 if escuro[yy] else 0
                 if n >= q["seguidos"]:
                     return yy - passo * (q["seguidos"] - 1) - passo * 0.5
@@ -2048,13 +2053,17 @@ def bordas_grama(final, chave):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def esquadrias_final(final, chave, pg, p2q, px_m, parede=None):
+def esquadrias_final(final, chave, pg, p2q, px_m, parede=None, limpar_cor=False):
     """parede: a cor das paredes da final (o cinza 80 da E10), para os batentes redesenhados nas esquadrias e para a
-    limpeza da faixa do vidro reconhecer a parede (que no preto era o que tinha luz abaixo de `escuro`)."""
+    limpeza da faixa do vidro reconhecer a parede (que no preto era o que tinha luz abaixo de `escuro`). limpar_cor: a
+    parede é reconhecida pela cor (e não subindo o `escuro`, que no Térreo pegava o granito marrom, de luz 60 a 95, e
+    trocava o piso dos dois lados da porta em manchas)."""
     import retoque_terreo_casae as T
     guardar = dict(T.ESQUADRIAS)
     T.ESQUADRIAS["faixa_px"] = round(guardar["faixa_px"] * final.shape[1] / 2000)
-    if parede is not None:
+    if parede is not None and limpar_cor:
+        T.ESQUADRIAS.update(parede=parede, parede_limpar=parede)
+    elif parede is not None:
         T.ESQUADRIAS.update(parede=parede, escuro=max(guardar["escuro"], float(np.mean(parede)) + 15))
     try:
         img = final.astype(np.float32)

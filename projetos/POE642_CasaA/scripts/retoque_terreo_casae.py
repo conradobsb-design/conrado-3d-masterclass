@@ -3087,6 +3087,8 @@ def esquadria_limpar(img, r, p2r):
     (u0, v0), (u1, v1) = p2r(r.x0, r.y0), p2r(r.x1, r.y1)
     f = q["faixa_px"]
     lum = img.mean(axis=2)
+    if q.get("parede_limpar") is not None:     # paredes de outra cor (o cinza 80 da E10 na Casa B): o px da parede vira
+        lum = np.where(np.abs(img - np.float32(q["parede_limpar"])).max(axis=2) < 14, 0.0, lum)   # "escuro" pela cor
     hor = (u1 - u0) >= (v1 - v0)
     if hor:
         X0, X1, Y0, Y1 = int(np.floor(u0)), int(np.ceil(u1)), int(np.floor(v0)) - f, int(np.ceil(v1)) + f
