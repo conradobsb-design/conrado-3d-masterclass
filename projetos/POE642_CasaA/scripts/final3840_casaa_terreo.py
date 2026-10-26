@@ -946,6 +946,15 @@ def projecoes(Q, img):
         pos = Q.p2q(x0, y0)[1] if a == 0.0 else Q.p2q(x0, y0)[0]
         if any(a == ca and abs(pos - cp) < 4 for ca, cp in q["cobertura"]):
             tracos += segs
+    out, n_b = preto_branco(Q, img, tracos)
+    print(f"    projeções tracejadas: {len(tracos)} traços do PDF, {len(tracos) - n_b} em preto (fundo claro) e "
+          f"{n_b} em branco (fundo escuro)")
+    return out
+
+
+def preto_branco(Q, img, tracos, q=None):
+    """Os traços do PDF (pt) nítidos por cima de tudo, cada um em preto ou branco pelo fundo em volta dele."""
+    q = q or PROJ
     out = img.astype(np.float32)
     lum = img.astype(np.float32).mean(axis=2)
     S, w = q["ss"], q["larg_px"]
@@ -964,9 +973,7 @@ def projecoes(Q, img):
         cor = np.float32(q["preto"] if claro else q["branco"])
         n_b += not claro
         out[by0:by1, bx0:bx1] = out[by0:by1, bx0:bx1] * (1 - a[..., None]) + cor * a[..., None]
-    print(f"    projeções tracejadas: {len(tracos)} traços do PDF, {len(tracos) - n_b} em preto (fundo claro) e "
-          f"{n_b} em branco (fundo escuro)")
-    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+    return np.clip(np.round(out), 0, 255).astype(np.uint8), n_b
 
 
 # ----------------------------------------------------------------------------------------------------------------------

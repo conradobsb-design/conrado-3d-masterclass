@@ -465,9 +465,14 @@ def bancada_pedra(Q, out, r, textura, borda_mult, larg_px, sombra, poli=None):
 def cuba_granito(Q, out, c, semente):
     """A cuba em granito marrom: a borda polida, a bacia mais funda com a sombra por dentro (no alto e à direita, a luz
     vem de lá), a prateleira de trás, a válvula cromada."""
-    q = GRANITO_CUBA
+    return cuba_pedra(Q, out, c, lambda tl: _granito(Q, tl, semente), GRANITO_CUBA)
+
+
+def cuba_pedra(Q, out, c, textura, q):
+    """A cuba esculpida numa pedra (`textura`: h x w x 3 da janela), como a de granito, com o `q` dela (a borda, a
+    bacia, a sombra por dentro e o contorno)."""
     tl = tela(out, Q, c["cuba"], folga=4)
-    G = _granito(Q, tl, semente)
+    G = textura(tl)
     m = tl.ret(c["cuba"], 1.2)
     tl.pintar_img(m, G * q["rim"])
     b = tl.ret(c["bacia"], 2.6)

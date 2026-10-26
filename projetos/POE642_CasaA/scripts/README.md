@@ -1012,3 +1012,31 @@ python3 pdf_entrega.py
 ```
 
 Os antes e depois: os da 1ª lista (`planta`, `granito`, … `sala_estar`) contra a final aprovada antes da auditoria; os dos pedidos seguintes (`travertino`, `banhos_varanda`, `ilha_gourmet`, `banho_motorista`, `projecoes`) contra a versão deles; os da limpeza dos contornos (`contornos_moveis`, `contornos_estar`, `contornos_banhos`, `contornos_lavabo`, `contornos_hall`, `ilha_cooktop`, `cozinha_bancadas`) contra a versão anterior a ela (`antes_depois(..., chaves=[...])`).
+
+## 1º Pavimento da Casa A em 3840 px com a auditoria de 26/10 (`final3840_casaa_1pav.py`)
+
+A lista do 1º Pavimento aprovada pelo usuário em 26/10/26 (os 12 itens do mapa `renders/POE642_CasaA_PH_1Pavimento_auditoria_2610_v2.jpg`, com "A. Sim." e "B. mantem"), mais os pedidos seguintes: a descida da escada em U com a linha de corte do Térreo e a parte do Térreo nublada; as cubas dos banhos em travertino bruto e os vasos brancos; o B. serviço com a bancada em granito marrom, a cuba e o vaso brancos. A partida é a imagem do pavimento com os ajustes no quadro de 3840 px, antes do Térreo nublado (`rotulos_casaa.no_quadro_fixo`, com a pegada e as janelas do Térreo, em cache: `1Pavimento_ini.png` e `1Pavimento_mascaras.npz`); o Térreo nublado entra no fim, a partir da final nova do Térreo:
+
+| Etapa | O que faz |
+|---|---|
+| `pisos` | travertino bruto (circulação, sala íntima, banhos), vinílico nas réguas das Casas B a D (suítes, closets) e Bege Bahia (quarto de serviço, saleta, B. serviço), cada um na sua cor da base chapada, até a borda das peças (`T.alfa_objetos`); nos banhos, as bancadas, as cubas, os vasos e os chuveiros a refazer viram piso, com as louças antigas fora do lugar do PDF e as linhas dos boxes antigos; a luz em volta das peças refeitas vem do piso limpo (inpaint); a banheira do master fica inteira (`PECAS_BRANCAS_1P`) |
+| `armario` | o armário do quarto de serviço com os cabides e o cabideiro, portas para o quarto |
+| `banhos` | as muretas do banho master em cinza 80; bancadas em travertino bruto com as cubas esculpidas no mesmo travertino (`FA.cuba_pedra`, `TRAV_CUBA`) e os vasos brancos; o B. serviço com a bancada em granito marrom no polígono do PDF, a cuba branca, o vaso branco e a descarga; os chuveiros e registros do PDF; os boxes em vidro contínuo |
+| `paredes` | cinza 80 nos preenchimentos pretos da ARQ_PAREDE, sem o limite de 300 pt do Térreo (aqui não há muros do lote, e as paredes compridas ficavam pretas) |
+| `escada_u` | os 19 degraus sem linhas e sem triângulo, no travertino bruto no tom do piso, com o sombreamento de subida; o D no degrau 19; o contorno fino do vão |
+| `caracol` | os cinco degraus do 1º Pavimento (0,6° a 93,1°) no travertino da caracol do Térreo, sombreados; o resto do círculo em branco limpo (o Térreo nublado); o anel, o pilar preto e o D do PDF |
+| `nublado` | o Térreo novo até a caracol, sem as letras (`terreo_sem_letras`, em cache: `Terreo_nublado_base.png`), nublado fora da pegada, nas janelas e, inteiro, nos degraus 1 a 7 da escada em U, recortados pela linha de corte do PDF do Térreo (`CORTE_U`), desenhada por cima em cinza escuro; o tracejado do lote |
+| `projecoes` | os traços do PDF em preto ou branco pelo fundo (`T.preto_branco`): a cobertura (as retas aprovadas, `AJ.PROJECOES_1PAV`), o pergolado e os X dos vazios; nas paredes, o traço some |
+| `rotulos` | os rótulos com os desvios aprovados; BANHO 3 e B. SERVIÇO longe do box, SALA ÍNTIMA fora do tapete (`AJUSTES_1P`) |
+
+```bash
+export POE642_CACHE=/caminho/do/cache                          # as etapas ficam em $POE642_CACHE/poe642_casaa_etapas
+python3 final3840_casaa_1pav.py                                # a final: renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png
+python3 final3840_casaa_1pav.py --de banhos --ate caracol      # recomeça e para numa etapa (só grava a final no fim)
+python3 final3840_casaa_1pav.py --de rotulos --antes antes.png # e os antes e depois: renders/..._1Pavimento_2610_<item>_antes_depois.jpg
+python3 rodape_entrega.py --no-quadro --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png
+python3 pdf_entrega.py
+```
+
+O 1º Pavimento depende da final do Térreo: depois de mudar o Térreo, rodar o `final3840_casaa_1pav.py --de nublado` (o `Terreo_nublado_base.png` se refaz quando o `Terreo_paredes.png` do cache é mais novo). Rodar `rotulos_casaa.py 1Pavimento` sobrescreveria a final com a versão antiga.
+
