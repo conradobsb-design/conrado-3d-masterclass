@@ -957,11 +957,11 @@ def boxes_s(Q, img):
 #   bancadas, que as etapas seguintes redesenham) saem num claro só, sem os restos do render (as folhas fora da floreira,
 #   a mancha branca no canto do vidro);
 # - a faixa das portas de correr da academia fica fora (`portas_academia_s`, depois das esquadrias).
-LIMPEZA_S = {"fino_px": 4, "perto_px": 2, "area_max": 6000,
+LIMPEZA_S = {"fino_px": 6, "perto_px": 4, "area_max": 6000,
              "porta_academia": (889.2, 540.8, 900.6, 926.3),
              # a floreira com a borda (a mureta branca do PDF em volta do canteiro) e o vão do vidro da sauna: tudo o que
              # não é o canteiro nem parede vira a pedra clara (a mureta e o peitoril do vidro), sem os restos do render
-             "floreira_pt": (508.0, 926.3, 549.6, 1158.0),
+             "floreira_pt": (508.0, 926.3, 549.6, 1158.0), "vidro_pt": 542.6,
              "fora": [ESTREITA_S["pdf"], (1565.0, 1008.5, 1661.4, 1099.2)]}
 
 
@@ -985,7 +985,10 @@ def limpeza_s(Q, img, dentro):
     k = q["fino_px"]
     fino = resto & (1 - cv2.morphologyEx(resto, cv2.MORPH_OPEN, np.ones((k, k), np.uint8)))
     perto = cv2.dilate(pisos.astype(np.uint8), np.ones((2 * q["perto_px"] + 1,) * 2, np.uint8))
-    linhas = (fino & perto).astype(np.uint8) * 255
+    # e os traços pretos finos do PDF (a borda do vão do vidro da sauna, os lados da mureta): as paredes são grossas e
+    # as etapas seguintes redesenham as finas, as peças e os vidros por cima; ali ficavam os vidros e as folhas do render
+    fino_preto = preto & ~cv2.morphologyEx(preto.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)).astype(bool)
+    linhas = ((fino | (fino_preto & dentro & ~fora)) & perto).astype(np.uint8) * 255
     out = cv2.inpaint(out, linhas, 2, cv2.INPAINT_TELEA)
     # a pedra clara: o Bege Bahia nítido das soleiras (`F.soleiras`), no quadro inteiro, para pousar em qualquer máscara
     T = textura("bege_bahia", Q.px_m, Q.H, Q.W, semente=F.SOLEIRAS_F["semente"] + 50).astype(np.float32)
@@ -1001,9 +1004,6 @@ def limpeza_s(Q, img, dentro):
     x0, y0, x1, y1 = F.ret_q(Q, q["floreira_pt"])
     zona = np.zeros_like(dentro)
     zona[y0:y1, x0:x1] = True
-    # os traços pretos finos do PDF ali (os contornos da mureta e do vão do vidro, não as paredes) também: neles ficavam
-    # as folhas do render
-    fino_preto = preto & ~cv2.morphologyEx(preto.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)).astype(bool)
     claros |= zona & ~outros & (~preto | fino_preto) & ~pisos
     out[claros] = T[claros].astype(np.uint8)
     out = cv2.inpaint(out, (chuv & dentro & (branco | ~pisos)).astype(np.uint8) * 255, 3, cv2.INPAINT_TELEA)
@@ -1053,14 +1053,31 @@ def portas_academia_s(Q, img):
 
 def sem_verde_s(Q, img):
     """Depois das esquadrias: a limpeza da faixa do vidro da sauna espelha o lado do canteiro para dentro do vão e
-    trazia as folhas da borda dele (pontinhos verdes junto ao vidro). Fora do canteiro da legenda, na zona da floreira,
-    o px esverdeado vai à pedra clara em volta (a mediana dos px claros e quentes da zona)."""
+    trazia as folhas da borda dele (pontinhos verdes junto ao vidro). A mureta da floreira e o peitoril até o vidro (o
+    que não é canteiro nem parede grossa, até `vidro_pt`) voltam inteiros à pedra clara; e, no resto da zona, o px
+    esverdeado fora do canteiro vai à pedra em volta (a mediana dos px claros e quentes da zona)."""
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    from retoque_terreo_casae import BEGE
     x0, y0, x1, y1 = F.ret_q(Q, LIMPEZA_S["floreira_pt"])
     out = img.copy()
+    xm = F.ret_q(Q, (LIMPEZA_S["vidro_pt"], 0, LIMPEZA_S["vidro_pt"], 0))[0]
+    preto = Q.chapada.max(axis=2) < 60
+    grosso = cv2.morphologyEx(preto.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)).astype(bool)
+    mureta = ~Q.cor([FLOREIRA_COR], tol=6) & ~grosso
+    mureta[:, :x0] = False
+    mureta[:, xm:] = False
+    mureta[:y0] = False
+    mureta[y1:] = False
+    T = textura("bege_bahia", Q.px_m, y1 - y0, xm - x0, semente=F.SOLEIRAS_F["semente"] + 51).astype(np.float32)
+    T = np.clip((1 + F.SOLEIRAS_F["forca"] * (T / T.reshape(-1, 3).mean(axis=0) - 1)) * np.float32(BEGE["tom"]), 0, 255)
+    reg = out[y0:y1, x0:xm]
+    m = mureta[y0:y1, x0:xm]
+    reg[m] = T[m].astype(np.uint8)
     reg = out[y0:y1, x0:x1].astype(np.int32)
-    canteiro = cv2.dilate(Q.cor([FLOREIRA_COR], tol=6)[y0:y1, x0:x1].astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    canteiro = Q.cor([FLOREIRA_COR], tol=6)[y0:y1, x0:x1]
     b, g, r = reg[..., 0], reg[..., 1], reg[..., 2]
-    verde = (g > r + 3) & (g > b + 15) & ~canteiro
+    verde = (g >= r - 2) & (g > b + 15) & ~canteiro
     pedra = (r > g) & (g > b) & (r > 170) & ~canteiro
     if verde.any() and pedra.any():
         reg[verde] = np.median(reg[pedra], axis=0).astype(np.int32)

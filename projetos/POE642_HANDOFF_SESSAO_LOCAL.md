@@ -2701,3 +2701,11 @@ A causa dos micro erros: onde a base chapada não tem a cor de um piso da legend
 - a cuba do BH academia em granito marrom (`F.cuba_granito`) e a torneira cromada na prateleira de trás, entre o aro e a parede, no meio da cuba (`torneira_s`, a rotina da Casa A).
 
 Antes e depois (o antes é a final enviada antes destes pedidos): `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2610_{limpeza_floreira,portas_academia,banho_cuba_granito,emenda_patio_varanda,planta_limpeza}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa C refeitos. Aguarda o OK do Subsolo da Casa C.
+
+### Depois: "ainda tem restos a serem limpos" (26/10/26, recorte da floreira e do vidro da sauna)
+
+Sobravam, junto à floreira: pontinhos olivas nas bordas da mureta, pontinhos verdes no vão do vidro da sauna e, do lado de dentro da sauna, uma faixa cinza com manchas escuras junto ao vidro (o vidro e as folhas do render de 14/10). Eram px em traços pretos finos do PDF (a borda do vão do vidro, os lados da mureta), que a limpeza não pegava, e a faixa de 4 px junto ao vidro, larga demais para a regra das linhas finas. Agora:
+- `limpeza_s` refaz pelos pisos em volta também os traços pretos finos do PDF (as paredes são grossas e as etapas seguintes redesenham as finas, as peças e os vidros), com as linhas até 6 px e a até 4 px de um piso (`LIMPEZA_S`);
+- `sem_verde_s`, depois das esquadrias, volta a mureta da floreira e o peitoril até o vidro (`vidro_pt`) inteiros à pedra clara (fora o canteiro e as paredes grossas), e o teste do verde pega também o verde acinzentado (a borda do canteiro, que a limpeza das esquadrias espelhava para o vão).
+
+Antes e depois: `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2610_limpeza_floreira_2_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa C refeitos. Aguarda o OK do Subsolo da Casa C.
