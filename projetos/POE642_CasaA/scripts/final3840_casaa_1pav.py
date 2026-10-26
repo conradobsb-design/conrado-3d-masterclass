@@ -645,7 +645,7 @@ def nublado(Q, img):
 # branco; para tons claros, marque-as com tom preto tracejado"), como no Térreo (`T.preto_branco`), por cima do nublado:
 # - ARQ_CONTRAPISO: a cobertura (o contorno de fora e o de dentro), as retas aprovadas em 21/10 (`AJ.PROJECOES_1PAV`);
 #   a de x = 1281,4 pt (no quarto e no banho master) é o contorno de dentro da cobertura no PDF (item 10: não é espúria;
-#   fica, para o OK do usuário);
+#   perguntado, o usuário respondeu "mantem");
 # - ARQ_PERGOLADO: a grade do pergolado da varanda;
 # - DOC_LINHAS E PROJEÇÕES: os X e os contornos dos dois vazios (dentro da pegada; ficam de fora os afastamentos e o
 #   lote, mais de `max_doc_pt`, e os X do elevador, do shaft e o da viga sobre a janela da escada, `fora_q`).
