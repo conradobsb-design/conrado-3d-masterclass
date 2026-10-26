@@ -2608,3 +2608,26 @@ O PDF do Subsolo não tem o chuveiro da ducha; ele entrou em 22/10 ("CADÊ O CHU
 Depois, com um recorte do Térreo: "a ducha fica mais no canto". No Térreo, o deck visível termina em x 730,5 pt (ali começa a suíte master), e a ducha fica a 28,5 pt dessa borda, com o braço até a borda de baixo; no Subsolo, o deck da ducha vai até a parede da sauna (x 787,2 pt), então nas mesmas coordenadas a ducha caía no meio. Agora ela fica no canto de baixo à direita, a 28,5 pt da parede da sauna (a ducha em 747,5–758,7 x 930,4–941,6 pt), com o braço até a parede de baixo (a face em y 958,0 pt). Antes (na parede da sauna) e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2610_ducha_antes_depois.jpg`. Prancha e PDF da Casa B refeitos.
 
 Ficou em aberto, interrompida por este pedido: a auditoria do Térreo da Casa B (achados até aqui, ainda sem o mapa: paredes pretas (E10); as três escadas com triângulo e linhas, os pisantes NO, os pisantes O e a escada 1-9 da varanda, com o D do PDF em duas delas (E3, E8); os pilares redondos em cinza 130 (pedido de 22/10) contra o preto do E10; a seta da entrada principal (E4); as bancadas da mesma cor do piso, nos banhos master, 1, 2 e 3, no lavabo, no lavatório e na ilha gourmet e na bancada da sala íntima (E9); os boxes em linha fina, não como os vidros do Subsolo (E5); as projeções em cinza (R8 pede preto ou branco pelo fundo); o travertino do piso ainda liso (o Subsolo passou ao bruto); uma linha vertical fina, que não existe no PDF, atravessando a suíte 3 e o banho 3, em x ≈ 2639 px).
+
+## Casa B · Térreo, auditoria para o OK (26/10/26)
+
+Pedido do usuário: "sim, termine a auditoria do térreo da casa B" (o Subsolo está aprovado: "subsolo da casa B aprovado"). Pela regra dele ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."), a lista foi apresentada sem alterar a imagem. O mapa numerado: `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_auditoria_2610_v2.jpg` (sobre a prancha atual; a v1 segue em `..._auditoria_2610.jpg`), feito com `auditoria_2610.mapa` e os itens trocados em memória.
+
+A conferência foi em 9 recortes da final a 1:1 e trecho a trecho com o PDF no mesmo quadro (banho 3 e suíte 3, entrada e hall, serviço e garagem, motorista, sala íntima, escadas e deck, suíte master e banho master, suítes 1 e 2), e com os 42 rótulos do PDF.
+
+Conformes: E1 (soleiras), E6 (raios), E2 (cabides nas suítes e nos closets), E7 (nenhum rótulo sobre objeto; nos jardins, em branco), E11 (as texturas da Casa B são a referência), carros (R12). A bancada da sala íntima (o bar com a cuba redonda) é pedra areia sobre a madeira: contraste bom, fora do E9.
+
+Os 13 itens:
+1. (E10) paredes pretas em cinza 80, com os muros do lote;
+2. (pergunta) os pilares redondos da garagem e do quarto do motorista: cinza (pedido de 22/10) ou preto (E10)? Recomendado: preto;
+3. (E4) a seta da entrada principal no HALL, apontando para a porta pivotante do HALL INTERNO;
+4. (E3, E8) a escada de 6 degraus (pisantes NO), com o D do PDF;
+5. (E3, E8) a escada de 9 degraus, da varanda ao deck, com o D do PDF;
+6. (E3, E8) os pisantes O: o PDF não marca o sentido; o D vai no lugar do triângulo de hoje;
+7. (E9) as bancadas areia sobre o travertino (banhos master, 1, 2 e 3, lavabo, lavatório gourmet, ilha gourmet), com a borda e a sombra;
+8. (E5) os boxes em linha fina (banho master ×2, banhos 1, 2 e 3, BH gourmet ×2), em vidro contínuo como no Subsolo; os do granito (BH serviço e BH motorista) ficam na faixa cinza-clara de 22/10;
+9. (R8) as projeções em cinza (pérgola do hall e da garagem, cobertura junto ao living e à sala íntima) em preto ou branco pelo fundo;
+10. o rótulo SHAFT do PDF junto ao elevador e o X do shaft ao lado da sala íntima;
+11. a linha vertical fina que não existe no PDF, da janela da suíte 3 atravessando o banho 3 (x ≈ 2639 px);
+12. o travertino do piso no travertino bruto do Subsolo aprovado;
+13. (pergunta) os materiais dos banhos do Térreo: hoje cubas brancas na bancada areia e vasos brancos (22/10). Mantém ou segue algum padrão?
