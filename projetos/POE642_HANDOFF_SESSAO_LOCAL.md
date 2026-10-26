@@ -2738,3 +2738,18 @@ Os 16 itens:
 15. a linha fina que não existe no PDF atravessando o BH 2 e o BH 1 (y ≈ 338 px; aparece na etapa das cortinas: o trilho da cortina do quarto passando pelas paredes, o caso que a Casa B corrigiu em 26/10, depois da final de 22/10 da Casa C) sai;
 16. a faixa escura e borrada no alto do jardim de inverno, junto à parede do elevador, na mesma folhagem do resto do jardim.
 
+## Casa C · Térreo, a lista aplicada (26/10/26)
+
+Resposta do usuário: "Aplique a lista. No item 8, siga a recomendação." (os materiais no padrão do Térreo aprovado da Casa B). Final refeita inteira (`final3840_casac.py Terreo`), depois `--de tampas`; o Subsolo, rodado de novo da hachura, sai igual ao aprovado (0 px diferentes).
+
+Os 16 itens estão nas REGRAS (seção 19, Casa C · Térreo, e seção 6). Na aplicação:
+- os boxes de correr (BH 1, 2 e 3, ducha) não são achados por `F.vidros_box` (7 traços ou mais), e sim por `AJ.folhas_box` (como no Subsolo); os dos BH master 1 e 2 são o vidro fixo (o preenchimento cinza de 3 cm da ARQ_BANCADAS) e a porta de vidro no vão (`VIDROS_TC`);
+- nos rótulos, só os boxes que fecham o chuveiro até a parede entram como barreira (BH master e BH serviço): os de correr e o do BH externo param antes da parede, o lado do chuveiro vazava para o banho inteiro e os rótulos BH 1, 2, 3, BH EXTERNO e QUARTO EXTERNO iam para fora;
+- a linha sobre os BH 1 e 2 era o trilho da cortina: `cortinas_b` juntava trilhos de ex vizinhos sem testar a sobreposição (o do quarto 3 e o do quarto 1 viravam um só); agora só junta os que se sobrepõem;
+- a faixa escura do jardim de inverno vinha do canteiro do jardim de inverno 2: a limpeza das folhas fora dele refazia a borda do jardim de inverno já pintado; agora o que já foi pintado volta;
+- com o travertino bruto, `restos_piso` (os pedacinhos de piso entre as linhas dos estofados do estar e da sala TV) devolvia ao render manchas do piso aberto em volta do tapete: só junto às peças do PDF;
+- a janela do chuveiro do BH master 2 ficava como uma barra preta com a parede em cinza 80: `janelas_s` com `JANELAS_T` (só os vãos quase todos escuros);
+- no BH master 1, a peça esculpida tem duas bacias (as de cima e de baixo, com as torneiras do PDF) e a prateleira no meio (antes, três cubas brancas).
+
+Antes e depois (o antes é a final de 22/10): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2610_{planta,banhos_master,bh_1_2_3,lavabos,lavabo,cozinha,gourmet,escadas,jardim_elevador,entrada,servico_externo,estar}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos. Aguarda o OK do Térreo da Casa C.
+

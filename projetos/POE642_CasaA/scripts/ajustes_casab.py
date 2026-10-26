@@ -929,7 +929,10 @@ def cortinas_b(out, chave, paredes=None):
         trilhos.append([o, v, ex, ate_parede((e0 + e1) / 2, -1), ate_parede((e0 + e1) / 2, +1)])
     unidos = []
     for o, v, ex, t0, t1 in sorted(trilhos, key=lambda t: (t[0], t[1], round(t[2]), t[3])):
-        if unidos and unidos[-1][:2] == [o, v] and abs(unidos[-1][2] - ex) < 3 and t0 < unidos[-1][4] - 2:
+        # só os que se sobrepõem: na ordem (round(ex), t0), um trilho de ex vizinho (342,4 e 343,6 px no Térreo da Casa
+        # C) vinha depois de um mais à direita e, sem o teste de t1, os dois viravam um só, de ponta a ponta da casa
+        if unidos and unidos[-1][:2] == [o, v] and abs(unidos[-1][2] - ex) < 3 and t0 < unidos[-1][4] - 2 \
+                and t1 > unidos[-1][3] + 2:
             unidos[-1][3], unidos[-1][4] = min(unidos[-1][3], t0), max(unidos[-1][4], t1)
         else:
             unidos.append([o, v, ex, t0, t1])
