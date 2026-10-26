@@ -2538,3 +2538,13 @@ python3 pdf_entrega.py
 
 **Antes e depois** (contra a versão anterior): `renders/POE642_CasaA_PH_Terreo_2610_{contornos_moveis,contornos_estar,contornos_banhos,contornos_lavabo,contornos_hall,ilha_cooktop,cozinha_bancadas}_antes_depois.jpg`.
 
+
+### Casa A · 1º Pavimento, auditoria para o OK (26/10/26)
+
+Pedido do usuário: "1º pavimento da casa A" (a próxima planta, depois do Térreo). Pela regra dele ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."), a lista foi apresentada sem alterar a imagem. O mapa numerado: `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_auditoria_2610_v2.jpg` (sobre a final atual, `..._1Pavimento_v7_final_rotulos.png`).
+
+Os pisos pela base do PDF (`bases/POE642_CasaA_BASE_1Pavimento_v3.png`): travertino (oliva) na circulação, na sala íntima e nos banhos 1, 2, 3 e master; vinílico (laranja) nas suítes e closets; Bege Bahia (cinza) no quarto de serviço, na saleta, no B. serviço e nas varandas.
+
+Os 12 itens: (1) paredes em cinza 80 e pilares pretos (E10); (2) escada em U sem triângulos e sem linhas, com o sombreamento de descida e o D do PDF, o trecho dos degraus 1 a 7 do Térreo novo (E3, E8); (3) caracol da saleta, idem (E3, E8); (4) armário do quarto de serviço com os cabides (E2); (5) boxes em vidro contínuo com o trilho (banho master só tracejado; conferir os banhos 1, 2, 3 e o B. serviço) (E5); (6) chuveiros pelo PDF no padrão do Subsolo e do Térreo; (7) rótulos BANHO 3 e B. SERVIÇO longe da linha do box, SALA ÍNTIMA fora do tapete (E7); (8) bancadas dos banhos mais marcadas que o piso (E9), com a pergunta da linguagem dos banhos; (9) pisos na escala (E11): travertino bruto, vinílico nas réguas das Casas B a D, Bege Bahia; (10) a linha tracejada espúria da suíte master e do banho master; (11) projeções tracejadas evidentes, em preto ou branco pelo fundo (R8); (12) o Térreo nublado refeito a partir do Térreo novo. Mais a limpeza dos contornos na troca dos pisos (seção 3).
+
+Perguntas ao usuário: a linguagem dos banhos 1, 2, 3 e master (como nos banhos do Subsolo e no lavatório do Térreo: bancada em travertino bruto mais escuro, cuba esculpida em granito marrom, vaso marrom-escuro) ou o Carrara com louça branca e só a borda (E9); o B. serviço como o banho de serviço do Térreo (pia em granito marrom mais escuro, cuba e vaso brancos).
