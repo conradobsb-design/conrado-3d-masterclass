@@ -434,4 +434,5 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
   - os boxes do BH sauna e do BH serviço em vidro contínuo, com as faces finas e a sombra curta (E5);
   - as bancadas mais marcadas que o piso, com a borda no tom escurecido da pedra e a sombra curta (E9);
   - o rótulo CIRCULAÇÃO (2,23 m²) no meio do corredor, sem encostar nas paredes (E7); o rótulo SHAFT do PDF;
-  - banhos (seção 6): BH sauna com as prateleiras em granito marrom, a cuba esculpida em travertino bruto e o vaso marrom; BH serviço com a bancada em granito marrom, a cuba branca e o vaso branco.
+  - banhos (seção 6): BH sauna com as prateleiras em granito marrom, a cuba esculpida em travertino bruto e o vaso marrom; BH serviço com a bancada em granito marrom, a cuba branca e o vaso branco;
+  - "melhore o aspecto do marmore travertino bruto": o piso de travertino (sauna, BH sauna com a ducha, depósito) e os bancos da sauna no travertino bruto aprovado na Casa A (a foto da biblioteca na escala, com os veios horizontais longos e os poros pequenos), na luz e no creme de antes; os bancos no desenho mais marcado das bancadas, mantidos os dois níveis, a linha fina e a sombra discreta.

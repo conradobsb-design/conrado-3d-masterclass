@@ -193,8 +193,9 @@ PISOS = {
 }
 
 
-def piso_textura(Q, img, m, nome, forca, sig_m, semente):
-    """O material `nome` na máscara m, na escala da prancha."""
+def piso_textura(Q, img, m, nome, forca, sig_m, semente, bruto=None):
+    """O material `nome` na máscara m, na escala da prancha. bruto: no travertino, o estilo do travertino bruto da Casa A
+    (`final3840_casaa.TRAVERTINO`: "piso" ou "bancada"), com os veios horizontais e os poros, na luz do próprio piso."""
     sys.path.insert(0, str(B.RAIZ / "_texturas"))
     from texturas import textura
     import fontes_procedurais as F
@@ -211,7 +212,10 @@ def piso_textura(Q, img, m, nome, forca, sig_m, semente):
         out, _ = trocar_pedra_portuguesa(img.astype(np.uint8), m, px_m, fonte="leque", sombra_limiar=1e-3)
         return out.astype(np.float32)
     L = luz_robusta(img, m, sig_m * px_m)
-    if nome == "travertino":
+    if nome == "travertino" and bruto:
+        import final3840_casaa as FA
+        D = FA.travertino_bruto(Q, h, w, semente, forca=forca, **FA.TRAVERTINO[bruto])[..., None]
+    elif nome == "travertino":
         T = textura("travertino", px_m, h, w, semente=semente).astype(np.float32)
         det = cv2.GaussianBlur(T, (0, 0), 0.6) / np.maximum(cv2.GaussianBlur(T, (0, 0), 3.0 * px_m), 1)
         D = 1 + forca * (det - 1)
@@ -278,9 +282,9 @@ def arcos_porta(Q):
     return m.astype(bool), n
 
 
-def pisos(Q, img, incluir=None, dentro=None):
+def pisos(Q, img, incluir=None, dentro=None, bruto=None):
     """incluir: {nome do piso: [retângulos em pt]} onde o branco da base (uma peça que sai, como os carros) também é
-    aquele piso. dentro: só nesta máscara (a pegada do Subsolo)."""
+    aquele piso. dentro: só nesta máscara (a pegada do Subsolo). bruto: {nome do piso: estilo do travertino bruto}."""
     out = img.astype(np.float32)
     incluir = incluir or {}
     branco = Q.cor([(255, 255, 255)], tol=3)
@@ -313,9 +317,11 @@ def pisos(Q, img, incluir=None, dentro=None):
         solto = soltas[i] & outros
         n_soltos += int(solto.sum())
         # a textura na máscara inteira (o mesmo desenho de sempre); só não é pousada nas manchas soltas
-        novo = piso_textura(Q, out, m, tex, forca, sig, 700 + i)
+        novo = piso_textura(Q, out, m, tex, forca, sig, 700 + i,
+                            **({"bruto": bruto[nome]} if bruto and nome in bruto else {}))
         out = pousar(out, novo, m & ~solto, suave=0.5)
-        print(f"    piso {nome}: {int(m.sum())} px, a {Q.px_m:.1f} px/m")
+        print(f"    piso {nome}" + (" bruto (veios e poros)" if bruto and nome in bruto else "")
+              + f": {int(m.sum())} px, a {Q.px_m:.1f} px/m")
     print(f"    {n_soltos} px de manchas soltas da legenda (antialias de traço com a cor de outro piso) ficam com o piso "
           f"em volta")
     return np.clip(out, 0, 255).astype(np.uint8)
@@ -914,7 +920,7 @@ def no_banco_sauna(Q, r):
         and r.y1 <= q["pt"][3] + 0.5
 
 
-def bancos_sauna(Q, img):
+def bancos_sauna(Q, img, bruto=None):
     sys.path.insert(0, str(B.RAIZ / "_texturas"))
     from texturas import textura
     from retoque_terreo_casae import linha_aa
@@ -926,9 +932,14 @@ def bancos_sauna(Q, img):
     x0, y0, x1, y1 = x0 - 2, y0 - 2, x1 + 2, y1 + 2
     px0, py0, px1, py1 = ret_q(Q, b["piso_pt"])
     cor = np.median(img[py0:py1, px0:px1].reshape(-1, 3).astype(np.float32), axis=0)   # o travertino do piso
-    T = textura("travertino", Q.px_m, y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32)
-    det = cv2.GaussianBlur(T, (0, 0), 0.6) / np.maximum(cv2.GaussianBlur(T, (0, 0), 3.0 * Q.px_m), 1)
-    T = cor * (1 + q["veio"] * (det - 1))                              # o veio na força do piso (`piso_textura`)
+    if bruto:                                                          # o travertino bruto (veios e poros), como o piso
+        import final3840_casaa as FA
+        T = cor * FA.travertino_bruto(Q, y1 - y0, x1 - x0, q["semente"], forca=q["veio"], **FA.TRAVERTINO[bruto])[
+            ..., None]
+    else:
+        T = textura("travertino", Q.px_m, y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32)
+        det = cv2.GaussianBlur(T, (0, 0), 0.6) / np.maximum(cv2.GaussianBlur(T, (0, 0), 3.0 * Q.px_m), 1)
+        T = cor * (1 + q["veio"] * (det - 1))                          # o veio na força do piso (`piso_textura`)
     ye0 = Q.p2q(b["pt"][0], b["espelho_pt"][0])[1] - y0
     ye1 = Q.p2q(b["pt"][0], b["espelho_pt"][1])[1] - y0
     yy = np.arange(y1 - y0, dtype=np.float32)[:, None]
@@ -948,8 +959,9 @@ def bancos_sauna(Q, img):
     reg = reg * (1 - ln) + np.float32(q["linha"]) * ln
     out = img.copy()
     out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
-    print(f"    sauna: os bancos ({b['pt'][2] - b['pt'][0]:.0f} x {b['pt'][3] - b['pt'][1]:.0f} pt) no travertino da "
-          f"biblioteca, no tom do piso, com o espelho em linha fina e a sombra discreta")
+    print(f"    sauna: os bancos ({b['pt'][2] - b['pt'][0]:.0f} x {b['pt'][3] - b['pt'][1]:.0f} pt) no travertino "
+          + ("bruto (veios e poros)" if bruto else "da biblioteca")
+          + ", no tom do piso, com o espelho em linha fina e a sombra discreta")
     return out
 
 
@@ -2311,11 +2323,13 @@ def passos_subsolo(Q, ini):
     # branco" (as duas bancadas do Subsolo em granito marrom, a cuba da ARQ_BANCADAS em travertino, o vaso do BH sauna
     # marrom). Auditoria de 26/10 (aprovada pelo usuário: "ok, aplique a lista"): as bancadas com a borda e a sombra (E9), os
     # boxes em vidro contínuo (E5), as paredes em cinza 80 (E10), a escada sem linhas com o S (E3, E8) e os rótulos
-    # (CIRCULAÇÃO de 2,23 m² no corpo do PDF, longe das paredes, e o SHAFT; E7)
+    # (CIRCULAÇÃO de 2,23 m² no corpo do PDF, longe das paredes, e o SHAFT; E7). Depois: "melhore o aspecto do marmore
+    # travertino bruto": o piso de travertino (sauna, BH sauna, depósito) e os bancos da sauna no travertino bruto da
+    # Casa A aprovado (`final3840_casaa.travertino_bruto`: os veios horizontais e os poros), na luz e no tom de antes
     return [
-        ("pisos", lambda im: pisos(Q, im, dentro=dentro)),
+        ("pisos", lambda im: pisos(Q, im, dentro=dentro, bruto={"travertino": "piso"})),
         ("bancadas", lambda im: bancadas(Q, im, borda=BANCADAS_F["borda_e9"], pedra="granito", cuba=cuba_travertino)),
-        ("sauna", lambda im: bancos_sauna(Q, im)),
+        ("sauna", lambda im: bancos_sauna(Q, im, bruto="bancada")),
         ("pecas", lambda im: pecas_pdf(Q, im, ini, fora=[c["ducha"]] and [(c["ducha"][0] - 3, c["ducha"][1] - 3,
                                                                           c["canopla"][2] + 3, c["ducha"][3] + 3)])),
         ("tampas", lambda im: tampas_vasos(Q, im)),
