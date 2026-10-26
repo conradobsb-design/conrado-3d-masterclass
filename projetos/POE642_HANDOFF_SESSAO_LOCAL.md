@@ -2441,6 +2441,8 @@ Pedido do usuário (26/10/26), as 11 especificações (E1 a E11) estão na seç�
 
 ## Casa A · Subsolo com os pedidos de 26/10 (final em 3840 px)
 
+**Aprovado** pelo usuário (26/10/26): "OK, subsolo da casa A aprovado". Próxima planta da auditoria: Casa A · Térreo.
+
 Pedidos do usuário (26/10/26), além da auditoria:
 - "Subsolo da casa A: Melhore o aspecto do Mármore travertino bruto em suas respectivas áreas; Melhore a representação do banco em mármore travertino bruto da sauna; Note que você usou o travertino na área do elevador. Essa área ficou bem representada no mármore, mas deveria ter um elevador, assim como fizemos em outras casas; Melhore a representação dos chuveiros; Melhore a representação dos armários do depósito - em marcenaria; Melhore a representação das folhas contínuas dos boxes; E faça os ajustes da auditoria."
 - "Ainda para o subsolo da casa A: Cubas dos banhos de serviço em marrom granito: Mantem a bancada das cubas em mármore travertino bruto. Sanitarios em marrom, não branco. A parede que divide os banhos masculino e feminino deve ser representado como parede em cinza 80."

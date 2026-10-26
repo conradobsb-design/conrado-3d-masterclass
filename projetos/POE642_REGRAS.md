@@ -380,7 +380,7 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
 - **Respostas do usuário:** paredes em cinza 80; "O tapete conta como objeto, sim" (o rótulo não fica sobre o tapete: A Térreo, sala de estar; A 1º Pav, sala íntima); "vou aprovar planta por planta".
 
 **Aplicação (planta por planta):**
-- **Casa A · Subsolo (26/10, `POE642_CasaA/scripts/final3840_casaa.py`, final refeita em 3840 px):** os pedidos do usuário para esta planta e a auditoria:
+- **Casa A · Subsolo (26/10, `POE642_CasaA/scripts/final3840_casaa.py`, final refeita em 3840 px; aprovada pelo usuário: "OK, subsolo da casa A aprovado"):** os pedidos do usuário para esta planta e a auditoria:
   - travertino bruto no hall, na sauna com a antessala e nos banhos feminino e masculino, na escala das Casas B a D, no creme delas, com os veios horizontais e os poros (E11);
   - Bege Bahia no pátio, na circulação, no depósito e no banho de serviço (que era Barlavento: "Já o banho serviço tem piso em mármore bege bahia");
   - a madeira da academia nas réguas das Casas B a D (E11);
