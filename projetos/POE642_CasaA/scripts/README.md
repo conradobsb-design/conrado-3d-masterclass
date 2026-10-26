@@ -939,3 +939,18 @@ Recursos da legenda usados no Térreo da Casa B:
 ## Teste
 
 Validado num PDF sintético com layer `ARQ_PAREDE`: paredes, vidro fino branco, divisória de vidro em traço, traço sobre parede, folha de porta com arco, vidro na faixa do muro e texto. Resultado esperado e obtido: 1 vidro-forma, 1 vidro-traço, 1 descarte de cada tipo (parede, porta, muros), texto removido sem apagar a linha que estava sob ele, nenhum pixel azulado e rotação de 180° idêntica.
+
+## Auditoria das especificações de 26/10 (`auditoria_2610.py`)
+
+Desenha os mapas numerados das 11 especificações do usuário de 26/10 (E1 a E11, `POE642_REGRAS.md`, seção 19) sobre as pranchas de entrega das 12 plantas. Só aponta; não altera nenhuma imagem.
+- Cada planta tem a sua lista em `ITENS`, com a especificação, o texto e os pontos em px do quadro de 3840 × 2160.
+- O recorte é a área construída: os rótulos do PDF no quadro, com folga.
+- A cor do círculo é a da especificação.
+
+```
+python auditoria_2610.py            # os 12 mapas
+python auditoria_2610.py D Terreo   # uma planta
+```
+
+Saída: `POE642_Casa?/renders/POE642_Casa?_PH_<pav>_auditoria_2610.jpg`.
+

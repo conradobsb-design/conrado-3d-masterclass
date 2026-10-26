@@ -2,6 +2,8 @@
 
 _Consolidado em 19/10/26, antes de começar as execuções. Este arquivo vale mais que o histórico (`POE642_HANDOFF_SESSAO_LOCAL.md`): quando uma regra daqui contradiz uma decisão antiga, vale a daqui. As regras novas de 19/10 estão marcadas com **[19/10]**, e as que elas substituem estão na seção 15._
 
+**[26/10] Especificações novas para todas as casas na seção 19.** Elas mudam o símbolo das escadas (S/D no lugar do triângulo da R14), a cor das paredes (cinza-escuro) e a dos pilares (preto). A aplicação aguarda o OK do usuário, planta por planta ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera.").
+
 Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de começar as execuções." Junto vieram 13 regras novas. Elas estão abaixo, cada uma no seu tema, com o número da lista do usuário (R1 a R13).
 
 ---
@@ -106,6 +108,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Em cada bocel, uma linha cinza suave e uma sombra de ~10 cm no degrau de baixo.
   - Nenhum traço preto.
   - Número de degraus igual ao PDF.
+- **[26/10] O triângulo da R14 dá lugar ao S/D** (seção 19, aguarda o OK do usuário).
 - **[19/10] R14. Triângulo de orientação no início da escada,** indicando o sentido, ora subida ora descida, conforme o pavimento. Usuário: "precisamos do triangulo como símbolo de orientação no inicio de escadas, indicando o sentido ora subida ora descida, a depender da situação".
   - Cheio, cinza-escuro, de 24 × 26 cm, no meio da largura e a 10 cm do início.
   - A ponta segue o sentido do percurso de quem chega por aquele pavimento.
@@ -339,3 +342,33 @@ O "x" marca o que cada regra exige em cada prancha já entregue.
   - **[22/10] Casa B:** o travertino é o da biblioteca (`_texturas/travertino.jpg`, tecido sem repetição), aplicado na final de 3840 px (59,7 px/m), onde os veios aparecem. Não pode haver riscos, emendas nem juntas: os traços verticais e as manchas do motor saem junto com o piso antigo (usuário: "melhore o aspecto do travertino. Remova os riscos").
 - **Escadas:** o sentido (de onde sobe) é o que o usuário define, mesmo quando o PDF indica outro. O triângulo fica no 1º degrau de quem sobe, apontando para a subida. A parte viva fica desse lado; a parte esmaecida e tracejada, depois do corte.
 - **Vidros em folha contínua:** sem montantes nem marcas no meio; só a folha com os perfis finos dos dois lados (os pontos escuros davam a impressão de várias folhas).
+
+## 19. Especificações de 26/10/26 (todas as casas)
+
+Pedido do usuário (26/10/26): "Especificações para todas as casas, valide cada uma delas em todas as plantas de todas as casas". Ele pediu também: "Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."
+
+As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
+
+| | Especificação (palavras do usuário) | Como fica na planta |
+|---|---|---|
+| E1 | "Verificar e validar a posição das soleiras." | Porta a porta contra o PDF, como a R13. |
+| E2 | "Representar os armários cortados com os cabides." | Todo armário cortado em planta (closets, quartos, DCE) com os cabides, como a R11. |
+| E3 | "Colocar o sentido nas escadas (S / D), em vez de triângulo." | A linha de percurso do PDF (bolinha no início, seta no fim) e a letra S ou D do PDF, em Inter SemiBold, cinza quase preto. Substitui o triângulo da R14. O sentido é o dos triângulos atuais, que já seguem as decisões do usuário (seção 18). |
+| E4 | "Marcar com uma setinha a entrada principal da casa." | Seta cheia, preta, de ~1,5 m, sobre o piso de fora, apontando para a porta principal. Só no Térreo. |
+| E5 | "Representar os boxes." | Box em vidro contínuo e visível (R10), nunca só o tracejado do caimento. |
+| E6 | "Retirar a representação dos raios nas portas." | Sem arco (R3). |
+| E7 | "O nome do ambiente não deve ficar sobre os objetos; optar sempre por uma das cores, branco ou preto, para criar contraste." | R6 e R7. Também fora da área do chuveiro e sem encostar na linha do box nem na bancada. |
+| E8 | "Representar a escada de forma mais demarcada." | Linhas dos degraus do PDF em cinza-escuro (~85), mais marcadas que o bocel suave de 19/10. |
+| E9 | "Se a bancada e o piso forem da mesma cor, deixar a bancada mais marcada do que o piso." | Borda fina no tom escurecido da própria pedra e uma sombra curta. |
+| E10 | "Representar as paredes em planta com uma tonalidade de um cinza escuro e os pilares no preto para melhor contraste." | Paredes cinza-escuro (proposta: RGB 70, 70, 70; opções 50 e 90 na prévia) e pilares pretos, inclusive os redondos (substitui o pilar redondo cinza de 22/10). |
+| E11 | "Se atentar à escala das texturas de piso." | As mesmas texturas e escalas em todas as casas. |
+
+**Auditoria de 26/10** (`POE642_CasaA/scripts/auditoria_2610.py`, que só aponta e não altera nenhuma imagem): os mapas numerados de cada planta estão em `POE642_Casa?/renders/POE642_Casa?_PH_<pav>_auditoria_2610.jpg`; a prévia do estilo proposto e a comparação das escalas, em `_auditoria_2610/`.
+- **Conformes em todas as plantas:** E1 (todas as portas conferidas com o PDF), E6 (nenhum raio de porta visível).
+- **Inconformes em todas as plantas:** E10 (paredes pretas, RGB 2 a 17), E3 e E8 (todas as escadas com o triângulo).
+- **E4:** nenhuma das 5 entradas principais tem seta.
+- **E2, E5, E7, E9:** os itens de cada planta estão nos mapas.
+- **E11:** as madeiras e o granito das Casas A e E (que vieram de renders de 2000 px) são mais largos e mais borrados que os das Casas B, C e D (réguas de ~10 a 12 cm, com as emendas). A proposta é levar A e E às texturas e escalas de B, C e D, já aprovadas.
+- **Fora das 11:** linha tracejada vertical que não existe no PDF atravessando a suíte master e o banho master do 1º Pavimento da Casa A.
+- **Perguntas ao usuário:** o tapete conta como objeto para os rótulos (A Térreo, sala de estar; A 1º Pav, sala íntima)? Qual tom de cinza para as paredes?
+

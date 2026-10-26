@@ -3,6 +3,8 @@ _14/10/2026. Estado ao fim da sessão na nuvem. Branch: `claude/poe642-casa-a-ha
 
 **Regras de representação: `POE642_REGRAS.md` (consolidadas em 19/10/26). Elas valem mais que as decisões antigas registradas aqui.**
 
+**Agora (26/10/26):** o usuário mandou 11 especificações para todas as casas (`POE642_REGRAS.md`, seção 19) e pediu para apresentar as inconformidades antes de alterar. A auditoria das 12 plantas está pronta (seção "Auditoria das especificações de 26/10", no fim). Nenhuma imagem foi alterada: aguarda o OK do usuário.
+
 Este arquivo é o ponto de partida da sessão no computador. Ele resume o que já foi feito, as decisões do cliente, como o trabalho é feito, os comandos de cada script e o que falta. A sessão nova não traz o histórico da conversa: tudo o que importa está aqui e nos arquivos citados.
 
 ---
@@ -2408,3 +2410,32 @@ python3 POE642_CasaA/scripts/piscinas_barlavento.py POE642_CasaD/renders/POE642_
   - imagem `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v2.png`; prancha do Térreo e PDF da Casa D refeitos com ela.
 - **Casa D, borda da piscina conforme a referência (15/10/26):** o usuário mandou um render de como é a borda ("segue um render de como é a borda dessa piscina") e: "são duas linhas de borda, entendeu?". Em volta do conjunto piscina + spa, uma capa de pedra da largura da faixa entre os dois (~8 px, ~26 cm), levemente mais clara que o piso; na borda de fora dela, o dreno em duas linhas finas paralelas contínuas (as bordas do canal, ~2,4 px entre elas), cantos em esquadro; a faixa entre a piscina e o spa é capa, sem dreno. A água volta a ter a sombra curta aprovada da borda (0,12; 1,6 px). Degraus em níveis como no ajuste anterior. Imagem `POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v3.png` (a v2, de uma linha só junto à água, fica como estava); prancha do Térreo, PDF e a prévia `renders/POE642_CasaD_PH_Terreo_piscina_antes_depois.jpg` refeitos.
 - **Casa D, borda alta (15/10/26):** pedido do usuário: "preciso que a borda rente a água seja mais alta que a água. preciso que tenha uma borda mesmo". A capa de pedra (~26 cm, ×1,03 do piso) fica acima da água (~12 cm): projeta na água uma sombra limpa e uniforme do lado da luz (força 0,28, 3,2 px, penumbra 0,45 px; as sombras do render caem para baixo à esquerda, então ela fica junto às bordas de cima e da direita da piscina e do spa e à esquerda da faixa entre os dois), com a linha fina do desnível junto à água em volta toda (0,20; 0,55 px) e a quina da capa iluminada (×1,07, 0,8 px). Reflexos mais fracos na sombra. Dreno em duas linhas e degraus em níveis como antes. Imagem `POE642_CasaD_PH_Terreo_v1_retocado_barlavento_v4.png` (v3 fica como estava); prancha do Térreo, PDF e prévia antes × depois refeitos.
+
+## Auditoria das especificações de 26/10 (todas as casas)
+
+Pedido do usuário (26/10/26), as 11 especificações (E1 a E11) estão na seção 19 do `POE642_REGRAS.md`. Ele disse: "Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."
+
+- **Método:**
+  - cada PDF do cliente posto no quadro da prancha (o `quadro_pdf` do `opcoes_1pav_casae.py`), a 59,7 px/m;
+  - checagens automáticas: cor das paredes (os preenchimentos escuros da ARQ_PAREDE), cor dos pilares (EST_PILAR), arcos de porta visíveis, bancada x piso (ΔE no Lab), escadas;
+  - conferência visual trecho a trecho (prancha em cima, PDF embaixo), porta a porta (soleiras e raios) e piso a piso (as escalas lado a lado, com barra de 1 m).
+  - Os scripts de conferência ficaram no rascunho da sessão (não entram no fluxo); o que entra no repositório é o mapa.
+- **Mapas:** `POE642_CasaA/scripts/auditoria_2610.py` (as listas `ITENS`, em px do quadro) desenha os 12 mapas numerados em `POE642_Casa?/renders/POE642_Casa?_PH_<pav>_auditoria_2610.jpg`. Só aponta; não altera nenhuma imagem.
+- **Prévia do estilo proposto** (Casa B, Térreo; só para aprovação, as pranchas não mudaram): `_auditoria_2610/POE642_proposta_estilo_2610.jpg` e os tons de parede em `_auditoria_2610/POE642_proposta_tons_parede.jpg`. Mostra:
+  - paredes em RGB 70 e pilares pretos;
+  - as linhas dos degraus do PDF em cinza-escuro, com a linha de percurso do PDF e a letra S/D do PDF no lugar do triângulo;
+  - a seta da entrada;
+  - a borda e a sombra da bancada.
+  - Os PDFs trazem S ou D em todas as escadas (texto de 6,4 pt): A Subsolo S; A Térreo S, S, D; A 1º Pav D, D, D; B Subsolo S, S; B Térreo D, D; C Subsolo S; C Térreo D; D Subsolo S; D Térreo D; E Subsolo S; E Térreo D, S; E 1º Pav D.
+- **Resultado:**
+  - E1 (soleiras) e E6 (raios) conformes em todas as plantas;
+  - E10 (paredes pretas) e E3/E8 (triângulos) inconformes em todas;
+  - E4: nenhuma das 5 entradas tem seta;
+  - E2, E5, E7 e E9 por planta, nos mapas;
+  - E11: madeiras e granito das Casas A e E mais largos e borrados que os de B, C e D (`_auditoria_2610/POE642_escala_pisos_casas_A_a_E.jpg`);
+  - fora das 11: uma linha tracejada vertical espúria (x = 1472 px) na suíte master e no banho master do 1º Pav da Casa A.
+- **Perguntas em aberto:**
+  - o tom de cinza das paredes (50, 70 ou 90);
+  - se o tapete conta como objeto para os rótulos;
+  - o OK por item ou por planta.
+
