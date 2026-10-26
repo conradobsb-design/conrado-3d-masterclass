@@ -267,6 +267,10 @@ def nao_piso(Q):
         dentro = a > 0.5
         if not dentro.any():
             dentro = a > 0.1
+        r = d["rect"]
+        if any(_dentro(z, (r.x0, r.y0, r.x1, r.y1)) for z in PORTAS_VIDRO["refaz_pt"]):
+            n_tira += 1                                       # redesenhada depois (`portas_vidro`)
+            continue
         if dentro.any() and neutro[y0:y1, x0:x1][dentro].mean() < q["fracao"]:
             n_tira += 1                                       # a final mostra piso ali
             continue
@@ -817,6 +821,82 @@ def armarios_deposito(Q, img):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# 5b. As portas de vidro de correr da academia (pergunta do usuário, 26/10/26: "as portas de vidro de correr que fecham a
+# academia estão bem representadas?"; não estavam: desenhadas em 2000 px e ampliadas, saíam como uma linha cinza borrada,
+# sem as folhas, os planos, os montantes nem os batentes). Redesenhadas na resolução da prancha, pelo PDF (ARQ_PAREDE),
+# como a regra da porta de correr (seção 4): os batentes em quadradinhos brancos com o contorno cinza; cada folha na
+# espessura do PDF (~5 cm), o caixilho claro de alumínio com o vidro na linha do meio e o contorno fino escuro, nos dois
+# planos do PDF; os montantes nas pontas das folhas; a sombra curta. Do pátio: 4 folhas em 2 trilhos (as das pontas no
+# de fora, as do meio no de dentro), fechadas; o piso do pátio passa por baixo (sem soleira, R13). Do hall: 2 folhas
+# desencontradas sobre a soleira de Bege Bahia, refeita nítida, com as faces da parede em cinza fino (R13).
+PORTAS_VIDRO = {
+    "refaz_pt": [(1144.8, 1233.0, 1151.4, 1654.1)],          # as folhas do pátio: o piso do pátio refeito por baixo
+    "portas": [
+        {"nome": "do pátio", "batentes": [(1145.3, 1230.9, 1156.7, 1233.2), (1145.3, 1653.9, 1156.7, 1656.1)],
+         "folhas": [((1145.3, 1233.2, 1148.2, 1340.6), "y"), ((1148.2, 1336.1, 1151.0, 1443.5), "y"),
+                    ((1148.2, 1443.5, 1151.0, 1551.0), "y"), ((1145.3, 1546.4, 1148.2, 1653.9), "y")],
+         "montante_pt": 4.5},
+        {"nome": "do hall", "soleira": (1655.55, 1232.34, 1666.89, 1371.24),
+         "batentes": [(1660.4, 1230.9, 1666.9, 1233.2), (1655.6, 1230.9, 1660.4, 1232.3),
+                      (1660.4, 1370.4, 1666.9, 1372.7), (1655.6, 1371.2, 1660.4, 1372.7)],
+         "folhas": [((1662.6, 1233.2, 1664.9, 1301.8), "y"), ((1660.4, 1301.8, 1662.6, 1370.4), "y")],
+         "montante_pt": 0.6},
+    ],
+    "aluminio": (232, 234, 235), "vidro": (204, 200, 190), "contorno": (88, 91, 94), "contorno_px": 0.4,
+    "batente": (240, 241, 242), "batente_contorno": (120, 123, 126), "sombra": 0.22,
+    "soleira": {"forca": 0.5, "linha": (150, 152, 154), "linha_px": 0.5, "semente": 7}}
+
+
+def soleira_bege(Q, out, r):
+    """A soleira de Bege Bahia (R13) na resolução da prancha: a foto da biblioteca no tom das Casas B a D, nítida, com as
+    faces da parede (os lados compridos) em cinza fino."""
+    q = PORTAS_VIDRO["soleira"]
+    sys.path.insert(0, str(A.RAIZ / "_texturas"))
+    from texturas import textura
+    tl = tela(out, Q, r, folga=3)
+    T = textura("bege_bahia", Q.px_m, tl.h, tl.w, semente=q["semente"]).astype(np.float32)
+    T = (1 + q["forca"] * (T / T.reshape(-1, 3).mean(axis=0) - 1)) * np.float32(PISOS_A["Bege Bahia"]["tom"])
+    tl.pintar_img(tl.ret(r), T)
+    x0, y0, x1, y1 = r
+    e = q["linha_px"] / PT_PX
+    faces = ((x0, y0, x0 + e, y1), (x1 - e, y0, x1, y1)) if (y1 - y0) >= (x1 - x0) else \
+        ((x0, y0, x1, y0 + e), (x0, y1 - e, x1, y1))
+    for f in faces:
+        tl.pintar(tl.ret(f), q["linha"])
+    return tl.gravar()
+
+
+def portas_vidro(Q, img):
+    q = PORTAS_VIDRO
+    out = np.ascontiguousarray(img.copy())
+    for p in q["portas"]:
+        if "soleira" in p:
+            out = soleira_bege(Q, out, p["soleira"])
+        caixa = tuple(f(v) for f, v in zip((min, min, max, max), zip(*([r for r, _ in p["folhas"]] + p["batentes"]))))
+        tl = tela(out, Q, caixa, folga=5)
+        for b in p["batentes"]:
+            m = tl.ret(b)
+            tl.pintar(m, q["batente"])
+            tl.contorno(m, q["contorno_px"], q["batente_contorno"])
+        for (x0, y0, x1, y1), eixo in p["folhas"]:
+            m = tl.ret((x0, y0, x1, y1))
+            sombra_q(tl, m, forca=q["sombra"], dist=0.9, sigma=0.8)
+            tl.pintar(m, q["aluminio"])
+            # o vidro na linha do meio, entre os montantes
+            k = p["montante_pt"]
+            xm = (x0 + x1) / 2
+            w = max(0.35, (x1 - x0) * 0.22)
+            tl.pintar(tl.ret((xm - w, y0 + k, xm + w, y1 - k)), q["vidro"])
+            for yy in (y0 + k, y1 - k):                               # os montantes: o traço no fim do vidro
+                tl.pintar(tl.ret((x0, yy - 0.2, x1, yy + 0.2)), q["contorno"], 0.7)
+            tl.contorno(m, q["contorno_px"], q["contorno"])
+        out = tl.gravar()
+        print(f"    porta de correr {p['nome']}: {len(p['folhas'])} folhas de vidro nos planos do PDF e "
+              f"{len(p['batentes'])} batentes" + (", sobre a soleira de Bege Bahia refeita" if "soleira" in p else ""))
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # 6. As paredes (E10; resposta do usuário: cinza 80) nos preenchimentos escuros da ARQ_PAREDE, com antialias; a divisória
 # entre os banhos feminino e masculino entra como parede (pedido de 26/10: "deve ser representado como parede em cinza
 # 80"; até aqui era uma divisória clara, item 94 de 19/10). Antes, o preto das paredes antigas que passa do PDF (a franja
@@ -961,6 +1041,7 @@ def passos_subsolo(Q, ini):
         ("sauna", lambda im: banco_sauna(Q, im)),
         ("elevador", lambda im: elevador(Q, im)),
         ("deposito", lambda im: armarios_deposito(Q, im)),
+        ("portas", lambda im: portas_vidro(Q, im)),
         ("paredes", lambda im: paredes(Q, im)),
         ("escada", lambda im: escada(Q, im)),
         ("rotulos", lambda im: rotulos(Q, im)),
@@ -969,6 +1050,7 @@ def passos_subsolo(Q, ini):
 
 # O antes e o depois de cada pedido (a final aprovada até aqui, com os rótulos, e a nova), recortes no quadro (px)
 ANTES_DEPOIS = {"planta": (860, 820, 2420, 1680), "banhos_sauna": (1180, 1490, 1900, 1660),
+                "porta_patio": (1300, 1040, 1400, 1530), "porta_hall": (1840, 1040, 1920, 1235),
                 "banho_servico": (1080, 850, 1350, 1070), "elevador_hall": (1860, 1040, 2400, 1235),
                 "deposito": (1330, 855, 1890, 1065), "academia": (1340, 1055, 1890, 1520),
                 "escada": (880, 1040, 1110, 1150)}
