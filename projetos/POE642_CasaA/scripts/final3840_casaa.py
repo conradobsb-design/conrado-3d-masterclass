@@ -830,7 +830,8 @@ def armarios_deposito(Q, img):
 # de fora, as do meio no de dentro), fechadas; o piso do pátio passa por baixo (sem soleira, R13). Do hall: 2 folhas
 # desencontradas sobre a soleira de Bege Bahia, refeita nítida, com as faces da parede em cinza fino (R13).
 PORTAS_VIDRO = {
-    "refaz_pt": [(1144.8, 1233.0, 1151.4, 1654.1)],          # as folhas do pátio: o piso do pátio refeito por baixo
+    # o piso refeito por baixo: as folhas do pátio; o vidro fixo da sauna, com o vão dele na parede
+    "refaz_pt": [(1144.8, 1233.0, 1151.4, 1654.1), (1009.0, 1655.9, 1145.5, 1664.8), (1009.0, 1655.9, 1018.0, 1735.8)],
     "portas": [
         {"nome": "do pátio", "batentes": [(1145.3, 1230.9, 1156.7, 1233.2), (1145.3, 1653.9, 1156.7, 1656.1)],
          "folhas": [((1145.3, 1233.2, 1148.2, 1340.6), "y"), ((1148.2, 1336.1, 1151.0, 1443.5), "y"),
@@ -841,6 +842,13 @@ PORTAS_VIDRO = {
                       (1660.4, 1370.4, 1666.9, 1372.7), (1655.6, 1371.2, 1660.4, 1372.7)],
          "folhas": [((1662.6, 1233.2, 1664.9, 1301.8), "y"), ((1660.4, 1301.8, 1662.6, 1370.4), "y")],
          "montante_pt": 0.6},
+        # o vidro fixo em L da sauna (usuário, 26/10/26: "corrija essa falha ao final da esquadria"; o fim do vidro
+        # junto à parede da esquerda saía esfumado, com um vão claro e um dente no canto da parede): o vão da parede
+        # em pedra (o branco do PDF), o vidro nos dois braços e os montantes do canto e das pontas, até a parede
+        {"nome": "da sauna (vidro fixo)", "soleiras": [(1009.3, 1656.1, 1145.3, 1664.6), (1009.3, 1664.6, 1017.8, 1735.5)],
+         "batentes": [(1013.8, 1660.7, 1018.6, 1665.5), (1143.3, 1660.7, 1145.3, 1663.5), (1013.8, 1733.5, 1016.6, 1735.5)],
+         "folhas": [((1018.6, 1660.7, 1143.3, 1663.5), "x"), ((1013.8, 1665.5, 1016.6, 1733.5), "y")],
+         "montante_pt": 0.0, "linhas": {"cor": (48, 50, 52), "faces_px": 0.9, "meio_px": 0.7, "largura_min_px": 4.8}},
     ],
     "aluminio": (232, 234, 235), "vidro": (204, 200, 190), "contorno": (88, 91, 94), "contorno_px": 0.4,
     "batente": (240, 241, 242), "batente_contorno": (120, 123, 126), "sombra": 0.22,
@@ -870,29 +878,57 @@ def portas_vidro(Q, img):
     q = PORTAS_VIDRO
     out = np.ascontiguousarray(img.copy())
     for p in q["portas"]:
-        if "soleira" in p:
-            out = soleira_bege(Q, out, p["soleira"])
+        for r in ([p["soleira"]] if "soleira" in p else []) + p.get("soleiras", []):
+            out = soleira_bege(Q, out, r)
+        if "linhas" in p:
+            # o caixilho com a largura do vidro aprovado (no PDF são 5 cm, ~3 px, e as três linhas viravam um cinza só)
+            lm = p["linhas"]["largura_min_px"] / PT_PX / 2
+
+            def largo(r, eixo):
+                x0, y0, x1, y1 = r
+                if eixo in ("y", "xy"):
+                    c = (x0 + x1) / 2
+                    x0, x1 = min(x0, c - lm), max(x1, c + lm)
+                if eixo in ("x", "xy"):
+                    c = (y0 + y1) / 2
+                    y0, y1 = min(y0, c - lm), max(y1, c + lm)
+                return (x0, y0, x1, y1)
+            p = dict(p, folhas=[(largo(r, e), e) for r, e in p["folhas"]], batentes=[largo(b, "xy") for b in p["batentes"]])
         caixa = tuple(f(v) for f, v in zip((min, min, max, max), zip(*([r for r, _ in p["folhas"]] + p["batentes"]))))
         tl = tela(out, Q, caixa, folga=5)
         for b in p["batentes"]:
             m = tl.ret(b)
             tl.pintar(m, q["batente"])
-            tl.contorno(m, q["contorno_px"], q["batente_contorno"])
+            tl.contorno(m, p["linhas"]["faces_px"] if "linhas" in p else q["contorno_px"],
+                        p["linhas"]["cor"] if "linhas" in p else q["batente_contorno"])
         for (x0, y0, x1, y1), eixo in p["folhas"]:
             m = tl.ret((x0, y0, x1, y1))
             sombra_q(tl, m, forca=q["sombra"], dist=0.9, sigma=0.8)
             tl.pintar(m, q["aluminio"])
-            # o vidro na linha do meio, entre os montantes
+            # o vidro na linha do meio, entre os montantes; no vidro fixo da sauna, como no PDF e na final aprovada:
+            # o caixilho branco entre as duas faces escuras e a linha escura do vidro no meio
             k = p["montante_pt"]
-            xm = (x0 + x1) / 2
-            w = max(0.35, (x1 - x0) * 0.22)
-            tl.pintar(tl.ret((xm - w, y0 + k, xm + w, y1 - k)), q["vidro"])
-            for yy in (y0 + k, y1 - k):                               # os montantes: o traço no fim do vidro
-                tl.pintar(tl.ret((x0, yy - 0.2, x1, yy + 0.2)), q["contorno"], 0.7)
+            if "linhas" in p:
+                ln = p["linhas"]
+                e = ln["meio_px"] / PT_PX / 2
+                meio = ((x0 + x1) / 2 - e, y0, (x0 + x1) / 2 + e, y1) if eixo == "y" else \
+                    (x0, (y0 + y1) / 2 - e, x1, (y0 + y1) / 2 + e)
+                tl.pintar(tl.ret(meio), ln["cor"])
+                tl.contorno(m, ln["faces_px"], ln["cor"])
+                continue
+            if eixo == "y":
+                xm, w = (x0 + x1) / 2, max(0.35, (x1 - x0) * 0.22)
+                tl.pintar(tl.ret((xm - w, y0 + k, xm + w, y1 - k)), q["vidro"])
+                for yy in ((y0 + k, y1 - k) if k else ()):            # os montantes: o traço no fim do vidro
+                    tl.pintar(tl.ret((x0, yy - 0.2, x1, yy + 0.2)), q["contorno"], 0.7)
+            else:
+                ym, w = (y0 + y1) / 2, max(0.35, (y1 - y0) * 0.22)
+                tl.pintar(tl.ret((x0 + k, ym - w, x1 - k, ym + w)), q["vidro"])
             tl.contorno(m, q["contorno_px"], q["contorno"])
         out = tl.gravar()
         print(f"    porta de correr {p['nome']}: {len(p['folhas'])} folhas de vidro nos planos do PDF e "
-              f"{len(p['batentes'])} batentes" + (", sobre a soleira de Bege Bahia refeita" if "soleira" in p else ""))
+              f"{len(p['batentes'])} batentes ou montantes" +
+              (", sobre a soleira de Bege Bahia refeita" if "soleira" in p or "soleiras" in p else ""))
     return out
 
 
@@ -1051,6 +1087,7 @@ def passos_subsolo(Q, ini):
 # O antes e o depois de cada pedido (a final aprovada até aqui, com os rótulos, e a nova), recortes no quadro (px)
 ANTES_DEPOIS = {"planta": (860, 820, 2420, 1680), "banhos_sauna": (1180, 1490, 1900, 1660),
                 "porta_patio": (1300, 1040, 1400, 1530), "porta_hall": (1840, 1040, 1920, 1235),
+                "vidro_sauna": (1180, 1490, 1400, 1640),
                 "banho_servico": (1080, 850, 1350, 1070), "elevador_hall": (1860, 1040, 2400, 1235),
                 "deposito": (1330, 855, 1890, 1065), "academia": (1340, 1055, 1890, 1520),
                 "escada": (880, 1040, 1110, 1150)}
