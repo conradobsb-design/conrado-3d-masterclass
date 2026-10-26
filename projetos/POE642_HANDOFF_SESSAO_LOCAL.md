@@ -2676,3 +2676,16 @@ Os 12 itens:
 10. (E7) o rótulo SAUNA encosta no banco (3 px): no meio do piso livre;
 11. os chuveiros de teto da ducha e do BH academia (placa branca com miolo cinza, parecem ralo) em placa cromada com os furinhos, como nas Casas A e B;
 12. a cabine do elevador, branca, em aço, como nas Casas A e B.
+
+## Casa C · Subsolo, a lista aplicada (26/10/26)
+
+Resposta do usuário: "ok, aplique a lista" (as perguntas 5 e 8 seguem a recomendação: a escada estreita nevoada depois da linha de corte; o BH academia como o BH sauna da Casa B). Final refeita inteira (`final3840_casac.py Subsolo`); o Térreo da Casa C não muda (a prancha do Térreo sai igual).
+
+Os 12 itens estão nas REGRAS (seção 19, Casa C · Subsolo, e seção 6). Na aplicação:
+- a escada estreita não tem preenchimento na ARQ_ESCADAS E RAMPAS do Subsolo (a `F.escada_sombreada` não serve): `escada_estreita_s` pinta o retângulo do PDF inteiro (o que tira os restos do render), pelos bocéis; a linha de corte é a do PDF (três traços com a quebra), como a `CORTE_U` da Casa A;
+- os degraus largos estão dentro do Bege Bahia contínuo do pátio e do caminho: `degraus_largos_s` só multiplica o tom de cada degrau; uma projeção do PDF que corta o pátio fica na base chapada como linha fina, e o primeiro recorte pelo Bege Bahia da legenda deixava uma linha clara vertical nos degraus: a máscara é fechada (`F.fechar`);
+- o box do BH academia é de correr (os traços tracejados e as duas folhas da ARQ_LOUÇAS E METAIS): não é pego por `F.vidros_box`, mas `ajustes_casaa.folhas_box` o acha (as duas folhas e o trilho); os traços do PDF saem das peças;
+- o poço do elevador da Casa C é largo à direita da cabine (17 pt): o anel cinza da rotina da Casa A ficou estreito (~4,5 pt) e o resto do poço branco, como os shafts;
+- com a parede em cinza 80, o vão da janela da ducha do BH academia (preenchimento branco da ARQ_PAREDE, que o render tinha preto) aparecia como uma barra preta: `janelas_s` deixa claros os vãos brancos do PDF que estão quase todos escuros (não os batentes do elevador).
+
+Antes e depois: `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2610_{planta,banhos,degraus_largos,escada_estreita,elevador,varanda}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa C refeitos. Aguarda o OK do Subsolo da Casa C.

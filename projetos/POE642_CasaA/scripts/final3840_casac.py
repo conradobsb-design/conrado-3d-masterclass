@@ -20,6 +20,10 @@ dois módulos para a Casa C (pastas, config, PDF, render, base chapada) e troca 
 coordenadas em pt do PDF da Casa C: camas, guarda-roupas, cooktops, inox, elevador, carros, jardins, guarda-corpos,
 escadas, projeções, rótulos). A imagem de partida é o render retocado e aprovado de 14/10 (2000 px), levado ao quadro.
 
+Auditoria de 26/10 no Subsolo (usuário: "ok, aplique a lista"): as paredes em cinza 80, o travertino bruto, as escadas
+com o S e o sombreamento (a estreita com a linha de corte e nevoada depois dela), o box de correr, os materiais do BH
+academia, os rótulos, os chuveiros cromados e a cabine do elevador em aço (`passos_subsolo_c`).
+
 Uso (da pasta POE642_CasaA/scripts/):
   python3 final3840_casac.py Terreo              # a final do Térreo com os rótulos
   python3 final3840_casac.py Terreo --de pecas   # recomeça de uma etapa (as anteriores ficam em cache)
@@ -95,8 +99,8 @@ TONS_C = {"granito": (68, 87, 116), "bege": (187, 211, 230), "grama": (43, 100, 
 _piso_textura_b = F.piso_textura
 
 
-def piso_textura_c(Q, img, m, nome, forca, sig_m, semente):
-    novo = _piso_textura_b(Q, img, m, nome, forca, sig_m, semente)
+def piso_textura_c(Q, img, m, nome, forca, sig_m, semente, **kw):
+    novo = _piso_textura_b(Q, img, m, nome, forca, sig_m, semente, **kw)
     alvo = TONS_C.get(nome)
     if alvo is not None and m.any():
         med = np.median(novo[m], axis=0)
@@ -252,6 +256,7 @@ def contexto_c():
     # o título da folha do Subsolo é "-1. 1º SUBSOLO": o filtro por "SUBSOLO" levava junto a VARANDA SUBSOLO
     A.FORA = tuple(f for f in A.FORA if f != "SUBSOLO") + ("1º SUBSOLO",)
     B.BORDAS = dict(B.BORDAS, pisos=list(B.BORDAS["pisos"]) + [(232, 232, 232)])
+    F.VASOS_COR = dict(F.VASOS_COR, **VASOS_COR_C)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -372,13 +377,13 @@ def arcos_porta_c(Q):
     return m.astype(bool), n
 
 
-def bancadas_c(Q, img):
+def bancadas_c(Q, img, **kw):
     """As bancadas (pedra areia e cubas brancas) sem o arco das portas de giro dos boxes, que o PDF desenha na
-    ARQ_BANCADAS (R3; antes, 14/10, o do BH master 2 tinha voltado)."""
+    ARQ_BANCADAS (R3; antes, 14/10, o do BH master 2 tinha voltado). kw: a borda, a pedra e a cuba de `F.bancadas`."""
     todos = Q.desenhos
     Q._desenhos = [d for d in todos if not (d.get("layer") == "ARQ_BANCADAS" and arco_porta(d))]
     try:
-        return F.bancadas(Q, img)
+        return F.bancadas(Q, img, **kw)
     finally:
         Q._desenhos = todos
 
@@ -681,13 +686,6 @@ def final_3840_c(chave, salvar=True, de=None, ate=None):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # O Subsolo
-# Os degraus largos no Subsolo (item 6): a mesma escada (os bocéis tracejados do PDF do Subsolo, nas mesmas posições),
-# subindo do pátio (degrau 1) para o caminho: a sombra no degrau de baixo (em cima de cada bocel; os dois em L, à
-# esquerda) e o triângulo no degrau 1, junto ao pátio, apontando para o caminho (para baixo na planta).
-DEGRAUS_LARGOS_S = {"bocels": DEGRAUS_LARGOS_T["bocels"], "triangulos": [(368.2, 947.3, "baixo")]}
-# A escada estreita (11 a 21) fica esmaecida (14/10); o "S" do PDF do Subsolo está no degrau 11: o triângulo ali,
-# apontando para a direita (sobe para o deck), esmaecido como ela
-TRIANGULO_ESTREITA_S = {"pt": (549.3, 1198.4, "direita"), "esmaecer": 0.5}
 # Os bancos da sauna em travertino (14/10): na legenda, o degrau da frente em L (#CAC6AE) e o assento junto à parede de
 # baixo (#C1BDA1); o travertino da biblioteca no tom do piso da sauna, 0,91 e 0,867 dele, com as arestas em linha fina
 SAUNA_C = {"pt": (549.6, 990.8, 651.7, 1138.9), "pecas": [((174, 198, 202), 0.91), ((161, 189, 193), 0.867)],
@@ -718,7 +716,8 @@ def pegada_subsolo(Q):
     return np.maximum(a, m * 1.0)
 
 
-def bancos_sauna_c(Q, img):
+def bancos_sauna_c(Q, img, bruto=None):
+    """bruto: o desenho do travertino bruto da Casa A (`final3840_casaa.TRAVERTINO[bruto]`), não a foto lisa."""
     sys.path.insert(0, str(RAIZ / "_texturas"))
     from texturas import textura
     q = SAUNA_C
@@ -728,20 +727,26 @@ def bancos_sauna_c(Q, img):
     piso = np.median(out[py0:py1, px0:px1][trav], axis=0)
     x0, y0, x1, y1 = F.ret_q(Q, q["pt"])
     x0, y0, x1, y1 = x0 - 3, y0 - 3, x1 + 3, y1 + 3
-    T = textura("travertino", Q.px_m, y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32)
-    det = cv2.GaussianBlur(T, (0, 0), 0.6) / np.maximum(cv2.GaussianBlur(T, (0, 0), 3.0 * Q.px_m), 1)
+    if bruto:
+        import final3840_casaa as FA
+        D = FA.travertino_bruto(Q, y1 - y0, x1 - x0, q["semente"], forca=F.SAUNA_F["veio"], **FA.TRAVERTINO[bruto])
+    else:
+        T = textura("travertino", Q.px_m, y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32)
+        det = cv2.GaussianBlur(T, (0, 0), 0.6) / np.maximum(cv2.GaussianBlur(T, (0, 0), 3.0 * Q.px_m), 1)
+        D = 1 + 1.6 * (det - 1)
     reg = out[y0:y1, x0:x1]
     tudo = np.zeros((y1 - y0, x1 - x0), np.uint8)
     for cor, f in q["pecas"]:
         m = Q.cor([cor], tol=4)[y0:y1, x0:x1].astype(np.uint8)
         m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
         a = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.5)[..., None]
-        reg[:] = reg * (1 - a) + piso * f * (1 + 1.6 * (det - 1)) * a
+        reg[:] = reg * (1 - a) + piso * f * D[..., None] * a
         tudo |= m
         borda = cv2.morphologyEx(m, cv2.MORPH_GRADIENT, np.ones((2, 2), np.uint8)).astype(np.float32)
         al = np.clip(cv2.GaussianBlur(borda, (0, 0), 0.4) * q["larg_px"] * 1.4, 0, 1)[..., None] * q["forca"]
         reg[:] = reg * (1 - al) + np.float32(q["linha"]) * al
-    print("    sauna: o banco em L e o assento em travertino da biblioteca, no tom do piso (0,91 e 0,867), arestas finas")
+    print("    sauna: o banco em L e o assento em travertino " + ("bruto (veios e poros)" if bruto else "da biblioteca")
+          + ", no tom do piso (0,91 e 0,867), arestas finas")
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
@@ -768,27 +773,204 @@ def floreira_s(Q, img):
     return out
 
 
-def escadas_s(Q, img):
-    out = degraus_linhas(Q, img, DEGRAUS_LARGOS_S)
-    from retoque_terreo_casae import ESCADA_LINHAS
-    t = ESCADA_LINHAS["triangulo"]
-    q = TRIANGULO_ESTREITA_S
-    xp, yp, sentido = q["pt"]
-    dx, dy = {"esquerda": (-1, 0), "direita": (1, 0), "cima": (0, -1), "baixo": (0, 1)}[sentido]
-    xa, ya = xp - dx * t["altura_pt"], yp - dy * t["altura_pt"]
-    bb = t["base_pt"] / 2
-    pts = [(xp, yp), (xa - dy * bb, ya - dx * bb), (xa + dy * bb, ya + dx * bb)]
-    k = 8
-    X0, Y0, X1, Y1 = F.ret_q(Q, (xp - 20, yp - 20, xp + 20, yp + 20))
-    w, h = X1 - X0, Y1 - Y0
-    mm = np.zeros((h * k, w * k), np.uint8)
-    cv2.fillPoly(mm, [np.int32(np.round([((np.array(Q.p2q(x, y)) - (X0, Y0)) * k) for x, y in pts]))], 255)
-    a = cv2.resize(mm.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
-    cor = 255 - (255 - np.float32(t["cor"])) * q["esmaecer"]
-    reg = out[Y0:Y1, X0:X1].astype(np.float32)
-    out[Y0:Y1, X0:X1] = np.clip(reg * (1 - a) + cor * a, 0, 255).astype(np.uint8)
-    print("    escada estreita (esmaecida): o triângulo da R14 no degrau 11, apontando para a direita")
+# ----------------------------------------------------------------------------------------------------------------------
+# A auditoria de 26/10 no Subsolo (mapa `renders/POE642_CasaC_PH_Subsolo_auditoria_2610_v2.jpg`; usuário: "ok, aplique a
+# lista", com as recomendações das duas perguntas): as paredes em cinza 80 (E10); o travertino bruto do Subsolo aprovado
+# da Casa B no piso e nos bancos da sauna (E11); as escadas sem linhas e sem triângulo, com o S e o sombreamento (E3,
+# E8); a escada estreita com a linha de corte do PDF e nevoada depois dela, como a escada em U da Casa A; o box de correr
+# do BH academia em vidro contínuo com o trilho (E5); a bancada com a borda e a sombra (E9) e os materiais do BH sauna da
+# Casa B (bancada em granito marrom, cuba esculpida em travertino bruto, vaso marrom); os rótulos SAUNA e BH ACADEMIA
+# longe do banco, do box e das paredes (E7); os chuveiros de teto na placa cromada com os furinhos; a cabine do
+# elevador em aço, como nas Casas A e B.
+# O vaso do BH academia (o retângulo da louça no PDF, pt) e a cor; no Térreo, nenhum (os da Casa B não valem aqui)
+VASOS_COR_C = {"Subsolo": [((781.3, 1094.9, 810.4, 1114.9), "marrom")], "Terreo": []}
+# Os chuveiros de teto do PDF (ARQ_LOUÇAS E METAIS, as placas de 20 cm): o da ducha e o do BH academia
+CHUVEIROS_S = [(685.8, 1026.9, 697.0, 1038.1), (685.8, 1102.1, 697.0, 1113.3)]
+# Os rótulos (E7): a folga maior em volta do texto (o BH ACADEMIA encostava na linha do box e na parede); o SAUNA parte do
+# meio do piso livre (o banco, ARQ_CONTRAPISO, não é obstáculo dos rótulos, e o texto encostava nele)
+ROTULOS_S = {"folga_px": 4, "pontos": {"SAUNA": (586.2, 1010.0)}}
+# Os degraus largos (pátio para o caminho), sem os bocéis e sem o triângulo: cada px leva o número do degrau pelos bocéis
+# do PDF (os 7 retos e os 2 em L: o lado de lá do L é o que fica à direita e abaixo do canto); 0 é o pátio, 1 o degrau
+# junto a ele (onde estava o triângulo) e o último, o patamar do caminho. O S no lugar do triângulo (o PDF não marca o
+# sentido aqui; vale o do triângulo de 22/10: sobe do pátio para o caminho).
+LARGOS_S = {"caixa_pt": (226.5, 926.9, 509.9, 1269.3), "s_pt": (368.2, 941.2),
+            "retos": (926.9, 955.5, 984.1, 1012.8, 1041.4, 1070.0, 1098.6), "em_l": ((300.2, 1127.3), (328.5, 1155.9))}
+# A escada estreita (11 a 21), do caminho para o deck: os degraus em Bege Bahia com o sombreamento de subida (o 11, à
+# esquerda, o mais escuro), esmaecida como desde 14/10; a linha de corte do PDF (ARQ_ESCADAS E RAMPAS, a diagonal com a
+# quebra) em cinza escuro fino, como na escada em U do 1º Pavimento da Casa A, e o trecho depois dela (19 a 21) nevoado;
+# o S do PDF no degrau 11 (a origem do texto cai fora da escada), esmaecido como ela. Saem os restos do render (o anel e o
+# traço laranja no 18, a diagonal fraca no 11, o pontinho no 19) e o triângulo.
+ESTREITA_S = {"pdf": (538.3, 1155.9, 708.4, 1240.9), "bocels": [555.3 + 17.0 * k for k in range(9)],
+              "corte": [(657.1, 1155.3), (672.8, 1194.5), (681.3, 1194.5), (667.4, 1202.4), (675.9, 1202.4),
+                        (691.4, 1240.9)],
+              "esmaecer": 0.40, "nevoa": {"branco": 0.72, "sigma_px": 1.2}, "linha": {"cor": (64, 64, 64), "larg_px": 1.2},
+              "letra": 0.35, "semente": 762}
+# A cabine do elevador em aço (a rotina da Casa A, `final3840_casaa.elevador`), no desenho do PDF da Casa C
+# (INS_INSTALAÇÕES HIDRÁULICAS): as paredes e o piso da cabine, a porta telescópica à esquerda, o poço entre as paredes
+# do PDF e a soleira em inox. O poço da Casa C é largo à direita da cabine (17 pt): o anel cinza fica estreito em volta
+# dela (~4,5 pt, como na Casa A) e o resto do poço fica branco, como os shafts
+ELEVADOR_S = {"externo": (1568.2, 1013.8, 1644.1, 1093.0), "interno": (1572.7, 1018.3, 1639.5, 1088.5),
+              "vao": (1568.2, 1036.4, 1572.7, 1070.4),
+              "folhas": [(1569.3, 1019.5, 1571.0, 1036.4), (1569.3, 1033.6, 1571.0, 1050.6),
+                         (1569.3, 1056.2, 1571.0, 1073.2), (1569.3, 1070.4, 1571.0, 1087.4)],
+              "soleira": SOLEIRA_ELEVADOR_C["pt"]["Subsolo"], "anel": (1565.0, 1009.3, 1648.6, 1097.5)}
+
+
+def grade_pt(Q, x0, y0, x1, y1):
+    """Os pt do PDF do centro de cada px do recorte [y0:y1, x0:x1] do quadro (o p2q é afim)."""
+    (a, b), (c, d), (e, f) = Q.p2q(0, 0), Q.p2q(100, 0), Q.p2q(0, 100)
+    M = np.linalg.inv(np.array([[(c - a) / 100, (e - a) / 100], [(d - b) / 100, (f - b) / 100]]))
+    U, V = np.meshgrid(np.arange(x0, x1) + 0.5 - a, np.arange(y0, y1) + 0.5 - b)
+    return M[0, 0] * U + M[0, 1] * V, M[1, 0] * U + M[1, 1] * V
+
+
+def sombras_degraus(k, n, s):
+    """O fator de cada px pelo número do degrau k (0 o piso de baixo, 1 a n-1 os degraus, n o de cima): cada degrau um
+    pouco mais claro que o de baixo, a sombra curta do espelho do de cima e a do 1º espelho no piso de baixo
+    (`F.ESCADA_SOMBRA`, como `F.escada_sombreada`)."""
+    rng = np.random.default_rng(s["semente"])
+    tons = 1 + rng.uniform(-s["tom_degrau"], s["tom_degrau"], n + 1)
+    t0, t1 = s["tom"]
+    f = np.where((k >= 1) & (k < n), (t0 + (t1 - t0) * (k - 1) / max(n - 1, 1)) * tons[k], 1.0).astype(np.float32)
+    for i in range(0, n):
+        m = k == i
+        if not m.any():
+            continue
+        d = cv2.distanceTransform((k <= i).astype(np.uint8), cv2.DIST_L2, 5)        # até o degrau de cima
+        fs, alc = s["piso"] if i == 0 else s["espelho"]
+        f = np.where(m, f * (1 - fs * np.exp(-np.maximum(d - 0.5, 0) / alc)), f)
+    return f
+
+
+def degraus_largos_s(Q, img):
+    q, s = LARGOS_S, F.ESCADA_SOMBRA
+    cx0, cy0, cx1, cy1 = q["caixa_pt"]
+    x0, y0, x1, y1 = F.ret_q(Q, (cx0, cy0 - 12, cx1, cy1))
+    X, Y = grade_pt(Q, x0, y0, x1, y1)
+    k = sum((Y > b).astype(np.int32) for b in q["retos"]) + sum(((X > lx) & (Y > ly)).astype(np.int32)
+                                                               for lx, ly in q["em_l"])
+    n = len(q["retos"]) + len(q["em_l"])
+    f = sombras_degraus(k, n, s)
+    # o Bege Bahia da legenda, com as linhas finas da base fechadas (a projeção do PDF que corta o pátio e os degraus)
+    bege = F.fechar(Q.cor([(232, 232, 232)], tol=6), 5)[y0:y1, x0:x1] & (X >= cx0) & (X <= cx1)
+    out = img.copy()
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    reg = np.where(bege[..., None], reg * f[..., None], reg)
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    out = F.letra(Q, out, "S", Q.p2q(*q["s_pt"]))
+    print(f"    degraus largos: {n - 1} degraus sem linhas e sem triângulo, com o sombreamento de subida (do pátio para "
+          f"o caminho); o S no degrau 1")
     return out
+
+
+def escada_estreita_s(Q, img, ss=8):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    q, s = ESTREITA_S, F.ESCADA_SOMBRA
+    ex0, ey0, ex1, ey1 = q["pdf"]
+    x0, y0, x1, y1 = F.ret_q(Q, (ex0 - 8, ey0, ex1, ey1))
+    x0, y0, x1, y1 = x0, y0 - 1, x1 + 1, y1 + 1
+    X, Y = grade_pt(Q, x0, y0, x1, y1)
+    a = F.ret_aa_q(Q, q["pdf"])[y0:y1, x0:x1][..., None]
+    h, w = a.shape[:2]
+    # os degraus pelos bocéis (0 = o caminho, à esquerda; 1 = o degrau 11), o tom do Bege Bahia da planta
+    bordas = [ex0] + list(q["bocels"]) + [ex1]
+    k = np.searchsorted(bordas, X).astype(np.int32)
+    n = len(bordas)
+    f = sombras_degraus(k, n, s)
+    bege = F.fechar(Q.cor([(232, 232, 232)], tol=6), 5)
+    tom = np.median(img[bege].reshape(-1, 3), axis=0).astype(np.float32)
+    T = textura(F.DEGRAUS_F["pedra"], Q.px_m, h, w, semente=q["semente"]).astype(np.float32)
+    novo = T / T.reshape(-1, 3).mean(axis=0) * tom * f[..., None]
+    # o trecho depois da linha de corte (0 a 1), pelo polígono da linha e da borda direita da escada
+    pts = [Q.p2q(x, y) for x, y in q["corte"] + [(ex1 + 3, ey1 + 3), (ex1 + 3, ey0 - 3), (q["corte"][0][0], ey0 - 3)]]
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    cv2.fillPoly(m, [np.int32(np.round((np.float32(pts) - (x0, y0)) * ss))], 255)
+    depois = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    e, nv = q["esmaecer"], q["nevoa"]
+    antes_c = novo * (1 - e) + 255 * e
+    nevoa = cv2.GaussianBlur(novo, (0, 0), nv["sigma_px"]) * (1 - nv["branco"]) + 255 * nv["branco"]
+    novo = antes_c * (1 - depois) + nevoa * depois
+    out = img.astype(np.float32)
+    reg = out[y0:y1, x0:x1]
+    # a sombra do 1º espelho no caminho (esmaecida como a escada), fora da escada
+    ch = bege[y0:y1, x0:x1][..., None] & (k == 0)[..., None]
+    reg[:] = np.where(ch, reg * (1 - (1 - f[..., None]) * (1 - e)), reg)
+    reg[:] = reg * (1 - a) + novo * a
+    out = np.clip(out, 0, 255).astype(np.uint8)
+    # a linha de corte do PDF, por cima, e o S do PDF no degrau 11, esmaecido como a escada
+    lc = q["linha"]
+    cp = np.float32([Q.p2q(x, y) for x, y in q["corte"]])
+    ml = np.zeros((h * ss, w * ss), np.uint8)
+    cv2.polylines(ml, [np.int32(np.round((cp - (x0, y0)) * ss))], False, 255, max(1, int(round(lc["larg_px"] * ss))),
+                  cv2.LINE_AA)
+    al = cv2.resize(ml.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(reg * (1 - al) + np.float32(lc["cor"]) * al, 0, 255).astype(np.uint8)
+    cor = F.LETRA_F["cor"]
+    F.LETRA_F["cor"] = tuple(int(round(c + (255 - c) * q["letra"])) for c in cor)
+    try:
+        out = F.letra(Q, out, "S", Q.p2q((bordas[0] + bordas[1]) / 2, (ey0 + ey1) / 2))
+    finally:
+        F.LETRA_F["cor"] = cor
+    print(f"    escada estreita: {n - 1} degraus em Bege Bahia, sem linhas e sem triângulo, com o sombreamento de subida, "
+          f"esmaecida; a linha de corte do PDF e o trecho depois dela nevoado; o S no degrau 11")
+    return out
+
+
+def chuveiros_s(Q, img):
+    """Os chuveiros de teto na placa cromada com os furinhos (`final3840_casaa.chuveiro`, sem o braço)."""
+    import final3840_casaa as FA
+    out = np.ascontiguousarray(img.copy())
+    for r in CHUVEIROS_S:
+        cx, cy = (r[0] + r[2]) / 2, (r[1] + r[3]) / 2
+        meio = (cx - 0.3, cy - 0.3, cx + 0.3, cy + 0.3)
+        out = FA.chuveiro(Q, out, {"ducha": r, "braco": meio, "canopla": meio})
+    print(f"    {len(CHUVEIROS_S)} chuveiros de teto: a placa cromada com os furinhos")
+    return out
+
+
+def boxes_s(Q, img):
+    """O box de correr do BH academia: as duas folhas do PDF em vidro contínuo e o trilho no vão (`final3840_casaa.boxes`,
+    como os boxes da Casa A)."""
+    import final3840_casaa as FA
+    return FA.boxes(Q, np.ascontiguousarray(img.copy()))
+
+
+JANELAS_S = {"lum_max": 90, "vao_max": 60, "cor": (232, 234, 236), "recuo_pt": 0.3}
+
+
+def janelas_s(Q, img):
+    """Os vãos das janelas (os preenchimentos brancos da ARQ_PAREDE) que ficaram escuros: com as paredes pretas não se
+    viam; no cinza 80, a janela da ducha do BH academia (na parede de baixo) saía como uma barra preta. O vão fica
+    claro, como nas janelas da Casa B, com o vidro fino das esquadrias."""
+    q = JANELAS_S
+    out = img.copy()
+    n = 0
+    for d in Q.desenhos:
+        r = d["rect"]
+        if d.get("layer") != "ARQ_PAREDE" or not d.get("fill") or min(d["fill"]) < 0.9 or r.width * r.height < 20:
+            continue
+        e = q["recuo_pt"]
+        x0, y0, x1, y1 = F.ret_q(Q, (r.x0 + e, r.y0 + e, r.x1 - e, r.y1 - e))
+        reg = out[y0:y1, x0:x1]
+        lum = reg.astype(np.float32).mean(axis=2)
+        m = lum < q["lum_max"]
+        if lum.mean() < q["vao_max"] and m.any():                # só o vão quase todo escuro (não os batentes)
+            reg[m] = q["cor"]
+            n += 1
+    print(f"    janelas: {n} vão(s) escuro(s) no claro")
+    return out
+
+
+def elevador_s(Q, img):
+    import final3840_casaa as FA
+    guarda = FA.ELEVADOR
+    FA.ELEVADOR = dict(FA.ELEVADOR, **ELEVADOR_S)
+    try:
+        return FA.elevador(Q, np.ascontiguousarray(img.copy()))
+    finally:
+        FA.ELEVADOR = guarda
 
 
 def passos_subsolo_c(Q, ini):
@@ -797,18 +979,27 @@ def passos_subsolo_c(Q, ini):
     dentro = peg > 0.5
     AJ.SUBSOLO_R2 = dict(AJ.SUBSOLO_R2, terreo=CASA_C / "renders" / "POE642_CasaC_PH_Terreo_final_rotulos.png")
     F.SAUNA_F = dict(F.SAUNA_F, Subsolo={"pt": SAUNA_C["pt"]})
+    F.ROTULOS_F = dict(F.ROTULOS_F, folga_px=ROTULOS_S["folga_px"], pontos={"Subsolo": ROTULOS_S["pontos"]})
+    cinza = F.PAREDES_F["cinza"]
+    fora_box = [(727.5, 1076.5, 731.5, 1139.0)]               # os traços do box de correr (vão em `boxes_s`)
+    fora_chuveiros = [(r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1) for r in CHUVEIROS_S]
     return [
-        ("pisos", lambda im: F.pisos(Q, im, dentro=dentro)),
+        ("pisos", lambda im: F.pisos(Q, im, dentro=dentro, bruto={"travertino": "piso"})),
         ("floreira", lambda im: floreira_s(Q, im)),
-        ("bancadas", lambda im: bancadas_c(Q, im)),
-        ("sauna", lambda im: bancos_sauna_c(Q, im)),
-        ("pecas", lambda im: F.pecas_pdf(Q, im, ini, fora=FORA_PECAS_S)),
+        ("bancadas", lambda im: bancadas_c(Q, im, borda=F.BANCADAS_F["borda_e9"], pedra="granito",
+                                           cuba=F.cuba_travertino)),
+        ("sauna", lambda im: bancos_sauna_c(Q, im, bruto="bancada")),
+        ("pecas", lambda im: F.pecas_pdf(Q, im, ini, fora=FORA_PECAS_S + fora_box + fora_chuveiros)),
         ("aparelhos", lambda im: pecas_do_render(Q, im, ini, FORA_PECAS_S, neutro, "academia: os aparelhos")),
         ("tampas", lambda im: F.tampas_vasos(Q, im)),
-        ("paredes", lambda im: F.paredes(Q, im)),
+        ("vasos", lambda im: F.vasos_cor(Q, im)),
+        ("chuveiros", lambda im: chuveiros_s(Q, im)),
+        ("boxes", lambda im: boxes_s(Q, im)),
+        ("elevador", lambda im: elevador_s(Q, im)),
+        ("paredes", lambda im: F.paredes(Q, im, cor=cinza)),
         ("soleiras", lambda im: soleira_elevador(Q, F.soleiras(Q, im))),
-        ("esquadrias", lambda im: B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m)),
-        ("escadas", lambda im: escadas_s(Q, im)),
+        ("esquadrias", lambda im: janelas_s(Q, B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m, parede=cinza))),
+        ("escadas", lambda im: escada_estreita_s(Q, degraus_largos_s(Q, im))),
         ("hachura", lambda im: AJ.subsolo_hachurado(im, peg, Q.px_m)),
         ("rotulos", lambda im: F.rotulos(Q, im, B.rotulos_casab(Q.pg, Q.p2q2000), Q.q["ajustes"],
                                          granito=A.granito(im, Q.q.get("granito_lum_max", 125)))),
