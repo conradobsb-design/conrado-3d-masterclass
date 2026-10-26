@@ -979,3 +979,29 @@ python3 final3840_casaa.py --de rotulos --antes antes.png  # e os antes e depois
 python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png
 python3 pdf_entrega.py
 ```
+
+## Térreo da Casa A em 3840 px com a auditoria de 26/10 (`final3840_casaa_terreo.py`)
+
+A lista do Térreo aprovada pelo usuário em 26/10/26 ("aplique a lista"; o travertino fica o de hoje): E2, E3, E4, E5, E7, E8, E9, E10 (cinza 80) e E11 (o granito). A final aprovada, sem os rótulos, no quadro de 3840 px (`rotulos_casaa.final_imagem`) é redesenhada etapa por etapa com as rotinas do `final3840_casaa.py`:
+
+| Etapa | O que faz |
+|---|---|
+| `granito` | o granito das Casas B a D na cor malva da base chapada, só no piso (os objetos, as sombras e o tracejado das projeções ficam) |
+| `motorista` | o armário do quarto com os cabides e o box do banho em vidro contínuo (cinza-claro no granito) |
+| `lavabo` | a borda e a sombra da bancada (E9) |
+| `paredes` | cinza 80 nas paredes do PDF; a linha preta dos muros do lote da própria final em cinza 80 |
+| `deck` | o lance do deck em Bege Bahia, sem linhas, com o sombreamento, esmaecido depois do corte; o D no degrau de cima |
+| `pisantes` | os degraus escalonados em Bege Bahia, sem contorno, com a sombra de cada um no de baixo; o D no de cima |
+| `escada_u` | a escada interna sem linhas, com o sombreamento (cheia até o corte do 7º degrau, esmaecida depois); o S no 1º degrau |
+| `caracol` | os degraus em leque sem linhas, com o sombreamento, o pilar preto e o corrimão; cheia até o corte, esmaecida depois; o S do PDF |
+| `seta` | a seta da entrada principal no hall externo, apontando para a porta pivotante |
+| `rotulos` | os rótulos com os desvios aprovados; LAVABO no corpo do PDF, SALA DE ESTAR fora do tapete |
+
+```bash
+export POE642_CACHE=/caminho/do/cache                            # as etapas ficam em $POE642_CACHE/poe642_casaa_etapas
+python3 final3840_casaa_terreo.py                                # a final: renders/POE642_CasaA_PH_Terreo_final_rotulos.png
+python3 final3840_casaa_terreo.py --de paredes --ate caracol     # recomeça e para numa etapa (só grava a final no fim)
+python3 final3840_casaa_terreo.py --de rotulos --antes antes.png # e os antes e depois: renders/..._Terreo_2610_<item>_antes_depois.jpg
+python3 rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png
+python3 pdf_entrega.py
+```

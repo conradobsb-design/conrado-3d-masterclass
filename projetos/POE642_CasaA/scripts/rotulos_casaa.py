@@ -58,6 +58,8 @@ PAVIMENTOS = {
                     # à direita da ducha, dentro do box (o resto do banho é vaso, bancada e o arco da porta)
                     ("BANHO SERV.", (605.5, 513.0), (-4.5, -39), 1.0),
                     ("BANHO MASC.", (926.4, 809.0), (-2, 0))]},          # encostava no arco da porta (sem arco desde o pente fino 4)
+    # Desde 26/10/26 a final do Térreo com os rótulos sai do `final3840_casaa_terreo.py` (a auditoria de 26/10), que
+    # parte da `final_imagem` daqui e usa estes desvios (com o LAVABO e o SALA DE ESTAR novos)
     "Terreo": {"render": "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento_ajustes.png",   # com os ajustes
                "aprovada": "renders/POE642_CasaA_PH_Terreo_final_bege_barlavento.png",
                "pdf": "642 - TÉRREO - CASA A.pdf",

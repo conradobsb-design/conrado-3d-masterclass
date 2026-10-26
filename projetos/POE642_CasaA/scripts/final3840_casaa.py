@@ -952,11 +952,11 @@ PAREDES_A = {"cor": (80, 80, 80), "divisoria": (1490.0, 1664.6, 1500.8, 1775.2),
              "folga_px": 3, "encostos": [(1187.8, 1670.3, 1196.3, 1671.7), (1187.8, 1714.2, 1196.3, 1715.6)]}
 
 
-def paredes(Q, img):
-    q = PAREDES_A
-    a = Q.preencher(lambda d: d.get("layer") == "ARQ_PAREDE" and d.get("fill") is not None and max(d["fill"]) < 0.5,
-                    ss=4)
-    for r in [q["divisoria"]] + q["encostos"]:
+def paredes(Q, img, q=None):
+    q = q or PAREDES_A
+    a = Q.preencher(lambda d: d.get("layer") == "ARQ_PAREDE" and d.get("fill") is not None and max(d["fill"]) < 0.5
+                    and max(d["rect"].width, d["rect"].height) <= q.get("max_pt", np.inf), ss=4)
+    for r in ([q["divisoria"]] if q.get("divisoria") else []) + q["encostos"]:
         a = np.maximum(a, ret_aa(Q, r))
     k = 2 * q["folga_px"] + 1
     perto = cv2.dilate((a > 0.02).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
@@ -968,7 +968,7 @@ def paredes(Q, img):
     out = img.copy()
     out[y0:y1, x0:x1] = cv2.inpaint(img[y0:y1, x0:x1], M[y0:y1, x0:x1].astype(np.uint8), 3, cv2.INPAINT_TELEA)
     out = out.astype(np.float32) * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None]
-    print(f"    paredes em cinza {q['cor'][0]} no contorno do PDF (com a divisória dos banhos); "
+    print(f"    paredes em cinza {q['cor'][0]} no contorno do PDF" + (" (com a divisória dos banhos)" if q.get("divisoria") else "") + "; "
           f"{int((M & (a < 0.5)).sum())} px da franja preta antiga refeitos")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
@@ -992,8 +992,8 @@ ESCADA_A = {"triangulo_q": (1052, 1078, 1088, 1110), "triangulo_lum": 125,
             "texto": "S", "origem": (914.0, 1267.6), "fonte": "Inter-SemiBold.otf", "corpo_px": 17, "cor_texto": (45, 45, 45)}
 
 
-def degraus_bege(Q, img):
-    q = DEGRAUS_A
+def degraus_bege(Q, img, q=None):
+    q = q or DEGRAUS_A
     sys.path.insert(0, str(A.RAIZ / "_texturas"))
     from texturas import textura
     tl = tela(np.ascontiguousarray(img.copy()), Q, q["pt"], folga=2)
@@ -1016,9 +1016,14 @@ def degraus_bege(Q, img):
     T *= f[..., None]
     (cx0, cy0), (cx1, cy1) = q["corte"]
     alem = X < cx0 + (cx1 - cx0) / (cy1 - cy0) * (Y - cy0)                 # à esquerda da diagonal do corte
+    if q.get("esmaece") == "direita":
+        alem = ~alem
     T = np.where(alem[..., None], T * (1 - q["esmaecer"]) + 255 * q["esmaecer"], T)
     tl.pintar_img(tl.ret(q["pt"]), T)
     out = tl.gravar()
+    if not q.get("patio"):
+        print(f"    escada: {n} degraus em Bege Bahia, sem linhas, com o sombreamento; esmaecidos depois do corte")
+        return out
     # a sombra do espelho do 1º degrau no pátio, à direita da escada
     fp, ap = q["patio"]
     r = (x1, y0, x1 + 4 * ap / PT_PX, y1)

@@ -2475,3 +2475,30 @@ python3 final3840_casaa.py --de banhos                            # recomeça de
 python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png
 python3 pdf_entrega.py
 ```
+
+## Casa A · Térreo com a auditoria de 26/10 (final em 3840 px)
+
+**Pedido:** a lista do Térreo apresentada para o OK (o mapa `renders/POE642_CasaA_PH_Terreo_auditoria_2610.jpg` e a folha das texturas `_auditoria_2610/POE642_CasaA_Terreo_texturas_2610.jpg`). Respostas do usuário (26/10/26): no travertino, "B" (fica o de hoje); "e aplique a lista". **Aguardando o OK do usuário.**
+
+**Como foi feito** (`POE642_CasaA/scripts/final3840_casaa_terreo.py`, com as rotinas do `final3840_casaa.py`): a final aprovada, sem os rótulos, no quadro de 3840 px (`rotulos_casaa.final_imagem("Terreo")`), redesenhada etapa por etapa:
+1. `granito`: o granito das Casas B a D (`fontes_procedurais.granito_referencia`) na cor malva da base chapada, só nos px que a final mostra como piso (os objetos ficam: carros, bancadas, armários, inox, a cama; as pintas claras do granito antigo não contam como objeto). A luz da final passa ao granito novo só onde escurece mais que o desenho da pedra antiga (as sombras dos carros e das bancadas ficam). O tracejado claro das projeções (a laje superior sobre a área de serviço) fica o da final.
+2. `motorista`: o armário com os cabides (`_texturas/elementos.guarda_roupa`, os tons dos closets da Casa A, portas para o quarto) e o box em vidro contínuo (as duas folhas do PDF e o trilho, na faixa cinza-clara).
+3. `lavabo`: a borda e a sombra da bancada (E9); a pedra, a cuba e a torneira ficam as da final.
+4. `paredes`: cinza 80 (`final3840_casaa.paredes`, agora com os parâmetros por pavimento); os muros do lote do PDF (faixas de mais de 300 pt) ficam de fora, porque a linha preta da final fica uns 5 px fora deles: ela mesma passa a cinza 80 (`MUROS`).
+5. `deck`, `pisantes`, `escada_u`, `caracol`: as escadas sem triângulo e sem linhas, com o sombreamento e as letras (S na interna e na caracol, D no lance do deck e nos escalonados). O lance do deck reaproveita o `degraus_bege` do Subsolo (agora com o lado esmaecido e a sombra no pátio opcionais).
+6. `seta`: a seta da entrada no hall externo.
+7. `rotulos`: os desvios aprovados do `rotulos_casaa.py`, com LAVABO no corpo do PDF e SALA DE ESTAR fora do tapete.
+
+**Arquivos:** `renders/POE642_CasaA_PH_Terreo_final_rotulos.png` (+ `_preview.jpg`), `entrega/POE642_CasaA_PH_Terreo_entrega.png`, `entrega/POE642_CasaA_Plantas_Humanizadas.pdf`; antes e depois em `renders/POE642_CasaA_PH_Terreo_2610_<item>_antes_depois.jpg` (planta, granito, motorista, lavabo, degraus_escalonados, lance_deck, escada_interna, caracol, entrada, sala_estar).
+
+**Atenção:**
+- a final do Térreo agora sai do `final3840_casaa_terreo.py`; rodar `rotulos_casaa.py Terreo` sobrescreveria a final com a versão antiga;
+- o 1º Pavimento usa o Térreo nublado (`rotulos_casaa.final_imagem("Terreo")`, a versão antiga): quando ele passar pela auditoria, trocar pelo Térreo novo (sem os rótulos: a etapa `seta` do cache).
+
+**Comandos** (da pasta `POE642_CasaA/scripts/`; o cache das etapas fica em `$POE642_CACHE/poe642_casaa_etapas`, com o prefixo `Terreo_`):
+```bash
+python3 final3840_casaa_terreo.py --antes <final aprovada antes, PNG>   # a final, com os antes e depois
+python3 final3840_casaa_terreo.py --de paredes                            # recomeça de uma etapa
+python3 rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png
+python3 pdf_entrega.py
+```
