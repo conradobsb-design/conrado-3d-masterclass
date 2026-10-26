@@ -986,16 +986,20 @@ A lista do Térreo aprovada pelo usuário em 26/10/26 ("aplique a lista"; o trav
 
 | Etapa | O que faz |
 |---|---|
-| `granito` | o granito das Casas B a D na cor malva da base chapada, só no piso (os objetos, as sombras e o tracejado das projeções ficam) |
-| `motorista` | o armário do quarto com os cabides e o box do banho em vidro contínuo (cinza-claro no granito) |
+| `granito` | o granito das Casas B a D na cor malva da base chapada, só no piso (os objetos, as sombras e o tracejado das projeções ficam); o banho do motorista em Bege Bahia |
+| `travertino` | o travertino bruto do Subsolo no piso de travertino da base, só no piso (os móveis, as sombras e o tracejado ficam) |
+| `motorista` | o armário do quarto com os cabides e o box do banho em vidro contínuo |
+| `loucas` | os vasos marrom-escuros (lavabo, WC, banho varanda); a bancada do lavatório em travertino bruto com a cuba esculpida em granito; a bancada do banho do motorista em granito mais escuro, cuba branca, chuveiro |
+| `ilha` | a ilha em U do gourmet em granito mais escuro, com a área molhada rebaixada e a cuba de inox |
 | `lavabo` | a borda e a sombra da bancada (E9) |
 | `paredes` | cinza 80 nas paredes do PDF; a linha preta dos muros do lote da própria final em cinza 80 |
 | `deck` | o lance do deck em Bege Bahia, sem linhas, com o sombreamento, esmaecido depois do corte; o D no degrau de cima |
 | `pisantes` | os degraus escalonados em Bege Bahia, sem contorno, com a sombra de cada um no de baixo; o D no de cima |
 | `escada_u` | a escada interna sem linhas, com o sombreamento (cheia até o corte do 7º degrau, esmaecida depois); o S no 1º degrau |
 | `caracol` | os degraus em leque sem linhas, com o sombreamento, o pilar preto e o corrimão; cheia até o corte, esmaecida depois; o S do PDF |
+| `projecoes` | o tracejado das projeções do PDF, nítido, em preto nos fundos claros e em branco nos escuros |
 | `seta` | a seta da entrada principal no hall externo, apontando para a porta pivotante |
-| `rotulos` | os rótulos com os desvios aprovados; LAVABO no corpo do PDF, SALA DE ESTAR fora do tapete |
+| `rotulos` | os rótulos com os desvios aprovados; LAVABO no corpo do PDF, SALA DE ESTAR fora do tapete, B. MOTORISTA no meio do piso seco |
 
 ```bash
 export POE642_CACHE=/caminho/do/cache                            # as etapas ficam em $POE642_CACHE/poe642_casaa_etapas

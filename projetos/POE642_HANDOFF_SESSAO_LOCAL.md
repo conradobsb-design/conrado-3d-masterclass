@@ -2502,3 +2502,21 @@ python3 final3840_casaa_terreo.py --de paredes                            # reco
 python3 rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png
 python3 pdf_entrega.py
 ```
+
+### Casa A · Térreo, pedidos seguintes (26/10/26)
+
+**Pedidos do usuário**, depois da lista da auditoria: "melhorar o aspecto do travertino bruto no piso do térreo."; "sanitário do lavabo em marrom escuro."; "nos banheiros da varanda gourmet: sanitários no marrom escuro, cuba esculpida no marrom granito, pedra bancada cuba em mármore travertino bruto levemente escurecido para distinguir do piso."; "Banho serviço: piso em mármore bege bahia, pedra pia em marrom granito levemente escurecida para distinguir do piso."; "o escrito do b. motorista pode ficar mais abaixo e centralizado."; e, durante o trabalho, "pedra da ilha em U da vanrada gourmet é marrom granito, igual ao piso. deixe-a levemente escurecida para distinguir do piso." e "a projeção em tracejado precisa ficar evidente. Em fundos escuros, faça a projeção com tom branco; para tons claros, marque-as com tom preto tracejado."
+
+**Leitura:** no Térreo não há "banho serviço" no PDF; o banho de serviço é o do motorista (o único banho da ala de serviço). **A confirmar com o usuário.**
+
+**Como foi feito** (novas etapas do `final3840_casaa_terreo.py`):
+- `granito`: o banho do motorista em Bege Bahia (`GRANITO_T["bege"]`), na mesma máscara e na mesma luz; a bancada e a cuba antigas viram piso (`refaz`);
+- `travertino` (nova): o travertino bruto do Subsolo (`final3840_casaa.travertino_bruto`, tom e força do Subsolo) na cor de travertino da base chapada; os móveis são os brancos da base (com 2 px de folga) e o que a final mostra fora do tom do piso (mais claro, de outra cor ou muito escuro); as sombras passam como luz; o tracejado das projeções fica; as louças e a bancada refeitas viram piso antes;
+- `loucas` (nova): os vasos marrom-escuros (lavabo, WC, banho varanda), a bancada do lavatório em travertino bruto mais marcado com a cuba esculpida em granito e a torneira, a bancada do banho do motorista em granito mais escuro com a cuba branca, a torneira e o chuveiro;
+- `ilha` (nova): a ilha em U em granito mais escuro, com a área molhada rebaixada e a cuba de inox da final;
+- `escada_u`: o trecho cheio no travertino novo;
+- `projecoes` (nova): os traços tracejados do PDF (`cadeias_tracejadas`: traços colineares com vãos) redesenhados em preto ou branco pelo fundo: DOC_LINHAS (sem os afastamentos e os limites do lote, as linhas dentro das paredes e os X do elevador e do shaft), ARQ_PERGOLADO e o contorno de fora da cobertura (ARQ_CONTRAPISO);
+- `rotulos`: o B. MOTORISTA no meio do piso seco.
+
+**Antes e depois** (contra a versão anterior do Térreo): `renders/POE642_CasaA_PH_Terreo_2610_{travertino,banhos_varanda,ilha_gourmet,banho_motorista,projecoes}_antes_depois.jpg`; os de antes (planta, granito, …) seguem contra a final aprovada antes da auditoria.
+

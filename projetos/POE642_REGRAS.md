@@ -188,6 +188,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Pilares em preto, como as paredes, na geometria do PDF (EST - Pilar).
   - **[22/10] Pilares redondos em cinza** (usuário, na Casa B: "existem dois pilares representados por bolas. Precisamos deixar em cinza para destacá-los"): cinza médio (RGB ~130, 128, 128) com o contorno escuro fino. Os retangulares seguem pretos.
   - Projeções (DOC_LINHAS E PROJEÇÕES, cobertura, claraboia, shaft com X, áreas descobertas) em tracejado bem visível.
+  - **[26/10] Tracejado preto ou branco pelo fundo** (usuário, no Térreo da Casa A: "a projeção em tracejado precisa ficar evidente. Em fundos escuros, faça a projeção com tom branco; para tons claros, marque-as com tom preto tracejado"): os traços do próprio PDF, redesenhados nítidos (~1,5 px) por cima de tudo, cada traço em preto (RGB ~30) nos fundos claros ou em branco nos escuros (granito, grama), pela luminância do fundo em volta dele. Os afastamentos e os limites do lote não são projeção e ficam como estão.
   - Exemplo do usuário: na Casa A faltaram as projeções dos brises.
   - **[22/10] Procurar a cobertura também fora da DOC_LINHAS** (usuário, na Casa B: "e onde estão as projeções de cobertura?"): no PDF da Casa B, a cobertura da entrada (a pérgola entre o jardim do hall e a garagem) é um tracejado da ARQ_PAREDE (traços de 5,7 pt). Ela entra na final, nos traços do próprio PDF, em cinza escuro e fino.
 - **[19/10] R9. Brises com as projeções de cobertura:** junto dos brises, o tracejado da projeção da cobertura (beiral ou laje), na posição do PDF e por cima. Escolha do usuário em 19/10: "tracejado da cobertura".
@@ -400,4 +401,12 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
   - a bancada do lavabo com a borda no tom escurecido da pedra e a sombra curta (E9);
   - os rótulos: LAVABO no corpo do PDF, sem encostar na bancada; SALA DE ESTAR fora do tapete, no piso livre entre ele e as poltronas do estar sob a projeção (E7);
   - o granito marrom (cozinha, gourmet, serviço, despensa, gás, motorista e garagem) no granito das Casas B a D (E11), só no piso: os objetos ficam, e ficam também as sombras e o tracejado das projeções.
+  - **Pedidos seguintes do usuário (26/10):**
+    - "melhorar o aspecto do travertino bruto no piso do térreo": o travertino bruto do Subsolo aprovado (os veios horizontais e os poros, no creme das Casas B a D) em todo o piso de travertino da base (estar, jantar, varanda, halls, escritório, lavabo, lavatório, banho varanda, WC, lounge do gourmet) e no trecho cheio da escada interna; só no piso: os móveis, as sombras e o tracejado ficam (substitui o "B" de antes);
+    - "sanitário do lavabo em marrom escuro" e, nos banheiros da varanda gourmet, "sanitários no marrom escuro": os vasos do lavabo, do WC e do banho varanda em louça marrom-escura;
+    - no lavatório da varanda gourmet: "cuba esculpida no marrom granito, pedra bancada cuba em mármore travertino bruto levemente escurecido para distinguir do piso" (a bancada no travertino mais marcado das bancadas do Subsolo, com a borda e a sombra);
+    - "Banho serviço: piso em mármore bege bahia, pedra pia em marrom granito levemente escurecida para distinguir do piso": no Térreo não há banho com esse nome; o banho de serviço é o do motorista: piso em Bege Bahia, bancada em granito marrom um pouco mais escuro (com a borda e a sombra), cuba branca, chuveiro em placa cromada; o vaso fica branco;
+    - "o escrito do b. motorista pode ficar mais abaixo e centralizado": no meio do piso seco, abaixo do vaso e da cuba;
+    - "pedra da ilha em U da vanrada gourmet é marrom granito, igual ao piso. deixe-a levemente escurecida para distinguir do piso": a ilha em U (era quartzito Carrara) em granito marrom um pouco mais escuro que o piso, com a borda e a sombra, a área molhada rebaixada um tom abaixo e a cuba de inox da final;
+    - as projeções tracejadas em preto ou branco pelo fundo (R8, acima): os dois X do pavimento superior, a claraboia do lavabo, a laje superior e o X da área de serviço descoberta, a grade do pergolado e o contorno de fora da cobertura.
 
