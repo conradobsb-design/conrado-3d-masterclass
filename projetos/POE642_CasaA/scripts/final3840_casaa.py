@@ -970,9 +970,37 @@ def paredes(Q, img):
 # cinza-escuro (~85), mais marcados que o bocel de 19/10 (os degraus, o contorno, a linha de percurso com a bolinha no
 # degrau 1, a marca de corte e o tracejado depois dela), e o S do PDF (o sentido: sobe do pátio para o deck) em Inter
 # SemiBold, cinza quase preto, na origem do texto do PDF.
+# Os degraus em Bege Bahia (usuário, 26/10/26: "os degraus da escada que sobem são em mármore bege bahia"; eram o creme
+# chapado da legenda): a foto da biblioteca na escala, no tom das Casas B a D, cada degrau (de 17 pt, como no PDF) com o
+# tom um pouco diferente, como peças de pedra; depois da marca de corte do PDF (a diagonal) o trecho segue esmaecido como
+# antes (~62% para o branco).
+DEGRAUS_A = {"pt": (735.4, 1230.9, 907.2, 1299.0), "piso": 17.0, "corte": ((773.0, 1268.7), (788.4, 1299.5)),
+             "esmaecer": 0.62, "tom_degrau": 0.025, "forca": 0.85, "semente": 2680}
 ESCADA_A = {"camada": "ARQ_ESCADAS E RAMPAS", "caixa_pt": (733.0, 1228.0, 912.0, 1302.0), "cor": (85, 85, 85),
             "larg_px": 0.9, "triangulo_q": (1052, 1078, 1088, 1110), "triangulo_lum": 125,
             "texto": "S", "origem": (914.0, 1267.6), "fonte": "Inter-SemiBold.otf", "corpo_px": 17, "cor_texto": (45, 45, 45)}
+
+
+def degraus_bege(Q, img):
+    q = DEGRAUS_A
+    sys.path.insert(0, str(A.RAIZ / "_texturas"))
+    from texturas import textura
+    tl = tela(np.ascontiguousarray(img.copy()), Q, q["pt"], folga=2)
+    T = textura("bege_bahia", Q.px_m, tl.h, tl.w, semente=q["semente"]).astype(np.float32)
+    T = (1 + q["forca"] * (T / T.reshape(-1, 3).mean(axis=0) - 1)) * np.float32(PISOS_A["Bege Bahia"]["tom"])
+    X, Y = tl.grade()
+    x0, y0, x1, y1 = q["pt"]
+    rng = np.random.default_rng(q["semente"])
+    n = int(np.ceil((x1 - x0) / q["piso"]))
+    tons = 1 + rng.uniform(-q["tom_degrau"], q["tom_degrau"], n)
+    k = np.clip(((x1 - X) // q["piso"]).astype(int), 0, n - 1)           # o degrau 1 é o da direita
+    T *= tons[k][..., None]
+    (cx0, cy0), (cx1, cy1) = q["corte"]
+    alem = X < cx0 + (cx1 - cx0) / (cy1 - cy0) * (Y - cy0)                 # à esquerda da diagonal do corte
+    T = np.where(alem[..., None], T * (1 - q["esmaecer"]) + 255 * q["esmaecer"], T)
+    tl.pintar_img(tl.ret(q["pt"]), T)
+    print(f"    escada: {n} degraus em Bege Bahia, esmaecidos depois do corte")
+    return tl.gravar()
 
 
 def escada(Q, img):
@@ -985,6 +1013,7 @@ def escada(Q, img):
     tri = (reg.astype(np.float32).mean(axis=2) < q["triangulo_lum"]).astype(np.uint8)
     tri = cv2.dilate(tri, np.ones((5, 5), np.uint8))
     out[y0:y1, x0:x1] = cv2.inpaint(reg, tri, 4, cv2.INPAINT_TELEA)
+    out = degraus_bege(Q, out)
     # os traços do PDF
     tl = tela(out, Q, q["caixa_pt"], folga=6)
     m = tl.vazia()
