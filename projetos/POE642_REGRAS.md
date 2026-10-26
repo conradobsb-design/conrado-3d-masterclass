@@ -360,7 +360,7 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
 |---|---|---|
 | E1 | "Verificar e validar a posição das soleiras." | Porta a porta contra o PDF, como a R13. |
 | E2 | "Representar os armários cortados com os cabides." | Todo armário cortado em planta (closets, quartos, DCE) com os cabides, como a R11. |
-| E3 | "Colocar o sentido nas escadas (S / D), em vez de triângulo." | A linha de percurso do PDF (bolinha no início, seta no fim) e a letra S ou D do PDF, em Inter SemiBold, cinza quase preto. Substitui o triângulo da R14. O sentido é o dos triângulos atuais, que já seguem as decisões do usuário (seção 18). |
+| E3 | "Colocar o sentido nas escadas (S / D), em vez de triângulo." | A letra S ou D do PDF, em Inter SemiBold, cinza quase preto, na origem do texto do PDF. Substitui o triângulo da R14. O sentido é o dos triângulos atuais, que já seguem as decisões do usuário (seção 18). Sem a linha de percurso do PDF (usuário, 26/10: "não precisa constar linhas"). |
 | E4 | "Marcar com uma setinha a entrada principal da casa." | Seta cheia, preta, de ~1,5 m, sobre o piso de fora, apontando para a porta principal. Só no Térreo. |
 | E5 | "Representar os boxes." | Box em vidro contínuo e visível (R10), nunca só o tracejado do caimento. |
 | E6 | "Retirar a representação dos raios nas portas." | Sem arco (R3). |
