@@ -735,10 +735,14 @@ BANCADAS_F = {"lado_min_m": 0.08, "volume": 0.06, "larg_m": 0.03, "contorno": (1
               "borda_e9": {"mult": 0.62, "larg_px": 0.7, "sombra": {"dist_m": 0.02, "sig_m": 0.022, "forca": 0.34}},
               # a pedra e a cuba por banho, planta a planta, com o pedido do usuário (`bancadas(..., pedra=, cuba=)`):
               # "granito", o granito marrom das Casas B a D (`fontes_procedurais.granito_referencia`); a cuba esculpida
-              # em travertino bruto (`cuba_travertino`), com a rotina da cuba de granito da Casa A
-              "cuba_travertino": {"tom": (172, 190, 210), "aro_pt": 1.2, "semente": 2760,
-                                  "cuba": {"rim": 1.05, "bacia": 0.82, "sombra_bacia": (0.36, 2.2),
-                                           "contorno": (104, 117, 133), "larg": 0.45}}}
+              # em travertino bruto, clara (`cuba_travertino`)
+              "cuba_travertino": {"tom": (206, 220, 234), "semente": 2760, "raio_pt": 1.6, "aro_pt": 2.0,
+                                  "raio_bacia_pt": 4.5, "valvula_pt": 1.1,
+                                  "desenho": {"veio": 0.012, "faixa": 0.025, "poros": 8, "poro_esc": 0.07},
+                                  "borda": 1.03, "quina": 0.07, "quina_px": 0.9,
+                                  "bacia": {"fundo": 0.95, "sombra": 0.22, "luz": 0.05, "alc_px": 3.5, "calma": 0.6},
+                                  "sombra": {"dist_px": 1.0, "sig_px": 1.0, "forca": 0.28},
+                                  "contorno": (146, 160, 176), "contorno_bacia": (158, 172, 188), "larg": 0.35}}
 
 
 def cubas_bancada(Q):
@@ -786,19 +790,48 @@ def _ret_arredondado(forma, x0, y0, x1, y1, raio):
 
 
 def cuba_travertino(Q, out, r):
-    """A cuba esculpida em travertino bruto no retângulo r (pt) da ARQ_BANCADAS: a rotina da cuba de granito da Casa A
-    (`final3840_casaa.cuba_pedra`: a borda polida, a bacia funda com a sombra por dentro, a válvula) no travertino bruto
-    das bancadas da Casa A, no tom delas."""
+    """A cuba esculpida em travertino bruto no retângulo r (pt, por fora do aro do PDF), clara e polida (usuário, 26/10/26:
+    "melhore a representação da cuba esculpida com o marmore travertino, mais claro"): a peça um pouco mais clara que o
+    piso, com o desenho calmo do travertino bruto (poucos poros); a borda larga (`aro_pt`) com a quina clara do lado da
+    luz (em cima e à direita) e a escura do outro; a bacia de cantos bem arredondados, funda: a parede de cima e da
+    direita na sombra, a de baixo e da esquerda na luz, o fundo um pouco mais escuro e mais liso; o contorno fino no tom
+    da pedra, a válvula cromada no meio e a sombra curta da peça na bancada (para baixo e à esquerda)."""
     import final3840_casaa as FA
+    from retoque_subsolo_casae import SS
     q = BANCADAS_F["cuba_travertino"]
-    e = q["aro_pt"]
-    c = {"cuba": r, "bacia": (r[0] + e, r[1] + e, r[2] - e, r[3] - e)}
-
-    def textura(tl):
-        D = FA.travertino_bruto(Q, tl.h, tl.w, q["semente"], **FA.TRAVERTINO["bancada"])
-        return np.float32(q["tom"]) * D[..., None]
     base = np.clip(out, 0, 255).astype(np.uint8)
-    novo = FA.cuba_pedra(Q, base.copy(), c, textura, dict(FA.GRANITO_CUBA, **q["cuba"]))
+    tl = FA.tela(base.copy(), Q, r, folga=6)
+    m = tl.ret(r, q["raio_pt"])
+    s = q["sombra"]
+    tl.sombra(m, dx=-s["dist_px"], dy=s["dist_px"], sigma=s["sig_px"], forca=s["forca"])
+    D = FA.travertino_bruto(Q, tl.h, tl.w, q["semente"], **q["desenho"])
+    G = np.float32(q["tom"]) * D[..., None]
+    X, Y = tl.grade()
+    # a borda, com a quina: clara perto dos lados de cima e da direita, escura perto dos de baixo e da esquerda
+    x0, y0, x1, y1 = r
+    d_m = cv2.resize(cv2.distanceTransform(m, cv2.DIST_L2, 5) / SS, (tl.w, tl.h), interpolation=cv2.INTER_AREA)
+    faixa = np.clip(1 - d_m / q["quina_px"], 0, 1)
+    luz = np.where(np.minimum(Y - y0, x1 - X) < np.minimum(y1 - Y, X - x0), 1.0, -1.0)
+    tl.pintar_img(m, G * (q["borda"] * (1 + q["quina"] * faixa * luz))[..., None])
+    # a bacia
+    e, bq = q["aro_pt"], q["bacia"]
+    bx0, by0, bx1, by1 = x0 + e, y0 + e, x1 - e, y1 - e
+    b = tl.ret((bx0, by0, bx1, by1), q["raio_bacia_pt"])
+    d_b = cv2.resize(cv2.distanceTransform(b, cv2.DIST_L2, 5) / SS, (tl.w, tl.h), interpolation=cv2.INTER_AREA)
+    parede = np.exp(-d_b / bq["alc_px"])
+    lado = np.clip(((X - bx0) / (bx1 - bx0) + (by1 - Y) / (by1 - by0)) / 2, 0, 1)        # 1 no alto à direita
+    prof = bq["fundo"] * (1 - bq["sombra"] * parede * lado) * (1 + bq["luz"] * parede * (1 - lado))
+    Gb = np.float32(q["tom"]) * (1 + bq["calma"] * (D - 1))[..., None]
+    tl.pintar_img(b, Gb * prof[..., None])
+    tl.contorno(b, q["larg"], q["contorno_bacia"])
+    tl.contorno(m, q["larg"], q["contorno"])
+    # a válvula, no meio da bacia
+    v = tl.vazia()
+    cx, cy = tl.pt((bx0 + bx1) / 2, (by0 + by1) / 2)
+    cv2.circle(v, (int(cx), int(cy)), int(q["valvula_pt"] * FA.PT_PX * SS), 255, -1, cv2.LINE_AA)
+    tl.pintar(v, FA.CROMO["meio"])
+    tl.contorno(v, 0.3, FA.CROMO["contorno"])
+    novo = tl.gravar()
     muda = np.any(novo != base, axis=2)
     out[muda] = novo[muda]
     return out
@@ -810,6 +843,12 @@ def bancadas(Q, img, borda=None, pedra=None, cuba=None):
     q = BANCADAS_F
     a = Q.preencher(lambda d: d.get("layer") == "ARQ_BANCADAS" and d.get("fill") and not no_banco_sauna(Q, d["rect"]),
                     fs=False)
+    cubas = cubas_bancada(Q)
+    e_ = q["cuba"]["aro_pt"]
+    if cuba is not None:            # a cuba esculpida é a peça inteira, com o aro: sem a pedra da bancada (e a borda dela)
+        import final3840_casaa as FA
+        for r in cubas:
+            a *= 1 - FA.ret_aa(Q, (r[0] - e_, r[1] - e_, r[2] + e_, r[3] + e_))
     n, lab, st, _ = cv2.connectedComponentsWithStats((a > 0.5).astype(np.uint8), 8)
     out = img.astype(np.float32)
     pecas = 0
@@ -843,12 +882,11 @@ def bancadas(Q, img, borda=None, pedra=None, cuba=None):
         pecas += 1
     # as cubas: louça branca, a bacia de cantos arredondados recuada do aro, a sombra interna do lado da luz
     lq, c = PECAS["louca"], q["cuba"]
-    cubas = cubas_bancada(Q)
     sem_traco = np.zeros((Q.H, Q.W), np.uint8)          # onde o traço do PDF não entra: o aro duplo vira um contorno só
     for r in cubas:
         x0, y0, x1, y1 = ret_q(Q, (r[0] - c["aro_pt"], r[1] - c["aro_pt"], r[2] + c["aro_pt"], r[3] + c["aro_pt"]))
         if cuba is not None:                            # a cuba pedida (a esculpida em pedra), no lugar da louça
-            out = cuba(Q, out, r)
+            out = cuba(Q, out, (r[0] - c["aro_pt"], r[1] - c["aro_pt"], r[2] + c["aro_pt"], r[3] + c["aro_pt"]))
             sem_traco[y0:y1, x0:x1] = 1
             continue
         ss_ = 4
