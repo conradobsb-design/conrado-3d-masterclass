@@ -19,7 +19,7 @@ sanitário branco." (o B. serviço como o banho de serviço do Subsolo aprovado)
 9. os pisos na escala (E11): travertino bruto (circulação, sala íntima, banhos), o vinílico nas réguas das Casas B a D,
    o Bege Bahia na escala (quarto de serviço, saleta, B. serviço; as varandas ficam);
 10. a linha tracejada da suíte master e do banho master (tida como espúria): no PDF, é o contorno de dentro da cobertura
-    (ARQ_CONTRAPISO, x = 1281,4 pt); fica, como projeção, até o OK do usuário para tirá-la;
+    (ARQ_CONTRAPISO, x = 1281,4 pt); fica, como projeção (perguntado, o usuário respondeu "mantem");
 11. as projeções tracejadas evidentes, em preto nos fundos claros e em branco nos escuros (R8);
 12. o Térreo nublado refeito a partir do Térreo novo; na descida da escada em U, a linha de corte do Térreo (a diagonal)
     desenhada e a parte do Térreo nublada (usuário, 26/10/26).

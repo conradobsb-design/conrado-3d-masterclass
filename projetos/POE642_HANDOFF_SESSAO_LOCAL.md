@@ -2534,7 +2534,7 @@ python3 pdf_entrega.py
 - `cozinha` (nova): a ilha e a bancada da pia em granito mais escuro, com o cooktop, as laterais, a área molhada e as duas cubas de inox;
 - `cadeias_tracejadas`: a distância à origem pela direção do próprio traço, com as faixas vizinhas juntas.
 
-**A confirmar com o usuário:** a bancada em L da área de serviço (com os tanques) continua em Carrara; o pedido falou só da cozinha.
+**Decidido com o usuário:** a bancada em L da área de serviço (com os tanques) continua em Carrara (o pedido falou só da cozinha; perguntado, ele respondeu "mantem").
 
 **Antes e depois** (contra a versão anterior): `renders/POE642_CasaA_PH_Terreo_2610_{contornos_moveis,contornos_estar,contornos_banhos,contornos_lavabo,contornos_hall,ilha_cooktop,cozinha_bancadas}_antes_depois.jpg`.
 
@@ -2562,7 +2562,7 @@ Perguntas ao usuário: a linguagem dos banhos 1, 2, 3 e master (como nos banhos 
 - projeções em preto ou branco pelo fundo (`T.preto_branco`, separado do `T.projecoes`; o Térreo ficou idêntico), sumindo nas paredes;
 - rótulos: BANHO 3 no piso seco, B. SERVIÇO no meio do box (corpo do PDF), SALA ÍNTIMA acima do sofá.
 
-**Item 10, para o OK:** a "linha tracejada espúria" da suíte master e do banho master é, no PDF, o contorno de dentro da cobertura (ARQ_CONTRAPISO, x = 1281,4 pt), a mesma que fecha nos outros lados; ficou como projeção, em preto. Se o usuário quiser, sai.
+**Item 10, para o OK:** a "linha tracejada espúria" da suíte master e do banho master é, no PDF, o contorno de dentro da cobertura (ARQ_CONTRAPISO, x = 1281,4 pt), a mesma que fecha nos outros lados; ficou como projeção, em preto. Perguntado se sai, o usuário respondeu "mantem": fica.
 
 **Arquivos:** `renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png` (+ `_preview.jpg`), `entrega/POE642_CasaA_PH_1Pavimento_entrega.png`, `entrega/POE642_CasaA_Plantas_Humanizadas.pdf`; antes e depois (contra a final de 21/10) em `renders/POE642_CasaA_PH_1Pavimento_2610_{planta,pisos,banho_master,banho_1,banho_2,banho_3,b_servico,armario,escada_u,caracol,sala_intima,projecoes}_antes_depois.jpg`.
 
