@@ -2642,3 +2642,13 @@ Os 12 itens e os banhos estão nas REGRAS (seção 19, Casa B · Térreo, e seç
 - no PDF, a linha da cobertura (ARQ_BANCADAS, traços de 5,7 pt) corre também sobre o vidro da porta de correr do living: sai, pela R8; os X dos dois shafts pequenos (diagonais de 36 a 39 pt) entraram baixando o mínimo das cadeias para 30 pt; o X do shaft do elevador abre embaixo do rótulo.
 
 Antes e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2610_{planta,escadas,banho_master,banho_1,banho_2,suite3_banho3,lavabo,gourmet,entrada,motorista,shafts,jardim_inverno,living}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa B refeitos. Aguarda o OK do Térreo.
+
+### Depois: "as pedras das bancadas e ilhas da varanda e cozinha são marrom granito. escureça levemente para distinguir do piso" (26/10/26)
+
+As 5 peças da cozinha e da varanda gourmet (a ilha e a bancada do gourmet; a ilha, a bancada da pia e a peça pequena da cozinha) saem da pedra areia para o granito marrom: o desenho do granito de referência (`fontes_procedurais.granito_referencia`), no tom mediano do piso de granito da própria imagem, a 86% (`BANCADAS_F["granito_escuro"]`), com a borda e a sombra curta das bancadas (E9). A escolha é por peça (`pedra_banhos`): as que têm cuba do PDF seguem em travertino bruto; as de centro dentro de `BANHOS_T["granito_pt"]` vão para o granito; as demais (serviço, BH serviço, motorista, adega, bar) ficam na pedra areia. Rodado `final3840_casab.py Terreo --de bancadas`.
+
+### Depois: "essa escada é em marmore travertino bruto" (26/10/26)
+
+A escada de 9 degraus, da varanda para o deck (`B.ESCADAS_S[1]`, com o D à direita), sai do Bege Bahia para o travertino bruto do piso (`final3840_casaa.travertino_bruto`, com os parâmetros do piso, no tom mediano do travertino da legenda na imagem), com o mesmo sombreamento (cada degrau mais claro que o de baixo) e o D no degrau de cima: `escada_sombreada(..., pedra="travertino")`. A de 6 degraus, da pedra grande para a ducha, fica no Bege Bahia. Rodado `Terreo --de escadas`; o Subsolo, de novo da hachura, sai igual (0 px diferentes).
+
+Antes e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2610_granito_cozinha_gourmet_antes_depois.jpg` e `..._escada_travertino_antes_depois.jpg` (o antes de cada um é a final anterior ao pedido); `..._{planta,escadas,gourmet}_antes_depois.jpg` refeitos contra a final de antes da auditoria. Prancha do Térreo e PDF da Casa B refeitos. Aguarda o OK do Térreo.

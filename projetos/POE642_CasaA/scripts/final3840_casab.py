@@ -741,6 +741,9 @@ BANCADAS_F = {"lado_min_m": 0.08, "volume": 0.06, "larg_m": 0.03, "contorno": (1
               # travertino bruto das bancadas da Casa A, mais marcado que o piso (`travertino_bancada`); a cuba esculpida
               # em travertino bruto, clara (`cuba_travertino`), ou em granito marrom (`cuba_granito`)
               "travertino_bancada": {"tom": (172, 190, 210), "semente": 2770},
+              # "granito_escuro": o granito marrom no tom do piso de granito da planta (a mediana dele), levemente
+              # escurecido para distinguir do piso (usuário, 26/10/26, no Térreo da Casa B; o mesmo 0,86 da Casa A)
+              "granito_escuro": {"cor_piso": (50, 66, 90), "escurecer": 0.86},
               "cuba_granito": {"semente": 2780, "raio_pt": 1.6, "aro_pt": 2.0, "raio_bacia_pt": 4.5, "valvula_pt": 1.1,
                                "borda": 1.08, "quina": 0.10, "quina_px": 0.9,
                                "bacia": {"fundo": 0.86, "sombra": 0.30, "luz": 0.06, "alc_px": 3.5, "calma": 0.7},
@@ -874,7 +877,8 @@ def bancadas(Q, img, borda=None, pedra=None, cuba=None):
             a *= 1 - FA.ret_aa(Q, (r[0] - e_, r[1] - e_, r[2] + e_, r[3] + e_))
     n, lab, st, _ = cv2.connectedComponentsWithStats((a > 0.5).astype(np.uint8), 8)
     out = img.astype(np.float32)
-    pecas = n_trav = 0
+    pecas = n_trav = n_gran = 0
+    med_gran = None
     for i in range(1, n):
         x, y, w, h, area = st[i]
         comp = lab == i
@@ -889,6 +893,14 @@ def bancadas(Q, img, borda=None, pedra=None, cuba=None):
         if p == "granito":
             import fontes_procedurais as FP
             tex = FP.granito_referencia(y1 - y0, x1 - x0, Q.px_m, semente=900 + i).astype(np.float32)
+        elif p == "granito_escuro":
+            import fontes_procedurais as FP
+            ge = q["granito_escuro"]
+            if med_gran is None:
+                med_gran = np.median(img[Q.cor([ge["cor_piso"]], tol=6)].reshape(-1, 3), axis=0).astype(np.float32)
+            T = FP.granito_referencia(y1 - y0, x1 - x0, Q.px_m, semente=900 + i).astype(np.float32)
+            tex = T / T.reshape(-1, 3).mean(axis=0) * med_gran * ge["escurecer"]
+            n_gran += 1
         elif p == "travertino":
             import final3840_casaa as FA
             tb = q["travertino_bancada"]
@@ -964,7 +976,8 @@ def bancadas(Q, img, borda=None, pedra=None, cuba=None):
     t *= (1 - sem_traco)[..., None]
     out = out * (1 - t) + np.float32(q["contorno"]) * t
     print(f"    bancadas: {pecas} peças em " + ("granito marrom" if pedra == "granito" else
-                                               f"{q['pedra']} no tom areia" + (f" ({n_trav} em travertino bruto)" if n_trav else ""))
+                                               f"{q['pedra']} no tom areia" + (f" ({n_trav} em travertino bruto)" if n_trav else "")
+                                               + (f" ({n_gran} em granito marrom escurecido)" if n_gran else ""))
           + f", a {Q.px_m:.1f} px/m, com o contorno do PDF"
           + (", a borda no tom escurecido da pedra e a sombra curta (E9)" if borda else "") +
           f"; {len(cubas)} cubas " + ("esculpidas na pedra pedida" if cuba else "em louça branca"))
@@ -2116,9 +2129,10 @@ def letra(Q, out, texto, centro_q):
     return out
 
 
-def escada_sombreada(Q, img, e, texto, no_alto=False):
+def escada_sombreada(Q, img, e, texto, no_alto=False, pedra=None):
     """no_alto: a letra no degrau de cima (o D, de onde se desce; no PDF do Térreo da Casa B, a origem do D cai no
-    degrau de cima ou logo fora dele), não no 1º."""
+    degrau de cima ou logo fora dele), não no 1º. pedra="travertino": os degraus no travertino bruto do piso (o desenho
+    de `final3840_casaa.travertino_bruto`, no tom mediano do travertino da legenda na imagem), não no Bege Bahia."""
     sys.path.insert(0, str(B.RAIZ / "_texturas"))
     from texturas import textura
     q = ESCADA_SOMBRA
@@ -2129,7 +2143,13 @@ def escada_sombreada(Q, img, e, texto, no_alto=False):
     x0, y0, x1, y1 = x0 - 2, y0 - 2, x1 + 2, y1 + 2
     al = a[y0:y1, x0:x1]
     h, w = al.shape
-    tex = textura(DEGRAUS_F["pedra"], Q.px_m, h, w, semente=DEGRAUS_F["semente"]).astype(np.float32)
+    if pedra == "travertino":
+        import final3840_casaa as FA
+        trav = Q.cor([c for n_, cs, *_ in PISOS["Terreo"] if n_ == "travertino" for c in cs])
+        tom = np.median(img[trav].reshape(-1, 3), axis=0).astype(np.float32)
+        tex = tom * FA.travertino_bruto(Q, h, w, DEGRAUS_F["semente"], **FA.TRAVERTINO["piso"])[..., None]
+    else:
+        tex = textura(DEGRAUS_F["pedra"], Q.px_m, h, w, semente=DEGRAUS_F["semente"]).astype(np.float32)
     # os degraus pelos bocéis do PDF, do 1º (do lado do `inicio`) ao último; X em pt de cada px
     (ax, _), (bx, _) = Q.p2q(0, 0), Q.p2q(100, 0)
     X = (np.arange(x0, x1) + 0.5 - ax) / ((bx - ax) / 100)
@@ -2159,7 +2179,8 @@ def escada_sombreada(Q, img, e, texto, no_alto=False):
     out = np.clip(out, 0, 255).astype(np.uint8)
     b = bordas[-2:] if direita != no_alto else bordas[:2]
     out = letra(Q, out, texto, Q.p2q((b[0] + b[1]) / 2, (ey0 + ey1) / 2))
-    print(f"    escada {e['nome']}: {n} degraus em Bege Bahia, sem linhas e sem triângulo, com o sombreamento "
+    print(f"    escada {e['nome']}: {n} degraus em " + ("travertino bruto" if pedra == "travertino" else "Bege Bahia")
+          + ", sem linhas e sem triângulo, com o sombreamento "
           f"(cada degrau mais claro que o de baixo); o {texto} do PDF no degrau {'de cima' if no_alto else '1'}")
     return out
 
@@ -2297,8 +2318,10 @@ def escadas_e3(Q, img):
     degrau no mesmo lado: o da ducha e o do deck) em Bege Bahia, sem linhas, com o sombreamento, e o D do PDF no degrau
     de cima. O X do jardim de inverno sai daqui: vai, com as outras projeções, para `projecoes_r8`."""
     out = degraus_blocos(Q, np.ascontiguousarray(img.copy()), linhas=False, letra_="D")
-    for e in B.ESCADAS_S:
-        out = escada_sombreada(Q, out, e, "D", no_alto=True)
+    for e, pedra in zip(B.ESCADAS_S, (None, "travertino")):
+        # a de 9 degraus, da varanda para o deck, em travertino bruto (usuário, 26/10/26: "essa escada é em marmore
+        # travertino bruto"); a de 6, da pedra grande para a ducha, no Bege Bahia (como no Subsolo aprovado)
+        out = escada_sombreada(Q, out, e, "D", no_alto=True, pedra=pedra)
     return out
 
 
@@ -2401,7 +2424,11 @@ def seta_b(Q, img):
 # pia em marmore travertino bruto, sanitários em marrom; banho 1, 2 e 3 e banho master - cuba e pedra da pia em marmore
 # travertino bruto, sanitario branco"): as 8 cubas do PDF (ARQ_BANCADAS) e as peças de bancada que as têm. As duas do
 # lavatório da varanda gourmet em granito marrom; as outras, em travertino bruto (a cuba clara do Subsolo aprovado).
-BANHOS_T = {"cubas_granito": [(1094.9, 1755.6, 1121.3, 1778.1), (1152.6, 1755.6, 1178.9, 1778.1)], "folga_pt": 2.0}
+BANHOS_T = {"cubas_granito": [(1094.9, 1755.6, 1121.3, 1778.1), (1152.6, 1755.6, 1178.9, 1778.1)], "folga_pt": 2.0,
+            # as bancadas e ilhas da cozinha e da varanda gourmet (usuário, 26/10/26: "as pedras das bancadas e ilhas da
+            # varanda e cozinha são marrom granito. escureça levemente para distinguir do piso"): as peças com o centro
+            # nesta caixa (pt), sem cuba do PDF (a do lavatório gourmet, que entra na caixa, fica em travertino)
+            "granito_pt": (1104.0, 1470.0, 1613.0, 1812.0)}
 
 
 def cuba_terreo(Q, out, r):
@@ -2412,12 +2439,18 @@ def cuba_terreo(Q, out, r):
 
 def pedra_banhos(Q):
     """A pedra de cada peça de bancada: travertino bruto onde a peça tem uma cuba do PDF (os banhos, o lavabo e o
-    lavatório gourmet); as outras (cozinha, gourmet, serviço) ficam na pedra areia."""
+    lavatório gourmet); granito marrom levemente escurecido nas da cozinha e da varanda gourmet (`granito_pt`); as
+    outras (serviço, BH serviço, motorista, adega, o bar da sala íntima) ficam na pedra areia."""
     f = BANHOS_T["folga_pt"]
     rs = [ret_q(Q, (r[0] - f, r[1] - f, r[2] + f, r[3] + f)) for r in cubas_bancada(Q)]
+    g0, g1 = Q.p2q(*BANHOS_T["granito_pt"][:2]), Q.p2q(*BANHOS_T["granito_pt"][2:])
 
     def p(Q_, comp):
-        return "travertino" if any(comp[y0:y1, x0:x1].any() for x0, y0, x1, y1 in rs) else None
+        if any(comp[y0:y1, x0:x1].any() for x0, y0, x1, y1 in rs):
+            return "travertino"
+        ys, xs = np.nonzero(comp)
+        cx, cy = (xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2
+        return "granito_escuro" if g0[0] <= cx <= g1[0] and g0[1] <= cy <= g1[1] else None
     return p
 
 
