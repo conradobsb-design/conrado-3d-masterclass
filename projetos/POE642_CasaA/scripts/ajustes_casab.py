@@ -65,7 +65,9 @@ PAVIMENTOS_B = {
                 "sem_tela": "bases/POE642_CasaB_BASE_Subsolo_v3_texturas.png",
                 "chapada": "bases/POE642_CasaB_BASE_Subsolo_v2_16x9.png",
                 "ajustes": [("BH SERVIÇO", (741.0, 216.0), (-4.0, -15.0), {"corpo": 1.0, "quebra": ["BH", "SERVIÇO"]}),
-                            ("CIRCULAÇÃO", (771.0, 181.5), (0.0, 0.0), {"corpo": 0.8})]},   # cabe na de 1,16 m²   # da bacia (item 9)
+                            ("CIRCULAÇÃO", (771.0, 181.5), (0.0, 0.0), {"corpo": 0.8}),     # cabe na de 1,16 m²
+                            # a de 2,23 m², no corpo do PDF: no 1,3x, só cabia encostada nas paredes (auditoria de 26/10)
+                            ("CIRCULAÇÃO", (620.4, 319.3), (0.0, 0.0), {"corpo": 1.0})]},
 }
 # quadro comum de 2000 px -> imagem de partida (SIFT da base 16:9 contra a imagem, como o rodape_entrega): o Térreo é o
 # render de 2000 x 1116, deslocado ~4,5 px; o Subsolo é o próprio quadro
@@ -2041,15 +2043,20 @@ def bordas_grama(final, chave):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def esquadrias_final(final, chave, pg, p2q, px_m):
+def esquadrias_final(final, chave, pg, p2q, px_m, parede=None):
+    """parede: a cor das paredes da final (o cinza 80 da E10), para os batentes redesenhados nas esquadrias e para a
+    limpeza da faixa do vidro reconhecer a parede (que no preto era o que tinha luz abaixo de `escuro`)."""
     import retoque_terreo_casae as T
-    faixa = T.ESQUADRIAS["faixa_px"]
-    T.ESQUADRIAS["faixa_px"] = round(faixa * final.shape[1] / 2000)
+    guardar = dict(T.ESQUADRIAS)
+    T.ESQUADRIAS["faixa_px"] = round(guardar["faixa_px"] * final.shape[1] / 2000)
+    if parede is not None:
+        T.ESQUADRIAS.update(parede=parede, escuro=max(guardar["escuro"], float(np.mean(parede)) + 15))
     try:
         img = final.astype(np.float32)
         n, z = esquadrias_pdf(img, pg, p2q, px_m, caixas=chave == "Subsolo")
     finally:
-        T.ESQUADRIAS["faixa_px"] = faixa
+        T.ESQUADRIAS.clear()
+        T.ESQUADRIAS.update(guardar)
     print(f"    esquadrias refeitas na final: {n} vidros e folhas finos em {z} esquadrias")
     return np.clip(img, 0, 255).astype(np.uint8)
 

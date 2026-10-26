@@ -61,6 +61,12 @@ class Quadro:
         self.chapada = cv2.resize(ch, (self.W, self.H), interpolation=cv2.INTER_NEAREST)
         self._desenhos = None
 
+    def q2p(self, x, y):
+        """quadro (px) -> pt do PDF (o p2q é afim)."""
+        (a, b), (c, d), (e, f) = self.p2q(0, 0), self.p2q(100, 0), self.p2q(0, 100)
+        M = np.array([[(c - a) / 100, (e - a) / 100], [(d - b) / 100, (f - b) / 100]])
+        return tuple(np.linalg.solve(M, np.array([x - a, y - b])))
+
     @property
     def desenhos(self):
         if self._desenhos is None:
@@ -681,6 +687,29 @@ def tampas_vasos(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# Os vasos na cor pedida (usuário, 26/10/26, no Subsolo: "banho sauna: sanitário marrom"): o vaso do PDF já desenhado
+# em louça (`pecas_pdf`, `tampas_vasos`), tingido no contorno exato do PDF: cada px leva a cor da louça pedida na luz
+# dele relativa à cerâmica branca (o volume, a tampa, o aro e o traço ficam, no tom da cor). A cor é a dos vasos marrons
+# da Casa A (`final3840_casaa.BANHOS["vaso_marrom"]`). Cada vaso: o retângulo (pt) da louça e a cor.
+VASOS_COR = {"Subsolo": [((1140.8, 914.0, 1169.9, 934.0), "marrom")],
+             "cores": {"marrom": (66, 88, 120)}, "folga_px": 1, "teto": 1.08}
+
+
+def vasos_cor(Q, img):
+    q = VASOS_COR
+    out = img.astype(np.float32)
+    ref = float(np.mean(PECAS["louca"]["ceramica"]))
+    for r, nome in q.get(Q.chave, []):
+        a = Q.preencher(lambda d: d.get("layer") == "ARQ_LOUÇAS E METAIS" and r[0] - 0.5 <= d["rect"].x0
+                        and d["rect"].x1 <= r[2] + 0.5 and r[1] - 0.5 <= d["rect"].y0 and d["rect"].y1 <= r[3] + 0.5)
+        k = 2 * q["folga_px"] + 1
+        m = np.maximum(a, cv2.dilate(a, np.ones((k, k), np.uint8)) * 0.85)[..., None]
+        t = np.clip(out.mean(axis=2, keepdims=True) / ref, 0, q["teto"])
+        out = out * (1 - m) + np.float32(q["cores"][nome]) * t * m
+    print(f"    vasos: {len(q.get(Q.chave, []))} tingido(s) na cor pedida, no contorno do PDF")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # 3. As bancadas em pedra tom areia, humanizada, no contorno do PDF (usuário, 22/10/26: "TROQUE O CINZA DAS BANCADAS PELO
 # TOM AREIA", "CUBAS EM BRANCO", "PRECISO QUE AS PEDRAS ESTEJAM HUMANIZADAS"): a foto do Bege Bahia da biblioteca (a
@@ -693,7 +722,17 @@ BANCADAS_F = {"lado_min_m": 0.08, "volume": 0.06, "larg_m": 0.03, "contorno": (1
               "pedra": "bege_bahia", "tom": (198, 217, 233),       # BGR: o areia (a média da placa levada a ele)
               "contraste": 0.8,                                     # as nuvens da placa, um pouco mais calmas
               "cuba": {"aro_max_m": 0.035, "lado_min_m": 0.20, "area_max_m2": 0.6, "cobre": 0.8, "folga_pt": 1.5,
-                       "aro_pt": 1.2, "recuo": 0.12, "raio_m": 0.035}}
+                       "aro_pt": 1.2, "recuo": 0.12, "raio_m": 0.035},
+              # E9 (26/10/26: "Se a bancada e o piso forem da mesma cor, deixar a bancada mais marcada do que o piso"):
+              # a borda fina no tom escurecido da própria pedra e a sombra curta no piso (luz do alto à direita), como
+              # nas bancadas da Casa A; ligada planta a planta, com o OK do usuário (`bancadas(..., borda=...)`)
+              "borda_e9": {"mult": 0.62, "larg_px": 0.7, "sombra": {"dist_m": 0.02, "sig_m": 0.022, "forca": 0.34}},
+              # a pedra e a cuba por banho, planta a planta, com o pedido do usuário (`bancadas(..., pedra=, cuba=)`):
+              # "granito", o granito marrom das Casas B a D (`fontes_procedurais.granito_referencia`); a cuba esculpida
+              # em travertino bruto (`cuba_travertino`), com a rotina da cuba de granito da Casa A
+              "cuba_travertino": {"tom": (172, 190, 210), "aro_pt": 1.2, "semente": 2760,
+                                  "cuba": {"rim": 1.05, "bacia": 0.82, "sombra_bacia": (0.36, 2.2),
+                                           "contorno": (104, 117, 133), "larg": 0.45}}}
 
 
 def cubas_bancada(Q):
@@ -740,7 +779,26 @@ def _ret_arredondado(forma, x0, y0, x1, y1, raio):
     return m
 
 
-def bancadas(Q, img):
+def cuba_travertino(Q, out, r):
+    """A cuba esculpida em travertino bruto no retângulo r (pt) da ARQ_BANCADAS: a rotina da cuba de granito da Casa A
+    (`final3840_casaa.cuba_pedra`: a borda polida, a bacia funda com a sombra por dentro, a válvula) no travertino bruto
+    das bancadas da Casa A, no tom delas."""
+    import final3840_casaa as FA
+    q = BANCADAS_F["cuba_travertino"]
+    e = q["aro_pt"]
+    c = {"cuba": r, "bacia": (r[0] + e, r[1] + e, r[2] - e, r[3] - e)}
+
+    def textura(tl):
+        D = FA.travertino_bruto(Q, tl.h, tl.w, q["semente"], **FA.TRAVERTINO["bancada"])
+        return np.float32(q["tom"]) * D[..., None]
+    base = np.clip(out, 0, 255).astype(np.uint8)
+    novo = FA.cuba_pedra(Q, base.copy(), c, textura, dict(FA.GRANITO_CUBA, **q["cuba"]))
+    muda = np.any(novo != base, axis=2)
+    out[muda] = novo[muda]
+    return out
+
+
+def bancadas(Q, img, borda=None, pedra=None, cuba=None):
     sys.path.insert(0, str(B.RAIZ / "_texturas"))
     from texturas import textura
     q = BANCADAS_F
@@ -755,14 +813,26 @@ def bancadas(Q, img):
         (_, _), (r1, r2), _ = cv2.minAreaRect(np.argwhere(comp)[:, ::-1].astype(np.float32))
         if min(r1, r2) < q["lado_min_m"] * Q.px_m:
             continue
-        x0, y0, x1, y1 = max(0, x - 2), max(0, y - 2), min(Q.W, x + w + 2), min(Q.H, y + h + 2)
+        f = 6 if borda else 2
+        x0, y0, x1, y1 = max(0, x - f), max(0, y - f), min(Q.W, x + w + f), min(Q.H, y + h + f)
         reg = (slice(y0, y1), slice(x0, x1))
         al = a[reg] * cv2.dilate(comp.astype(np.uint8), np.ones((3, 3), np.uint8))[reg]
-        tex = textura(q["pedra"], Q.px_m, y1 - y0, x1 - x0, semente=900 + i).astype(np.float32)
-        med = tex.reshape(-1, 3).mean(axis=0)
-        tex = (med + q["contraste"] * (tex - med)) * (np.float32(q["tom"]) / med)  # o desenho da placa, no tom areia
+        if pedra == "granito":
+            import fontes_procedurais as FP
+            tex = FP.granito_referencia(y1 - y0, x1 - x0, Q.px_m, semente=900 + i).astype(np.float32)
+        else:
+            tex = textura(q["pedra"], Q.px_m, y1 - y0, x1 - x0, semente=900 + i).astype(np.float32)
+            med = tex.reshape(-1, 3).mean(axis=0)
+            tex = (med + q["contraste"] * (tex - med)) * (np.float32(q["tom"]) / med)  # a placa, no tom areia
         d = cv2.distanceTransform((al > 0.5).astype(np.uint8), cv2.DIST_L2, 3)
         tex *= (1 - q["volume"] * (1 - np.minimum(1, d / (q["larg_m"] * Q.px_m))) ** 2)[..., None]
+        if borda:
+            s = borda["sombra"]
+            d_ = s["dist_m"] * Q.px_m
+            sb = cv2.GaussianBlur(cv2.warpAffine(al, np.float32([[1, 0, -d_], [0, 1, d_]]), al.shape[::-1]), (0, 0),
+                                  s["sig_m"] * Q.px_m) * s["forca"]
+            out[reg] *= (1 - sb * (1 - al))[..., None]
+            tex *= (1 - (1 - borda["mult"]) * np.clip(borda["larg_px"] + 1 - d, 0, 1))[..., None]
         out[reg] = out[reg] * (1 - al[..., None]) + tex * al[..., None]
         pecas += 1
     # as cubas: louça branca, a bacia de cantos arredondados recuada do aro, a sombra interna do lado da luz
@@ -771,6 +841,10 @@ def bancadas(Q, img):
     sem_traco = np.zeros((Q.H, Q.W), np.uint8)          # onde o traço do PDF não entra: o aro duplo vira um contorno só
     for r in cubas:
         x0, y0, x1, y1 = ret_q(Q, (r[0] - c["aro_pt"], r[1] - c["aro_pt"], r[2] + c["aro_pt"], r[3] + c["aro_pt"]))
+        if cuba is not None:                            # a cuba pedida (a esculpida em pedra), no lugar da louça
+            out = cuba(Q, out, r)
+            sem_traco[y0:y1, x0:x1] = 1
+            continue
         ss_ = 4
         forma = ((y1 - y0 + 8) * ss_, (x1 - x0 + 8) * ss_)
         (fx0, fy0), (fx1, fy1) = Q.p2q(r[0] - c["aro_pt"], r[1] - c["aro_pt"]), Q.p2q(r[2] + c["aro_pt"], r[3] + c["aro_pt"])
@@ -815,8 +889,10 @@ def bancadas(Q, img):
     t = cv2.resize(m, (Q.W, Q.H), interpolation=cv2.INTER_AREA).astype(np.float32)[..., None] / 255 * q["forca"]
     t *= (1 - sem_traco)[..., None]
     out = out * (1 - t) + np.float32(q["contorno"]) * t
-    print(f"    bancadas: {pecas} peças em {q['pedra']} no tom areia, a {Q.px_m:.1f} px/m, com o contorno do PDF; "
-          f"{len(cubas)} cubas em louça branca")
+    print(f"    bancadas: {pecas} peças em " + ("granito marrom" if pedra == "granito" else f"{q['pedra']} no tom areia")
+          + f", a {Q.px_m:.1f} px/m, com o contorno do PDF"
+          + (", a borda no tom escurecido da pedra e a sombra curta (E9)" if borda else "") +
+          f"; {len(cubas)} cubas " + ("esculpidas na pedra pedida" if cuba else "em louça branca"))
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
@@ -1416,7 +1492,10 @@ def soleiras(Q, img):
 # DE CORRER, EXISTE MURO (EM PRETO)"): no PDF, cada lateral tem a porta de correr no alto e, dela até o muro de divisa,
 # um trecho fino da ARQ_ELEMENTOS FIXOS em branco, que saía como uma linha cinza na grama. É muro: entra em preto, na
 # espessura do caixilho da porta (pt), do fim da folha até o muro de divisa.
-PAREDES_F = {"cor": (8, 8, 8), "camadas": ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS"),
+# E10 (26/10/26: "Representar as paredes em planta com uma tonalidade de um cinza escuro e os pilares no preto"; o
+# usuário escolheu o cinza 80): `paredes(..., cor=PAREDES_F["cinza"])`, planta a planta, com o OK dele; os pilares
+# retangulares seguem no preto (`cor`).
+PAREDES_F = {"cor": (8, 8, 8), "cinza": (80, 80, 80), "camadas": ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS"),
              "pilar_redondo": {"cor": (128, 128, 130), "contorno": (62, 62, 64), "larg_px": 1.1},
              "muros_pt": {"Terreo": [(1609.25, 1884.96, 1613.78, 2009.68), (1903.93, 1884.96, 1908.46, 2009.68)]},
              # os brises da faixa de baixo do jardim do hall (as 11 lâminas giradas da ARQ_ELEMENTOS FIXOS nesta caixa):
@@ -1545,7 +1624,7 @@ def guarda_corpo(Q, img):
     return out, len(rs)
 
 
-def paredes(Q, img):
+def paredes(Q, img, cor=None):
     q = PAREDES_F
     bs = brises_pdf(Q)
     ids = {id(d) for d in bs}
@@ -1561,7 +1640,7 @@ def paredes(Q, img):
         a = np.maximum(a, cv2.resize(m, (Q.W, Q.H), interpolation=cv2.INTER_AREA).astype(np.float32) / 255)
     out = img.astype(np.float32)
     out, ng = guarda_corpo(Q, out)                           # antes do preto: a ponta que encosta na parede fica sob ele
-    out = out * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None]
+    out = out * (1 - a[..., None]) + np.float32(cor or q["cor"]) * a[..., None]
     # pilares: os redondos (usuário, 22/10/26: "EXISTEM DOIS PILARES REPRESENTADOS POR BOLAS. PRECISAMOS DEIXAR EM
     # CINZA PARA DESTACÁ-LOS"), em cinza médio com o contorno escuro fino; os retangulares, pretos como as paredes
     pr = q["pilar_redondo"]
@@ -1593,7 +1672,7 @@ def paredes(Q, img):
             out[Y0:Y0 + 64, X0:X0 + 64] = out[Y0:Y0 + 64, X0:X0 + 64] * (1 - af) + np.float32(q["cor"]) * af
         n += 1
     out = brises(Q, out, bs)
-    print(f"    paredes pretas no contorno do PDF; {len(muros)} muros na sequência de portas de correr; {n} pilares (os "
+    print(f"    paredes {'em cinza ' + str(cor[0]) if cor else 'pretas'} no contorno do PDF; {len(muros)} muros na sequência de portas de correr; {n} pilares (os "
           f"redondos em cinza, com o contorno fino); {len(bs)} brises em grafite; {ng} trechos de guarda-corpo de vidro")
     return np.clip(out, 0, 255).astype(np.uint8)
 
@@ -1902,6 +1981,129 @@ def degraus_bege(Q, img, escadas):
     return out
 
 
+# As escadas sem linhas (E3, E8; usuário, 26/10/26, no Subsolo da Casa A: "não precisa constar linhas, mas sim sombras
+# denotando que o sentido é de subida"; E3: "Colocar o sentido nas escadas (S / D), em vez de triângulo"): os degraus do
+# PDF em Bege Bahia, como em `degraus_bege`, sem os bocéis da R14 nem o triângulo, marcados pelo sombreamento das escadas
+# aprovadas da Casa A: cada degrau um pouco mais claro que o de baixo (`tom`, do 1º, do lado do `inicio`, ao último) e a
+# sombra curta do espelho do de cima no de baixo (`espelho`: força e alcance em px), mais a do 1º degrau no piso de onde
+# ela sobe (`piso`). A letra do PDF (S ou D) em Inter SemiBold, cinza quase preto, centrada no 1º degrau quando a origem
+# do texto do PDF cai fora da escada (como no Térreo da Casa A).
+ESCADA_SOMBRA = {"tom": (0.84, 1.0), "tom_degrau": 0.02, "espelho": (0.34, 2.4), "piso": (0.30, 2.6), "semente": 761}
+LETRA_F = {"fonte": "Inter-SemiBold.otf", "corpo_px": 17, "cor": (45, 45, 45)}
+
+
+def letra(Q, out, texto, centro_q):
+    """A letra do sentido da escada, centrada num ponto do quadro (px)."""
+    from PIL import Image, ImageDraw, ImageFont
+    from rodape_entrega import FONTES
+    q = LETRA_F
+    fonte = ImageFont.truetype(str(FONTES / q["fonte"]), q["corpo_px"] * 4)
+    ox, oy = centro_q
+    W = H = q["corpo_px"] * 3
+    X0, Y0 = int(ox) - W // 2, int(oy) - H // 2
+    t = Image.new("L", (W * 4, H * 4), 0)
+    ImageDraw.Draw(t).text(((ox - X0) * 4, (oy - Y0) * 4), texto, font=fonte, fill=255, anchor="mm")
+    a = np.asarray(t.resize((W, H), Image.LANCZOS), np.float32)[..., None] / 255
+    reg = out[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
+    out[Y0:Y0 + H, X0:X0 + W] = np.clip(reg * (1 - a) + np.float32(q["cor"]) * a, 0, 255).astype(np.uint8)
+    return out
+
+
+def escada_sombreada(Q, img, e, texto):
+    sys.path.insert(0, str(B.RAIZ / "_texturas"))
+    from texturas import textura
+    q = ESCADA_SOMBRA
+    pt_px = Q.px_m / 56.69
+    a = Q.preencher(lambda d: d.get("layer") == "ARQ_ESCADAS E RAMPAS" and d.get("fill"), fs=False)
+    ex0, ey0, ex1, ey1 = e["pdf"]
+    x0, y0, x1, y1 = ret_q(Q, e["pdf"])
+    x0, y0, x1, y1 = x0 - 2, y0 - 2, x1 + 2, y1 + 2
+    al = a[y0:y1, x0:x1]
+    h, w = al.shape
+    tex = textura(DEGRAUS_F["pedra"], Q.px_m, h, w, semente=DEGRAUS_F["semente"]).astype(np.float32)
+    # os degraus pelos bocéis do PDF, do 1º (do lado do `inicio`) ao último; X em pt de cada px
+    (ax, _), (bx, _) = Q.p2q(0, 0), Q.p2q(100, 0)
+    X = (np.arange(x0, x1) + 0.5 - ax) / ((bx - ax) / 100)
+    bordas = [ex0] + list(e["bocels"]) + [ex1]
+    k = np.clip(np.searchsorted(bordas, X) - 1, 0, len(bordas) - 2)
+    n = len(bordas) - 1
+    direita = e["inicio"] == "direita"
+    i = (n - 1 - k) if direita else k                                      # 0 = o 1º degrau
+    rng = np.random.default_rng(q["semente"])
+    tons = 1 + rng.uniform(-q["tom_degrau"], q["tom_degrau"], n)
+    t0, t1 = q["tom"]
+    f = (t0 + (t1 - t0) * i / max(n - 1, 1)) * tons[i]
+    fs, alc = q["espelho"]
+    esp = np.array(bordas)[k if direita else k + 1]                        # o espelho do degrau de cima
+    dist = ((X - esp) if direita else (esp - X)) * pt_px
+    f = f * np.where(i < n - 1, 1 - fs * np.exp(-np.maximum(dist, 0) / alc), 1.0)
+    out = img.astype(np.float32)
+    reg = out[y0:y1, x0:x1]
+    # a sombra do espelho do 1º degrau no piso de onde a escada sobe
+    fp, ap = q["piso"]
+    xb = ex1 if direita else ex0
+    dp = ((X - xb) if direita else (xb - X)) * pt_px
+    sp = np.where(dp > 0, fp * np.exp(-dp / ap), 0.0)[None, :]
+    linhas = (np.arange(y0, y1) + 0.5 >= Q.p2q(0, ey0)[1]) & (np.arange(y0, y1) + 0.5 <= Q.p2q(0, ey1)[1])
+    reg *= (1 - sp * linhas[:, None] * (1 - al))[..., None]
+    reg[:] = reg * (1 - al[..., None]) + tex * f[None, :, None] * al[..., None]
+    out = np.clip(out, 0, 255).astype(np.uint8)
+    b = bordas[-2:] if direita else bordas[:2]
+    out = letra(Q, out, texto, Q.p2q((b[0] + b[1]) / 2, (ey0 + ey1) / 2))
+    print(f"    escada {e['nome']}: {n} degraus em Bege Bahia, sem linhas e sem triângulo, com o sombreamento de "
+          f"subida; o {texto} do PDF no 1º degrau")
+    return out
+
+
+# Os boxes (E5: "Representar os boxes."; R10: o vidro contínuo e visível, nunca só o traço): cada vidro de box do PDF
+# (`vidros_box`) fora do granito (no granito, a faixa cinza-clara de `boxes_granito`) como as folhas dos boxes da Casa A:
+# a faixa de vidro na largura do PDF, com as duas faces em linha fina e a sombra curta (luz do alto à direita). São
+# vidros fixos, sem o trilho de correr.
+BOXES_VIDRO = {"vidro": (218, 214, 204), "face": (104, 108, 112), "face_px": 0.45, "larg_min_px": 2.4, "sombra": 0.20,
+               "ss": 8}
+
+
+def boxes_vidro(Q, img):
+    q, ss = BOXES_VIDRO, BOXES_VIDRO["ss"]
+    gran = Q.cor([BOXES_F["granito"]], tol=8)
+    out = img.astype(np.float32)
+    n = 0
+    for x0, y0, x1, y1, hor in vidros_box(Q):
+        a0, b0, a1, b1 = ret_q(Q, (x0, y0, x1, y1))
+        if gran[b0 - 4:b1 + 5, a0 - 4:a1 + 5].mean() >= BOXES_F["granito_min"]:
+            continue
+        (u0, v0), (u1, v1) = Q.p2q(x0, y0), Q.p2q(x1, y1)
+        if hor and v1 - v0 < q["larg_min_px"]:
+            v0, v1 = (v0 + v1 - q["larg_min_px"]) / 2, (v0 + v1 + q["larg_min_px"]) / 2
+        if not hor and u1 - u0 < q["larg_min_px"]:
+            u0, u1 = (u0 + u1 - q["larg_min_px"]) / 2, (u0 + u1 + q["larg_min_px"]) / 2
+        X0, Y0, X1, Y1 = int(u0) - 4, int(v0) - 4, int(np.ceil(u1)) + 5, int(np.ceil(v1)) + 5
+        w, h = X1 - X0, Y1 - Y0
+        m = np.zeros((h * ss, w * ss), np.uint8)
+        c0, r0, c1, r1 = [int(round(v * ss)) for v in (u0 - X0, v0 - Y0, u1 - X0, v1 - Y0)]
+        cv2.rectangle(m, (c0, r0), (c1 - 1, r1 - 1), 255, -1)
+        lt = max(1, int(round(q["face_px"] * ss)))
+        faces = np.zeros_like(m)
+        if hor:
+            faces[r0:r0 + lt, c0:c1] = 255
+            faces[r1 - lt:r1, c0:c1] = 255
+        else:
+            faces[r0:r1, c0:c0 + lt] = 255
+            faces[r0:r1, c1 - lt:c1] = 255
+
+        def reduzir(x):
+            return cv2.resize(x.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+        av, af = reduzir(m), reduzir(faces)
+        reg = out[Y0:Y1, X0:X1]
+        sb = cv2.GaussianBlur(cv2.warpAffine(av, np.float32([[1, 0, -0.9], [0, 1, 0.9]]), (w, h)), (0, 0), 0.8)
+        reg *= (1 - q["sombra"] * sb * (1 - av))[..., None]
+        reg[:] = reg * (1 - av[..., None]) + np.float32(q["vidro"]) * av[..., None]
+        reg[:] = reg * (1 - af[..., None]) + np.float32(q["face"]) * af[..., None]
+        n += 1
+    print(f"    boxes: {n} vidros contínuos do PDF, com as faces finas e a sombra curta")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 # A pedra grande e as lajes que descem dela (usuário, 22/10/26, apontando a área à esquerda do deck: "AQUI SÃO
 # DEGRAUS"): no PDF são 7 blocos retangulares de pedra (ARQ_CONTRAPISO, os de 4 lados nesta caixa) sobrepostos em
 # cascata: o patamar no alto da escada de 6 degraus e as 6 lajes em volta dele. A legenda os dava como travertino, e a
@@ -2095,24 +2297,37 @@ def passos_subsolo(Q, ini):
         return chuveiro(np.ascontiguousarray(im.copy()), Q.p2q, c["ducha"], c["braco"], c["canopla"])
 
     def escadas_s(im):
-        # a escada de 6 degraus (a de 9 é do Térreo e fica na hachura): os degraus do PDF em Bege Bahia e as linhas da
-        # R14 (`retoque_terreo_casae.escada_linhas`), no quadro da prancha
-        return degraus_bege(Q, np.ascontiguousarray(im.copy()), B.ESCADAS_S[:1])
+        # a escada de 6 degraus (a de 9 é do Térreo e fica na hachura): os degraus do PDF em Bege Bahia, sem linhas,
+        # com o sombreamento de subida e o S do PDF (auditoria de 26/10, E3 e E8)
+        return escada_sombreada(Q, np.ascontiguousarray(im.copy()), B.ESCADAS_S[0], "S")
+
+    def rotulos_s(im):
+        # o rótulo do shaft (no PDF, fora da lista dos ambientes), como no Térreo da Casa A (auditoria de 26/10)
+        import retoque_1pav_casae as R1
+        rot = B.rotulos_casab(Q.pg, Q.p2q2000) + [r for r in R1.rotulos_pdf(Q.pg) if r[0] == "SHAFT"]
+        return rotulos(Q, im, rot, Q.q["ajustes"], granito=A.granito(im, Q.q.get("granito_lum_max", 125)))
+    # Pedido do usuário (26/10/26): "banho sauna: sanitário marrom, cuba esculpida em mármore travertino bruto e pedra
+    # da bancada da cuba em granito marrom; banho serviço: cuba branca, pedra da pia em marrom granito, sanitário
+    # branco" (as duas bancadas do Subsolo em granito marrom, a cuba da ARQ_BANCADAS em travertino, o vaso do BH sauna
+    # marrom). Auditoria de 26/10 (aprovada pelo usuário: "ok, aplique a lista"): as bancadas com a borda e a sombra (E9), os
+    # boxes em vidro contínuo (E5), as paredes em cinza 80 (E10), a escada sem linhas com o S (E3, E8) e os rótulos
+    # (CIRCULAÇÃO de 2,23 m² no corpo do PDF, longe das paredes, e o SHAFT; E7)
     return [
         ("pisos", lambda im: pisos(Q, im, dentro=dentro)),
-        ("bancadas", lambda im: bancadas(Q, im)),
+        ("bancadas", lambda im: bancadas(Q, im, borda=BANCADAS_F["borda_e9"], pedra="granito", cuba=cuba_travertino)),
         ("sauna", lambda im: bancos_sauna(Q, im)),
         ("pecas", lambda im: pecas_pdf(Q, im, ini, fora=[c["ducha"]] and [(c["ducha"][0] - 3, c["ducha"][1] - 3,
                                                                           c["canopla"][2] + 3, c["ducha"][3] + 3)])),
         ("tampas", lambda im: tampas_vasos(Q, im)),
+        ("vasos", lambda im: vasos_cor(Q, im)),
         ("biblioteca", biblioteca_s),
-        ("paredes", lambda im: paredes(Q, im)),
+        ("boxes", lambda im: boxes_vidro(Q, im)),
+        ("paredes", lambda im: paredes(Q, im, cor=PAREDES_F["cinza"])),
         ("soleiras", lambda im: soleiras(Q, im)),
-        ("esquadrias", lambda im: B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m)),
+        ("esquadrias", lambda im: B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m, parede=PAREDES_F["cinza"])),
         ("escadas", escadas_s),
         ("hachura", lambda im: AJ.subsolo_hachurado(im, peg.astype(np.float32) / 255, Q.px_m)),
-        ("rotulos", lambda im: rotulos(Q, im, B.rotulos_casab(Q.pg, Q.p2q2000), Q.q["ajustes"],
-                                       granito=A.granito(im, Q.q.get("granito_lum_max", 125)))),
+        ("rotulos", rotulos_s),
     ]
 
 

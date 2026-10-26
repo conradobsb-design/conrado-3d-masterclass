@@ -2576,3 +2576,17 @@ Conformes: E1 (soleiras), E6 (raios), E2 (não há armário cortado no Subsolo),
 
 Os 6 itens: (1) paredes pretas em cinza 80, com o muro que sobe na hachura acima do depósito (E10; não há pilares); (2) escada da ducha, 6 degraus em Bege Bahia, sem o triângulo e sem as linhas, com o S do PDF e o sombreamento de subida do 1º degrau (junto ao deck) ao 6º (E3, E8); (3) os boxes do BH sauna (o vidro entre a ducha e o banho) e do BH serviço (entre o vaso e a ducha) em vidro contínuo com as faces, a sombra e o trilho, como na Casa A (E5); (4) a borda e a sombra das bancadas do BH serviço e do BH sauna (E9); (5) o rótulo CIRCULAÇÃO (2,23 m²) no meio do corredor, sem encostar nas paredes (E7); (6) o rótulo SHAFT do PDF, como no Térreo da Casa A.
 
+## Casa B · Subsolo, a lista aplicada e os materiais dos banhos (26/10/26)
+
+O usuário aprovou a lista ("ok, aplique a lista") e, no meio da aplicação, pediu os materiais dos banhos: "banho sauna: sanitário marrom, cuba esculpida em mármore travertino bruto e e pedra da bancada da cuba em granito marrom; banho serviço: cuba branca, pedra da pia em marrom granito, sanitário branco."
+
+Aplicado na final de 3840 px (`final3840_casab.py Subsolo --de bancadas`; o motor é compartilhado com as Casas C e D, então tudo vai por argumento em `passos_subsolo`):
+1. **Paredes em cinza 80** (E10), com o muro que sobe na hachura. As esquadrias passaram a ler a parede cinza (`esquadrias_final(..., parede=)`): antes, a limpeza espelhava o cinza para dentro da faixa da porta e os batentes saíam pretos.
+2. **Escada da ducha** (E3, E8): 5 degraus em Bege Bahia sem linhas e sem triângulo, com o sombreamento de subida, a sombra do 1º degrau no deck e o S no 1º degrau (`escada_sombreada`).
+3. **Boxes** do BH sauna e do BH serviço em vidro contínuo, com as faces finas e a sombra curta (E5, `boxes_vidro`).
+4. **Bancadas** com a borda no tom escurecido da pedra e a sombra curta (E9). Agora em granito marrom, pelo pedido dos banhos.
+5. **CIRCULAÇÃO** (2,23 m²) no meio do corredor, no corpo 1,0, sem encostar nas paredes (E7).
+6. **SHAFT**, o rótulo do PDF.
+7. **Banhos:** BH sauna com as prateleiras em granito marrom, a cuba esculpida em travertino bruto (a rotina da cuba do 1º Pavimento da Casa A) e o vaso marrom (`vasos_cor`, no contorno do PDF); BH serviço com a bancada em granito marrom, a cuba branca e o vaso branco.
+
+Antes e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2610_{planta,escada_ducha,bh_sauna,bh_servico,shaft,muro_hachura}_antes_depois.jpg`. A prancha (`POE642_CasaB/entrega/POE642_CasaB_PH_Subsolo_entrega.png`) e o PDF da Casa B (`POE642_CasaB_Plantas_Humanizadas.pdf`) foram refeitos; o Térreo da Casa B não mudou. Aguarda o OK do usuário para o Subsolo; depois, a auditoria do Térreo da Casa B.
