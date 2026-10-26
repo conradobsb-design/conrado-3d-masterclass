@@ -2566,3 +2566,13 @@ Perguntas ao usuário: a linguagem dos banhos 1, 2, 3 e master (como nos banhos 
 
 **Arquivos:** `renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png` (+ `_preview.jpg`), `entrega/POE642_CasaA_PH_1Pavimento_entrega.png`, `entrega/POE642_CasaA_Plantas_Humanizadas.pdf`; antes e depois (contra a final de 21/10) em `renders/POE642_CasaA_PH_1Pavimento_2610_{planta,pisos,banho_master,banho_1,banho_2,banho_3,b_servico,armario,escada_u,caracol,sala_intima,projecoes}_antes_depois.jpg`.
 
+## Casa B · Subsolo, auditoria para o OK (26/10/26)
+
+Pedido do usuário: "prossiga com o subsolo da casa B" (a Casa A está aprovada inteira: Subsolo, Térreo e 1º Pavimento). Pela regra dele ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."), a lista foi apresentada sem alterar a imagem. O mapa numerado: `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_auditoria_2610_v2.jpg` (sobre a prancha atual; a v1, de antes, segue em `..._auditoria_2610.jpg`).
+
+A conferência foi trecho a trecho, a final em cima e o PDF no mesmo quadro embaixo. Os pisos pela base chapada: Bege Bahia (232) na garagem, nas duas circulações e no BH serviço; travertino (202, 217, 220) na sauna, no BH sauna com a ducha e no depósito; deck na ducha; madeira na academia.
+
+Conformes: E1 (soleiras), E6 (raios), E2 (não há armário cortado no Subsolo), E11 (as texturas da Casa B são a referência das escalas), os contornos (a final é desenhada pelo PDF) e os demais rótulos.
+
+Os 6 itens: (1) paredes pretas em cinza 80, com o muro que sobe na hachura acima do depósito (E10; não há pilares); (2) escada da ducha, 6 degraus em Bege Bahia, sem o triângulo e sem as linhas, com o S do PDF e o sombreamento de subida do 1º degrau (junto ao deck) ao 6º (E3, E8); (3) os boxes do BH sauna (o vidro entre a ducha e o banho) e do BH serviço (entre o vaso e a ducha) em vidro contínuo com as faces, a sombra e o trilho, como na Casa A (E5); (4) a borda e a sombra das bancadas do BH serviço e do BH sauna (E9); (5) o rótulo CIRCULAÇÃO (2,23 m²) no meio do corredor, sem encostar nas paredes (E7); (6) o rótulo SHAFT do PDF, como no Térreo da Casa A.
+
