@@ -784,6 +784,10 @@ def floreira_s(Q, img):
 # elevador em aço, como nas Casas A e B.
 # O vaso do BH academia (o retângulo da louça no PDF, pt) e a cor; no Térreo, nenhum (os da Casa B não valem aqui)
 VASOS_COR_C = {"Subsolo": [((781.3, 1094.9, 810.4, 1114.9), "marrom")], "Terreo": []}
+# A torneira cromada da cuba do BH academia (usuário, 26/10/26: "faltou a torneira metalica da cuba"; o PDF não a
+# desenha): na prateleira de trás, entre o aro da cuba e a parede da direita, no meio da cuba, com a bica sobre a bacia,
+# como as dos banhos da Casa A (`final3840_casaa.torneira`: a base redonda e o bico, em pt)
+TORNEIRA_S = {"bico": (801.4, 996.5, 808.7, 998.6), "base": (808.7, 997.55, 1.4)}
 # Os chuveiros de teto do PDF (ARQ_LOUÇAS E METAIS, as placas de 20 cm): o da ducha e o do BH academia
 CHUVEIROS_S = [(685.8, 1026.9, 697.0, 1038.1), (685.8, 1102.1, 697.0, 1113.3)]
 # Os rótulos (E7): a folga maior em volta do texto (o BH ACADEMIA encostava na linha do box e na parede); o SAUNA parte do
@@ -918,6 +922,13 @@ def escada_estreita_s(Q, img, ss=8):
     return out
 
 
+def torneira_s(Q, img):
+    import final3840_casaa as FA
+    out = FA.torneira(Q, np.ascontiguousarray(img.copy()), TORNEIRA_S["bico"], TORNEIRA_S["base"])
+    print("    BH academia: a torneira cromada na prateleira de trás da cuba")
+    return out
+
+
 def chuveiros_s(Q, img):
     """Os chuveiros de teto na placa cromada com os furinhos (`final3840_casaa.chuveiro`, sem o braço)."""
     import final3840_casaa as FA
@@ -937,7 +948,125 @@ def boxes_s(Q, img):
     return FA.boxes(Q, np.ascontiguousarray(img.copy()))
 
 
-JANELAS_S = {"lum_max": 90, "vao_max": 60, "cor": (232, 234, 236), "recuo_pt": 0.3}
+# A limpeza (usuário, 26/10/26, vendo a final: "limpeza necessária, vários micro imagens em erro" e, nas portas de vidro
+# da academia, "alguns retoques no piso e nas portas de vidro"): o que a base chapada não pinta como piso ficava com os
+# px do render de 14/10. Logo depois dos pisos:
+# - as linhas finas da base entre os pisos (a emenda do pátio com a varanda, os bocéis tracejados junto à floreira) são
+#   refeitas pelos pisos em volta (`cv2.inpaint`);
+# - os brancos do PDF (a borda da floreira, o vão do vidro da sauna, os vãos das janelas e das portas, as louças e as
+#   bancadas, que as etapas seguintes redesenham) saem num claro só, sem os restos do render (as folhas fora da floreira,
+#   a mancha branca no canto do vidro);
+# - a faixa das portas de correr da academia fica fora (`portas_academia_s`, depois das esquadrias).
+LIMPEZA_S = {"fino_px": 4, "perto_px": 2, "area_max": 6000,
+             "porta_academia": (889.2, 540.8, 900.6, 926.3),
+             # a floreira com a borda (a mureta branca do PDF em volta do canteiro) e o vão do vidro da sauna: tudo o que
+             # não é o canteiro nem parede vira a pedra clara (a mureta e o peitoril do vidro), sem os restos do render
+             "floreira_pt": (508.0, 926.3, 549.6, 1158.0),
+             "fora": [ESTREITA_S["pdf"], (1565.0, 1008.5, 1661.4, 1099.2)]}
+
+
+def limpeza_s(Q, img, dentro):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    from retoque_terreo_casae import BEGE
+    q = LIMPEZA_S
+    out = img.copy()
+    ch = Q.chapada
+    pisos = Q.cor([c for _, cs, *_ in PISOS_C["Subsolo"] for c in cs], tol=6)
+    preto = ch.max(axis=2) < 60
+    branco = ch.min(axis=2) >= 250
+    outros = Q.cor([FLOREIRA_COR] + [c for c, _ in SAUNA_C["pecas"]], tol=6)
+    fora = np.zeros_like(dentro)
+    for r in q["fora"] + [q["porta_academia"]] + FORA_PECAS_S:          # e os aparelhos da academia, do render
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        fora[y0 - 2:y1 + 2, x0 - 2:x1 + 2] = True
+    # 1. as linhas finas da base entre os pisos
+    resto = (dentro & ~pisos & ~preto & ~branco & ~outros & ~fora).astype(np.uint8)
+    k = q["fino_px"]
+    fino = resto & (1 - cv2.morphologyEx(resto, cv2.MORPH_OPEN, np.ones((k, k), np.uint8)))
+    perto = cv2.dilate(pisos.astype(np.uint8), np.ones((2 * q["perto_px"] + 1,) * 2, np.uint8))
+    linhas = (fino & perto).astype(np.uint8) * 255
+    out = cv2.inpaint(out, linhas, 2, cv2.INPAINT_TELEA)
+    # a pedra clara: o Bege Bahia nítido das soleiras (`F.soleiras`), no quadro inteiro, para pousar em qualquer máscara
+    T = textura("bege_bahia", Q.px_m, Q.H, Q.W, semente=F.SOLEIRAS_F["semente"] + 50).astype(np.float32)
+    T = np.clip((1 + F.SOLEIRAS_F["forca"] * (T / T.reshape(-1, 3).mean(axis=0) - 1)) * np.float32(BEGE["tom"]), 0, 255)
+    # 2. os brancos do PDF na pedra clara (os pequenos: não os ambientes inteiros nem o poço do elevador); as placas dos
+    # chuveiros (as etapas seguintes as desenham no tamanho do PDF) ficam no piso em volta
+    chuv = np.zeros_like(dentro)
+    for r in CHUVEIROS_S:
+        x0, y0, x1, y1 = F.ret_q(Q, (r[0] - 2, r[1] - 2, r[2] + 2, r[3] + 2))
+        chuv[y0:y1, x0:x1] = True
+    n, lab, st, _ = cv2.connectedComponentsWithStats((branco & dentro & ~fora & ~chuv).astype(np.uint8), 8)
+    claros = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= q["area_max"]])
+    x0, y0, x1, y1 = F.ret_q(Q, q["floreira_pt"])
+    zona = np.zeros_like(dentro)
+    zona[y0:y1, x0:x1] = True
+    # os traços pretos finos do PDF ali (os contornos da mureta e do vão do vidro, não as paredes) também: neles ficavam
+    # as folhas do render
+    fino_preto = preto & ~cv2.morphologyEx(preto.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8)).astype(bool)
+    claros |= zona & ~outros & (~preto | fino_preto) & ~pisos
+    out[claros] = T[claros].astype(np.uint8)
+    out = cv2.inpaint(out, (chuv & dentro & (branco | ~pisos)).astype(np.uint8) * 255, 3, cv2.INPAINT_TELEA)
+    print(f"    limpeza: {int((linhas > 0).sum())} px de linhas finas da base refeitos pelos pisos em volta; "
+          f"{int(claros.sum())} px dos brancos do PDF e da borda da floreira na pedra clara")
+    return out
+
+
+JANELAS_S = {"lum_max": 90, "escuro_min": 0.15, "cor": (232, 234, 236), "recuo_pt": 0.3, "x_max_pt": 1550.0}
+
+
+# As portas de correr da academia (usuário, 26/10/26: "alguns retoques no piso e nas portas de vidro"): na faixa da
+# parede, o PDF desenha as 4 folhas em escada (ARQ_PAREDE, brancas) e as pontas da soleira; a final tinha o travertino e
+# a madeira em degraus e uma faixa bege do render, e a limpeza das esquadrias espelhava os pisos para dentro da faixa.
+# Depois das esquadrias, a porta é refeita pela rotina das portas de vidro da Casa A (`final3840_casaa.portas_vidro`): a
+# soleira de Bege Bahia nítido na faixa toda, com as faces da parede em cinza fino; os batentes nas pontas; as 4 folhas
+# nos planos do PDF, o caixilho claro com o vidro no meio, os montantes e a sombra curta.
+PORTA_ACADEMIA_S = {"nome": "da academia", "soleira": (889.2, 540.8, 900.6, 926.3),
+                    "batentes": [(889.2, 540.8, 900.6, 543.1), (889.2, 924.0, 900.6, 926.3)],
+                    "folhas": [((897.7, 543.1, 900.6, 641.7), "y"), ((894.9, 637.2, 897.7, 735.8), "y"),
+                               ((892.0, 731.3, 894.9, 829.9), "y"), ((889.2, 825.4, 892.0, 924.0), "y")],
+                    "montante_pt": 4.5, "pontas_pt": [(884.0, 926.3, 906.0, 940.0), (884.0, 528.0, 906.0, 540.8)]}
+
+
+def portas_academia_s(Q, img):
+    import final3840_casaa as FA
+    guarda = FA.PORTAS_VIDRO
+    FA.PORTAS_VIDRO = dict(FA.PORTAS_VIDRO, portas=[PORTA_ACADEMIA_S])
+    try:
+        out = FA.portas_vidro(Q, img)
+    finally:
+        FA.PORTAS_VIDRO = guarda
+    # nas pontas da porta, as esquadrias desenhavam um batente listrado por cima da parede (no pé, junto ao depósito):
+    # a parede do PDF volta ali, só nessas janelas
+    par = F.paredes(Q, out.copy(), cor=F.PAREDES_F["cinza"])
+    for r in PORTA_ACADEMIA_S["pontas_pt"]:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        out[y0:y1, x0:x1] = par[y0:y1, x0:x1]
+    # e os tiquinhos cinza dos montantes antigos das esquadrias que sobravam na madeira, junto à faixa: a madeira em volta
+    s_ = PORTA_ACADEMIA_S["soleira"]
+    x0, y0, x1, y1 = F.ret_q(Q, (s_[2] + 0.6, s_[1] + 3, s_[2] + 3.0, s_[3] - 3))
+    reg = out[y0:y1, x0:x1].astype(np.int32)
+    cinza = np.zeros(out.shape[:2], np.uint8)
+    cinza[y0:y1, x0:x1] = (((reg[..., 2] - reg[..., 0]) < 45) & (reg.mean(axis=2) < 150)).astype(np.uint8) * 255
+    return cv2.inpaint(out, cinza, 2, cv2.INPAINT_TELEA)
+
+
+def sem_verde_s(Q, img):
+    """Depois das esquadrias: a limpeza da faixa do vidro da sauna espelha o lado do canteiro para dentro do vão e
+    trazia as folhas da borda dele (pontinhos verdes junto ao vidro). Fora do canteiro da legenda, na zona da floreira,
+    o px esverdeado vai à pedra clara em volta (a mediana dos px claros e quentes da zona)."""
+    x0, y0, x1, y1 = F.ret_q(Q, LIMPEZA_S["floreira_pt"])
+    out = img.copy()
+    reg = out[y0:y1, x0:x1].astype(np.int32)
+    canteiro = cv2.dilate(Q.cor([FLOREIRA_COR], tol=6)[y0:y1, x0:x1].astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    b, g, r = reg[..., 0], reg[..., 1], reg[..., 2]
+    verde = (g > r + 3) & (g > b + 15) & ~canteiro
+    pedra = (r > g) & (g > b) & (r > 170) & ~canteiro
+    if verde.any() and pedra.any():
+        reg[verde] = np.median(reg[pedra], axis=0).astype(np.int32)
+        out[y0:y1, x0:x1] = reg.astype(np.uint8)
+    print(f"    floreira: {int(verde.sum())} px esverdeados fora do canteiro na pedra clara")
+    return out
 
 
 def janelas_s(Q, img):
@@ -949,14 +1078,15 @@ def janelas_s(Q, img):
     n = 0
     for d in Q.desenhos:
         r = d["rect"]
-        if d.get("layer") != "ARQ_PAREDE" or not d.get("fill") or min(d["fill"]) < 0.9 or r.width * r.height < 20:
+        if d.get("layer") != "ARQ_PAREDE" or not d.get("fill") or min(d["fill"]) < 0.9 or r.width * r.height < 20 \
+                or r.x0 > q["x_max_pt"]:                               # não os batentes do elevador
             continue
         e = q["recuo_pt"]
         x0, y0, x1, y1 = F.ret_q(Q, (r.x0 + e, r.y0 + e, r.x1 - e, r.y1 - e))
         reg = out[y0:y1, x0:x1]
         lum = reg.astype(np.float32).mean(axis=2)
         m = lum < q["lum_max"]
-        if lum.mean() < q["vao_max"] and m.any():                # só o vão quase todo escuro (não os batentes)
+        if m.mean() >= q["escuro_min"]:
             reg[m] = q["cor"]
             n += 1
     print(f"    janelas: {n} vão(s) escuro(s) no claro")
@@ -984,10 +1114,10 @@ def passos_subsolo_c(Q, ini):
     fora_box = [(727.5, 1076.5, 731.5, 1139.0)]               # os traços do box de correr (vão em `boxes_s`)
     fora_chuveiros = [(r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1) for r in CHUVEIROS_S]
     return [
-        ("pisos", lambda im: F.pisos(Q, im, dentro=dentro, bruto={"travertino": "piso"})),
+        ("pisos", lambda im: limpeza_s(Q, F.pisos(Q, im, dentro=dentro, bruto={"travertino": "piso"}), dentro)),
         ("floreira", lambda im: floreira_s(Q, im)),
-        ("bancadas", lambda im: bancadas_c(Q, im, borda=F.BANCADAS_F["borda_e9"], pedra="granito",
-                                           cuba=F.cuba_travertino)),
+        ("bancadas", lambda im: torneira_s(Q, bancadas_c(Q, im, borda=F.BANCADAS_F["borda_e9"], pedra="granito",
+                                                      cuba=F.cuba_granito))),
         ("sauna", lambda im: bancos_sauna_c(Q, im, bruto="bancada")),
         ("pecas", lambda im: F.pecas_pdf(Q, im, ini, fora=FORA_PECAS_S + fora_box + fora_chuveiros)),
         ("aparelhos", lambda im: pecas_do_render(Q, im, ini, FORA_PECAS_S, neutro, "academia: os aparelhos")),
@@ -998,7 +1128,8 @@ def passos_subsolo_c(Q, ini):
         ("elevador", lambda im: elevador_s(Q, im)),
         ("paredes", lambda im: F.paredes(Q, im, cor=cinza)),
         ("soleiras", lambda im: soleira_elevador(Q, F.soleiras(Q, im))),
-        ("esquadrias", lambda im: janelas_s(Q, B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m, parede=cinza))),
+        ("esquadrias", lambda im: portas_academia_s(Q, sem_verde_s(Q, janelas_s(
+            Q, B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m, parede=cinza))))),
         ("escadas", lambda im: escada_estreita_s(Q, degraus_largos_s(Q, im))),
         ("hachura", lambda im: AJ.subsolo_hachurado(im, peg, Q.px_m)),
         ("rotulos", lambda im: F.rotulos(Q, im, B.rotulos_casab(Q.pg, Q.p2q2000), Q.q["ajustes"],

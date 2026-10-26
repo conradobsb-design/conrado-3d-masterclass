@@ -2689,3 +2689,15 @@ Os 12 itens estão nas REGRAS (seção 19, Casa C · Subsolo, e seção 6). Na a
 - com a parede em cinza 80, o vão da janela da ducha do BH academia (preenchimento branco da ARQ_PAREDE, que o render tinha preto) aparecia como uma barra preta: `janelas_s` deixa claros os vãos brancos do PDF que estão quase todos escuros (não os batentes do elevador).
 
 Antes e depois: `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2610_{planta,banhos,degraus_largos,escada_estreita,elevador,varanda}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa C refeitos. Aguarda o OK do Subsolo da Casa C.
+
+### Depois: a limpeza, as portas de vidro da academia e a cuba em granito com a torneira (26/10/26)
+
+Pedidos do usuário, com dois recortes da prancha: "limpeza necessária, vários micro imagens em erro" (a floreira, o vidro da sauna e o pátio), "alguns retoques no piso e nas portas de vidro" (as portas de correr da academia), "a cuba esculpida do banho é em marrom granito" e "faltou a torneira metalica da cuba".
+
+A causa dos micro erros: onde a base chapada não tem a cor de um piso da legenda (as linhas finas do PDF, os brancos das muretas, dos vãos e das louças), a etapa dos pisos não pinta, e ficavam os px do render de 14/10 (a linha lilás entre o pátio e a varanda, as folhas antigas fora da floreira, a mancha branca no canto do vidro). Agora:
+- `limpeza_s`, logo depois dos pisos: as linhas finas (até 4 px) junto aos pisos são refeitas pelos pisos em volta (`cv2.inpaint`); os brancos pequenos do PDF e a zona da floreira (o que não é canteiro nem parede, com os traços pretos finos) vão à pedra clara, o Bege Bahia nítido das soleiras; as placas dos chuveiros ficam no piso em volta. As etapas seguintes (bancadas, peças, chuveiros, paredes, soleiras, esquadrias) desenham por cima, como antes;
+- a limpeza da faixa do vidro nas esquadrias espelha o lado do canteiro para dentro do vão: `sem_verde_s` leva os px esverdeados fora do canteiro à pedra clara;
+- as portas de correr da academia: a faixa da parede (no PDF, as 4 folhas em escada) tinha o travertino e a madeira em degraus e uma faixa bege do render, e a limpeza das esquadrias espelhava os pisos para dentro dela. Depois das esquadrias, `portas_academia_s` refaz a porta pela rotina da Casa A (`final3840_casaa.portas_vidro`): a soleira de Bege Bahia na faixa toda, com as faces da parede, os batentes, as 4 folhas nos planos do PDF com os montantes; nas pontas, a parede do PDF de volta (as esquadrias desenhavam um batente listrado sobre ela) e, junto à faixa, os tiquinhos cinza na madeira refeitos pela madeira em volta;
+- a cuba do BH academia em granito marrom (`F.cuba_granito`) e a torneira cromada na prateleira de trás, entre o aro e a parede, no meio da cuba (`torneira_s`, a rotina da Casa A).
+
+Antes e depois (o antes é a final enviada antes destes pedidos): `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2610_{limpeza_floreira,portas_academia,banho_cuba_granito,emenda_patio_varanda,planta_limpeza}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa C refeitos. Aguarda o OK do Subsolo da Casa C.
