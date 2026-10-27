@@ -19,7 +19,8 @@ Auditoria de 26/10 no Subsolo (usuário, 27/10: "ok, aplique a lista. no item 7,
 cinza 80, a escada sem linhas e sem triângulo (com o S, nevoada depois do corte), os cabides no armário do DCE 1, o box
 do WC DCE em vidro contínuo, as bancadas em granito com a borda e a sombra, a cuba esculpida e o vaso marrom no
 vestiário, os chuveiros cromados, as portas de vidro da academia como as da Casa C e o rótulo do WC DCE no piso livre
-(`passos_subsolo_d`).
+(`passos_subsolo_d`). Depois do OK, a pedido do usuário (27/10): a cuba esculpida do vestiário em Bege Bahia e o vaso
+branco.
 
 Auditoria de 26/10 no Térreo (usuário, 27/10: "Aprovo a lista e sigamos no item 9 com a recomendação"): as paredes e os
 muros em cinza 80, o travertino em estratos da Casa C, a seta da entrada, a escada e os blocos em cascata sem linhas e sem
@@ -282,6 +283,7 @@ def contexto_d():
     C.jardins_c = jardins_d
     F.ROTULOS_F = dict(F.ROTULOS_F, livres=("JARDIM",), textos={}, pontos=ROTULOS_PONTOS_D)
     F.BLOCOS_F = BLOCOS_D
+    F.BANCADAS_F = dict(F.BANCADAS_F, chapas=CHAPAS_D, **CUBAS_CHAPA_D)
     B.CARROS_B = CARROS_D
     B.CAMAS_B = CAMAS_D
     B.COOKTOPS_B = COOKTOPS_D
@@ -539,10 +541,16 @@ def paredes_d(Q, img):
 #    madeira, sem encosto, como o da varanda da Casa E: a madeira da mesa da suíte 3/escritório (o veio no comprido; a
 #    textura do piso de madeira trazia as juntas das réguas e o banco saía xadrez), um pouco mais escura, em 4 ripas;
 # 15. a prateleira de vinhos da adega na parede do fundo (a da direita), como na Casa C (`C.adega_c`).
-MATERIAIS_TD = {"granito": [(2320.0, 1370.0, 2362.0, 1492.0)],                                        # o lavabo
-                "travertino": [(628.0, 1705.0, 766.0, 1750.0), (910.0, 1694.0, 954.0, 1770.0),
-                               (1885.0, 1694.0, 1971.0, 1770.0),                # banho master, banhos 1, 2 e 3
+# Depois, vendo a final (usuário, 27/10/26: "Lavabo: bancada e Cuba esculpida no mármore travertino bruto, sanitário
+# marrom"; "Banhos suítes: piso quartzo aura, bancada e pia esculpida no quartzo aura e sanitário branco"): o lavabo com a
+# bancada e a cuba esculpida em travertino bruto (o vaso já era marrom); o banho master e os banhos 1, 2 e 3 com o piso,
+# a bancada e a cuba esculpida no quartzito Aura da biblioteca (a chapa do quadro de referências de 19/10, no tom entre o
+# branco e o cinza dos banhos do 1º Pavimento da Casa E; `QUARTZITO_TD`, `CHAPAS_D`), o vaso branco como já era.
+MATERIAIS_TD = {"granito": [],
+                "travertino": [(2320.0, 1370.0, 2362.0, 1492.0),                # o lavabo (pedido de 27/10)
                                (1360.0, 640.0, 1500.0, 673.0)],                 # o banho gourmet (pedido de 27/10)
+                "quartzito": [(628.0, 1705.0, 766.0, 1750.0), (910.0, 1694.0, 954.0, 1770.0),
+                              (1885.0, 1694.0, 1971.0, 1770.0)],                # banho master, banhos 1, 2 e 3
                 "granito_escuro": [(1200.0, 675.0, 1430.0, 727.0), (1255.0, 804.0, 1458.0, 881.0),
                                    (1598.0, 575.0, 1818.0, 620.0),
                                    (1660.0, 680.0, 1806.0, 750.0)],               # gourmet e cozinha, bancada e ilha
@@ -583,6 +591,48 @@ ESCADA_DESCIDA_TD = {"d_pt": (957.0, 1449.5),                # o meio do degrau 
                      "d_blocos_pt": (588.7, 1108.0)}          # o meio do bloco de cima da cascata (574,2 a 603,2 pt)
 SETA_TD = {"ponta": (2462, 1068)}
 ROTULOS_TD = {"pontos": {"WC DCE TÉRREO": (2195.0, 790.0)}, "folga_px": 4}
+# o piso dos banhos das suítes em quartzito Aura (pedido de 27/10): o Bege Bahia da legenda (a mancha de cada banho, a
+# partir do rótulo do PDF) com a luz larga do render e o desenho da chapa, no tom dela
+QUARTZITO_TD = {"banhos": ("BANHO MASTER", "BANHO 1", "BANHO 2", "BANHO 3"), "chapa": "quartzito_aura",
+                "tom": (211, 215, 221), "contraste": 1.0, "sig_m": 1.5, "semente": 731, "busca_px": 24}
+# as chapas da biblioteca nas bancadas e cubas (`F.bancadas`, `F.cuba_esculpida`): o quartzito Aura dos banhos das
+# suítes (a bancada no tom do piso, marcada pela borda E9; a cuba um pouco mais clara, polida) e o Bege Bahia da cuba do
+# vestiário do Subsolo (pedido de 27/10: "Vestiário: mármore bege Bahia no piso e Cuba esculpida, bancada da pia no
+# granito marrom, sanitário branco")
+CHAPAS_D = {"quartzito": {"chapa": "quartzito_aura", "tom": (211, 215, 221), "contraste": 0.8}}
+CUBAS_CHAPA_D = {
+    "cuba_quartzito": dict(F.BANCADAS_F["cuba_travertino"], chapa="quartzito_aura", contraste=0.6,
+                           tom=(218, 222, 227), contorno=(150, 156, 164), contorno_bacia=(162, 168, 176)),
+    "cuba_bege": dict(F.BANCADAS_F["cuba_travertino"], chapa="bege_bahia", contraste=0.6, tom=(194, 216, 234),
+                      contorno=(140, 160, 182), contorno_bacia=(152, 172, 192))}
+
+
+def quartzito_banhos_d(Q, img, antes):
+    """O piso dos banhos das suítes em quartzito Aura: na mancha de Bege Bahia de cada banho (a que tem o rótulo do PDF;
+    a mesma máscara dos pisos, sem as paredes), a luz larga do render (`antes`, a entrada dos pisos) com o desenho da
+    chapa, no tom dela."""
+    q = QUARTZITO_TD
+    arcos, _ = F.arcos_porta(Q)
+    preto = Q.cor([(17, 17, 17), (0, 0, 0)], tol=20) & ~arcos
+    bege = F.fechar(Q.cor([(232, 232, 232)], tol=6), 5) & ~preto
+    _, lab = cv2.connectedComponents(bege.astype(np.uint8), connectivity=4)
+    m = np.zeros_like(bege)
+    r = q["busca_px"]
+    for nome, _, (px, py), _ in B.rotulos_casab(Q.pg, Q.p2q2000):
+        if nome in q["banhos"]:
+            cx, cy = (int(round(v)) for v in Q.p2q(px, py))
+            jan = lab[cy - r:cy + r, cx - r:cx + r]
+            ids, n = np.unique(jan[jan > 0], return_counts=True)
+            m |= lab == ids[np.argmax(n)]
+    ys, xs = np.nonzero(m)
+    y0, x0, y1, x1 = ys.min(), xs.min(), ys.max() + 1, xs.max() + 1
+    L = F.luz_robusta(antes, m, q["sig_m"] * Q.px_m)
+    L = L / np.median(L[m], axis=0)
+    D = F._chapa_luz(Q, q, y1 - y0, x1 - x0, q["semente"])
+    novo = img.astype(np.float32).copy()
+    novo[y0:y1, x0:x1] = L[y0:y1, x0:x1] * np.float32(q["tom"]) * D[..., None]
+    print(f"    banhos das suítes: o piso em quartzito Aura ({int(m.sum())} px, {len(q['banhos'])} banhos)")
+    return np.clip(F.pousar(img.astype(np.float32), novo, m, suave=0.5), 0, 255).astype(np.uint8)
 
 
 def piso_estratos_d(Q, img, m, nome, forca, sig_m, semente, **kw):
@@ -597,25 +647,27 @@ def _dentro_td(r, zonas):
 
 
 def bancadas_terreo_d(Q, img):
-    """As bancadas com a borda e a sombra (E9) e os materiais do Térreo aprovado da Casa C, peça a peça; as cubas
-    esculpidas (granito no lavabo, travertino nos banhos e no banho gourmet) no lugar da louça; a branca (WC DCE), de
-    parede, por cima da pedra."""
+    """As bancadas com a borda e a sombra (E9) e os materiais pedidos, peça a peça; as cubas esculpidas (travertino no
+    lavabo e no banho gourmet, quartzito Aura nos banhos das suítes) no lugar da louça; a branca (WC DCE), de parede,
+    por cima da pedra."""
     import final3840_casaa as FA
     mt = MATERIAIS_TD
     brancas = [tuple(round(v, 1) for v in r) for r in mt["cubas_brancas"]]
     cubas = [c for c in cubas_bancada_d(Q) if tuple(round(v, 1) for v in c) not in brancas]
-    gs = {k: [(Q.p2q(*z[:2]), Q.p2q(*z[2:])) for z in mt[k]] for k in ("granito", "travertino", "granito_escuro")}
+    gs = {k: [(Q.p2q(*z[:2]), Q.p2q(*z[2:])) for z in mt[k]]
+          for k in ("granito", "travertino", "granito_escuro", "quartzito")}
 
     def pedra(Q_, comp):
         ys, xs = np.nonzero(comp)
         cx, cy = (xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2
-        for k in ("granito", "granito_escuro", "travertino"):
+        for k in ("granito", "granito_escuro", "travertino", "quartzito"):
             if any(a[0] <= cx <= b[0] and a[1] <= cy <= b[1] for a, b in gs[k]):
                 return k
         return None
 
     def cuba(Q_, out, r):
-        return F.cuba_esculpida(Q_, out, r, "granito" if _dentro_td(r, mt["granito"]) else "travertino")
+        return F.cuba_esculpida(Q_, out, r, next((k for k in ("granito", "quartzito") if _dentro_td(r, mt[k])),
+                                                 "travertino"))
     guarda = F.cubas_bancada
     F.cubas_bancada = lambda Q_: cubas
     todos = Q.desenhos
@@ -630,8 +682,8 @@ def bancadas_terreo_d(Q, img):
     out = np.ascontiguousarray(np.clip(out, 0, 255).astype(np.uint8))
     for r in mt["cubas_brancas"]:
         out = FA.cuba_branca(Q, out, r)
-    print(f"    bancadas: lavabo em granito marrom com a cuba esculpida em granito; banho master, banhos 1, 2 e 3 e "
-          f"banho gourmet em travertino bruto com a cuba esculpida em travertino; gourmet e cozinha em granito marrom "
+    print(f"    bancadas: lavabo e banho gourmet em travertino bruto com a cuba esculpida em travertino; banho master e "
+          f"banhos 1, 2 e 3 em quartzito Aura com a cuba esculpida em quartzito; gourmet e cozinha em granito marrom "
           f"escurecido; {len(mt['cubas_brancas'])} cuba branca (WC DCE)")
     return out
 
@@ -858,7 +910,8 @@ def passos_terreo_d(Q, ini, M):
     F.VASOS_COR = dict(F.VASOS_COR, Terreo=VASOS_TD)
     cinza = F.PAREDES_F["cinza"]
     return [
-        ("pisos", lambda im: F.pisos(Q, im, incluir={"granito": CARROS_PT}, bruto={"travertino": "estratos"})),
+        ("pisos", lambda im: quartzito_banhos_d(Q, F.pisos(Q, im, incluir={"granito": CARROS_PT},
+                                                           bruto={"travertino": "estratos"}), im)),
         ("bordas", lambda im: B.bordas_grama(im, chave)),
         ("vegetacao", lambda im: C.vegetacao_c(Q, im, M)),
         ("bancadas", lambda im: bancadas_terreo_d(Q, im)),
@@ -973,7 +1026,9 @@ def pegada_subsolo(Q):
 #    como o BH serviço das Casas B e C (bancada em granito marrom no tom do piso, levemente escurecido, a cuba de
 #    semiencaixe e o vaso brancos, a torneira cromada); o vestiário como o BH academia da Casa C (bancada em granito
 #    marrom, a cuba esculpida em granito marrom na bacia do PDF, a torneira cromada na prateleira de trás, o vaso marrom).
-#    No PDF do Subsolo as bancadas são só traços (a ARQ_BANCADAS sem preenchimento): entram pelos retângulos (pt);
+#    Depois (usuário, 27/10/26: "Vestiário: mármore bege Bahia no piso e Cuba esculpida, bancada da pia no granito
+#    marrom, sanitário branco"): a cuba esculpida em Bege Bahia (`CUBAS_CHAPA_D`) e o vaso branco; o piso já era Bege
+#    Bahia e a bancada, granito marrom. No PDF do Subsolo as bancadas são só traços (a ARQ_BANCADAS sem preenchimento): entram pelos retângulos (pt);
 # 8. os chuveiros do WC DCE, da ducha da sauna e do vestiário na placa cromada com os furinhos, o braço até a parede e a
 #    canopla (`final3840_casaa.chuveiro`); as placas e os braços do PDF ficam fora das peças;
 # 9. as portas de correr do pátio para a academia como as da Casa C (`C.portas_academia_s`): a soleira de Bege Bahia na
@@ -997,7 +1052,8 @@ BANHOS_SUB_D = {
     "vestiario": {"bancada": (924.6, 1801.6, 955.0, 1874.7), "cuba": (931.9, 1817.0, 951.8, 1856.2),
                   "torneira": (928.6, 1835.6, 936.0, 1837.7), "base": (928.6, 1836.65, 1.4), "semente": 2711},
     "borda": 0.62, "larg_px": 0.6, "sombra": 0.34}
-VASOS_SUB_D = [((1065.6, 1770.6, 1094.7, 1790.6), "marrom")]          # o do WC do vestiário; o do WC DCE fica branco
+# os vasos tingidos: nenhum (o do WC do vestiário era marrom; pedido de 27/10, "sanitário branco"); o do WC DCE é branco
+VASOS_SUB_D = []
 CHUVEIROS_SUB_D = [
     {"nome": "WC DCE", "ducha": (701.6, 1201.2, 712.8, 1212.4), "braco": (686.0, 1206.1, 708.3, 1207.6),
      "canopla": (686.0, 1205.4, 687.3, 1208.3)},
@@ -1143,16 +1199,17 @@ def banhos_sub_d(Q, img):
                            q["borda"], q["larg_px"], q["sombra"])
     out = FA.cuba_branca(Q, out, w["cuba"])
     out = FA.torneira(Q, out, w["torneira"], w["base"])
-    # o vestiário: a bancada em granito marrom (o piso é Bege Bahia), a cuba esculpida em granito na bacia do PDF, a
-    # torneira na prateleira de trás, junto à parede
+    # o vestiário: a bancada em granito marrom (o piso é Bege Bahia), a cuba esculpida na bacia do PDF em Bege Bahia
+    # (pedido de 27/10; antes, em granito), a torneira na prateleira de trás, junto à parede
     out = FA.bancada_pedra(Q, out, v["bancada"], lambda tl: granito(tl, v["semente"]), q["borda"], q["larg_px"],
                            q["sombra"])
-    out = np.ascontiguousarray(np.clip(F.cuba_granito(Q, out, v["cuba"]), 0, 255).astype(np.uint8))
+    out = np.ascontiguousarray(np.clip(F.cuba_esculpida(Q, out, v["cuba"], "bege"), 0, 255).astype(np.uint8))
     out = FA.torneira(Q, out, v["torneira"], v["base"])
     for c in CHUVEIROS_SUB_D:
         out = FA.chuveiro(Q, out, c)
-    print(f"    WC DCE: bancada em granito marrom levemente escurecido, cuba e vaso brancos, torneira; vestiário: bancada e "
-          f"cuba esculpida em granito marrom, torneira; {len(CHUVEIROS_SUB_D)} chuveiros na placa cromada com o braço")
+    print(f"    WC DCE: bancada em granito marrom levemente escurecido, cuba e vaso brancos, torneira; vestiário: bancada "
+          f"em granito marrom, cuba esculpida em Bege Bahia, torneira; {len(CHUVEIROS_SUB_D)} chuveiros na placa "
+          f"cromada com o braço")
     return out
 
 

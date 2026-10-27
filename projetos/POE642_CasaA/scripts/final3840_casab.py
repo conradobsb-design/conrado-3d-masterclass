@@ -830,7 +830,10 @@ def cuba_esculpida(Q, out, r, material="travertino"):
         G = FP.granito_referencia(tl.h, tl.w, Q.px_m, semente=q["semente"]).astype(np.float32)
         Gm = G.reshape(-1, 3).mean(axis=0)
     else:
-        D = FA.travertino_bruto(Q, tl.h, tl.w, q["semente"], **q["desenho"])
+        if q.get("chapa"):                        # uma chapa da biblioteca (o quartzito Aura, o Bege Bahia): só o
+            D = _chapa_luz(Q, q, tl.h, tl.w, q["semente"])            # desenho dela, no tom pedido
+        else:
+            D = FA.travertino_bruto(Q, tl.h, tl.w, q["semente"], **q["desenho"])
         G = np.float32(q["tom"]) * D[..., None]
     X, Y = tl.grade()
     # a borda, com a quina: clara perto dos lados de cima e da direita, escura perto dos de baixo e da esquerda
@@ -863,6 +866,15 @@ def cuba_esculpida(Q, out, r, material="travertino"):
     return out
 
 
+def _chapa_luz(Q, q, h, w, semente):
+    """O desenho (a luz, sem a cor) da chapa `q["chapa"]` da biblioteca na escala da prancha, em torno de 1, com o
+    contraste `q["contraste"]`."""
+    sys.path.insert(0, str(B.RAIZ / "_texturas"))
+    from texturas import textura
+    T = textura(q["chapa"], Q.px_m, h, w, semente=semente).astype(np.float32).mean(axis=2)
+    return 1 + q["contraste"] * (T / T.mean() - 1)
+
+
 def bancadas(Q, img, borda=None, pedra=None, cuba=None):
     sys.path.insert(0, str(B.RAIZ / "_texturas"))
     from texturas import textura
@@ -877,7 +889,7 @@ def bancadas(Q, img, borda=None, pedra=None, cuba=None):
             a *= 1 - FA.ret_aa(Q, (r[0] - e_, r[1] - e_, r[2] + e_, r[3] + e_))
     n, lab, st, _ = cv2.connectedComponentsWithStats((a > 0.5).astype(np.uint8), 8)
     out = img.astype(np.float32)
-    pecas = n_trav = n_gran = 0
+    pecas = n_trav = n_gran = n_chapa = 0
     med_gran = None
     for i in range(1, n):
         x, y, w, h, area = st[i]
@@ -907,6 +919,10 @@ def bancadas(Q, img, borda=None, pedra=None, cuba=None):
             tex = np.float32(tb["tom"]) * FA.travertino_bruto(Q, y1 - y0, x1 - x0, tb["semente"] + i,
                                                               **FA.TRAVERTINO["bancada"])[..., None]
             n_trav += 1
+        elif p in q.get("chapas", {}):           # outra chapa da biblioteca, no tom pedido (o quartzito Aura dos banhos)
+            ch = q["chapas"][p]
+            tex = np.float32(ch["tom"]) * _chapa_luz(Q, ch, y1 - y0, x1 - x0, 900 + i)[..., None]
+            n_chapa += 1
         else:
             tex = textura(q["pedra"], Q.px_m, y1 - y0, x1 - x0, semente=900 + i).astype(np.float32)
             med = tex.reshape(-1, 3).mean(axis=0)
@@ -977,7 +993,8 @@ def bancadas(Q, img, borda=None, pedra=None, cuba=None):
     out = out * (1 - t) + np.float32(q["contorno"]) * t
     print(f"    bancadas: {pecas} peças em " + ("granito marrom" if pedra == "granito" else
                                                f"{q['pedra']} no tom areia" + (f" ({n_trav} em travertino bruto)" if n_trav else "")
-                                               + (f" ({n_gran} em granito marrom escurecido)" if n_gran else ""))
+                                               + (f" ({n_gran} em granito marrom escurecido)" if n_gran else "")
+                                               + (f" ({n_chapa} em outra chapa da biblioteca)" if n_chapa else ""))
           + f", a {Q.px_m:.1f} px/m, com o contorno do PDF"
           + (", a borda no tom escurecido da pedra e a sombra curta (E9)" if borda else "") +
           f"; {len(cubas)} cubas " + ("esculpidas na pedra pedida" if cuba else "em louça branca"))
