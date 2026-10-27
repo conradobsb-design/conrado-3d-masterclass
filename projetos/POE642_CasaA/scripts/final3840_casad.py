@@ -1109,64 +1109,8 @@ def moveis_td(Q, img):
     out = cadeiras_mesas_d(Q, out, piso)
     out = jantar_d(Q, out, piso)
     out = jogos_mesa_d(Q, out, piso)
-    out = sofa_living_d(Q, out)
     out = diagonais_armarios_d(Q, out)
     return floreiras_td(Q, out)
-
-
-# O sofá do estar do living (usuário, 27/10/26: "represente melhor esse sofá e almofadas, mais humanizado"; é o sofá
-# das duas propostas do estar com a biblioteca): o `sofa_reto_cinza` (2 lugares de 1,15 m, cada um com a almofada) com
-# um lugar a mais, para os 3 do PDF: o bloco cortado na emenda dos encostos (`emenda_px`, a `px_m_bloco`); o lugar da
-# esquerda com o braço, o mesmo sem o braço (de `braco_px`) no meio e, na outra ponta, o da esquerda espelhado (na foto,
-# o braço da direita fica cortado). No retângulo do sofá do PDF (`pt`; o encosto embaixo, girado
-# 180°), em 4x, com a sombra curta. Embaixo do sofá antigo, o tapete (em cima da borda dele, `tapete_y_pt`) vem das
-# linhas livres dele entre as mesas de centro e o sofá (`tapete_livre_px`, em espelho) e o travertino (estratos
-# deitados), das mesmas linhas à esquerda da mesa lateral (`trav_x_px`, depois do vão da porta de vidro)
-SOFA_LIVING_TD = {"pt": (1764.0, 1402.8, 1935.8, 1460.5), "bloco": "sofa_reto_cinza", "px_m_bloco": 200,
-                  "emenda_px": 235, "braco_px": 42, "giro": 180, "tapete_y_pt": 1433.5, "tapete_livre_px": (1210, 1235),
-                  "trav_x_px": (1820, 1938), "folga_px": 4}
-
-
-def sofa_living_d(Q, img):
-    sys.path.insert(0, str(RAIZ / "_blocos"))
-    import blocos
-    q = SOFA_LIVING_TD
-    out = img.astype(np.float32)
-    x0, y0, x1, y1 = F.ret_q(Q, q["pt"])
-    f = q["folga_px"]
-    X0, Y0, X1, Y1 = x0 - f, y0 - f, x1 + f, y1 + f
-    _, ty = Q.p2q(q["pt"][0], q["tapete_y_pt"])
-    ty = int(round(ty))
-    # o fundo sem o sofá antigo: o tapete de cima (as linhas livres entre as mesas de centro e o sofá, em espelho) e o
-    # travertino ao lado
-    t0, t1 = q["tapete_livre_px"]
-    tap = img[t0:t1, X0:X1]
-    tap = np.concatenate([tap[::-1], tap] * ((ty - Y0) // (2 * (t1 - t0)) + 1), axis=0)
-    out[Y0:ty, X0:X1] = tap[:ty - Y0]
-    a, b = q["trav_x_px"]
-    for y in range(ty, Y1):
-        linha = img[y, a:b].astype(np.float32)
-        faixa = np.concatenate([linha, linha[::-1]] * ((X1 - X0) // (2 * len(linha)) + 1), axis=0)
-        out[y, X0:X1] = faixa[:X1 - X0]
-    # o sofá de 3 lugares
-    cor, al = blocos.bloco(q["bloco"], q["px_m_bloco"])
-    e, br = q["emenda_px"], q["braco_px"]
-    cor = np.concatenate([cor[:, :e], cor[:, br:e], cor[:, :e][:, ::-1]], axis=1).astype(np.float32)
-    al = np.concatenate([al[:, :e], al[:, br:e], al[:, :e][:, ::-1]], axis=1).astype(np.float32)
-    if q["giro"] == 180:
-        cor, al = cor[::-1, ::-1], al[::-1, ::-1]
-    (ax, ay), (bx, by) = Q.p2q(q["pt"][0], q["pt"][1]), Q.p2q(q["pt"][2], q["pt"][3])
-    w4, h4 = int(round(4 * (bx - ax))), int(round(4 * (by - ay)))
-    c = cv2.resize(np.ascontiguousarray(cor * al[..., None]), (w4, h4), interpolation=cv2.INTER_AREA)
-    a4 = cv2.resize(np.ascontiguousarray(al), (w4, h4), interpolation=cv2.INTER_AREA)
-    w1, h1 = int(np.ceil(w4 / 4)), int(np.ceil(h4 / 4))
-    c = cv2.resize(np.pad(c, ((0, h1 * 4 - h4), (0, w1 * 4 - w4), (0, 0))), (w1, h1), interpolation=cv2.INTER_AREA)
-    a1 = cv2.resize(np.pad(a4, ((0, h1 * 4 - h4), (0, w1 * 4 - w4))), (w1, h1), interpolation=cv2.INTER_AREA)
-    c = c / np.maximum(a1, 1e-4)[..., None]
-    _pousar(out, c, np.clip(a1, 0, 1), (ax + bx) / 2 + (w1 - w4 / 4) / 2, (ay + by) / 2 + (h1 - h4 / 4) / 2, Q.px_m)
-    print(f"    living: o sofá de 3 lugares com as almofadas (`{q['bloco']}` com um lugar a mais), "
-          f"{(bx - ax) / Q.px_m:.2f} x {(by - ay) / Q.px_m:.2f} m")
-    return np.clip(out, 0, 255).astype(np.uint8)
 
 
 def carros_d(Q, img, M):
@@ -1413,7 +1357,10 @@ ROTULOS_TD = {"pontos": {}, "folga_px": 4,
               # o WC DCE dentro do box, como no PDF, com o corpo menor (usuário, 27/10/26: "o rótulo aqui está sobre a
               # porta. preciso que coloque dentro do box como está no pdf, com fonte mais reduzida"); antes, a busca
               # partia de (2195, 790) pt, no piso seco, e o rótulo caía junto da porta
-              "fixos": {"WC DCE TÉRREO": {"corpo": 0.62, "quebra": ["WC DCE", "TÉRREO"]}}}
+              "fixos": {"WC DCE TÉRREO": {"corpo": 0.62, "quebra": ["WC DCE", "TÉRREO"]},
+                        # a adega (usuário, 27/10/26, com a adega em U: "centralize o rótulo"): no meio do piso livre,
+                        # entre o vidro (2121 pt) e a prateleira do fundo, e entre as prateleiras de cima e de baixo
+                        "ADEGA": {"pt": (2181.3, 1035.6)}}}
 # o piso dos banhos das suítes em quartzito Aura (pedido de 27/10): o Bege Bahia da legenda (a mancha de cada banho, a
 # partir do rótulo do PDF) com a luz larga do render e o desenho da chapa, no tom dela
 QUARTZITO_TD = {"banhos": ("BANHO MASTER", "BANHO 1", "BANHO 2", "BANHO 3"), "chapa": "quartzito_aura",
@@ -1911,6 +1858,15 @@ PORTAS_VIDRO_TD = [
      "montante_pt": 0.6},
     {"nome": "de correr da cozinha para o living", "soleira": (1757.2, 868.4, 1861.6, 876.9), "batentes": [],
      "folhas": [((1744.2, 865.8, 1851.9, 868.1), "x")], "montante_pt": 0.6},
+    # a de correr da suíte 2 para o beiral (usuário, 27/10/26: "abaixo da porta de vidro à direita tem uma linha preta
+    # que não deveria existir, remova-a. são três folhas que se movem para esquerda. folhas únicas, sem estarem
+    # duplicadas"): as três folhas do PDF, cada uma no plano dela (de 1880,3 a 1887,1 pt, a da direita por dentro),
+    # uma folha só cada (o render as desenhava em dois traços ou num bloco cinza); a soleira sem as faces (`faces`), até
+    # 1 px abaixo do vão, e sem a face do beiral embaixo (`BEIRAL_SEM_FACE_TD`): o Bege Bahia passa direto ao beiral
+    {"nome": "de correr da suíte 2", "soleira": (1602.6, 1880.3, 1801.1, 1889.8), "faces": False,
+     "batentes": [(1602.6, 1880.3, 1604.9, 1888.8), (1798.8, 1880.3, 1801.1, 1888.8)],
+     "folhas": [((1604.9, 1884.9, 1669.5, 1887.1), "x"), ((1669.5, 1882.6, 1734.2, 1884.9), "x"),
+                ((1734.2, 1880.3, 1798.8, 1882.6), "x")], "montante_pt": 0.6},
 ]
 
 
@@ -1972,6 +1928,28 @@ RECOLHE_ELEV_TD = {"alvo_pt": (1137.0, 1382.1, 1254.0, 1389.5)}
 # `grama_px` linhas logo abaixo do beiral (o fio cinza e preto da borda do jardim no render) recebem a grama de baixo
 BEIRAL_BEGE_TD = {"x_pt": (1252.3, 2284.3), "y_pt": (1888.8, 1898.0), "fonte_px": (880, 1700),
                   "grama_x_pt": (1252.3, 1596.0), "grama_px": 3}
+# O beiral sobe formando o L (usuário, 27/10/26: "o beiral também sobe formando o L. segue o bege no lugar desse cinza
+# claro com falhas. remova o cinza e substitua por bege. não altere paredes e nem o tracejado"; depois: "é somente esse
+# trecho até o brise marrom"): a faixa entre a face da parede do escritório (2275,6 pt) e o tracejado da laje
+# (2284,3 pt), do pé do brise (1645,5 pt) até o beiral, recebe o beiral de junto do canto, de pé (o trecho de mesmo
+# comprimento à esquerda da faixa, sem a linha da face); a face do beiral sai sob a faixa, para o L ficar contínuo. A
+# coluna da face da parede e a do tracejado ficam. Vai na etapa das projeções, depois delas: antes, a limpeza do
+# tracejado da lateral (`limpar_v`, que compara com a faixa vizinha) mudava com o claro e mexia no tracejado
+BEIRAL_L_TD = {"x_pt": (2275.6, 2284.3), "y_pt": (1645.5, 1888.8)}
+# os vãos de porta da fachada de baixo onde a linha da face do beiral (a de cima da tira) não passa: x0, x1 (pt)
+BEIRAL_SEM_FACE_TD = [(1602.6, 1801.1)]
+
+
+def beiral_l_td(Q, img):
+    q = BEIRAL_L_TD
+    (u0, v0), (u1, v1) = Q.p2q(q["x_pt"][0], q["y_pt"][0]), Q.p2q(q["x_pt"][1], q["y_pt"][1])
+    x0, x1, y0 = int(np.ceil(u0)) + 1, int(np.floor(u1)), int(np.ceil(v0))
+    face = int(np.floor(v1)) + 1                                    # a linha da face do beiral (a de cima dele)
+    y1 = face + 1
+    out = img.copy()
+    out[y0:y1, x0:x1] = img[face + 1:face + 1 + x1 - x0, x0 - (y1 - y0):x0].transpose(1, 0, 2)
+    print(f"    beiral: sobe no L entre a parede do escritório e o tracejado ({x1 - x0} x {y1 - y0} px)")
+    return out
 
 
 def portas_vidro_td(Q, img):
@@ -2019,6 +1997,10 @@ def portas_vidro_td(Q, img):
     alvo = out[by0:by1, bx0:bx1]
     livre = np.ones(alvo.shape[:2], bool)
     alvo[livre] = tira[livre]
+    for xa, xb in BEIRAL_SEM_FACE_TD:
+        (ua, _), (ub, _) = Q.p2q(xa, 0), Q.p2q(xb, 0)
+        ua, ub = int(np.ceil(ua)), int(np.floor(ub))
+        out[by0, ua:ub] = out[by0 + 1, ua:ub]
     (gx0, _), (gx1, _) = Q.p2q(bq["grama_x_pt"][0], 0), Q.p2q(bq["grama_x_pt"][1], 0)
     gx0, gx1, g = int(np.floor(gx0)), int(np.ceil(gx1)), bq["grama_px"]
     out[by1:by1 + g, gx0:gx1] = out[by1 + g:by1 + 2 * g, gx0:gx1]
@@ -2116,7 +2098,7 @@ def passos_terreo_d(Q, ini, M):
             Q, F.esquadrias_terreo(Q, im.copy(), parede=cinza), im)), im))),
         ("cortinas", lambda im: sem_trilho_fora_d(Q, F.cortinas(Q, im, paredes_pdf=True), im)),
         ("escadas", lambda im: escadas_terreo_d(Q, im)),
-        ("projecoes", lambda im: projecoes_lajes_td(Q, projecoes_terreo_d(Q, im))),
+        ("projecoes", lambda im: beiral_l_td(Q, projecoes_lajes_td(Q, projecoes_terreo_d(Q, im)))),
         ("seta", lambda im: seta_terreo_d(Q, im)),
         ("rotulos", lambda im: rotulos_terreo_d(Q, im)),
     ]

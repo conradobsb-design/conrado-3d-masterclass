@@ -3017,3 +3017,16 @@ Pedidos, vendo a final (cada um com um recorte): "vamos manter o beiral no mesmo
 Rodado `final3840_casad.py Terreo --de biblioteca`. Antes e depois: `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_pedidos2710f_{beiral_esquerda,beiral_direita,fechamento_projecao,box_banho_gourmet,adega_u}_antes_depois.jpg`. O Subsolo, rodado de novo da hachura, não muda (0 px). Prancha do Térreo e PDF da Casa D refeitos.
 
 Seguem em aberto, aguardando o usuário: as cadeiras dos jogos da varanda ("volta as cadeiras que estavam antes": qual versão), a proposta A ou B do estar do living, a faixa branca vertical à esquerda do elevador (manter ou cinza) e as banquetas do Térreo aprovado da Casa C (`BANQUETAS_C["giro"]` 270 → 90, sem mexer na Casa C sem o OK). O Térreo da Casa D segue sem o OK.
+
+### Depois: beiral em L, porta da suíte 2, o sofá anterior e o rótulo da adega (27/10/26)
+
+Pedidos, vendo a final (cada um com um recorte): "o beiral também sobe formando o L. segue o bege no lugar desse cinza claro com falhas. remova o cinza e substitua por bege. não altere paredes e nem o tracejado." e, depois, "é somente esse trecho até o brise marrom." (a lateral do escritório); "na suite 2, abaixo da porta de vidro à direita tem uma linha preta que não deveria existir, remova-a. são três folhas que se movem para esquerda. folhas únicas, sem estarem duplicadas."; "volte o sofá anterior. esse não ficou bom, muito artificial." (o estar do living); "centralize o rótulo" (a adega).
+
+- Beiral em L: a faixa cinza com falhas entre a parede do escritório e o tracejado da laje, do pé do brise até o beiral, agora no Bege Bahia do beiral, de pé e contínuo com ele no canto. A parede e o tracejado ficaram idênticos (0 px de diferença); para isso o L entra depois das projeções (a limpeza do tracejado da lateral comparava com a faixa e, com o claro, mexia nele).
+- Porta da suíte 2: a soleira de Bege Bahia no vão do PDF e as três folhas, uma em cada plano (a da direita por dentro, a da esquerda por fora), cada uma numa folha só, como as do living (o render as desenhava em dois traços, num bloco cinza e num fio). A linha preta embaixo do vão (a face da soleira e a do beiral) saiu: o Bege da soleira passa direto ao beiral.
+- Sofá do living: o sofá da biblioteca saiu; voltou o anterior, igual, pixel a pixel, ao de antes do 6º lote. O resto do estar segue aguardando a proposta A ou B (as duas usavam o sofá da biblioteca; se uma for escolhida, o sofá fica o anterior, salvo novo pedido).
+- Rótulo da adega: no meio do piso livre do U (entre o vidro e a prateleira do fundo, e entre as de cima e de baixo).
+
+Rodado `final3840_casad.py Terreo --de moveis`. Antes e depois: `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_pedidos2710g_{beiral_l,porta_suite_2,sofa_living,rotulo_adega}_antes_depois.jpg`. O Subsolo, rodado de novo da hachura, não muda (0 px). Prancha do Térreo e PDF da Casa D refeitos.
+
+Seguem em aberto, aguardando o usuário: as cadeiras dos jogos da varanda ("volta as cadeiras que estavam antes": qual versão), a proposta A ou B do estar do living, a faixa branca vertical à esquerda do elevador (manter ou cinza) e as banquetas do Térreo aprovado da Casa C (`BANQUETAS_C["giro"]` 270 → 90, sem mexer na Casa C sem o OK). O Térreo da Casa D segue sem o OK.
