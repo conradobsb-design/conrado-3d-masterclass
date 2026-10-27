@@ -1357,35 +1357,67 @@ CORTINA_TC = {"passo_m": 0.15, "prof_pano_m": 0.075, "festa_m": 0.018}
 
 
 def pano_cortina(comp_m, px_m, cor=None, passo_m=None, prof_pano=None, festa=None, **_):
+    """O pano franzido, que desde 27/10 está na biblioteca (`blocos.pano_franzido`) e vale para todas as casas."""
     sys.path.insert(0, str(RAIZ / "_blocos"))
     import blocos
     q = CORTINA_TC
-    cor = blocos.LINHO if cor is None else cor
-    passo_m = q["passo_m"] if passo_m is None else passo_m
-    prof_pano = q["prof_pano_m"] if prof_pano is None else prof_pano
-    festa = q["festa_m"] if festa is None else festa
-    k = px_m * blocos.SS
-    prof_m = 0.17
-    W, H = max(1, round(comp_m * k)), max(1, round(prof_m * k))
-    X, Y = np.meshgrid(np.arange(W) + 0.5, np.arange(H) + 0.5)
-    x_m = X / k
-    fase = 2 * np.pi * x_m / passo_m
-    y_c = 0.085 * k
-    tras = y_c - prof_pano / 2 * k + 0.004 * k * np.sin(fase)
-    frente = y_c + prof_pano / 2 * k + festa * k * np.cos(fase)
-    tec = np.clip(Y - tras + 0.5, 0, 1) * np.clip(frente - Y + 0.5, 0, 1)
-    tec *= np.clip(np.minimum(x_m, comp_m - x_m) / 0.02, 0, 1)
-    luz = 0.80 + 0.22 * (0.5 + 0.5 * np.cos(fase + 0.9))
-    borda = np.clip(1 - np.abs(Y - frente) / (0.006 * k), 0, 1)
-    luz = cv2.GaussianBlur((luz * (1 - 0.10 * borda)).astype(np.float32), (0, 0), 0.004 * k)
-    sombra = cv2.GaussianBlur(np.roll(tec, round(0.018 * k), axis=0).astype(np.float32), (0, 0), 0.012 * k) * 0.28
-    rgb = np.array(cor, np.float32) * luz[..., None]
-    alfa = 1 - (1 - tec) * (1 - sombra)
-    pre = rgb * tec[..., None]
-    Wr, Hr = max(1, round(comp_m * px_m)), max(1, round(prof_m * px_m))
-    pre = cv2.resize(pre.astype(np.float32), (Wr, Hr), interpolation=cv2.INTER_AREA)
-    a = cv2.resize(alfa.astype(np.float32), (Wr, Hr), interpolation=cv2.INTER_AREA)
-    return pre / np.maximum(a, 1e-4)[..., None], a
+    return blocos.pano_franzido(comp_m, px_m, cor=blocos.LINHO if cor is None else cor,
+                                passo_m=q["passo_m"] if passo_m is None else passo_m,
+                                prof_pano=q["prof_pano_m"] if prof_pano is None else prof_pano,
+                                festa=q["festa_m"] if festa is None else festa)
+
+
+# As cortinas do estar (usuário, 27/10/26, sobre a final: "e essas cortinas? corrija-as."): no PDF da Casa C, as do
+# estar, junto aos vidros do canto do hall e da fachada de baixo, estão na ARQ_MOBILIÁRIO (as outras, na ARQ_LOUÇAS E
+# METAIS, que é onde `B.onda_cortina_b` procura) e ficavam as bolinhas do render. Entram as ondas da ARQ_MOBILIÁRIO, nos
+# mesmos critérios (traço de 0,85 pt, curvas de 4 a 8 pt), em trechos de pelo menos `min_pt`; o lado do vidro é o do
+# traço comprido da ARQ_PAREDE paralelo mais perto (até `vidro_pt`), que no estar fica embaixo ou à direita.
+CORTINAS_MOB_TC = {"camada": "ARQ_MOBILIÁRIO", "min_pt": 30.0, "vidro_pt": 14.0, "parede_min_pt": 40.0}
+
+
+def trechos_cortina_tc(chave, orig):
+    import pymupdf
+    q, qb = CORTINAS_MOB_TC, B.CORTINAS_B
+    trechos = orig(chave)
+    pg, p2r = AJ.pdf_pavimento(chave)
+    seg, par = [], []
+    for d in pg.get_drawings():
+        r = d["rect"]
+        if d.get("layer") == q["camada"] and d["type"] == "s" and abs((d.get("width") or 0) - qb["traco"]) < 0.05 \
+                and any(it[0] == "c" for it in d["items"]) and qb["onda"][0] < max(r.width, r.height) < qb["onda"][1] \
+                and min(r.width, r.height) < qb["onda"][2]:
+            seg.append((r.height > r.width, pymupdf.Rect(r)))
+        elif d.get("layer") == "ARQ_PAREDE" and max(r.width, r.height) >= q["parede_min_pt"] and min(r.width, r.height) < 1:
+            par.append(pymupdf.Rect(r))
+    grupos = []
+    for v, r in seg:
+        perto = [g for g in grupos if g[0] == v and g[1].intersects(pymupdf.Rect(r.x0 - 1, r.y0 - 1, r.x1 + 1, r.y1 + 1))]
+        z = pymupdf.Rect(r)
+        for g in perto:
+            z |= g[1]
+            grupos.remove(g)
+        grupos.append((v, z))
+    n = 0
+    for v, r in grupos:
+        if max(r.width, r.height) < q["min_pt"]:
+            continue
+        if v:
+            eixo = (r.x0 + r.x1) / 2
+            ds = [(p.x0 - eixo) for p in par if p.width < 1 and p.y0 < r.y1 and p.y1 > r.y0
+                  and abs(p.x0 - eixo) < q["vidro_pt"]]
+            lado = "direita" if ds and min(ds, key=abs) > 0 else "esquerda"
+            (ex, e0), (_, e1) = p2r(eixo, r.y0), p2r(eixo, r.y1)
+            trechos.append(("v", lado, ex, e0, e1))
+        else:
+            eixo = (r.y0 + r.y1) / 2
+            ds = [(p.y0 - eixo) for p in par if p.height < 1 and p.x0 < r.x1 and p.x1 > r.x0
+                  and abs(p.y0 - eixo) < q["vidro_pt"]]
+            lado = "baixo" if ds and min(ds, key=abs) > 0 else "cima"
+            (e0, ey), (e1, _) = p2r(r.x0, eixo), p2r(r.x1, eixo)
+            trechos.append(("h", lado, ey, e0, e1))
+        n += 1
+    print(f"    cortinas da ARQ_MOBILIÁRIO (o estar): {n} trechos")
+    return sorted(trechos, key=lambda t: (t[0], t[2], t[3]))
 
 
 def cortinas_t(Q, img):
@@ -1398,10 +1430,13 @@ def cortinas_t(Q, img):
             return pano_cortina(comp_m, px_m, **kw)
         return orig(comp_m, px_m, aberta=aberta, com_pano=com_pano, com_trilho=com_trilho, **kw)
     blocos.cortina = cortina
+    tr = B.trechos_cortina_b
+    B.trechos_cortina_b = lambda chave: trechos_cortina_tc(chave, tr)
     try:
         return F.cortinas(Q, img, paredes_pdf=True)
     finally:
         blocos.cortina = orig
+        B.trechos_cortina_b = tr
 
 
 def passos_terreo_c(Q, ini, M):

@@ -154,8 +154,23 @@ def bloco(bid, px_m):
     return cor, a
 
 
-def cortina(comp_m, px_m, aberta=False, cor=LINHO, passo_m=0.14, amp_m=0.035, esp_m=0.022, mac0=0.18,
-            com_pano=True, com_trilho=True):
+def cortina(comp_m, px_m, aberta=False, cor=LINHO, com_pano=True, com_trilho=True, **kw):
+    """A cortina vista de cima, na horizontal (o trilho em cima, do lado do vidro). Fechada, o pano franzido
+    (`pano_franzido`, o modelo de todas as casas desde 27/10/26); aberta, os maços da `cortina_ondulada`. O trilho é o da
+    `cortina_ondulada`. Devolve (BGR float32, alfa)."""
+    if aberta or not com_pano:
+        return cortina_ondulada(comp_m, px_m, aberta=aberta, cor=cor, com_pano=com_pano, com_trilho=com_trilho, **kw)
+    cp, ap = pano_franzido(comp_m, px_m, cor=cor)
+    if not com_trilho:
+        return cp, ap
+    ct, at = cortina_ondulada(comp_m, px_m, cor=cor, com_pano=False)
+    pre = cp * ap[..., None] + ct * (at * (1 - ap))[..., None]
+    a = ap + at * (1 - ap)
+    return pre / np.maximum(a, 1e-4)[..., None], a
+
+
+def cortina_ondulada(comp_m, px_m, aberta=False, cor=LINHO, passo_m=0.14, amp_m=0.035, esp_m=0.022, mac0=0.18,
+                     com_pano=True, com_trilho=True):
     """A cortina vista de cima, na horizontal: o trilho em cima (lado do vidro), o tecido em ondas (prega wave) e a
     sombra para baixo (lado de dentro). Aberta, o tecido fica franzido em dois maços nas pontas, com as pregas mais
     fechadas e fundas e o miolo do maço cheio de tecido. `com_pano=False` dá só o trilho e `com_trilho=False` só o pano:
@@ -196,6 +211,36 @@ def cortina(comp_m, px_m, aberta=False, cor=LINHO, passo_m=0.14, amp_m=0.035, es
     pre = rgb * (1 - (1 - tecido) * (1 - trilho))[..., None]   # a sombra é preta
     Wr, Hr = max(1, round(comp_m * px_m)), max(1, round(prof_m * px_m))
     pre = cv2.resize(pre, (Wr, Hr), interpolation=cv2.INTER_AREA)
+    a = cv2.resize(alfa.astype(np.float32), (Wr, Hr), interpolation=cv2.INTER_AREA)
+    return pre / np.maximum(a, 1e-4)[..., None], a
+
+
+def pano_franzido(comp_m, px_m, cor=LINHO, passo_m=0.15, prof_pano=0.075, festa=0.018):
+    """O pano fechado com o corpo do tecido franzido (o modelo das cortinas de todas as casas desde 27/10/26; usuário,
+    vendo as do Térreo da Casa C: "adote esses modelos de cortinas para as todas as casas"): o lado do vidro quase reto,
+    o do ambiente em ondas (a festa da prega), as pregas em luz e sombra (a crista clara, o vale escuro), a dobra da frente
+    um pouco mais escura e a sombra curta no piso. Na mesma peça e no mesmo eixo que o pano de `cortina` (0,17 m, o eixo
+    do tecido a 0,085 m do lado do vidro, em cima), sem o trilho. Devolve (BGR float32, alfa)."""
+    k = px_m * SS
+    prof_m = 0.17
+    W, H = max(1, round(comp_m * k)), max(1, round(prof_m * k))
+    X, Y = np.meshgrid(np.arange(W) + 0.5, np.arange(H) + 0.5)
+    x_m = X / k
+    fase = 2 * np.pi * x_m / passo_m
+    y_c = 0.085 * k
+    tras = y_c - prof_pano / 2 * k + 0.004 * k * np.sin(fase)              # o lado do vidro, quase reto
+    frente = y_c + prof_pano / 2 * k + festa * k * np.cos(fase)              # o lado do ambiente, em ondas
+    tec = np.clip(Y - tras + 0.5, 0, 1) * np.clip(frente - Y + 0.5, 0, 1)
+    tec *= np.clip(np.minimum(x_m, comp_m - x_m) / 0.02, 0, 1)
+    luz = 0.80 + 0.22 * (0.5 + 0.5 * np.cos(fase + 0.9))                    # as pregas: crista clara, vale escuro
+    borda = np.clip(1 - np.abs(Y - frente) / (0.006 * k), 0, 1)              # a dobra da frente, um pouco mais escura
+    luz = cv2.GaussianBlur((luz * (1 - 0.10 * borda)).astype(np.float32), (0, 0), 0.004 * k)
+    sombra = cv2.GaussianBlur(np.roll(tec, round(0.018 * k), axis=0).astype(np.float32), (0, 0), 0.012 * k) * 0.28
+    rgb = np.array(cor, np.float32) * luz[..., None]
+    alfa = 1 - (1 - tec) * (1 - sombra)
+    pre = rgb * tec[..., None]
+    Wr, Hr = max(1, round(comp_m * px_m)), max(1, round(prof_m * px_m))
+    pre = cv2.resize(pre.astype(np.float32), (Wr, Hr), interpolation=cv2.INTER_AREA)
     a = cv2.resize(alfa.astype(np.float32), (Wr, Hr), interpolation=cv2.INTER_AREA)
     return pre / np.maximum(a, 1e-4)[..., None], a
 

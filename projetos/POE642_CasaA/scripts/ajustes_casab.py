@@ -888,12 +888,33 @@ def trechos_cortina_b(chave):
         if v:
             eixo = (r.x0 + r.x1) / 2
             (ex, e0), (_, e1) = p2r(eixo, r.y0), p2r(eixo, r.y1)
-            trechos.append(("v", "esquerda" if eixo < q["vidro_x"] else "direita", ex, e0, e1))
+            trechos.append(("v", lado_vidro_pdf(pg, r, True) or ("esquerda" if eixo < q["vidro_x"] else "direita"),
+                            ex, e0, e1))
         else:
             eixo = (r.y0 + r.y1) / 2
             (e0, ey), (e1, _) = p2r(r.x0, eixo), p2r(r.x1, eixo)
-            trechos.append(("h", "cima", ey, e0, e1))
+            trechos.append(("h", lado_vidro_pdf(pg, r, False) or "cima", ey, e0, e1))
     return sorted(trechos, key=lambda t: (t[0], t[2], t[3]))
+
+
+def lado_vidro_pdf(pg, r, vertical, perto_pt=14.0, parede_min_pt=40.0):
+    """O lado do vidro de um trecho de cortina (r, pt): o do traço comprido da ARQ_PAREDE paralelo mais perto, até
+    `perto_pt` (27/10/26: as cortinas das fachadas de baixo do Térreo da Casa D têm o vidro embaixo; o motor supunha
+    sempre o vidro em cima, o que o zigue-zague antigo escondia e o pano franzido mostra). None se não achar."""
+    import pymupdf
+    if not hasattr(pg, "_paredes_longas"):
+        pg._paredes_longas = [pymupdf.Rect(d["rect"]) for d in pg.get_drawings() if d.get("layer") == "ARQ_PAREDE"
+                              and max(d["rect"].width, d["rect"].height) >= parede_min_pt
+                              and min(d["rect"].width, d["rect"].height) < 1]
+    if vertical:
+        e = (r.x0 + r.x1) / 2
+        ds = [p.x0 - e for p in pg._paredes_longas if p.width < 1 and p.y0 < r.y1 and p.y1 > r.y0
+              and abs(p.x0 - e) < perto_pt]
+        return ("direita" if min(ds, key=abs) > 0 else "esquerda") if ds else None
+    e = (r.y0 + r.y1) / 2
+    ds = [p.y0 - e for p in pg._paredes_longas if p.height < 1 and p.x0 < r.x1 and p.x1 > r.x0
+          and abs(p.y0 - e) < perto_pt]
+    return ("baixo" if min(ds, key=abs) > 0 else "cima") if ds else None
 
 
 def cortinas_b(out, chave, paredes=None):
