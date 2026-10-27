@@ -283,7 +283,10 @@ def contexto_d():
     C.jardins_c = jardins_d
     F.ROTULOS_F = dict(F.ROTULOS_F, livres=("JARDIM",), textos={}, pontos=ROTULOS_PONTOS_D)
     F.BLOCOS_F = BLOCOS_D
-    F.BANCADAS_F = dict(F.BANCADAS_F, chapas=CHAPAS_D, **CUBAS_CHAPA_D)
+    F.BANCADAS_F = dict(F.BANCADAS_F, chapas=CHAPAS_D, **CUBAS_CHAPA_D,
+                        travertino_bancada=dict(F.BANCADAS_F["travertino_bancada"],
+                                                tom=TRAVERTINO_BRUTO_D["tom_bancada"]),
+                        cuba_travertino=dict(F.BANCADAS_F["cuba_travertino"], tom=TRAVERTINO_BRUTO_D["tom_cuba"]))
     B.CARROS_B = CARROS_D
     B.CAMAS_B = CAMAS_D
     B.COOKTOPS_B = COOKTOPS_D
@@ -600,11 +603,29 @@ QUARTZITO_TD = {"banhos": ("BANHO MASTER", "BANHO 1", "BANHO 2", "BANHO 3"), "ch
 # vestiário do Subsolo (pedido de 27/10: "Vestiário: mármore bege Bahia no piso e Cuba esculpida, bancada da pia no
 # granito marrom, sanitário branco")
 CHAPAS_D = {"quartzito": {"chapa": "quartzito_aura", "tom": (211, 215, 221), "contraste": 0.8}}
+# O travertino bruto das bancadas e das cubas esculpidas (lavabo e banho gourmet; usuário, 27/10/26: "Melhore o aspecto
+# do travertino bruto"): o desenho em estratos da Casa C (`C.travertino_estratos`) saía calmo demais e num tom rosado,
+# quase de madeira clara. Agora no creme da foto da biblioteca (`_texturas/originais/travertino.webp`, RGB ~228, 221,
+# 204), um pouco mais escuro na bancada que na cuba; os veios mais marcados e no comprido da peça (na bancada em pé do
+# lavabo, na vertical); os poros abertos (o "bruto") mais numerosos e mais escuros. Só na Casa D.
+TRAVERTINO_BRUTO_D = {"base": 1.0, "amp": 1.5, "finas": 1.0, "poros": 1.6, "poro_esc": 1.85,
+                      "tom_bancada": (186, 204, 216), "tom_cuba": (200, 217, 228)}                      # BGR
 CUBAS_CHAPA_D = {
     "cuba_quartzito": dict(F.BANCADAS_F["cuba_travertino"], chapa="quartzito_aura", contraste=0.6,
                            tom=(218, 222, 227), contorno=(150, 156, 164), contorno_bacia=(162, 168, 176)),
     "cuba_bege": dict(F.BANCADAS_F["cuba_travertino"], chapa="bege_bahia", contraste=0.6, tom=(194, 216, 234),
                       contorno=(140, 160, 182), contorno_bacia=(152, 172, 192))}
+
+
+def travertino_bruto_d(Q, h, w, semente, veio, faixa, poros, poro_esc, forca=1.6):
+    """No lugar de `final3840_casaa.travertino_bruto` (as bancadas e as cubas): o desenho de `TRAVERTINO_BRUTO_D`, sem o
+    tom, com o veio no comprido da peça."""
+    q = TRAVERTINO_BRUTO_D
+    em_pe = h > w
+    hh, ww = (w, h) if em_pe else (h, w)
+    D = C.travertino_estratos(Q, hh, ww, semente, base=forca * q["base"], poros=poros * q["poros"],
+                              poro_esc=poro_esc * q["poro_esc"], amp=q["amp"], finas=q["finas"], quente=False)
+    return np.ascontiguousarray(D.T) if em_pe else D
 
 
 def quartzito_banhos_d(Q, img, antes):
@@ -946,7 +967,7 @@ def final_3840_d(chave, salvar=True, de=None, ate=None):
     else:
         import final3840_casaa as FA
         passos = passos_terreo_d(Q, ini, M)
-        FA.travertino_bruto = C.travertino_bruto_tc     # o travertino em estratos nas bancadas e cubas (como na Casa C)
+        FA.travertino_bruto = travertino_bruto_d        # o travertino bruto das bancadas e cubas (pedido de 27/10)
     nomes = [n for n, _ in passos]
     i0 = nomes.index(de) if de else 0
     i1 = nomes.index(ate) + 1 if ate else len(passos)
