@@ -2824,3 +2824,17 @@ Os 10 itens:
 10. (E7) WC DCE: o rótulo fica a 3 px do vaso, e um ponto claro do granito colado no W faz ler "*WC": no meio do piso livre, sem o ponto.
 
 Aguarda a resposta do usuário (o OK da lista e a pergunta 7).
+
+## Casa D · Subsolo, a lista aplicada (27/10/26)
+
+Resposta do usuário: "ok, aplique a lista. no item 7, siga a recomendação". Final refeita inteira (`final3840_casad.py Subsolo`, 2 min), depois `--de soleiras`; o Térreo da Casa D não muda (a prancha do Térreo fica como está).
+
+Os 10 itens estão nas REGRAS (seção 19, Casa D · Subsolo). Na aplicação, com as rotinas do Subsolo aprovado da Casa C:
+- no PDF do Subsolo da Casa D as bancadas são só traços (a ARQ_BANCADAS sem preenchimento): o `F.bancadas` não as acha, e elas entram pelos retângulos do PDF (`BANHOS_SUB_D`), com a rotina das bancadas dos banhos da Casa A (`final3840_casaa.bancada_pedra`); a bancada do vestiário que vinha do render (`CUBA_VESTIARIO_S`) saiu;
+- a cuba do vestiário é a bacia do PDF com a prateleira de trás, junto à parede: a cuba esculpida em granito (`F.cuba_granito`) vai só na bacia, e a torneira na prateleira, como a do BH academia da Casa C;
+- o box do WC DCE é de correr (as duas folhas e o trilho da ARQ_LOUÇAS E METAIS, que `ajustes_casaa.folhas_box` acha); a faixa cinza da divisória, pintada na base (a config da Casa D) e no render, é refeita com o granito 7 px acima antes do vidro;
+- a escada é a rotina da escada estreita da Casa C (`C.escada_estreita_s`) com a geometria da Casa D (`ESCADA_SUB_D`), sem esmaecer o trecho de antes do corte (cheio desde 15/10);
+- o rótulo do WC DCE: com a folga de 4 px da Casa C ele não cabia e o VESTIÁRIO saía do ambiente (ficou a folga de sempre); o arco da porta do PDF, que não aparece, ocupava o piso livre no mapa de obstáculos e mandava o rótulo para o lado do chuveiro: os arcos das portas saem dos obstáculos dos rótulos do Subsolo (`rotulos_sub_d`), e o rótulo parte do meio do piso livre (`ROTULOS_SUB_D`);
+- com as paredes em cinza, o nicho do chuveiro do vestiário (um retângulo da ARQ_BANCADAS dentro da parede da direita, antes escondido no preto) aparecia branco: entra na pedra clara das soleiras (`nicho_d`).
+
+Conferido na final: as mudanças ficam só dentro da planta (fora dela, nenhum px muda). Antes e depois (o antes é a final de 22/10): `POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_2610_{planta,dce_wc,escada,banhos,portas_academia}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa D refeitos. Aguarda o OK do Subsolo da Casa D.
