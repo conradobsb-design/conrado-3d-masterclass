@@ -588,6 +588,45 @@ def soleira_elevador(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# O banco em L do deck (usuário, 27/10/26, vendo a final: "banco bronze fosco, sem falhas."): no PDF, o banco é o
+# assento (a madeira escura da legenda, a cor do `F.BANCO_DECK`) e, do lado do deck, a frente dele, uma faixa branca
+# fina da ARQ_PAREDE com o traço preto. O `F.deck_detalhes` pintava de bronze só o assento; a frente ficava a madeira do
+# render, com o reflexo claro sob o braço de cima, o degrau na ponta de cima, a peça clara na de baixo e o quadrado
+# escuro no canto de dentro. A moldura da frente, das pontas e do canto entra no banco (os px cinza da base, brancos, de
+# traço ou do antialias, a até `frente_px` do assento; a faixa de trás, a até `tras_px` da pedra e da grama, fica como
+# está) e o L inteiro sai em bronze fosco, escovado, com o contorno e a sombra curta, como o da Casa B.
+BANCO_DECK_TC = {"frente_px": 7, "tras_px": 8, "tras": [(232, 232, 232), (80, 145, 110)], "tras_min_px": 500,
+                 "assento_min_px": 2000}
+
+
+def deck_detalhes_c(Q, img):
+    q, qb = BANCO_DECK_TC, F.BANCO_DECK
+    assento = F.fechar(Q.cor([qb["cor_base"]], tol=6), 3)
+    # só o assento do banco (as manchas grandes da cor; pedacinhos da mesma cor em outras peças não ganham moldura)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(assento.astype(np.uint8), 8)
+    assento = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["assento_min_px"]])
+    tras = Q.cor(q["tras"], tol=6)
+    # só as manchas grandes (a pedra, a grama): o antialias claro de um traço dentro do banco não conta
+    n, lab, st, _ = cv2.connectedComponentsWithStats(tras.astype(np.uint8), 8)
+    tras = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["tras_min_px"]])
+    ch = Q.chapada.astype(np.int16)
+    cinza = (np.abs(ch[..., 0] - ch[..., 1]) < 6) & (np.abs(ch[..., 1] - ch[..., 2]) < 6)
+    moldura = cinza & ~tras
+
+    def perto(m, d):
+        return cv2.dilate(m.astype(np.uint8), np.ones((2 * d + 1, 2 * d + 1), np.uint8)) > 0
+    frente = moldura & perto(assento, q["frente_px"]) & ~perto(tras, q["tras_px"]) & ~assento
+    guarda = Q.chapada.copy()
+    try:
+        Q.chapada[frente] = qb["cor_base"]
+        out = F.deck_detalhes(Q, img)
+    finally:
+        Q.chapada[...] = guarda
+    print(f"    banco do deck: a moldura da frente e das pontas do PDF ({int(frente.sum())} px) junto com o assento, o L "
+          f"inteiro em bronze fosco")
+    return out
+
+
 # As cadeiras das mesas de trabalho (usuário, 27/10/26, vendo a final: "As cadeiras precisam ficar parcialmente abaixo
 # da mesa de escritório."): no PDF, a cadeira entra cerca de 1/3 sob o tampo (11 de 35 pt), mas a mesa é uma faixa da
 # DOC_LINHAS E PROJEÇÕES, pintada antes da cadeira, que saía inteira por cima. A mesa volta por cima da parte da cadeira
@@ -1571,7 +1610,7 @@ def passos_terreo_c(Q, ini, M):
         ("biblioteca", lambda im: biblioteca_c(Q, im)),
         ("cadeiras", lambda im: cadeiras_mesas_t(Q, im)),
         ("carros", lambda im: F.carros(Q, im, M)),
-        ("deck", lambda im: F.deck_detalhes(Q, im)),
+        ("deck", lambda im: deck_detalhes_c(Q, im)),
         ("chuveiros", lambda im: chuveiros_tc(Q, im)),
         ("boxes", lambda im: boxes_t(Q, im)),
         ("elevador", lambda im: elevador_t(Q, im)),
