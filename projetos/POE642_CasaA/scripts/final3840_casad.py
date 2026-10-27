@@ -135,7 +135,12 @@ CARROS_PT = [(2414.4, 690.9, 2526.1, 943.2), (2572.5, 687.3, 2684.0, 935.3), (27
 # O carro branco do meio do render é o modelo. O granito do render da Casa D é quase neutro (~51, 44, 48): o carro é o
 # que foge dele (mais de `foge` num canal), não o px neutro, que pegava o granito e juntava os três carros num só.
 CARROS_D = dict(B.CARROS_B, janela=(1468, 236, 1556, 400), foge=45,
-                centros_pdf=[(2470.2, 815.0), (2628.3, 815.0), (2788.8, 815.0)])
+                centros_pdf=[(2470.2, 815.0), (2628.3, 815.0), (2788.8, 815.0)],
+                # desde 27/10 ("melhorar a representação dos veículos"): o modelo é o carro do meio da final aprovada da
+                # Casa C (prata, nítido, na mesma escala), no lugar do carro branco do render de 2000 px da Casa D (vidros
+                # com ruído, borda irregular); a silhueta é o que não tem o tom do granito (o carro é neutro)
+                fonte=RAIZ / "POE642_CasaC" / "renders" / "POE642_CasaC_PH_Terreo_final_rotulos.png",
+                janela_fonte=(2905, 355, 3065, 680), croma_max=20, lum_min=100)
 # As camas e os bancos ao pé delas (item 23; resposta 5, "Os do render"): ficam como no render aprovado de 15/10; as
 # peças do PDF delas não entram e, depois das peças, o render volta no retângulo, com a sombra curta.
 CAMAS_D = {"borda": 1.7, "ss": 4, "semente": 41, "camas": [
@@ -157,11 +162,13 @@ GUARDA_CORPOS_D = [(604.9, 1202.9, 606.0, 1376.3), (361.7, 1375.2, 606.0, 1376.3
 # Os brises de ripas (item 14; resposta 2, "Em Madeira"): as ripas da ARQ_ELEMENTOS FIXOS (os preenchimentos brancos
 # pequenos, com o contorno preto) nestas caixas: a lateral direita da garagem e a faixa abaixo dela, os dois lados da
 # porta pivotante do hall, a fachada da suíte master (em cima e à esquerda) e a faixa à direita da escada, a lateral
-# da suíte 3, as duas faixas da fachada de baixo e as duas peças giradas junto à gourmet
+# da suíte 3, a faixa da fachada de baixo à direita e as duas peças giradas junto à gourmet. Saíram (pedidos de 27/10)
+# a faixa à direita da escada, sob a porta de vidro do hall ("não existe essa linha marrom"), e a faixa da fachada de
+# baixo à esquerda ("esse beiral é todo no bege bahia. remova o vinilico daqui"): nas duas, as ripas da ARQ_ELEMENTOS
+# FIXOS estão no PDF, mas por baixo do piso (pintadas antes dele), e não aparecem; ali fica o Bege Bahia
 BRISES_D = {"caixas_pt": [(2891.1, 652.8, 2911.0, 834.1), (2780.0, 975.6, 2893.0, 995.6),
                           (2175.2, 1083.9, 2208.4, 1163.6), (2175.2, 1290.8, 2208.4, 1375.4),
-                          (463.2, 1476.9, 686.4, 1709.6), (957.9, 1476.9, 1135.5, 1496.9),
-                          (2268.2, 1489.3, 2288.1, 1653.6), (775.6, 1881.4, 1045.3, 1901.4),
+                          (463.2, 1476.9, 686.4, 1709.6), (2268.2, 1489.3, 2288.1, 1653.6),
                           (1793.5, 1881.4, 2063.1, 1901.4), (1141.2, 760.1, 1201.0, 879.7)],
             "lado_max_pt": 20.0, "madeira": 0.92, "tons": (0.86, 1.06), "contorno": (34, 50, 68),
             "contorno_px": 0.5, "sombra": {"dist_m": 0.04, "sig_m": 0.025, "forca": 0.30}, "semente": 91}
@@ -170,9 +177,9 @@ BRISES_D = {"caixas_pt": [(2891.1, 652.8, 2911.0, 834.1), (2780.0, 975.6, 2893.0
 # e o do jardim do lavabo, e o tracejado da cobertura na faixa de cima da garagem, na ARQ_ELEMENTOS FIXOS). Os
 # retângulos com diagonal da DOC_LINHAS (armários até o teto) não entram (seção 7).
 PROJECOES_D = [(604.7, 1829.2, 790.8, 1880.5)]
-PROJECOES_CLARAS_D = [(2371.7, 549.3, 2922.4, 672.7), (2409.7, 981.3, 2879.7, 1090.5), (1949.2, 748.7, 2120.1, 881.6),
-                      (2351.8, 1363.0, 2451.5, 1501.6)]
-COBERTURA_D = [(2371.7, 615.8, 2912.9, 672.7)]
+PROJECOES_CLARAS_D = [(1949.2, 748.7, 2120.1, 881.6), (2351.8, 1363.0, 2451.5, 1501.6)]
+# a cobertura e os X da garagem e da faixa de grama abaixo dela: desde os pedidos de 27/10 em `projecoes_lajes_td`
+COBERTURA_D = []
 PROJECOES_TRACO_D = {"pisos": {"cor": (92, 92, 94), "forca": 0.9, "larg": 1.4},
                      "claras": {"cor": (214, 214, 212), "forca": 0.95, "larg": 1.4}}
 # As peças do PDF que ficam como no render aprovado: o estar da suíte 3 (no PDF da Casa D, o sofá está na INS_INSTALAÇÕES
@@ -180,7 +187,14 @@ PROJECOES_TRACO_D = {"pisos": {"cor": (92, 92, 94), "forca": 0.9, "larg": 1.4},
 FORA_PECAS_D = [(2060.0, 1495.0, 2256.0, 1640.0)]
 # os dois vasos do hall, junto aos brises, e a planta sobre a bancada gourmet (objetos de 15/10, item 22): as plantas do
 # render (no PDF, a da bancada é um contorno de traço)
-VASOS_D = [(2117.6, 1089.9, 2186.9, 1153.8), (2117.7, 1299.9, 2187.0, 1363.8), (1276.9, 681.3, 1315.9, 715.5)]
+VASOS_D = [(2117.6, 1089.9, 2186.9, 1153.8), (2117.7, 1299.9, 2187.0, 1363.8)]
+# a planta sobre a bancada gourmet saiu (usuário, 27/10/26: "remova esse elemento decorativo do gourmet"): o render não
+# volta ali, e o desenho dela no PDF (traços da ARQ_LAYOUT HUMANIZAÇÃO) segue fora das peças; fica a pedra da bancada
+SEM_PLANTA_TD = [(1276.9, 681.3, 1315.9, 715.5)]
+# o quadrado da circulação da ala íntima (usuário, 27/10/26: "esse quadrante pontilhado não existe aqui"): um
+# preenchimento branco de 0,8 m da ARQ_LAYOUT HUMANIZAÇÃO pintado no PDF antes do vinílico, que o cobre (não aparece);
+# entrava como peça, com o contorno tracejado. Fica fora das peças, com o vinílico em volta
+PECAS_OCULTAS_TD = [(1677.0, 1512.0, 1724.2, 1559.0)]
 # As cubas que o PDF da Casa D desenha sem o aro (seção 6, todas em louça branca): as duas do banho master (retângulos
 # soltos na bancada), a do lavabo (só a torneira no PDF; a bacia no lugar da do render) e a do WC DCE (de parede, só
 # contorno). Entram com as outras, pela rotina das cubas das bancadas.
@@ -381,28 +395,21 @@ def biblioteca_d(Q, img):
 
 
 def carros_d(Q, img, M):
-    """Os 3 carros da R12 (prata, 4,70 x 1,85 m, alinhados), como `final3840_casab.carros`, com a silhueta do modelo
-    achada pelo que foge do granito em volta (a borda da janela)."""
+    """Os 3 carros da R12 (prata, 4,70 x 1,85 m, alinhados), como `final3840_casab.carros`. O modelo (desde 27/10) é o
+    carro do meio da final aprovada da Casa C: a silhueta é o que foge do tom do granito (neutro e claro, com os vidros
+    de dentro), levada à medida da R12 em cada centro do PDF, com a borda limpa e a sombra curta."""
     from scipy import ndimage
     q = CARROS_D
     r = dict(AJ.CARROS_A["r12"], centros_pdf=q["centros_pdf"])
-    ap = cv2.imread(str(CASA_D / Q.q["aprovada"]))
-    wx0, wy0, wx1, wy1 = q["janela"]
-    reg = ap[wy0:wy1, wx0:wx1].astype(np.float32)
-    borda = np.concatenate([reg[:, :6].reshape(-1, 3), reg[:, -6:].reshape(-1, 3)])
-    car = np.abs(reg - np.median(borda, axis=0)).max(axis=2) > q["foge"]
-    m = cv2.morphologyEx(car.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
-    m = cv2.morphologyEx(m, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    fonte = cv2.imread(str(q["fonte"]))
+    wx0, wy0, wx1, wy1 = q["janela_fonte"]
+    reg = fonte[wy0:wy1, wx0:wx1].astype(np.float32)
+    carro = (reg[..., 2] - reg[..., 0] < q["croma_max"]) & (reg.mean(axis=2) > q["lum_min"])
+    m = cv2.morphologyEx(carro.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    m = cv2.morphologyEx(m, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
     n, lab, st, _ = cv2.connectedComponentsWithStats(m)
     sil = ndimage.binary_fill_holes(lab == 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA])))
     sil = cv2.erode(sil.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
-    qa = AJ.CARROS_A
-    Y = reg.mean(axis=2)
-    lanterna = (reg[..., 2] - reg[..., 0] > qa["lanterna"][0]) & (reg[..., 2] > qa["lanterna"][1]) & \
-        (reg[..., 2] - reg[..., 1] > qa["lanterna"][0])
-    pq, alvo = r["quantis"]
-    Yn = np.interp(Y, np.percentile(Y[sil & ~lanterna], pq), alvo)
-    prata = np.where((sil & ~lanterna)[..., None], Yn[..., None] * np.float32(r["tom"]), reg)
     ys, xs = np.nonzero(sil)
     y0, y1 = ys.min(), ys.max() + 1
     comp = y1 - y0
@@ -417,15 +424,14 @@ def carros_d(Q, img, M):
         tx, ty = Q.p2q(px_, py_)
         Mw = np.float32([[sx, 0, tx - sx * cx], [0, sy, ty - sy * cy]])
         a = cv2.warpAffine(alfa0, Mw, (Q.W, Q.H), flags=cv2.INTER_LINEAR)
-        c = cv2.warpAffine(prata, Mw, (Q.W, Q.H), flags=cv2.INTER_CUBIC)
-        c = cv2.addWeighted(c, 1.5, cv2.GaussianBlur(c, (0, 0), 1.2), -0.5, 0)
+        c = cv2.warpAffine(reg, Mw, (Q.W, Q.H), flags=cv2.INTER_CUBIC)
         d_ = 0.08 * Q.px_m
         sb = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, -d_], [0, 1, d_]]), (Q.W, Q.H)), (0, 0),
                               0.06 * Q.px_m) * (1 - a) * 0.38
         out *= (1 - sb)[..., None]
         out = out * (1 - a[..., None]) + c * a[..., None]
     print(f"    garagem (R12): {len(r['centros_pdf'])} carros prata de {r['comprimento_m']:.2f} x {r['largura_m']:.2f} m "
-          f"(o modelo: o carro branco do render), alinhados, com a borda limpa e a sombra curta")
+          f"(o modelo: o carro da final aprovada da Casa C, escala {sx:.2f} x {sy:.2f}), alinhados, com a sombra curta")
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
@@ -584,7 +590,11 @@ BOXES_TD = [{"nome": "banho 1", "hor": True, "meio": 1821.6, "trilho": [(980.9, 
 BOX_FAIXA_TD = {"meia_pt": 2.4, "sobe_px": 7}
 GUARDA_ROUPAS_TD = {"ss": 4, "semente": 61, "pecas": [("DCE", (2238.8, 834.4, 2295.5, 868.4), "cima"),
                                                       ("suíte 3/escritório", (1932.6, 1577.0, 1966.6, 1690.4), "direita"),
-                                                      ("ao lado do banho master", (872.5, 1710.3, 906.5, 1880.3), "esquerda")]}
+                                                      ("ao lado do banho master", (872.5, 1710.3, 906.5, 1880.3), "esquerda"),
+                                                      # usuário, 27/10/26: "armário à esquerda com cabides." (o do outro
+                                                      # lado do corredor, aberto para ele)
+                                                      ("à esquerda do corredor do banho master",
+                                                       (787.4, 1806.6, 821.5, 1880.3), "direita")]}
 BANCO_VARANDA_TD = {"pt": (1263.0, 1196.9, 1297.0, 1298.9), "raio_pt": 5.7, "ripas": 4, "madeira": 0.80,
                     "fonte_pt": (2125.0, 1705.0, 2166.0, 1811.0),       # o tampo da mesa da suíte 3/escritório
                     "junta": (70, 92, 118), "larg_junta": 0.35, "forca_junta": 0.45, "contorno": (60, 72, 88),
@@ -867,8 +877,144 @@ def projecoes_terreo_d(Q, img):
                 n += k
         finally:
             AJ.PROJECOES_A = pa
-    print(f"    projeções do PDF em tracejado ({n} traços): os X do banho master, da garagem, da área descoberta e do "
-          f"jardim do lavabo, e a cobertura da garagem")
+    print(f"    projeções do PDF em tracejado ({n} traços): os X do banho master, da área descoberta e do jardim do "
+          f"lavabo")
+    return out
+
+
+# As projeções da laje sobre a garagem e a faixa de grama abaixo dela (pedidos de 27/10: na garagem, "melhorar a
+# representação dessas projeções em branco"; no gramado, "faltou a representação correta dessas projeções"), como no
+# PDF: os 9 vãos da laje com o X tracejado nas diagonais; no gramado, o contorno de cada vão (a EST_LAJE, que no PDF só
+# aparece sobre o branco) e a borda da laje à esquerda em traço fino contínuo, e as duas linhas tracejadas de baixo (a
+# partir da grama); na garagem, as duas linhas tracejadas de cima (o tracejado escuro do render sai antes), a de baixo
+# e as bordas da direita (até o brise) e da esquerda (abaixo do gás). O tracejado regular de `C._tracejado` (começa e
+# termina num traço inteiro), mais curto e fino que o de antes, em branco quente; nada sobre as paredes.
+PROJ_LAJES_TD = {
+    "vaos_x": [(2420.1, 2459.9), (2471.2, 2510.9), (2522.2, 2561.9), (2573.3, 2612.9), (2624.3, 2664.0),
+               (2675.3, 2715.0), (2726.3, 2766.0), (2777.4, 2817.0), (2828.4, 2868.1)],
+    "garagem": {"y": (570.7, 661.4), "contorno": False,
+                "tracejadas": [((2335.7, 559.4), (2910.6, 559.4)), ((2383.3, 570.7), (2899.3, 570.7)),
+                               ((2383.3, 662.0), (2899.3, 662.0)), ((2899.3, 570.7), (2899.3, 662.0)),
+                               ((2910.6, 559.4), (2910.6, 662.0)), ((2383.3, 627.4), (2383.3, 662.0))],
+                "finas": [], "limpar": [((2335.7, 2910.6), 559.4), ((2383.3, 2899.3), 570.7)]},
+    "grama": {"y": (995.9, 1081.0), "contorno": True,
+              "tracejadas": [((2366.3, 1081.0), (2899.3, 1081.0)), ((2366.3, 1092.3), (2910.6, 1092.3))],
+              "finas": [((2383.3, 987.4), (2383.3, 1081.0))], "limpar": []},
+    "traco_m": 0.10, "vao_m": 0.05, "larg_px": 1.1, "fino_px": 0.7, "cor": (228, 233, 236), "forca": 0.92,
+    "fino_forca": 0.75, "parede_tol": 10, "limpeza": {"meia_px": 2, "desvio_px": 6, "escuro": 14}, "ss": 4}
+
+
+def projecoes_lajes_td(Q, img):
+    from scipy import ndimage
+    q = PROJ_LAJES_TD
+    out = img.copy()
+    parede = np.abs(out.astype(np.int16) - 80).max(axis=2) <= q["parede_tol"]
+    parede = cv2.dilate(parede.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    # o tracejado escuro do render ao longo das linhas de cima da garagem: cada px da faixa mais escuro que o granito
+    # logo acima e logo abaixo (a mediana ao longo da linha) volta a ser o granito de `desvio_px` acima
+    lq = q["limpeza"]
+    h, d = lq["meia_px"], lq["desvio_px"]
+    n_limpo = 0
+    for nome in ("garagem", "grama"):
+        for (xa, xb), y in q[nome]["limpar"]:
+            (x0, yq), (x1, _) = Q.p2q(xa, y), Q.p2q(xb, y)
+            x0, x1, yi = int(np.floor(x0)), int(np.ceil(x1)), int(round(yq))
+            faixa = out[yi - h:yi + h + 1, x0:x1]
+            viz = np.concatenate([out[yi - d - h:yi - d + h + 1, x0:x1], out[yi + d - h:yi + d + h + 1, x0:x1]])
+            ref = ndimage.median_filter(np.median(viz.mean(axis=2), axis=0), size=15)
+            esc = faixa.mean(axis=2) < ref[None, :] - lq["escuro"]
+            esc = cv2.dilate(esc.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & \
+                ~parede[yi - h:yi + h + 1, x0:x1]
+            faixa[esc] = out[yi - d - h:yi - d + h + 1, x0:x1][esc]
+            n_limpo += int(esc.sum())
+    ss = q["ss"]
+    tr, va = q["traco_m"] * Q.px_m, q["vao_m"] * Q.px_m
+    linhas_tr, linhas_fi = [], []
+    for nome in ("garagem", "grama"):
+        z = q[nome]
+        y0, y1 = z["y"]
+        for xa, xb in q["vaos_x"]:
+            linhas_tr += [((xa, y0), (xb, y1)), ((xb, y0), (xa, y1))]
+            if z["contorno"]:
+                linhas_fi += [((xa, y0), (xb, y0)), ((xa, y0), (xa, y1)), ((xb, y0), (xb, y1))]
+        linhas_tr += z["tracejadas"]
+        linhas_fi += z["finas"]
+    pts = np.array([Q.p2q(*p) for ln in linhas_tr + linhas_fi for p in ln])
+    X0, Y0 = (np.floor(pts.min(axis=0)) - 6).astype(int)
+    X1, Y1 = (np.ceil(pts.max(axis=0)) + 7).astype(int)
+    m_tr = np.zeros(((Y1 - Y0) * ss, (X1 - X0) * ss), np.uint8)
+    m_fi = np.zeros_like(m_tr)
+    for a, b in linhas_tr:
+        C._tracejado(m_tr, np.subtract(Q.p2q(*a), (X0, Y0)), np.subtract(Q.p2q(*b), (X0, Y0)), tr, va, q["larg_px"], ss)
+    for a, b in linhas_fi:
+        pa, pb = (tuple(int(round(v * ss)) for v in np.subtract(Q.p2q(*p), (X0, Y0))) for p in (a, b))
+        cv2.line(m_fi, pa, pb, 255, max(1, int(round(q["fino_px"] * ss))), cv2.LINE_AA)
+
+    def reduzir(m):
+        return cv2.resize(m.astype(np.float32) / 255.0, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
+    a = np.maximum(reduzir(m_tr) * q["forca"], reduzir(m_fi) * q["fino_forca"])
+    a[parede[Y0:Y1, X0:X1]] = 0
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    cor = np.float32(q["cor"])
+    out[Y0:Y1, X0:X1] = np.clip(reg * (1 - a[..., None]) + cor * a[..., None], 0, 255).astype(np.uint8)
+    print(f"    projeções da laje: {n_limpo} px do tracejado escuro do render saem; os X dos 9 vãos na garagem e no "
+          f"gramado, o contorno fino dos vãos no gramado e {sum(len(q[k]['tracejadas']) for k in ('garagem', 'grama'))} "
+          f"linhas tracejadas da laje, em branco")
+    return out
+
+
+# As portas de vidro (pedidos de 27/10): entre o living e a varanda ("corrija a representação dessas portas de vidro") e
+# entre a cozinha e o living ("representar a soleira e a porta de correr adequadamente"), como as portas de vidro da
+# Casa A (`final3840_casaa.portas_vidro`): a soleira de Bege Bahia no vão do PDF (R13), os batentes em branco e cada
+# folha no plano dela no PDF, com o caixilho de alumínio, o vidro e a sombra curta. No living, as 4 folhas em dois
+# planos (as das pontas por fora); na cozinha, a folha de correr por fora do vão, junto à parede (no PDF, sem batentes:
+# a parede encosta na soleira)
+PORTAS_VIDRO_TD = [
+    {"nome": "do living para a varanda", "soleira": (1589.1, 876.9, 1597.6, 1367.3),
+     "batentes": [(1589.1, 876.9, 1597.6, 879.1), (1589.1, 1365.0, 1597.6, 1367.3)],
+     "folhas": [((1595.3, 882.0, 1597.6, 997.8), "y"), ((1593.0, 1003.4, 1595.3, 1119.2), "y"),
+                ((1593.0, 1124.9, 1595.3, 1240.7), "y"), ((1595.3, 1246.4, 1597.6, 1362.2), "y")],
+     "montante_pt": 0.6},
+    {"nome": "de correr da cozinha para o living", "soleira": (1757.2, 868.4, 1861.6, 876.9), "batentes": [],
+     "folhas": [((1744.2, 865.8, 1851.9, 868.1), "x")], "montante_pt": 0.6},
+]
+
+
+# Os restos escuros do render junto às portas novas (pt): a ponta da folha antiga da porta da cozinha, sobre o granito à
+# direita da folha nova, e os puxadores antigos nas emendas das folhas do living, sobre o piso do living, junto à face
+# da soleira; os px mais escuros que o piso do retângulo (a mediana menos `escuro`) voltam ao piso `desvio_px` acima
+RESTOS_PORTAS_TD = {"rets": [(1851.9, 863.0, 1857.0, 868.4), (1598.3, 994.6, 1604.0, 1005.0),
+                             (1598.3, 1116.3, 1604.0, 1125.8), (1598.3, 1237.9, 1604.0, 1248.4)],
+                    "escuro": 25, "desvio_px": 6}
+# Os nichos das janelas da fachada de baixo à esquerda (pt; o vão do PDF entre o caixilho e a face de fora da parede,
+# branco no PDF): com o brise escondido fora (pedido de 27/10, "esse beiral é todo no bege bahia"), ali aparecia o
+# desenho antigo da janela do render; o nicho recebe o Bege Bahia do beiral logo abaixo, como os das outras janelas
+NICHOS_BEIRAL_TD = [(822.6, 1883.6, 869.2, 1888.8), (939.8, 1883.6, 992.1, 1888.8)]
+
+
+def portas_vidro_td(Q, img):
+    import final3840_casaa as FA
+    pv = FA.PORTAS_VIDRO
+    FA.PORTAS_VIDRO = dict(pv, portas=PORTAS_VIDRO_TD)
+    try:
+        out = FA.portas_vidro(Q, img)
+    finally:
+        FA.PORTAS_VIDRO = pv
+    q = RESTOS_PORTAS_TD
+    n = 0
+    for r in q["rets"]:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        reg = out[y0:y1, x0:x1]
+        lum = reg.astype(np.int16).mean(axis=2)
+        esc = lum < np.median(lum) - q["escuro"]
+        reg[esc] = out[y0 - q["desvio_px"]:y1 - q["desvio_px"], x0:x1][esc]
+        n += int(esc.sum())
+    for r in NICHOS_BEIRAL_TD:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        h = y1 - y0
+        out[y0:y1, x0:x1] = out[y1 + 1:y1 + 1 + h, x0:x1]
+    print(f"    {n} px escuros das folhas antigas (cozinha e living) voltam ao piso; {len(NICHOS_BEIRAL_TD)} nichos "
+          f"de janela da fachada de baixo no Bege Bahia do beiral")
     return out
 
 
@@ -922,7 +1068,8 @@ def passos_terreo_d(Q, ini, M):
     camas = [c[1] for c in CAMAS_D["camas"]]
     chuv = [(min(c["ducha"][0], c["braco"][0]) - 1, min(c["ducha"][1], c["braco"][1]) - 1,
              max(c["ducha"][2], c["braco"][2]) + 1, max(c["ducha"][3], c["braco"][3]) + 1) for c in chuveiros_td()]
-    fora = CARROS_PT + cooktops + FORA_PECAS_D + VASOS_D + camas + BANCOS_D + [BANQUETAS_D["caixa_pt"]] + chuv
+    fora = CARROS_PT + cooktops + FORA_PECAS_D + VASOS_D + SEM_PLANTA_TD + PECAS_OCULTAS_TD + camas + BANCOS_D + \
+        [BANQUETAS_D["caixa_pt"]] + chuv
     # sob os carros, a legenda tem o contorno deles (traços): ali tudo é granito, para o piso não guardar o desenho
     for r in CARROS_PT:
         x0, y0, x1, y1 = F.ret_q(Q, r)
@@ -946,10 +1093,10 @@ def passos_terreo_d(Q, ini, M):
         ("boxes", lambda im: boxes_terreo_d(Q, im)),
         ("paredes", lambda im: brises_madeira(Q, F.paredes(Q, im, cor=cinza))),
         ("soleiras", lambda im: C.soleira_elevador(Q, F.soleiras(Q, im))),
-        ("esquadrias", lambda im: pos_esquadrias_d(Q, F.esquadrias_terreo(Q, im, parede=cinza), im)),
+        ("esquadrias", lambda im: portas_vidro_td(Q, pos_esquadrias_d(Q, F.esquadrias_terreo(Q, im, parede=cinza), im))),
         ("cortinas", lambda im: F.cortinas(Q, im, paredes_pdf=True)),
         ("escadas", lambda im: escadas_terreo_d(Q, im)),
-        ("projecoes", lambda im: projecoes_terreo_d(Q, im)),
+        ("projecoes", lambda im: projecoes_lajes_td(Q, projecoes_terreo_d(Q, im))),
         ("seta", lambda im: seta_terreo_d(Q, im)),
         ("rotulos", lambda im: rotulos_terreo_d(Q, im)),
     ]
