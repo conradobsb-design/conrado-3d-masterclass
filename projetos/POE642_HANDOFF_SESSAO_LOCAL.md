@@ -2802,3 +2802,25 @@ Conferido na final: só essas 6 regiões mudaram (as 3 cadeiras e os 3 rótulos)
 - **Depois, a adega** ("adicione a prateleira de vinhos como fizemos na outra casa, ao fundo da adega. não sobreponha o rotulo nessa prateleira"; "as garrafas em escala"): no PDF da Casa C a adega (1,26 x 4,30 m, as folhas de vidro na parede da esquerda) não tem nada dentro. `adega_c` (`ADEGA_C`, no fim da etapa `biblioteca`) põe a prateleira na parede do fundo, a da direita, de ponta a ponta, como a da Casa B: marcenaria areia com o veio no comprido, o contorno fino, 6 módulos em traço fino e 42 garrafas deitadas, o gargalo junto à parede. As garrafas na escala real (0,075 m de diâmetro, 0,29 m de comprimento, a cada 0,09 m; as da Casa B, no quadro de 3840 px, ficaram com a metade disso); a prateleira com 0,30 m de fundo, o comprimento delas. Ela entra como obstáculo dos rótulos. Ao lado dela o piso livre tem 0,96 m e a área do rótulo 0,90 m: no corpo cheio, o "A:" encostava na porta de vidro (1 px). Apresentado ao usuário, ele escolheu o rótulo menor: só o da ADEGA a 85% do corpo (`ROTULOS_TC["corpos"]`), no meio do piso livre (6 px de cada lado; `ROTULOS_TC["pontos"]`). Conferido: nada mudou fora da adega. Antes e depois: `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_pedidos2710_adega_antes_depois.jpg`. Prancha e PDF refeitos.
 
 **Aprovado** (27/10/26): "ok, casa C térreo aprovada", depois da adega. Casa C fechada: Subsolo e Térreo aprovados, prancha dos dois e PDF (`POE642_CasaC/entrega/POE642_CasaC_Plantas_Humanizadas.pdf`) na versão final (commit 15a613f). Próxima planta: a que o usuário indicar (pela ordem, o Subsolo da Casa D), com a lista apresentada antes de alterar. As cortinas franzidas das Casas A (1º Pavimento), B, D e E seguem aguardando o OK.
+
+## Casa D · Subsolo, auditoria para o OK (27/10/26)
+
+Pedido do usuário: "prossiga com o subsolo da casa D" (a Casa C está aprovada inteira: "Aprovado" e "ok, casa C térreo aprovada"). Pela regra dele ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."), a lista foi apresentada sem alterar a imagem. O mapa numerado: `POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_auditoria_2610_v2.jpg` (sobre a prancha atual; a v1 segue em `..._auditoria_2610.jpg`), feito com `auditoria_2610.mapa` e os itens trocados em memória.
+
+A conferência foi trecho a trecho, a final em cima e o PDF no mesmo quadro (WC DCE, DCE 1 e depósito; a escada de 16 degraus; o elevador; a academia e as portas do pátio; a sauna, a ducha e o vestiário), com os 7 rótulos do PDF e as texturas lado a lado com as do Subsolo aprovado da Casa C. Os pisos pela legenda de 15/10: granito no DCE 1, no WC DCE e no depósito; vinílico (a madeira das Casas B e C) na academia; Bege Bahia na sauna, na ducha, no vestiário, na circulação, na escada e no pátio.
+
+Conformes: E1 (soleiras), E6 (sem raios), E11 (Bege Bahia, granito e madeira na escala das Casas B e C), a cabine do elevador em aço, os bancos da sauna nos dois tons de Bege Bahia, os rótulos DCE 1, DEPÓSITO/CASA DE MÁQUINAS, ELEVADOR, ACADEMIA, SAUNA e VESTIÁRIO. O PDF do Subsolo não tem pilares (nenhum EST_PILAR) nem SHAFT.
+
+Os 10 itens:
+1. (E10) paredes pretas em cinza 80 (não há pilares);
+2. (E3) escada de 16 degraus: o triângulo vira o S do PDF; a origem do texto cai no pátio, fora do degrau, e a letra fica centrada no degrau 1;
+3. (E8) a escada sem os traços dos bocéis, com o sombreamento de subida; a linha de corte do PDF (no degrau 7) em cinza fino e os degraus 8 a 16 nevoados, como no Subsolo aprovado da Casa C (hoje esses degraus são só ~3% mais claros que os de baixo);
+4. (E2) DCE 1: o armário cortado (madeira lisa) com os cabides, como nos closets;
+5. (E5) WC DCE: o box (uma faixa cinza tracejada) em vidro contínuo, com as faces finas, a sombra curta e o trilho;
+6. (E9) as bancadas do WC DCE (só o contorno cinza, com o granito do piso aparecendo por dentro) e do vestiário (clara, quase no tom do Bege Bahia) com a borda no tom escurecido da pedra e a sombra curta;
+7. (pergunta) os materiais: hoje bancadas claras, cubas e vasos brancos. Recomendado: o WC DCE como o BH serviço das Casas B e C (bancada em granito marrom levemente escurecido, cuba e vaso brancos); o vestiário como o BH academia do Subsolo da Casa C (bancada e cuba esculpida em granito marrom, torneira cromada, vaso marrom);
+8. os chuveiros do WC DCE, da ducha da sauna e do vestiário (placa branca com o miolo azul) na placa cromada com os furinhos, o braço e a canopla, como nas Casas A, B e C;
+9. as portas de vidro do pátio para a academia (os vidros fixos com retângulos rosados, a folha num traço fino) refeitas como as do Subsolo aprovado da Casa C: a soleira de Bege Bahia na faixa da parede, as folhas e os vidros fixos nos planos do PDF, com os montantes e os batentes;
+10. (E7) WC DCE: o rótulo fica a 3 px do vaso, e um ponto claro do granito colado no W faz ler "*WC": no meio do piso livre, sem o ponto.
+
+Aguarda a resposta do usuário (o OK da lista e a pergunta 7).
