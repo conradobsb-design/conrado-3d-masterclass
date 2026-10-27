@@ -2696,6 +2696,10 @@ ROTULOS_F = {"raio_m": 3.0, "passo_px": 2, "folga_px": 2,
              # BOX") e o ponto (pt) de onde a busca parte, no lugar do ponto do PDF ("O RÓTULO DA PRAINHA PODE FICAR
              # ABAIXO DAS DUAS ESPREGUIÇADEIRAS")
              "textos": {"BANHO GOURMET": "BH. GOURMET"},
+             # o rótulo fixo no ponto do PDF (`pt`, se dado, no lugar dele), com o corpo (`corpo`, fração do da regra) e a
+             # quebra pedidos, sem a busca do lugar livre (na Casa D, o do WC DCE dentro do box, como no PDF), por
+             # pavimento: {"Terreo": {nome: {...}}}
+             "fixos": {},
              "pontos": {"Terreo": {"PRAINHA": (816.8, 1470.0)}}}
 
 
@@ -2854,6 +2858,20 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
                 opc = dict(extra[0]) if extra and isinstance(extra[0], dict) else ({"corpo": extra[0]} if extra else {})
         if nome in q["livres"]:
             novos.append((nome, (cx / esc, cy / esc), (0.0, 0.0), dict(opc, cor=q["branco"])))   # sobre as plantas
+            continue
+        fixo = q.get("fixos", {}).get(Q.chave, {}).get(nome)
+        if fixo is not None:                                        # no ponto do PDF (ou no `pt` dado), sem busca
+            o2 = dict(opc, corpo=opc.get("corpo", R1.ROTULOS["escala"]) * fixo.get("corpo", 1.0))
+            if "quebra" in fixo:
+                o2["quebra"] = fixo["quebra"]
+            px_, py_ = Q.p2q(*fixo["pt"]) if "pt" in fixo else (cx, cy)
+            dx, dy = px_ - cx, py_ - cy
+            bx0, by0, bx1, by1 = _caixa_texto(Q, rot1, o2)
+            x0_, y0_ = int(round(cx + bx0 + dx)), int(round(cy + by0 + dy))
+            x1_, y1_ = x0_ + int(round(bx1 - bx0)), y0_ + int(round(by1 - by0))
+            ocupado[max(0, y0_ - 6):y1_ + 6, max(0, x0_ - 6):x1_ + 6] = 1
+            novos.append((nome, (cx / esc, cy / esc), (dx / esc, dy / esc),
+                          dict(o2, cor=cor_do_fundo(img, x0_, y0_, x1_, y1_))))
             continue
         dentro = (amb == i_rot + 1).astype(np.uint8)                # o ambiente do rótulo (`ambientes_rotulos`)
         sx, sy = busca[i_rot][0] - cx, busca[i_rot][1] - cy          # de onde a busca parte (o ponto do PDF ou o pedido)

@@ -579,8 +579,9 @@ MOVEIS_TD = {
                          # mobiliários mais próximo do tom das outras mobílias? não queria que destoasse"): a nogueira
                          # escura do tampo no mel do aparador e da mesa de jantar, o couro escuro das cadeiras no areia
                          # do linho e do bouclé, o vidro fumê do centro num cinza claro; cada parte no seu `tom` (BGR),
-                         # na luz da foto (`gama`: o contraste dela, menor no couro, que é quase preto)
-                         "tons": {"madeira": ((126, 156, 188), 1.0), "couro": ((140, 163, 190), 0.7),
+                         # na luz da foto (`gama`: o contraste dela). As cadeiras voltaram ao couro da foto (usuário,
+                         # 27/10/26, vendo-as no areia: "volta as cadeiras que estavam antes"): `couro` None, sem tom
+                         "tons": {"madeira": ((126, 156, 188), 1.0), "couro": None,
                                   "vidro": ((140, 146, 152), 0.8), "sat_vidro": 45, "borda_px": 3.0}},
     "diagonais": {"min_pt": 30.0, "faixa_px": 5.0, "claro": 12, "vizinhos": 10, "mediana_px": 7},
 }
@@ -903,7 +904,7 @@ def bege_limpo_d(Q, piso, caixa, fora):
 def tons_varanda_d(cor, al, q):
     """O bloco do jogo da varanda nos tons de `q["tons"]`: o tampo (o disco de `tampo_px` no centro do bloco), o vidro
     (no tampo, o cinza: saturação abaixo de `sat_vidro`) e o couro (fora do tampo); a passagem do tampo às cadeiras
-    suave em `borda_px`."""
+    suave em `borda_px`. A parte com o tom None fica na cor da foto."""
     t = q["tons"]
     h, w = al.shape
     yy, xx = np.mgrid[:h, :w]
@@ -916,6 +917,9 @@ def tons_varanda_d(cor, al, q):
     ok = al > 0.5
     novo = np.zeros(cor.shape, np.float32)
     for nome, p in pesos.items():
+        if t[nome] is None:                         # a parte fica na cor da foto
+            novo += p[..., None] * cor.astype(np.float32)
+            continue
         tom, gama = t[nome]
         med = np.median(L[ok & (p > 0.9)])
         novo += p[..., None] * np.float32(tom) * ((L / med) ** gama)[..., None]
@@ -1105,8 +1109,64 @@ def moveis_td(Q, img):
     out = cadeiras_mesas_d(Q, out, piso)
     out = jantar_d(Q, out, piso)
     out = jogos_mesa_d(Q, out, piso)
+    out = sofa_living_d(Q, out)
     out = diagonais_armarios_d(Q, out)
     return floreiras_td(Q, out)
+
+
+# O sofá do estar do living (usuário, 27/10/26: "represente melhor esse sofá e almofadas, mais humanizado"; é o sofá
+# das duas propostas do estar com a biblioteca): o `sofa_reto_cinza` (2 lugares de 1,15 m, cada um com a almofada) com
+# um lugar a mais, para os 3 do PDF: o bloco cortado na emenda dos encostos (`emenda_px`, a `px_m_bloco`); o lugar da
+# esquerda com o braço, o mesmo sem o braço (de `braco_px`) no meio e, na outra ponta, o da esquerda espelhado (na foto,
+# o braço da direita fica cortado). No retângulo do sofá do PDF (`pt`; o encosto embaixo, girado
+# 180°), em 4x, com a sombra curta. Embaixo do sofá antigo, o tapete (em cima da borda dele, `tapete_y_pt`) vem das
+# linhas livres dele entre as mesas de centro e o sofá (`tapete_livre_px`, em espelho) e o travertino (estratos
+# deitados), das mesmas linhas à esquerda da mesa lateral (`trav_x_px`, depois do vão da porta de vidro)
+SOFA_LIVING_TD = {"pt": (1764.0, 1402.8, 1935.8, 1460.5), "bloco": "sofa_reto_cinza", "px_m_bloco": 200,
+                  "emenda_px": 235, "braco_px": 42, "giro": 180, "tapete_y_pt": 1433.5, "tapete_livre_px": (1210, 1235),
+                  "trav_x_px": (1820, 1938), "folga_px": 4}
+
+
+def sofa_living_d(Q, img):
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    q = SOFA_LIVING_TD
+    out = img.astype(np.float32)
+    x0, y0, x1, y1 = F.ret_q(Q, q["pt"])
+    f = q["folga_px"]
+    X0, Y0, X1, Y1 = x0 - f, y0 - f, x1 + f, y1 + f
+    _, ty = Q.p2q(q["pt"][0], q["tapete_y_pt"])
+    ty = int(round(ty))
+    # o fundo sem o sofá antigo: o tapete de cima (as linhas livres entre as mesas de centro e o sofá, em espelho) e o
+    # travertino ao lado
+    t0, t1 = q["tapete_livre_px"]
+    tap = img[t0:t1, X0:X1]
+    tap = np.concatenate([tap[::-1], tap] * ((ty - Y0) // (2 * (t1 - t0)) + 1), axis=0)
+    out[Y0:ty, X0:X1] = tap[:ty - Y0]
+    a, b = q["trav_x_px"]
+    for y in range(ty, Y1):
+        linha = img[y, a:b].astype(np.float32)
+        faixa = np.concatenate([linha, linha[::-1]] * ((X1 - X0) // (2 * len(linha)) + 1), axis=0)
+        out[y, X0:X1] = faixa[:X1 - X0]
+    # o sofá de 3 lugares
+    cor, al = blocos.bloco(q["bloco"], q["px_m_bloco"])
+    e, br = q["emenda_px"], q["braco_px"]
+    cor = np.concatenate([cor[:, :e], cor[:, br:e], cor[:, :e][:, ::-1]], axis=1).astype(np.float32)
+    al = np.concatenate([al[:, :e], al[:, br:e], al[:, :e][:, ::-1]], axis=1).astype(np.float32)
+    if q["giro"] == 180:
+        cor, al = cor[::-1, ::-1], al[::-1, ::-1]
+    (ax, ay), (bx, by) = Q.p2q(q["pt"][0], q["pt"][1]), Q.p2q(q["pt"][2], q["pt"][3])
+    w4, h4 = int(round(4 * (bx - ax))), int(round(4 * (by - ay)))
+    c = cv2.resize(np.ascontiguousarray(cor * al[..., None]), (w4, h4), interpolation=cv2.INTER_AREA)
+    a4 = cv2.resize(np.ascontiguousarray(al), (w4, h4), interpolation=cv2.INTER_AREA)
+    w1, h1 = int(np.ceil(w4 / 4)), int(np.ceil(h4 / 4))
+    c = cv2.resize(np.pad(c, ((0, h1 * 4 - h4), (0, w1 * 4 - w4), (0, 0))), (w1, h1), interpolation=cv2.INTER_AREA)
+    a1 = cv2.resize(np.pad(a4, ((0, h1 * 4 - h4), (0, w1 * 4 - w4))), (w1, h1), interpolation=cv2.INTER_AREA)
+    c = c / np.maximum(a1, 1e-4)[..., None]
+    _pousar(out, c, np.clip(a1, 0, 1), (ax + bx) / 2 + (w1 - w4 / 4) / 2, (ay + by) / 2 + (h1 - h4 / 4) / 2, Q.px_m)
+    print(f"    living: o sofá de 3 lugares com as almofadas (`{q['bloco']}` com um lugar a mais), "
+          f"{(bx - ax) / Q.px_m:.2f} x {(by - ay) / Q.px_m:.2f} m")
+    return np.clip(out, 0, 255).astype(np.uint8)
 
 
 def carros_d(Q, img, M):
@@ -1224,6 +1284,34 @@ def paredes_d(Q, img):
     return brises_madeira(Q, F.paredes(Q, img))
 
 
+# O revestimento de ripas em L da suíte master (usuário, 27/10/26: "esse revestimento em marrom em L e em volta das
+# portas de vidro é contínuo. de uma parede a outra"): as ripas saem inteiras na etapa das paredes, mas a limpeza das
+# esquadrias (o piso de junto do vidro espelhado) as apagava diante das portas de vidro, em cima e embaixo à esquerda.
+# Nas caixas de `BRISES_DE_VOLTA_TD` (as de `BRISES_D`), as ripas do PDF voltam da imagem de antes das esquadrias
+BRISES_DE_VOLTA_TD = [(463.2, 1476.9, 686.4, 1709.6)]
+# A soleira entre a cozinha e a área de serviço (usuário, 27/10/26: "a soleira que divide a cozinha da área de serviço
+# precisa ser melhor representada. ela é mais larga do que foi apresentado aqui"): o vão da parede no PDF (pt), na
+# espessura inteira dela, entre as duas faces; a etapa das soleiras não o achava, e ficava um fio do render
+SOLEIRAS_EXTRA_TD = [(1952.5, 699.8, 1961.0, 753.1)]
+
+
+def pos_vidros_d(Q, img, antes):
+    import final3840_casaa as FA
+    out = img.copy()
+    caixas = BRISES_DE_VOLTA_TD
+    ripas = [d for d in brises_pdf_d(Q) if any(c[0] <= d["rect"].x0 and d["rect"].x1 <= c[2] and c[1] <= d["rect"].y0
+                                                and d["rect"].y1 <= c[3] for c in caixas)]
+    ids = {id(d) for d in ripas}
+    m = Q.preencher(lambda d: id(d) in ids, fs=True) > 0.02
+    n = int((m & (np.abs(out.astype(np.int16) - antes.astype(np.int16)).max(axis=2) > 0)).sum())
+    out[m] = antes[m]
+    for r in SOLEIRAS_EXTRA_TD:
+        out = FA.soleira_bege(Q, out, r)
+    print(f"    suíte master: as ripas em L de volta diante das portas de vidro ({len(ripas)} ripas, {n} px); "
+          f"{len(SOLEIRAS_EXTRA_TD)} soleira de Bege Bahia no vão inteiro (cozinha e área de serviço)")
+    return out
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 # A auditoria de 26/10 no Térreo (mapa `renders/POE642_CasaD_PH_Terreo_auditoria_2610_v2.jpg`; usuário, 27/10/26: "Aprovo
 # a lista e sigamos no item 9 com a recomendação"), com as rotinas do Térreo aprovado da Casa C:
@@ -1259,7 +1347,8 @@ def paredes_d(Q, img):
 #    os rótulos saem duas vezes, a segunda sobre o fundo sem o tracejado embaixo dos textos (`rotulos_terreo_d`);
 # 12. o rótulo do WC DCE TÉRREO parte do piso livre entre a cuba, o vaso e a porta (E7); os arcos das portas do PDF,
 #    que a final não desenha (R3), saem dos obstáculos dos rótulos, como no Subsolo (`rotulos_sub_d`): o do WC DCE
-#    fechava o piso livre e devolvia o rótulo para dentro do box;
+#    fechava o piso livre e devolvia o rótulo para dentro do box (desde 27/10, a pedido, ele vai para o box, como no
+#    PDF, com o corpo menor: `ROTULOS_TD["fixos"]`);
 # 13. a cama do DCE com a roupa de cama da biblioteca, como no DCE 1 do Subsolo (`cama_dce_d`);
 # 14. o banco do estar da varanda gourmet (o retângulo de cantos redondos da DOC_LINHAS E PROJEÇÕES, 0,60 x 1,80 m), em
 #    madeira, sem encosto, como o da varanda da Casa E: a madeira da mesa da suíte 3/escritório (o veio no comprido; a
@@ -1320,7 +1409,11 @@ ADEGA_TD = dict(C.ADEGA_C, pt=(2241.6, 987.4, 2258.6, 1083.8), modulos=2)
 ESCADA_DESCIDA_TD = {"d_pt": (957.0, 1449.5),                # o meio do degrau 16 (o D do PDF, na ponta do degrau)
                      "d_blocos_pt": (588.7, 1108.0)}          # o meio do bloco de cima da cascata (574,2 a 603,2 pt)
 SETA_TD = {"ponta": (2462, 1068)}
-ROTULOS_TD = {"pontos": {"WC DCE TÉRREO": (2195.0, 790.0)}, "folga_px": 4}
+ROTULOS_TD = {"pontos": {}, "folga_px": 4,
+              # o WC DCE dentro do box, como no PDF, com o corpo menor (usuário, 27/10/26: "o rótulo aqui está sobre a
+              # porta. preciso que coloque dentro do box como está no pdf, com fonte mais reduzida"); antes, a busca
+              # partia de (2195, 790) pt, no piso seco, e o rótulo caía junto da porta
+              "fixos": {"WC DCE TÉRREO": {"corpo": 0.62, "quebra": ["WC DCE", "TÉRREO"]}}}
 # o piso dos banhos das suítes em quartzito Aura (pedido de 27/10): o Bege Bahia da legenda (a mancha de cada banho, a
 # partir do rótulo do PDF) com a luz larga do render e o desenho da chapa, no tom dela
 QUARTZITO_TD = {"banhos": ("BANHO MASTER", "BANHO 1", "BANHO 2", "BANHO 3"), "chapa": "quartzito_aura",
@@ -1658,20 +1751,57 @@ def projecoes_terreo_d(Q, img):
 # aparece sobre o branco) e a borda da laje à esquerda em traço fino contínuo, e as duas linhas tracejadas de baixo (a
 # partir da grama); na garagem, as duas linhas tracejadas de cima (o tracejado escuro do render sai antes), a de baixo
 # e as bordas da direita (até o brise) e da esquerda (abaixo do gás). O tracejado regular de `C._tracejado` (começa e
-# termina num traço inteiro), mais curto e fino que o de antes, em branco quente; nada sobre as paredes.
+# termina num traço inteiro), mais curto e fino que o de antes, em branco quente; nada sobre as paredes. A linha de cima
+# (559,4 pt) vai até onde o PDF a desenha (usuário, 27/10/26: "esse pontilhado branco se estende até depois do banho
+# gourmet"): os 209 traços da ARQ_PAREDE de 1147,3 a 2298,8 pt, por cima da grama e das floreiras; antes, desde a
+# ponta da floreira (2214 pt). A limpeza do escuro do render fica no granito
 PROJ_LAJES_TD = {
     "vaos_x": [(2420.1, 2459.9), (2471.2, 2510.9), (2522.2, 2561.9), (2573.3, 2612.9), (2624.3, 2664.0),
                (2675.3, 2715.0), (2726.3, 2766.0), (2777.4, 2817.0), (2828.4, 2868.1)],
     "garagem": {"y": (570.7, 661.4), "contorno": False,
-                "tracejadas": [((2214.0, 559.4), (2910.6, 559.4)), ((2383.3, 570.7), (2899.3, 570.7)),
+                "tracejadas": [((1147.3, 559.4), (2910.6, 559.4)), ((2383.3, 570.7), (2899.3, 570.7)),
                                ((2383.3, 662.0), (2899.3, 662.0)), ((2899.3, 570.7), (2899.3, 662.0)),
                                ((2910.6, 559.4), (2910.6, 662.0)), ((2383.3, 627.4), (2383.3, 662.0))],
                 "finas": [], "limpar": [((2214.0, 2910.6), 559.4), ((2383.3, 2899.3), 570.7)]},
     "grama": {"y": (995.9, 1081.0), "contorno": True,
               "tracejadas": [((2366.3, 1081.0), (2899.3, 1081.0)), ((2366.3, 1092.3), (2910.6, 1092.3))],
               "finas": [((2383.3, 987.4), (2383.3, 1081.0))], "limpar": []},
+    # a laje da lateral direita da sala íntima, junto ao brise (usuário, 27/10/26: "vamos melhorar a representação da
+    # projeção tracejada em branco. tem a laje aqui em cinza claro"): a faixa de laje (o cinza claro, da parede à borda
+    # de 2284,3 pt) fica; o retângulo tracejado da ARQ_PAREDE além dela (2284,3 a 2295,6 pt, de 1497,7 a 1894,5),
+    # que o render desenhava em preto sobre a grama, sai (`limpar_v`: (y0, y1), x) e entra em branco; sem os X dos vãos
+    "lateral": {"vaos": False, "contorno": False,
+                "tracejadas": [((2284.3, 1497.7), (2284.3, 1894.5)), ((2295.6, 1497.7), (2295.6, 1894.5)),
+                               ((2284.3, 1497.7), (2295.6, 1497.7)), ((2284.3, 1894.5), (2295.6, 1894.5))],
+                "finas": [], "limpar": [], "limpar_v": [((1497.7, 1894.5), 2284.3), ((1497.7, 1894.5), 2295.6)]},
     "traco_m": 0.10, "vao_m": 0.05, "larg_px": 1.1, "fino_px": 0.7, "cor": (228, 233, 236), "forca": 0.92,
     "fino_forca": 0.75, "parede_tol": 10, "limpeza": {"meia_px": 2, "desvio_px": 6, "escuro": 14}, "ss": 4}
+
+
+ZONAS_LAJE_TD = ("garagem", "grama", "lateral")
+# A laje na borda do jardim da sala íntima (usuário, 27/10/26: "vamos representar a laje em tom cinza claro aqui, na
+# borda do jardim da sala íntima"): no PDF, a faixa da EST_LAJE com o preenchimento branco entre as paredes do jardim
+# (até 1897,4 pt; o render tem a borda do jardim 3 px abaixo, com um fio cinza e preto, que a faixa cobre), no cinza
+# claro da faixa de laje da lateral da sala íntima (`fonte_pt`, a parte de baixo do brise, sem as bordas), deitada
+# (o lado da parede em cima), espelhada ao longo do comprimento e mais lisa (`variacao`)
+LAJE_JARDIM_TD = {"alvo_pt": (1263.7, 1888.8, 1575.5, 1899.9), "fonte_pt": (2277.0, 1655.8, 2282.7, 1883.8),
+                  "variacao": 0.4}                             # o quanto fica das manchas da lateral, em volta do corte
+
+
+def laje_jardim_d(Q, img, antes):
+    q = LAJE_JARDIM_TD
+    sx0, sy0, sx1, sy1 = F.ret_q(Q, q["fonte_pt"])
+    tx0, ty0, tx1, ty1 = F.ret_q(Q, q["alvo_pt"])
+    fonte = antes[sy0:sy1, sx0:sx1].transpose(1, 0, 2)            # de pé para deitada: a parede (à esquerda) em cima
+    fonte = np.concatenate([fonte, fonte[:, ::-1]], axis=1)
+    fonte = np.concatenate([fonte] * (1 + (tx1 - tx0) // fonte.shape[1]), axis=1)[:, :tx1 - tx0]
+    faixa = cv2.resize(fonte, (tx1 - tx0, ty1 - ty0), interpolation=cv2.INTER_AREA).astype(np.float32)
+    perfil = np.median(faixa, axis=1, keepdims=True)              # o corte da faixa, sem as manchas da lateral
+    faixa = perfil + q["variacao"] * (faixa - perfil)
+    out = img.copy()
+    out[ty0:ty1, tx0:tx1] = np.clip(faixa, 0, 255).astype(np.uint8)
+    print(f"    jardim da sala íntima: a laje da borda em cinza claro ({tx1 - tx0} x {ty1 - ty0} px)")
+    return out
 
 
 def projecoes_lajes_td(Q, img):
@@ -1685,7 +1815,7 @@ def projecoes_lajes_td(Q, img):
     lq = q["limpeza"]
     h, d = lq["meia_px"], lq["desvio_px"]
     n_limpo = 0
-    for nome in ("garagem", "grama"):
+    for nome in ZONAS_LAJE_TD:
         for (xa, xb), y in q[nome]["limpar"]:
             (x0, yq), (x1, _) = Q.p2q(xa, y), Q.p2q(xb, y)
             x0, x1, yi = int(np.floor(x0)), int(np.ceil(x1)), int(round(yq))
@@ -1697,13 +1827,25 @@ def projecoes_lajes_td(Q, img):
                 ~parede[yi - h:yi + h + 1, x0:x1]
             faixa[esc] = out[yi - d - h:yi - d + h + 1, x0:x1][esc]
             n_limpo += int(esc.sum())
+        # as linhas de pé: o mesmo, de lado (o escuro volta ao que está `desvio_px` à direita, a grama)
+        for (ya, yb), x in q[nome].get("limpar_v", []):
+            (xq, y0), (_, y1) = Q.p2q(x, ya), Q.p2q(x, yb)
+            y0, y1, xi = int(np.floor(y0)), int(np.ceil(y1)), int(round(xq))
+            faixa = out[y0:y1, xi - h:xi + h + 1]
+            viz = np.concatenate([out[y0:y1, xi - d - h:xi - d + h + 1], out[y0:y1, xi + d - h:xi + d + h + 1]], axis=1)
+            ref = ndimage.median_filter(np.median(viz.mean(axis=2), axis=1), size=15)
+            esc = faixa.mean(axis=2) < ref[:, None] - lq["escuro"]
+            esc = cv2.dilate(esc.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & \
+                ~parede[y0:y1, xi - h:xi + h + 1]
+            faixa[esc] = out[y0:y1, xi + d - h:xi + d + h + 1][esc]
+            n_limpo += int(esc.sum())
     ss = q["ss"]
     tr, va = q["traco_m"] * Q.px_m, q["vao_m"] * Q.px_m
     linhas_tr, linhas_fi = [], []
-    for nome in ("garagem", "grama"):
+    for nome in ZONAS_LAJE_TD:
         z = q[nome]
-        y0, y1 = z["y"]
-        for xa, xb in q["vaos_x"]:
+        y0, y1 = z.get("y", (0, 0))
+        for xa, xb in (q["vaos_x"] if z.get("vaos", True) else []):
             linhas_tr += [((xa, y0), (xb, y1)), ((xb, y0), (xa, y1))]
             if z["contorno"]:
                 linhas_fi += [((xa, y0), (xb, y0)), ((xa, y0), (xa, y1)), ((xb, y0), (xb, y1))]
@@ -1728,8 +1870,8 @@ def projecoes_lajes_td(Q, img):
     cor = np.float32(q["cor"])
     out[Y0:Y1, X0:X1] = np.clip(reg * (1 - a[..., None]) + cor * a[..., None], 0, 255).astype(np.uint8)
     print(f"    projeções da laje: {n_limpo} px do tracejado escuro do render saem; os X dos 9 vãos na garagem e no "
-          f"gramado, o contorno fino dos vãos no gramado e {sum(len(q[k]['tracejadas']) for k in ('garagem', 'grama'))} "
-          f"linhas tracejadas da laje, em branco")
+          f"gramado, o contorno fino dos vãos no gramado e {sum(len(q[k]['tracejadas']) for k in ZONAS_LAJE_TD)} "
+          f"linhas tracejadas da laje (garagem, gramado e a lateral da sala íntima), em branco")
     return out
 
 
@@ -1872,7 +2014,7 @@ def seta_terreo_d(Q, img):
 def rotulos_terreo_d(Q, img):
     """Os rótulos (E7) sem tracejado embaixo, como na Casa C (`C.rotulos_t`): os rótulos saem uma vez, e o que as
     projeções e a seta mudaram (a etapa das escadas, do cache) volta embaixo de cada texto, com folga; então os rótulos
-    saem de novo, nos mesmos lugares, sobre o fundo sem o tracejado. O WC DCE TÉRREO parte do piso livre, e os arcos
+    saem de novo, nos mesmos lugares, sobre o fundo sem o tracejado. O WC DCE TÉRREO fica no ponto do PDF, dentro do box (`ROTULOS_TD["fixos"]`), e os arcos
     das portas saem dos obstáculos (como em `rotulos_sub_d`); os guarda-roupas novos, o banco e a prateleira da adega
     entram como obstáculo."""
     rot = B.rotulos_casab(Q.pg, Q.p2q2000)
@@ -1880,7 +2022,8 @@ def rotulos_terreo_d(Q, img):
     obst = [r for _, r, _ in GUARDA_ROUPAS_TD["pecas"]] + [BANCO_VARANDA_TD["pt"], ADEGA_TD["pt"]]
     pontos = dict(rf["pontos"].get(Q.chave, {}), **ROTULOS_TD["pontos"])
     F.ROTULOS_F = dict(rf, pontos=dict(rf["pontos"], **{Q.chave: pontos}),
-                       obstaculos_pt=dict(rf.get("obstaculos_pt", {}), **{Q.chave: obst}))
+                       obstaculos_pt=dict(rf.get("obstaculos_pt", {}), **{Q.chave: obst}),
+                       fixos=dict(rf.get("fixos", {}), **{Q.chave: ROTULOS_TD["fixos"]}))
     todos = Q.desenhos
     Q._desenhos = [d for d in todos if not (d.get("layer") == "ARQ_PAREDE" and C.arco_porta(d))]
     try:
@@ -1937,11 +2080,11 @@ def passos_terreo_d(Q, ini, M):
         ("soleiras", lambda im: C.soleira_elevador(Q, F.soleiras(Q, im))),
         # a entrada das esquadrias vai em cópia: `F.esquadrias_terreo` escreve nela, e o `antes` de `pos_esquadrias_d`
         # tem de ser a etapa das soleiras (os recortes atrás das folhas abertas não voltavam)
-        ("esquadrias", lambda im: portas_vidro_td(Q, pos_esquadrias_d(Q, F.esquadrias_terreo(Q, im.copy(), parede=cinza),
-                                                                      im))),
+        ("esquadrias", lambda im: pos_vidros_d(Q, portas_vidro_td(Q, pos_esquadrias_d(
+            Q, F.esquadrias_terreo(Q, im.copy(), parede=cinza), im)), im)),
         ("cortinas", lambda im: sem_trilho_fora_d(Q, F.cortinas(Q, im, paredes_pdf=True), im)),
         ("escadas", lambda im: escadas_terreo_d(Q, im)),
-        ("projecoes", lambda im: projecoes_lajes_td(Q, projecoes_terreo_d(Q, im))),
+        ("projecoes", lambda im: laje_jardim_d(Q, projecoes_lajes_td(Q, projecoes_terreo_d(Q, im)), im)),
         ("seta", lambda im: seta_terreo_d(Q, im)),
         ("rotulos", lambda im: rotulos_terreo_d(Q, im)),
     ]
