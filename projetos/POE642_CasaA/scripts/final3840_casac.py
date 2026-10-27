@@ -679,6 +679,11 @@ def jardins_vidros_t(Q, img):
 # do vidro é refeito: a metade de fora com o travertino de fora, a de dentro com as plantas do jardim (cada uma copiada
 # logo ao lado, `fundo_px` além da faixa), para não voltar o risco claro entre as plantas e as folhas. Laterais do
 # JARDIM DE INVERNO: 2 folhas cada; embaixo: 3; no alto do JARDIM DE INVERNO 2: 2. `jardim` é o lado das plantas.
+# O vidro fixo do JARDIM 1 (usuário, 27/10/26: "aplique o mesmo desenho no vidro fixo também"): no PDF, o painel branco
+# de 4,3 pt (o vidro de 2,9 pt e o caixilho) entre os dois arremates cinza da parede, com os quadrados brancos do
+# caixilho nas pontas; entra como uma folha (sem correr) com os montantes nas pontas e os dois quadrados como batentes.
+# A faixa do fundo fica entre os arremates cinza (que são parede) e é refletida nas bordas (`espelho`): a 13 px, a cópia
+# de fora pegava a ponta da costela-de-adão do vaso ao lado, e a reflexão não deixa emenda na borda.
 PORTAS_JARDINS_TC = {"fundo_px": 3, "portas": [
     {"nome": "do jardim de inverno, à esquerda", "faixa": (1553.7, 1110.6, 1562.2, 1357.2), "jardim": "dir",
      "batentes": [(1553.7, 1110.6, 1562.2, 1112.8), (1553.7, 1354.9, 1562.2, 1357.2)],
@@ -692,7 +697,10 @@ PORTAS_JARDINS_TC = {"fundo_px": 3, "portas": [
                 ((1564.4, 1362.8, 1646.1, 1365.7), "x")], "montante_pt": 4.6},
     {"nome": "do jardim de inverno 2, em cima", "faixa": (1672.7, 997.2, 1802.5, 1005.7), "jardim": "baixo",
      "batentes": [(1672.7, 997.2, 1675.0, 1005.7), (1800.3, 997.2, 1802.5, 1005.7)],
-     "folhas": [((1675.0, 1002.8, 1739.9, 1005.7), "x"), ((1735.4, 1000.0, 1800.3, 1002.8), "x")], "montante_pt": 4.5}]}
+     "folhas": [((1675.0, 1002.8, 1739.9, 1005.7), "x"), ((1735.4, 1000.0, 1800.3, 1002.8), "x")], "montante_pt": 4.5},
+    {"nome": "do jardim 1 (vidro fixo)", "faixa": (1048.5, 1021.5, 1057.0, 1091.8), "jardim": "esq",
+     "batentes": [(1053.1, 1019.8, 1055.9, 1021.5), (1053.1, 1091.8, 1055.9, 1093.5)],
+     "folhas": [((1051.6, 1021.5, 1055.9, 1091.8), "y")], "montante_pt": 2.9, "espelho": True}]}
 
 
 def portas_jardins_t(Q, img):
@@ -709,12 +717,16 @@ def portas_jardins_t(Q, img):
         jardim_depois = p["jardim"] in ("dir", "baixo")
         # a metade de fora com o piso de fora, a de dentro com as plantas, copiadas logo além da faixa
         for c in range(c0, c1):
-            de_dentro = (c >= meio) == jardim_depois
-            d = larg + q["fundo_px"]
-            src = c + d if (de_dentro == jardim_depois) else c - d
+            if p.get("espelho"):
+                src = 2 * c1 - 1 - c if c >= meio else 2 * c0 - 1 - c
+            else:
+                de_dentro = (c >= meio) == jardim_depois
+                d = larg + q["fundo_px"]
+                src = c + d if (de_dentro == jardim_depois) else c - d
             v[l0:l1, c] = fonte[l0:l1, src]
     guarda = FA.PORTAS_VIDRO
-    FA.PORTAS_VIDRO = dict(FA.PORTAS_VIDRO, portas=[{k: v_ for k, v_ in p.items() if k not in ("faixa", "jardim")}
+    so_fundo = ("faixa", "jardim", "espelho")
+    FA.PORTAS_VIDRO = dict(FA.PORTAS_VIDRO, portas=[{k: v_ for k, v_ in p.items() if k not in so_fundo}
                                                      for p in q["portas"]])
     try:
         out = FA.portas_vidro(Q, out)
@@ -1488,8 +1500,13 @@ POCO_ELEVADOR_T = (1562.2, 1008.5, 1661.4, 1099.2)
 # área descoberta e a área de serviço (granito); o da porta de correr do escritório (o vinílico dele) e o da adega
 # (travertino); a claraboia da varanda master (travertino); e as faixas dos vidros dos jardins de inverno (o travertino
 # de fora; o jardim termina no vidro).
+# 27/10, vendo a final ("aplique a correção na soleira."; "a soleira é da área de serviço."): a porta de correr entre a
+# cozinha e a área de serviço tinha no vão, entre os batentes, a faixa clara do render (bege rosado, não do
+# `F.soleiras`: o vão não é um dos `B.vaos_brancos`). A mesma correção do quarto de serviço: o granito dos dois lados
+# atravessa o vão (o vão de dentro, sem os batentes) e a folha fica como está.
 SEM_SOLEIRA_TC = [(2365.0, 707.5, 2373.5, 750.6)]
-VAOS_TC = {"granito": [(2365.0, 707.5, 2373.5, 750.6), (2264.6, 458.6, 2406.3, 470.8)],
+VAO_COZINHA_SERVICO_T = (2219.2, 511.5, 2227.7, 576.7)
+VAOS_TC = {"granito": [(2365.0, 707.5, 2373.5, 750.6), (2264.6, 458.6, 2406.3, 470.8), VAO_COZINHA_SERVICO_T],
            "vinílico": [(2309.9, 1110.6, 2320.0, 1354.3)],
            "travertino": [(578.1, 468.9, 782.1, 506.2), (2036.3, 1110.6, 2046.3, 1354.3),
                           (1553.7, 1110.6, 1562.2, 1365.7), (1802.5, 1110.6, 1811.0, 1365.7),
@@ -1505,7 +1522,8 @@ VAOS_TC = {"granito": [(2365.0, 707.5, 2373.5, 750.6), (2264.6, 458.6, 2406.3, 4
 #   desenhavam como vidro) saem;
 # - a porta de correr da área descoberta e os vidros dos jardins de inverno: o que não é folha nem batente do PDF na
 #   faixa volta ao piso dos pisos (o granito; o travertino de fora dos jardins), sem a faixa clara e sem as plantas e a
-#   terra que passavam do vidro;
+#   terra que passavam do vidro; e o vão da porta de correr entre a cozinha e a área de serviço (27/10; o trecho junto
+#   à folha, em `vao_cozinha`);
 # - a janela da cozinha: a faixa clara sob a folha da direita vira a bancada de granito (o trecho logo abaixo, copiado);
 # - as portas de correr do escritório e da adega: o vão volta ao piso e as 4 folhas são refeitas nos planos do PDF
 #   (`final3840_casaa.portas_vidro`, como a da academia no Subsolo), sem a soleira e sem os riscos.
@@ -1513,8 +1531,12 @@ POS_ESQUADRIAS_TC = {
     "portoes": [(2228.0, 326.4, 2272.5, 333.4), (2404.0, 326.4, 2448.6, 333.4)], "poste_lum": 90,
     "ilha": (2044.0, 573.5, 2055.0, 751.8),
     "faixas_piso": [(2264.6, 461.5, 2406.3, 470.8), (1553.7, 1110.6, 1562.2, 1365.7), (1802.5, 1110.6, 1811.0, 1365.7),
-                    (1553.7, 1357.2, 1811.0, 1365.7), (1672.7, 997.2, 1802.5, 1005.7)],
+                    (1553.7, 1357.2, 1811.0, 1365.7), (1672.7, 997.2, 1802.5, 1005.7), VAO_COZINHA_SERVICO_T],
     "janela": {"pt": (2101.0, 461.5, 2166.0, 470.6), "desce_px": 13, "fonte_x_pt": (2113.0, 2161.5)},
+    # o vão da porta de correr da cozinha para a área de serviço (27/10): junto à folha, onde a base tem o traço do
+    # contrapiso e o cinza da folha (não o branco do vão), os pisos guardavam a faixa clara do render; ali (a chapada
+    # abaixo de `branco`) entra o granito da cozinha, `desloca_px` ao lado
+    "vao_cozinha": {"pt": VAO_COZINHA_SERVICO_T, "branco": 230, "desloca_px": -12},
     "claro": 150, "croma": 40,
     "paredes": {"croma_min": 16, "cinza_tol": 14},
     "portas": [{"nome": "do escritório", "vao": (2309.9, 1110.6, 2320.0, 1354.3),
@@ -1588,6 +1610,11 @@ def pos_esquadrias_t(Q, img, antes):
         m = ~folha
         out[y0:y1, x0:x1][m] = pisos[y0:y1, x0:x1][m]
         n_faixa += int(m.sum())
+    v = q["vao_cozinha"]
+    x0, y0, x1, y1 = F.ret_q(Q, v["pt"])
+    m = Q.chapada[y0:y1, x0:x1].astype(np.int32).mean(axis=2) < v["branco"]
+    out[y0:y1, x0:x1][m] = out[y0:y1, x0 + v["desloca_px"]:x1 + v["desloca_px"]][m]
+    n_faixa += int(m.sum())
     # a janela da cozinha: a faixa clara sob a folha da direita vira a bancada logo abaixo
     j = q["janela"]
     x0, y0, x1, y1 = F.ret_q(Q, j["pt"])
