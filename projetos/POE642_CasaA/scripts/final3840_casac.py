@@ -851,6 +851,85 @@ def cadeiras_mesas_t(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# A adega (usuário, 27/10/26, vendo a final: "adicione a prateleira de vinhos como fizemos na outra casa, ao fundo da
+# adega. não sobreponha o rotulo nessa prateleira"; "as garrafas em escala"). No PDF da Casa C a adega (1,26 x 4,30 m,
+# as folhas de vidro na parede da esquerda) não tem nada dentro: a prateleira entra na parede do fundo, a da direita, de
+# ponta a ponta, como a da Casa B (`ajustes_casab.adega_b`): marcenaria areia com o veio no comprido, o contorno fino,
+# os módulos em traço fino e as garrafas deitadas, o gargalo junto à parede e a base para o piso. As garrafas na escala
+# real (m): 0,075 de diâmetro, o corpo de 0,21 e o gargalo de 0,08 (0,03 de diâmetro), a cada 0,09; a da Casa B, no
+# quadro de 3840 px, ficou com a metade disso. A prateleira tem 0,30 m de fundo (o comprimento da garrafa), e o piso
+# livre, 0,96 m, onde o rótulo (0,90 m) cabe sem encostar nela; ela entra como obstáculo dos rótulos (`rotulos_t`).
+ADEGA_C = {"pt": (2100.2, 1110.6, 2117.2, 1354.3), "modulos": 6, "madeira": (160, 186, 206), "contorno": (110, 118, 124),
+           "larg_px": 0.4, "garrafa_m": {"diam": 0.075, "corpo": 0.21, "ombro": 0.015, "gargalo": 0.08,
+                                         "diam_gargalo": 0.03, "passo": 0.09, "folga": 0.03, "da_parede": 0.005},
+           "vidros": [(26, 40, 28), (20, 32, 48), (30, 24, 46), (24, 34, 26), (22, 30, 40)], "brilho": 0.45,
+           "sombra": {"desloc_px": (-0.6, 0.7), "sigma_px": 0.6, "forca": 0.35}, "ss": 8, "semente": 3}
+
+
+def adega_c(Q, img):
+    from retoque_terreo_casae import linha_aa
+    q, g = ADEGA_C, ADEGA_C["garrafa_m"]
+    X0, Y0 = Q.p2q(q["pt"][0], q["pt"][1])
+    X1, Y1 = Q.p2q(q["pt"][2], q["pt"][3])
+    wx0, wy0, wx1, wy1 = int(X0) - 6, int(Y0) - 6, int(np.ceil(X1)) + 6, int(np.ceil(Y1)) + 6
+    h, w = wy1 - wy0, wx1 - wx0
+    r = (X0 - wx0, Y0 - wy0, X1 - wx0, Y1 - wy0)
+    out = img.astype(np.float32)
+    reg = out[wy0:wy1, wx0:wx1]
+    al = B.ret_aa((h, w), r)
+    # a marcenaria: o tom areia com o veio no comprido (aqui, na vertical)
+    rng = np.random.default_rng(q["semente"])
+    ve = cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0), sigmaX=0.6, sigmaY=9)
+    mad = np.float32(q["madeira"])[None, None] * (1 + 0.06 * ve / max(ve.std(), 1e-6))[..., None]
+    reg *= (1 - B.sombra_de(al, Q.px_m, forca=0.25))[..., None]
+    reg = reg * (1 - al[..., None]) + mad * al[..., None]
+    c = B.contorno_aa((h, w), r, q["larg_px"])[..., None]
+    reg = reg * (1 - c) + np.float32(q["contorno"]) * c
+    mods = np.linspace(r[1], r[3], q["modulos"] + 1)
+    for yd in mods[1:-1]:
+        c = linha_aa((h, w), [(r[0], yd), (r[2], yd)], q["larg_px"])[..., None]
+        reg = reg * (1 - c) + np.float32(q["contorno"]) * c
+    # as garrafas: deitadas, o gargalo junto à parede (à direita), a base para o piso
+    k, m_, s_ = q["ss"], Q.px_m, q["sombra"]
+    ponta = r[2] - g["da_parede"] * m_
+    gl, om, cp = g["gargalo"] * m_, g["ombro"] * m_, g["corpo"] * m_
+    n = 0
+    for a, b in zip(mods[:-1], mods[1:]):
+        ys = np.arange(a + (g["folga"] + g["diam"] / 2) * m_, b - (g["folga"] + g["diam"] / 2) * m_ + 1e-6,
+                       g["passo"] * m_)
+        ys += ((b - a) - (g["folga"] * 2 + g["diam"]) * m_ - (ys[-1] - ys[0])) / 2 if len(ys) else 0
+        for y in ys:
+            cor = np.float32(q["vidros"][int(rng.integers(len(q["vidros"])))])
+            mk = np.zeros((h * k, w * k), np.uint8)
+
+            def traco(xa, xb, larg, y=y, mk=mk):
+                cv2.line(mk, (int(round(xa * k)), int(round(y * k))), (int(round(xb * k)), int(round(y * k))), 255,
+                         max(1, int(round(larg * k))), cv2.LINE_AA)
+            dg, dc = g["diam_gargalo"] * m_, g["diam"] * m_
+            traco(ponta - dg / 2, ponta - gl, dg)
+            traco(ponta - gl, ponta - gl - om, (dg + dc) / 2)
+            traco(ponta - gl - om - dc / 2, ponta - gl - om - cp + dc / 2, dc)       # as pontas do traço são redondas
+            a_ = cv2.resize(mk.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * al
+            sh = cv2.GaussianBlur(cv2.warpAffine(a_, np.float32([[1, 0, s_["desloc_px"][0]], [0, 1, s_["desloc_px"][1]]]),
+                                                 (w, h)), (0, 0), s_["sigma_px"]) * (1 - a_)
+            reg *= (1 - s_["forca"] * sh)[..., None]
+            reg = reg * (1 - a_[..., None]) + cor * a_[..., None]
+            # o brilho no comprido do corpo, do lado da luz (em cima)
+            bm = np.zeros((h * k, w * k), np.uint8)
+            yb = y - dc * 0.22
+            cv2.line(bm, (int(round((ponta - gl - om - 0.4) * k)), int(round(yb * k))),
+                     (int(round((ponta - gl - om - cp + 0.6) * k)), int(round(yb * k))), 255,
+                     max(1, int(round(0.45 * k))), cv2.LINE_AA)
+            ab = cv2.resize(bm.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None] * \
+                q["brilho"] * a_[..., None]
+            reg = reg * (1 - ab) + (cor * 0.4 + 255 * 0.6) * ab
+            n += 1
+    out[wy0:wy1, wx0:wx1] = reg
+    print(f"    adega: prateleira de vinhos na parede do fundo ({(X1 - X0) / m_:.2f} x {(Y1 - Y0) / m_:.2f} m), "
+          f"{q['modulos']} módulos e {n} garrafas na escala")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 def biblioteca_c(Q, img):
     out = np.ascontiguousarray(img.copy())
     with F.em_quadro(Q):
@@ -858,6 +937,8 @@ def biblioteca_c(Q, img):
             out = B.guarda_roupas_terreo(out)
             out = B.cooktops_b(out)
             out = banquetas_c(Q, out)
+    if Q.chave == "Terreo":
+        out = adega_c(Q, out)
     return out
 
 
@@ -1172,13 +1253,15 @@ def rotulos_t(Q, img):
     esc = Q.W / 2000
     quebras = [(r[0], (Q.p2q(*r[2])[0] / esc, Q.p2q(*r[2])[1] / esc), (0.0, 0.0), {"quebra": ROTULOS_TC["quebras"][r[0]]})
                for r in rot if r[0] in ROTULOS_TC["quebras"]]
-    ajustes = list(Q.q["ajustes"]) + quebras
+    corpos = [(r[0], (Q.p2q(*r[2])[0] / esc, Q.p2q(*r[2])[1] / esc), (0.0, 0.0),
+               {"corpo": R1.ROTULOS["escala"] * ROTULOS_TC["corpos"][r[0]]}) for r in rot if r[0] in ROTULOS_TC["corpos"]]
+    ajustes = list(Q.q["ajustes"]) + quebras + corpos
     vb = F.vidros_box
     F.vidros_box = vidros_box_t
     fonte = R1.ROTULOS.get("fonte_nome")
     R1.ROTULOS["fonte_nome"] = ROTULOS_TC["fonte_nome"]
     rf = F.ROTULOS_F
-    obst = [r for _, r, _ in GUARDA_ROUPAS_C["pecas"]] + list(CLARABOIAS_T["rets"])
+    obst = [r for _, r, _ in GUARDA_ROUPAS_C["pecas"]] + list(CLARABOIAS_T["rets"]) + [ADEGA_C["pt"]]
     pontos = dict(rf["pontos"].get(Q.chave, {}), **{n: p for n, p in ROTULOS_TC["pontos"].items() if p})
     F.ROTULOS_F = dict(rf, pontos=dict(rf["pontos"], **{Q.chave: pontos}),
                        obstaculos_pt=dict(rf.get("obstaculos_pt", {}), **{Q.chave: obst}))
@@ -1219,7 +1302,12 @@ ROTULOS_TC = {"folga_px": 4,
               # "corrija o rótulo da garagem para que não fique muito próximo do carro": no PDF, o GARAGEM está sobre
               # o carro do meio, e o lugar livre mais perto encostava no retrovisor dele (4 px); a busca parte do meio
               # do vão entre o carro do meio e o da direita (a 0,2 m de cada um)
-              "pontos": {"GARAGEM": (2788.1, 695.2), "CLOSET MASTER 1": (794.6, 707.4)}}
+              "pontos": {"GARAGEM": (2788.1, 695.2), "CLOSET MASTER 1": (794.6, 707.4), "ADEGA": (2070.4, 1242.7)},
+              # a prateleira de vinhos da adega (27/10, `ADEGA_C`): ao lado dela, o piso livre tem 0,96 m e a área do
+              # rótulo, 0,90 m; no corpo cheio, o "A:" encostava na porta de vidro. O usuário escolheu o rótulo menor:
+              # 85% do corpo (a mesma fração da `F.ROTULOS_F["corpos"]`), no meio do piso livre (o ponto acima, entre a
+              # porta e a prateleira, na altura do PDF)
+              "corpos": {"ADEGA": 0.85}}
 
 
 # ----------------------------------------------------------------------------------------------------------------------
