@@ -595,6 +595,12 @@ FORA_PECAS_S = [(672.1, 1636.5, 743.3, 1721.9), (957.0, 1622.2, 1075.6, 1726.7),
 # da final aprovada (item 37 de 15/10), é refeita pelo PDF desde a auditoria de 26/10 (`banhos_sub_d`).
 CAMAS_S = {"borda": 1.7, "ss": 4, "semente": 41, "camas": [("DCE 1", (846.0, 1203.9, 902.7, 1317.3), "baixo",
                                                              "solteiro")]}
+# Depois (usuário, 27/10/26: "melhore o aspecto da roupa de cama para dar mais clareza de se trata de uma cama"): a cama do
+# render era um retângulo branco com o travesseiro; no colchão (o retângulo do PDF menos a borda, que fica a moldura de
+# madeira do render) entra a roupa de cama da biblioteca do tipo "motorista", a da cama de solteiro do Térreo da Casa A
+# aprovada em 21/10 ("está tudo muito brancão"): o lençol branco com a dobra, o travesseiro, o edredom em linho claro e a
+# peseira bordô nos pés, com o pesponto; a cabeceira embaixo, contra a parede da janela
+CAMA_DCE_S = {"camas": [("DCE 1", CAMAS_S["camas"][0][1], "baixo", "motorista")], "borda": 1.7, "ss": 4, "semente": 31}
 
 
 def pegada_subsolo(Q):
@@ -670,6 +676,39 @@ PORTA_ACADEMIA_SUB_D = {"nome": "do pátio para a academia", "soleira": (600.0, 
 JANELAS_SUB_D = dict(C.JANELAS_S, x_max_pt=1240.0)
 ROTULOS_SUB_D = {"pontos": {"WC DCE": (731.5, 1268.0)}}
 NICHO_VESTIARIO_S = (1094.7, 1833.9, 1099.8, 1855.4)
+# Depois, vendo a final (usuário, 27/10/26: "corrija as portas e seus contornos, além da parede na parte de baixo"; "corrija
+# os erros nas paredes"; "corrija esse erro na parede. complete a parte que ficou faltando no batente da porta do banho";
+# "limpe o risco atrás da porta e os riscos em frente a janela no piso"): a faixa de limpeza das esquadrias
+# (`B.esquadrias_final`) refaz o que está em volta das folhas e das janelas espelhando a vizinhança, e no Subsolo trazia o
+# que não é piso: o cinza da parede numa faixa acima da folha da porta da escada para o depósito, o Bege Bahia da soleira
+# num bloco acima da folha de baixo da porta dupla do depósito (e o granito no lugar da parede logo abaixo dela), o traço
+# do box acima da folha da porta do WC DCE, os pedaços do Bege Bahia de fora no piso diante da janela do WC DCE, a cama
+# esticada diante da janela do DCE 1, a faixa de granito mais clara ao lado da folha da porta do DCE 1 e os recortes de
+# Bege Bahia na parede do vestiário, acima da folha e do batente da porta. Depois das esquadrias:
+# - a parede do PDF (e o traço da face, 1 px para fora) volta à etapa anterior (as soleiras) onde lá era o cinza ou o
+#   traço, neutros, e as esquadrias puseram cor (como as paredes recortadas atrás das portas do Térreo da Casa C,
+#   `C.pos_esquadrias_t`): o batente da porta do vestiário fica inteiro, encostado na parede;
+# - nas `faixa_px` de cada lado de cada folha e do caixilho das janelas, fora da peça nova e da parede, o piso volta à
+#   etapa anterior; onde lá estava a folha antiga (o traço claro e a sombra arroxeada do render, que fogem do piso em
+#   volta), entra o piso da etapa anterior um pouco mais longe da folha (`desloca_px`), do mesmo lado.
+POS_ESQUADRIAS_SUB_D = {
+    # fora: o box de correr entre o vaso e o chuveiro do vestiário, com uma folha em cada face da parede do PDF; ali as
+    # esquadrias abrem o vão entre as folhas (o piso passa), como na final aprovada
+    "paredes": {"croma_min": 12, "cinza_tol": 14, "neutro": 10, "fora": [(1020.4, 1806.1, 1059.5, 1816.3)]},
+    "faixa_px": 8, "cobre": 0.2, "anel_px": 5, "desloca_px": (8, 11, 14, 17), "velho": {"gb": 9, "lum": 45},
+    "pecas": [("porta dupla do depósito, folha de cima", (912.2, 1329.2, 950.3, 1331.4)),
+              ("porta dupla do depósito, folha de baixo", (912.2, 1403.1, 950.3, 1405.4)),
+              ("porta da escada para o depósito", (974.5, 1477.8, 1009.9, 1480.1)),
+              ("porta do WC DCE", (718.0, 1237.6, 753.4, 1239.9)),
+              ("porta do DCE 1", (766.9, 1283.7, 769.2, 1319.1)),
+              ("porta do vestiário", (930.3, 1753.4, 964.3, 1755.7)),
+              ("porta da sauna", (803.2, 1802.3, 805.5, 1843.6)),
+              # as janelas: o caixilho fino das esquadrias (1 pt além do retângulo do PDF); do lado de dentro, o piso vai
+              # até ele
+              ("janela do WC DCE", (702.3, 1320.3, 734.0, 1325.5)),
+              # no DCE 1, a cama e o criado-mudo encostam na janela: do lado de dentro, a faixa volta inteira à etapa
+              # anterior (lá, a cabeceira e o traço da parede; mais longe da janela seria a cama de novo)
+              ("janela do DCE 1", (828.1, 1320.3, 882.6, 1325.5), {"so_antes": -1})]}
 
 
 def escada_sub_d(Q, img):
@@ -709,6 +748,42 @@ def armario_dce_d(Q, img):
     out[Y0:Y1, X0:X1] = out[Y0:Y1, X0:X1] * (1 - ar) + cr
     print(f"    DCE 1: o armário com os cabides e o cabideiro ({comp:.2f} x {prof:.2f} m), as portas para o quarto")
     return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def cama_dce_d(Q, img):
+    """A roupa de cama da biblioteca (`elementos.roupa_de_cama`) no colchão de cada cama de CAMA_DCE_S, no quadro, como
+    `ajustes_casab.camas_b` (as camas em pé na planta, com a cabeceira em cima ou embaixo)."""
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    import elementos
+    q = CAMA_DCE_S
+    k = q["ss"]
+    out = img.copy()
+    for i, (nome, r, cab, tipo) in enumerate(q["camas"]):
+        e = q["borda"]
+        (u0, v0), (u1, v1) = Q.p2q(r[0] + e, r[1] + e), Q.p2q(r[2] - e, r[3] - e)
+        cor, al = elementos.roupa_de_cama((v1 - v0) / Q.px_m, (u1 - u0) / Q.px_m, Q.px_m * k, tipo,
+                                          semente=q["semente"] + i)
+        if cab == "cima":
+            cor, al = cv2.rotate(cor, cv2.ROTATE_90_CLOCKWISE)[:, ::-1], cv2.rotate(al, cv2.ROTATE_90_CLOCKWISE)[:, ::-1]
+        else:
+            cor, al = cv2.rotate(cor, cv2.ROTATE_90_COUNTERCLOCKWISE), cv2.rotate(al, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        X0, Y0 = int(np.floor(u0)) - 1, int(np.floor(v0)) - 1
+        X1, Y1 = int(np.ceil(u1)) + 2, int(np.ceil(v1)) + 2
+        tw, th = int(round((u1 - u0) * k)), int(round((v1 - v0) * k))
+        cor = cv2.resize(np.ascontiguousarray(cor * al[..., None]), (tw, th), interpolation=cv2.INTER_AREA)
+        al = cv2.resize(np.ascontiguousarray(al), (tw, th), interpolation=cv2.INTER_AREA)
+        g = np.zeros(((Y1 - Y0) * k, (X1 - X0) * k, 3), np.float32)
+        ga = np.zeros(g.shape[:2], np.float32)
+        ox, oy = int(round((u0 - X0) * k)), int(round((v0 - Y0) * k))
+        g[oy:oy + th, ox:ox + tw] = cor
+        ga[oy:oy + th, ox:ox + tw] = al
+        pre = cv2.resize(g, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
+        a_ = cv2.resize(ga, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a_[..., None]) + pre), 0, 255).astype(np.uint8)
+    print("    camas: a roupa de cama da biblioteca (" + "; ".join(f"{n}, {t}" for n, _, _, t in q["camas"]) +
+          "), com a cabeceira contra a parede")
+    return out
 
 
 def banhos_sub_d(Q, img):
@@ -783,6 +858,75 @@ def portas_academia_sub_d(Q, img):
         C.PORTA_ACADEMIA_S = guarda
 
 
+def _faixas_folha(out, A, a, ret, q, so_antes=0):
+    """Os dois lados (-1, antes; 1, depois) da peça horizontal `ret` (px, fracionário): a faixa de `faixa_px` fora da peça
+    (as linhas que ela cobre em até `cobre`) e da parede volta a A (a etapa anterior); onde A tinha a peça antiga (foge do
+    piso do anel logo depois da faixa; se lá é parede, do anel do outro lado), o piso de A mais longe; no lado `so_antes`,
+    a faixa toda volta a A."""
+    f, an = q["faixa_px"], q["anel_px"]
+    u0, v0, u1, v1 = ret
+    c0, c1 = int(np.floor(u0)) - 1, int(np.ceil(u1)) + 1
+    topo, base = int(np.floor(v0 - 1 + q["cobre"])) + 1, int(np.ceil(v1 - q["cobre"]))
+    lados = {-1: ((topo - f, topo), (topo - f - an, topo - f)), 1: ((base, base + f), (base + f, base + f + an))}
+    refs = {}
+    for lado, (_, (g0, g1)) in lados.items():
+        ref = A[g0:g1, c0:c1][a[g0:g1, c0:c1] <= 0.02]
+        if len(ref) >= 10:
+            refs[lado] = (np.median(ref[:, 1] - ref[:, 0]), np.median(ref.mean(axis=1)))
+    n = 0
+    for lado, ((r0, r1), _) in lados.items():
+        if not refs:
+            break
+        gb, lum = refs.get(lado, refs.get(-lado))
+
+        def velho(B):
+            return ((B[..., 1] - B[..., 0]) < gb - q["velho"]["gb"]) | (np.abs(B.mean(axis=2) - lum) > q["velho"]["lum"])
+        livre = a[r0:r1, c0:c1] <= 0.02
+        novo = A[r0:r1, c0:c1].copy()
+        falta = (velho(novo) & livre) if so_antes != lado else np.zeros_like(livre)
+        for s in q["desloca_px"]:
+            if not falta.any():
+                break
+            fonte = A[r0 + lado * s:r1 + lado * s, c0:c1]
+            ok = falta & ~velho(fonte) & (a[r0 + lado * s:r1 + lado * s, c0:c1] <= 0.02)
+            novo[ok] = fonte[ok]
+            falta &= ~ok
+        m = livre & ~falta
+        out[r0:r1, c0:c1][m] = novo[m].astype(np.uint8)
+        n += int(m.sum())
+    return n
+
+
+def pos_esquadrias_sub_d(Q, img, antes):
+    q = POS_ESQUADRIAS_SUB_D
+    out = img.copy()
+    A = antes.astype(np.int32)
+    a = Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS") and d.get("fill") is not None
+                    and max(d["fill"]) < 0.5, ss=4)
+    # as faixas em volta das folhas e das janelas (as verticais, na imagem transposta)
+    n_fx = 0
+    for _, r, *op in q["pecas"]:
+        (x0, y0), (x1, y1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        if r[2] - r[0] >= r[3] - r[1]:
+            o, B, m, ret = out, A, a, (x0, y0, x1, y1)
+        else:
+            o, B, m, ret = out.transpose(1, 0, 2), A.transpose(1, 0, 2), a.T, (y0, x0, y1, x1)
+        n_fx += _faixas_folha(o, B, m, ret, q, **(op[0] if op else {}))
+    # a parede do PDF (e o traço da face, 1 px para fora) de volta onde lá era o cinza (ou o traço, mais escuro) e as
+    # esquadrias puseram cor
+    pq = q["paredes"]
+    parede = cv2.dilate((a >= 0.5).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    era = (C._croma(antes) <= pq["neutro"]) & (A.mean(axis=2) <= np.mean(F.PAREDES_F["cinza"]) + pq["cinza_tol"])
+    volta = parede & era & (C._croma(out) >= pq["croma_min"])
+    for r in pq["fora"]:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        volta[y0:y1, x0:x1] = False
+    out[volta] = antes[volta]
+    print(f"    depois das esquadrias: {n_fx} px de piso de volta em volta de {len(q['pecas'])} folhas e janelas; "
+          f"{int(volta.sum())} px de parede de volta")
+    return out
+
+
 def passos_subsolo_d(Q, ini):
     chave = "Subsolo"
     peg = pegada_subsolo(Q)
@@ -803,14 +947,14 @@ def passos_subsolo_d(Q, ini):
         ("bancadas", lambda im: C.bancadas_c(Q, im)),            # o peitoril cinza do WC DCE (a única peça cheia)
         ("pecas", lambda im: F.pecas_pdf(Q, im, ini, fora=fora, camas=camas)),
         ("aparelhos", lambda im: C.pecas_do_render(Q, im, ini, FORA_PECAS_S, C.neutro, "academia: os aparelhos")),
-        ("tampas", lambda im: C.camas_render(Q, F.tampas_vasos(Q, im), ini)),
+        ("tampas", lambda im: cama_dce_d(Q, C.camas_render(Q, F.tampas_vasos(Q, im), ini))),
         ("vasos", lambda im: F.vasos_cor(Q, im)),
         ("armario", lambda im: armario_dce_d(Q, im)),
         ("banhos", lambda im: box_wc_dce_d(Q, banhos_sub_d(Q, im))),
         ("paredes", lambda im: F.paredes(Q, im, cor=cinza)),
         ("soleiras", lambda im: nicho_d(Q, C.soleira_elevador(Q, F.soleiras(Q, im)))),
-        ("esquadrias", lambda im: portas_academia_sub_d(Q, C.janelas_s(
-            Q, B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m, parede=cinza), JANELAS_SUB_D))),
+        ("esquadrias", lambda im: pos_esquadrias_sub_d(Q, portas_academia_sub_d(Q, C.janelas_s(
+            Q, B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m, parede=cinza), JANELAS_SUB_D)), im)),
         ("escadas", lambda im: escada_sub_d(Q, im)),
         ("hachura", lambda im: AJ.subsolo_hachurado(im, peg, Q.px_m)),
         ("rotulos", lambda im: rotulos_sub_d(Q, im)),
