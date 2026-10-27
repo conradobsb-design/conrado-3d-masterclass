@@ -1588,7 +1588,9 @@ def chuveiros_terreo_d(Q, img):
 # entre o chuveiro e o vaso (as duas linhas tracejadas da ARQ_LOUÇAS E METAIS, 1252,3 a 1255,1 pt, de parede a parede),
 # que `F.boxes_granito` não achava; no render, um traço cinza-escuro. O traço sai (o granito de `desvio_px` ao lado) e
 # entra o vidro claro, com as faces finas
-BOX_GOURMET_TD = {"pt": (1252.3, 603.3, 1255.1, 669.4), "cor": (222, 226, 228), "face": (150, 154, 158),
+# Depois, o fechamento (usuário, 27/10/26: "faz o fechamento do box"): desde a parede de cima (579,8 pt; antes começava
+# em 603,3 pt e ficava um vão de uns 0,4 m)
+BOX_GOURMET_TD = {"pt": (1252.3, 579.8, 1255.1, 669.4), "cor": (222, 226, 228), "face": (150, 154, 158),
                   "face_forca": 0.55, "limpa_px": 3, "desvio_px": 9}
 
 
@@ -1645,9 +1647,50 @@ def biblioteca_terreo_d(Q, img):
     ga = C.ADEGA_C
     C.ADEGA_C = ADEGA_TD
     try:
-        return C.adega_c(Q, out)
+        out = C.adega_c(Q, out)
     finally:
         C.ADEGA_C = ga
+    return out
+
+
+# A adega em U (usuário, 27/10/26: "faz a adega em u"): além da prateleira do fundo (`ADEGA_TD`, a parede da direita),
+# as das paredes de cima e de baixo, do mesmo fundo (0,30 m), da prateleira do fundo até perto das folhas de vidro da
+# esquerda (`lados`: (onde fica a parede, retângulo pt)); a mesma rotina da Casa C (`C.adega_c`, que põe o gargalo na
+# parede da direita), na imagem girada para a parede de cada uma ficar à direita
+ADEGA_U_TD = {"lados": [("cima", (2130.0, 987.4, 2241.6, 1004.4)), ("baixo", (2130.0, 1066.8, 2241.6, 1083.8))],
+              "modulos": 2}
+
+
+class _QGirado:
+    """O quadro visto na imagem girada (`cima`: 90° no sentido horário; `baixo`: no anti-horário), para as rotinas que
+    só pedem `p2q` e `px_m`."""
+
+    def __init__(self, Q, lado, H, W):
+        self.Q, self.lado, self.H, self.W, self.px_m = Q, lado, H, W, Q.px_m
+
+    def p2q(self, x, y):
+        u, v = self.Q.p2q(x, y)
+        return ((self.H - 1) - v, u) if self.lado == "cima" else (v, (self.W - 1) - u)
+
+
+def adega_u_d(Q, img):
+    q = ADEGA_U_TD
+    out = img
+    ga = C.ADEGA_C
+    try:
+        for lado, (x0, y0, x1, y1) in q["lados"]:
+            H, W = out.shape[:2]
+            if lado == "cima":                                      # a parede de cima fica à direita
+                gir, pt = np.ascontiguousarray(np.rot90(out, -1)), (x0, y1, x1, y0)
+            else:                                                   # a de baixo
+                gir, pt = np.ascontiguousarray(np.rot90(out, 1)), (x1, y0, x0, y1)
+            C.ADEGA_C = dict(ADEGA_TD, pt=pt, modulos=q["modulos"])
+            gir = C.adega_c(_QGirado(Q, lado, H, W), gir)
+            out = np.ascontiguousarray(np.rot90(gir, 1 if lado == "cima" else -1))
+    finally:
+        C.ADEGA_C = ga
+    print("    adega: em U, com as prateleiras das paredes de cima e de baixo")
+    return out
 
 
 def banco_varanda_d(Q, img):
@@ -1760,6 +1803,10 @@ PROJ_LAJES_TD = {
                (2675.3, 2715.0), (2726.3, 2766.0), (2777.4, 2817.0), (2828.4, 2868.1)],
     "garagem": {"y": (570.7, 661.4), "contorno": False,
                 "tracejadas": [((1147.3, 559.4), (2910.6, 559.4)), ((2383.3, 570.7), (2899.3, 570.7)),
+                               # o fechamento na ponta esquerda (usuário, 27/10/26: "faltou o fechamento da projeção em
+                               # tracejado branco"): as duas linhas de pé da ARQ_PAREDE e a de dentro até a parede
+                               ((1147.3, 559.4), (1147.3, 633.9)), ((1158.6, 570.7), (1158.6, 633.1)),
+                               ((1158.6, 570.7), (1195.6, 570.7)),
                                ((2383.3, 662.0), (2899.3, 662.0)), ((2899.3, 570.7), (2899.3, 662.0)),
                                ((2910.6, 559.4), (2910.6, 662.0)), ((2383.3, 627.4), (2383.3, 662.0))],
                 "finas": [], "limpar": [((2214.0, 2910.6), 559.4), ((2383.3, 2899.3), 570.7)]},
@@ -1779,31 +1826,6 @@ PROJ_LAJES_TD = {
 
 
 ZONAS_LAJE_TD = ("garagem", "grama", "lateral")
-# A laje na borda do jardim da sala íntima (usuário, 27/10/26: "vamos representar a laje em tom cinza claro aqui, na
-# borda do jardim da sala íntima"): no PDF, a faixa da EST_LAJE com o preenchimento branco entre as paredes do jardim
-# (até 1897,4 pt; o render tem a borda do jardim 3 px abaixo, com um fio cinza e preto, que a faixa cobre), no cinza
-# claro da faixa de laje da lateral da sala íntima (`fonte_pt`, a parte de baixo do brise, sem as bordas), deitada
-# (o lado da parede em cima), espelhada ao longo do comprimento e mais lisa (`variacao`)
-LAJE_JARDIM_TD = {"alvo_pt": (1263.7, 1888.8, 1575.5, 1899.9), "fonte_pt": (2277.0, 1655.8, 2282.7, 1883.8),
-                  "variacao": 0.4}                             # o quanto fica das manchas da lateral, em volta do corte
-
-
-def laje_jardim_d(Q, img, antes):
-    q = LAJE_JARDIM_TD
-    sx0, sy0, sx1, sy1 = F.ret_q(Q, q["fonte_pt"])
-    tx0, ty0, tx1, ty1 = F.ret_q(Q, q["alvo_pt"])
-    fonte = antes[sy0:sy1, sx0:sx1].transpose(1, 0, 2)            # de pé para deitada: a parede (à esquerda) em cima
-    fonte = np.concatenate([fonte, fonte[:, ::-1]], axis=1)
-    fonte = np.concatenate([fonte] * (1 + (tx1 - tx0) // fonte.shape[1]), axis=1)[:, :tx1 - tx0]
-    faixa = cv2.resize(fonte, (tx1 - tx0, ty1 - ty0), interpolation=cv2.INTER_AREA).astype(np.float32)
-    perfil = np.median(faixa, axis=1, keepdims=True)              # o corte da faixa, sem as manchas da lateral
-    faixa = perfil + q["variacao"] * (faixa - perfil)
-    out = img.copy()
-    out[ty0:ty1, tx0:tx1] = np.clip(faixa, 0, 255).astype(np.uint8)
-    print(f"    jardim da sala íntima: a laje da borda em cinza claro ({tx1 - tx0} x {ty1 - ty0} px)")
-    return out
-
-
 def projecoes_lajes_td(Q, img):
     from scipy import ndimage
     q = PROJ_LAJES_TD
@@ -1944,7 +1966,12 @@ RECOLHE_TD = {"fonte_pt": (1589.1, 739.3, 1597.6, 876.9), "alvo_pt": (1589.1, 13
 # parede de cima do elevador (branco no PDF) recebe o mesmo vão de cima do living, girado (a ponta junto da porta, à
 # direita, na porta); `alvo_pt` já só o vão, entre as faces das paredes
 RECOLHE_ELEV_TD = {"alvo_pt": (1137.0, 1382.1, 1254.0, 1389.5)}
-BEIRAL_BEGE_TD = {"x_pt": (1596.0, 2057.2), "y_pt": (1888.8, 1898.0), "fonte_px": (880, 1700)}
+# Depois, de fora a fora (usuário, 27/10/26, vendo a borda do jardim da sala íntima em cinza e a ponta da direita em
+# concreto: "vamos manter o beiral no mesmo tom claro e uniforme de fora a fora"): da laje sob o jardim (a EST_LAJE de
+# 1252,3 pt, que passa sob as pontas das paredes dele) até a borda da laje da lateral (2284,3 pt); sob o jardim, as
+# `grama_px` linhas logo abaixo do beiral (o fio cinza e preto da borda do jardim no render) recebem a grama de baixo
+BEIRAL_BEGE_TD = {"x_pt": (1252.3, 2284.3), "y_pt": (1888.8, 1898.0), "fonte_px": (880, 1700),
+                  "grama_x_pt": (1252.3, 1596.0), "grama_px": 3}
 
 
 def portas_vidro_td(Q, img):
@@ -1992,11 +2019,14 @@ def portas_vidro_td(Q, img):
     alvo = out[by0:by1, bx0:bx1]
     livre = np.ones(alvo.shape[:2], bool)
     alvo[livre] = tira[livre]
+    (gx0, _), (gx1, _) = Q.p2q(bq["grama_x_pt"][0], 0), Q.p2q(bq["grama_x_pt"][1], 0)
+    gx0, gx1, g = int(np.floor(gx0)), int(np.ceil(gx1)), bq["grama_px"]
+    out[by1:by1 + g, gx0:gx1] = out[by1 + g:by1 + 2 * g, gx0:gx1]
     for r in NICHOS_BEIRAL_TD:
         x0, y0, x1, y1 = F.ret_q(Q, r)
         h = y1 - y0
         out[y0:y1, x0:x1] = out[y1 + 1:y1 + 1 + h, x0:x1]
-    print(f"    {n} px escuros das folhas antigas (cozinha e living) voltam ao piso; o beiral de baixo à direita "
+    print(f"    {n} px escuros das folhas antigas (cozinha e living) voltam ao piso; o beiral de baixo de fora a fora "
           f"({int(livre.sum())} px) e {len(NICHOS_BEIRAL_TD)} nichos de janela da fachada de baixo no Bege Bahia")
     return out
 
@@ -2019,7 +2049,8 @@ def rotulos_terreo_d(Q, img):
     entram como obstáculo."""
     rot = B.rotulos_casab(Q.pg, Q.p2q2000)
     rf = F.ROTULOS_F
-    obst = [r for _, r, _ in GUARDA_ROUPAS_TD["pecas"]] + [BANCO_VARANDA_TD["pt"], ADEGA_TD["pt"]]
+    obst = [r for _, r, _ in GUARDA_ROUPAS_TD["pecas"]] + [BANCO_VARANDA_TD["pt"], ADEGA_TD["pt"]] + \
+        [r for _, r in ADEGA_U_TD["lados"]]
     pontos = dict(rf["pontos"].get(Q.chave, {}), **ROTULOS_TD["pontos"])
     F.ROTULOS_F = dict(rf, pontos=dict(rf["pontos"], **{Q.chave: pontos}),
                        obstaculos_pt=dict(rf.get("obstaculos_pt", {}), **{Q.chave: obst}),
@@ -2080,11 +2111,12 @@ def passos_terreo_d(Q, ini, M):
         ("soleiras", lambda im: C.soleira_elevador(Q, F.soleiras(Q, im))),
         # a entrada das esquadrias vai em cópia: `F.esquadrias_terreo` escreve nela, e o `antes` de `pos_esquadrias_d`
         # tem de ser a etapa das soleiras (os recortes atrás das folhas abertas não voltavam)
-        ("esquadrias", lambda im: pos_vidros_d(Q, portas_vidro_td(Q, pos_esquadrias_d(
-            Q, F.esquadrias_terreo(Q, im.copy(), parede=cinza), im)), im)),
+        # a adega em U depois das esquadrias: a limpeza delas espelhava a ponta da prateleira junto do vidro
+        ("esquadrias", lambda im: adega_u_d(Q, pos_vidros_d(Q, portas_vidro_td(Q, pos_esquadrias_d(
+            Q, F.esquadrias_terreo(Q, im.copy(), parede=cinza), im)), im))),
         ("cortinas", lambda im: sem_trilho_fora_d(Q, F.cortinas(Q, im, paredes_pdf=True), im)),
         ("escadas", lambda im: escadas_terreo_d(Q, im)),
-        ("projecoes", lambda im: laje_jardim_d(Q, projecoes_lajes_td(Q, projecoes_terreo_d(Q, im)), im)),
+        ("projecoes", lambda im: projecoes_lajes_td(Q, projecoes_terreo_d(Q, im))),
         ("seta", lambda im: seta_terreo_d(Q, im)),
         ("rotulos", lambda im: rotulos_terreo_d(Q, im)),
     ]

@@ -3004,3 +3004,16 @@ Pedidos, vendo a final (cada um com um recorte): "volta as cadeiras que estavam 
 Rodado `final3840_casad.py Terreo --de moveis`. Antes e depois: `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_pedidos2710e_{ripas_suite_master,tracejado_banho_gourmet,soleira_cozinha_servico,rotulo_wc_dce,sofa_living,laje_lateral,laje_jardim_sala_intima}_antes_depois.jpg`. O Subsolo, rodado de novo da hachura, não muda (0 px). Prancha do Térreo e PDF da Casa D refeitos.
 
 Segue em aberto (do lote anterior): as banquetas do Térreo aprovado da Casa C de costas para a ilha (`BANQUETAS_C["giro"]` 270; a correção seria 90), aguardando o OK do usuário.
+
+### Depois: beiral num tom só, fechamento do tracejado, box do banho gourmet e adega em U (27/10/26)
+
+Pedidos, vendo a final (cada um com um recorte): "vamos manter o beiral no mesmo tom claro e uniforme de fora a fora" (o beiral de baixo, do jardim da sala íntima à suíte 2); "faltou o fechamento da projeção em tracejado branco." (a ponta esquerda da laje da fachada de cima, junto ao banho gourmet); "faz o fechamento do box" (o banho gourmet); "faz a adega em u".
+
+- Beiral de baixo: o Bege Bahia claro e uniforme de fora a fora, também sob o jardim da sala íntima. Substitui o cinza claro da borda do jardim, do lote anterior (a regra foi revista nas REGRAS, seção 9); a faixa de laje da lateral, junto ao brise, segue em cinza claro. Logo abaixo do beiral, onde o render tinha um fio cinza, a grama.
+- Fechamento do tracejado: no PDF, a projeção da laje fecha na ponta esquerda com duas linhas de pé (1147,3 e 1158,6 pt) e um trecho de volta (570,7 pt); agora em branco, como o resto.
+- Box do banho gourmet: o vidro fixo vai da parede de cima à de baixo, como as duas linhas tracejadas do PDF (antes começava uns 0,4 m abaixo da parede).
+- Adega em U: além da prateleira do fundo, as das paredes de cima e de baixo, no mesmo desenho (marcenaria areia com veio, 2 módulos cada, 20 garrafas na escala, o gargalo para a parede), da prateleira do fundo até perto das folhas de vidro; o rótulo fora delas. Elas entram depois das esquadrias: a limpeza das esquadrias, que espelha o piso de junto do vidro, copiava a ponta da prateleira de baixo para o vão.
+
+Rodado `final3840_casad.py Terreo --de biblioteca`. Antes e depois: `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_pedidos2710f_{beiral_esquerda,beiral_direita,fechamento_projecao,box_banho_gourmet,adega_u}_antes_depois.jpg`. O Subsolo, rodado de novo da hachura, não muda (0 px). Prancha do Térreo e PDF da Casa D refeitos.
+
+Seguem em aberto, aguardando o usuário: as cadeiras dos jogos da varanda ("volta as cadeiras que estavam antes": qual versão), a proposta A ou B do estar do living, a faixa branca vertical à esquerda do elevador (manter ou cinza) e as banquetas do Térreo aprovado da Casa C (`BANQUETAS_C["giro"]` 270 → 90, sem mexer na Casa C sem o OK). O Térreo da Casa D segue sem o OK.
