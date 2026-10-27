@@ -672,6 +672,57 @@ def jardins_vidros_t(Q, img):
     return out
 
 
+# As portas de vidro dos jardins de inverno (usuário, 27/10/26, vendo a final: "melhore o aspecto das portas de vidro dos
+# jardins de inverno"): eram os traços finos e falhados das esquadrias. Ficam como as do escritório e da adega
+# (`final3840_casaa.portas_vidro`): cada folha de correr do PDF (as faixas brancas da ARQ_PAREDE, com os montantes de
+# 4,5 pt nas pontas) em alumínio, com o vidro no meio, o contorno e a sombra curta, e os batentes. Antes, o fundo da faixa
+# do vidro é refeito: a metade de fora com o travertino de fora, a de dentro com as plantas do jardim (cada uma copiada
+# logo ao lado, `fundo_px` além da faixa), para não voltar o risco claro entre as plantas e as folhas. Laterais do
+# JARDIM DE INVERNO: 2 folhas cada; embaixo: 3; no alto do JARDIM DE INVERNO 2: 2. `jardim` é o lado das plantas.
+PORTAS_JARDINS_TC = {"fundo_px": 3, "portas": [
+    {"nome": "do jardim de inverno, à esquerda", "faixa": (1553.7, 1110.6, 1562.2, 1357.2), "jardim": "dir",
+     "batentes": [(1553.7, 1110.6, 1562.2, 1112.8), (1553.7, 1354.9, 1562.2, 1357.2)],
+     "folhas": [((1559.3, 1112.8, 1562.2, 1236.1), "y"), ((1556.5, 1231.6, 1559.3, 1354.9), "y")], "montante_pt": 4.5},
+    {"nome": "do jardim de inverno, à direita", "faixa": (1802.5, 1110.6, 1811.0, 1357.2), "jardim": "esq",
+     "batentes": [(1802.5, 1110.6, 1811.0, 1112.8), (1802.5, 1354.9, 1811.0, 1357.2)],
+     "folhas": [((1802.5, 1112.8, 1805.4, 1236.1), "y"), ((1805.4, 1231.6, 1808.2, 1354.9), "y")], "montante_pt": 4.5},
+    {"nome": "do jardim de inverno, embaixo", "faixa": (1562.2, 1357.2, 1802.5, 1365.7), "jardim": "cima",
+     "batentes": [(1562.2, 1357.2, 1564.4, 1365.7), (1800.3, 1357.2, 1802.5, 1365.7)],
+     "folhas": [((1718.6, 1357.2, 1800.3, 1360.0), "x"), ((1641.5, 1360.0, 1723.2, 1362.8), "x"),
+                ((1564.4, 1362.8, 1646.1, 1365.7), "x")], "montante_pt": 4.6},
+    {"nome": "do jardim de inverno 2, em cima", "faixa": (1672.7, 997.2, 1802.5, 1005.7), "jardim": "baixo",
+     "batentes": [(1672.7, 997.2, 1675.0, 1005.7), (1800.3, 997.2, 1802.5, 1005.7)],
+     "folhas": [((1675.0, 1002.8, 1739.9, 1005.7), "x"), ((1735.4, 1000.0, 1800.3, 1002.8), "x")], "montante_pt": 4.5}]}
+
+
+def portas_jardins_t(Q, img):
+    import final3840_casaa as FA
+    q = PORTAS_JARDINS_TC
+    out = img.copy()
+    for p in q["portas"]:
+        x0, y0, x1, y1 = F.ret_q(Q, p["faixa"])
+        v = out if p["jardim"] in ("dir", "esq") else out.transpose(1, 0, 2)
+        c0, c1, l0, l1 = (x0, x1, y0, y1) if p["jardim"] in ("dir", "esq") else (y0, y1, x0, x1)
+        fonte = v.copy()
+        meio = (c0 + c1) // 2
+        larg = c1 - c0
+        jardim_depois = p["jardim"] in ("dir", "baixo")
+        # a metade de fora com o piso de fora, a de dentro com as plantas, copiadas logo além da faixa
+        for c in range(c0, c1):
+            de_dentro = (c >= meio) == jardim_depois
+            d = larg + q["fundo_px"]
+            src = c + d if (de_dentro == jardim_depois) else c - d
+            v[l0:l1, c] = fonte[l0:l1, src]
+    guarda = FA.PORTAS_VIDRO
+    FA.PORTAS_VIDRO = dict(FA.PORTAS_VIDRO, portas=[{k: v_ for k, v_ in p.items() if k not in ("faixa", "jardim")}
+                                                     for p in q["portas"]])
+    try:
+        out = FA.portas_vidro(Q, out)
+    finally:
+        FA.PORTAS_VIDRO = guarda
+    return out
+
+
 # O banco em L do deck (usuário, 27/10/26, vendo a final: "banco bronze fosco, sem falhas."): no PDF, o banco é o
 # assento (a madeira escura da legenda, a cor do `F.BANCO_DECK`) e, do lado do deck, a frente dele, uma faixa branca
 # fina da ARQ_PAREDE com o traço preto. O `F.deck_detalhes` pintava de bronze só o assento; a frente ficava a madeira do
@@ -1700,8 +1751,8 @@ def passos_terreo_c(Q, ini, M):
         ("elevador", lambda im: elevador_t(Q, im)),
         ("paredes", lambda im: F.paredes(Q, im, cor=cinza)),
         ("soleiras", lambda im: soleira_elevador(Q, soleiras_t(Q, im))),
-        ("esquadrias", lambda im: jardins_vidros_t(Q, pos_esquadrias_t(
-            Q, janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T), im))),
+        ("esquadrias", lambda im: portas_jardins_t(Q, jardins_vidros_t(Q, pos_esquadrias_t(
+            Q, janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T), im)))),
         ("cortinas", lambda im: cortinas_t(Q, im)),
         ("escadas", lambda im: escada_estreita_t(Q, degraus_largos_t(Q, im))),
         ("projecoes", lambda im: projecoes_t(Q, im)),
