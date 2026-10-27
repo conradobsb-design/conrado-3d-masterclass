@@ -191,6 +191,11 @@ FORA_PECAS_D = [(2060.0, 1495.0, 2256.0, 1640.0)]
 # os dois vasos do hall, junto aos brises, e a planta sobre a bancada gourmet (objetos de 15/10, item 22): as plantas do
 # render (no PDF, a da bancada é um contorno de traço)
 VASOS_D = [(2117.6, 1089.9, 2186.9, 1153.8), (2117.7, 1299.9, 2187.0, 1363.8)]
+# Os vasos do hall (usuário, 27/10/26: "o sombreado das plantas ficou muito carregado. suavize mais."): no render, cada
+# planta está sobre a sombra cinza dele, um quadrado entre 110 e 170 de luminância que `C.verde` (o escuro abaixo de 170
+# ligado às folhas) levava junto. Só as folhas vêm do render (o verde e o escuro abaixo de `escuro` ligado a ele), com a
+# sombra curta das peças mais leve e mais aberta (`sombra`)
+PLANTAS_VASO_TD = {"escuro": 95, "sombra": {"dist_m": 0.05, "sig_m": 0.05, "forca": 0.16}}
 # a planta sobre a bancada gourmet saiu (usuário, 27/10/26: "remova esse elemento decorativo do gourmet"): o render não
 # volta ali, e o desenho dela no PDF (traços da ARQ_LAYOUT HUMANIZAÇÃO) segue fora das peças; fica a pedra da bancada
 SEM_PLANTA_TD = [(1276.9, 681.3, 1315.9, 715.5)]
@@ -354,6 +359,26 @@ def jardins_d(Q, img):
 _vasos_b = F.vasos_sanitarios
 
 
+def folhas_d(reg):
+    """As folhas da planta do render: o verde (BGR: acima do vermelho) e o escuro abaixo de `escuro` ligado a ele, sem
+    buracos; a sombra cinza do render em volta fica fora."""
+    from scipy import ndimage
+    v = reg[..., 1] > reg[..., 2] + 12
+    m = cv2.morphologyEx((v | (reg.mean(axis=2) < PLANTAS_VASO_TD["escuro"])).astype(np.uint8), cv2.MORPH_CLOSE,
+                         np.ones((3, 3), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
+    return ndimage.binary_fill_holes(np.isin(lab, np.unique(lab[v & (lab > 0)])))
+
+
+def plantas_vaso_d(Q, img, ini):
+    guarda = F.PECAS["sombra"]
+    F.PECAS["sombra"] = PLANTAS_VASO_TD["sombra"]
+    try:
+        return C.pecas_do_render(Q, img, ini, VASOS_D, folhas_d, "hall: as plantas em vaso")
+    finally:
+        F.PECAS["sombra"] = guarda
+
+
 def vasos_sanitarios_d(Q):
     x0, y0, x1, y1 = BANQUETAS_D["caixa_pt"]
     return [(d, lado) for d, lado in _vasos_b(Q) if not (x0 <= d["rect"].x0 and d["rect"].x1 <= x1
@@ -442,14 +467,21 @@ MOVEIS_TD = {
     "ss": 4,
     "estofados": [("as 4 poltronas do estar junto à mesa de jantar", (1890.0, 930.0, 2075.0, 1120.0), (45, 60), False),
                   ("as 2 poltronas redondas do living", (1785.0, 1210.0, 1910.0, 1268.0), (38, 50), False),
-                  ("a poltrona da sala íntima", (1368.0, 1535.0, 1428.0, 1595.0), (45, 56), False, 99.0)],
+                  ("a poltrona da sala íntima", (1368.0, 1535.0, 1428.0, 1595.0), (45, 56), False, 99.0),
+                  # usuário, 27/10/26: "aprimore o revestimento dessa poltrona e seu apoio" (a poltrona girada e o puff)
+                  ("a poltrona e o apoio da suíte 2", (1605.0, 1580.0, 1705.0, 1665.0), (35, 60), False)],
     # a poltrona da sala íntima (o círculo do PDF, com o desenho miúdo): uma concha em bouclé, o assento (`assento`, do
     # raio) puxado para a frente (para a mesa de centro e o sofá), o encosto e os braços em volta, mais altos
     "conchas": {"a poltrona da sala íntima": {"frente": (-0.28, 0.96), "assento": 0.64, "desvio": 0.20}},
     "cor": {"poltrona": (200, 212, 222), "cadeira": (170, 180, 190)},
     "costura_min_pt": 14.0,
     "estofado": {"raio_m": 0.10, "altura": 3.0, "contraste": 0.8, "luz_min": -0.30, "luz_max": 0.18, "vale": 0.14,
-                 "trama": 0.035, "borda": 0.74, "costura_px": 0.9, "silhueta_px": 0.9, "semente": 2711},
+                 "trama": 0.035, "borda": 0.74, "costura_px": 0.9, "silhueta_px": 0.9, "semente": 2711,
+                 # os vincos (usuário, 27/10/26: "você tirou as linhas, mas não deixou o contorno delas em formato de
+                 # sombra para deixar claro as partes e encosto da poltrona"): cada traço de dentro do PDF (de
+                 # `vinco_min_pt` para cima, longe da borda) vira uma sombra macia, com o lado da luz mais claro
+                 "vinco": 0.30, "vinco_sig_px": 0.75, "vinco_min_pt": 2.5, "vinco_borda_px": 1.4, "realce": 0.10,
+                 "realce_px": 0.9},
     "madeiras": {"zonas_pt": [(1860.0, 930.0, 2075.0, 1120.0), (1785.0, 1210.0, 1910.0, 1268.0)], "lado_pt": (10, 60),
                  "quente": 28, "miolo_px": 2, "chanfro_m": 0.03, "chanfro": 1.6, "aro": 0.22},
     # as cadeiras das mesas de trabalho: (nome, caixa da cadeira do PDF, mesa, para onde olha, refazer o tampo sob a
@@ -467,12 +499,14 @@ MOVEIS_TD = {
                         (2122.5, 1701.8, 2167.8, 1815.1), (1, 0), False)],
     "cadeira": {"bloco": "banqueta_linho", "largura_bloco_m": 0.45, "m": 0.56, "sob": 1 / 3, "folga_px": 7},
     # os jogos de mesa da varanda gourmet (usuário, 27/10/26: "melhore o aspectos desses jogos de mesa. adicione um
-    # freijó às mesas e cadeiras mais realistas e humanizadas"): as 6 cadeiras de cada mesa (as caixas do PDF) viram a
-    # cadeira de madeira e linho, virada para o centro da mesa; a mesa redonda (1,60 m) em freijó, por cima delas
-    "jogos": [{"mesa_pt": (1254.9, 974.6, 1345.6, 1065.3), "semente": 31},
-              {"mesa_pt": (1425.0, 974.6, 1515.7, 1065.3), "semente": 32}],
-    "freijo": {"tom": (122, 172, 208), "veio": 0.03, "fibra": 0.045, "tabua_m": 0.16, "junta": 0.10, "brilho": 0.06,
-               "borda": 0.70, "chanfro_m": 0.02, "sombra": {"dist_m": 0.06, "sig_m": 0.045, "forca": 0.30}},
+    # freijó às mesas e cadeiras mais realistas e humanizadas"; depois, vendo o conjunto da biblioteca: "USE ESSA MESA E
+    # CADEIRAS NA VARANDA, NO LUGAR DAQUELAS"): o conjunto de mesa de madeira com 6 cadeiras de couro
+    # (`mesa_redonda_6_couro`, a referência do usuário das mesas da varanda da Casa E, na mesma disposição das cadeiras do
+    # PDF) no centro de cada mesa, com o tampo (`tampo_px` no bloco a `px_m_bloco`) no diâmetro da mesa do PDF (1,60 m);
+    # o segundo girado 180°, como na Casa E
+    "jogos": [{"mesa_pt": (1254.9, 974.6, 1345.6, 1065.3), "giro": 0},
+              {"mesa_pt": (1425.0, 974.6, 1515.7, 1065.3), "giro": 180}],
+    "conjunto_varanda": {"bloco": "mesa_redonda_6_couro", "px_m_bloco": 400, "tampo_px": 705, "luz_px": 8.0},
     "diagonais": {"min_pt": 30.0, "faixa_px": 5.0, "claro": 12, "vizinhos": 10, "mediana_px": 7},
 }
 
@@ -503,7 +537,7 @@ def _mascara_pdf(Q, ds, X0, Y0, w, h, ss, traco_px=None):
     return m
 
 
-def estofado_d(Q, img, fills, tracos, cor, rng, concha=None):
+def estofado_d(Q, img, fills, tracos, cor, rng, concha=None, vincos=()):
     q, ss = MOVEIS_TD["estofado"], MOVEIS_TD["ss"]
     X0, Y0, X1, Y1 = _caixa_px(Q, [d["rect"] for d in fills])
     w, h = X1 - X0, Y1 - Y0
@@ -517,6 +551,11 @@ def estofado_d(Q, img, fills, tracos, cor, rng, concha=None):
         sc = (int(round(cx + fr[0] * concha["desvio"] * R)), int(round(cy + fr[1] * concha["desvio"] * R)))
         cv2.circle(Cs, sc, int(round(concha["assento"] * R)), 255, max(1, int(round(q["costura_px"] * ss))))
         Cs &= M
+    # os vincos: os traços de dentro e a costura da concha, longe da borda (lá fica a borda macia)
+    V = (_mascara_pdf(Q, vincos, X0, Y0, w, h, ss, traco_px=q["costura_px"]) > 0) if vincos else np.zeros(M.shape, bool)
+    if concha:
+        V |= Cs > 0
+    V &= cv2.distanceTransform((M > 0).astype(np.uint8), cv2.DIST_L2, 5) > q["vinco_borda_px"] * ss
     n, lab = cv2.connectedComponents(((M > 0) & (Cs == 0)).astype(np.uint8), connectivity=4)
     hgt = np.zeros(M.shape, np.float32)
     R = q["raio_m"] * Q.px_m * ss
@@ -538,6 +577,17 @@ def estofado_d(Q, img, fills, tracos, cor, rng, concha=None):
     tr = a / max(a.std(), 1e-6) + 0.25 * b / max(b.std(), 1e-6)
     tr /= max(tr.std(), 1e-6)
     f = (1 + luz) * (1 - q["vale"] * (1 - hgt)) * (1 + q["trama"] * tr)
+    if V.any():
+        sg = q["vinco_sig_px"] * ss
+        pico = min(1.0, q["costura_px"] * ss / (np.sqrt(2 * np.pi) * sg))
+        d_ = q["realce_px"] * ss
+
+        def vinco(dx, dy):
+            v = cv2.warpAffine(V.astype(np.float32), np.float32([[1, 0, dx], [0, 1, dy]]), V.shape[::-1])
+            return np.clip(cv2.GaussianBlur(v, (0, 0), sg) / pico, 0, 1)
+        escuro = vinco(d_ * 0.4, -d_ * 0.4)                # a sombra do vinco, puxada para o lado oposto à luz
+        claro = np.clip(vinco(-d_, d_) - escuro, 0, 1)       # a borda do vinco virada para a luz (alto à direita)
+        f *= (1 - q["vinco"] * escuro) * (1 + q["realce"] * claro)
     rgb = np.float32(cor)[None, None, :] * f[..., None]
 
     def red(x):
@@ -748,85 +798,170 @@ def cadeiras_mesas_d(Q, img, piso):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def _freijo(Q, h, w, vertical, rng):
-    """O freijó: o dourado claro, o veio reto e fino no comprido, as tábuas de `tabua_m` com a junta leve."""
-    q = MOVEIS_TD["freijo"]
-    H, W = (h, w) if not vertical else (w, h)
-    n1 = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), sigmaX=80.0, sigmaY=1.6)
-    n2 = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), sigmaX=120.0, sigmaY=5.0)
-    n3 = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), sigmaX=6.0, sigmaY=1.2)
-    f = 1 + q["veio"] * n2 / max(n2.std(), 1e-6) + q["fibra"] * (n1 / max(n1.std(), 1e-6)
-                                                                 + 0.5 * n3 / max(n3.std(), 1e-6))
-    tb = q["tabua_m"] * Q.px_m * 4
-    y = np.arange(H, dtype=np.float32)
-    junta = np.exp(-((y % tb) - 0.0) ** 2 / 2.0) + np.exp(-((y % tb) - tb) ** 2 / 2.0)
-    tons = 1 + 0.04 * rng.normal(0, 1, int(H / tb) + 2)
-    f *= (1 - q["junta"] * junta)[:, None] * tons[(y // tb).astype(int)][:, None]
-    T = np.float32(q["tom"])[None, None, :] * f[..., None]
-    return T if not vertical else T.transpose(1, 0, 2)
+def bege_limpo_d(Q, piso, caixa, fora):
+    """O Bege Bahia dos pisos refeito na `caixa` (px) onde a etapa dos pisos ainda tem o render (as peças do render
+    ficam fora da legenda): o mesmo desenho (`textura("bege_bahia")` com a semente e o retângulo de `F.piso_textura`,
+    guardado em `F.ETAPAS`) na luz do piso em volta (o piso dividido pelo desenho, liso, levado para dentro, fora de
+    `fora`)."""
+    x0, y0, x1, y1 = caixa
+    arq = F.ETAPAS / f"{Q.chave}_bege_{x0}_{y0}_{x1}_{y1}.npy"
+    bege = Q.cor([(232, 232, 232)], tol=6)
+    if arq.exists():
+        Dd = np.load(arq)
+    else:
+        sys.path.insert(0, str(RAIZ / "_texturas"))
+        from texturas import textura
+        ys, xs = np.nonzero(bege)
+        by0, bx0, by1, bx1 = ys.min(), xs.min(), ys.max() + 1, xs.max() + 1
+        i = [pz[3] for pz in F.PISOS[Q.chave]].index("bege")
+        T = textura("bege_bahia", Q.px_m, by1 - by0, bx1 - bx0, semente=700 + i).astype(np.float32)
+        Dd = (T / T.reshape(-1, 3).mean(axis=0))[y0 - by0:y1 - by0, x0 - bx0:x1 - bx0]
+        np.save(arq, Dd)
+    sub = piso[y0:y1, x0:x1].astype(np.float32)
+    ok = (cv2.erode(bege[y0:y1, x0:x1].astype(np.uint8), np.ones((5, 5), np.uint8)) > 0) & ~fora[y0:y1, x0:x1]
+    sg = MOVEIS_TD["conjunto_varanda"]["luz_px"]
+    L = cv2.GaussianBlur(sub / Dd * ok[..., None], (0, 0), sg) / np.maximum(
+        cv2.GaussianBlur(ok.astype(np.float32), (0, 0), sg), 1e-4)[..., None]
+    return L * Dd
 
 
 def jogos_mesa_d(Q, img, piso):
-    """Os jogos de mesa da varanda gourmet: as cadeiras antigas e a mesa saem (o piso da etapa dos pisos), as 6 cadeiras
-    da biblioteca entram viradas para o centro, e a mesa redonda em freijó vem por cima delas, com a borda macia, o
-    chanfro, a luz do alto à direita e a sombra curta (sobre o piso e as cadeiras)."""
-    q, qf = MOVEIS_TD, MOVEIS_TD["freijo"]
+    """Os jogos de mesa da varanda gourmet: o jogo do render sai (o piso da etapa dos pisos na caixa da mesa e das
+    cadeiras do PDF) e entra o conjunto de mesa de madeira e 6 cadeiras de couro da referência do usuário
+    (`mesa_redonda_6_couro`), no centro da mesa do PDF, com o tampo no diâmetro dela, girado `giro`, com a sombra curta."""
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    q = MOVEIS_TD["conjunto_varanda"]
     out = img.astype(np.float32)
     P = piso.astype(np.float32)
-    ss = 4
-    for jg in q["jogos"]:
-        rng = np.random.default_rng(jg["semente"])
+    cor, al = blocos.bloco(q["bloco"], q["px_m_bloco"])
+    for jg in MOVEIS_TD["jogos"]:
         mesa = jg["mesa_pt"]
         mcx, mcy = (mesa[0] + mesa[2]) / 2, (mesa[1] + mesa[3]) / 2
         cads = [d["rect"] for d in Q.desenhos if d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO" and d["type"] in ("f", "fs")
                 and 28 <= max(d["rect"].width, d["rect"].height) <= 40
                 and abs((d["rect"].x0 + d["rect"].x1) / 2 - mcx) < 80 and abs((d["rect"].y0 + d["rect"].y1) / 2 - mcy) < 80]
         # o piso de volta na caixa do jogo inteiro (mesa e cadeiras, com as sombras)
-        rs = cads + [type(cads[0])(*mesa)] if cads else []
         m = np.zeros(out.shape[:2], np.float32)
-        for r in rs:
+        for r in cads + [type(cads[0])(*mesa)] if cads else []:
             a0, b0, a1, b1 = F.ret_q(Q, (r.x0, r.y0, r.x1, r.y1))
             m[b0 - 8:b1 + 9, a0 - 9:a1 + 8] = 1
         m = cv2.GaussianBlur(m, (0, 0), 1.5)
-        out = out * (1 - m[..., None]) + P * m[..., None]
-        # a mesa (o círculo do PDF), em 4x
+        # embaixo do jogo do render, a etapa dos pisos ainda tem as cadeiras dele: ali o Bege Bahia é refeito
+        ys, xs = np.nonzero(m > 0.01)
+        cx0, cy0, cx1, cy1 = xs.min() - 30, ys.min() - 30, xs.max() + 31, ys.max() + 31
+        Pl = P.copy()
+        Pl[cy0:cy1, cx0:cx1] = bege_limpo_d(Q, piso, (cx0, cy0, cx1, cy1), m > 0.01)
+        out = out * (1 - m[..., None]) + Pl * m[..., None]
+        # o conjunto em 4x, com o tampo no diâmetro da mesa do PDF, e reduzido ao quadro
         (ax, ay), (bx, by) = Q.p2q(mesa[0], mesa[1]), Q.p2q(mesa[2], mesa[3])
-        tx0, ty0 = int(np.floor(ax)) - 4, int(np.floor(ay)) - 4
-        tw, th = int(np.ceil(bx)) + 5 - tx0, int(np.ceil(by)) + 5 - ty0
-        cx4, cy4, r4 = ((ax + bx) / 2 - tx0) * ss, ((ay + by) / 2 - ty0) * ss, (bx - ax) / 2 * ss
-        Md = np.zeros((th * ss, tw * ss), np.uint8)
-        cv2.circle(Md, (int(round(cx4)), int(round(cy4))), int(round(r4)), 255, -1, cv2.LINE_AA)
-        mesa_a = np.zeros(out.shape[:2], np.float32)
-        mesa_a[ty0:ty0 + th, tx0:tx0 + tw] = cv2.resize(Md.astype(np.float32) / 255, (tw, th),
-                                                        interpolation=cv2.INTER_AREA)
-        # as cadeiras, viradas para o centro, por baixo da mesa
-        for r in cads:
-            ccx, ccy = Q.p2q((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2)
-            ox, oy = Q.p2q(mcx, mcy)
-            fr = np.float32([ox - ccx, oy - ccy])
-            cor, a = _cadeira_bloco(Q, fr / np.linalg.norm(fr))
-            _pousar(out, cor, a, ccx, ccy, Q.px_m, cobre=mesa_a)
-        # a sombra da mesa e a mesa
-        s = qf["sombra"]
-        d_ = s["dist_m"] * Q.px_m
-        sb = cv2.GaussianBlur(cv2.warpAffine(mesa_a, np.float32([[1, 0, -d_], [0, 1, d_]]), mesa_a.shape[::-1]),
-                              (0, 0), s["sig_m"] * Q.px_m) * s["forca"]
-        out *= (1 - sb * (1 - mesa_a))[..., None]
-        T = _freijo(Q, th * ss, tw * ss, False, rng)
-        yy, xx = np.mgrid[0:th * ss, 0:tw * ss].astype(np.float32)
-        rr = np.hypot(xx - cx4, yy - cy4) / max(r4, 1)
-        ch = qf["chanfro_m"] * Q.px_m * ss / max(r4, 1)
-        borda = np.clip((1 - rr) / ch, 0, 1)
-        ang = np.arctan2(yy - cy4, xx - cx4)
-        luz_b = (1 - borda) * (-np.sin(ang) * 0.7 + np.cos(ang) * 0.7) * 0.18      # em cima à direita, mais clara
-        brilho = qf["brilho"] * np.exp(-((xx - cx4 - 0.35 * r4) ** 2 + (yy - cy4 + 0.35 * r4) ** 2) / (0.6 * r4) ** 2)
-        T = T * (1 + luz_b + brilho)[..., None] * (1 - (1 - qf["borda"]) * (rr > 1 - 0.6 / max(r4 / ss, 1)))[..., None]
-        cor = cv2.resize(T * (Md > 0)[..., None], (tw, th), interpolation=cv2.INTER_AREA) / \
-            np.maximum(mesa_a[ty0:ty0 + th, tx0:tx0 + tw], 1e-4)[..., None]
-        al = mesa_a[ty0:ty0 + th, tx0:tx0 + tw][..., None]
-        reg = out[ty0:ty0 + th, tx0:tx0 + tw]
-        reg[:] = reg * (1 - al) + cor * al
-        print(f"    jogo de mesa da varanda: {len(cads)} cadeiras de madeira e linho e a mesa de 1,60 m em freijó")
+        sc = 4 * (bx - ax) / q["tampo_px"]
+        c = cv2.resize(cor.astype(np.float32) * al[..., None], None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
+        a = cv2.resize(al.astype(np.float32), None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
+        if jg["giro"]:
+            c, a = cv2.rotate(c, cv2.ROTATE_180), cv2.rotate(a, cv2.ROTATE_180)
+        h4, w4 = a.shape
+        h1, w1 = int(np.ceil(h4 / 4)), int(np.ceil(w4 / 4))
+        c = cv2.resize(np.pad(c, ((0, h1 * 4 - h4), (0, w1 * 4 - w4), (0, 0))), (w1, h1), interpolation=cv2.INTER_AREA)
+        a = cv2.resize(np.pad(a, ((0, h1 * 4 - h4), (0, w1 * 4 - w4))), (w1, h1), interpolation=cv2.INTER_AREA)
+        c = c / np.maximum(a, 1e-4)[..., None]
+        _pousar(out, c, a, (ax + bx) / 2 + (w1 - w4 / 4) / 2, (ay + by) / 2 + (h1 - h4 / 4) / 2, Q.px_m)
+        print("    jogo de mesa da varanda: a mesa de madeira (1,60 m) e as 6 cadeiras de couro da referência do usuário")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+# A mesa de jantar do living (usuário, 27/10/26: "melhore o aspecto das cadeiras, sem repetir o modelo das demais da
+# planta"): as 10 cadeiras do PDF (ARQ_MOBILIÁRIO, de `lado_pt`, junto à mesa, com 1/3 sob o tampo) saem, com o piso da
+# etapa dos pisos, e entra a cadeira estofada em linho com o quadro de madeira da mesa de 10 lugares da biblioteca
+# (`mesa_jantar_10`, a segunda de cima: a cadeira até onde começa o tampo, `recorte` em px do bloco a `px_m_bloco`), na
+# largura da cadeira do PDF, de frente para a mesa, com a borda do recorte `sob_px` sob o tampo; a mesa fica por cima. As
+# outras cadeiras da planta são a de madeira e linho (`banqueta_linho`, mesas de trabalho e banquetas) e as de couro dos
+# jogos da varanda (`mesa_redonda_6_couro`)
+JANTAR_TD = {"mesa_pt": (1697.4, 956.1, 1765.4, 1126.3), "lado_pt": (26.0, 32.0), "bloco": "mesa_jantar_10",
+             "px_m_bloco": 400, "recorte": (496, 6, 727, 150), "sob_px": 2.0, "folga_px": 7,
+             # o linho da foto, cinza-esverdeado e na sombra da mesa, no bege quente (`tom`, BGR, na luz `gama`); a
+             # madeira (saturação acima de `sat_madeira`) fica
+             "linho": {"tom": (176, 196, 214), "gama": 0.75, "sat_madeira": (0.30, 0.15)}}
+
+
+def jantar_d(Q, img, piso):
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    import final3840_casaa as FA
+    q, s = JANTAR_TD, F.PECAS["sombra"]
+    mesa = q["mesa_pt"]
+    cads = [d["rect"] for d in Q.desenhos if d.get("layer") == "ARQ_MOBILIÁRIO" and d["type"] in ("f", "fs")
+            and q["lado_pt"][0] <= min(d["rect"].width, d["rect"].height)
+            and max(d["rect"].width, d["rect"].height) <= q["lado_pt"][1]
+            and mesa[0] - 35 <= d["rect"].x0 and d["rect"].x1 <= mesa[2] + 35
+            and mesa[1] - 35 <= d["rect"].y0 and d["rect"].y1 <= mesa[3] + 35]
+    out = img.astype(np.float32)
+    P = piso.astype(np.float32)
+    mesa_a = FA.ret_aa(Q, mesa)
+    f = q["folga_px"]
+    m = np.zeros(mesa_a.shape, np.float32)
+    # a etapa dos pisos ainda tem as cadeiras do render embaixo das do PDF: o piso de cada caixa vem do travertino ao
+    # lado, nas mesmas linhas (os estratos são deitados), do primeiro deslocamento cuja origem é toda travertino na
+    # legenda do PDF
+    trav = cv2.erode(Q.cor(next(pz[1] for pz in F.PISOS[Q.chave] if pz[3] == "travertino"), tol=6).astype(np.uint8),
+                     np.ones((5, 5), np.uint8)) > 0
+    Pl = P.copy()
+    for r in cads:
+        a0, b0, a1, b1 = F.ret_q(Q, (r.x0, r.y0, r.x1, r.y1))
+        x0_, y0_, x1_, y1_ = a0 - f - 3, b0 - f - 3, a1 + f + 3, b1 + f + 3
+        m[b0 - f:b1 + f, a0 - f:a1 + f] = 1
+        passo = x1_ - x0_ + 2
+        fora = -1 if (r.x0 + r.x1) / 2 < (mesa[0] + mesa[2]) / 2 else 1
+        for dx in (fora * passo, -fora * passo, 2 * fora * passo, -2 * fora * passo):
+            if 0 <= x0_ + dx and x1_ + dx <= Q.W and trav[y0_:y1_, x0_ + dx:x1_ + dx].all():
+                Pl[y0_:y1_, x0_:x1_] = P[y0_:y1_, x0_ + dx:x1_ + dx]
+                break
+    m = cv2.GaussianBlur(m, (0, 0), 1.5) * (1 - np.clip(mesa_a * 1.5, 0, 1))
+    out = out * (1 - m[..., None]) + Pl * m[..., None]
+    k = 4 * Q.px_m
+    cor, al = blocos.bloco(q["bloco"], k)
+    e = k / q["px_m_bloco"]
+    x0, y0, x1, y1 = (int(round(v * e)) for v in q["recorte"])
+    c0 = np.clip(cor[y0:y1, x0:x1].astype(np.float32), 0, 255)
+    ql = q["linho"]
+    sat = cv2.cvtColor(c0.astype(np.uint8), cv2.COLOR_BGR2HSV)[..., 1:2].astype(np.float32) / 255
+    madeira = np.clip((sat - ql["sat_madeira"][0]) / ql["sat_madeira"][1], 0, 1)
+    linho = 255 * (c0.mean(axis=2, keepdims=True) / 255) ** ql["gama"] * np.float32(ql["tom"]) / np.mean(ql["tom"])
+    # o halo claro do recorte da foto (o fundo que ficou na borda) sai: o alfa 1 px menor no quadro
+    a0_ = cv2.erode(al[y0:y1, x0:x1].astype(np.float32), np.ones((5, 5), np.uint8))
+    c0 = (linho * (1 - madeira) + c0 * madeira) * a0_[..., None]
+    (mx0, my0), (mx1, my1) = Q.p2q(mesa[0], mesa[1]), Q.p2q(mesa[2], mesa[3])
+    d_ = s["dist_m"] * Q.px_m
+    for r in cads:
+        (ax, ay), (bx, by) = Q.p2q(r.x0, r.y0), Q.p2q(r.x1, r.y1)
+        cx, cy = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
+        lado = "esq" if cx < mesa[0] else "dir" if cx > mesa[2] else "cima" if cy < mesa[1] else "baixo"
+        larg = (by - ay) if lado in ("esq", "dir") else (bx - ax)       # a largura da cadeira ao longo da borda
+        sc = 4 * larg / c0.shape[1]
+        c = cv2.resize(c0, None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
+        a = cv2.resize(a0_, None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
+        # no recorte, a frente (a borda do tampo) fica embaixo: gira para a frente olhar a mesa
+        giro = {"baixo": None, "cima": cv2.ROTATE_180, "esq": cv2.ROTATE_90_CLOCKWISE,
+                "dir": cv2.ROTATE_90_COUNTERCLOCKWISE}[lado]
+        if giro is not None:
+            c, a = cv2.rotate(c, giro), cv2.rotate(a, giro)
+        h4, w4 = a.shape
+        h1, w1 = int(np.ceil(h4 / 4)), int(np.ceil(w4 / 4))
+        c = cv2.resize(np.pad(c, ((0, h1 * 4 - h4), (0, w1 * 4 - w4), (0, 0))), (w1, h1), interpolation=cv2.INTER_AREA)
+        a = cv2.resize(np.pad(a, ((0, h1 * 4 - h4), (0, w1 * 4 - w4))), (w1, h1), interpolation=cv2.INTER_AREA)
+        c = c / np.maximum(a, 1e-4)[..., None]
+        h, w = h4 / 4, w4 / 4
+        sob = q["sob_px"]
+        px, py = {"baixo": ((ax + bx) / 2, my1 - sob + h / 2), "cima": ((ax + bx) / 2, my0 + sob - h / 2),
+                  "esq": (mx0 + sob - w / 2, (ay + by) / 2), "dir": (mx1 - sob + w / 2, (ay + by) / 2)}[lado]
+        _pousar(out, c, a, px + (w1 - w) / 2, py + (h1 - h) / 2, Q.px_m, cobre=mesa_a)
+    # a sombra curta do tampo sobre as cadeiras
+    sb = cv2.GaussianBlur(cv2.warpAffine(mesa_a, np.float32([[1, 0, -d_], [0, 1, d_]]), mesa_a.shape[::-1]), (0, 0),
+                          s["sig_m"] * Q.px_m) * s["forca"]
+    alvo = np.clip(m * 2, 0, 1) * (1 - mesa_a)
+    out *= (1 - sb * alvo)[..., None]
+    print(f"    mesa de jantar do living: {len(cads)} cadeiras estofadas em linho com o quadro de madeira (a da mesa de 10 "
+          f"lugares da biblioteca), de frente para a mesa, 1/3 sob o tampo")
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
@@ -863,11 +998,14 @@ def moveis_td(Q, img):
             caixa = (min(r.x0 for r in rs), min(r.y0 for r in rs), max(r.x1 for r in rs), max(r.y1 for r in rs))
             tr = [d for d in pecas if d["type"] == "s" and _dentro_pt(d["rect"], caixa)
                   and max(d["rect"].width, d["rect"].height) >= (cmin[0] if cmin else q["costura_min_pt"])]
-            out = estofado_d(Q, out, g, tr, cor, rng, concha=q.get("conchas", {}).get(nome))
+            vs = [d for d in pecas if d["type"] == "s" and _dentro_pt(d["rect"], caixa)
+                  and max(d["rect"].width, d["rect"].height) >= max([q["estofado"]["vinco_min_pt"], *cmin])]
+            out = estofado_d(Q, out, g, tr, cor, rng, concha=q.get("conchas", {}).get(nome), vincos=vs)
             n_est += 1
     print(f"    móveis: {n_est} estofados com volume e bouclé, sem os traços; {n_mad} mesas de madeira sem o contorno")
     piso = cv2.imread(str(F.ETAPAS / f"{Q.chave}_pisos.png"))
     out = cadeiras_mesas_d(Q, out, piso)
+    out = jantar_d(Q, out, piso)
     out = jogos_mesa_d(Q, out, piso)
     out = diagonais_armarios_d(Q, out)
     return floreiras_td(Q, out)
@@ -1041,7 +1179,9 @@ MATERIAIS_TD = {"granito": [],
                               (1885.0, 1694.0, 1971.0, 1770.0)],                # banho master, banhos 1, 2 e 3
                 "granito_escuro": [(1200.0, 675.0, 1430.0, 727.0), (1255.0, 804.0, 1458.0, 881.0),
                                    (1598.0, 575.0, 1818.0, 620.0),
-                                   (1660.0, 680.0, 1806.0, 750.0)],               # gourmet e cozinha, bancada e ilha
+                                   (1660.0, 680.0, 1806.0, 750.0),                # gourmet e cozinha, bancada e ilha
+                                   (2050.0, 565.0, 2220.0, 625.0)],               # área de serviço, a dos tanques
+                # (usuário, 27/10/26, na bancada dos tanques: "altere o tom da bancada para o marrom granito")
                 "cubas_brancas": [(2150.0, 759.9, 2166.6, 783.2)],                                  # a do WC DCE
                 # o pontilhado do granito que o PDF desenha na bancada do banho gourmet (466 pontos da ARQ_BANCADAS):
                 # o contorno do PDF o redesenhava, e no travertino eram poros escuros densos; sai
@@ -1398,10 +1538,10 @@ PROJ_LAJES_TD = {
     "vaos_x": [(2420.1, 2459.9), (2471.2, 2510.9), (2522.2, 2561.9), (2573.3, 2612.9), (2624.3, 2664.0),
                (2675.3, 2715.0), (2726.3, 2766.0), (2777.4, 2817.0), (2828.4, 2868.1)],
     "garagem": {"y": (570.7, 661.4), "contorno": False,
-                "tracejadas": [((2335.7, 559.4), (2910.6, 559.4)), ((2383.3, 570.7), (2899.3, 570.7)),
+                "tracejadas": [((2214.0, 559.4), (2910.6, 559.4)), ((2383.3, 570.7), (2899.3, 570.7)),
                                ((2383.3, 662.0), (2899.3, 662.0)), ((2899.3, 570.7), (2899.3, 662.0)),
                                ((2910.6, 559.4), (2910.6, 662.0)), ((2383.3, 627.4), (2383.3, 662.0))],
-                "finas": [], "limpar": [((2335.7, 2910.6), 559.4), ((2383.3, 2899.3), 570.7)]},
+                "finas": [], "limpar": [((2214.0, 2910.6), 559.4), ((2383.3, 2899.3), 570.7)]},
     "grama": {"y": (995.9, 1081.0), "contorno": True,
               "tracejadas": [((2366.3, 1081.0), (2899.3, 1081.0)), ((2366.3, 1092.3), (2910.6, 1092.3))],
               "finas": [((2383.3, 987.4), (2383.3, 1081.0))], "limpar": []},
@@ -1652,8 +1792,8 @@ def passos_terreo_d(Q, ini, M):
         ("vegetacao", lambda im: C.vegetacao_c(Q, im, M)),
         ("bancadas", lambda im: bancadas_terreo_d(Q, im)),
         ("pecas", lambda im: C.pecas_c(Q, im, ini, fora, camas + NAO_TAPETE_D)),
-        ("tampas", lambda im: cama_dce_d(Q, C.pecas_do_render(Q, C.camas_render(Q, F.tampas_vasos(Q, C.restos_piso(
-            Q, im, ini, FORA_PECAS_D)), ini), ini, VASOS_D, C.verde, "hall e gourmet: as plantas em vaso"))),
+        ("tampas", lambda im: cama_dce_d(Q, plantas_vaso_d(Q, C.camas_render(Q, F.tampas_vasos(Q, C.restos_piso(
+            Q, im, ini, FORA_PECAS_D)), ini), ini))),
         ("vasos", lambda im: F.vasos_cor(Q, im)),
         ("biblioteca", lambda im: biblioteca_terreo_d(Q, im)),
         ("moveis", lambda im: moveis_td(Q, im)),
