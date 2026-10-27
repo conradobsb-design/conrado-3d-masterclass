@@ -100,6 +100,14 @@ _piso_textura_b = F.piso_textura
 
 
 def piso_textura_c(Q, img, m, nome, forca, sig_m, semente, **kw):
+    if nome == "travertino" and kw.get("bruto") == "estratos":
+        # o travertino bruto em estratos (pedidos de 26/10, `travertino_estratos`), na luz do próprio piso
+        ys, xs = np.nonzero(m)
+        y0, x0, y1, x1 = ys.min(), xs.min(), ys.max() + 1, xs.max() + 1
+        L = F.luz_robusta(img, m, sig_m * Q.px_m)
+        novo = img.astype(np.float32).copy()
+        novo[y0:y1, x0:x1] = L[y0:y1, x0:x1] * travertino_estratos(Q, y1 - y0, x1 - x0, semente)
+        return novo
     novo = _piso_textura_b(Q, img, m, nome, forca, sig_m, semente, **kw)
     alvo = TONS_C.get(nome)
     if alvo is not None and m.any():
@@ -146,8 +154,10 @@ GUARDA_ROUPAS_C = {"ss": 4, "semente": 51, "pecas": [
     ("quarto externo", (2698.3, 943.3, 2729.5, 997.2), "direita")]}
 # Os cooktops de 5 bocas (14/10, item 10): o da gourmet deitado (2 em cima, 3 embaixo); o da ilha da cozinha em pé, com
 # 3 bocas na coluna da esquerda e 2 na da direita
-COOKTOPS_C = [{"pt": (1188.3, 1264.3, 1238.2, 1292.6), "giro": 0},
-              {"pt": (2057.7, 615.1, 2086.0, 664.9), "giro": 90}]
+# Pedidos de 26/10: os dois girados 180º ("gire o cooktop da varanda em 180º"; na ilha: "o cooktop precisa ser girado
+# em 180º para ficar corretamente"), o da varanda gourmet de 0 para 180 e o da ilha de 90 para 270
+COOKTOPS_C = [{"pt": (1188.3, 1264.3, 1238.2, 1292.6), "giro": 180},
+              {"pt": (2057.7, 615.1, 2086.0, 664.9), "giro": 270}]
 # As 4 banquetas da ilha da cozinha: os círculos (0,40 m) da ARQ_LAYOUT HUMANIZAÇÃO à esquerda da ilha, viradas para ela
 BANQUETAS_C = {"caixa_pt": (2000.0, 590.0, 2035.0, 760.0), "giro": 270}
 # O chuveiro externo do pisante (14/10, item 14): a ducha, o braço até o muro e a canopla do PDF
@@ -319,9 +329,36 @@ def alfa_canteiros_c(Q):
     return np.max([a for _, a, *_ in floreiras(Q)], axis=0)
 
 
+def sprite_limpo(cor, a, sig=1.2):
+    """A planta da biblioteca sem a franja clara do recorte (pedidos de 26/10, nos jardins de inverno: "corrigir os
+    erros dos contornos"): a borda do alfa mais justa e, na borda, a cor das folhas de dentro (não a do fundo branco da
+    foto)."""
+    a = np.clip((a - 0.25) / 0.75, 0, 1).astype(np.float32)
+    dentro = (a > 0.92).astype(np.float32)
+    num = cv2.GaussianBlur(cor * dentro[..., None], (0, 0), sig)
+    den = cv2.GaussianBlur(dentro, (0, 0), sig)[..., None]
+    viz = num / np.maximum(den, 1e-4)
+    borda = ((a < 0.92) & (den[..., 0] > 0.02))[..., None]
+    return np.where(borda, viz, cor).astype(np.float32), a
+
+
 def jardins_c(Q, img):
     q = JARDINS_C
     out = np.ascontiguousarray(img.copy())
+    sprite = B.planta_sprite
+
+    def sprite_c(nome, d_m, px_m):
+        cor, a, d_px = sprite(nome, d_m, px_m)
+        return (*sprite_limpo(cor, a), d_px)
+    B.planta_sprite = sprite_c
+    try:
+        return _jardins_c(Q, out)
+    finally:
+        B.planta_sprite = sprite
+
+
+def _jardins_c(Q, out):
+    q = JARDINS_C
     comum = {"terra": q["terra"], "terra_ruido": q["terra_ruido"], "forracao": q["forracao"]}
     feitos = np.zeros(out.shape[:2], np.float32)
     with F.em_quadro(Q):
@@ -641,6 +678,7 @@ def escadas_c(Q, img):
 # ----------------------------------------------------------------------------------------------------------------------
 # O Térreo, auditoria de 26/10 (mapa `POE642_CasaC_PH_Terreo_auditoria_2610_v2.jpg`; aprovada pelo usuário: "Aplique a
 # lista. No item 8, siga a recomendação.")
+# (Os materiais dos lavabos, do BH serviço e do BH externo mudaram com os pedidos de 26/10: `MATERIAIS_TC`.)
 # Item 8, os materiais, no padrão do Térreo aprovado da Casa B: as cubas esculpidas e as bancadas dos banhos em travertino
 # bruto (BH 1, 2 e 3, BH master 1 e 2, lavabo); as cubas dos lavabos masc. e fem. (os da varanda gourmet) em granito
 # marrom, na bancada de travertino bruto; os vasos do lavabo e dos lavabos masc. e fem. marrons (`VASOS_COR_C`); a ilha e
@@ -651,7 +689,6 @@ def escadas_c(Q, img):
 # prateleira saía como uma terceira cuba).
 BANHOS_TC = {"cubas_fora": [(596.5, 643.6, 619.6, 707.2), (596.5, 677.4, 619.6, 707.2), (596.5, 707.2, 619.6, 741.2)],
              "cubas_mais": [(596.5, 643.6, 619.6, 676.2), (596.5, 708.4, 619.6, 741.2)],
-             "cubas_granito": [(1025.8, 1675.8, 1045.7, 1727.9), (1315.0, 1675.8, 1334.8, 1727.9)],
              "granito_pt": [(1940.0, 450.0, 2218.0, 860.0), (1045.0, 1105.0, 1430.0, 1330.0)], "folga_pt": 2.0}
 # Item 9: os chuveiros de teto do PDF (as placas de 20 cm da ARQ_LOUÇAS E METAIS) na placa cromada com os furinhos
 # (`final3840_casaa.chuveiro`); os do BH serviço, do BH externo e do deck com o braço até a parede e a canopla do PDF
@@ -697,26 +734,41 @@ def cubas_terreo_c(Q):
 _cubas_bancada_f = F.cubas_bancada
 
 
+def _dentro(cx, cy, rs):
+    return any(r[0] <= cx <= r[2] and r[1] <= cy <= r[3] for r in rs)
+
+
 def cuba_terreo_c(Q, out, r):
+    """A cuba esculpida: em granito marrom a do lavabo (pedidos de 26/10); as outras em travertino bruto (as dos lavabos
+    masc. e fem., que eram de granito, passam ao travertino bruto, pedido de 26/10)."""
     cx, cy = (r[0] + r[2]) / 2, (r[1] + r[3]) / 2
-    gran = any(g[0] <= cx <= g[2] and g[1] <= cy <= g[3] for g in BANHOS_TC["cubas_granito"])
-    return F.cuba_esculpida(Q, out, r, "granito" if gran else "travertino")
+    return F.cuba_esculpida(Q, out, r, "granito" if _dentro(cx, cy, [MATERIAIS_TC["lavabo_pt"]]) else "travertino")
 
 
 def pedra_terreo_c(Q):
-    """A pedra de cada peça de bancada: travertino bruto onde a peça tem uma cuba (os banhos e os lavabos); granito
-    marrom escurecido na cozinha e no gourmet (`granito_pt`); a pedra areia nas outras (BH serviço, BH externo,
-    área de serviço)."""
+    """A pedra de cada peça de bancada (pedidos de 26/10): granito marrom no lavabo e nos lavabos masc. e fem.; granito
+    marrom escurecido no BH serviço e no BH externo (sobre o piso de granito) e na cozinha e no gourmet (`granito_pt`);
+    travertino bruto nos outros banhos com cuba (BH 1, 2 e 3, BH master 1 e 2); a pedra areia nas demais (área de
+    serviço)."""
     f = BANHOS_TC["folga_pt"]
-    rs = [F.ret_q(Q, (r[0] - f, r[1] - f, r[2] + f, r[3] + f)) for r in F.cubas_bancada(Q)]
-    gs = [(Q.p2q(*g[:2]), Q.p2q(*g[2:])) for g in BANHOS_TC["granito_pt"]]
+    mt = MATERIAIS_TC
+    zonas = [mt["lavabo_pt"]] + mt["lavabos_mf_pt"]
+    cubas = F.cubas_bancada(Q)
+    gran = [r for r in cubas if _dentro((r[0] + r[2]) / 2, (r[1] + r[3]) / 2, zonas)]
+    rs_g = [F.ret_q(Q, (r[0] - f, r[1] - f, r[2] + f, r[3] + f)) for r in gran]
+    rs = [F.ret_q(Q, (r[0] - f, r[1] - f, r[2] + f, r[3] + f)) for r in cubas if r not in gran]
+    gs = [(Q.p2q(*g[:2]), Q.p2q(*g[2:])) for g in BANHOS_TC["granito_pt"] + mt["granito_escuro_pt"]]
 
     def p(Q_, comp):
-        if any(comp[y0:y1, x0:x1].any() for x0, y0, x1, y1 in rs):
-            return "travertino"
+        if any(comp[y0:y1, x0:x1].any() for x0, y0, x1, y1 in rs_g):       # a peça da cuba do lavabo ou dos masc./fem.
+            return "granito"
         ys, xs = np.nonzero(comp)
         cx, cy = (xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2
-        return "granito_escuro" if any(a[0] <= cx <= b[0] and a[1] <= cy <= b[1] for a, b in gs) else None
+        if any(a[0] <= cx <= b[0] and a[1] <= cy <= b[1] for a, b in gs):
+            return "granito_escuro"
+        if any(comp[y0:y1, x0:x1].any() for x0, y0, x1, y1 in rs):
+            return "travertino"
+        return None
     return p
 
 
@@ -767,8 +819,11 @@ def elevador_t(Q, img):
     import final3840_casaa as FA
     guarda = FA.ELEVADOR
     FA.ELEVADOR = dict(FA.ELEVADOR, **dict(ELEVADOR_S, **ELEVADOR_T))
+    out = img.astype(np.float32)
+    a = FA.ret_aa(Q, POCO_ELEVADOR_T)[..., None]                    # o poço limpo, branco (pedidos de 26/10)
+    out = np.clip(out * (1 - a) + 255.0 * a, 0, 255).astype(np.uint8)
     try:
-        return FA.elevador(Q, np.ascontiguousarray(img.copy()))
+        return FA.elevador(Q, np.ascontiguousarray(out))
     finally:
         FA.ELEVADOR = guarda
 
@@ -816,22 +871,22 @@ def escada_estreita_t(Q, img):
 
 
 def projecoes_t(Q, img):
-    """As projeções do PDF (R8) em tracejado, como em 22/10 (`escadas_c`), mais a claraboia do BH master 1."""
+    """As projeções do PDF (R8) em tracejado, como em 22/10 (`escadas_c`): os X dos jardins de inverno e da área
+    descoberta; as claraboias, desenhadas (`claraboias_t`, pedidos de 26/10)."""
     out = np.ascontiguousarray(img.copy())
     with F.em_quadro(Q):
         pa = AJ.PROJECOES_A
         n = 0
         try:
-            for zonas, t in ((PROJECOES_C, PROJECOES_TRACO_C["pisos"]),
-                             (PROJECOES_JARDINS_C, PROJECOES_TRACO_C["jardins"])):
+            for zonas, t in ((PROJECOES_JARDINS_C, PROJECOES_TRACO_C["jardins"]),):
                 AJ.PROJECOES_A = dict(pa, larg_px=pa["larg_px"] * Q.W / 2000 * t["larg"], cor=t["cor"],
                                       forca=t["forca"])
                 out, k = B.linhas_pdf(out, "Terreo", zonas, "DOC_LINHAS E PROJEÇÕES")
                 n += k
         finally:
             AJ.PROJECOES_A = pa
-    print(f"    projeções do PDF em tracejado ({n} traços): claraboias, os X dos jardins e da área descoberta")
-    return out
+    print(f"    projeções do PDF em tracejado ({n} traços): os X dos jardins e da área descoberta")
+    return claraboias_t(Q, out)
 
 
 def seta_t(Q, img):
@@ -849,12 +904,19 @@ def rotulos_t(Q, img):
     tracejado embaixo: os rótulos saem uma vez, e o que as projeções mudaram (a etapa anterior às projeções, do cache)
     volta embaixo de cada texto, com folga; então os rótulos saem de novo, nos mesmos lugares (o lugar depende só do
     PDF), sobre o fundo sem o tracejado, como o X do shaft da Casa B."""
+    import retoque_1pav_casae as R1
     rot = B.rotulos_casab(Q.pg, Q.p2q2000)
+    esc = Q.W / 2000
+    quebras = [(r[0], (Q.p2q(*r[2])[0] / esc, Q.p2q(*r[2])[1] / esc), (0.0, 0.0), {"quebra": ROTULOS_TC["quebras"][r[0]]})
+               for r in rot if r[0] in ROTULOS_TC["quebras"]]
+    ajustes = list(Q.q["ajustes"]) + quebras
     vb = F.vidros_box
     F.vidros_box = vidros_box_t
+    fonte = R1.ROTULOS.get("fonte_nome")
+    R1.ROTULOS["fonte_nome"] = ROTULOS_TC["fonte_nome"]
     try:
         def uma(im):
-            return F.rotulos(Q, im, rot, Q.q["ajustes"], granito=A.granito(im, Q.q.get("granito_lum_max", 125)))
+            return F.rotulos(Q, im, rot, ajustes, granito=A.granito(im, Q.q.get("granito_lum_max", 125)))
         antes = cv2.imread(str(F.ETAPAS / f"{Q.chave}_escadas.png"))
         out1 = uma(img)
         texto = np.abs(out1.astype(np.int16) - img.astype(np.int16)).max(axis=2) > 10
@@ -867,9 +929,479 @@ def rotulos_t(Q, img):
         return uma(base)
     finally:
         F.vidros_box = vb
+        if fonte is None:
+            R1.ROTULOS.pop("fonte_nome", None)
+        else:
+            R1.ROTULOS["fonte_nome"] = fonte
 
 
-ROTULOS_TC = {"folga_px": 4}
+ROTULOS_TC = {"folga_px": 4,
+              # pedidos de 26/10 ("melhorar a representação dos rótulos de toda a planta"): o nome em Inter SemiBold e a
+              # área em Regular (a hierarquia do nome; o texto segue preto ou branco, sem halo nem sombra, a regra de
+              # 22/10); o JARDIM DE INVERNO 2, que passava das paredes do jardim, em duas linhas
+              "fonte_nome": "SemiBold", "quebras": {"JARDIM DE INVERNO 2": ["JARDIM DE", "INVERNO 2"]}}
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# O Térreo, pedidos de 26/10 vendo a final da auditoria (usuário, um a um: "melhorar o aspecto das cortinas"; "melhorar o
+# aspecto do marmore travertino bruto"; "melhorar a representação da claraboia"; "melhorar a representação dos rótulos
+# de toda a planta"; "lavabo: pedra da bancada e cuba esculpida em marrom granito. na parte de cima temos uma floreira";
+# lavabos masc. e fem.: "pedra das pias em marrom granito. cubas em marmore travertino bruto"; "banho serviço: pedra da
+# pia em marrom granito e cuba branca"; "banho externo: pedra da pia em marrom granito e cuba branca"; os portões da área
+# descoberta: "atras das portas tem uma soleira. remova-as"; "remova soleira clara de uma das portas"; "tem uma soleira
+# atras da porta do quarto serviço. remova-a"; "remova essa 'soleira' da janela da cozinha"; a ilha: "essas duas linhas
+# claras não existem na bancada. e o cooktop precisa ser girado em 180º"; "melhorar a representação dos chuveiros de teto
+# dos banhos"; "gire o cooktop da varanda em 180º"; "remover sujeiras e riscos do escritório"; o elevador e os jardins de
+# inverno: "remover as sujeiras, limpar as sujeiras e corrigir os erros dos contornos"; "corrija as paredes atrás das
+# portas. alguma sombra ou efeito recortou as paredes"; "corrija as portas da adega").
+#
+# O travertino bruto em estratos: o travertino de verdade, serrado no veio, tem faixas finas e compridas (umas mais
+# claras, outras mais amareladas), as linhas finas de alguns encontros e os poros alongados no sentido das faixas; o
+# desenho de antes (a foto da biblioteca com dois ruídos borrados) saía manchado. Duas famílias de faixas (largas, de 5
+# a 25 cm, e finas, de 0,8 a 4 cm), levemente onduladas, cada uma com a força variando ao longo do comprimento; uma em
+# cada quatro com a linha fina no encontro; os poros de 2 a 7 cm, deitados; as faixas escuras puxam para o amarelo. A
+# foto da biblioteca fica por baixo, calma, para o grão. O mesmo desenho nas bancadas, nas cubas esculpidas e no piso
+# (`travertino_bruto_tc` troca o da Casa A só durante o Térreo).
+TRAVERTINO_TC = {"base": 1.1, "estratos": [((0.05, 0.25), 0.028), ((0.008, 0.04), 0.022)], "veio": 0.06,
+                 "veio_frac": 0.25, "poros": 6, "poro_esc": 0.12, "poro_m": (0.015, 0.06),
+                 "quente": (1.35, 1.05, 0.80)}                                 # BGR
+
+
+def _estratos(rng, h, w, px_m, larg_m, amp, n_extra=300):
+    """As faixas horizontais: o desvio de cada px (amp x o nível da faixa x a força ao longo dela), a distância ao
+    encontro de cima (px), o índice da faixa e a força."""
+    Y = np.mgrid[0:h, 0:w][0].astype(np.float32)
+    ond = cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0), sigmaX=1.5 * px_m, sigmaY=0.5 * px_m)
+    yw = Y + ond / max(float(ond.std()), 1e-6) * 0.04 * px_m
+    n = int(h / (larg_m[0] * px_m)) + n_extra
+    larg = rng.uniform(*larg_m, n) * px_m
+    bordas = np.cumsum(larg) - n_extra / 2 * np.mean(larg)
+    nivel = rng.normal(0, 1, n).astype(np.float32)
+    k = np.clip(np.searchsorted(bordas, yw), 0, n - 1)
+    env = cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0), sigmaX=0.9 * px_m, sigmaY=0.06 * px_m)
+    env = np.clip(0.5 + env / max(float(env.std()), 1e-6) * 0.5, 0, 1)
+    fr = np.abs(yw - bordas[np.clip(k - 1, 0, n - 1)])
+    return amp * nivel[k] * env, fr, k, env
+
+
+def travertino_estratos(Q, h, w, semente, base=None, poros=None, poro_esc=None, amp=1.0, finas=1.0, quente=True):
+    """O desenho do travertino bruto em estratos (média ~1), h x w px: (h, w, 3) com o tom quente das faixas, ou
+    (h, w) sem ele (quente=False). finas: a força das faixas finas e das linhas (numa peça estreita, as faixas finas
+    fortes liam como réguas de madeira)."""
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    q = TRAVERTINO_TC
+    px_m = Q.px_m
+    rng = np.random.default_rng(semente)
+    T = textura("travertino", px_m, h, w, semente=semente).astype(np.float32)
+    det = cv2.GaussianBlur(T, (0, 0), 0.6) / np.maximum(cv2.GaussianBlur(T, (0, 0), 3.0 * px_m), 1)
+    D = 1 + (q["base"] if base is None else base) * (det.mean(axis=2) - 1)
+    delta = np.zeros((h, w), np.float32)
+    for i, (larg_m, a) in enumerate(q["estratos"]):
+        s, fr, k, env = _estratos(rng, h, w, px_m, larg_m, a * amp * (finas if i else 1.0))
+        delta += s
+    tem = rng.uniform(0, 1, 100000) < q["veio_frac"]
+    delta -= q["veio"] * amp * finas * np.clip(1 - fr / 0.7, 0, 1) * tem[np.clip(k, 0, 99999)] * env
+    n = int((q["poros"] if poros is None else poros) * h * w / px_m ** 2)
+    P = np.zeros((h * 4, w * 4), np.float32)
+    for x, y, c, e in zip(rng.uniform(0, w * 4, n), rng.uniform(0, h * 4, n),
+                          rng.uniform(*q["poro_m"], n) * px_m * 4, rng.uniform(0.6, 1.0, n)):
+        cv2.ellipse(P, (int(x), int(y)), (max(2, int(c / 2)), 1), 0, 0, 360, float(e), -1, cv2.LINE_AA)
+    P = np.clip(cv2.resize(P, (w, h), interpolation=cv2.INTER_AREA) * 3, 0, 1)
+    pe = q["poro_esc"] if poro_esc is None else poro_esc
+    if not quente:
+        return (D * (1 + delta) * (1 - pe * P)).astype(np.float32)
+    Dc = D[..., None] * (1 + delta[..., None] * np.float32(q["quente"]))
+    return (Dc * (1 - pe * P)[..., None]).astype(np.float32)
+
+
+def travertino_bruto_tc(Q, h, w, semente, veio, faixa, poros, poro_esc, forca=1.6):
+    """No lugar de `final3840_casaa.travertino_bruto` durante o Térreo: o desenho em estratos, sem o tom (as bancadas, as
+    cubas e as faixas o multiplicam pelo delas), mais calmo que o do piso (as peças são estreitas: as faixas largas
+    ficam, as finas e as linhas quase somem)."""
+    return travertino_estratos(Q, h, w, semente, base=forca * 0.6, poros=poros * 0.7, poro_esc=poro_esc,
+                               amp=min(1.0, faixa / 0.02) * 0.9, finas=0.3, quente=False)
+
+
+# As claraboias (R8): as cinco do PDF (DOC_LINHAS E PROJEÇÕES, o retângulo com o X), a da varanda master, as dos closets
+# master 1 e 2, a do box do BH master 2 e a do chuveiro e do vaso do BH master 1. Antes, o tracejado do PDF ia como está
+# (traços de comprimentos diferentes, o X partido, a moldura aberta embaixo no closet master 1) e a da varanda ficava
+# em branco (o preenchimento branco do PDF). Agora: o piso por baixo (o travertino da varanda, `incluir` nos pisos); a
+# luz de cima, um clarão suave no retângulo; a moldura e o X em tracejado regular, com um traço inteiro em cada canto e
+# no cruzamento do X (o tracejado é repartido para caber exato em cada lado e em cada diagonal).
+CLARABOIAS_T = {"rets": [(578.1, 468.9, 782.1, 506.2), (782.1, 616.0, 809.7, 679.9), (797.8, 1050.6, 866.2, 1079.2),
+                         (703.8, 1087.9, 722.5, 1144.6), (592.1, 538.0, 728.2, 563.6)],
+                "luz": 0.13, "luz_cor": (252, 252, 250), "luz_sig_px": 1.4,
+                "cor": (78, 78, 80), "larg_px": 1.35, "forca": 0.88, "traco_m": 0.15, "vao_m": 0.085, "ss": 4}
+
+
+def _tracejado(m, p0, p1, traco, vao, larg, ss):
+    """Traços de p0 a p1 (px), com o tracejado repartido para começar e terminar num traço inteiro e, com n ímpar, um
+    traço no meio."""
+    p0, p1 = np.float64(p0), np.float64(p1)
+    L = float(np.hypot(*(p1 - p0)))
+    n = max(1, int(round((L + vao) / (traco + vao))))
+    if n % 2 == 0:
+        n += 1
+    u = L / (n * traco + (n - 1) * vao) if n > 1 else 1.0
+    t, g = traco * u, vao * u
+    d = (p1 - p0) / max(L, 1e-6)
+    for i in range(n):
+        a = p0 + d * i * (t + g)
+        b = a + d * (t if n > 1 else L)
+        cv2.line(m, tuple(int(round(v * ss)) for v in a), tuple(int(round(v * ss)) for v in b), 255,
+                 max(1, int(round(larg * ss))), cv2.LINE_AA)
+
+
+def claraboias_t(Q, img):
+    q = CLARABOIAS_T
+    out = img.astype(np.float32)
+    ss = q["ss"]
+    for r in q["rets"]:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        X0, Y0, X1, Y1 = x0 - 6, y0 - 6, x1 + 6, y1 + 6
+        (a, b), (c, d) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        a, b, c, d = a - X0, b - Y0, c - X0, d - Y0
+        reg = out[Y0:Y1, X0:X1]
+        luz = np.zeros(reg.shape[:2], np.float32)
+        cv2.rectangle(luz, (int(round(a)), int(round(b))), (int(round(c)) - 1, int(round(d)) - 1), 1.0, -1)
+        luz = cv2.GaussianBlur(luz, (0, 0), q["luz_sig_px"])[..., None] * q["luz"]
+        reg[:] = reg + (np.float32(q["luz_cor"]) - reg) * luz
+        m = np.zeros(((Y1 - Y0) * ss, (X1 - X0) * ss), np.uint8)
+        tr, va = q["traco_m"] * Q.px_m, q["vao_m"] * Q.px_m
+        for p0, p1 in (((a, b), (c, b)), ((c, b), (c, d)), ((c, d), (a, d)), ((a, d), (a, b)),
+                       ((a, b), (c, d)), ((c, b), (a, d))):
+            _tracejado(m, p0, p1, tr, va, q["larg_px"], ss)
+        al = cv2.resize(m.astype(np.float32) / 255, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)[..., None]
+        al *= q["forca"]
+        reg[:] = reg * (1 - al) + np.float32(q["cor"]) * al
+    print(f"    claraboias: {len(q['rets'])} com o piso por baixo, a luz de cima e a moldura e o X em tracejado regular")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+# Os materiais pedidos: o lavabo com a bancada e a cuba esculpida em granito marrom; os lavabos masc. e fem. com a
+# bancada em granito marrom e as cubas esculpidas em travertino bruto; o BH serviço e o BH externo com a bancada em
+# granito marrom e as louças brancas (no piso de granito, o granito da bancada escurecido, como as da cozinha, para
+# destacar do piso: E9). As peças de bancada (pt) de cada um.
+MATERIAIS_TC = {"lavabo_pt": (2120.0, 1140.0, 2232.0, 1312.0),
+                "lavabos_mf_pt": [(990.0, 1650.0, 1080.0, 1760.0), (1290.0, 1650.0, 1370.0, 1760.0)],
+                "granito_escuro_pt": [(2418.0, 700.0, 2446.0, 756.0), (2546.0, 881.0, 2573.0, 946.0)]}
+
+
+# A floreira do lavabo (o preenchimento da ARQ_CONTRAPISO no alto do lavabo, entre as paredes e a bancada; a referência
+# do usuário: folhas largas verde-escuras sobre seixos e casca de pinus): o fundo de casca e seixos claros, as plantas
+# de folha larga da biblioteca, cortadas na caixa, e a borda fina da floreira na pedra da bancada.
+FLOREIRA_LAVABO_T = {"pt": (2125.7, 1110.6, 2219.2, 1144.4), "borda_pt": 1.1, "semente": 4211,
+                     "casca": (38, 52, 70), "seixo": (178, 186, 192), "seixos_m2": 220, "seixo_m": (0.012, 0.03),
+                     "borda": (60, 74, 96), "sombra": 0.35, "folha": (0.50, 0.62, 0.48), "folha_sat": 0.75,
+                     "plantas": [("planta_folhas_largas", 0.62, (0.12, 0.50), 20), ("costela_de_adao", 0.58, (0.36, 0.45), 200),
+                                 ("dieffenbachia", 0.55, (0.60, 0.55), 110), ("planta_folhas_largas", 0.60, (0.86, 0.48), 300)]}
+
+
+def floreira_lavabo_t(Q, img):
+    q = FLOREIRA_LAVABO_T
+    out = img.astype(np.float32)
+    x0, y0, x1, y1 = q["pt"]
+    e = q["borda_pt"]
+    X0, Y0, X1, Y1 = F.ret_q(Q, q["pt"])
+    X0, Y0, X1, Y1 = X0 - 2, Y0 - 2, X1 + 2, Y1 + 2
+    h, w = Y1 - Y0, X1 - X0
+    rng = np.random.default_rng(q["semente"])
+    import final3840_casaa as FA
+    caixa = FA.ret_aa(Q, q["pt"])[Y0:Y1, X0:X1]
+    miolo = FA.ret_aa(Q, (x0 + e, y0 + e, x1 - e, y1 - e))[Y0:Y1, X0:X1]
+    # o fundo: a casca de pinus (manchas escuras alongadas) e os seixos claros
+    n = rng.normal(0, 1, (h, w)).astype(np.float32)
+    fundo = np.float32(q["casca"]) * (1 + 0.22 * cv2.GaussianBlur(n, (0, 0), 0.8)[..., None])
+    sx = np.zeros((h * 4, w * 4), np.float32)
+    k = int(q["seixos_m2"] * h * w / Q.px_m ** 2)
+    for cx, cy, r_, ang in zip(rng.uniform(0, w * 4, k), rng.uniform(0, h * 4, k),
+                               rng.uniform(*q["seixo_m"], k) * Q.px_m * 2, rng.uniform(0, 180, k)):
+        cv2.ellipse(sx, (int(cx), int(cy)), (max(2, int(r_)), max(2, int(r_ * 0.7))), float(ang), 0, 360, 1.0, -1,
+                    cv2.LINE_AA)
+    sx = cv2.resize(sx, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    luz_s = 1 + 0.10 * cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0), 0.6)[..., None]
+    fundo = fundo * (1 - sx) + np.float32(q["seixo"]) * luz_s * sx
+    reg = out[Y0:Y1, X0:X1]
+    a = caixa[..., None]
+    reg[:] = reg * (1 - a) + np.float32(q["borda"]) * a                   # a borda: a pedra da bancada, escura
+    m = miolo[..., None]
+    reg[:] = reg * (1 - m) + fundo * m
+    # as plantas, cortadas no miolo, com a sombra curta (as folhas por cima umas das outras: "over" pré-multiplicado)
+    pre = np.zeros((h, w, 3), np.float32)
+    folhas = np.zeros((h, w), np.float32)
+    for nome, d_m, (fx, fy), giro in q["plantas"]:
+        cor, al = sprite_limpo(*B.planta_sprite(nome, d_m, Q.px_m)[:2])
+        M = cv2.getRotationMatrix2D((al.shape[1] / 2, al.shape[0] / 2), giro, 1.0)
+        cor = cv2.warpAffine(cor, M, (al.shape[1], al.shape[0]))
+        al = cv2.warpAffine(al, M, (al.shape[1], al.shape[0]))
+        px_, py_ = Q.p2q(x0 + (x1 - x0) * fx, y0 + (y1 - y0) * fy)
+        ox, oy = int(round(px_ - X0 - al.shape[1] / 2)), int(round(py_ - Y0 - al.shape[0] / 2))
+        a0, b0 = max(0, ox), max(0, oy)
+        a1, b1 = min(w, ox + al.shape[1]), min(h, oy + al.shape[0])
+        if a1 <= a0 or b1 <= b0:
+            continue
+        s_al = al[b0 - oy:b1 - oy, a0 - ox:a1 - ox][..., None]
+        s_cor = cor[b0 - oy:b1 - oy, a0 - ox:a1 - ox]
+        # o verde-escuro e fosco da referência (as plantas da biblioteca são claras e com brilho branco)
+        cinza_f = s_cor.mean(axis=2, keepdims=True)
+        s_cor = (cinza_f + (s_cor - cinza_f) * q["folha_sat"]) * np.float32(q["folha"])
+        pre[b0:b1, a0:a1] = s_cor * s_al + pre[b0:b1, a0:a1] * (1 - s_al)
+        folhas[b0:b1, a0:a1] = s_al[..., 0] + folhas[b0:b1, a0:a1] * (1 - s_al[..., 0])
+    pre *= miolo[..., None]
+    folhas *= miolo
+    sombra = cv2.GaussianBlur(np.roll(np.roll(folhas, 2, axis=0), -2, axis=1), (0, 0), 1.6) * q["sombra"] * miolo
+    reg[:] = reg * (1 - sombra[..., None])
+    reg[:] = reg * (1 - folhas[..., None]) + pre
+    print(f"    lavabo: a floreira com a casca e os seixos, {len(q['plantas'])} plantas de folha larga e a borda fina")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+# Os chuveiros de teto (a placa quadrada de 20 cm do PDF): a placa cromada nítida, com o chanfro claro em cima e à
+# direita (a luz do alto à direita) e escuro embaixo e à esquerda, a face acetinada levemente rebaixada, os bicos em dois
+# anéis e no centro, o contorno fino e a sombra curta. Antes, a placa saía cinza e borrada, com uma grade de pontos.
+CHUVEIRO_TETO_T = {"raio_pt": 1.5, "chanfro_pt": 1.0, "face": (206, 209, 212), "claro": (246, 247, 248),
+                   "escuro": (128, 132, 137), "bico": (104, 108, 113), "bico_pt": 0.30,
+                   "aneis": [(3.3, 12), (1.8, 6)], "contorno": (78, 82, 87), "sombra": 0.32}
+
+
+def chuveiro_teto(Q, out, r):
+    import final3840_casaa as FA
+    q = CHUVEIRO_TETO_T
+    tl = FA.tela(out, Q, r, folga=5)
+    x0, y0, x1, y1 = r
+    d = tl.ret(r, q["raio_pt"])
+    FA.sombra_q(tl, d, forca=q["sombra"], dist=1.1, sigma=1.0)
+    X, Y = tl.grade()
+    # o chanfro: claro em cima e à direita, escuro embaixo e à esquerda
+    t = np.clip(((X - x0) / (x1 - x0) + (y1 - Y) / (y1 - y0)) / 2, 0, 1)[..., None]
+    cor = np.float32(q["escuro"]) * (1 - t) + np.float32(q["claro"]) * t
+    tl.pintar_img(d, cor)
+    c = q["chanfro_pt"]
+    face = tl.ret((x0 + c, y0 + c, x1 - c, y1 - c), max(0.4, q["raio_pt"] - c))
+    v = np.clip((Y - y0) / (y1 - y0), 0, 1)[..., None]
+    tl.pintar_img(face, np.float32(q["face"]) * (1.03 - 0.06 * v))
+    bicos = tl.vazia()
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    pts = [(cx, cy)] + [(cx + rr * np.cos(2 * np.pi * i / n), cy + rr * np.sin(2 * np.pi * i / n))
+                        for rr, n in q["aneis"] for i in range(n)]
+    for px_, py_ in pts:
+        a, b = tl.pt(px_, py_)
+        cv2.circle(bicos, (int(round(a)), int(round(b))), max(1, int(round(q["bico_pt"] * FA.PT_PX * 8))), 255, -1,
+                   cv2.LINE_AA)
+    tl.pintar(bicos, q["bico"], 0.85)
+    tl.contorno(face, 0.25, (172, 176, 180))
+    tl.contorno(d, 0.4, q["contorno"])
+    return tl.gravar()
+
+
+def chuveiros_tc(Q, img):
+    """Os chuveiros: os do braço até a parede com o braço e a canopla de `final3840_casaa.chuveiro`; a placa de todos
+    na `chuveiro_teto`."""
+    import final3840_casaa as FA
+    out = np.ascontiguousarray(img.copy())
+    for c in CHUVEIROS_T:
+        if isinstance(c, dict):
+            out = FA.chuveiro(Q, out, c)
+            out = chuveiro_teto(Q, out, c["ducha"])
+        else:
+            out = chuveiro_teto(Q, out, c)
+    print(f"    {len(CHUVEIROS_T)} chuveiros na placa cromada nova (chanfro, face acetinada, bicos em anéis); 3 com o braço")
+    return out
+
+
+# O poço do elevador: entre a cabine e a parede da direita sobravam restos do render (uma mancha preta e branca); o poço
+# todo (a face de dentro das paredes do PDF) fica branco, como no Subsolo aprovado, e a cabine vem por cima.
+POCO_ELEVADOR_T = (1562.2, 1008.5, 1661.4, 1099.2)
+
+
+# As soleiras e os vãos (pedidos de 26/10): a soleira atrás da porta do quarto de serviço (o vão vertical do BH serviço)
+# sai (`B.SOLEIRAS_B["sem"]`) e o granito do piso atravessa o vão. Os vãos onde o piso passa: o da porta de correr entre a
+# área descoberta e a área de serviço (granito); o da porta de correr do escritório (o vinílico dele) e o da adega
+# (travertino); a claraboia da varanda master (travertino); e as faixas dos vidros dos jardins de inverno (o travertino
+# de fora; o jardim termina no vidro).
+SEM_SOLEIRA_TC = [(2365.0, 707.5, 2373.5, 750.6)]
+VAOS_TC = {"granito": [(2365.0, 707.5, 2373.5, 750.6), (2264.6, 458.6, 2406.3, 470.8)],
+           "vinílico": [(2309.9, 1110.6, 2320.0, 1354.3)],
+           "travertino": [(578.1, 468.9, 782.1, 506.2), (2036.3, 1110.6, 2046.3, 1354.3),
+                          (1553.7, 1110.6, 1562.2, 1365.7), (1802.5, 1110.6, 1811.0, 1365.7),
+                          (1553.7, 1357.2, 1811.0, 1365.7), (1672.7, 997.2, 1802.5, 1005.7)]}
+
+
+# Depois das esquadrias:
+# - as paredes recortadas atrás das portas: a limpeza da faixa das folhas trocava pela cor do piso o trecho de parede
+#   junto à folha aberta (3 a 4 px ao longo de 1 m nos BH 1, 2 e 3; as pontas das paredes junto aos batentes); onde o PDF
+#   tem parede e a etapa anterior tinha o cinza dela, o cinza volta (o batente claro, neutro, fica);
+# - os portões da área descoberta: a faixa clara entre o trilho e a folha volta ao granito da etapa anterior;
+# - a ilha da cozinha: as duas linhas claras (os preenchimentos brancos da ARQ_PAREDE ao longo da ilha, que as esquadrias
+#   desenhavam como vidro) saem;
+# - a porta de correr da área descoberta e os vidros dos jardins de inverno: o que não é folha nem batente do PDF na
+#   faixa volta ao piso dos pisos (o granito; o travertino de fora dos jardins), sem a faixa clara e sem as plantas e a
+#   terra que passavam do vidro;
+# - a janela da cozinha: a faixa clara sob a folha da direita vira a bancada de granito (o trecho logo abaixo, copiado);
+# - as portas de correr do escritório e da adega: o vão volta ao piso e as 4 folhas são refeitas nos planos do PDF
+#   (`final3840_casaa.portas_vidro`, como a da academia no Subsolo), sem a soleira e sem os riscos.
+POS_ESQUADRIAS_TC = {
+    "portoes": [(2228.0, 326.4, 2272.5, 333.4), (2404.0, 326.4, 2448.6, 333.4)], "poste_lum": 90,
+    "ilha": (2044.0, 573.5, 2055.0, 751.8),
+    "faixas_piso": [(2264.6, 461.5, 2406.3, 470.8), (1553.7, 1110.6, 1562.2, 1365.7), (1802.5, 1110.6, 1811.0, 1365.7),
+                    (1553.7, 1357.2, 1811.0, 1365.7), (1672.7, 997.2, 1802.5, 1005.7)],
+    "janela": {"pt": (2101.0, 461.5, 2166.0, 470.6), "desce_px": 13, "fonte_x_pt": (2113.0, 2161.5)},
+    "claro": 150, "croma": 40,
+    "paredes": {"croma_min": 16, "cinza_tol": 14},
+    "portas": [{"nome": "do escritório", "vao": (2309.9, 1110.6, 2320.0, 1354.3),
+                "batentes": [(2309.9, 1110.6, 2318.4, 1112.8), (2309.9, 1352.1, 2318.4, 1354.3)],
+                "folhas": [((2309.9, 1112.8, 2312.8, 1174.9), "y"), ((2312.8, 1170.4, 2315.6, 1232.4), "y"),
+                           ((2312.8, 1232.4, 2315.6, 1294.5), "y"), ((2309.9, 1290.0, 2312.8, 1352.1), "y")],
+                "montante_pt": 4.5},
+               {"nome": "da adega", "vao": (2036.3, 1110.6, 2046.3, 1354.3),
+                "batentes": [(2037.8, 1110.6, 2046.3, 1112.8), (2037.8, 1352.1, 2046.3, 1354.3)],
+                "folhas": [((2037.8, 1112.8, 2040.6, 1174.9), "y"), ((2040.6, 1170.4, 2043.5, 1232.4), "y"),
+                           ((2040.6, 1232.4, 2043.5, 1294.5), "y"), ((2037.8, 1290.0, 2040.6, 1352.1), "y")],
+                "montante_pt": 4.5}]}
+
+
+def _croma(img):
+    i = img.astype(np.int32)
+    return i.max(axis=2) - i.min(axis=2)
+
+
+def _folhas_pdf(Q, r, folga_px=0.6):
+    """Os preenchimentos da ARQ_PAREDE (folhas, batentes, montantes, paredes) dentro de r (pt), no quadro (bool)."""
+    x0, y0, x1, y1 = r
+    a = Q.preencher(lambda d: d.get("layer") == "ARQ_PAREDE" and d.get("fill") is not None
+                    and d["rect"].x0 >= x0 - 0.5 and d["rect"].x1 <= x1 + 0.5
+                    and d["rect"].y0 >= y0 - 0.5 and d["rect"].y1 <= y1 + 0.5, ss=4)
+    return cv2.dilate((a > 0.15).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0 if folga_px else a > 0.15
+
+
+def soleiras_t(Q, img):
+    guarda = B.SOLEIRAS_B
+    B.SOLEIRAS_B = dict(guarda, sem=list(guarda.get("sem", [])) + SEM_SOLEIRA_TC)
+    try:
+        return F.soleiras(Q, img)
+    finally:
+        B.SOLEIRAS_B = guarda
+
+
+def pos_esquadrias_t(Q, img, antes):
+    import final3840_casaa as FA
+    q = POS_ESQUADRIAS_TC
+    out = img.copy()
+    pisos = cv2.imread(str(F.ETAPAS / f"{Q.chave}_pisos.png"))
+    # as paredes recortadas atrás das portas
+    pq = q["paredes"]
+    a = Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS") and d.get("fill") is not None
+                    and max(d["fill"]) < 0.5, ss=4)
+    era = (np.abs(antes.astype(np.int32) - np.int32(F.PAREDES_F["cinza"])).max(axis=2) <= pq["cinza_tol"])
+    volta = (a >= 0.5) & era & (_croma(out) >= pq["croma_min"])
+    volta = cv2.dilate(volta.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & (a > 0.02) & \
+        (_croma(out) >= pq["croma_min"])
+    out[volta] = antes[volta]
+    n_par = int(volta.sum())
+    # os portões: o vão entre o trilho e a folha (a faixa clara e o contorno dela) volta à etapa anterior; os postes
+    # escuros das guias ficam
+    n_port = 0
+    for r in q["portoes"]:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        m = out[y0:y1, x0:x1].astype(np.int32).mean(axis=2) > q["poste_lum"]
+        out[y0:y1, x0:x1][m] = antes[y0:y1, x0:x1][m]
+        n_port += int(m.sum())
+    # a ilha: as duas linhas claras saem
+    x0, y0, x1, y1 = F.ret_q(Q, q["ilha"])
+    mud = np.abs(out[y0:y1, x0:x1].astype(np.int32) - antes[y0:y1, x0:x1].astype(np.int32)).max(axis=2) > 0
+    out[y0:y1, x0:x1][mud] = antes[y0:y1, x0:x1][mud]
+    n_ilha = int(mud.sum())
+    # as faixas onde o piso passa (a porta de correr da área descoberta, os vidros dos jardins de inverno)
+    n_faixa = 0
+    for r in q["faixas_piso"]:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        folha = _folhas_pdf(Q, r)[y0:y1, x0:x1]
+        m = ~folha
+        out[y0:y1, x0:x1][m] = pisos[y0:y1, x0:x1][m]
+        n_faixa += int(m.sum())
+    # a janela da cozinha: a faixa clara sob a folha da direita vira a bancada logo abaixo
+    j = q["janela"]
+    x0, y0, x1, y1 = F.ret_q(Q, j["pt"])
+    folha = _folhas_pdf(Q, (j["pt"][0], 458.0, j["pt"][2], j["pt"][3]), folga_px=0)[y0:y1, x0:x1]
+    reg = out[y0:y1, x0:x1]
+    m = (reg.astype(np.int32).mean(axis=2) > q["claro"] - 30) & ~folha
+    m = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & ~folha
+    d = j["desce_px"] + (y1 - y0)
+    fx0, _, fx1, _ = F.ret_q(Q, (j["fonte_x_pt"][0], 470.0, j["fonte_x_pt"][1], 471.0))
+    cols = fx0 + np.arange(x1 - x0) % (fx1 - fx0)                  # o trecho livre da bancada, repetido na largura
+    fonte = out[y0 + d:y1 + d][:, cols]
+    reg[m] = fonte[m]
+    n_jan = int(m.sum())
+    # as portas de correr do escritório e da adega
+    for p in q["portas"]:
+        x0, y0, x1, y1 = F.ret_q(Q, p["vao"])
+        out[y0:y1, x0:x1] = pisos[y0:y1, x0:x1]
+    guarda = FA.PORTAS_VIDRO
+    FA.PORTAS_VIDRO = dict(FA.PORTAS_VIDRO, portas=[{k: v for k, v in p.items() if k != "vao"} for p in q["portas"]])
+    try:
+        out = FA.portas_vidro(Q, out)
+    finally:
+        FA.PORTAS_VIDRO = guarda
+    print(f"    depois das esquadrias: {n_par} px de parede de volta atrás das portas; {n_port} px de soleira clara fora "
+          f"dos portões; {n_ilha} px das linhas da ilha; {n_faixa} px de piso na porta de correr e nos vidros dos jardins; "
+          f"{n_jan} px da janela da cozinha; as portas do escritório e da adega refeitas")
+    return out
+
+
+# As cortinas (pedido: "melhorar o aspecto das cortinas"): o pano fechado era uma linha fina em zigue-zague (a onda do
+# tecido sem corpo). Agora o pano tem o corpo do tecido franzido: o lado do vidro quase reto, o do ambiente em ondas
+# (a festa da prega), as pregas em luz e sombra (a crista clara, o vale escuro), a dobra da frente um pouco mais escura
+# e a sombra curta no piso. O trilho segue o mesmo, de parede a parede.
+CORTINA_TC = {"passo_m": 0.15, "prof_pano_m": 0.075, "festa_m": 0.018}
+
+
+def pano_cortina(comp_m, px_m, cor=None, passo_m=None, prof_pano=None, festa=None, **_):
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    q = CORTINA_TC
+    cor = blocos.LINHO if cor is None else cor
+    passo_m = q["passo_m"] if passo_m is None else passo_m
+    prof_pano = q["prof_pano_m"] if prof_pano is None else prof_pano
+    festa = q["festa_m"] if festa is None else festa
+    k = px_m * blocos.SS
+    prof_m = 0.17
+    W, H = max(1, round(comp_m * k)), max(1, round(prof_m * k))
+    X, Y = np.meshgrid(np.arange(W) + 0.5, np.arange(H) + 0.5)
+    x_m = X / k
+    fase = 2 * np.pi * x_m / passo_m
+    y_c = 0.085 * k
+    tras = y_c - prof_pano / 2 * k + 0.004 * k * np.sin(fase)
+    frente = y_c + prof_pano / 2 * k + festa * k * np.cos(fase)
+    tec = np.clip(Y - tras + 0.5, 0, 1) * np.clip(frente - Y + 0.5, 0, 1)
+    tec *= np.clip(np.minimum(x_m, comp_m - x_m) / 0.02, 0, 1)
+    luz = 0.80 + 0.22 * (0.5 + 0.5 * np.cos(fase + 0.9))
+    borda = np.clip(1 - np.abs(Y - frente) / (0.006 * k), 0, 1)
+    luz = cv2.GaussianBlur((luz * (1 - 0.10 * borda)).astype(np.float32), (0, 0), 0.004 * k)
+    sombra = cv2.GaussianBlur(np.roll(tec, round(0.018 * k), axis=0).astype(np.float32), (0, 0), 0.012 * k) * 0.28
+    rgb = np.array(cor, np.float32) * luz[..., None]
+    alfa = 1 - (1 - tec) * (1 - sombra)
+    pre = rgb * tec[..., None]
+    Wr, Hr = max(1, round(comp_m * px_m)), max(1, round(prof_m * px_m))
+    pre = cv2.resize(pre.astype(np.float32), (Wr, Hr), interpolation=cv2.INTER_AREA)
+    a = cv2.resize(alfa.astype(np.float32), (Wr, Hr), interpolation=cv2.INTER_AREA)
+    return pre / np.maximum(a, 1e-4)[..., None], a
+
+
+def cortinas_t(Q, img):
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    orig = blocos.cortina
+
+    def cortina(comp_m, px_m, aberta=False, com_pano=True, com_trilho=True, **kw):
+        if com_pano and not com_trilho and not aberta:
+            return pano_cortina(comp_m, px_m, **kw)
+        return orig(comp_m, px_m, aberta=aberta, com_pano=com_pano, com_trilho=com_trilho, **kw)
+    blocos.cortina = cortina
+    try:
+        return F.cortinas(Q, img, paredes_pdf=True)
+    finally:
+        blocos.cortina = orig
 
 
 def passos_terreo_c(Q, ini, M):
@@ -889,12 +1421,19 @@ def passos_terreo_c(Q, ini, M):
     # cromados (9); os boxes em vidro contínuo (6); a cabine em aço (10); paredes em cinza 80 (1); o trilho das cortinas
     # parando nas paredes do PDF (15); as escadas sem linhas, com o D (4, 5); a claraboia do BH master 1 (14); a seta (3);
     # os rótulos sem tracejado embaixo e o BH SERVIÇO fora do box (12, 13). O armário do quarto externo com os cabides
-    # (11, `GUARDA_ROUPAS_C`) e o jardim de inverno sem a faixa escura (16, `jardins_c`)
+    # (11, `GUARDA_ROUPAS_C`) e o jardim de inverno sem a faixa escura (16, `jardins_c`).
+    # Pedidos de 26/10 vendo a final: o travertino em estratos (pisos, bancadas e cubas); os vãos onde o piso passa e a
+    # claraboia da varanda com o piso (`VAOS_TC`); a floreira do lavabo e os materiais dos lavabos e dos BH serviço e
+    # externo; os cooktops girados; os chuveiros de teto novos; o poço do elevador limpo; sem a soleira atrás da porta do
+    # quarto de serviço; depois das esquadrias, as paredes atrás das portas, os portões, a ilha, a porta de correr, a
+    # janela da cozinha, os vidros dos jardins e as portas do escritório e da adega (`pos_esquadrias_t`); as cortinas com
+    # o pano novo; as claraboias desenhadas; os rótulos com o nome em SemiBold
     return [
-        ("pisos", lambda im: F.pisos(Q, im, incluir={"granito": CARROS_PT}, bruto={"travertino": "piso"})),
+        ("pisos", lambda im: F.pisos(Q, im, incluir=dict(VAOS_TC, granito=CARROS_PT + VAOS_TC["granito"]),
+                                     bruto={"travertino": "estratos"})),
         ("bordas", lambda im: B.bordas_grama(im, chave)),
         ("vegetacao", lambda im: vegetacao_c(Q, im, M)),
-        ("bancadas", lambda im: bancadas_t(Q, im)),
+        ("bancadas", lambda im: floreira_lavabo_t(Q, bancadas_t(Q, im))),
         ("pecas", lambda im: pecas_c(Q, im, ini, fora, camas + NAO_TAPETE_C)),
         ("tampas", lambda im: pecas_do_render(Q, camas_render(Q, F.tampas_vasos(Q, restos_piso(Q, im, ini, FORA_PECAS_C[1:4])),
                                                              ini), ini, VASOS_C, verde,
@@ -903,13 +1442,14 @@ def passos_terreo_c(Q, ini, M):
         ("biblioteca", lambda im: biblioteca_c(Q, im)),
         ("carros", lambda im: F.carros(Q, im, M)),
         ("deck", lambda im: F.deck_detalhes(Q, im)),
-        ("chuveiros", lambda im: chuveiros_t(Q, im)),
+        ("chuveiros", lambda im: chuveiros_tc(Q, im)),
         ("boxes", lambda im: boxes_t(Q, im)),
         ("elevador", lambda im: elevador_t(Q, im)),
         ("paredes", lambda im: F.paredes(Q, im, cor=cinza)),
-        ("soleiras", lambda im: soleira_elevador(Q, F.soleiras(Q, im))),
-        ("esquadrias", lambda im: janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T)),
-        ("cortinas", lambda im: F.cortinas(Q, im, paredes_pdf=True)),
+        ("soleiras", lambda im: soleira_elevador(Q, soleiras_t(Q, im))),
+        ("esquadrias", lambda im: pos_esquadrias_t(Q, janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T),
+                                                   im)),
+        ("cortinas", lambda im: cortinas_t(Q, im)),
         ("escadas", lambda im: escada_estreita_t(Q, degraus_largos_t(Q, im))),
         ("projecoes", lambda im: projecoes_t(Q, im)),
         ("seta", lambda im: seta_t(Q, im)),
@@ -924,10 +1464,12 @@ def final_3840_c(chave, salvar=True, de=None, ate=None):
     Q = F.Quadro(chave)
     ini = quadro_inicial_c(Q)
     M = F.afim_render(Q, CASA_C / Q.q["render"], CASA_C / Q.q["aprovada"])
+    import final3840_casaa as FA
     if chave == "Subsolo":
         passos = passos_subsolo_c(Q, ini)
     else:
         passos = passos_terreo_c(Q, ini, M)
+        FA.travertino_bruto = travertino_bruto_tc       # o travertino em estratos nas bancadas e cubas (pedidos de 26/10)
     nomes = [n for n, _ in passos]
     i0 = nomes.index(de) if de else 0
     i1 = nomes.index(ate) + 1 if ate else len(passos)

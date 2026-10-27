@@ -1113,7 +1113,9 @@ def rotulos_ambientes(img, rotulos, pdf2img, escala_desvio=None, granito=None, a
         fim_area = None                                            # onde termina o "A: ... m" (px de ss)
         for texto, tam, (ox, oy), ancora in linhas:
             corpo = max(4, int(round(tam * px_pt * e * ss)))
-            f = ImageFont.truetype(str(FONTES / f"Inter-{q['fonte']}.otf"), corpo)
+            # o nome pode ir num peso próprio (`fonte_nome`, planta a planta; a área e o "2" seguem na `fonte`)
+            peso = q["fonte"] if texto.startswith("A:") or texto == "2" else q.get("fonte_nome", q["fonte"])
+            f = ImageFont.truetype(str(FONTES / f"Inter-{peso}.otf"), corpo)
             gx, gy = pdf2img(ox, oy)
             gx, gy = cx + (gx - cx) * e, cy + (gy - cy) * e          # as linhas afastam na mesma escala
             px_, py_ = (gx + dx - x0) * ss, (gy + dy - y0) * ss
