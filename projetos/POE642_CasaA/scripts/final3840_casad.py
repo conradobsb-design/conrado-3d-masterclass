@@ -21,6 +21,13 @@ do WC DCE em vidro contínuo, as bancadas em granito com a borda e a sombra, a c
 vestiário, os chuveiros cromados, as portas de vidro da academia como as da Casa C e o rótulo do WC DCE no piso livre
 (`passos_subsolo_d`).
 
+Auditoria de 26/10 no Térreo (usuário, 27/10: "Aprovo a lista e sigamos no item 9 com a recomendação"): as paredes e os
+muros em cinza 80, o travertino em estratos da Casa C, a seta da entrada, a escada e os blocos em cascata sem linhas e sem
+triângulo (com o D), os cabides nos armários do DCE, da suíte 3 e ao lado do banho master, os boxes em vidro contínuo,
+as bancadas com a borda e a sombra e os materiais do Térreo da Casa C, os chuveiros cromados, os X abrindo embaixo dos
+rótulos, o rótulo do WC DCE no piso livre, a roupa de cama no DCE, o banco da varanda gourmet e a prateleira da adega
+(`passos_terreo_d`).
+
 A Casa D tem a mesma folha, o mesmo recorte, a mesma escala e as mesmas cores de legenda das Casas B e C: as rotinas do
 `final3840_casab.py` e do `final3840_casac.py` servem como estão. `contexto_d()` aponta os módulos para a Casa D e
 troca os parâmetros que são da casa (as coordenadas em pt do PDF da Casa D). As imagens de partida são o render
@@ -101,7 +108,7 @@ TONS_D = dict(C.TONS_C)
 _piso_textura_b = F.piso_textura
 
 
-def piso_textura_d(Q, img, m, nome, forca, sig_m, semente):
+def piso_textura_d(Q, img, m, nome, forca, sig_m, semente, **kw):
     if nome == "granito" and Q.chave == "Terreo":
         # a luz do granito sem os carros do render (grafite e azul-marinho, quase no tom do granito, entravam na luz
         # e deixavam manchas escuras em volta dos carros novos): ali, a mediana do granito
@@ -113,7 +120,7 @@ def piso_textura_d(Q, img, m, nome, forca, sig_m, semente):
         med = np.median(img[livre], axis=0)
         for x0, y0, x1, y1 in caixas:
             img[y0:y1, x0:x1] = med
-    novo = _piso_textura_b(Q, img, m, nome, forca, sig_m, semente)
+    novo = _piso_textura_b(Q, img, m, nome, forca, sig_m, semente, **kw)
     alvo = TONS_D.get(nome)
     if alvo is not None and m.any():
         med = np.median(novo[m], axis=0)
@@ -492,29 +499,333 @@ def paredes_d(Q, img):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# As escadas (R14) e as projeções
-def escadas_d(Q, img):
-    from retoque_terreo_casae import escada_linhas
-    out = np.ascontiguousarray(img.copy())
-    if Q.chave == "Terreo":
-        out = escada_linhas(out, None, ESCADA_T, p2r=Q.p2q)
-        out = F.degraus_blocos(Q, out)
-        with F.em_quadro(Q):
-            pa = AJ.PROJECOES_A
-            n = 0
-            try:
-                for zonas, t, camada in ((PROJECOES_D, PROJECOES_TRACO_D["pisos"], "DOC_LINHAS E PROJEÇÕES"),
-                                         (PROJECOES_CLARAS_D, PROJECOES_TRACO_D["claras"], "DOC_LINHAS E PROJEÇÕES"),
-                                         (COBERTURA_D, PROJECOES_TRACO_D["claras"], "ARQ_ELEMENTOS FIXOS")):
-                    AJ.PROJECOES_A = dict(pa, larg_px=pa["larg_px"] * Q.W / 2000 * t["larg"], cor=t["cor"],
-                                          forca=t["forca"])
-                    out, k = B.linhas_pdf(out, "Terreo", zonas, camada)
-                    n += k
-            finally:
-                AJ.PROJECOES_A = pa
-        print(f"    projeções do PDF em tracejado ({n} traços): os X do banho master, da garagem, da área descoberta e "
-              f"do jardim do lavabo, e a cobertura da garagem")
+# A auditoria de 26/10 no Térreo (mapa `renders/POE642_CasaD_PH_Terreo_auditoria_2610_v2.jpg`; usuário, 27/10/26: "Aprovo
+# a lista e sigamos no item 9 com a recomendação"), com as rotinas do Térreo aprovado da Casa C:
+# 1. as paredes e os muros do lote em cinza 80 (E10) e, depois das esquadrias, a parede de volta onde a limpeza delas a
+#    cortou (`pos_esquadrias_d`). Sem a limpeza dos vãos escuros da Casa C (`C.janelas_s`): aqui ela só pegava as faixas
+#    brancas da ARQ_PAREDE dentro das ilhas (em granito escuro, uma linha branca de ponta a ponta) e na borda do jardim da
+#    sala íntima. Os trilhos das cortinas param nas paredes do PDF (`F.cortinas(paredes_pdf=True)`, como na Casa B):
+#    sem o preto, o da janela da suíte master descia pelo closet até o muro;
+# 2. o travertino em estratos do Térreo da Casa C (`C.travertino_estratos`) no living/jantar, no hall e no lavabo, e o
+#    mesmo desenho nas bancadas e cubas de travertino (`C.travertino_bruto_tc`, como na Casa C);
+# 3. a seta da entrada principal (E4), no piso do hall de entrada, apontando para a porta pivotante (`SETA_TD`);
+# 4. a escada de 16 degraus sem as linhas e sem o triângulo (E3, E8): os degraus em Bege Bahia com o sombreamento de
+#    descida (o 16, junto ao terraço, o mais claro; `C.sombras_degraus`) e o D do PDF no degrau 16;
+# 5. os blocos em cascata sem o bocel e sem o triângulo, com a sombra curta de cada bloco sobre o de baixo
+#    (`F.degraus_blocos`, como na Casa B) e o D no meio do bloco de cima (o último pintado do PDF, junto ao deck; no lugar
+#    do triângulo ele ficava na borda, metade no deck);
+# 6. os guarda-roupas com cabides (E2; `elementos.guarda_roupa`, como os closets das Casas B e C): o armário do DCE, o da
+#    suíte 3/escritório e o módulo ao lado do banho master (os retângulos com a diagonal da DOC_LINHAS);
+# 7. os boxes de correr dos banhos 1, 2 e 3 e do WC DCE em vidro contínuo, com as faces finas, a sombra curta e o trilho
+#    (`final3840_casaa.boxes`); as folhas do PDF, pareadas por box (`AJ.folhas_box` juntava as dos três banhos, que estão
+#    na mesma linha); antes, a faixa tracejada da base sai, refeita com o piso logo acima;
+# 8-9. as bancadas com a borda e a sombra curta (E9) e os materiais do Térreo aprovado da Casa C (pergunta 9,
+#    recomendação aceita): o lavabo com a bancada e a cuba esculpida em granito marrom e o vaso marrom; o banho master e
+#    os banhos 1, 2 e 3 com a bancada e a cuba esculpida em travertino bruto e o vaso branco; o banho gourmet com a
+#    bancada em granito marrom escurecido e a cuba branca (o WC DCE tem só a cuba, de parede: branca); a ilha e as
+#    bancadas da cozinha e da gourmet em granito marrom no tom do piso, escurecido (86%), como nas Casas B e C;
+# 10. os chuveiros na placa cromada com os furinhos, o braço até a parede e a canopla (`final3840_casaa.chuveiro`): banho
+#    master (2), banhos 1, 2 e 3, WC DCE, banho gourmet e a ducha do deck; as placas e os braços do PDF ficam fora das peças;
+# 11. os X tracejados (GARAGEM, ÁREA DESCOBERTA, JARDIM do lavabo) abrem embaixo dos rótulos (E7), como na Casa C:
+#    os rótulos saem duas vezes, a segunda sobre o fundo sem o tracejado embaixo dos textos (`rotulos_terreo_d`);
+# 12. o rótulo do WC DCE TÉRREO parte do piso livre entre a cuba, o vaso e a porta (E7); os arcos das portas do PDF,
+#    que a final não desenha (R3), saem dos obstáculos dos rótulos, como no Subsolo (`rotulos_sub_d`): o do WC DCE
+#    fechava o piso livre e devolvia o rótulo para dentro do box;
+# 13. a cama do DCE com a roupa de cama da biblioteca, como no DCE 1 do Subsolo (`cama_dce_d`);
+# 14. o banco do estar da varanda gourmet (o retângulo de cantos redondos da DOC_LINHAS E PROJEÇÕES, 0,60 x 1,80 m), em
+#    madeira, sem encosto, como o da varanda da Casa E: a madeira da mesa da suíte 3/escritório (o veio no comprido; a
+#    textura do piso de madeira trazia as juntas das réguas e o banco saía xadrez), um pouco mais escura, em 4 ripas;
+# 15. a prateleira de vinhos da adega na parede do fundo (a da direita), como na Casa C (`C.adega_c`).
+MATERIAIS_TD = {"granito": [(2320.0, 1370.0, 2362.0, 1492.0)],                                        # o lavabo
+                "travertino": [(628.0, 1705.0, 766.0, 1750.0), (910.0, 1694.0, 954.0, 1770.0),
+                               (1885.0, 1694.0, 1971.0, 1770.0)],                       # banho master, banhos 1, 2 e 3
+                "granito_escuro": [(1360.0, 640.0, 1500.0, 673.0), (1200.0, 675.0, 1430.0, 727.0),
+                                   (1255.0, 804.0, 1458.0, 881.0), (1598.0, 575.0, 1818.0, 620.0),
+                                   (1660.0, 680.0, 1806.0, 750.0)],     # banho gourmet; gourmet e cozinha, bancada e ilha
+                "cubas_brancas": [(1387.9, 645.0, 1428.0, 668.2), (2150.0, 759.9, 2166.6, 783.2)]}  # gourmet; WC DCE
+VASOS_TD = [((2216.1, 1454.1, 2245.2, 1474.1), "marrom")]                                           # o do lavabo
+# os chuveiros: a placa (ducha) e o braço do PDF; a canopla, na ponta do braço junto à parede
+CHUVEIROS_TD = [("banho master, à esquerda", (630.7, 1849.0, 641.9, 1860.2), (615.1, 1853.9, 637.5, 1855.3)),
+                ("banho master, à direita", (686.9, 1849.2, 698.1, 1860.4), (691.3, 1854.1, 713.7, 1855.5)),
+                ("banho 1", (931.2, 1845.8, 942.4, 1857.0), (915.6, 1850.7, 938.0, 1852.1)),
+                ("banho 2", (1896.7, 1845.8, 1907.9, 1857.0), (1901.2, 1850.7, 1923.5, 1852.1)),
+                ("banho 3", (1948.9, 1846.1, 1960.1, 1857.3), (1933.3, 1851.0, 1955.6, 1852.4)),
+                ("WC DCE", (2202.8, 836.7, 2214.0, 847.9), (2207.3, 841.6, 2229.6, 843.1)),
+                ("banho gourmet", (1219.3, 642.5, 1230.5, 653.7), (1224.2, 647.0, 1225.6, 669.3)),
+                ("ducha do deck", (1159.7, 659.3, 1170.9, 670.5), (1164.2, 664.2, 1186.5, 665.7))]
+# os boxes de correr: as duas folhas do PDF de cada um, o meio e o trilho no vão (pt)
+BOXES_TD = [{"nome": "banho 1", "hor": True, "meio": 1821.6, "trilho": [(980.9, 1016.5)],
+             "folhas": [(915.6, 1820.9, 968.0, 1821.4), (928.5, 1821.7, 980.9, 1822.3)]},
+            {"nome": "banho 2", "hor": True, "meio": 1821.9, "trilho": [(1822.6, 1858.3)],
+             "folhas": [(1858.3, 1821.2, 1910.7, 1821.7), (1871.1, 1822.0, 1923.5, 1822.6)]},
+            {"nome": "banho 3", "hor": True, "meio": 1821.6, "trilho": [(1998.5, 2034.1)],
+             "folhas": [(1933.3, 1820.9, 1985.6, 1821.4), (1946.1, 1821.7, 1998.5, 1822.3)]},
+            {"nome": "WC DCE", "hor": True, "meio": 818.1, "trilho": [(2145.2, 2174.5)],
+             "folhas": [(2174.5, 817.4, 2218.9, 817.9), (2185.8, 818.2, 2230.2, 818.8)]}]
+BOX_FAIXA_TD = {"meia_pt": 2.4, "sobe_px": 7}
+GUARDA_ROUPAS_TD = {"ss": 4, "semente": 61, "pecas": [("DCE", (2238.8, 834.4, 2295.5, 868.4), "cima"),
+                                                      ("suíte 3/escritório", (1932.6, 1577.0, 1966.6, 1690.4), "direita"),
+                                                      ("ao lado do banho master", (872.5, 1710.3, 906.5, 1880.3), "esquerda")]}
+BANCO_VARANDA_TD = {"pt": (1263.0, 1196.9, 1297.0, 1298.9), "raio_pt": 5.7, "ripas": 4, "madeira": 0.80,
+                    "fonte_pt": (2125.0, 1705.0, 2166.0, 1811.0),       # o tampo da mesa da suíte 3/escritório
+                    "junta": (70, 92, 118), "larg_junta": 0.35, "forca_junta": 0.45, "contorno": (60, 72, 88),
+                    "larg_contorno": 0.45, "sombra": {"dist_m": 0.05, "sig_m": 0.035, "forca": 0.32}, "ss": 4}
+ADEGA_TD = dict(C.ADEGA_C, pt=(2241.6, 987.4, 2258.6, 1083.8), modulos=2)
+ESCADA_DESCIDA_TD = {"d_pt": (957.0, 1449.5),                # o meio do degrau 16 (o D do PDF, na ponta do degrau)
+                     "d_blocos_pt": (588.7, 1108.0)}          # o meio do bloco de cima da cascata (574,2 a 603,2 pt)
+SETA_TD = {"ponta": (2462, 1068)}
+ROTULOS_TD = {"pontos": {"WC DCE TÉRREO": (2195.0, 790.0)}, "folga_px": 4}
+
+
+def piso_estratos_d(Q, img, m, nome, forca, sig_m, semente, **kw):
+    if nome == "travertino" and kw.get("bruto") == "estratos":
+        return C.piso_textura_c(Q, img, m, nome, forca, sig_m, semente, **kw)
+    return piso_textura_d(Q, img, m, nome, forca, sig_m, semente, **kw)
+
+
+def _dentro_td(r, zonas):
+    cx, cy = (r[0] + r[2]) / 2, (r[1] + r[3]) / 2
+    return any(z[0] <= cx <= z[2] and z[1] <= cy <= z[3] for z in zonas)
+
+
+def bancadas_terreo_d(Q, img):
+    """As bancadas com a borda e a sombra (E9) e os materiais do Térreo aprovado da Casa C, peça a peça; as cubas
+    esculpidas (granito no lavabo, travertino nos banhos) no lugar da louça; as brancas (banho gourmet e WC DCE), de
+    semiencaixe, por cima da pedra."""
+    import final3840_casaa as FA
+    mt = MATERIAIS_TD
+    brancas = [tuple(round(v, 1) for v in r) for r in mt["cubas_brancas"]]
+    cubas = [c for c in cubas_bancada_d(Q) if tuple(round(v, 1) for v in c) not in brancas]
+    gs = {k: [(Q.p2q(*z[:2]), Q.p2q(*z[2:])) for z in mt[k]] for k in ("granito", "travertino", "granito_escuro")}
+
+    def pedra(Q_, comp):
+        ys, xs = np.nonzero(comp)
+        cx, cy = (xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2
+        for k in ("granito", "granito_escuro", "travertino"):
+            if any(a[0] <= cx <= b[0] and a[1] <= cy <= b[1] for a, b in gs[k]):
+                return k
+        return None
+
+    def cuba(Q_, out, r):
+        return F.cuba_esculpida(Q_, out, r, "granito" if _dentro_td(r, mt["granito"]) else "travertino")
+    guarda = F.cubas_bancada
+    F.cubas_bancada = lambda Q_: cubas
+    try:
+        out = C.bancadas_c(Q, img, borda=F.BANCADAS_F["borda_e9"], pedra=pedra, cuba=cuba)
+    finally:
+        F.cubas_bancada = guarda
+    out = np.ascontiguousarray(np.clip(out, 0, 255).astype(np.uint8))
+    for r in mt["cubas_brancas"]:
+        out = FA.cuba_branca(Q, out, r)
+    print(f"    bancadas: lavabo em granito marrom com a cuba esculpida em granito; banho master e banhos 1, 2 e 3 em "
+          f"travertino bruto com a cuba esculpida em travertino; banho gourmet, gourmet e cozinha em granito marrom "
+          f"escurecido; {len(mt['cubas_brancas'])} cubas brancas (banho gourmet e WC DCE)")
     return out
+
+
+def chuveiros_td():
+    """Os chuveiros como `final3840_casaa.chuveiro` os pede: a placa, o braço e a canopla na ponta do braço que fica
+    longe da placa (a da parede)."""
+    out = []
+    for nome, ducha, braco in CHUVEIROS_TD:
+        cx, cy = (ducha[0] + ducha[2]) / 2, (ducha[1] + ducha[3]) / 2
+        x0, y0, x1, y1 = braco
+        if x1 - x0 >= y1 - y0:
+            xw = x0 if abs(cx - x0) > abs(cx - x1) else x1
+            canopla = (min(xw, xw + (1.3 if xw == x0 else -1.3)), y0 - 0.7, max(xw, xw + (1.3 if xw == x0 else -1.3)),
+                       y1 + 0.7)
+        else:
+            yw = y0 if abs(cy - y0) > abs(cy - y1) else y1
+            canopla = (x0 - 0.7, min(yw, yw + (1.3 if yw == y0 else -1.3)), x1 + 0.7,
+                       max(yw, yw + (1.3 if yw == y0 else -1.3)))
+        out.append({"nome": nome, "ducha": ducha, "braco": braco, "canopla": canopla})
+    return out
+
+
+def chuveiros_terreo_d(Q, img):
+    import final3840_casaa as FA
+    out = np.ascontiguousarray(img.copy())
+    for c in chuveiros_td():
+        out = FA.chuveiro(Q, out, c)
+    print(f"    {len(CHUVEIROS_TD)} chuveiros na placa cromada com os furinhos, o braço até a parede e a canopla")
+    return out
+
+
+def boxes_terreo_d(Q, img):
+    """O box do banho gourmet (no granito) na faixa cinza-clara, como estava (`F.boxes_granito`); os de correr dos
+    banhos 1, 2 e 3 e do WC DCE em vidro contínuo (`final3840_casaa.boxes`), com as folhas pareadas por box. Antes, a
+    faixa tracejada da base, ao longo de cada box, recebe o piso logo acima."""
+    import final3840_casaa as FA
+    out = F.boxes_granito(Q, img).copy()
+    q = BOX_FAIXA_TD
+    for b in BOXES_TD:
+        xs = [f[0] for f in b["folhas"]] + [f[2] for f in b["folhas"]] + [t for tr in b["trilho"] for t in tr]
+        x0, y0, x1, y1 = F.ret_q(Q, (min(xs), b["meio"] - q["meia_pt"], max(xs), b["meio"] + q["meia_pt"]))
+        d = q["sobe_px"]
+        out[y0:y1, x0:x1] = out[y0 - d:y1 - d, x0:x1]
+    folhas = AJ.folhas_box
+    AJ.folhas_box = lambda pg: [dict(b) for b in BOXES_TD]
+    try:
+        return FA.boxes(Q, np.ascontiguousarray(out))
+    finally:
+        AJ.folhas_box = folhas
+
+
+def biblioteca_terreo_d(Q, img):
+    """As peças da biblioteca (cooktops, banquetas) e as da auditoria de 26/10: os guarda-roupas com cabides, o banco
+    da varanda gourmet e a prateleira de vinhos da adega."""
+    out = biblioteca_d(Q, img)
+    guarda = B.GUARDA_ROUPAS_B
+    B.GUARDA_ROUPAS_B = GUARDA_ROUPAS_TD
+    try:
+        with F.em_quadro(Q):
+            out = B.guarda_roupas_terreo(out)
+    finally:
+        B.GUARDA_ROUPAS_B = guarda
+    out = banco_varanda_d(Q, out)
+    ga = C.ADEGA_C
+    C.ADEGA_C = ADEGA_TD
+    try:
+        return C.adega_c(Q, out)
+    finally:
+        C.ADEGA_C = ga
+
+
+def banco_varanda_d(Q, img):
+    """O banco do estar da varanda gourmet, sem encosto, em madeira (como o da varanda da Casa E): o retângulo de
+    cantos redondos do PDF, as ripas no comprido (com o veio da mesa da suíte 3/escritório, já na imagem), as juntas,
+    o contorno fino e a sombra curta."""
+    q, k = BANCO_VARANDA_TD, BANCO_VARANDA_TD["ss"]
+    (u0, v0), (u1, v1) = Q.p2q(*q["pt"][:2]), Q.p2q(*q["pt"][2:])
+    X0, Y0, X1, Y1 = int(u0) - 6, int(v0) - 6, int(np.ceil(u1)) + 7, int(np.ceil(v1)) + 7
+    w, h = X1 - X0, Y1 - Y0
+    rr = q["raio_pt"] * (u1 - u0) / (q["pt"][2] - q["pt"][0])
+    m = np.zeros((h * k, w * k), np.uint8)
+    a_, b_, c_, d_ = (u0 - X0) * k, (v0 - Y0) * k, (u1 - X0) * k, (v1 - Y0) * k
+    r_ = rr * k
+    cv2.rectangle(m, (int(a_ + r_), int(b_)), (int(c_ - r_), int(d_)), 255, -1)
+    cv2.rectangle(m, (int(a_), int(b_ + r_)), (int(c_), int(d_ - r_)), 255, -1)
+    for cx, cy in ((a_ + r_, b_ + r_), (c_ - r_, b_ + r_), (a_ + r_, d_ - r_), (c_ - r_, d_ - r_)):
+        cv2.circle(m, (int(cx), int(cy)), int(r_), 255, -1, cv2.LINE_AA)
+    mf = m.astype(np.float32) / 255
+
+    def reduzir(x):
+        return cv2.resize(x.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+    a = reduzir(mf)
+    s = q["sombra"]
+    dd = s["dist_m"] * Q.px_m * k
+    sb = reduzir(cv2.GaussianBlur(cv2.warpAffine(mf, np.float32([[1, 0, -dd], [0, 1, dd]]), (w * k, h * k)), (0, 0),
+                                  s["sig_m"] * Q.px_m * k)) * s["forca"]
+    fx0, fy0, fx1, fy1 = F.ret_q(Q, q["fonte_pt"])
+    tex = cv2.resize(img[fy0:fy1, fx0:fx1].astype(np.float32), (w, h), interpolation=cv2.INTER_AREA) * q["madeira"]
+    out = img.astype(np.float32)
+    reg = out[Y0:Y1, X0:X1]
+    reg *= (1 - sb * (1 - a))[..., None]
+    reg[:] = reg * (1 - a[..., None]) + tex[:h, :w] * a[..., None]
+    from retoque_terreo_casae import linha_aa
+    n = q["ripas"]
+    for i in range(1, n):
+        x = (u0 - X0) + i * (u1 - u0) / n
+        al = linha_aa((h, w), [(x, v0 - Y0 + 0.5), (x, v1 - Y0 - 0.5)], q["larg_junta"])[..., None] * \
+            q["forca_junta"] * a[..., None]
+        reg[:] = reg * (1 - al) + np.float32(q["junta"]) * al
+    anel = m & ~cv2.erode(m, np.ones((max(1, int(round(q["larg_contorno"] * k))),) * 2, np.uint8))
+    al = np.clip(reduzir(anel / 255.0) * 1.3, 0, 1)[..., None]
+    reg[:] = reg * (1 - al) + np.float32(q["contorno"]) * al
+    print(f"    varanda gourmet: o banco de madeira sem encosto ({(u1 - u0) / Q.px_m:.2f} x {(v1 - v0) / Q.px_m:.2f} m), "
+          f"em {n} ripas, com a sombra curta")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def escadas_terreo_d(Q, img):
+    """A escada de 16 degraus sem as linhas e sem o triângulo, com o sombreamento de descida e o D do PDF no degrau 16;
+    os blocos em cascata sem o bocel, com a sombra de cada um sobre o de baixo e o D no lugar do triângulo."""
+    s = F.ESCADA_SOMBRA
+    ex0, ey0, ex1, ey1 = ESCADA_T["pdf"]
+    x0, y0, x1, y1 = F.ret_q(Q, (ex0 - 8, ey0, ex1, ey1))
+    X, Y = C.grade_pt(Q, x0, y0, x1, y1)
+    bordas = [ex0] + list(ESCADA_T["bocels"]) + [ex1]
+    k = np.searchsorted(bordas, X).astype(np.int32)
+    n = len(bordas)
+    f = C.sombras_degraus(k, n, s)
+    bege = F.fechar(Q.cor([(232, 232, 232)], tol=6), 5)[y0:y1, x0:x1] & (Y >= ey0) & (Y <= ey1) & (X <= ex1)
+    out = img.copy()
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    reg = np.where(bege[..., None], reg * f[..., None], reg)
+    out[y0:y1, x0:x1] = np.clip(reg, 0, 255).astype(np.uint8)
+    out = F.letra(Q, out, "D", Q.p2q(*ESCADA_DESCIDA_TD["d_pt"]))
+    print("    escada de 16 degraus: sem linhas e sem triângulo, com o sombreamento de descida; o D no degrau 16")
+    bf = F.BLOCOS_F
+    F.BLOCOS_F = dict(bf, triangulos_pt=[])                   # o D vai no meio do bloco de cima, não na borda
+    try:
+        out = F.degraus_blocos(Q, out, linhas=False, letra_="D")
+    finally:
+        F.BLOCOS_F = bf
+    print("    o D no meio do bloco de cima da cascata")
+    return F.letra(Q, out, "D", Q.p2q(*ESCADA_DESCIDA_TD["d_blocos_pt"]))
+
+
+def projecoes_terreo_d(Q, img):
+    """As projeções do PDF em tracejado (item 15 de 22/10), como desde 25/10 (antes na etapa das escadas)."""
+    out = np.ascontiguousarray(img.copy())
+    with F.em_quadro(Q):
+        pa = AJ.PROJECOES_A
+        n = 0
+        try:
+            for zonas, t, camada in ((PROJECOES_D, PROJECOES_TRACO_D["pisos"], "DOC_LINHAS E PROJEÇÕES"),
+                                     (PROJECOES_CLARAS_D, PROJECOES_TRACO_D["claras"], "DOC_LINHAS E PROJEÇÕES"),
+                                     (COBERTURA_D, PROJECOES_TRACO_D["claras"], "ARQ_ELEMENTOS FIXOS")):
+                AJ.PROJECOES_A = dict(pa, larg_px=pa["larg_px"] * Q.W / 2000 * t["larg"], cor=t["cor"],
+                                      forca=t["forca"])
+                out, k = B.linhas_pdf(out, "Terreo", zonas, camada)
+                n += k
+        finally:
+            AJ.PROJECOES_A = pa
+    print(f"    projeções do PDF em tracejado ({n} traços): os X do banho master, da garagem, da área descoberta e do "
+          f"jardim do lavabo, e a cobertura da garagem")
+    return out
+
+
+def seta_terreo_d(Q, img):
+    import final3840_casaa_terreo as FT
+    guarda = FT.SETA
+    FT.SETA = dict(guarda, ponta=SETA_TD["ponta"])
+    try:
+        return FT.seta(Q, img)
+    finally:
+        FT.SETA = guarda
+
+
+def rotulos_terreo_d(Q, img):
+    """Os rótulos (E7) sem tracejado embaixo, como na Casa C (`C.rotulos_t`): os rótulos saem uma vez, e o que as
+    projeções e a seta mudaram (a etapa das escadas, do cache) volta embaixo de cada texto, com folga; então os rótulos
+    saem de novo, nos mesmos lugares, sobre o fundo sem o tracejado. O WC DCE TÉRREO parte do piso livre, e os arcos
+    das portas saem dos obstáculos (como em `rotulos_sub_d`); os guarda-roupas novos, o banco e a prateleira da adega
+    entram como obstáculo."""
+    rot = B.rotulos_casab(Q.pg, Q.p2q2000)
+    rf = F.ROTULOS_F
+    obst = [r for _, r, _ in GUARDA_ROUPAS_TD["pecas"]] + [BANCO_VARANDA_TD["pt"], ADEGA_TD["pt"]]
+    pontos = dict(rf["pontos"].get(Q.chave, {}), **ROTULOS_TD["pontos"])
+    F.ROTULOS_F = dict(rf, pontos=dict(rf["pontos"], **{Q.chave: pontos}),
+                       obstaculos_pt=dict(rf.get("obstaculos_pt", {}), **{Q.chave: obst}))
+    todos = Q.desenhos
+    Q._desenhos = [d for d in todos if not (d.get("layer") == "ARQ_PAREDE" and C.arco_porta(d))]
+    try:
+        def uma(im):
+            return F.rotulos(Q, im, rot, Q.q["ajustes"], granito=A.granito(im, Q.q.get("granito_lum_max", 125)))
+        antes = cv2.imread(str(F.ETAPAS / f"{Q.chave}_escadas.png"))
+        out1 = uma(img)
+        texto = np.abs(out1.astype(np.int16) - img.astype(np.int16)).max(axis=2) > 10
+        perto = cv2.dilate(texto.astype(np.uint8), np.ones((2 * ROTULOS_TD["folga_px"] + 1,) * 2, np.uint8)) > 0
+        proj = np.abs(img.astype(np.int16) - antes.astype(np.int16)).max(axis=2) > 0
+        sob = perto & proj
+        base = img.copy()
+        base[sob] = antes[sob]
+        print(f"    rótulos: {int(sob.sum())} px de tracejado embaixo dos textos voltam ao fundo; os rótulos de novo")
+        return uma(base)
+    finally:
+        F.ROTULOS_F = rf
+        Q._desenhos = todos
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -523,29 +834,37 @@ def passos_terreo_d(Q, ini, M):
     chave = "Terreo"
     cooktops = [(c["pt"][0] - 2, c["pt"][1] - 2, c["pt"][2] + 2, c["pt"][3] + 2) for c in COOKTOPS_D]
     camas = [c[1] for c in CAMAS_D["camas"]]
-    fora = CARROS_PT + cooktops + FORA_PECAS_D + VASOS_D + camas + BANCOS_D + [BANQUETAS_D["caixa_pt"]]
+    chuv = [(min(c["ducha"][0], c["braco"][0]) - 1, min(c["ducha"][1], c["braco"][1]) - 1,
+             max(c["ducha"][2], c["braco"][2]) + 1, max(c["ducha"][3], c["braco"][3]) + 1) for c in chuveiros_td()]
+    fora = CARROS_PT + cooktops + FORA_PECAS_D + VASOS_D + camas + BANCOS_D + [BANQUETAS_D["caixa_pt"]] + chuv
     # sob os carros, a legenda tem o contorno deles (traços): ali tudo é granito, para o piso não guardar o desenho
     for r in CARROS_PT:
         x0, y0, x1, y1 = F.ret_q(Q, r)
         Q.chapada[y0:y1, x0:x1] = (50, 66, 90)
+    F.piso_textura = piso_estratos_d
+    F.VASOS_COR = dict(F.VASOS_COR, Terreo=VASOS_TD)
+    cinza = F.PAREDES_F["cinza"]
     return [
-        ("pisos", lambda im: F.pisos(Q, im, incluir={"granito": CARROS_PT})),
+        ("pisos", lambda im: F.pisos(Q, im, incluir={"granito": CARROS_PT}, bruto={"travertino": "estratos"})),
         ("bordas", lambda im: B.bordas_grama(im, chave)),
         ("vegetacao", lambda im: C.vegetacao_c(Q, im, M)),
-        ("bancadas", lambda im: C.bancadas_c(Q, im)),
+        ("bancadas", lambda im: bancadas_terreo_d(Q, im)),
         ("pecas", lambda im: C.pecas_c(Q, im, ini, fora, camas + NAO_TAPETE_D)),
-        ("tampas", lambda im: C.pecas_do_render(Q, C.camas_render(Q, F.tampas_vasos(Q, C.restos_piso(
-            Q, im, ini, FORA_PECAS_D)), ini), ini, VASOS_D, C.verde, "hall e gourmet: as plantas em vaso")),
-        ("biblioteca", lambda im: biblioteca_d(Q, im)),
+        ("tampas", lambda im: cama_dce_d(Q, C.pecas_do_render(Q, C.camas_render(Q, F.tampas_vasos(Q, C.restos_piso(
+            Q, im, ini, FORA_PECAS_D)), ini), ini, VASOS_D, C.verde, "hall e gourmet: as plantas em vaso"))),
+        ("vasos", lambda im: F.vasos_cor(Q, im)),
+        ("biblioteca", lambda im: biblioteca_terreo_d(Q, im)),
         ("carros", lambda im: carros_d(Q, im, M)),
-        ("boxes", lambda im: F.boxes_granito(Q, im)),
-        ("paredes", lambda im: paredes_d(Q, im)),
+        ("chuveiros", lambda im: chuveiros_terreo_d(Q, im)),
+        ("boxes", lambda im: boxes_terreo_d(Q, im)),
+        ("paredes", lambda im: brises_madeira(Q, F.paredes(Q, im, cor=cinza))),
         ("soleiras", lambda im: C.soleira_elevador(Q, F.soleiras(Q, im))),
-        ("esquadrias", lambda im: F.esquadrias_terreo(Q, im)),
-        ("cortinas", lambda im: F.cortinas(Q, im)),
-        ("escadas", lambda im: escadas_d(Q, im)),
-        ("rotulos", lambda im: F.rotulos(Q, im, B.rotulos_casab(Q.pg, Q.p2q2000), Q.q["ajustes"],
-                                         granito=A.granito(im, Q.q.get("granito_lum_max", 125)))),
+        ("esquadrias", lambda im: pos_esquadrias_d(Q, F.esquadrias_terreo(Q, im, parede=cinza), im)),
+        ("cortinas", lambda im: F.cortinas(Q, im, paredes_pdf=True)),
+        ("escadas", lambda im: escadas_terreo_d(Q, im)),
+        ("projecoes", lambda im: projecoes_terreo_d(Q, im)),
+        ("seta", lambda im: seta_terreo_d(Q, im)),
+        ("rotulos", lambda im: rotulos_terreo_d(Q, im)),
     ]
 
 
@@ -559,7 +878,9 @@ def final_3840_d(chave, salvar=True, de=None, ate=None):
     if chave == "Subsolo":
         passos = passos_subsolo_d(Q, ini)
     else:
+        import final3840_casaa as FA
         passos = passos_terreo_d(Q, ini, M)
+        FA.travertino_bruto = C.travertino_bruto_tc     # o travertino em estratos nas bancadas e cubas (como na Casa C)
     nomes = [n for n, _ in passos]
     i0 = nomes.index(de) if de else 0
     i1 = nomes.index(ate) + 1 if ate else len(passos)
@@ -600,7 +921,10 @@ CAMAS_S = {"borda": 1.7, "ss": 4, "semente": 41, "camas": [("DCE 1", (846.0, 120
 # madeira do render) entra a roupa de cama da biblioteca do tipo "motorista", a da cama de solteiro do Térreo da Casa A
 # aprovada em 21/10 ("está tudo muito brancão"): o lençol branco com a dobra, o travesseiro, o edredom em linho claro e a
 # peseira bordô nos pés, com o pesponto; a cabeceira embaixo, contra a parede da janela
-CAMA_DCE_S = {"camas": [("DCE 1", CAMAS_S["camas"][0][1], "baixo", "motorista")], "borda": 1.7, "ss": 4, "semente": 31}
+# No Térreo (auditoria de 26/10, item 13), a mesma roupa de cama na cama do DCE, com a cabeceira em cima
+CAMA_DCE_S = {"camas": {"Subsolo": [("DCE 1", CAMAS_S["camas"][0][1], "baixo", "motorista")],
+                        "Terreo": [("DCE", (2317.0, 727.8, 2373.7, 841.2), "cima", "motorista")]},
+              "borda": 1.7, "ss": 4, "semente": 31}
 
 
 def pegada_subsolo(Q):
@@ -709,6 +1033,9 @@ POS_ESQUADRIAS_SUB_D = {
               # no DCE 1, a cama e o criado-mudo encostam na janela: do lado de dentro, a faixa volta inteira à etapa
               # anterior (lá, a cabeceira e o traço da parede; mais longe da janela seria a cama de novo)
               ("janela do DCE 1", (828.1, 1320.3, 882.6, 1325.5), {"so_antes": -1})]}
+# No Térreo (auditoria de 26/10, item 1), a mesma limpeza: a parede do PDF de volta onde as esquadrias a cortaram
+POS_ESQUADRIAS_D = {"Subsolo": POS_ESQUADRIAS_SUB_D,
+                    "Terreo": dict(POS_ESQUADRIAS_SUB_D, paredes=dict(POS_ESQUADRIAS_SUB_D["paredes"], fora=[]), pecas=[])}
 
 
 def escada_sub_d(Q, img):
@@ -758,7 +1085,8 @@ def cama_dce_d(Q, img):
     q = CAMA_DCE_S
     k = q["ss"]
     out = img.copy()
-    for i, (nome, r, cab, tipo) in enumerate(q["camas"]):
+    camas = q["camas"][Q.chave]
+    for i, (nome, r, cab, tipo) in enumerate(camas):
         e = q["borda"]
         (u0, v0), (u1, v1) = Q.p2q(r[0] + e, r[1] + e), Q.p2q(r[2] - e, r[3] - e)
         cor, al = elementos.roupa_de_cama((v1 - v0) / Q.px_m, (u1 - u0) / Q.px_m, Q.px_m * k, tipo,
@@ -781,7 +1109,7 @@ def cama_dce_d(Q, img):
         a_ = cv2.resize(ga, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
         reg = out[Y0:Y1, X0:X1].astype(np.float32)
         out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a_[..., None]) + pre), 0, 255).astype(np.uint8)
-    print("    camas: a roupa de cama da biblioteca (" + "; ".join(f"{n}, {t}" for n, _, _, t in q["camas"]) +
+    print("    camas: a roupa de cama da biblioteca (" + "; ".join(f"{n}, {t}" for n, _, _, t in camas) +
           "), com a cabeceira contra a parede")
     return out
 
@@ -897,8 +1225,8 @@ def _faixas_folha(out, A, a, ret, q, so_antes=0):
     return n
 
 
-def pos_esquadrias_sub_d(Q, img, antes):
-    q = POS_ESQUADRIAS_SUB_D
+def pos_esquadrias_d(Q, img, antes):
+    q = POS_ESQUADRIAS_D[Q.chave]
     out = img.copy()
     A = antes.astype(np.int32)
     a = Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS") and d.get("fill") is not None
@@ -953,7 +1281,7 @@ def passos_subsolo_d(Q, ini):
         ("banhos", lambda im: box_wc_dce_d(Q, banhos_sub_d(Q, im))),
         ("paredes", lambda im: F.paredes(Q, im, cor=cinza)),
         ("soleiras", lambda im: nicho_d(Q, C.soleira_elevador(Q, F.soleiras(Q, im)))),
-        ("esquadrias", lambda im: pos_esquadrias_sub_d(Q, portas_academia_sub_d(Q, C.janelas_s(
+        ("esquadrias", lambda im: pos_esquadrias_d(Q, portas_academia_sub_d(Q, C.janelas_s(
             Q, B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m, parede=cinza), JANELAS_SUB_D)), im)),
         ("escadas", lambda im: escada_sub_d(Q, im)),
         ("hachura", lambda im: AJ.subsolo_hachurado(im, peg, Q.px_m)),

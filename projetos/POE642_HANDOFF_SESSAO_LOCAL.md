@@ -2880,3 +2880,23 @@ Os 15 itens:
 
 Depois de aplicar, o Subsolo roda de novo da hachura (o lote vem do Térreo final). Aguarda a resposta do usuário (o OK da lista e a pergunta 9).
 
+
+## Casa D · Térreo, a lista aplicada (27/10/26)
+
+Resposta do usuário: "Já já reviso o subsolo. Aprovo a lista e sigamos no item 9 com a recomendação". Final refeita inteira (`final3840_casad.py Terreo`, ~7 min), depois `--de biblioteca`; o Subsolo roda de novo da hachura (`--de hachura`: o lote vem do Térreo final).
+
+Os 15 itens estão nas REGRAS (seção 19, Casa D · Térreo) e no comentário antes de `MATERIAIS_TD`. Na aplicação, com as rotinas do Térreo aprovado da Casa C:
+- o travertino em estratos entra pelo `F.piso_textura` (`piso_estratos_d`, o ramo dos estratos de `C.piso_textura_c`); as bancadas e cubas de travertino bruto saem no mesmo desenho (`FA.travertino_bruto = C.travertino_bruto_tc`);
+- as bancadas: `C.bancadas_c` com a borda E9 e a pedra de cada bancada pelo centro dela (`MATERIAIS_TD`); as duas cubas brancas (a da bancada da gourmet e a de parede do WC DCE) saem da lista das esculpidas e vão por `final3840_casaa.cuba_branca`;
+- os boxes: a faixa tracejada da base é refeita com o piso 7 px acima antes do vidro; `AJ.folhas_box` juntava as folhas dos banhos 1, 2 e 3 (estão na mesma linha) e foi trocado pelas folhas pareadas de `BOXES_TD`;
+- os guarda-roupas novos, o banco e a prateleira da adega entram como obstáculo dos rótulos;
+- a escada de 16 degraus e as projeções: o sombreamento sai de `C.sombras_degraus` no Bege Bahia da escada; as projeções que estavam em `escadas_d` passaram à etapa `projecoes` (para os rótulos acharem o tracejado embaixo dos textos).
+
+Conferido na final, trecho a trecho, contra a final anterior (`T_antes`) e o PDF. Na primeira rodada apareceram e foram corrigidos:
+- uma linha branca de ponta a ponta nas ilhas da cozinha e da gourmet e uma faixa branca manchada na borda do jardim da sala íntima: a limpeza dos vãos escuros das janelas da Casa C (`C.janelas_s`, que eu tinha posto na etapa das esquadrias) pegava as faixas brancas da ARQ_PAREDE dentro das ilhas (agora em granito escuro) e no guarda-corpo do jardim. Saiu: no Térreo da Casa D nenhuma janela de verdade precisava dela;
+- um traço cinza vertical atravessando o closet da suíte master até o muro: o trilho da cortina da janela da suíte master não parava mais na parede (procurava o preto). `F.cortinas(..., paredes_pdf=True)`, como na Casa B (auditoria de 26/10, item 11);
+- o banco da varanda saía xadrez: a textura do piso de madeira tem as juntas das réguas. Agora a madeira é a do tampo da mesa da suíte 3/escritório (já na imagem, `BANCO_VARANDA_TD["fonte_pt"]`), com o veio no comprido, a 80%;
+- o D dos blocos em cascata ficava no lugar do triângulo, na borda do bloco de cima, metade no deck: vai ao meio do bloco de cima (`ESCADA_DESCIDA_TD["d_blocos_pt"]`);
+- o rótulo do WC DCE voltava para dentro do box: o arco da porta do PDF, que a final não desenha, fechava o piso livre entre a cuba, o vaso e a porta. Os arcos das portas saem dos obstáculos dos rótulos do Térreo, como no Subsolo (`rotulos_sub_d`).
+
+Conferido de novo na final: as diferenças para a final anterior ficam só nos 15 itens (paredes e muros, travertino, bancadas e louças, boxes, chuveiros, guarda-roupas, cama, banco, adega, seta, escadas, rótulos e os X); nos dois jardins, só o contorno claro em volta das plantas em vaso saiu e, no do lavabo, o X abre embaixo do JARDIM. As ilhas e bancadas em granito escurecido ficam, como recomendado, quase no tom do piso, marcadas pela borda e pela sombra. O Subsolo, rodado de novo da hachura, não muda (0 px: a hachura usa só o contorno do lote). Antes e depois (o antes é a final anterior, com as cortinas franzidas de 27/10): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2610_{planta,servico,social,intima,escadas,varanda,garagem}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa D refeitos. Aguarda o OK do Térreo e do Subsolo da Casa D.
