@@ -2852,3 +2852,31 @@ A causa dos riscos é a mesma: a limpeza das esquadrias (`B.esquadrias_final`) r
 A cama do DCE 1 (`cama_dce_d`, `CAMA_DCE_S`): no colchão, a roupa de cama da biblioteca do tipo da cama do motorista da Casa A, aprovada em 21/10 ("está tudo muito brancão"): lençol branco com a dobra, travesseiro, edredom em linho claro e peseira bordô nos pés, com o pesponto; a cabeceira embaixo, contra a parede da janela; a moldura de madeira do render fica.
 
 Conferido: as mudanças ficam nas portas, nas paredes junto a elas, nas duas janelas e na cama (e no traço da face de algumas paredes cortado pela mesma limpeza, junto ao elevador, à sauna e ao vestiário). Antes e depois: `POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_pedidos2710_{portas_deposito,wc_dce,parede_vestiario,cama_dce1}_antes_depois.jpg` (o `..._2610_planta_antes_depois.jpg` refeito sobre a final nova). Prancha do Subsolo e PDF da Casa D refeitos. Aguarda o OK do Subsolo da Casa D.
+
+## Casa D · Térreo, auditoria para o OK (27/10/26)
+
+Pedido do usuário: "Vamos para o térreo da casa D" (depois das correções do Subsolo, sem o OK explícito dele, que segue em aberto). Pela regra dele ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."), a lista foi apresentada sem alterar a imagem. O mapa numerado: `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_auditoria_2610_v2.jpg` (sobre a prancha atual; a v1 segue em `..._auditoria_2610.jpg`), feito com `auditoria_2610.mapa` e os itens trocados em memória.
+
+A conferência foi trecho a trecho, a final ao lado do PDF no mesmo quadro (banho gourmet e gourmet, cozinha, louceiro e despensa, serviço, gás, WC DCE e DCE, área descoberta, garagem, piscina, deck e blocos em cascata, varanda gourmet, living/jantar, adega, hall e lavabo, suíte master, banho master e closet, escada de 16 degraus, elevador, sala íntima e jardim, suítes 1, 2 e 3 e banhos 1, 2 e 3), com as cores da base da legenda (travertino no living/jantar, no hall e no lavabo; Bege Bahia nos banhos, no deck e na varanda) e as letras do PDF (só um D, no degrau 16 da escada).
+
+Conformes: E1 (soleiras), E6 (sem raios), os carros (prata, alinhados, R12), as camas e os bancos do render nas suítes (resposta 5 de 22/10), os brises em madeira (também as duas peças giradas no deck, junto à gourmet, que são da ARQ_ELEMENTOS FIXOS), as cortinas franzidas, a cabine do elevador em aço, os closets com cabides da suíte master e das suítes 1 e 2, as escalas dos pisos. O PDF do Térreo não tem pilares nem SHAFT. O chuveiro do banho master fica aberto, sem box (o PDF não desenha vidro ali; a v1 apontava a falta).
+
+Os 15 itens:
+1. (E10) paredes e muros do lote pretos em cinza 80;
+2. (E11) o travertino liso de 22/10 (living/jantar, hall de entrada, lavabo) no travertino do Térreo aprovado da Casa C (em estratos);
+3. (E4) a seta da entrada principal junto à porta pivotante do hall (acesso pelos pisantes do leste), apontando para dentro;
+4. (E3, E8) escada de 16 degraus: sem as linhas e sem o triângulo, com o sombreamento de descida e o D do PDF no degrau 16;
+5. (E3, E8) blocos em cascata à esquerda da piscina: sem o triângulo, com o sombreamento de descida e o D no bloco de cima (o PDF não marca o sentido ali);
+6. (E2) armários cortados sem cabides: DCE, suíte 3/escritório e o módulo ao lado do banho master (hoje com o desenho borrado do render) com os cabides, como nos closets;
+7. (E5) os boxes dos banhos 1, 2 e 3 e do WC DCE (só tracejados) em vidro contínuo, com as faces finas e a sombra curta;
+8. (E9) as bancadas claras sobre o piso claro (lavabo, banho master, banhos 1, 2 e 3) com a borda e a sombra curta;
+9. (pergunta) os materiais: hoje bancadas em pedra areia e cubas e vasos brancos; ilha e bancadas da cozinha e da gourmet em pedra areia (resposta "Areia" de 22/10). Recomendado, o padrão do Térreo aprovado da Casa C: lavabo com a bancada e a cuba esculpida em granito marrom e o vaso marrom; banho master e banhos 1, 2 e 3 com a cuba e a bancada em travertino bruto e o vaso branco; banho gourmet e WC DCE com a bancada em granito marrom e a cuba branca; a ilha e as bancadas da cozinha e da gourmet em granito marrom no tom do piso, escurecido (86%), como nas Casas B e C;
+10. os chuveiros (placa branca com o miolo cinza: banho master, banhos 1, 2 e 3, WC DCE, banho gourmet, ducha do deck) na placa cromada com os furinhos, o braço e a canopla, como nos Subsolos;
+11. (E7) os X tracejados que cortam os rótulos GARAGEM, ÁREA DESCOBERTA e JARDIM (do lavabo) abrem embaixo do rótulo, como na Casa C;
+12. (E7) WC DCE TÉRREO: o rótulo, na área do chuveiro e junto à placa, para o piso livre;
+13. DCE: a cama branca do render com a roupa de cama da biblioteca, como no DCE 1 do Subsolo (pedido de 27/10);
+14. varanda gourmet: o banco comprido do PDF, à esquerda do estar (no tapete), não aparece;
+15. a adega vazia ganha a prateleira de vinhos ao fundo, como nas Casas C e E.
+
+Depois de aplicar, o Subsolo roda de novo da hachura (o lote vem do Térreo final). Aguarda a resposta do usuário (o OK da lista e a pergunta 9).
+
