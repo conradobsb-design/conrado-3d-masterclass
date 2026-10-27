@@ -2838,3 +2838,7 @@ Os 10 itens estão nas REGRAS (seção 19, Casa D · Subsolo). Na aplicação, c
 - com as paredes em cinza, o nicho do chuveiro do vestiário (um retângulo da ARQ_BANCADAS dentro da parede da direita, antes escondido no preto) aparecia branco: entra na pedra clara das soleiras (`nicho_d`).
 
 Conferido na final: as mudanças ficam só dentro da planta (fora dela, nenhum px muda). Antes e depois (o antes é a final de 22/10): `POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_2610_{planta,dce_wc,escada,banhos,portas_academia}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa D refeitos. Aguarda o OK do Subsolo da Casa D.
+
+### Depois: "remova a linha técnica em diagonal. deixe apenas uma sombra no lugar." (27/10/26)
+
+Na escada de 16 degraus, a linha de corte do PDF (cinza fino, com o zigue-zague da quebra) saiu: a divisa com o trecho nevoado é a diagonal reta do corte (do primeiro ao último ponto do PDF) e, no lugar da linha, uma sombra suave sobre os degraus de antes dela (`ESCADA_SUB_D["sombra_corte"]`: 30%, caindo em ~4 px). A rotina da Casa C (`C.escada_estreita_s`) ganhou essa opção; sem ela, desenha a linha como antes (o Subsolo aprovado da Casa C não muda). Conferido: só a escada mudou. Antes e depois: `POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_pedidos2710_escada_corte_antes_depois.jpg` (os `..._2610_{planta,escada}_antes_depois.jpg` refeitos sobre a final nova). Prancha do Subsolo e PDF da Casa D refeitos. Aguarda o OK do Subsolo da Casa D.

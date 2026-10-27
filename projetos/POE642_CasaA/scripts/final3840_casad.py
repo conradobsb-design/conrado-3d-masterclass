@@ -619,10 +619,9 @@ def pegada_subsolo(Q):
 # 1. as paredes em cinza 80 (E10; não há pilares), com os vãos das janelas que ficavam escuros no claro (`C.janelas_s`;
 #    os batentes do elevador, a partir de 1240 pt, ficam);
 # 2-3. a escada de 16 degraus sem os traços dos bocéis e sem o triângulo (E3, E8): os degraus em Bege Bahia com o
-#    sombreamento de subida (o 1, junto ao pátio, o mais escuro), a linha de corte do PDF (no degrau 7) em cinza fino e
-#    os degraus 8 a 16, depois dela, nevoados, como a escada estreita da Casa C (`C.escada_estreita_s`, aqui sem esmaecer
-#    o trecho de antes do corte, que é cheio desde 15/10); o S do PDF centrado no degrau 1 (a origem do texto cai no
-#    pátio);
+#    sombreamento de subida (o 1, junto ao pátio, o mais escuro), o corte do PDF (no degrau 7) e os degraus 8 a 16,
+#    depois dele, nevoados, como a escada estreita da Casa C (`C.escada_estreita_s`, aqui sem esmaecer o trecho de antes
+#    do corte, que é cheio desde 15/10); o S do PDF centrado no degrau 1 (a origem do texto cai no pátio);
 # 4. o armário do DCE 1 (o retângulo da DOC_LINHAS, junto à parede de cima) com os cabides (E2), o guarda-roupa aberto
 #    dos closets das Casas A e B (`elementos.guarda_roupa`), com as portas para o quarto;
 # 5. o box de correr do WC DCE em vidro contínuo, com as faces finas, a sombra curta e o trilho (E5, `final3840_casaa.
@@ -641,9 +640,12 @@ def pegada_subsolo(Q):
 #    portas (`C.arco_porta`) saem dos obstáculos dos rótulos do Subsolo.
 # Com as paredes em cinza, o nicho do chuveiro do vestiário (o retângulo da ARQ_BANCADAS dentro da parede da direita,
 # que a parede preta escondia) saía branco: entra na pedra clara das soleiras, com as faces finas, como prateleira.
-ESCADA_SUB_D = {"pdf": ESCADA_S["pdf"], "bocels": ESCADA_T["bocels"], "corte": ESCADA_S["corte"], "esmaecer": 0.0,
-                "nevoa": {"branco": 0.72, "sigma_px": 1.2}, "linha": {"cor": (64, 64, 64), "larg_px": 1.2},
-                "letra": 0.0, "semente": 763}
+# Depois, vendo a final (usuário, 27/10/26: "remova a linha técnica em diagonal. deixe apenas uma sombra no lugar."): sem
+# a linha de corte do PDF e sem o zigue-zague da quebra; a divisa com o trecho nevoado é a diagonal reta do PDF (do 1º
+# ao último ponto do corte) e, no lugar da linha, só uma sombra suave sobre os degraus de antes dela
+ESCADA_SUB_D = {"pdf": ESCADA_S["pdf"], "bocels": ESCADA_T["bocels"],
+                "corte": [ESCADA_S["corte"][0], ESCADA_S["corte"][-1]], "esmaecer": 0.0, "nevoa": {"branco": 0.72, "sigma_px": 1.2}, "linha": None,
+                "sombra_corte": {"forca": 0.30, "alc_px": 4.0}, "letra": 0.0, "semente": 763}
 ARMARIO_DCE_S = {"pt": (761.9, 1183.0, 830.0, 1214.2), "lado": "baixo", "ss": 4, "semente": 57}
 BOX_WC_DCE_S = {"faixa": (686.0, 1224.8, 752.9, 1229.2), "sobe_px": 7}
 BANHOS_SUB_D = {

@@ -2127,15 +2127,21 @@ def escada_estreita_s(Q, img, ss=8):
     reg[:] = np.where(ch, reg * (1 - (1 - f[..., None]) * (1 - e)), reg)
     reg[:] = reg * (1 - a) + novo * a
     out = np.clip(out, 0, 255).astype(np.uint8)
-    # a linha de corte do PDF, por cima, e o S do PDF no degrau 11, esmaecido como a escada
-    lc = q["linha"]
+    # a linha de corte do PDF, por cima (ou, com `sombra_corte`, só uma sombra no lugar dela, do lado de antes do corte),
+    # e o S do PDF no degrau 11, esmaecido como a escada
     cp = np.float32([Q.p2q(x, y) for x, y in q["corte"]])
     ml = np.zeros((h * ss, w * ss), np.uint8)
-    cv2.polylines(ml, [np.int32(np.round((cp - (x0, y0)) * ss))], False, 255, max(1, int(round(lc["larg_px"] * ss))),
-                  cv2.LINE_AA)
+    lc, sc = q.get("linha"), q.get("sombra_corte")
+    cv2.polylines(ml, [np.int32(np.round((cp - (x0, y0)) * ss))], False, 255,
+                  max(1, int(round((lc["larg_px"] if lc else 1.0) * ss))), cv2.LINE_AA)
     al = cv2.resize(ml.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
     reg = out[y0:y1, x0:x1].astype(np.float32)
-    out[y0:y1, x0:x1] = np.clip(reg * (1 - al) + np.float32(lc["cor"]) * al, 0, 255).astype(np.uint8)
+    if sc:
+        d = cv2.distanceTransform((al[..., 0] < 0.5).astype(np.uint8), cv2.DIST_L2, 5)
+        f = 1 - sc["forca"] * np.exp(-d / sc["alc_px"]) * (1 - depois[..., 0]) * a[..., 0]
+        out[y0:y1, x0:x1] = np.clip(reg * f[..., None], 0, 255).astype(np.uint8)
+    else:
+        out[y0:y1, x0:x1] = np.clip(reg * (1 - al) + np.float32(lc["cor"]) * al, 0, 255).astype(np.uint8)
     cor = F.LETRA_F["cor"]
     F.LETRA_F["cor"] = tuple(int(round(c + (255 - c) * q["letra"])) for c in cor)
     try:
