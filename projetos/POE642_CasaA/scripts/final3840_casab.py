@@ -2804,6 +2804,12 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
             for c in Q.caminhos(d):
                 cv2.polylines(tr, [np.int32(np.round(c))], False, 1, 2)
     obst |= tr.astype(bool)
+    # peças que o PDF não marca nas camadas de obstáculo (na Casa C, os guarda-roupas da DOC_LINHAS e as claraboias):
+    # retângulos em pt, por pavimento
+    for r in q.get("obstaculos_pt", {}).get(Q.chave, ()):
+        (u0, v0), (u1, v1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        obst[max(0, int(min(v0, v1))):int(np.ceil(max(v0, v1))) + 1,
+             max(0, int(min(u0, u1))):int(np.ceil(max(u0, u1))) + 1] = True
     k = 2 * q["folga_px"] + 1
     obst = cv2.dilate(obst.astype(np.uint8), np.ones((k, k), np.uint8))
     I_obst = cv2.integral(obst)

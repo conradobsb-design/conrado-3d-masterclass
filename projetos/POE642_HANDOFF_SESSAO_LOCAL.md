@@ -2781,3 +2781,13 @@ Pedidos do usuário, vendo a final do Térreo da Casa C: "e essas cortinas? corr
 
 Antes e depois (o antes é a final do commit anterior): `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_cortinas2710_antes_depois.jpg`, `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_cortinas2710_antes_depois.jpg`, `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_cortinas2710_antes_depois.jpg`, `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_cortinas2710_antes_depois.jpg`, `POE642_CasaE/renders/POE642_CasaE_PH_{Terreo,1Pavimento}_cortinas2710_antes_depois.jpg`. Pranchas dessas plantas e os PDFs das cinco casas refeitos. Aguarda o OK do usuário (e continua aguardando o do Térreo da Casa C).
 
+## Casa C · Térreo, pedidos de 27/10 vendo a final (27/10/26)
+
+Pedidos do usuário, um a um, sobre a final do Térreo da Casa C: "As cadeiras precisam ficar parcialmente abaixo da mesa de escritório."; "corrija esse rótulo para que não fique sobre o guarda roupas" (CLOSET MASTER 1); "corrija o rótulo da garagem para que não fique muito próximo do carro". Feito no motor (`final3840_casac.py Terreo --de cadeiras`), detalhes no README dos scripts e regras nas seções 8 e 12.
+
+- **Cadeiras:** no PDF, as cadeiras dos quartos 1 e 3 e da suíte master entram cerca de 1/3 sob o tampo (11 de 35 pt), mas as mesas são faixas da DOC_LINHAS E PROJEÇÕES, pintadas antes, e as cadeiras saíam inteiras por cima. A etapa nova `cadeiras` põe a mesa por cima da parte sob o tampo. O primeiro jeito (copiar um trecho do tampo) deixava costuras e faixas de tom; ficou o tom de cada coluna passando de uma ponta à outra, com o veio fino de um trecho livre, sem as juntas, e a sombra do tampo só sobre a cadeira.
+- **CLOSET MASTER 1:** os guarda-roupas da Casa C (faixas da DOC_LINHAS) e as claraboias não eram obstáculo para os rótulos; agora são (`obstaculos_pt`). O piso livre do closet tem 2,1 m (124 px) e o nome, numa linha, 116 px: foi para duas linhas (CLOSET / MASTER 1), no meio do piso livre. O CLOSET MASTER 2 se afastou 7 px do tracejado da claraboia; os outros rótulos não mudaram.
+- **GARAGEM:** no PDF o texto está sobre o carro do meio, e o lugar livre mais perto encostava no retrovisor dele (4 px). A busca parte do meio do vão entre o carro do meio e o da direita: ~0,2 m de cada um.
+
+Conferido na final: só essas 6 regiões mudaram (as 3 cadeiras e os 3 rótulos). Antes e depois: `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_pedidos2710_{cadeiras,closets,garagem}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos. Aguarda o OK do Térreo da Casa C.
+

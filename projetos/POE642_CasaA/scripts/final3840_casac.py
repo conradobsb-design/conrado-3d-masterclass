@@ -588,6 +588,83 @@ def soleira_elevador(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# As cadeiras das mesas de trabalho (usuário, 27/10/26, vendo a final: "As cadeiras precisam ficar parcialmente abaixo
+# da mesa de escritório."): no PDF, a cadeira entra cerca de 1/3 sob o tampo (11 de 35 pt), mas a mesa é uma faixa da
+# DOC_LINHAS E PROJEÇÕES, pintada antes da cadeira, que saía inteira por cima. A mesa volta por cima da parte da cadeira
+# que fica sob o tampo, como as banquetas sob a pedra (seção 8): o tampo, na largura toda e com 1 px da borda do lado da
+# cadeira, é refeito ali com o tom de cada coluna passando de uma ponta à outra e o veio fino de um trecho livre da
+# própria mesa, adiante no comprimento (longe das pontas), sem o que atravessa a mesa (uma junta, um risco); assim não
+# entra costura nem faixa de tom nova. A caixa da cadeira vai com folga (`folga_px`: a sombra dela cai para baixo e à
+# esquerda). A sombra curta do tampo cai sobre a cadeira (só na silhueta dela no PDF) onde a luz (do alto, à direita) a
+# manda, como a das peças (`F.PECAS["sombra"]`). Pares (pt) do PDF: cadeira e mesa.
+CADEIRAS_MESAS_TC = {"pares": [("quarto 1", (1882.2, 786.8, 1915.6, 822.0), (1904.6, 730.7, 1932.9, 855.4)),
+                               ("quarto 3", (1150.0, 716.8, 1185.2, 750.3), (1127.9, 739.2, 1241.3, 767.6)),
+                               ("suíte master", (997.8, 832.2, 1031.2, 867.3), (1020.2, 776.1, 1048.5, 917.8))],
+                     "folga_px": {"esq": 7, "cima": 5, "dir": 5, "baixo": 7}, "borda_px": 1, "pontas_px": 3,
+                     "emenda_px": 2, "veio_sig_px": 4.0}
+
+
+def cadeiras_mesas_t(Q, img):
+    q, s = CADEIRAS_MESAS_TC, F.PECAS["sombra"]
+    f, e, n = q["folga_px"], q["borda_px"], q["emenda_px"]
+    out = img.astype(np.float32)
+    H, W = out.shape[:2]
+    for nome, cad, mesa in q["pares"]:
+        (cx0, cy0), (cx1, cy1) = Q.p2q(cad[0], cad[1]), Q.p2q(cad[2], cad[3])
+        (mx0, my0), (mx1, my1) = Q.p2q(mesa[0], mesa[1]), Q.p2q(mesa[2], mesa[3])
+        X0, X1, Y0, Y1 = int(round(mx0)), int(round(mx1)), int(round(my0)), int(round(my1))
+        a0, a1 = int(np.floor(cx0)) - f["esq"], int(np.ceil(cx1)) + f["dir"]
+        b0, b1 = int(np.floor(cy0)) - f["cima"], int(np.ceil(cy1)) + f["baixo"]
+        vertical = (Y1 - Y0) > (X1 - X0)
+        # trabalha sempre com a mesa em pé (o comprimento nas linhas): a horizontal vai transposta
+        v = out if vertical else out.transpose(1, 0, 2)
+        if vertical:
+            c0, c1, l0, l1, k0, k1, antes = X0, X1, Y0, Y1, b0, b1, (cx0 + cx1) / 2 < (X0 + X1) / 2
+        else:
+            c0, c1, l0, l1, k0, k1, antes = Y0, Y1, X0, X1, a0, a1, (cy0 + cy1) / 2 < (Y0 + Y1) / 2
+        rc0, rc1 = (c0 - e, c1) if antes else (c0, c1 + e)          # a largura toda, com a borda do lado da cadeira
+        r0, r1 = max(l0, k0), min(l1, k1)
+        L = r1 - r0
+        lo, hi = l0 + q["pontas_px"], l1 - q["pontas_px"]
+        orig = v.copy()
+
+        def veio_de(dl):
+            # o detalhe fino do trecho, sem o que atravessa a mesa de lado a lado (uma junta, um risco): a média de cada
+            # linha sai
+            c = np.ascontiguousarray(orig[r0 + dl:r1 + dl, rc0:rc1])
+            d = c - cv2.GaussianBlur(c, (1, 0), sigmaX=0.1, sigmaY=q["veio_sig_px"])
+            return d - d.mean(axis=1, keepdims=True)
+
+        # o trecho do veio: o livre, adiante no comprimento (o mais perto que não toca a cadeira nem as pontas)
+        desl = next((sg * d for d in range(L, l1 - l0) for sg in (-1, 1) if lo <= r0 + sg * d and r1 + sg * d <= hi),
+                    None)
+        if desl is None:
+            print(f"    cadeira do {nome}: a mesa não tem trecho livre para refazer o tampo; fica como está")
+            continue
+        # o tom: coluna a coluna, de uma ponta à outra (média de `emenda_px` linhas em cada ponta), como se a mesa
+        # passasse por baixo da cadeira; o veio: só o detalhe fino do trecho copiado (sem as faixas de tom dele)
+        ini = orig[r0 - n:r0, rc0:rc1].mean(axis=0)
+        fim = orig[r1:r1 + n, rc0:rc1].mean(axis=0)
+        t = ((np.arange(L) + 0.5) / L)[:, None, None]
+        veio = veio_de(desl)
+        v[r0:r1, rc0:rc1] = ini[None] * (1 - t) + fim[None] * t + veio
+        # a sombra curta do tampo, fora da mesa, só na caixa da cadeira
+        m = np.zeros((H, W), np.float32)
+        m[Y0:Y1, X0:X1] = 1
+        d_ = s["dist_m"] * Q.px_m
+        sb = cv2.GaussianBlur(cv2.warpAffine(m, np.float32([[1, 0, -d_], [0, 1, d_]]), (W, H)), (0, 0),
+                              s["sig_m"] * Q.px_m) * s["forca"]
+        # só sobre a cadeira (a silhueta dela no PDF, 1 px mais larga): o piso junto à mesa já tem a sombra do tampo
+        sil = Q.preencher(lambda d, r=cad: d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO" and d["rect"].x0 >= r[0] - 0.5
+                          and d["rect"].y0 >= r[1] - 0.5 and d["rect"].x1 <= r[2] + 0.5 and d["rect"].y1 <= r[3] + 0.5)
+        sil = cv2.dilate(sil, np.ones((3, 3), np.uint8))
+        sb *= sil * (1 - m)
+        out *= (1 - sb)[..., None]
+        print(f"    cadeira do {nome}: a mesa por cima da parte sob o tampo ({L} px de comprimento, o veio de "
+              f"{abs(desl)} px adiante, no tom das pontas)")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 def biblioteca_c(Q, img):
     out = np.ascontiguousarray(img.copy())
     with F.em_quadro(Q):
@@ -914,6 +991,11 @@ def rotulos_t(Q, img):
     F.vidros_box = vidros_box_t
     fonte = R1.ROTULOS.get("fonte_nome")
     R1.ROTULOS["fonte_nome"] = ROTULOS_TC["fonte_nome"]
+    rf = F.ROTULOS_F
+    obst = [r for _, r, _ in GUARDA_ROUPAS_C["pecas"]] + list(CLARABOIAS_T["rets"])
+    pontos = dict(rf["pontos"].get(Q.chave, {}), **{n: p for n, p in ROTULOS_TC["pontos"].items() if p})
+    F.ROTULOS_F = dict(rf, pontos=dict(rf["pontos"], **{Q.chave: pontos}),
+                       obstaculos_pt=dict(rf.get("obstaculos_pt", {}), **{Q.chave: obst}))
     try:
         def uma(im):
             return F.rotulos(Q, im, rot, ajustes, granito=A.granito(im, Q.q.get("granito_lum_max", 125)))
@@ -929,6 +1011,7 @@ def rotulos_t(Q, img):
         return uma(base)
     finally:
         F.vidros_box = vb
+        F.ROTULOS_F = rf
         if fonte is None:
             R1.ROTULOS.pop("fonte_nome", None)
         else:
@@ -939,7 +1022,18 @@ ROTULOS_TC = {"folga_px": 4,
               # pedidos de 26/10 ("melhorar a representação dos rótulos de toda a planta"): o nome em Inter SemiBold e a
               # área em Regular (a hierarquia do nome; o texto segue preto ou branco, sem halo nem sombra, a regra de
               # 22/10); o JARDIM DE INVERNO 2, que passava das paredes do jardim, em duas linhas
-              "fonte_nome": "SemiBold", "quebras": {"JARDIM DE INVERNO 2": ["JARDIM DE", "INVERNO 2"]}}
+              "fonte_nome": "SemiBold", "quebras": {"JARDIM DE INVERNO 2": ["JARDIM DE", "INVERNO 2"],
+                                                    "CLOSET MASTER 1": ["CLOSET", "MASTER 1"]},
+              # 27/10, vendo a final: "corrija esse rótulo para que não fique sobre o guarda roupas" (CLOSET MASTER 1).
+              # Os guarda-roupas da Casa C são faixas da DOC_LINHAS E PROJEÇÕES, fora das camadas de obstáculo dos
+              # rótulos, e as claraboias também: entram como obstáculo (`obstaculos_pt` do `final3840_casab.rotulos`).
+              # O piso livre do closet master 1, entre a parede e o guarda-roupa, tem 2,1 m (124 px) e o nome numa linha
+              # 116 px: vai em duas linhas, como o JARDIM DE INVERNO 2, no meio do piso livre entre a claraboia e os
+              # guarda-roupas
+              # "corrija o rótulo da garagem para que não fique muito próximo do carro": no PDF, o GARAGEM está sobre
+              # o carro do meio, e o lugar livre mais perto encostava no retrovisor dele (4 px); a busca parte do meio
+              # do vão entre o carro do meio e o da direita (a 0,2 m de cada um)
+              "pontos": {"GARAGEM": (2788.1, 695.2), "CLOSET MASTER 1": (794.6, 707.4)}}
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1475,6 +1569,7 @@ def passos_terreo_c(Q, ini, M):
                                               "estar: os dois vasos junto ao sofá curvo")),
         ("vasos", lambda im: F.vasos_cor(Q, im)),
         ("biblioteca", lambda im: biblioteca_c(Q, im)),
+        ("cadeiras", lambda im: cadeiras_mesas_t(Q, im)),
         ("carros", lambda im: F.carros(Q, im, M)),
         ("deck", lambda im: F.deck_detalhes(Q, im)),
         ("chuveiros", lambda im: chuveiros_tc(Q, im)),
