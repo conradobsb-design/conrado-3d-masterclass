@@ -523,7 +523,10 @@ def paredes_d(Q, img):
 #    recomendação aceita): o lavabo com a bancada e a cuba esculpida em granito marrom e o vaso marrom; o banho master e
 #    os banhos 1, 2 e 3 com a bancada e a cuba esculpida em travertino bruto e o vaso branco; o banho gourmet com a
 #    bancada em granito marrom escurecido e a cuba branca (o WC DCE tem só a cuba, de parede: branca); a ilha e as
-#    bancadas da cozinha e da gourmet em granito marrom no tom do piso, escurecido (86%), como nas Casas B e C;
+#    bancadas da cozinha e da gourmet em granito marrom no tom do piso, escurecido (86%), como nas Casas B e C.
+#    Depois, vendo a final (usuário, 27/10/26: "Banho gourmet: sanitário marrom, bancada da pia e Cuba esculpida no
+#    mármore travertino bruto"): o banho gourmet como os banhos, com a bancada e a cuba esculpida em travertino bruto, e
+#    o vaso marrom, como o do lavabo;
 # 10. os chuveiros na placa cromada com os furinhos, o braço até a parede e a canopla (`final3840_casaa.chuveiro`): banho
 #    master (2), banhos 1, 2 e 3, WC DCE, banho gourmet e a ducha do deck; as placas e os braços do PDF ficam fora das peças;
 # 11. os X tracejados (GARAGEM, ÁREA DESCOBERTA, JARDIM do lavabo) abrem embaixo dos rótulos (E7), como na Casa C:
@@ -538,12 +541,17 @@ def paredes_d(Q, img):
 # 15. a prateleira de vinhos da adega na parede do fundo (a da direita), como na Casa C (`C.adega_c`).
 MATERIAIS_TD = {"granito": [(2320.0, 1370.0, 2362.0, 1492.0)],                                        # o lavabo
                 "travertino": [(628.0, 1705.0, 766.0, 1750.0), (910.0, 1694.0, 954.0, 1770.0),
-                               (1885.0, 1694.0, 1971.0, 1770.0)],                       # banho master, banhos 1, 2 e 3
-                "granito_escuro": [(1360.0, 640.0, 1500.0, 673.0), (1200.0, 675.0, 1430.0, 727.0),
-                                   (1255.0, 804.0, 1458.0, 881.0), (1598.0, 575.0, 1818.0, 620.0),
-                                   (1660.0, 680.0, 1806.0, 750.0)],     # banho gourmet; gourmet e cozinha, bancada e ilha
-                "cubas_brancas": [(1387.9, 645.0, 1428.0, 668.2), (2150.0, 759.9, 2166.6, 783.2)]}  # gourmet; WC DCE
-VASOS_TD = [((2216.1, 1454.1, 2245.2, 1474.1), "marrom")]                                           # o do lavabo
+                               (1885.0, 1694.0, 1971.0, 1770.0),                # banho master, banhos 1, 2 e 3
+                               (1360.0, 640.0, 1500.0, 673.0)],                 # o banho gourmet (pedido de 27/10)
+                "granito_escuro": [(1200.0, 675.0, 1430.0, 727.0), (1255.0, 804.0, 1458.0, 881.0),
+                                   (1598.0, 575.0, 1818.0, 620.0),
+                                   (1660.0, 680.0, 1806.0, 750.0)],               # gourmet e cozinha, bancada e ilha
+                "cubas_brancas": [(2150.0, 759.9, 2166.6, 783.2)],                                  # a do WC DCE
+                # o pontilhado do granito que o PDF desenha na bancada do banho gourmet (466 pontos da ARQ_BANCADAS):
+                # o contorno do PDF o redesenhava, e no travertino eram poros escuros densos; sai
+                "sem_pontilhado": [(1360.0, 640.0, 1500.0, 673.0)]}
+VASOS_TD = [((2216.1, 1454.1, 2245.2, 1474.1), "marrom"),                                           # o do lavabo
+            ((1272.3, 640.8, 1292.3, 669.9), "marrom")]                                # o do banho gourmet (27/10)
 # os chuveiros: a placa (ducha) e o braço do PDF; a canopla, na ponta do braço junto à parede
 CHUVEIROS_TD = [("banho master, à esquerda", (630.7, 1849.0, 641.9, 1860.2), (615.1, 1853.9, 637.5, 1855.3)),
                 ("banho master, à direita", (686.9, 1849.2, 698.1, 1860.4), (691.3, 1854.1, 713.7, 1855.5)),
@@ -590,8 +598,8 @@ def _dentro_td(r, zonas):
 
 def bancadas_terreo_d(Q, img):
     """As bancadas com a borda e a sombra (E9) e os materiais do Térreo aprovado da Casa C, peça a peça; as cubas
-    esculpidas (granito no lavabo, travertino nos banhos) no lugar da louça; as brancas (banho gourmet e WC DCE), de
-    semiencaixe, por cima da pedra."""
+    esculpidas (granito no lavabo, travertino nos banhos e no banho gourmet) no lugar da louça; a branca (WC DCE), de
+    parede, por cima da pedra."""
     import final3840_casaa as FA
     mt = MATERIAIS_TD
     brancas = [tuple(round(v, 1) for v in r) for r in mt["cubas_brancas"]]
@@ -610,16 +618,21 @@ def bancadas_terreo_d(Q, img):
         return F.cuba_esculpida(Q_, out, r, "granito" if _dentro_td(r, mt["granito"]) else "travertino")
     guarda = F.cubas_bancada
     F.cubas_bancada = lambda Q_: cubas
+    todos = Q.desenhos
+    Q._desenhos = [d for d in todos if not (d.get("layer") == "ARQ_BANCADAS" and d["type"] == "s"
+                                            and d["rect"].width < 0.6 and d["rect"].height < 0.6
+                                            and _dentro_td(tuple(d["rect"]), mt["sem_pontilhado"]))]
     try:
         out = C.bancadas_c(Q, img, borda=F.BANCADAS_F["borda_e9"], pedra=pedra, cuba=cuba)
     finally:
         F.cubas_bancada = guarda
+        Q._desenhos = todos
     out = np.ascontiguousarray(np.clip(out, 0, 255).astype(np.uint8))
     for r in mt["cubas_brancas"]:
         out = FA.cuba_branca(Q, out, r)
-    print(f"    bancadas: lavabo em granito marrom com a cuba esculpida em granito; banho master e banhos 1, 2 e 3 em "
-          f"travertino bruto com a cuba esculpida em travertino; banho gourmet, gourmet e cozinha em granito marrom "
-          f"escurecido; {len(mt['cubas_brancas'])} cubas brancas (banho gourmet e WC DCE)")
+    print(f"    bancadas: lavabo em granito marrom com a cuba esculpida em granito; banho master, banhos 1, 2 e 3 e "
+          f"banho gourmet em travertino bruto com a cuba esculpida em travertino; gourmet e cozinha em granito marrom "
+          f"escurecido; {len(mt['cubas_brancas'])} cuba branca (WC DCE)")
     return out
 
 

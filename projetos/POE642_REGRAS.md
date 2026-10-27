@@ -526,4 +526,5 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
   - o banco do estar da varanda gourmet (0,60 x 1,80 m, à esquerda do estar, sobre o tapete), em madeira, sem encosto, em 4 ripas, com a sombra curta;
   - a prateleira de vinhos na parede do fundo da adega, como na Casa C, com o rótulo fora dela.
   - Antes e depois: `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2610_{planta,servico,social,intima,escadas,varanda,garagem}_antes_depois.jpg`. O Subsolo roda de novo da hachura (o lote vem do Térreo final).
+  - Depois, vendo a final ("Banho gourmet: sanitário marrom, bancada da pia e Cuba esculpida no mármore travertino bruto"): o banho gourmet como os banhos, com a bancada e a cuba esculpida em travertino bruto (no lugar do granito escurecido e da cuba branca), e o vaso marrom, como o do lavabo; sem o pontilhado de granito que o PDF desenha nessa bancada (no travertino, saía em poros escuros densos). A bancada da pia da gourmet, do lado de fora, segue em granito escurecido. Antes e depois: `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_pedidos2710_banho_gourmet_antes_depois.jpg`.
 
