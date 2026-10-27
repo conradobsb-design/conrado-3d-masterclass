@@ -588,6 +588,90 @@ def soleira_elevador(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# Os vidros dos jardins de inverno (usuário, 27/10/26, vendo a final: "corrija esses riscos brancos dentro da área verde,
+# no contorno interno, logo depois das portas de vidro."): a faixa do vidro na base é mais larga que o vidro fino que as
+# esquadrias desenham, e a parte de dentro dela ficava com manchinhas claras do travertino; embaixo do jardim de inverno,
+# a base tem ainda uma soleira estreita (branco e travertino) entre as plantas e o vidro, que saía como um risco claro.
+# Linha a linha, em cada lado do jardim (sem os cantos, `cantos_px`), da borda das plantas para fora até a primeira linha
+# comprida do vidro desenhado (`longo_px`; sem vidro a até `busca_px`, a linha fica como está): o claro entre as plantas
+# e o vidro (e nos `borda_px` px da borda das plantas) vira a vegetação de dentro do próprio jardim, copiada a `fontes`
+# px para dentro; onde há a soleira (2 px ou mais da base que não são planta, vidro nem traço), a borda das plantas, com a
+# sombra dela, é deslocada até o vidro (os últimos `desloca_px` px, com a emenda em transição), como nos outros lados. O que ficar sem fonte vai por inpaint curto. O vidro e
+# o lado de fora não mudam.
+JARDINS_VIDROS_TC = {"jardim": [(58, 122, 79)], "vidro": [(211, 214, 214)], "area_min_px": 2000, "busca_px": 10,
+                     "claro": 120, "longo_px": 25, "borda_px": 3, "desloca_px": 14, "transicao_px": 6, "cantos_px": 4,
+                     "fontes": (16, 22, 28, 34, 40)}
+
+
+def jardins_vidros_t(Q, img):
+    q = JARDINS_VIDROS_TC
+    G = Q.cor(q["jardim"], tol=6)
+    vidro = Q.cor(q["vidro"], tol=6)
+    traco = Q.cor([(0, 0, 0)], tol=20)
+    lum = img.astype(np.float32).mean(axis=2)
+    claro = lum > q["claro"]
+    cv_ = (claro & (vidro | traco)).astype(np.uint8)
+    k_ = q["longo_px"]
+    longo = (cv2.morphologyEx(cv_, cv2.MORPH_OPEN, np.ones((1, k_), np.uint8)) |
+             cv2.morphologyEx(cv_, cv2.MORPH_OPEN, np.ones((k_, 1), np.uint8))) > 0
+    n, lab, st, _ = cv2.connectedComponentsWithStats(G.astype(np.uint8), 8)
+    out = img.copy()
+    sobra = np.zeros(G.shape, np.uint8)
+    trocados, jardins = 0, 0
+    for i in range(1, n):
+        if st[i, cv2.CC_STAT_AREA] < q["area_min_px"]:
+            continue
+        g = lab == i
+        x, y, w, h, _ = st[i]
+        mexeu = False
+        for ox, oy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            vertical = ox != 0
+            c0 = q["cantos_px"]
+            for t in (range(y + c0, y + h - c0) if vertical else range(x + c0, x + w - c0)):
+                ls = np.nonzero(g[t, x:x + w] if vertical else g[y:y + h, t])[0]
+                if not len(ls):
+                    continue
+                e = (x if vertical else y) + (ls.min() if (ox if vertical else oy) < 0 else ls.max())
+                p0 = (e, t) if vertical else (t, e)
+                fim = next((k for k in range(1, q["busca_px"] + 1) if longo[p0[1] + oy * k, p0[0] + ox * k]), None)
+                if fim is None:
+                    continue
+                fora = [(p0[0] + ox * k, p0[1] + oy * k) for k in range(1, fim)]
+                soleira = sum(1 for px, py in fora if not (g[py, px] or vidro[py, px] or traco[py, px]))
+                if soleira >= 2:
+                    # a soleira entre as plantas e o vidro: a borda das plantas (com a sombra dela) vai até o vidro,
+                    # com a emenda, lá dentro das plantas, em transição (`transicao_px`)
+                    vao = len(fora)
+                    k0 = 1 - q["desloca_px"]
+                    for k in range(k0, fim):
+                        px, py = p0[0] + ox * k, p0[1] + oy * k
+                        a_ = min(1.0, (k - k0 + 1) / q["transicao_px"])
+                        novo = img[py - oy * vao, px - ox * vao].astype(np.float32)
+                        out[py, px] = np.clip(a_ * novo + (1 - a_) * img[py, px], 0, 255).astype(np.uint8)
+                        trocados += 1
+                    mexeu = True
+                    continue
+                for k in range(1 - q["borda_px"], fim):
+                    px, py = p0[0] + ox * k, p0[1] + oy * k
+                    if not (claro[py, px] or k > 0):
+                        continue
+                    for s in q["fontes"]:
+                        sx, sy = px - ox * s, py - oy * s
+                        if g[sy, sx] and not claro[sy, sx]:
+                            out[py, px] = img[sy, sx]
+                            trocados += 1
+                            mexeu = True
+                            break
+                    else:
+                        sobra[py, px] = 255
+        jardins += mexeu
+    if sobra.any():
+        out = cv2.inpaint(out, sobra, 2, cv2.INPAINT_TELEA)
+    print(f"    jardins de inverno: {trocados} px entre as plantas e o vidro com a vegetação de dentro, em {jardins} "
+          f"jardins ({int((sobra > 0).sum())} por inpaint)")
+    return out
+
+
 # O banco em L do deck (usuário, 27/10/26, vendo a final: "banco bronze fosco, sem falhas."): no PDF, o banco é o
 # assento (a madeira escura da legenda, a cor do `F.BANCO_DECK`) e, do lado do deck, a frente dele, uma faixa branca
 # fina da ARQ_PAREDE com o traço preto. O `F.deck_detalhes` pintava de bronze só o assento; a frente ficava a madeira do
@@ -1616,8 +1700,8 @@ def passos_terreo_c(Q, ini, M):
         ("elevador", lambda im: elevador_t(Q, im)),
         ("paredes", lambda im: F.paredes(Q, im, cor=cinza)),
         ("soleiras", lambda im: soleira_elevador(Q, soleiras_t(Q, im))),
-        ("esquadrias", lambda im: pos_esquadrias_t(Q, janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T),
-                                                   im)),
+        ("esquadrias", lambda im: jardins_vidros_t(Q, pos_esquadrias_t(
+            Q, janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T), im))),
         ("cortinas", lambda im: cortinas_t(Q, im)),
         ("escadas", lambda im: escada_estreita_t(Q, degraus_largos_t(Q, im))),
         ("projecoes", lambda im: projecoes_t(Q, im)),
