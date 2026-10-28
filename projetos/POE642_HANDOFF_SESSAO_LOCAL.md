@@ -3567,3 +3567,5 @@ O usuário: "ok, pode alargar e tirar a mancha"; e, enquanto isso: "por que não
 - O sofá fica sob a laje do 1º Pavimento: o Térreo nublado não muda.
 
 Antes e depois (o antes é a entrega anterior, b5d85bc): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_simetrico_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
+
+**Aprovado** (28/10/26): "pode deixar assim, está aprovado", o sofá da varanda simétrico como está (e2d6c84), com os 0,97 m de fundo (sem estreitar o assento do meio). O resto do Térreo e o 1º Pavimento da Casa E seguem aguardando a validação.
