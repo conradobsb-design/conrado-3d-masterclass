@@ -1677,14 +1677,13 @@ def cabine_elevador_e(Q, img):
     return out
 
 
-# A borda de baixo da piscina do Subsolo (usuário, 28/10/26: "na parte de baixo da piscina está invertido: a parede é a
-# parte de baixo e a borda da piscina a parte de cima"): ali o PDF tem um bloco cheio (preto) e o render pôs a parede
-# junto à água e a faixa de Bege Bahia por fora. Na `caixa` (px da final), da linha `topo_y` para baixo, o que era
-# parede ou Bege Bahia (com a emenda entre eles) vira Bege Bahia até `borda_px` da água, em quadrado (a borda segue o
-# contorno da água, com o degrau da parte rasa, e os cantos ficam retos) e parede depois (por fora, fechando também o canto de baixo à esquerda). O Bege Bahia novo vem da faixa antiga,
-# deslocado (`deslocs`, o primeiro que cai na faixa antiga; o que sobra, pelos vizinhos); a parede, no cinza dela.
-PISCINA_BORDA_SUB = {"caixa": (850, 895, 1064, 958), "topo_y": 909, "borda_px": 12.5, "parede_lum": 95,
-                     "deslocs": [(0, 14), (0, 7), (0, 13), (0, 6), (0, 12), (12, 0), (-12, 0), (0, 20), (0, -14)]}
+# A parte de baixo da piscina do Subsolo (usuário, 28/10/26: "na parte de baixo da piscina está invertido: a parede é a
+# parte de baixo e a borda da piscina a parte de cima"; depois, vendo a troca: "o subsolo ficou horrivel, deixe apenas
+# parede na parte de baixo sem borda"): ali o PDF tem um bloco cheio (preto), e o render pôs a parede junto à água e uma
+# faixa de Bege Bahia por fora. Na `caixa` (px da final), da linha `topo_y` para baixo, o que era parede ou Bege Bahia
+# (com a emenda entre eles) vira parede, no cinza dela; só fica a borda da esquerda, ao lado da água (o px com água a
+# até `lado_px` à direita na mesma linha).
+PISCINA_BORDA_SUB = {"caixa": (850, 895, 1064, 958), "topo_y": 909, "lado_px": 15, "parede_lum": 95}
 
 
 def piscina_borda_sub(Q, img, q=None):
@@ -1699,27 +1698,14 @@ def piscina_borda_sub(Q, img, q=None):
     # a parede e o Bege Bahia, com os px da emenda entre eles (a linha antisserrilhada), menos a água
     zona = cv2.morphologyEx((parede | bege).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8)).astype(bool)
     zona &= (yy >= q["topo_y"]) & ~agua
-    d = cv2.distanceTransform((~agua).astype(np.uint8), cv2.DIST_C, 3)      # em quadrado: os cantos ficam retos
-    novo_bege = zona & (d <= q["borda_px"])
-    nova_parede = zona & ~novo_bege
+    agua_dir = np.zeros_like(agua)                                        # água a até `lado_px` à direita
+    for k in range(1, q["lado_px"] + 1):
+        agua_dir[:, :-k] |= agua[:, k:]
+    nova_parede = zona & ~agua_dir
     out = img.copy()
-    reg = out[y0:y1, x0:x1]
-    cor_parede = np.median(r[parede & (yy >= q["topo_y"])], axis=0)
-    reg[nova_parede] = np.round(cor_parede).astype(np.uint8)
-    falta = novo_bege & ~bege
-    bege = bege & ~cv2.dilate((~bege).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)   # fonte sem a emenda
-    h, w = falta.shape
-    for dx, dy in q["deslocs"]:
-        ys, xs = np.nonzero(falta)
-        sy, sx = ys + dy, xs + dx
-        ok = (sy >= 0) & (sy < h) & (sx >= 0) & (sx < w)
-        ok[ok] &= bege[sy[ok], sx[ok]]
-        reg[ys[ok], xs[ok]] = img[y0:y1, x0:x1][sy[ok], sx[ok]]
-        falta[ys[ok], xs[ok]] = False
-    if falta.any():                                                       # o resto, pelos vizinhos
-        reg[:] = cv2.inpaint(reg, falta.astype(np.uint8), 3, cv2.INPAINT_TELEA)
-    print(f"    borda de baixo da piscina: {int(novo_bege.sum() - (novo_bege & bege).sum())} px de parede viraram Bege "
-          f"Bahia e {int((nova_parede & bege).sum())} de Bege Bahia viraram parede ({int(falta.sum())} sem fonte)")
+    out[y0:y1, x0:x1][nova_parede] = np.round(np.median(r[parede & (yy >= q["topo_y"])], axis=0)).astype(np.uint8)
+    print(f"    parte de baixo da piscina só em parede: {int((nova_parede & ~parede).sum())} px de Bege Bahia viraram "
+          f"parede")
     return out
 
 

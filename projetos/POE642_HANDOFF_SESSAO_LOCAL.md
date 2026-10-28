@@ -3537,4 +3537,11 @@ O usuário: "subsolo da casa e"; "precisamos melhorar o aspecto do sofá e remov
 - **Piscina do Subsolo.** Na parte de baixo, a faixa de Bege Bahia (a borda) passou para junto da água, nas duas partes da piscina (a funda e a do degrau), com os cantos retos, e a parede escura ficou por fora, fechando também o canto de baixo à esquerda.
 - **Revisão do Subsolo.** Revendo o Subsolo inteiro de perto (circulação, academia, DCE e WC DCE 2, depósito, casas de máquinas, sauna, ambiente, vestiário, elevador), não apareceu outra inconformidade além da piscina.
 
-Antes e depois (o antes é a entrega anterior, 4e4108d): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_sem_sombra_antes_depois.jpg` e `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_piscina_borda_parede_antes_depois.jpg`. Pranchas do Subsolo e do Térreo e PDF da Casa E refeitos.
+Antes e depois (o antes é a entrega anterior, 4e4108d): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_sem_sombra_antes_depois.jpg` (a imagem da troca da borda saiu; a piscina foi refeita abaixo). Pranchas do Subsolo e do Térreo e PDF da Casa E refeitos.
+
+### Pedido de 28/10/26: só parede embaixo da piscina do Subsolo (Casa E)
+
+O usuário, vendo a borda de Bege Bahia passada para junto da água: "o subsolo ficou horrivel, deixe apenas parede na parte de baixo sem borda".
+- **Piscina do Subsolo.** A parte de baixo da piscina agora é só parede, um bloco reto como o do PDF, sem a faixa de Bege Bahia, nas duas partes (a funda e a do degrau). A borda de Bege Bahia do lado esquerdo continua ao lado da água até o fundo dela. A troca anterior foi desfeita (refeito a partir do Subsolo de 4e4108d).
+
+Antes e depois (o antes é a entrega anterior, 5418bb9): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_piscina_so_parede_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.
