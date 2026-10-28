@@ -338,19 +338,38 @@ def legenda(Q, cores, tol=4, fechar=5, dentro=None, area_min=300):
 # PDF) é refeito pelo que está em volta, como no Subsolo da Casa A (`final3840_casaa.paredes`). O preto que sobra além
 # da franja, até 15 px das paredes do PDF (paredes do render mais grossas que o desenho), vai ao mesmo cinza pela conta do
 # alfa contra o piso de perto; o lote e o quadro, mais longe, ficam.
+#
+# As paredes limpas (usuário, 28/10/26: "CORRIJA A REPRESENTAÇÃO DAS PAREDES" e "CORRIJA ESSA IMPERFEIÇÃO NA PAREDE. NÃO
+# ESSE DENTE"): as peças entram todas numa máscara só, desenhada em 4x e reduzida uma vez (antes, cada peça vinha com o
+# antialias dela e a junta de duas peças vizinhas, a 50% de cada lado, deixava ver o fundo: os fios claros e escuros
+# dentro das paredes, nos encontros dos tocos e nas diagonais das pontas); a peça escura que o PDF cobre depois com
+# um branco da mesma camada (`coberta`: a fração dela sob os brancos de seqno maior) e que a final já mostra clara
+# (o branco ali é borda ou piso; onde a final mostra parede, como na faixa branca embaixo da piscina, ela fica) sai,
+# como no desenho (os dentes de 1,7 pt embaixo da parede da academia, junto ao vidro da piscina); e a franja escura do render que passa do
+# contorno (`franja`: até `folga_px` fora da parede, mais escura que `franja[0]` e com croma até `franja[1]`) é
+# refeita pelo piso em volta, como o preto.
 PAREDES_E = {"cor": (80, 80, 80), "camadas": ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS"), "escuro": 48, "croma": 12, "folga_px": 3, "escuro_min": 0.25,
+             "coberta": 0.9, "franja": (64, 22),
              "pilar_cor": (8, 8, 8), "pilar_camadas": ("EST - Pilar", "EST_PILAR")}
 
 
 def paredes_e(Q, img, q=None, extra=None, pilares=True):
+    """`extra`: a máscara (0 a 1) de outras paredes, somada por cima, ou um filtro dos desenhos do PDF, que entram na
+    mesma máscara das paredes (sem a conta do escuro)."""
     q = q or PAREDES_E
     im = img.astype(np.int16)
     preto = (im.max(axis=2) < q["escuro"]) & ((im.max(axis=2) - im.min(axis=2)) <= q["croma"])
     ss = 4
-    a = np.zeros((Q.H, Q.W), np.float32)
-    n_ok = n_fora = 0
+    filtro_extra = extra if callable(extra) else None
+    brancos = [d for d in Q.desenhos if d.get("layer") in q["camadas"] and d["type"] in ("f", "fs") and d.get("fill")
+               and min(d["fill"]) > 0.9]
+    n_ok = n_fora = n_coberta = 0
+    pecas = []
     for d in Q.desenhos:
-        if d.get("layer") not in q["camadas"] or d.get("fill") is None or max(d["fill"]) >= 0.5:
+        if d["type"] not in ("f", "fs") or d.get("fill") is None or max(d["fill"]) >= 0.5:
+            continue
+        de_extra = filtro_extra is not None and filtro_extra(d)
+        if d.get("layer") not in q["camadas"] and not de_extra:
             continue
         cs = [c for c in Q.caminhos(d) if len(c) >= 3]
         if not cs:
@@ -364,18 +383,48 @@ def paredes_e(Q, img, q=None, extra=None, pilares=True):
         m = np.zeros(((y1 - y0) * ss, (x1 - x0) * ss), np.uint8)
         for c in cs:
             cv2.fillPoly(m, [np.int32(np.round((c - (x0, y0)) * ss))], 255)
-        ad = cv2.resize(m, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
-        anel = cv2.dilate((ad > 0.05).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
-        if preto[y0:y1, x0:x1][anel].mean() < q["escuro_min"]:
-            n_fora += 1
+        if not m.any():
             continue
-        a[y0:y1, x0:x1] = np.maximum(a[y0:y1, x0:x1], ad)
+        # a peça que o PDF cobre depois com um branco da mesma camada não aparece no desenho
+        r = d["rect"]
+        wb = np.zeros_like(m)
+        for b in brancos:
+            rb = b["rect"]
+            if b.get("seqno", 0) > d.get("seqno", 0) and b.get("layer") == d.get("layer") and rb[0] < r[2] and \
+                    rb[2] > r[0] and rb[1] < r[3] and rb[3] > r[1]:
+                for c in Q.caminhos(b):
+                    if len(c) >= 3:
+                        cv2.fillPoly(wb, [np.int32(np.round((c - (x0, y0)) * ss))], 255)
+        if (m & wb).astype(bool).sum() >= q["coberta"] * m.astype(bool).sum():
+            ad = cv2.resize(m, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+            if preto[y0:y1, x0:x1][ad > 0.5].mean() < 0.5:     # e que a final já mostra clara (o branco é borda, piso)
+                n_coberta += 1
+                continue
+        if not de_extra:
+            ad = cv2.resize(m, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+            anel = cv2.dilate((ad > 0.05).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+            if preto[y0:y1, x0:x1][anel].mean() < q["escuro_min"]:
+                n_fora += 1
+                continue
+        pecas.append(cs)
         n_ok += 1
-    if extra is not None:
+    # todas as peças numa máscara só (em 4x, por faixas), reduzida uma vez: sem as juntas entre as peças
+    a = np.zeros((Q.H, Q.W), np.float32)
+    faixa = 256
+    for fy in range(0, Q.H, faixa):
+        fy1 = min(Q.H, fy + faixa)
+        m = np.zeros(((fy1 - fy) * ss, Q.W * ss), np.uint8)
+        for cs in pecas:
+            for c in cs:
+                if c[:, 1].max() >= fy - 1 and c[:, 1].min() <= fy1 + 1:
+                    cv2.fillPoly(m, [np.int32(np.round((c - (0, fy)) * ss))], 255)
+        a[fy:fy1] = cv2.resize(m, (Q.W, fy1 - fy), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+    if extra is not None and not callable(extra):
         a = np.maximum(a, extra)
     k = 2 * q["folga_px"] + 1
     perto = cv2.dilate((a > 0.02).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
-    M = perto & preto
+    franja = perto & (a < 0.5) & (im.max(axis=2) < q["franja"][0]) & ((im.max(axis=2) - im.min(axis=2)) <= q["franja"][1])
+    M = perto & (preto | franja)
     out = cv2.inpaint(img, M.astype(np.uint8), 3, cv2.INPAINT_TELEA)
     out = out.astype(np.float32) * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None]
     # o preto que sobra longe do PDF: o alfa contra o piso de perto (a mediana dos px claros num raio de 4 px)
@@ -395,8 +444,9 @@ def paredes_e(Q, img, q=None, extra=None, pilares=True):
         ap = Q.preencher(lambda d: d.get("layer") in q["pilar_camadas"] and d.get("fill") is not None
                          and max(d["fill"]) < 0.5, ss=4)
         out = out * (1 - ap[..., None]) + np.float32(q["pilar_cor"]) * ap[..., None]
-    print(f"    paredes em cinza {q['cor'][0]} no contorno do PDF: {n_ok} peças ({n_fora} que a final mostra claras "
-          f"ficam); {int((M & (a < 0.5)).sum())} px da franja preta refeitos; {n_resto} px pretos fora do PDF ao cinza")
+    print(f"    paredes em cinza {q['cor'][0]} no contorno do PDF, numa máscara só (sem juntas): {n_ok} peças ({n_fora} "
+          f"que a final mostra claras ficam; {n_coberta} cobertas por um branco do PDF saem); "
+          f"{int((M & (a < 0.5)).sum())} px da franja escura refeitos; {n_resto} px pretos fora do PDF ao cinza")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
@@ -706,7 +756,10 @@ ESCADA_SUB_E = {"nome": "da circulação", "pdf": (972.0, 617.0, 1261.2, 685.0),
                 "forca": 1.0, "letra": "S", "semente": 2805}
 ARMARIO_DCE_E = {"pt": (1439.8, 795.5, 1507.8, 829.6), "lado": "cima"}
 BANCADA_WC_DCE2 = (1697.6, 693.5, 1726.1, 729.1)
-AJUSTES_E["Subsolo"] = [("CASA DE MÁQUINAS", (1043.4, 335.8), (0, 0), 1.0),
+# a casa de máquinas da direita (5,83 m²) no corpo 0,85 e no centro do cômodo (entre as paredes e da soleira à parede
+# de baixo: usuário, 28/10/26, "CENTRALIZE O RÓTULO PARA NÃO ENCOSTAR NAS BORDAS"; no corpo 1,0 o nome ia de parede a
+# parede)
+AJUSTES_E["Subsolo"] = [("CASA DE MÁQUINAS", (1043.4, 335.8), (0, -22.5), 0.85),
                         ("WC DCE 2", (986.5, 310.9), (-3.9, -30.0), 0.85)]
 
 
@@ -766,8 +819,10 @@ PISCINA_E = {"caixa_pt": (688.0, 675.0, 1004.0, 1124.0), "agua_fill": (0.5, 0.87
              "tom": (168, 160, 42), "claro": (204, 226, 168),                       # BGR: turquesa e o claro da luz
              "peca_cm": 14.5, "pastilha_var": 0.06, "fundo": 0.07,
              "causticas": [(0.32, 0.55), (0.13, 0.35)], "caustica_larg": 0.22,
-             "bege": [(694.2, 679.3, 705.6, 1118.7), (705.6, 679.3, 807.6, 690.7), (796.3, 690.7, 812.2, 957.1),
-                      (705.6, 957.1, 812.2, 968.5)],
+             "bege": [(694.2, 679.3, 705.6, 1118.7), (705.6, 679.3, 807.6, 690.7), (796.3, 690.7, 812.2, 957.1)],
+             # sem a divisória entre a piscina e a parte de baixo, até o vidro (usuário, 28/10/26: "REMOVA ESSA
+             # DIVISÓRIA DA PISCINA"): a faixa branca do PDF vira água, contínua
+             "agua_extra": [(705.6, 957.1, 812.2, 968.5)],
              "tom_bege": (190, 213, 231), "semente_bege": 2831,
              "degrau": [(815.0, 957.1, 888.9, 968.5), (877.6, 968.5, 888.9, 1096.1)],
              "vidros": [(812.2, 693.5, 815.0, 945.8), (812.2, 957.1, 815.0, 1090.3)],
@@ -813,6 +868,10 @@ def piscina_e(Q, img):
             for c in Q.caminhos(d):
                 if len(c) >= 3:
                     cv2.fillPoly(m, [np.int32(np.round((c - (X0, Y0)) * ss))], 255)
+    for r in q.get("agua_extra", []):                       # na mesma máscara (sem junta com a água do PDF)
+        (x0, y0), (x1, y1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        cv2.rectangle(m, (round((x0 - X0) * ss), round((y0 - Y0) * ss)),
+                      (round((x1 - X0) * ss) - 1, round((y1 - Y0) * ss) - 1), 255, -1)
     agua = cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
     par = paredes_pdf(Q)[Y0:Y1, X0:X1].astype(np.float32)
     bege = np.clip(_uniao(Q, q["bege"], X0, Y0, w, h) - par, 0, 1)
@@ -1279,18 +1338,14 @@ def portas_e(Q, img):
     return out
 
 
-def paredes_cabines(Q):
-    """As paredes da ARQ - Parede (as cabines do vestiário e a divisória entre elas), que a E10 não pegava."""
-    return Q.preencher(lambda d: d.get("layer") == "ARQ - Parede" and d.get("fill") is not None and max(d["fill"]) < 0.5)
-
-
 def zonas_academia(Q):
-    """As zonas dos aparelhos e das louças do vestiário (bool): a caixa de cada um com folga, onde o piso novo passa por
-    inteiro (as peças antigas saem; as novas são desenhadas depois)."""
+    """As zonas dos aparelhos, das louças do vestiário e do chuveiro da ducha do ambiente (bool): a caixa de cada um com
+    folga, onde o piso novo passa por inteiro (as peças antigas saem; as novas são desenhadas depois)."""
     m = np.zeros((Q.H, Q.W), np.uint8)
     caixas = [(c, ACADEMIA_E["zona_m"]) for _, c, _ in ACADEMIA_E["aparelhos"]] + \
         [(c, VESTIARIO_E["zona_m"]) for c in (VESTIARIO_E["vaso"][0], VESTIARIO_E["chuveiro"]["ducha"],
                                               VESTIARIO_E["chuveiro"]["braco"])]
+    caixas.append((DUCHA_AMBIENTE_E["zona"], 0.0))
     for (x0, y0, x1, y1), z in caixas:
         fo = z * 56.69
         a, b, c, d = F.ret_q(Q, (x0 - fo, y0 - fo, x1 + fo, y1 + fo))
@@ -1314,6 +1369,40 @@ VESTIARIO_E = {"bancada": (1262.8, 954.3, 1289.5, 1023.7), "cuba": (1266.1, 971.
                "tabaco": {"tom": (50, 64, 88), "contraste": 0.75, "liso_px": 0.5, "escovado": 0.025, "borda": 0.72,
                           "larg_px": 0.8, "sombra": 0.30, "semente": 2840},
                "cuba_tom": (208, 225, 236), "zona_m": 0.10}
+
+
+# O chuveiro da ducha do ambiente, ao lado da sauna (usuário, 28/10/26: "MELHORE A REPRESENTAÇÃO DO CHUVEIRO, AO LADO
+# DA SAUNA"): até aqui ficava o do render (um cálice cinza fora do desenho e uma grelha escura junto à parede). Agora é
+# o do PDF (ARQ_LOUÇAS E METAIS), como o do vestiário (`final3840_casaa.chuveiro`): a placa quadrada cromada do
+# chuveiro de teto (11 pt, com os furinhos e a luz do alto à direita), o braço cromado descendo até a parede de baixo e
+# a canopla nela; embaixo, o travertino do piso inteiro (`zona`, nas zonas de `pisos_e`). O nicho na parede atrás do
+# chuveiro (o branco da ARQ_PAREDE na espessura dela, que o render pintou como uma grelha escura) no travertino do piso,
+# um pouco mais escuro (`nicho_luz`, recuado), com a sombra curta do fundo e da lateral esquerda.
+DUCHA_AMBIENTE_E = {"ducha": (1031.0, 1062.9, 1042.1, 1074.1), "braco": (1035.8, 1067.4, 1037.3, 1089.4),
+                    "canopla": (1034.6, 1088.9, 1038.5, 1090.3), "zona": (1024.0, 1058.0, 1048.0, 1090.3),
+                    "nicho": (1025.8, 1090.3, 1048.5, 1096.0), "nicho_luz": 0.90, "nicho_sombra": (0.30, 1.3),
+                    "semente": 2836}
+
+
+def nicho_ducha(Q, img):
+    q = DUCHA_AMBIENTE_E
+    r = q["nicho"]
+    X0, Y0, X1, Y1 = F.ret_q(Q, (r[0] - 40, r[1] - 40, r[2] + 40, r[3] + 4))
+    w, h = X1 - X0, Y1 - Y0
+    out = img.astype(np.float32)
+    reg = out[Y0:Y1, X0:X1]
+    trav = legenda(Q, [(202, 217, 220)])[Y0:Y1, X0:X1]
+    tom = np.median(reg[trav], axis=0) if trav.any() else np.float32(TRAVERTINO_E["tom"])
+    a = _ret_local(Q, r, X0, Y0, w, h)
+    T = travertino_e(Q, h, w, q["semente"])[..., None] * tom * q["nicho_luz"]
+    reg[:] = reg * (1 - a[..., None]) + T * a[..., None]
+    # a sombra curta do fundo (embaixo) e da lateral esquerda, dentro do nicho
+    (u0, _), (u1, v1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    d = np.minimum((v1 - Y0) - yy, xx - (u0 - X0))
+    fs, alc = q["nicho_sombra"]
+    reg *= (1 - fs * np.exp(-np.maximum(d, 0) / alc) * a)[..., None]
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
 def vestiario_e(Q, img):
@@ -1346,8 +1435,11 @@ def vestiario_e(Q, img):
     out = FA.torneira(Q, out, q["torneira"]["bico"], q["torneira"]["base"])
     out = FA.vaso(Q, out, *q["vaso"])
     out = FA.chuveiro(Q, out, q["chuveiro"])
+    out = nicho_ducha(Q, out)
+    out = FA.chuveiro(Q, out, DUCHA_AMBIENTE_E)
     print("    vestiário: a bancada em granito Marrom Tabaco escovado (borda e sombra, E9), a cuba esculpida em travertino "
-          "bruto, a torneira cromada, o vaso branco e o chuveiro de teto cromado")
+          "bruto, a torneira cromada, o vaso branco e o chuveiro de teto cromado; o chuveiro da ducha do ambiente "
+          "(placa, braço e canopla cromados) pelo PDF, com o nicho da parede em travertino")
     return out
 
 
@@ -1359,7 +1451,8 @@ def passos_subsolo(Q):
         ("bancada", lambda im: bancada_e9(Q, im, BANCADA_WC_DCE2, nome="WC DCE 2")),
         ("piscina", lambda im: piscina_e(Q, im)),
         ("sauna", lambda im: sauna_e(Q, im)),
-        ("paredes", lambda im: paredes_e(Q, im, extra=paredes_cabines(Q))),
+        # as cabines do vestiário e a divisória entre elas (a ARQ - Parede, que a E10 não pegava), na mesma máscara
+        ("paredes", lambda im: paredes_e(Q, im, extra=lambda d: d.get("layer") == "ARQ - Parede")),
         ("vestiario", lambda im: vestiario_e(Q, im)),
         ("aparelhos", lambda im: aparelhos_e(Q, im)),
         ("portas", lambda im: portas_e(Q, im)),
@@ -1414,6 +1507,25 @@ SETA_TER_E = (2500, 1542)
 AJUSTES_E["Terreo"] = [("WC DCE 1", (1261.6, 271.3), (-0.9, 32.3), 0.85)]  # no meio do piso seco (2177,5 x 780 pt)
 
 
+# A água da piscina, da prainha e do spa no tom da referência do Subsolo (usuário, 28/10/26: "APLIQUE O TOM DA PISCINA
+# NO TÉRREO TAMBÉM"), pela rotina das piscinas de todas as casas (`piscinas_turquesa.turquesa`); as duas folhas de vidro
+# do lado esquerdo (os traços claros e neutros em pé, de pelo menos `vidro_px` px) ficam como estão.
+PISCINA_TER_E = {"vidro_px": 41, "vidro_croma": 14, "vidro_luz": 120, "semente": 2851}
+
+
+def piscina_terreo_e(Q, img):
+    import piscinas_turquesa as PT
+    q = PISCINA_TER_E
+    a = img.astype(np.int16)
+    neutro = ((a.max(axis=2) - a.min(axis=2)) < q["vidro_croma"]) & (a.mean(axis=2) > q["vidro_luz"])
+    vidros = cv2.morphologyEx(neutro.astype(np.uint8), cv2.MORPH_OPEN, np.ones((q["vidro_px"], 1), np.uint8))
+    vidros = cv2.dilate(vidros, np.ones((3, 3), np.uint8)).astype(bool)
+    out, areas = PT.turquesa(img, px_m=Q.px_m, semente=q["semente"], proteger=vidros)
+    print(f"    piscina: a água no turquesa da referência ({', '.join(map(str, areas))} m²: piscina e prainha, a faixa entre "
+          f"os vidros, o spa), com as peças, os degraus e a rede das cáusticas; os vidros ficam")
+    return out
+
+
 def passos_terreo(Q):
     return [
         ("pisos", lambda im: pisos_e(Q, im, PISOS_TER_E)),
@@ -1424,6 +1536,7 @@ def passos_terreo(Q):
         ("bancadas", lambda im: _bancadas(Q, im, BANCADAS_TER_E)),
         ("paredes", lambda im: paredes_e(Q, im)),
         ("seta", lambda im: seta_e(Q, im, SETA_TER_E)),
+        ("piscina", lambda im: piscina_terreo_e(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("Terreo", im)),
     ]
 
@@ -1460,7 +1573,7 @@ BANCADAS_1PAV_E = [("banho master", (1692.9, 655.9, 1726.1, 789.6)), ("banho 1",
 
 def terreo_para_nublado():
     """O Térreo novo sem as letras das escadas, a seta e os rótulos: as etapas do Térreo de novo a partir dos pisos, com
-    as letras desligadas (em cache)."""
+    as letras desligadas e a piscina no turquesa (em cache)."""
     c = ETAPAS / "Terreo_nublado_fonte.png"
     if c.exists():
         return cv2.imread(str(c))
@@ -1473,6 +1586,7 @@ def terreo_para_nublado():
     img = box_e(QT, img, BOX_WC_DCE1, nome="WC DCE 1")
     img = _bancadas(QT, img, BANCADAS_TER_E)
     img = paredes_e(QT, img)
+    img = piscina_terreo_e(QT, img)
     cv2.imwrite(str(c), img)
     return img
 

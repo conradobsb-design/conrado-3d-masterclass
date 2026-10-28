@@ -1106,7 +1106,9 @@ Etapas do Subsolo (`passos_subsolo`):
 - `armario`: `armario_cabides`, o guarda-roupa aberto com os cabides (`elementos.guarda_roupa`) no retângulo do PDF.
 - `bancada`: `bancada_e9`, a borda no tom escurecido da pedra (só fora das paredes) e a sombra curta.
 - `paredes`: `paredes_e`, as paredes em cinza 80 nos preenchimentos escuros da ARQ_PAREDE que a final mostra escuros.
-  - Antes, a franja preta antiga a até 3 px é refeita pelos vizinhos.
+  - Desde 28/10, todas as peças entram numa máscara só, desenhada em 4x e reduzida uma vez (sem as juntas claras e escuras entre peças vizinhas).
+  - A peça escura que o PDF cobre depois com um branco da mesma camada (`PAREDES_E["coberta"]`) e que a final já mostra clara sai: os dentes junto ao vidro da piscina do Subsolo.
+  - Antes, a franja preta antiga a até 3 px é refeita pelos vizinhos, e também a franja escura de pouca cor (`PAREDES_E["franja"]`).
   - O preto que sobra até 15 px das paredes vai ao cinza pela conta do alfa contra o piso de perto.
   - Os pilares da EST - Pilar ficam pretos.
 - `rotulos`: `escrever_rotulos`.
@@ -1130,6 +1132,7 @@ Etapas do Térreo (`passos_terreo`):
 - `bancadas`: `BANCADAS_TER_E`.
 - `paredes`: a ARQ_PAREDE e a ARQ_ELEMENTOS FIXOS (`PAREDES_E["camadas"]`; os brises de madeira ficam porque a final não os mostra escuros).
 - `seta`: `seta_e`, a do `final3840_casaa_terreo.seta`, com a ponta em `SETA_TER_E`.
+- `piscina` (28/10): `piscina_terreo_e`, a água no turquesa do Subsolo pela `piscinas_turquesa.turquesa`, com as duas folhas de vidro do lado esquerdo protegidas (`PISCINA_TER_E`: os traços claros e neutros em pé).
 - `rotulos`: com o WC DCE 1 em `AJUSTES_E["Terreo"]`.
 
 ```bash
@@ -1140,7 +1143,7 @@ python3 pdf_entrega.py --config $C/config_bases.json
 
 Etapas do 1º Pavimento (`passos_1pav`):
 - `nublado`: `nublado_novo`.
-  - O contexto antigo (`entorno_esmaecido.contexto_render` do `opcoes_1pav_casae.TERREO`, o retocado de 2000 px) é trocado pelo nublado do Térreo novo (`terreo_para_nublado`: as etapas do Térreo a partir dos pisos, sem as letras, a seta e os rótulos, em cache).
+  - O contexto antigo (`entorno_esmaecido.contexto_render` do `opcoes_1pav_casae.TERREO`, o retocado de 2000 px) é trocado pelo nublado do Térreo novo (`terreo_para_nublado`: as etapas do Térreo a partir dos pisos, sem as letras, a seta e os rótulos, com a piscina no turquesa, em cache).
   - Fora da pegada (`entorno_esmaecido.pegada` da base do 1º Pavimento, com o `FORA` das opções) a troca é direta; nos vazios, entra a razão novo/antigo.
 - `pisos`: o vinílico (`PISOS_1PAV_E`), com as peças da final que o PDF não desenha em `FICAM_1PAV_E`.
 - `escada`: `ESCADA_1PAV_E`, o D no degrau de cima.
@@ -1169,8 +1172,28 @@ Nos `pisos`:
 - As `zonas` dos aparelhos e das louças (`zonas_academia`) tiram as peças antigas e enchem os buracos da legenda de piso.
 - O `incluir` (`zonas_portas`) põe na legenda de cada piso o quadrante de cada porta e as faixas de `PORTAS_E["limpar"]`.
 
-A etapa `paredes` recebe `extra=paredes_cabines(Q)`, a ARQ - Parede das cabines do vestiário.
+A etapa `paredes` recebe `extra=` um filtro dos desenhos (a ARQ - Parede das cabines do vestiário), que entram na mesma máscara das paredes.
+
+Pedidos de 28/10, 2ª rodada, no Subsolo:
+- `PISCINA_E["agua_extra"]`: a faixa entre a piscina e a parte de baixo, à esquerda do vidro, vira água (sem a divisória), na mesma máscara da água do PDF.
+- `DUCHA_AMBIENTE_E` (na etapa `vestiario`): o chuveiro da ducha do ambiente pelo PDF (`final3840_casaa.chuveiro`) e o nicho da parede atrás dele em travertino (`nicho_ducha`). A `zona` dele entra em `zonas_academia`, onde o piso passa inteiro, sem o cálice do render.
+- `AJUSTES_E["Subsolo"]`: a casa de máquinas da direita (5,83 m²) no corpo 0,85, no centro do cômodo.
 
 ```bash
 python3 final3840_casae.py Subsolo --de pisos     # ~3 min (os pisos); as outras etapas, segundos
+```
+
+## O tom da piscina em todas as casas (`piscinas_turquesa.py`)
+
+Pedido de 28/10/26: "APLIQUE ESSE TOM DE PISCINA EM TODAS AS PISCINAS DE TODAS AS CASAS". A água dos Térreos vai ao turquesa do Subsolo da Casa E (`final3840_casae.PISCINA_E`), com a rede das cáusticas dele. Como as piscinas das Casas A a D vêm dos renders de 2000 px, o script troca só a água nas finais aprovadas e as regrava no lugar, como `cortinas_franzidas.py`.
+
+- `turquesa(img, px_m, semente, q, proteger)` acha cada piscina pelo miolo azul (`TURQUESA["ciano"]`, manchas de pelo menos `area_min` px) e vai até a beira quente (o Bege Bahia, a madeira: `quente_br`), a até `beira_px` do miolo.
+- Ficam como estão: as peças claras e neutras grandes (`peca_croma`, `peca_px`: as espreguiçadeiras da Casa B) e os px de `proteger`.
+- Os traços escuros (`escuro_rel`: os rótulos, os tracejados) são separados da água antiga pelo miolo do traço e postos sobre a nova, sem halo.
+- O desenho da água antiga passa ao turquesa com `ganho` (peças, rejunte, degraus, sombra das bordas). Depois entram a sombra curta das beiras (`sombra`) e a rede das cáusticas (`causticas_px` longe das beiras).
+
+```bash
+# de POE642_CasaA/scripts/
+python3 piscinas_turquesa.py A-Terreo   # e B-Terreo, C-Terreo, D-Terreo; --antes <png> guarda a final anterior
+# a Casa E: a etapa "piscina" do Térreo (final3840_casae.py Terreo --de piscina) e o 1º Pavimento de novo
 ```

@@ -3159,5 +3159,44 @@ O que foi feito (`final3840_casae.py`, novas etapas do Subsolo):
 
 Ordem das etapas: pisos, escada, armário, bancada, piscina, sauna, paredes, vestiário, aparelhos, portas, rótulos. Antes e depois (o antes é a final de 87f558e): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_pedidos2810_{planta,academia,piscina_sauna,sauna_degraus,vestiario,portas_dce_wc_deposito,portas_academia,porta_casa_maquinas,travertino_escada}_antes_depois.jpg`. Prancha e PDF refeitos.
 
-**Pendente:**
-- o Térreo da Casa E (a mesma piscina, vista de cima) segue com o Barlavento sob a água verde-azulada clara de antes. Se o tom novo vale para o projeto todo, ele entra no Térreo e nas Casas A a D.
+Pendente nesta altura (resolvido logo abaixo): o Térreo da Casa E seguia com o Barlavento sob a água verde-azulada clara de antes.
+
+### Pedidos de 28/10/26, 2ª rodada: o tom da piscina em todas as casas, paredes, divisória, chuveiro e rótulo
+
+O usuário, vendo a final do Subsolo:
+- "APLIQUE O TOM DA PISCINA NO TÉRREO TAMBÉM" e "APLIQUE ESSE TOM DE PISCINA EM TODAS AS PISCINAS DE TODAS AS CASAS";
+- com o recorte do rótulo da casa de máquinas da direita: "CENTRALIZE O RÓTULO PARA NÃO ENCOSTAR NAS BORDAS";
+- com o recorte da ducha do ambiente: "MELHORE A REPRESENTAÇÃO DO CHUVEIRO, AO LADO DA SAUNA";
+- com o recorte dos tocos de parede entre o ambiente e a casa de máquinas: "CORRIJA A REPRESENTAÇÃO DAS PAREDES";
+- com o recorte da faixa entre a piscina e a parte de baixo: "REMOVA ESSA DIVISÓRIA DA PISCINA";
+- com o recorte da parede junto ao vidro da piscina: "CORRIJA ESSA IMPERFEIÇÃO NA PAREDE. NÃO ESSE DENTE".
+
+O que foi feito:
+1. **O tom da piscina em todas as casas** (`piscinas_turquesa.py`, novo): a água dos Térreos no turquesa do Subsolo da Casa E, com as pastilhas do Barlavento, a rede das cáusticas e a sombra curta das beiras.
+   - As piscinas dos Térreos das Casas A a D vêm dos renders de 2000 px. Por isso o script troca só a água nas finais já aprovadas, sem rodar os motores, como as cortinas (`cortinas_franzidas.py`). Cada final é regravada no lugar: `python3 piscinas_turquesa.py A-Terreo` (e `B-`, `C-`, `D-Terreo`).
+   - O desenho da água antiga fica, com mais contraste: as peças e o rejunte, os degraus da prainha e do spa, a sombra das bordas.
+   - A água vai até a beira quente (o Bege Bahia, a madeira). Por isso a faixa clara que o render deixou junto às bordas da prainha da Casa D entra.
+   - Ficam como estão as espreguiçadeiras (Casa B), os tracejados de projeção (Casa A) e os rótulos. Cada px de traço escuro é separado da água antiga e posto sobre a nova, então os rótulos não ganham halo.
+   - No Térreo da Casa E é a etapa nova "piscina" do motor (`piscina_terreo_e`, antes dos rótulos), com as duas folhas de vidro do lado esquerdo protegidas. Ela entra também no Térreo esmaecido do 1º Pavimento (`terreo_para_nublado`), que foi refeito.
+   - Áreas de água: A 36,5 e 8,9 m²; B 35,3 e 9,3; C 32,2 e 7,9; D 36,9 e 6,4; E 22,3, 1,3 e 6,7 (piscina e prainha, a faixa entre os vidros, spa).
+2. **Paredes** (`paredes_e`, vale para os três pavimentos da Casa E):
+   - As peças do PDF entram numa máscara só, desenhada em 4x e reduzida uma vez. Antes, cada peça vinha com o próprio antialias, e a junta de duas peças vizinhas deixava ver o fundo: fios claros e escuros nos encontros dos tocos, nas diagonais das pontas e na parede de baixo da piscina.
+   - A franja escura do render que passava do contorno (até 3 px, escura e com pouca cor) é refeita pelo piso em volta.
+   - As cabines do vestiário (ARQ - Parede) entram na mesma máscara.
+3. **O dente** (`PAREDES_E["coberta"]`): embaixo da parede da academia, junto ao vidro da piscina, havia duas pecinhas escuras de 1,7 pt que o PDF cobre com um branco desenhado depois. Agora sai a peça escura coberta por um branco da mesma camada que a final já mostra clara.
+   - A faixa branca embaixo da piscina, que a final mostra como parede, fica.
+4. **A divisória da piscina** (`PISCINA_E["agua_extra"]`): a faixa de Bege Bahia entre a piscina e a parte de baixo, à esquerda do vidro, vira água contínua. O degrau da sauna, à direita do vidro, fica.
+5. **O chuveiro da ducha do ambiente** (`DUCHA_AMBIENTE_E`, `nicho_ducha`):
+   - O do PDF, como o do vestiário: a placa quadrada cromada com os furinhos, o braço descendo até a parede e a canopla.
+   - O cálice do render saiu, com o piso de travertino inteiro em volta.
+   - O nicho da parede atrás dele, que o render pintou como uma grelha escura, vai em travertino com a sombra curta do recuo.
+6. **O rótulo da casa de máquinas da direita (5,83 m²)** (`AJUSTES_E["Subsolo"]`): passou ao corpo 0,85, no centro do cômodo, entre as paredes e da soleira à parede de baixo. No corpo 1,0 o nome ia de parede a parede.
+
+Antes e depois (o antes é a final de 17c2f1b):
+- `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_pedidos2810b_{planta,piscina_divisoria_parede,chuveiro_paredes,rotulo_casa_maquinas}_antes_depois.jpg`;
+- `POE642_Casa{A,B,C,D,E}/renders/POE642_Casa*_PH_Terreo_piscina_turquesa_antes_depois.jpg`;
+- `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_piscina_turquesa_antes_depois.jpg`.
+
+Pranchas e PDFs das cinco casas refeitos. Os Subsolos das Casas B a D, que usam o Térreo final no terreno hachurado, não foram rodados de novo: lá a piscina não aparece.
+
+Segue em aberto, de outra casa: as banquetas do Térreo da Casa C (`BANQUETAS_C["giro"]` 270 → 90, sem mexer sem o OK).
