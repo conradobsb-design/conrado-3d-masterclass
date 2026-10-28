@@ -1294,3 +1294,8 @@ python3 colar_boxes.py C-Terreo --antes /tmp/c_antes.png --nova /tmp/c_motor.png
 ```
 
 Ficam como estavam: os boxes da Casa B (`F.boxes_vidro`, já um vidro só de parede a parede), os vidros fixos e as portas de vidro dos BH master da Casa C (`F.boxes_vidro`), os boxes no granito (`F.boxes_granito`, `box_gourmet_d`), o box do Subsolo da Casa E (`retoque_subsolo_casae.vidro_box`) e os do 1º Pavimento da Casa E (`retoque_1pav_casae.boxes_continuos`), todos já contínuos e sem tracejado.
+
+### A porta do WC DCE da Casa D e o nicho da cabine do vestiário da Casa E (28/10)
+
+- `final3840_casad.entre_porta_box_td` (na etapa `esquadrias` do Térreo, depois de `pos_esquadrias_d`): a limpeza das esquadrias (`F.esquadrias_terreo`) espelhava o vidro do box, logo abaixo da folha aberta da porta do WC DCE, sobre a folha antiga do render, e ficava uma segunda folha a 5 px da porta. Entre a face de baixo da folha do PDF e a linha do box (`ENTRE_PORTA_BOX_TD`), o piso volta ao de antes das esquadrias, com as colunas das duas pontas da folha; na ponta junto à parede, o piso da coluna ao lado. Aplicado sobre a final com a etapa `soleiras` do cache como o "antes" (o resto da final não muda).
+- `final3840_casae.nicho_ducha(Q, img, q)`: o nicho em travertino também com o fundo à direita (`"fundo": "direita"`: a sombra curta do fundo e da lateral de cima). `NICHO_CABINE_E`, na etapa `vestiario` do Subsolo, antes do chuveiro da cabine: o nicho do PDF na parede da direita, onde o braço chega, no lugar da moldura escura do render. `python3 final3840_casae.py Subsolo --de vestiario` (só o nicho muda).

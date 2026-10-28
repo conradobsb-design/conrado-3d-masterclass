@@ -3418,4 +3418,19 @@ Antes e depois (o antes é a final de 42c3dda): `POE642_Casa{A,C,D,E}/renders/PO
 
 Pranchas e PDFs das Casas A, C, D e E refeitos.
 
-Pendente de antes (aguardando o OK do usuário): o nicho escuro na parede direita da cabine do chuveiro do vestiário, no Subsolo da Casa E.
+
+### Pedidos de 28/10/26: porta do WC DCE da Casa D e nicho da cabine da Casa E
+
+O usuário:
+- com o OK pendente: "ok, pode corrigir o nicho da cabine da casa E";
+- com o recorte do WC DCE do Térreo da Casa D: "CORRIJA A EXISTÊNCIA DE UMA SEGUNDA PORTA, ATRÁS DA PRINCIPAL. REMOVA ESSA PORTA QUE ESTÁ ATRÁS"; depois, "REMOVA ESSE TRACEJADO NA PONTA DA PORTA".
+
+**Casa D, WC DCE.** A porta é de giro e está aberta junto ao box. A segunda folha era uma cópia do vidro do box: a limpeza das esquadrias leva a folha antiga do render ao piso espelhando o que está ao lado, e ao lado estava o box. Entre a folha do PDF e o box, o piso volta ao de antes das esquadrias (`entre_porta_box_td`). O "tracejado na ponta da porta" eram as colunas das duas pontas da folha, que ficavam fora da faixa, em claro e escuro alternados; entraram também. Conferido no resto da Casa D e na Casa C: só o WC DCE tinha a cópia.
+
+**Casa E, Subsolo, nicho da cabine.** Na parede da direita da cabine do chuveiro do vestiário, onde chega o braço, o nicho do PDF (o branco na espessura da parede) estava como um retângulo de moldura escura do render. Agora é travertino, como o nicho da ducha do ambiente: um pouco mais escuro que o piso, com a sombra curta do fundo e da lateral de cima. O chuveiro da cabine vem por cima. Refeito de `--de vestiario`; só o nicho mudou.
+
+Antes e depois:
+- `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2810_wc_dce_segunda_porta_antes_depois.jpg`;
+- `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_nicho_cabine_antes_depois.jpg`.
+
+Pranchas e PDFs das Casas D e E refeitos.

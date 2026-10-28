@@ -1472,10 +1472,24 @@ DUCHA_AMBIENTE_E = {"ducha": (1031.0, 1062.9, 1042.1, 1074.1), "braco": (1035.8,
                     "semente": 2836}
 
 
-def nicho_ducha(Q, img):
-    q = DUCHA_AMBIENTE_E
+# O nicho da cabine do chuveiro do vestiário (usuário, 28/10/26, com o OK: "pode corrigir o nicho da cabine da casa
+# E"): na parede da direita da cabine, onde o braço do chuveiro chega, o PDF desenha o nicho (o branco da ARQ_PAREDE na
+# espessura da parede, com o da ARQ_REVESTIMENTOS na face), que o render pintou como um retângulo de moldura escura.
+# Como o da ducha do ambiente: o travertino do piso um pouco mais escuro, com a sombra curta do fundo (à direita) e da
+# lateral de cima; o chuveiro da cabine (placa, braço e canopla) vem por cima.
+NICHO_CABINE_E = {"nicho": (1289.0, 1048.0, 1295.2, 1070.7), "fundo": "direita", "nicho_luz": 0.90,
+                  "nicho_sombra": (0.30, 1.3), "semente": 2841}
+
+
+def nicho_ducha(Q, img, q=None):
+    """O nicho em travertino (`q["nicho"]`, pt), com a sombra curta do fundo e de uma lateral: `fundo` "baixo" (o da
+    ducha do ambiente, na parede de baixo: o fundo embaixo e a lateral esquerda) ou "direita" (o da cabine do
+    vestiário, na parede da direita: o fundo à direita e a lateral de cima)."""
+    q = DUCHA_AMBIENTE_E if q is None else q
     r = q["nicho"]
-    X0, Y0, X1, Y1 = F.ret_q(Q, (r[0] - 40, r[1] - 40, r[2] + 40, r[3] + 4))
+    direita = q.get("fundo", "baixo") == "direita"
+    X0, Y0, X1, Y1 = F.ret_q(Q, (r[0] - 40, r[1] - 40, r[2] + 4, r[3] + 40) if direita else
+                             (r[0] - 40, r[1] - 40, r[2] + 40, r[3] + 4))
     w, h = X1 - X0, Y1 - Y0
     out = img.astype(np.float32)
     reg = out[Y0:Y1, X0:X1]
@@ -1484,10 +1498,13 @@ def nicho_ducha(Q, img):
     a = _ret_local(Q, r, X0, Y0, w, h)
     T = travertino_e(Q, h, w, q["semente"])[..., None] * tom * q["nicho_luz"]
     reg[:] = reg * (1 - a[..., None]) + T * a[..., None]
-    # a sombra curta do fundo (embaixo) e da lateral esquerda, dentro do nicho
-    (u0, _), (u1, v1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+    # a sombra curta do fundo e da lateral, dentro do nicho
+    (u0, v0), (u1, v1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
     yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
-    d = np.minimum((v1 - Y0) - yy, xx - (u0 - X0))
+    if direita:
+        d = np.minimum((u1 - X0) - xx, yy - (v0 - Y0))
+    else:
+        d = np.minimum((v1 - Y0) - yy, xx - (u0 - X0))
     fs, alc = q["nicho_sombra"]
     reg *= (1 - fs * np.exp(-np.maximum(d, 0) / alc) * a)[..., None]
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
@@ -1522,6 +1539,7 @@ def vestiario_e(Q, img):
         FA.travertino_bruto, F.BANCADAS_F["cuba_travertino"] = guarda
     out = FA.torneira(Q, out, q["torneira"]["bico"], q["torneira"]["base"])
     out = FA.vaso(Q, out, *q["vaso"])
+    out = nicho_ducha(Q, out, NICHO_CABINE_E)
     out = FA.chuveiro(Q, out, q["chuveiro"])
     out = nicho_ducha(Q, out)
     out = FA.chuveiro(Q, out, DUCHA_AMBIENTE_E)
@@ -1537,7 +1555,7 @@ def vestiario_e(Q, img):
     out[par & zona] = img[par & zona]
     print("    vestiário: a bancada em granito Marrom Tabaco escovado (borda e sombra, E9), a cuba esculpida em travertino "
           "bruto, a torneira cromada, o vaso branco e o chuveiro de teto cromado; o chuveiro da ducha do ambiente "
-          "(placa, braço e canopla cromados) pelo PDF, com o nicho da parede em travertino")
+          "(placa, braço e canopla cromados) pelo PDF; os nichos da parede (o da ducha e o da cabine) em travertino")
     return out
 
 

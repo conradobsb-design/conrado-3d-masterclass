@@ -1671,6 +1671,33 @@ def box_gourmet_d(Q, img):
     return np.clip(o, 0, 255).astype(np.uint8)
 
 
+# 28/10 (usuário, no WC DCE: "corrija a existência de uma segunda porta, atrás da principal. remova essa porta que está
+# atrás"): a limpeza das esquadrias (`F.esquadrias_terreo`) leva ao piso a folha antiga do render espelhando o que está
+# em volta, e logo abaixo da folha aberta da porta do WC DCE fica o vidro do box: o espelho punha uma cópia dele, uma
+# segunda folha, a 5 px da porta. Entre a face de baixo da folha do PDF (`folha_pt`) e a linha do box (`box_pt`), o piso
+# volta ao de antes das esquadrias; a primeira linha logo abaixo da folha, que antes ainda era a folha antiga do render,
+# vem da seguinte. Depois ("remova esse tracejado na ponta da porta"): as colunas das duas pontas da folha entram
+# também; ficavam em claro e escuro alternados, como um tracejado. Na da ponta junto à parede (`parede`), o piso da
+# coluna ao lado, como a face da parede abaixo do box (a de antes das esquadrias tinha um traço escuro de 2 px).
+ENTRE_PORTA_BOX_TD = [{"x_pt": (2190.6, 2229.6), "folha_pt": 810.3, "box_pt": 818.1, "parede": "direita"}]
+
+
+def entre_porta_box_td(Q, img, antes):
+    out = img.copy()
+    for q in ENTRE_PORTA_BOX_TD:
+        (x0, y0), (x1, y1) = Q.p2q(q["x_pt"][0], q["folha_pt"]), Q.p2q(q["x_pt"][1], q["box_pt"])
+        a, b = int(np.floor(x0)), int(np.ceil(x1))                  # com as colunas das duas pontas da folha
+        r0, r1 = int(np.ceil(y0)), int(np.floor(y1 - 1.5))           # da folha até antes da face do vidro do box
+        out[r0 + 1:r1, a:b] = antes[r0 + 1:r1, a:b]
+        out[r0, a:b] = antes[r0 + 1, a:b]
+        if q["parede"] == "direita":
+            out[r0:r1, b - 1] = out[r0:r1, b - 2]
+        else:
+            out[r0:r1, a] = out[r0:r1, a + 1]
+    print(f"    WC DCE: sem a cópia do vidro do box entre a folha da porta e o box ({len(ENTRE_PORTA_BOX_TD)} faixa)")
+    return out
+
+
 def boxes_terreo_d(Q, img):
     """O box do banho gourmet (no granito) na faixa cinza-clara, como estava (`F.boxes_granito`); os de correr dos
     banhos 1, 2 e 3 e do WC DCE em vidro contínuo (`final3840_casaa.boxes`), com as folhas pareadas por box. Antes, a
@@ -2246,8 +2273,8 @@ def passos_terreo_d(Q, ini, M):
         # a entrada das esquadrias vai em cópia: `F.esquadrias_terreo` escreve nela, e o `antes` de `pos_esquadrias_d`
         # tem de ser a etapa das soleiras (os recortes atrás das folhas abertas não voltavam)
         # a adega em U depois das esquadrias: a limpeza delas espelhava a ponta da prateleira junto do vidro
-        ("esquadrias", lambda im: adega_u_d(Q, pos_vidros_d(Q, portas_vidro_td(Q, pos_esquadrias_d(
-            Q, F.esquadrias_terreo(Q, im.copy(), parede=cinza), im)), im))),
+        ("esquadrias", lambda im: adega_u_d(Q, pos_vidros_d(Q, portas_vidro_td(Q, entre_porta_box_td(Q, pos_esquadrias_d(
+            Q, F.esquadrias_terreo(Q, im.copy(), parede=cinza), im), im)), im))),
         ("cortinas", lambda im: sem_trilho_fora_d(Q, F.cortinas(Q, im, paredes_pdf=True), im)),
         ("escadas", lambda im: escadas_terreo_d(Q, im)),
         ("projecoes", lambda im: pisante_reto_td(Q, beiral_l_td(Q, projecoes_lajes_td(Q, projecoes_terreo_d(Q,
