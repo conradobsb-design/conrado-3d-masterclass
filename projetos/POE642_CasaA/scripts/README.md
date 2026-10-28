@@ -1388,6 +1388,12 @@ Pedidos do usuário: "precisa aprimorar o contorno do tapete na parte onde inclu
 - O sofá e as poltronas do tapete ficam sob a laje do 1º Pavimento: o Térreo nublado não muda. `terreo_para_nublado` já põe o sofá novo numa rodada do zero.
 - **Na final do Térreo:** a final de da8fecd → `--sobre-final poltronas_living` → `--sobre-final sofa_varanda` (refeita do mesmo jeito depois da troca do braço e da sombra, e de novo com o braço da esquerda refinado: "consegue refinar mais ainda esse braço da esquerda do sofá?"; "corrija também a parte interna do braço").
 
+### O tracejado da borda de baixo da garagem da Casa E em branco (28/10)
+
+Pedido do usuário, com o recorte da garagem do Térreo: "esse tracejado em branco". A borda de baixo da laje da garagem (`TRACEJADOS_TE["cobertura"]["laje da garagem"]`, o 3º trecho) corre sobre a divisa do granito com a pedra portuguesa do acesso de veículos; a cor de cada traço vem da mediana do fundo em volta, que ali é metade pedra clara, e os traços saíram pretos; entre eles aparecia a linha cinza antiga do retoque.
+- **`TRACEJADOS_TE["brancos"]`:** os trechos (pelo nome, `"laje da garagem (3)"`) que vão sempre em branco; `tracejados_pb_te` não troca a cor deles pelo fundo.
+- **`tracejado_branco_te`** (etapa `tracejado_branco` do Térreo, logo depois de `tracejados`; sobre a final, `--sobre-final tracejado_branco`): os px da linha que já estava ali (os traços pretos e o cinza embaixo, `vaos["limpa_px"]` de cada lado) ganham o piso do mesmo material ao lado (`_limpa_tracos` com `fonte` = o granito e a pedra portuguesa da chapada naquela caixa, e `mesmo` = o material de cada px, com os px da linha do PDF no material mais perto), e os traços voltam em branco, nos mesmos lugares. Mudam só as linhas 907 a 913 da final, de x 2455 a 3045.
+
 ### A parte de baixo da piscina do Subsolo da Casa E (28/10)
 
 Pedidos do usuário: "na parte de baixo da piscina está invertido: a parede é a parte de baixo e a borda da piscina a parte de cima. entendeu?"; e, vendo a borda de Bege Bahia passada para junto da água (5418bb9): "o subsolo ficou horrivel, deixe apenas parede na parte de baixo sem borda". O PDF tem ali um bloco cheio (preto, com as linhas tracejadas da seção); o render tinha a parede junto à água e uma faixa de Bege Bahia por fora.

@@ -3588,3 +3588,11 @@ O usuário: "diminua um pouco o tamanho" e "jogue um leve efeito de sombra para 
 Antes e depois (o antes é a entrega anterior, 24743ab): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_sombra_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
 
 **Aprovado** (28/10/26): "ficou bom, sofá aprovado", o sofá da varanda como está (964186a): simétrico, 3,67 x 1,06 m, com a sombra leve. O tapete atrás das poltronas, o resto do Térreo e o 1º Pavimento da Casa E seguem aguardando a validação.
+
+### Pedido de 28/10/26: tracejado da borda de baixo da garagem em branco (Térreo da Casa E)
+
+O usuário, com o recorte da garagem: "esse tracejado em branco".
+- **Tracejado da garagem.** A borda de baixo da laje da garagem corre sobre a divisa do granito com a pedra portuguesa do acesso; os traços tinham saído pretos (a cor vem do fundo em volta, ali metade pedra clara) e entre eles aparecia a linha cinza antiga do retoque, que de longe parecia um tracejado branco. Agora os traços são brancos, nos mesmos lugares, e a linha cinza saiu: entre os traços, o granito de um lado e a pedra do outro. Os outros lados da laje (o de cima e o da direita, sobre o granito) já eram brancos.
+- O Térreo nublado do 1º Pavimento não leva as projeções do Térreo: não muda.
+
+Antes e depois (o antes é a entrega anterior, f798821): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_tracejado_garagem_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
