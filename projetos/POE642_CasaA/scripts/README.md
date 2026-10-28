@@ -1206,3 +1206,18 @@ Pedido de 28/10/26: "APLIQUE ESSE TOM DE PISCINA EM TODAS AS PISCINAS DE TODAS A
 python3 piscinas_turquesa.py A-Terreo   # e B-Terreo, C-Terreo, D-Terreo; --antes <png> guarda a final anterior
 # a Casa E: a etapa "piscina" do Térreo (final3840_casae.py Terreo --de piscina) e o 1º Pavimento de novo
 ```
+
+### As bordas retas pelo PDF (`--bordas`)
+
+Pedido de 28/10/26, no Térreo da Casa A: "corrija as bordas deixando as perfeitas". `bordas_retas(img, agua_px, pedra_px, pedra_tom, pedra_grao, rede)` refaz as beiras nos retângulos do PDF de `BORDAS[planta]` (pt, levados ao quadro pelo `p2q`):
+- `agua`: o preenchimento azul da ARQ_CONTRAPISO (a piscina com a prainha, o spa); a cobertura de cada px vem por supersample (`ss`), para a beira nítida.
+- Na faixa de `faixa_px` junto à beira, a água é refeita: o fundo, pelo espelho da água de dentro sem os fios claros; a rede das cáusticas, a mesma que `turquesa` pôs (`rede_turquesa`, refeita da final de antes do turquesa: `--rede`), contínua até a beira e sumindo junto a ela; a sombra curta (`sombra`, a do `PISCINA_E`) a partir da beira exata.
+- Fora da água, o piso de fora é espelhado sobre a água que passava e o fio claro antigo; o alcance é medido em cada lado (até `fora_px`, pela diferença da linha ao piso de mais longe, `fora_dif`), para não dobrar os fios do piso numa linha paralela à beira.
+- `pedra`: as faixas entre as linhas do PDF (entre o deck e a piscina, o anel do spa), na pedra clara lisa (`pedra_tom`, `pedra_grao`).
+- Os traços escuros e neutros por cima (os tracejados de projeção, `traco`) ficam.
+
+```bash
+# de POE642_CasaA/scripts/; o antes do turquesa sai do git (o commit anterior a 3041093)
+git show 3041093^:projetos/POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_rotulos.png > /tmp/a_pre_turquesa.png
+python3 piscinas_turquesa.py A-Terreo --bordas --rede /tmp/a_pre_turquesa.png
+```

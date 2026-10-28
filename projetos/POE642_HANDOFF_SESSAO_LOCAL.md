@@ -3256,3 +3256,19 @@ O usuário, com o recorte da cabine do chuveiro do vestiário: "represente melho
   - o quadrante da folha (`arco`) continua nas `zonas_portas`, e o piso passa limpo onde estava a folha branca.
 
 Antes e depois (o antes é a final de 4124497): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_pedidos2810e_{planta,porta_cabine_chuveiro}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.
+
+### Pedido de 28/10/26: as bordas da piscina da Casa A, perfeitas
+
+O usuário, com o recorte da piscina do Térreo da Casa A (piscina, prainha e spa) no tom novo: "casa A -terreo: corrija as bordas deixando as perfeitas".
+
+- **O que havia:**
+  - a água do render de 2000 px passava até 3 px do desenho do PDF, com a beira ondulada, pingos ciano fora dela, cantos arredondados e um fio claro em volta;
+  - no topo do spa, a beira dobrada (uma lasca de água acima do traço escuro);
+  - as faixas de pedra entre o deck e a piscina e em volta do spa variavam de largura, com uma franja ciano por dentro, e o deck de madeira invadia o anel do spa.
+- **O que foi feito** (`piscinas_turquesa.py --bordas`, `BORDAS["A-Terreo"]`):
+  - a água exatamente nos retângulos do PDF (ARQ_CONTRAPISO, o preenchimento azul), com a beira nítida;
+  - junto à beira, o fundo refeito pelo espelho da água de dentro, a mesma rede de cáusticas do turquesa, contínua e sumindo junto à beira (refeita da final de antes do turquesa), e a sombra curta da água de referência (`PISCINA_E["sombra"]`);
+  - as faixas de pedra do PDF (907,2 a 918,5 pt entre o deck e a piscina; o anel de 11,4 pt do spa) com largura constante, na pedra clara do render, lisa;
+  - fora, o piso espelhado sobre a água que passava e o fio claro, com o alcance medido em cada lado; os tracejados de projeção por cima.
+
+Antes e depois (o antes é a final de a680667): `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_bordas_piscina_antes_depois.jpg` e `..._bordas_piscina_spa_detalhe_antes_depois.jpg`. Prancha do Térreo e PDF da Casa A refeitos.
