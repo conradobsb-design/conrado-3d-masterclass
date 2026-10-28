@@ -3107,3 +3107,11 @@ Lista aplicada:
 O resto fica como estava: rótulos, cortinas franzidas de 27/10, camas, guarda-roupas com cabides, boxes, quartzito Aura dos banhos e Bege Bahia das varandas.
 
 Rodado `python3 final3840_casae.py 1Pavimento`. Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_{planta,escada,banhos_3_4,banho_master,banhos_1_2,suites,sala_intima,nublado}_antes_depois.jpg`. Prancha `POE642_CasaE/entrega/POE642_CasaE_PH_1Pavimento_entrega.png` e PDF `POE642_CasaE_Plantas_Humanizadas.pdf` (Subsolo, Térreo e 1º Pavimento) refeitos.
+
+Sobre o Subsolo depois do 1º Pavimento: o motor ganhou ajustes durante o Térreo e o 1º Pavimento:
+- a proteção das linhas de projeção;
+- o ARQ_ELEMENTOS FIXOS nas paredes;
+- a borda de 2 px das peças;
+- os círculos `FICAM`.
+
+Rodar `python3 final3840_casae.py Subsolo` hoje dá uma variante quase igual à final entregue (commit 87f558e). Mudam o grão do granito na Casa de Máquinas e no DCE, e um anel de 2 px em volta das esteiras e dos aparelhos da academia, sem ganho visível. A final do Subsolo fica a de 87f558e.
