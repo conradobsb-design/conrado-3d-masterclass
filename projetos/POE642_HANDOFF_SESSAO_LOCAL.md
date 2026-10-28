@@ -3446,3 +3446,20 @@ O usuário: "VAMOS REVISAR O SUBSOLO DA CASA E". A revisão contra o PDF e as re
 Conferido sem inconformidade: circulação e depósito; DCE, WC DCE 2 e o box; portas e soleiras; aparelhos da academia; sauna, ambiente e vestiário; as duas casas de máquinas; cabine e rótulo do elevador; escada.
 
 Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_revisao_{piscina_contorno,barra_alongamento,elevador_batentes}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.
+
+### Revisão de 28/10/26 do Térreo da Casa E: adega, pisantes, curva da pedra portuguesa e projeção da cobertura
+
+O usuário: "VAMOS REVISAR O TÉRREO DA CASA E". A revisão contra o PDF e as regras achou 3 inconformidades, apresentadas antes de alterar: a porta da adega, os pisantes e a curva da pedra portuguesa. O usuário respondeu "pode". Depois perguntou de qual prancha a revisão tinha partido ("a última tinha os tracejados das projeções"). A comparação com a prancha de 27/10 mostrou que o tracejado da projeção da cobertura sobre o granito tinha sumido na rodada de 28/10, 01:47, quando o granito foi refeito. Isso entrou como item 4. A resposta: "pode aplicar os 4". Durante a aplicação, o usuário pediu ainda: "essas manchas nas pedras da vegetação antiga precisam ser removidas".
+
+1. **Porta da adega.** No vão, o render deixou uma faixa cinza borrada e um dente claro no lugar da porta. Agora vai a porta de vidro de correr do PDF, como as do Subsolo: a soleira de Bege Bahia, os batentes, o vidro fixo da esquerda e as duas folhas de correr nos seus planos, com os montantes. O travertino do hall vai até a porta.
+2. **Pisantes.** Os 9 pisantes do caminho estão nos retângulos do PDF, com a borda reta, em Bege Bahia limpo e com a sombra curta. Saíram os dentes, as bordas claras e as manchas da vegetação antiga. Na pedra grande do acesso, à esquerda dos pisantes, saíram as folhas sobre a borda da direita e sobre o canto de baixo, e a borda ficou na reta do PDF. A grama em volta ficou sem a borda clara e sem os restos da pedra.
+3. **Curva da pedra portuguesa.** A borda contra a grama era em degraus. Agora segue a curva do PDF, lisa, nas duas curvas. Saiu a mancha escura junto ao arbusto de cima.
+4. **Projeção da cobertura.** O tracejado cinza fino voltou nas linhas do PDF, como na prancha de 27/10 e na varanda: a laje da garagem sobre a circulação, a borda de cima do granito e a lateral direita. Ele não passa sobre as paredes.
+
+O 1º Pavimento mostra o Térreo nublado em volta. Ali entraram os pisantes, a curva e o tracejado novos. A adega fica sob a pegada.
+
+Antes e depois:
+- Térreo: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_revisao_{adega_porta,pisantes,curva_pedra_portuguesa,curva_mancha,projecao_cobertura,projecao_cobertura_canto}_antes_depois.jpg`;
+- 1º Pavimento: `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_revisao_terreo_nublado_antes_depois.jpg`.
+
+Pranchas do Térreo e do 1º Pavimento e PDF da Casa E refeitos.

@@ -116,6 +116,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - **[22/10] Na resolução da prancha e nas faces das paredes** (usuário, na Casa B: "corrigir as soleiras"): a soleira é desenhada na final de 3840 px (nunca ampliada de 2000 px, que borrava), da ponta de uma parede à da outra e na espessura exata da parede do PDF (o desenho vetorial, a 8 x), nítida, com o Bege Bahia da biblioteca no tom da referência; as faces da parede em traço cinza fino; batentes e folhas por cima.
 - **Portões de correr** da área descoberta em alumínio. A porta do elevador em inox, com soleira em inox escovado.
   - **[28/10] Os batentes da porta do elevador** (revisão do Subsolo da Casa E, OK do usuário no item 3): as duas tiras cinza do PDF que descem da face da parede, uma de cada lado do vão, finas e iguais, no cinza das paredes, como na entrada do elevador do Subsolo da Casa D. O piso em volta delas fica inteiro, sem o toco largo e a mancha escura do render.
+- **[28/10] A porta de vidro da adega pelo PDF** (revisão do Térreo da Casa E, OK do usuário no item 1): no vão da adega, o render deixou uma faixa cinza borrada e um dente claro no lugar da porta. A porta vai como as de correr do Subsolo: a soleira de Bege Bahia no vão, os batentes brancos, o vidro fixo da esquerda e as duas folhas de correr, cada uma no plano dela, com os montantes e a sombra curta; o piso dos dois lados vai até a porta, sem a faixa.
 
 ## 5. Escadas
 
@@ -247,6 +248,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - **[27/10] Os vãos da laje como no PDF** (usuário, na Casa D: no gramado abaixo da garagem, "faltou a representação correta dessas projeções"; na garagem, "melhorar a representação dessas projeções em branco"): o X tracejado de cada vão, o contorno dele onde o PDF o mostra (sobre o gramado, em traço fino contínuo; na garagem o PDF o cobre com o piso) e as bordas tracejadas da laje; o tracejado regular (começa e termina num traço inteiro), mais curto e fino que o das outras projeções, em branco quente sobre o granito e a grama, nunca sobre as paredes; o tracejado escuro que o render deixou nas mesmas linhas sai antes.
   - **[27/10] O tracejado até o fim** (usuário, na Casa D, na linha da laje junto ao gás: "mantenha o tracejado branco até o fim, removendo o tom preto"): a linha tracejada segue o PDF de ponta a ponta (ali, da floreira até o brise), e o tracejado escuro do render sai em toda ela.
 - **[27/10] Só o que aparece no PDF** (usuário, na Casa D: "não existe essa linha marrom"; "esse beiral é todo no bege bahia. remova o vinilico daqui"; "esse quadrante pontilhado não existe aqui"): o que o PDF desenha mas cobre com um preenchimento pintado depois (ripas de brise por baixo do piso de um beiral, um quadrado da ARQ_LAYOUT HUMANIZAÇÃO por baixo do vinílico) não aparece na planta e não entra; ali fica o piso que o PDF mostra.
+- **[28/10] O tracejado não se perde quando o piso é refeito** (revisão do Térreo da Casa E, OK do usuário no item 4; usuário: "a última tinha os tracejados das projeções"): o granito do Térreo da Casa E, refeito em 28/10 (01:47), levou junto o tracejado da projeção da cobertura que estava sobre ele. Sempre que um piso é refeito, o tracejado volta por cima, nas linhas do PDF e no mesmo traço de antes (ali, o cinza fino da varanda e da prancha de 27/10): a laje da garagem sobre a circulação, a borda de cima do granito e a lateral direita, sem passar sobre as paredes. Antes de entregar, comparar com a prancha anterior.
 - **[19/10] R9. Brises com as projeções de cobertura:** junto dos brises, o tracejado da projeção da cobertura (beiral ou laje), na posição do PDF e por cima. Escolha do usuário em 19/10: "tracejado da cobertura".
 - **Brises:** na cor pedida para cada fachada:
   - Casa E: madeira no Térreo, bronze no 1º Pavimento;
@@ -265,8 +267,10 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 ## 10. Área externa
 
 - **[27/10] Pisantes com a borda reta do PDF** (usuário, na Casa D, no pisante junto ao hall: "tem um traço branco no contorno de baixo do bloco de pedra no acesso a casa. formando um dente que não existe. corrija, deixando-o reto"): o contorno de cada bloco de pedra é o do PDF, reto, sem o Bege Bahia passando da borda.
+  - **[28/10] Sem as manchas da vegetação antiga** (revisão do Térreo da Casa E, OK do usuário no item 2; depois, "essas manchas nas pedras da vegetação antiga precisam ser removidas"): cada pisante no retângulo do PDF, em Bege Bahia limpo, no tom dos outros, com a sombra curta; as folhas e as sombras das plantas do render sobre as pedras saem, também na pedra grande do acesso (a borda junto à grama e o canto de baixo); em volta, a grama, sem a borda clara nem restos da pedra.
 - **[28/10] Contorno do Bege Bahia junto à grama, sem resquícios** (usuário, no Térreo da Casa A: "limpe esses resquicios"; "corrija o contorno do marmore bege bahia, removendo esses resquicios"): a borda da pedra contra a grama é uma linha reta, sem as pecinhas cinza-rosadas do render que avançam sobre a grama, sem tufos de folhas sobre a pedra e sem riscos claros na grama entre as placas; fora do lote, o branco da prancha, sem a faixa rosada. Os tracejados de projeção que cruzam a borda ficam.
   - O mesmo vale para a beira de qualquer piso contra a grama (usuário, na varanda do Térreo da Casa A: "pode corrigir a borda de baixo da varanda também"): a borda do travertino é uma linha reta na linha do PDF, sem a faixa cinza-rosada, sem dentes e sem trechos escuros soltos; o piso vai até a linha e a grama começa nela.
+  - **[28/10] Nas curvas também** (revisão do Térreo da Casa E, OK do usuário no item 3): a borda da pedra portuguesa contra a grama segue a curva do PDF, lisa e com antialias, sem os degraus do render; a pedra vai até a curva e a grama começa nela; a mancha escura junto ao arbusto, sobre a pedra, sai.
 - **Vegetação:** só dentro do lote e fora dos pisos, decks e piscina.
   - Árvores, arbustos e palmeiras da biblioteca (`_texturas/vegetacao/`), no tamanho real, com a sombra.
   - Canteiros com touceiras.
@@ -676,3 +680,10 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
   - a barra de alongamento junto ao DCE, que não é TV: a moldura em madeira e as barras do meio cromadas (seção 8);
   - os dois batentes da porta do elevador finos e iguais, sem o toco e a mancha do render (seção 4).
   - Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_revisao_{piscina_contorno,barra_alongamento,elevador_batentes}_antes_depois.jpg`.
+- **Casa E · Térreo, revisão de 28/10 (os 4 itens com o OK do usuário; aguardando a validação):**
+  - a porta de vidro de correr da adega pelo PDF, sem a faixa cinza e o dente do render (seção 4);
+  - os 9 pisantes nos retângulos do PDF, em Bege Bahia limpo, sem as manchas da vegetação antiga, e a pedra grande do acesso sem as folhas sobre a borda (seção 10);
+  - a curva da pedra portuguesa contra a grama lisa, na curva do PDF, sem a mancha junto ao arbusto (seção 10);
+  - o tracejado da projeção da cobertura sobre o granito de volta, como na prancha de 27/10 (seção 9);
+  - o Térreo nublado do 1º Pavimento com a revisão (os pisantes, a curva, o tracejado).
+  - Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_revisao_{adega_porta,pisantes,curva_pedra_portuguesa,curva_mancha,projecao_cobertura,projecao_cobertura_canto}_antes_depois.jpg` e `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_revisao_terreo_nublado_antes_depois.jpg`.

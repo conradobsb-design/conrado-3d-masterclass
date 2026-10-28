@@ -1832,6 +1832,7 @@ def passos_terreo(Q):
         ("seta", lambda im: seta_e(Q, im, SETA_TER_E)),
         ("cortinas", lambda im: cortinas_terreo_e(Q, im)),
         ("piscina", lambda im: piscina_terreo_e(Q, im)),
+        ("revisao", lambda im: revisao_terreo_e(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("Terreo", im)),
     ]
 
@@ -1844,6 +1845,271 @@ def _bancadas(Q, img, lista):
     for nome, r in lista:
         img = bancada_e9(Q, img, r, nome=nome)
     return img
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# A revisão de 28/10/26 do Térreo (usuário: "VAMOS REVISAR O TÉRREO DA CASA E"; os quatro itens aprovados com "pode
+# aplicar os 4"), na etapa `revisao`, antes dos rótulos. Vai sobre a final aprovada (`--sobre-final revisao`): a final das
+# etapas em cache é anterior aos acertos feitos direto na final.
+# 1. A frente da adega: no vão, o render deixou uma faixa cinza borrada e um dente claro no lugar da porta. A faixa do fim
+#    das prateleiras ao travertino limpo do hall (`faixa_pt`) volta ao travertino do hall (as linhas logo abaixo, em
+#    espelho), com as paredes do PDF por cima, e a porta do PDF entra como as de correr do Subsolo
+#    (`final3840_casaa.portas_vidro`): a soleira de Bege Bahia no vão, os três batentes, o vidro fixo da esquerda (a linha
+#    do PDF em 1004,6 pt) e as duas folhas de correr nos seus planos, com os montantes.
+# 2. Os pisantes (os 9 retângulos da ARQ_CONTRAPISO à direita do acesso; regra de 27/10: a borda reta do PDF): cada um no
+#    retângulo do PDF, em Bege Bahia (a foto da biblioteca no tom dos pisantes do render, cada peça com o tom um pouco
+#    diferente), com a sombra curta; em volta, onde o render deixou a borda clara e restos da pedra, a grama vizinha. As
+#    manchas da vegetação antiga (usuário, 28/10: "essas manchas nas pedras da vegetação antiga precisam ser removidas")
+#    saem com eles; na pedra grande do acesso (o Bege Bahia da ARQ_CONTRAPISO à esquerda), as folhas sobre a borda da
+#    direita e sobre o canto de baixo também: o que não é pedra (verde ou escuro) nas `faixas` junto à borda vem, em
+#    espelho, da pedra mais para dentro, e a borda fica na reta do PDF.
+# 3. A curva da pedra portuguesa contra a grama: a borda em degraus do render vai para a curva do PDF (o preenchimento da
+#    ARQ_CONTRAPISO), lisa, com antialias. De cada lado da curva, a faixa de `d0_px` vem em espelho de logo além dela (a
+#    pedra de dentro, a grama de fora), só onde do lado de fora há grama. A mancha escura junto ao arbusto de cima sai
+#    junto (o que não é pedra na faixa de `mancha_px` dentro da curva, em espelho da pedra mais para dentro).
+# 4. A projeção da cobertura sobre o granito (perdida em 28/10, 01:47, quando o granito foi refeito; a prancha de 27/10 a
+#    tinha): o tracejado cinza do retoque (`retoque_terreo_casae.PROJECOES`, o mesmo que segue na varanda) nas linhas do
+#    PDF: a da laje da garagem sobre a circulação (687,8 pt), a borda de cima do granito (516,3 pt) e a lateral direita
+#    (2763,5 pt), até a pedra portuguesa; nada sobre as paredes.
+REVISAO_TE = {
+    "adega": {"faixa_pt": (1854.75, 998.5, 1985.71, 1008.1),
+              "portas": [{"nome": "da adega, vidro fixo", "soleira": (1856.45, 1003.61, 1984.01, 1005.31),
+                          "batentes": [(1856.45, 1003.61, 1857.58, 1005.31), (1890.47, 1003.61, 1891.6, 1005.31),
+                                       (1982.87, 1003.61, 1984.01, 1005.31)],
+                          "folhas": [((1857.58, 1004.06, 1890.47, 1005.2), "x")], "montante_pt": 0.0},
+                         {"nome": "da adega, folhas de correr", "batentes": [],
+                          "folhas": [((1891.6, 1000.77, 1936.95, 1003.04), "x"),
+                                     ((1936.95, 1003.04, 1982.87, 1005.31), "x")], "montante_pt": 2.84}]},
+    # `faixas`: (x0, y0, x1, y1) em pt, o lado da borda ("dir" ou "baixo") e a largura em px que é refeita (o espelho é
+    # sobre a linha a essa distância da borda; a faixa tem o dobro, para a pedra de onde vem o espelho)
+    "pisantes": {"bloco": 197, "semente": 2841, "forca": 0.75, "tom_peca": 0.015, "sombra": (0.22, 1.15, 1.35), "folga_px": 7,
+                 "faixas": [((2347.0, 1487.4, 2383.69, 1790.5), "dir", 18), ((2340.0, 1762.0, 2383.69, 1790.5), "baixo", 14)]},
+    "curva": {"seqno": 35463, "d0_px": 5, "grama_min": 0.5, "mancha_px": 16, "escuro": 140},
+    "projecao": {"linhas": [[(1992.5, 687.8), (2763.5, 687.8)],
+                            [(1372.9, 516.3), (2763.5, 516.3), (2763.5, 1090.3)]],
+                 "traco_pt": 8.5, "vao_pt": 4.25, "larg_px": 1.1, "cor": (150, 151, 150), "forca": 0.85, "ss": 8},
+}
+
+
+def _verde(reg):
+    """Grama e vegetação (bool): o verde passa o vermelho e não fica abaixo do azul."""
+    r = reg.astype(np.int16)
+    return (r[..., 1] > r[..., 2] + 4) & (r[..., 1] >= r[..., 0])
+
+
+def adega_porta_te(Q, img, q=None):
+    import final3840_casaa as FA
+    q = q or REVISAO_TE["adega"]
+    out = np.ascontiguousarray(img.copy())
+    x0, y0, x1, y1 = q["faixa_pt"]
+    (u0, v0), (u1, v1) = Q.p2q(x0, y0), Q.p2q(x1, y1)
+    a, b, c, d = int(np.floor(u0)), int(np.ceil(v0)), int(np.ceil(u1)), int(np.floor(v1))
+    # a faixa volta ao travertino do hall: as linhas logo abaixo dela, em espelho (a linha d - 1 recebe a d)
+    out[b:d, a:c] = out[d:2 * d - b, a:c][::-1]
+    paredes_pdf(Q)
+    par = Q._par[b:d, a:c]
+    reg = out[b:d, a:c].astype(np.float32)
+    out[b:d, a:c] = np.clip(np.round(reg * (1 - par[..., None]) + np.float32(PAREDES_E["cor"]) * par[..., None]),
+                            0, 255).astype(np.uint8)
+    guarda = FA.PORTAS_VIDRO
+    FA.PORTAS_VIDRO = dict(FA.PORTAS_VIDRO, portas=q["portas"])
+    try:
+        out = FA.portas_vidro(Q, out)
+    finally:
+        FA.PORTAS_VIDRO = guarda
+    print(f"    adega: a faixa do vão ({c - a} x {d - b} px) no travertino do hall e a porta de vidro de correr do PDF "
+          f"(soleira, batentes, vidro fixo e duas folhas)")
+    return out
+
+
+def _espelho_faixa(reg, lado, larg):
+    """A faixa de `larg` px junto à borda (`lado`: a borda é a última coluna ou linha de `reg`) em espelho da pedra logo
+    para dentro dela (a linha de espelho a `larg` px da borda)."""
+    if lado == "dir":
+        src = reg[:, -2 * larg:-larg][:, ::-1]
+        return np.concatenate([reg[:, :-larg], src], axis=1)
+    src = reg[-2 * larg:-larg][::-1]
+    return np.concatenate([reg[:-larg], src], axis=0)
+
+
+def pisantes_te(Q, img, q=None):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    q = q or REVISAO_TE["pisantes"]
+    pis = [d for d in Q.desenhos if d.get("layer") == "ARQ_CONTRAPISO" and d["type"] == "f" and d.get("fill")
+           and abs(d["fill"][0] - 0.894) < 0.01 and 60 < d["rect"].width < 120 and 120 < d["rect"].height < 200]
+    rets = [tuple(d["rect"]) for d in pis]
+    bloco = next(d for d in Q.desenhos if d.get("seqno") == q["bloco"])
+    fx = [Q.p2q(r[0], r[1]) for r, _, _ in q["faixas"]] + [Q.p2q(r[2], r[3]) for r, _, _ in q["faixas"]]
+    fx += [Q.p2q(r[0], r[1]) for r in rets] + [Q.p2q(r[2], r[3]) for r in rets]
+    fx = np.array(fx)
+    X0, Y0 = (np.floor(fx.min(axis=0)) - 14).astype(int)
+    X1, Y1 = (np.ceil(fx.max(axis=0)) + 14).astype(int)
+    w, h = X1 - X0, Y1 - Y0
+    reg = img[Y0:Y1, X0:X1].copy()
+    a_pis = _ret_pdf(Q, rets, X0, Y0, w, h, ss=8)
+    ss = 8
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    for c in Q.caminhos(bloco):
+        if len(c) >= 3:
+            cv2.fillPoly(m, [np.int32(np.round((c - (X0, Y0)) * ss))], 255)
+    a_blk = cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+    verde = _verde(reg)
+    # as faixas da pedra grande: as manchas (verde ou escuro) e a borda (as 2 últimas colunas ou linhas) em espelho
+    faixa = np.zeros((h, w), bool)
+    pedra = reg.astype(np.float32).copy()
+    n_mancha = 0
+    for r, lado, larg in q["faixas"]:
+        (u0, v0), (u1, v1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        a, b = int(np.floor(u0)) - X0, int(np.floor(v0)) - Y0
+        c, d = int(np.ceil(u1)) - X0, int(np.ceil(v1)) - Y0
+        faixa[b:d, a:c] = True
+        f = reg[b:d, a:c]
+        lum = f.astype(np.float32).mean(axis=2)
+        dentro = a_blk[b:d, a:c] > 0.99
+        med = np.median(lum[dentro])
+        mancha = dentro & (_verde(f) | (lum < med - 25) | (f[..., 1].astype(np.int16) >= f[..., 2].astype(np.int16) - 4))
+        mancha = cv2.dilate(mancha.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+        borda = np.zeros_like(mancha)
+        if lado == "dir":
+            borda[:, -3:] = True
+        else:
+            borda[-3:] = True
+        esp = _espelho_faixa(f.astype(np.float32), lado, larg)
+        troca = mancha | borda
+        if lado == "dir":
+            troca[:, :-larg] = False
+        else:
+            troca[:-larg] = False
+        pedra[b:d, a:c] = np.where(troca[..., None], esp, pedra[b:d, a:c])
+        n_mancha += int((mancha & dentro).sum())
+    # a grama: tudo o que não é verde perto das pedras (a borda clara, os restos da pedra antiga) e as próprias pedras
+    # saem e voltam pela grama vizinha (inpaint)
+    k = 2 * q["folga_px"] + 1
+    pedras = (a_pis > 0.01) | ((a_blk > 0.01) & faixa)
+    perto = cv2.dilate(pedras.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & (a_blk <= 0.5)
+    sem = pedras | (perto & ~verde)
+    G = cv2.inpaint(reg, sem.astype(np.uint8), 4, cv2.INPAINT_TELEA).astype(np.float32)
+    # os pisantes: a foto da biblioteca no tom do render (o miolo dos pisantes antigos, sem as manchas)
+    miolo = cv2.erode((a_pis > 0.99).astype(np.uint8), np.ones((17, 17), np.uint8)).astype(bool)
+    lum = reg.astype(np.float32).mean(axis=2)
+    tom = np.median(reg[miolo & (lum > np.median(lum[miolo]) - 20) & ~verde].reshape(-1, 3), axis=0).astype(np.float32)
+    T = textura("bege_bahia", Q.px_m, h, w, semente=q["semente"]).astype(np.float32)
+    T = (1 + q["forca"] * (T / T.reshape(-1, 3).mean(axis=0) - 1)) * tom
+    rng = np.random.default_rng(q["semente"])
+    fs, dist, sig = q["sombra"]
+    sb = cv2.GaussianBlur(cv2.warpAffine(a_pis, np.float32([[1, 0, -dist], [0, 1, dist]]), (w, h)), (0, 0), sig) * fs
+    out = np.where(sem[..., None], G, reg.astype(np.float32)) * (1 - sb * (1 - a_pis))[..., None]
+    for r in rets:
+        ai = _ret_pdf(Q, [r], X0, Y0, w, h, ss=8)
+        out = out * (1 - ai[..., None]) + T * (1 + rng.uniform(-q["tom_peca"], q["tom_peca"])) * ai[..., None]
+    # a pedra grande: nas faixas, a pedra limpa até a reta do PDF; fora delas fica como estava
+    blk = (a_blk > 0.01) & faixa
+    out = np.where(blk[..., None], out * (1 - a_blk[..., None]) + pedra * a_blk[..., None], out)
+    out = np.where(((a_blk > 0.01) & ~faixa)[..., None], reg.astype(np.float32), out)
+    res = img.copy()
+    res[Y0:Y1, X0:X1] = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    print(f"    pisantes: {len(rets)} retângulos do PDF em Bege Bahia (tom {tom.round().astype(int).tolist()}), com a sombra "
+          f"curta e a grama em volta; pedra grande do acesso: {n_mancha} px de manchas da vegetação antiga e a borda reta")
+    return res
+
+
+def curva_pedra_te(Q, img, q=None):
+    q = q or REVISAO_TE["curva"]
+    d = next(d for d in Q.desenhos if d.get("seqno") == q["seqno"])
+    cams = AJ.caminhos_pdf(d, Q.p2q, passos=64)
+    tudo = np.concatenate(cams)
+    X0, Y0 = np.maximum(np.floor(tudo.min(axis=0)).astype(int) - 24, 0)
+    X1, Y1 = np.minimum(np.ceil(tudo.max(axis=0)).astype(int) + 24, (Q.W, Q.H))
+    w, h = X1 - X0, Y1 - Y0
+    ss = 4
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    for c in cams:
+        if len(c) >= 3:
+            cv2.fillPoly(m, [np.int32(np.round((c - (X0, Y0)) * ss))], 255)
+    a = cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+    din = cv2.distanceTransform((m > 0).astype(np.uint8), cv2.DIST_L2, 5)
+    dout = cv2.distanceTransform((m == 0).astype(np.uint8), cv2.DIST_L2, 5)
+    s = cv2.resize((din - dout) / ss, (w, h), interpolation=cv2.INTER_AREA)       # px, positivo dentro da pedra
+    gy, gx = np.gradient(cv2.GaussianBlur(s, (0, 0), 1.5))
+    n = np.hypot(gx, gy) + 1e-6
+    nx, ny = (gx / n).astype(np.float32), (gy / n).astype(np.float32)               # a normal para dentro
+    reg = img[Y0:Y1, X0:X1].astype(np.float32)
+    ys, xs = np.mgrid[0:h, 0:w].astype(np.float32)
+    d0, dm = q["d0_px"], q["mancha_px"]
+
+    def espelho(fonte, linha):
+        """`fonte` em espelho sobre a linha de distância `linha` à curva (positiva dentro da pedra), do lado de cá dela."""
+        k = (2 * (linha - s)).astype(np.float32)
+        k = np.where((k > 0) if linha > 0 else (k < 0), k, 0).astype(np.float32)
+        return cv2.remap(fonte, xs + nx * k, ys + ny * k, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
+    verde = _verde(img[Y0:Y1, X0:X1])
+    fora = (s < -1.5) & (s > -(2 * d0 + 6))
+    kk = (2 * d0 + 9, 2 * d0 + 9)
+    frac = cv2.boxFilter((verde & fora).astype(np.float32), -1, kk, normalize=False) / \
+        np.maximum(cv2.boxFilter(fora.astype(np.float32), -1, kk, normalize=False), 1)
+    grama = frac > q["grama_min"]
+    perto_grama = cv2.dilate(grama.astype(np.uint8), np.ones((2 * dm + 9,) * 2, np.uint8)).astype(bool)
+    # 1. a pedra limpa: o que não é pedra (verde ou escuro: a pedra portuguesa não desce de ~155) a até `mancha_px` da
+    #    curva, junto à grama, vem em espelho da pedra mais para dentro
+    lum = reg.mean(axis=2)
+    mancha = (s > 0) & (s < dm) & (verde | (lum < q["escuro"])) & perto_grama
+    mancha = cv2.dilate(mancha.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) & (s > 0)
+    limpa = np.where(mancha[..., None], espelho(reg, dm + 3), reg)
+    # 2. as duas faixas junto à curva: a pedra de dentro e a grama de fora, em espelho; onde a grama de fora é estreita
+    #    (o espelho cai num pisante), a grama vem da vizinha (inpaint)
+    S = espelho(limpa, d0)
+    G = espelho(reg, -d0)
+    banda = (np.abs(s) < d0 + 1) & grama
+    ruim = banda & (a < 0.999) & ~_verde(np.clip(G, 0, 255).astype(np.uint8))
+    if ruim.any():
+        base = np.clip(np.where((banda & (a < 0.999))[..., None], G, reg), 0, 255).astype(np.uint8)
+        G = cv2.inpaint(base, (ruim | (banda & (s > -1))).astype(np.uint8), 3, cv2.INPAINT_TELEA).astype(np.float32)
+    novo = S * a[..., None] + G * (1 - a[..., None])
+    reg = np.where(banda[..., None], novo, limpa)
+    out = img.copy()
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    pedra portuguesa: a borda contra a grama na curva do PDF ({int(banda.sum())} px, faixa de {d0} px de cada "
+          f"lado; {int(ruim.sum())} px da grama de fora pela vizinha); {int(mancha.sum())} px de mancha junto à curva")
+    return out
+
+
+def projecao_cobertura_te(Q, img, q=None):
+    q = q or REVISAO_TE["projecao"]
+    pts = np.array([Q.p2q(x, y) for linha in q["linhas"] for x, y in linha])
+    X0, Y0 = (np.floor(pts.min(axis=0)) - 4).astype(int)
+    X1, Y1 = (np.ceil(pts.max(axis=0)) + 5).astype(int)
+    w, h, ss = X1 - X0, Y1 - Y0, q["ss"]
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    lw = max(1, int(round(q["larg_px"] * ss)))
+    n = 0
+    for linha in q["linhas"]:
+        for (ax, ay), (bx, by) in zip(linha[:-1], linha[1:]):
+            comp = np.hypot(bx - ax, by - ay)
+            t = 0.0
+            while t < comp:
+                t1 = min(comp, t + q["traco_pt"])
+                u = np.subtract(Q.p2q(ax + (bx - ax) * t / comp, ay + (by - ay) * t / comp), (X0, Y0)) * ss
+                v = np.subtract(Q.p2q(ax + (bx - ax) * t1 / comp, ay + (by - ay) * t1 / comp), (X0, Y0)) * ss
+                cv2.line(m, tuple(int(round(z)) for z in u), tuple(int(round(z)) for z in v), 255, lw, cv2.LINE_AA)
+                n += 1
+                t = t1 + q["vao_pt"]
+    a = cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255 * q["forca"]
+    paredes_pdf(Q)
+    a *= 1 - np.clip(cv2.dilate(Q._par[Y0:Y1, X0:X1], np.ones((3, 3), np.uint8)), 0, 1)       # nada sobre as paredes
+    out = img.copy()
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None]), 0,
+                                255).astype(np.uint8)
+    print(f"    projeção da cobertura: {len(q['linhas'])} linhas do PDF em tracejado cinza ({n} traços), sobre o granito")
+    return out
+
+
+def revisao_terreo_e(Q, img):
+    out = adega_porta_te(Q, img)
+    out = pisantes_te(Q, out)
+    out = curva_pedra_te(Q, out)
+    return projecao_cobertura_te(Q, out)
 
 
 # O 1º Pavimento (auditoria de 26/10, mapa `renders/POE642_CasaE_PH_1Pavimento_auditoria_2610.jpg`, e as regras aprovadas
@@ -1886,8 +2152,42 @@ def terreo_para_nublado():
     img = _bancadas(QT, img, BANCADAS_TER_E)
     img = paredes_e(QT, img)
     img = piscina_terreo_e(QT, img)
+    img = revisao_terreo_e(QT, img)                       # a revisão de 28/10 (adega, pisantes, curva, projeção)
     cv2.imwrite(str(c), img)
     return img
+
+
+def _nublar(t, W):
+    """O Térreo no nublado do 1º Pavimento (`entorno_esmaecido.NUBLADO`: desfoque leve, 80% da saturação, 70% de branco)."""
+    from entorno_esmaecido import NUBLADO as n
+    t = cv2.GaussianBlur(t.astype(np.float32), (0, 0), n["desfoque"] * W / 3840)
+    cinza = t.mean(axis=2, keepdims=True)
+    t = cinza + (t - cinza) * n["saturacao"]
+    return 255 - (255 - t) * (1 - n["clarear"])
+
+
+def _onde_terreo(Q):
+    """Onde a final do 1º Pavimento mostra o Térreo: o contexto (fora da pegada, sem o tracejado do lote; 0 a 1) e os
+    vazios (bool), onde o contexto vem multiplicado pelo X e pelo vidro."""
+    import opcoes_1pav_casae as O
+    from entorno_esmaecido import pegada
+    W = Q.W
+    base = cv2.imread(str(O.BASE_CIMA))
+    H = round(base.shape[0] * W / base.shape[1])
+    base = cv2.resize(base, (W, H), interpolation=cv2.INTER_AREA)
+    peg = pegada(base, O.FORA)
+    a = np.maximum(cv2.GaussianBlur(peg.astype(np.float32), (0, 0), 1.0), peg)
+    tracejado = (base.min(axis=2) < 225) & ~peg
+    return (1 - a) * ~tracejado, O.mascara_vazios(base) & (a > 0.5)
+
+
+def _trocar_nublado(Q, img, t_velho, t_novo):
+    f = img.astype(np.float32)
+    ctx, vaz = _onde_terreo(Q)
+    out = f + (t_novo - t_velho) * ctx[..., None]
+    raz = t_novo / np.maximum(t_velho, 1)
+    out[vaz] = (f * raz)[vaz]
+    return np.clip(np.round(out), 0, 255).astype(np.uint8), ctx, vaz
 
 
 def nublado_novo(Q, img):
@@ -1895,29 +2195,26 @@ def nublado_novo(Q, img):
     final mostra o Térreo: fora da pegada (o px é o contexto antigo) e nos vazios (o contexto multiplicado pelo X e pelo
     vidro: entra a razão novo/antigo)."""
     import opcoes_1pav_casae as O
-    from entorno_esmaecido import NUBLADO, contexto_render, pegada
-    W = Q.W
-    base = cv2.imread(str(O.BASE_CIMA))
-    H = round(base.shape[0] * W / base.shape[1])
-    base = cv2.resize(base, (W, H), interpolation=cv2.INTER_AREA)
-    peg = pegada(base, O.FORA)
-    a = np.maximum(cv2.GaussianBlur(peg.astype(np.float32), (0, 0), 1.0), peg)
-    t_velho = contexto_render(O.TERREO, O.BASE_TERREO, W, **NUBLADO)
-    n = NUBLADO
-    t = cv2.GaussianBlur(terreo_para_nublado().astype(np.float32), (0, 0), n["desfoque"] * W / 3840)
-    cinza = t.mean(axis=2, keepdims=True)
-    t = cinza + (t - cinza) * n["saturacao"]
-    t_novo = 255 - (255 - t) * (1 - n["clarear"])
-    tracejado = (base.min(axis=2) < 225) & ~peg
-    f = img.astype(np.float32)
-    ctx = (1 - a) * ~tracejado
-    out = f + (t_novo - t_velho) * ctx[..., None]
-    vaz = O.mascara_vazios(base) & (a > 0.5)
-    raz = t_novo / np.maximum(t_velho, 1)
-    out[vaz] = (f * raz)[vaz]
+    from entorno_esmaecido import NUBLADO, contexto_render
+    t_velho = contexto_render(O.TERREO, O.BASE_TERREO, Q.W, **NUBLADO)
+    out, ctx, vaz = _trocar_nublado(Q, img, t_velho, _nublar(terreo_para_nublado(), Q.W))
     print(f"    o Térreo nublado em volta refeito com o Térreo novo: {int((ctx > 0.5).sum())} px de contexto e "
           f"{int(vaz.sum())} px nos vazios")
-    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+    return out
+
+
+def nublado_revisao_te(Q, img):
+    """Sobre a final do 1º Pavimento: o nublado passa a mostrar a revisão de 28/10 do Térreo (os pisantes, a curva da
+    pedra portuguesa, o tracejado da projeção; a adega fica sob a pegada). Entra só a diferença entre a fonte do nublado
+    em cache (sem a revisão) e ela com a revisão, que fica no cache."""
+    c = ETAPAS / "Terreo_nublado_fonte.png"
+    antes = cv2.imread(str(c))
+    depois = revisao_terreo_e(QuadroE("Terreo"), antes)
+    out, ctx, _ = _trocar_nublado(Q, img, _nublar(antes, Q.W), _nublar(depois, Q.W))
+    cv2.imwrite(str(c), depois)
+    mud = (np.abs(out.astype(np.int16) - img.astype(np.int16)).max(axis=2) > 2).sum()
+    print(f"    o Térreo nublado com a revisão de 28/10 do Térreo: {int(mud)} px mudados")
+    return out
 
 
 # Os traços do render no Bege Bahia da varanda grande, rente aos guarda-corpos (usuário, 28/10/26: "CORRIJA ESSES
@@ -2000,6 +2297,8 @@ def passos_1pav(Q):
 
 
 PASSOS = {"Subsolo": passos_subsolo, "Terreo": passos_terreo, "1Pavimento": passos_1pav}
+# as etapas que só vão sobre a final (`--sobre-final`): numa rodada do zero, o nublado já vem com a revisão do Térreo
+SO_SOBRE_FINAL = {"1Pavimento": {"nublado_revisao": nublado_revisao_te}}
 
 
 def final_3840(chave, de=None, ate=None, salvar=True):
@@ -2018,13 +2317,26 @@ def final_3840(chave, de=None, ate=None, salvar=True):
         if ate == nome:
             return img
     if salvar:
-        destino = CASA / "renders" / PAV_E[chave]["final"]
-        cv2.imwrite(str(destino), img)
-        cv2.imwrite(str(destino.with_name(destino.stem + "_preview.jpg")),
-                    cv2.resize(img, (2000, round(2000 * img.shape[0] / img.shape[1])), interpolation=cv2.INTER_AREA),
-                    [cv2.IMWRITE_JPEG_QUALITY, 90])
-        print(f"[fim] {destino}")
+        gravar_final(chave, img)
     return img
+
+
+def gravar_final(chave, img):
+    destino = CASA / "renders" / PAV_E[chave]["final"]
+    cv2.imwrite(str(destino), img)
+    cv2.imwrite(str(destino.with_name(destino.stem + "_preview.jpg")),
+                cv2.resize(img, (2000, round(2000 * img.shape[0] / img.shape[1])), interpolation=cv2.INTER_AREA),
+                [cv2.IMWRITE_JPEG_QUALITY, 90])
+    print(f"[fim] {destino}")
+
+
+def sobre_final(chave, etapa):
+    """Uma etapa aplicada direto na final aprovada (a revisão de 28/10 do Térreo: a final em cache é anterior a ela)."""
+    Q = QuadroE(chave)
+    f = dict(PASSOS[chave](Q), **{n: (lambda im, g=g: g(Q, im)) for n, g in SO_SOBRE_FINAL.get(chave, {}).items()})[etapa]
+    img = cv2.imread(str(CASA / "renders" / PAV_E[chave]["final"]))
+    print(f"[{etapa}] sobre a final")
+    gravar_final(chave, f(img))
 
 
 if __name__ == "__main__":
@@ -2032,5 +2344,9 @@ if __name__ == "__main__":
     ap.add_argument("pavimento", choices=list(PAV_E))
     ap.add_argument("--de", default=None)
     ap.add_argument("--ate", default=None)
+    ap.add_argument("--sobre-final", default=None, help="aplica só esta etapa, direto na final aprovada")
     args = ap.parse_args()
-    final_3840(args.pavimento, de=args.de, ate=args.ate)
+    if args.sobre_final:
+        sobre_final(args.pavimento, args.sobre_final)
+    else:
+        final_3840(args.pavimento, de=args.de, ate=args.ate)
