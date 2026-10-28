@@ -3434,3 +3434,15 @@ Antes e depois:
 - `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_nicho_cabine_antes_depois.jpg`.
 
 Pranchas e PDFs das Casas D e E refeitos.
+
+### Revisão de 28/10/26 do Subsolo da Casa E: contorno da piscina, barra de alongamento e batentes do elevador
+
+O usuário: "VAMOS REVISAR O SUBSOLO DA CASA E". A revisão contra o PDF e as regras achou 3 inconformidades, apresentadas antes de alterar (folha com a final e o PDF lado a lado). A resposta: "ITEM 1: OK / ITEM 2: NÃO É TV É UMA BARRA COM BARRAS AO MEIO PARA ALONGAMENTO / ITEM 3: OK".
+
+1. **Contorno da piscina.** No PDF, a borda branca (11,4 pt) contorna a piscina inteira: desce pela esquerda até o fim, passa sob a parede de baixo, sobe em degrau e segue sob a parte da direita até o degrau da sauna. Ela é pintada por cima da parede, depois dela. Na final, a borda de Bege Bahia da esquerda parava no meio e o canto todo era parede cinza, num bloco grosso. Agora a borda vai em Bege Bahia até o fim, como o resto, e a parede fica só nas faixas cinza do desenho, entre a água e a borda. Do lado de fora, a hachura chega até a pedra, sem a franja da parede antiga.
+2. **Barra de alongamento** (não é TV). Junto à parede do DCE, ia só a barra escura do meio, e parecia uma TV solta no vinílico. Agora vai a moldura do PDF (ARQ_MARCENARIA) em madeira, presa na parede, e as barras do meio cromadas, como tubos, com os traços finos e a sombra curta.
+3. **Batentes do elevador.** O da esquerda era um toco marrom largo, com uma mancha escura ao lado, e o da direita quase não aparecia. Agora os dois são finos e iguais, no cinza das paredes, como no PDF e na entrada do elevador do Subsolo da Casa D, com o vinílico inteiro em volta.
+
+Conferido sem inconformidade: circulação e depósito; DCE, WC DCE 2 e o box; portas e soleiras; aparelhos da academia; sauna, ambiente e vestiário; as duas casas de máquinas; cabine e rótulo do elevador; escada.
+
+Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_revisao_{piscina_contorno,barra_alongamento,elevador_batentes}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.

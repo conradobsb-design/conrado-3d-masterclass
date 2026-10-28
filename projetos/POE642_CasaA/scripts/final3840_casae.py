@@ -392,14 +392,15 @@ PAREDES_E = {"cor": (80, 80, 80), "camadas": ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS
              "pilar_cor": (8, 8, 8), "pilar_camadas": ("EST - Pilar", "EST_PILAR")}
 
 
-def paredes_e(Q, img, q=None, extra=None, pilares=True, sempre=(), ini=None, tirar=(), por=()):
+def paredes_e(Q, img, q=None, extra=None, pilares=True, sempre=(), ini=None, tirar=(), por=(), brancos=()):
     """`extra`: a máscara (0 a 1) de outras paredes, somada por cima, ou um filtro dos desenhos do PDF, que entram na
     mesma máscara das paredes (sem a conta do escuro). `sempre`: caixas (pt) onde toda peça escura do PDF é parede, mesmo
     onde a final a mostra clara (a piscina do Subsolo, onde o render pintou água sobre as pontas das paredes). `ini`: a
     final aprovada sem os rótulos; com ela, a sobra da parede antiga do render em volta da nova (os px a até `folga_px`
     que nenhuma etapa redesenhou e que são mais escuros que o piso de perto, `sobra`) sai também, refeita pelo piso.
     `tirar`: retângulos (pt) cujas peças escuras de dentro saem; `por`: retângulos (pt) que entram na parede (os dentes
-    das pontas de parede trocados pela face reta)."""
+    das pontas de parede trocados pela face reta); `brancos`: retângulos (pt) que o PDF pinta de branco por cima da
+    parede, depois dela (o contorno de baixo da piscina, `PISCINA_E["contorno"]`): saem da máscara e ficam como estão."""
     q = q or PAREDES_E
     im = img.astype(np.int16)
     preto = (im.max(axis=2) < q["escuro"]) & ((im.max(axis=2) - im.min(axis=2)) <= q["croma"])
@@ -464,6 +465,11 @@ def paredes_e(Q, img, q=None, extra=None, pilares=True, sempre=(), ini=None, tir
         a[fy:fy1] = cv2.resize(m, (Q.W, fy1 - fy), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
     if extra is not None and not callable(extra):
         a = np.maximum(a, extra)
+    if brancos:
+        bx0, by0, bx1, by1 = F.ret_q(Q, (min(r[0] for r in brancos), min(r[1] for r in brancos),
+                                         max(r[2] for r in brancos), max(r[3] for r in brancos)))
+        bx0, by0, bx1, by1 = bx0 - 2, by0 - 2, bx1 + 2, by1 + 2
+        a[by0:by1, bx0:bx1] = np.clip(a[by0:by1, bx0:bx1] - _ret_pdf(Q, brancos, bx0, by0, bx1 - bx0, by1 - by0), 0, 1)
     k = 2 * q["folga_px"] + 1
     perto = cv2.dilate((a > 0.02).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
     franja = perto & (a < 0.5) & (im.max(axis=2) < q["franja"][0]) & ((im.max(axis=2) - im.min(axis=2)) <= q["franja"][1])
@@ -857,6 +863,17 @@ def _ret_local(Q, r, X0, Y0, w, h, ss=8):
     return cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
 
 
+def _ret_pdf(Q, rs, X0, Y0, w, h, ss=4):
+    """Os retângulos rs (pt) na janela, rasterizados como os preenchimentos do PDF (`Q.preencher` e as peças de
+    `paredes_e`: fillPoly a `ss` x, com o mesmo arredondamento), para que uma borda comum com eles caia no mesmo subpixel
+    e a subtração não deixe linha."""
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    for r in rs:
+        c = np.float32([Q.p2q(r[0], r[1]), Q.p2q(r[2], r[1]), Q.p2q(r[2], r[3]), Q.p2q(r[0], r[3])]) - (X0, Y0)
+        cv2.fillPoly(m, [np.int32(np.round(c * ss))], 255)
+    return cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+
+
 def _uniao(Q, rs, X0, Y0, w, h, ss=8):
     """Os retângulos rs (pt) juntos na janela, numa máscara só (em `ss` x, reduzida uma vez: sem a junta a 50% entre
     retângulos vizinhos, que deixava ver o fundo)."""
@@ -895,6 +912,15 @@ PISCINA_E = {"caixa_pt": (688.0, 675.0, 1004.0, 1124.0), "agua_fill": (0.5, 0.87
              # o degrau passam por cima deles (sem eles, a parede é reta)
              "dentes": [(807.6, 957.1, 812.2, 958.8), (815.0, 957.1, 819.0, 958.8)],
              "tom_bege": (190, 213, 231), "semente_bege": 2831,
+             # o contorno de baixo (revisão de 28/10, item 1, OK do usuário): no PDF, a faixa branca da borda (os
+             # brancos da ARQ_PAREDE pintados depois do cinza, por cima dele) desce pela esquerda até o fim, passa sob a
+             # parede de baixo, sobe em degrau e segue sob a parte da direita até o degrau da sauna; ia como parede
+             # (cinza, num bloco grosso). Em Bege Bahia, como o resto da borda; a parede fica só nas faixas cinza do
+             # desenho (entre a água e a borda). `fundo_pt`: a janela da piscina desce até o fim dele
+             # (nas coordenadas exatas do PDF: as bordas comuns com a parede caem no mesmo subpixel, `_ret_pdf`)
+             "contorno": [(694.2426, 1091.0795, 705.5812, 1130.0304), (705.5812, 1118.6918, 807.6286, 1130.0304),
+                          (796.29, 1096.1309, 807.6286, 1118.6918), (807.6286, 1096.1309, 888.915, 1107.4695)],
+             "fundo_pt": 1132.0, "franja": 0.88,
              "degrau": [(815.0, 957.1, 890.0, 968.5), (877.6, 968.5, 890.0, 1096.1)],     # +1,1 pt: junta fechada
              "vidros": [(812.2, 693.5, 815.0, 945.8), (812.2, 957.1, 815.0, 1090.3)],
              "vidro": {"cor": (208, 214, 212), "alfa": 0.55, "fio": (118, 124, 126), "larg_fio": 0.45},
@@ -927,6 +953,8 @@ def piscina_e(Q, img):
     from texturas import textura
     q = PISCINA_E
     X0, Y0, X1, Y1 = F.ret_q(Q, q["caixa_pt"])
+    h0 = Y1 - Y0                                            # a água e o degrau: os desenhos na janela de antes
+    Y1 = F.ret_q(Q, q["caixa_pt"][:3] + (q["fundo_pt"],))[3]
     w, h = X1 - X0, Y1 - Y0
     out = img.astype(np.float32)
     reg = out[Y0:Y1, X0:X1]
@@ -947,7 +975,13 @@ def piscina_e(Q, img):
     par = paredes_pdf(Q)[Y0:Y1, X0:X1].astype(np.float32)
     folga = 0.8                                             # pt: o antialias dos dentes também passa (a parede cobre o de cima)
     par = par * (1 - _uniao(Q, [(a - folga, b - folga, c + folga, d + folga) for a, b, c, d in q["dentes"]], X0, Y0, w, h))
-    bege = np.clip(_uniao(Q, q["bege"], X0, Y0, w, h) - par, 0, 1)
+    # o contorno de baixo: o branco do PDF por cima da parede (a borda inteira, a parede só onde ela não passa)
+    # (junto dele, a parede pela área do PDF, não pela máscara de >5 %: senão a linha da emenda com a coluna de cima e as
+    # beiras do contorno ficavam em parte como parede)
+    cont = _ret_pdf(Q, q["contorno"], X0, Y0, w, h)
+    junto =cv2.dilate((cont > 0).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    par = np.clip(np.where(junto, Q._par[Y0:Y1, X0:X1], par) - cont, 0, 1)
+    bege = np.maximum(np.clip(_uniao(Q, q["bege"], X0, Y0, w, h) - par, 0, 1), cont)
     degrau = np.clip(_uniao(Q, q["degrau"], X0, Y0, w, h) - par, 0, 1)
     vidro = _uniao(Q, q["vidros"], X0, Y0, w, h)
     agua = np.clip(agua - bege - degrau - vidro - par, 0, 1)
@@ -956,14 +990,27 @@ def piscina_e(Q, img):
     dist = cv2.distanceTransform((beira < 0.5).astype(np.uint8), cv2.DIST_L2, 5)
     fs, alc = q["sombra"]
     sombra = 1 - fs * np.exp(-dist / alc)
-    A = agua_e(Q, h, w, q["semente"]) * sombra[..., None]
+    A = np.pad(agua_e(Q, h0, w, q["semente"]), ((0, h - h0), (0, 0), (0, 0)), mode="edge") * sombra[..., None]
     # as bordas em Bege Bahia (a foto da biblioteca, no tom dos pisos de Bege Bahia)
     T = textura("bege_bahia", Q.px_m, h, w, semente=q["semente_bege"]).astype(np.float32)
     Bg = T / T.reshape(-1, 3).mean(axis=0) * np.float32(q["tom_bege"])
     # o degrau da sauna no travertino do piso dela (o tom da mediana do piso de travertino em volta)
     trav = legenda(Q, [(202, 217, 220)])[Y0:Y1, X0:X1]
     tom_t = np.median(reg[trav], axis=0) if trav.any() else np.float32(TRAVERTINO_E["tom"])
-    Tt = travertino_e(Q, h, w, q["semente"] + 7)[..., None] * tom_t
+    Tt = np.pad(travertino_e(Q, h0, w, q["semente"] + 7), ((0, h - h0), (0, 0)), mode="edge")[..., None] * tom_t
+    # a franja do render em volta do contorno de baixo (a parede antiga, preta e borrada, passava ~2 px dele): refeita
+    # pelo fundo de fora antes da borda, como a sobra da parede antiga em `paredes_e`
+    cm = cont > 0.02
+    lum = reg.mean(axis=2)
+    perto = cv2.dilate(cm.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) & ~cm & (agua < 0.02) & \
+        (bege < 0.02) & (degrau < 0.02) & (par < 0.02)
+    claro = cv2.dilate(np.where(perto, lum, 0).astype(np.float32), np.ones((7, 7), np.uint8))
+    franja = perto & (lum < q["franja"] * claro)
+    fundo = cv2.inpaint(np.clip(reg, 0, 255).astype(np.uint8), (franja | cm).astype(np.uint8), 3, cv2.INPAINT_TELEA)
+    sob = franja | cm                                       # na beira do contorno, o fundo de fora sob o antialias
+    reg[sob] = fundo[sob].astype(np.float32)
+    print(f"    piscina: o contorno de baixo em Bege Bahia ({cont.sum() / Q.px_m ** 2:.2f} m²), {int(franja.sum())} px da "
+          f"franja da parede antiga refeitos")
     reg[:] = reg * (1 - agua[..., None]) + A * agua[..., None]
     reg[:] = reg * (1 - bege[..., None]) + Bg * bege[..., None]
     reg[:] = reg * (1 - degrau[..., None]) + Tt * degrau[..., None]
@@ -1090,18 +1137,24 @@ ACADEMIA_E = {
                   ("bolas e acessórios", (1019.0, 689.0, 1111.0, 741.0), "bolas"),
                   ("barra de parede", (1137.1, 693.5, 1222.1, 705.3), "barra"),
                   ("estação de musculação", (1178.7, 779.0, 1283.2, 895.9), "estacao"),
-                  ("prateleira junto ao DCE", (1449.3, 845.4, 1503.1, 850.5), "prateleira"),
+                  ("barra de alongamento junto ao DCE", (1449.3, 845.4, 1503.1, 850.5), "alongamento"),
                   ("suporte de halteres", (1691.3, 845.1, 1720.9, 935.8), "halteres"),
                   ("supino com barra", (1400.2, 981.1, 1497.7, 1057.6), "supino"),
                   ("banco regulável", (1546.2, 973.9, 1575.4, 1057.7), "banco")],
     "bolas": [(1045.5, 714.9, 19.4), (1083.9, 714.9, 19.4)],                       # centro e raio (pt)
+    # a barra de alongamento junto ao DCE (revisão de 28/10, item 2; usuário: "NÃO É TV É UMA BARRA COM BARRAS AO MEIO
+    # PARA ALONGAMENTO"): ia só a barra do meio, escura, e parecia uma TV solta no vinílico. Agora, a moldura do PDF (a
+    # ARQ_MARCENARIA em volta, presa na parede) em madeira, e as barras do meio (a ARQ_ MOB COMUM) cromadas, cada uma
+    # como um tubo
+    "moldura": {"alongamento": ("ARQ_MARCENARIA", (1440.8, 838.1, 1508.8, 855.1), "madeira")},
     "zona_m": 0.45, "ss": 6, "folga_pt": 1.0,
     "materiais": {                                            # BGR, o volume e o brilho
         "estrutura": ((72, 74, 78), "bisel", 0.0), "tubo": ((80, 82, 86), "cilindro", 0.25),
         "estofado": ((42, 42, 45), "almofada", 0.0), "borracha": ((36, 36, 38), "bisel", 0.0),
         "cromo": ((178, 180, 184), "cilindro", 0.55), "aluminio": ((156, 158, 162), "bisel", 0.0),
         "lona": ((38, 38, 40), "lona", 0.0), "painel": ((54, 56, 60), "bisel", 0.0), "tela": ((92, 74, 54), "plano", 0.0),
-        "botao": ((150, 152, 155), "plano", 0.0), "bola": ((198, 200, 202), "esfera", 0.0)},
+        "botao": ((150, 152, 155), "plano", 0.0), "bola": ((198, 200, 202), "esfera", 0.0),
+        "madeira": ((104, 152, 196), "bisel", 0.0)},
     "traco": {"cor": (26, 26, 28), "alfa": 0.55, "larg_px": 0.35, "alfa_bola": 0.18},
     "bisel": (0.40, 0.9), "sombra": [(2.2, 1.6, 0.40), (3.5, 4.0, 0.14)]}       # (desloc px, sigma px, força)
 
@@ -1139,6 +1192,8 @@ def _material_ap(tipo, c, maior):
         return "cromo" if e < 0.035 and L < 0.35 else "estrutura"
     if tipo == "barra":
         return "cromo" if e < 0.03 else "estrutura"
+    if tipo == "alongamento":                              # as barras do meio (a moldura vai pela camada dela)
+        return "cromo"
     if tipo == "bolas":
         return "borracha" if a > 0.003 else "estrutura"
     return "estrutura"
@@ -1191,16 +1246,23 @@ def aparelhos_e(Q, img):
     for nome, caixa, tipo in q["aparelhos"]:
         x0p, y0p, x1p, y1p = caixa
         fo = q["folga_pt"]
-        ds = sorted([d for d in Q.desenhos if d.get("layer") == "ARQ_ MOB COMUM" and d["rect"].x0 >= x0p - fo
-                     and d["rect"].x1 <= x1p + fo and d["rect"].y0 >= y0p - fo and d["rect"].y1 <= y1p + fo],
-                    key=lambda d: d.get("seqno", 0))
-        X0, Y0, X1, Y1 = F.ret_q(Q, (x0p - 8, y0p - 8, x1p + 8, y1p + 8))
+        pegar = [("ARQ_ MOB COMUM", caixa)]
+        mold = q["moldura"].get(tipo)                    # a moldura de outra camada em volta (a barra de alongamento)
+        if mold:
+            pegar.append(mold[:2])
+        ds = sorted([d for camada, (a, b, c, e) in pegar for d in Q.desenhos if d.get("layer") == camada and
+                     d["rect"].x0 >= a - fo and d["rect"].x1 <= c + fo and d["rect"].y0 >= b - fo and
+                     d["rect"].y1 <= e + fo], key=lambda d: d.get("seqno", 0))
+        jx0, jy0 = min(r[1][0] for r in pegar), min(r[1][1] for r in pegar)
+        jx1, jy1 = max(r[1][2] for r in pegar), max(r[1][3] for r in pegar)
+        X0, Y0, X1, Y1 = F.ret_q(Q, (jx0 - 8, jy0 - 8, jx1 + 8, jy1 + 8))
         w, h = X1 - X0, Y1 - Y0
         W_, H_ = w * S, h * S
         lab = np.zeros((H_, W_), np.int32)
         lin = np.zeros((H_, W_), np.uint8)
         lb = np.zeros((H_, W_), np.uint8)                                    # os traços dentro das bolas
         k = 0
+        da_moldura = [False]                                                 # por peça: se é da camada da moldura
         for d in ds:
             cs = [np.int32(np.round((c - (X0, Y0)) * S)) for c in Q.caminhos(d)]
             if d["type"] in ("f", "fs"):
@@ -1208,6 +1270,7 @@ def aparelhos_e(Q, img):
                 m = np.zeros((H_, W_), np.uint8)
                 cv2.fillPoly(m, [c for c in cs if len(c) >= 3], 1)
                 lab[m > 0] = k
+                da_moldura.append(bool(mold) and d.get("layer") == mold[0])
             if d["type"] in ("s", "fs"):
                 for c in cs:
                     cv2.polylines(lin, [c], False, 255, max(1, round(tr["larg_px"] * S)), cv2.LINE_AA)
@@ -1246,7 +1309,11 @@ def aparelhos_e(Q, img):
                 bola = None
             if bola is not None:
                 continue                                                     # as bolas vão inteiras, depois
-            mat = _material_ap(tipo, c, i == maior and tipo == "esteira")
+            pecas_cel = lab[by:by + bh, bx:bx + bw][sub]
+            if mold and da_moldura[int(np.bincount(pecas_cel).argmax())]:
+                mat = mold[2]
+            else:
+                mat = _material_ap(tipo, c, i == maior and tipo == "esteira")
             base, modo, brilho = mats[mat]
             sh = _sombreado(modo, sub, d, brilho, q, ss_px_m) if min(bw, bh) >= 3 else np.ones(sub.shape, np.float32)
             reg = cor[by:by + bh, bx:bx + bw]
@@ -1340,7 +1407,9 @@ PORTAS_E = {
                 "montante_pt": 2.8}],
     # o piso refeito junto às esquadrias onde o render deixou a peça antiga do lado de dentro (a barra cinza da janela de
     # correr do DCE, embaixo dela, no granito)
-    "limpar": [("granito", (1493.1, 693.5, 1555.5, 699.5))],
+    # e o vinílico diante da porta do elevador (revisão de 28/10, item 3): a faixa de 3,6 pt sob a face da parede fica fora
+    # da legenda do vinílico (a linha do contrapiso do PDF), e o toco e a mancha escura do render ficavam nela
+    "limpar": [("granito", (1493.1, 693.5, 1555.5, 699.5)), ("vinílico", (1750.0, 1006.1, 1810.0, 1017.0))],
     "folha": (238, 238, 236), "contorno": (88, 90, 92), "larg_contorno": 0.5, "sombra": (0.26, 1.0, 0.9),
     "vidro": (218, 214, 204), "vidro_face": (104, 108, 112), "vidro_px": 1.4, "vidro_face_px": 0.45,
     "zona_pt": 5.7}
@@ -1564,8 +1633,15 @@ def vestiario_e(Q, img):
 # revestimento das faces (os preenchimentos escuros da ARQ_REVESTIMENTOS, 0,57 pt, que o PDF desenha como parte da
 # parede: sem elas o topo do toco saía em degrau e as paredes ficavam mais finas que o desenho); na ponta da parede da
 # sauna junto à porta, o dente de 1,4 pt (o encaixe do batente) sai e a face de baixo segue reta até a porta.
+# Na porta do elevador (revisão de 28/10, item 3, OK do usuário), os dois batentes do PDF (as tiras cinza de 1,4 pt da
+# ARQ_PAREDE que descem da face da parede para a academia), finos e iguais, como na entrada do elevador do Subsolo da
+# Casa D: o render só desenhava o da esquerda, um toco marrom largo com uma mancha escura ao lado, e o da direita quase
+# sumia (a final os mostrava claros e as peças ficavam de fora). O vinílico em volta deles é refeito antes, nos pisos
+# (`PORTAS_E["limpar"]`).
 PAREDES_SUB_E = dict(PAREDES_E, camadas=PAREDES_E["camadas"] + ("ARQ_REVESTIMENTOS",),
-                     tirar=[(1000.38, 957.12, 1008.89, 958.53)], por=[(999.19, 957.12, 1008.89, 957.68)])
+                     tirar=[(1000.38, 957.12, 1008.89, 958.53)],
+                     por=[(999.19, 957.12, 1008.89, 957.68),
+                          (1758.7, 1005.3, 1760.1, 1014.1), (1799.8, 1005.3, 1801.2, 1014.1)])
 
 
 # A borda direita da cabine do elevador sob o rótulo antigo (o ELEVADOR, que agora vai ao centro: o "R" dele cobria a
@@ -1595,7 +1671,8 @@ def passos_subsolo(Q):
         # as cabines do vestiário e a divisória entre elas (a ARQ - Parede, que a E10 não pegava), na mesma máscara
         ("paredes", lambda im: paredes_e(Q, im, q=PAREDES_SUB_E, extra=lambda d: d.get("layer") == "ARQ - Parede",
                                          sempre=[PISCINA_E["caixa_pt"]], ini=inicial("Subsolo"),
-                                         tirar=PAREDES_SUB_E["tirar"], por=PAREDES_SUB_E["por"])),
+                                         tirar=PAREDES_SUB_E["tirar"], por=PAREDES_SUB_E["por"],
+                                         brancos=PISCINA_E["contorno"])),
         ("vestiario", lambda im: vestiario_e(Q, im)),
         ("aparelhos", lambda im: aparelhos_e(Q, im)),
         ("portas", lambda im: portas_e(Q, im)),
