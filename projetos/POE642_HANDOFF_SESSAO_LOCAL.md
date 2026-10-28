@@ -3569,3 +3569,11 @@ O usuário: "ok, pode alargar e tirar a mancha"; e, enquanto isso: "por que não
 Antes e depois (o antes é a entrega anterior, b5d85bc): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_simetrico_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
 
 **Aprovado** (28/10/26): "pode deixar assim, está aprovado", o sofá da varanda simétrico como está (e2d6c84), com os 0,97 m de fundo (sem estreitar o assento do meio). O resto do Térreo e o 1º Pavimento da Casa E seguem aguardando a validação.
+
+### Pedido de 28/10/26: sofá da varanda no fundo do anterior (Térreo da Casa E)
+
+O usuário: "o sofá ficou nas dimensões do anterior?". Medido na planta: o anterior tinha ≈ 3,45 x 1,19 m (o PDF, 3,39 x 1,17 m), e o simétrico ≈ 3,35 x 0,95 m, no comprimento do PDF e mais raso (o sofá da sala íntima, com as duas pontas, tem 4,0 m e foi reduzido inteiro). Resposta do usuário: "pode aumentar o sofá para ter a mesma altura, preservando a proporcionalidade".
+- **Sofá da varanda.** Aumentado na mesma proporção até o fundo do anterior (1,17 m, o do PDF): fica com 4,07 x 1,17 m, centrado no lugar do sofá do PDF. Passa uns 30 cm de cada lado do sofá anterior; em volta continua livre: o brise à esquerda fica a ~0,85 m, o guarda-corpo de vidro à direita a ~0,55 m e o banco embaixo a ~0,8 m; o encosto fica na mesma linha, abaixo do rótulo da varanda, como antes.
+- O sofá fica sob a laje do 1º Pavimento: o Térreo nublado não muda.
+
+Antes e depois (o antes é a entrega anterior, 3e0b48c): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_fundo_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
