@@ -2822,6 +2822,7 @@ def terreo_para_nublado():
     img = paredes_e(QT, img)
     img = piscina_terreo_e(QT, img)
     img = revisao_terreo_e(QT, img)       # a revisão de 28/10 (adega, pisantes, curva, varanda; sem as projeções)
+    img = poltronas_living_te(QT, img)    # as poltronas do living no modelo da sala íntima (28/10)
     cv2.imwrite(str(c), img)
     return img
 
@@ -2883,6 +2884,20 @@ def nublado_revisao_te(Q, img):
     cv2.imwrite(str(c), depois)
     mud = (np.abs(out.astype(np.int16) - img.astype(np.int16)).max(axis=2) > 2).sum()
     print(f"    o Térreo nublado com a revisão de 28/10 do Térreo: {int(mud)} px mudados")
+    return out
+
+
+def nublado_poltronas_te(Q, img):
+    """Sobre a final do 1º Pavimento (usuário, 28/10/26: "pode refazer o nublado"): o Térreo nublado passa a mostrar as
+    poltronas novas do living (`poltronas_living_te`), no lugar das bouclé. Entra só a diferença entre a fonte do nublado
+    em cache e ela com as poltronas trocadas, que fica no cache."""
+    c = ETAPAS / "Terreo_nublado_fonte.png"
+    antes = cv2.imread(str(c))
+    depois = poltronas_living_te(QuadroE("Terreo"), antes)
+    out, _, _ = _trocar_nublado(Q, img, _nublar(antes, Q.W), _nublar(depois, Q.W))
+    cv2.imwrite(str(c), depois)
+    mud = (np.abs(out.astype(np.int16) - img.astype(np.int16)).max(axis=2) > 2).sum()
+    print(f"    o Térreo nublado com as poltronas novas do living: {int(mud)} px mudados")
     return out
 
 
@@ -3252,7 +3267,7 @@ PASSOS = {"Subsolo": passos_subsolo, "Terreo": passos_terreo, "1Pavimento": pass
 # as etapas que só vão sobre a final (`--sobre-final`): numa rodada do zero, o nublado já vem com a revisão do Térreo
 SO_SOBRE_FINAL = {"1Pavimento": {"nublado_revisao": nublado_revisao_te, "nublado_tracejados": nublado_tracejados_te,
                                  "tracejados_final": tracejados_1p_sobre_final, "sofa": sofa_sala_intima_1p,
-                                 "poltrona_master": poltrona_master_1p},
+                                 "poltrona_master": poltrona_master_1p, "nublado_poltronas": nublado_poltronas_te},
                   "Terreo": {"seta_hall": seta_rotulo_hall_te, "tracejados_final": tracejados_sobre_final_te,
                              "vao_servico": vao_rotulo_servico_te, "poltronas_living": poltronas_living_sobre_final_te}}
 
