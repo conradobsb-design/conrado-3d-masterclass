@@ -3577,3 +3577,12 @@ O usuário: "o sofá ficou nas dimensões do anterior?". Medido na planta: o ant
 - O sofá fica sob a laje do 1º Pavimento: o Térreo nublado não muda.
 
 Antes e depois (o antes é a entrega anterior, 3e0b48c): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_fundo_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
+
+### Pedido de 28/10/26: sofá da varanda um pouco menor e com sombra leve (Térreo da Casa E)
+
+O usuário: "diminua um pouco o tamanho" e "jogue um leve efeito de sombra para mostrar que o sofá está integrado ao piso".
+- **Tamanho.** 10% menor, na mesma proporção: 3,67 x 1,06 m (antes 4,07 x 1,17 m; o PDF tem 3,39 x 1,17 m), com o encosto na mesma linha e centrado no lugar do sofá do PDF.
+- **Sombra.** A mesma sombra das poltronas novas do living (curta, para baixo e para a esquerda, mais a de contato), mais fraca (45% e 30%, contra 60% e 30% nas poltronas) e suave, sem borda dura. Na primeira prova ela saía cortada num retângulo, porque o desfoque ficava preso à caixa do sofá; o sofá passou a ir com uma margem em volta.
+- O sofá fica sob a laje do 1º Pavimento: o Térreo nublado não muda.
+
+Antes e depois (o antes é a entrega anterior, 24743ab): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_sombra_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.

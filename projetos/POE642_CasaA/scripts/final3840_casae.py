@@ -2849,15 +2849,19 @@ def poltronas_living_sobre_final_te(Q, img):
 # direita espelhado, com o braço e as almofadas (usuário: "por que não pegar todo o modulo da direita e espelhar para a
 # esquerda, usando as almofadas?"). No Térreo, ele vai no fundo do sofá do PDF (`caixa`, px da final: 1,17 m, o do sofá
 # anterior), na mesma proporção, centrado no comprimento (usuário: "pode aumentar o sofá para ter a mesma altura,
-# preservando a proporcionalidade"; fica com ~4,1 m, mais que os 3,4 m do PDF), com o encosto para cima, sem sombra (o
-# contorno vem da beirada do estofado, escurecida em `beirada` até `beirada_px`). O sofá antigo sai com a sombra dele e
-# o halo claro de cima (`buraco`, px da final, com a borda esfumada em `esfuma_px`): o Bege Bahia de fora, refletido no
-# lado mais perto do retângulo (nos cantos, os dois lados misturados junto à diagonal, em `canto_px`).
+# preservando a proporcionalidade"), e depois um pouco menor (`fundo_px`, 1,06 m; usuário: "diminua um pouco o tamanho"),
+# com o encosto para cima e a beirada do estofado escurecida em `beirada` até `beirada_px`; a sombra leve, como a das
+# poltronas, mais fraca (`sombra`, `sombra_contato`; usuário: "jogue um leve efeito de sombra para mostrar que o sofá
+# está integrado ao piso"). O sofá antigo sai com a sombra dele e o halo claro de cima (`buraco`, px da final, com a
+# borda esfumada em `esfuma_px`): o Bege Bahia de fora, refletido no lado mais perto do retângulo (nos cantos, os dois
+# lados misturados junto à diagonal, em `canto_px`).
 SOFA_VARANDA_TE = {"modelo": {"caixa": (1846, 1194, 2076, 1270), "lum_min": 185, "rb_max": 45, "frente_y": 1265.5,
                               "modulo_x": (1986, 2076), "meio_x": (1920, 1986), "meio_borda_px": 5,
                               "nitidez": 0.6},
                    "caixa": (1320, 1236, 1522.5, 1306), "buraco": (1303, 1217, 1538, 1315),
-                   "esfuma_px": 2, "canto_px": 1.5, "beirada": 0.12, "beirada_px": 2.0}
+                   "esfuma_px": 2, "canto_px": 1.5, "beirada": 0.12, "beirada_px": 2.0, "fundo_px": 63,
+                   "sombra": {"dx": -0.06, "dy": 0.06, "desfoque": 0.07, "opacidade": 0.45},
+                   "sombra_contato": {"dx": 0.0, "dy": 0.0, "desfoque": 0.03, "opacidade": 0.3}}
 
 
 def _modelo_sofa_1p(q=None):
@@ -2901,6 +2905,7 @@ def _modelo_sofa_1p(q=None):
 
 def sofa_varanda_te(Q, img, q=None):
     """O sofá da varanda trocado pela parte reta do sofá da sala íntima do 1º Pavimento (a imagem sem rótulos)."""
+    import retoque_terreo_casae as T
     q = q or SOFA_VARANDA_TE
     out = img.astype(np.float32)
     H, W = img.shape[:2]
@@ -2922,7 +2927,7 @@ def sofa_varanda_te(Q, img, q=None):
     out = out * (1 - al) + novo * al
     cor, al = _modelo_sofa_1p(q)
     x0, y0, x1, y1 = q["caixa"]
-    k = (y1 - y0) / cor.shape[0]                      # no fundo do PDF (o do sofá anterior), na mesma proporção
+    k = q["fundo_px"] / cor.shape[0]                  # no fundo `fundo_px`, na mesma proporção
     w, h = int(round(cor.shape[1] * k)), int(round(cor.shape[0] * k))
     c2 = cv2.resize(cor * al[..., None], (w, h), interpolation=cv2.INTER_AREA)
     a2 = np.clip(cv2.resize(al, (w, h), interpolation=cv2.INTER_AREA), 0, 1)
@@ -2931,12 +2936,17 @@ def sofa_varanda_te(Q, img, q=None):
     # a beirada do estofado um pouco mais escura (`beirada`, até `beirada_px` para dentro): o contorno sem sombra no piso
     dd = cv2.distanceTransform((a2 > 0.5).astype(np.uint8), cv2.DIST_L2, 3)
     c2 *= 1 - q["beirada"] * np.clip((q["beirada_px"] - dd) / q["beirada_px"], 0, 1)[..., None]
-    # sem sombra: o encosto na linha de trás do PDF, centrado no comprimento do PDF
+    # o encosto na linha de trás do PDF, centrado no comprimento do PDF, com a sombra leve das poltronas (`sombra` e
+    # `sombra_contato`, medidas em fração do fundo do sofá)
+    # (com uma margem em volta, para o desfoque da sombra não ser cortado na caixa do sofá)
     px, py = int(round((x0 + x1) / 2 - w / 2)), int(round(y0))
-    reg = out[py:py + h, px:px + w]
-    out[py:py + h, px:px + w] = reg * (1 - a2[..., None]) + np.clip(c2, 0, 255) * a2[..., None]
+    mg = int(np.ceil(h * 0.3))
+    c2 = np.pad(np.clip(c2, 0, 255), ((mg, mg), (mg, mg), (0, 0)), mode="edge")
+    a2 = np.pad(a2, mg)
+    for sb in (q["sombra"], q["sombra_contato"]):
+        T.pousar_planta(out, c2, a2, px + w / 2, py + h / 2, h, sb)
     print(f"    sofá da varanda: a parte reta do sofá da sala íntima ({cor.shape[1]} x {cor.shape[0]} px) no "
-          f"fundo do PDF ({w} x {h} px: {w / Q.px_m:.2f} x {h / Q.px_m:.2f} m), sem sombra")
+          f"fundo de {h} px ({w} x {h} px: {w / Q.px_m:.2f} x {h / Q.px_m:.2f} m), com a sombra leve")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
