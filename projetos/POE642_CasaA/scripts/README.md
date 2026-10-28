@@ -1221,8 +1221,15 @@ Pedido de 28/10/26, no Térreo da Casa A: "corrija as bordas deixando as perfeit
 - `pedra`: as faixas entre as linhas do PDF (entre o deck e a piscina, o anel do spa), na pedra clara lisa (`pedra_tom`, `pedra_grao`).
 - Os traços escuros e neutros por cima (os tracejados de projeção, `traco`) ficam.
 
+Desde o pedido seguinte ("aplique nas bordas das outras casas também"), a rotina vale para todas as casas:
+- `agua` em `BORDAS[planta]`: os corpos d'água, cada um um retângulo ou a lista dos retângulos que o formam (a piscina com a prainha; o L da Casa B, com a faixa à esquerda do braço, que é água na base da legenda). As distâncias à beira são medidas pelos eixos na união dos retângulos (`_distancias`); nos cantos para dentro, o espelho segue a direção da beira mais perto; por fora dos cantos, o piso só é espelhado quando os dois lados que se encontram ali são limpos.
+- `proteger`: os px que ficam como estão (`_bordas_px` desenha as `CAMADAS_PROTEGIDAS` do PDF perto da água: o muro fino ao lado da piscina da Casa C). `BORDAS["D-Terreo"]["proteger"] = ()`: a parede fina da piscina da Casa D virou no render um contorno borrado e sai.
+- `quadro(planta)`: o quadro da prancha de cada casa (o `p2q` do PDF).
+- A Casa E faz as bordas na etapa `piscina` do motor (`final3840_casae.piscina_terreo_e`), logo depois do turquesa, com a mesma rede e os vidros protegidos; depois, apagar o `Terreo_nublado_fonte.png` do cache e rodar o 1º Pavimento.
+
 ```bash
 # de POE642_CasaA/scripts/; o antes do turquesa sai do git (o commit anterior a 3041093)
 git show 3041093^:projetos/POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_rotulos.png > /tmp/a_pre_turquesa.png
-python3 piscinas_turquesa.py A-Terreo --bordas --rede /tmp/a_pre_turquesa.png
+python3 piscinas_turquesa.py A-Terreo --bordas --rede /tmp/a_pre_turquesa.png   # e B-Terreo, C-Terreo, D-Terreo
+python3 final3840_casae.py Terreo --de piscina && python3 final3840_casae.py 1Pavimento   # a Casa E
 ```

@@ -184,9 +184,9 @@ def rede_turquesa(img_antes, q=None, px_m=None, semente=None):
     return lab, redes
 
 
-def _rede_quadro(img_antes, agua_px, forma):
+def _rede_quadro(img_antes, agua_px, forma, px_m=None, semente=None):
     """A rede de `rede_turquesa` no quadro inteiro, por retângulo de água (a mancha que mais cobre cada um)."""
-    lab, redes = rede_turquesa(img_antes)
+    lab, redes = rede_turquesa(img_antes, px_m=px_m, semente=semente)
     C = np.zeros(forma[:2], np.float32)
     for a, b, c, d in agua_px:
         i0, i1, j0, j1 = int(b), int(np.ceil(d)), int(a), int(np.ceil(c))
@@ -212,95 +212,185 @@ def _cobertura(rets, x0, y0, w, h, ss):
     return cv2.resize(m.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
 
 
-def bordas_retas(img, agua_px, pedra_px, pedra_tom, pedra_grao=2.5, rede=None, q=None):
-    """As bordas das piscinas retas e nítidas nos retângulos do PDF (px do quadro). Na faixa de `faixa_px` junto à beira,
-    a água é refeita: o fundo, pelo espelho da água de dentro sem os fios claros (sem a beira antiga); a rede das
-    cáusticas, a mesma da água de dentro (`rede`, do quadro inteiro: `_rede_quadro`), contínua até a beira e sumindo
-    junto a ela (`causticas_px`); a sombra curta das beiras (`sombra`) a partir da beira exata. Fora da água, a até
-    `fora_px`, o piso de fora é espelhado sobre a água que passava; as faixas de `pedra` levam a pedra clara lisa
-    (`pedra_tom`, com o grão fino); os traços escuros e neutros por cima (os tracejados de projeção, `traco`: luz
-    máxima, luz do miolo e croma) ficam. Devolve a imagem nova."""
+def _corpos(agua):
+    """Cada corpo d'água como lista de retângulos (a união deles): um retângulo solto é um corpo só."""
+    return [[c] if len(c) == 4 and not isinstance(c[0], (tuple, list)) else list(c) for c in agua]
+
+
+def _distancias(rets, xs, ys, folga=0.0):
+    """As distâncias pelos eixos à borda da união dos retângulos (px do quadro), para os px de centro (xs, ys):
+    por dentro, até a borda à esquerda, à direita, em cima e embaixo (dl, dr, du, dd; inf fora); por fora, até a água à
+    direita, à esquerda, embaixo e em cima (er, el, ed, eu; inf se não há na linha). `folga`: os retângulos crescem
+    tanto no eixo de través (para os cantos por fora)."""
+    h, w = xs.shape
+    inf = np.float32(np.inf)
+    dl, dr, du, dd = (np.full((h, w), inf, np.float32) for _ in range(4))
+    er, el, ed, eu = (np.full((h, w), inf, np.float32) for _ in range(4))
+
+    def uniao(iv):
+        iv = sorted(iv)
+        out = []
+        for a, b in iv:
+            if out and a <= out[-1][1] + 0.6:
+                out[-1][1] = max(out[-1][1], b)
+            else:
+                out.append([a, b])
+        return out
+    for i in range(h):
+        y = ys[i, 0]
+        x = xs[i]
+        for a, b in uniao([(r[0], r[2]) for r in rets if r[1] - folga <= y < r[3] + folga]):
+            den = (x >= a) & (x < b)
+            dl[i] = np.where(den, x - a, dl[i])
+            dr[i] = np.where(den, b - x, dr[i])
+            er[i] = np.where(x < a, np.minimum(er[i], a - x), er[i])
+            el[i] = np.where(x >= b, np.minimum(el[i], x - b), el[i])
+    for j in range(w):
+        x = xs[0, j]
+        y = ys[:, j]
+        for a, b in uniao([(r[1], r[3]) for r in rets if r[0] - folga <= x < r[2] + folga]):
+            den = (y >= a) & (y < b)
+            du[:, j] = np.where(den, y - a, du[:, j])
+            dd[:, j] = np.where(den, b - y, dd[:, j])
+            ed[:, j] = np.where(y < a, np.minimum(ed[:, j], a - y), ed[:, j])
+            eu[:, j] = np.where(y >= b, np.minimum(eu[:, j], y - b), eu[:, j])
+    return (dl, dr, du, dd), (er, el, ed, eu)
+
+
+def bordas_retas(img, agua_px, pedra_px=(), pedra_tom=None, pedra_grao=2.5, rede=None, proteger=None, q=None):
+    """As bordas das piscinas retas e nítidas no desenho do PDF (px do quadro). `agua_px`: os corpos d'água, cada um um
+    retângulo ou a lista dos retângulos que o formam (a piscina com a prainha, um L). Na faixa de `faixa_px` junto à
+    beira, a água é refeita: o fundo, pelo espelho da água de dentro (pelos eixos; nos cantos para dentro, na direção
+    da beira mais perto) sem os fios claros; a rede das cáusticas, a mesma da água de dentro (`rede`, do quadro
+    inteiro: `_rede_quadro`), contínua até a beira e sumindo junto a ela (`causticas_px`); a sombra curta das beiras
+    (`sombra`) a partir da beira exata. Fora da água, o piso de fora é espelhado sobre a água que passava e o fio claro
+    antigo, com o alcance medido em cada lado de cada corpo (até `fora_px`). As faixas de `pedra` levam a pedra clara
+    lisa (`pedra_tom`, com o grão fino). Ficam como estão os px de `proteger` (bool, do quadro: as paredes e os vidros
+    do PDF junto às piscinas) e os traços escuros e neutros por cima (os tracejados de projeção, `traco`)."""
+    from scipy import ndimage
     q = q or BORDA
     ss, L, Lf = q["ss"], q["faixa_px"], q["fora_px"]
-    todos = list(agua_px) + list(pedra_px)
-    x0 = int(np.floor(min(r[0] for r in todos))) - 2 * L - 4
-    y0 = int(np.floor(min(r[1] for r in todos))) - 2 * L - 4
-    x1 = int(np.ceil(max(r[2] for r in todos))) + 2 * L + 4
-    y1 = int(np.ceil(max(r[3] for r in todos))) + 2 * L + 4
-    x0, y0, x1, y1 = max(x0, 0), max(y0, 0), min(x1, img.shape[1]), min(y1, img.shape[0])
+    corpos = _corpos(agua_px)
+    todos = [r for c in corpos for r in c] + list(pedra_px)
+    m = 2 * max(L, Lf) + 12
+    x0 = max(int(np.floor(min(r[0] for r in todos))) - m, 0)
+    y0 = max(int(np.floor(min(r[1] for r in todos))) - m, 0)
+    x1 = min(int(np.ceil(max(r[2] for r in todos))) + m, img.shape[1])
+    y1 = min(int(np.ceil(max(r[3] for r in todos))) + m, img.shape[0])
     w, h = x1 - x0, y1 - y0
     orig = img[y0:y1, x0:x1].astype(np.float32)
     reg = orig.copy()
-    xs = np.arange(w, dtype=np.float32)[None, :] + x0 + 0.5
-    ys = np.arange(h, dtype=np.float32)[:, None] + y0 + 0.5
-    xs, ys = np.broadcast_to(xs, (h, w)), np.broadcast_to(ys, (h, w))
-    a_agua = _cobertura(agua_px, x0, y0, w, h, ss)
-    a_pedra = np.clip(_cobertura(pedra_px, x0, y0, w, h, ss) - a_agua, 0, 1)
-    # 1. fora da água (e fora da pedra): o piso de fora espelhado sobre a água que passava e o fio claro que o render
-    # deixava junto a ela; o alcance é medido em cada lado (até `fora_px`): a última linha, a partir da beira, que
-    # ainda difere do piso de mais longe (`fora_dif` na média da linha, ou ciano), mais 1 px. Espelhar a faixa toda
-    # sem medir dobraria os fios do piso numa linha paralela à beira
-    mx, my = xs.copy(), ys.copy()
-    fora = np.zeros((h, w), bool)
-    livre = a_pedra < 0.01
+    xs = np.broadcast_to(np.arange(w, dtype=np.float32)[None, :] + x0 + 0.5, (h, w)).copy()
+    ys = np.broadcast_to(np.arange(h, dtype=np.float32)[:, None] + y0 + 0.5, (h, w)).copy()
+    prot = np.zeros((h, w), bool) if proteger is None else proteger[y0:y1, x0:x1].copy()
+    a_agua = _cobertura([r for c in corpos for r in c], x0, y0, w, h, ss)
+    agua_alguma = a_agua > 0.01
+    a_pedra = np.clip(_cobertura(list(pedra_px), x0, y0, w, h, ss) - a_agua, 0, 1) if pedra_px else np.zeros((h, w),
+                                                                                                         np.float32)
     ciano = (orig[..., 0] - orig[..., 2] > 22) & (orig[..., 1] - orig[..., 2] > 22)
 
-    def alcance(linha):
-        """O alcance do lado: `linha(e)` dá a máscara da linha a `e` px da beira, por fora."""
-        ref = [orig[linha(e) & livre] for e in range(Lf + 4, Lf + 10)]
-        ref = np.concatenate([r for r in ref if len(r)]) if any(len(r) for r in ref) else None
-        if ref is None or len(ref) < 20:
-            return 0
-        ref = ref.mean(0)
-        ult = -1
-        for e in range(Lf):
-            px = orig[linha(e) & livre]
-            if len(px) < 10:
+    def remapear(mx, my):
+        return cv2.remap(orig, (mx - x0 - 0.5).astype(np.float32), (my - y0 - 0.5).astype(np.float32),
+                         cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
+
+    def fonte_ruim(mx, my):
+        """A fonte cai num px protegido (ou fora da janela)."""
+        jx = np.clip(np.round(mx - x0 - 0.5).astype(int), 0, w - 1)
+        jy = np.clip(np.round(my - y0 - 0.5).astype(int), 0, h - 1)
+        return prot[jy, jx]
+    # 1. fora da água (e fora da pedra): o piso de fora espelhado sobre a água que passava e o fio claro antigo, com o
+    # alcance medido em cada lado de cada corpo: a última linha, a partir da beira, que ainda difere do piso de mais
+    # longe (`fora_dif` na mediana da linha, ou ciano), mais 1 px
+    livre = (a_pedra < 0.01) & ~prot & ~agua_alguma
+    mx, my = xs.copy(), ys.copy()
+    fora = np.zeros((h, w), bool)
+    for corpo in corpos:
+        # as distâncias pela união de verdade (com os recantos dos cantos para dentro) e pelos retângulos crescidos de
+        # través (os cantos por fora: só onde os dois lados que se encontram ali são limpos)
+        _, d0 = _distancias(corpo, xs, ys)
+        _, d1 = _distancias(corpo, xs, ys, folga=Lf)
+        ks = []
+        for dist in d0:
+            def linha(e, dist=dist):
+                return (dist > e) & (dist <= e + 1)
+            refs = [orig[linha(e) & livre & ~ciano] for e in range(Lf + 4, Lf + 10)]
+            refs = [r for r in refs if len(r)]
+            if not refs or sum(len(r) for r in refs) < 20:
+                ks.append(0)
                 continue
-            if np.abs(px.mean(0) - ref).max() > q["fora_dif"] or ciano[linha(e) & livre].mean() > 0.05:
-                ult = e
-        return min(ult + 2, Lf) if ult >= 0 else 0
-    for a, b, c, d in agua_px:
-        dentro_y = (ys > b) & (ys < d)
-        dentro_x = (xs > a) & (xs < c)
-        lados = (("x", a, -1, lambda e, a=a: dentro_y & (xs < a - e) & (xs > a - e - 1)),
-                 ("x", c, 1, lambda e, c=c: dentro_y & (xs > c + e) & (xs < c + e + 1)),
-                 ("y", b, -1, lambda e, b=b: dentro_x & (ys < b - e) & (ys > b - e - 1)),
-                 ("y", d, 1, lambda e, d=d: dentro_x & (ys > d + e) & (ys < d + e + 1)))
-        for eixo, borda, sinal, linha in lados:
-            k = alcance(linha)
+            ref = np.median(np.concatenate(refs), axis=0)
+            ult = -1
+            for e in range(Lf):
+                sel = linha(e) & livre
+                if sel.sum() < 10:
+                    continue
+                if np.abs(np.median(orig[sel], axis=0) - ref).max() > q["fora_dif"] or ciano[sel].mean() > 0.05:
+                    ult = e
+            ks.append(min(ult + 2, Lf) if ult >= 0 else 0)
+        kr, kl, kd, ku = ks                 # o lado esquerdo (água à direita), o direito, o de cima e o de baixo
+        er0, el0, ed0, eu0 = d0
+        er1, el1, ed1, eu1 = d1
+        diag_x = ~np.isfinite(er0) & ~np.isfinite(el0)
+        diag_y = ~np.isfinite(ed0) & ~np.isfinite(eu0)
+        perto_y = ((ed1 < kd) & (kd > 0)) | ((eu1 < ku) & (ku > 0))
+        perto_x = ((er1 < kr) & (kr > 0)) | ((el1 < kl) & (kl > 0))
+        for dist0, dist1, k, eixo, sinal, perto in ((er0, er1, kr, "x", -1, perto_y), (el0, el1, kl, "x", 1, perto_y),
+                                                    (ed0, ed1, kd, "y", -1, perto_x), (eu0, eu1, ku, "y", 1, perto_x)):
             if k == 0:
                 continue
+            diag = diag_x if eixo == "x" else diag_y
+            dist = np.where(diag & perto, dist1, dist0)
+            sel = (dist > 0) & (dist < k) & ~agua_alguma
             if eixo == "x":
-                e = (xs - borda) * sinal
-                sel = (e > 0) & (e < k) & (ys > b - k) & (ys < d + k)
-                mx = np.where(sel, borda + sinal * (2 * k - e), mx)
+                mx = np.where(sel, xs + sinal * 2 * (k - dist), mx)
             else:
-                e = (ys - borda) * sinal
-                sel = (e > 0) & (e < k) & (xs > a - k) & (xs < c + k)
-                my = np.where(sel, borda + sinal * (2 * k - e), my)
+                my = np.where(sel, ys + sinal * 2 * (k - dist), my)
             fora |= sel
-    piso = cv2.remap(orig, (mx - x0 - 0.5).astype(np.float32), (my - y0 - 0.5).astype(np.float32), cv2.INTER_LINEAR,
-                     borderMode=cv2.BORDER_REFLECT)
-    reg = np.where(fora[..., None], piso, reg)
+    ruim = fonte_ruim(mx, my) | (cv2.remap(agua_alguma.astype(np.float32), (mx - x0 - 0.5).astype(np.float32),
+                                            (my - y0 - 0.5).astype(np.float32), cv2.INTER_LINEAR) > 0.01)
+    fora &= ~ruim
+    reg = np.where(fora[..., None], remapear(mx, my), reg)
     # 2. a pedra clara nas faixas do PDF, lisa, com o grão fino
-    rng = np.random.default_rng(q["semente"])
-    grao = cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0), 0.8)
-    grao *= pedra_grao / max(float(grao.std()), 1e-6)
-    pedra = np.float32(pedra_tom)[None, None, :] + grao[..., None]
-    reg = reg * (1 - a_pedra[..., None]) + pedra * a_pedra[..., None]
+    if pedra_px:
+        rng = np.random.default_rng(q["semente"])
+        grao = cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0), 0.8)
+        grao *= pedra_grao / max(float(grao.std()), 1e-6)
+        pedra = np.float32(pedra_tom)[None, None, :] + grao[..., None]
+        reg = reg * (1 - a_pedra[..., None]) + pedra * a_pedra[..., None]
     # 3. a água: na faixa junto à beira, o espelho da água de dentro, com a sombra curta a partir da beira exata
     fs, sa = q["sombra"]
     mx, my = xs.copy(), ys.copy()
     prof = np.full((h, w), np.inf, np.float32)
-    for a, b, c, d in agua_px:
-        den = (xs >= a - 1) & (xs <= c + 1) & (ys >= b - 1) & (ys <= d + 1)
-        dl, dr, dt, db = xs - a, c - xs, ys - b, d - ys
-        mx = np.where(den & (dl < L), a + 2 * L - dl, np.where(den & (dr < L), c - 2 * L + dr, mx))
-        my = np.where(den & (dt < L), b + 2 * L - dt, np.where(den & (db < L), d - 2 * L + db, my))
-        prof = np.where(den, np.minimum(prof, np.maximum(np.minimum.reduce([dl, dr, dt, db]), 0)), prof)
-    agua = cv2.remap(orig, (mx - x0 - 0.5).astype(np.float32), (my - y0 - 0.5).astype(np.float32), cv2.INTER_LINEAR,
-                     borderMode=cv2.BORDER_REFLECT)
+    mascara = np.zeros((h * ss, w * ss), np.uint8)
+    for corpo in corpos:
+        cresce = [(r[0] - 1, r[1] - 1, r[2] + 1, r[3] + 1) for r in corpo]
+        (dl, dr, du, dd), _ = _distancias(cresce, xs, ys)
+        dl, dr, du, dd = dl - 1, dr - 1, du - 1, dd - 1           # a partir da beira de verdade (-1 a 0: o antialias)
+        den = np.isfinite(dl)
+        perto_x = den & ((dl < L) | (dr < L))
+        perto_y = den & ((du < L) | (dd < L))
+        mx = np.where(den & (dl < L) & (dl <= dr), xs + 2 * (L - dl), np.where(den & (dr < L), xs - 2 * (L - dr), mx))
+        my = np.where(den & (du < L) & (du <= dd), ys + 2 * (L - du), np.where(den & (dd < L), ys - 2 * (L - dd), my))
+        for a, b, c, d in corpo:
+            i0, i1 = int(round((b - y0) * ss)), int(round((d - y0) * ss))
+            j0, j1 = int(round((a - x0) * ss)), int(round((c - x0) * ss))
+            mascara[max(i0, 0):max(i1, 0), max(j0, 0):max(j1, 0)] = 1
+        # nos cantos para dentro (o encontro do L), a beira mais perto é a ponta: o espelho na direção dela
+        edt, ind = ndimage.distance_transform_edt(np.pad(mascara, 1), return_indices=True)
+        edt, ind = edt[1:-1, 1:-1], ind[:, 1:-1, 1:-1] - 1
+        cy = (np.arange(h) * ss + ss // 2)[:, None]
+        cx = (np.arange(w) * ss + ss // 2)[None, :]
+        pe = edt[cy, cx] / ss
+        canto = den & ~perto_x & ~perto_y & (pe < L) & (pe > 0)
+        if canto.any():
+            ny = (cy - ind[0][cy, cx]) / np.maximum(edt[cy, cx], 1e-6)
+            nx = (cx - ind[1][cy, cx]) / np.maximum(edt[cy, cx], 1e-6)
+            mx = np.where(canto, xs + 2 * (L - pe) * nx, mx)
+            my = np.where(canto, ys + 2 * (L - pe) * ny, my)
+        prof = np.where(den, np.minimum(prof, np.where(np.isfinite(pe) & (pe > 0), pe,
+                                                        np.maximum(np.minimum.reduce([dl, dr, du, dd]), 0))), prof)
+    agua = remapear(mx, my)
+    agua = np.where(fonte_ruim(mx, my)[..., None], orig, agua)
     # o fundo sem a rede clara (a abertura tira os fios claros finos) e a rede voltando de `causticas_px[0]` a `[1]`
     # da beira: a mesma de dentro (`rede`), ou, sem ela, a do espelho
     lisa = cv2.GaussianBlur(cv2.morphologyEx(agua, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8)), (0, 0), 0.8)
@@ -317,37 +407,91 @@ def bordas_retas(img, agua_px, pedra_px, pedra_tom, pedra_grao=2.5, rede=None, q
     sombra = np.where(faixa, 1 - fs * np.exp(-np.maximum(prof - 0.5, 0) / sa), 1.0).astype(np.float32)
     agua = np.where(faixa[..., None], agua * sombra[..., None], orig)
     reg = reg * (1 - a_agua[..., None]) + agua * a_agua[..., None]
-    # 4. os traços escuros e neutros por cima ficam, só onde a imagem mudou
+    # 4. os traços escuros e neutros por cima e os px protegidos ficam, só onde a imagem mudou
     t1, t0, cr = q["traco"]
     lum = orig.max(axis=2)
     croma = orig.max(axis=2) - orig.min(axis=2)
     at = np.clip((t1 - lum) / (t1 - t0), 0, 1) * (croma < cr)
-    mudou = np.abs(reg - orig).max(axis=2) > 0.5
-    at *= mudou
+    at = np.maximum(at, prot.astype(np.float32))
+    at *= np.abs(reg - orig).max(axis=2) > 0.5
     reg = reg * (1 - at[..., None]) + orig * at[..., None]
     out = img.copy()
     out[y0:y1, x0:x1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
     return out
 
 
-def _bordas_px(planta):
-    """Os retângulos de `BORDAS[planta]` em px do quadro da prancha (o p2q do quadro da Casa)."""
+# Os corpos d'água de cada Térreo (pt do PDF: os preenchimentos azuis da ARQ_CONTRAPISO; a piscina com a prainha, que o
+# degrau divide por dentro, é um corpo só) e as camadas do PDF que ficam como estão junto a eles (a parede fina ao lado
+# da piscina da Casa C; os vidros e as esquadrias)
+BORDAS.update({
+    # na Casa B, a faixa de 17 pt à esquerda do braço da piscina (contornada no PDF, sem o azul) é água na base da
+    # legenda aprovada (a mesma cor do braço) e na final: entra no corpo
+    "B-Terreo": {"agua": [[(588.8, 1088.4, 605.8, 1264.2), (605.8, 1088.4, 713.5, 1281.2), (481.1, 1281.2, 900.6, 1518.4)],
+                          (730.5, 1088.4, 900.6, 1264.2)]},
+    "C-Terreo": {"agua": [[(498.6, 1467.7, 748.0, 1637.8), (496.3, 1637.8, 918.1, 1779.5)],
+                          (759.4, 1467.7, 918.1, 1626.5)]},
+    # na Casa D, a parede da piscina (a ARQ_PAREDE de 3,1 pt colada na água) virou no render um contorno cinza-azulado
+    # borrado em volta da água: não fica protegida, e a água encontra a borda de pedra direto, como nas outras casas
+    "D-Terreo": {"agua": [[(750.6, 709.6, 920.1, 1146.2), (920.1, 709.6, 1079.4, 986.5)],
+                          (937.1, 1003.5, 1079.4, 1146.2)], "proteger": ()},
+    # na Casa E, a beira vem na etapa "piscina" do motor (`final3840_casae.piscina_terreo_e`), com os vidros protegidos
+    "E-Terreo": {"agua": [[(509.9, 1108.1, 953.9, 1277.4)], (809.4, 1294.4, 953.9, 1439.0)], "proteger": ()},
+})
+CAMADAS_PROTEGIDAS = ("ARQ_PAREDE", "ARQ - Parede", "ARQ_ESQUADRIAS", "ARQ_ELEMENTOS FIXOS", "ARQ_VIDROS")
+
+
+def quadro(planta):
+    """O quadro da prancha (o PDF e o p2q) do pavimento da planta ("A-Terreo"...)."""
     casa, chave = planta.split("-")
-    if casa != "A":
-        raise SystemExit(f"{planta}: sem os retângulos do PDF em BORDAS")
-    import final3840_casaa as FA
-    Q = FA.QuadroA({"Terreo": "Terreo"}[chave])
+    if casa == "A":
+        import final3840_casaa as FA
+        return FA.QuadroA(chave)
+    import final3840_casab as F
+    if casa == "C":
+        import final3840_casac as C
+        C.contexto_c()
+    elif casa == "D":
+        import final3840_casad as D
+        D.contexto_d()
+    elif casa == "E":
+        import final3840_casae as E
+        return E.QuadroE(chave)
+    return F.Quadro(chave)
+
+
+def _bordas_px(planta, Q=None):
+    """Os corpos e as faixas de pedra de `BORDAS[planta]` em px do quadro da prancha, e os px protegidos do PDF
+    (`CAMADAS_PROTEGIDAS`, com 1 px de folga) perto deles."""
+    Q = Q or quadro(planta)
 
     def px(r):
         (a, b), (c, d) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
         return (min(a, c), min(b, d), max(a, c), max(b, d))
     b = BORDAS[planta]
-    return [px(r) for r in b["agua"]], [px(r) for r in b["pedra"]], b["pedra_tom"], b["pedra_grao"]
+    corpos = [[px(r) for r in c] for c in _corpos(b["agua"])]
+    pedra = [px(r) for r in b.get("pedra", [])]
+    xs = [v for c in corpos for r in c for v in (r[0], r[2])]
+    ys = [v for c in corpos for r in c for v in (r[1], r[3])]
+    j0, i0, j1, i1 = int(min(xs)) - 40, int(min(ys)) - 40, int(max(xs)) + 40, int(max(ys)) + 40
+    prot = np.zeros((Q.H, Q.W), np.uint8)
+    for d in Q.pg.get_drawings():
+        if d.get("layer") not in b.get("proteger", CAMADAS_PROTEGIDAS):
+            continue
+        (a, bb), (c, dd) = Q.p2q(d["rect"].x0, d["rect"].y0), Q.p2q(d["rect"].x1, d["rect"].y1)
+        if max(a, c) < j0 or min(a, c) > j1 or max(bb, dd) < i0 or min(bb, dd) > i1:
+            continue
+        for cam in Q.caminhos(d):
+            pts = np.int32(np.round(cam))
+            if d["type"] in ("f", "fs") and len(pts) >= 3:
+                cv2.fillPoly(prot, [pts], 1)
+            cv2.polylines(prot, [pts], False, 1, 1)
+    prot = cv2.dilate(prot, np.ones((3, 3), np.uint8)).astype(bool)
+    return corpos, pedra, b.get("pedra_tom"), b.get("pedra_grao", 2.5), prot
 
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("planta", choices=sorted(FINAIS))
+    ap.add_argument("planta", choices=sorted(set(FINAIS) | set(BORDAS)))
     ap.add_argument("--antes", type=Path, help="guarda aqui uma cópia da final anterior")
     ap.add_argument("--bordas", action="store_true", help="só as bordas retas pelo PDF (`BORDAS`), sem trocar a água")
     ap.add_argument("--rede", type=Path, help="com --bordas: a final de antes do turquesa, para a rede das cáusticas "
@@ -358,10 +502,10 @@ def main():
         shutil.copyfile(final, a.antes)
     img = cv2.imread(str(final))
     if a.bordas:
-        agua, pedra, tom, grao = _bordas_px(a.planta)
-        rede = _rede_quadro(cv2.imread(str(a.rede)), agua, img.shape) if a.rede else None
-        cv2.imwrite(str(final), bordas_retas(img, agua, pedra, tom, grao, rede=rede))
-        print(f"{a.planta}: as bordas de {len(agua)} piscinas retas pelo PDF, com {len(pedra)} faixas de pedra clara "
+        corpos, pedra, tom, grao, prot = _bordas_px(a.planta)
+        rede = _rede_quadro(cv2.imread(str(a.rede)), [r for c in corpos for r in c], img.shape) if a.rede else None
+        cv2.imwrite(str(final), bordas_retas(img, corpos, pedra, tom, grao, rede=rede, proteger=prot))
+        print(f"{a.planta}: as bordas de {len(corpos)} piscinas retas pelo PDF, com {len(pedra)} faixas de pedra clara "
               f"-> {final.relative_to(RAIZ)}")
         return
     novo, areas = turquesa(img)

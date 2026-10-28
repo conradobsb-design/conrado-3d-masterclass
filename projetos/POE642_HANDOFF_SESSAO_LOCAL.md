@@ -3289,3 +3289,15 @@ O que foi feito (`final3840_casaa_terreo.py`, duas etapas novas no fim de `passo
 Antes e depois (o antes é a final de a7dbda8): `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_2810_{box_banho_varanda,contorno_bege_bahia,placa_pedra}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa A refeitos.
 
 Notado e não alterado (aguarda o OK): na borda de baixo da varanda (travertino) junto à grama, entre x ~1253 e ~1459, há tiquinhos claros parecidos.
+
+### Pedido de 28/10/26: as bordas das piscinas das outras casas
+
+O usuário, depois das bordas da Casa A: "aplique nas bordas das outras casas também".
+
+`piscinas_turquesa.bordas_retas` passou a aceitar corpos d'água de vários retângulos (a união: a piscina com a prainha, o L da Casa B) e px protegidos; `BORDAS` ganhou os Térreos das Casas B a E (pt do PDF, os preenchimentos azuis da ARQ_CONTRAPISO). O que havia e o que ficou, casa a casa:
+- **Casa B** (1295 px de água fora do PDF a até 8 px da beira, e o fio cinza antigo na quina da prainha): as beiras retas. A faixa de 17 pt à esquerda do braço da piscina, contornada no PDF mas sem o azul, é água na base da legenda aprovada (a mesma cor do braço) e na final: entrou no corpo e continua água.
+- **Casa C** (614 px fora): as beiras retas; o muro fino (ARQ_PAREDE) ao lado esquerdo da piscina ficou, protegido.
+- **Casa D** (a parede fina da piscina, 3,1 pt da ARQ_PAREDE colada na água, virou no render um contorno cinza-azulado borrado em volta da água): sem proteção; a água encontra a borda de pedra direto, com a beira reta, como nas outras casas.
+- **Casa E** (1452 px fora, um fio cinza no topo da água, cantos arredondados): as bordas na etapa `piscina` do motor, logo depois do turquesa, com a mesma rede das cáusticas (`semente` 2851) e os vidros da lateral protegidos; o Térreo foi refeito de `--de piscina`, e o 1º Pavimento de novo (o Térreo esmaecido vem do Térreo).
+
+Antes e depois (o antes é a final de b39850f): `POE642_Casa{B,C,D,E}/renders/POE642_Casa*_PH_Terreo_bordas_piscina_antes_depois.jpg` e `..._detalhe_antes_depois.jpg`. Pranchas do Térreo e PDFs das Casas B a E refeitos (e a do 1º Pavimento da Casa E).
