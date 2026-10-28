@@ -3311,3 +3311,40 @@ O que havia: entre o pilar preto da varanda e a parede do WC, a beira do travert
 O que foi feito: a etapa nova `varanda_baixo` em `final3840_casaa_terreo.py` (`VARANDA_BAIXO`, aplicada com `--so varanda_baixo` sobre a final atual). De x 1251 a 1476, a beira fica reta na linha do PDF (o fim do piso da varanda, 1786,5 pt = 1643 px): a cada coluna, as 6 linhas de cima recebem o travertino espelhado de logo acima, as 6 de baixo a grama espelhada de logo abaixo, e a linha da beira o meio-termo do antialias. O pilar, a parede e o tracejado branco da projeção não mudam (2878 px alterados, todos entre y 1637 e 1649).
 
 Antes e depois (o antes é a final de c28fa80): `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_2810_borda_varanda_antes_depois.jpg`. Prancha do Térreo e PDF da Casa A refeitos.
+
+### OK de 28/10/26: as banquetas da ilha da Casa C
+
+O usuário: "pode girar as banquetas da casa C" (o achado que aguardava o OK desde o 4º lote da Casa D).
+
+O que foi feito: `BANQUETAS_C["giro"]` de 270 para 90 em `final3840_casac.py`. Na folha da `banqueta_linho`, a frente do assento fica em cima; com 90 ela vai para a direita, para a ilha, com o encosto à vista e a frente sob o tampo, como nas Casas A, B, D e E. O Térreo foi refeito de `--de biblioteca`; o cache das etapas era o mesmo da final antes do turquesa (idêntico ao do git). Por cima, o turquesa e as bordas de novo:
+- `piscinas_turquesa.py C-Terreo`;
+- `--bordas --rede` com a saída do motor.
+
+Conferido contra a final de antes: mudaram só as 4 banquetas (2104 px; nada na piscina). O Subsolo da Casa C não muda, porque ali a cozinha está sob a hachura branca.
+
+Antes e depois: `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2810_banquetas_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos.
+
+### Pedidos de 28/10/26: os vidros da borda das piscinas das Casas B e E como o da Casa C
+
+O usuário, com os recortes da borda da Casa C (a grama, o vidro e a água) e do braço da piscina da Casa B (o deck e a água):
+- "faça a representação do vidro borda da piscina da casa B igual ao da Casa C. Na verdade, na casa B são dois vidros na borda.";
+- "faça o mesmo na piscina da casa E, com duas bordas em vidro."
+
+O vidro da Casa C é o do render: a lâmina da ARQ_PAREDE de 0,6 + 5,1 pt à esquerda da piscina, que o turquesa deixou como uma lâmina fina. Medido na final (mediana de 135 linhas), de fora para a água:
+- um fio claro;
+- 3 px de turquesa escuro;
+- 2 px de fio escuro;
+- 1 px de passagem clara.
+
+`piscinas_turquesa.vidros_borda` desenha esse perfil (`VIDRO`) nos vidros de `VIDROS_BORDA`:
+- **Casa B:** no PDF, a faixa de 17 pt entre o deck e o braço da piscina é branca, contornada e sem divisões; até aqui ia como água. Os dois vidros pedidos entram na largura do da Casa C (5,7 pt): um junto ao deck e outro junto ao braço, com a água entre eles (como a faixa entre os vidros da Casa E), do fim da pedra de cima ao bloco de pedra de baixo. Aplicado sobre a final (`--vidros`).
+- **Casa E:** as duas lâminas do PDF (1,7 + 5,1 + 1,7 pt) do lado esquerdo da piscina, que estavam em cinza metálico, passam ao desenho da Casa C. Os fios ficam na largura dos da Casa C, e o corpo turquesa estica até os 9 px do PDF. As pontas cinza do vidro antigo, que avançavam até 3 px sobre o Bege Bahia de cima e de baixo, saíram (a pedra espelhada na mesma coluna). Feito na etapa `piscina` do motor; o Térreo foi refeito de `--de piscina` e o 1º Pavimento de novo (o Térreo esmaecido).
+
+Antes e depois (o antes é a final de 3cfa560):
+- `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_vidros_borda_{,detalhe_}antes_depois.jpg`;
+- `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_vidros_borda_{,detalhe_}antes_depois.jpg`;
+- `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_vidros_borda_antes_depois.jpg`.
+
+Pranchas e PDFs das Casas B e E refeitos (na Casa E, o Térreo e o 1º Pavimento).
+
+Escolha a confirmar com o usuário: na Casa B, os dois vidros ficaram nas duas beiras da faixa, com a água entre eles. A alternativa seria os dois vidros juntos.

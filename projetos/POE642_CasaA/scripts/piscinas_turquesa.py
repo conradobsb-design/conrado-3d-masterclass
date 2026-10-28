@@ -28,6 +28,9 @@ A final é regravada no lugar (`--antes` guarda uma cópia da anterior). O Térr
 
 As bordas retas pelo PDF ("corrija as bordas deixando as perfeitas", na Casa A), sem trocar a água (`bordas_retas`):
   python3 piscinas_turquesa.py A-Terreo --bordas --rede <a final de antes do turquesa>
+
+Os vidros da borda no desenho do da Casa C (`vidros_borda`, `VIDROS_BORDA`), depois das bordas:
+  python3 piscinas_turquesa.py B-Terreo --vidros
 """
 import argparse
 import shutil
@@ -425,7 +428,8 @@ def bordas_retas(img, agua_px, pedra_px=(), pedra_tom=None, pedra_grao=2.5, rede
 # da piscina da Casa C; os vidros e as esquadrias)
 BORDAS.update({
     # na Casa B, a faixa de 17 pt à esquerda do braço da piscina (contornada no PDF, sem o azul) é água na base da
-    # legenda aprovada (a mesma cor do braço) e na final: entra no corpo
+    # legenda aprovada (a mesma cor do braço) e na final: entra no corpo (os dois vidros da borda vão por cima, depois:
+    # `VIDROS_BORDA`)
     "B-Terreo": {"agua": [[(588.8, 1088.4, 605.8, 1264.2), (605.8, 1088.4, 713.5, 1281.2), (481.1, 1281.2, 900.6, 1518.4)],
                           (730.5, 1088.4, 900.6, 1264.2)]},
     "C-Terreo": {"agua": [[(498.6, 1467.7, 748.0, 1637.8), (496.3, 1637.8, 918.1, 1779.5)],
@@ -438,6 +442,101 @@ BORDAS.update({
     "E-Terreo": {"agua": [[(509.9, 1108.1, 953.9, 1277.4)], (809.4, 1294.4, 953.9, 1439.0)], "proteger": ()},
 })
 CAMADAS_PROTEGIDAS = ("ARQ_PAREDE", "ARQ - Parede", "ARQ_ESQUADRIAS", "ARQ_ELEMENTOS FIXOS", "ARQ_VIDROS")
+
+
+# Os vidros da borda das piscinas no desenho do da Casa C (usuário, 28/10/26: "faça a representação do vidro borda da
+# piscina da casa B igual ao da Casa C. Na verdade, na casa B são dois vidros na borda"; "faça o mesmo na piscina da casa
+# E, com duas bordas em vidro"). O perfil é o do vidro da borda infinita da Casa C na final (a mediana de 135 linhas, RGB),
+# de fora para a água: o fio claro do topo do vidro, o corpo turquesa escuro (a água vista pelo vidro, mais clara para
+# dentro), o fio escuro da face junto à água e a passagem clara para a água, nas larguras de lá (px, num vidro de
+# `larg_ref` px). Num vidro mais fino do PDF, tudo vai na proporção; num mais largo, os fios ficam como os da Casa C e
+# o corpo estica. O corpo acompanha de leve a luz da água ao lado (`luz_agua`). `ponta_px`: as linhas da pedra logo
+# acima e abaixo do vidro onde ficou a ponta de um vidro antigo (na Casa E, o cinza que avançava até 3 px sobre o Bege
+# Bahia), refeitas com a pedra espelhada de logo depois, na mesma coluna (a beira da pedra com a grama fica onde está).
+VIDRO = {"fio_claro": ((163, 178, 166), 1.0), "corpo": ((23, 86, 91), (40, 126, 129)),
+         "fio_escuro": (((32, 35, 28), (40, 50, 45)), 2.0), "passagem": ((101, 137, 136), 1.0), "larg_ref": 7.0,
+         "luz_agua": 0.35, "ponta_px": 3, "ss": 8}
+# Os vidros de cada Térreo (pt do PDF): o retângulo e o lado da água ("direita": a água à direita, o fora à esquerda,
+# como na Casa C).
+# - Casa B: a faixa branca de 17 pt entre o deck e o braço da piscina, contornada no PDF e sem divisões: os dois vidros,
+#   cada um da largura do vidro da Casa C (5,7 pt: a ARQ_PAREDE de 0,6 + 5,1 pt), um junto ao deck e outro junto ao
+#   braço, com a água entre eles (como a faixa entre os vidros da Casa E), do fim da pedra de cima ao bloco de pedra de baixo.
+# - Casa E: as duas lâminas da ARQ_PAREDE (1,7 + 5,1 + 1,7 pt) no lado esquerdo da piscina, na altura da água.
+VIDROS_BORDA = {
+    "B-Terreo": [((588.8, 1088.4, 594.5, 1264.2), "direita"), ((600.1, 1088.4, 605.8, 1264.2), "direita")],
+    "E-Terreo": [((501.4, 1108.1, 509.9, 1277.4), "direita"), ((532.5, 1108.1, 541.0, 1277.4), "direita")],
+}
+
+
+def _perfil_vidro(d, larg, q):
+    """A cor RGB (float) do vidro a `d` px da face de fora, num vidro de `larg` px."""
+    (claro, l_claro), (c0, c1) = q["fio_claro"], q["corpo"]
+    (e0, e1), l_esc = q["fio_escuro"]
+    passagem, l_pas = q["passagem"]
+    k = min(larg / q["larg_ref"], 1.0)
+    l_claro, l_esc, l_pas = l_claro * k, l_esc * k, l_pas * k
+    corpo = larg - l_claro - l_esc - l_pas
+    if d < l_claro:
+        return np.float32(claro)
+    if d < l_claro + corpo:
+        t = (d - l_claro) / corpo
+        return np.float32(c0) * (1 - t) + np.float32(c1) * t
+    if d < l_claro + corpo + l_esc:
+        t = (d - l_claro - corpo) / l_esc
+        return np.float32(e0) * (1 - t) + np.float32(e1) * t
+    return np.float32(passagem)
+
+
+def vidros_borda(img, vidros_px, q=None, pontas=False):
+    """Os vidros da borda no desenho do da Casa C (`VIDRO`). vidros_px: [((x0, y0, x1, y1) em px do quadro, lado da
+    água)]; os vidros em pé com a água à direita ou à esquerda (o perfil vai de fora para a água). As pontas e as faces
+    com a cobertura exata de cada px (supersample `ss`). pontas: limpa a ponta de um vidro antigo na pedra de cima e de
+    baixo (`ponta_px`)."""
+    q = q or VIDRO
+    ss = q["ss"]
+    out = img.astype(np.float32)
+    for (x0, y0, x1, y1), lado in vidros_px:
+        larg = x1 - x0
+        X0, X1, Y0, Y1 = int(np.floor(x0)), int(np.ceil(x1)), int(np.floor(y0)), int(np.ceil(y1))
+        if pontas:
+            n = q["ponta_px"]
+            for r in list(range(Y0 - n, Y0)) + list(range(Y1, Y1 + n)):
+                fonte = 2 * (Y0 - n) - 1 - r if r < Y0 else 2 * (Y1 + n) - 1 - r
+                out[r, X0:X1] = out[fonte, X0:X1]
+        cor = np.zeros((X1 - X0, 3), np.float32)
+        cob = np.zeros(X1 - X0, np.float32)
+        for i, x in enumerate(range(X0, X1)):
+            for k in range(ss):
+                u = x + (k + 0.5) / ss
+                if x0 <= u < x1:
+                    d = u - x0 if lado == "direita" else x1 - u
+                    cor[i] += _perfil_vidro(d, larg, q)
+                    cob[i] += 1
+            if cob[i]:
+                cor[i] /= cob[i]
+        cob /= ss
+        cv = np.clip(np.minimum(np.arange(Y0, Y1) + 1, y1) - np.maximum(np.arange(Y0, Y1), y0), 0, 1)
+        # o corpo acompanha de leve a luz da água logo depois do vidro (as cáusticas vistas pelo vidro)
+        xa = min(X1 + 2, out.shape[1] - 1) if lado == "direita" else max(X0 - 3, 0)
+        luz = out[Y0:Y1, xa].mean(axis=1)
+        luz = (luz / max(np.median(luz), 1)) ** q["luz_agua"]
+        k = min(larg / q["larg_ref"], 1.0)
+        c0, c1 = q["fio_claro"][1] * k, larg - (q["fio_escuro"][1] + q["passagem"][1]) * k
+        corpo = np.array([(1.0 if c0 <= ((x + 0.5 - x0) if lado == "direita" else (x1 - x - 0.5)) < c1 else 0.0)
+                          for x in range(X0, X1)], np.float32)
+        bgr = cor[:, ::-1][None, :, :] * (1 + (luz[:, None, None] - 1) * corpo[None, :, None])
+        a = (cv[:, None] * cob[None, :])[..., None]
+        out[Y0:Y1, X0:X1] = out[Y0:Y1, X0:X1] * (1 - a) + bgr * a
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def _vidros_px(planta, Q=None):
+    Q = Q or quadro(planta)
+    res = []
+    for r, lado in VIDROS_BORDA[planta]:
+        (a, b), (c, d) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        res.append(((min(a, c), min(b, d), max(a, c), max(b, d)), lado))
+    return res
 
 
 def quadro(planta):
@@ -496,11 +595,17 @@ def main():
     ap.add_argument("--bordas", action="store_true", help="só as bordas retas pelo PDF (`BORDAS`), sem trocar a água")
     ap.add_argument("--rede", type=Path, help="com --bordas: a final de antes do turquesa, para a rede das cáusticas "
                     "seguir contínua até a beira")
+    ap.add_argument("--vidros", action="store_true", help="só os vidros da borda (`VIDROS_BORDA`), no desenho da Casa C")
     a = ap.parse_args()
     final = FINAIS[a.planta]
     if a.antes:
         shutil.copyfile(final, a.antes)
     img = cv2.imread(str(final))
+    if a.vidros:
+        vp = _vidros_px(a.planta)
+        cv2.imwrite(str(final), vidros_borda(img, vp))
+        print(f"{a.planta}: {len(vp)} vidros da borda no desenho do da Casa C -> {final.relative_to(RAIZ)}")
+        return
     if a.bordas:
         corpos, pedra, tom, grao, prot = _bordas_px(a.planta)
         rede = _rede_quadro(cv2.imread(str(a.rede)), [r for c in corpos for r in c], img.shape) if a.rede else None

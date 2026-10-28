@@ -820,6 +820,8 @@ Pedido do usuário (22/10/26), às perguntas dos mapas do pente fino da Casa C: 
 python3 final3840_casac.py Terreo               # -> ../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png
 python3 final3840_casac.py Subsolo              # depois do Térreo (a hachura vem dele)
 python3 final3840_casac.py Terreo --de pecas    # refaz só dali em diante; --ate <etapa> para nela
+# desde 28/10, o Térreo tem por cima o turquesa e as bordas da piscina (`piscinas_turquesa.py`): depois do motor,
+# python3 piscinas_turquesa.py C-Terreo && python3 piscinas_turquesa.py C-Terreo --bordas --rede <a saída do motor>
 # depois, rodape_entrega.py --no-quadro e pdf_entrega.py, com a config da Casa C
 ```
 
@@ -1233,4 +1235,21 @@ Desde o pedido seguinte ("aplique nas bordas das outras casas também"), a rotin
 git show 3041093^:projetos/POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_rotulos.png > /tmp/a_pre_turquesa.png
 python3 piscinas_turquesa.py A-Terreo --bordas --rede /tmp/a_pre_turquesa.png   # e B-Terreo, C-Terreo, D-Terreo
 python3 final3840_casae.py Terreo --de piscina && python3 final3840_casae.py 1Pavimento   # a Casa E
+```
+
+### Os vidros da borda no desenho da Casa C (`--vidros`)
+
+Pedidos de 28/10/26: "faça a representação do vidro borda da piscina da casa B igual ao da Casa C. Na verdade, na casa B são dois vidros na borda"; "faça o mesmo na piscina da casa E, com duas bordas em vidro". `vidros_borda(img, vidros_px, q, pontas)` desenha cada vidro de `VIDROS_BORDA[planta]` (pt do PDF e o lado da água) com o perfil do vidro da borda infinita da Casa C na final (`VIDRO`, a mediana de 135 linhas):
+- de fora para a água: o fio claro do topo (1 px), o corpo turquesa escuro (3 px, mais claro para dentro), o fio escuro da face junto à água (2 px) e a passagem clara (1 px), num vidro de `larg_ref` = 7 px; num vidro mais fino, tudo na proporção; num mais largo, os fios ficam e o corpo estica;
+- as faces e as pontas com a cobertura exata de cada px (`ss`); o corpo acompanha de leve a luz da água ao lado (`luz_agua`);
+- `pontas=True` (Casa E): as `ponta_px` linhas da pedra logo acima e abaixo do vidro, onde o cinza do vidro antigo avançava sobre o Bege Bahia, refeitas com a pedra espelhada na mesma coluna.
+
+`VIDROS_BORDA`:
+- `B-Terreo`: a faixa branca de 17 pt entre o deck e o braço (sem divisões no PDF) leva dois vidros de 5,7 pt (a largura do da Casa C), um junto ao deck e outro junto ao braço, com a água entre eles; do fim da pedra de cima ao bloco de pedra de baixo.
+- `E-Terreo`: as duas lâminas da ARQ_PAREDE (1,7 + 5,1 + 1,7 pt) do lado esquerdo da piscina, na altura da água; entram na etapa `piscina` do motor (`final3840_casae.piscina_terreo_e`), depois das bordas.
+
+```bash
+# de POE642_CasaA/scripts/, depois das bordas
+python3 piscinas_turquesa.py B-Terreo --vidros
+python3 final3840_casae.py Terreo --de piscina && python3 final3840_casae.py 1Pavimento   # a Casa E (apagar antes o Terreo_nublado_fonte.png do cache)
 ```

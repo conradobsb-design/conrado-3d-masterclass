@@ -159,7 +159,9 @@ GUARDA_ROUPAS_C = {"ss": 4, "semente": 51, "pecas": [
 COOKTOPS_C = [{"pt": (1188.3, 1264.3, 1238.2, 1292.6), "giro": 180},
               {"pt": (2057.7, 615.1, 2086.0, 664.9), "giro": 270}]
 # As 4 banquetas da ilha da cozinha: os círculos (0,40 m) da ARQ_LAYOUT HUMANIZAÇÃO à esquerda da ilha, viradas para ela
-BANQUETAS_C = {"caixa_pt": (2000.0, 590.0, 2035.0, 760.0), "giro": 270}
+# (na folha da `banqueta_linho`, a frente do assento fica em cima: `giro` 90 a põe para a direita, para a ilha; com 270
+# ficavam de costas para ela, o encosto sob o tampo; usuário, 28/10/26: "pode girar as banquetas da casa C")
+BANQUETAS_C = {"caixa_pt": (2000.0, 590.0, 2035.0, 760.0), "giro": 90}
 # O chuveiro externo do pisante (14/10, item 14): a ducha, o braço até o muro e a canopla do PDF
 CHUVEIRO_C = {"ducha": (1000.4, 1942.0, 1011.6, 1953.2), "braco": (1005.3, 1946.5, 1006.7, 1968.8),
               "canopla": (1004.3, 1968.8, 1007.7, 1969.4)}

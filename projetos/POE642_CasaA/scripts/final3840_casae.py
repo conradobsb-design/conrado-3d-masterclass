@@ -1652,8 +1652,12 @@ def piscina_terreo_e(Q, img):
     corpos, _, _, _, _ = PT._bordas_px("E-Terreo", Q)
     rede = PT._rede_quadro(img, [r for c in corpos for r in c], img.shape, px_m=Q.px_m, semente=q["semente"])
     out = PT.bordas_retas(out, corpos, rede=rede, proteger=vidros)
+    # as duas bordas em vidro no desenho do vidro da Casa C (usuário, 28/10/26: "faça o mesmo na piscina da casa E, com
+    # duas bordas em vidro"): `piscinas_turquesa.vidros_borda`, nas lâminas da ARQ_PAREDE (`VIDROS_BORDA["E-Terreo"]`)
+    out = PT.vidros_borda(out, PT._vidros_px("E-Terreo", Q), pontas=True)
     print(f"    piscina: a água no turquesa da referência ({', '.join(map(str, areas))} m²: piscina e prainha, a faixa entre "
-          f"os vidros, o spa), com as peças, os degraus e a rede das cáusticas; as bordas retas pelo PDF; os vidros ficam")
+          f"os vidros, o spa), com as peças, os degraus e a rede das cáusticas; as bordas retas pelo PDF; as duas bordas "
+          f"em vidro no desenho da Casa C")
     return out
 
 
