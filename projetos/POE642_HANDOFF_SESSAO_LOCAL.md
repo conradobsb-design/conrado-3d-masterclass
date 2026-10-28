@@ -3586,3 +3586,5 @@ O usuário: "diminua um pouco o tamanho" e "jogue um leve efeito de sombra para 
 - O sofá fica sob a laje do 1º Pavimento: o Térreo nublado não muda.
 
 Antes e depois (o antes é a entrega anterior, 24743ab): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_sombra_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
+
+**Aprovado** (28/10/26): "ficou bom, sofá aprovado", o sofá da varanda como está (964186a): simétrico, 3,67 x 1,06 m, com a sombra leve. O tapete atrás das poltronas, o resto do Térreo e o 1º Pavimento da Casa E seguem aguardando a validação.
