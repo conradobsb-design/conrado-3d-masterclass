@@ -3050,3 +3050,28 @@ Apresentado ao usuário, sem alterar (aguardando o OK): os tanques da área de s
 Seguem em aberto, aguardando o usuário: as cadeiras dos jogos da varanda ("volta as cadeiras que estavam antes": qual versão), a proposta A ou B do estar do living, a faixa branca vertical à esquerda do elevador (manter ou cinza) e as banquetas do Térreo aprovado da Casa C (`BANQUETAS_C["giro"]` 270 → 90, sem mexer na Casa C sem o OK). O Térreo da Casa D segue sem o OK.
 
 **Aprovado** (28/10/26): "APROVADA", logo depois do 9º lote. Térreo da Casa D fechado, como está na final (`POE642_CasaD/renders/POE642_CasaD_PH_Terreo_final_rotulos.png`), na prancha e no PDF da Casa D (`POE642_CasaD/entrega/POE642_CasaD_Plantas_Humanizadas.pdf`, Subsolo e Térreo). A Casa D está fechada (o Subsolo foi aprovado em 27/10). Com a aprovação, ficam como estão os itens da Casa D que esperavam resposta: os tanques da área de serviço (o branco entre a janela e as cubas, apresentado sem alterar), as cadeiras dos jogos da varanda (no areia), o estar do living (sem a proposta A ou B; o sofá anterior com as almofadas de lã), a faixa branca à esquerda do elevador e a textura do sofá (a pergunta sem imagem). Segue em aberto, de outra casa, as banquetas do Térreo aprovado da Casa C (`BANQUETAS_C["giro"]` 270 → 90, sem mexer na Casa C sem o OK). A seguir, a Casa E (Subsolo, Térreo e 1º Pavimento), planta por planta: a lista de inconformidades de cada uma para o OK antes de alterar.
+
+## Casa E · rodada de 28/10/26 (auditoria de 26/10, planta por planta, sem esperar o OK)
+
+Pedido do usuário (28/10/26), logo depois de aprovar o Térreo da Casa D: "PODE COMEÇAR COM O SUBSOLO, NA SEQUENCIA O TERREO E DEPOIS O PRIMEIRO PAVIMENTO. VOU DORMIR AGORA E QUERO QUE ELENQUE AS ALTERAÇÕES, APLIQUE-AS E AMANHÃ CEDO EU VALIDO. SÓ FINALIZE APÓS QUE APLICAR A ÚLTIMA ALTERAÇÃO DA ÚLTIMA PLANTA QUE É O 1º PAVIMENTO." Desta vez a lista não espera o OK: cada planta tem a lista e a aplicação, e o usuário valida de manhã.
+
+A lista de cada planta é a da auditoria de 26/10 (`POE642_CasaE/renders/POE642_CasaE_PH_<pav>_auditoria_2610.jpg`) com as regras que as Casas A a D já aprovaram (`POE642_REGRAS.md`, seção 19). Motor novo: `POE642_CasaA/scripts/final3840_casae.py`. Ele parte da final aprovada de cada pavimento, lida do git (o commit está em `PAV_E`), tira os rótulos pela conta inversa da composição (a mesma rotina dos rótulos sobre um quadro preto e um branco dá o alfa e a cor de cada px do texto) e, no fim, escreve os rótulos de novo pela rotina aprovada da Casa E (`retoque_1pav_casae.rotulos_ambientes`), com os ajustes desta rodada (`AJUSTES_E`).
+
+### Subsolo (28/10/26)
+
+Lista aplicada:
+1. **E11, pisos** nas texturas e escalas das Casas B a D (`F.piso_textura`, na resolução da prancha):
+   - o vinílico da academia nas réguas do 1º Pavimento e das Casas B a D, no tom dele;
+   - o granito do DCE e da casa de máquinas de baixo no granito de referência das Casas B a D (o do Térreo da Casa E, RGB ~116, 87, 68). Era o Marrom Tabaco escuro (~83, 59, 52) que vinha do render de 2000 px;
+   - o Bege Bahia (circulação, depósito, casa de máquinas da direita e WC DCE 2) na foto da biblioteca, no tom das Casas B a D;
+   - o travertino da sauna, do ambiente e do vestiário na foto da biblioteca, no tom do travertino do Térreo.
+   As peças ficam as da final aprovada: as do PDF (móveis, louças, bancadas, marcenaria) e o que a final mostra com outra cor que não a do piso. As sombras e os reflexos antigos do render (o piso mais escuro ou mais claro, na mesma cor) saem com o piso velho, e cada peça ganha a sombra curta de novo. Os aparelhos da academia, que o PDF só traça (e o render pôs um pouco fora do traço), contam onde a final não mostra a cor do piso.
+2. **E3, E8, escada da circulação**: sem as linhas e sem o triângulo. Os 17 degraus são em travertino, com o sombreamento de subida da direita para a esquerda (o sentido do triângulo aprovado em 20/10: "subindo da direita para esquerda, com a parte da direita viva"). O trecho depois do corte do PDF, à esquerda, fica nevoado, sem a linha de corte; no lugar dela, só uma sombra suave, como no Subsolo aprovado da Casa D. O S do PDF fica no 1º degrau, o da direita.
+3. **E2, armário do DCE**: o retângulo com a diagonal junto à parede de baixo tem os cabides e o cabideiro (o guarda-roupa aberto dos closets), aberto para o quarto.
+4. **E9, bancada do WC DCE 2**: a borda no tom escurecido da pedra e a sombra curta.
+5. **E10, paredes** em cinza 80, no contorno do PDF; a franja preta antiga em volta foi refeita. Os 15 trechos do PDF que a final mostra claros ficam como estão (vidros, o fundo do poço do elevador). Não há pilares no Subsolo: os da EST - Pilar são do Térreo, fora da pegada.
+6. **E7, rótulo do WC DCE 2**: sai da área do chuveiro para o meio do piso seco, entre a porta, a bancada e o vaso, no corpo 0,85 do PDF.
+
+O resto fica como estava: boxes, louças, elevador, piscina, banco da sauna, portas e a hachura do lote. As alterações ficam só dentro da pegada do Subsolo (x 858 a 2082, y 303 a 1106 no quadro).
+
+Rodado `python3 final3840_casae.py Subsolo`. Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_{planta,escada,dce_wc,academia,sauna_vestiario}_antes_depois.jpg`. Prancha `POE642_CasaE/entrega/POE642_CasaE_PH_Subsolo_entrega.png` e PDF `POE642_CasaE_Plantas_Humanizadas.pdf` refeitos.

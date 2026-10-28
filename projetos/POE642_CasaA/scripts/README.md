@@ -1087,3 +1087,35 @@ python3 cortinas_franzidas.py E-1Pavimento      # 10
 ```
 
 Rodar de novo sobre uma final que já tem o pano franzido não serve: o script procura o pano antigo. Para refazer, volte a final anterior (a do commit de 27/10, antes das cortinas) e rode de novo. Os Subsolos não mudam: a hachura deles usa só o contorno do lote do Térreo. Antes e depois: `renders/..._cortinas2710_antes_depois.jpg` em cada casa.
+
+## As finais da Casa E em 3840 px com a auditoria de 26/10 (`final3840_casae.py`)
+
+Pedido do usuário (28/10/26): "PODE COMEÇAR COM O SUBSOLO, NA SEQUENCIA O TERREO E DEPOIS O PRIMEIRO PAVIMENTO [...] ELENQUE AS ALTERAÇÕES, APLIQUE-AS E AMANHÃ CEDO EU VALIDO." A lista de cada planta está no handoff ("Casa E · rodada de 28/10/26").
+
+Como funciona:
+- **Ponto de partida.** A final aprovada de cada pavimento, lida do git: o commit fica em `PAV_E[...]["aprovada"]`, porque a final é regravada no lugar (`final_aprovada`).
+- **Rótulos.** Saem pela conta inversa da composição (`sem_rotulos`): a rotina dos rótulos da Casa E (`retoque_1pav_casae.rotulos_ambientes`, com os ajustes de cada pavimento) é rodada num quadro preto e num branco, o que dá o alfa e a cor de cada px do texto. O fundo é tirado do px da final; onde o alfa passa de 0,8, é refeito pelos vizinhos. No fim, os rótulos são escritos de novo, com os ajustes desta rodada (`AJUSTES_E`, que substituem os de mesmo nome).
+- **Quadro.** `QuadroE` é o `final3840_casab.Quadro` com os caminhos da Casa E: PDF, base 16:9 e base chapada da legenda.
+
+Etapas do Subsolo (`passos_subsolo`):
+- `pisos`: os pisos nas texturas e escalas das Casas B a D (`troca_piso`, com `F.piso_textura`), na mancha da legenda (`legenda`, sem as manchas soltas de menos de 300 px).
+  - As peças ficam: as do PDF (`objetos_pdf`, `CAMADAS_OBJ`, cheias por dentro) e o que a final mostra com outra cor ou muito escuro junto a elas (`_piso_e_peca`, `_pecas_final`, `PECAS_E`).
+  - A sombra e o reflexo do render (a mesma cromaticidade do piso, mais escura ou mais clara) saem com o piso velho. As peças que o PDF só traça (`camadas_tracos`, os aparelhos da academia) contam só onde a final não mostra a cor do piso.
+  - Por fim, a sombra curta de cada peça.
+- `escada`: `escada_e`. Os degraus do PDF na pedra da escada, com o sombreamento de `F.ESCADA_SOMBRA`, sem linhas e sem triângulo. Depois do corte, o trecho nevoado, sem a linha e com a sombra suave no lugar. A letra do PDF (`F.letra`) vai no 1º degrau.
+- `armario`: `armario_cabides`, o guarda-roupa aberto com os cabides (`elementos.guarda_roupa`) no retângulo do PDF.
+- `bancada`: `bancada_e9`, a borda no tom escurecido da pedra (só fora das paredes) e a sombra curta.
+- `paredes`: `paredes_e`, as paredes em cinza 80 nos preenchimentos escuros da ARQ_PAREDE que a final mostra escuros.
+  - Antes, a franja preta antiga a até 3 px é refeita pelos vizinhos.
+  - O preto que sobra até 15 px das paredes vai ao cinza pela conta do alfa contra o piso de perto.
+  - Os pilares da EST - Pilar ficam pretos.
+- `rotulos`: `escrever_rotulos`.
+
+```bash
+# de POE642_CasaA/scripts/
+python3 final3840_casae.py Subsolo              # -> ../../POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_final.png (+ _preview.jpg)
+python3 final3840_casae.py Subsolo --de rotulos # recomeça de uma etapa (as anteriores no cache, $POE642_CACHE ou /tmp/poe642_casae_etapas)
+C=../../POE642_CasaE
+python3 rodape_entrega.py --config $C/config_bases.json --no-quadro --render Subsolo=$C/renders/POE642_CasaE_PH_Subsolo_v1_final.png
+python3 pdf_entrega.py --config $C/config_bases.json
+```
