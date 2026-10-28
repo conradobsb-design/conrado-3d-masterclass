@@ -182,7 +182,7 @@ LINHAS_FICAM = ("DOC_LINHAS E PROJEÇÕES", "ARQ_ELEMENTOS FIXOS")
 CAMADAS_OBJ = ("ARQ_ MOB COMUM", "ARQ_LOUÇAS E METAIS", "ARQ_BANCADAS", "ARQ_LAYOUT HUMANIZAÇÃO", "ARQ_MARCENARIA",
                "ARQ_MOBILIÁRIO", "ARQ - Marcenaria", "INS_INSTALAÇÕES HIDRÁULICAS")
 PECAS_E = {"max_m2": 6.0, "linha_longa_m": 1.2, "desvio": 30, "croma": 0.03, "escuro": 0.62, "sombra_min": 0.30, "claro": 1.35,
-           "area_min": 25, "junto_px": 4, "camadas_tracos": ("ARQ_ MOB COMUM",),
+           "area_min": 25, "junto_px": 4, "borda_px": 2, "borda_desvio": 14, "camadas_tracos": ("ARQ_ MOB COMUM",),
            "sombra": (0.26, 1.15, 1.35)}                     # força, distância e sigma (px) da sombra curta
 
 
@@ -268,6 +268,12 @@ def troca_piso(Q, img, ini, legenda, textura, tom, sig_m, semente, fora=None, fo
     pec = (pdf & legenda) | _pecas_final(Q, ini, legenda, solido | tracos, perto)
     if pecas is not None:
         pec |= pecas & legenda
+    # a borda das peças (a passagem para o piso, a quina mais escura de um pufe de madeira) vai junto com elas: o px a
+    # até `borda_px` de uma peça que ainda foge da luz do piso (`borda_desvio`)
+    L, _, _ = _piso_e_peca(Q, ini, legenda, perto)
+    k = 2 * q["borda_px"] + 1
+    foge = np.abs(ini.astype(np.float32) - L).max(axis=2) > q["borda_desvio"]
+    pec |= cv2.dilate(pec.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & foge & legenda
     m = legenda & ~pec & ~paredes_pdf(Q, folga=1) & ~linhas_pdf(Q)
     if fora is not None:
         m &= ~fora
@@ -462,10 +468,11 @@ def escada_e(Q, img, e, ss=8):
     out = np.clip(out, 0, 255).astype(np.uint8)
     no_alto = e.get("letra_no_alto", False)                               # o D no degrau de cima, de onde se desce
     b = bordas[-2:] if direita != no_alto else bordas[:2]
-    out = F.letra(Q, out, e["letra"], Q.p2q((b[0] + b[1]) / 2, (ey0 + ey1) / 2))
+    if e.get("letra"):
+        out = F.letra(Q, out, e["letra"], Q.p2q((b[0] + b[1]) / 2, (ey0 + ey1) / 2))
     print(f"    escada {e['nome']}: {n} degraus em {e['textura']}, sem linhas e sem triângulo, com o sombreamento "
           f"{'de descida' if no_alto else 'de subida'}; {'o trecho depois do corte nevoado; ' if e.get('corte') else ''}"
-          f"o {e['letra']} no degrau {'de cima' if no_alto else '1'}")
+          + (f"o {e['letra']} no degrau {'de cima' if no_alto else '1'}" if e.get("letra") else "sem a letra"))
     return out
 
 
@@ -608,9 +615,10 @@ def blocos_e(Q, img, q):
                                                  (w * k, h * k)), (0, 0), s["sig_m"] * Q.px_m * k) * (de_baixo > 0)
             reg *= (1 - s["forca"] * reduzir(sb))[..., None]
     out = np.clip(out, 0, 255).astype(np.uint8)
-    out = F.letra(Q, out, q["letra"], Q.p2q(*q["letra_pt"]))
+    if q.get("letra"):
+        out = F.letra(Q, out, q["letra"], Q.p2q(*q["letra_pt"]))
     print(f"    {q['nome']}: {n} blocos de pedra do PDF em Bege Bahia, sem contorno, cada um com a sombra curta do de "
-          f"cima; o {q['letra']} no bloco de cima")
+          f"cima; " + (f"o {q['letra']} no bloco de cima" if q.get("letra") else "sem a letra"))
     return out
 
 
@@ -659,12 +667,16 @@ AJUSTES_E["Subsolo"] = [("CASA DE MÁQUINAS", (1043.4, 335.8), (0, 0), 1.0),
                         ("WC DCE 2", (986.5, 310.9), (-3.9, -30.0), 0.85)]
 
 
-def pisos_e(Q, img, specs):
+def pisos_e(Q, img, specs, ficam=()):
+    """ficam: peças da final que o PDF não desenha e que têm a cor do piso (círculos: centro e raio em px do quadro)."""
     ini = img.copy()
     out = img.copy()
+    extra = np.zeros((Q.H, Q.W), np.uint8)
+    for cx, cy, r in ficam:
+        cv2.circle(extra, (int(round(cx)), int(round(cy))), int(round(r)), 1, -1)
     for nome, cores, tex, tom, sig, sem, forca in specs:
         leg = legenda(Q, cores)
-        out, m, _ = troca_piso(Q, out, ini, leg, tex, tom, sig, sem, forca=forca)
+        out, m, _ = troca_piso(Q, out, ini, leg, tex, tom, sig, sem, forca=forca, pecas=extra.astype(bool))
         print(f"    {nome}: {m.sum() / Q.px_m ** 2:.1f} m² ({tex}, na escala da prancha)")
     return out
 
@@ -747,7 +759,91 @@ def _bancadas(Q, img, lista):
     return img
 
 
-PASSOS = {"Subsolo": passos_subsolo, "Terreo": passos_terreo}
+# O 1º Pavimento (auditoria de 26/10, mapa `renders/POE642_CasaE_PH_1Pavimento_auditoria_2610.jpg`, e as regras aprovadas
+# no 1º Pavimento da Casa A):
+# 1. o Térreo nublado em volta refeito a partir do Térreo novo desta rodada (as paredes em cinza 80, o granito, as escadas),
+#    sem as letras das escadas, a seta e os rótulos (`terreo_para_nublado`), no mesmo nublado (`entorno_esmaecido.NUBLADO`:
+#    70% de branco, 80% da saturação, desfoque leve); só onde a final mostra o Térreo (fora da pegada do 1º Pavimento e
+#    nos vazios, onde o X e o vidro ficam por cima);
+# 2. E11: o vinílico (suítes, closets, circulação, sala íntima) nas réguas das Casas B a D na resolução da prancha (vinha
+#    do retocado de 2000 px, ampliado);
+# 3. E3, E8: a escada interna sem as linhas e sem o triângulo: o trecho do 1º Pavimento (à esquerda) com o sombreamento
+#    de descida para a direita, o trecho depois do corte (os degraus do Térreo, à direita) nevoado e o D do PDF no degrau
+#    de cima, à esquerda (onde estava o triângulo);
+# 4. E9: as bancadas dos banhos master, 1, 2, 3 e 4 (claras sobre o porcelanato claro) com a borda no tom escurecido da
+#    pedra e a sombra curta;
+# 5. E10: as paredes em cinza 80 (não há pilares no 1º Pavimento).
+PISOS_1PAV_E = [("vinílico", [(79, 120, 168)], "vinilico", None, 1.0, 2821, None)]
+# a mesinha redonda de madeira ao lado do sofá da sala íntima (da final aprovada; o PDF não a desenha) tem a cor do
+# vinílico e saía com o piso
+FICAM_1PAV_E = [(2097.5, 1222.0, 17.5)]
+ESCADA_1PAV_E = dict(ESCADAS_TER_E[1], nome="interna", apos="direita", letra="D", letra_no_alto=True, semente=2822)
+BANCADAS_1PAV_E = [("banho master", (1692.9, 655.9, 1726.1, 789.6)), ("banho 1", (2120.1, 1113.0, 2194.4, 1148.0)),
+                   ("banho 2", (2120.1, 764.4, 2194.4, 799.3)), ("banho 3", (1330.5, 1339.6, 1402.9, 1371.0)),
+                   ("banho 4", (1330.5, 1382.3, 1402.9, 1413.7))]
+
+
+def terreo_para_nublado():
+    """O Térreo novo sem as letras das escadas, a seta e os rótulos: as etapas do Térreo de novo a partir dos pisos, com
+    as letras desligadas (em cache)."""
+    c = ETAPAS / "Terreo_nublado_fonte.png"
+    if c.exists():
+        return cv2.imread(str(c))
+    QT = QuadroE("Terreo")
+    pisos = ETAPAS / "Terreo_pisos.png"
+    img = cv2.imread(str(pisos)) if pisos.exists() else final_3840("Terreo", ate="pisos", salvar=False)
+    sem = [dict(e, letra=None) for e in ESCADAS_TER_E]
+    img = blocos_e(QT, escada_e(QT, escada_e(QT, img, sem[0]), sem[1]), dict(BLOCOS_TER_E, letra=None))
+    img = armario_cabides(QT, img, ARMARIO_DCE_TER_E["pt"], ARMARIO_DCE_TER_E["lado"], nome="DCE")
+    img = box_e(QT, img, BOX_WC_DCE1, nome="WC DCE 1")
+    img = _bancadas(QT, img, BANCADAS_TER_E)
+    img = paredes_e(QT, img)
+    cv2.imwrite(str(c), img)
+    return img
+
+
+def nublado_novo(Q, img):
+    """Troca o Térreo nublado da final (o do retocado de 2000 px, `opcoes_1pav_casae.TERREO`) pelo do Térreo novo, onde a
+    final mostra o Térreo: fora da pegada (o px é o contexto antigo) e nos vazios (o contexto multiplicado pelo X e pelo
+    vidro: entra a razão novo/antigo)."""
+    import opcoes_1pav_casae as O
+    from entorno_esmaecido import NUBLADO, contexto_render, pegada
+    W = Q.W
+    base = cv2.imread(str(O.BASE_CIMA))
+    H = round(base.shape[0] * W / base.shape[1])
+    base = cv2.resize(base, (W, H), interpolation=cv2.INTER_AREA)
+    peg = pegada(base, O.FORA)
+    a = np.maximum(cv2.GaussianBlur(peg.astype(np.float32), (0, 0), 1.0), peg)
+    t_velho = contexto_render(O.TERREO, O.BASE_TERREO, W, **NUBLADO)
+    n = NUBLADO
+    t = cv2.GaussianBlur(terreo_para_nublado().astype(np.float32), (0, 0), n["desfoque"] * W / 3840)
+    cinza = t.mean(axis=2, keepdims=True)
+    t = cinza + (t - cinza) * n["saturacao"]
+    t_novo = 255 - (255 - t) * (1 - n["clarear"])
+    tracejado = (base.min(axis=2) < 225) & ~peg
+    f = img.astype(np.float32)
+    ctx = (1 - a) * ~tracejado
+    out = f + (t_novo - t_velho) * ctx[..., None]
+    vaz = O.mascara_vazios(base) & (a > 0.5)
+    raz = t_novo / np.maximum(t_velho, 1)
+    out[vaz] = (f * raz)[vaz]
+    print(f"    o Térreo nublado em volta refeito com o Térreo novo: {int((ctx > 0.5).sum())} px de contexto e "
+          f"{int(vaz.sum())} px nos vazios")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def passos_1pav(Q):
+    return [
+        ("nublado", lambda im: nublado_novo(Q, im)),
+        ("pisos", lambda im: pisos_e(Q, im, PISOS_1PAV_E, FICAM_1PAV_E)),
+        ("escada", lambda im: escada_e(Q, im, ESCADA_1PAV_E)),
+        ("bancadas", lambda im: _bancadas(Q, im, BANCADAS_1PAV_E)),
+        ("paredes", lambda im: paredes_e(Q, im)),
+        ("rotulos", lambda im: escrever_rotulos("1Pavimento", im)),
+    ]
+
+
+PASSOS = {"Subsolo": passos_subsolo, "Terreo": passos_terreo, "1Pavimento": passos_1pav}
 
 
 def final_3840(chave, de=None, ate=None, salvar=True):

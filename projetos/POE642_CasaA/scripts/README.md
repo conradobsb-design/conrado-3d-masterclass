@@ -1137,3 +1137,22 @@ python3 final3840_casae.py Terreo
 python3 rodape_entrega.py --config $C/config_bases.json --no-quadro --render Terreo=$C/renders/POE642_CasaE_PH_Terreo_v1_final.png
 python3 pdf_entrega.py --config $C/config_bases.json
 ```
+
+Etapas do 1º Pavimento (`passos_1pav`):
+- `nublado`: `nublado_novo`.
+  - O contexto antigo (`entorno_esmaecido.contexto_render` do `opcoes_1pav_casae.TERREO`, o retocado de 2000 px) é trocado pelo nublado do Térreo novo (`terreo_para_nublado`: as etapas do Térreo a partir dos pisos, sem as letras, a seta e os rótulos, em cache).
+  - Fora da pegada (`entorno_esmaecido.pegada` da base do 1º Pavimento, com o `FORA` das opções) a troca é direta; nos vazios, entra a razão novo/antigo.
+- `pisos`: o vinílico (`PISOS_1PAV_E`), com as peças da final que o PDF não desenha em `FICAM_1PAV_E`.
+- `escada`: `ESCADA_1PAV_E`, o D no degrau de cima.
+- `bancadas`: `BANCADAS_1PAV_E`.
+- `paredes` e `rotulos`.
+
+A borda das peças vai junto com elas na troca dos pisos (`PECAS_E["borda_px"]`, `borda_desvio`). Os rótulos do 1º Pavimento são escritos de novo com os ajustes aprovados (`retoque_1pav_casae.ROTULOS`).
+
+```bash
+python3 final3840_casae.py 1Pavimento
+python3 rodape_entrega.py --config $C/config_bases.json --no-quadro --render 1Pavimento=$C/renders/POE642_CasaE_PH_1Pavimento_v1_final.png
+python3 pdf_entrega.py --config $C/config_bases.json
+```
+
+Depois de mudar o Térreo, apagar o `Terreo_nublado_fonte.png` do cache e rodar o 1º Pavimento de novo.

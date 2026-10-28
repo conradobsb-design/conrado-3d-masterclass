@@ -598,3 +598,10 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
   - a seta da entrada principal no Bege Bahia de fora, apontando para a porta pivotante do HALL DE ENTRADA (E4);
   - o rótulo do WC DCE 1 no piso seco, fora do box (E7).
   - Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_*_antes_depois.jpg`.
+- **Casa E · 1º Pavimento (28/10, `final3840_casae.py`; aplicado sem o OK prévio, como o Subsolo e o Térreo; aguardando a validação):** a lista do mapa `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_auditoria_2610.jpg`:
+  - o Térreo nublado em volta refeito a partir do Térreo novo, sem as letras, a seta e os rótulos (como no 1º Pavimento da Casa A);
+  - o vinílico nas réguas das Casas B a D, na resolução da prancha (E11);
+  - a escada interna sem linhas e sem triângulo, com o sombreamento de descida, o trecho do Térreo nevoado depois do corte e o D do PDF no degrau de cima (E3, E8);
+  - as bancadas dos banhos master, 1, 2, 3 e 4 com a borda e a sombra (E9);
+  - paredes em cinza 80 (E10).
+  - Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_*_antes_depois.jpg`.

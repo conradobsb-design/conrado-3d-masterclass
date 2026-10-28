@@ -3094,3 +3094,16 @@ Lista aplicada:
 Rodado `python3 final3840_casae.py Terreo`. Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_{planta,escada_gourmet,escada_interna,degraus_deck,dce_wc,banho_gourmet,lavabo_hall,cozinha_gourmet,garagem}_antes_depois.jpg`. Prancha `POE642_CasaE/entrega/POE642_CasaE_PH_Terreo_entrega.png` e PDF refeitos.
 
 Hachura do Subsolo: o lote vem do Térreo final. Recalculado com o Térreo novo, ele muda só 23 px, no canto de baixo à esquerda do lote: as linhas do lote ficaram cinza. Na final do Subsolo, esses px ficam sob a linha do lote da base, então ela não muda.
+
+### 1º Pavimento (28/10/26)
+
+Lista aplicada:
+1. **Térreo nublado em volta**, refeito a partir do Térreo novo desta rodada (paredes em cinza 80, granito, escadas), sem as letras das escadas, a seta e os rótulos. É o mesmo nublado de antes: 70% de branco, 80% da saturação, desfoque leve. Só muda onde a final mostra o Térreo: fora da pegada do 1º Pavimento e nos vazios, onde o X e o vidro ficam por cima. Antes, o nublado vinha do retocado de 2000 px do Térreo, com o triângulo da escada gourmet e as paredes pretas. O nublado anterior foi conferido contra a final aprovada (diferença máxima de 1,6, só arredondamento) antes da troca.
+2. **E11, vinílico** (suítes, closets, circulação, sala íntima) nas réguas das Casas B a D, na resolução da prancha. Vinha do retocado de 2000 px, ampliado. As peças ficam as da final, com a borda delas. A mesinha redonda de madeira ao lado do sofá da sala íntima, que o PDF não desenha e tem a cor do vinílico, fica protegida (`FICAM_1PAV_E`).
+3. **E3, E8, escada interna**: sem as linhas e sem o triângulo. O trecho do 1º Pavimento, à esquerda, tem o sombreamento de descida para a direita. Os degraus depois do corte, que são do Térreo, à direita, ficam nevoados. O D do PDF vai no degrau de cima, à esquerda, onde estava o triângulo.
+4. **E9, bancadas** dos banhos master, 1, 2, 3 e 4 (claras sobre o porcelanato claro): a borda no tom escurecido da pedra e a sombra curta.
+5. **E10, paredes** em cinza 80. Não há pilares no 1º Pavimento.
+
+O resto fica como estava: rótulos, cortinas franzidas de 27/10, camas, guarda-roupas com cabides, boxes, quartzito Aura dos banhos e Bege Bahia das varandas.
+
+Rodado `python3 final3840_casae.py 1Pavimento`. Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_{planta,escada,banhos_3_4,banho_master,banhos_1_2,suites,sala_intima,nublado}_antes_depois.jpg`. Prancha `POE642_CasaE/entrega/POE642_CasaE_PH_1Pavimento_entrega.png` e PDF `POE642_CasaE_Plantas_Humanizadas.pdf` (Subsolo, Térreo e 1º Pavimento) refeitos.
