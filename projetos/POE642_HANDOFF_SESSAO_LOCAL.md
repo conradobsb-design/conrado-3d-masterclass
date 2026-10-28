@@ -3223,3 +3223,20 @@ O que foi feito (`final3840_casae.py`):
 4. **A quina das bordas** (`PISCINA_E`): a coluna de Bege Bahia à direita da piscina desce até o fundo do degrau da sauna e encontra o degrau no vidro, numa quina só. Na rodada anterior, ao tirar a divisória, a água tinha entrado também sob a coluna; agora a água sem divisória vai só entre as duas partes da piscina, até a coluna.
 
 Antes e depois (o antes é a final de 3041093): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_pedidos2810c_{planta,quina_bordas_dente,piscina_paredes,rotulo_elevador}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.
+
+### Pedidos de 28/10/26, 4ª rodada: o toco do ambiente e a parede da sauna, retos
+
+O usuário, vendo a prancha do Subsolo:
+- com o recorte do toco entre a ducha e o ambiente: "A PAREDE AQUI NÃO ESTÁ PERFEITA. PRECISO DELA RETA E SEM DENTE";
+- "ESSA PAREDE DA SAUNA TEM UM DENTE TAMBÉM QUE PRECISA DE CORREÇÃO" e "é uma imperfeição no meio da parede".
+
+As causas e o que foi feito (`final3840_casae.py`):
+1. **A sobra da parede antiga**: o render desenhava as paredes ~1 px mais largas que o preenchimento do PDF e com um chapéu claro nas pontas. A limpeza da franja só pegava o preto puro, e essa sobra cinza ficava em volta das paredes novas, como um contorno irregular.
+   - Agora `paredes_e(..., ini=)` tira a sobra: os px a até 3 px da parede que nenhuma etapa redesenhou desde a final aprovada e que são mais escuros que o piso claro de perto (`PAREDES_E["sobra"]`, 0,88). Eles são refeitos pelo piso.
+2. **As faixas de revestimento das faces** (`PAREDES_SUB_E`): os preenchimentos escuros da ARQ_REVESTIMENTOS (0,57 pt), que o PDF desenha como parte da parede, entram na máscara. Sem elas, o topo do toco saía em degrau e as paredes mais finas que o desenho.
+3. **A ponta da parede da sauna junto à porta**: o dente de 1,4 pt (o encaixe do batente) sai (`tirar`), e a face de baixo segue reta até a porta (`por`).
+4. **No meio da parede da sauna**:
+   - O tique escuro onde o degrau da piscina encontra o piso da sauna fechou: o degrau vai 1,1 pt além.
+   - O fio ciano na emenda das duas partes do degrau sumiu. `_uniao` agora junta os retângulos numa máscara só, sem a junta a 50%.
+
+Antes e depois (o antes é a final de 50a24e1): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_pedidos2810d_{planta,toco_ambiente,parede_sauna}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.

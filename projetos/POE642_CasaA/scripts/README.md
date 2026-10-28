@@ -1110,6 +1110,9 @@ Etapas do Subsolo (`passos_subsolo`):
   - A peça escura pequena (até `PAREDES_E["coberta_max_pt2"]`) que o PDF cobre depois com um branco da mesma camada (`pecas_cobertas`) e que a final já mostra clara sai: os dentes junto ao vidro da piscina do Subsolo, onde a piscina pinta a borda e o degrau por cima (`PISCINA_E["dentes"]`).
   - `sempre`: caixas (pt) onde toda peça escura é parede, sem a conta do escuro (no Subsolo, a caixa da piscina, onde o render pintou água sobre as pontas das paredes).
   - O fundo de toda a parede e do antialias dela é refeito pelo piso de fora (inpaint), para a borda sair regular.
+  - `ini` (a final aprovada sem os rótulos; no Subsolo): a sobra cinza da parede antiga do render em volta da nova (os px a até `folga_px` iguais aos da final aprovada e mais escuros que `sobra` do piso claro de perto) sai também.
+  - `tirar` e `por`: retângulos (pt) cujas peças escuras saem e que entram na parede (no Subsolo, `PAREDES_SUB_E`: o dente da ponta da parede da sauna trocado pela face reta). `PAREDES_SUB_E` também põe a ARQ_REVESTIMENTOS (as faixas de 0,57 pt das faces) nas camadas.
+  - `_uniao` junta os retângulos numa máscara só (em 8x), sem a junta a 50% entre vizinhos.
   - Antes, a franja preta antiga a até 3 px é refeita pelos vizinhos, e também a franja escura de pouca cor (`PAREDES_E["franja"]`).
   - O preto que sobra até 15 px das paredes vai ao cinza pela conta do alfa contra o piso de perto.
   - Os pilares da EST - Pilar ficam pretos.
