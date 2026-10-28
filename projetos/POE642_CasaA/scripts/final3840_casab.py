@@ -2700,6 +2700,8 @@ ROTULOS_F = {"raio_m": 3.0, "passo_px": 2, "folga_px": 2,
              # quebra pedidos, sem a busca do lugar livre (na Casa D, o do WC DCE dentro do box, como no PDF), por
              # pavimento: {"Terreo": {nome: {...}}}
              "fixos": {},
+             # os rótulos em branco por pedido, qualquer que seja o fundo (na Casa D, o DCE TÉRREO): {pavimento: (nomes)}
+             "brancos": {},
              "pontos": {"Terreo": {"PRAINHA": (816.8, 1470.0)}}}
 
 
@@ -2871,7 +2873,8 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
             x1_, y1_ = x0_ + int(round(bx1 - bx0)), y0_ + int(round(by1 - by0))
             ocupado[max(0, y0_ - 6):y1_ + 6, max(0, x0_ - 6):x1_ + 6] = 1
             novos.append((nome, (cx / esc, cy / esc), (dx / esc, dy / esc),
-                          dict(o2, cor=cor_do_fundo(img, x0_, y0_, x1_, y1_))))
+                          dict(o2, cor=q["branco"] if nome in q.get("brancos", {}).get(Q.chave, ())
+                               else cor_do_fundo(img, x0_, y0_, x1_, y1_))))
             continue
         dentro = (amb == i_rot + 1).astype(np.uint8)                # o ambiente do rótulo (`ambientes_rotulos`)
         sx, sy = busca[i_rot][0] - cx, busca[i_rot][1] - cy          # de onde a busca parte (o ponto do PDF ou o pedido)
@@ -2911,7 +2914,8 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
                 break
         custo, dx, dy, (x0_, y0_, x1_, y1_), o2, toca, fora_amb = melhor
         ocupado[max(0, y0_ - 6):y1_ + 6, max(0, x0_ - 6):x1_ + 6] = 1
-        o2 = dict(o2, cor=cor_do_fundo(img, x0_, y0_, x1_, y1_))      # preto ou branco, pelo fundo
+        o2 = dict(o2, cor=q["branco"] if nome in q.get("brancos", {}).get(Q.chave, ())     # preto ou branco, pelo
+                  else cor_do_fundo(img, x0_, y0_, x1_, y1_))                                 # fundo
         novos.append((nome, (cx / esc, cy / esc), (dx / esc, dy / esc), o2))
         if toca or fora_amb:
             print(f"    rótulo {nome}: sem lugar totalmente livre (toca {toca} px; fora do ambiente {fora_amb} px)")

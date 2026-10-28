@@ -537,7 +537,11 @@ MOVEIS_TD = {
                   ("as 2 poltronas redondas do living", (1785.0, 1210.0, 1910.0, 1268.0), (38, 50), False),
                   ("a poltrona da sala íntima", (1368.0, 1535.0, 1428.0, 1595.0), (45, 56), False, 99.0),
                   # usuário, 27/10/26: "aprimore o revestimento dessa poltrona e seu apoio" (a poltrona girada e o puff)
-                  ("a poltrona e o apoio da suíte 2", (1605.0, 1580.0, 1705.0, 1665.0), (35, 60), False)],
+                  ("a poltrona e o apoio da suíte 2", (1605.0, 1580.0, 1705.0, 1665.0), (35, 60), False),
+                  # usuário, 27/10/26: "aplique na poltrona e suporte da suíte master o mesmo revestimento estofado da
+                  # poltrona da suíte" (a da suíte 2); no PDF, as costuras dela vêm picadas em segmentos curtos (de
+                  # menos de 1 a 4,8 pt): todos contam, para o assento, o encosto e os braços saírem em partes
+                  ("a poltrona e o apoio da suíte master", (500.0, 1590.0, 590.0, 1680.0), (35, 60), False, 0.1)],
     # a poltrona da sala íntima (o círculo do PDF, com o desenho miúdo): uma concha em bouclé, o assento (`assento`, do
     # raio) puxado para a frente (para a mesa de centro e o sofá), o encosto e os braços em volta, mais altos
     "conchas": {"a poltrona da sala íntima": {"frente": (-0.28, 0.96), "assento": 0.64, "desvio": 0.20}},
@@ -1105,12 +1109,99 @@ def moveis_td(Q, img):
             out = estofado_d(Q, out, g, tr, cor, rng, concha=q.get("conchas", {}).get(nome), vincos=vs)
             n_est += 1
     print(f"    móveis: {n_est} estofados com volume e bouclé, sem os traços; {n_mad} mesas de madeira sem o contorno")
+    out = almofadas_d(Q, out)
     piso = cv2.imread(str(F.ETAPAS / f"{Q.chave}_pisos.png"))
     out = cadeiras_mesas_d(Q, out, piso)
     out = jantar_d(Q, out, piso)
     out = jogos_mesa_d(Q, out, piso)
     out = diagonais_armarios_d(Q, out)
     return floreiras_td(Q, out)
+
+
+# As almofadas do sofá do estar do living (usuário, 27/10/26, com o sofá anterior de volta: "deixe ao menos as almofadas
+# em um tom sólido, sem linhas"; depois: "nas almofadas deixe evidente os contornos para que saibamos que existem uma na
+# frente da outra", "pode ser até tom sobre tom para cada uma das almofadas. sendo uma mais escura atrás e outra mais
+# clara na frente" e "traga um revestimento com textura pra dar efeito almofada de lã"): as 3 do PDF, cada uma em duas
+# peças (a de trás, acima de `corte_pt`, e a da frente, em roundrects da ARQ_MOBILIÁRIO, em `caixa_pt`), cada peça
+# preenchida por dentro dos contornos fechados dela (os traços abertos, como a linha do assento, saem na abertura de
+# `abre_px`; os vincos de dentro somem), tom sobre tom (o tecido claro do sofá em volta, acima de `tecido_min`, a `tom`:
+# a de trás mais escura, a da frente mais clara), com o contorno fino (`contorno`, da cor de cada uma) e a sombra curta e
+# macia; a da frente por cima da de trás. O revestimento (`la`): o tricô da almofada cinza do `sofa_reto_boucle` da
+# biblioteca (o recorte girado `giro` graus, para as carreiras ficarem deitadas, no comprido das almofadas), só o
+# relevo dele (a luz da foto sai no desfoque de `sigma_px`), na escala real (a foto tem `px_m_foto`), tecido sem
+# repetição (o image quilting da biblioteca de texturas), e o volume de almofada (`volume`: o miolo mais claro, as bordas mais fundas, até `raio_m` da borda)
+ALMOFADAS_TD = {"caixa_pt": (1780.0, 1430.0, 1921.0, 1452.5), "corte_pt": (1442.0, 1440.5), "traco_px": 0.8,
+                "abre_px": 1.5, "tom": {"tras": 0.84, "frente": 0.97}, "tecido_min": 170, "ss": 4,
+                "contorno": {"px": 0.7, "tom": 0.72},
+                "sombra": {"desloc_px": (-0.8, 0.8), "sigma_px": 1.0, "forca": 0.16},
+                "la": {"recorte": "sofa_reto_boucle", "centro": (112, 102), "giro": 45, "lado_px": 20,
+                       "px_m_foto": 126.25, "sigma_px": 3.0, "forca": 1.6, "semente": 64},
+                "volume": {"forca": 0.10, "raio_m": 0.06}}
+
+
+def _textura_la(Q, h, w, px_m):
+    """O relevo do tricô (`ALMOFADAS_TD["la"]`) em volta de 1, em `px_m`, tecido em h x w pelo image quilting da
+    biblioteca de texturas (retalhos da amostra e dos espelhos dela, sem os giros: as carreiras ficam deitadas)."""
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    import texturas
+    q = ALMOFADAS_TD["la"]
+    im = cv2.imread(str(RAIZ / "_blocos" / "recortes" / f"{q['recorte']}.png"))
+    gi = cv2.warpAffine(im, cv2.getRotationMatrix2D(q["centro"], q["giro"], 1.0), im.shape[1::-1],
+                        flags=cv2.INTER_LINEAR)
+    (cx, cy), r = q["centro"], q["lado_px"]
+    L = gi[cy - r:cy + r, cx - r:cx + r].astype(np.float32).mean(axis=2)
+    rel = L / np.maximum(cv2.GaussianBlur(L, (0, 0), q["sigma_px"]), 1)
+    rel = 1 + q["forca"] * (rel - rel.mean())
+    e = px_m / q["px_m_foto"]
+    rel = cv2.resize(rel, None, fx=e, fy=e, interpolation=cv2.INTER_CUBIC)
+    u8 = np.repeat(np.clip((rel - 1) * 255 + 128, 0, 255).astype(np.uint8)[..., None], 3, axis=2)
+    p_ = int(min(40, rel.shape[0] // 3))
+    tec = texturas.quilting(texturas.variantes(u8, True), h, w, p=p_, sobra=max(3, p_ // 4),
+                            rng=np.random.default_rng(q["semente"]))[:h, :w]
+    return 1 + (tec[..., 0].astype(np.float32) - 128) / 255
+
+
+def almofadas_d(Q, img):
+    from scipy import ndimage
+    q, ss = ALMOFADAS_TD, ALMOFADAS_TD["ss"]
+    tr = [d for d in Q.desenhos if d["type"] == "s" and d.get("layer") in F.CAMADAS_PECAS
+          and _dentro_pt(d["rect"], q["caixa_pt"])]
+    X0, Y0, X1, Y1 = _caixa_px(Q, [d["rect"] for d in tr])
+    w, h = X1 - X0, Y1 - Y0
+    k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * int(round(q["abre_px"] * ss)) + 1,) * 2)
+    kc = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * int(round(q["contorno"]["px"] * ss)) + 1,) * 2)
+    la = _textura_la(Q, h * ss, w * ss, Q.px_m * ss)
+    R = q["volume"]["raio_m"] * Q.px_m * ss
+
+    def peca(ds):
+        cheio = ndimage.binary_fill_holes(_mascara_pdf(Q, ds, X0, Y0, w, h, ss, traco_px=q["traco_px"]) > 0)
+        cheio = cv2.morphologyEx(cheio.astype(np.uint8), cv2.MORPH_OPEN, k)
+        borda = cheio - cv2.erode(cheio, kc)
+        t = np.clip(cv2.distanceTransform(cheio, cv2.DIST_L2, 5) / R, 0, 1)
+        relevo = la * (1 + q["volume"]["forca"] * (t - 0.5)) * cheio
+        a, b = [cv2.resize(m.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA) for m in (cheio, borda)]
+        rel = cv2.resize(relevo, (w, h), interpolation=cv2.INTER_AREA) / np.maximum(a, 1e-4)
+        return a, b, rel
+    tras = peca([d for d in tr if d["rect"].y1 <= q["corte_pt"][0]])
+    frente = peca([d for d in tr if d["rect"].y0 >= q["corte_pt"][1]])
+    out = img.copy()
+    reg = img[Y0:Y1, X0:X1].astype(np.float32)
+    uniao = np.maximum(tras[0], frente[0])
+    anel = (cv2.dilate((uniao > 0.05).astype(np.uint8), np.ones((7, 7), np.uint8)) > 0) & (uniao <= 0.05)
+    tecido = np.median(reg[anel & (reg.mean(axis=2) > q["tecido_min"])], axis=0)
+    s_ = q["sombra"]
+    for (a, b, rel), t in ((tras, q["tom"]["tras"]), (frente, q["tom"]["frente"])):  # a de trás primeiro; a da frente
+        cor = tecido * t                                                             # por cima
+        sh = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, s_["desloc_px"][0]], [0, 1, s_["desloc_px"][1]]]),
+                                             (w, h)), (0, 0), s_["sigma_px"]) * (1 - a) * s_["forca"]
+        reg *= (1 - sh)[..., None]
+        reg = reg * (1 - a[..., None]) + cor * rel[..., None] * a[..., None]
+        reg = reg * (1 - b[..., None]) + cor * q["contorno"]["tom"] * b[..., None]
+    out[Y0:Y1, X0:X1] = np.clip(reg, 0, 255).astype(np.uint8)
+    n, _ = cv2.connectedComponents((uniao > 0.5).astype(np.uint8))
+    print(f"    sofá do living: {n - 1} almofadas de lã (o tricô da biblioteca), tom sobre tom (a de trás mais escura, "
+          f"a da frente mais clara), com o contorno fino")
+    return out
 
 
 def carros_d(Q, img, M):
@@ -1239,6 +1330,14 @@ BRISES_DE_VOLTA_TD = [(463.2, 1476.9, 686.4, 1709.6)]
 SOLEIRAS_EXTRA_TD = [(1952.5, 699.8, 1961.0, 753.1)]
 
 
+# A bancada da pia da cozinha (usuário, 27/10/26: "entre a cuba e a jardineira tem uma faixa branca que não deveria
+# estar ali. o contorno da pia é em marrom granito igual a pia da direita. acima da pia esquerda tem esse item em branco
+# que não existe"): a limpeza das esquadrias espelha a vizinhança da janela e trazia o branco da cuba da esquerda para a
+# faixa entre a janela (579,2 pt) e a cuba (586 pt). O granito com a torneira volta da imagem de antes das esquadrias; as
+# `espelho_px` linhas de cima (lá, o resto da janela antiga do render) recebem as de baixo, em espelho
+BANCADAS_DE_VOLTA_TD = [{"pt": (1687.0, 579.2, 1733.6, 585.9), "espelho_px": 2}]
+
+
 def pos_vidros_d(Q, img, antes):
     import final3840_casaa as FA
     out = img.copy()
@@ -1251,6 +1350,11 @@ def pos_vidros_d(Q, img, antes):
     out[m] = antes[m]
     for r in SOLEIRAS_EXTRA_TD:
         out = FA.soleira_bege(Q, out, r)
+    for b in BANCADAS_DE_VOLTA_TD:
+        (u0, v0), (u1, v1) = Q.p2q(*b["pt"][:2]), Q.p2q(*b["pt"][2:])
+        x0, x1, y0, y1, k = int(np.floor(u0)), int(np.ceil(u1)), int(np.ceil(v0)), int(np.floor(v1)), b["espelho_px"]
+        out[y0 + k:y1, x0:x1] = antes[y0 + k:y1, x0:x1]
+        out[y0:y0 + k, x0:x1] = antes[y0 + k:y0 + 2 * k, x0:x1][::-1]
     print(f"    suíte master: as ripas em L de volta diante das portas de vidro ({len(ripas)} ripas, {n} px); "
           f"{len(SOLEIRAS_EXTRA_TD)} soleira de Bege Bahia no vão inteiro (cozinha e área de serviço)")
     return out
@@ -1360,7 +1464,13 @@ ROTULOS_TD = {"pontos": {}, "folga_px": 4,
               "fixos": {"WC DCE TÉRREO": {"corpo": 0.62, "quebra": ["WC DCE", "TÉRREO"]},
                         # a adega (usuário, 27/10/26, com a adega em U: "centralize o rótulo"): no meio do piso livre,
                         # entre o vidro (2121 pt) e a prateleira do fundo, e entre as prateleiras de cima e de baixo
-                        "ADEGA": {"pt": (2181.3, 1035.6)}}}
+                        "ADEGA": {"pt": (2181.3, 1035.6)},
+                        # a despensa (usuário, 27/10/26: "corrija a posição do rótulo, de forma que não fique sobre o
+                        # armário. centralize no piso"): entre a folha da porta aberta (1879 pt) e o armário em L
+                        # (1934,1 pt), e entre a parede de cima (763,5 pt) e o armário de baixo (847,3 pt)
+                        "DESPENSA": {"pt": (1906.5, 805.4)}},
+              # em branco (usuário, 27/10/26, no DCE TÉRREO: "rótulo em branco"), qualquer que seja o fundo
+              "brancos": ("DCE TÉRREO",)}
 # o piso dos banhos das suítes em quartzito Aura (pedido de 27/10): o Bege Bahia da legenda (a mancha de cada banho, a
 # partir do rótulo do PDF) com a luz larga do render e o desenho da chapa, no tom dela
 QUARTZITO_TD = {"banhos": ("BANHO MASTER", "BANHO 1", "BANHO 2", "BANHO 3"), "chapa": "quartzito_aura",
@@ -1752,8 +1862,10 @@ PROJ_LAJES_TD = {
                 "tracejadas": [((1147.3, 559.4), (2910.6, 559.4)), ((2383.3, 570.7), (2899.3, 570.7)),
                                # o fechamento na ponta esquerda (usuário, 27/10/26: "faltou o fechamento da projeção em
                                # tracejado branco"): as duas linhas de pé da ARQ_PAREDE e a de dentro até a parede
-                               ((1147.3, 559.4), (1147.3, 633.9)), ((1158.6, 570.7), (1158.6, 633.1)),
-                               ((1158.6, 570.7), (1195.6, 570.7)),
+                               # depois (usuário, 27/10/26: "dentro da área do bege bahia não tem tracejado. ele
+                               # termina logo acima, no encontro com o piso bege bahia"): no PDF, o piso do deck cobre
+                               # o resto das linhas de pé; a de fora vai só até a borda dele e a de dentro sai
+                               ((1147.3, 559.4), (1147.3, 570.7)), ((1158.6, 570.7), (1195.6, 570.7)),
                                ((2383.3, 662.0), (2899.3, 662.0)), ((2899.3, 570.7), (2899.3, 662.0)),
                                ((2910.6, 559.4), (2910.6, 662.0)), ((2383.3, 627.4), (2383.3, 662.0))],
                 "finas": [], "limpar": [((2214.0, 2910.6), 559.4), ((2383.3, 2899.3), 570.7)]},
@@ -1934,10 +2046,42 @@ BEIRAL_BEGE_TD = {"x_pt": (1252.3, 2284.3), "y_pt": (1888.8, 1898.0), "fonte_px"
 # (2284,3 pt), do pé do brise (1645,5 pt) até o beiral, recebe o beiral de junto do canto, de pé (o trecho de mesmo
 # comprimento à esquerda da faixa, sem a linha da face); a face do beiral sai sob a faixa, para o L ficar contínuo. A
 # coluna da face da parede e a do tracejado ficam. Vai na etapa das projeções, depois delas: antes, a limpeza do
-# tracejado da lateral (`limpar_v`, que compara com a faixa vizinha) mudava com o claro e mexia no tracejado
-BEIRAL_L_TD = {"x_pt": (2275.6, 2284.3), "y_pt": (1645.5, 1888.8)}
+# tracejado da lateral (`limpar_v`, que compara com a faixa vizinha) mudava com o claro e mexia no tracejado.
+# Depois, em frente ao brise (usuário, 27/10/26: "corrija só um trecho fino do beiral que ficou com vestígios antigos em
+# cinza. esse beiral passa em frente ao brise marrom, mas em uma faixa estreita"): de `brise` (a face de fora das lâminas
+# do PDF, 2280,2 pt, e o canto da laje, 1497,7 pt) até o pé do brise, só a faixa estreita entre as lâminas e o
+# tracejado, a continuação de pé do mesmo beiral
+BEIRAL_L_TD = {"x_pt": (2275.6, 2284.3), "y_pt": (1645.5, 1888.8), "brise": {"x_pt": 2280.2, "y_pt": 1497.7}}
 # os vãos de porta da fachada de baixo onde a linha da face do beiral (a de cima da tira) não passa: x0, x1 (pt)
 BEIRAL_SEM_FACE_TD = [(1602.6, 1801.1)]
+
+
+# O pisante junto ao hall de entrada (usuário, 27/10/26: "tem um traço branco no contorno de baixo do bloco de pedra no
+# acesso a casa. formando um dente que não existe. corrija, deixando-o reto"): no PDF, a borda de baixo do bloco (a
+# EST_LAJE de 2371,4 a 2590,8 pt) é reta em 1347,2 pt; na imagem, o Bege Bahia da parte da esquerda descia 2 px além dela
+# (o traço claro) e o da direita parava nela, com a borda. Nas colunas em que o claro passa da borda, as `linhas` da borda
+# vêm das da direita, em espelho
+PISANTE_RETO_TD = {"x_pt": (2371.4, 2590.8), "y_pt": 1347.2, "linhas": 2, "claro": 100}
+
+
+def pisante_reto_td(Q, img):
+    q = PISANTE_RETO_TD
+    (u0, v), (u1, _) = Q.p2q(q["x_pt"][0], q["y_pt"]), Q.p2q(q["x_pt"][1], q["y_pt"])
+    x0, x1, y0 = int(np.ceil(u0)), int(np.floor(u1)), int(np.floor(v))
+    y1 = y0 + q["linhas"]
+    out = img.copy()
+    passa = img[y1 - 1, x0:x1].astype(np.float32).mean(axis=1) > q["claro"]
+    certo = np.nonzero(~passa)[0]
+    n = 0
+    if len(certo):
+        ref = img[y0:y1, x0 + certo].copy()
+        for i in np.nonzero(passa)[0]:
+            j = int(np.argmin(np.abs(certo - i)))
+            k = (j + (certo[j] - i)) % (2 * len(certo))                # o espelho a partir da coluna certa mais perto
+            out[y0:y1, x0 + i] = ref[:, k if k < len(certo) else 2 * len(certo) - 1 - k]
+            n += 1
+    print(f"    pisante do hall: o contorno de baixo reto ({n} colunas)")
+    return out
 
 
 def beiral_l_td(Q, img):
@@ -1946,9 +2090,14 @@ def beiral_l_td(Q, img):
     x0, x1, y0 = int(np.ceil(u0)) + 1, int(np.floor(u1)), int(np.ceil(v0))
     face = int(np.floor(v1)) + 1                                    # a linha da face do beiral (a de cima dele)
     y1 = face + 1
+    (ub, vb) = Q.p2q(q["brise"]["x_pt"], q["brise"]["y_pt"])
+    xb, yb = int(np.ceil(ub)), int(np.ceil(vb))
+    de_pe = img[face + 1:face + 1 + x1 - x0, x0 - (y1 - yb):x0].transpose(1, 0, 2)    # de yb (em cima) a y1
     out = img.copy()
-    out[y0:y1, x0:x1] = img[face + 1:face + 1 + x1 - x0, x0 - (y1 - y0):x0].transpose(1, 0, 2)
-    print(f"    beiral: sobe no L entre a parede do escritório e o tracejado ({x1 - x0} x {y1 - y0} px)")
+    out[y0:y1, x0:x1] = de_pe[y0 - yb:]
+    out[yb:y0, xb:x1] = de_pe[:y0 - yb, xb - x0:]
+    print(f"    beiral: sobe no L entre a parede do escritório e o tracejado ({x1 - x0} x {y1 - y0} px) e segue, "
+          f"estreito, em frente ao brise ({x1 - xb} x {y0 - yb} px)")
     return out
 
 
@@ -2036,7 +2185,8 @@ def rotulos_terreo_d(Q, img):
     pontos = dict(rf["pontos"].get(Q.chave, {}), **ROTULOS_TD["pontos"])
     F.ROTULOS_F = dict(rf, pontos=dict(rf["pontos"], **{Q.chave: pontos}),
                        obstaculos_pt=dict(rf.get("obstaculos_pt", {}), **{Q.chave: obst}),
-                       fixos=dict(rf.get("fixos", {}), **{Q.chave: ROTULOS_TD["fixos"]}))
+                       fixos=dict(rf.get("fixos", {}), **{Q.chave: ROTULOS_TD["fixos"]}),
+                       brancos=dict(rf.get("brancos", {}), **{Q.chave: ROTULOS_TD["brancos"]}))
     todos = Q.desenhos
     Q._desenhos = [d for d in todos if not (d.get("layer") == "ARQ_PAREDE" and C.arco_porta(d))]
     try:
@@ -2098,7 +2248,8 @@ def passos_terreo_d(Q, ini, M):
             Q, F.esquadrias_terreo(Q, im.copy(), parede=cinza), im)), im))),
         ("cortinas", lambda im: sem_trilho_fora_d(Q, F.cortinas(Q, im, paredes_pdf=True), im)),
         ("escadas", lambda im: escadas_terreo_d(Q, im)),
-        ("projecoes", lambda im: beiral_l_td(Q, projecoes_lajes_td(Q, projecoes_terreo_d(Q, im)))),
+        ("projecoes", lambda im: pisante_reto_td(Q, beiral_l_td(Q, projecoes_lajes_td(Q, projecoes_terreo_d(Q,
+                                                                                                         im))))),
         ("seta", lambda im: seta_terreo_d(Q, im)),
         ("rotulos", lambda im: rotulos_terreo_d(Q, im)),
     ]
