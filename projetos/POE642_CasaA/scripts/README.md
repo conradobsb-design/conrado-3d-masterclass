@@ -1028,13 +1028,14 @@ A lista do Térreo aprovada pelo usuário em 26/10/26 ("aplique a lista"; o trav
 | `rotulos` | os rótulos com os desvios aprovados; LAVABO no corpo do PDF, SALA DE ESTAR fora do tapete, B. MOTORISTA no meio do piso seco |
 | `box_varanda` | (28/10) o box de correr do banho varanda: `final3840_casaa.boxes(..., so=)` só com o box horizontal de `BOX_VARANDA["meio"]` (as duas folhas de vidro contínuas e o trilho no vão até a parede) |
 | `limpeza_2810` | (28/10) a borda de cima do Bege Bahia junto à grama sem as pecinhas cinza-rosadas (`LIMPEZA_2810["bege_topo"]`: a cada coluna, o que não é grama logo acima da linha da borda, refeito com uma coluna limpa ao lado; os tracejados brancos da projeção protegidos); a placa da ponta direita do caminho (`remendos`): a faixa rosada fora do lote no branco da prancha, o tufo na borda de cima e o risco na grama entre as placas |
+| `varanda_baixo` | (28/10) a borda de baixo da varanda junto à grama, entre o pilar e a parede do WC (`VARANDA_BAIXO`: x 1251 a 1476): reta na linha do PDF (1786,5 pt, 1643 px); a cada coluna, as 6 linhas de cima com o travertino espelhado de logo acima, as 6 de baixo com a grama espelhada de logo abaixo, a linha da beira no meio-termo do antialias |
 
 ```bash
 export POE642_CACHE=/caminho/do/cache                            # as etapas ficam em $POE642_CACHE/poe642_casaa_etapas
 python3 final3840_casaa_terreo.py                                # a final: renders/POE642_CasaA_PH_Terreo_final_rotulos.png
 python3 final3840_casaa_terreo.py --de paredes --ate caracol     # recomeça e para numa etapa (só grava a final no fim)
 python3 final3840_casaa_terreo.py --de rotulos --antes antes.png # e os antes e depois: renders/..._Terreo_2610_<item>_antes_depois.jpg
-python3 final3840_casaa_terreo.py --so box_varanda,limpeza_2810  # só estas etapas, sobre a final atual (no lugar)
+python3 final3840_casaa_terreo.py --so box_varanda,limpeza_2810,varanda_baixo  # só estas etapas, sobre a final atual (no lugar)
 python3 rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png
 python3 pdf_entrega.py
 ```

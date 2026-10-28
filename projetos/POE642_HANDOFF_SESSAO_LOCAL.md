@@ -3288,7 +3288,7 @@ O que foi feito (`final3840_casaa_terreo.py`, duas etapas novas no fim de `passo
 
 Antes e depois (o antes é a final de a7dbda8): `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_2810_{box_banho_varanda,contorno_bege_bahia,placa_pedra}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa A refeitos.
 
-Notado e não alterado (aguarda o OK): na borda de baixo da varanda (travertino) junto à grama, entre x ~1253 e ~1459, há tiquinhos claros parecidos.
+Notado e não alterado (aguarda o OK): na borda de baixo da varanda (travertino) junto à grama, entre x ~1253 e ~1459, há tiquinhos claros parecidos. (Corrigido depois, a pedido; ver a seção da borda da varanda.)
 
 ### Pedido de 28/10/26: as bordas das piscinas das outras casas
 
@@ -3301,3 +3301,13 @@ O usuário, depois das bordas da Casa A: "aplique nas bordas das outras casas ta
 - **Casa E** (1452 px fora, um fio cinza no topo da água, cantos arredondados): as bordas na etapa `piscina` do motor, logo depois do turquesa, com a mesma rede das cáusticas (`semente` 2851) e os vidros da lateral protegidos; o Térreo foi refeito de `--de piscina`, e o 1º Pavimento de novo (o Térreo esmaecido vem do Térreo).
 
 Antes e depois (o antes é a final de b39850f): `POE642_Casa{B,C,D,E}/renders/POE642_Casa*_PH_Terreo_bordas_piscina_antes_depois.jpg` e `..._detalhe_antes_depois.jpg`. Pranchas do Térreo e PDFs das Casas B a E refeitos (e a do 1º Pavimento da Casa E).
+
+### Pedido de 28/10/26: a borda de baixo da varanda da Casa A
+
+O usuário: "pode corrigir a borda de baixo da varanda também" (o que eu tinha notado junto ao contorno do Bege Bahia).
+
+O que havia: entre o pilar preto da varanda e a parede do WC, a beira do travertino contra a grama era uma faixa cinza-rosada de 2 a 4 px, com entalhes em V a cada ~20 px, trechos mais altos (dentes) e riscos escuros soltos (o maior junto à parede).
+
+O que foi feito: a etapa nova `varanda_baixo` em `final3840_casaa_terreo.py` (`VARANDA_BAIXO`, aplicada com `--so varanda_baixo` sobre a final atual). De x 1251 a 1476, a beira fica reta na linha do PDF (o fim do piso da varanda, 1786,5 pt = 1643 px): a cada coluna, as 6 linhas de cima recebem o travertino espelhado de logo acima, as 6 de baixo a grama espelhada de logo abaixo, e a linha da beira o meio-termo do antialias. O pilar, a parede e o tracejado branco da projeção não mudam (2878 px alterados, todos entre y 1637 e 1649).
+
+Antes e depois (o antes é a final de c28fa80): `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_2810_borda_varanda_antes_depois.jpg`. Prancha do Térreo e PDF da Casa A refeitos.

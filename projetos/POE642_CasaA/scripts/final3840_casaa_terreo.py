@@ -1114,6 +1114,33 @@ def limpeza_2810(Q, img):
     return out
 
 
+# A borda de baixo da varanda junto à grama (usuário, 28/10/26: "pode corrigir a borda de baixo da varanda também"):
+# entre o pilar preto e a parede do lavatório, uma faixa cinza-rosada de 2 a 4 px com dentes e trechos escuros soltos.
+# A beira fica reta na linha do PDF (o fim do piso da varanda, 1786,5 pt): por cima, o travertino espelhado do piso de
+# logo acima; por baixo, a grama espelhada da de logo abaixo; na linha, o meio-termo do antialias.
+VARANDA_BAIXO = {"x": (1251, 1476), "linha_pt": 1786.5, "faixa": 6}
+
+
+def varanda_baixo(Q, img):
+    q = VARANDA_BAIXO
+    out = np.ascontiguousarray(img.copy())
+    x0, x1 = q["x"]
+    L = Q.p2q(0, q["linha_pt"])[1]
+    Li, f = int(np.floor(L)), q["faixa"]
+    src = img.astype(np.float32)
+    for y in range(Li - f, Li + f + 1):
+        if y < Li:
+            linha = src[2 * (Li - f) - 1 - y, x0:x1]                   # o piso, espelhado em volta de Li - f
+        elif y > Li:
+            linha = src[2 * (Li + f) + 1 - y, x0:x1]                   # a grama, espelhada em volta de Li + f
+        else:
+            a = L - Li                                                  # a fração do px Li que ainda é piso
+            linha = src[2 * (Li - f) - 1 - (Li - 1), x0:x1] * a + src[2 * (Li + f) + 1 - (Li + 1), x0:x1] * (1 - a)
+        out[y, x0:x1] = np.clip(np.round(linha), 0, 255).astype(np.uint8)
+    print(f"    varanda: a borda de baixo junto à grama reta na linha do PDF ({L:.1f} px), de x {x0} a {x1}")
+    return out
+
+
 def passos_terreo(Q, ini):
     return [
         ("granito", lambda im: granito(Q, im)),
@@ -1133,6 +1160,7 @@ def passos_terreo(Q, ini):
         ("rotulos", lambda im: rotulos(Q, im)),
         ("box_varanda", lambda im: box_varanda(Q, im)),
         ("limpeza_2810", lambda im: limpeza_2810(Q, im)),
+        ("varanda_baixo", lambda im: varanda_baixo(Q, im)),
     ]
 
 
