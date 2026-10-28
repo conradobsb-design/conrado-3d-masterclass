@@ -3545,3 +3545,5 @@ O usuário, vendo a borda de Bege Bahia passada para junto da água: "o subsolo 
 - **Piscina do Subsolo.** A parte de baixo da piscina agora é só parede, um bloco reto como o do PDF, sem a faixa de Bege Bahia, nas duas partes (a funda e a do degrau). A borda de Bege Bahia do lado esquerdo continua ao lado da água até o fundo dela. A troca anterior foi desfeita (refeito a partir do Subsolo de 4e4108d).
 
 Antes e depois (o antes é a entrega anterior, 5418bb9): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_piscina_so_parede_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.
+
+**Aprovado** (28/10/26): "subsolo da casa E aprovado", com a parte de baixo da piscina só em parede (883d600). A final do Subsolo da Casa E fica como está; o Térreo e o 1º Pavimento da Casa E seguem aguardando a validação.
