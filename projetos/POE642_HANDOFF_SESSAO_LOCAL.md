@@ -3272,3 +3272,20 @@ O usuário, com o recorte da piscina do Térreo da Casa A (piscina, prainha e sp
   - fora, o piso espelhado sobre a água que passava e o fio claro, com o alcance medido em cada lado; os tracejados de projeção por cima.
 
 Antes e depois (o antes é a final de a680667): `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_bordas_piscina_antes_depois.jpg` e `..._bordas_piscina_spa_detalhe_antes_depois.jpg`. Prancha do Térreo e PDF da Casa A refeitos.
+
+### Pedidos de 28/10/26 no Térreo da Casa A: o box do banho varanda e os resquícios do Bege Bahia
+
+O usuário, vendo a prancha do Térreo da Casa A:
+- "na casa A terreo: faltou o box do banho varanda. incluir.";
+- com o recorte da placa de pedra da ponta direita do caminho: "na casa A terrea - limpe esses resquicios";
+- com o recorte da borda de cima do Bege Bahia junto à grama, perto da projeção tracejada: "Casa A - terreo: corrija o contorno do marmore bege bahia, removendo esses resquicios".
+
+O que foi feito (`final3840_casaa_terreo.py`, duas etapas novas no fim de `passos_terreo`, aplicadas sobre a final atual com `--so`, porque a final já tem o turquesa e as bordas da piscina):
+- **`box_varanda`:** o box de correr do PDF (horizontal, a 1712,8 pt, entre o vaso e o chuveiro), de que o render só deixou um traço azul fraco. Usa `final3840_casaa.boxes`, que ganhou o filtro `so=`: as duas folhas de vidro contínuas, desencontradas, com as faces finas e a sombra curta, e o trilho no vão até a parede (seção 6 das regras).
+- **`limpeza_2810`:**
+  - na borda de cima do Bege Bahia (x 1083 a 1512, linha 340), três pecinhas cinza-rosadas que avançavam sobre a grama (em x ~1401, ~1466 e ~1489-1506) foram refeitas com a borda e a grama de uma coluna limpa ao lado; o tracejado branco da projeção que cruza a borda ficou;
+  - na placa da ponta direita do caminho: a faixa rosada fora do lote (x 3430 a 3442) no branco da prancha, o tufo de folhas sobre a borda de cima e o risco claro na grama entre as placas.
+
+Antes e depois (o antes é a final de a7dbda8): `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_2810_{box_banho_varanda,contorno_bege_bahia,placa_pedra}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa A refeitos.
+
+Notado e não alterado (aguarda o OK): na borda de baixo da varanda (travertino) junto à grama, entre x ~1253 e ~1459, há tiquinhos claros parecidos.

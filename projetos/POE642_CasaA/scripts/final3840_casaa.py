@@ -621,10 +621,13 @@ def chuveiro(Q, out, c):
     return tl.gravar()
 
 
-def boxes(Q, out):
+def boxes(Q, out, so=None):
+    """Os boxes de correr do PDF (`AJ.folhas_box`); `so`: um filtro dos boxes (o Térreo desenha só o do banho varanda)."""
     q = BANHOS["box"]
     n = 0
     for box in AJ.folhas_box(Q.pg):
+        if so is not None and not so(box):
+            continue
         meio = box["meio"]
         lado = q["afasta_px"] / PT_PX
         e = q["larg_px"] / PT_PX / 2

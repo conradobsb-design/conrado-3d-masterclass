@@ -1026,15 +1026,20 @@ A lista do Térreo aprovada pelo usuário em 26/10/26 ("aplique a lista"; o trav
 | `projecoes` | o tracejado das projeções do PDF, nítido, em preto nos fundos claros e em branco nos escuros |
 | `seta` | a seta da entrada principal no hall externo, apontando para a porta pivotante |
 | `rotulos` | os rótulos com os desvios aprovados; LAVABO no corpo do PDF, SALA DE ESTAR fora do tapete, B. MOTORISTA no meio do piso seco |
+| `box_varanda` | (28/10) o box de correr do banho varanda: `final3840_casaa.boxes(..., so=)` só com o box horizontal de `BOX_VARANDA["meio"]` (as duas folhas de vidro contínuas e o trilho no vão até a parede) |
+| `limpeza_2810` | (28/10) a borda de cima do Bege Bahia junto à grama sem as pecinhas cinza-rosadas (`LIMPEZA_2810["bege_topo"]`: a cada coluna, o que não é grama logo acima da linha da borda, refeito com uma coluna limpa ao lado; os tracejados brancos da projeção protegidos); a placa da ponta direita do caminho (`remendos`): a faixa rosada fora do lote no branco da prancha, o tufo na borda de cima e o risco na grama entre as placas |
 
 ```bash
 export POE642_CACHE=/caminho/do/cache                            # as etapas ficam em $POE642_CACHE/poe642_casaa_etapas
 python3 final3840_casaa_terreo.py                                # a final: renders/POE642_CasaA_PH_Terreo_final_rotulos.png
 python3 final3840_casaa_terreo.py --de paredes --ate caracol     # recomeça e para numa etapa (só grava a final no fim)
 python3 final3840_casaa_terreo.py --de rotulos --antes antes.png # e os antes e depois: renders/..._Terreo_2610_<item>_antes_depois.jpg
+python3 final3840_casaa_terreo.py --so box_varanda,limpeza_2810  # só estas etapas, sobre a final atual (no lugar)
 python3 rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png
 python3 pdf_entrega.py
 ```
+
+Desde 28/10, a final do Térreo tem por cima o turquesa e as bordas retas da piscina (`piscinas_turquesa.py A-Terreo` e `--bordas`), que o motor não refaz: as etapas novas entram com `--so` sobre a final; se o motor rodar inteiro, rodar de novo o `piscinas_turquesa.py` (o turquesa e as bordas, com `--rede` na saída do motor).
 
 Os antes e depois: os da 1ª lista (`planta`, `granito`, … `sala_estar`) contra a final aprovada antes da auditoria; os dos pedidos seguintes (`travertino`, `banhos_varanda`, `ilha_gourmet`, `banho_motorista`, `projecoes`) contra a versão deles; os da limpeza dos contornos (`contornos_moveis`, `contornos_estar`, `contornos_banhos`, `contornos_lavabo`, `contornos_hall`, `ilha_cooktop`, `cozinha_bancadas`) contra a versão anterior a ela (`antes_depois(..., chaves=[...])`).
 

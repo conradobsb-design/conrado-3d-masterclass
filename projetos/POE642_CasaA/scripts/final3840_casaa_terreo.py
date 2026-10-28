@@ -1029,6 +1029,91 @@ def rotulos(Q, img):
     return out
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# Pedidos de 28/10/26 no Térreo (com a final já no turquesa e nas bordas retas de `piscinas_turquesa.py`):
+# - "faltou o box do banho varanda. incluir.": o box de correr do PDF (horizontal, entre o vaso e o chuveiro), de que o
+#   render só deixou um traço azul fraco, como os boxes do Subsolo (`final3840_casaa.boxes`): as duas folhas de vidro
+#   contínuas, desencontradas, com as faces finas e a sombra curta, e o trilho no vão até a parede;
+# - "limpe esses resquicios" e "corrija o contorno do marmore bege bahia, removendo esses resquicios": as pecinhas
+#   cinza-rosadas na borda de cima do Bege Bahia junto à grama (a cada coluna, o que não é grama logo acima da linha da
+#   borda), refeitas com a borda e a grama de uma coluna limpa ao lado; na placa de pedra da ponta direita do caminho,
+#   a faixa rosada para fora do lote (o branco da prancha, como acima dela), o tufo de folhas sobre a borda de cima da
+#   placa e o risco claro na grama entre as placas.
+BOX_VARANDA = {"meio": 1712.8}
+LIMPEZA_2810 = {
+    # a borda de cima do Bege Bahia: as colunas (px), a linha da borda (a primeira de pedra), as linhas refeitas acima e
+    # abaixo dela, a grama (g - b mínimo), os tracejados brancos da projeção na grama (protegidos) e a transição (px)
+    "bege_topo": {"x": (1083, 1512), "linha": 340, "acima": 6, "abaixo": 4, "grama_gb": 30, "branco": 215, "suave": 2},
+    # a placa da ponta direita: (x0, y0, x1, y1) de cada remendo e de onde vem (dx, dy)
+    "remendos": [((3430, 712, 3442, 867), "linha", 690), ((3430, 867, 3442, 881), "linha", 890),
+                 ((3331, 602, 3359, 619), "desloca", (0, 17)), ((3260, 655, 3269, 679), "desloca", (0, 26))],
+}
+
+
+def box_varanda(Q, img):
+    out = FA.boxes(Q, np.ascontiguousarray(img.copy()),
+                   so=lambda b: b["hor"] and abs(b["meio"] - BOX_VARANDA["meio"]) < 1)
+    print("    banho varanda: o box de correr (as duas folhas de vidro contínuas e o trilho no vão até a parede)")
+    return out
+
+
+def _colar(out, src, x0, y0, x1, y1, suave):
+    """Cola src[y0:y1, x0:x1] em out com a transição de `suave` px nas bordas do remendo."""
+    h, w = y1 - y0, x1 - x0
+    ay = np.clip(np.minimum(np.arange(h) + 1, h - np.arange(h)) / (suave + 1), 0, 1)
+    ax = np.clip(np.minimum(np.arange(w) + 1, w - np.arange(w)) / (suave + 1), 0, 1)
+    a = (ay[:, None] * ax[None, :])[..., None]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(np.round(reg * (1 - a) + src.astype(np.float32) * a), 0, 255).astype(np.uint8)
+
+
+def limpeza_2810(Q, img):
+    q = LIMPEZA_2810
+    out = np.ascontiguousarray(img.copy())
+    t = q["bege_topo"]
+    x0, x1 = t["x"]
+    L, ac, ab, sv = t["linha"], t["acima"], t["abaixo"], t["suave"]
+    a = img.astype(np.int32)
+    faixa = a[L - ac:L, x0:x1]
+    nao_grama = (faixa[..., 1] - faixa[..., 0] < t["grama_gb"])
+    branco = faixa.min(axis=2) > t["branco"]
+    longe = a[L - 30:L - ac - 2, x0:x1]
+    tracejado = (longe.min(axis=2) > t["branco"]).any(axis=0)
+    tracejado = np.convolve(tracejado, np.ones(5), "same") > 0
+    ruim = (nao_grama & ~branco).any(axis=0) & ~tracejado
+    ruim = (np.convolve(ruim, np.ones(2 * sv + 1), "same") > 0) & ~tracejado
+    corridas, i = [], 0
+    while i < len(ruim):
+        if ruim[i]:
+            j = i
+            while j < len(ruim) and ruim[j]:
+                j += 1
+            corridas.append((i, j))
+            i = j
+        else:
+            i += 1
+    feitas = 0
+    for i, j in corridas:
+        n = j - i
+        for dx in [-(n + 8), n + 8, -(2 * n + 12), 2 * n + 12]:
+            s0, s1 = i + dx, j + dx
+            if s0 >= 0 and s1 <= len(ruim) and not ruim[s0:s1].any() and not tracejado[s0:s1].any():
+                y0, y1 = L - ac - sv, L + ab + sv
+                _colar(out, img[y0:y1, x0 + s0:x0 + s1], x0 + i, y0, x0 + j, y1, sv)
+                feitas += 1
+                break
+    for (r0, r1, r2, r3), modo, de in q["remendos"]:
+        if modo == "linha":
+            src = np.repeat(img[de:de + 1, r0:r2], r3 - r1, axis=0)
+            out[r1:r3, r0:r2] = src
+        else:
+            dx, dy = de
+            _colar(out, img[r1 + dy:r3 + dy, r0 + dx:r2 + dx], r0, r1, r2, r3, 2)
+    print(f"    contorno do Bege Bahia junto à grama: {feitas} de {len(corridas)} trechos com resquícios refeitos; a placa "
+          f"da ponta direita sem a faixa rosada fora do lote, sem o tufo na borda e sem o risco na grama")
+    return out
+
+
 def passos_terreo(Q, ini):
     return [
         ("granito", lambda im: granito(Q, im)),
@@ -1046,6 +1131,8 @@ def passos_terreo(Q, ini):
         ("projecoes", lambda im: projecoes(Q, im)),
         ("seta", lambda im: seta(Q, im)),
         ("rotulos", lambda im: rotulos(Q, im)),
+        ("box_varanda", lambda im: box_varanda(Q, im)),
+        ("limpeza_2810", lambda im: limpeza_2810(Q, im)),
     ]
 
 
@@ -1107,7 +1194,19 @@ if __name__ == "__main__":
     ap.add_argument("--de")
     ap.add_argument("--ate")
     ap.add_argument("--antes", help="a final aprovada antes destes itens (PNG): gera os antes e depois")
+    ap.add_argument("--so", help="aplica só estas etapas (separadas por vírgula) sobre a final atual, no lugar (a final "
+                    "já tem o turquesa e as bordas da piscina de `piscinas_turquesa.py`, que o motor não refaz)")
     a = ap.parse_args()
+    if a.so:
+        Q = FA.QuadroA("Terreo")
+        nome = CASA / "renders" / "POE642_CasaA_PH_Terreo_final_rotulos.png"
+        img = cv2.imread(str(nome))
+        etapas = dict(passos_terreo(Q, None))
+        for e in a.so.split(","):
+            img = etapas[e](img)
+        cv2.imwrite(str(nome), img)
+        print(f"    {nome}")
+        raise SystemExit
     Q, img = final_3840(de=a.de, ate=a.ate)
     if a.antes:
         antes_depois(cv2.imread(a.antes), img)
