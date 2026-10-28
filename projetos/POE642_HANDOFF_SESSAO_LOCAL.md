@@ -3619,3 +3619,16 @@ Durante a revisão da Casa D (pedido do usuário: "vamos para casa D, depois C e
 - **Regra nova** nas REGRAS (seção 4, R13): no vão estreito de uma porta de giro entre dois ambientes do mesmo vinílico, sem faixa de soleira.
 
 Antes e depois (o antes é a final aprovada, 015a936): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2810_porta_circulacao_sala_intima{,_contexto}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa D refeitos.
+
+### Revisão de 28/10/26: Térreo da Casa D (apresentada para o OK, nada alterado)
+
+Pedido do usuário: "vamos para casa D, depois C e depois B". Revisão trecho a trecho da final do Térreo (aprovada em 28/10) contra a base do PDF e as REGRAS, em 12 quadros e nos pontos suspeitos ampliados, com as camadas do PDF lidas onde havia dúvida (DOC_LINHAS E PROJEÇÕES, EST_LAJE, ARQ_PAREDE, ARQ_CONTRAPISO).
+- **Conforme:** piscina, spa e prainha; gourmet e banho gourmet; cozinha, louceiro, despensa, serviço, gás, WC DCE e DCE; área descoberta (X branco no granito, aberto sob o rótulo); garagem e carros; projeções da garagem e do gramado em branco; pisantes; adega em U; living/jantar, hall, seta e lavabo; suíte master, closets com cabides, banhos 1, 2 e 3 (boxes fechados); sala íntima (cortinas e portas de vidro), jardim, suítes 1, 2 e 3/escritório; as outras portas de giro. A linha fina do PDF entre o deck e a varanda gourmet é o contorno do contrapiso (ARQ_CONTRAPISO), entre dois pisos iguais: fica sem linha (pisos contínuos). As linhas do lote seguem em cinza (não mudam).
+- **Para o OK (5):**
+  1. banho master: os dois X tracejados do PDF (DOC_LINHAS E PROJEÇÕES, sobre os chuveiros e o vaso) estão em cinza (~100); pela regra de 28/10 ("os tracejados são ou brancos ou pretos"), em preto no quartzito;
+  2. hall: as duas linhas tracejadas da laje (1081,0 e 1092,3 pt) começam no PDF junto à folha da porta ao lado da adega (2267 pt) e atravessam o hall; na final, só a partir da grama (2366 pt). Proposta: do ponto do PDF, em preto no travertino (branco segue na grama);
+  3. hall: a folha dessa porta (aberta, encostada na parede da adega) aparece só como um fio pontilhado cinza-azulado; proposta: a folha clara com o contorno fino, como as outras portas de giro;
+  4. suíte master: um traço escuro paralelo à folha aberta, entre ela e a parede de cima (resto da folha antiga do render, uma "segunda folha");
+  5. sala íntima, porta para a circulação da suíte 2: o mesmo traço escuro logo abaixo da folha aberta.
+
+Mapa: `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2810_revisao_mapa.jpg` (a final com os números e, em cada item, a final ao lado da base do PDF). A seguir, a revisão do Subsolo da Casa D.
