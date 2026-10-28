@@ -3596,3 +3596,5 @@ O usuário, com o recorte da garagem: "esse tracejado em branco".
 - O Térreo nublado do 1º Pavimento não leva as projeções do Térreo: não muda.
 
 Antes e depois (o antes é a entrega anterior, f798821): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_tracejado_garagem_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
+
+**Aprovado** (28/10/26): "ok, aprovado", o tracejado da borda de baixo da garagem em branco (e058833). O tapete atrás das poltronas, o resto do Térreo e o 1º Pavimento da Casa E seguem aguardando a validação.
