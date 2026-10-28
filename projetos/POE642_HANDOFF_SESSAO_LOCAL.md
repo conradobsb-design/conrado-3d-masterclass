@@ -3610,3 +3610,12 @@ O usuário: "1º pavimento da casa E". Revisão trecho a trecho, a final contra 
 - **Feito (28/10/26, OK do usuário: "ok"):** o rótulo da SUÍTE 1 desceu 16 px e foi 17 px para a esquerda, no piso livre entre o aparador e o tapete (`AJUSTES_E["1Pavimento"]`, `--sobre-final rotulo_suite1`); só a caixa dele mudou na final, e o piso de onde ele saiu ficou limpo. Antes e depois (o antes é a entrega anterior, 6e8e063): `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_rotulo_suite1_antes_depois.jpg`. Prancha do 1º Pavimento e PDF da Casa E refeitos.
 
 **1º Pavimento da Casa E aprovado** (28/10/26): "aprovado", depois do rótulo da SUÍTE 1 (632a2cc). A final `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final.png` fica como está, com tudo o que estava em validação (a lista do mapa de 26/10, a varanda grande, os tracejados, a rouparia e os vazios, o sofá da sala íntima e a poltrona da suíte master, o Térreo nublado com as poltronas novas, a piscina e os boxes). **A Casa E está aprovada nos três pavimentos** (Subsolo, Térreo e 1º Pavimento); as pranchas e o PDF `POE642_CasaE/entrega/POE642_CasaE_Plantas_Humanizadas.pdf` são os da entrega final.
+
+### Pedido de 28/10/26: a "segunda porta" da circulação para a sala íntima (Térreo da Casa D)
+
+Durante a revisão da Casa D (pedido do usuário: "vamos para casa D, depois C e depois B"), o usuário mandou o recorte da porta da circulação para a sala íntima: "tem uma segunda porta colada na parede em tom cinza que precisa ser removida".
+- **O que era:** no vão da porta, o render tinha deixado a folha fechada (uma faixa clara de ponta a ponta), e a etapa das soleiras pôs por cima a soleira de Bege Bahia com as faces cinza (o vão é branco no PDF). Ao lado da folha aberta, ela se lia como uma segunda folha, fechada, encostada na parede.
+- **O que foi feito:** os dois lados são vinílico; o vinílico atravessa o vão entre os batentes, cada metade vinda do seu lado (as réguas são deitadas). A folha aberta e os batentes ficam. Só o vão mudou (672 px); o Subsolo não muda.
+- **Regra nova** nas REGRAS (seção 4, R13): no vão estreito de uma porta de giro entre dois ambientes do mesmo vinílico, sem faixa de soleira.
+
+Antes e depois (o antes é a final aprovada, 015a936): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2810_porta_circulacao_sala_intima{,_contexto}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa D refeitos.

@@ -1698,6 +1698,43 @@ def entre_porta_box_td(Q, img, antes):
     return out
 
 
+# 28/10 (usuário, com o recorte da porta da circulação para a sala íntima: "tem uma segunda porta colada na parede em
+# tom cinza que precisa ser removida"): no vão dessa porta, o render deixou a folha fechada (uma faixa clara de ponta a
+# ponta) e a etapa das soleiras desenhou por cima a soleira de Bege Bahia com as faces cinza (o vão é branco no PDF),
+# que se lê como uma segunda folha, fechada, junto à aberta. Os dois lados são vinílico: o vão, entre os batentes
+# (`vao_pt`), recebe o vinílico dos dois lados, cada metade espelhada do seu lado e as duas fundidas no meio (as réguas
+# são deitadas); nas linhas da folha aberta (`folha_y_pt`, com folga), só o lado de lá, para a folha não entrar no vão.
+# A folha e os batentes ficam. A soleira saía 1,2 px à esquerda do vão do PDF (vem do vão branco da base de 2000 px),
+# com a face da esquerda em 1438 e 1439: o vão cresce 2 px para a esquerda (`alarga_px`), para a face sair junto.
+VAO_SEM_SOLEIRA_TD = [{"vao_pt": (1246.6, 1509.2, 1255.2, 1561.4), "folha_y_pt": (1559.8, 1562.1), "lado": "direita",
+                       "folga_px": 2, "alarga_px": (2, 0)}]
+
+
+def vao_sem_soleira_td(Q, img):
+    import final3840_casaa as FA
+    out = img.astype(np.float32)
+    for q in VAO_SEM_SOLEIRA_TD:
+        x0, y0, x1, y1 = F.ret_q(Q, q["vao_pt"])
+        x0, x1 = x0 - q["alarga_px"][0], x1 + q["alarga_px"][1]
+        w = x1 - x0
+        esq = out[y0:y1, x0 - w:x0][:, ::-1]                      # o lado esquerdo, espelhado na face do vão
+        dir_ = out[y0:y1, x1:x1 + w][:, ::-1]                     # o lado direito, espelhado na outra face
+        p = ((np.arange(w, dtype=np.float32) + 0.5) / w)[None, :, None]
+        if q["lado"] == "esquerda":
+            p = 1 - p
+            esq, dir_ = dir_, esq
+        novo = esq * (1 - p) + dir_ * p
+        f0 = int(np.floor(Q.p2q(0, q["folha_y_pt"][0])[1])) - q["folga_px"]
+        f1 = int(np.ceil(Q.p2q(0, q["folha_y_pt"][1])[1])) + q["folga_px"]
+        lin = np.arange(y0, y1)
+        na_folha = (lin >= f0) & (lin < f1)
+        novo[na_folha] = dir_[na_folha]
+        a = FA.ret_aa(Q, q["vao_pt"])[y0:y1].max(axis=1)[:, None, None]          # só a cobertura das linhas
+        out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + novo * a
+    print("    vão sem soleira: o vinílico dos dois lados no vão da porta da circulação para a sala íntima")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 def boxes_terreo_d(Q, img):
     """O box do banho gourmet (no granito) na faixa cinza-clara, como estava (`F.boxes_granito`); os de correr dos
     banhos 1, 2 e 3 e do WC DCE em vidro contínuo (`final3840_casaa.boxes`), com as folhas pareadas por box. Antes, a
@@ -2269,7 +2306,7 @@ def passos_terreo_d(Q, ini, M):
         ("chuveiros", lambda im: chuveiros_terreo_d(Q, im)),
         ("boxes", lambda im: boxes_terreo_d(Q, im)),
         ("paredes", lambda im: brises_madeira(Q, F.paredes(Q, im, cor=cinza))),
-        ("soleiras", lambda im: C.soleira_elevador(Q, F.soleiras(Q, im))),
+        ("soleiras", lambda im: vao_sem_soleira_td(Q, C.soleira_elevador(Q, F.soleiras(Q, im)))),
         # a entrada das esquadrias vai em cópia: `F.esquadrias_terreo` escreve nela, e o `antes` de `pos_esquadrias_d`
         # tem de ser a etapa das soleiras (os recortes atrás das folhas abertas não voltavam)
         # a adega em U depois das esquadrias: a limpeza delas espelhava a ponta da prateleira junto do vidro
