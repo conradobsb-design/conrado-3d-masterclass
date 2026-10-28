@@ -3488,9 +3488,18 @@ O usuário, sobre as duas perguntas da rodada anterior: "item 1: A. item 2: pode
 - **Área de serviço descoberta (Térreo), opção A.** O rótulo (o nome em duas linhas e a área, no corpo de sempre) foi para o cruzamento do X tracejado, e o X se abre em volta dele: os traços param numa folga de ~13 cm do texto, como no X do shaft da Casa B. Os traços que estavam no vão e as letras no lugar antigo do rótulo saíram sem mancha (o granito ao lado).
 - **Tracejados do 1º Pavimento.** Estavam em cinza: os X dos dois vazios (o da escada e o do hall, sobre o Térreo nublado), o X do shaft, o desenho da rouparia e os X rasos do banho master, sobre o vaso e o box. Agora são traços nítidos, em preto nos fundos claros e, na rouparia (sobre o vinílico), em branco. O cinza antigo saiu antes, com o fundo ao lado. Os rótulos ficam por cima.
 - **Subsolo.** A final do Subsolo não desenha tracejado de projeção (as curvas de nível, a escada e as linhas da academia do PDF ficam fora), então não mudou.
-- **Inconformidades vistas, para o OK do usuário (nada alterado):**
+- **Inconformidades vistas, apresentadas ao usuário (resolvidas abaixo, com o OK):**
   1. o rótulo ROUPARIA (1º Pavimento) fica sobre o desenho tracejado da rouparia, como estava o da área de serviço; proposta: a mesma opção A (o tracejado parando numa folga em volta do texto);
   2. no vazio do hall (1º Pavimento), na borda da esquerda, aparece bem fraco um tracejado vertical do Térreo nublado (a linha da esquerda do X do hall do Térreo); pela regra do nublado sem as projeções do Térreo, ele sairia.
   Imagem: `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_inconformidades_rouparia_vazio_hall.jpg`.
 
 Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_area_servico_vao_x_antes_depois.jpg` e `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_tracejados_{planta,banho_master,shaft_rouparia,vazio_escada,vazio_hall}_antes_depois.jpg`. Pranchas do Térreo e do 1º Pavimento e PDF da Casa E refeitos.
+
+### Pedidos de 28/10/26: rouparia e Térreo nublado no vazio do hall (1º Pavimento da Casa E)
+
+O usuário, sobre as duas inconformidades: "item 1: A. item 2: pode".
+- **Rouparia, opção A.** O desenho tracejado da rouparia agora para numa folga em volta do rótulo, como o X da área de serviço do Térreo. O texto é mais largo que o desenho, então a folga é proporcional (~7 cm): ficam a borda de cima, a de baixo e o pé das pernas do desenho. O halo escuro que o render deixava em volta do traço antigo também saiu.
+- **Vazio do hall.** O tracejado fraco do Térreo (a linha da esquerda do X do hall do Térreo) saiu do nublado; o X do vazio é só o do 1º Pavimento.
+- **Cantos dos vazios.** Revendo de perto, os cantos dos dois vazios tinham restos do cinza antigo e o tom da escada ou do vidro puxado para dentro (já na entrega anterior). A limpeza agora preserva as linhas da borda (a linha do degrau, o vidro, a face da parede) e o degradê do nublado; o X vai de canto a canto.
+
+Antes e depois (o antes é a entrega anterior, ee4c56e): `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_{rouparia_vao,vazio_hall_sem_terreo,vazio_escada_bordas}_antes_depois.jpg`. Prancha do 1º Pavimento e PDF da Casa E refeitos.

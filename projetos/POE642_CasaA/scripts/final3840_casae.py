@@ -2343,16 +2343,18 @@ def _fora_das_caixas(p0, p1, caixas, min_px):
 
 
 def _vaos_te(Q, q=None):
-    """As caixas (px da final) dos vãos do tracejado embaixo dos rótulos de `TRACEJADOS_TE["vaos"]`."""
+    """As caixas (px da final) dos vãos do tracejado embaixo dos rótulos de `q["vaos"]`, no pavimento dela."""
     v = (q or TRACEJADOS_TE)["vaos"]
     f = v["folga_px"]
-    return [(x0 - f, y0 - f, x1 + f, y1 + f) for x0, y0, x1, y1 in caixas_rotulos("Terreo", v["rotulos"])]
+    return [(x0 - f, y0 - f, x1 + f, y1 + f)
+            for x0, y0, x1, y1 in caixas_rotulos(v.get("pavimento", "Terreo"), v["rotulos"])]
 
 
-def _limpa_tracos(Q, img, caixas, extra=None, q=None, trechos=None, fonte=None):
+def _limpa_tracos(Q, img, caixas, extra=None, q=None, trechos=None, fonte=None, so_em=None, mesmo=None):
     """Tira das caixas os traços que já estão na imagem: os px das linhas tracejadas (`limpa_px` de cada lado, os vãos
     entre os traços incluídos) e os de `extra` ganham o piso ao lado, o mesmo px deslocado (`deslocs`), tirado de
-    `fonte` (máscara; o padrão é o granito do Térreo). `trechos`: as linhas (o padrão são as do Térreo)."""
+    `fonte` (máscara; o padrão é o granito do Térreo). `trechos`: as linhas (o padrão são as do Térreo); `so_em`: só
+    os px dessa máscara mudam; `mesmo`: o px de fonte tem o mesmo valor desse mapa que o px refeito (o material)."""
     import retoque_terreo_casae as T
     q = q or TRACEJADOS_TE
     v = q["vaos"]
@@ -2377,17 +2379,34 @@ def _limpa_tracos(Q, img, caixas, extra=None, q=None, trechos=None, fonte=None):
     if fonte is None:
         fonte = np.abs(Q.chapada.astype(int) - np.array(T.ARCOS["granito"])).max(axis=2) <= 6
     alvo = (linhas | (extra if extra is not None else False)) & dentro & ~par
+    if so_em is not None:
+        alvo &= so_em
     fonte = fonte & ~par & ~cv2.dilate(linhas.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~alvo
     if extra is not None:
         fonte &= ~extra
     out = img.copy()
     falta = alvo.copy()
-    for dx, dy in v["deslocs"]:
-        ys, xs = np.nonzero(falta)
+
+    def valido(ys, xs, dx, dy):
         sy, sx = ys + dy, xs + dx
         ok = (sy >= 0) & (sy < H) & (sx >= 0) & (sx < W)
         ok[ok] = fonte[sy[ok], sx[ok]]
-        out[ys[ok], xs[ok]] = img[sy[ok], sx[ok]]
+        if mesmo is not None:
+            ok[ok] = mesmo[sy[ok], sx[ok]] == mesmo[ys[ok], xs[ok]]
+        return ok
+    # `media`: primeiro a média dos dois lados (o px deslocado para um lado e para o outro), que segue o degradê do fundo
+    if v.get("media"):
+        for dx, dy in v["deslocs"]:
+            ys, xs = np.nonzero(falta)
+            ok = valido(ys, xs, dx, dy) & valido(ys, xs, -dx, -dy)
+            ys, xs = ys[ok], xs[ok]
+            out[ys, xs] = ((img[ys + dy, xs + dx].astype(np.uint16) + img[ys - dy, xs - dx]) // 2).astype(np.uint8)
+            falta[ys, xs] = False
+    # `so_media`: sem a cópia de um lado só; o que sobra vai ao inpaint (no fundo liso, o nublado dos vazios)
+    for dx, dy in ([] if v.get("so_media") else v["deslocs"]):
+        ys, xs = np.nonzero(falta)
+        ok = valido(ys, xs, dx, dy)
+        out[ys[ok], xs[ok]] = img[ys[ok] + dy, xs[ok] + dx]
         falta[ys[ok], xs[ok]] = False
     if falta.any():
         out = cv2.inpaint(out, falta.astype(np.uint8), 3, cv2.INPAINT_TELEA)
@@ -2397,12 +2416,12 @@ def _limpa_tracos(Q, img, caixas, extra=None, q=None, trechos=None, fonte=None):
 
 
 def tracejados_pb_te(Q, img, q=None, vaos=True, trechos=None):
-    """`vaos`: os traços param em volta dos rótulos de `TRACEJADOS_TE["vaos"]` (o que já estava ali sai). `trechos`:
-    os traços (pt) a desenhar, [(nome, [(x0, y0, x1, y1)])], no lugar dos do Térreo (sem os vãos)."""
+    """`vaos`: os traços param em volta dos rótulos de `q["vaos"]` (o que já estava ali sai). `trechos`: os traços (pt)
+    a desenhar, [(nome, [(x0, y0, x1, y1)])], no lugar dos do Térreo (aí a limpeza é de quem chama)."""
     q = q or TRACEJADOS_TE
     paredes_pdf(Q)
-    caixas = _vaos_te(Q, q) if vaos and trechos is None else []
-    if caixas:
+    caixas = _vaos_te(Q, q) if vaos else []
+    if caixas and trechos is None:
         img = _limpa_tracos(Q, img, caixas, q=q)
     k = 2 * q["folga_px"] + 1
     pe = cv2.dilate((Q._par > 0.3).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
@@ -2699,10 +2718,28 @@ def varanda_1pav_e(Q, img):
 # do banho master, sobre o vaso e o box). O cinza sai (o fundo ao lado, deslocado, dentro do mesmo grupo) e o traço
 # volta fino (1,5 px), preto no fundo claro e branco no escuro, como no Térreo (`tracejados_pb_te`), por baixo dos
 # rótulos. As linhas do lote e a cobertura (ARQ_CONTRAPISO), que a final não desenha, ficam como estão.
-TRACEJADOS_1P = dict(TRACEJADOS_TE, vaos=dict(TRACEJADOS_TE["vaos"], limpa_px=2,
+# O rótulo da ROUPARIA (usuário, 28/10/26, opção A, como na área de serviço do Térreo): o desenho tracejado para numa
+# folga em volta do texto. O rótulo (54 px) é mais largo que o desenho (48 px): a folga é de 4 px (~7 cm), proporcional,
+# para que fiquem a borda de cima, a de baixo e o pé das pernas do desenho.
+# O Térreo nublado nos vazios (usuário, 28/10/26: "pode"): sem as projeções do Térreo (como no 1º Pavimento da Casa A);
+# no vazio do hall aparecia, fraca, a linha da esquerda do X do hall do Térreo. Os traços do Térreo (`_tracos_te`) que
+# caem nos vazios saem, só dentro deles (o nublado ao lado, deslocado).
+TRACEJADOS_1P = dict(TRACEJADOS_TE, vaos=dict(TRACEJADOS_TE["vaos"], pavimento="1Pavimento", rotulos=("ROUPARIA",),
+                                              folga_px=4, limpa_px=3, media=True,
                                               deslocs=[(0, 5), (0, -5), (5, 0), (-5, 0), (0, 8), (0, -8), (8, 0),
                                                        (-8, 0), (4, 4), (-4, -4), (4, -4), (-4, 4), (0, 12), (0, -12),
-                                                       (12, 0), (-12, 0)]),
+                                                       (12, 0), (-12, 0), (16, 0), (-16, 0), (0, 16), (0, -16)]),
+                     # a fonte do fundo: a caixa do grupo com esta folga (nos vazios, só o vazio), no mesmo material do
+                     # PDF que o px refeito (o vinílico no vinílico, o vaso no vaso); na rouparia, o vinílico entre a
+                     # lateral do desenho e a perna dele é estreito demais, e o desenho antigo tem um halo escuro do
+                     # render a ±3 px do traço (`limpa_px`)
+                     fonte_px=10,
+                     # nos vazios, a faixa junto à borda (a linha do degrau, o vidro, a sombra da parede) é refeita só
+                     # com o fundo ao longo da borda: nas faixas de cima e de baixo, deslocado na horizontal; nas dos
+                     # lados, na vertical (o X raso da escada cruza ~15 px da faixa na horizontal)
+                     borda_px=10, borda_tol=30,
+                     deslocs_linha=[(d * s_, 0) for d in (12, 20, 28, 36, 44, 52) for s_ in (1, -1)],
+                     deslocs_coluna=[(0, d * s_) for d in (12, 20, 28, 36) for s_ in (1, -1)],
                      grupos=[("vazio da escada", (1652.9, 1213.9, 1991.0, 1296.5), True),
                              ("vazio do hall", (1985.3, 1479.8, 2237.8, 1728.6), True)]
                      + [(nome, caixa, False) for nome, caixa in (("shaft", (1832.5, 905.5, 1849.0, 997.5)),
@@ -2732,22 +2769,116 @@ def _tracos_1p(Q, q=None):
     return trechos
 
 
+def _bordas_vazio(lum, vaz, caixa, k=10, tol=30):
+    """As linhas retas da borda do vazio (a linha do degrau, o vidro, a face da parede): as linhas e as colunas a até `k`
+    px da borda, dentro da caixa (x0, y0, x1, y1, px), cuja mediana de luz se afasta mais de `tol` da do miolo, com 1 px
+    em volta. Devolve (linhas, colunas), máscaras dentro do vazio."""
+    x0, y0, x1, y1 = (int(round(v)) for v in caixa)
+    sub, l = vaz[y0:y1, x0:x1], lum[y0:y1, x0:x1]
+    lin, col = np.zeros_like(vaz), np.zeros_like(vaz)
+    ys, xs = np.nonzero(sub)
+    if not len(ys):
+        return lin, col
+    for eixo, (a, b), m in ((0, (ys.min(), ys.max()), lin), (1, (xs.min(), xs.max()), col)):
+        med = np.array([np.median(l[i][sub[i]]) if sub[i].any() else np.nan for i in range(sub.shape[0])]) \
+            if eixo == 0 else np.array([np.median(l[:, j][sub[:, j]]) if sub[:, j].any() else np.nan
+                                        for j in range(sub.shape[1])])
+        miolo = np.nanmedian(med[a + k:b - k + 1]) if b - a > 2 * k else np.nanmedian(med)
+        for i in list(range(a, min(a + k, b + 1))) + list(range(max(b - k + 1, a), b + 1)):
+            if abs(med[i] - miolo) > tol:
+                for i2 in (i - 1, i, i + 1):
+                    if eixo == 0:
+                        m[y0 + i2, x0:x1] = True
+                    else:
+                        m[y0:y1, x0 + i2] = True
+    return lin & vaz, col & vaz
+
+
 def tracejados_pb_1p(Q, img, q=None):
     """Os tracejados cinza do 1º Pavimento em preto ou branco: o cinza sai e o traço volta fino (a imagem sem rótulos)."""
     q = q or TRACEJADOS_1P
     paredes_pdf(Q)
     trechos = _tracos_1p(Q, q)
     vaz = _onde_terreo(Q)[1]
+    lum = img.astype(np.float32).mean(axis=2)
+    vazios = {nome for nome, _, vazio in q["grupos"] if vazio}
+    # cada vazio, para a limpeza: as linhas retas da borda (a linha do degrau, o vidro, a face da parede), refeitas só ao
+    # longo delas (as de cima e de baixo, com o fundo deslocado na horizontal; as dos lados, na vertical), e o resto
+    # (o nublado desfocado, a sombra da parede), pela média dos dois lados da faixa e, onde não há, pelo inpaint
+    regioes = []
+    for nome, caixa, vazio in q["grupos"]:
+        if not vazio:
+            continue
+        (a, b), (c, d) = Q.p2q(*caixa[:2]), Q.p2q(*caixa[2:])
+        cx = (a - 3, b - 3, c + 3, d + 3)
+        x0, y0, x1, y1 = (int(round(v)) for v in cx)
+        m = np.zeros_like(vaz)
+        m[y0:y1, x0:x1] = True
+        m &= vaz
+        lin, col = _bordas_vazio(lum, vaz, cx, k=q["borda_px"], tol=q["borda_tol"])
+        lin, col = lin & m, col & m & ~lin
+        resto = m & ~lin & ~col
+        regioes.append((cx, [(col, col, {"deslocs": q["deslocs_coluna"]}), (lin, lin, {"deslocs": q["deslocs_linha"]}),
+                             (resto, resto, {"so_media": True})]))
+
+    def limpa_vazios(im, linhas):
+        for cx, partes in regioes:
+            for regiao, fonte_r, opc in partes:
+                if regiao.any():
+                    im = _limpa_tracos(Q, im, [cx], q=dict(q, vaos=dict(q["vaos"], **opc)), trechos=linhas,
+                                       fonte=fonte_r, so_em=regiao)
+        return im
+    # o Térreo nublado nos vazios sem as projeções do Térreo
+    QT, terreo = QuadroE("Terreo"), []
+    for nome, t in _tracos_te(QT):
+        segs = []
+        for x0, y0, x1, y1 in t:
+            (a, b), (c, d) = QT.p2q(x0, y0), QT.p2q(x1, y1)
+            u, v = int((a + c) / 2), int((b + d) / 2)
+            if 0 <= v < vaz.shape[0] and 0 <= u < vaz.shape[1] and vaz[v, u]:
+                segs.append(tuple(Q.q2p(a, b)) + tuple(Q.q2p(c, d)))
+        if segs:
+            terreo.append((f"Térreo: {nome}", segs))
+    if terreo:
+        img = limpa_vazios(img, terreo)
+        print("    Térreo nublado nos vazios sem: " + ", ".join(f"{n} ({len(t)} traços)" for n, t in terreo))
+    # o X cinza dos vazios
+    img = limpa_vazios(img, [(n, t) for n, t in trechos if n in vazios])
+    # os outros grupos: o fundo da caixa do grupo com `fonte_px` de folga, no mesmo material do PDF que o px refeito
     caixas, fonte = [], np.zeros(img.shape[:2], bool)
     for nome, caixa, vazio in q["grupos"]:
+        if vazio:
+            continue
         (a, b), (c, d) = Q.p2q(*caixa[:2]), Q.p2q(*caixa[2:])
         caixas.append((a - 3, b - 3, c + 3, d + 3))
-        m = np.zeros(img.shape[:2], bool)
-        m[max(int(b) - 3, 0):int(np.ceil(d)) + 3, max(int(a) - 3, 0):int(np.ceil(c)) + 3] = True
-        fonte |= m & vaz if vazio else m
-    limpa = _limpa_tracos(Q, img, caixas, q=q, trechos=trechos, fonte=fonte)
-    print(f"    grupos: " + ", ".join(f"{nome} ({len(t)} traços)" for nome, t in trechos))
-    return tracejados_pb_te(Q, limpa, q=q, trechos=trechos)
+        f = q["fonte_px"]
+        fonte[max(int(b) - f, 0):int(np.ceil(d)) + f, max(int(a) - f, 0):int(np.ceil(c)) + f] = True
+    ch = Q.chapada.astype(np.int32)
+    material = ch[..., 0] * 65536 + ch[..., 1] * 256 + ch[..., 2]
+    limpa = _limpa_tracos(Q, img, caixas, q=q, trechos=[(n, t) for n, t in trechos if n not in vazios], fonte=fonte,
+                          mesmo=material, so_em=~vaz)
+    # o X dos vazios só dentro deles, de canto a canto, como no PDF (as linhas da borda ficam inteiras em volta)
+    dentro = cv2.erode(vaz.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    cortados = []
+    for nome, t in trechos:
+        if nome not in vazios:
+            cortados.append((nome, t))
+            continue
+        novos = []
+        for x0, y0, x1, y1 in t:
+            (u0, v0), (u1, v1) = Q.p2q(x0, y0), Q.p2q(x1, y1)
+            n = max(2, int(np.hypot(u1 - u0, v1 - v0) * 4))
+            f = np.linspace(0, 1, n)
+            ok = dentro[np.clip(np.round(v0 + (v1 - v0) * f).astype(int), 0, vaz.shape[0] - 1),
+                        np.clip(np.round(u0 + (u1 - u0) * f).astype(int), 0, vaz.shape[1] - 1)]
+            if ok.sum() < 2:
+                continue
+            i = np.nonzero(ok)[0]
+            fa, fb = f[i[0]], f[i[-1]]
+            novos.append((x0 + (x1 - x0) * fa, y0 + (y1 - y0) * fa, x0 + (x1 - x0) * fb, y0 + (y1 - y0) * fb))
+        cortados.append((nome, novos))
+    print(f"    grupos: " + ", ".join(f"{nome} ({len(t)} traços)" for nome, t in cortados))
+    return tracejados_pb_te(Q, limpa, q=q, trechos=cortados)
 
 
 def tracejados_1p_sobre_final(Q, img):
