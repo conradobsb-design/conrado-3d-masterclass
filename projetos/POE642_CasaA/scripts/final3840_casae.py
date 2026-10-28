@@ -1661,6 +1661,65 @@ def piscina_terreo_e(Q, img):
     return out
 
 
+# As cortinas no modelo padrão (usuário, 28/10/26: "NO TERREO DA CASA E, VAMOS ALTERAR O MODELO DAS CORTINAS PARA A QUE
+# ADOTAMOS COMO PADRÃO"). O pano já era o franzido (`blocos.pano_franzido`, 27/10), mas no travertino claro do Térreo o
+# linho quase some e só as sombras das pregas aparecem, como a linha em zigue-zague antiga; e, na janela de baixo do
+# living, a corda do render entre o trilho e a primeira folha de vidro ficou. Aqui:
+# - "limpar": a corda sai (px do quadro: x0, x1, y0, y1), com o travertino das mesmas colunas `dy` px acima;
+# - cada pano sai inteiro (a pegada do pano franzido, `limiar`, com `folga` px) e volta com o piso do ambiente
+#   (`cortinas_franzidas.tirar`), e o pano franzido entra no mesmo eixo, com o linho um pouco mais fechado (`linho`), o
+#   contorno do tecido mais escuro (`contorno`: largura em px e escurecimento) e a sombra curta no piso mais marcada
+#   (`sombra`), para o pano se ler como corpo de tecido no piso claro, como nas casas de piso escuro.
+CORTINAS_TER_E = {"limpar": [(1591, 1714, 1546, 1554, -300), (1714, 1847, 1546, 1551, -300)],
+                  "limiar": 0.02, "folga": 1, "linho": 0.94, "contorno": (0.7, 0.25), "sombra": 1.8, "k": 8}
+
+
+def cortinas_terreo_e(Q, img):
+    import json
+    import pymupdf
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    import cortinas_franzidas as CF
+    import retoque_terreo_casae as T
+    from opcoes_1pav_casae import quadro_pdf
+    q = CORTINAS_TER_E
+    out = np.ascontiguousarray(img.copy())
+    for x0, x1, y0, y1, dy in q["limpar"]:
+        out[y0:y1, x0:x1] = img[y0 + dy:y1 + dy, x0:x1]
+    cfg = json.loads(T.CONFIG.read_text())
+    pg = pymupdf.open(T.PDF)[cfg["pavimentos"]["Terreo"]["pagina"]]
+    at, lt = cv2.imread(str(T.BASE), cv2.IMREAD_GRAYSCALE).shape
+    hb, wb = cv2.imread(str(T.BASE_SEM_TELA), cv2.IMREAD_GRAYSCALE).shape
+    p2q = quadro_pdf(pg, cfg, lt, at, wb, hb, out.shape[1])
+    px_m = CF.px_m_de(p2q)
+    k = q["k"]
+    n = 0
+    for c in T.CORTINAS["conjuntos"]:
+        vertical = c["vidro"] in ("direita", "esquerda")
+        ep = c["trilho"][0]
+        for pp0, pp1 in c["panos"]:
+            if vertical:
+                (eixo, t0), (_, t1) = p2q(ep, pp0), p2q(ep, pp1)
+            else:
+                (t0, eixo), (t1, _) = p2q(pp0, ep), p2q(pp1, ep)
+            comp = (t1 - t0) / px_m
+            cor, a = blocos.pano_franzido(comp, px_m * k)
+            velho = CF.pegada(out.shape, cor, a, eixo, t0, k, c["vidro"]) > q["limiar"]
+            velho = cv2.dilate(velho.astype(np.uint8), np.ones((2 * q["folga"] + 1,) * 2, np.uint8)).astype(bool)
+            CF.tirar(out, velho, c["vidro"], px_m)
+            tec = (a > 0.6).astype(np.float32)
+            lc, esc = q["contorno"]
+            r = max(1, int(round(lc * k)))
+            borda = tec - cv2.erode(tec, np.ones((2 * r + 1, 2 * r + 1), np.uint8))
+            cor = cor * (q["linho"] * (1 - esc * borda))[..., None]
+            a = np.where(tec > 0, a, np.clip(a * q["sombra"], 0, 1)).astype(np.float32)
+            T.pousar_cortina(out, cor, a, eixo, t0, k, c["vidro"])
+            n += 1
+    print(f"    cortinas: {n} panos franzidos no modelo padrão, com o contorno do linho e a sombra curta; a corda do render "
+          f"junto ao vidro do living fora")
+    return out
+
+
 def passos_terreo(Q):
     return [
         ("pisos", lambda im: pisos_e(Q, im, PISOS_TER_E)),
@@ -1671,6 +1730,7 @@ def passos_terreo(Q):
         ("bancadas", lambda im: _bancadas(Q, im, BANCADAS_TER_E)),
         ("paredes", lambda im: paredes_e(Q, im)),
         ("seta", lambda im: seta_e(Q, im, SETA_TER_E)),
+        ("cortinas", lambda im: cortinas_terreo_e(Q, im)),
         ("piscina", lambda im: piscina_terreo_e(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("Terreo", im)),
     ]
@@ -1756,6 +1816,73 @@ def nublado_novo(Q, img):
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
+# Os traços do render no Bege Bahia da varanda grande, rente aos guarda-corpos (usuário, 28/10/26: "CORRIJA ESSES
+# RESQUICIOS NO PISO, RENTE AO GUARDA CORPO DA VARANDA DO 1º PAV DA CASA E. NOTE QUE TEM UNS TRAÇOS QUE NÃO FAZEM PARTE DA
+# IMAGEM. ESSES TRAÇOS APARECEM NA VERTICAL E NA HORIZONTAL ABAIXO DO VASO"). Em px do quadro:
+# - "esq": a linha dupla (um fio claro e um escuro) logo depois do guarda-corpo da esquerda, por trechos (o de cima, junto
+#   à planta, e os de baixo): onde a linha aparece (o fio claro mais claro que o escuro em `dif`), a faixa vem do piso
+#   logo depois dela, espelhado, na mesma linha;
+# - "cantos": no canto de baixo, em volta dos dois vasos e da planta, o piso do render (mais claro e liso, em quadrados) e
+#   o fio escuro em L em volta do vaso de baixo (a base quadrada do vaso do render): o piso do canto vem do Bege Bahia da
+#   mesma varanda `dy` px acima (as mesmas colunas), com as emendas com o piso de fora esfumadas (`suave`); os vasos e a
+#   planta ficam por cima, com a sombra curta (`sombra`: px para a esquerda e para baixo, desfoque, força). No canto de
+#   cima, a planta tem a borda clara do render, que num piso novo vira um contorno: lá só sai a linha da esquerda;
+# o que é planta (o verde-oliva: o vermelho quase igual ao verde e o azul abaixo dele; as folhas escuras) ou vaso (o
+# terracota) fica.
+VARANDA_1PAV_E = {"esq": {"x": (1175, 1182), "y": (530, 1531), "dif": 15, "folga": 2},
+                  "cantos": [{"px": (1174, 1388, 1318, 1534), "dy": -170, "emendas": ("cima", "direita")}],
+                  "suave": 10, "sombra": (3, 2.5, 0.30), "mancha_min": 40}
+
+
+def _planta_vaso(px):
+    a = px.astype(np.int16)
+    b, g, r = a[..., 0], a[..., 1], a[..., 2]
+    planta = ((r - g < 11) & (g - b > 12)) | ((r + g + b) < 405)
+    return planta | ((r - b > 55) & (r - g > 30))
+
+
+def varanda_1pav_e(Q, img):
+    q = VARANDA_1PAV_E
+    out = img.copy()
+    lum = img.astype(np.float32).mean(axis=2)
+    e = q["esq"]
+    x0, x1 = e["x"]
+    linha = lum[:, x0] - lum[:, x0 + 4] > e["dif"]
+    linha[:e["y"][0]] = False
+    linha[e["y"][1]:] = False
+    linha = cv2.dilate(linha.astype(np.uint8)[:, None], np.ones((2 * e["folga"] + 1, 1), np.uint8))[:, 0] > 0
+    n = 0
+    espelho = 2 * x1 - np.arange(x0, x1)          # o piso logo depois da faixa, espelhado (sem emenda na borda da faixa)
+    for y in np.nonzero(linha)[0]:
+        alvo, fonte = img[y, x0:x1], img[y, espelho]
+        ok = ~_planta_vaso(alvo) & ~_planta_vaso(fonte)
+        out[y, x0:x1][ok] = fonte[ok]
+        n += int(ok.sum())
+    for c in q["cantos"]:
+        a0, b0, a1, b1 = c["px"]
+        reg = out[b0:b1, a0:a1].astype(np.float32)
+        piso = out[b0 + c["dy"]:b1 + c["dy"], a0:a1].astype(np.float32)
+        # a planta e os vasos inteiros (sem os pontinhos do piso que a cor confunde: manchas de menos de `mancha_min`
+        # px), com a borda macia
+        pv = cv2.morphologyEx(_planta_vaso(img[b0:b1, a0:a1]).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+        nc, lab, st, _ = cv2.connectedComponentsWithStats(pv, 8)
+        pv = np.isin(lab, [i for i in range(1, nc) if st[i, cv2.CC_STAT_AREA] >= q["mancha_min"]])
+        fica = cv2.GaussianBlur(pv.astype(np.float32), (0, 0), 0.6)
+        h, w = fica.shape
+        dsx, sig, forca = q["sombra"]
+        sb = cv2.GaussianBlur(cv2.warpAffine(fica, np.float32([[1, 0, -dsx], [0, 1, dsx]]), (w, h)), (0, 0), sig) * forca
+        piso *= (1 - sb * (1 - fica))[..., None]
+        # as emendas com o piso de fora do canto esfumadas
+        yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+        dist = {"cima": yy, "baixo": (h - 1) - yy, "direita": (w - 1) - xx}
+        borda = np.clip(np.minimum.reduce([dist[e] for e in c["emendas"]]) / q["suave"], 0, 1)
+        m = borda * (1 - fica)
+        out[b0:b1, a0:a1] = np.clip(reg * (1 - m[..., None]) + piso * m[..., None], 0, 255).astype(np.uint8)
+        n += int((m > 0.5).sum())
+    print(f"    varanda: {n} px dos traços do render rente aos guarda-corpos refeitos com o Bege Bahia ao lado")
+    return out
+
+
 def passos_1pav(Q):
     return [
         ("nublado", lambda im: nublado_novo(Q, im)),
@@ -1763,6 +1890,7 @@ def passos_1pav(Q):
         ("escada", lambda im: escada_e(Q, im, ESCADA_1PAV_E)),
         ("bancadas", lambda im: _bancadas(Q, im, BANCADAS_1PAV_E)),
         ("paredes", lambda im: paredes_e(Q, im)),
+        ("varanda", lambda im: varanda_1pav_e(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("1Pavimento", im)),
     ]
 

@@ -3347,4 +3347,45 @@ Antes e depois (o antes é a final de 3cfa560):
 
 Pranchas e PDFs das Casas B e E refeitos (na Casa E, o Térreo e o 1º Pavimento).
 
-Escolha a confirmar com o usuário: na Casa B, os dois vidros ficaram nas duas beiras da faixa, com a água entre eles. A alternativa seria os dois vidros juntos.
+Escolha a confirmar com o usuário: na Casa B, os dois vidros ficaram nas duas beiras da faixa, com a água entre eles. A alternativa seria os dois vidros juntos. Resposta: "pode deixar os vidros da casa B como estão".
+
+### Pedidos de 28/10/26: cadeiras da Casa D, cortinas e varanda da Casa E, poltronas da Casa C
+
+O usuário, vendo as pranchas:
+- com o recorte da mesa de jantar do living da Casa D: "AS CADEIRAS DA MESA ESTÃO INVERTIDAS? CONTINUE";
+- "NO TERREO DA CASA E, VAMOS ALTERAR O MODELO DAS CORTINAS PARA A QUE ADOTAMOS COMO PADRÃO";
+- com um recorte da varanda grande do 1º Pavimento da Casa E: "CORRIJA ESSES RESQUICIOS NO PISO, RENTE AO GUARDA CORPO DA VARANDA DO 1º PAV DA CASA E. NOTE QUE TEM UNS TRAÇOS QUE NÃO FAZEM PARTE DA IMAGEM. ESSES TRACÇOS APARECEM NA VERTICAL E NA HORIZONTAL ABAIXO DO VASO";
+- com três recortes das poltronas dos quartos da Casa C: "NO TERREO DA CASA C, ALTERE AS POLTRONAS E MESAS LATERAIS PARA O NOVO MODELO QUE ADOTAMOS";
+- com o recorte das cortinas dos quartos da Casa D: "ESSE É O MODELO DE CORTINA A SER ADOTADO EM TODAS AS CASAS".
+
+O que foi feito:
+
+**Casa D, cadeiras da mesa de jantar.** Estavam invertidas, com o encosto curvo virado para a mesa. No recorte da `mesa_jantar_10` (a cadeira de cima da foto), a frente fica embaixo; o giro de `jantar_d` supunha o contrário. Agora a cadeira de cima fica como está, a de baixo gira 180° e as dos lados giram 90° para a mesa. Refeito de `--de moveis`; por cima, o turquesa e as bordas de novo. Só as 10 cadeiras mudaram.
+
+**Casa E Térreo, cortinas.** O modelo já era o pano franzido de 27/10, o mesmo do recorte da Casa D; os motores das cinco casas o usam (`blocos.cortina` fechada). No travertino claro, porém, o linho quase sumia e o pano se lia como a linha em zigue-zague antiga. Na janela de baixo do living, a corda do render entre o trilho e a primeira folha de vidro ainda estava lá. Nova etapa `cortinas` no motor (`CORTINAS_TER_E`):
+- a corda sai;
+- os 5 panos voltam no mesmo eixo, com o linho um pouco mais fechado, o contorno do tecido e a sombra curta mais marcados.
+
+O 1º Pavimento foi refeito (o Térreo esmaecido).
+
+**Casa E 1º Pavimento, varanda grande.** Nova etapa `varanda` (`VARANDA_1PAV_E`):
+- a linha dupla do render (um fio claro e um escuro) logo depois do guarda-corpo da esquerda, em vários trechos, sai com o piso espelhado;
+- no canto de baixo, o piso do render em volta dos vasos (mais claro e liso, em quadrados) e o L escuro da base quadrada do vaso de baixo vêm do Bege Bahia de cima, com as emendas esfumadas;
+- os vasos e a planta ficam, com a sombra curta.
+
+No canto de cima, em volta da outra planta, só a linha saiu: refazer o piso deixava a borda clara da planta como contorno.
+
+**Casa C Térreo, poltronas e mesas laterais.** Nova etapa `moveis` (`MOVEIS_TC`), com o estofado e a madeira da Casa D (`final3840_casad.estofado_d`, `madeira_d`):
+- a poltrona, o pufe e a mesa lateral da suíte master 1 e do quarto 1;
+- a poltrona e a mesa lateral da sala TV (a outra mesa do PDF, junto ao sofá, não aparece na final e não entra);
+- as 2 poltronas do estar.
+
+Refeito de `--de moveis`; por cima, o turquesa e as bordas.
+
+Antes e depois:
+- `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2810_cadeiras_jantar_antes_depois.jpg`;
+- `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_cortinas_{living,detalhe,escritorio}_antes_depois.jpg`;
+- `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_varanda_{guarda_corpo,inteira}_antes_depois.jpg`;
+- `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2810_{poltrona_suite_master,poltrona_quarto1,poltrona_sala_tv,poltronas_estar}_antes_depois.jpg`.
+
+Pranchas e PDFs das Casas C, D e E refeitos.

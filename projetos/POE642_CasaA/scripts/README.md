@@ -820,6 +820,7 @@ Pedido do usuário (22/10/26), às perguntas dos mapas do pente fino da Casa C: 
 python3 final3840_casac.py Terreo               # -> ../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png
 python3 final3840_casac.py Subsolo              # depois do Térreo (a hachura vem dele)
 python3 final3840_casac.py Terreo --de pecas    # refaz só dali em diante; --ate <etapa> para nela
+python3 final3840_casac.py Terreo --de moveis   # (28/10) as poltronas, os pufes e as mesas laterais no modelo da Casa D
 # desde 28/10, o Térreo tem por cima o turquesa e as bordas da piscina (`piscinas_turquesa.py`): depois do motor,
 # python3 piscinas_turquesa.py C-Terreo && python3 piscinas_turquesa.py C-Terreo --bordas --rede <a saída do motor>
 # depois, rodape_entrega.py --no-quadro e pdf_entrega.py, com a config da Casa C
@@ -863,6 +864,9 @@ python3 rodape_entrega.py --config ../../POE642_CasaD/config_bases.json --no-qua
     --render Subsolo=../../POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_final_rotulos.png
 python3 pdf_entrega.py --config ../../POE642_CasaD/config_bases.json
 ```
+
+- Etapa `moveis` da Casa C (28/10, "NO TERREO DA CASA C, ALTERE AS POLTRONAS E MESAS LATERAIS PARA O NOVO MODELO QUE ADOTAMOS"): `final3840_casac.moveis_tc`, com `MOVEIS_TC`, chama `final3840_casad.estofado_d` e `madeira_d` em cada zona. São a suíte master 1, o quarto 1, a sala TV e as 2 poltronas do estar. Os estofados (lado de 30 a 60 pt) saem em bouclé com volume e as costuras como vincos; as mesas laterais (12 a 25 pt) saem em madeira, só as que a final mostra no tom quente.
+- Mesa de jantar do living (28/10, "AS CADEIRAS DA MESA ESTÃO INVERTIDAS?"): em `jantar_d`, o giro de cada cadeira estava trocado, com o encosto virado para a mesa. No recorte, a frente fica embaixo; agora a de cima fica como está, a de baixo gira 180° e as dos lados giram 90° para a mesa.
 
 ## Ajustes da Casa A depois da conferência: `ajustes_casaa.py`
 
@@ -1161,12 +1165,21 @@ Etapas do 1º Pavimento (`passos_1pav`):
 - `pisos`: o vinílico (`PISOS_1PAV_E`), com as peças da final que o PDF não desenha em `FICAM_1PAV_E`.
 - `escada`: `ESCADA_1PAV_E`, o D no degrau de cima.
 - `bancadas`: `BANCADAS_1PAV_E`.
-- `paredes` e `rotulos`.
+- `paredes`.
+- `varanda` (28/10, "CORRIJA ESSES RESQUICIOS NO PISO, RENTE AO GUARDA CORPO DA VARANDA DO 1º PAV DA CASA E"): `VARANDA_1PAV_E`. A linha dupla do render logo depois do guarda-corpo da esquerda da varanda grande sai onde aparece (o fio claro mais claro que o escuro em `dif`), com o piso logo depois, espelhado. No canto de baixo (`cantos`), o piso do render em volta dos dois vasos e da planta e o L escuro da base do vaso vêm do Bege Bahia 170 px acima, com as emendas esfumadas; os vasos e a planta (`_planta_vaso`: o verde-oliva, as folhas escuras, o terracota; sem manchas de menos de `mancha_min` px) ficam por cima, com a sombra curta.
+- `rotulos`.
+
+No Térreo, a etapa `cortinas` (28/10, "VAMOS ALTERAR O MODELO DAS CORTINAS PARA A QUE ADOTAMOS COMO PADRÃO"; depois, "ESSE É O MODELO DE CORTINA A SER ADOTADO EM TODAS AS CASAS", com as dos quartos da Casa D): `CORTINAS_TER_E`, depois da `seta`.
+- O pano já era o franzido de 27/10, mas no travertino claro ele quase sumia e lia-se como a linha em zigue-zague antiga.
+- Cada um dos 5 panos sai inteiro (a pegada do `blocos.pano_franzido`, com o piso do ambiente) e volta no mesmo eixo, com o linho um pouco mais fechado (`linho`), o contorno do tecido mais escuro (`contorno`) e a sombra curta mais marcada (`sombra`).
+- A corda do render entre o trilho e a primeira folha de vidro do living (`limpar`) sai, com o travertino das mesmas colunas 300 px acima.
 
 A borda das peças vai junto com elas na troca dos pisos (`PECAS_E["borda_px"]`, `borda_desvio`). Os rótulos do 1º Pavimento são escritos de novo com os ajustes aprovados (`retoque_1pav_casae.ROTULOS`).
 
 ```bash
+python3 final3840_casae.py Terreo --de cortinas      # as cortinas, a piscina e os rótulos do Térreo
 python3 final3840_casae.py 1Pavimento
+python3 final3840_casae.py 1Pavimento --de varanda  # só a limpeza da varanda e os rótulos
 python3 rodape_entrega.py --config $C/config_bases.json --no-quadro --render 1Pavimento=$C/renders/POE642_CasaE_PH_1Pavimento_v1_final.png
 python3 pdf_entrega.py --config $C/config_bases.json
 ```

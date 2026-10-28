@@ -1046,9 +1046,11 @@ def jantar_d(Q, img, piso):
         sc = 4 * larg / c0.shape[1]
         c = cv2.resize(c0, None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
         a = cv2.resize(a0_, None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
-        # no recorte, a frente (a borda do tampo) fica embaixo: gira para a frente olhar a mesa
-        giro = {"baixo": None, "cima": cv2.ROTATE_180, "esq": cv2.ROTATE_90_CLOCKWISE,
-                "dir": cv2.ROTATE_90_COUNTERCLOCKWISE}[lado]
+        # no recorte (a cadeira de cima da mesa da foto), a frente (a borda do tampo) fica embaixo e o encosto curvo em
+        # cima: a de cima fica como está e as outras giram para a frente olhar a mesa (usuário, 28/10/26: "AS CADEIRAS
+        # DA MESA ESTÃO INVERTIDAS?": o giro estava trocado, com o encosto virado para a mesa)
+        giro = {"cima": None, "baixo": cv2.ROTATE_180, "esq": cv2.ROTATE_90_COUNTERCLOCKWISE,
+                "dir": cv2.ROTATE_90_CLOCKWISE}[lado]
         if giro is not None:
             c, a = cv2.rotate(c, giro), cv2.rotate(a, giro)
         h4, w4 = a.shape

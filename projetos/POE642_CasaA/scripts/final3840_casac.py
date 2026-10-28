@@ -1824,6 +1824,53 @@ def cortinas_t(Q, img):
         B.trechos_cortina_b = tr
 
 
+# As poltronas, os pufes e as mesas laterais no modelo novo, o da Casa D (usuário, 28/10/26: "NO TERREO DA CASA C, ALTERE
+# AS POLTRONAS E MESAS LATERAIS PARA O NOVO MODELO QUE ADOTAMOS"): os estofados em bouclé com volume, sem os traços, e as
+# costuras do PDF como sombras macias (`final3840_casad.estofado_d`); as mesas laterais em madeira até a borda, com o
+# chanfro e sem o contorno escuro (`madeira_d`). Por zona (pt do PDF): os estofados (lado de `lado_pt`) e as mesas
+# (`mesas_lado_pt`, só as que a final mostra em madeira: R - B acima de `quente`); as costuras são os traços de dentro de
+# `costura_min_pt` para cima e os vincos, de `vinco_min_pt`.
+MOVEIS_TC = {"zonas": [("a poltrona, o pufe e a mesa lateral da suíte master 1", (640.0, 795.0, 725.0, 885.0)),
+                       ("a poltrona, o pufe e a mesa lateral do quarto 1", (1770.0, 755.0, 1860.0, 845.0)),
+                       ("a poltrona e as mesas laterais da sala TV", (1295.0, 975.0, 1412.0, 1045.0)),
+                       ("as 2 poltronas do estar", (1925.0, 1468.0, 2042.0, 1528.0))],
+             "lado_pt": (30, 60), "mesas_lado_pt": (12, 25), "costura_min_pt": 14.0, "vinco_min_pt": 2.5,
+             "quente": 20, "cor": (200, 212, 222), "semente": 2811}
+
+
+def moveis_tc(Q, img):
+    import final3840_casad as D
+    q = MOVEIS_TC
+    out = np.ascontiguousarray(img.copy())
+    rng = np.random.default_rng(q["semente"])
+    pecas = [d for d in Q.desenhos if d.get("layer") in F.CAMADAS_PECAS]
+    n_e = n_m = 0
+    for nome, z in q["zonas"]:
+        fills = [d for d in pecas if d["type"] in ("f", "fs") and D._dentro_pt(d["rect"], z)]
+        for d in fills:
+            lado = max(d["rect"].width, d["rect"].height)
+            if q["mesas_lado_pt"][0] <= lado <= q["mesas_lado_pt"][1]:
+                # só as mesas que a final mostra em madeira (o tom quente); a da sala TV junto ao sofá não aparece
+                x0, y0, x1, y1 = F.ret_q(Q, (d["rect"].x0, d["rect"].y0, d["rect"].x1, d["rect"].y1))
+                c = np.median(out[y0 + 2:y1 - 2, x0 + 2:x1 - 2].reshape(-1, 3), axis=0)
+                if c[2] - c[0] > q["quente"]:
+                    out = D.madeira_d(Q, out, d)
+                    n_m += 1
+        for d in fills:
+            r = d["rect"]
+            if not q["lado_pt"][0] <= max(r.width, r.height) <= q["lado_pt"][1]:
+                continue
+            tr = [t for t in pecas if t["type"] == "s" and D._dentro_pt(t["rect"], (r.x0, r.y0, r.x1, r.y1))
+                  and max(t["rect"].width, t["rect"].height) >= q["costura_min_pt"]]
+            vs = [t for t in pecas if t["type"] == "s" and D._dentro_pt(t["rect"], (r.x0, r.y0, r.x1, r.y1))
+                  and max(t["rect"].width, t["rect"].height) >= q["vinco_min_pt"]]
+            out = D.estofado_d(Q, out, [d], tr, q["cor"], rng, vincos=vs)
+            n_e += 1
+    print(f"    móveis: {n_e} poltronas e pufes em bouclé com volume, sem os traços; {n_m} mesas laterais em madeira, "
+          f"sem o contorno (o modelo da Casa D)")
+    return out
+
+
 def passos_terreo_c(Q, ini, M):
     chave = "Terreo"
     cooktops = [(c["pt"][0] - 2, c["pt"][1] - 2, c["pt"][2] + 2, c["pt"][3] + 2) for c in COOKTOPS_C]
@@ -1861,6 +1908,7 @@ def passos_terreo_c(Q, ini, M):
         ("vasos", lambda im: F.vasos_cor(Q, im)),
         ("biblioteca", lambda im: biblioteca_c(Q, im)),
         ("cadeiras", lambda im: cadeiras_mesas_t(Q, im)),
+        ("moveis", lambda im: moveis_tc(Q, im)),
         ("carros", lambda im: F.carros(Q, im, M)),
         ("deck", lambda im: deck_detalhes_c(Q, im)),
         ("chuveiros", lambda im: chuveiros_tc(Q, im)),
