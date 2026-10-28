@@ -1380,8 +1380,8 @@ def pos_vidros_d(Q, img, antes):
 #    do triângulo ele ficava na borda, metade no deck);
 # 6. os guarda-roupas com cabides (E2; `elementos.guarda_roupa`, como os closets das Casas B e C): o armário do DCE, o da
 #    suíte 3/escritório e o módulo ao lado do banho master (os retângulos com a diagonal da DOC_LINHAS);
-# 7. os boxes de correr dos banhos 1, 2 e 3 e do WC DCE em vidro contínuo, com as faces finas, a sombra curta e o trilho
-#    (`final3840_casaa.boxes`); as folhas do PDF, pareadas por box (`AJ.folhas_box` juntava as dos três banhos, que estão
+# 7. os boxes de correr dos banhos 1, 2 e 3 e do WC DCE em vidro contínuo, com as faces finas e a sombra curta, desde
+#    28/10 fechados, de parede a parede, sem o trilho tracejado (`final3840_casaa.boxes`); as folhas do PDF, pareadas por box (`AJ.folhas_box` juntava as dos três banhos, que estão
 #    na mesma linha); antes, a faixa tracejada da base sai, refeita com o piso logo acima;
 # 8-9. as bancadas com a borda e a sombra curta (E9) e os materiais do Térreo aprovado da Casa C (pergunta 9,
 #    recomendação aceita): o lavabo com a bancada e a cuba esculpida em granito marrom e o vaso marrom; o banho master e
@@ -2343,8 +2343,8 @@ def pegada_subsolo(Q):
 #    do corte, que é cheio desde 15/10); o S do PDF centrado no degrau 1 (a origem do texto cai no pátio);
 # 4. o armário do DCE 1 (o retângulo da DOC_LINHAS, junto à parede de cima) com os cabides (E2), o guarda-roupa aberto
 #    dos closets das Casas A e B (`elementos.guarda_roupa`), com as portas para o quarto;
-# 5. o box de correr do WC DCE em vidro contínuo, com as faces finas, a sombra curta e o trilho (E5, `final3840_casaa.
-#    boxes`); antes, a faixa cinza tracejada da base e do render sai, refeita com o granito logo acima;
+# 5. o box de correr do WC DCE em vidro contínuo, com as faces finas e a sombra curta, desde 28/10 fechado, de parede a
+#    parede, sem o trilho tracejado (E5, `final3840_casaa.boxes`); antes, a faixa cinza tracejada da base e do render sai, refeita com o granito logo acima;
 # 6-7. as bancadas com a borda no tom escurecido da pedra e a sombra curta (E9) e os materiais da recomendação: o WC DCE
 #    como o BH serviço das Casas B e C (bancada em granito marrom no tom do piso, levemente escurecido, a cuba de
 #    semiencaixe e o vaso brancos, a torneira cromada); o vestiário como o BH academia da Casa C (bancada em granito

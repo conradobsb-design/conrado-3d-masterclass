@@ -338,7 +338,8 @@ def travertino(Q, img):
 #   (`ajustes_casaa.guarda_roupas_1pav`: `_texturas/elementos.guarda_roupa`, os tons da Casa E, bege dentro e ocre na
 #   borda), com as portas do lado do quarto e a sombra curta no granito;
 # - E5: o box do banho (as duas folhas de correr do PDF, `AJ.folhas_box`) em vidro contínuo e visível; no granito, a faixa
-#   cinza-clara da regra de 22/10 ("Tem que estar visível"), com as faces finas, e o trilho contínuo até a parede.
+#   cinza-clara da regra de 22/10 ("Tem que estar visível"), com as faces finas. Desde 28/10 (etapa `box_motorista`,
+#   `FA.boxes`), as duas folhas fechadas, de parede a parede, sem o trilho tracejado.
 MOTORISTA = {"armario": (2250.8, 1287.6, 2284.8, 1389.7), "portas": "esquerda", "sombra": 0.30, "ss": 4,
              "semente": 41, "box_meio": 2060.9}
 
@@ -374,26 +375,15 @@ def motorista(Q, img):
     out[Y0:Y1, X0:X1] = np.clip(reg * (1 - ar) + cr, 0, 255).astype(np.uint8)
     print(f"    quarto do motorista: o armário com os cabides e o cabideiro ({comp:.2f} x {prof:.2f} m), portas à "
           f"{q['portas']}")
-    # o box: as duas folhas e o trilho contínuo, na faixa cinza-clara
-    b = FA.BANHOS["box"]
-    box = next(x for x in AJ.folhas_box(Q.pg) if not x["hor"] and abs(x["meio"] - q["box_meio"]) < 1)
-    meio, lado, e = box["meio"], b["afasta_px"] / PT_PX, b["larg_px"] / PT_PX / 2
-    for i, f in enumerate(sorted(box["folhas"], key=lambda f: (f[0] + f[2]) / 2)):
-        c = meio + (-lado if i == 0 else lado) / 2
-        rr = (c - e, f[1], c + e, f[3])
-        tl = tela(out, Q, rr, folga=5)
-        m = tl.ret(rr)
-        sombra_q(tl, m, forca=b["sombra"], dist=0.9, sigma=0.8)
-        tl.pintar(m, b["vidro"])
-        tl.contorno(m, b["face_px"], b["face"])
-        out = tl.gravar()
-    a0, a1 = min(t[0] for t in box["trilho"]), max(t[1] for t in box["trilho"])
-    w = b["trilho_px"] / PT_PX / 2
-    rr = (meio - w, a0, meio + w, a1)
-    tl = tela(out, Q, rr, folga=3)
-    tl.pintar(tl.ret(rr), b["vidro"], 0.9)
-    out = tl.gravar()
-    print("    banho do motorista: o box em vidro contínuo (as duas folhas e o trilho até a parede), cinza-claro no granito")
+    return out
+
+
+def box_motorista(Q, img):
+    """O box do banho do motorista (`FA.boxes`): as duas folhas fechadas, de parede a parede, sem o trilho tracejado
+    (pedido de 28/10); no granito, o vidro claro lê como a faixa cinza-clara da regra de 22/10."""
+    q = MOTORISTA
+    out = FA.boxes(Q, np.ascontiguousarray(img.copy()), so=lambda b: not b["hor"] and abs(b["meio"] - q["box_meio"]) < 1)
+    print("    banho do motorista: o box em vidro contínuo, de parede a parede")
     return out
 
 
@@ -1033,7 +1023,8 @@ def rotulos(Q, img):
 # Pedidos de 28/10/26 no Térreo (com a final já no turquesa e nas bordas retas de `piscinas_turquesa.py`):
 # - "faltou o box do banho varanda. incluir.": o box de correr do PDF (horizontal, entre o vaso e o chuveiro), de que o
 #   render só deixou um traço azul fraco, como os boxes do Subsolo (`final3840_casaa.boxes`): as duas folhas de vidro
-#   contínuas, desencontradas, com as faces finas e a sombra curta, e o trilho no vão até a parede;
+#   contínuas, desencontradas, com as faces finas e a sombra curta (desde o pedido seguinte, fechadas, de parede a
+#   parede, sem o trilho tracejado);
 # - "limpe esses resquicios" e "corrija o contorno do marmore bege bahia, removendo esses resquicios": as pecinhas
 #   cinza-rosadas na borda de cima do Bege Bahia junto à grama (a cada coluna, o que não é grama logo acima da linha da
 #   borda), refeitas com a borda e a grama de uma coluna limpa ao lado; na placa de pedra da ponta direita do caminho,
@@ -1053,7 +1044,7 @@ LIMPEZA_2810 = {
 def box_varanda(Q, img):
     out = FA.boxes(Q, np.ascontiguousarray(img.copy()),
                    so=lambda b: b["hor"] and abs(b["meio"] - BOX_VARANDA["meio"]) < 1)
-    print("    banho varanda: o box de correr (as duas folhas de vidro contínuas e o trilho no vão até a parede)")
+    print("    banho varanda: o box de correr (as duas folhas de vidro contínuas, de parede a parede)")
     return out
 
 
@@ -1146,6 +1137,7 @@ def passos_terreo(Q, ini):
         ("granito", lambda im: granito(Q, im)),
         ("travertino", lambda im: travertino(Q, im)),
         ("motorista", lambda im: motorista(Q, im)),
+        ("box_motorista", lambda im: box_motorista(Q, im)),
         ("loucas", lambda im: loucas(Q, im)),
         ("ilha", lambda im: ilha(Q, im)),
         ("cozinha", lambda im: cozinha(Q, im)),

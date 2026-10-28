@@ -1046,7 +1046,7 @@ CHUVEIROS_T = [(623.4, 569.2, 634.6, 580.4), (680.1, 1110.6, 691.3, 1121.8), (10
                 "canopla": (2685.2, 968.6, 2686.3, 971.8)},
                CHUVEIRO_C]
 # Item 6, os boxes: os de correr dos BH 1, 2 e 3 e da ducha entre os lavabos são os pares de folhas do PDF
-# (`AJ.folhas_box`, como no Subsolo e na Casa A); os dos BH master 1 e 2 são o vidro fixo (o preenchimento cinza de 3 cm
+# (`AJ.folhas_box`, como no Subsolo e na Casa A), desde 28/10 fechados, de parede a parede, sem o trilho tracejado; os dos BH master 1 e 2 são o vidro fixo (o preenchimento cinza de 3 cm
 # da ARQ_BANCADAS) e a porta de vidro (a faixa branca no vão), que entram como um vidro contínuo (`F.boxes_vidro`), com a
 # divisória de vidro entre o chuveiro e o vaso do BH master 1; os do granito (BH serviço e BH externo) na faixa
 # cinza-clara (`F.boxes_granito`), como na Casa B. A mesma lista vale para os rótulos: o lado do chuveiro sai dos
@@ -2223,8 +2223,8 @@ def chuveiros_s(Q, img):
 
 
 def boxes_s(Q, img):
-    """O box de correr do BH academia: as duas folhas do PDF em vidro contínuo e o trilho no vão (`final3840_casaa.boxes`,
-    como os boxes da Casa A)."""
+    """O box de correr do BH academia: as duas folhas do PDF em vidro contínuo, fechadas, de parede a parede, sem o trilho
+    tracejado (`final3840_casaa.boxes`, como os boxes da Casa A)."""
     import final3840_casaa as FA
     return FA.boxes(Q, np.ascontiguousarray(img.copy()))
 

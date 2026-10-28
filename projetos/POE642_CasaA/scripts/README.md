@@ -1266,3 +1266,31 @@ Pedidos de 28/10/26: "faça a representação do vidro borda da piscina da casa 
 python3 piscinas_turquesa.py B-Terreo --vidros
 python3 final3840_casae.py Terreo --de piscina && python3 final3840_casae.py 1Pavimento   # a Casa E (apagar antes o Terreo_nublado_fonte.png do cache)
 ```
+
+## Os boxes dos chuveiros fechados, sem tracejado (`final3840_casaa.boxes`, `colar_boxes.py`)
+
+Pedido de 28/10/26, com o recorte dos BH 1 e 2 da Casa C: "MELHORE A REPRESENTAÇÃO DOS BOX DOS CHUVEIROS COM FOLHA CONTÍNUA, SEM TRACEJADO. REVEJA TODOS OS BOX DE TODOS OS AMBIENTES". Os boxes de correr (`AJ.folhas_box`) das Casas A, C, D e E saem todos de `final3840_casaa.boxes`, que desenhava as duas folhas do PDF e o trilho tracejado no vão de passagem, por cima do tracejado do render. Agora o box vai fechado:
+- `vao_box(Q, box)`: o vão ao longo do box (pt), de cada ponta das folhas até a face mais perto do que é escuro no PDF e cruza a linha do vidro (a parede ou o perfil do box junto a ela; preenchimentos com o cinza médio até `escuro`), procurada até o fim do trilho mais `encaixe_pt`. A primeira parede a partir das folhas para o vão: na Casa A, o trilho que `AJ.folhas_box` junta à antessala segue, no mesmo alinhamento, até o banho feminino, do outro lado da parede.
+- `limpar_box(Q, out, box, v0, v1)`: a faixa de `limpa_px` = 4 px de cada lado da linha, de ponta a ponta do vão, volta ao piso (cada metade é o piso logo ao lado dela, espelhado; a emenda do meio fica sob o vidro). Saem o traço e o tracejado antigos do render e o desenho anterior do box, de modo que a rotina vale também sobre uma final pronta.
+- as duas folhas desencontradas (`afasta_px`), cada uma com metade do vão e a sobreposição de `sobrepoe` = 10% no meio; a que começa antes no PDF fica na ponta de cima (ou da esquerda). Faces finas e sombra curta como antes; sem o trilho.
+
+Nos motores:
+- Casa A: no Subsolo e no 1º Pavimento, os boxes passam a ser a etapa `boxes` (depois de `banhos`); no Térreo, o box do banho do motorista sai da etapa `motorista` para a `box_motorista` (também `FA.boxes`, no lugar do desenho próprio de folhas e trilho contínuo). Os três motores aceitam `--so` (as etapas sobre a final atual, no lugar), que é como as finais da Casa A foram refeitas (o motor da Casa A não tem cache):
+  `python3 final3840_casaa.py Subsolo --so boxes`, `python3 final3840_casaa_terreo.py --so box_motorista,box_varanda`, `python3 final3840_casaa_1pav.py --so boxes`.
+- Casas C e D: `boxes_t`, `boxes_s`, `boxes_terreo_d` e `box_wc_dce_d` seguem chamando `FA.boxes`.
+- Casa E: a etapa `box` do Térreo (`boxes_terreo_e`) desenha também o box do banho gourmet (`BOX_GOURMET_E`), que vinha do retoque só com as duas folhas e o vão até a parede de cima vazio; o Térreo esmaecido do 1º Pavimento (`terreo_para_nublado`) usa a mesma rotina.
+
+`colar_boxes.py`: os motores das Casas C, D e E, refeitos da etapa dos boxes, redesenham também as paredes, com o antialias das bordas 1 px diferente do da final aprovada (e, nas Casas C e D, saem antes do turquesa e das bordas da piscina). A final aprovada recebe da refeita só a faixa de cada box (o vão de `vao_box` com `folga_px` nas pontas, `meia_px` = 8 px de cada lado da linha):
+
+```bash
+# de POE642_CasaA/scripts/
+python3 final3840_casac.py Terreo --de boxes          # e Subsolo; Casa D: Terreo --de boxes, Subsolo --de banhos
+python3 final3840_casae.py Terreo --de box            # e, sem o Terreo_nublado_fonte.png no cache, 1Pavimento
+git show HEAD:projetos/POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png > /tmp/c_antes.png
+cp ../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png /tmp/c_motor.png
+python3 colar_boxes.py C-Terreo --antes /tmp/c_antes.png --nova /tmp/c_motor.png \
+    --saida ../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png
+# no 1º Pavimento da Casa E, os boxes do Térreo esmaecido: python3 colar_boxes.py E-Terreo com as finais do 1º Pavimento
+```
+
+Ficam como estavam: os boxes da Casa B (`F.boxes_vidro`, já um vidro só de parede a parede), os vidros fixos e as portas de vidro dos BH master da Casa C (`F.boxes_vidro`), os boxes no granito (`F.boxes_granito`, `box_gourmet_d`), o box do Subsolo da Casa E (`retoque_subsolo_casae.vidro_box`) e os do 1º Pavimento da Casa E (`retoque_1pav_casae.boxes_continuos`), todos já contínuos e sem tracejado.

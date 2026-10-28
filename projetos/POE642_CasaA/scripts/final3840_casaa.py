@@ -410,9 +410,13 @@ def pisos(Q, img, ini):
 # - os chuveiros (antessala, banho feminino e banho de serviço): a placa quadrada cromada com os furinhos e o brilho da
 #   luz do alto à direita, o braço cromado com o brilho no eixo e a canopla na parede, com a sombra curta; no banho de
 #   serviço a ducha do PDF tem só 7 cm e vira a placa de 19 cm das outras, no mesmo centro;
-# - os boxes (pedido 6): as duas folhas de vidro de correr do PDF inteiras (`AJ.folhas_box`), cada uma uma faixa de
-#   vidro de 1,3 px com as faces finas, um pouco mais afastadas que no PDF (lá ficam a 0,85 pt e viravam uma linha só),
-#   com a sombra curta, e o trilho tracejado no vão até a parede.
+# - os boxes (pedido 6): as duas folhas de vidro de correr do PDF (`AJ.folhas_box`), cada uma uma faixa de vidro de
+#   1,5 px com as faces finas, um pouco mais afastadas que no PDF (lá ficam a 0,85 pt e viravam uma linha só), com a
+#   sombra curta. Desde 28/10 ("melhore a representação dos box dos chuveiros com folha contínua, sem tracejado. reveja
+#   todos os box de todos os ambientes"), o box fechado: as duas folhas de parede a parede (até a face da parede ou do
+#   perfil escuro do PDF em cada ponta, `vao_box`), cada uma com metade do vão e 10% de sobreposição no meio, e sem o
+#   trilho tracejado; antes, a faixa de 4 px de cada lado da linha volta ao piso (`limpar_box`), sem o traço e o
+#   tracejado antigos.
 GRANITO_CUBA = {"rim": 1.10, "bacia": 0.80, "sombra_bacia": (0.35, 2.2), "contorno": (34, 44, 58), "larg": 0.45}
 CROMO = {"escuro": (122, 126, 130), "meio": (190, 193, 196), "claro": (238, 240, 242), "contorno": (88, 92, 96)}
 BANHOS = {
@@ -440,7 +444,7 @@ BANHOS = {
          "canopla": (929.9, 1090.0, 931.2, 1094.1)},
     ],
     "box": {"vidro": (218, 214, 204), "face": (104, 108, 112), "larg_px": 1.5, "afasta_px": 0.9, "face_px": 0.45,
-            "sombra": 0.20, "trilho": (150, 152, 154), "trilho_px": 0.7, "trilho_min_pt": 1.5},
+            "sombra": 0.20, "sobrepoe": 0.10, "encaixe_pt": 6.0, "escuro": 0.5, "limpa_px": 4},
 }
 
 
@@ -621,19 +625,76 @@ def chuveiro(Q, out, c):
     return tl.gravar()
 
 
+def vao_box(Q, box):
+    """O vão do box ao longo dele (pt): de cada ponta das folhas do PDF até a face mais perto do que é escuro no PDF e
+    cruza a linha do vidro (a parede, ou o perfil do box junto a ela), procurada até o fim do trilho mais `encaixe_pt`;
+    sem nada escuro, até o fim do trilho. A parede mais perto das folhas para o vão: o trilho que `AJ.folhas_box` junta
+    na mesma linha pode seguir depois dela (na Casa A, o da antessala ia até o banho feminino)."""
+    q = BANHOS["box"]
+    hor, meio = box["hor"], box["meio"]
+    k0, k1 = (0, 2) if hor else (1, 3)
+    u0, u1 = min(f[k0] for f in box["folhas"]), max(f[k1] for f in box["folhas"])
+    a0 = min([u0] + [t[0] for t in box["trilho"]])
+    a1 = max([u1] + [t[1] for t in box["trilho"]])
+    v0 = v1 = None
+    for d in Q.desenhos:
+        if d["type"] not in ("f", "fs") or not d.get("fill") or sum(d["fill"]) / 3 > q["escuro"]:
+            continue
+        r = d["rect"]
+        p0, p1, s0, s1 = (r.y0, r.y1, r.x0, r.x1) if hor else (r.x0, r.x1, r.y0, r.y1)
+        if not p0 - 0.6 <= meio <= p1 + 0.6:
+            continue
+        if a0 - q["encaixe_pt"] <= s1 <= u0 + 0.5:
+            v0 = s1 if v0 is None else max(v0, s1)
+        if u1 - 0.5 <= s0 <= a1 + q["encaixe_pt"]:
+            v1 = s0 if v1 is None else min(v1, s0)
+    return (a0 if v0 is None else v0), (a1 if v1 is None else v1)
+
+
+def limpar_box(Q, out, box, v0, v1):
+    """Leva ao piso a faixa de `limpa_px` px de cada lado da linha do box, de ponta a ponta do vão: o traço e o
+    tracejado antigos (do render e do PDF) e o desenho anterior do box saem. Cada metade da faixa é o piso logo ao lado
+    dela, espelhado; a emenda no meio fica sob o vidro."""
+    w = BANHOS["box"]["limpa_px"]
+    hor, meio = box["hor"], box["meio"]
+    (x0, y0), (x1, y1) = (Q.p2q(v0, meio), Q.p2q(v1, meio)) if hor else (Q.p2q(meio, v0), Q.p2q(meio, v1))
+    T = out if hor else out.transpose(1, 0, 2)                     # nas verticais, troca x e y
+    c = int(round(y0 if hor else x0))                              # a linha de px do vidro
+    s0, s1 = (int(np.ceil(x0)), int(np.floor(x1))) if hor else (int(np.ceil(y0)), int(np.floor(y1)))
+    reg = T[c - 2 * w:c + 2 * w + 1, s0:s1].copy()                 # w de piso, a faixa (2w + 1) e w de piso
+    for i in range(w):
+        T[c - w + i, s0:s1] = reg[w - 1 - i]                       # de cima (ou da esquerda), espelhado
+        T[c + w - i, s0:s1] = reg[3 * w + 1 + i]                   # de baixo (ou da direita), espelhado
+    T[c, s0:s1] = ((reg[0].astype(np.float32) + reg[4 * w]) / 2).astype(np.uint8)
+    return out
+
+
 def boxes(Q, out, so=None):
-    """Os boxes de correr do PDF (`AJ.folhas_box`); `so`: um filtro dos boxes (o Térreo desenha só o do banho varanda)."""
+    """Os boxes de correr do PDF (`AJ.folhas_box`), fechados (usuário, 28/10: "melhore a representação dos box dos
+    chuveiros com folha contínua, sem tracejado"): as duas folhas de vidro, desencontradas, de parede a parede no vão
+    (`vao_box`), cada uma com metade dele e a sobreposição no meio, com as faces finas e a sombra curta, sem o trilho
+    tracejado; antes, a faixa da linha do box volta ao piso (`limpar_box`). `so`: um filtro dos boxes (o Térreo desenha
+    só os do banho do motorista e do banho varanda)."""
     q = BANHOS["box"]
     n = 0
     for box in AJ.folhas_box(Q.pg):
         if so is not None and not so(box):
             continue
-        meio = box["meio"]
+        hor, meio = box["hor"], box["meio"]
+        v0, v1 = vao_box(Q, box)
+        out = limpar_box(Q, np.ascontiguousarray(out), box, v0, v1)
         lado = q["afasta_px"] / PT_PX
         e = q["larg_px"] / PT_PX / 2
-        for k, f in enumerate(sorted(box["folhas"], key=lambda f: (f[1] + f[3]) / 2 if box["hor"] else (f[0] + f[2]) / 2)):
-            c = meio + (-lado if k == 0 else lado) / 2 * 1.0
-            r = (f[0], c - e, f[2], c + e) if box["hor"] else (c - e, f[1], c + e, f[3])
+        k0, k1 = (0, 2) if hor else (1, 3)
+        # as duas folhas do PDF, de um lado e do outro da linha; a que começa antes fica na ponta v0
+        fs = sorted(box["folhas"], key=lambda f: (f[1] + f[3]) / 2 if hor else (f[0] + f[2]) / 2)
+        lados = [-lado / 2, lado / 2]
+        primeira = 0 if fs[0][k0] <= fs[1][k0] else 1
+        meia = (v1 - v0) * (1 + q["sobrepoe"]) / 2
+        for k in range(2):
+            c = meio + lados[k]
+            s0, s1 = (v0, v0 + meia) if k == primeira else (v1 - meia, v1)
+            r = (s0, c - e, s1, c + e) if hor else (c - e, s0, c + e, s1)
             tl = tela(out, Q, r, folga=5)
             m = tl.ret(r)
             sombra_q(tl, m, forca=q["sombra"], dist=0.9, sigma=0.8)
@@ -641,15 +702,8 @@ def boxes(Q, out, so=None):
             tl.contorno(m, q["face_px"], q["face"])
             out = tl.gravar()
             n += 1
-        for a0, a1 in box["trilho"]:
-            if a1 - a0 < q["trilho_min_pt"]:
-                continue
-            w = q["trilho_px"] / PT_PX / 2
-            r = (a0, meio - w, a1, meio + w) if box["hor"] else (meio - w, a0, meio + w, a1)
-            tl = tela(out, Q, r, folga=3)
-            tl.pintar(tl.ret(r), q["trilho"], 0.85)
-            out = tl.gravar()
-    print(f"    boxes: {n} folhas de vidro contínuas do PDF, com as faces finas, a sombra curta e o trilho no vão")
+    print(f"    boxes: {n} folhas de vidro contínuas, de parede a parede, com as faces finas e a sombra curta, sem o "
+          f"trilho tracejado")
     return out
 
 
@@ -681,7 +735,7 @@ def banhos(Q, img):
     for c in q["chuveiros"]:
         out = chuveiro(Q, out, c)
     print(f"    {len(q['chuveiros'])} chuveiros: a placa cromada com os furinhos, o braço e a canopla")
-    return boxes(Q, out)
+    return out
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -1131,6 +1185,7 @@ def passos_subsolo(Q, ini):
     return [
         ("pisos", lambda im: pisos(Q, im, ini)),
         ("banhos", lambda im: banhos(Q, im)),
+        ("boxes", lambda im: boxes(Q, im)),
         ("sauna", lambda im: banco_sauna(Q, im)),
         ("elevador", lambda im: elevador(Q, im)),
         ("deposito", lambda im: armarios_deposito(Q, im)),
@@ -1190,7 +1245,18 @@ if __name__ == "__main__":
     ap.add_argument("--de")
     ap.add_argument("--ate")
     ap.add_argument("--antes", help="a final aprovada antes destes pedidos (PNG): gera os antes e depois")
+    ap.add_argument("--so", help="aplica só estas etapas (separadas por vírgula) sobre a final atual, no lugar")
     a = ap.parse_args()
+    if a.so:
+        Q = QuadroA(a.chave)
+        nome = CASA / "renders" / f"POE642_CasaA_PH_{a.chave}_final_rotulos.png"
+        img = cv2.imread(str(nome))
+        etapas = dict(passos_subsolo(Q, None))
+        for e in a.so.split(","):
+            img = etapas[e](img)
+        cv2.imwrite(str(nome), img)
+        print(f"    {nome}")
+        raise SystemExit
     Q, img = final_3840(a.chave, de=a.de, ate=a.ate)
     if a.antes:
         antes_depois(cv2.imread(a.antes), img, a.chave)

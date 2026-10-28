@@ -655,8 +655,8 @@ def bancada_e9(Q, img, r, nome="bancada", q=None):
 
 
 # E5: o box de correr em vidro contínuo (como os boxes das Casas A a D, `final3840_casaa.boxes`): as duas folhas do PDF
-# (`AJ.folhas_box`) inteiras, cada uma uma faixa de vidro com as faces finas e a sombra curta, e o trilho no vão, só nos
-# boxes dentro de `caixa_pt`
+# (`AJ.folhas_box`), cada uma uma faixa de vidro com as faces finas e a sombra curta, fechadas, de parede a parede, sem
+# o trilho tracejado (28/10), só nos boxes dentro de `caixa_pt`
 def box_e(Q, img, caixa_pt, nome="box"):
     import final3840_casaa as FA
     x0, y0, x1, y1 = caixa_pt
@@ -1600,7 +1600,8 @@ def passos_subsolo(Q):
 #      mais escuro que o de cima e com a sombra curta dele, descendo da direita para a esquerda (aprovado em 20/10), com
 #      o D no bloco de cima;
 # 3. E2: o armário do DCE (o retângulo com a diagonal junto à parede da esquerda) com os cabides, aberto para o quarto;
-# 4. E5: o box de correr do WC DCE 1 nas duas folhas de vidro do PDF, com o trilho no vão;
+# 4. E5: o box de correr do WC DCE 1 nas duas folhas de vidro do PDF, com o trilho no vão (desde 28/10, como todos os
+#    boxes, as duas folhas fechadas, de parede a parede, sem o trilho tracejado; e também o do banho gourmet);
 # 5. E9: as bancadas do banho gourmet (o granito sobre o granito do piso), do WC DCE 1 e do lavabo com a borda no tom
 #    escurecido da pedra e a sombra curta;
 # 6. E10: as paredes e os muros em cinza 80; os pilares redondos da varanda em preto;
@@ -1627,6 +1628,10 @@ BLOCOS_TER_E = {"nome": "degraus em blocos do deck", "caixa_pt": (520.0, 1410.0,
                 "letra": "D", "letra_pt": (614.65, 1528.5)}
 ARMARIO_DCE_TER_E = {"pt": (1992.5, 761.5, 2023.7, 823.9), "lado": "direita"}
 BOX_WC_DCE1 = (2150.0, 735.0, 2235.0, 750.0)
+# o box do banho gourmet (usuário, 28/10: "reveja todos os box de todos os ambientes"): o do retoque
+# (`retoque_terreo_casae.box_gourmet`) eram só as duas folhas do PDF, com o vão até a parede de cima vazio; agora, como os
+# outros (`box_e`), as duas folhas fechadas, de parede a parede, no vidro claro sobre o granito
+BOX_GOURMET_E = (1100.0, 720.0, 1110.0, 790.0)
 BANCADAS_TER_E = [("banho gourmet", (1163.3, 759.8, 1252.7, 784.2)), ("WC DCE 1", (2202.4, 788.0, 2230.6, 823.9)),
                   ("lavabo", (2064.0, 1453.3, 2159.3, 1478.7))]
 SETA_TER_E = (2500, 1542)
@@ -1726,7 +1731,7 @@ def passos_terreo(Q):
         ("escadas", lambda im: blocos_e(Q, escada_e(Q, escada_e(Q, im, ESCADAS_TER_E[0]), ESCADAS_TER_E[1]),
                                         BLOCOS_TER_E)),
         ("armario", lambda im: armario_cabides(Q, im, ARMARIO_DCE_TER_E["pt"], ARMARIO_DCE_TER_E["lado"], nome="DCE")),
-        ("box", lambda im: box_e(Q, im, BOX_WC_DCE1, nome="WC DCE 1")),
+        ("box", lambda im: boxes_terreo_e(Q, im)),
         ("bancadas", lambda im: _bancadas(Q, im, BANCADAS_TER_E)),
         ("paredes", lambda im: paredes_e(Q, im)),
         ("seta", lambda im: seta_e(Q, im, SETA_TER_E)),
@@ -1734,6 +1739,10 @@ def passos_terreo(Q):
         ("piscina", lambda im: piscina_terreo_e(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("Terreo", im)),
     ]
+
+
+def boxes_terreo_e(Q, img):
+    return box_e(Q, box_e(Q, img, BOX_WC_DCE1, nome="WC DCE 1"), BOX_GOURMET_E, nome="banho gourmet")
 
 
 def _bancadas(Q, img, lista):
@@ -1778,7 +1787,7 @@ def terreo_para_nublado():
     sem = [dict(e, letra=None) for e in ESCADAS_TER_E]
     img = blocos_e(QT, escada_e(QT, escada_e(QT, img, sem[0]), sem[1]), dict(BLOCOS_TER_E, letra=None))
     img = armario_cabides(QT, img, ARMARIO_DCE_TER_E["pt"], ARMARIO_DCE_TER_E["lado"], nome="DCE")
-    img = box_e(QT, img, BOX_WC_DCE1, nome="WC DCE 1")
+    img = boxes_terreo_e(QT, img)
     img = _bancadas(QT, img, BANCADAS_TER_E)
     img = paredes_e(QT, img)
     img = piscina_terreo_e(QT, img)

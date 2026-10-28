@@ -412,7 +412,7 @@ def banhos(Q, img):
             out = FA.placa_cromada(Q, out, r)
         feito.append(f"{len(b.get('chuveiros', []))} chuveiro(s)")
         print(f"    {nome}: " + ", ".join(feito))
-    return FA.boxes(Q, out)
+    return out
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -741,6 +741,7 @@ def passos_1pav(Q):
         ("pisos", lambda im: pisos(Q, im)),
         ("armario", lambda im: armario(Q, im)),
         ("banhos", lambda im: banhos(Q, im)),
+        ("boxes", lambda im: FA.boxes(Q, im)),
         ("paredes", lambda im: paredes(Q, im)),
         ("escada_u", lambda im: escada_u(Q, im)),
         ("caracol", lambda im: caracol(Q, im)),
@@ -802,7 +803,20 @@ if __name__ == "__main__":
     ap.add_argument("--de")
     ap.add_argument("--ate")
     ap.add_argument("--antes", help="a final aprovada antes destes itens (PNG): gera os antes e depois")
+    ap.add_argument("--so", help="aplica só estas etapas (separadas por vírgula) sobre a final atual, no lugar")
     a = ap.parse_args()
+    if a.so:
+        Q = FA.QuadroA("1Pavimento")
+        nome = CASA / "renders" / "POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png"
+        img = cv2.imread(str(nome))
+        etapas = dict(passos_1pav(Q))
+        for e in a.so.split(","):
+            img = etapas[e](img)
+        cv2.imwrite(str(nome), img)
+        prev = cv2.resize(img, (2000, round(img.shape[0] * 2000 / img.shape[1])), interpolation=cv2.INTER_AREA)
+        cv2.imwrite(str(nome.with_name(nome.stem + "_preview.jpg")), prev, [cv2.IMWRITE_JPEG_QUALITY, 90])
+        print(f"    {nome}")
+        raise SystemExit
     Q, img = final_3840(de=a.de, ate=a.ate)
     if a.antes:
         antes_depois(cv2.imread(a.antes), img)

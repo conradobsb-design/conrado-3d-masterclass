@@ -3389,3 +3389,33 @@ Antes e depois:
 - `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2810_{poltrona_suite_master,poltrona_quarto1,poltrona_sala_tv,poltronas_estar}_antes_depois.jpg`.
 
 Pranchas e PDFs das Casas C, D e E refeitos.
+
+### Pedido de 28/10/26: boxes dos chuveiros fechados, sem tracejado (todas as casas)
+
+O usuário, com o recorte da faixa de cima do Térreo da Casa C (VARANDA, BH 2, BH 1): "MELHORE A REPRESENTAÇÃO DOS BOX DOS CHUVEIROS COM FOLHA CONTÍNUA, SEM TRACEJADO. REVEJA TODOS OS BOX DE TODOS OS AMBIENTES".
+
+Revisão das 12 plantas (todos os boxes que o PDF desenha, nas finais):
+- **Com tracejado:** os boxes de correr das Casas A, C, D e E. A mesma rotina (`final3840_casaa.boxes`) desenhava as duas folhas do PDF e o trilho tracejado no vão de passagem, e o tracejado do render ficava por baixo.
+- **Incompleto:** o box do banho gourmet da Casa E (Térreo), que não chegava à parede de cima.
+- **Já contínuos, sem tracejado, e ficam:** os da Casa B; os vidros fixos e as portas de vidro dos BH master da Casa C; os boxes no granito (BH serviço e BH externo da Casa C, banho gourmet da Casa D); o Subsolo e o 1º Pavimento da Casa E.
+
+O que foi feito: o box de correr vai fechado. As duas folhas de vidro, desencontradas, cobrem o vão inteiro, de parede a parede, cada uma com metade dele e uma sobreposição curta no meio. Ficam as faces finas e a sombra curta; sai o trilho tracejado. Antes, a faixa de 4 px de cada lado da linha volta ao piso, sem o traço e o tracejado antigos. O vão para na primeira parede a partir das folhas: na Casa A, o trilho da antessala seguia no PDF, no mesmo alinhamento, até o banho feminino; na primeira tentativa, o vidro atravessou a parede, e a regra foi corrigida.
+
+Boxes refeitos:
+- **Casa A.** Subsolo: banho de serviço, antessala, banho feminino. Térreo: banho do motorista, banho varanda. 1º Pavimento: banhos 1, 2, 3, master e de serviço.
+- **Casa C.** Térreo: BH 1, 2 e 3 e a ducha entre os lavabos. Subsolo: BH academia.
+- **Casa D.** Térreo: banhos 1, 2 e 3 e WC DCE. Subsolo: WC DCE.
+- **Casa E.** Térreo: WC DCE 1 e banho gourmet. Os mesmos dois aparecem no Térreo esmaecido do 1º Pavimento.
+
+Como:
+- **Casa A:** as etapas aplicadas sobre as finais, no lugar (`--so`); o motor da Casa A não tem cache.
+- **Casas C, D e E:** os motores refeitos da etapa dos boxes. Eles redesenham também as paredes, com o antialias das bordas 1 px diferente do da final aprovada, e nas Casas C e D saem antes do turquesa. Por isso as finais aprovadas recebem só a faixa de cada box (`colar_boxes.py`), sem o turquesa e as bordas de novo.
+- **Conferência:** fora das faixas dos boxes, nenhum px mudou nas finais.
+
+Comandos no README dos scripts, em "Os boxes dos chuveiros fechados, sem tracejado".
+
+Antes e depois (o antes é a final de 42c3dda): `POE642_Casa{A,C,D,E}/renders/POE642_Casa*_PH_*_2810_boxes_*_antes_depois.jpg`.
+
+Pranchas e PDFs das Casas A, C, D e E refeitos.
+
+Pendente de antes (aguardando o OK do usuário): o nicho escuro na parede direita da cabine do chuveiro do vestiário, no Subsolo da Casa E.
