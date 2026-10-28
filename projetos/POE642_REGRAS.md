@@ -261,6 +261,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **[22/10] Casa B: banco em L do deck em bronze fosco** (usuário: "o banco em L do deck é em bronze fosco"): cor chapada de bronze (RGB ~104, 84, 62), escovado bem leve no sentido de cada braço, a quina do lado da luz um pouco mais clara e a do outro lado um pouco mais escura, contorno fino e sombra curta no deck. Não é madeira.
 - **Piscinas:**
   - revestimento Barlavento (Portobello, 14,5 cm, Caribbean), luz chapada, só a sombra curta das bordas;
+  - **[28/10] O tom da piscina** (usuário, com a vista de cima da sauna do modelo 3D da Casa E: "NOTE TAMBÉM O TOM DA PISCINA QUE ADOTAREMOS"): a água no turquesa da referência (BGR ~168, 160, 42), mais saturado que a água verde-azulada clara de antes. As peças de 14,5 cm do Barlavento ficam marcadas como pastilhas, e a rede clara das cáusticas fica na água. Aplicado no Subsolo da Casa E; aguardando dizer se vale para as outras piscinas;
+  - **[28/10] Bordas de Bege Bahia perceptíveis** (usuário: "AS BORDAS EXISTENTES DA PISCINA SÃO EM MARMORE BEGE BAHIA. ESSA BORDA É QUASE IMPERCEPTÍVEL NA VISTA"): as bordas do PDF (os brancos em volta da água) vão no Bege Bahia dos pisos, com a quina marcada e a sombra curta na água;
   - sem bordas ou vidros inventados;
   - degraus, prainha e spa como no PDF;
   - a borda em pedra conforme a casa.
@@ -605,3 +607,16 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
   - as bancadas dos banhos master, 1, 2, 3 e 4 com a borda e a sombra (E9);
   - paredes em cinza 80 (E10).
   - Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_*_antes_depois.jpg`.
+- **Casa E · Subsolo, pedidos de 28/10 vendo a final (`final3840_casae.py`; aguardando a validação):**
+  - os aparelhos da academia redesenhados pelo PDF: cada peça dos blocos num material (estrutura grafite, tubos, estofado preto, borracha, cromado, o alumínio e a lona das esteiras), com volume, os traços finos do PDF e as bolas como esferas; embaixo e em volta deles, o vinílico novo inteiro e a sombra curta (seção 8);
+  - o travertino bruto em estratos das Casas C e D, no creme claro da referência, com os veios na vertical (pisos da sauna, do ambiente e do vestiário, escada, bancos);
+  - a piscina no tom novo (seção 10), com as bordas de Bege Bahia perceptíveis e o degrau da sauna, no nível do piso e em travertino, indo até o vidro como banco dentro da piscina;
+  - os bancos da sauna em degrau com os dentes aparentes: a quina clara do de cima, o fio do espelho, a sombra curta no nível de baixo e a sombra das pontas, mais longa no banco mais alto (seção 6);
+  - o vestiário: piso e cuba esculpida em travertino bruto, a bancada em granito Marrom Tabaco escovado (fosco, com o risco fino), o vaso branco, a torneira e o chuveiro cromados;
+  - as portas pela R3 e pela seção 4:
+    - as de giro com a folha branca fina na posição do PDF e os batentes, o piso refeito no quadrante;
+    - as soleiras de Bege Bahia nos vãos brancos;
+    - as de correr e a janela do DCE nos planos do PDF;
+    - a ducha do ambiente em vidro fino;
+    - as paredes das cabines (ARQ - Parede) em cinza 80.
+  - Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_pedidos2810_*_antes_depois.jpg`.

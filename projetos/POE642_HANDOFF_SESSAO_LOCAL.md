@@ -3115,3 +3115,49 @@ Sobre o Subsolo depois do 1º Pavimento: o motor ganhou ajustes durante o Térre
 - os círculos `FICAM`.
 
 Rodar `python3 final3840_casae.py Subsolo` hoje dá uma variante quase igual à final entregue (commit 87f558e). Mudam o grão do granito na Casa de Máquinas e no DCE, e um anel de 2 px em volta das esteiras e dos aparelhos da academia, sem ganho visível. A final do Subsolo fica a de 87f558e.
+
+### Subsolo, pedidos de 28/10/26 vendo a final
+
+O usuário, sobre a final do Subsolo:
+- "MELHORE A REPRESENTAÇÃO DOS APARELHOS DE ACADEMIA E O CONTORNO DO PISO EM VOLTA DESSES APARELHOS";
+- "MELHORE O ASPECTO DO MARMORE TRAVERTINO";
+- "AS BORDAS EXISTENTES DA PISCINA SÃO EM MARMORE BEGE BAHIA. ESSA BORDA É QUASE IMPERCEPTÍVEL NA VISTA";
+- "VESTIARIO: PISO EM MARMORE TRAVERTINO BRUTO, CUBA ESCUPLIDA EM MARMORE TRAVERTINO BRUTO, PEDRA DA PIA EM MAGRANITO MARROM TABACO ESCOVADO, VASO SANITÁRIO EM BRANCO E METAIS CROMADOS";
+- "VAMOS REVISAR E AJUSTAR REPRESENTAÇÃO DAS PORTAS";
+- com a vista de cima da sauna no modelo 3D: "TEM UM DEGRAU NO MESMO NIVEL DO PISO DA SAUNA E VAI ATÉ A BORDA DO VIDRO, FORMANDO UM BANCO DENTRO DA PISCINA, MAS AINDA DENTRO DO AMBIENTE DA SAUNA. NOTE TAMBÉM O TOM DA PISCINA QUE ADOTAREMOS"; "OS DEGRAUS EM FORMA DE BANCO NO MARMORE TRAVERTINO DENTRO DA SAUNA TEM DENTES APARENTES PARA DIZER QUAL DEGRAU ESTÁ ACIMA E OUTRO ABAIXO".
+
+O que foi feito (`final3840_casae.py`, novas etapas do Subsolo):
+1. **Aparelhos da academia** (`aparelhos_e`), redesenhados pelo PDF na resolução da prancha. Eram os do render: borrados, serrilhados, um pouco fora do PDF e com lascas escuras no vinílico em volta.
+   - São 11 blocos: os elípticos, as esteiras, as bolas de pilates com os acessórios, a barra de parede, a estação de musculação, a prateleira junto ao DCE, o suporte de halteres, o supino com a barra e o banco regulável.
+   - Cada peça do PDF vai num material, pela forma e pelo aparelho: estrutura grafite, tubos, estofado preto, borracha, cromado (a barra do supino, os pegadores dos halteres, a barra de parede), o alumínio das laterais da esteira, a lona e o painel.
+   - As peças têm o volume do material, os traços do PDF por cima, finos, e as bolas vão como esferas.
+   - Embaixo e em volta de cada aparelho (0,45 m), o vinílico novo passa inteiro e entra a sombra curta e macia.
+2. **Travertino** (`TRAVERTINO_E`, `travertino_e`): o travertino bruto em estratos das Casas C e D, com os veios marcados e os poros abertos, sem o tom rosado, no creme claro da referência.
+   - Os veios correm na vertical, como na sauna da referência.
+   - Vale nos pisos da sauna, do ambiente e do vestiário, nos degraus da escada da circulação, nos bancos da sauna e no degrau da piscina.
+3. **Piscina** (`piscina_e`):
+   - A água fica no turquesa da referência: as peças de 14,5 cm do Barlavento, com o contraste das pastilhas, a variação do fundo e as cáusticas.
+   - As bordas, os brancos da ARQ_PAREDE em volta da água, vão em Bege Bahia com a quina e a sombra curta na água. Antes eram um bege pálido; a faixa entre as duas partes da piscina ia como água.
+   - Dentro da sauna, a faixa de cima da piscina interna, do vidro até a sauna, e a da beira junto ao piso são o degrau no nível do piso, em travertino. É o banco dentro da piscina, ainda no ambiente da sauna.
+   - Os vidros finos foram redesenhados por cima.
+4. **Sauna** (`sauna_e`): os dois bancos do PDF em degrau, no travertino do piso, com o veio deitado e o de cima mais claro.
+   - Os dentes: a quina clara do degrau de cima, o fio do espelho e a sombra curta no nível de baixo.
+   - Nas pontas, junto ao degrau da piscina, a sombra de cada banco, mais longa no mais alto.
+5. **Vestiário** (`vestiario_e`):
+   - o piso em travertino bruto;
+   - a bancada do PDF em granito Marrom Tabaco escovado: o granito de referência calmo e fosco, no tom do Marrom Tabaco (RGB ~88, 64, 50), com o risco fino do escovado, a borda e a sombra;
+   - a cuba esculpida em travertino bruto, mais clara;
+   - a torneira cromada saindo da parede;
+   - o vaso em louça branca;
+   - o chuveiro de teto com o braço e a canopla cromados.
+6. **Portas** (`portas_e`; R3 e seção 4 das regras):
+   - As 10 portas de giro vinham como tubos cinza do render, sem batentes; a do DCE tinha um "L" a mais e a da sauna estava quase sumida. Agora levam a folha na posição e na espessura do PDF, em branco com o contorno fino e a sombra curta, e os batentes. Antes disso, o piso novo passa inteiro no quadrante de cada porta.
+   - As 7 soleiras dos vãos brancos são de Bege Bahia. No WC DCE 2 havia uma faixa marrom no lugar.
+   - As duas portas de vidro de correr da circulação para a academia e a janela de correr do DCE seguem a Casa D: as duas folhas nos planos do PDF, sobre a soleira de Bege Bahia, com os batentes.
+   - A porta e o vidro fixo da ducha do ambiente vão em vidro fino.
+   - As paredes das cabines do vestiário (a ARQ - Parede do PDF, que a E10 não pegava) vão em cinza 80.
+
+Ordem das etapas: pisos, escada, armário, bancada, piscina, sauna, paredes, vestiário, aparelhos, portas, rótulos. Antes e depois (o antes é a final de 87f558e): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_pedidos2810_{planta,academia,piscina_sauna,sauna_degraus,vestiario,portas_dce_wc_deposito,portas_academia,porta_casa_maquinas,travertino_escada}_antes_depois.jpg`. Prancha e PDF refeitos.
+
+**Pendente:**
+- o Térreo da Casa E (a mesma piscina, vista de cima) segue com o Barlavento sob a água verde-azulada clara de antes. Se o tom novo vale para o projeto todo, ele entra no Térreo e nas Casas A a D.

@@ -253,7 +253,7 @@ def _pecas_final(Q, ini, legenda, pdf, perto=None):
     return ok[lab]
 
 
-def troca_piso(Q, img, ini, legenda, textura, tom, sig_m, semente, fora=None, forca=None, pecas=None):
+def troca_piso(Q, img, ini, legenda, textura, tom, sig_m, semente, fora=None, forca=None, pecas=None, fora_pecas=None):
     """O piso `textura` na mancha da legenda, sem as peças; devolve (imagem, máscara do piso novo, peças). As peças do
     PDF desenhadas só em traço nas camadas `camadas_tracos` (os aparelhos da academia: o render os pôs um pouco fora do
     traço) contam só onde a final não mostra a cor do piso."""
@@ -274,10 +274,12 @@ def troca_piso(Q, img, ini, legenda, textura, tom, sig_m, semente, fora=None, fo
     k = 2 * q["borda_px"] + 1
     foge = np.abs(ini.astype(np.float32) - L).max(axis=2) > q["borda_desvio"]
     pec |= cv2.dilate(pec.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool) & foge & legenda
+    if fora_pecas is not None:
+        pec &= ~fora_pecas
     m = legenda & ~pec & ~paredes_pdf(Q, folga=1) & ~linhas_pdf(Q)
     if fora is not None:
         m &= ~fora
-    novo = F.piso_textura(Q, img, m, textura, forca, sig_m, semente)
+    novo = piso_textura_e(Q, img, m, textura, forca, sig_m, semente)
     if tom is not None:
         novo = novo * (np.float32(tom) / np.maximum(np.median(novo[m], axis=0), 1.0))
     out = F.pousar(img.astype(np.float32), novo, m, suave=0)
@@ -430,9 +432,13 @@ def escada_e(Q, img, e, ss=8):
     esp = np.array(bordas)[k if direita else k + 1]
     dist = ((X - esp) if direita else (esp - X)) * pt_px
     f = f * np.where(i < n - 1, 1 - fs * np.exp(-np.maximum(dist, 0) / alc), 1.0)
-    T = textura(e["textura"], Q.px_m, h, w, semente=e.get("semente", 2805)).astype(np.float32)
-    det = cv2.GaussianBlur(T, (0, 0), 0.6) / np.maximum(cv2.GaussianBlur(T, (0, 0), 3.0 * Q.px_m), 1)
-    novo = (1 + e.get("forca", 1.0) * (det - 1)) * np.float32(e["tom"]) * f[..., None]
+    if e["textura"] == "travertino_e":
+        # o travertino bruto em estratos (pedidos de 28/10), com o veio no comprido de cada degrau
+        novo = travertino_e(Q, h, w, e.get("semente", 2805), vertical=True)[..., None] * np.float32(e["tom"]) * f[..., None]
+    else:
+        T = textura(e["textura"], Q.px_m, h, w, semente=e.get("semente", 2805)).astype(np.float32)
+        det = cv2.GaussianBlur(T, (0, 0), 0.6) / np.maximum(cv2.GaussianBlur(T, (0, 0), 3.0 * Q.px_m), 1)
+        novo = (1 + e.get("forca", 1.0) * (det - 1)) * np.float32(e["tom"]) * f[..., None]
     depois = np.zeros((h, w, 1), np.float32)
     if e.get("corte"):
         c0, c1 = e["corte"][0], e["corte"][-1]
@@ -641,7 +647,7 @@ def seta_e(Q, img, ponta):
 #    B a D, no tom dele; o granito do DCE e da casa de máquinas de baixo no granito de referência das Casas B a D (o do
 #    Térreo da Casa E, RGB ~116, 87, 68; era o Marrom Tabaco escuro, ~83, 59, 52); o Bege Bahia (circulação, depósito,
 #    casa de máquinas da direita e WC DCE 2) na foto da biblioteca no tom das Casas B a D; o travertino (sauna, ambiente,
-#    vestiário) na foto da biblioteca, no tom do travertino do Térreo;
+#    vestiário) no travertino bruto em estratos (`TRAVERTINO_E`, pedidos de 28/10; antes, a foto da biblioteca);
 # 2. E3, E8: a escada da circulação sem as linhas e sem o triângulo: os 17 degraus no travertino, com o sombreamento de
 #    subida da direita para a esquerda (o sentido do triângulo aprovado em 20/10: "subindo da direita para esquerda, com
 #    a parte da direita viva"), o trecho depois do corte do PDF (à esquerda) nevoado, sem a linha de corte, e o S do PDF
@@ -652,14 +658,51 @@ def seta_e(Q, img, ponta):
 # 5. E10: as paredes em cinza 80 (não há pilares no Subsolo; os da EST - Pilar são do Térreo, fora da pegada);
 # 6. E7: o rótulo do WC DCE 2 fora da área do chuveiro: no meio do piso seco, entre a porta, a bancada e o vaso, no corpo
 #    0,85 do PDF.
+# Pedidos de 28/10, vendo a final do Subsolo (usuário: "MELHORE O ASPECTO DO MARMORE TRAVERTINO"; no vestiário, "PISO EM
+# MARMORE TRAVERTINO BRUTO"; e a referência da sauna, a vista de cima do modelo 3D): o travertino bruto em estratos
+# aprovado nas Casas C e D (`final3840_casac.travertino_estratos`, com os veios marcados e os poros abertos da Casa D,
+# `final3840_casad.TRAVERTINO_BRUTO_D`), sem o tom quente das faixas (puxava para o rosado), no creme claro da
+# referência; os veios correm na vertical, como na sauna da referência (`vertical`). Antes, era a foto da biblioteca
+# borrada, quase lisa e rosada. Nos pisos da sauna, do ambiente e do vestiário, nos degraus da escada da circulação e
+# nos bancos da sauna (`sauna_e`).
+TRAVERTINO_E = {"tom": (204, 222, 233), "base": 1.0, "amp": 1.3, "finas": 1.0, "poros": 8.0, "poro_esc": 0.2,
+                "vertical": True, "luz_m": 3.0}                                                          # tom em BGR
+
+
+def travertino_e(Q, h, w, semente, vertical=None, amp=None, finas=None):
+    """O desenho do travertino bruto em estratos (h x w, média ~1), com os veios na vertical (`vertical`) ou deitados."""
+    import final3840_casac as C
+    q = TRAVERTINO_E
+    v = q["vertical"] if vertical is None else vertical
+    hh, ww = (w, h) if v else (h, w)
+    D = C.travertino_estratos(Q, hh, ww, semente, base=q["base"], poros=q["poros"], poro_esc=q["poro_esc"],
+                              amp=q["amp"] if amp is None else amp, finas=q["finas"] if finas is None else finas,
+                              quente=False)
+    return np.ascontiguousarray(D.T) if v else D
+
+
+def piso_textura_e(Q, img, m, nome, forca, sig_m, semente):
+    """`F.piso_textura`, e o travertino bruto em estratos (`travertino_e`) na luz larga do próprio piso, no tom dele."""
+    if nome != "travertino_e":
+        return F.piso_textura(Q, img, m, nome, forca, sig_m, semente)
+    ys, xs = np.nonzero(m)
+    y0, x0, y1, x1 = ys.min(), xs.min(), ys.max() + 1, xs.max() + 1
+    L = F.luz_robusta(img, m, sig_m * Q.px_m)
+    L = L / np.maximum(np.median(L[m], axis=0), 1.0)
+    novo = img.astype(np.float32).copy()
+    novo[y0:y1, x0:x1] = L[y0:y1, x0:x1] * np.float32(TRAVERTINO_E["tom"]) * \
+        travertino_e(Q, y1 - y0, x1 - x0, semente)[..., None]
+    return novo
+
+
 PISOS_SUB_E = [("granito", [(50, 66, 90)], "granito", (68, 87, 116), 1.5, 2801, None),
                ("vinílico", [(79, 120, 168)], "vinilico", None, 1.0, 2802, None),
                ("Bege Bahia", [(232, 232, 232)], "bege", (187, 211, 230), 1.5, 2803, None),
-               ("travertino", [(202, 217, 220)], "travertino", (205, 220, 235), 3.0, 2804, 1.6)]
+               ("travertino", [(202, 217, 220)], "travertino_e", None, TRAVERTINO_E["luz_m"], 2804, None)]
 ESCADA_SUB_E = {"nome": "da circulação", "pdf": (972.0, 617.0, 1261.2, 685.0),
                 "bocels": [972.0 + 17.0 * k for k in range(1, 17)], "inicio": "direita", "apos": "esquerda",
                 "corte": [(1073.8, 616.4), (1108.1, 685.0)], "nevoa": {"branco": 0.72, "sigma_px": 1.2},
-                "sombra_corte": {"forca": 0.30, "alc_px": 4.0}, "textura": "travertino", "tom": (205, 220, 235),
+                "sombra_corte": {"forca": 0.30, "alc_px": 4.0}, "textura": "travertino_e", "tom": TRAVERTINO_E["tom"],
                 "forca": 1.0, "letra": "S", "semente": 2805}
 ARMARIO_DCE_E = {"pt": (1439.8, 795.5, 1507.8, 829.6), "lado": "cima"}
 BANCADA_WC_DCE2 = (1697.6, 693.5, 1726.1, 729.1)
@@ -667,8 +710,12 @@ AJUSTES_E["Subsolo"] = [("CASA DE MÁQUINAS", (1043.4, 335.8), (0, 0), 1.0),
                         ("WC DCE 2", (986.5, 310.9), (-3.9, -30.0), 0.85)]
 
 
-def pisos_e(Q, img, specs, ficam=()):
-    """ficam: peças da final que o PDF não desenha e que têm a cor do piso (círculos: centro e raio em px do quadro)."""
+def pisos_e(Q, img, specs, ficam=(), zonas=None, incluir=None):
+    """ficam: peças da final que o PDF não desenha e que têm a cor do piso (círculos: centro e raio em px do quadro).
+    zonas: onde as peças antigas saem e o piso passa por inteiro, também nos buracos da legenda (os aparelhos da
+    academia, que são desenhados depois). incluir: {nome do piso: bool} entra na legenda dele, sem as peças antigas
+    (as zonas das portas, refeitas depois)."""
+    from scipy import ndimage
     ini = img.copy()
     out = img.copy()
     extra = np.zeros((Q.H, Q.W), np.uint8)
@@ -676,18 +723,646 @@ def pisos_e(Q, img, specs, ficam=()):
         cv2.circle(extra, (int(round(cx)), int(round(cy))), int(round(r)), 1, -1)
     for nome, cores, tex, tom, sig, sem, forca in specs:
         leg = legenda(Q, cores)
-        out, m, _ = troca_piso(Q, out, ini, leg, tex, tom, sig, sem, forca=forca, pecas=extra.astype(bool))
+        fora = None
+        if zonas is not None and (leg & zonas).any():
+            leg |= ndimage.binary_fill_holes(leg) & zonas
+            fora = zonas
+        if incluir and nome in incluir:
+            leg |= incluir[nome]
+            fora = incluir[nome] if fora is None else (fora | incluir[nome])
+        out, m, _ = troca_piso(Q, out, ini, leg, tex, tom, sig, sem, forca=forca, pecas=extra.astype(bool),
+                               fora_pecas=fora)
         print(f"    {nome}: {m.sum() / Q.px_m ** 2:.1f} m² ({tex}, na escala da prancha)")
+    return out
+
+
+def _ret_local(Q, r, X0, Y0, w, h, ss=8):
+    """O retângulo r (pt) na janela (X0, Y0, w x h) do quadro, com antialias (0 a 1)."""
+    (x0, y0), (x1, y1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    cv2.rectangle(m, (round((x0 - X0) * ss), round((y0 - Y0) * ss)), (round((x1 - X0) * ss) - 1, round((y1 - Y0) * ss) - 1),
+                  255, -1)
+    return cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+
+
+def _uniao(Q, rs, X0, Y0, w, h):
+    return np.max([_ret_local(Q, r, X0, Y0, w, h) for r in rs], axis=0) if rs else np.zeros((h, w), np.float32)
+
+
+# A piscina (usuário, 28/10/26: "AS BORDAS EXISTENTES DA PISCINA SÃO EM MARMORE BEGE BAHIA. ESSA BORDA É QUASE
+# IMPERCEPTÍVEL NA VISTA."; e, com a referência da sauna: "NOTE TAMBÉM O TOM DA PISCINA QUE ADOTAREMOS"; "TEM UM DEGRAU
+# NO MESMO NIVEL DO PISO DA SAUNA E VAI ATÉ A BORDA DO VIDRO, FORMANDO UM BANCO DENTRO DA PISCINA, MAS AINDA DENTRO DO
+# AMBIENTE DA SAUNA"). Antes, a água era um ciano claro e lavado, as bordas um bege pálido que se perdia nele, e a
+# faixa entre as duas partes da piscina e a borda junto à sauna (os brancos da ARQ_PAREDE do PDF) iam como água.
+# - a água (os preenchimentos azuis da ARQ_CONTRAPISO) no turquesa da referência: as peças de 14,5 cm do Barlavento (o
+#   revestimento da legenda, `fontes_procedurais.barlavento`), cada uma num tom um pouco diferente, a variação larga do
+#   fundo e as cáusticas (a rede clara da luz na água); antes, o Barlavento ia sob uma água verde-azulada clara;
+# - as bordas (os brancos da ARQ_PAREDE em volta da água, fora da sauna) em Bege Bahia, no tom dos pisos de Bege Bahia,
+#   com a quina marcada (um fio escuro na beira) e a sombra curta da borda na água;
+# - dentro da sauna, a faixa de cima da piscina interna (do vidro até a sauna) e a da beira junto ao piso da sauna são
+#   o degrau no nível do piso da sauna, em travertino (o desenho e o tom do piso), com a quina e a sombra na água;
+# - o vidro (os painéis da ARQ_PAREDE entre a piscina, a academia e a piscina interna) redesenhado fino por cima.
+PISCINA_E = {"caixa_pt": (688.0, 675.0, 1004.0, 1124.0), "agua_fill": (0.5, 0.87, 1.0),
+             "tom": (168, 160, 42), "claro": (204, 226, 168),                       # BGR: turquesa e o claro da luz
+             "peca_cm": 14.5, "pastilha_var": 0.06, "fundo": 0.07,
+             "causticas": [(0.32, 0.55), (0.13, 0.35)], "caustica_larg": 0.22,
+             "bege": [(694.2, 679.3, 705.6, 1118.7), (705.6, 679.3, 807.6, 690.7), (796.3, 690.7, 812.2, 957.1),
+                      (705.6, 957.1, 812.2, 968.5)],
+             "tom_bege": (190, 213, 231), "semente_bege": 2831,
+             "degrau": [(815.0, 957.1, 888.9, 968.5), (877.6, 968.5, 888.9, 1096.1)],
+             "vidros": [(812.2, 693.5, 815.0, 945.8), (812.2, 957.1, 815.0, 1090.3)],
+             "vidro": {"cor": (208, 214, 212), "alfa": 0.55, "fio": (118, 124, 126), "larg_fio": 0.45},
+             "quina": 0.70, "sombra": (0.34, 2.2), "ciano": 10, "semente": 2830}
+
+
+def agua_e(Q, h, w, semente):
+    """A água da piscina (h x w x 3, BGR) no tom da referência: as pastilhas, o fundo e as cáusticas."""
+    import fontes_procedurais as FP
+    q = PISCINA_E
+    rng = np.random.default_rng(semente)
+    px = Q.px_m
+    # as peças do Barlavento (o revestimento da legenda do cliente, 14,5 cm), com o contraste das pastilhas da referência
+    T = FP.barlavento(h, w, cm_por_px=100.0 / px, peca_cm=q["peca_cm"], semente=semente).mean(axis=2)
+    base = 1 + q["pastilha_var"] * (T - 1) / max(float(T.std()), 1e-6)
+    lf = cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0), 0.9 * px)
+    base *= 1 + q["fundo"] * lf / max(float(lf.std()), 1e-6)
+    c = np.zeros((h, w), np.float32)
+    for esc, f in q["causticas"]:
+        n = cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0), esc * px * 0.3)
+        n /= max(float(n.std()), 1e-6)
+        c += f * np.exp(-(n / q["caustica_larg"]) ** 2)
+    c = np.clip(cv2.GaussianBlur(c, (0, 0), 0.6), 0, 1)
+    agua = np.float32(q["tom"]) * base[..., None]
+    return agua * (1 - c[..., None]) + np.float32(q["claro"]) * c[..., None]
+
+
+def piscina_e(Q, img):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    q = PISCINA_E
+    X0, Y0, X1, Y1 = F.ret_q(Q, q["caixa_pt"])
+    w, h = X1 - X0, Y1 - Y0
+    out = img.astype(np.float32)
+    reg = out[Y0:Y1, X0:X1]
+    # a água: os azuis da ARQ_CONTRAPISO, sem as bordas, o degrau e os vidros
+    ss = 4
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    for d in Q.desenhos:
+        if d.get("layer") == "ARQ_CONTRAPISO" and d["type"] in ("f", "fs") and d.get("fill") and \
+                np.allclose(d["fill"], q["agua_fill"], atol=0.02):
+            for c in Q.caminhos(d):
+                if len(c) >= 3:
+                    cv2.fillPoly(m, [np.int32(np.round((c - (X0, Y0)) * ss))], 255)
+    agua = cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+    par = paredes_pdf(Q)[Y0:Y1, X0:X1].astype(np.float32)
+    bege = np.clip(_uniao(Q, q["bege"], X0, Y0, w, h) - par, 0, 1)
+    degrau = np.clip(_uniao(Q, q["degrau"], X0, Y0, w, h) - par, 0, 1)
+    vidro = _uniao(Q, q["vidros"], X0, Y0, w, h)
+    agua = np.clip(agua - bege - degrau - vidro - par, 0, 1)
+    # a sombra curta das bordas, do degrau e das paredes na água (a luz do alto à direita: mais forte junto à beira)
+    beira = np.clip(bege + degrau + par, 0, 1)
+    dist = cv2.distanceTransform((beira < 0.5).astype(np.uint8), cv2.DIST_L2, 5)
+    fs, alc = q["sombra"]
+    sombra = 1 - fs * np.exp(-dist / alc)
+    A = agua_e(Q, h, w, q["semente"]) * sombra[..., None]
+    # as bordas em Bege Bahia (a foto da biblioteca, no tom dos pisos de Bege Bahia)
+    T = textura("bege_bahia", Q.px_m, h, w, semente=q["semente_bege"]).astype(np.float32)
+    Bg = T / T.reshape(-1, 3).mean(axis=0) * np.float32(q["tom_bege"])
+    # o degrau da sauna no travertino do piso dela (o tom da mediana do piso de travertino em volta)
+    trav = legenda(Q, [(202, 217, 220)])[Y0:Y1, X0:X1]
+    tom_t = np.median(reg[trav], axis=0) if trav.any() else np.float32(TRAVERTINO_E["tom"])
+    Tt = travertino_e(Q, h, w, q["semente"] + 7)[..., None] * tom_t
+    reg[:] = reg * (1 - agua[..., None]) + A * agua[..., None]
+    reg[:] = reg * (1 - bege[..., None]) + Bg * bege[..., None]
+    reg[:] = reg * (1 - degrau[..., None]) + Tt * degrau[..., None]
+    # a quina das bordas e do degrau: um fio escuro na beira da água
+    quina = np.clip(cv2.dilate(agua, np.ones((3, 3), np.uint8)) * np.clip(bege + degrau, 0, 1), 0, 1) * (agua < 0.5)
+    reg *= (1 - (1 - q["quina"]) * quina)[..., None]
+    # o vidro fino: o painel claro e os dois fios
+    v = q["vidro"]
+    vf = np.zeros((h * 8, w * 8), np.uint8)
+    for r in q["vidros"]:
+        (x0, y0), (x1, y1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        for xx in (x0, x1):
+            cv2.line(vf, (round((xx - X0) * 8), round((y0 - Y0) * 8)), (round((xx - X0) * 8), round((y1 - Y0) * 8)), 255,
+                     max(1, round(v["larg_fio"] * 8)))
+    fio = cv2.resize(vf, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+    reg[:] = reg * (1 - v["alfa"] * vidro[..., None]) + np.float32(v["cor"]) * v["alfa"] * vidro[..., None]
+    reg[:] = reg * (1 - fio[..., None]) + np.float32(v["fio"]) * fio[..., None]
+    # o ciano da água antiga que sobrou nas beiradas (a borda da sauna, os cantos): refeito pelos vizinhos
+    r8 = np.clip(reg, 0, 255).astype(np.uint8)
+    b_, g_, r_ = [r8[..., i].astype(np.int16) for i in range(3)]
+    ciano = (b_ - r_ > q["ciano"]) & (g_ - r_ > q["ciano"] - 5) & (agua < 0.5) & (vidro < 0.05)
+    ciano &= cv2.dilate((agua > 0.5).astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) | \
+        cv2.dilate(((bege + degrau) > 0.5).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    reg[:] = cv2.inpaint(r8, ciano.astype(np.uint8), 2, cv2.INPAINT_TELEA).astype(np.float32) * ciano[..., None] + \
+        reg * ~ciano[..., None]
+    print(f"    piscina: o ciano antigo nas beiradas, {int(ciano.sum())} px refeitos")
+    print(f"    piscina: a água no turquesa da referência ({agua.sum() / Q.px_m ** 2:.1f} m², pastilhas e cáusticas); "
+          f"as bordas em Bege Bahia ({bege.sum() / Q.px_m ** 2:.1f} m²) e o degrau da sauna em travertino "
+          f"({degrau.sum() / Q.px_m ** 2:.2f} m²) com a quina e a sombra na água; os vidros finos")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# Os bancos da sauna em degraus (usuário, 28/10/26, com a referência: "OBSERVE QUE OS DEGRAUS EM FORMA DE BANCO NO
+# MARMORE TRAVERTINO DENTRO DA SAUNA TEM DENTES APARENTES PARA DIZER QUAL DEGRAU ESTÁ ACIMA E OUTRO ABAIXO, DEIXANDO
+# CLARO OS NÍVEIS"): os dois bancos do PDF (os brancos da ARQ_ELEMENTOS FIXOS: o de baixo, junto ao piso, e o de cima,
+# encostado na parede) no travertino do piso, com o veio no comprido; o de cima um pouco mais claro (mais alto, mais
+# luz). Os dentes: na beira de cada nível, a quina clara do degrau de cima, o fio escuro do espelho e a sombra curta
+# no degrau (ou no piso) de baixo; nas pontas, junto ao degrau da piscina (no nível do piso), o mesmo, e a sombra dos
+# dois bancos sobre ele (a luz do alto à direita).
+SAUNA_E = {"bancos": [(888.9, 1021.3, 999.8, 1055.5), (888.9, 1055.5, 999.8, 1089.8)], "luz": (1.0, 1.075),
+           "quina": 1.10, "fio": 0.50, "sombra": (0.38, 2.6), "ponta": {"desloc_px": (2.0, 4.0), "forca": 0.45, "sig": 0.9},
+           "semente": 2834}
+
+
+def sauna_e(Q, img):
+    q = SAUNA_E
+    (bx0, by0, bx1, by1), (cx0, cy0, cx1, cy1) = q["bancos"]
+    X0, Y0, X1, Y1 = F.ret_q(Q, (bx0 - 20, by0 - 20, cx1 + 4, cy1 + 4))
+    w, h = X1 - X0, Y1 - Y0
+    out = img.astype(np.float32)
+    reg = out[Y0:Y1, X0:X1]
+    trav = legenda(Q, [(202, 217, 220)])[Y0:Y1, X0:X1]
+    tom = np.median(reg[trav], axis=0) if trav.any() else np.float32(TRAVERTINO_E["tom"])
+    niveis = [_ret_local(Q, r, X0, Y0, w, h) for r in q["bancos"]]
+    for k, (a, f) in enumerate(zip(niveis, q["luz"])):
+        T = travertino_e(Q, h, w, q["semente"] + k, vertical=False)[..., None] * tom * f
+        reg[:] = reg * (1 - a[..., None]) + T * a[..., None]
+    # os dentes: a beira de cada nível (a de cima de cada banco, de frente para o de baixo, e a ponta da esquerda)
+    pt_px = Q.px_m / 56.69
+
+    def fio_h(y_pt, x0_pt, x1_pt, larg=0.9):
+        (u0, v), (u1, _) = Q.p2q(x0_pt, y_pt), Q.p2q(x1_pt, y_pt)
+        m = np.zeros((h * 8, w * 8), np.uint8)
+        cv2.line(m, (round((u0 - X0) * 8), round((v - Y0) * 8)), (round((u1 - X0) * 8), round((v - Y0) * 8)), 255,
+                 max(1, round(larg * 8)))
+        return cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+
+    def fio_v(x_pt, y0_pt, y1_pt, larg=0.9):
+        (u, v0), (_, v1) = Q.p2q(x_pt, y0_pt), Q.p2q(x_pt, y1_pt)
+        m = np.zeros((h * 8, w * 8), np.uint8)
+        cv2.line(m, (round((u - X0) * 8), round((v0 - Y0) * 8)), (round((u - X0) * 8), round((v1 - Y0) * 8)), 255,
+                 max(1, round(larg * 8)))
+        return cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    fs, alc = q["sombra"]
+    (u0, _), (u1, _) = Q.p2q(bx0, by0), Q.p2q(bx1, by0)
+    faixa = np.clip(np.minimum(xx - (u0 - X0) + 0.5, (u1 - X0) - xx + 0.5), 0, 1)       # só no comprido dos bancos
+    # a sombra curta no nível de baixo, junto ao espelho do de cima: no piso diante do banco de baixo e no banco de
+    # baixo diante do de cima
+    for y_pt, baixo in ((by0, None), (cy0, niveis[0])):
+        _, v = Q.p2q(bx0, y_pt)
+        d = (v - Y0) - yy
+        s = np.where(d > 0, fs * np.exp(-d / alc), 0) * faixa
+        s *= (1 - np.clip(niveis[0] + niveis[1], 0, 1)) if baixo is None else baixo
+        reg *= (1 - s)[..., None]
+    # na ponta da esquerda, a sombra de cada banco sobre o degrau da piscina, para a esquerda e para baixo, mais longa no
+    # banco mais alto: o perfil dos dentes
+    p = q["ponta"]
+    alto = np.clip(niveis[0] + niveis[1], 0, 1)
+    sh = np.zeros((h, w), np.float32)
+    for a, dpx in zip(niveis, p["desloc_px"]):
+        sh = np.maximum(sh, cv2.warpAffine(a, np.float32([[1, 0, -dpx], [0, 1, dpx * 0.5]]), (w, h)))
+    sh = cv2.GaussianBlur(sh, (0, 0), p["sig"]) * (1 - alto) * (xx < (u0 - X0))
+    reg *= (1 - p["forca"] * sh)[..., None]
+    # o fio escuro do espelho e a quina clara logo dentro do degrau de cima
+    for y_pt in (by0, cy0):
+        f = fio_h(y_pt, bx0, bx1)
+        reg[:] = reg * (1 - f[..., None]) + reg * q["fio"] * f[..., None]
+        fq = fio_h(y_pt + 1.0 / pt_px, bx0, bx1, 0.8)
+        reg *= (1 + (q["quina"] - 1) * fq)[..., None]
+    f = fio_v(bx0, by0, cy1)
+    reg[:] = reg * (1 - f[..., None]) + reg * q["fio"] * f[..., None]
+    fq = fio_v(bx0 + 1.0 / pt_px, by0, cy1, 0.8)
+    reg *= (1 + (q["quina"] - 1) * fq)[..., None]
+    print("    sauna: os dois bancos em degrau no travertino do piso (o de cima mais claro), com os dentes (a quina, o fio "
+          "do espelho e a sombra curta no nível de baixo) e a sombra das pontas no degrau da piscina")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# Os aparelhos da academia (usuário, 28/10/26: "MELHORE A REPRESENTAÇÃO DOS APARELHOS DE ACADEMIA E O CONTORNO DO PISO EM
+# VOLTA DESSES APARELHOS"). Até aqui ficavam os do render (borrados, serrilhados, um pouco fora do PDF, com restos da
+# sombra antiga e lascas escuras no vinílico em volta). Agora são desenhados pelo PDF, na resolução da prancha: cada
+# peça dos blocos (os preenchimentos brancos da ARQ_ MOB COMUM, na ordem do PDF, divididos pelos traços em células) num
+# material pela forma e pelo aparelho (`_material_ap`): estrutura grafite, tubos, estofado preto, borracha, cromado, o
+# alumínio das laterais da esteira, a lona dela e o painel; cada célula com o volume do material (o bisel com a luz do
+# alto à direita, o cilindro, a almofada) e os traços do PDF por cima, finos; as bolas de pilates como esferas. Embaixo
+# de cada aparelho, o vinílico novo inteiro (`pisos_e`: nas `zonas`, as peças antigas saem e o piso passa) e a sombra
+# curta e macia do aparelho.
+ACADEMIA_E = {
+    "aparelhos": [("elíptico de cima", (863.6, 709.0, 949.6, 747.4), "eliptico"),
+                  ("elíptico de baixo", (863.6, 760.5, 949.6, 799.0), "eliptico"),
+                  ("esteira de cima", (859.1, 819.4, 954.9, 857.9), "esteira"),
+                  ("esteira de baixo", (859.1, 884.6, 954.9, 923.2), "esteira"),
+                  ("bolas e acessórios", (1019.0, 689.0, 1111.0, 741.0), "bolas"),
+                  ("barra de parede", (1137.1, 693.5, 1222.1, 705.3), "barra"),
+                  ("estação de musculação", (1178.7, 779.0, 1283.2, 895.9), "estacao"),
+                  ("prateleira junto ao DCE", (1449.3, 845.4, 1503.1, 850.5), "prateleira"),
+                  ("suporte de halteres", (1691.3, 845.1, 1720.9, 935.8), "halteres"),
+                  ("supino com barra", (1400.2, 981.1, 1497.7, 1057.6), "supino"),
+                  ("banco regulável", (1546.2, 973.9, 1575.4, 1057.7), "banco")],
+    "bolas": [(1045.5, 714.9, 19.4), (1083.9, 714.9, 19.4)],                       # centro e raio (pt)
+    "zona_m": 0.45, "ss": 6, "folga_pt": 1.0,
+    "materiais": {                                            # BGR, o volume e o brilho
+        "estrutura": ((72, 74, 78), "bisel", 0.0), "tubo": ((80, 82, 86), "cilindro", 0.25),
+        "estofado": ((42, 42, 45), "almofada", 0.0), "borracha": ((36, 36, 38), "bisel", 0.0),
+        "cromo": ((178, 180, 184), "cilindro", 0.55), "aluminio": ((156, 158, 162), "bisel", 0.0),
+        "lona": ((38, 38, 40), "lona", 0.0), "painel": ((54, 56, 60), "bisel", 0.0), "tela": ((92, 74, 54), "plano", 0.0),
+        "botao": ((150, 152, 155), "plano", 0.0), "bola": ((198, 200, 202), "esfera", 0.0)},
+    "traco": {"cor": (26, 26, 28), "alfa": 0.55, "larg_px": 0.35, "alfa_bola": 0.18},
+    "bisel": (0.40, 0.9), "sombra": [(2.2, 1.6, 0.40), (3.5, 4.0, 0.14)]}       # (desloc px, sigma px, força)
+
+
+def _material_ap(tipo, c, maior):
+    """O material da célula c (área, espessura e comprimento em m, centro relativo à caixa) no aparelho `tipo`."""
+    a, e, L, cx = c["area"], c["esp"], c["comp"], c["cx"]
+    if tipo == "esteira":
+        if maior:
+            return "lona"
+        if e < 0.1 and L > 0.55:
+            return "aluminio"
+        if cx < 0.3 and a < 0.0012:
+            return "botao"
+        if cx < 0.3 and a < 0.03:
+            return "tela" if 0.01 < a < 0.03 and c["quadrado"] else "painel"
+        return "estrutura"
+    if tipo == "eliptico":
+        return "tubo" if e < 0.045 and L > 0.15 else "estrutura"
+    if tipo == "estacao":
+        if a > 0.035 and e > 0.1:
+            return "estofado"
+        return "tubo" if e < 0.04 and L > 0.12 else "estrutura"
+    if tipo == "supino":
+        if L > 1.0 and e < 0.04:
+            return "cromo"
+        if cx < 0.13 or cx > 0.87:
+            return "borracha"
+        return "estofado" if a > 0.05 else "estrutura"
+    if tipo == "banco":
+        return "estofado" if a > 0.012 else "estrutura"
+    if tipo == "halteres":
+        if e > 0.06 and c["quadrado"]:
+            return "borracha"
+        return "cromo" if e < 0.035 and L < 0.35 else "estrutura"
+    if tipo == "barra":
+        return "cromo" if e < 0.03 else "estrutura"
+    if tipo == "bolas":
+        return "borracha" if a > 0.003 else "estrutura"
+    return "estrutura"
+
+
+def _sombreado(modo, cel, d, brilho, q, ss_px_m, bola=None):
+    """O fator de luz da célula (d: a distância à borda, px do desenho grande)."""
+    luz = np.float32([1.0, -1.0]) / np.sqrt(2)
+    if modo == "esfera":
+        cx, cy, R, yy, xx = bola
+        dx, dy = (xx - cx) / R, (yy - cy) / R
+        z = np.sqrt(np.clip(1 - dx ** 2 - dy ** 2, 0, 1))
+        L3 = np.float32([0.45, -0.45, 0.77]) / np.linalg.norm([0.45, -0.45, 0.77])
+        lam = np.clip(dx * L3[0] + dy * L3[1] + z * L3[2], 0, 1)
+        return 0.42 + 0.66 * lam + 0.22 * lam ** 30
+    if modo == "plano":
+        return np.ones_like(d)
+    dmax = max(float(d.max()), 1.0)
+    if modo == "cilindro":
+        r = np.clip(d / dmax, 0, 1)
+        return 0.66 + 0.40 * np.sqrt(r * (2 - r)) + brilho * np.exp(-((r - 0.8) / 0.18) ** 2)
+    if modo == "almofada":
+        r = np.clip(d / (0.05 * ss_px_m), 0, 1)
+        s = 0.80 + 0.30 * r * r * (3 - 2 * r)
+        hl = cv2.GaussianBlur(cv2.warpAffine(cel.astype(np.float32), np.float32([[1, 0, 0.03 * ss_px_m], [0, 1, -0.03 * ss_px_m]]),
+                                             cel.shape[::-1]), (0, 0), 0.04 * ss_px_m)
+        return s + 0.10 * hl
+    # bisel (e a lona): a beira que olha para a luz mais clara, a outra mais escura
+    f, larg = q["bisel"]
+    mb = cv2.GaussianBlur(cel.astype(np.float32), (0, 0), max(larg * ss_px_m / 59.7 * 6, 1.0))
+    gy, gx = np.gradient(mb)
+    nn = np.sqrt(gx ** 2 + gy ** 2) + 1e-6
+    face = -(gx * luz[0] + gy * luz[1]) / nn
+    e = np.exp(-d / max(0.012 * ss_px_m, 1.0))
+    s = 1 + f * face * e
+    if modo == "lona":
+        yy = np.arange(cel.shape[0], dtype=np.float32)[:, None]
+        xx = np.arange(cel.shape[1], dtype=np.float32)[None, :]
+        s = s * (1 + 0.05 * np.sin(2 * np.pi * (xx + 0 * yy) / (0.02 * ss_px_m)))
+    return s
+
+
+def aparelhos_e(Q, img):
+    q = ACADEMIA_E
+    S = q["ss"]
+    out = img.astype(np.float32)
+    mats = q["materiais"]
+    tr = q["traco"]
+    n_cel = 0
+    for nome, caixa, tipo in q["aparelhos"]:
+        x0p, y0p, x1p, y1p = caixa
+        fo = q["folga_pt"]
+        ds = sorted([d for d in Q.desenhos if d.get("layer") == "ARQ_ MOB COMUM" and d["rect"].x0 >= x0p - fo
+                     and d["rect"].x1 <= x1p + fo and d["rect"].y0 >= y0p - fo and d["rect"].y1 <= y1p + fo],
+                    key=lambda d: d.get("seqno", 0))
+        X0, Y0, X1, Y1 = F.ret_q(Q, (x0p - 8, y0p - 8, x1p + 8, y1p + 8))
+        w, h = X1 - X0, Y1 - Y0
+        W_, H_ = w * S, h * S
+        lab = np.zeros((H_, W_), np.int32)
+        lin = np.zeros((H_, W_), np.uint8)
+        lb = np.zeros((H_, W_), np.uint8)                                    # os traços dentro das bolas
+        k = 0
+        for d in ds:
+            cs = [np.int32(np.round((c - (X0, Y0)) * S)) for c in Q.caminhos(d)]
+            if d["type"] in ("f", "fs"):
+                k += 1
+                m = np.zeros((H_, W_), np.uint8)
+                cv2.fillPoly(m, [c for c in cs if len(c) >= 3], 1)
+                lab[m > 0] = k
+            if d["type"] in ("s", "fs"):
+                for c in cs:
+                    cv2.polylines(lin, [c], False, 255, max(1, round(tr["larg_px"] * S)), cv2.LINE_AA)
+        sil = lab > 0
+        yy, xx = np.mgrid[0:H_, 0:W_].astype(np.float32)
+        bolas = []
+        if tipo == "bolas":
+            for bx, by, r in q["bolas"]:
+                (u, v), (u2, _) = Q.p2q(bx, by), Q.p2q(bx + r, by)
+                cx, cy, R = (u - X0) * S, (v - Y0) * S, (u2 - u) * S
+                bolas.append((cx, cy, R))
+            dentro_b = np.zeros((H_, W_), bool)
+            for cx, cy, R in bolas:
+                dentro_b |= (xx - cx) ** 2 + (yy - cy) ** 2 <= (R - 0.5 * S) ** 2
+            lb = np.where(dentro_b, lin, 0).astype(np.uint8)
+            lin = np.where(dentro_b, 0, lin).astype(np.uint8)
+        cor = np.zeros((H_, W_, 3), np.float32)
+        ss_px_m = Q.px_m * S
+        # as células: cada peça dividida pelos traços
+        livre = sil & (lin < 128)
+        n, cel_lab, st, cen = cv2.connectedComponentsWithStats(livre.astype(np.uint8), 4)
+        areas = st[:, cv2.CC_STAT_AREA].astype(np.float64) / ss_px_m ** 2
+        maior = int(np.argmax(areas[1:]) + 1) if n > 1 else 0
+        for i in range(1, n):
+            bx, by, bw, bh = st[i, :4]
+            sub = cel_lab[by:by + bh, bx:bx + bw] == i
+            d = cv2.distanceTransform(np.pad(sub, 1).astype(np.uint8), cv2.DIST_L2, 5)[1:-1, 1:-1]
+            esp = 2 * float(d.max()) / ss_px_m
+            c = {"area": areas[i], "esp": esp, "comp": areas[i] / max(esp, 1e-4),
+                 "cx": (cen[i][0] / S + X0 - Q.p2q(x0p, y0p)[0]) / max(Q.p2q(x1p, y0p)[0] - Q.p2q(x0p, y0p)[0], 1),
+                 "quadrado": 0.6 < bw / max(bh, 1) < 1.6}
+            if tipo == "bolas" and bolas:
+                ccx, ccy = cen[i]
+                bola = next(((bcx, bcy, R) for bcx, bcy, R in bolas if (ccx - bcx) ** 2 + (ccy - bcy) ** 2 <= R ** 2), None)
+            else:
+                bola = None
+            if bola is not None:
+                continue                                                     # as bolas vão inteiras, depois
+            mat = _material_ap(tipo, c, i == maior and tipo == "esteira")
+            base, modo, brilho = mats[mat]
+            sh = _sombreado(modo, sub, d, brilho, q, ss_px_m) if min(bw, bh) >= 3 else np.ones(sub.shape, np.float32)
+            reg = cor[by:by + bh, bx:bx + bw]
+            reg[sub] = (np.float32(base) * sh[..., None])[sub]
+            n_cel += 1
+        # as bolas: a esfera inteira, com os traços do PDF bem leves por cima
+        for cx, cy, R in bolas:
+            disco = (xx - cx) ** 2 + (yy - cy) ** 2 <= R ** 2
+            base, modo, _ = mats["bola"]
+            s = _sombreado("esfera", disco, None, 0, q, ss_px_m, bola=(cx, cy, R, yy, xx))
+            cor[disco] = (np.float32(base) * s[..., None])[disco]
+            sil |= disco
+        # os traços do PDF por cima (nas bolas, bem leves)
+        al = (lin.astype(np.float32) / 255) * tr["alfa"] + (lb.astype(np.float32) / 255) * tr["alfa_bola"]
+        cor = cor * (1 - al[..., None]) + np.float32(tr["cor"]) * al[..., None]
+        a = sil.astype(np.float32)
+        # o tamanho da prancha
+        A = cv2.resize(a, (w, h), interpolation=cv2.INTER_AREA)
+        C = cv2.resize(cor * a[..., None], (w, h), interpolation=cv2.INTER_AREA) / np.maximum(A, 1e-4)[..., None]
+        reg = out[Y0:Y1, X0:X1]
+        for dpx, sig, f in q["sombra"]:
+            s = cv2.GaussianBlur(cv2.warpAffine(A, np.float32([[1, 0, -dpx], [0, 1, dpx]]), (w, h)), (0, 0), sig)
+            reg *= (1 - f * s * (1 - A))[..., None]
+        reg[:] = reg * (1 - A[..., None]) + C * A[..., None]
+    print(f"    academia: {len(q['aparelhos'])} aparelhos desenhados pelo PDF ({n_cel} peças nos materiais, as bolas como "
+          f"esferas), com a sombra curta no vinílico novo")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# As portas (usuário, 28/10/26: "VAMOS REVISAR E AJUSTAR REPRESENTAÇÃO DAS PORTAS"). As portas de giro vinham do render:
+# tubos cinza arredondados de 8 a 10 px no lugar da folha, sem batentes; a do DCE com um "L" que não existe (uma segunda
+# barra rente à soleira); a da sauna quase sumida; as das cabines do vestiário fundidas numa barra só sobre a divisória,
+# que também não aparecia (a ARQ - Parede do PDF, fora das paredes de E10). Agora, como as portas aprovadas na Casa D
+# (R3, seção 4 das regras): sem arco, a folha na posição e na espessura do PDF, em branco suave com o contorno fino e a
+# sombra curta, e os batentes do PDF em branco com o contorno; em volta de cada porta (o quadrante do arco do PDF, do
+# lado do cômodo), o piso novo passa inteiro antes (`zonas_portas` nos pisos), sem nada da folha antiga. A porta de
+# vidro da ducha do ambiente e o vidro fixo dela como os boxes (o vidro claro com as faces finas e a sombra curta).
+PORTAS_E = {
+    "giro": [("DCE", (1444.0, 693.5, 1446.3, 738.8), (1444.0, 693.5, 1489.4, 738.8), "granito",
+              [(1440.0, 693.5, 1444.0, 694.6), (1489.4, 693.5, 1493.3, 694.6), (1442.6, 685.0, 1444.6, 693.5),
+               (1488.8, 685.0, 1490.8, 693.5)]),
+             ("WC DCE 2", (1646.7, 697.7, 1692.0, 700.0), (1646.7, 697.7, 1692.0, 743.1), "Bege Bahia",
+              [(1646.7, 743.1, 1647.8, 747.1), (1646.7, 693.8, 1647.8, 697.7), (1638.2, 742.5, 1646.7, 744.5),
+               (1638.2, 696.3, 1646.7, 698.3)]),
+             ("casa de máquinas da direita", (1738.8, 693.5, 1741.1, 738.8), (1738.8, 693.5, 1784.2, 738.8), "Bege Bahia",
+              [(1734.8, 693.5, 1738.8, 694.6), (1784.2, 693.5, 1788.1, 694.6), (1737.4, 685.0, 1739.4, 693.5),
+               (1783.6, 685.0, 1785.6, 693.5)]),
+             ("depósito, folha de cima", (1564.5, 564.7, 1602.6, 567.0), (1564.5, 564.7, 1602.6, 602.8), "Bege Bahia",
+              [(1564.5, 561.0, 1565.6, 563.8), (1558.0, 563.1, 1564.5, 565.4)]),
+             ("depósito, folha de baixo", (1564.5, 638.6, 1602.6, 640.9), (1564.5, 602.8, 1602.6, 640.9), "Bege Bahia",
+              [(1564.5, 641.7, 1565.6, 644.6), (1558.0, 640.2, 1564.5, 642.5)]),
+             ("casa de máquinas de baixo", (1352.4, 1107.4, 1354.7, 1152.7), (1309.4, 1107.4, 1354.7, 1152.7), "granito",
+              [(1305.4, 1107.4, 1309.4, 1108.5), (1354.7, 1107.4, 1358.7, 1108.5), (1307.9, 1090.3, 1309.9, 1107.4),
+               (1354.1, 1090.3, 1356.1, 1107.4)]),
+             ("sauna", (1008.9, 961.4, 1048.6, 963.6), (1008.9, 961.4, 1048.6, 1001.1), "travertino",
+              [(1008.9, 1001.1, 1010.0, 1005.0), (1008.9, 957.4, 1010.0, 961.4), (1000.4, 1000.5, 1008.9, 1002.5),
+               (1000.4, 960.0, 1008.9, 961.9)]),
+             ("vestiário", (1147.8, 964.2, 1193.1, 966.5), (1147.8, 964.2, 1193.1, 1009.6), "travertino",
+              [(1147.8, 1009.6, 1148.9, 1013.5), (1147.8, 960.2, 1148.9, 964.2), (1139.3, 1009.0, 1147.8, 1011.0),
+               (1139.3, 962.8, 1147.8, 964.8)]),
+             ("cabine do vaso", (1212.6, 1027.1, 1214.9, 1065.9), (1176.1, 1027.1, 1214.9, 1065.9), "travertino",
+              [(1175.6, 1023.7, 1176.8, 1027.1), (1214.2, 1023.7, 1215.3, 1027.1)]),
+             ("cabine do chuveiro", (1218.6, 1027.1, 1220.8, 1065.9), (1218.6, 1027.1, 1257.4, 1065.9), "travertino",
+              [(1218.1, 1023.7, 1219.3, 1027.1), (1256.7, 1023.7, 1257.8, 1027.1)])],
+    "vidros": [("ducha do ambiente: a porta", (1026.9, 1022.3, 1028.1, 1061.1), (1026.9, 1022.3, 1065.7, 1061.1), "travertino"),
+               ("ducha do ambiente: o vidro fixo", (1009.5, 1021.7, 1026.9, 1022.3), (1009.5, 1019.5, 1026.9, 1024.5),
+                "travertino")],
+    # as soleiras de Bege Bahia (R13: o vão branco do PDF na espessura da parede, nítido, com as faces finas)
+    "soleiras": [(1444.6, 685.0, 1488.8, 693.5), (1638.2, 698.3, 1646.7, 742.5), (1739.4, 685.0, 1783.6, 693.5),
+                 (1556.0, 563.1, 1564.5, 642.5), (1309.9, 1090.3, 1354.1, 1107.4), (1176.8, 1023.7, 1214.2, 1027.1),
+                 (1219.3, 1023.7, 1256.7, 1027.1)],
+    # as portas de vidro de correr da circulação para a academia e a janela de correr do DCE, como as da academia da
+    # Casa D (`final3840_casaa.portas_vidro`): a soleira de Bege Bahia no vão, as duas folhas nos planos do PDF (o
+    # caixilho de alumínio com o vidro no meio e os montantes) e os batentes
+    "correr": [{"nome": "da circulação para a academia, à esquerda", "soleira": (847.3, 685.0, 972.0, 693.5),
+                "batentes": [(847.3, 685.0, 849.6, 693.5), (969.8, 685.0, 972.0, 693.5)],
+                "folhas": [((849.6, 685.0, 911.9, 687.8), "x"), ((907.4, 687.8, 969.8, 690.7), "x")], "montante_pt": 4.5},
+               {"nome": "da circulação para a academia, à direita", "soleira": (1306.5, 685.0, 1431.3, 693.5),
+                "batentes": [(1306.5, 685.0, 1308.8, 693.5), (1429.0, 685.0, 1431.3, 693.5)],
+                "folhas": [((1308.8, 687.8, 1371.2, 690.7), "x"), ((1366.6, 685.0, 1429.0, 687.8), "x")],
+                "montante_pt": 4.5},
+               {"nome": "janela do DCE", "soleira": (1493.1, 685.0, 1555.5, 693.5),
+                "batentes": [(1493.1, 685.0, 1496.0, 690.7), (1552.6, 685.0, 1555.5, 690.7)],
+                "folhas": [((1496.0, 687.8, 1525.7, 690.7), "x"), ((1522.9, 685.0, 1552.6, 687.8), "x")],
+                "montante_pt": 2.8}],
+    # o piso refeito junto às esquadrias onde o render deixou a peça antiga do lado de dentro (a barra cinza da janela de
+    # correr do DCE, embaixo dela, no granito)
+    "limpar": [("granito", (1493.1, 693.5, 1555.5, 699.5))],
+    "folha": (238, 238, 236), "contorno": (88, 90, 92), "larg_contorno": 0.5, "sombra": (0.26, 1.0, 0.9),
+    "vidro": (218, 214, 204), "vidro_face": (104, 108, 112), "vidro_px": 1.4, "vidro_face_px": 0.45,
+    "zona_pt": 5.7}
+
+
+def zonas_portas(Q):
+    """As zonas das portas por piso ({nome do piso: bool}): o quadrante do arco do PDF com `zona_pt` de folga, só do lado
+    do cômodo (a parede e a soleira ficam)."""
+    q = PORTAS_E
+    z = {}
+    for item in q["giro"] + q["vidros"]:
+        _, f, arco, piso = item[:4]
+        x0, y0, x1, y1 = arco
+        e = q["zona_pt"]
+        zx0, zy0, zx1, zy1 = x0 - e, y0 - e, x1 + e, y1 + e
+        if (f[2] - f[0]) < (f[3] - f[1]):                       # a folha em pé: a parede em cima ou embaixo
+            if abs(f[1] - y0) < 0.5:
+                zy0 = y0 + 0.3
+            else:
+                zy1 = y1 - 0.3
+        elif abs(f[0] - x0) < 0.5 and (f[3] - f[1]) > 1.5:      # deitada: a parede à esquerda ou à direita
+            zx0 = x0 + 0.3
+        elif (f[3] - f[1]) > 1.5:
+            zx1 = x1 - 0.3
+        a, b, c, d = F.ret_q(Q, (zx0, zy0, zx1, zy1))
+        m = z.setdefault(piso, np.zeros((Q.H, Q.W), bool))
+        m[b:d, a:c] = True
+    for piso, r in q["limpar"]:
+        a, b, c, d = F.ret_q(Q, r)
+        z.setdefault(piso, np.zeros((Q.H, Q.W), bool))[b:d, a:c] = True
+    return z
+
+
+def portas_e(Q, img):
+    import final3840_casaa as FA
+    q = PORTAS_E
+    out = np.ascontiguousarray(img.copy())
+    for r in q["soleiras"]:
+        out = FA.soleira_bege(Q, out, r)
+    guarda = FA.PORTAS_VIDRO
+    FA.PORTAS_VIDRO = dict(FA.PORTAS_VIDRO, portas=q["correr"])
+    try:
+        out = FA.portas_vidro(Q, out)
+    finally:
+        FA.PORTAS_VIDRO = guarda
+    fs, dist, sig = q["sombra"]
+    for nome, folha, _, _, batentes in q["giro"]:
+        caixa = (min(r[0] for r in [folha] + batentes), min(r[1] for r in [folha] + batentes),
+                 max(r[2] for r in [folha] + batentes), max(r[3] for r in [folha] + batentes))
+        tl = FA.tela(out, Q, caixa, folga=5)
+        m = tl.ret(folha)
+        FA.sombra_q(tl, m, forca=fs, dist=dist, sigma=sig)
+        tl.pintar(m, q["folha"])
+        tl.contorno(m, q["larg_contorno"], q["contorno"])
+        for b in batentes:
+            mb = tl.ret(b)
+            tl.pintar(mb, q["folha"])
+            tl.contorno(mb, q["larg_contorno"] * 0.8, q["contorno"])
+        out = tl.gravar()
+    for nome, vidro, _, _ in q["vidros"]:
+        tl = FA.tela(out, Q, vidro, folga=5)
+        x0, y0, x1, y1 = vidro
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        meia = q["vidro_px"] / 2 / FA.PT_PX
+        r = (x0, cy - meia, x1, cy + meia) if (x1 - x0) >= (y1 - y0) else (cx - meia, y0, cx + meia, y1)
+        m = tl.ret(r)
+        FA.sombra_q(tl, m, forca=0.20, dist=0.9, sigma=0.8)
+        tl.pintar(m, q["vidro"])
+        tl.contorno(m, q["vidro_face_px"], q["vidro_face"])
+        out = tl.gravar()
+    print(f"    portas: {len(q['giro'])} folhas de giro na posição e na espessura do PDF (branco suave, contorno fino, "
+          f"sombra curta), com os batentes, sem arco; {len(q['soleiras'])} soleiras de Bege Bahia; a porta e o vidro fixo "
+          f"da ducha do ambiente em vidro fino")
+    return out
+
+
+def paredes_cabines(Q):
+    """As paredes da ARQ - Parede (as cabines do vestiário e a divisória entre elas), que a E10 não pegava."""
+    return Q.preencher(lambda d: d.get("layer") == "ARQ - Parede" and d.get("fill") is not None and max(d["fill"]) < 0.5)
+
+
+def zonas_academia(Q):
+    """As zonas dos aparelhos e das louças do vestiário (bool): a caixa de cada um com folga, onde o piso novo passa por
+    inteiro (as peças antigas saem; as novas são desenhadas depois)."""
+    m = np.zeros((Q.H, Q.W), np.uint8)
+    caixas = [(c, ACADEMIA_E["zona_m"]) for _, c, _ in ACADEMIA_E["aparelhos"]] + \
+        [(c, VESTIARIO_E["zona_m"]) for c in (VESTIARIO_E["vaso"][0], VESTIARIO_E["chuveiro"]["ducha"],
+                                              VESTIARIO_E["chuveiro"]["braco"])]
+    for (x0, y0, x1, y1), z in caixas:
+        fo = z * 56.69
+        a, b, c, d = F.ret_q(Q, (x0 - fo, y0 - fo, x1 + fo, y1 + fo))
+        m[b:d, a:c] = 1
+    return m.astype(bool)
+
+
+# O vestiário (usuário, 28/10/26: "VESTIARIO: PISO EM MARMORE TRAVERTINO BRUTO, CUBA ESCULPIDA EM MARMORE TRAVERTINO
+# BRUTO, PEDRA DA PIA EM MAGRANITO MARROM TABACO ESCOVADO, VASO SANITÁRIO EM BRANCO E METAIS CROMADOS"): o piso já vem
+# no travertino bruto (`TRAVERTINO_E`); a bancada do PDF (ARQ_BANCADAS) no granito Marrom Tabaco escovado: o desenho do
+# granito de referência das Casas B a D, calmo (os grãos suavizados, o contraste baixo: o escovado é fosco), no tom do
+# Marrom Tabaco escolhido em 15/10 (RGB ~90, 66, 50), com o risco fino do escovado no comprido da bancada, a borda no
+# tom escurecido e a sombra curta (E9); a cuba esculpida (`F.cuba_esculpida`) no travertino bruto do piso, um pouco
+# mais clara e mais calma; a torneira cromada saindo da parede sobre a bacia; o vaso do PDF em louça branca; o chuveiro
+# de teto, o braço e a canopla cromados (`final3840_casaa.chuveiro`).
+VESTIARIO_E = {"bancada": (1262.8, 954.3, 1289.5, 1023.7), "cuba": (1266.1, 971.3, 1289.5, 1006.2),
+               "torneira": {"bico": (1280.2, 987.9, 1287.4, 989.5), "base": (1287.9, 988.7, 1.3)},
+               "vaso": ((1147.8, 1056.8, 1176.9, 1076.8), "esquerda"),
+               "chuveiro": {"ducha": (1262.1, 1053.2, 1273.3, 1064.4), "braco": (1266.6, 1058.1, 1288.9, 1059.5),
+                            "canopla": (1288.4, 1056.9, 1289.5, 1060.7)},
+               "tabaco": {"tom": (50, 64, 88), "contraste": 0.75, "liso_px": 0.5, "escovado": 0.025, "borda": 0.72,
+                          "larg_px": 0.8, "sombra": 0.30, "semente": 2840},
+               "cuba_tom": (208, 225, 236), "zona_m": 0.10}
+
+
+def vestiario_e(Q, img):
+    import final3840_casaa as FA
+    import fontes_procedurais as FP
+    q = VESTIARIO_E
+    t = q["tabaco"]
+
+    def tabaco(tl):
+        G = FP.granito_referencia(tl.h, tl.w, Q.px_m, semente=t["semente"]).astype(np.float32)
+        G = cv2.GaussianBlur(G, (0, 0), t["liso_px"])
+        D = G.mean(axis=2) / max(float(G.mean()), 1.0)
+        D = 1 + t["contraste"] * (D - 1)
+        rng = np.random.default_rng(t["semente"])
+        em_pe = (q["bancada"][3] - q["bancada"][1]) > (q["bancada"][2] - q["bancada"][0])
+        esc = cv2.GaussianBlur(rng.normal(0, 1, (tl.h, tl.w)).astype(np.float32), (0, 0),
+                               sigmaX=0.4 if em_pe else 6.0, sigmaY=6.0 if em_pe else 0.4)
+        D *= 1 + t["escovado"] * esc / max(float(esc.std()), 1e-6)
+        return np.float32(t["tom"]) * D[..., None]
+    out = FA.bancada_pedra(Q, np.ascontiguousarray(img.copy()), q["bancada"], tabaco, t["borda"], t["larg_px"], t["sombra"])
+    # a cuba esculpida no travertino bruto do piso (o desenho em estratos, calmo, no comprido da cuba)
+    guarda = (FA.travertino_bruto, F.BANCADAS_F["cuba_travertino"])
+    try:
+        FA.travertino_bruto = lambda Q_, h, w, semente, **kw: travertino_e(Q_, h, w, semente, vertical=True, amp=0.8,
+                                                                            finas=0.4)
+        F.BANCADAS_F["cuba_travertino"] = dict(guarda[1], tom=q["cuba_tom"])
+        out = F.cuba_esculpida(Q, out, q["cuba"], "travertino")
+    finally:
+        FA.travertino_bruto, F.BANCADAS_F["cuba_travertino"] = guarda
+    out = FA.torneira(Q, out, q["torneira"]["bico"], q["torneira"]["base"])
+    out = FA.vaso(Q, out, *q["vaso"])
+    out = FA.chuveiro(Q, out, q["chuveiro"])
+    print("    vestiário: a bancada em granito Marrom Tabaco escovado (borda e sombra, E9), a cuba esculpida em travertino "
+          "bruto, a torneira cromada, o vaso branco e o chuveiro de teto cromado")
     return out
 
 
 def passos_subsolo(Q):
     return [
-        ("pisos", lambda im: pisos_e(Q, im, PISOS_SUB_E)),
+        ("pisos", lambda im: pisos_e(Q, im, PISOS_SUB_E, zonas=zonas_academia(Q), incluir=zonas_portas(Q))),
         ("escada", lambda im: escada_e(Q, im, ESCADA_SUB_E)),
         ("armario", lambda im: armario_cabides(Q, im, ARMARIO_DCE_E["pt"], ARMARIO_DCE_E["lado"], nome="DCE")),
         ("bancada", lambda im: bancada_e9(Q, im, BANCADA_WC_DCE2, nome="WC DCE 2")),
-        ("paredes", lambda im: paredes_e(Q, im)),
+        ("piscina", lambda im: piscina_e(Q, im)),
+        ("sauna", lambda im: sauna_e(Q, im)),
+        ("paredes", lambda im: paredes_e(Q, im, extra=paredes_cabines(Q))),
+        ("vestiario", lambda im: vestiario_e(Q, im)),
+        ("aparelhos", lambda im: aparelhos_e(Q, im)),
+        ("portas", lambda im: portas_e(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("Subsolo", im)),
     ]
 

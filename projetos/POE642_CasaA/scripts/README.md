@@ -1156,3 +1156,21 @@ python3 pdf_entrega.py --config $C/config_bases.json
 ```
 
 Depois de mudar o Térreo, apagar o `Terreo_nublado_fonte.png` do cache e rodar o 1º Pavimento de novo.
+
+Pedidos de 28/10 no Subsolo, vendo a final. As etapas novas de `passos_subsolo`:
+- `piscina`: `piscina_e`, com a água em `agua_e` e o Barlavento de `fontes_procedurais.barlavento`.
+- `sauna`: `sauna_e`.
+- `vestiario`: `vestiario_e`, que usa `final3840_casaa`: `bancada_pedra`, `torneira`, `vaso` e `chuveiro`; e `F.cuba_esculpida` com o travertino de `travertino_e`.
+- `aparelhos`: `aparelhos_e`, com o material de cada peça em `_material_ap` e o volume em `_sombreado`.
+- `portas`: `portas_e`, com as soleiras em `final3840_casaa.soleira_bege` e as de correr em `final3840_casaa.portas_vidro`.
+
+Nos `pisos`:
+- O travertino é o `travertino_e`, pelo `piso_textura_e`.
+- As `zonas` dos aparelhos e das louças (`zonas_academia`) tiram as peças antigas e enchem os buracos da legenda de piso.
+- O `incluir` (`zonas_portas`) põe na legenda de cada piso o quadrante de cada porta e as faixas de `PORTAS_E["limpar"]`.
+
+A etapa `paredes` recebe `extra=paredes_cabines(Q)`, a ARQ - Parede das cabines do vestiário.
+
+```bash
+python3 final3840_casae.py Subsolo --de pisos     # ~3 min (os pisos); as outras etapas, segundos
+```
