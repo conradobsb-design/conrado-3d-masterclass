@@ -3547,3 +3547,13 @@ O usuário, vendo a borda de Bege Bahia passada para junto da água: "o subsolo 
 Antes e depois (o antes é a entrega anterior, 5418bb9): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_piscina_so_parede_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.
 
 **Aprovado** (28/10/26): "subsolo da casa E aprovado", com a parte de baixo da piscina só em parede (883d600). A final do Subsolo da Casa E fica como está; o Térreo e o 1º Pavimento da Casa E seguem aguardando a validação.
+
+### Pedidos de 28/10/26: braço da esquerda do sofá da varanda (Térreo da Casa E)
+
+O usuário, com o recorte do sofá da varanda: "consegue refinar mais ainda esse braço da esquerda do sofá?"; e, com o recorte da junção do braço com o assento: "corrija também a parte interna do braço".
+- **Braço da esquerda.** Antes era o braço da direita espelhado e esticado, com a faixa da almofada marrom alisada: lia como uma tira chapada e clara. Agora o braço é o próprio estofado do render (o encosto que seguia na perna do L), com o rolo de fora, o vinco e o canto arredondado de cima ligado ao encosto de trás. Só a ponta de baixo, o arredondado, vem do braço da direita espelhado, numa passagem suave.
+- **Parte interna do braço.** Da almofada para baixo, a junção do braço com o assento e a quina da frente do assento vêm do lado direito espelhado, no tom do assento do canto (que fica à sombra das almofadas). Saíram a costura do módulo da perna do L, o vinco escuro em Y no pé do braço e o fio marrom ao lado da almofada.
+- O sofá fica sob a laje do 1º Pavimento: o Térreo nublado não muda.
+- **Para o OK (nada alterado):** à direita do braço da direita, no Bege Bahia, sobrou uma manchinha clara e vertical (cerca de 4 x 18 px), resto do sofá antigo logo fora do retângulo refeito. Proposta: alargar 4 px o retângulo à direita (`SOFA_VARANDA_TE["buraco"]`) para o Bege Bahia cobrir a mancha.
+
+Antes e depois (o antes é a entrega anterior, 6d0183a): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_braco_antes_depois.jpg` (o sofá inteiro) e `..._2810_sofa_varanda_braco_detalhe_antes_depois.jpg` (o braço ampliado). Prancha do Térreo e PDF da Casa E refeitos.

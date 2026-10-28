@@ -2853,7 +2853,8 @@ def poltronas_living_sobre_final_te(Q, img):
 # com a borda esfumada em `esfuma_px`): o Bege Bahia de fora, refletido no lado mais perto do retângulo (nos cantos, os
 # dois lados misturados junto à diagonal, em `canto_px`).
 SOFA_VARANDA_TE = {"modelo": {"caixa": (1846, 1194, 2076, 1270), "lum_min": 185, "rb_max": 45, "frente_y": 1265.5,
-                              "braco_x": (2055, 2074), "encosto_x": (1848, 1869), "almofada_y": (1206, 1243),
+                              "braco_x": (2055, 2074), "encosto_x": (1848, 1869), "ponta_y": 1246, "passagem_px": 7,
+                              "interno_y": 1248, "interno_px": 12, "interno_suave_px": 5,
                               "nitidez": 0.6},
                    "caixa": (1320, 1236, 1522.5, 1306), "buraco": (1303, 1217, 1531, 1315),
                    "esfuma_px": 2, "canto_px": 1.5, "beirada": 0.12, "beirada_px": 2.0}
@@ -2874,16 +2875,30 @@ def _modelo_sofa_1p(q=None):
         j = np.nonzero(claro[i])[0]
         m[i, j.min():j.max() + 1] = True
     m = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 1.0) > 0.5
-    # a perna do L sai: no lugar do encosto da esquerda, que seguia na perna, o braço da direita espelhado (da dobra à
-    # borda, na largura do encosto); onde a almofada marrom encosta no braço (`almofada_y`), o braço vem das linhas
-    # limpas de cima e de baixo, em gradiente
+    # a perna do L sai: o encosto da esquerda (`encosto_x`, da borda à dobra) fica, com a textura do render, até
+    # `ponta_y`; dali para baixo vem a ponta do braço da direita (`braco_x`, da dobra à borda) espelhada e na largura do
+    # encosto, com o arredondado dela, numa passagem em gradiente (`ponta_y` .. +`passagem_px`)
     (b0, b1), (e0, e1) = q["braco_x"], q["encosto_x"]
-    braco, bm = r[:, b0 - x0:b1 - x0].copy(), m[:, b0 - x0:b1 - x0].astype(np.float32)
-    a0, a1 = q["almofada_y"][0] - y0, q["almofada_y"][1] - y0
-    tt = np.linspace(0, 1, a1 - a0 + 2)[1:-1, None, None]
-    braco[a0:a1] = braco[a0 - 1] * (1 - tt) + braco[a1] * tt
-    r[:, e0 - x0:e1 - x0] = cv2.resize(braco[:, ::-1], (e1 - e0, h), interpolation=cv2.INTER_LINEAR)
-    m[:, e0 - x0:e1 - x0] = cv2.resize(bm[:, ::-1], (e1 - e0, h), interpolation=cv2.INTER_LINEAR) > 0.5
+    braco = cv2.resize(r[:, b0 - x0:b1 - x0][:, ::-1], (e1 - e0, h), interpolation=cv2.INTER_LINEAR)
+    bm = cv2.resize(m[:, b0 - x0:b1 - x0][:, ::-1].astype(np.float32), (e1 - e0, h),
+                    interpolation=cv2.INTER_LINEAR) > 0.5
+    p0, p1 = q["ponta_y"] - y0, q["ponta_y"] - y0 + q["passagem_px"]
+    tt = np.clip((np.arange(h) - p0) / (p1 - p0), 0, 1)[:, None, None]
+    r[:, e0 - x0:e1 - x0] = r[:, e0 - x0:e1 - x0] * (1 - tt) + braco * tt
+    m[p0:, e0 - x0:e1 - x0] = bm[p0:]
+    # a parte interna do braço: de baixo das almofadas (`interno_y`) até a frente, a costura do braço com o assento e a
+    # quina da frente do assento (`interno_px` colunas depois da dobra) vêm do lado direito espelhado, em gradiente no
+    # alto e na ponta de dentro, no tom do assento do canto (que fica à sombra das almofadas)
+    d, i0 = q["interno_px"], q["interno_y"] - y0
+    lado, lm = r[:, b0 - x0 - d:b0 - x0][:, ::-1], m[:, b0 - x0 - d:b0 - x0][:, ::-1]
+    ls = slice(i0 + q["passagem_px"], int(q["frente_y"]) - y0 - 2)
+    lado = lado * (r[ls, e1 - x0 + d:e1 - x0 + d + 8].reshape(-1, 3).mean(axis=0)
+                   / r[ls, b0 - x0 - d - 8:b0 - x0 - d].reshape(-1, 3).mean(axis=0))
+    wy = np.clip((np.arange(h) - i0) / q["passagem_px"], 0, 1)[:, None]
+    wx = np.clip((d - 0.5 - np.arange(d)) / q["interno_suave_px"], 0, 1)[None, :]
+    w = (wy * wx)[..., None]
+    r[:, e1 - x0:e1 - x0 + d] = r[:, e1 - x0:e1 - x0 + d] * (1 - w) + lado * w
+    m[:, e1 - x0:e1 - x0 + d] = np.where(w[..., 0] > 0.5, lm, m[:, e1 - x0:e1 - x0 + d])
     m[:, :e0 - x0] = False
     # a borda antisserrilhada, com a cor do estofado (sem o vinílico ou o tapete de fundo)
     dentro = cv2.erode(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
