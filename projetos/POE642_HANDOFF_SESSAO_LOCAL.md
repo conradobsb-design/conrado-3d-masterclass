@@ -3529,3 +3529,12 @@ O usuário: "precisa aprimorar o contorno do tapete na parte onde incluimos as p
 - O sofá e as poltronas do tapete ficam sob a laje do 1º Pavimento: o Térreo nublado do 1º Pavimento não muda.
 
 Antes e depois (o antes é a entrega anterior, 218727c): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_{tapete_poltronas,sofa_varanda}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
+
+### Pedidos de 28/10/26: sofá da varanda sem sombra (Térreo) e borda da piscina do Subsolo (Casa E)
+
+O usuário: "subsolo da casa e"; "precisamos melhorar o aspecto do sofá e remover a sombra"; "na parte de baixo da piscina está invertido: a parede é a parte de baixo e a borda da piscina a parte de cima. entendeu?".
+- **Sofá da varanda (Térreo).** As duas pontas agora são iguais: no lugar do encosto que seguia na perna do L entrou o braço da direita, espelhado. O sofá está na proporção do modelo (antes estava esticado para a profundidade do PDF, o que afinava as almofadas), no comprimento do PDF, sem sombra no piso; a beirada do estofado, um pouco mais escura, marca o contorno sobre o Bege Bahia.
+- **Piscina do Subsolo.** Na parte de baixo, a faixa de Bege Bahia (a borda) passou para junto da água, nas duas partes da piscina (a funda e a do degrau), com os cantos retos, e a parede escura ficou por fora, fechando também o canto de baixo à esquerda.
+- **Revisão do Subsolo.** Revendo o Subsolo inteiro de perto (circulação, academia, DCE e WC DCE 2, depósito, casas de máquinas, sauna, ambiente, vestiário, elevador), não apareceu outra inconformidade além da piscina.
+
+Antes e depois (o antes é a entrega anterior, 4e4108d): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_sem_sombra_antes_depois.jpg` e `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_piscina_borda_parede_antes_depois.jpg`. Pranchas do Subsolo e do Térreo e PDF da Casa E refeitos.

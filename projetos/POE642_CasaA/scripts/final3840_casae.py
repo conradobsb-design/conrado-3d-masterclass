@@ -1677,6 +1677,52 @@ def cabine_elevador_e(Q, img):
     return out
 
 
+# A borda de baixo da piscina do Subsolo (usuário, 28/10/26: "na parte de baixo da piscina está invertido: a parede é a
+# parte de baixo e a borda da piscina a parte de cima"): ali o PDF tem um bloco cheio (preto) e o render pôs a parede
+# junto à água e a faixa de Bege Bahia por fora. Na `caixa` (px da final), da linha `topo_y` para baixo, o que era
+# parede ou Bege Bahia (com a emenda entre eles) vira Bege Bahia até `borda_px` da água, em quadrado (a borda segue o
+# contorno da água, com o degrau da parte rasa, e os cantos ficam retos) e parede depois (por fora, fechando também o canto de baixo à esquerda). O Bege Bahia novo vem da faixa antiga,
+# deslocado (`deslocs`, o primeiro que cai na faixa antiga; o que sobra, pelos vizinhos); a parede, no cinza dela.
+PISCINA_BORDA_SUB = {"caixa": (850, 895, 1064, 958), "topo_y": 909, "borda_px": 12.5, "parede_lum": 95,
+                     "deslocs": [(0, 14), (0, 7), (0, 13), (0, 6), (0, 12), (12, 0), (-12, 0), (0, 20), (0, -14)]}
+
+
+def piscina_borda_sub(Q, img, q=None):
+    q = q or PISCINA_BORDA_SUB
+    x0, y0, x1, y1 = q["caixa"]
+    r = img[y0:y1, x0:x1].astype(np.float32)
+    lum, rb = r.mean(axis=2), r[..., 2] - r[..., 0]
+    agua = (r[..., 0] - r[..., 2] > 40)                                   # o turquesa (B bem acima de R)
+    parede = (lum < q["parede_lum"]) & (np.abs(rb) < 12)
+    bege = (rb > 15) & (lum > 150) & (lum < 240)
+    yy = np.mgrid[y0:y1, x0:x1][0]
+    # a parede e o Bege Bahia, com os px da emenda entre eles (a linha antisserrilhada), menos a água
+    zona = cv2.morphologyEx((parede | bege).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8)).astype(bool)
+    zona &= (yy >= q["topo_y"]) & ~agua
+    d = cv2.distanceTransform((~agua).astype(np.uint8), cv2.DIST_C, 3)      # em quadrado: os cantos ficam retos
+    novo_bege = zona & (d <= q["borda_px"])
+    nova_parede = zona & ~novo_bege
+    out = img.copy()
+    reg = out[y0:y1, x0:x1]
+    cor_parede = np.median(r[parede & (yy >= q["topo_y"])], axis=0)
+    reg[nova_parede] = np.round(cor_parede).astype(np.uint8)
+    falta = novo_bege & ~bege
+    bege = bege & ~cv2.dilate((~bege).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)   # fonte sem a emenda
+    h, w = falta.shape
+    for dx, dy in q["deslocs"]:
+        ys, xs = np.nonzero(falta)
+        sy, sx = ys + dy, xs + dx
+        ok = (sy >= 0) & (sy < h) & (sx >= 0) & (sx < w)
+        ok[ok] &= bege[sy[ok], sx[ok]]
+        reg[ys[ok], xs[ok]] = img[y0:y1, x0:x1][sy[ok], sx[ok]]
+        falta[ys[ok], xs[ok]] = False
+    if falta.any():                                                       # o resto, pelos vizinhos
+        reg[:] = cv2.inpaint(reg, falta.astype(np.uint8), 3, cv2.INPAINT_TELEA)
+    print(f"    borda de baixo da piscina: {int(novo_bege.sum() - (novo_bege & bege).sum())} px de parede viraram Bege "
+          f"Bahia e {int((nova_parede & bege).sum())} de Bege Bahia viraram parede ({int(falta.sum())} sem fonte)")
+    return out
+
+
 def passos_subsolo(Q):
     return [
         ("pisos", lambda im: pisos_e(Q, im, PISOS_SUB_E, zonas=zonas_academia(Q), incluir=zonas_portas(Q))),
@@ -1694,6 +1740,7 @@ def passos_subsolo(Q):
         ("aparelhos", lambda im: aparelhos_e(Q, im)),
         ("portas", lambda im: portas_e(Q, im)),
         ("elevador", lambda im: cabine_elevador_e(Q, im)),
+        ("piscina_borda", lambda im: piscina_borda_sub(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("Subsolo", im)),
     ]
 
@@ -2820,11 +2867,10 @@ def poltronas_living_sobre_final_te(Q, img):
 # com a borda esfumada em `esfuma_px`): o Bege Bahia de fora, refletido no lado mais perto do retângulo (nos cantos, os
 # dois lados misturados junto à diagonal, em `canto_px`).
 SOFA_VARANDA_TE = {"modelo": {"caixa": (1846, 1194, 2076, 1270), "lum_min": 185, "rb_max": 45, "frente_y": 1265.5,
-                              "encosto_x": 1869, "ponta_y": 1262, "raio": 6},
+                              "braco_x": (2055, 2074), "encosto_x": (1848, 1869), "almofada_y": (1206, 1243),
+                              "nitidez": 0.6},
                    "caixa": (1320, 1236, 1522.5, 1306), "buraco": (1303, 1217, 1531, 1315),
-                   "esfuma_px": 2, "canto_px": 1.5,
-                   "sombra": {"dx": -0.06, "dy": 0.06, "desfoque": 0.07, "opacidade": 0.5},
-                   "sombra_contato": {"dx": 0.0, "dy": 0.0, "desfoque": 0.03, "opacidade": 0.3}}
+                   "esfuma_px": 2, "canto_px": 1.5, "beirada": 0.12, "beirada_px": 2.0}
 
 
 def _modelo_sofa_1p(q=None):
@@ -2836,17 +2882,23 @@ def _modelo_sofa_1p(q=None):
     h, w = r.shape[:2]
     yy, xx = np.mgrid[y0:y1, x0:x1].astype(np.float32)
     claro = (r.mean(axis=2) > q["lum_min"]) & (r[..., 2] - r[..., 0] < q["rb_max"]) & (yy <= q["frente_y"])
-    # a perna do L sai: o encosto da esquerda termina em `ponta_y`, com o canto de fora arredondado
-    ex, py, rr = q["encosto_x"], q["ponta_y"], q["raio"]
-    claro &= ~((xx < ex) & (yy > py))
-    cx, cy = xx[claro].min() + rr, py - rr
-    claro &= ~((xx < cx) & (yy > cy) & (np.hypot(xx - cx, yy - cy) > rr))
     # cada linha cheia entre o primeiro e o último px claro (o assento do canto, à sombra das almofadas, fica)
     m = np.zeros((h, w), bool)
     for i in np.nonzero(claro.any(axis=1))[0]:
         j = np.nonzero(claro[i])[0]
         m[i, j.min():j.max() + 1] = True
     m = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 1.0) > 0.5
+    # a perna do L sai: no lugar do encosto da esquerda, que seguia na perna, o braço da direita espelhado (da dobra à
+    # borda, na largura do encosto); onde a almofada marrom encosta no braço (`almofada_y`), o braço vem das linhas
+    # limpas de cima e de baixo, em gradiente
+    (b0, b1), (e0, e1) = q["braco_x"], q["encosto_x"]
+    braco, bm = r[:, b0 - x0:b1 - x0].copy(), m[:, b0 - x0:b1 - x0].astype(np.float32)
+    a0, a1 = q["almofada_y"][0] - y0, q["almofada_y"][1] - y0
+    tt = np.linspace(0, 1, a1 - a0 + 2)[1:-1, None, None]
+    braco[a0:a1] = braco[a0 - 1] * (1 - tt) + braco[a1] * tt
+    r[:, e0 - x0:e1 - x0] = cv2.resize(braco[:, ::-1], (e1 - e0, h), interpolation=cv2.INTER_LINEAR)
+    m[:, e0 - x0:e1 - x0] = cv2.resize(bm[:, ::-1], (e1 - e0, h), interpolation=cv2.INTER_LINEAR) > 0.5
+    m[:, :e0 - x0] = False
     # a borda antisserrilhada, com a cor do estofado (sem o vinílico ou o tapete de fundo)
     dentro = cv2.erode(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
     _, rot = cv2.distanceTransformWithLabels((~dentro).astype(np.uint8), cv2.DIST_L2, 5,
@@ -2864,7 +2916,6 @@ def _modelo_sofa_1p(q=None):
 
 def sofa_varanda_te(Q, img, q=None):
     """O sofá da varanda trocado pela parte reta do sofá da sala íntima do 1º Pavimento (a imagem sem rótulos)."""
-    import retoque_terreo_casae as T
     q = q or SOFA_VARANDA_TE
     out = img.astype(np.float32)
     H, W = img.shape[:2]
@@ -2886,15 +2937,21 @@ def sofa_varanda_te(Q, img, q=None):
     out = out * (1 - al) + novo * al
     cor, al = _modelo_sofa_1p(q)
     x0, y0, x1, y1 = q["caixa"]
-    w, h = int(round(x1 - x0)), int(round(y1 - y0))
+    k = (x1 - x0) / cor.shape[1]                      # no comprimento do PDF, na mesma proporção
+    w, h = int(round(cor.shape[1] * k)), int(round(cor.shape[0] * k))
     c2 = cv2.resize(cor * al[..., None], (w, h), interpolation=cv2.INTER_AREA)
     a2 = np.clip(cv2.resize(al, (w, h), interpolation=cv2.INTER_AREA), 0, 1)
     c2 = c2 / np.maximum(a2, 1e-4)[..., None]
-    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-    T.pousar_planta(out, c2, a2, cx, cy, h, q["sombra"])
-    T.pousar_planta(out, c2, a2, cx, cy, h, q["sombra_contato"])
-    print(f"    sofá da varanda: a parte reta do sofá da sala íntima ({cor.shape[1]} x {cor.shape[0]} px) na caixa do "
-          f"PDF ({w} x {h} px)")
+    c2 = c2 + q["modelo"]["nitidez"] * (c2 - cv2.GaussianBlur(c2, (0, 0), 1.0))
+    # a beirada do estofado um pouco mais escura (`beirada`, até `beirada_px` para dentro): o contorno sem sombra no piso
+    dd = cv2.distanceTransform((a2 > 0.5).astype(np.uint8), cv2.DIST_L2, 3)
+    c2 *= 1 - q["beirada"] * np.clip((q["beirada_px"] - dd) / q["beirada_px"], 0, 1)[..., None]
+    # sem sombra: o encosto na linha de trás do PDF, centrado no comprimento
+    px, py = int(round((x0 + x1) / 2 - w / 2)), int(round(y0))
+    reg = out[py:py + h, px:px + w]
+    out[py:py + h, px:px + w] = reg * (1 - a2[..., None]) + np.clip(c2, 0, 255) * a2[..., None]
+    print(f"    sofá da varanda: a parte reta do sofá da sala íntima ({cor.shape[1]} x {cor.shape[0]} px) no "
+          f"comprimento do PDF ({w} x {h} px), sem sombra")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
@@ -3415,7 +3472,8 @@ def passos_1pav(Q):
 
 PASSOS = {"Subsolo": passos_subsolo, "Terreo": passos_terreo, "1Pavimento": passos_1pav}
 # as etapas que só vão sobre a final (`--sobre-final`): numa rodada do zero, o nublado já vem com a revisão do Térreo
-SO_SOBRE_FINAL = {"1Pavimento": {"nublado_revisao": nublado_revisao_te, "nublado_tracejados": nublado_tracejados_te,
+SO_SOBRE_FINAL = {"Subsolo": {"piscina_borda": piscina_borda_sub},
+                  "1Pavimento": {"nublado_revisao": nublado_revisao_te, "nublado_tracejados": nublado_tracejados_te,
                                  "tracejados_final": tracejados_1p_sobre_final, "sofa": sofa_sala_intima_1p,
                                  "poltrona_master": poltrona_master_1p, "nublado_poltronas": nublado_poltronas_te},
                   "Terreo": {"seta_hall": seta_rotulo_hall_te, "tracejados_final": tracejados_sobre_final_te,
