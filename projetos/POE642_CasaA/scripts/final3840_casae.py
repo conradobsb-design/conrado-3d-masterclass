@@ -1729,8 +1729,16 @@ BOX_WC_DCE1 = (2150.0, 735.0, 2235.0, 750.0)
 BOX_GOURMET_E = (1100.0, 720.0, 1110.0, 790.0)
 BANCADAS_TER_E = [("banho gourmet", (1163.3, 759.8, 1252.7, 784.2)), ("WC DCE 1", (2202.4, 788.0, 2230.6, 823.9)),
                   ("lavabo", (2064.0, 1453.3, 2159.3, 1478.7))]
-SETA_TER_E = (2500, 1542)
-AJUSTES_E["Terreo"] = [("WC DCE 1", (1261.6, 271.3), (-0.9, 32.3), 0.85)]  # no meio do piso seco (2177,5 x 780 pt)
+# a seta em frente à porta pivotante do hall (usuário, 28/10/26: "A seta em preto deve ficar em frente a porta, um pouco
+# mais acima de onde ela está"): a ponta no meio do vão do PDF, entre os batentes (1488,3 e 1638,6 pt, o meio em 1563,5 pt);
+# antes, em y = 1542 px, ela apontava para o vidro fixo abaixo da porta
+SETA_TER_E = (2500, 1408)
+SETA_TER_E_ANTES = (2500, 1542)
+AJUSTES_E["Terreo"] = [("WC DCE 1", (1261.6, 271.3), (-0.9, 32.3), 0.85),  # no meio do piso seco (2177,5 x 780 pt)
+                       # fora do X tracejado do hall (usuário, 28/10/26: "o rótulo do hall de entrada não pode ficar sobre
+                       # o tracejado"): à direita do cruzamento, no triângulo entre o X e a porta, no corpo de sempre, a
+                       # ~10 px do tracejado, das paredes e dos objetos (o lugar livre mais folgado do hall)
+                       ("HALL DE ENTRADA", (1220.2, 777.0), (35.4, -20.3))]
 
 
 # A água da piscina, da prainha e do spa no tom da referência do Subsolo (usuário, 28/10/26: "APLIQUE O TOM DA PISCINA
@@ -2105,6 +2113,44 @@ def projecao_cobertura_te(Q, img, q=None):
     return out
 
 
+def seta_rotulo_hall_te(Q, img, desvio_px=38):
+    """Sobre a final do Térreo: a seta sai de `SETA_TER_E_ANTES` (o Bege Bahia de `desvio_px` acima, nas mesmas colunas) e
+    volta em `SETA_TER_E`; o rótulo do hall vai para o ajuste novo (`AJUSTES_E`), sem mexer nos outros rótulos."""
+    import final3840_casaa_terreo as FT
+    guarda = FT.SETA
+    FT.SETA = dict(guarda, ponta=SETA_TER_E_ANTES)
+    try:
+        branca = FT.seta(Q, np.full_like(img, 255))
+    finally:
+        FT.SETA = guarda
+    a = (255 - branca.astype(np.float32).mean(axis=2)) / (255 - np.mean(guarda["cor"]))
+    m = cv2.dilate((a > 0.01).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(np.float32)
+    m = np.maximum(cv2.GaussianBlur(m, (0, 0), 1.0), np.clip(a, 0, 1))
+    ys, xs = np.nonzero(m > 0)
+    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    out = img.astype(np.float32)
+    fonte = out[y0 - desvio_px:y1 - desvio_px, x0:x1]
+    mm = m[y0:y1, x0:x1, None]
+    out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - mm) + fonte * mm
+    out = seta_e(Q, np.clip(np.round(out), 0, 255).astype(np.uint8), SETA_TER_E)
+    # o rótulo do hall: a final sem os rótulos, os rótulos de novo e, na final, só as caixas do rótulo do hall (a de antes
+    # e a nova)
+    limpa, _ = sem_rotulos("Terreo", out)
+    nova = escrever_rotulos("Terreo", limpa)
+    _, rot, aj, _ = _rotulos_pav("Terreo")
+    hall = [r for r in rot if r[0] == "HALL DE ENTRADA"]
+    import retoque_1pav_casae as R1
+    caixa = np.zeros(img.shape[:2], bool)
+    for ajs in (aj, aj + [a_ for a_ in AJUSTES_E["Terreo"] if a_[0] == "HALL DE ENTRADA"]):
+        b = R1.rotulos_ambientes(np.full_like(img, 255), hall, Q.p2q, escala_desvio=Q.W / 2000, ajustes=ajs)
+        caixa |= b.min(axis=2) < 255
+    caixa = cv2.dilate(caixa.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    out = np.where(caixa[..., None], nova, out)
+    print(f"    entrada: a seta de y = {SETA_TER_E_ANTES[1]} para y = {SETA_TER_E[1]} px (em frente à porta pivotante); "
+          f"o rótulo do hall fora do X tracejado ({int(caixa.sum())} px refeitos)")
+    return out
+
+
 def revisao_terreo_e(Q, img):
     out = adega_porta_te(Q, img)
     out = pisantes_te(Q, out)
@@ -2298,7 +2344,7 @@ def passos_1pav(Q):
 
 PASSOS = {"Subsolo": passos_subsolo, "Terreo": passos_terreo, "1Pavimento": passos_1pav}
 # as etapas que só vão sobre a final (`--sobre-final`): numa rodada do zero, o nublado já vem com a revisão do Térreo
-SO_SOBRE_FINAL = {"1Pavimento": {"nublado_revisao": nublado_revisao_te}}
+SO_SOBRE_FINAL = {"1Pavimento": {"nublado_revisao": nublado_revisao_te}, "Terreo": {"seta_hall": seta_rotulo_hall_te}}
 
 
 def final_3840(chave, de=None, ate=None, salvar=True):

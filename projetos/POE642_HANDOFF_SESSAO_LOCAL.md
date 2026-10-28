@@ -3463,3 +3463,11 @@ Antes e depois:
 - 1º Pavimento: `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_revisao_terreo_nublado_antes_depois.jpg`.
 
 Pranchas do Térreo e do 1º Pavimento e PDF da Casa E refeitos.
+
+### Pedido de 28/10/26: a seta da entrada e o rótulo do hall do Térreo da Casa E
+
+O usuário, com o recorte do hall: "A seta em preto deve ficar em frente a porta, um pouco mais acima de onde ela está. e o rótulo do hal de entrada não pode ficar sobre o tracejado."
+- **Seta.** No PDF, o vão da porta pivotante vai do batente de cima (1488,3 pt) ao de baixo (1638,6 pt). A seta apontava para o vidro fixo, abaixo dele. Agora a ponta fica no meio do vão, 134 px (~2,2 m) acima de onde estava. No lugar antigo ficou o Bege Bahia da pedra.
+- **Rótulo do HALL DE ENTRADA.** Ele estava sobre a diagonal do X tracejado. Agora fica à direita do cruzamento do X, entre ele e a porta, no mesmo corpo dos outros rótulos. É o lugar do hall com mais folga do tracejado, das paredes e dos objetos (~10 px). O outro lugar livre, abaixo da folha da porta, ficava mais apertado (~7 px). Na parte de baixo do X, o rótulo cairia sobre a planta.
+
+Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_seta_rotulo_hall_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos. O 1º Pavimento não muda: o Térreo nublado não leva a seta nem os rótulos.
