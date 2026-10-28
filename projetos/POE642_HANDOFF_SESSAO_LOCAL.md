@@ -3554,6 +3554,16 @@ O usuário, com o recorte do sofá da varanda: "consegue refinar mais ainda esse
 - **Braço da esquerda.** Antes era o braço da direita espelhado e esticado, com a faixa da almofada marrom alisada: lia como uma tira chapada e clara. Agora o braço é o próprio estofado do render (o encosto que seguia na perna do L), com o rolo de fora, o vinco e o canto arredondado de cima ligado ao encosto de trás. Só a ponta de baixo, o arredondado, vem do braço da direita espelhado, numa passagem suave.
 - **Parte interna do braço.** Da almofada para baixo, a junção do braço com o assento e a quina da frente do assento vêm do lado direito espelhado, no tom do assento do canto (que fica à sombra das almofadas). Saíram a costura do módulo da perna do L, o vinco escuro em Y no pé do braço e o fio marrom ao lado da almofada.
 - O sofá fica sob a laje do 1º Pavimento: o Térreo nublado não muda.
-- **Para o OK (nada alterado):** à direita do braço da direita, no Bege Bahia, sobrou uma manchinha clara e vertical (cerca de 4 x 18 px), resto do sofá antigo logo fora do retângulo refeito. Proposta: alargar 4 px o retângulo à direita (`SOFA_VARANDA_TE["buraco"]`) para o Bege Bahia cobrir a mancha.
+- **Para o OK (nada alterado; feito na seção seguinte, com o OK):** à direita do braço da direita, no Bege Bahia, sobrou uma manchinha clara e vertical (cerca de 4 x 18 px), resto do sofá antigo logo fora do retângulo refeito. Proposta: alargar 4 px o retângulo à direita (`SOFA_VARANDA_TE["buraco"]`) para o Bege Bahia cobrir a mancha.
 
 Antes e depois (o antes é a entrega anterior, 6d0183a): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_braco_antes_depois.jpg` (o sofá inteiro) e `..._2810_sofa_varanda_braco_detalhe_antes_depois.jpg` (o braço ampliado). Prancha do Térreo e PDF da Casa E refeitos.
+
+### Pedidos de 28/10/26: sofá da varanda simétrico e a manchinha ao lado do braço (Térreo da Casa E)
+
+O usuário: "ok, pode alargar e tirar a mancha"; e, enquanto isso: "por que não pegar todo o modulo da direita e espelhar para a esquerda, usando as almofadas?".
+- **Sofá simétrico.** No lugar do módulo do canto (com as duas almofadas creme e o braço montado a partir do encosto do L) entrou o módulo da direita inteiro, espelhado: o braço, a almofada creme e a marrom. O módulo do meio ficou entre os dois, com a beirada esquerda igualada à direita, para as duas costuras ficarem iguais (a da esquerda tinha um fio claro e a sombra das almofadas do canto).
+- **Medida.** O sofá continua no comprimento do PDF (3,4 m). Com os dois módulos de ponta, que são mais largos que o do canto, ele fica com 0,97 m de fundo (antes 1,04 m; o PDF tem 1,2 m). Alternativa, se preferir mais fundo: estreitar o assento do meio (ele ficaria cerca de 1/4 mais estreito que os das pontas) para o sofá voltar a 1,04 m de fundo.
+- **Manchinha.** Com o OK, o Bege Bahia em volta do sofá foi refeito até 7 px mais à direita (4 px não bastavam, porque o reflexo puxava o próprio resto cinza); a mancha saiu.
+- O sofá fica sob a laje do 1º Pavimento: o Térreo nublado não muda.
+
+Antes e depois (o antes é a entrega anterior, b5d85bc): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_sofa_varanda_simetrico_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
