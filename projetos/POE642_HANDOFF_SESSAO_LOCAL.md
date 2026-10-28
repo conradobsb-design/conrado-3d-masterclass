@@ -3520,3 +3520,12 @@ O usuário, sobre a inconformidade: "pode refazer o nublado".
 - **Térreo nublado.** A faixa do Térreo nublado logo abaixo da sala íntima agora mostra as poltronas novas do living, no lugar das 2 bouclé antigas, com o halo delas fora. Só esse trecho do 1º Pavimento mudou.
 
 Antes e depois (o antes é a entrega anterior, d0357e5): `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_nublado_poltronas_antes_depois.jpg`. Prancha do 1º Pavimento e PDF da Casa E refeitos.
+
+### Pedidos de 28/10/26: contorno do tapete atrás das poltronas e sofá da varanda (Térreo da Casa E)
+
+O usuário: "precisa aprimorar o contorno do tapete na parte onde incluimos as poltronas, logo atrás dela. seguindo a direção correta e dando a impressão de continuidade"; "você consegue substituir o sofá da varanda da casa e pelo sofá da sala íntima do primeiro pavimento, deixando apenas a parte horizontal? teria que remover o último módulo do L para dar certo".
+- **Tapete do living.** Atrás das duas poltronas sobre o tapete, a borda agora segue a curva do tapete de um lado ao outro, em diagonal, contínua por trás delas (antes fazia um dente atrás da poltrona de cima).
+- **Sofá da varanda.** No lugar do sofá branco com as almofadas cor de palha entrou o sofá da sala íntima do 1º Pavimento, só a parte reta: os três módulos de cima, sem o último módulo do L; o encosto da esquerda termina arredondado, como o braço da direita. Ele está na medida do sofá do PDF (3,4 x 1,2 m), com as almofadas do modelo e a sombra curta. O Bege Bahia em volta foi refeito contínuo, sem o halo do sofá antigo.
+- O sofá e as poltronas do tapete ficam sob a laje do 1º Pavimento: o Térreo nublado do 1º Pavimento não muda.
+
+Antes e depois (o antes é a entrega anterior, 218727c): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_{tapete_poltronas,sofa_varanda}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
