@@ -3598,3 +3598,5 @@ O usuário, com o recorte da garagem: "esse tracejado em branco".
 Antes e depois (o antes é a entrega anterior, f798821): `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_tracejado_garagem_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos.
 
 **Aprovado** (28/10/26): "ok, aprovado", o tracejado da borda de baixo da garagem em branco (e058833). O tapete atrás das poltronas, o resto do Térreo e o 1º Pavimento da Casa E seguem aguardando a validação.
+
+**Térreo da Casa E aprovado** (28/10/26): "térreo da casa E aprovado". A final `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_final.png` fica como está (0c64bd4), com tudo o que estava em validação: a revisão de 28/10, os tracejados em preto ou branco, a seta e os rótulos, as cortinas, as poltronas do living e o tapete atrás delas, o sofá da varanda, o tracejado da garagem, a piscina (tom, bordas e vidros) e o box do banho gourmet. Na Casa E, o Subsolo e o Térreo estão aprovados; o 1º Pavimento segue aguardando a validação.
