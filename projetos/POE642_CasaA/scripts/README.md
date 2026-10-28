@@ -1107,7 +1107,9 @@ Etapas do Subsolo (`passos_subsolo`):
 - `bancada`: `bancada_e9`, a borda no tom escurecido da pedra (só fora das paredes) e a sombra curta.
 - `paredes`: `paredes_e`, as paredes em cinza 80 nos preenchimentos escuros da ARQ_PAREDE que a final mostra escuros.
   - Desde 28/10, todas as peças entram numa máscara só, desenhada em 4x e reduzida uma vez (sem as juntas claras e escuras entre peças vizinhas).
-  - A peça escura que o PDF cobre depois com um branco da mesma camada (`PAREDES_E["coberta"]`) e que a final já mostra clara sai: os dentes junto ao vidro da piscina do Subsolo.
+  - A peça escura pequena (até `PAREDES_E["coberta_max_pt2"]`) que o PDF cobre depois com um branco da mesma camada (`pecas_cobertas`) e que a final já mostra clara sai: os dentes junto ao vidro da piscina do Subsolo, onde a piscina pinta a borda e o degrau por cima (`PISCINA_E["dentes"]`).
+  - `sempre`: caixas (pt) onde toda peça escura é parede, sem a conta do escuro (no Subsolo, a caixa da piscina, onde o render pintou água sobre as pontas das paredes).
+  - O fundo de toda a parede e do antialias dela é refeito pelo piso de fora (inpaint), para a borda sair regular.
   - Antes, a franja preta antiga a até 3 px é refeita pelos vizinhos, e também a franja escura de pouca cor (`PAREDES_E["franja"]`).
   - O preto que sobra até 15 px das paredes vai ao cinza pela conta do alfa contra o piso de perto.
   - Os pilares da EST - Pilar ficam pretos.
@@ -1177,7 +1179,10 @@ A etapa `paredes` recebe `extra=` um filtro dos desenhos (a ARQ - Parede das cab
 Pedidos de 28/10, 2ª rodada, no Subsolo:
 - `PISCINA_E["agua_extra"]`: a faixa entre a piscina e a parte de baixo, à esquerda do vidro, vira água (sem a divisória), na mesma máscara da água do PDF.
 - `DUCHA_AMBIENTE_E` (na etapa `vestiario`): o chuveiro da ducha do ambiente pelo PDF (`final3840_casaa.chuveiro`) e o nicho da parede atrás dele em travertino (`nicho_ducha`). A `zona` dele entra em `zonas_academia`, onde o piso passa inteiro, sem o cálice do render.
-- `AJUSTES_E["Subsolo"]`: a casa de máquinas da direita (5,83 m²) no corpo 0,85, no centro do cômodo.
+- `AJUSTES_E["Subsolo"]`: a casa de máquinas da direita (5,83 m²) no corpo 0,85, no centro do cômodo; o ELEVADOR no centro da cabine, no corpo do PDF.
+- `PISCINA_E`: a coluna de Bege Bahia desce até o fundo do degrau da sauna (uma quina só no vidro); a água sem a divisória vai só até a coluna (`agua_extra`); `dentes`, as pecinhas cobertas sob a parede da academia, onde a borda e o degrau passam por cima.
+- Etapa nova `elevador` (antes dos `rotulos`): `cabine_elevador_e` refaz a borda direita da cabine sob o rótulo antigo (`ELEVADOR_SUB_E`).
+- No `vestiario`, a parede do PDF volta inteira em volta da bancada e do vaso (a borda e a sombra deles não passam para a face da parede).
 
 ```bash
 python3 final3840_casae.py Subsolo --de pisos     # ~3 min (os pisos); as outras etapas, segundos

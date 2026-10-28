@@ -3200,3 +3200,26 @@ Antes e depois (o antes é a final de 17c2f1b):
 Pranchas e PDFs das cinco casas refeitos. Os Subsolos das Casas B a D, que usam o Térreo final no terreno hachurado, não foram rodados de novo: lá a piscina não aparece.
 
 Segue em aberto, de outra casa: as banquetas do Térreo da Casa C (`BANQUETAS_C["giro"]` 270 → 90, sem mexer sem o OK).
+
+### Pedidos de 28/10/26, 3ª rodada: rótulo do elevador, falhas das paredes, o dente e a quina das bordas
+
+O usuário, vendo a prancha do Subsolo:
+- com o recorte da cabine: "CENTRALIZE O RÓTULO" (o ELEVADOR);
+- com o recorte da parede embaixo da piscina: "CORRIJA O ACABAMENTO DAS PAREDES, SEM FALHAS";
+- "NÃO EXISTE ESSE DENTE NA PAREDE. ELA É RETA";
+- com o recorte do encontro da coluna de Bege Bahia com o degrau da sauna, no vidro: "JUNTE AS BORDAS, FORMANDO APENAS UMA QUINA".
+
+O que foi feito (`final3840_casae.py`):
+1. **Rótulo do elevador** (`AJUSTES_E["Subsolo"]`): no centro da cabine, no corpo do PDF. No ponto do PDF e no corpo 1,3 ele ia à direita e encostava no contorno da cabine.
+   - A borda direita da cabine, que o "R" do rótulo antigo cobria e a retirada dos rótulos deixou borrada, foi refeita pelas linhas de cima (etapa nova `elevador`, `cabine_elevador_e`).
+2. **O dente**: a pecinha de 1,7 pt sob a ponta da parede da academia, junto ao vidro, já não era pintada de cinza, mas o escuro do render ficava embaixo.
+   - Agora a borda e o degrau da piscina passam por cima dela (`PISCINA_E["dentes"]`), e a parede fica reta.
+   - A regra das peças cobertas por um branco do PDF passou a valer só para pecinhas (`coberta_max_pt2`, 10 pt²) que a final já mostra claras. Na rodada anterior ela também tirava a ponta da parede no canto de baixo à esquerda da piscina e deixava uma faixa clara entre a parede e a água; essa faixa voltou a ser parede.
+3. **Falhas das paredes**:
+   - Na caixa da piscina (`sempre=[PISCINA_E["caixa_pt"]]`), toda peça escura do PDF entra, mesmo onde o render pintou água por cima: o entalhe no canto do degrau da parede de baixo fechou.
+   - O fundo do antialias das paredes vem do piso de fora (antes vinha do preto antigo de dentro e deixava a borda irregular).
+   - A borda da bancada do vestiário e o vaso não pintam mais a face da parede.
+   - Conferido px a px com o PDF (as paredes da final contra as do PDF): o que sobra são só os encontros de propósito (as folhas das portas e os batentes sobre a face da parede).
+4. **A quina das bordas** (`PISCINA_E`): a coluna de Bege Bahia à direita da piscina desce até o fundo do degrau da sauna e encontra o degrau no vidro, numa quina só. Na rodada anterior, ao tirar a divisória, a água tinha entrado também sob a coluna; agora a água sem divisória vai só entre as duas partes da piscina, até a coluna.
+
+Antes e depois (o antes é a final de 3041093): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_pedidos2810c_{planta,quina_bordas_dente,piscina_paredes,rotulo_elevador}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.
