@@ -1308,12 +1308,18 @@ PORTAS_E = {
               [(1147.8, 1009.6, 1148.9, 1013.5), (1147.8, 960.2, 1148.9, 964.2), (1139.3, 1009.0, 1147.8, 1011.0),
                (1139.3, 962.8, 1147.8, 964.8)]),
              ("cabine do vaso", (1212.6, 1027.1, 1214.9, 1065.9), (1176.1, 1027.1, 1214.9, 1065.9), "travertino",
-              [(1175.6, 1023.7, 1176.8, 1027.1), (1214.2, 1023.7, 1215.3, 1027.1)]),
-             ("cabine do chuveiro", (1218.6, 1027.1, 1220.8, 1065.9), (1218.6, 1027.1, 1257.4, 1065.9), "travertino",
-              [(1218.1, 1023.7, 1219.3, 1027.1), (1256.7, 1023.7, 1257.8, 1027.1)])],
+              [(1175.6, 1023.7, 1176.8, 1027.1), (1214.2, 1023.7, 1215.3, 1027.1)])],
+    # a porta da cabine do chuveiro do vestiário (usuário, 28/10/26: "represente melhor a porta desse ambiente de
+    # chuveiro"; "pode fazer aberta mesmo"; "no mesmo padrão que adotamos para as demais"): aberta contra a divisória,
+    # como no PDF, no padrão das portas de vidro do Subsolo (a da ducha do ambiente): o vidro fino com as faces e a
+    # sombra curta, os batentes brancos na soleira, sem arco. A folha branca colava no traço escuro da divisória e não
+    # se lia como porta; o vidro fica na metade de fora da folha do PDF, com o piso entre ele e a divisória
     "vidros": [("ducha do ambiente: a porta", (1026.9, 1022.3, 1028.1, 1061.1), (1026.9, 1022.3, 1065.7, 1061.1), "travertino"),
                ("ducha do ambiente: o vidro fixo", (1009.5, 1021.7, 1026.9, 1022.3), (1009.5, 1019.5, 1026.9, 1024.5),
-                "travertino")],
+                "travertino"),
+               ("cabine do chuveiro: a porta de vidro, aberta", (1219.5, 1027.1, 1220.9, 1065.9),
+                (1218.6, 1027.1, 1257.4, 1065.9), "travertino",
+                {"batentes": [(1218.1, 1023.7, 1219.3, 1027.1), (1256.7, 1023.7, 1257.8, 1027.1)]})],
     # as soleiras de Bege Bahia (R13: o vão branco do PDF na espessura da parede, nítido, com as faces finas)
     "soleiras": [(1444.6, 685.0, 1488.8, 693.5), (1638.2, 698.3, 1646.7, 742.5), (1739.4, 685.0, 1783.6, 693.5),
                  (1556.0, 563.1, 1564.5, 642.5), (1309.9, 1090.3, 1354.1, 1107.4), (1176.8, 1023.7, 1214.2, 1027.1),
@@ -1394,8 +1400,12 @@ def portas_e(Q, img):
             tl.pintar(mb, q["folha"])
             tl.contorno(mb, q["larg_contorno"] * 0.8, q["contorno"])
         out = tl.gravar()
-    for nome, vidro, _, _ in q["vidros"]:
-        tl = FA.tela(out, Q, vidro, folga=5)
+    for item in q["vidros"]:
+        vidro, extra = item[1], (item[4] if len(item) > 4 else {})
+        caixa = vidro
+        for r in extra.get("batentes", []):
+            caixa = (min(caixa[0], r[0]), min(caixa[1], r[1]), max(caixa[2], r[2]), max(caixa[3], r[3]))
+        tl = FA.tela(out, Q, caixa, folga=5)
         x0, y0, x1, y1 = vidro
         cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
         meia = q["vidro_px"] / 2 / FA.PT_PX
@@ -1404,10 +1414,15 @@ def portas_e(Q, img):
         FA.sombra_q(tl, m, forca=0.20, dist=0.9, sigma=0.8)
         tl.pintar(m, q["vidro"])
         tl.contorno(m, q["vidro_face_px"], q["vidro_face"])
+        for b in extra.get("batentes", []):
+            mb = tl.ret(b)
+            tl.pintar(mb, q["folha"])
+            tl.contorno(mb, q["larg_contorno"] * 0.8, q["contorno"])
         out = tl.gravar()
     print(f"    portas: {len(q['giro'])} folhas de giro na posição e na espessura do PDF (branco suave, contorno fino, "
           f"sombra curta), com os batentes, sem arco; {len(q['soleiras'])} soleiras de Bege Bahia; a porta e o vidro fixo "
-          f"da ducha do ambiente em vidro fino")
+          f"da ducha do ambiente e a porta da cabine do chuveiro do vestiário (aberta, como no PDF, com os batentes) em "
+          f"vidro fino")
     return out
 
 

@@ -1186,6 +1186,7 @@ Pedidos de 28/10, 2ª rodada, no Subsolo:
 - `PISCINA_E`: a coluna de Bege Bahia desce até o fundo do degrau da sauna (uma quina só no vidro); a água sem a divisória vai só até a coluna (`agua_extra`); `dentes`, as pecinhas cobertas sob a parede da academia, onde a borda e o degrau passam por cima.
 - Etapa nova `elevador` (antes dos `rotulos`): `cabine_elevador_e` refaz a borda direita da cabine sob o rótulo antigo (`ELEVADOR_SUB_E`).
 - No `vestiario`, a parede do PDF volta inteira em volta da bancada e do vaso (a borda e a sombra deles não passam para a face da parede).
+- `PORTAS_E["vidros"]` (5ª rodada): a porta da cabine do chuveiro do vestiário sai das folhas de giro e entra nos vidros. Fica aberta, como no PDF, no padrão da porta da ducha do ambiente. O 5º elemento opcional do item, `{"batentes": [...]}`, desenha os batentes brancos, como nas de giro. O vidro fica na metade de fora da folha do PDF, com o piso entre ele e a divisória. O quadrante (`arco`) continua em `zonas_portas`.
 
 ```bash
 python3 final3840_casae.py Subsolo --de pisos     # ~3 min (os pisos); as outras etapas, segundos

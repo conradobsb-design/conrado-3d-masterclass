@@ -3240,3 +3240,19 @@ As causas e o que foi feito (`final3840_casae.py`):
    - O fio ciano na emenda das duas partes do degrau sumiu. `_uniao` agora junta os retângulos numa máscara só, sem a junta a 50%.
 
 Antes e depois (o antes é a final de 50a24e1): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_pedidos2810d_{planta,toco_ambiente,parede_sauna}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.
+
+### Pedidos de 28/10/26, 5ª rodada: a porta da cabine do chuveiro do vestiário
+
+O usuário, com o recorte da cabine do chuveiro do vestiário: "represente melhor a porta desse ambiente de chuveiro". Depois, vendo as tentativas: "pode fazer aberta mesmo" e "no mesmo padrão que adotamos para as demais".
+
+- **Antes:** a folha branca de giro, aberta contra a divisória, colava no traço escuro dela e não se lia como porta.
+- **Tentativas descartadas:**
+  - o vidro no centro da folha do PDF: some junto à divisória;
+  - o vidro fechado no vão, sobre a soleira, com a dobradiça e o puxador cromados: o usuário preferiu a porta aberta, sem ferragens a mais.
+- **Agora** (`final3840_casae.PORTAS_E["vidros"]`):
+  - a porta sai das folhas de giro e entra nos vidros: aberta, como no PDF, no padrão da porta da ducha do ambiente (o vidro fino com as faces e a sombra curta, sem arco);
+  - os batentes brancos na soleira (o 5º elemento do item, `{"batentes": [...]}`);
+  - o vidro fica na metade de fora da folha do PDF, com um fio de piso entre ele e a divisória;
+  - o quadrante da folha (`arco`) continua nas `zonas_portas`, e o piso passa limpo onde estava a folha branca.
+
+Antes e depois (o antes é a final de 4124497): `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_pedidos2810e_{planta,porta_cabine_chuveiro}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa E refeitos.
