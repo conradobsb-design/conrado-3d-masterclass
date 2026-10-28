@@ -118,13 +118,17 @@ def _rotulos_pav(chave):
     return Q, R1.rotulos_pdf(Q.pg), list(R1.ROTULOS["ajustes"]), None
 
 
-def escrever_rotulos(chave, img, novos=True):
-    """Os rótulos do pavimento na imagem, como na final aprovada (novos=False) ou com os ajustes desta rodada."""
+def escrever_rotulos(chave, img, novos=True, so=None, sem_ajustes=()):
+    """Os rótulos do pavimento na imagem, como na final aprovada (novos=False) ou com os ajustes desta rodada.
+    so: só os rótulos com esses nomes; sem_ajustes: os ajustes desta rodada com esses nomes ficam fora (a final de antes)."""
     import retoque_1pav_casae as R1
     Q, rot, aj, leg = _rotulos_pav(chave)
-    if novos and AJUSTES_E[chave]:
-        nomes = {a[0] for a in AJUSTES_E[chave]}
-        aj = [a for a in aj if a[0] not in nomes] + list(AJUSTES_E[chave])
+    meus = [a for a in AJUSTES_E[chave] if a[0] not in sem_ajustes]
+    if novos and meus:
+        nomes = {a[0] for a in meus}
+        aj = [a for a in aj if a[0] not in nomes] + meus
+    if so is not None:
+        rot = [r for r in rot if r[0] in so]
     kw = {}
     if leg is not None:
         kw = {"granito": np.abs(Q.chapada.astype(int) - np.array(leg)).max(axis=2) <= 6,
@@ -132,12 +136,14 @@ def escrever_rotulos(chave, img, novos=True):
     return R1.rotulos_ambientes(img, rot, Q.p2q, escala_desvio=Q.W / 2000, ajustes=aj, **kw)
 
 
-def sem_rotulos(chave, final, novos=False):
+def sem_rotulos(chave, final, novos=False, sem_ajustes=()):
     """A final sem os rótulos: a composição dos rótulos (out = cor * a + fundo * (1 - a)) desfeita px a px; onde o
-    alfa passa de 0,8, o fundo vem dos vizinhos (inpaint de 3 px). `novos`: os rótulos com os ajustes desta rodada."""
+    alfa passa de 0,8, o fundo vem dos vizinhos (inpaint de 3 px). `novos`: os rótulos com os ajustes desta rodada
+    (menos os de `sem_ajustes`)."""
     H, W = final.shape[:2]
-    vp = escrever_rotulos(chave, np.zeros((H, W, 3), np.uint8), novos=novos).astype(np.float32)
-    vb = escrever_rotulos(chave, np.full((H, W, 3), 255, np.uint8), novos=novos).astype(np.float32)
+    vp = escrever_rotulos(chave, np.zeros((H, W, 3), np.uint8), novos=novos, sem_ajustes=sem_ajustes).astype(np.float32)
+    vb = escrever_rotulos(chave, np.full((H, W, 3), 255, np.uint8), novos=novos,
+                          sem_ajustes=sem_ajustes).astype(np.float32)
     a = np.clip(1 - (vb - vp).mean(axis=2) / 255, 0, 1)
     ca = vp
     f = final.astype(np.float32)
@@ -148,6 +154,17 @@ def sem_rotulos(chave, final, novos=False):
     out = cv2.inpaint(out, cheio, 3, cv2.INPAINT_TELEA)
     print(f"    rótulos tirados da final: {int((a > 0.004).sum())} px ({int(cheio.sum())} refeitos pelos vizinhos)")
     return out, a
+
+
+def caixas_rotulos(chave, nomes, **kw):
+    """As caixas (x0, y0, x1, y1, em px da final) do texto dos rótulos `nomes`, como escritos (todas as linhas)."""
+    Q = QuadroE(chave)
+    caixas = []
+    for nome in nomes:
+        v = escrever_rotulos(chave, np.zeros((Q.H, Q.W, 3), np.uint8), so=(nome,), **kw)
+        ys, xs = np.nonzero(v.max(axis=2) > 8)
+        caixas.append((int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1))
+    return caixas
 
 
 def final_aprovada(chave):
@@ -1739,6 +1756,11 @@ AJUSTES_E["Terreo"] = [("WC DCE 1", (1261.6, 271.3), (-0.9, 32.3), 0.85),  # no 
                        # o tracejado"): à direita do cruzamento, no triângulo entre o X e a porta, no corpo de sempre, a
                        # ~10 px do tracejado, das paredes e dos objetos (o lugar livre mais folgado do hall)
                        ("HALL DE ENTRADA", (1220.2, 777.0), (35.4, -20.3))]
+# o rótulo da área de serviço descoberta no X tracejado (usuário, 28/10/26, opção A: o X aberto embaixo do rótulo, o
+# tracejado parando numa folga em volta do texto e o rótulo no centro, como o X do shaft da Casa B): o centro do bloco
+# no cruzamento do X (2060,4 x 496,5 px da final); o vão é `TRACEJADOS_TE["vaos"]`
+ROTULO_SERVICO_TE = ("ÁREA DE SERVIÇO DESCOBERTA", (1110.2, 254.4), (-38.6, 3.9))
+AJUSTES_E["Terreo"].append(ROTULO_SERVICO_TE)
 
 
 # A água da piscina, da prainha e do spa no tom da referência do Subsolo (usuário, 28/10/26: "APLIQUE O TOM DA PISCINA
@@ -2264,7 +2286,14 @@ TRACEJADOS_TE = {"cobertura": {"L: laje do espaço gourmet + varanda": [(1372.9,
                                "laje da garagem": [(1992.5, 687.8), (2763.5, 687.8), (2763.5, 1090.3), (2207.9, 1090.3)],
                                "faixa de cima": [(1372.9, 516.3), (2763.5, 516.3), (2763.5, 687.8)]},
                  "traco_pt": 8.5, "vao_pt": 4.25, "max_doc_pt": 900, "topo_q": 100, "min_ext_pt": 30, "folga_px": 1,
-                 "larg_px": 1.5, "fundo_px": 9, "limiar": 120, "preto": (30, 30, 30), "branco": (250, 250, 250), "ss": 4}
+                 "larg_px": 1.5, "fundo_px": 9, "limiar": 120, "preto": (30, 30, 30), "branco": (250, 250, 250), "ss": 4,
+                 # o vão embaixo dos rótulos que caem no tracejado: o bloco do texto + `folga_px`; os traços param na
+                 # borda dele (os pedaços com menos de `min_px` saem), e os px das linhas que já estavam ali (`limpa_px`
+                 # de cada lado; os cinza do retoque ou os já em preto e branco) ganham o piso ao lado: o mesmo px
+                 # deslocado (o primeiro de `deslocs` que cai no granito, fora das linhas e das paredes)
+                 "vaos": {"rotulos": (ROTULO_SERVICO_TE[0],), "folga_px": 8, "min_px": 3, "limpa_px": 3,
+                          "deslocs": [(0, 8), (0, -8), (0, 12), (0, -12), (0, 16), (0, -16), (0, 22), (0, -22),
+                                      (22, 0), (-22, 0), (6, 6), (-6, -6), (6, -6), (-6, 6)]}}
 
 
 def _tracos_te(Q, q=None):
@@ -2290,23 +2319,108 @@ def _tracos_te(Q, q=None):
     return trechos
 
 
-def tracejados_pb_te(Q, img, q=None):
+def _fora_das_caixas(p0, p1, caixas, min_px):
+    """As partes do segmento p0-p1 (px) fora das caixas (x0, y0, x1, y1), com pelo menos `min_px`."""
+    dx, dy = p1[0] - p0[0], p1[1] - p0[1]
+    partes = [(0.0, 1.0)]
+    for x0, y0, x1, y1 in caixas:
+        t0, t1 = 0.0, 1.0                                   # o trecho dentro da caixa (Liang-Barsky)
+        for p, d in ((-dx, p0[0] - x0), (dx, x1 - p0[0]), (-dy, p0[1] - y0), (dy, y1 - p0[1])):
+            if p == 0:
+                if d < 0:
+                    t0, t1 = 1.0, 0.0
+            elif p < 0:
+                t0 = max(t0, d / p)
+            else:
+                t1 = min(t1, d / p)
+        if t0 >= t1:
+            continue
+        partes = [r for a, b in partes for r in ([(a, b)] if b <= t0 or a >= t1 else
+                                                 [x for x in ((a, t0), (t1, b)) if x[1] > x[0]])]
+    comp = np.hypot(dx, dy)
+    return [((p0[0] + dx * a, p0[1] + dy * a), (p0[0] + dx * b, p0[1] + dy * b)) for a, b in partes
+            if (b - a) * comp >= min_px]
+
+
+def _vaos_te(Q, q=None):
+    """As caixas (px da final) dos vãos do tracejado embaixo dos rótulos de `TRACEJADOS_TE["vaos"]`."""
+    v = (q or TRACEJADOS_TE)["vaos"]
+    f = v["folga_px"]
+    return [(x0 - f, y0 - f, x1 + f, y1 + f) for x0, y0, x1, y1 in caixas_rotulos("Terreo", v["rotulos"])]
+
+
+def _limpa_tracos(Q, img, caixas, extra=None, q=None, trechos=None, fonte=None):
+    """Tira das caixas os traços que já estão na imagem: os px das linhas tracejadas (`limpa_px` de cada lado, os vãos
+    entre os traços incluídos) e os de `extra` ganham o piso ao lado, o mesmo px deslocado (`deslocs`), tirado de
+    `fonte` (máscara; o padrão é o granito do Térreo). `trechos`: as linhas (o padrão são as do Térreo)."""
+    import retoque_terreo_casae as T
+    q = q or TRACEJADOS_TE
+    v = q["vaos"]
+    H, W = img.shape[:2]
+    paredes_pdf(Q)
+    lin = np.zeros((H, W), np.uint8)
+    for _, tracos in (_tracos_te(Q, q) if trechos is None else trechos):
+        for t in tracos:
+            (u0, v0), (u1, v1) = Q.p2q(t[0], t[1]), Q.p2q(t[2], t[3])
+            c = np.hypot(u1 - u0, v1 - v0)
+            if c < 1e-6:
+                continue
+            e = q["vao_pt"] * Q.p2q(1, 0)[0] - q["vao_pt"] * Q.p2q(0, 0)[0]
+            ex, ey = (u1 - u0) / c * e, (v1 - v0) / c * e
+            cv2.line(lin, (int(round(u0 - ex)), int(round(v0 - ey))), (int(round(u1 + ex)), int(round(v1 + ey))), 1, 1)
+    r = v["limpa_px"]
+    linhas = cv2.dilate(lin, np.ones((2 * r + 1, 2 * r + 1), np.uint8)).astype(bool)
+    dentro = np.zeros((H, W), bool)
+    for x0, y0, x1, y1 in caixas:
+        dentro[max(int(y0), 0):min(int(np.ceil(y1)), H), max(int(x0), 0):min(int(np.ceil(x1)), W)] = True
+    par = cv2.dilate((Q._par > 0.3).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    if fonte is None:
+        fonte = np.abs(Q.chapada.astype(int) - np.array(T.ARCOS["granito"])).max(axis=2) <= 6
+    alvo = (linhas | (extra if extra is not None else False)) & dentro & ~par
+    fonte = fonte & ~par & ~cv2.dilate(linhas.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~alvo
+    if extra is not None:
+        fonte &= ~extra
+    out = img.copy()
+    falta = alvo.copy()
+    for dx, dy in v["deslocs"]:
+        ys, xs = np.nonzero(falta)
+        sy, sx = ys + dy, xs + dx
+        ok = (sy >= 0) & (sy < H) & (sx >= 0) & (sx < W)
+        ok[ok] = fonte[sy[ok], sx[ok]]
+        out[ys[ok], xs[ok]] = img[sy[ok], sx[ok]]
+        falta[ys[ok], xs[ok]] = False
+    if falta.any():
+        out = cv2.inpaint(out, falta.astype(np.uint8), 3, cv2.INPAINT_TELEA)
+    print(f"    vão do tracejado: {int(alvo.sum())} px dos traços (e das letras) refeitos com o piso ao lado "
+          f"({int(falta.sum())} pelos vizinhos)")
+    return out
+
+
+def tracejados_pb_te(Q, img, q=None, vaos=True, trechos=None):
+    """`vaos`: os traços param em volta dos rótulos de `TRACEJADOS_TE["vaos"]` (o que já estava ali sai). `trechos`:
+    os traços (pt) a desenhar, [(nome, [(x0, y0, x1, y1)])], no lugar dos do Térreo (sem os vãos)."""
     q = q or TRACEJADOS_TE
     paredes_pdf(Q)
+    caixas = _vaos_te(Q, q) if vaos and trechos is None else []
+    if caixas:
+        img = _limpa_tracos(Q, img, caixas, q=q)
     k = 2 * q["folga_px"] + 1
     pe = cv2.dilate((Q._par > 0.3).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
     lum = img.astype(np.float32).mean(axis=2)
     out = img.astype(np.float32)
     S, fp = q["ss"], q["fundo_px"]
-    n_p = n_b = n_fora = 0
-    for nome, tracos in _tracos_te(Q, q):
+    n_p = n_b = n_fora = n_vao = 0
+    for nome, tracos in (_tracos_te(Q, q) if trechos is None else trechos):
         fica = []
         for t in tracos:
             (u0, v0), (u1, v1) = Q.p2q(t[0], t[1]), Q.p2q(t[2], t[3])
             if pe[int((v0 + v1) / 2), int((u0 + u1) / 2)]:
                 n_fora += 1
                 continue
-            fica.append(((u0, v0), (u1, v1)))
+            partes = _fora_das_caixas((u0, v0), (u1, v1), caixas, q["vaos"]["min_px"]) if caixas else \
+                [((u0, v0), (u1, v1))]
+            n_vao += len(partes) != 1 or partes[0] != ((u0, v0), (u1, v1))
+            fica += partes
         if not fica:
             continue
         alfas, fundos = [], []
@@ -2333,7 +2447,7 @@ def tracejados_pb_te(Q, img, q=None):
     par = Q._par > 0.5
     out[par] = img[par]
     print(f"    tracejados (R8): {n_p} traços em preto (fundo claro) e {n_b} em branco (fundo escuro); {n_fora} sobre "
-          f"paredes ficam fora")
+          f"paredes ficam fora; {n_vao} cortados ou fora no vão dos rótulos")
     return out
 
 
@@ -2349,14 +2463,38 @@ def tracejados_sobre_final_te(Q, img):
     base[Y0:Y0 + h, X0:X0 + w] = np.clip(np.round((reg - cor * a[..., None]) / (1 - a[..., None])), 0,
                                          255).astype(np.uint8)
     base = dente_varanda_te(Q, base)
-    limpa, _ = sem_rotulos("Terreo", base, novos=True)
-    com = tracejados_pb_te(Q, limpa)
-    nova = escrever_rotulos("Terreo", com)
+    # como no dia (o vão e o rótulo da área de serviço vêm depois, em `vao_rotulo_servico_te`)
+    sem = (ROTULO_SERVICO_TE[0],)
+    limpa, _ = sem_rotulos("Terreo", base, novos=True, sem_ajustes=sem)
+    com = tracejados_pb_te(Q, limpa, vaos=False)
+    nova = escrever_rotulos("Terreo", com, sem_ajustes=sem)
     faixa = cv2.dilate((np.abs(com.astype(np.int16) - limpa.astype(np.int16)).max(axis=2) > 0).astype(np.uint8),
                        np.ones((7, 7), np.uint8)).astype(bool)
     out = np.where(faixa[..., None], nova, base)
     print(f"    o cinza da projeção da revisão desfeito ({int((a > 0.01).sum())} px); tracejados em preto ou branco "
           f"({int(faixa.sum())} px refeitos)")
+    return out
+
+
+def vao_rotulo_servico_te(Q, img):
+    """Sobre a final do Térreo (depois de `tracejados_final`): o rótulo da ÁREA DE SERVIÇO DESCOBERTA vai ao cruzamento
+    do X, e o X se abre em volta dele. A final sem os rótulos (o da área de serviço no lugar de antes); no lugar velho do
+    rótulo e no vão, os traços e as letras saem (o piso ao lado, deslocado); os traços voltam, parando no vão, e os
+    rótulos, com o da área de serviço no lugar novo. Na final, só essas duas caixas mudam."""
+    nome = ROTULO_SERVICO_TE[0]
+    x0, y0, x1, y1 = caixas_rotulos("Terreo", [nome], sem_ajustes=(nome,))[0]
+    velha = (x0 - 3, y0 - 3, x1 + 3, y1 + 3)
+    vaos = _vaos_te(Q)
+    limpa, a = sem_rotulos("Terreo", img, novos=True, sem_ajustes=(nome,))
+    letras = cv2.dilate((a > 0.8).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    limpa = _limpa_tracos(Q, limpa, [velha] + vaos, extra=letras)
+    nova = escrever_rotulos("Terreo", tracejados_pb_te(Q, limpa))
+    reg = np.zeros(img.shape[:2], bool)
+    for c0, r0, c1, r1 in [velha] + vaos:
+        reg[int(r0):int(np.ceil(r1)), int(c0):int(np.ceil(c1))] = True
+    out = img.copy()
+    out[reg] = nova[reg]
+    print(f"    rótulo da área de serviço no cruzamento do X, com o vão em volta ({int(reg.sum())} px refeitos)")
     return out
 
 
@@ -2554,6 +2692,77 @@ def varanda_1pav_e(Q, img):
     return out
 
 
+# Os tracejados do 1º Pavimento em preto ou branco (usuário, 28/10/26: "os tracejados são ou brancos ou pretos, a
+# depender do fundo"; para o 1º Pavimento, "pode"): os que estavam em cinza, nos traços do PDF (DOC_LINHAS E
+# PROJEÇÕES): os X dos dois vazios, o da escada e o do hall (`retoque_1pav_casae.VAZIOS`, o cinza multiplicado pelo
+# Térreo nublado), e os grupos de `retoque_1pav_casae.PROJECOES_1P` (o X do shaft, o desenho da rouparia e os X rasos
+# do banho master, sobre o vaso e o box). O cinza sai (o fundo ao lado, deslocado, dentro do mesmo grupo) e o traço
+# volta fino (1,5 px), preto no fundo claro e branco no escuro, como no Térreo (`tracejados_pb_te`), por baixo dos
+# rótulos. As linhas do lote e a cobertura (ARQ_CONTRAPISO), que a final não desenha, ficam como estão.
+TRACEJADOS_1P = dict(TRACEJADOS_TE, vaos=dict(TRACEJADOS_TE["vaos"], limpa_px=2,
+                                              deslocs=[(0, 5), (0, -5), (5, 0), (-5, 0), (0, 8), (0, -8), (8, 0),
+                                                       (-8, 0), (4, 4), (-4, -4), (4, -4), (-4, 4), (0, 12), (0, -12),
+                                                       (12, 0), (-12, 0)]),
+                     grupos=[("vazio da escada", (1652.9, 1213.9, 1991.0, 1296.5), True),
+                             ("vazio do hall", (1985.3, 1479.8, 2237.8, 1728.6), True)]
+                     + [(nome, caixa, False) for nome, caixa in (("shaft", (1832.5, 905.5, 1849.0, 997.5)),
+                                                                 ("rouparia", (1886.0, 943.0, 1933.5, 990.0)),
+                                                                 ("banho master: vaso", (1538.5, 974.0, 1608.0, 997.5)),
+                                                                 ("banho master: box", (1615.0, 974.0, 1726.5, 997.5)))])
+
+
+def _tracos_1p(Q, q=None):
+    """Os traços do PDF (pt) de cada grupo do 1º Pavimento, sem os repetidos, na ordem do PDF."""
+    import pymupdf
+    q = q or TRACEJADOS_1P
+    trechos = []
+    for nome, caixa, _ in q["grupos"]:
+        cx, vistos, tr = pymupdf.Rect(*caixa), set(), []
+        for d in Q.desenhos:
+            if d.get("layer") != "DOC_LINHAS E PROJEÇÕES" or d["type"] != "s" or d["rect"] not in cx:
+                continue
+            for it in d["items"]:
+                if it[0] == "l":
+                    t = (it[1].x, it[1].y, it[2].x, it[2].y)
+                    k = tuple(round(v, 1) for v in t)
+                    if k not in vistos:
+                        vistos.add(k)
+                        tr.append(t)
+        trechos.append((nome, tr))
+    return trechos
+
+
+def tracejados_pb_1p(Q, img, q=None):
+    """Os tracejados cinza do 1º Pavimento em preto ou branco: o cinza sai e o traço volta fino (a imagem sem rótulos)."""
+    q = q or TRACEJADOS_1P
+    paredes_pdf(Q)
+    trechos = _tracos_1p(Q, q)
+    vaz = _onde_terreo(Q)[1]
+    caixas, fonte = [], np.zeros(img.shape[:2], bool)
+    for nome, caixa, vazio in q["grupos"]:
+        (a, b), (c, d) = Q.p2q(*caixa[:2]), Q.p2q(*caixa[2:])
+        caixas.append((a - 3, b - 3, c + 3, d + 3))
+        m = np.zeros(img.shape[:2], bool)
+        m[max(int(b) - 3, 0):int(np.ceil(d)) + 3, max(int(a) - 3, 0):int(np.ceil(c)) + 3] = True
+        fonte |= m & vaz if vazio else m
+    limpa = _limpa_tracos(Q, img, caixas, q=q, trechos=trechos, fonte=fonte)
+    print(f"    grupos: " + ", ".join(f"{nome} ({len(t)} traços)" for nome, t in trechos))
+    return tracejados_pb_te(Q, limpa, q=q, trechos=trechos)
+
+
+def tracejados_1p_sobre_final(Q, img):
+    """Sobre a final do 1º Pavimento: a final sem os rótulos, os tracejados em preto ou branco, os rótulos de novo; na
+    final, só a faixa dos traços (a do cinza tirado incluída)."""
+    limpa, _ = sem_rotulos("1Pavimento", img, novos=True)
+    com = tracejados_pb_1p(Q, limpa)
+    nova = escrever_rotulos("1Pavimento", com)
+    faixa = cv2.dilate((np.abs(com.astype(np.int16) - limpa.astype(np.int16)).max(axis=2) > 0).astype(np.uint8),
+                       np.ones((7, 7), np.uint8)).astype(bool)
+    out = np.where(faixa[..., None], nova, img)
+    print(f"    tracejados do 1º Pavimento em preto ou branco ({int(faixa.sum())} px refeitos)")
+    return out
+
+
 def passos_1pav(Q):
     return [
         ("nublado", lambda im: nublado_novo(Q, im)),
@@ -2562,14 +2771,17 @@ def passos_1pav(Q):
         ("bancadas", lambda im: _bancadas(Q, im, BANCADAS_1PAV_E)),
         ("paredes", lambda im: paredes_e(Q, im)),
         ("varanda", lambda im: varanda_1pav_e(Q, im)),
+        ("tracejados", lambda im: tracejados_pb_1p(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("1Pavimento", im)),
     ]
 
 
 PASSOS = {"Subsolo": passos_subsolo, "Terreo": passos_terreo, "1Pavimento": passos_1pav}
 # as etapas que só vão sobre a final (`--sobre-final`): numa rodada do zero, o nublado já vem com a revisão do Térreo
-SO_SOBRE_FINAL = {"1Pavimento": {"nublado_revisao": nublado_revisao_te, "nublado_tracejados": nublado_tracejados_te},
-                  "Terreo": {"seta_hall": seta_rotulo_hall_te, "tracejados_final": tracejados_sobre_final_te}}
+SO_SOBRE_FINAL = {"1Pavimento": {"nublado_revisao": nublado_revisao_te, "nublado_tracejados": nublado_tracejados_te,
+                                 "tracejados_final": tracejados_1p_sobre_final},
+                  "Terreo": {"seta_hall": seta_rotulo_hall_te, "tracejados_final": tracejados_sobre_final_te,
+                             "vao_servico": vao_rotulo_servico_te}}
 
 
 def final_3840(chave, de=None, ate=None, salvar=True):

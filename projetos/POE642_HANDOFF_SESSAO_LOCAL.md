@@ -3478,6 +3478,19 @@ O usuário, com o recorte da borda de baixo da varanda: "não existe esse dente.
 - **Borda reta.** O tracejado da laje da varanda vinha do retoque. Ele seguia a borda da varanda do 1º Pavimento e, a partir de 1204,5 pt, a face da parede da suíte 3, 10 cm acima, com um degrau entre as duas. Agora segue a borda da laje (a do PDF do 1º Pavimento, 1694,1 pt), reto até a fachada da sala. A planta do canto e a sombra dela ficam.
 - **Preto ou branco.** Todos os tracejados de projeção do Térreo estavam em cinza: o L da varanda e do gourmet, a laje da garagem, a borda de cima e a lateral do granito, o X do hall e o X da área de serviço descoberta. Agora são traços nítidos em preto nos pisos claros (Bege Bahia, travertino, pedra portuguesa) e em branco no granito e nas bordas contra a grama, como nas Casas A e B. A cor troca onde o piso troca: na borda de cima, preto no Bege Bahia do gourmet e branco no granito. As linhas do lote não mudam.
 - **1º Pavimento.** Como no 1º Pavimento da Casa A, o Térreo nublado não leva as projeções do Térreo. O tracejado da cobertura que tinha entrado ali com a revisão saiu.
-- **Inconformidade apresentada, aguardando o OK:** o rótulo da ÁREA DE SERVIÇO DESCOBERTA fica sobre o X tracejado (o nome em duas linhas e a área). Com o rótulo inteiro, não há lugar livre do X no cômodo (a busca achou no máximo 2 px de folga). Imagem: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_area_servico_rotulo_sobre_x.jpg`.
+- **Inconformidade apresentada (resolvida abaixo, opção A):** o rótulo da ÁREA DE SERVIÇO DESCOBERTA fica sobre o X tracejado (o nome em duas linhas e a área). Com o rótulo inteiro, não há lugar livre do X no cômodo (a busca achou no máximo 2 px de folga). Imagem: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_area_servico_rotulo_sobre_x.jpg`.
 
 Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_{varanda_borda_reta,tracejados_varanda_gourmet,tracejados_hall,tracejados_granito}_antes_depois.jpg` e `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_nublado_sem_projecoes_antes_depois.jpg`. Pranchas do Térreo e do 1º Pavimento e PDF da Casa E refeitos.
+
+### Pedidos de 28/10/26: o X aberto sob o rótulo da área de serviço e os tracejados do 1º Pavimento (Casa E)
+
+O usuário, sobre as duas perguntas da rodada anterior: "item 1: A. item 2: pode".
+- **Área de serviço descoberta (Térreo), opção A.** O rótulo (o nome em duas linhas e a área, no corpo de sempre) foi para o cruzamento do X tracejado, e o X se abre em volta dele: os traços param numa folga de ~13 cm do texto, como no X do shaft da Casa B. Os traços que estavam no vão e as letras no lugar antigo do rótulo saíram sem mancha (o granito ao lado).
+- **Tracejados do 1º Pavimento.** Estavam em cinza: os X dos dois vazios (o da escada e o do hall, sobre o Térreo nublado), o X do shaft, o desenho da rouparia e os X rasos do banho master, sobre o vaso e o box. Agora são traços nítidos, em preto nos fundos claros e, na rouparia (sobre o vinílico), em branco. O cinza antigo saiu antes, com o fundo ao lado. Os rótulos ficam por cima.
+- **Subsolo.** A final do Subsolo não desenha tracejado de projeção (as curvas de nível, a escada e as linhas da academia do PDF ficam fora), então não mudou.
+- **Inconformidades vistas, para o OK do usuário (nada alterado):**
+  1. o rótulo ROUPARIA (1º Pavimento) fica sobre o desenho tracejado da rouparia, como estava o da área de serviço; proposta: a mesma opção A (o tracejado parando numa folga em volta do texto);
+  2. no vazio do hall (1º Pavimento), na borda da esquerda, aparece bem fraco um tracejado vertical do Térreo nublado (a linha da esquerda do X do hall do Térreo); pela regra do nublado sem as projeções do Térreo, ele sairia.
+  Imagem: `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_inconformidades_rouparia_vazio_hall.jpg`.
+
+Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_area_servico_vao_x_antes_depois.jpg` e `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_tracejados_{planta,banho_master,shaft_rouparia,vazio_escada,vazio_hall}_antes_depois.jpg`. Pranchas do Térreo e do 1º Pavimento e PDF da Casa E refeitos.
