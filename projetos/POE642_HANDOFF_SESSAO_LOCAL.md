@@ -3471,3 +3471,13 @@ O usuário, com o recorte do hall: "A seta em preto deve ficar em frente a porta
 - **Rótulo do HALL DE ENTRADA.** Ele estava sobre a diagonal do X tracejado. Agora fica à direita do cruzamento do X, entre ele e a porta, no mesmo corpo dos outros rótulos. É o lugar do hall com mais folga do tracejado, das paredes e dos objetos (~10 px). O outro lugar livre, abaixo da folha da porta, ficava mais apertado (~7 px). Na parte de baixo do X, o rótulo cairia sobre a planta.
 
 Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_seta_rotulo_hall_antes_depois.jpg`. Prancha do Térreo e PDF da Casa E refeitos. O 1º Pavimento não muda: o Térreo nublado não leva a seta nem os rótulos.
+
+### Pedidos de 28/10/26: a borda reta da varanda e os tracejados em preto ou branco (Térreo da Casa E)
+
+O usuário, com o recorte da borda de baixo da varanda: "não existe esse dente. o tracejado é em linha reta". Depois: "os tracejados são ou brancos ou pretos, a depender do fundo".
+- **Borda reta.** O tracejado da laje da varanda vinha do retoque. Ele seguia a borda da varanda do 1º Pavimento e, a partir de 1204,5 pt, a face da parede da suíte 3, 10 cm acima, com um degrau entre as duas. Agora segue a borda da laje (a do PDF do 1º Pavimento, 1694,1 pt), reto até a fachada da sala. A planta do canto e a sombra dela ficam.
+- **Preto ou branco.** Todos os tracejados de projeção do Térreo estavam em cinza: o L da varanda e do gourmet, a laje da garagem, a borda de cima e a lateral do granito, o X do hall e o X da área de serviço descoberta. Agora são traços nítidos em preto nos pisos claros (Bege Bahia, travertino, pedra portuguesa) e em branco no granito e nas bordas contra a grama, como nas Casas A e B. A cor troca onde o piso troca: na borda de cima, preto no Bege Bahia do gourmet e branco no granito. As linhas do lote não mudam.
+- **1º Pavimento.** Como no 1º Pavimento da Casa A, o Térreo nublado não leva as projeções do Térreo. O tracejado da cobertura que tinha entrado ali com a revisão saiu.
+- **Inconformidade apresentada, aguardando o OK:** o rótulo da ÁREA DE SERVIÇO DESCOBERTA fica sobre o X tracejado (o nome em duas linhas e a área). Com o rótulo inteiro, não há lugar livre do X no cômodo (a busca achou no máximo 2 px de folga). Imagem: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_area_servico_rotulo_sobre_x.jpg`.
+
+Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_{varanda_borda_reta,tracejados_varanda_gourmet,tracejados_hall,tracejados_granito}_antes_depois.jpg` e `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_nublado_sem_projecoes_antes_depois.jpg`. Pranchas do Térreo e do 1º Pavimento e PDF da Casa E refeitos.

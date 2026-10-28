@@ -132,12 +132,12 @@ def escrever_rotulos(chave, img, novos=True):
     return R1.rotulos_ambientes(img, rot, Q.p2q, escala_desvio=Q.W / 2000, ajustes=aj, **kw)
 
 
-def sem_rotulos(chave, final):
+def sem_rotulos(chave, final, novos=False):
     """A final sem os rótulos: a composição dos rótulos (out = cor * a + fundo * (1 - a)) desfeita px a px; onde o
-    alfa passa de 0,8, o fundo vem dos vizinhos (inpaint de 3 px)."""
+    alfa passa de 0,8, o fundo vem dos vizinhos (inpaint de 3 px). `novos`: os rótulos com os ajustes desta rodada."""
     H, W = final.shape[:2]
-    vp = escrever_rotulos(chave, np.zeros((H, W, 3), np.uint8), novos=False).astype(np.float32)
-    vb = escrever_rotulos(chave, np.full((H, W, 3), 255, np.uint8), novos=False).astype(np.float32)
+    vp = escrever_rotulos(chave, np.zeros((H, W, 3), np.uint8), novos=novos).astype(np.float32)
+    vb = escrever_rotulos(chave, np.full((H, W, 3), 255, np.uint8), novos=novos).astype(np.float32)
     a = np.clip(1 - (vb - vp).mean(axis=2) / 255, 0, 1)
     ca = vp
     f = final.astype(np.float32)
@@ -1841,6 +1841,7 @@ def passos_terreo(Q):
         ("cortinas", lambda im: cortinas_terreo_e(Q, im)),
         ("piscina", lambda im: piscina_terreo_e(Q, im)),
         ("revisao", lambda im: revisao_terreo_e(Q, im)),
+        ("tracejados", lambda im: tracejados_pb_te(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("Terreo", im)),
     ]
 
@@ -2082,7 +2083,8 @@ def curva_pedra_te(Q, img, q=None):
     return out
 
 
-def projecao_cobertura_te(Q, img, q=None):
+def _alfa_projecao_te(Q, q=None):
+    """O alfa (0 a 1) do tracejado cinza de `projecao_cobertura_te` na janela dele: (alfa, X0, Y0)."""
     q = q or REVISAO_TE["projecao"]
     pts = np.array([Q.p2q(x, y) for linha in q["linhas"] for x, y in linha])
     X0, Y0 = (np.floor(pts.min(axis=0)) - 4).astype(int)
@@ -2105,6 +2107,14 @@ def projecao_cobertura_te(Q, img, q=None):
     a = cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32) / 255 * q["forca"]
     paredes_pdf(Q)
     a *= 1 - np.clip(cv2.dilate(Q._par[Y0:Y1, X0:X1], np.ones((3, 3), np.uint8)), 0, 1)       # nada sobre as paredes
+    return a, X0, Y0, n
+
+
+def projecao_cobertura_te(Q, img, q=None):
+    q = q or REVISAO_TE["projecao"]
+    a, X0, Y0, n = _alfa_projecao_te(Q, q)
+    h, w = a.shape
+    Y1, X1 = Y0 + h, X0 + w
     out = img.copy()
     reg = out[Y0:Y1, X0:X1].astype(np.float32)
     out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a[..., None]) + np.float32(q["cor"]) * a[..., None]), 0,
@@ -2151,11 +2161,225 @@ def seta_rotulo_hall_te(Q, img, desvio_px=38):
     return out
 
 
+# A borda de baixo da laje da varanda, reta (usuário, 28/10/26: "não existe esse dente. o tracejado é em linha reta"): no
+# retoque (`retoque_terreo_casae.PROJECOES`, o L), a linha de baixo seguia a borda da varanda do 1º Pavimento (a
+# ARQ_CONTRAPISO dele, em 1694,1 pt) até 1204,5 pt e, dali até a fachada da sala, a face da parede da suíte 3 (1688,5 pt),
+# com o degrau de 10 cm entre as duas. A projeção é a borda da laje, uma linha só, em 1694,1 pt:
+# - o trecho da direita e o degrau saem: o retângulo deles (de `meia_px` acima da linha antiga a `meia_px` abaixo da nova,
+#   de 1204,5 pt até a planta do canto) recebe o piso de `desvio_px` acima, com as emendas de cima e de baixo esfumadas;
+# - os traços seguem retos até 1380 pt no ritmo do trecho da esquerda (o retoque começava cada linha num traço: de 983,4
+#   pt, traço de 8,5 pt e vão de 4,25 pt), no molde dele: a média dos traços inteiros do trecho da esquerda (o quanto cada
+#   px vai para o cinza dos traços, sobre o piso de logo acima e logo abaixo), na mesma fase. A planta do canto fica por
+#   cima.
+DENTE_VARANDA_TE = {"y_pt": 1694.13, "y_antes_pt": 1688.46, "x_pt": (983.38, 1204.48, 1380.0), "traco_pt": 8.5,
+                    "vao_pt": 4.25, "meia_px": 4, "cor": (150, 151, 150), "desvio_px": 16, "suave_px": 2, "poupa_px": 14}
+
+
+def dente_varanda_te(Q, img, q=None):
+    q = q or DENTE_VARANDA_TE
+    x0p, xdp, xfp = q["x_pt"]
+    px_pt = Q.p2q(100, 0)[0] - Q.p2q(0, 0)[0]
+    px_pt /= 100
+    (xi, yn), (xd, ya), (xf, _) = Q.p2q(x0p, q["y_pt"]), Q.p2q(xdp, q["y_antes_pt"]), Q.p2q(xfp, q["y_pt"])
+    mp, dv, cor = q["meia_px"], q["desvio_px"], np.float32(q["cor"])
+    per, tr = (q["traco_pt"] + q["vao_pt"]) * px_pt, q["traco_pt"] * px_pt
+    X0, X1 = int(np.floor(xi)) - 2, int(np.ceil(xf)) + 4
+    Y0, Y1 = int(np.floor(ya)) - mp - dv - 4, int(np.ceil(yn)) + mp + 8
+    reg = img[Y0:Y1, X0:X1].astype(np.float32)
+    h, w = reg.shape[:2]
+    planta = cv2.dilate(_verde(img[Y0:Y1, X0:X1]).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    # o molde dos traços, do trecho da esquerda: o alfa sobre o piso (a média das linhas logo acima e logo abaixo)
+    yn_, xi_, xd_ = yn - Y0, xi - X0, xd - X0
+    r0, r1 = int(np.floor(yn_)) - mp, int(np.ceil(yn_)) + mp + 1
+    piso = 0.5 * (reg[r0 - 6:r0 - 1].mean(axis=0) + reg[r1 + 1:r1 + 6].mean(axis=0))
+    alfa = np.clip(((piso[None] - reg[r0:r1]) / np.maximum(piso[None] - cor, 1)).mean(axis=2), 0, 1)
+    n = int((xd_ - xi_ - tr) // per) + 1                         # os traços inteiros do trecho da esquerda
+    t = np.arange(-2.0, per - 2.0, 0.25)
+    molde = np.mean([np.array([np.interp(xi_ + k * per + t, np.arange(w), alfa[j]) for j in range(r1 - r0)])
+                     for k in range(n)], axis=0)                 # (linhas, fase)
+    # o retângulo do trecho da direita e do degrau, limpo com o piso de `desvio_px` acima
+    ya_ = ya - Y0
+    c0 = int(np.floor(xd_)) - 1
+    l0, l1 = int(np.floor(ya_)) - mp, r1
+    fonte = reg[l0 - dv:l1 - dv, c0:]
+    lim = reg.copy()
+    m = np.ones((l1 - l0, w - c0), np.float32)
+    s_ = q["suave_px"]
+    for k in range(s_):
+        m[k] = m[-1 - k] = (k + 1) / (s_ + 1)
+    # a planta do canto e a sombra dela ficam (a folga `poupa_px` em volta das folhas), com a emenda esfumada
+    k = 2 * q["poupa_px"] + 1
+    poupa = cv2.dilate(planta.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    m = m * ~(poupa[l0:l1, c0:] | poupa[l0 - dv:l1 - dv, c0:])
+    m = np.minimum(m, cv2.GaussianBlur(m, (0, 0), 1.5))
+    lim[l0:l1, c0:] = reg[l0:l1, c0:] * (1 - m[..., None]) + fonte * m[..., None]
+    # os traços da direita: o molde na fase do trecho da esquerda, do fim dele até 1380 pt
+    xs = np.arange(w, dtype=np.float32)
+    fase = (xs - xi_) % per
+    k_ = np.floor((xs - xi_) / per)
+    fim = xf - X0
+    a = np.zeros((h, w), np.float32)
+    for j in range(r1 - r0):
+        v = np.interp(fase, t, molde[j], period=None)
+        v = np.where(fase > per - 2.0, np.interp(fase - per, t, molde[j]), v)
+        ini = xs + 0.5 >= xd_
+        dentro = ini & (xi_ + k_ * per + 0.0 <= fim)
+        v = np.where(dentro, v, 0)
+        v = np.where(xs > fim + 1, 0, v)
+        a[r0 + j] = v
+    a *= ~planta
+    out = lim * (1 - a[..., None]) + cor * a[..., None]
+    res = img.copy()
+    res[Y0:Y1, X0:X1] = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    print(f"    varanda: a borda de baixo da laje reta em {q['y_pt']} pt, no molde de {n} traços do trecho da esquerda "
+          f"(o trecho da direita desceu {yn - ya:.1f} px; o degrau saiu)")
+    return res
+
+
 def revisao_terreo_e(Q, img):
+    """Os itens da revisão de 28/10; a projeção da cobertura (item 4) vai em preto ou branco na etapa `tracejados`."""
     out = adega_porta_te(Q, img)
     out = pisantes_te(Q, out)
     out = curva_pedra_te(Q, out)
-    return projecao_cobertura_te(Q, out)
+    return dente_varanda_te(Q, out)
+
+
+# Os tracejados do Térreo em preto ou branco pelo fundo (usuário, 28/10/26, vendo a borda reta da varanda: "os tracejados
+# são ou brancos ou pretos, a depender do fundo"; a R8 de 26/10, como nas Casas A e B, `final3840_casaa_terreo.PROJ`):
+# antes, todos em cinza (o do retoque, ampliado de 2000 px, e o da revisão de 28/10 no granito). Agora, nítidos (1,5 px),
+# por cima do cinza antigo, nos mesmos traços:
+# - as projeções da cobertura do retoque (`retoque_terreo_casae.PROJECOES`), com a borda de baixo da varanda reta
+#   (`DENTE_VARANDA_TE`): o L da laje do espaço gourmet + varanda, a laje da garagem e a faixa de cima; traço de 8,5 pt e
+#   vão de 4,25 pt, cada trecho começando num traço;
+# - as cadeias tracejadas da DOC_LINHAS E PROJEÇÕES (o X do hall com a linha da esquerda; o X da área de serviço
+#   descoberta com a linha de cima); as linhas do lote (mais longas que `max_doc_pt`) e o que fica fora dele (acima de
+#   `topo_q`) não;
+# - nada sobre as paredes: o traço com o meio numa parede do PDF (com `folga_px`) sai, e as paredes voltam por cima;
+# - a cor traço a traço, como nas Casas A e B: preto se o fundo em volta (a mediana da luminância numa faixa de
+#   `fundo_px`, sem o traço e sem as paredes) passa de `limiar`, branco se não; o fundo de cada traço vai com o dos
+#   vizinhos da mesma reta (a mediana de 5), para a cor trocar onde o piso troca (a borda de cima, do Bege Bahia do
+#   gourmet para o granito) sem piscar nos traços sobre a divisa de dois fundos.
+TRACEJADOS_TE = {"cobertura": {"L: laje do espaço gourmet + varanda": [(1372.9, 518.6), (697.6, 518.6), (697.6, 1090.3),
+                                                                     (983.4, 1090.3), (983.4, 1694.13), (1380.0, 1694.13)],
+                               "laje da garagem": [(1992.5, 687.8), (2763.5, 687.8), (2763.5, 1090.3), (2207.9, 1090.3)],
+                               "faixa de cima": [(1372.9, 516.3), (2763.5, 516.3), (2763.5, 687.8)]},
+                 "traco_pt": 8.5, "vao_pt": 4.25, "max_doc_pt": 900, "topo_q": 100, "min_ext_pt": 30, "folga_px": 1,
+                 "larg_px": 1.5, "fundo_px": 9, "limiar": 120, "preto": (30, 30, 30), "branco": (250, 250, 250), "ss": 4}
+
+
+def _tracos_te(Q, q=None):
+    """Os trechos tracejados do Térreo: [(nome, [traços (x0, y0, x1, y1) em pt])]."""
+    import final3840_casaa_terreo as FT
+    q = q or TRACEJADOS_TE
+    trechos = []
+    for nome, pts in q["cobertura"].items():
+        for i, ((ax, ay), (bx, by)) in enumerate(zip(pts[:-1], pts[1:])):
+            comp, t, tr = np.hypot(bx - ax, by - ay), 0.0, []
+            while t < comp:
+                t1 = min(comp, t + q["traco_pt"])
+                tr.append((ax + (bx - ax) * t / comp, ay + (by - ay) * t / comp,
+                           ax + (bx - ax) * t1 / comp, ay + (by - ay) * t1 / comp))
+                t = t1 + q["vao_pt"]
+            trechos.append((f"{nome} ({i + 1})", tr))
+    doc = FT.cadeias_tracejadas(Q, ["DOC_LINHAS E PROJEÇÕES"], min_ext=q["min_ext_pt"])
+    for k, ext, segs in doc:
+        tot = sum(e for k2, e, _ in doc if k2[1] == k[1] and abs(k2[2] - k[2]) <= 2)
+        if tot > q["max_doc_pt"] or min(Q.p2q(x0, y0)[1] for x0, y0, _, _ in segs) < q["topo_q"]:
+            continue
+        trechos.append((f"DOC {k[1]:.1f}°", segs))
+    return trechos
+
+
+def tracejados_pb_te(Q, img, q=None):
+    q = q or TRACEJADOS_TE
+    paredes_pdf(Q)
+    k = 2 * q["folga_px"] + 1
+    pe = cv2.dilate((Q._par > 0.3).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    lum = img.astype(np.float32).mean(axis=2)
+    out = img.astype(np.float32)
+    S, fp = q["ss"], q["fundo_px"]
+    n_p = n_b = n_fora = 0
+    for nome, tracos in _tracos_te(Q, q):
+        fica = []
+        for t in tracos:
+            (u0, v0), (u1, v1) = Q.p2q(t[0], t[1]), Q.p2q(t[2], t[3])
+            if pe[int((v0 + v1) / 2), int((u0 + u1) / 2)]:
+                n_fora += 1
+                continue
+            fica.append(((u0, v0), (u1, v1)))
+        if not fica:
+            continue
+        alfas, fundos = [], []
+        for (u0, v0), (u1, v1) in fica:
+            bx0, by0 = max(int(min(u0, u1)) - fp, 0), max(int(min(v0, v1)) - fp, 0)
+            bx1, by1 = min(int(max(u0, u1)) + fp + 2, Q.W), min(int(max(v0, v1)) + fp + 2, Q.H)
+            m = np.zeros(((by1 - by0) * S, (bx1 - bx0) * S), np.uint8)
+            cv2.line(m, (int(round((u0 - bx0) * S)), int(round((v0 - by0) * S))),
+                     (int(round((u1 - bx0) * S)), int(round((v1 - by0) * S))), 255,
+                     max(1, int(round(q["larg_px"] * S))), cv2.LINE_AA)
+            a = cv2.resize(m.astype(np.float32) / 255, (bx1 - bx0, by1 - by0), interpolation=cv2.INTER_AREA)
+            f = lum[by0:by1, bx0:bx1][(a < 0.02) & ~pe[by0:by1, bx0:bx1]]
+            alfas.append((a, bx0, by0, bx1, by1))
+            fundos.append(np.median(f) if f.size else 255.0)
+        # o fundo de cada traço com o dos vizinhos (mediana de 5): a cor troca onde o piso troca, sem piscar
+        fundos = np.array(fundos)
+        viz = np.array([np.median(fundos[max(i - 2, 0):i + 3]) for i in range(len(fundos))])
+        for (a, bx0, by0, bx1, by1), fv in zip(alfas, viz):
+            claro = fv >= q["limiar"]
+            cor = np.float32(q["preto"] if claro else q["branco"])
+            n_p, n_b = n_p + claro, n_b + (not claro)
+            out[by0:by1, bx0:bx1] = out[by0:by1, bx0:bx1] * (1 - a[..., None]) + cor * a[..., None]
+    out = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    par = Q._par > 0.5
+    out[par] = img[par]
+    print(f"    tracejados (R8): {n_p} traços em preto (fundo claro) e {n_b} em branco (fundo escuro); {n_fora} sobre "
+          f"paredes ficam fora")
+    return out
+
+
+def tracejados_sobre_final_te(Q, img):
+    """Sobre a final do Térreo: sai o cinza da projeção da revisão de 28/10 (a composição desfeita, pelo alfa dele), a
+    borda de baixo da varanda fica reta, e os tracejados vão em preto ou branco por baixo dos rótulos (a final sem eles,
+    os traços, os rótulos de novo; na final, só a faixa dos traços)."""
+    a, X0, Y0, _ = _alfa_projecao_te(Q)
+    h, w = a.shape
+    reg = img[Y0:Y0 + h, X0:X0 + w].astype(np.float32)
+    cor = np.float32(REVISAO_TE["projecao"]["cor"])
+    base = img.copy()
+    base[Y0:Y0 + h, X0:X0 + w] = np.clip(np.round((reg - cor * a[..., None]) / (1 - a[..., None])), 0,
+                                         255).astype(np.uint8)
+    base = dente_varanda_te(Q, base)
+    limpa, _ = sem_rotulos("Terreo", base, novos=True)
+    com = tracejados_pb_te(Q, limpa)
+    nova = escrever_rotulos("Terreo", com)
+    faixa = cv2.dilate((np.abs(com.astype(np.int16) - limpa.astype(np.int16)).max(axis=2) > 0).astype(np.uint8),
+                       np.ones((7, 7), np.uint8)).astype(bool)
+    out = np.where(faixa[..., None], nova, base)
+    print(f"    o cinza da projeção da revisão desfeito ({int((a > 0.01).sum())} px); tracejados em preto ou branco "
+          f"({int(faixa.sum())} px refeitos)")
+    return out
+
+
+def nublado_tracejados_te(Q, img):
+    """Sobre a final do 1º Pavimento: o Térreo nublado sem as projeções do Térreo (como no 1º Pavimento da Casa A): sai
+    o tracejado cinza da revisão de 28/10 que tinha entrado no nublado, e a borda de baixo da varanda fica reta, pela
+    diferença entre a fonte do nublado em cache e ela sem esse tracejado e com a borda reta (que fica no cache)."""
+    QT = QuadroE("Terreo")
+    c = ETAPAS / "Terreo_nublado_fonte.png"
+    antes = cv2.imread(str(c))
+    a, X0, Y0, _ = _alfa_projecao_te(QT)
+    h, w = a.shape
+    reg = antes[Y0:Y0 + h, X0:X0 + w].astype(np.float32)
+    cor = np.float32(REVISAO_TE["projecao"]["cor"])
+    depois = antes.copy()
+    depois[Y0:Y0 + h, X0:X0 + w] = np.clip(np.round((reg - cor * a[..., None]) / (1 - a[..., None])), 0,
+                                           255).astype(np.uint8)
+    depois = dente_varanda_te(QT, depois)
+    out, _, _ = _trocar_nublado(Q, img, _nublar(antes, Q.W), _nublar(depois, Q.W))
+    cv2.imwrite(str(c), depois)
+    mud = (np.abs(out.astype(np.int16) - img.astype(np.int16)).max(axis=2) > 2).sum()
+    print(f"    o Térreo nublado sem o tracejado cinza da revisão e com a borda da varanda reta: {int(mud)} px mudados")
+    return out
 
 
 # O 1º Pavimento (auditoria de 26/10, mapa `renders/POE642_CasaE_PH_1Pavimento_auditoria_2610.jpg`, e as regras aprovadas
@@ -2198,7 +2422,7 @@ def terreo_para_nublado():
     img = _bancadas(QT, img, BANCADAS_TER_E)
     img = paredes_e(QT, img)
     img = piscina_terreo_e(QT, img)
-    img = revisao_terreo_e(QT, img)                       # a revisão de 28/10 (adega, pisantes, curva, projeção)
+    img = revisao_terreo_e(QT, img)       # a revisão de 28/10 (adega, pisantes, curva, varanda; sem as projeções)
     cv2.imwrite(str(c), img)
     return img
 
@@ -2344,7 +2568,8 @@ def passos_1pav(Q):
 
 PASSOS = {"Subsolo": passos_subsolo, "Terreo": passos_terreo, "1Pavimento": passos_1pav}
 # as etapas que só vão sobre a final (`--sobre-final`): numa rodada do zero, o nublado já vem com a revisão do Térreo
-SO_SOBRE_FINAL = {"1Pavimento": {"nublado_revisao": nublado_revisao_te}, "Terreo": {"seta_hall": seta_rotulo_hall_te}}
+SO_SOBRE_FINAL = {"1Pavimento": {"nublado_revisao": nublado_revisao_te, "nublado_tracejados": nublado_tracejados_te},
+                  "Terreo": {"seta_hall": seta_rotulo_hall_te, "tracejados_final": tracejados_sobre_final_te}}
 
 
 def final_3840(chave, de=None, ate=None, salvar=True):
