@@ -843,6 +843,21 @@ AJUSTES_E["Subsolo"] = [("CASA DE MÁQUINAS", (1043.4, 335.8), (0, -22.5), 0.85)
                         # o ELEVADOR no centro da cabine, no corpo do PDF (usuário, 28/10/26: "CENTRALIZE O RÓTULO"; no
                         # ponto do PDF e no corpo 1,3 ele ia à direita e encostava no contorno da cabine)
                         ("ELEVADOR", (1044.65, 400.14), (-3.9, -1.3), 1.0)]
+# a SUÍTE 1 desce e vai para a esquerda, no piso livre entre o aparador e o tapete (revisão do 1º Pavimento de 28/10/26,
+# OK do usuário: "ok"; no ponto do PDF, o "m²" passava sobre a borda do tapete)
+AJUSTES_E["1Pavimento"] = [("SUÍTE 1", (1192.7, 623.4), (-9, 8.5))]
+
+
+def rotulos_ajustados_sobre_final(chave, img, nomes):
+    """Sobre a final: os rótulos `nomes` no lugar novo (`AJUSTES_E`). A final sem os rótulos (como estavam), os rótulos
+    com os ajustes; na final, só as caixas desses rótulos (a de antes e a nova, com folga) mudam."""
+    limpa, _ = sem_rotulos(chave, img, novos=False)
+    nova = escrever_rotulos(chave, limpa)
+    m = np.zeros(img.shape[:2], bool)
+    for x0, y0, x1, y1 in caixas_rotulos(chave, nomes, novos=False) + caixas_rotulos(chave, nomes):
+        m[max(y0 - 6, 0):y1 + 6, max(x0 - 6, 0):x1 + 6] = True
+    print(f"    rótulos no lugar novo: {', '.join(nomes)} ({int(m.sum())} px)")
+    return np.where(m[..., None], nova, img)
 
 
 def pisos_e(Q, img, specs, ficam=(), zonas=None, incluir=None):
@@ -3508,7 +3523,9 @@ PASSOS = {"Subsolo": passos_subsolo, "Terreo": passos_terreo, "1Pavimento": pass
 SO_SOBRE_FINAL = {"Subsolo": {"piscina_borda": piscina_borda_sub},
                   "1Pavimento": {"nublado_revisao": nublado_revisao_te, "nublado_tracejados": nublado_tracejados_te,
                                  "tracejados_final": tracejados_1p_sobre_final, "sofa": sofa_sala_intima_1p,
-                                 "poltrona_master": poltrona_master_1p, "nublado_poltronas": nublado_poltronas_te},
+                                 "poltrona_master": poltrona_master_1p, "nublado_poltronas": nublado_poltronas_te,
+                                 "rotulo_suite1": lambda Q, im: rotulos_ajustados_sobre_final("1Pavimento", im,
+                                                                                               ("SUÍTE 1",))},
                   "Terreo": {"seta_hall": seta_rotulo_hall_te, "tracejados_final": tracejados_sobre_final_te,
                              "vao_servico": vao_rotulo_servico_te, "poltronas_living": poltronas_living_sobre_final_te,
                              "sofa_varanda": sofa_varanda_sobre_final_te,

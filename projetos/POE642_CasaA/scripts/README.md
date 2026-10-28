@@ -1394,6 +1394,12 @@ Pedido do usuário, com o recorte da garagem do Térreo: "esse tracejado em bran
 - **`TRACEJADOS_TE["brancos"]`:** os trechos (pelo nome, `"laje da garagem (3)"`) que vão sempre em branco; `tracejados_pb_te` não troca a cor deles pelo fundo.
 - **`tracejado_branco_te`** (etapa `tracejado_branco` do Térreo, logo depois de `tracejados`; sobre a final, `--sobre-final tracejado_branco`): os px da linha que já estava ali (os traços pretos e o cinza embaixo, `vaos["limpa_px"]` de cada lado) ganham o piso do mesmo material ao lado (`_limpa_tracos` com `fonte` = o granito e a pedra portuguesa da chapada naquela caixa, e `mesmo` = o material de cada px, com os px da linha do PDF no material mais perto), e os traços voltam em branco, nos mesmos lugares. Mudam só as linhas 907 a 913 da final, de x 2455 a 3045.
 
+### O rótulo da SUÍTE 1 do 1º Pavimento da Casa E (28/10)
+
+Na revisão do 1º Pavimento ("1º pavimento da casa E"), o único ponto: o rótulo da SUÍTE 1, no ponto do PDF, passava o "m²" sobre a borda do tapete. Com o OK do usuário ("ok"):
+- **`AJUSTES_E["1Pavimento"]`:** `("SUÍTE 1", (1192.7, 623.4), (-9, 8.5))` (centro e desvio em px de 2000, como em `retoque_1pav_casae.ROTULOS["ajustes"]`): 17 px para a esquerda e 16 px para baixo na final, no piso livre entre o aparador e o tapete.
+- **`rotulos_ajustados_sobre_final(chave, img, nomes)`** (etapa `rotulo_suite1` do 1º Pavimento, `--sobre-final rotulo_suite1`): a final sem os rótulos como estavam (`sem_rotulos`, `novos=False`), os rótulos com os ajustes, e na final só as caixas desses rótulos (a de antes e a nova, com 6 px de folga) mudam.
+
 ### A parte de baixo da piscina do Subsolo da Casa E (28/10)
 
 Pedidos do usuário: "na parte de baixo da piscina está invertido: a parede é a parte de baixo e a borda da piscina a parte de cima. entendeu?"; e, vendo a borda de Bege Bahia passada para junto da água (5418bb9): "o subsolo ficou horrivel, deixe apenas parede na parte de baixo sem borda". O PDF tem ali um bloco cheio (preto, com as linhas tracejadas da seção); o render tinha a parede junto à água e uma faixa de Bege Bahia por fora.
