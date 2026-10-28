@@ -3075,3 +3075,22 @@ Lista aplicada:
 O resto fica como estava: boxes, louças, elevador, piscina, banco da sauna, portas e a hachura do lote. As alterações ficam só dentro da pegada do Subsolo (x 858 a 2082, y 303 a 1106 no quadro).
 
 Rodado `python3 final3840_casae.py Subsolo`. Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_{planta,escada,dce_wc,academia,sauna_vestiario}_antes_depois.jpg`. Prancha `POE642_CasaE/entrega/POE642_CasaE_PH_Subsolo_entrega.png` e PDF `POE642_CasaE_Plantas_Humanizadas.pdf` refeitos.
+
+### Térreo (28/10/26)
+
+Lista aplicada:
+1. **E11, granito** (cozinha, serviço, circulações, banho gourmet, DCE, garagem e a faixa de cima): o granito de referência das Casas B a D, na resolução da prancha. O tom já era o delas; o desenho vinha do render de 2000 px, largo e borrado. As projeções da DOC_LINHAS e os elementos fixos ficam por cima. O travertino, o Bege Bahia, a pedra portuguesa e a grama ficam como estavam: a auditoria só apontou as madeiras e o granito.
+2. **E3, E8, escadas** sem as linhas e sem o triângulo:
+   - **Circulação gourmet** (a mesma do Subsolo): o trecho vivo à esquerda, com o sombreamento de descida para a direita. O trecho depois do corte fica nevoado, sem a linha. O D do PDF vai no degrau de cima, à esquerda, onde estava o triângulo.
+   - **Interna, do jardim**: sobe da direita para a esquerda. O S do PDF vai no 1º degrau, à direita; o trecho depois do corte, à esquerda, fica nevoado.
+   - **Degraus em blocos à direita do deck**: os quatro blocos do PDF (ARQ_CONTRAPISO) em Bege Bahia, sem o contorno. Cada um é um pouco mais escuro que o de cima e recebe a sombra curta dele, descendo da direita para a esquerda (o sentido aprovado em 20/10). O D vai no bloco de cima. Na planta, o bloco de cima cobre o de baixo; antes, a final mostrava só os contornos sobrepostos dos quatro.
+3. **E2, armário do DCE**: o retângulo com a diagonal junto à parede da esquerda tem os cabides e o cabideiro, aberto para o quarto.
+4. **E5, box do WC DCE 1**: as duas folhas de correr do PDF em vidro contínuo, com as faces finas, a sombra curta e o trilho no vão (antes, uma linha fraca).
+5. **E9, bancadas**: a do banho gourmet (granito sobre o granito do piso), a do WC DCE 1 e a do lavabo têm a borda no tom escurecido da pedra e a sombra curta.
+6. **E10, paredes e muros** em cinza 80: os da ARQ_PAREDE e os da ARQ_ELEMENTOS FIXOS, entre eles o muro junto ao lavabo e as linhas do lote em cima e embaixo. Os brises de madeira ficam. Os pilares redondos da varanda seguem pretos.
+7. **E4, seta da entrada principal**: cheia, preta, de 1,5 m, no Bege Bahia de fora, com a ponta junto à porta pivotante do HALL DE ENTRADA, apontando para ela.
+8. **E7, rótulo do WC DCE 1**: sai da área do chuveiro para o meio do piso seco, entre o box, o vaso, a bancada e a folha da porta, no corpo 0,85.
+
+Rodado `python3 final3840_casae.py Terreo`. Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_{planta,escada_gourmet,escada_interna,degraus_deck,dce_wc,banho_gourmet,lavabo_hall,cozinha_gourmet,garagem}_antes_depois.jpg`. Prancha `POE642_CasaE/entrega/POE642_CasaE_PH_Terreo_entrega.png` e PDF refeitos.
+
+Hachura do Subsolo: o lote vem do Térreo final. Recalculado com o Térreo novo, ele muda só 23 px, no canto de baixo à esquerda do lote: as linhas do lote ficaram cinza. Na final do Subsolo, esses px ficam sob a linha do lote da base, então ela não muda.

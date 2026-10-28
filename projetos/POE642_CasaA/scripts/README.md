@@ -1119,3 +1119,21 @@ C=../../POE642_CasaE
 python3 rodape_entrega.py --config $C/config_bases.json --no-quadro --render Subsolo=$C/renders/POE642_CasaE_PH_Subsolo_v1_final.png
 python3 pdf_entrega.py --config $C/config_bases.json
 ```
+
+Etapas do Térreo (`passos_terreo`):
+- `pisos`: só o granito (`PISOS_TER_E`). As projeções da DOC_LINHAS e os elementos fixos ficam por cima (`linhas_pdf`).
+- `escadas`: as duas escadas do PDF (`escada_e`, `ESCADAS_TER_E`; `letra_no_alto`: o D no degrau de cima) e os degraus em blocos do deck (`blocos_e`, `BLOCOS_TER_E`).
+  - Nos blocos, os retângulos da ARQ_CONTRAPISO são pintados do de baixo ao de cima (`inverter`).
+  - Cada bloco é um pouco mais escuro que o de cima (`tom`) e leva a sombra curta dele.
+- `armario`: o DCE, aberto para a direita.
+- `box`: o WC DCE 1 (`box_e`, as folhas do `AJ.folhas_box` dentro de `BOX_WC_DCE1`, desenhadas por `final3840_casaa.boxes`).
+- `bancadas`: `BANCADAS_TER_E`.
+- `paredes`: a ARQ_PAREDE e a ARQ_ELEMENTOS FIXOS (`PAREDES_E["camadas"]`; os brises de madeira ficam porque a final não os mostra escuros).
+- `seta`: `seta_e`, a do `final3840_casaa_terreo.seta`, com a ponta em `SETA_TER_E`.
+- `rotulos`: com o WC DCE 1 em `AJUSTES_E["Terreo"]`.
+
+```bash
+python3 final3840_casae.py Terreo
+python3 rodape_entrega.py --config $C/config_bases.json --no-quadro --render Terreo=$C/renders/POE642_CasaE_PH_Terreo_v1_final.png
+python3 pdf_entrega.py --config $C/config_bases.json
+```

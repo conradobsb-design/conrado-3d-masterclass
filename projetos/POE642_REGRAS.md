@@ -589,3 +589,12 @@ As 11 especificações, na ordem do usuário (E1 a E11 nos mapas da auditoria):
   - as paredes em cinza 80 (E10; não há pilares no Subsolo);
   - o rótulo do WC DCE 2 fora da área do chuveiro, no meio do piso seco, no corpo 0,85 (E7).
   - Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_2810_{planta,escada,dce_wc,academia,sauna_vestiario}_antes_depois.jpg`.
+- **Casa E · Térreo (28/10, `final3840_casae.py`; aplicado sem o OK prévio, como o Subsolo; aguardando a validação):** a lista do mapa `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_auditoria_2610.jpg`:
+  - o granito no granito de referência na resolução da prancha (E11); o travertino, o Bege Bahia, a pedra portuguesa e a grama ficam;
+  - as escadas sem linhas e sem triângulo (E3, E8): a da circulação gourmet com o D no degrau de cima (à esquerda) e a descida para a direita, nevoada depois do corte; a interna com o S no 1º degrau (à direita), nevoada depois do corte; os degraus em blocos do deck sem contorno, cada bloco com a sombra curta do de cima e o D no de cima (à direita);
+  - os cabides no armário do DCE (E2); o box de correr do WC DCE 1 em vidro contínuo com o trilho (E5);
+  - as bancadas do banho gourmet, do WC DCE 1 e do lavabo com a borda e a sombra (E9);
+  - paredes e muros em cinza 80, também os da ARQ_ELEMENTOS FIXOS (E10); os pilares redondos seguem pretos;
+  - a seta da entrada principal no Bege Bahia de fora, apontando para a porta pivotante do HALL DE ENTRADA (E4);
+  - o rótulo do WC DCE 1 no piso seco, fora do box (E7).
+  - Antes e depois: `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_*_antes_depois.jpg`.
