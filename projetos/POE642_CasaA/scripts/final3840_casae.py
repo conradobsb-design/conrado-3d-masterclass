@@ -1864,6 +1864,7 @@ def passos_terreo(Q):
         ("piscina", lambda im: piscina_terreo_e(Q, im)),
         ("revisao", lambda im: revisao_terreo_e(Q, im)),
         ("tracejados", lambda im: tracejados_pb_te(Q, im)),
+        ("poltronas", lambda im: poltronas_living_te(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("Terreo", im)),
     ]
 
@@ -2517,6 +2518,247 @@ def vao_rotulo_servico_te(Q, img):
     return out
 
 
+# As poltronas do living (usuário, 28/10/26: "vamos aplicar essa poltrona da sala íntima do primeiro pavimento da casa e
+# em substituição das poltronas a todas as 6 poltronas do terreo"): as 6 bouclé da biblioteca
+# (`retoque_terreo_casae.POLTRONAS`: 2 junto à mesa de centro, sobre o tapete, e 4 em X em volta da mesa redonda) dão
+# lugar à poltrona da sala íntima do 1º Pavimento, a concha de estofado creme do render, recortada da final dele
+# ("modelo": na `caixa`, o estofado claro, luz acima de `lum_min` e R - B abaixo de `rb_max`, fechado pelo envoltório
+# convexo, mais a borda sombreada do encosto do lado do vinílico, à direita de `borda_x`; "frente": para onde a abertura
+# do assento aponta no recorte). Cada uma vai no centro e no tamanho do PDF (o maior lado), virada para o ponto do PDF (a
+# mesa). A bouclé sai antes (a desenhada, como em `retoque_terreo_casae.poltronas`, com `folga_px`), com o halo cinza que
+# o retocado deixou em volta, e o buraco recebe o piso limpo de perto (o tapete do tapete, o travertino do travertino).
+# Nas 2 sobre o tapete (`no_tapete`, na ordem das bouclé do PDF) sai só a bouclé com `folga_tapete_px` (o disco pegava
+# o travertino de fora do tapete). Nas 4 da mesa redonda sai o disco de `raio_mesa` x tamanho (e o da sombra do motor),
+# que vai até o travertino limpo além do halo escuro (o halo acaba a ~1,1 x tamanho), menos a mesa (`mesa_folga_px`);
+# a sombra da mesa, que estava junto com os halos, é refeita no piso novo (`mesa_sombra`, a de `POLTRONAS["sombra"]`).
+# O buraco é coberto por cópia direta do piso deslocado, com a borda esfumada em `esfuma_px` e a diferença de tom do
+# anel corrigida (o clone de Poisson puxava o escuro da mesa e do halo para dentro). No tapete, cada material (o tapete
+# entre `tapete_lum`, o travertino acima) vem do seu: o tom pelo desfoque do material limpo em volta e o grão em
+# ladrilhos (não há trecho limpo de tapete do tamanho do buraco), com a borda do tapete puxada do anel para dentro.
+# A sombra das poltronas novas é a de `POLTRONAS["sombra"]` mais marcada (`sombra`) e um contato curto em volta
+# (`sombra_contato`), para a concha creme não sumir no travertino claro.
+POLTRONAS_TE = {"modelo": {"caixa": (2070, 1255, 2175, 1355), "lum_min": 205, "rb_max": 40, "borda_rb": 48,
+                           "borda_x": 2118, "frente": (-0.86, 0.51)},
+                "bloco_velho": "poltrona_boucle", "raio_mesa": 1.15, "sombra_motor": 0.18, "folga_px": 3,
+                "no_tapete": (0, 1), "folga_tapete_px": 6, "mesa_folga_px": 0.5, "esfuma_px": 3,
+                "mesa_sombra": {"dx": -0.06, "dy": 0.06, "desfoque": 0.06, "opacidade": 0.35},
+                "tapete_lum": (185, 213), "tapete_borda_px": 4, "objeto_claro": 238, "busca_max": 5.0,
+                "ladrilho_px": 12, "tom_px": 5,
+                "busca": (1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.6, 3.0, 3.5, 4.0, 4.5, 5.0),
+                "direcoes": (90, 270, 60, 120, 240, 300, 30, 150, 210, 330, 0, 180),
+                "sombra": {"dx": -0.06, "dy": 0.06, "desfoque": 0.07, "opacidade": 0.6},
+                "sombra_contato": {"dx": 0.0, "dy": 0.0, "desfoque": 0.03, "opacidade": 0.3}}
+
+
+def _modelo_poltrona_1p(q=None):
+    """A poltrona da sala íntima do 1º Pavimento: (cor BGR float32, alfa) recortados da final."""
+    q = (q or POLTRONAS_TE)["modelo"]
+    f = cv2.imread(str(CASA / "renders" / PAV_E["1Pavimento"]["final"]))
+    x0, y0, x1, y1 = q["caixa"]
+    r = f[y0:y1, x0:x1].astype(np.float32)
+    lum, rb = r.mean(axis=2), r[..., 2] - r[..., 0]
+    m = cv2.morphologyEx(((lum > q["lum_min"]) & (rb < q["rb_max"])).astype(np.uint8), cv2.MORPH_OPEN,
+                         np.ones((3, 3), np.uint8))
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m)
+    comp = (lab == 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))).astype(np.uint8)
+    cnts, _ = cv2.findContours(comp, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    casca = np.zeros_like(comp)
+    cv2.fillPoly(casca, [cv2.convexHull(max(cnts, key=cv2.contourArea))], 1)
+    xx = np.arange(x0, x1)[None, :]
+    borda = cv2.dilate(casca, np.ones((5, 5), np.uint8)).astype(bool) & (rb < q["borda_rb"]) & (xx > q["borda_x"])
+    m = casca.astype(bool) | borda
+    # a borda antisserrilhada, com a cor do estofado (sem o tapete ou o vinílico de fundo)
+    dentro = cv2.erode(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    _, rot = cv2.distanceTransformWithLabels((~dentro).astype(np.uint8), cv2.DIST_L2, 5,
+                                             labelType=cv2.DIST_LABEL_PIXEL)
+    ys, xs = np.nonzero(dentro)
+    idx = np.zeros(rot.max() + 1, int)
+    idx[rot[ys, xs]] = np.arange(len(ys))
+    cor = r.copy()
+    fora = ~dentro
+    cor[fora] = r[ys[idx[rot[fora]]], xs[idx[rot[fora]]]]
+    al = np.clip(cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.6), 0, 1) * (cv2.dilate(
+        m.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
+    yy, xx2 = np.nonzero(al > 0.01)
+    return cor[yy.min():yy.max() + 1, xx2.min():xx2.max() + 1], al[yy.min():yy.max() + 1, xx2.min():xx2.max() + 1]
+
+
+def _girar_peca(cor, al, esc, ang):
+    h, w = al.shape
+    lado = int(np.ceil(max(h, w) * esc * 1.5)) + 4
+    M = cv2.getRotationMatrix2D((w / 2, h / 2), float(ang), esc)
+    M[0, 2] += lado / 2 - w / 2
+    M[1, 2] += lado / 2 - h / 2
+    c2 = cv2.warpAffine(cor * al[..., None], M, (lado, lado), flags=cv2.INTER_AREA)
+    a2 = cv2.warpAffine(al, M, (lado, lado), flags=cv2.INTER_AREA)
+    return c2 / np.maximum(a2, 1e-4)[..., None], a2
+
+
+def _melhor_desloc(out, L, m, anel, proibido, q, t):
+    """O deslocamento (múltiplos do tamanho `t`, nas direções de `q`) do piso que melhor continua o anel em volta do
+    buraco `m`: sem px proibidos, sem px de outra peça (a mais de "objeto" níveis da luz do anel), com o veio vertical do
+    travertino pesando contra o deslocamento para os lados (`retoque_terreo_casae.POLTRONAS`)."""
+    import retoque_terreo_casae as T
+    qt = T.POLTRONAS
+    H, W = L.shape
+    ya, xa = np.nonzero(anel)
+    ym, xm = np.nonzero(m)
+    ref = np.median(L[ya, xa])
+    melhor = None
+    for f in q["busca"]:
+        for g in q["direcoes"]:
+            ox, oy = int(round(f * t * np.cos(np.radians(g)))), int(round(f * t * np.sin(np.radians(g))))
+            if min(xa.min() + ox, ya.min() + oy, xm.min() + ox, ym.min() + oy) < 0 or \
+                    max(xa.max(), xm.max()) + ox >= W or max(ya.max(), ym.max()) + oy >= H:
+                continue
+            if proibido[ym + oy, xm + ox].any() or proibido[ya + oy, xa + ox].any():
+                continue
+            if (np.abs(L[ym + oy, xm + ox] - ref) > qt["objeto"]).mean() > 0.002:
+                continue
+            custo = np.abs(out[ya + oy, xa + ox] - out[ya, xa]).mean()
+            custo += qt["lateral"] * abs(np.cos(np.radians(g)))
+            custo += 400 * (np.abs(L[ym + oy, xm + ox] - ref) > qt["fuga"]).mean()
+            if melhor is None or custo < melhor[0]:
+                melhor = (custo, ox, oy)
+    return melhor[1:]
+
+
+def _material_por_ladrilhos(out, buraco, livre, q, t):
+    """O piso de um material dentro do `buraco`: o tom (o desfoque de `tom_px` só do material limpo em volta, `livre`)
+    mais o grão (o que sobra do desfoque de 3 px), copiado em ladrilhos de `ladrilho_px` com meia sobreposição, cada um
+    do trecho mais perto em que ele cabe todo em `livre` (até `busca_max` x `t`), somados com janela de Hann."""
+    H, W = buraco.shape
+    s_ = q["tom_px"]
+    lv = livre.astype(np.float32)
+    tom = cv2.GaussianBlur(out * lv[..., None], (0, 0), s_) / np.maximum(cv2.GaussianBlur(lv, (0, 0), s_),
+                                                                         1e-6)[..., None]
+    grao = out - cv2.GaussianBlur(out, (0, 0), 3)
+    n = q["ladrilho_px"]
+    integ = cv2.integral(livre.astype(np.uint8))
+    cabe = (integ[n:, n:] - integ[:-n, n:] - integ[n:, :-n] + integ[:-n, :-n]) == n * n   # caixa n x n em (y, x)
+    janela = np.outer(np.hanning(n + 2)[1:-1], np.hanning(n + 2)[1:-1]).astype(np.float32)
+    soma = np.zeros_like(out)
+    peso = np.zeros((H, W), np.float32)
+    ys, xs = np.nonzero(buraco)
+    R = int(q["busca_max"] * t)
+    for y in range(ys.min() - n // 2, ys.max() + 1, n // 2):
+        for x in range(xs.min() - n // 2, xs.max() + 1, n // 2):
+            if not buraco[max(y, 0):y + n, max(x, 0):x + n].any():
+                continue
+            y0, x0 = max(y - R, 0), max(x - R, 0)
+            vy, vx = np.nonzero(cabe[y0:y + R, x0:x + R])
+            k = np.argmin((vy + y0 - y) ** 2 + (vx + x0 - x) ** 2)
+            sy, sx = vy[k] + y0, vx[k] + x0
+            soma[y:y + n, x:x + n] += grao[sy:sy + n, sx:sx + n] * janela[..., None]
+            peso[y:y + n, x:x + n] += janela
+    return tom + soma / np.maximum(peso, 1e-6)[..., None]
+
+
+def _fonte_tom(out, anel, ox, oy):
+    """A imagem deslocada de (ox, oy), com o tom corrigido pela mediana do anel."""
+    ya, xa = np.nonzero(anel)
+    delta = np.median(out[ya, xa], axis=0) - np.median(out[ya + oy, xa + ox], axis=0)
+    return np.roll(out, (-oy, -ox), axis=(0, 1)) + delta, delta
+
+
+def poltronas_living_te(Q, img, q=None):
+    """As 6 bouclé do living trocadas pela poltrona da sala íntima do 1º Pavimento (a imagem sem rótulos)."""
+    import retoque_terreo_casae as T
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    q = q or POLTRONAS_TE
+    qt = T.POLTRONAS
+    H, W = img.shape[:2]
+    px_m = Q.px_m
+    pecas = [(np.float32(Q.p2q(*cen)), np.float32(Q.p2q(*alvo)), tam * px_m) for bid, cen, alvo, tam in qt["pecas"]
+             if bid == q["bloco_velho"]]
+    out = img.astype(np.float32)
+    yy, xx = np.mgrid[0:H, 0:W]
+    # as bouclé desenhadas (como em `T.poltronas`, na final) e o disco com o halo e a sombra
+    cv_, av_ = blocos.bloco(q["bloco_velho"], 100)
+    fx, fy = qt["frente"][q["bloco_velho"]]
+    # a mesa redonda fica (a sombra dela é refeita no fim)
+    prot = np.zeros((H, W), bool)
+    mesas = []
+    for (px, py), rp in qt["proteger"]:
+        (cx_, cy_), (ex_, _) = Q.p2q(px, py), Q.p2q(px + rp, py)
+        mesas.append((cx_, cy_, abs(ex_ - cx_)))
+        prot |= np.hypot(xx - cx_, yy - cy_) < abs(ex_ - cx_) + q["mesa_folga_px"]
+    L = out.mean(axis=2)
+    mascaras = []
+    for i, (cen, alvo, t) in enumerate(pecas):
+        ang = np.degrees(np.arctan2(alvo[0] - cen[0], alvo[1] - cen[1]) - np.arctan2(fx, fy))
+        _, a2 = _girar_peca(cv_.astype(np.float32), av_.astype(np.float32), t / max(av_.shape), ang)
+        lado = a2.shape[0]
+        x0, y0 = int(round(cen[0] - lado / 2)), int(round(cen[1] - lado / 2))
+        m = np.zeros((H, W), np.uint8)
+        m[y0:y0 + lado, x0:x0 + lado] = (a2 > 0.03).astype(np.uint8)
+        k = 2 * (q["folga_tapete_px"] if i in q["no_tapete"] else q["folga_px"]) + 1
+        m = cv2.dilate(m, np.ones((k, k), np.uint8)).astype(bool)
+        if i not in q["no_tapete"]:
+            r, sm = q["raio_mesa"] * t, q["sombra_motor"] * t
+            m |= (np.hypot(xx - cen[0], yy - cen[1]) < r) | (np.hypot(xx - cen[0] + sm, yy - cen[1] - sm) < r)
+        mascaras.append(m & ~prot)
+    e = q["esfuma_px"]
+    Lb = cv2.GaussianBlur(L, (0, 0), 3.0)
+    lo, hi = q["tapete_lum"]
+    tap = cv2.morphologyEx(((Lb > lo) & (Lb < hi)).astype(np.uint8), cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
+    cober = np.zeros((H, W), np.float32)
+    for i, ((cen, alvo, t), m) in enumerate(zip(pecas, mascaras)):
+        pend = np.logical_or.reduce(mascaras[i:]) | prot
+        anel = cv2.dilate(m.astype(np.uint8), np.ones((2 * e + 5,) * 2, np.uint8)).astype(bool) & ~m & ~pend
+        if i not in q["no_tapete"]:
+            ox, oy = _melhor_desloc(out, L, m, anel, pend, q, t)
+            fonte, delta = _fonte_tom(out, anel, ox, oy)
+            print(f"      poltrona {i}: fonte deslocada ({ox}, {oy}), correção de tom {np.round(delta, 1)}")
+        else:
+            # o tapete e o travertino em volta, cada um do seu material; a borda do tapete, puxada do anel para dentro
+            mm = cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8))
+            rot = cv2.inpaint((tap * 255).astype(np.uint8), mm, 2 * e, cv2.INPAINT_TELEA).astype(np.float32) / 255
+            a_tap = np.clip((cv2.GaussianBlur(rot, (0, 0), q["tapete_borda_px"] / 2) - 0.5) * 2.5 + 0.5, 0, 1)
+            fontes = []
+            for nome, mat, parte in (("tapete", tap.astype(bool), a_tap > 0.01),
+                                     ("travertino", Lb >= hi, a_tap < 0.99)):
+                livre = cv2.erode(mat.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~pend
+                livre &= (L < q["objeto_claro"]) if nome == "travertino" else True
+                fontes.append(_material_por_ladrilhos(out, m & parte, livre, q, t))
+                print(f"      poltrona {i}, {nome}: grão em ladrilhos de {q['ladrilho_px']} px, tom do anel")
+            fonte = fontes[1] * (1 - a_tap[..., None]) + fontes[0] * a_tap[..., None]
+        al = cv2.GaussianBlur(cv2.dilate(m.astype(np.uint8), np.ones((2 * e + 1,) * 2, np.uint8)).astype(np.float32),
+                              (0, 0), e / 2)[..., None]
+        al[pend[..., None] & ~m[..., None]] = 0
+        al[m] = 1
+        out = out * (1 - al) + fonte * al
+        cober = np.maximum(cober, al[..., 0])
+    # a sombra da mesa no piso novo
+    for cx_, cy_, rm in mesas:
+        sm = q["mesa_sombra"]
+        d = np.hypot(xx - cx_ - sm["dx"] * 2 * rm, yy - cy_ - sm["dy"] * 2 * rm)
+        a = cv2.GaussianBlur(np.clip(rm + 0.5 - d, 0, 1).astype(np.float32), (0, 0), sm["desfoque"] * 2 * rm)
+        a *= sm["opacidade"] * cober * ~prot
+        out = out * (1 - a[..., None]) + out * 0.4 * a[..., None]
+    # a poltrona da sala íntima, no centro, no tamanho e na direção do PDF, com a sombra curta
+    cor, al = _modelo_poltrona_1p(q)
+    fx, fy = q["modelo"]["frente"]
+    for cen, alvo, t in pecas:
+        ang = np.degrees(np.arctan2(alvo[0] - cen[0], alvo[1] - cen[1]) - np.arctan2(fx, fy))
+        c2, a2 = _girar_peca(cor, al, t / max(al.shape), ang)
+        T.pousar_planta(out, c2, a2, float(cen[0]), float(cen[1]), t, q["sombra"])
+        T.pousar_planta(out, c2, a2, float(cen[0]), float(cen[1]), t, q["sombra_contato"])
+    print(f"    {len(pecas)} poltronas do living no modelo da sala íntima do 1º Pavimento (as bouclé e o halo saíram)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def poltronas_living_sobre_final_te(Q, img):
+    """Sobre a final do Térreo: a final sem os rótulos, as poltronas trocadas, os rótulos de novo; só a área mudada."""
+    limpa, _ = sem_rotulos("Terreo", img, novos=True)
+    com = poltronas_living_te(Q, limpa)
+    nova = escrever_rotulos("Terreo", com)
+    mud = cv2.dilate((np.abs(com.astype(np.int16) - limpa.astype(np.int16)).max(axis=2) > 0).astype(np.uint8),
+                     np.ones((5, 5), np.uint8)).astype(bool)
+    return np.where(mud[..., None], nova, img)
+
+
 def nublado_tracejados_te(Q, img):
     """Sobre a final do 1º Pavimento: o Térreo nublado sem as projeções do Térreo (como no 1º Pavimento da Casa A): sai
     o tracejado cinza da revisão de 28/10 que tinha entrado no nublado, e a borda de baixo da varanda fica reta, pela
@@ -2894,6 +3136,103 @@ def tracejados_1p_sobre_final(Q, img):
     return out
 
 
+# O sofá da sala íntima (usuário, 28/10/26: "corrija a imperfeição no sofá gerada pelo piso"): a borda de cima do encosto
+# tinha dois entalhes do render, junto às emendas das almofadas, com o piso entrando no estofado (mais à vista com o
+# vinílico novo). Em cada entalhe (x0, x1, y0, y1 em px da final), o topo do encosto e a sombra fina dele sobre o piso vêm
+# da mesma linha, das colunas inteiras a `dx` px, com `suave_px` de transição dos lados: a borda fica reta, como no resto
+# do encosto (y = 1199 px), e as emendas seguem logo abaixo.
+SOFA_1P = {"remendos": [(1911, 1924, 1194, 1203, -14), (1969, 2000, 1194, 1204, -32)], "suave_px": 2}
+
+
+def sofa_sala_intima_1p(Q, img, q=None):
+    q = q or SOFA_1P
+    out = img.astype(np.float32)
+    s = q["suave_px"]
+    for x0, x1, y0, y1, dx in q["remendos"]:
+        a = np.ones(x1 - x0, np.float32)
+        a[:s] = (np.arange(s) + 1) / (s + 1)
+        a[-s:] = a[:s][::-1]
+        a = a[None, :, None]
+        out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + img[y0:y1, x0 + dx:x1 + dx].astype(np.float32) * a
+    print(f"    sofá da sala íntima: {len(q['remendos'])} entalhes do encosto refeitos com o encosto ao lado")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def _mais_perto(r, fonte, alvo):
+    """Cada px de `alvo` com a cor do px de `fonte` mais perto."""
+    _, rot = cv2.distanceTransformWithLabels((~fonte).astype(np.uint8), cv2.DIST_L2, 5,
+                                             labelType=cv2.DIST_LABEL_PIXEL)
+    ys, xs = np.nonzero(fonte)
+    idx = np.zeros(rot.max() + 1, int)
+    idx[rot[ys, xs]] = np.arange(len(ys))
+    out = r.copy()
+    k = idx[rot[alvo]]
+    out[alvo] = r[ys[k], xs[k]]
+    return out
+
+
+def contorno_peca(img, caixa, semente, corte=None, rb_max=48, lum_min=95, sigma=2.0, piso_rb=50, franja_px=5, piso_lum=140):
+    """O contorno de uma peça clara (estofado) sobre o vinílico, alisado: a peça é o que tem R - B abaixo de `rb_max` (o
+    vinílico é mais quente) ligado à `semente`, fora do meio-plano `corte` (a*x + b*y + c > 0: o tapete, a mesa), com os
+    furos cheios; a silhueta alisada (desfoque de `sigma` px, limiar 0,5) leva os entalhes ao estofado mais perto (2 px
+    para dentro) e os calombos e a franja (o que, a até `franja_px` px da peça, não tem cara de vinílico) ao piso mais
+    perto (a 3 px da peça, com a sombra de antes); a borda nova vai antisserrilhada. Só muda uma faixa fina em volta."""
+    x0, y0, x1, y1 = caixa
+    r = img[y0:y1, x0:x1].astype(np.float32)
+    h, w = r.shape[:2]
+    lum, rb = r.mean(axis=2), r[..., 2] - r[..., 0]
+    m = (rb < rb_max) & (lum > lum_min)
+    livre = np.ones((h, w), bool)
+    if corte is not None:                                  # meio-plano fora: a*x + b*y + c > 0 (px da final)
+        a, b, c = corte
+        yy, xx = np.mgrid[y0:y1, x0:x1]
+        livre = ~(a * xx + b * yy + c > 0)
+        m &= livre
+    n, lab = cv2.connectedComponents(m.astype(np.uint8))
+    m = lab == lab[semente[1] - y0, semente[0] - x0]
+    fora = (m.astype(np.uint8) * 255).copy()
+    cv2.floodFill(fora, np.zeros((h + 2, w + 2), np.uint8), (0, 0), 255)
+    m = m | (fora == 0)
+    ms = cv2.GaussianBlur(m.astype(np.float32), (0, 0), sigma) > 0.5
+
+    def mx(a_, k):
+        return cv2.dilate(a_.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+
+    def mn(a_, k):
+        return cv2.erode(a_.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    # A: o estofado (os entalhes com o estofado mais perto, 2 px para dentro); F: o piso (a franja e os calombos com o
+    # piso mais perto, a 3 px do estofado, com a sombra de antes)
+    A = _mais_perto(r, mn(m, 5), ms & ~mn(m, 5))
+    # a franja: junto à peça, o que não tem cara de piso (meio estofado, meio piso)
+    piso = (rb >= piso_rb + 2) & (lum < piso_lum)
+    franja = mx(m, franja_px * 2 + 1) & ~ms & ~piso & livre
+    F = _mais_perto(r, ~mx(m, 7) & ~franja & (rb >= piso_rb) & livre, (~ms & mx(m, 5)) | franja)
+    al = np.clip(cv2.GaussianBlur(ms.astype(np.float32), (0, 0), 0.7), 0, 1)[..., None]
+    nova = A * al + F * (1 - al)
+    # junto ao corte (o tapete, a mesa) nada muda: lá a borda alisada levaria o piso para a quina
+    faixa = (mx(m ^ ms, 5) | (mx(ms, 5) & ~mn(ms, 5)) | (mx(m, 5) & ~mn(m, 5)) | mx(franja, 3)) & mn(livre, 5)
+    reg = r.copy()
+    reg[faixa] = nova[faixa]
+    out = img.copy()
+    out[y0:y1, x0:x1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    return out, m, ms
+
+
+# A poltrona da suíte master (usuário, 28/10/26: "corrija o contorno do encosto da poltrona da suite master"): o contorno
+# do render, girado a 45°, era serrilhado e com calombos, mais à vista no vinílico novo. `contorno_peca` alisa a
+# silhueta; o meio-plano acima da reta pela quina de cima (`corte`, de p0 a p1) deixa de fora o tapete e a mesa lateral.
+POLTRONA_MASTER_1P = {"caixa": (1419, 776, 1508, 872), "semente": (1458, 825), "corte": ((1446, 786), (1500, 829))}
+
+
+def poltrona_master_1p(Q, img, q=None):
+    q = q or POLTRONA_MASTER_1P
+    (ax, ay), (bx, by) = q["corte"]
+    a, b = by - ay, -(bx - ax)
+    out, m, ms = contorno_peca(img, q["caixa"], q["semente"], corte=(a, b, -(a * ax + b * ay)))
+    print(f"    poltrona da suíte master: contorno alisado ({int((m ^ ms).sum())} px trocados de lado)")
+    return out
+
+
 def passos_1pav(Q):
     return [
         ("nublado", lambda im: nublado_novo(Q, im)),
@@ -2902,6 +3241,8 @@ def passos_1pav(Q):
         ("bancadas", lambda im: _bancadas(Q, im, BANCADAS_1PAV_E)),
         ("paredes", lambda im: paredes_e(Q, im)),
         ("varanda", lambda im: varanda_1pav_e(Q, im)),
+        ("sofa", lambda im: sofa_sala_intima_1p(Q, im)),
+        ("poltrona_master", lambda im: poltrona_master_1p(Q, im)),
         ("tracejados", lambda im: tracejados_pb_1p(Q, im)),
         ("rotulos", lambda im: escrever_rotulos("1Pavimento", im)),
     ]
@@ -2910,9 +3251,10 @@ def passos_1pav(Q):
 PASSOS = {"Subsolo": passos_subsolo, "Terreo": passos_terreo, "1Pavimento": passos_1pav}
 # as etapas que só vão sobre a final (`--sobre-final`): numa rodada do zero, o nublado já vem com a revisão do Térreo
 SO_SOBRE_FINAL = {"1Pavimento": {"nublado_revisao": nublado_revisao_te, "nublado_tracejados": nublado_tracejados_te,
-                                 "tracejados_final": tracejados_1p_sobre_final},
+                                 "tracejados_final": tracejados_1p_sobre_final, "sofa": sofa_sala_intima_1p,
+                                 "poltrona_master": poltrona_master_1p},
                   "Terreo": {"seta_hall": seta_rotulo_hall_te, "tracejados_final": tracejados_sobre_final_te,
-                             "vao_servico": vao_rotulo_servico_te}}
+                             "vao_servico": vao_rotulo_servico_te, "poltronas_living": poltronas_living_sobre_final_te}}
 
 
 def final_3840(chave, de=None, ate=None, salvar=True):

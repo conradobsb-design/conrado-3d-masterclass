@@ -3503,3 +3503,13 @@ O usuário, sobre as duas inconformidades: "item 1: A. item 2: pode".
 - **Cantos dos vazios.** Revendo de perto, os cantos dos dois vazios tinham restos do cinza antigo e o tom da escada ou do vidro puxado para dentro (já na entrega anterior). A limpeza agora preserva as linhas da borda (a linha do degrau, o vidro, a face da parede) e o degradê do nublado; o X vai de canto a canto.
 
 Antes e depois (o antes é a entrega anterior, ee4c56e): `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_{rouparia_vao,vazio_hall_sem_terreo,vazio_escada_bordas}_antes_depois.jpg`. Prancha do 1º Pavimento e PDF da Casa E refeitos.
+
+### Pedidos de 28/10/26: sofá da sala íntima, poltrona da suíte master e poltronas do living (Casa E)
+
+O usuário: "corrija a imperfeição no sofá gerada pelo piso. no primeiro pavimento da casa E"; "corrija o contorno do encosto da poltrona da suite master"; "vamos aplicar essa poltrona da sala íntima do primeiro pavimento da casa e em substituição das poltronas a todas as 6 poltronas do terreo, também da casa E".
+- **Sofá da sala íntima (1º Pavimento).** Os dois entalhes do piso no topo do encosto saíram; a borda do encosto fica reta de ponta a ponta, com as emendas das almofadas logo abaixo.
+- **Poltrona da suíte master (1º Pavimento).** O contorno ficou liso, sem os calombos, o serrilhado e a franja clara de baixo; o tapete e a mesa lateral não mudam.
+- **Poltronas do living (Térreo).** As 6 bouclé (as 2 no tapete, junto à mesa de centro, e as 4 em volta da mesa redonda) agora são a poltrona da sala íntima do 1º Pavimento, cada uma no tamanho e na posição do PDF, de frente para a mesa, com uma sombra curta mais marcada para não sumir no travertino. As bouclé saíram com o halo escuro que o retoque tinha deixado em volta; o travertino volta contínuo, com o veio, e o tapete com o grão e a borda; a sombra da mesa redonda foi refeita.
+- **Inconformidade vista, para o OK do usuário (nada alterado):** no 1º Pavimento, a faixa do Térreo nublado logo abaixo da sala íntima ainda mostra, esmaecidas, as 2 bouclé de baixo da mesa redonda (o nublado vem do Térreo de antes); proposta: refazer o nublado com o Térreo novo, para mostrar as poltronas novas. Imagem (em cima o 1º Pavimento, embaixo o Térreo novo): `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_inconformidade_nublado_poltronas.jpg`.
+
+Antes e depois (o antes é a entrega anterior, da8fecd): `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_2810_{sofa_sala_intima,poltrona_suite_master}_antes_depois.jpg` e `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_2810_poltronas_living_antes_depois.jpg`. Pranchas do Térreo e do 1º Pavimento e PDF da Casa E refeitos.
