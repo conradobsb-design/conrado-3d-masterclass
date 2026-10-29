@@ -3988,3 +3988,23 @@ Conferidos e conformes:
 - escadas;
 - cortinas;
 - Térreo nublado do 1º Pavimento.
+
+**Aplicado com o OK do usuário: os itens 1 a 10.** OK: "No item 4, preencha com tom Branco sem tracejado. Itens de 1 a 10 ok." O item 11 (o piso entre o bronze e o vidro das suítes 1 e 2) não foi aprovado e fica como está, aguardando o OK.
+
+O que foi feito (`POE642_CasaA/scripts/revisao_casaa_2910.py --revisao`, uma vez, sobre as finais aprovadas do commit 1ccaaa3; o Térreo primeiro, porque o Subsolo nevoa as peças dele):
+1. Térreo, JARDIM (4,79 m²): o tracejado da projeção da cobertura sai só sob o texto (`jardins_ta`).
+2. Térreo, ÁREA DE SERVIÇO DESCOBERTA: o X tracejado aberto em volta do texto, com o rótulo no cruzamento, como na Casa E (`servico_ta`).
+3. Térreo, JARDIM (17,46 m²): o rótulo em branco sobre a grama (`jardins_ta`).
+4. Térreo, a faixa entre o hall externo e o jardim: toda em branco, sem o tracejado, no retângulo do PDF; os restos claros do X antigo na parede em volta recebem a cor da parede (`faixa_branca_ta`).
+5. Elevador: a cabine de aço padrão, a mesma da Casa B e do Subsolo de 26/10, nos três pavimentos, com o rótulo ELEVADOR de novo por cima (`elevador_ta`). Os X dos shafts do Subsolo (os dois) e do Térreo saem do cinza e entram em preto, só no miolo, abertos em volta do rótulo SHAFT do Térreo (`shafts_ta`). O shaft do 1º Pavimento não tem X no PDF e fica como está.
+6. Subsolo: as peças do Térreo que o PDF do Subsolo desenha fora dele (o spa, a borda da piscina e o deck, acima da escada) nevoadas, a partir do Térreo novo, sem os rótulos e sem as letras dele; fora delas, a hachura fica (`nevoado_ta`).
+7. Térreo, as 12 cadeiras das duas mesas redondas da varanda gourmet: as de couro do conjunto padrão das Casas B e C (`final3840_casac.jogos_varanda_tc`). O tampo de madeira do render tinha uns 4 px a menos de raio que o do PDF (o anel entre os dois era das cadeiras antigas): antes, ele é ampliado em volta do centro até o círculo do PDF (`mesas_varanda_ta`).
+8. Térreo, mesa de jantar: as 8 cadeiras do PDF (a lista falava em 10; o PDF tem 8) na cadeira padrão das outras casas (`final3840_casad.jantar_d`), de frente para a mesa, 1/3 sob o tampo; antes, o travertino da mesma linha no lugar das antigas (`jantar_ta`).
+9. Poltronas: as 13 do Térreo (2 da varanda, 2 sob a projeção da varanda, 3 da sala de estar em volta do tapete, as 4 em X, a do terraço gourmet e a do escritório) e as 3 do 1º Pavimento (sala íntima, suíte 2 e suíte master) no modelo padrão, a poltrona da sala íntima do 1º Pavimento da Casa E, com a sombra e o contato dela (`poltronas_ta`). O lugar das antigas é refeito antes (`tirar_poltronas_ta`): no piso, o mesmo material da mesma linha (os estratos do travertino e as réguas do vinílico são deitados); no tapete, um modelo do próprio tapete (o tom limpo do miolo e o perfil da borda); a passagem para o entorno sem degrau.
+10. Sofás e tapetes: os sofás da varanda (o curvo e o reto), da sala de estar e do terraço gourmet, e o sofá em L da sala íntima do 1º Pavimento com as duas almofadas, estofados como nas Casas B e D (`revisao_casab_2910.estofados_pdf_tb`). A trama do tapete da Casa D (`final3840_casad.tapete_trama_d`) em todos os tapetes: os da varanda e da sala de estar no Térreo; os das 4 suítes e o da sala íntima no 1º Pavimento.
+
+As projeções tracejadas que cruzam as peças trocadas no Térreo voltam por cima, em preto ou branco pelo fundo (`tracejados_ta`).
+
+Antes e depois: `POE642_CasaA/renders/POE642_CasaA_PH_<pavimento>_2910_item<n>_<trecho>_antes_depois.jpg` (16 imagens: 9 do Térreo, 2 do Subsolo, 5 do 1º Pavimento). Refeitos as três pranchas, o PDF da Casa A e o book.
+
+Pendências: o item 11 aguarda o OK; o book segue com os textos provisórios (as áreas das Casas D e E, os textos das casas e o nome do empreendimento).
