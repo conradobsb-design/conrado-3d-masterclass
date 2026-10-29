@@ -1566,13 +1566,19 @@ As páginas são desenhadas em PIL a 200 dpi (3307 × 2339 px). O desenho é fei
 ### A revisão de 29/10 da Casa A: `revisao_casaa_2910.py`
 
 Retoques locais sobre as finais aprovadas, como o `revisao_casab_2910.py` da Casa B.
-- **Portas das suítes do 1º Pavimento (`--portas`, uma vez, sobre a final aprovada).** Pedidos do usuário: "note que é o mesmo caso da casa B: 4 folhas na varanda, sendo duas de vidro e duas de bronze", "e que cobrem o banho master: as de bronze" e "e atenção ao piso entre as folhas de vidro e de bronze".
+- **Portas das suítes do 1º Pavimento (`--portas`, sobre a final aprovada de antes das portas).** Pedidos do usuário: "note que é o mesmo caso da casa B: 4 folhas na varanda, sendo duas de vidro e duas de bronze", "e que cobrem o banho master: as de bronze" e "e atenção ao piso entre as folhas de vidro e de bronze".
   - **As folhas (`VAOS_SUITES_TA`, `BRISES_SUITES_TA`):** em pt do PDF, cada uma são duas tiras brancas de 1,4 pt da ARQ_PAREDE. São pares (de fora, de dentro) por trecho, nas suítes 3, 2 e master (varanda à esquerda, `lado` +1) e 1 (varanda à direita, -1). Mais as 2 folhas de fora na frente do banho master, só em bronze.
   - **O piso entre as folhas (`piso_entre_folhas_ta`, `PISO_ENTRE_FOLHAS_TA`):**
     - Abrange a faixa da face de fora do bronze à de dentro do vidro, mais `folga_dentro_px` para o quarto, que leva os nós dos caixilhos antigos, em todo o vão.
     - Recebe um bloco de réguas limpo do próprio quarto, do mesmo tamanho, procurado a até `busca_px` da porta. Só valem px de madeira (`revisao_casab_2910._madeira`) a até `tol_cor` da cor mediana do piso: fora a cortina, a sombra dela, os tapetes e as camas. Escolhe-se o bloco mais limpo e, entre os limpos, o mais perto.
     - Na Casa B, a faixa ia na cor média de cada linha; aqui ficava chapada e rosada, porque junto à porta a cortina cobre o piso.
     - Do lado de fora, `folga_fora_px` px junto à face recebem o piso da varanda da mesma linha, `fora_de_px` mais longe.
-  - **Depois:** `vidros_dentro_ta` desenha as folhas de dentro em vidro fino, com o miolo e as bordas da Casa B; `final3840_casac.brises_suites_tc` desenha as de fora em bronze escovado.
+  - **Depois:** `vidros_dentro_ta` desenha o plano de dentro em vidro fino, com o miolo e as bordas da Casa B; `bronzes_fora_ta` desenha o de fora em bronze escovado, com o bronze, o escovado, o brilho, o contorno e a sombra de `final3840_casac.brises_suites_tc`.
+  - **As junções (`JUNCOES_TA`).** Pedido do usuário: "Preciso que as portas de vidro tanto de vidro quanto de bronze tenhas as junções, na origem e na extremidade conectando as duas  de seus respectivos matérias (vidro com vidro e bronze com bronze)".
+    - São as peças de 2,8 x 4,5 pt da ARQ_PAREDE em cada plano, em pt do PDF, por suíte: `fora` e `dentro`. Na origem, do batente à primeira folha; no encontro das folhas, as duas peças lado a lado, unidas num retângulo só; na extremidade, da última folha ao batente.
+    - Cada plano é uma máscara só (`_plano_ss`, a 8 x): as folhas e as junções unidas. O vidro leva a borda em volta dela toda e o miolo pela máscara erodida. O bronze leva o contorno centrado na borda da máscara; o brilho fica só nas folhas.
+    - Na suíte master, `BRISES_SUITES_TA["folhas_pt"]["Suíte Master"]` junta as 2 folhas de fora do quarto e as 2 da frente do banho master: o plano segue de um para o outro, com as duas peças em fila entre eles.
+    - `batentes`: a face de cada batente (y, pt). O piso entre as folhas vai até eles, para limpar os caixilhos antigos das pontas. Com a faixa mais comprida, o bloco de réguas já não sai 100% limpo; os poucos px que não são madeira limpa são refeitos com `cv2.inpaint`, a partir da madeira em volta.
+  - **Como refazer:** sempre sobre a final aprovada de antes das portas (commit 29588a5), passada em `--antes`. Sobre a final atual, as portas sairiam duas vezes.
   - **`revisao_casab_2910.vaos_suites_tb(Q, img, q=None)`:** passou a aceitar a configuração. Sem ela, faz o mesmo de antes na Casa B.
 - **Mapas da revisão:** `renders/POE642_CasaA_PH_<pavimento>_2910_revisao_mapa.jpg`. A base do PDF é rasterizada no quadro de 3840 px pela afim do `QuadroA` (`p2q`), na escala 4 do pymupdf, e posta ao lado da final.

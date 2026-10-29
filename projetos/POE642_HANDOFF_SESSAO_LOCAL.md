@@ -3952,6 +3952,19 @@ O que foi feito (`POE642_CasaA/scripts/revisao_casaa_2910.py --portas`, uma vez,
 - Antes e depois: `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_2910_portas_{suite1,suite2,suite3,suite_master}_antes_depois.jpg`.
 - Refeitos a prancha do 1º Pavimento, o PDF da Casa A e o book. Aguarda a validação.
 
+**Depois, também a pedido do usuário: as junções das folhas.** Pedido: "Preciso que as portas de vidro tanto de vidro quanto de bronze tenhas as junções, na origem e na extremidade conectando as duas  de seus respectivos matérias (vidro com vidro e bronze com bronze)".
+- No PDF, cada plano de folhas tem peças de junção de 2,8 x 4,5 pt:
+  - na origem, do batente à primeira folha;
+  - no encontro das duas folhas, duas peças lado a lado, que fazem o degrau de um trilho para o outro;
+  - na extremidade, da última folha ao batente.
+- Na final, as folhas de cada plano estavam soltas, e as pontas guardavam os caixilhos antigos do render.
+- Agora as junções estão no material do plano: bronze com bronze por fora, vidro com vidro por dentro. Cada plano é uma peça só, com um contorno em volta das folhas e das junções. O piso entre as folhas vai até os batentes.
+- Suíte master: o bronze segue do quarto para a frente do banho master, com as duas peças em fila entre as folhas. Isso fecha o trecho de madeira que aparecia entre elas.
+- Suítes 1 e 2: a junção da origem de fora encosta no guarda-corpo de vidro da varanda, que segue.
+- Refeito sobre a final aprovada, a de antes das portas (commit 29588a5): `revisao_casaa_2910.py --portas --antes <essa final>`.
+- Antes e depois: `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_2910_juncoes_{suite1,suite2,suite3,suite_master}_antes_depois.jpg`, e as pontas e os encontros de perto em `..._2910_juncoes_detalhe_antes_depois.jpg`.
+- Refeitos a prancha do 1º Pavimento, o PDF da Casa A e o book. Aguarda a validação.
+
 **Para o OK (nada alterado).** Mapas: `POE642_CasaA/renders/POE642_CasaA_PH_{Subsolo,Terreo,1Pavimento}_2910_revisao_mapa.jpg`, com a final e, em cada item, a final ao lado da base do PDF.
 1. Térreo, JARDIM (4,79 m²): o tracejado da projeção da cobertura passa por baixo do texto. Proposta: tirar o traço só sob o texto, como na Casa B (seção 12).
 2. Térreo, ÁREA DE SERVIÇO DESCOBERTA: o X tracejado atravessa o rótulo. Proposta: abrir o X em volta do texto, com o rótulo no cruzamento, como na Casa E (seção 12).
@@ -3963,6 +3976,7 @@ O que foi feito (`POE642_CasaA/scripts/revisao_casaa_2910.py --portas`, uma vez,
 8. Térreo, as 10 cadeiras da mesa de jantar: estão no desenho do PDF. Proposta: a cadeira padrão das outras casas (seção 8).
 9. Poltronas, Térreo e 1º Pavimento: no Térreo, as da varanda, as 4 em X da sala de estar, a do terraço gourmet e a do escritório; no 1º Pavimento, as da sala íntima, da suíte 2 e da suíte master. Estão lisas, em rosa claro. Proposta: o modelo padrão, a poltrona da sala íntima da Casa E (seção 8).
 10. Sofás e tapetes: no Térreo, os sofás da varanda, da sala de estar e do terraço gourmet; no 1º Pavimento, o da sala íntima; e os tapetes. Proposta: estofados, e a trama em todos os tapetes, como nas Casas B e D (seção 8).
+11. 1º Pavimento, o piso entre o bronze e o vidro das suítes 1 e 2 (achado ao desenhar as junções; no mapa do 1º Pavimento): nessas duas portas, o piso do quarto do PDF vai só até o vidro. Entre o vidro e o bronze, o PDF tem o piso da varanda: ali as folhas de fora correm do lado de fora da fachada. Na final, a faixa toda está na madeira do quarto, como no render aprovado. Proposta: o travertino da varanda entre o vidro e o bronze dessas duas portas, como no PDF. Nas suítes 3 e master, o PDF tem a madeira entre os dois planos, e fica.
 
 Conferidos e conformes:
 - portas de giro, sem "segunda linha";
