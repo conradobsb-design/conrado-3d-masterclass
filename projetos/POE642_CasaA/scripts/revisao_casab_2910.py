@@ -1065,8 +1065,9 @@ MARCENARIA_TB = {"madeira": F.B.ADEGA_B["madeira"], "contorno": F.B.ADEGA_B["con
                            ("armário em L da despensa", [(1796.3, 1527.8, 1819.0, 1641.2), (1721.2, 1618.5, 1796.3, 1641.2)])]}
 
 
-def marcenaria_tb(Q, img):
-    q, k = MARCENARIA_TB, MARCENARIA_TB["ss"]
+def marcenaria_tb(Q, img, q=None):
+    q = q or MARCENARIA_TB
+    k = q["ss"]
     out = img.copy()
     rng = np.random.default_rng(q["semente"])
     for nome, bracos in q["pecas"]:

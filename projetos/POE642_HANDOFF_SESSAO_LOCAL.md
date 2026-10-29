@@ -3844,7 +3844,7 @@ Antes e depois (o antes é a final de d83aee4): `POE642_CasaB/renders/POE642_Cas
 Pedido do usuário: "antes do ok, preciso ver o subsolo da casa B"; vendo-o: "preciso que represente nevoado as partes que constam no pdf, correspondente fora do subsolo. o resto do terreno permanece hachurado."
 
 - O PDF do Subsolo desenha, à esquerda e abaixo da ducha, peças do Térreo: a pedra grande e as 6 lajes da descida (o bege a 50%), o deck em L e os 8 degraus da escada que desce ao deck. A final tinha tudo isso na hachura.
-- Agora elas saem do Térreo final (com as pedras na ordem da descida), sem as letras D, no nublado do 1º Pavimento (70% de branco, 80% da saturação, desfoque leve), recortadas pelo contorno delas no PDF do Subsolo (`POE642_CasaA/scripts/subsolo_nevoado_casab.py`, uma vez sobre a final de f6ea4b6). A escada e o deck da ducha, que são do Subsolo, ficam em cor cheia; o resto do lote (a grama, a piscina, os vãos entre as lajes, que o PDF do Subsolo não desenha) continua na hachura.
+- Agora elas saem do Térreo final (com as pedras na ordem da descida), sem as letras D, no nublado do 1º Pavimento (70% de branco, 80% da saturação, desfoque leve), recortadas pelo contorno delas no PDF do Subsolo (`POE642_CasaA/scripts/subsolo_casab_2910.py`, uma vez sobre a final de f6ea4b6). A escada e o deck da ducha, que são do Subsolo, ficam em cor cheia; o resto do lote (a grama, a piscina, os vãos entre as lajes, que o PDF do Subsolo não desenha) continua na hachura.
 - Só mudam os px dentro das peças; a prancha do Térreo sai igual. Prancha do Subsolo e PDF da Casa B refeitos.
 - Antes e depois (o antes é a final de f6ea4b6): `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2910_{nevoado_terreo,planta}_antes_depois.jpg`.
 
@@ -3853,3 +3853,9 @@ Conferido também, para o OK (nada alterado):
 2. (pergunta) o painel junto ao shaft, na academia (no PDF, um retângulo branco do layout de 0,60 × 2,00 m, com uma diagonal tracejada de projeção), está em pedra areia pontilhada; se for armário, proposta: a marcenaria areia com veios do armário da cozinha do Térreo.
 
 Conformes: o elevador (o desenho do PDF do Subsolo, a cabine sem corrimãos nem X, com a porta e a soleira), os banhos (o vaso marrom do BH sauna é o pedido de 26/10), a garagem sem carros (o PDF não tem), o SHAFT do PDF, os aparelhos da academia.
+
+Resposta do usuário: "altere". Aplicados os dois itens (`subsolo_casab_2910.py --revisao`, uma vez sobre a final de 2cad7fa):
+1. DEPÓSITO, ACADEMIA e SAUNA no meio do piso livre, pela rotina dos rótulos do Térreo (o texto antigo sai e o rótulo volta do meio do recinto, fora dos objetos). O banco da sauna está na ARQ_CONTRAPISO, fora das camadas de obstáculo: entrou como objeto, e a SAUNA foi ao meio do piso acima dele (com o banco, ela só subia 8 px);
+2. o armário junto ao shaft na marcenaria areia com o veio no comprido e o contorno fino, sem sombra, como o armário da cozinha do Térreo.
+
+Só mudam os 3 rótulos e o armário; a prancha do Térreo sai igual. Antes e depois (o antes é a final de 2cad7fa): `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2910_{rotulos_deposito_academia_armario,rotulo_sauna}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa B refeitos. Aguarda o OK da Casa B.
