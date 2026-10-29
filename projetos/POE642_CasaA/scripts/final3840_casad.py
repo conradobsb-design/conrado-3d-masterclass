@@ -1115,11 +1115,13 @@ JANTAR_TD = {"mesa_pt": (1697.4, 956.1, 1765.4, 1126.3), "lado_pt": (26.0, 32.0)
              "linho": {"tom": (176, 196, 214), "gama": 0.75, "sat_madeira": (0.30, 0.15)}}
 
 
-def jantar_d(Q, img, piso):
+def jantar_d(Q, img, piso, q=None):
+    """`q`: a configuração (a da Casa D por padrão). Com `linho["absoluto"]`, o assento fica no `tom` (BGR) na luz da
+    foto (a luz de cada px sobre a mediana do assento, na potência `gama`), não só na cor do `tom`."""
     sys.path.insert(0, str(RAIZ / "_blocos"))
     import blocos
     import final3840_casaa as FA
-    q, s = JANTAR_TD, F.PECAS["sombra"]
+    q, s = q or JANTAR_TD, F.PECAS["sombra"]
     mesa = q["mesa_pt"]
     cads = [d["rect"] for d in Q.desenhos if d.get("layer") == "ARQ_MOBILIÁRIO" and d["type"] in ("f", "fs")
             and q["lado_pt"][0] <= min(d["rect"].width, d["rect"].height)
@@ -1129,6 +1131,13 @@ def jantar_d(Q, img, piso):
     out = img.astype(np.float32)
     P = piso.astype(np.float32)
     mesa_a = FA.ret_aa(Q, mesa)
+    if q.get("mesa_pdf"):                   # a forma do tampo do PDF (a oval), não a caixa dele
+        d_m = next(d for d in Q.desenhos if d.get("layer") == "ARQ_MOBILIÁRIO" and d["type"] in ("f", "fs")
+                   and max(abs(a_ - b_) for a_, b_ in zip(d["rect"], mesa)) < 0.5)
+        X0_, Y0_, X1_, Y1_ = F.ret_q(Q, mesa)
+        mm = _mascara_pdf(Q, [d_m], X0_, Y0_, X1_ - X0_, Y1_ - Y0_, 4).astype(np.float32) / 255
+        mesa_a = np.zeros_like(mesa_a)
+        mesa_a[Y0_:Y1_, X0_:X1_] = cv2.resize(mm, (X1_ - X0_, Y1_ - Y0_), interpolation=cv2.INTER_AREA)
     f = q["folga_px"]
     m = np.zeros(mesa_a.shape, np.float32)
     # a etapa dos pisos ainda tem as cadeiras do render embaixo das do PDF: o piso de cada caixa vem do travertino ao
@@ -1143,7 +1152,7 @@ def jantar_d(Q, img, piso):
         m[b0 - f:b1 + f, a0 - f:a1 + f] = 1
         passo = x1_ - x0_ + 2
         fora = -1 if (r.x0 + r.x1) / 2 < (mesa[0] + mesa[2]) / 2 else 1
-        for dx in (fora * passo, -fora * passo, 2 * fora * passo, -2 * fora * passo):
+        for dx in [j * fora * passo for i in range(1, q.get("passos", 2) + 1) for j in (i, -i)]:
             if 0 <= x0_ + dx and x1_ + dx <= Q.W and trav[y0_:y1_, x0_ + dx:x1_ + dx].all():
                 Pl[y0_:y1_, x0_:x1_] = P[y0_:y1_, x0_ + dx:x1_ + dx]
                 break
@@ -1157,7 +1166,12 @@ def jantar_d(Q, img, piso):
     ql = q["linho"]
     sat = cv2.cvtColor(c0.astype(np.uint8), cv2.COLOR_BGR2HSV)[..., 1:2].astype(np.float32) / 255
     madeira = np.clip((sat - ql["sat_madeira"][0]) / ql["sat_madeira"][1], 0, 1)
-    linho = 255 * (c0.mean(axis=2, keepdims=True) / 255) ** ql["gama"] * np.float32(ql["tom"]) / np.mean(ql["tom"])
+    if ql.get("absoluto"):
+        Lc = c0.mean(axis=2, keepdims=True)
+        ok = (al[y0:y1, x0:x1] > 0.5) & (madeira[..., 0] < 0.5)
+        linho = np.float32(ql["tom"]) * (Lc / max(float(np.median(Lc[..., 0][ok])), 1.0)) ** ql["gama"]
+    else:
+        linho = 255 * (c0.mean(axis=2, keepdims=True) / 255) ** ql["gama"] * np.float32(ql["tom"]) / np.mean(ql["tom"])
     # o halo claro do recorte da foto (o fundo que ficou na borda) sai: o alfa 1 px menor no quadro
     a0_ = cv2.erode(al[y0:y1, x0:x1].astype(np.float32), np.ones((5, 5), np.uint8))
     c0 = (linho * (1 - madeira) + c0 * madeira) * a0_[..., None]
@@ -1167,6 +1181,9 @@ def jantar_d(Q, img, piso):
         (ax, ay), (bx, by) = Q.p2q(r.x0, r.y0), Q.p2q(r.x1, r.y1)
         cx, cy = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
         lado = "esq" if cx < mesa[0] else "dir" if cx > mesa[2] else "cima" if cy < mesa[1] else "baixo"
+        if q.get("lado_norm"):              # a mesa oval: as cabeceiras ficam dentro da caixa dela
+            u, v = (cx - (mesa[0] + mesa[2]) / 2) / (mesa[2] - mesa[0]), (cy - (mesa[1] + mesa[3]) / 2) / (mesa[3] - mesa[1])
+            lado = ("esq" if u < 0 else "dir") if abs(u) > abs(v) else ("cima" if v < 0 else "baixo")
         larg = (by - ay) if lado in ("esq", "dir") else (bx - ax)       # a largura da cadeira ao longo da borda
         sc = 4 * larg / c0.shape[1]
         c = cv2.resize(c0, None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
@@ -1423,13 +1440,15 @@ TAPETE_TRAMA_D = {"tapetes_pt": [("varanda", (1272.6, 1154.9, 1499.3, 1324.9)),
                                   ("suíte 3/escritório", (2069.4, 1523.3, 2239.5, 1636.7))],
                   "anel_px": 10, "recorte": "conjunto_estar_tapete",
                   "trecho": (4, 8, 138, 48), "px_m_foto": 317 / 3.1, "sigma_px": 4.0, "forca": 1.4, "limite": 0.06,
-                  "p_px": 10, "semente": 29, "recuo_px": 3, "croma_tol": 6, "claro_tol": 8}
+                  "p_px": 10, "semente": 29, "recuo_px": 3, "croma_tol": 6, "claro_tol": 8, "miolo": ("varanda",)}
 
 
-def tapete_trama_d(Q, img, nomes=None):
+def tapete_trama_d(Q, img, nomes=None, q=None):
+    """`q`: a configuração (a da Casa D por padrão); `miolo`: os tapetes cuja cor é a mediana de todo o miolo (nos
+    outros, a da faixa junto à borda)."""
     sys.path.insert(0, str(RAIZ / "_texturas"))
     import texturas
-    q = TAPETE_TRAMA_D
+    q = q or TAPETE_TRAMA_D
     foto = cv2.imread(str(RAIZ / "_blocos" / "recortes" / f"{q['recorte']}.png"))
     x0, y0, x1, y1 = q["trecho"]
     L = foto[y0:y1, x0:x1].astype(np.float32).mean(axis=2)
@@ -1452,7 +1471,7 @@ def tapete_trama_d(Q, img, nomes=None):
         k = q["recuo_px"]
         ref = np.zeros((h, w), bool)
         ref[k:-k, k:-k] = True
-        if nome != "varanda":
+        if nome not in q["miolo"]:
             n_ = k + q["anel_px"]
             ref[n_:-n_, n_:-n_] = False
         cm = np.median(cr[ref], axis=0)

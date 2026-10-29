@@ -3801,3 +3801,19 @@ Antes e depois (o antes é a final de 175b56e): `POE642_CasaB/renders/POE642_Cas
 - O usuário, com o recorte da adega: "as garrafas estão em escala? Me parece que não.". Não estavam: as medidas eram px do render de 2000 e, no quadro de 3840, as garrafas saíam com a metade (0,11 m de corpo e 3 cm de diâmetro). Agora em metros, como as da Casa C: 31 garrafas (3 em cada nicho de 0,40 m e 22 no trecho longo). As adegas das Casas C e D já estavam na escala (a da D usa a da C); a da Casa E foi desenhada no quadro do render dela, onde as medidas valem (conferida na final: as garrafas com cerca de 0,32 m).
 
 Antes e depois (o antes é a final de 0b25351): `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2910_{folhas_suites_cima,folhas_suite_3,folhas_suite_master,adega_garrafas}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa B refeitos.
+
+### Pedidos de 29/10/26 depois da revisão da Casa B (2ª leva): tapetes, mesas, cadeiras, peças da suíte master, inox e janela da pia
+
+Aplicados de uma vez sobre a final de d83aee4 (`python3 revisao_casab_2910.py --pedidos`), como retoques locais (detalhes no README, "Os pedidos depois da revisão"):
+
+- "aplique textura em todos os tapetes": a trama da Casa D nos 7 tapetes do PDF (varanda, living, sala íntima e as 4 suítes), sem mudar o tom médio.
+- Mesa redonda do hall, com a referência de uma mesa: "preciso do efeito de madeira ... sendo ao centro um tom mais fechado e os outros três divisórias mais claro": o centro (peça de centro e anel) e o aro da borda em nogueira escura, os três painéis de fora em castanho mais claro, com o veio na tangente e as linhas do PDF como friso.
+- Mesa de jantar: "vamos aplicar o tom mais fechado na mesa e trazer as cadeiras que utilizamos nas casas, mas com o assento mais escuro igual a imagem 2 de referencia": o tampo em nogueira com o veio que tinha; as 10 cadeiras do padrão (a da mesa de jantar das Casas D e E, `mesa_jantar_10`) em ameixa escuro, de frente para a mesa e 1/3 sob o tampo; as antigas saem com o travertino da mesma linha.
+- Mesas redondas da varanda: "tampos da mesa em um tom mais marrom igual a imagem de referencia 2": os tampos em marrom, com o veio.
+- "adicione textura de madeira ao criado mudo do quarto do motorista": em freijó, com o veio, o chanfro e a sombra no piso.
+- "adicionar o tom metalico inox aos eletrodomestico que estão sob a bancada" (área de serviço): a lavadora e a secadora do PDF à mostra, em inox escovado.
+- "corrigir as folhas de vidro da pia da cozinha. são apenas duas folhas": o tubo claro do caixilho antigo entre a bancada e as folhas (na metade da direita) vira o granito da bancada; ficam as duas folhas do PDF.
+- "melhorar a representação dos criados mudos e do cobreleito da suite master": os criados-mudos em nogueira, com a sombra no piso; o cobre-leito e o rolo em matelassê com o relevo de cada losango.
+- "melhorar a representação desses recamiers e mesas de apoio. textura, revestimento, sombra de integração ao solo": os recamiers em linho off-white com volume, trama e vincos, e a sombra macia e a de contato no piso; as mesas de apoio em freijó, com o vão da alça na sombra.
+
+Antes e depois (o antes é a final de d83aee4): `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2910b_{tapetes_varanda_living,tapetes_suites_sala_intima,mesa_hall,mesa_jantar_cadeiras,mesas_varanda,maquinas_inox,janela_pia_cozinha,criado_mudo_motorista,cama_criados_suite_master,recamiers_suite_master}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa B refeitos. Aguarda o OK da Casa B.

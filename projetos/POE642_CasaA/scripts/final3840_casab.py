@@ -1242,8 +1242,12 @@ CAMA_MASTER_F = {
 }
 
 
-def cama_master(Q, img):
-    q, k = CAMA_MASTER_F, CAMA_MASTER_F["ss"]
+def cama_master(Q, img, q=None):
+    """`q`: a configuração (`CAMA_MASTER_F` por padrão). Com `so_cama` (a cama sobre uma final pronta): o banco e a
+    sombra de fora ficam como estão e só a cama volta (no contorno dela), com o cobre-leito em `acolchoado` (o relevo
+    de cada losango do matelassê, na luz do alto à direita) e o rolo com o volume `rolo_vol` (largura em m, força)."""
+    q = q or CAMA_MASTER_F
+    k = q["ss"]
     c = {n: np.float32(v) for n, v in q["cores"].items()}
     cx0, cy0, cx1, cy1 = q["cama_pt"]
     bx0, by0, bx1, by1 = q["banco_pt"]
@@ -1291,8 +1295,10 @@ def cama_master(Q, img):
     # o fundo (o tapete) sem a cama do PDF: a mediana em volta, com a sombra curta do conjunto
     fora = cv2.dilate(((P + Bm) > 0.01).astype(np.uint8), np.ones((3 * k, 3 * k), np.uint8)) == 0
     fundo = np.median(base[fora], axis=0)
-    out = np.where(((P + Bm) > 0.01)[..., None], fundo, base)
-    out *= (1 - sombra(np.maximum(P, Bm)) * (1 - np.maximum(P, Bm)))[..., None]
+    so_cama = q.get("so_cama", False)
+    out = np.where(((P + (0 if so_cama else Bm)) > 0.01)[..., None], fundo, base)
+    if not so_cama:
+        out *= (1 - sombra(np.maximum(P, Bm)) * (1 - np.maximum(P, Bm)))[..., None]
     rug = 1 + 0.010 * ruido(0.18) + 0.006 * ruido(0.05)
     # 1. a placa da cabeceira e o lençol
     placa = P * (ypt >= q["placa_y"])
@@ -1315,6 +1321,12 @@ def cama_master(Q, img):
     u, v = (xpt + ypt) / passo, (xpt - ypt) / passo
     pesp = np.maximum(np.exp(-((u - np.round(u)) * passo / 0.35) ** 2), np.exp(-((v - np.round(v)) * passo / 0.35) ** 2))
     tecido = (1 - 0.045 * pesp) * (1 + 0.014 * ruido(0.15) + 0.006 * ruido(0.04)) * volume(corpo, 0.07, 0.12)
+    if q.get("acolchoado"):
+        # cada losango estufado entre os pespontos: a altura cresce da costura ao meio dele; a luz do alto à direita
+        alt = np.minimum(np.abs(u - np.round(u)), np.abs(v - np.round(v))) * 2
+        alt = cv2.GaussianBlur(np.clip(alt, 0, 1) ** 0.6, (0, 0), 0.3 * k)
+        gy, gx = np.gradient(alt * passo * Q.px_m / 56.69 * k)
+        tecido *= 1 + q["acolchoado"] * np.clip(gx * 0.7 - gy * 0.7, -1, 1)
     out = out * (1 - corpo[..., None]) + c["matelasse"] * tecido[..., None] * corpo[..., None]
     # a peseira bordô atravessada nos pés, com as dobras e a sombra nas duas bordas
     pe0, pe1 = q["peseira_y"]
@@ -1332,7 +1344,11 @@ def cama_master(Q, img):
     rugas = 1 + 0.03 * cv2.GaussianBlur(rng.normal(0, 1, (1, w * k)).astype(np.float32), (0, 0), 0.04 * Q.px_m * k) \
         / 0.3
     out *= (1 - sombra(rolo, 0.25) * (1 - rolo))[..., None]
-    out = out * (1 - rolo[..., None]) + c["matelasse"] * (cil * np.clip(rugas, 0.9, 1.1) * volume(rolo, 0.03, 0.10)
+    rv = q.get("rolo_vol", (0.03, 0.10))
+    mt = 1.0
+    if q.get("acolchoado"):                                     # o rolo é o próprio cobre-leito: o mesmo matelassê
+        mt = (1 - 0.045 * pesp) * (1 + 0.7 * q["acolchoado"] * np.clip(gx * 0.7 - gy * 0.7, -1, 1))
+    out = out * (1 - rolo[..., None]) + c["matelasse"] * (cil * np.clip(rugas, 0.9, 1.1) * volume(rolo, *rv) * mt
                                                           )[..., None] * rolo[..., None]
     # as almofadas da frente por cima do rolo (como no PDF)
     for r in q["almofadas"]:
@@ -1342,6 +1358,14 @@ def cama_master(Q, img):
     lt = max(1, int(round(0.5 * k)))
     anel = P * (1 - cv2.erode(P, np.ones((lt, lt), np.uint8)))
     out = out * (1 - 0.55 * anel[..., None]) + c["traco"] * 0.55 * anel[..., None]
+    if so_cama:
+        a_ = cv2.resize(cv2.dilate((P > 0.01).astype(np.uint8), np.ones((k, k), np.uint8)).astype(np.float32), (w, h),
+                        interpolation=cv2.INTER_AREA)[..., None]
+        novo = cv2.resize(out, (w, h), interpolation=cv2.INTER_AREA)
+        res = img.copy()
+        res[Y0:Y1, X0:X1] = np.clip(img[Y0:Y1, X0:X1] * (1 - a_) + novo * a_, 0, 255).astype(np.uint8)
+        print("    suíte master: a cama refeita na silhueta do PDF, com o cobre-leito acolchoado e o rolo com volume")
+        return res
     # 6. o banco: linho greige estofado, os três assentos, as costuras tracejadas e os rolos laterais
     bq = q["banco"]
     tex_b = volume(Bm, 0.05, 0.16) * (1 + 0.025 * ruido(0.012))
