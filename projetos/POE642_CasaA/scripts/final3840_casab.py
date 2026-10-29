@@ -2729,7 +2729,7 @@ ROTULOS_F = {"raio_m": 3.0, "passo_px": 2, "folga_px": 2,
              "pontos": {"Terreo": {"PRAINHA": (816.8, 1470.0)}}}
 
 
-def ambientes_rotulos(Q, ancoras, f=2):
+def ambientes_rotulos(Q, ancoras, f=2, todas=False):
     """O ambiente de cada rótulo (imagem int32: i + 1 no ambiente do ponto i, 0 nas paredes). As paredes são os
     preenchimentos escuros da ARQ_PAREDE, dos elementos fixos e dos pilares; os vãos entre dois trechos de parede
     alinhados (a porta, a passagem sem porta, como a da circulação do Subsolo para a garagem) fecham até `vao_max_m`.
@@ -2739,7 +2739,12 @@ def ambientes_rotulos(Q, ancoras, f=2):
     pontos do PDF que caem nela, pela distância andando por dentro."""
     q = ROTULOS_F
     par = (Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "ARQ_ELEMENTOS FIXOS", "EST_PILAR") and d.get("fill")
-                       and max(d["fill"]) < 0.6, ss=1) > 0.3).astype(np.uint8)
+                       and (todas or max(d["fill"]) < 0.6), ss=1) > 0.3).astype(np.uint8)
+    if todas:                     # o recinto: também os vidros, caixilhos e batentes (os claros e os traços da parede)
+        for d in Q.desenhos:
+            if d.get("layer") == "ARQ_PAREDE" and d["type"] == "s":
+                for c in Q.caminhos(d):
+                    cv2.polylines(par, [np.int32(np.round(c))], False, 1, 2)
     t = int(round(q["parede_max_m"] * Q.px_m))
     k = int(round(q["vao_max_m"] * Q.px_m))
     deitada = par & (1 - cv2.morphologyEx(par, cv2.MORPH_OPEN, np.ones((t + 1, 1), np.uint8)))   # fina na vertical
@@ -2863,7 +2868,11 @@ def rotulos(Q, img, rot, ajustes_manuais, granito=None):
     # os ambientes: o que não é parede, esquadria nem porta (os arcos e as folhas do PDF fecham as portas)
     rot = textos_rotulos(rot)
     pontos = q["pontos"].get(Q.chave, {})
-    busca = [Q.p2q(*pontos[r[0]]) if r[0] in pontos else Q.p2q(r[2][0], r[2][1]) for r in rot]
+
+    def ponto(r):                     # pelo nome ou, entre nomes repetidos, por (nome, x, y do ponto do PDF arredondados)
+        p = pontos.get((r[0], round(r[2][0]), round(r[2][1])), pontos.get(r[0]))
+        return Q.p2q(*p) if p is not None else Q.p2q(r[2][0], r[2][1])
+    busca = [ponto(r) for r in rot]
     amb = ambientes_rotulos(Q, busca)
     esc = Q.W / 2000
 

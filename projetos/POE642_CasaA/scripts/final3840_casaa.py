@@ -786,7 +786,9 @@ ELEVADOR = {"externo": (2026.3, 1290.5, 2102.2, 1369.8), "interno": (2030.9, 129
 def elevador(Q, img):
     q = ELEVADOR
     O, I = q["externo"], q["interno"]
-    tl = tela(np.ascontiguousarray(img.copy()), Q, (q["soleira"][0], q["anel"][1], q["anel"][2], q["anel"][3]), folga=6)
+    sl, an = q["soleira"], q["anel"]                     # a caixa: o poço e a soleira (de qualquer lado da cabine)
+    tl = tela(np.ascontiguousarray(img.copy()), Q, (min(sl[0], an[0]), min(sl[1], an[1]), max(sl[2], an[2]),
+                                                     max(sl[3], an[3])), folga=6)
     rng = np.random.default_rng(q["semente"])
     X, Y = tl.grade()
     # o aço escovado (o fio na vertical) com o brilho largo no meio
@@ -812,10 +814,14 @@ def elevador(Q, img):
         cv2.line(xs, tuple(int(v) for v in tl.pt(a, b)), tuple(int(v) for v in tl.pt(c, d)), 255,
                  max(1, int(0.5 * 8)), cv2.LINE_AA)
     tl.pintar(xs, q["x"], 0.45)
-    # os corrimãos: em cima, à direita e embaixo, a 1,2 pt da parede, com as pontas redondas
+    # os corrimãos: nas paredes sem porta (`corrimaos`; com a porta à esquerda, em cima, à direita e embaixo), a 1,2 pt
+    # da parede, com as pontas redondas
     w = 1.5
-    for rr in ((I[0] + 12, I[1] + 1.2, I[2] - 12, I[1] + 1.2 + w), (I[2] - 1.2 - w, I[1] + 12, I[2] - 1.2, I[3] - 12),
-               (I[0] + 12, I[3] - 1.2 - w, I[2] - 12, I[3] - 1.2)):
+    lados = {"cima": (I[0] + 12, I[1] + 1.2, I[2] - 12, I[1] + 1.2 + w),
+             "direita": (I[2] - 1.2 - w, I[1] + 12, I[2] - 1.2, I[3] - 12),
+             "baixo": (I[0] + 12, I[3] - 1.2 - w, I[2] - 12, I[3] - 1.2),
+             "esquerda": (I[0] + 1.2, I[1] + 12, I[0] + 1.2 + w, I[3] - 12)}
+    for rr in (lados[k_] for k_ in q.get("corrimaos", ("cima", "direita", "baixo"))):
         mc = tl.ret(rr, w / 2)
         sombra_q(tl, mc, forca=0.28, dist=0.8, sigma=0.7)
         tl.pintar(mc, q["corrimao"])
@@ -828,11 +834,15 @@ def elevador(Q, img):
         tl.contorno(mf, 0.35, q["contorno"])
     tl.contorno(mi, 0.45, q["quadro"])
     tl.contorno(mo, 0.5, q["contorno"])
-    # a soleira em inox escovado, com as faces da parede (os lados compridos) em cinza fino
+    # a soleira em inox escovado, com as faces da parede (as pontas do vão: em cima e embaixo com a porta na parede da
+    # esquerda ou da direita; à esquerda e à direita, `faces_soleira` "v", com ela na parede de cima ou de baixo) em
+    # cinza fino
     s_ = tl.ret(q["soleira"])
     tl.pintar_img(s_, aco((198, 199, 200)) - luz[..., None])
     sx0, sy0, sx1, sy1 = q["soleira"]
-    for rr in ((sx0, sy0, sx1, sy0 + 0.6 / PT_PX), (sx0, sy1 - 0.6 / PT_PX, sx1, sy1)):
+    faces = (((sx0, sy0, sx0 + 0.6 / PT_PX, sy1), (sx1 - 0.6 / PT_PX, sy0, sx1, sy1)) if q.get("faces_soleira") == "v"
+             else ((sx0, sy0, sx1, sy0 + 0.6 / PT_PX), (sx0, sy1 - 0.6 / PT_PX, sx1, sy1)))
+    for rr in faces:
         tl.pintar(tl.ret(rr), (128, 130, 132))
     print("    elevador: a cabine de aço (paredes, piso escovado, painel, corrimãos, folhas da porta) e a soleira em inox")
     return tl.gravar()
