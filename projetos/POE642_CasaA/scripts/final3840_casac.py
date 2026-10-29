@@ -1655,13 +1655,39 @@ def _folhas_pdf(Q, r, folga_px=0.6):
     return cv2.dilate((a > 0.15).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0 if folga_px else a > 0.15
 
 
+# 29/10 (usuário, com o recorte da porta do Louceiro 2: "tem uma segunda linha atrás da porta e a soleira não existe"):
+# o vão dessa porta (entre os batentes) é branco no PDF, como os das outras portas, mas o branco dele emenda no do
+# próprio louceiro (o retângulo branco da ARQ_LAYOUT HUMANIZAÇÃO) e ele não entrava em `B.vaos_brancos`. Entra aqui,
+# com a soleira de Bege Bahia de face a face das paredes, como a do lavabo (também travertino dos dois lados).
+SOLEIRAS_MAIS_TC = [(2156.0, 997.2, 2211.6, 1005.7)]
+
+
 def soleiras_t(Q, img):
-    guarda = B.SOLEIRAS_B
+    guarda, vaos = B.SOLEIRAS_B, B.vaos_brancos
     B.SOLEIRAS_B = dict(guarda, sem=list(guarda.get("sem", [])) + SEM_SOLEIRA_TC)
+    B.vaos_brancos = lambda chave: vaos(chave) + (SOLEIRAS_MAIS_TC if chave == "Terreo" else [])
     try:
         return F.soleiras(Q, img)
     finally:
-        B.SOLEIRAS_B = guarda
+        B.SOLEIRAS_B, B.vaos_brancos = guarda, vaos
+
+
+# 29/10, na mesma porta: o espelho da limpeza das esquadrias copiava a borda da parede da direita (a coluna de
+# antialias, cinza 140) para o meio da faixa entre a folha aberta e a parede, uma segunda linha ao longo da folha; e na
+# ponta de baixo da folha ficava o fim da folha antiga do render, um traço escuro. Nas faixas `rets` (pt), o travertino
+# das mesmas linhas, `desloca_px` à esquerda (os estratos são deitados e seguem contínuos).
+RESTOS_FOLHA_TC = {"rets": [(2213.4, 1006.3, 2218.6, 1063.7), (2206.7, 1063.2, 2212.9, 1063.7)], "desloca_px": -12}
+
+
+def restos_folha_tc(Q, img):
+    out = img.copy()
+    d = RESTOS_FOLHA_TC["desloca_px"]
+    for r in RESTOS_FOLHA_TC["rets"]:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        out[y0:y1, x0:x1] = img[y0:y1, x0 + d:x1 + d]
+    print(f"    Louceiro 2: sem a segunda linha atrás da folha e sem o traço na ponta dela ({len(RESTOS_FOLHA_TC['rets'])} "
+          f"faixas)")
+    return out
 
 
 def pos_esquadrias_t(Q, img, antes):
@@ -1916,8 +1942,8 @@ def passos_terreo_c(Q, ini, M):
         ("elevador", lambda im: elevador_t(Q, im)),
         ("paredes", lambda im: F.paredes(Q, im, cor=cinza)),
         ("soleiras", lambda im: soleira_elevador(Q, soleiras_t(Q, im))),
-        ("esquadrias", lambda im: portas_jardins_t(Q, jardins_vidros_t(Q, pos_esquadrias_t(
-            Q, janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T), im)))),
+        ("esquadrias", lambda im: restos_folha_tc(Q, portas_jardins_t(Q, jardins_vidros_t(Q, pos_esquadrias_t(
+            Q, janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T), im))))),
         ("cortinas", lambda im: cortinas_t(Q, im)),
         ("escadas", lambda im: escada_estreita_t(Q, degraus_largos_t(Q, im))),
         ("projecoes", lambda im: projecoes_t(Q, im)),

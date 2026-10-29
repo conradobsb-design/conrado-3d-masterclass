@@ -3696,3 +3696,14 @@ O que foi feito:
 Antes e depois (o antes é a final de 9c8a711): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2910b_{banquetas_ilha_contorno,cadeira_suite_master_contorno,cadeira_suite1_contorno,tapete_living_textura,tapetes_suites_textura}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa D refeitos. Aguarda o OK da Casa D; a seguir, a Casa C.
 
 **Casa D aprovada** (29/10/26): "casa D aprovada". As finais `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_final_rotulos.png` e `..._Subsolo_final_rotulos.png`, as pranchas e o PDF ficam como estão (cf6e28d), com tudo o que estava em validação: a revisão de 28/10 (os 7 itens), a "segunda porta" da circulação/sala íntima, a sombra dos jogos da varanda, as poltronas no modelo da Casa E e o entorno delas, a trama dos tapetes (varanda, living e as 4 suítes) e o contorno das cadeiras (escritório, suítes, banquetas da ilha). A seguir, a revisão da Casa C (Térreo e Subsolo), apresentada para o OK antes de alterar.
+
+### Pedido de 29/10/26: porta do Louceiro 2 (Térreo da Casa C)
+
+O usuário, com o recorte da porta do Louceiro 2 na prancha do Térreo da Casa C: "tem uma segunda linha atrás da porta e a soleira não existe".
+
+O que foi feito:
+- **Segunda linha:** entre a folha aberta e a parede da direita havia uma linha cinza fina ao longo da folha inteira: a borda da parede, que o espelho da limpeza das esquadrias copiava para ali. Saiu, e na ponta de baixo da folha também o traço escuro (o fim da folha antiga do render). Ali fica o travertino.
+- **Soleira:** o vão entre os batentes é branco no PDF, como o das outras portas, mas o branco dele emenda no do próprio louceiro e a etapa das soleiras não o achava. Entrou pelo PDF: a soleira de Bege Bahia de face a face das paredes, com as faces cinza, como a do lavabo (também travertino dos dois lados); os batentes e a folha por cima.
+- A regra de 28/10 (sem soleira entre dois ambientes do mesmo piso) veio da Casa D; na Casa C, as portas entre dois travertinos têm soleira, e a do Louceiro 2 ficou igual a elas.
+
+Antes e depois (o antes é a final de f5b0499): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_porta_louceiro2_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos.
