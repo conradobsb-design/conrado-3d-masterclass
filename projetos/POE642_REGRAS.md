@@ -423,6 +423,12 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - marca Paulo Octávio.
 - **Quadro de áreas:** as do cliente; sem dado, "NÃO INFORMADO", sem total.
 - **PDF:** A3 de largura, na ordem Subsolo, Térreo, 1º Pavimento. Opções para o cliente com sufixo; depois da escolha, regerar sem sufixo.
+- **Book de entrega [29/10]** (Modelo 2, editorial: "modelo 2"; `book_entrega.py`):
+  - A3 deitado, com a ordem capa, sumário, cada casa (abertura, pavimentos de baixo para cima, detalhes) e contracapa.
+  - As plantas são as das pranchas aprovadas, sem o rodapé, sem redesenho.
+  - Térreo e 1º Pavimento usam o mesmo enquadramento, na mesma escala; o Subsolo é recortado no que está desenhado, com as peças nevoadas inteiras.
+  - Toda planta leva a nota "planta ilustrativa".
+  - Os textos só usam os nomes dos ambientes dos PDFs do cliente; a área segue o quadro de áreas acima.
 
 ## 14. Casos específicos já pedidos (por casa)
 

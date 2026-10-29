@@ -1537,3 +1537,24 @@ Pedido do usuário, vendo o Subsolo antes do OK da Casa B: "preciso que represen
   - **Bancos da sauna (`BANCOS_SAUNA_SB`, `bancos_sauna_sb`):** a mesma textura de `F.bancos_sauna` (o travertino bruto, a semente de `SAUNA_F`), com `nivel` (piso, frente, trás), a sombra de contato de cada banco no de baixo (`sombra`, exponencial em `larg_m`; no piso só ela, entre as bordas dos bancos), o espelho a `espelho`, o fio do pé (`pe`) e o brilho da quina (`quina`); as paredes (px abaixo de `parede_max`) não mudam.
   - **Elevador (`elevador_sb`):** `final3840_casaa.elevador` com `revisao_casab_2910.ELEVADOR_TB` (a caixa e a porta do PDF do Subsolo estão nas mesmas coordenadas da do Térreo); depois, `rotulos_centro_sb` só com o ELEVADOR (o texto antigo já ficou sob a cabine nova): o rótulo vai ao meio da cabine, no corpo da regra e em preto.
   - **Conferência:** só mudam os 4 trechos (a porta do BH sauna, a porta do depósito, a sauna, o elevador). A prancha do Térreo sai igual.
+
+### O book de entrega: `book_entrega.py` (29/10)
+
+Modelo 2 (editorial), escolhido pelo usuário ("modelo 2"). Junta as 12 plantas aprovadas das Casas A–E num PDF A3 deitado: `POE642_Book/POE642_Book_Plantas_Humanizadas.pdf`, mais a prévia `POE642_Book_previa.jpg`.
+
+As páginas são desenhadas em PIL a 200 dpi (3307 × 2339 px). O desenho é feito em unidades de uma página de 1600 px e convertido por `z()`. O PDF é montado com pymupdf; cada página entra como JPEG em memória.
+
+- **Fonte das plantas:** `planta(c, pav)` lê a prancha de entrega e pega as 2160 linhas de cima, a final sem o rodapé. Nada é redesenhado.
+- **Enquadramento (`caixa_planta(c, pav)`):**
+  - Térreo e 1º Pavimento: a caixa de tudo o que não é branco (`min < 235`), somada nos dois e com 20 px de folga. A mesma caixa nas duas páginas, como as coordenadas das pranchas.
+  - Subsolo: as manchas cheias (`min < 250`, abertura 9 × 9, componentes acima de 2000 px; a hachura e as linhas finas somem) com 120 px de folga. Assim as peças nevoadas do Térreo entram inteiras, como na Casa B.
+  - Sumário: `caixa_cor` usa só o que tem cor (saturação acima de 22), sem a faixa branca até a linha do lote.
+- **Recortes ampliados:**
+  - `CAPA`, `ABERTURA` (um por casa) e `DETALHES` (dois por casa) guardam o pavimento, a caixa em px e a legenda.
+  - As legendas foram conferidas com os nomes à vista no recorte.
+  - `cobrir` preenche o quadro cortando o excesso; `caber` encaixa com fundo.
+- **Textos:**
+  - `CASAS[c]["texto"]` lista o programa pelos nomes dos ambientes dos PDFs do cliente, sem número de vagas nem posição; é provisório.
+  - `quebrar` faz a quebra pela largura.
+  - Áreas como nas pranchas: sem dado, "não informado" e sem total.
+- **Uso:** `python3 book_entrega.py` grava o PDF e a prévia. Com `--paginas`, grava também cada página em JPG em `POE642_Book/paginas` (no `.gitignore` da pasta).

@@ -3878,3 +3878,45 @@ Depois, com o recorte do canto de cima do vidro da sauna: "remova esse \"arco\" 
 **Casa B aprovada** (29/10/26): "casa B aprovada". As finais `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_final_rotulos.png` e `..._Subsolo_final_rotulos.png`, as pranchas e o PDF (`POE642_CasaB/entrega/POE642_CasaB_Plantas_Humanizadas.pdf`) ficam como estão (2c7bfe6), com tudo o que estava em validação: no Térreo, a revisão de 29/10, as 4 folhas das portas das suítes, as garrafas da adega e as duas levas de pedidos (até as pedras na ordem da descida, o matelassê em todas as camas e o rótulo do motorista); no Subsolo, o Térreo nevoado fora do subsolo, os rótulos centralizados, o armário da academia, as portas do BH sauna e do depósito, o vidro e os bancos da sauna, o elevador do Térreo e o canto do vidro sem o traço.
 
 Com isso, as cinco casas estão aprovadas: A (Subsolo, Térreo e 1º Pavimento), B (Subsolo e Térreo), C (Subsolo e Térreo, 29/10), D (Subsolo e Térreo, 29/10) e E (Subsolo, Térreo e 1º Pavimento, 28/10).
+
+### Book de entrega: Modelo 2, editorial (29/10/26)
+
+Pedido do usuário, com as cinco casas aprovadas: "vamos consolidar as pranchas em um book de entrega para a Paulo Octavio. Faça uma pesquisa na internet e me apresente 3 modelos de entrega." A pesquisa usou books de lançamento em PDF (Domous), os books digitais de Morar Vista de Campos e Invexo Niemeyer 360 (cada planta com o aviso de "ilustrativa"), modelos de brochura de arquitetura e o site da Paulo Octávio (vermelho #BD1B20). Foram apresentados três modelos:
+1. book técnico;
+2. book editorial de alto padrão;
+3. catálogo digital.
+
+Resposta: "modelo 2".
+
+Feito em `POE642_CasaA/scripts/book_entrega.py`. Saídas:
+- `POE642_Book/POE642_Book_Plantas_Humanizadas.pdf`: A3 deitado, 25 páginas, 200 dpi, cerca de 21 MB;
+- `POE642_Book/POE642_Book_previa.jpg`: todas as páginas numa folha.
+
+Ordem das páginas:
+- capa: recorte ampliado das piscinas e lajes do Térreo da Casa B, com degradê, título e PAULO OCTÁVIO;
+- sumário: as cinco casas com os pavimentos e a página de cada uma, e as miniaturas do Térreo;
+- por casa:
+  - abertura: número, nome, texto de apresentação, quadro de áreas e um recorte ampliado à direita, com a legenda "NA IMAGEM" na coluna do texto;
+  - uma página por pavimento, na ordem Subsolo, Térreo e 1º Pavimento: a planta aprovada sem o rodapé técnico, num painel branco; à direita, o nome, o pavimento, a área, o quadro de áreas com o pavimento em vermelho, o norte e a nota de planta ilustrativa;
+  - detalhes: dois recortes ampliados com a legenda;
+- contracapa: cliente, endereço, conteúdo, créditos (New Air · Render 3D · Conrado Cortez), data, a nota de que mobiliário e paisagismo são sugestões de decoração e a marca New Air.
+
+Decisões:
+- Nada é redesenhado: as plantas vêm das pranchas de entrega aprovadas, das 2160 linhas de cima.
+- Enquadramento: no Térreo e no 1º Pavimento, a mesma caixa (o lote), na mesma escala e posição, para ver um pavimento sobre o outro. No Subsolo, o que está desenhado, com as peças nevoadas do Térreo inteiras e folga. No lote inteiro, os rótulos do Subsolo não se liam.
+- Legendas dos recortes: conferidas uma a uma com os nomes dos ambientes à vista.
+- Áreas: as das pranchas. Nas Casas D e E, "não informado" e sem total, como no quadro das pranchas (seção 13 das regras).
+
+Provisório, a confirmar com o usuário:
+- Textos de apresentação: só listam o programa pelos nomes dos ambientes dos PDFs do cliente (`_pdfs_cliente`), sem número de vagas nem posição dos ambientes, até virem os textos da Paulo Octávio.
+- Áreas das Casas D e E.
+- Nome do empreendimento, hoje "ML 10 · Conjunto 02 · Lote 17 · Casas A a E".
+- Marca: "PAULO OCTÁVIO" em texto na capa, como na prévia escolhida, em vez do logotipo oficial.
+- Fonte: Inter, a das pranchas, em vez da Poppins do site.
+
+Para refazer:
+```
+cd POE642_CasaA/scripts
+python3 book_entrega.py
+```
+Com `--paginas`, também grava cada página em JPG em `POE642_Book/paginas`, que fica fora do git, para conferir.
