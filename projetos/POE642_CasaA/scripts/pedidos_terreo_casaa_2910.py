@@ -14,7 +14,8 @@ Uso (sobre as finais da revisão, as do commit 219b22b; o Subsolo e as poltronas
 antes da revisão, as do commit 1ccaaa3; `--pasta_comparar` e `--pasta_comparar_3a`, opcionais, com as finais da 1ª leva,
 a do commit 387a97f, e da 2ª, a do cb0b471, para os antes e depois da 2ª e da 3ª leva):
   python3 pedidos_terreo_casaa_2910.py --pasta_antes <finais de 219b22b> --antes_subsolo <Subsolo de 1ccaaa3> \
-      --antes_1pav <1º Pavimento de 1ccaaa3> --pasta_comparar <finais de 387a97f> --pasta_comparar_3a <finais de cb0b471>
+      --antes_1pav <1º Pavimento de 1ccaaa3> --pasta_comparar <finais de 387a97f> --pasta_comparar_3a <finais de cb0b471> \
+      --pasta_comparar_4a <finais de 0a17741>
 """
 import sys
 from pathlib import Path
@@ -412,41 +413,155 @@ ROTULOS_CENTRO_TA = {"manter": ("ELEVADOR", "SHAFT", "PROJ. CLARABOIA", "JARDIM"
                      "alvos_px": {"GARAGEM": (2432, 1329), "Q. MOTORISTA": (2463, 1266)}}
 
 
+def _no_so(r, so):
+    """O rótulo r está na lista `so` (os nomes; "NOME|área" quando o nome se repete, como as varandas)? Sem lista, todos
+    estão."""
+    if not so:
+        return True
+    for item in so:
+        nome, _, area = item.partition("|")
+        if r[0] == nome and (not area or any(area in t[0] for t in r[1])):
+            return True
+    return False
+
+
+def _achar_rotulo(Q, img, r, aj, q, busca=90):
+    """O rótulo r como está na imagem (os do 1º Pavimento e do Subsolo nem sempre estão nos ajustes: o motor das Casas B
+    a D os põe no lugar livre mais perto do PDF, às vezes em duas linhas): entre o desenho dos ajustes e as variantes
+    (os corpos de `corpos_busca`, numa linha ou em duas), o de forma mais parecida com o texto escuro da imagem, no
+    deslocamento de melhor correlação (até `busca` px). Devolve o alfa no lugar achado e os ajustes com o desvio e as
+    opções de lá; abaixo de `minimo_forma`, o desenho dos ajustes."""
+    import revisao_casaa_2910 as R
+    H, W = img.shape[:2]
+    e, esc = W / 2000, FA.A.LARGURA / 2000
+    ax, ay = Q.p2q(*r[2])
+    idx, desvio, op = None, (0.0, 0.0), {}
+    for i, a_ in enumerate(aj):
+        if a_[0] == r[0] and np.hypot(ax - a_[1][0] * e, ay - a_[1][1] * e) < 25 * e:
+            idx, desvio = i, a_[2]
+            op = a_[3] if len(a_) > 3 else {}
+            op = op if isinstance(op, dict) else {"corpo": op}
+            break
+    g = 255 - cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    palavras = r[0].split()
+    variantes = [dict(op)] + [dict({k: v for k, v in op.items() if k != "quebra"}, corpo=c,
+                                   **({"quebra": palavras} if qb else {}))
+                              for c in q["corpos_busca"] for qb in ((False, True) if len(palavras) == 2 else (False,))]
+    melhor = None
+    for opv in variantes:
+        for dv in (desvio, (0.0, 0.0)):
+            a = R._alfa_rotulo(Q, (H, W), r, [(r[0], (ax / e, ay / e), dv, opv)])
+            if a.max() < 0.3:
+                continue
+            x0, y0, x1, y1 = R._caixa(a)
+            X0, Y0 = max(0, x0 - busca), max(0, y0 - busca)
+            res = cv2.matchTemplate(g[Y0:min(H, y1 + busca), X0:min(W, x1 + busca)],
+                                    a[y0:y1, x0:x1].astype(np.float32), cv2.TM_CCOEFF_NORMED)
+            j = np.unravel_index(np.argmax(res), res.shape)
+            if melhor is None or res[j] > melhor[0]:
+                melhor = (float(res[j]), opv, dv, X0 + j[1] - x0, Y0 + j[0] - y0)
+    nota, opv, dv, dx, dy = melhor
+    if nota < q["minimo_forma"]:
+        print(f"    {r[0]}: não achado na imagem pela forma ({nota:.2f}); fica o desenho dos ajustes")
+        return R._alfa_rotulo(Q, (H, W), r, aj), aj
+    entrada = (r[0], (ax / e, ay / e), (dv[0] + dx / esc, dv[1] + dy / esc), opv)
+    aj = list(aj)
+    if idx is None:
+        aj.append(entrada)
+    else:
+        aj[idx] = entrada
+    return R._alfa_rotulo(Q, (H, W), r, [entrada]), aj
+
+
+def _caixa_toca(Q, r, m):
+    """O retângulo r (pt) toca algum px da máscara m?"""
+    (x0, y0), (x1, y1) = Q.p2q(r.x0, r.y0), Q.p2q(r.x1, r.y1)
+    return bool(m[max(0, int(y0)):int(np.ceil(y1)) + 1, max(0, int(x0)):int(np.ceil(x1)) + 1].any())
+
+
 def rotulos_tirar_ta(Q, img, q=None):
     """Os rótulos dos ambientes saem: o texto (o alfa de cada um, `revisao_casaa_2910._alfa_rotulo`, com 1 px) recebe o
     piso de volta copiado do entorno (`copiar_textura`; a subtração pela cor deixava o texto fantasma, porque a final
-    suavizou os rótulos depois de escritos)."""
+    suavizou os rótulos depois de escritos). Com a lista `so` (1º Pavimento e Subsolo): o rótulo é achado na imagem
+    (`_achar_rotulo`); nos de `fantasmas_em`, as sobras de rótulos antigos em volta também saem; a folga em volta do
+    texto não leva os traços escuros vizinhos; nos de `linhas_em` (os quartos de réguas e os tapetes, deitados), cada
+    trecho de linha do buraco vem da mesma linha, deslocado até o primeiro lugar livre do mesmo material
+    (`revisao_casaa_2910._tapar_linhas`: a borda do tapete e as réguas continuam), sem a correção de tom, que marcava a
+    forma do texto na borda do tapete."""
     import revisao_casaa_2910 as R
     q = q or ROTULOS_CENTRO_TA
+    so = bool(q.get("so"))
     rot, aj = R._rotulos_pav(Q)
     tirados, alfas = [], []
     for r in rot:
-        if r[0] in q["manter"]:
+        if r[0] in q["manter"] or not _no_so(r, q.get("so")):
             continue
         a = R._alfa_rotulo(Q, img.shape[:2], r, aj)
+        if so:                                            # o rótulo da lista onde ele está na imagem
+            a, aj = _achar_rotulo(Q, img, r, aj, q)
         if a.max() < 0.3:
             continue
         tirados.append(r)
         alfas.append(a)
+    cinza = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).astype(np.int16)
     texto = np.zeros(img.shape[:2], bool)
     for a in alfas:
         texto |= a > 0.03
+    if so:
+        # as sobras de rótulos antigos em volta (o "I" e o "A" de uma cópia deslocada, no BANHO 2): os px escuros e
+        # neutros, bem mais escuros que o piso, numa faixa em volta do texto, fora dos objetos do PDF
+        croma = img.max(axis=2).astype(np.int16) - img.min(axis=2)
+        objetos = _dilatar(Q.preencher(lambda d: d.get("layer") in q["obstaculos"] + ("ARQ_PAREDE",), ss=2, fs=True)
+                           > 0.05, 1)
+        fx, fy = q["fantasma_px"]
+        for r, a in zip(tirados, alfas):
+            if r[0] not in q["fantasmas_em"]:
+                continue
+            x0, y0, x1, y1 = R._caixa(a)
+            z = np.zeros(texto.shape, bool)
+            z[max(0, y0 - fy):y1 + fy, max(0, x0 - fx):x1 + fx] = True
+            piso = z & (a < 0.02) & ~objetos
+            if piso.sum() < 20:
+                continue
+            fundo = np.median(cinza[piso])
+            texto |= z & ~objetos & (cinza < fundo - q["fantasma_dif"]) & (croma < 30)
     buraco = cv2.dilate(texto.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    if so:                                                # a folga não leva os traços escuros vizinhos
+        buraco &= texto | (cinza >= q["escuro_folga"])
     todos = R._rotulos_mascara(Q, img.shape[:2])
     valido = ~cv2.dilate((buraco | todos | _salientes(img)).astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
     out = img.copy()
-    falhou = copiar_textura(out, buraco, valido, busca=150, trecho=14, anel=4, perto=4)
+    deitados = np.zeros(buraco.shape, bool)
+    for r, a in zip(tirados, alfas):
+        if r[0] in q.get("linhas_em", ()):
+            deitados |= a > 0.03
+    deitados = _dilatar(deitados, 2) & buraco
+    copia = buraco & ~deitados
+    falhou = np.zeros(buraco.shape, bool)
+    if deitados.any():
+        m2 = 56.69 ** 2
+        tapetes = [Q.preencher(lambda d, d0=d0: d is d0, ss=2) > 0.5 for d0 in Q.desenhos
+                   if d0.get("layer") in ("ARQ_LAYOUT HUMANIZAÇÃO", "ARQ_MOBILIÁRIO") and d0["type"] in ("f", "fs")
+                   and d0["rect"].width * d0["rect"].height > q["tapete_min_m2"] * m2
+                   and _caixa_toca(Q, d0["rect"], deitados)]
+        pecas = Q.preencher(lambda d: d.get("layer") in q["obstaculos"] + ("ARQ_PAREDE", "EST_PILAR")
+                            and d["rect"].width * d["rect"].height <= q["tapete_min_m2"] * m2, ss=2, fs=True) > 0.05
+        proibido = _dilatar(todos | pecas | _salientes(img), 2)
+        fonte, falhou = R._tapar_linhas(img.astype(np.float32), deitados, tapetes, proibido, 150, q["tol_linhas"])
+        out[deitados] = np.clip(np.round(fonte), 0, 255).astype(np.uint8)[deitados]
+    if copia.any():
+        falhou |= copiar_textura(out, copia, valido, busca=150, trecho=14, anel=4, perto=4)
     if falhou.any():
         out = cv2.inpaint(out, (falhou * 255).astype(np.uint8), 3, cv2.INPAINT_TELEA)
-    # o tom: o do entorno (média normalizada, sem os traços e os pontos); do trecho copiado, só o desenho fino (sem o
-    # remendo mais claro ou mais escuro que o piso em volta)
+    # o tom, no que veio por cópia: o do entorno (média normalizada, sem os traços e os pontos); do trecho copiado, só o
+    # desenho fino (sem o remendo mais claro ou mais escuro que o piso em volta)
     s_ = q["tom_sigma_px"]
     V = (~buraco & ~_salientes(img, k=21, lim=14)).astype(np.float32)
-    B = buraco.astype(np.float32)
+    B = copia.astype(np.float32)
     I0, F = img.astype(np.float32), out.astype(np.float32)
     tom_fora = cv2.GaussianBlur(I0 * V[..., None], (0, 0), s_) / np.maximum(cv2.GaussianBlur(V, (0, 0), s_), 1e-3)[..., None]
     tom_copia = cv2.GaussianBlur(F * B[..., None], (0, 0), s_) / np.maximum(cv2.GaussianBlur(B, (0, 0), s_), 1e-3)[..., None]
-    out[buraco] = np.clip(np.round(F + tom_fora - tom_copia), 0, 255).astype(np.uint8)[buraco]
+    out[copia] = np.clip(np.round(F + tom_fora - tom_copia), 0, 255).astype(np.uint8)[copia]
     print(f"    rótulos: {len(tirados)} tirados para os pedidos (o piso copiado do entorno; voltam no centro do "
           f"ambiente no fim)")
     return out, tirados, aj
@@ -480,12 +595,16 @@ def rotulos_centro_ta(Q, img, tirados, aj, q=None):
     for r in tirados:
         c = R._caixa(alfa(r, *ajuste(r)))
         pontos.append(((c[0] + c[2]) / 2, (c[1] + c[3]) / 2))
+        if r[0] in q.get("sementes_pt", {}):              # o rótulo estava fora do recinto (dentro do box)
+            pontos[-1] = Q.p2q(*q["sementes_pt"][r[0]])
     guardar = (F.vidros_box, F.duchas_box, Q.preencher)
     preencher = Q.preencher
 
     def preencher_com_divisoria(filtro, ss=4, fs=True):
         m = preencher(filtro, ss=ss, fs=fs)
         sonda = {"layer": "ARQ_PAREDE", "fill": (0.36, 0.36, 0.36), "type": "f"}
+        if not q.get("divisoria", True):
+            return m
         return np.maximum(m, FA.ret_aa(Q, FA.PAREDES_A["divisoria"])) if filtro(sonda) else m
     try:
         F.vidros_box, F.duchas_box = FA.vidros_box_a, FA.duchas_box_a
@@ -497,7 +616,7 @@ def rotulos_centro_ta(Q, img, tirados, aj, q=None):
     obst = Q.preencher(lambda d: d.get("layer") in q["obstaculos"] and d["rect"].width * d["rect"].height < grande,
                        ss=2, fs=True) > 0.05
     for r in R._rotulos_pav(Q)[0]:                        # os rótulos que ficam também são obstáculo
-        if r[0] in q["manter"]:
+        if r[0] in q["manter"] or not _no_so(r, q.get("so")):
             a_ = alfa(r, *ajuste(r))
             if a_.max() > 0.3:
                 x0_, y0_, x1_, y1_ = R._caixa(a_)
@@ -511,6 +630,9 @@ def rotulos_centro_ta(Q, img, tirados, aj, q=None):
         for u0, v0, u1, v1 in segs_q(Q, segs):
             cv2.line(tr, (int(u0), int(v0)), (int(u1), int(v1)), 1, 3)
     obst |= tr.astype(bool)
+    if q.get("sem_paredes"):                              # as paredes também (o recinto que vaza não as tira)
+        obst |= Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "EST_PILAR") and d.get("fill") is not None
+                            and max(d["fill"]) < 0.6, ss=2) > 0.05
     k = 2 * q["obst_px"] + 1
     obst = cv2.dilate(obst.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
     novos, out = [], img.copy()
@@ -523,6 +645,8 @@ def rotulos_centro_ta(Q, img, tirados, aj, q=None):
         regs = [a_ == i + 1 for a_ in ambs]
         razao = [rg.sum() / Q.px_m ** 2 / area[0] if area else 0 for rg in regs]
         k_ = int(np.argmin([abs(np.log(max(z, 1e-3))) for z in razao]))
+        if q.get("com_vidros"):                           # o recinto fechado também pelos vidros (fora do box)
+            k_ = 0
         reg = regs[k_]
         vazou = not area or not (q["minimo"] <= razao[k_] <= q["vazou"]) or reg.sum() < 50
         desvio, op = ajuste(r)
@@ -553,6 +677,9 @@ def rotulos_centro_ta(Q, img, tirados, aj, q=None):
                 break
         ys, xs = np.nonzero(reg)
         gx, gy = xs.mean(), ys.mean()                  # o centro do ambiente (o recinto inteiro)
+        if q.get("alvo_livre") and livre.any():        # ou o do piso livre dele (no banho, o piso seco fora das louças)
+            yl, xl = np.nonzero(livre)
+            gx, gy = xl.mean(), yl.mean()
         if r[0] in q["alvos_px"]:                      # o centro da faixa livre dada (o quarto do motorista, a garagem)
             gx, gy = q["alvos_px"][r[0]]
         elif r[0] in q["alvo_pdf"]:                    # nos ambientes abertos, o centro é o do texto do PDF
@@ -571,7 +698,7 @@ def rotulos_centro_ta(Q, img, tirados, aj, q=None):
         cor = q["branco"] if fundo < q["escuro_lum"] else R1.ROTULOS["cor"]
         out = R._com_rotulo(out, a, cor)
         novos.append(f"{r[0]} {corpo:.2f}x{' em 2 linhas' if qb else ''} ({round(pontos[i][0])}, {round(pontos[i][1])})"
-                     f"->({round(tx)}, {round(ty)})")
+                     f"->({round(tx)}, {round(ty)})" + (f" (o recinto vazou: {razao[k_]:.2f} da área)" if vazou else ""))
     print("    rótulos no centro do piso livre: " + "; ".join(novos))
     return out
 
@@ -2049,6 +2176,32 @@ def grama_escada_ta(Q, img, q=None):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# 18. Os rótulos do 1º Pavimento e do Subsolo (usuário, com os recortes: "corrija e centralize esses rotulos", com o
+# BANHO 2, o CLOSET 2 e a VARANDA de 7,15 m², e "corrija esse rotulo tambem, está sobre o tapete", com o SUÍTE 3; e o
+# OK da lista apresentada: o SUÍTE 2, o B. SERVIÇO, e no Subsolo o BANHO FEM. e o BANHO SERV.). O mesmo método dos
+# rótulos do Térreo (seção 6), só nos rótulos da lista (`so`): saem com o piso copiado do entorno e voltam no centro do
+# piso livre do recinto, no corpo padrão (em duas linhas antes de diminuir). Os tapetes também são obstáculo (o rótulo
+# não fica sobre eles), e os vidros dos boxes fecham o recinto (o rótulo não fica no box nem sobre o vidro). A cor segue
+# a dos rótulos do pavimento: o cinza, fora do granito escuro.
+ROTULOS_OUTROS_TA = dict(ROTULOS_CENTRO_TA, manter=(), alvo_pdf=(), regioes_px={}, alvos_px={}, tapete_m2=1e9,
+                         escuro_lum=70, sem_paredes=True, corpos_busca=(1.3, 1.15, 1.0, 0.9, 0.85), minimo_forma=0.6,
+                         fantasma_px=(16, 6), fantasma_dif=45, fantasmas_em=("BANHO 2",), escuro_folga=110,
+                         tapete_min_m2=1.5, tol_linhas=(30, 9), linhas_em=("SUÍTE 3", "SUÍTE 2", "CLOSET 2", "BANHO 2",
+                                                                              "B. SERVIÇO", "BANHO FEM.", "BANHO SERV."),
+                         # nos banhos com box, o piso seco é menos da metade da área do PDF
+                         minimo=0.3, com_vidros=True, alvo_livre=True)
+ROTULOS_1PAV_TA = dict(ROTULOS_OUTROS_TA, divisoria=False,
+                       so=("BANHO 2", "CLOSET 2", "VARANDA|7,15", "SUÍTE 2", "SUÍTE 3", "B. SERVIÇO"))
+ROTULOS_SUBSOLO_TA = dict(ROTULOS_OUTROS_TA, so=("BANHO FEM.", "BANHO SERV."))
+
+
+def rotulos_pavimento_ta(chave, img, q):
+    Q = FA.QuadroA(chave)
+    out, tirados, aj = rotulos_tirar_ta(Q, img, q)
+    return rotulos_centro_ta(Q, out, tirados, aj, q)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # A sequência
 def pedidos_terreo_ta(img):
     """O Térreo com os pedidos; devolve a final nova e o Térreo sem rótulos de antes e de depois (para o nublado do 1º
@@ -2153,6 +2306,11 @@ ANTES_DEPOIS_3A_TA = {
                    "poltrona_sala_intima": (2020, 1120, 2160, 1265)},
     "Subsolo": {"deck_escada_grama": (690, 960, 1130, 1180)}}
 
+# Os dos rótulos do 1º Pavimento e do Subsolo, contra a final da 3ª leva (`--pasta_comparar_4a`).
+ANTES_DEPOIS_4A_TA = {
+    "1Pavimento": {"rotulos_suites_2_3": (1500, 320, 1980, 1220), "rotulo_b_servico": (2150, 1420, 2270, 1590)},
+    "Subsolo": {"rotulos_banhos": (1090, 870, 1890, 1645)}}
+
 
 def antes_depois_pedidos_ta(chave, antes, depois, max_lado=1800, caixas=None, sufixo="2910b"):
     for nome, (x0, y0, x1, y1) in (caixas or ANTES_DEPOIS_PEDIDOS_TA)[chave].items():
@@ -2181,6 +2339,8 @@ def main():
                     help="a final do 1º Pavimento de antes da revisão de 29/10 (a do commit 1ccaaa3: as poltronas limpas)")
     ap.add_argument("--pasta_comparar_3a", type=Path, default=None,
                     help="a pasta das finais da 2ª leva (para os antes e depois da 3ª leva, `_2910d_`)")
+    ap.add_argument("--pasta_comparar_4a", type=Path, default=None,
+                    help="a pasta das finais da 3ª leva (para os antes e depois dos rótulos, `_2910e_`)")
     a = ap.parse_args()
     finais = RA.FINAIS_TA
     antes = {k: cv2.imread(str(a.pasta_antes / v.name if a.pasta_antes else v)) for k, v in finais.items()}
@@ -2189,8 +2349,10 @@ def main():
     um = matelasse_ta(FA.QuadroA("1Pavimento"), um)
     um = poltronas_1pav_ta(um, cv2.imread(str(a.antes_1pav)))
     um = banhos_1pav_ta(FA.QuadroA("1Pavimento"), um)
+    um = rotulos_pavimento_ta("1Pavimento", um, ROTULOS_1PAV_TA)
     sub = RA.revisao_ta("Subsolo", cv2.imread(str(a.antes_subsolo)), terreo)
     sub = grama_escada_ta(FA.QuadroA("Subsolo"), sub)
+    sub = rotulos_pavimento_ta("Subsolo", sub, ROTULOS_SUBSOLO_TA)
     for k, out in (("Terreo", terreo), ("1Pavimento", um), ("Subsolo", sub)):
         cv2.imwrite(str(finais[k]), out)
         print(finais[k])
@@ -2201,6 +2363,9 @@ def main():
         if a.pasta_comparar_3a and k in ANTES_DEPOIS_3A_TA:
             antes_depois_pedidos_ta(k, cv2.imread(str(a.pasta_comparar_3a / finais[k].name)), out,
                                     caixas=ANTES_DEPOIS_3A_TA, sufixo="2910d")
+        if a.pasta_comparar_4a and k in ANTES_DEPOIS_4A_TA:
+            antes_depois_pedidos_ta(k, cv2.imread(str(a.pasta_comparar_4a / finais[k].name)), out,
+                                    caixas=ANTES_DEPOIS_4A_TA, sufixo="2910e")
 
 
 if __name__ == "__main__":

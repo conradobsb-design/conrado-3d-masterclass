@@ -4162,4 +4162,18 @@ Antes e depois (o antes é a final da 2ª leva, cb0b471):
 
 Os `_2910b_` e `_2910c_` também foram regravados. As três pranchas, o PDF da Casa A e o book foram refeitos. Aguarda a validação.
 
+
+### Casa A: os rótulos do 1º Pavimento e do Subsolo (29/10)
+
+Pedidos do usuário: "corrija e centralize esses rotulos" (com o recorte do BANHO 2, do CLOSET 2 e da VARANDA de 7,15 m²) e "corrija esse rotulo tambem, está sobre o tapete" (com o SUÍTE 3), depois da lista apresentada (BANHO 2, SUÍTE 2, SUÍTE 3, B. SERVIÇO; no Subsolo, BANHO FEM. e BANHO SERV.).
+
+O que foi feito (`pedidos_terreo_casaa_2910.py`, seção 18, sobre as finais de 0a17741; detalhes no README):
+- BANHO 2: o "I BANHO 2 / AA:" eram sobras de um rótulo antigo, deslocado, por baixo do atual. Saíram, e o rótulo foi para o centro do piso seco, longe do vidro do box.
+- SUÍTE 3: fora do tapete, no piso livre ao lado dele, como o SUÍTE 2; a borda do tapete onde ele estava ficou limpa.
+- CLOSET 2, VARANDA (7,15 m²) e SUÍTE 2: no centro do piso livre, no corpo padrão.
+- B. SERVIÇO: a 1,15× (era 1,0), centrado na largura do banho. O piso seco ao lado do vaso tem uns 46 px, menos que o texto em qualquer corpo; por isso ele fica onde estava, acima do vidro.
+- Subsolo: BANHO FEM. no centro do piso seco, entre a parede e o vidro; BANHO SERV. já estava no centro do piso seco e ficou.
+
+Antes e depois (o antes é a final de 0a17741): `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_2910e_{rotulos_suites_2_3,rotulo_b_servico}_antes_depois.jpg` e `..._Subsolo_2910e_rotulos_banhos_antes_depois.jpg`. Pranchas, PDF da Casa A e book refeitos. Aguarda a validação.
+
 Pendências: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) aguarda o OK.

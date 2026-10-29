@@ -1691,6 +1691,13 @@ Retoques locais sobre as finais da revisão (commit 219b22b). Cada pedido veio c
   - **O Subsolo:**
     - O deck nevoado ganha o trecho de baixo, à esquerda da escada, até a linha do gramado: a 3ª caixa do `deck_pt` em `revisao_casaa_2910.NEVOADO_TA`.
     - `grama_escada_ta` (`GRAMA_ESCADA_TA`): a grama encontra a escada e o deck numa linha reta, a do PDF (`linha_pt`). As primeiras linhas da grama recebem a grama de logo abaixo, refletida (`grama_px`); as últimas da escada e do deck, as de logo acima. Sai o fio claro com pintas que ficava entre elas.
+- **Os rótulos do 1º Pavimento e do Subsolo (seção 18; `rotulos_pavimento_ta`, `ROTULOS_1PAV_TA`, `ROTULOS_SUBSOLO_TA`):** o método dos rótulos do Térreo, só nos rótulos da lista (`so`; "NOME|área" quando o nome se repete, como as varandas).
+  - No 1º Pavimento: BANHO 2, CLOSET 2, VARANDA de 7,15 m², SUÍTE 2, SUÍTE 3 (estava sobre o tapete) e B. SERVIÇO. No Subsolo: BANHO FEM. e BANHO SERV.
+  - O rótulo é achado na imagem pela forma do texto (`_achar_rotulo`): entre o desenho dos ajustes e as variantes de corpo e de quebra, o de melhor correlação, até 90 px em volta. No Subsolo, o motor das Casas B a D tinha posto os rótulos fora dos ajustes (o BANHO SERV. em duas linhas).
+  - As sobras de rótulos antigos em volta do texto (`fantasmas_em`: no BANHO 2, um "I" e um "A" de uma cópia deslocada) entram no buraco: os px escuros e neutros, bem mais escuros que o piso (`fantasma_dif`), numa faixa em volta (`fantasma_px`), fora dos objetos do PDF. A folga em volta do texto não leva os px escuros vizinhos (`escuro_folga`: o tracejado da borda da varanda, que o motor do 1º Pavimento desenhou e o PDF não tem, fica).
+  - Nos quartos e nos banhos (`linhas_em`: réguas, tapetes e travertino, de desenho deitado), o buraco é tapado pela mesma linha deslocada até o primeiro lugar livre do mesmo material (`revisao_casaa_2910._tapar_linhas`, `tol_linhas`), sem a correção de tom, que marcava a forma do texto na borda do tapete. Na varanda (o Bege Bahia, numa faixa estreita), pela cópia de trechos com o tom do entorno, como no Térreo.
+  - A volta: os tapetes são obstáculo (`tapete_m2` sem limite); os vidros dos boxes fecham o recinto (`com_vidros`); as paredes são obstáculo (`sem_paredes`); o alvo é o centro do piso livre do recinto (`alvo_livre`); nos banhos com box, o piso seco basta com 0,3 da área do PDF (`minimo`).
+  - O B. SERVIÇO fica no lugar dele, centrado na largura do banho, a 1,15×: o piso seco ao lado do vaso tem uns 46 px, menos que o texto em qualquer corpo.
 - **Os outros pavimentos:**
   - 1º Pavimento: `nublado_1pav_ta`, onde o Térreo mudou, sem os rótulos e sem os tracejados novos da pista (`fora_px`). Fora da pegada, soma a diferença entre o Térreo novo e o antigo, nublados (`entorno_esmaecido.NUBLADO`). Nos vazios, aplica a razão entre eles. Depois, o matelassê.
   - Subsolo: `revisao_casaa_2910.revisao_ta("Subsolo", ...)` sobre a final de antes da revisão, com o Térreo novo, para as peças nevoadas.
@@ -1698,13 +1705,15 @@ Retoques locais sobre as finais da revisão (commit 219b22b). Cada pedido veio c
   - `antes_depois_pedidos_ta` grava as caixas de `ANTES_DEPOIS_PEDIDOS_TA` em `renders/POE642_CasaA_PH_<pavimento>_2910b_<trecho>_antes_depois.jpg`, contra as finais da revisão.
   - Com `--pasta_comparar`, grava também as caixas de `ANTES_DEPOIS_2A_TA` em `..._2910c_<trecho>_antes_depois.jpg`, contra as finais da 1ª leva (commit 387a97f).
   - Com `--pasta_comparar_3a`, as de `ANTES_DEPOIS_3A_TA` em `..._2910d_<trecho>_antes_depois.jpg`, contra as finais da 2ª leva (commit cb0b471).
+  - Com `--pasta_comparar_4a`, as de `ANTES_DEPOIS_4A_TA` em `..._2910e_<trecho>_antes_depois.jpg` (os rótulos), contra as finais da 3ª leva (commit 0a17741).
 - **Como refazer:**
 
   ```bash
   # de POE642_CasaA/scripts/; <pasta> com as três finais do commit 219b22b, <pasta_1a> com as do 387a97f e <pasta_2a>
-  # com as do cb0b471 (os mesmos nomes)
+  # com as do cb0b471 e <pasta_3a> com as do 0a17741 (os mesmos nomes)
   python3 pedidos_terreo_casaa_2910.py --pasta_antes <pasta> --antes_subsolo <a final do Subsolo do commit 1ccaaa3> \
-      --antes_1pav <a final do 1º Pavimento do commit 1ccaaa3> --pasta_comparar <pasta_1a> --pasta_comparar_3a <pasta_2a>
+      --antes_1pav <a final do 1º Pavimento do commit 1ccaaa3> --pasta_comparar <pasta_1a> --pasta_comparar_3a <pasta_2a> \
+      --pasta_comparar_4a <pasta_3a>
   python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png \
       --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png \
       --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png
