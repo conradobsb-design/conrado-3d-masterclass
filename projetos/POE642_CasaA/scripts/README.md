@@ -1466,3 +1466,10 @@ Na final: Térreo, 3351 px mudam (só nos itens 1 a 5); Subsolo, 8746 px (o vão
 
 - **`RESTOS_FOLHA_TC`:** mais duas faixas, sob a folha de vidro da direita das portas dos Quartos 3 (1341–1427 x 335–340 px) e 2 (1533–1618 x 335–340), entre ela e a face da parede do quarto (549,3 pt): o caixilho claro do render (174–195), que a limpeza das esquadrias deixava. Vem a madeira 7 px abaixo (`(0, 7)`, o passo das réguas, com as juntas no lugar). Os montantes das pontas (1428–1433 e 1619–1624) ficam.
 - **Na final:** o motor de `esquadrias` em diante, sem salvar; os 2 trechos (e 1 px junto à parede entre os quartos, que a etapa das cortinas mudou em 21) colados na final.
+
+### As cadeiras da varanda gourmet (Casa C, 29/10)
+
+- **`jogos_varanda_tc` (`JOGOS_VARANDA_TC`, na etapa dos móveis, depois de `moveis_tc`):** nas duas mesas redondas da varanda gourmet (`mesas_pt`, as da ARQ_MOBILIÁRIO), as 6 cadeiras do PDF (ARQ_LAYOUT HUMANIZAÇÃO, 28–40 pt, a menos de 80 pt do centro da mesa) dão lugar às do bloco `mesa_redonda_6_couro`, com os parâmetros e os tons do conjunto da varanda da Casa D (`final3840_casad.MOVEIS_TD["conjunto_varanda"]`, `tons_varanda_d`) e sem o tampo do bloco (tirado a `tampo_folga_px` além do raio dele): a mesa de madeira do render fica. A beira das cadeiras vem na cor do couro de dentro (`miolo_px`, pelo `distance_transform_edt`), sem a franja clara do recorte da foto. Pousadas por `D._jogo_q` e `D._pousar` no centro da mesa do PDF, nos `giros` 0 e 180.
+- **O piso:** na caixa de cada cadeira antiga (`folga_px`: esquerda, cima, direita, baixo), o travertino da mesma fileira deslocado na horizontal: o menor |dx| em `busca_px` com a fonte livre das peças do PDF (dilatadas `livre_px`) e de bordas em pé da imagem (Sobel x acima de `borda_sx`; o travertino só tem estratos deitados, e assim a esquadria da varanda à direita não é copiada), com a passagem `suave_px` e fora do tampo.
+- **A sombra:** a de `D.SOMBRA_JOGOS_D` (a macia e a de contato), só no piso, fora das cadeiras e do tampo.
+- **Na final:** o motor de `moveis` em diante, sem salvar; os 2 trechos das mesas colados na final, conferidos iguais ao cache antigo.

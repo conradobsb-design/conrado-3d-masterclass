@@ -3752,3 +3752,11 @@ O usuário, com o recorte das portas dos Quartos 3 e 2 para a varanda: "remove e
 Era o caixilho antigo do render: uma faixa clara de 6 px sob a folha de vidro da direita de cada porta, entre ela e a face da parede do quarto, que a limpeza das esquadrias não cobria. Saiu, e ali fica a madeira do quarto, com as juntas das réguas no lugar. Nos Quartos 1 e na Suíte Master não havia a faixa. Fica o trilho fino da cortina, de parede a parede, como em todas as cortinas (regra de 20/10).
 
 Antes e depois (o antes é a final de 49dfec4): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_traco_cortina_vidro_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos.
+
+### Pedido de 29/10/26: as cadeiras da varanda gourmet no padrão (Térreo da Casa C)
+
+O usuário, com o recorte das duas mesas redondas da varanda gourmet: "vamos trocar essas cadeiras. utilize do nosso padrão modelo".
+
+As 12 cadeiras do render (6 em cada mesa, estofadas em cinza com o traço do PDF) deram lugar às cadeiras de couro do conjunto padrão dos jogos da varanda (`mesa_redonda_6_couro`, as da Casa D), nas posições das cadeiras do PDF, com a sombra macia e a de contato no piso. As mesas de madeira da Casa C ficam, porque o pedido foi só das cadeiras; se o usuário quiser, as mesas também podem ir para a do conjunto (a madeira com o vidro no centro, como na Casa D). Sob as cadeiras antigas fica o travertino da mesma fileira, sem emenda e sem copiar a esquadria da varanda.
+
+Antes e depois (o antes é a final de 756385a): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_cadeiras_varanda_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos.

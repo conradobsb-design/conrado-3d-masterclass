@@ -914,6 +914,91 @@ def cadeiras_contorno_tc(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# As cadeiras dos jogos de mesa da varanda gourmet (usuário, 29/10/26, com o recorte das duas mesas redondas: "vamos
+# trocar essas cadeiras. utilize do nosso padrão modelo"): as cadeiras do PDF (cinza, com o contorno) dão lugar às de
+# couro do conjunto padrão dos jogos de varanda (`mesa_redonda_6_couro`, o das Casas D e E), na mesma disposição (uma
+# em cima, uma embaixo e duas de cada lado), com a mesa de 1,60 m do bloco no diâmetro da do PDF (`_jogo_q` da Casa D)
+# e o couro na cor da foto; a mesa de madeira da Casa C fica (do bloco, só as cadeiras: o tampo dele sai, `tampo_folga_px`
+# a mais). Antes, o piso onde estavam as cadeiras antigas (a caixa de cada uma, `folga_px`, com a sombra), fora da mesa:
+# o travertino das mesmas linhas, deslocado na horizontal até o trecho livre mais perto (`busca_px`; os estratos são
+# deitados e seguem contínuos), longe das peças do PDF e de qualquer traço em pé que já esteja na imagem (a esquadria
+# da varanda; o travertino só tem estratos deitados, então a borda vertical acima de `borda_sx` marca o que não é piso)
+# (`livre_px`), com a passagem macia (`suave_px`) para a emenda não
+# marcar. A franja clara do recorte da foto sai (a beira das cadeiras na cor do couro mais perto, `miolo_px` para
+# dentro). Por cima, a sombra curta e a macia das cadeiras, como nos jogos da varanda da Casa D (`SOMBRA_JOGOS_D`, só no
+# piso).
+JOGOS_VARANDA_TC = {"mesas_pt": [(1038.3, 1447.0, 1128.9, 1537.7), (1265.9, 1447.0, 1356.6, 1537.7)], "giros": [0, 180],
+                    "folga_px": (13, 9, 9, 13), "busca_px": (40, 320), "livre_px": 6, "tampo_folga_px": 6,
+                    "suave_px": 3.0, "miolo_px": 6, "borda_sx": 140}
+
+
+def jogos_varanda_tc(Q, img):
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    import final3840_casad as D
+    q = JOGOS_VARANDA_TC
+    qb = D.MOVEIS_TD["conjunto_varanda"]
+    cor, al = blocos.bloco(qb["bloco"], qb["px_m_bloco"])
+    cor = D.tons_varanda_d(cor, al, qb)
+    h, w = al.shape
+    yy, xx = np.mgrid[:h, :w]
+    al = al * np.clip((np.hypot(xx - w / 2, yy - h / 2) - qb["tampo_px"] / 2 - q["tampo_folga_px"]) / 2, 0, 1)
+    from scipy import ndimage
+    miolo = cv2.erode((al > 0.98).astype(np.uint8), np.ones((2 * q["miolo_px"] + 1,) * 2, np.uint8)) > 0
+    _, (iy, ix) = ndimage.distance_transform_edt(~miolo, return_indices=True)
+    cor = np.where(miolo[..., None], cor, cor[iy, ix])                  # a beira na cor do couro de dentro
+    out = img.astype(np.float32)
+    H, W = out.shape[:2]
+    pecas = [d for d in Q.desenhos if d.get("layer") in ("ARQ_LAYOUT HUMANIZAÇÃO", "ARQ_MOBILIÁRIO")
+             and d["type"] in ("f", "fs")]
+    ocupado = Q.preencher(lambda d: d in pecas) > 0.02
+    cinza = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    ocupado |= np.abs(cv2.Sobel(cinza, cv2.CV_32F, 1, 0, ksize=3)) > q["borda_sx"]
+    ocupado = cv2.dilate(ocupado.astype(np.uint8), np.ones((2 * q["livre_px"] + 1,) * 2, np.uint8)) > 0
+    n_cad = 0
+    for mesa, giro in zip(q["mesas_pt"], q["giros"]):
+        mcx, mcy = (mesa[0] + mesa[2]) / 2, (mesa[1] + mesa[3]) / 2
+        tampo = Q.preencher(lambda d, m_=mesa: d.get("layer") == "ARQ_MOBILIÁRIO" and abs(d["rect"].x0 - m_[0]) < 0.5
+                            and abs(d["rect"].y0 - m_[1]) < 0.5 and abs(d["rect"].x1 - m_[2]) < 0.5)
+        cads = [d["rect"] for d in pecas if d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO"
+                and 28 <= max(d["rect"].width, d["rect"].height) <= 40
+                and abs((d["rect"].x0 + d["rect"].x1) / 2 - mcx) < 80 and abs((d["rect"].y0 + d["rect"].y1) / 2 - mcy) < 80]
+        # o piso no lugar das cadeiras antigas
+        for r in cads:
+            x0, y0, x1, y1 = F.ret_q(Q, (r.x0, r.y0, r.x1, r.y1))
+            fe, fc, fd, fb = q["folga_px"]
+            x0, y0, x1, y1 = x0 - fe, y0 - fc, x1 + fd, y1 + fb
+            dx = next((s * d for d in range(q["busca_px"][0], q["busca_px"][1]) for s in (-1, 1)
+                       if 0 <= x0 + s * d and x1 + s * d <= W and not ocupado[y0:y1, x0 + s * d:x1 + s * d].any()), None)
+            if dx is None:
+                print(f"    jogos da varanda: sem trecho livre para o piso da cadeira em ({x0}, {y0})")
+                continue
+            m = np.zeros((H, W), np.float32)
+            m[y0:y1, x0:x1] = 1
+            m = cv2.GaussianBlur(m, (0, 0), q["suave_px"]) * (1 - tampo)
+            fonte = np.roll(out, -dx, axis=1)
+            out = out * (1 - m[..., None]) + fonte * m[..., None]
+        # as cadeiras de couro do conjunto padrão, sem o tampo dele
+        c, a, cx, cy = D._jogo_q(Q, {"mesa_pt": mesa, "giro": giro}, cor, al, qb)
+        D._pousar(out, c, a, cx, cy, Q.px_m)
+        # a sombra macia e a de contato, só no piso (fora das cadeiras e da mesa)
+        hh, ww = a.shape
+        f = int(np.ceil(max(abs(s["dx_m"]) + 3 * s["sig_m"] for s in D.SOMBRA_JOGOS_D) * Q.px_m)) + 4
+        X0, Y0 = int(np.floor(cx - ww / 2)) - f, int(np.floor(cy - hh / 2)) - f
+        Wr, Hr = ww + 2 * f, hh + 2 * f
+        aa = cv2.warpAffine(a, np.float32([[1, 0, cx - ww / 2 - X0], [0, 1, cy - hh / 2 - Y0]]), (Wr, Hr))
+        luz = np.ones((Hr, Wr), np.float32)
+        for s in D.SOMBRA_JOGOS_D:
+            dd = np.float32([[1, 0, s["dx_m"] * Q.px_m], [0, 1, s["dy_m"] * Q.px_m]])
+            luz *= 1 - cv2.GaussianBlur(cv2.warpAffine(aa, dd, (Wr, Hr)), (0, 0), s["sig_m"] * Q.px_m) * s["forca"]
+        livre = (1 - aa) * (1 - tampo[Y0:Y0 + Hr, X0:X0 + Wr])
+        out[Y0:Y0 + Hr, X0:X0 + Wr] *= (1 - (1 - luz) * livre)[..., None]
+        n_cad += len(cads)
+    print(f"    jogos da varanda gourmet: {n_cad} cadeiras do PDF trocadas pelas de couro do conjunto padrão, as mesas "
+          f"de madeira ficam")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 # As portas das suítes para as varandas (usuário, 29/10/26: "percebe um padrão varanda, onde tem duas folhas de brise
 # bronze escovado na parte mais externa e na parte interna duas folhas de vidro? em todas as suítes são assim."): nos
 # Quartos 1, 2 e 3 e na Suíte Master, o PDF tem 4 folhas de correr em dois planos. As duas do plano de fora (junto à
@@ -2118,7 +2203,7 @@ def passos_terreo_c(Q, ini, M):
         ("vasos", lambda im: F.vasos_cor(Q, im)),
         ("biblioteca", lambda im: biblioteca_c(Q, im)),
         ("cadeiras", lambda im: cadeiras_contorno_tc(Q, cadeiras_mesas_t(Q, im))),
-        ("moveis", lambda im: moveis_tc(Q, im)),
+        ("moveis", lambda im: jogos_varanda_tc(Q, moveis_tc(Q, im))),
         ("carros", lambda im: F.carros(Q, im, M)),
         ("deck", lambda im: deck_detalhes_c(Q, im)),
         ("chuveiros", lambda im: chuveiros_tc(Q, im)),
