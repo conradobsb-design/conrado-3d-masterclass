@@ -455,25 +455,145 @@ def maquinas_inox_tb(Q, img):
     return out
 
 
-# 6. A janela da pia da cozinha (usuário: "corrigir as folhas de vidro da pia da cozinha. são apenas duas folhas"): no
-# PDF, duas folhas de correr (a da esquerda no plano de dentro, a da direita no de fora); no render, na metade da
-# direita, entre a borda da bancada e a folha, ficou um tubo claro (o caixilho antigo), que lia como uma terceira folha.
-# As linhas dele (`faixa_px`, entre os batentes) recebem o granito da bancada logo acima da linha da borda dela, em
-# espelho e vai e vem nas linhas `fonte_y` (mais acima fica a borda das cubas), como na metade da esquerda.
-JANELA_PIA_TB = {"faixa_px": (1685, 1666, 1777, 1673), "fonte_y": (1661, 1665)}
+# 6. A janela da pia da cozinha (usuário: "corrigir as folhas de vidro da pia da cozinha. são apenas duas folhas"; depois:
+# "na cozinha, aqui é uma janela com duas folhas, por isso precisa ter a base da janela em forma de 'soleira'") e a porta de
+# correr da área de serviço para a área descoberta ("estamos sem a soleira. insira-a."): no vão do PDF (a espessura da
+# parede, entre os batentes), a soleira de Bege Bahia (`final3840_casaa.soleira_bege`, com as faces da parede em cinza
+# fino) e, por cima, os batentes e as duas folhas de correr do PDF, cada uma no plano dela, finas (alumínio com o vidro
+# no meio, `final3840_casaa.portas_vidro`). Na janela, a soleira cobre o caixilho antigo da metade da direita (o tubo
+# claro que lia como uma terceira folha); na porta, a folha do render era um tubo grosso da espessura da parede: as
+# linhas dele que passam do vão (`limpa_px`: px, e de que lado vem o granito, em espelho) voltam ao granito.
+SOLEIRAS_TB = {
+    "limpa_px": [((2122, 1561, 2198, 1565), "cima"), ((2122, 1574, 2158, 1577), "baixo")],
+    "portas": [
+        {"nome": "janela da pia da cozinha", "soleira": (1393.2, 1808.4, 1567.3, 1819.8),
+         "batentes": [(1391.0, 1808.4, 1393.2, 1819.8), (1567.3, 1808.4, 1569.6, 1819.8)],
+         "folhas": [((1393.2, 1814.1, 1482.5, 1816.9), "x"), ((1478.0, 1816.9, 1567.3, 1819.8), "x")],
+         "montante_pt": 0.6},
+        {"nome": "de correr da área de serviço para a área descoberta", "soleira": (1829.8, 1712.0, 1964.1, 1720.6),
+         "batentes": [(1827.5, 1712.0, 1829.8, 1720.6), (1964.1, 1712.0, 1966.4, 1720.6)],
+         "folhas": [((1894.7, 1712.0, 1964.1, 1714.9), "x"), ((1829.8, 1714.9, 1899.2, 1717.7), "x")],
+         "montante_pt": 0.6}]}
 
 
-def janela_pia_tb(img):
-    q = JANELA_PIA_TB
+def soleiras_tb(Q, img):
+    import final3840_casaa as FA
+    q = SOLEIRAS_TB
     out = img.copy()
-    x0, y0, x1, y1 = q["faixa_px"]
-    a, b = q["fonte_y"]
-    vaivem = list(range(b - 1, a - 1, -1)) + list(range(a + 1, b - 1))
-    for i, y in enumerate(range(y0, y1)):
-        out[y, x0:x1] = img[vaivem[i % len(vaivem)], x0:x1]
-    print(f"    janela da pia da cozinha: o caixilho antigo entre a bancada e as folhas sai ({x1 - x0}x{y1 - y0} px); "
-          f"ficam as duas folhas")
+    for (x0, y0, x1, y1), lado in q["limpa_px"]:
+        for y in range(y0, y1):
+            out[y, x0:x1] = img[2 * y0 - 1 - y if lado == "cima" else 2 * y1 - 1 - y, x0:x1]
+    pv = FA.PORTAS_VIDRO
+    FA.PORTAS_VIDRO = dict(pv, portas=q["portas"])
+    try:
+        out = FA.portas_vidro(Q, out)
+    finally:
+        FA.PORTAS_VIDRO = pv
     return out
+
+
+# 15. A ilha da varanda gourmet (usuário, com o recorte da ilha com o cooktop: "não existe essas linhas cinzas no meio da
+# bancada. isso denota um degrau, o qual não existe."): no PDF, uma tira branca de 2,2 pt da ARQ_BANCADAS de ponta a
+# ponta da ilha (1112,7 a 1349,6 x 1499,0 a 1501,2 pt), que o render desenhou como duas linhas cinza. As linhas dela
+# (`faixa_px`, entre a borda esquerda da ilha e a parede) recebem o granito de logo acima, em espelho; o tom das duas
+# metades da ilha já é o mesmo.
+LINHA_ILHA_TB = {"faixa_px": (1301, 1339, 1548, 1344)}
+
+
+def linha_ilha_tb(img):
+    x0, y0, x1, y1 = LINHA_ILHA_TB["faixa_px"]
+    out = img.copy()
+    for y in range(y0, y1):
+        out[y, x0:x1] = img[2 * y0 - 1 - y, x0:x1]
+    print(f"    ilha da varanda gourmet: a linha do meio da bancada sai ({x1 - x0}x{y1 - y0} px), sem degrau")
+    return out
+
+
+# 16. As espreguiçadeiras da prainha (usuário: "melhore a representação dessas espreguiçadeiras. dando um efeito que está
+# dentro da água. melhore o contorno dela também."): o render as deixava chapadas, com o contorno cinza grosso, uma sombra
+# serrilhada e restos claros em volta. Em volta de cada uma (`zona_px` além da peça do PDF), a água é tecida de novo com
+# a água limpa da prainha (`fonte_px`, image quilting da biblioteca de texturas, sem direção), no tom da água em volta.
+# Por cima: a sombra no fundo da prainha, vista pela água (deslocada para baixo e à esquerda, macia e azulada); o corpo
+# submerso, um pouco maior que o tampo (`corpo_px`), num branco esverdeado translúcido, com a água ainda aparecendo; a
+# linha d'água, um fio claro e quebrado junto ao tampo; e o tampo em off-white com volume (a borda que cai, sem o
+# contorno grosso, só o aro fino), o encosto (a parte menor, do lado de `encosto`) um tom abaixo e o vinco entre ele e o
+# assento.
+ESPREGUICADEIRAS_TB = {"pecas_pt": [(761.8, 1317.2, 871.8, 1359.0), (761.8, 1390.3, 871.8, 1432.2)],
+                       "camada": "ARQ_LAYOUT HUMANIZAÇÃO", "vinco_x_pt": 828.0, "encosto": "dir",
+                       "zona_px": 14, "fonte_px": (900, 1111, 1074, 1142), "p_px": 14, "semente": 2912,
+                       "tampo": (238, 240, 241), "volume": {"larg_m": 0.05, "forca": 0.16}, "encosto_tom": 0.95,
+                       "vinco": 0.22, "aro": 0.30, "ss": 8,
+                       "sombra": {"dx_m": -0.13, "dy_m": 0.13, "sig_m": 0.06, "forca": 0.55, "tinta": (0.65, 0.85, 1.00)},
+                       "corpo_px": 2.0, "corpo": {"cor": (222, 232, 214), "alfa": 0.50},
+                       "linha": {"alfa": 0.45, "larg_px": 0.8}}
+
+
+def espreguicadeiras_tb(Q, img):
+    sys.path.insert(0, str(F.B.RAIZ / "_texturas"))
+    import texturas
+    q, ss = ESPREGUICADEIRAS_TB, ESPREGUICADEIRAS_TB["ss"]
+    out = img.astype(np.float32)
+    rng = np.random.default_rng(q["semente"])
+    fx0, fy0, fx1, fy1 = q["fonte_px"]
+    fonte = img[fy0:fy1, fx0:fx1]
+    agua_med = np.median(fonte.reshape(-1, 3).astype(np.float32), axis=0)
+    for k, r in enumerate(q["pecas_pt"]):
+        d = _desenho_tb(Q, q["camada"], r)
+        z = q["zona_px"]
+        X0, Y0, X1, Y1 = F.ret_q(Q, r)
+        X0, Y0, X1, Y1 = X0 - z - 8, Y0 - z - 8, X1 + z + 8, Y1 + z + 8
+        w, h = X1 - X0, Y1 - Y0
+        M = D._mascara_pdf(Q, [d], X0, Y0, w, h, ss).astype(np.float32) / 255
+
+        def red(x):
+            return cv2.resize(x, (w, h), interpolation=cv2.INTER_AREA)
+        a1 = red(M)
+        # 1. a água de novo na zona, tecida com a água limpa, no tom da água de fora da zona
+        zona = cv2.dilate((a1 > 0.01).astype(np.uint8), np.ones((2 * z + 1,) * 2, np.uint8)).astype(np.float32)
+        tec = texturas.quilting(texturas.variantes(fonte, False), h, w, p=q["p_px"], sobra=max(3, q["p_px"] // 3),
+                                rng=np.random.default_rng(q["semente"] + k))[:h, :w].astype(np.float32)
+        reg = out[Y0:Y1, X0:X1]
+        fora = cv2.erode(1 - zona, np.ones((3, 3), np.uint8)) > 0.5
+        tom = np.median(reg[fora], axis=0) if fora.any() else agua_med
+        tec *= (tom / np.maximum(tec.reshape(-1, 3).mean(axis=0), 1))[None, None, :]
+        al = cv2.GaussianBlur(zona, (0, 0), 1.5)
+        al = np.maximum(al, zona * (cv2.erode(zona, np.ones((5, 5), np.uint8))))
+        agua = reg * (1 - al[..., None]) + tec * al[..., None]
+        # 2. a sombra no fundo, pela água
+        s = q["sombra"]
+        dsl = np.float32([[1, 0, s["dx_m"] * Q.px_m], [0, 1, s["dy_m"] * Q.px_m]])
+        sb = cv2.GaussianBlur(cv2.warpAffine(a1, dsl, (w, h)), (0, 0), s["sig_m"] * Q.px_m) * s["forca"]
+        agua *= 1 - sb[..., None] * np.float32(s["tinta"])[None, None, :]     # mais no vermelho: a sombra azulada
+        # 3. o corpo submerso, maior que o tampo, translúcido, e a linha d'água junto ao tampo
+        kc = 2 * int(round(q["corpo_px"] * ss)) + 1
+        Mc = cv2.GaussianBlur(cv2.dilate(M, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kc, kc))), (0, 0), 0.6 * ss)
+        ac = red(Mc) * (1 - a1) * q["corpo"]["alfa"]
+        agua = agua * (1 - ac[..., None]) + np.float32(q["corpo"]["cor"]) * ac[..., None]
+        kl = 2 * int(round(q["linha"]["larg_px"] * ss)) + 1
+        anel = cv2.dilate(M, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kl, kl))) - M
+        quebra = cv2.GaussianBlur(rng.normal(0, 1, M.shape).astype(np.float32), (0, 0), 3.0 * ss)
+        quebra = np.clip(0.5 + quebra / max(float(quebra.std()), 1e-6), 0, 1)
+        al_l = red(anel * quebra) * q["linha"]["alfa"]
+        agua = agua * (1 - al_l[..., None]) + 250.0 * al_l[..., None]
+        # 4. o tampo: off-white, a borda que cai, o encosto um tom abaixo, o vinco e o aro fino
+        dist = cv2.distanceTransform((M > 0.5).astype(np.uint8), cv2.DIST_L2, 5) / ss / Q.px_m
+        vol = 1 - q["volume"]["forca"] * (1 - np.minimum(1, dist / q["volume"]["larg_m"])) ** 2
+        xs = (np.arange(w * ss) + 0.5) / ss + X0
+        xv = Q.p2q(q["vinco_x_pt"], 0)[0]
+        enc = (xs > xv) if q["encosto"] == "dir" else (xs < xv)
+        fator = vol * np.where(enc[None, :], q["encosto_tom"], 1.0)
+        vinco = np.exp(-((xs - xv) / 0.9) ** 2)[None, :]
+        fator *= 1 - q["vinco"] * vinco
+        ruido = cv2.GaussianBlur(rng.normal(0, 1, M.shape).astype(np.float32), (0, 0), 0.5 * ss)
+        fator *= 1 + 0.008 * ruido / max(float(ruido.std()), 1e-6)
+        aro = M - cv2.erode(M, np.ones((ss // 2 + 1,) * 2, np.uint8))
+        fator *= 1 - q["aro"] * aro
+        cor = np.float32(q["tampo"])[None, None, :] * fator[..., None]
+        tampo = red(cor * M[..., None]) / np.maximum(a1, 1e-4)[..., None]
+        out[Y0:Y1, X0:X1] = agua * (1 - a1[..., None]) + tampo * a1[..., None]
+    print(f"    prainha: {len(q['pecas_pt'])} espreguiçadeiras na água (a água refeita, a sombra no fundo, o corpo submerso, "
+          f"a linha d'água e o tampo com volume)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
 # 7-9. As peças de madeira: o criado-mudo redondo do quarto do motorista (usuário: "adicione textura de madeira ao criado
@@ -772,7 +892,9 @@ def pedidos_tb(img):
     img = tampos_tb(Q, img)
     img = D.jantar_d(Q, img, img, q=JANTAR_TB)
     img = maquinas_inox_tb(Q, img)
-    img = janela_pia_tb(img)
+    img = soleiras_tb(Q, img)
+    img = linha_ilha_tb(img)
+    img = espreguicadeiras_tb(Q, img)
     img = F.cama_master(Q, img, CAMA_MASTER_TB)
     img = recamiers_tb(Q, img)
     return pecas_madeira_tb(Q, img)
