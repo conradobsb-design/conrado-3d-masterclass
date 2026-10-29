@@ -3859,3 +3859,16 @@ Resposta do usuário: "altere". Aplicados os dois itens (`subsolo_casab_2910.py 
 2. o armário junto ao shaft na marcenaria areia com o veio no comprido e o contorno fino, sem sombra, como o armário da cozinha do Térreo.
 
 Só mudam os 3 rótulos e o armário; a prancha do Térreo sai igual. Antes e depois (o antes é a final de 2cad7fa): `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2910_{rotulos_deposito_academia_armario,rotulo_sauna}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa B refeitos. Aguarda o OK da Casa B.
+
+### Casa B · Subsolo: os pedidos vendo o Subsolo (29/10/26)
+
+Pedidos do usuário, com os recortes: na porta do BH sauna, "remova a linha atrás da porta. parece que tem outra porta"; no elevador, "padronize como do terreo. e represente melhor o rótulo"; na porta do depósito, "corrija a parede atrás da porta. tem um dente que não existe. a parede é retilinea" e "representa a soleira. não pode ficar no tom branco."; no vidro da sauna, "represente melhor essas folhas de vidro e corrija imperfeições"; nos bancos da sauna, "represente melhor esses degraus da sauna com o efeito sombra de cada um deles em forma de bancos".
+
+Aplicados de uma vez sobre a final de 29ce96b (`POE642_CasaA/scripts/subsolo_casab_2910.py --pedidos`):
+- BH sauna: o traço claro entre a folha aberta e a parede de cima (uma folha antiga da base) sai; ali fica o travertino.
+- Depósito: a face da parede de cima reta sobre a folha (subia ~3 px ali, e o canto do vão saía branco); a soleira de Bege Bahia no vão, com as faces em cinza fino e os batentes do PDF por cima (o vão não entrava na busca dos vãos porque emenda no branco da circulação no PDF); o começo da parede de baixo, que saía branco, é parede.
+- Sauna, vidro fixo em L: como o da sauna da Casa A, aprovado em 26/10: o vão da parede em Bege Bahia (antes, faixas escuras e um resto claro no canto), o caixilho com a linha do vidro nos dois braços e os montantes do canto e das pontas.
+- Sauna, bancos: em degraus, cada nível mais claro que o de baixo, a sombra de contato de cada banco no de baixo (o da frente no piso, o de trás no da frente), o espelho na sombra, o fio do pé e o brilho da quina.
+- Elevador: a cabine do Térreo (aço claro, corrimãos nas três paredes sem porta, as folhas e a soleira em inox), nas mesmas coordenadas do PDF; o ELEVADOR no meio da cabine, maior e em preto.
+
+Só mudam esses 4 trechos; a prancha do Térreo sai igual. Antes e depois (o antes é a final de 29ce96b): `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2910c_{porta_bh_sauna,porta_deposito_parede_soleira,sauna_vidros_bancos,elevador_rotulo}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa B refeitos. Aguarda o OK da Casa B.

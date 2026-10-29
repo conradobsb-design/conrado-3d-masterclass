@@ -204,9 +204,158 @@ def revisao_sb(Q, img):
     return rotulos_centro_sb(Q, RB.marcenaria_tb(Q, img, MARCENARIA_SB))
 
 
+# 3. Os pedidos de 29/10 vendo o Subsolo depois da conferência (usuário, com os recortes):
+# 3a. "remova a linha atrás da porta. parece que tem outra porta" (BH sauna): entre a folha aberta (ARQ_PAREDE,
+# 1062,2-1107,5 x 809,2-811,5 pt) e a face da parede de cima, o traço claro de uma folha antiga da base (y 607-612 px), que
+# já vinha das etapas do motor. Sai com o travertino de logo abaixo da folha (os estratos são deitados: `dy` px).
+LINHA_PORTA_BHS_SB = {"px": (1250, 607, 1297, 613), "dy": 10}
+
+# 3b. "corrija a parede atrás da porta. tem um dente que não existe. a parede é retilínea" (depósito): sobre a folha aberta
+# da porta do depósito (1322,9-1362,6 pt), a face da parede de cima subia ~3 px (o revestimento do PDF, de 1,7 pt, saía
+# como piso) e, no vão da porta, o canto da parede saía em branco. A face volta reta, na linha da parede ao lado
+# (`modelo_x`: as linhas do fim da parede, a face escura e o fio, copiadas coluna a coluna). Embaixo do vão, o começo da
+# parede de baixo (585,3 pt, 378 px) também saía em branco até 383 px: vira a parede (`pe_px`, a linha `pe_modelo_y`).
+PAREDE_DEPOSITO_SB = {"px": (1511, 1565), "linhas": (325, 330), "modelo_x": 1570, "pe_px": (1511, 378, 1521, 383),
+                      "pe_modelo_y": 386}
+
+# 3c. "representa a soleira. não pode ficar no tom branco." (depósito): o vão da porta na parede entre a circulação e o
+# depósito (1314,4-1322,9 x 539,9-585,3 pt) não entrou na busca dos vãos brancos (o branco do vão emenda no branco da
+# circulação no PDF, como o Louceiro 2 da Casa C) e ficou no branco. Agora a soleira de Bege Bahia com as faces em cinza
+# fino (R13) e, por cima, os batentes do PDF (as barras de cima e de baixo e as peças dos lados).
+SOLEIRA_DEPOSITO_SB = {"nome": "do depósito (soleira)", "soleira": (1314.4, 539.9, 1322.9, 585.3),
+                       "batentes": [(1314.4, 541.3, 1322.9, 543.3), (1314.4, 581.9, 1322.9, 583.9),
+                                    (1313.3, 538.2, 1314.4, 542.2), (1322.9, 538.8, 1324.1, 542.8),
+                                    (1313.3, 583.0, 1314.4, 587.0), (1322.9, 582.4, 1324.1, 586.4)],
+                       "folhas": [], "montante_pt": 0.6}
+
+# 3d. "represente melhor essas folhas de vidro e corrija imperfeições" (o vidro fixo em L da sauna): o vão da parede saía
+# em faixas escuras e com um resto claro no canto de cima. Agora como o vidro fixo em L da sauna do Subsolo da Casa A
+# (aprovado em 26/10, `final3840_casaa.portas_vidro`): o vão da parede (os dois braços do PDF, o bege a 50% da ARQ_PAREDE)
+# em Bege Bahia sem as faces, o caixilho branco entre as faces escuras com a linha do vidro no meio, nos dois braços, e os
+# montantes do canto e das pontas, até as paredes.
+VIDRO_SAUNA_SB = {"nome": "da sauna (vidro fixo)",
+                  "soleiras": [(787.2, 793.6, 888.1, 802.1), (787.2, 802.1, 798.5, 895.7)], "faces": False,
+                  "batentes": [],
+                  "postes": [(791.7, 798.2, 796.6, 803.0), (886.1, 798.2, 888.1, 801.0), (791.7, 895.4, 794.6, 897.4)],
+                  "folhas": [((796.6, 798.2, 886.1, 801.0), "x"), ((791.7, 803.0, 794.6, 895.4), "y")],
+                  "montante_pt": 0.0, "linhas": {"cor": (48, 50, 52), "faces_px": 0.9, "meio_px": 0.7, "largura_min_px": 4.8}}
+
+# 3e. "represente melhor esses degraus da sauna com o efeito sombra de cada um deles em forma de bancos": os dois níveis
+# (o da frente, 895,7-924,0 pt, e o de trás, junto à parede, 926,3-952,4; o espelho entre eles, 924,0-926,3) refeitos no
+# mesmo travertino bruto (`F.bancos_sauna`, a mesma textura), cada um mais claro que o de baixo (`nivel`), com a sombra de
+# contato de cada banco no de baixo (no piso, à frente do banco da frente; no banco da frente, à frente do de trás:
+# `sombra`), o espelho na sombra (`espelho`), o fio escuro do pé de cada banco e o brilho fino da quina (`quina`).
+BANCOS_SAUNA_SB = {"nivel": (1.0, 1.035, 1.075), "sombra": {"larg_m": 0.07, "forca": 0.30}, "espelho": 0.80,
+                   "pe": {"cor": (112, 110, 104), "larg_px": 0.8, "forca": 0.55}, "quina": {"larg_px": 0.8, "forca": 0.10},
+                   "parede_max": 110}
+
+# 3f. "padronize como do terreo. e represente melhor o rótulo" (o elevador): a cabine era a do Subsolo de 26/10 (a
+# referência das Casas C, D e E), mais escura, com o painel cinza, sem os corrimãos dos lados nem as folhas. O PDF do
+# Subsolo tem a caixa do elevador nas mesmas coordenadas da do Térreo (INS_INSTALAÇÕES HIDRÁULICAS, 1527,1-1606,4 x
+# 766,6-842,4 pt) e a porta no mesmo vão: a cabine de aço do Térreo (`revisao_casab_2910.ELEVADOR_TB`), a mesma. O
+# rótulo ELEVADOR volta no meio da cabine, no corpo e no preto dos rótulos (`rotulos_centro_sb`).
+
+
+def linha_porta_bhs_sb(img, q=LINHA_PORTA_BHS_SB):
+    x0, y0, x1, y1 = q["px"]
+    out = img.copy()
+    out[y0:y1, x0:x1] = img[y0 + q["dy"]:y1 + q["dy"], x0:x1]
+    print(f"    BH sauna: o traço atrás da folha sai ({x1 - x0}x{y1 - y0} px), com o travertino de {q['dy']} px abaixo")
+    return out
+
+
+def parede_deposito_sb(img, q=PAREDE_DEPOSITO_SB):
+    (x0, x1), (y0, y1), xm = q["px"], q["linhas"], q["modelo_x"]
+    out = img.copy()
+    out[y0:y1, x0:x1] = img[y0:y1, xm:xm + 1]
+    a, b, c, d = q["pe_px"]
+    out[b:d, a:c] = img[q["pe_modelo_y"], a:c][None]
+    print(f"    depósito: a face da parede de cima reta sobre a porta ({x1 - x0} px, as linhas {y0}-{y1 - 1} da parede ao lado)")
+    return out
+
+
+def portas_vidro_sb(Q, img, portas):
+    import final3840_casaa as FA
+    pv = FA.PORTAS_VIDRO
+    FA.PORTAS_VIDRO = dict(pv, portas=portas)
+    try:
+        return FA.portas_vidro(Q, np.ascontiguousarray(img.copy()))
+    finally:
+        FA.PORTAS_VIDRO = pv
+
+
+def bancos_sauna_sb(Q, img, q=BANCOS_SAUNA_SB):
+    import final3840_casaa as FA
+    from retoque_terreo_casae import linha_aa
+    s, b = F.SAUNA_F, F.SAUNA_F[Q.chave]
+    a = Q.preencher(lambda d: d.get("layer") == "ARQ_CONTRAPISO" and d.get("fill") and
+                    all(abs(v - w) < 0.5 for v, w in zip((d["rect"].x0, d["rect"].y0, d["rect"].x1, d["rect"].y1),
+                                                         b["pt"])), fs=False)
+    x0, y0, x1, y1 = F.ret_q(Q, b["pt"])
+    x0, y0, x1, y1 = x0 - 2, y0 - 2, x1 + 2, y1 + 2
+    sm = q["sombra"]["larg_m"] * Q.px_m
+    ys0 = int(y0 - 4 * sm)                                     # a sombra no piso, à frente do banco da frente
+    px0, py0, px1, py1 = F.ret_q(Q, b["piso_pt"])
+    cor = np.median(img[py0:py1, px0:px1].reshape(-1, 3).astype(np.float32), axis=0)
+    T = cor * FA.travertino_bruto(Q, y1 - y0, x1 - x0, s["semente"], forca=s["veio"], **FA.TRAVERTINO["bancada"])[..., None]
+    yf = Q.p2q(b["pt"][0], b["pt"][1])[1]                      # a frente do banco da frente
+    ye0 = Q.p2q(b["pt"][0], b["espelho_pt"][0])[1]             # o espelho
+    ye1 = Q.p2q(b["pt"][0], b["espelho_pt"][1])[1]
+    yy = np.arange(ys0, y1, dtype=np.float32)[:, None]
+    n0, n1, n2 = q["nivel"]
+    nivel = np.where(yy >= ye1, n2, np.where(yy >= ye0, n1 * q["espelho"], np.where(yy >= yf, n1, n0)))
+    f = q["sombra"]["forca"]
+    sombra = np.where(yy < yf, 1 - f * np.exp(-(yf - yy) / sm), 1.0) * \
+        np.where((yy >= yf) & (yy < ye0), 1 - f * np.exp(-(ye0 - yy) / sm), 1.0)
+    out = img.astype(np.float32)
+    # o banco (no travertino bruto) e, no piso à frente dele, só a sombra; nada nas paredes em volta
+    reg = out[ys0:y1, x0:x1]
+    al = a[ys0:y1, x0:x1, None]
+    parede = (reg.max(axis=2, keepdims=True) < q["parede_max"])
+    novo_banco = np.concatenate([np.zeros((y0 - ys0, x1 - x0, 3), np.float32), T]) * nivel[..., None]
+    xa, xb = Q.p2q(b["pt"][0], 0)[0] - x0, Q.p2q(b["pt"][2], 0)[0] - x0
+    X = np.arange(x1 - x0, dtype=np.float32)[None, :]
+    no_x = ((X >= xa) & (X <= xb))[..., None]
+    piso_sombra = reg * sombra[..., None]
+    reg[:] = np.where(parede, reg, np.where(no_x & (yy[..., None] < yf), piso_sombra, reg))
+    reg[:] = np.where(parede, reg, reg * (1 - al) + novo_banco * sombra[..., None] * al)
+    # o fio do pé de cada banco (a frente de cada nível) e o brilho fino da quina, logo atrás dele
+    h, w = reg.shape[:2]
+    for yl in (yf, ye1):
+        ln = linha_aa((h, w), [(xa, yl - ys0), (xb, yl - ys0)], q["pe"]["larg_px"])[..., None] * q["pe"]["forca"] * al
+        reg[:] = reg * (1 - ln) + np.float32(q["pe"]["cor"]) * ln
+        lq = linha_aa((h, w), [(xa, yl - ys0 + 1.2), (xb, yl - ys0 + 1.2)], q["quina"]["larg_px"])[..., None] * al
+        reg[:] = reg * (1 + q["quina"]["forca"] * lq)
+    print(f"    sauna: os dois bancos em níveis (piso, frente, trás: {n0}, {n1}, {n2}), com a sombra de contato de cada um "
+          f"no de baixo ({q['sombra']['larg_m'] * 100:.0f} cm), o espelho na sombra, o pé e a quina")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def elevador_sb(Q, img):
+    import final3840_casaa as FA
+    guarda = FA.ELEVADOR
+    FA.ELEVADOR = dict(FA.ELEVADOR, **RB.ELEVADOR_TB)
+    try:
+        out = FA.elevador(Q, np.ascontiguousarray(img.copy()))
+    finally:
+        FA.ELEVADOR = guarda
+    print("    elevador: a cabine de aço do Térreo (o mesmo desenho, nas mesmas coordenadas do PDF)")
+    return out
+
+
+def pedidos_sb(Q, img):
+    out = linha_porta_bhs_sb(img)
+    out = parede_deposito_sb(out)
+    out = portas_vidro_sb(Q, out, [SOLEIRA_DEPOSITO_SB, VIDRO_SAUNA_SB])
+    out = bancos_sauna_sb(Q, out)
+    out = elevador_sb(Q, out)
+    return rotulos_centro_sb(Q, out, dict(ROTULOS_CENTRO_SB, mover=("ELEVADOR",), obstaculos_pt=[]))
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--revisao", action="store_true", help="os 2 itens da conferência (sobre a final de 2cad7fa)")
+    ap.add_argument("--pedidos", action="store_true", help="os pedidos vendo o Subsolo (sobre a final de 29ce96b)")
     ap.add_argument("--antes", default=str(SUBSOLO_B))
     ap.add_argument("--terreo", default=str(TERREO_B))
     ap.add_argument("--saida", default=str(SUBSOLO_B))
@@ -214,7 +363,9 @@ if __name__ == "__main__":
     Q = F.Quadro("Subsolo")
     img = cv2.imread(a.antes)
     assert img.shape == (Q.H, Q.W, 3)
-    if a.revisao:
+    if a.pedidos:
+        out = pedidos_sb(Q, img)
+    elif a.revisao:
         out = revisao_sb(Q, img)
     else:
         terreo = cv2.imread(a.terreo)
