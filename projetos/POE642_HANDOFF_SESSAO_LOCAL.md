@@ -3642,3 +3642,15 @@ A mesma revisão, no Subsolo (aprovado em 27/10), em 4 quadros e nos pontos ampl
   7. pátio: a parede tracejada dupla do PDF em volta do pátio (ARQ_PAREDE, fora da planta: à esquerda, embaixo e no alto, ~1 m afastada do piso) não aparece; a hachura cobre, e só fica o traço de dentro no alto, onde ele coincide com a borda do piso. Proposta: as duas linhas tracejadas nos três lados, em preto, por cima da hachura.
 
 Mapa: `POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_2810_revisao_mapa.jpg` (itens 6 a 8; o 8 é o canto de baixo do item 7).
+
+### A revisão da Casa D aplicada (28/10/26)
+
+Resposta do usuário: "pode aplicar os 7". Feito sobre as finais aprovadas (as funções novas do motor chamadas direto nelas; o motor também as tem, para as próximas rodadas):
+1. **Banho master:** os dois X em preto nítido, nos traços do PDF, por cima do cinza.
+2. **Hall:** as duas linhas tracejadas da laje desde a folha da porta ao lado da adega, em preto no travertino (24 traços do PDF); na grama segue o branco.
+3. **Hall:** a folha (de vidro no PDF) como as portas de vidro do living, no lugar do fio pontilhado.
+4. e 5. **Suíte master e sala íntima:** o traço escuro junto à folha aberta saiu; ali fica o vinílico.
+6. **Subsolo, WC DCE ↔ DCE 1:** o granito atravessa o vão, com os batentes do PDF.
+7. **Subsolo, pátio:** a parede tracejada dupla do PDF por cima da hachura, em preto (396 traços).
+
+Conferido: no Térreo mudam 3351 px, só nos itens 1 a 5; no Subsolo, 8746 px (o vão e as linhas do pátio). Regras novas nas REGRAS (seção 4: o resto da folha antiga, a folha de vidro de giro, o vão entre dois granitos; seção do R2: a parede tracejada do pátio). Antes e depois (o antes é a final de bc66fcd): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2810_revisao_{x_banho_master,hall_porta_tracejado,folha_suite_master,folha_sala_intima}_antes_depois.jpg` e `POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_2810_revisao_{wc_dce_vao,parede_patio}_antes_depois.jpg`. Pranchas do Térreo e do Subsolo e PDF da Casa D refeitos. Aguarda o OK da Casa D; a seguir, a Casa C.

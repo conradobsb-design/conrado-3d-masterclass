@@ -185,7 +185,9 @@ PROJECOES_D = [(604.7, 1829.2, 790.8, 1880.5)]
 PROJECOES_CLARAS_D = [(1949.2, 748.7, 2120.1, 881.6), (2351.8, 1363.0, 2451.5, 1501.6)]
 # a cobertura e os X da garagem e da faixa de grama abaixo dela: desde os pedidos de 27/10 em `projecoes_lajes_td`
 COBERTURA_D = []
-PROJECOES_TRACO_D = {"pisos": {"cor": (92, 92, 94), "forca": 0.9, "larg": 1.4},
+# Revisão de 28/10/26, item 1 (OK do usuário: "pode aplicar os 7"; a regra de 28/10: "os tracejados são ou brancos ou
+# pretos, a depender do fundo"): os dois X do banho master, no quartzito claro, em preto nítido, não mais no cinza-escuro
+PROJECOES_TRACO_D = {"pisos": {"cor": (30, 30, 30), "forca": 1.0, "larg": 1.4},
                      "claras": {"cor": (214, 214, 212), "forca": 0.95, "larg": 1.4}}
 # As peças do PDF que ficam como no render aprovado: o estar da suíte 3 (no PDF da Casa D, o sofá está na INS_INSTALAÇÕES
 # HIDRÁULICAS e a mesa de centro na DOC_LINHAS; só o tapete, da ARQ_LAYOUT, entrava, e cobria os dois)
@@ -1708,12 +1710,23 @@ def entre_porta_box_td(Q, img, antes):
 # com a face da esquerda em 1438 e 1439: o vão cresce 2 px para a esquerda (`alarga_px`), para a face sair junto.
 VAO_SEM_SOLEIRA_TD = [{"vao_pt": (1246.6, 1509.2, 1255.2, 1561.4), "folha_y_pt": (1559.8, 1562.1), "lado": "direita",
                        "folga_px": 2, "alarga_px": (2, 0)}]
+# Revisão de 28/10/26, item 6 (OK do usuário): no Subsolo, a porta do WC DCE para o DCE 1, o mesmo caso, entre dois
+# granitos. Ali a soleira ia de ponta a ponta do vão (sem os batentes) e a face da direita era um traço escuro (a coluna
+# 930): o vão inteiro do PDF recebe o granito dos dois lados (1 px mais largo à direita) e os batentes do PDF voltam
+# (`batentes`, como os das portas de vidro: claros com o contorno fino). Nas linhas da folha aberta do WC DCE, à
+# esquerda e em cima, só o granito do DCE 1; e, na final, o rótulo do WC DCE encosta no vão pela esquerda: o vão todo
+# vem só do lado do DCE 1 (`so_lado`).
+VAO_SEM_SOLEIRA_SD = [{"vao_pt": (753.4, 1235.5, 761.9, 1275.1), "folha_y_pt": (1237.6, 1239.9), "lado": "direita",
+                       "folga_px": 2, "alarga_px": (0, 1), "so_lado": True,
+                       "batentes": [(753.4, 1235.5, 759.9, 1238.3), (759.9, 1235.5, 761.9, 1236.9),
+                                    (753.4, 1272.3, 759.9, 1275.1), (759.9, 1273.7, 761.9, 1275.1)]}]
 
 
 def vao_sem_soleira_td(Q, img):
     import final3840_casaa as FA
     out = img.astype(np.float32)
-    for q in VAO_SEM_SOLEIRA_TD:
+    vaos = VAO_SEM_SOLEIRA_TD if Q.chave == "Terreo" else VAO_SEM_SOLEIRA_SD
+    for q in vaos:
         x0, y0, x1, y1 = F.ret_q(Q, q["vao_pt"])
         x0, x1 = x0 - q["alarga_px"][0], x1 + q["alarga_px"][1]
         w = x1 - x0
@@ -1729,10 +1742,99 @@ def vao_sem_soleira_td(Q, img):
         lin = np.arange(y0, y1)
         na_folha = (lin >= f0) & (lin < f1)
         novo[na_folha] = dir_[na_folha]
+        if q.get("so_lado"):
+            novo = dir_
         a = FA.ret_aa(Q, q["vao_pt"])[y0:y1].max(axis=1)[:, None, None]          # só a cobertura das linhas
         out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + novo * a
-    print("    vão sem soleira: o vinílico dos dois lados no vão da porta da circulação para a sala íntima")
-    return np.clip(out, 0, 255).astype(np.uint8)
+    out = np.clip(out, 0, 255).astype(np.uint8)
+    batentes = [b for q in vaos for b in q.get("batentes", [])]
+    if batentes:
+        pv = FA.PORTAS_VIDRO
+        FA.PORTAS_VIDRO = dict(pv, portas=[{"nome": "batentes do vão sem soleira", "batentes": batentes, "folhas": [],
+                                            "montante_pt": 0.6}])
+        try:
+            out = FA.portas_vidro(Q, out)
+        finally:
+            FA.PORTAS_VIDRO = pv
+    print(f"    vão sem soleira: o piso dos dois lados no vão ({len(vaos)} porta)")
+    return out
+
+
+# Revisão de 28/10/26, itens 4 e 5 (OK do usuário): na suíte master e na porta da sala íntima para a circulação da suíte
+# 2, um traço escuro de 1 px ao longo da folha aberta, entre ela e a parede (um resto da folha antiga do render que a
+# limpeza das esquadrias deixava, uma "segunda folha"). Nas faixas `rets` (pt), o piso volta ao de antes das esquadrias
+# (a etapa das soleiras, onde o vinílico já estava limpo).
+RESTOS_FOLHA_TD = {"rets": [(891.0, 1502.7, 944.0, 1505.4), (1559.5, 1560.6, 1612.0, 1563.3)]}
+
+
+def restos_folha_td(Q, img, antes):
+    out = img.copy()
+    for r in RESTOS_FOLHA_TD["rets"]:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        out[y0:y1, x0:x1] = antes[y0:y1, x0:x1]
+    print(f"    sem o traço escuro junto à folha aberta ({len(RESTOS_FOLHA_TD['rets'])} portas)")
+    return out
+
+
+# Revisão de 28/10/26, itens 2 e 3 (OK do usuário), no hall, na porta ao lado da adega:
+# - a folha é de vidro no PDF (o contorno de 2268,6 a 2270,9 pt com a linha do meio), aberta junto à parede da adega, e
+#   saía num fio pontilhado cinza-azulado; agora como as portas de vidro do living (`final3840_casaa.portas_vidro`: o
+#   caixilho de alumínio, o vidro no meio, os montantes e a sombra curta), depois de o fio sair (`limpa_pt`: o
+#   travertino do lado, espelhado);
+# - as duas linhas tracejadas da laje (1081,0 e 1092,3 pt) começam no PDF junto à folha (2267,1 pt) e atravessam o hall;
+#   na final, só a partir da grama (2366,3 pt). Os traços do próprio PDF (ARQ_PAREDE) até a borda da grama (`ate_x_pt`)
+#   entram em preto nítido (fundo claro, a regra de 28/10), por baixo da folha; o branco na grama fica como estava.
+HALL_PORTA_TD = {"limpa_pt": (2267.1, 987.4, 2272.6, 1082.9),
+                 "porta": {"nome": "de vidro do hall, junto à adega", "batentes": [],
+                           "folhas": [((2268.6, 987.4, 2270.9, 1082.9), "y")], "montante_pt": 0.6},
+                 "linhas_y_pt": (1081.0, 1092.3), "de_x_pt": 2267.0, "ate_x_pt": 2366.3,
+                 "cor": (30, 30, 30), "larg_px": 1.5, "ss": 8}
+
+
+def _tracos_d(Q, img, segs, cor, larg_px, ss=8):
+    """Os traços (pt) por cima, nítidos e com antialias, numa cor só."""
+    out = img.astype(np.float32)
+    for x0, y0, x1, y1 in segs:
+        (u0, v0), (u1, v1) = Q.p2q(x0, y0), Q.p2q(x1, y1)
+        bx0, by0 = int(min(u0, u1)) - 3, int(min(v0, v1)) - 3
+        bx1, by1 = int(max(u0, u1)) + 4, int(max(v0, v1)) + 4
+        m = np.zeros(((by1 - by0) * ss, (bx1 - bx0) * ss), np.uint8)
+        cv2.line(m, (int(round((u0 - bx0) * ss)), int(round((v0 - by0) * ss))),
+                 (int(round((u1 - bx0) * ss)), int(round((v1 - by0) * ss))), 255,
+                 max(1, int(round(larg_px * ss))), cv2.LINE_AA)
+        a = cv2.resize(m.astype(np.float32) / 255, (bx1 - bx0, by1 - by0), interpolation=cv2.INTER_AREA)[..., None]
+        out[by0:by1, bx0:bx1] = out[by0:by1, bx0:bx1] * (1 - a) + np.float32(cor) * a
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def hall_porta_td(Q, img):
+    import final3840_casaa as FA
+    q = HALL_PORTA_TD
+    out = img.copy()
+    x0, y0, x1, y1 = F.ret_q(Q, q["limpa_pt"])
+    x0 += 1                                                   # a face da parede da adega fica
+    w = x1 - x0
+    out[y0:y1, x0:x1] = out[y0:y1, x1:x1 + w][:, ::-1]           # o travertino de junto, espelhado (estratos deitados)
+    segs = []
+    for d in Q.desenhos:
+        if d.get("layer") != "ARQ_PAREDE" or d["type"] != "s":
+            continue
+        for it in d["items"]:
+            if it[0] != "l":
+                continue
+            a, b = it[1], it[2]
+            if abs(a.y - b.y) < 0.05 and any(abs(a.y - y) < 0.05 for y in q["linhas_y_pt"]) and \
+                    q["de_x_pt"] <= min(a.x, b.x) and max(a.x, b.x) <= q["ate_x_pt"] and abs(a.x - b.x) < 8:
+                segs.append((a.x, a.y, b.x, b.y))
+    out = _tracos_d(Q, out, segs, q["cor"], q["larg_px"], q["ss"])
+    pv = FA.PORTAS_VIDRO
+    FA.PORTAS_VIDRO = dict(pv, portas=[q["porta"]])
+    try:
+        out = FA.portas_vidro(Q, out)
+    finally:
+        FA.PORTAS_VIDRO = pv
+    print(f"    hall: a folha de vidro da porta junto à adega e {len(segs)} traços da laje em preto no travertino")
+    return out
 
 
 def boxes_terreo_d(Q, img):
@@ -1890,16 +1992,18 @@ def escadas_terreo_d(Q, img):
     return F.letra(Q, out, "D", Q.p2q(*ESCADA_DESCIDA_TD["d_blocos_pt"]))
 
 
-def projecoes_terreo_d(Q, img):
-    """As projeções do PDF em tracejado (item 15 de 22/10), como desde 25/10 (antes na etapa das escadas)."""
+def projecoes_terreo_d(Q, img, so_pisos=False):
+    """As projeções do PDF em tracejado (item 15 de 22/10), como desde 25/10 (antes na etapa das escadas). `so_pisos`:
+    só as dos pisos claros (os dois X do banho master), para refazê-las sobre a final."""
     out = np.ascontiguousarray(img.copy())
     with F.em_quadro(Q):
         pa = AJ.PROJECOES_A
         n = 0
+        grupos = ((PROJECOES_D, PROJECOES_TRACO_D["pisos"], "DOC_LINHAS E PROJEÇÕES"),
+                  (PROJECOES_CLARAS_D, PROJECOES_TRACO_D["claras"], "DOC_LINHAS E PROJEÇÕES"),
+                  (COBERTURA_D, PROJECOES_TRACO_D["claras"], "ARQ_ELEMENTOS FIXOS"))
         try:
-            for zonas, t, camada in ((PROJECOES_D, PROJECOES_TRACO_D["pisos"], "DOC_LINHAS E PROJEÇÕES"),
-                                     (PROJECOES_CLARAS_D, PROJECOES_TRACO_D["claras"], "DOC_LINHAS E PROJEÇÕES"),
-                                     (COBERTURA_D, PROJECOES_TRACO_D["claras"], "ARQ_ELEMENTOS FIXOS")):
+            for zonas, t, camada in grupos[:1] if so_pisos else grupos:
                 AJ.PROJECOES_A = dict(pa, larg_px=pa["larg_px"] * Q.W / 2000 * t["larg"], cor=t["cor"],
                                       forca=t["forca"])
                 out, k = B.linhas_pdf(out, "Terreo", zonas, camada)
@@ -2310,12 +2414,12 @@ def passos_terreo_d(Q, ini, M):
         # a entrada das esquadrias vai em cópia: `F.esquadrias_terreo` escreve nela, e o `antes` de `pos_esquadrias_d`
         # tem de ser a etapa das soleiras (os recortes atrás das folhas abertas não voltavam)
         # a adega em U depois das esquadrias: a limpeza delas espelhava a ponta da prateleira junto do vidro
-        ("esquadrias", lambda im: adega_u_d(Q, pos_vidros_d(Q, portas_vidro_td(Q, entre_porta_box_td(Q, pos_esquadrias_d(
-            Q, F.esquadrias_terreo(Q, im.copy(), parede=cinza), im), im)), im))),
+        ("esquadrias", lambda im: adega_u_d(Q, pos_vidros_d(Q, portas_vidro_td(Q, restos_folha_td(Q, entre_porta_box_td(
+            Q, pos_esquadrias_d(Q, F.esquadrias_terreo(Q, im.copy(), parede=cinza), im), im), im)), im))),
         ("cortinas", lambda im: sem_trilho_fora_d(Q, F.cortinas(Q, im, paredes_pdf=True), im)),
         ("escadas", lambda im: escadas_terreo_d(Q, im)),
-        ("projecoes", lambda im: pisante_reto_td(Q, beiral_l_td(Q, projecoes_lajes_td(Q, projecoes_terreo_d(Q,
-                                                                                                         im))))),
+        ("projecoes", lambda im: hall_porta_td(Q, pisante_reto_td(Q, beiral_l_td(Q, projecoes_lajes_td(
+            Q, projecoes_terreo_d(Q, im)))))),
         ("seta", lambda im: seta_terreo_d(Q, im)),
         ("rotulos", lambda im: rotulos_terreo_d(Q, im)),
     ]
@@ -2378,6 +2482,37 @@ CAMAS_S = {"borda": 1.7, "ss": 4, "semente": 41, "camas": [("DCE 1", (846.0, 120
 CAMA_DCE_S = {"camas": {"Subsolo": [("DCE 1", CAMAS_S["camas"][0][1], "baixo", "motorista")],
                         "Terreo": [("DCE", (2317.0, 727.8, 2373.7, 841.2), "cima", "motorista")]},
               "borda": 1.7, "ss": 4, "semente": 31}
+
+
+# Revisão de 28/10/26, item 7 (OK do usuário): a parede tracejada dupla do PDF em volta do pátio (ARQ_PAREDE, fora da
+# pegada: as duas linhas à esquerda, as duas embaixo, que seguem até o canto da academia, e a de fora no alto, a ~1 m do
+# piso) sumia sob a hachura do terreno (R2), e só ficava o traço de dentro no alto, onde ele coincide com a borda do
+# pátio. Os traços do próprio PDF entram por cima da hachura, em preto (fundo claro), nítidos; os que tocam a pegada
+# (dilatada `folga_px`) ficam de fora (as paredes e o contorno do pátio).
+PAREDE_PATIO_SD = {"caixa_q": (440, 1150, 1500, 1800), "folga_px": 2, "cor": (30, 30, 30), "larg_px": 1.2}
+
+
+def parede_patio_sd(Q, img, peg):
+    q = PAREDE_PATIO_SD
+    k = 2 * q["folga_px"] + 1
+    dentro = cv2.dilate((peg > 0.5).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    cx0, cy0, cx1, cy1 = q["caixa_q"]
+    segs = []
+    for d in Q.desenhos:
+        if d.get("layer") != "ARQ_PAREDE" or d["type"] != "s":
+            continue
+        for it in d["items"]:
+            if it[0] != "l":
+                continue
+            (u0, v0), (u1, v1) = Q.p2q(it[1].x, it[1].y), Q.p2q(it[2].x, it[2].y)
+            if not all(cx0 <= u <= cx1 and cy0 <= v <= cy1 for u, v in ((u0, v0), (u1, v1))):
+                continue
+            if dentro[int(v0), int(u0)] or dentro[int(v1), int(u1)]:
+                continue
+            segs.append((it[1].x, it[1].y, it[2].x, it[2].y))
+    out = _tracos_d(Q, img, segs, q["cor"], q["larg_px"])
+    print(f"    pátio: a parede tracejada dupla do PDF, {len(segs)} traços em preto sobre a hachura")
+    return out
 
 
 def pegada_subsolo(Q):
@@ -2752,11 +2887,11 @@ def passos_subsolo_d(Q, ini):
         ("armario", lambda im: armario_dce_d(Q, im)),
         ("banhos", lambda im: box_wc_dce_d(Q, banhos_sub_d(Q, im))),
         ("paredes", lambda im: F.paredes(Q, im, cor=cinza)),
-        ("soleiras", lambda im: nicho_d(Q, C.soleira_elevador(Q, F.soleiras(Q, im)))),
+        ("soleiras", lambda im: vao_sem_soleira_td(Q, nicho_d(Q, C.soleira_elevador(Q, F.soleiras(Q, im))))),
         ("esquadrias", lambda im: pos_esquadrias_d(Q, portas_academia_sub_d(Q, C.janelas_s(
             Q, B.esquadrias_final(im, chave, Q.pg, Q.p2q, Q.px_m, parede=cinza), JANELAS_SUB_D)), im)),
         ("escadas", lambda im: escada_sub_d(Q, im)),
-        ("hachura", lambda im: AJ.subsolo_hachurado(im, peg, Q.px_m)),
+        ("hachura", lambda im: parede_patio_sd(Q, AJ.subsolo_hachurado(im, peg, Q.px_m), peg)),
         ("rotulos", lambda im: rotulos_sub_d(Q, im)),
     ]
 
