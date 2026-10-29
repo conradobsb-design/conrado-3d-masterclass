@@ -3680,3 +3680,17 @@ O que foi feito:
 - **Cadeiras do escritório:** sem a franja branca do recorte, com a silhueta macia e a beira fina mais escura; o piso em volta nas réguas da mesma fileira (saiu o retângulo escuro à esquerda das cadeiras de visita) e o traço da beira do tampo contínuo por cima delas. As cadeiras das mesas da suíte master e da suíte 1 usam o mesmo modelo e ficaram como estavam (não vieram no recorte).
 
 Antes e depois (o antes é a final de 744f1db): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2910_{entorno_poltronas_varanda,entorno_poltronas_living,tapete_varanda_textura,cadeiras_escritorio_contorno}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa D refeitos (o Subsolo não muda). Aguarda o OK da Casa D; a seguir, a Casa C.
+
+### Pedidos de 29/10/26 (2ª rodada): banquetas da ilha, cadeiras das suítes e textura dos tapetes do living e das suítes (Térreo da Casa D)
+
+O usuário, com recortes da prancha do Térreo da Casa D:
+- as 4 banquetas da ilha gourmet: "melhore o contorno dessas cadeiras também";
+- a cadeira da mesa da suíte 1: "faça os retoques a essa cadeira"; a da suíte master: "faça retoques nessa cadeira também";
+- o estar do living: "adicione textura ao tapete"; depois: "adicione textura aos tapetes das suites".
+
+O que foi feito:
+- **Banquetas:** o contorno limpo das cadeiras do escritório; o aro cinza em volta delas era a banqueta antiga do render (a etapa dos pisos ainda a guarda e o retoque a trazia de volta por baixo): o piso das caixas agora é o desenho do Bege Bahia na luz em volta.
+- **Cadeiras da suíte master e da suíte 1:** o mesmo contorno, com o piso em volta das réguas da mesma fileira (a etapa dos pisos também tem ali as cadeiras do render). As mesas das suítes seguem sem traço de borda.
+- **Tapetes:** a trama do tapete da varanda no do living e nos das 4 suítes (master, suíte 1, suíte 2, suíte 3/escritório). O da sala íntima ficou como estava (não foi pedido).
+
+Antes e depois (o antes é a final de 9c8a711): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2910b_{banquetas_ilha_contorno,cadeira_suite_master_contorno,cadeira_suite1_contorno,tapete_living_textura,tapetes_suites_textura}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa D refeitos. Aguarda o OK da Casa D; a seguir, a Casa C.
