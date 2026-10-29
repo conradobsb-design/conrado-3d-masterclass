@@ -3928,3 +3928,49 @@ Depois, sobre a marca e a fonte: "quero o logotipo oficial e a fonte Poppins do 
 - **Onde entra o logotipo:**
   - na capa, embaixo à direita, no lugar de "PAULO OCTÁVIO" em texto;
   - na contracapa, em cima à direita. A marca da New Air desceu para baixo à direita, na altura da nota.
+
+### Revisão de 29/10/26: Casa A, Subsolo, Térreo e 1º Pavimento
+
+Pedido do usuário: "preciso revisar as plantas da casa A novamente." Fiz a revisão trecho a trecho das três finais aprovadas contra a base do PDF, rasterizada no mesmo quadro e conferida lado a lado. Usei também as regras que entraram nas Casas B a E depois da aprovação da Casa A:
+- portas e "segunda linha";
+- X tracejados;
+- rótulos;
+- elevador;
+- peças nevoadas do Subsolo;
+- cadeiras, poltronas, sofás e tapetes;
+- portas das suítes.
+
+**Aplicado a pedido do usuário, durante a revisão: as portas das suítes do 1º Pavimento.** Pedidos:
+- "note que é o mesmo caso da casa B: 4 folhas na varanda, sendo duas de vidro e duas de bronze. Essas precisam estar representadas corretamente.";
+- "e que cobrem o banho master: as de bronze. percebeu?";
+- "e atenção ao piso entre as folhas de vidro e de bronze".
+
+O que foi feito (`POE642_CasaA/scripts/revisao_casaa_2910.py --portas`, uma vez, sobre a final aprovada):
+- Suítes 1, 2, 3 e master: no PDF, como nas Casas B e C, 4 folhas em dois planos. As 2 de fora (do lado da varanda) em brise de bronze escovado; as 2 de dentro em vidro fino.
+- Suíte master: as 2 folhas de fora que seguem na frente do banho master, do lado da floreira, também em bronze.
+- Entre o bronze e o vidro, o piso do quarto. Antes ali havia os caixilhos antigos do render e os nós nos encontros das folhas. Junto à porta a cortina cobre o piso, então a faixa inteira recebe um bloco de réguas limpo do próprio quarto; do lado de fora, o fio do caixilho antigo dá lugar ao piso da varanda.
+- Antes e depois: `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_2910_portas_{suite1,suite2,suite3,suite_master}_antes_depois.jpg`.
+- Refeitos a prancha do 1º Pavimento, o PDF da Casa A e o book. Aguarda a validação.
+
+**Para o OK (nada alterado).** Mapas: `POE642_CasaA/renders/POE642_CasaA_PH_{Subsolo,Terreo,1Pavimento}_2910_revisao_mapa.jpg`, com a final e, em cada item, a final ao lado da base do PDF.
+1. Térreo, JARDIM (4,79 m²): o tracejado da projeção da cobertura passa por baixo do texto. Proposta: tirar o traço só sob o texto, como na Casa B (seção 12).
+2. Térreo, ÁREA DE SERVIÇO DESCOBERTA: o X tracejado atravessa o rótulo. Proposta: abrir o X em volta do texto, com o rótulo no cruzamento, como na Casa E (seção 12).
+3. Térreo, JARDIM (17,46 m²): o rótulo está em preto sobre a grama. Proposta: em branco, como nos outros jardins (seção 12).
+4. Térreo, a faixa entre o hall externo e o jardim: no PDF é piso, na cor dos ambientes internos, com um X tracejado; na final está branca, com o X em traços pretos, brancos e cinza misturados. Proposta: o piso (travertino) com o X em preto. Pergunta ao usuário: o que é essa peça?
+5. Elevador, nos três pavimentos: no Térreo e no 1º Pavimento, o X do PDF sobre o bege ou o branco; no Subsolo, a cabine de 26/10. Proposta: a cabine padrão de aço da Casa B, a mesma nos três (seção 4). Os X dos shafts (Subsolo e Térreo) estão em cinza; proposta: em preto, como os tracejados (seção 9).
+6. Subsolo: as peças do Térreo que o PDF do Subsolo desenha fora dele (o spa, a borda da piscina e o deck, acima da escada) estão hachuradas. Proposta: nevoadas, como na Casa B (seção 11).
+7. Térreo, as 12 cadeiras das duas mesas redondas da varanda: estão no desenho do PDF. Proposta: as de couro do conjunto padrão, como nas Casas B e C (seção 8).
+8. Térreo, as 10 cadeiras da mesa de jantar: estão no desenho do PDF. Proposta: a cadeira padrão das outras casas (seção 8).
+9. Poltronas, Térreo e 1º Pavimento: no Térreo, as da varanda, as 4 em X da sala de estar, a do terraço gourmet e a do escritório; no 1º Pavimento, as da sala íntima, da suíte 2 e da suíte master. Estão lisas, em rosa claro. Proposta: o modelo padrão, a poltrona da sala íntima da Casa E (seção 8).
+10. Sofás e tapetes: no Térreo, os sofás da varanda, da sala de estar e do terraço gourmet; no 1º Pavimento, o da sala íntima; e os tapetes. Proposta: estofados, e a trama em todos os tapetes, como nas Casas B e D (seção 8).
+
+Conferidos e conformes:
+- portas de giro, sem "segunda linha";
+- boxes fechados;
+- tracejados das projeções em preto ou branco;
+- rótulos da varanda, da sala de estar e do hall fora dos X;
+- seta da entrada;
+- piscina;
+- escadas;
+- cortinas;
+- Térreo nublado do 1º Pavimento.

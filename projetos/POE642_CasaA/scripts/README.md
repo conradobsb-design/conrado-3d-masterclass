@@ -1562,3 +1562,17 @@ As páginas são desenhadas em PIL a 200 dpi (3307 × 2339 px). O desenho é fei
   - `logo_po(altura)` devolve o `logo_paulo_octavio.png` do rodapé das pranchas sem alteração. O fundo claro dos cantos, ou seja as manchas claras que tocam a borda, fica transparente, com a franja suave pela claridade.
   - O logotipo vai na capa (embaixo à direita) e na contracapa (em cima à direita; a New Air fica embaixo à direita).
 - **Uso:** `python3 book_entrega.py` grava o PDF e a prévia. Com `--paginas`, grava também cada página em JPG em `POE642_Book/paginas` (no `.gitignore` da pasta).
+
+### A revisão de 29/10 da Casa A: `revisao_casaa_2910.py`
+
+Retoques locais sobre as finais aprovadas, como o `revisao_casab_2910.py` da Casa B.
+- **Portas das suítes do 1º Pavimento (`--portas`, uma vez, sobre a final aprovada).** Pedidos do usuário: "note que é o mesmo caso da casa B: 4 folhas na varanda, sendo duas de vidro e duas de bronze", "e que cobrem o banho master: as de bronze" e "e atenção ao piso entre as folhas de vidro e de bronze".
+  - **As folhas (`VAOS_SUITES_TA`, `BRISES_SUITES_TA`):** em pt do PDF, cada uma são duas tiras brancas de 1,4 pt da ARQ_PAREDE. São pares (de fora, de dentro) por trecho, nas suítes 3, 2 e master (varanda à esquerda, `lado` +1) e 1 (varanda à direita, -1). Mais as 2 folhas de fora na frente do banho master, só em bronze.
+  - **O piso entre as folhas (`piso_entre_folhas_ta`, `PISO_ENTRE_FOLHAS_TA`):**
+    - Abrange a faixa da face de fora do bronze à de dentro do vidro, mais `folga_dentro_px` para o quarto, que leva os nós dos caixilhos antigos, em todo o vão.
+    - Recebe um bloco de réguas limpo do próprio quarto, do mesmo tamanho, procurado a até `busca_px` da porta. Só valem px de madeira (`revisao_casab_2910._madeira`) a até `tol_cor` da cor mediana do piso: fora a cortina, a sombra dela, os tapetes e as camas. Escolhe-se o bloco mais limpo e, entre os limpos, o mais perto.
+    - Na Casa B, a faixa ia na cor média de cada linha; aqui ficava chapada e rosada, porque junto à porta a cortina cobre o piso.
+    - Do lado de fora, `folga_fora_px` px junto à face recebem o piso da varanda da mesma linha, `fora_de_px` mais longe.
+  - **Depois:** `vidros_dentro_ta` desenha as folhas de dentro em vidro fino, com o miolo e as bordas da Casa B; `final3840_casac.brises_suites_tc` desenha as de fora em bronze escovado.
+  - **`revisao_casab_2910.vaos_suites_tb(Q, img, q=None)`:** passou a aceitar a configuração. Sem ela, faz o mesmo de antes na Casa B.
+- **Mapas da revisão:** `renders/POE642_CasaA_PH_<pavimento>_2910_revisao_mapa.jpg`. A base do PDF é rasterizada no quadro de 3840 px pela afim do `QuadroA` (`p2q`), na escala 4 do pymupdf, e posta ao lado da final.

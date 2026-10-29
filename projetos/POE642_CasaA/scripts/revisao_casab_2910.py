@@ -94,8 +94,8 @@ def _madeira(px):
     return (px[..., 2].astype(np.int16) - px[..., 0] > 35) & (m > 100) & (m < 165)
 
 
-def vaos_suites_tb(Q, img):
-    q = VAOS_SUITES_TB
+def vaos_suites_tb(Q, img, q=None):
+    q = q or VAOS_SUITES_TB
     out = img.copy()
     k = q["ss"]
     n = 0
