@@ -3654,3 +3654,16 @@ Resposta do usuário: "pode aplicar os 7". Feito sobre as finais aprovadas (as f
 7. **Subsolo, pátio:** a parede tracejada dupla do PDF por cima da hachura, em preto (396 traços).
 
 Conferido: no Térreo mudam 3351 px, só nos itens 1 a 5; no Subsolo, 8746 px (o vão e as linhas do pátio). Regras novas nas REGRAS (seção 4: o resto da folha antiga, a folha de vidro de giro, o vão entre dois granitos; seção do R2: a parede tracejada do pátio). Antes e depois (o antes é a final de bc66fcd): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2810_revisao_{x_banho_master,hall_porta_tracejado,folha_suite_master,folha_sala_intima}_antes_depois.jpg` e `POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_2810_revisao_{wc_dce_vao,parede_patio}_antes_depois.jpg`. Pranchas do Térreo e do Subsolo e PDF da Casa D refeitos. Aguarda o OK da Casa D; a seguir, a Casa C.
+
+### Pedidos de 28/10/26: sombra dos jogos da varanda e poltronas no modelo da Casa E (Térreo da Casa D)
+
+O usuário, vendo as pranchas da Casa D:
+- com o recorte das duas mesas redondas da varanda gourmet: "traga um sombreamento das cadeiras e mesas que integre ao piso";
+- com o recorte das duas poltronas embaixo do tapete do estar da varanda gourmet e o da poltrona da sala íntima do 1º Pavimento da Casa E: "preciso que as poltronas estejam no modelo da poltrona da casa e, da sala intima da casa E.";
+- com o recorte das duas poltronas à esquerda do tapete do estar do living (com a mesinha de madeira entre elas) e o mesmo da Casa E: "altere essas duas também para o modelo sugerido da poltrona da sala intima da casa E."
+
+O que foi feito:
+- **Jogos da varanda:** uma sombra macia para baixo e à esquerda (a luz do render vem do alto, à direita) e uma de contato junto à base, nas duas mesas com as 6 cadeiras; só o Bege Bahia em volta escurece.
+- **Poltronas:** as 4 (2 da varanda, 2 do living) trocadas pela concha creme da sala íntima do 1º Pavimento da Casa E, no centro e no tamanho das peças do PDF, viradas para a mesa de centro (varanda) e para o tapete (living), com a sombra das poltronas do Térreo da Casa E. Por baixo, o tapete, a borda escura dele, o Bege Bahia (varanda) e o travertino (living, na mesma linha, sem quebrar os estratos) refeitos sem resto das antigas. A poltrona da direita do estar da varanda, a da sala íntima e as do living em volta da mesa redonda ficam como estavam (não vieram nos recortes).
+
+Antes e depois (o antes é a final de 8c2a52b): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2810_{sombra_jogos_varanda,poltronas_varanda,poltronas_living}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa D refeitos (o Subsolo não muda). Aguarda o OK da Casa D; a seguir, a Casa C.

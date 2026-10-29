@@ -961,20 +961,62 @@ def jogos_mesa_d(Q, img, piso):
         Pl = P.copy()
         Pl[cy0:cy1, cx0:cx1] = bege_limpo_d(Q, piso, (cx0, cy0, cx1, cy1), m > 0.01)
         out = out * (1 - m[..., None]) + Pl * m[..., None]
-        # o conjunto em 4x, com o tampo no diâmetro da mesa do PDF, e reduzido ao quadro
-        (ax, ay), (bx, by) = Q.p2q(mesa[0], mesa[1]), Q.p2q(mesa[2], mesa[3])
-        sc = 4 * (bx - ax) / q["tampo_px"]
-        c = cv2.resize(cor.astype(np.float32) * al[..., None], None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
-        a = cv2.resize(al.astype(np.float32), None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
-        if jg["giro"]:
-            c, a = cv2.rotate(c, cv2.ROTATE_180), cv2.rotate(a, cv2.ROTATE_180)
-        h4, w4 = a.shape
-        h1, w1 = int(np.ceil(h4 / 4)), int(np.ceil(w4 / 4))
-        c = cv2.resize(np.pad(c, ((0, h1 * 4 - h4), (0, w1 * 4 - w4), (0, 0))), (w1, h1), interpolation=cv2.INTER_AREA)
-        a = cv2.resize(np.pad(a, ((0, h1 * 4 - h4), (0, w1 * 4 - w4))), (w1, h1), interpolation=cv2.INTER_AREA)
-        c = c / np.maximum(a, 1e-4)[..., None]
-        _pousar(out, c, a, (ax + bx) / 2 + (w1 - w4 / 4) / 2, (ay + by) / 2 + (h1 - h4 / 4) / 2, Q.px_m)
+        _pousar(out, *_jogo_q(Q, jg, cor, al, q), Q.px_m)
         print("    jogo de mesa da varanda: a mesa de madeira (1,60 m) e as 6 cadeiras de couro da referência do usuário")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+def _jogo_q(Q, jg, cor, al, q):
+    """O conjunto no quadro: (cor, alfa, cx, cy), em 4x com o tampo no diâmetro da mesa do PDF, girado `giro` e reduzido
+    ao quadro; (cx, cy) é o centro em px, em subpixel."""
+    mesa = jg["mesa_pt"]
+    (ax, ay), (bx, by) = Q.p2q(mesa[0], mesa[1]), Q.p2q(mesa[2], mesa[3])
+    sc = 4 * (bx - ax) / q["tampo_px"]
+    c = cv2.resize(cor.astype(np.float32) * al[..., None], None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
+    a = cv2.resize(al.astype(np.float32), None, fx=sc, fy=sc, interpolation=cv2.INTER_AREA)
+    if jg["giro"]:
+        c, a = cv2.rotate(c, cv2.ROTATE_180), cv2.rotate(a, cv2.ROTATE_180)
+    h4, w4 = a.shape
+    h1, w1 = int(np.ceil(h4 / 4)), int(np.ceil(w4 / 4))
+    c = cv2.resize(np.pad(c, ((0, h1 * 4 - h4), (0, w1 * 4 - w4), (0, 0))), (w1, h1), interpolation=cv2.INTER_AREA)
+    a = cv2.resize(np.pad(a, ((0, h1 * 4 - h4), (0, w1 * 4 - w4))), (w1, h1), interpolation=cv2.INTER_AREA)
+    c = c / np.maximum(a, 1e-4)[..., None]
+    return c, a, (ax + bx) / 2 + (w1 - w4 / 4) / 2, (ay + by) / 2 + (h1 - h4 / 4) / 2
+
+
+# A sombra dos jogos da varanda (usuário, 28/10/26, com o recorte das duas mesas: "traga um sombreamento das cadeiras e
+# mesas que integre ao piso"): a sombra curta das peças (3,5 cm, 30%) mal aparecia no Bege Bahia. Como o sofá da
+# varanda da Casa E ("sombra leve"): uma sombra macia projetada para baixo e à esquerda (a luz do render vem do alto, à
+# direita) e uma de contato, junto à base, que assenta as peças no piso. Cada uma é o alfa do conjunto deslocado
+# (`dx_m`, `dy_m`), desfocado (`sig_m`) e na `forca`; as duas se somam (1 − Π(1 − s)) e escurecem só o piso, fora das
+# peças.
+SOMBRA_JOGOS_D = [{"dx_m": -0.10, "dy_m": 0.10, "sig_m": 0.09, "forca": 0.42},
+                  {"dx_m": -0.02, "dy_m": 0.02, "sig_m": 0.03, "forca": 0.35}]
+
+
+def sombra_jogos_d(Q, img):
+    sys.path.insert(0, str(RAIZ / "_blocos"))
+    import blocos
+    q = MOVEIS_TD["conjunto_varanda"]
+    cor, al = blocos.bloco(q["bloco"], q["px_m_bloco"])
+    out = img.astype(np.float32)
+    for jg in MOVEIS_TD["jogos"]:
+        _, a, cx, cy = _jogo_q(Q, jg, cor, al, q)
+        h, w = a.shape
+        f = int(np.ceil(max(abs(s["dx_m"]) + 3 * s["sig_m"] for s in SOMBRA_JOGOS_D) * Q.px_m)) + 4
+        X0, Y0 = int(np.floor(cx - w / 2)) - f, int(np.floor(cy - h / 2)) - f
+        Wr, Hr = w + 2 * f, h + 2 * f
+        aa = cv2.warpAffine(a, np.float32([[1, 0, cx - w / 2 - X0], [0, 1, cy - h / 2 - Y0]]), (Wr, Hr),
+                            flags=cv2.INTER_LINEAR)
+        luz = np.ones((Hr, Wr), np.float32)
+        for s in SOMBRA_JOGOS_D:
+            d = np.float32([[1, 0, s["dx_m"] * Q.px_m], [0, 1, s["dy_m"] * Q.px_m]])
+            sb = cv2.GaussianBlur(cv2.warpAffine(aa, d, (Wr, Hr), flags=cv2.INTER_LINEAR), (0, 0),
+                                  s["sig_m"] * Q.px_m) * s["forca"]
+            luz *= 1 - sb
+        reg = out[Y0:Y0 + Hr, X0:X0 + Wr]
+        reg *= (1 - (1 - luz) * (1 - aa))[..., None]
+    print(f"    jogos da varanda: a sombra macia e a de contato no piso ({len(MOVEIS_TD['jogos'])} jogos)")
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
@@ -1117,9 +1159,121 @@ def moveis_td(Q, img):
     piso = cv2.imread(str(F.ETAPAS / f"{Q.chave}_pisos.png"))
     out = cadeiras_mesas_d(Q, out, piso)
     out = jantar_d(Q, out, piso)
-    out = jogos_mesa_d(Q, out, piso)
+    out = sombra_jogos_d(Q, jogos_mesa_d(Q, out, piso))
+    out = poltronas_modelo_e_d(Q, out)
     out = diagonais_armarios_d(Q, out)
     return floreiras_td(Q, out)
+
+
+# As poltronas no modelo da sala íntima da Casa E (usuário, 28/10/26, com o recorte das duas poltronas embaixo do tapete
+# do estar da varanda gourmet e o da poltrona da sala íntima do 1º Pavimento da Casa E: "preciso que as poltronas
+# estejam no modelo da poltrona da casa e, da sala intima da casa E."; depois, com o das duas à esquerda do tapete do
+# estar do living, junto à mesinha de madeira: "altere essas duas também para o modelo sugerido da poltrona da sala
+# intima da casa E."): as 4 poltronas (no PDF, as peças da ARQ_LAYOUT HUMANIZAÇÃO em `pecas`, pt) saem e entra a
+# concha de estofado creme recortada da final do 1º Pavimento da Casa E (`final3840_casae._modelo_poltrona_1p`), no
+# centro e no maior lado da peça do PDF, com a abertura do assento virada para `frente` (para a mesa de centro na
+# varanda, para o tapete no living), com a sombra e o contato das poltronas do Térreo da Casa E
+# (`POLTRONAS_TE["sombra"]`, `["sombra_contato"]`).
+# O buraco (a peça do PDF com `folga_px` e a sombra antiga para baixo e à esquerda, `sombra_px`; fora dele, a madeira da
+# mesinha do living, R − B acima de `madeira_rb`) é refeito com o que estava em volta: o tapete (dentro do retângulo do
+# PDF, `tapetes`, aquém da borda) e o piso de fora (o Bege Bahia na varanda, o travertino no living), cada um do seu, em
+# ladrilhos de grão com o tom do anel (`final3840_casae._material_por_ladrilhos`); a borda escura de 1 px do tapete
+# (`borda`: a linha "y" de baixo do tapete da varanda, a "x" da esquerda do do living) volta nos px dela, com a cor dos
+# trechos limpos da mesma borda. Só os px livres (o material dentro de `tol_lum` da mediana dele e longe dos objetos)
+# servem de fonte (o Bege Bahia é manchado: a tolerância é larga, e só as paredes e as peças ficam de fora). No living,
+# o travertino de fora do tapete vem da mesma linha, `fora_desloc` ao lado (os estratos são deitados).
+POLTRONAS_E_D = {"pecas": [((1328.3, 1308.6, 1374.2, 1351.4), (0, -1)), ((1396.3, 1308.6, 1442.3, 1351.4), (0, -1)),
+                           ((1687.7, 1268.4, 1735.5, 1311.4), (1, 0)), ((1687.7, 1353.4, 1735.5, 1396.5), (1, 0))],
+                 "tapetes": [{"pt": (1272.6, 1154.9, 1499.3, 1324.9), "borda": ("y", 1324.9)},
+                             {"pt": (1713.6, 1235.1, 1997.1, 1433.5), "borda": ("x", 1713.6), "fora_desloc": (-40, 0)}],
+                 "folga_px": 5, "sombra_px": 3, "madeira_rb": 25, "tol_lum": 45, "esfuma_px": 2}
+
+
+def poltronas_modelo_e_d(Q, img):
+    import final3840_casae as E
+    import retoque_terreo_casae as T
+    q = POLTRONAS_E_D
+    qe = E.POLTRONAS_TE
+    H, W = img.shape[:2]
+    out = img.astype(np.float32)
+    L = out.mean(axis=2)
+    madeira = (out[..., 2] - out[..., 0]) > q["madeira_rb"]
+    # os buracos: a peça do PDF com folga e a sombra antiga
+    buraco = np.zeros((H, W), bool)
+    k = 2 * q["folga_px"] + 1
+    for r, _ in q["pecas"]:
+        a = Q.preencher(lambda d, r=r: d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO" and _dentro_pt(d["rect"], r))
+        m = cv2.dilate((a > 0.05).astype(np.uint8), np.ones((k, k), np.uint8))
+        s = q["sombra_px"]
+        m |= cv2.warpAffine(m, np.float32([[1, 0, -s], [0, 1, s]]), (W, H))
+        buraco |= m.astype(bool)
+    buraco &= ~cv2.dilate(madeira.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    proibido = cv2.dilate(buraco.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) | \
+        cv2.dilate(madeira.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    fonte = out.copy()
+    feito = np.zeros((H, W), bool)
+    for tp in q["tapetes"]:
+        x0, y0, x1, y1 = F.ret_q(Q, tp["pt"])
+        eixo, v = tp["borda"]
+        lx = int(round(Q.p2q(v, 0)[0])) if eixo == "x" else None
+        ly = int(round(Q.p2q(0, v)[1])) if eixo == "y" else None
+        zona = np.zeros((H, W), bool)
+        zona[y0 - 60:y1 + 60, x0 - 60:x1 + 60] = True
+        alvo = buraco & zona
+        if not alvo.any():
+            continue
+        dentro = np.zeros((H, W), bool)
+        dentro[y0:y1, x0:x1] = True
+        linha = np.zeros((H, W), bool)
+        if eixo == "y":
+            linha[ly, x0:x1] = True
+            dentro[ly:, :] = False
+        else:
+            linha[y0:y1, lx] = True
+            dentro[:, :lx + 1] = False
+        fora = ~dentro & ~linha
+        for nome, mat in (("tapete", dentro), ("piso", fora)):
+            parte = alvo & mat
+            if not parte.any():
+                continue
+            if nome == "piso" and "fora_desloc" in tp:
+                # o travertino em estratos deitados: a mesma linha, do lado (sem o grão em ladrilhos, que quebrava o veio)
+                ox, oy = tp["fora_desloc"]
+                ys, xs = np.nonzero(parte)
+                fonte[ys, xs] = out[ys + oy, xs + ox]
+                print(f"      poltronas no modelo da Casa E: {nome}, {int(parte.sum())} px da mesma linha, {ox} px ao lado")
+                continue
+            limpo = mat & ~proibido & zona
+            med = np.median(L[limpo])
+            livre = limpo & (np.abs(L - med) < q["tol_lum"])
+            novo = E._material_por_ladrilhos(out, parte, livre, qe, 50.0)
+            fonte[parte] = novo[parte]
+            print(f"      poltronas no modelo da Casa E: {nome}, {int(parte.sum())} px em ladrilhos ({int(livre.sum())} livres)")
+        lin = alvo & linha
+        ok = linha & ~proibido
+        if lin.any() and ok.any():
+            ys, xs = np.nonzero(ok)
+            cores = out[ys, xs]
+            yl, xl = np.nonzero(lin)
+            fonte[yl, xl] = cores[np.arange(len(yl)) % len(cores)]
+        feito |= alvo
+    e = q["esfuma_px"]
+    al = cv2.GaussianBlur(cv2.dilate(feito.astype(np.uint8), np.ones((2 * e + 1,) * 2, np.uint8)).astype(np.float32),
+                          (0, 0), e / 2)
+    al[feito] = 1
+    out = out * (1 - al[..., None]) + fonte * al[..., None]
+    # a concha da sala íntima da Casa E, no centro e no tamanho da peça, virada para a `frente`
+    cor, a_m = E._modelo_poltrona_1p(qe)
+    fx, fy = qe["modelo"]["frente"]
+    for r, (dx, dy) in q["pecas"]:
+        (ax, ay), (bx, by) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        cx, cy, t = (ax + bx) / 2, (ay + by) / 2, max(bx - ax, by - ay)
+        ang = np.degrees(np.arctan2(dx, dy) - np.arctan2(fx, fy))
+        c2, a2 = E._girar_peca(cor, a_m, t / max(a_m.shape), ang)
+        T.pousar_planta(out, c2, a2, float(cx), float(cy), t, qe["sombra"])
+        T.pousar_planta(out, c2, a2, float(cx), float(cy), t, qe["sombra_contato"])
+    print(f"    {len(q['pecas'])} poltronas no modelo da sala íntima da Casa E (varanda gourmet e living)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
 # As almofadas do sofá do estar do living (usuário, 27/10/26, com o sofá anterior de volta: "deixe ao menos as almofadas
