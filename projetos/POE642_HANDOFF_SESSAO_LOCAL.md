@@ -3744,3 +3744,11 @@ O usuário: "percebe um padrão varanda, onde tem duas folhas de brise bronze es
 No PDF, as portas de correr dos Quartos 1, 2 e 3 e da Suíte Master para as varandas têm 4 folhas em dois planos (as outras portas de correr do Térreo têm um plano só). Na final, as 4 iam em vidro. Agora as duas de fora, junto à varanda, vão em brise de bronze escovado (a folha em bronze, o contorno escuro, o brilho no meio, o escovado no comprido e a sombra curta, como os brises do 1º Pavimento da Casa E), e as duas de dentro seguem em vidro.
 
 Antes e depois (o antes é a final de 14d555f): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_brises_{quartos_3_e_2,quarto_1,suite_master}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos.
+
+### Pedido de 29/10/26: o traço entre a cortina e a folha de vidro (Térreo da Casa C)
+
+O usuário, com o recorte das portas dos Quartos 3 e 2 para a varanda: "remove esse traço entre a cortina e a folha de vidro".
+
+Era o caixilho antigo do render: uma faixa clara de 6 px sob a folha de vidro da direita de cada porta, entre ela e a face da parede do quarto, que a limpeza das esquadrias não cobria. Saiu, e ali fica a madeira do quarto, com as juntas das réguas no lugar. Nos Quartos 1 e na Suíte Master não havia a faixa. Fica o trilho fino da cortina, de parede a parede, como em todas as cortinas (regra de 20/10).
+
+Antes e depois (o antes é a final de 49dfec4): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_traco_cortina_vidro_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos.

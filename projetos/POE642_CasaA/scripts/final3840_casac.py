@@ -1819,13 +1819,18 @@ def soleiras_t(Q, img):
 # - Quarto 2 (item 7): a linha escura entre a folha aberta e o armário (a borda do armário espelhada);
 # - BH master 1 (item 8): a pinta marrom junto ao topo da folha aberta, a beira da folha ali, e o ponto escuro do outro
 #   lado da parede, no closet master 1 (o fim da folha antiga da porta dele).
+# 29/10 (usuário, com o recorte das portas dos Quartos 3 e 2 para a varanda: "remove esse traço entre a cortina e a
+# folha de vidro"): sob a folha de vidro da direita de cada uma, entre ela e a face da parede do quarto, ficava uma
+# faixa clara de 6 px, o caixilho antigo do render, que a limpeza das esquadrias não cobria. Ali fica a madeira do
+# quarto, 7 px abaixo (o passo das réguas: as juntas seguem no lugar).
 RESTOS_FOLHA_TC = {"rets": [((2213.4, 1006.3, 2218.6, 1063.7), (-12, 0)), ((2206.7, 1063.2, 2212.9, 1063.7), (-12, 0)),
                             ((2033.0, 865.7, 2040.1, 867.1), (-12, 0)), ((2042.5, 827.7, 2042.9, 867.1), (-2, 0)),
                             ((1995.0, 827.7, 1999.3, 828.2), (0, 1)), ((2040.6, 827.7, 2042.9, 828.2), (0, 1)),
                             ((1968.4, 825.8, 1996.4, 827.3), (0, 3)), ((2043.4, 825.8, 2045.8, 827.3), (0, 3)),
                             ((1995.9, 822.0, 1997.4, 826.3), (6, 0)), ((2040.6, 822.0, 2041.0, 825.4), (-6, 0)),
                             ((1478.5, 734.7, 1480.8, 766.5), (4, 0)),
-                            ((721.7, 716.6, 723.2, 726.6), (3, 0)), ((737.9, 727.1, 743.1, 729.5), (6, 0))],
+                            ((721.7, 716.6, 723.2, 726.6), (3, 0)), ((737.9, 727.1, 743.1, 729.5), (6, 0)),
+                            ((1152.8, 544.8, 1234.9, 550.0), (0, 7)), ((1335.1, 544.8, 1416.3, 550.0), (0, 7))],
                    "colunas": [(2274, (655, 672), (636, 655)), (886, (517, 527), (528, 540))],
                    "batentes": [(1997.3, 821.6, 1999.3, 825.8), (1994.2, 825.8, 1998.1, 826.9),
                                 (1994.7, 820.5, 1998.7, 821.6), (2037.8, 821.6, 2039.8, 825.8),

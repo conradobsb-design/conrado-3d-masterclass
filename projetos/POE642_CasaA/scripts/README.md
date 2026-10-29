@@ -1461,3 +1461,8 @@ Na final: Térreo, 3351 px mudam (só nos itens 1 a 5); Subsolo, 8746 px (o vão
 
 - **`brises_suites_tc` (`BRISES_SUITES_TC`, no fim da etapa das esquadrias, depois de `restos_folha_tc`):** as folhas do plano de fora das portas de correr dos Quartos 1, 2 e 3 e da Suíte Master (`folhas_pt`, por suíte: no PDF, cada folha são duas tiras brancas de 1,4 pt da ARQ_PAREDE, coladas). Cada uma em 8x: a sombra curta (`retoque_1pav_casae.sombra`), o bronze (74, 106, 139) com o escovado (ruído desfocado 6 px no comprido e 0,3 px na espessura, a 7%), o brilho no meio (0,4 px) e o contorno escuro (0,35 px), `folga_px` 0,3 além da folha, por cima do vidro das esquadrias. As do plano de dentro ficam em vidro.
 - **Na final:** o motor do Térreo de `esquadrias` em diante, sem salvar; 4 trechos (as 3 portas de cima e a da Suíte Master) colados na final, conferidos iguais ao cache antigo.
+
+### O traço entre a cortina e o vidro (Casa C, 29/10)
+
+- **`RESTOS_FOLHA_TC`:** mais duas faixas, sob a folha de vidro da direita das portas dos Quartos 3 (1341–1427 x 335–340 px) e 2 (1533–1618 x 335–340), entre ela e a face da parede do quarto (549,3 pt): o caixilho claro do render (174–195), que a limpeza das esquadrias deixava. Vem a madeira 7 px abaixo (`(0, 7)`, o passo das réguas, com as juntas no lugar). Os montantes das pontas (1428–1433 e 1619–1624) ficam.
+- **Na final:** o motor de `esquadrias` em diante, sem salvar; os 2 trechos (e 1 px junto à parede entre os quartos, que a etapa das cortinas mudou em 21) colados na final.
