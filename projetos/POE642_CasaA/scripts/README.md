@@ -1557,4 +1557,8 @@ As páginas são desenhadas em PIL a 200 dpi (3307 × 2339 px). O desenho é fei
   - `CASAS[c]["texto"]` lista o programa pelos nomes dos ambientes dos PDFs do cliente, sem número de vagas nem posição; é provisório.
   - `quebrar` faz a quebra pela largura.
   - Áreas como nas pranchas: sem dado, "não informado" e sem total.
+- **Marca e fonte (29/10, pedido do usuário: "quero o logotipo oficial e a fonte Poppins do site deles em vez da Inter"):**
+  - `F(peso, t)` carrega a Poppins (`assets/fontes/Poppins-*.ttf`, OFL, com `LICENCA_Poppins_OFL.txt`).
+  - `logo_po(altura)` devolve o `logo_paulo_octavio.png` do rodapé das pranchas sem alteração. O fundo claro dos cantos, ou seja as manchas claras que tocam a borda, fica transparente, com a franja suave pela claridade.
+  - O logotipo vai na capa (embaixo à direita) e na contracapa (em cima à direita; a New Air fica embaixo à direita).
 - **Uso:** `python3 book_entrega.py` grava o PDF e a prévia. Com `--paginas`, grava também cada página em JPG em `POE642_Book/paginas` (no `.gitignore` da pasta).

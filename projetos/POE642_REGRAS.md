@@ -429,6 +429,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - Térreo e 1º Pavimento usam o mesmo enquadramento, na mesma escala; o Subsolo é recortado no que está desenhado, com as peças nevoadas inteiras.
   - Toda planta leva a nota "planta ilustrativa".
   - Os textos só usam os nomes dos ambientes dos PDFs do cliente; a área segue o quadro de áreas acima.
+  - O book usa a fonte Poppins, a do site do cliente, e o logotipo oficial (`logo_paulo_octavio.png`, o mesmo das pranchas, sem alteração) na capa e na contracapa ("quero o logotipo oficial e a fonte Poppins do site deles em vez da Inter"). As pranchas continuam em Inter.
 
 ## 14. Casos específicos já pedidos (por casa)
 

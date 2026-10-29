@@ -3911,8 +3911,8 @@ Provisório, a confirmar com o usuário:
 - Textos de apresentação: só listam o programa pelos nomes dos ambientes dos PDFs do cliente (`_pdfs_cliente`), sem número de vagas nem posição dos ambientes, até virem os textos da Paulo Octávio.
 - Áreas das Casas D e E.
 - Nome do empreendimento, hoje "ML 10 · Conjunto 02 · Lote 17 · Casas A a E".
-- Marca: "PAULO OCTÁVIO" em texto na capa, como na prévia escolhida, em vez do logotipo oficial.
-- Fonte: Inter, a das pranchas, em vez da Poppins do site.
+- ~~Marca: "PAULO OCTÁVIO" em texto na capa, como na prévia escolhida, em vez do logotipo oficial.~~ Resolvido: logotipo oficial, ver abaixo.
+- ~~Fonte: Inter, a das pranchas, em vez da Poppins do site.~~ Resolvido: Poppins, ver abaixo.
 
 Para refazer:
 ```
@@ -3920,3 +3920,11 @@ cd POE642_CasaA/scripts
 python3 book_entrega.py
 ```
 Com `--paginas`, também grava cada página em JPG em `POE642_Book/paginas`, que fica fora do git, para conferir.
+
+Depois, sobre a marca e a fonte: "quero o logotipo oficial e a fonte Poppins do site deles em vez da Inter". Feito no book. As pranchas continuam como foram aprovadas, com o rodapé em Inter.
+- **Fonte:** Poppins, a do site da Paulo Octávio (Light, Regular, Medium e SemiBold), baixada do repositório do Google Fonts. Licença OFL; os arquivos e a licença ficam em `POE642_CasaA/entrega/assets/fontes`.
+- **Logotipo:** `logo_paulo_octavio.png`, o arquivo PaulOOctavio® que o usuário enviou em 14/10 e que já está no rodapé das pranchas. Vai sem alteração: o selo preto de cantos redondos com a marca em branco. Só o fundo claro dos cantos ficou transparente.
+  - O arquivo do site (`paulooctavio.com.br`) não pôde ser baixado: o proxy desta sessão bloqueia o domínio.
+- **Onde entra o logotipo:**
+  - na capa, embaixo à direita, no lugar de "PAULO OCTÁVIO" em texto;
+  - na contracapa, em cima à direita. A marca da New Air desceu para baixo à direita, na altura da nota.

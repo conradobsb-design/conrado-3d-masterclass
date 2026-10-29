@@ -103,10 +103,31 @@ _fontes = {}
 
 
 def F(peso, t):
+    """Poppins, a fonte do site da Paulo Octávio (pedido do usuário em 29/10: "quero o logotipo oficial e a fonte
+    Poppins do site deles em vez da Inter"); OFL, em `assets/fontes` com a licença."""
     k = (peso, t)
     if k not in _fontes:
-        _fontes[k] = ImageFont.truetype(str(ASSETS / "fontes" / f"Inter-{peso}.otf"), z(t))
+        _fontes[k] = ImageFont.truetype(str(ASSETS / "fontes" / f"Poppins-{peso}.ttf"), z(t))
     return _fontes[k]
+
+
+def logo_po(altura):
+    """O logotipo da Paulo Octávio, o mesmo do rodapé das pranchas (o arquivo enviado pelo usuário em 14/10): o selo
+    preto de cantos redondos com a marca em branco, sem alteração. Só o fundo claro dos cantos, fora do selo, fica
+    transparente (as manchas claras que tocam a borda), com a borda suave pela claridade."""
+    im = Image.open(ASSETS / "logo_paulo_octavio.png").convert("RGB")
+    a = np.asarray(im).astype(np.float32)
+    lum = a.mean(axis=2)
+    _, lab = cv2.connectedComponents((lum > 120).astype(np.uint8))
+    borda = set(np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))) - {0}
+    fora = np.isin(lab, list(borda)).astype(np.uint8)
+    franja = cv2.dilate(fora, np.ones((5, 5), np.uint8)) & (1 - fora)
+    alfa = np.where(fora > 0, 0.0, 1.0)
+    alfa = np.where(franja > 0, np.clip((239 - lum) / (239 - 14), 0, 1), alfa)
+    rgb = np.where(franja[..., None] > 0, np.array([14, 14, 17], np.float32), a)
+    out = Image.fromarray(np.dstack([rgb, alfa * 255]).astype(np.uint8), "RGBA")
+    k = z(altura) / out.height
+    return out.resize((round(out.width * k), z(altura)), Image.LANCZOS)
 
 
 _plantas = {}
@@ -216,7 +237,8 @@ def capa():
     texto(d, (90, 1131 - 300), "CASAS A — E", F("Light", 30), (235, 235, 235), track=14)
     texto(d, (88, 1131 - 248), "Plantas Humanizadas", F("Light", 92), (255, 255, 255))
     texto(d, (92, 1131 - 112), "ML 10 · CONJUNTO 02 · LOTE 17", F("Regular", 17), (215, 215, 215), track=6)
-    texto(d, (1510, 1131 - 112), "PAULO OCTÁVIO", F("SemiBold", 17), (255, 255, 255), track=6, anchor="ra")
+    logo = logo_po(58)
+    im.paste(logo, (z(1510) - logo.width, z(1131 - 112 + 10) - logo.height // 2), logo)
     return im
 
 
@@ -345,12 +367,15 @@ def contracapa():
         y += 92
     for i, ln in enumerate([NOTA[:96].rsplit(" ", 1)[0], NOTA[len(NOTA[:96].rsplit(" ", 1)[0]) + 1:]]):
         texto(d, (92, 1131 - 120 + i * 24), ln, F("Regular", 14), (170, 170, 170))
+    # o cliente em cima, à direita; a New Air embaixo, na altura da nota
+    po = logo_po(64)
+    im.paste(po, (W - z(90) - po.width, z(130)), po)
     logo = Image.open(ASSETS / "logo_new_air.png").convert("RGBA")
-    k = z(70) / logo.height
-    logo = logo.resize((int(logo.width * k), z(70)), Image.LANCZOS)
-    claro = Image.new("RGBA", (logo.width + z(40), logo.height + z(30)), (255, 255, 255, 255))
-    claro.alpha_composite(logo, (z(20), z(15)))
-    im.paste(claro.convert("RGB"), (W - z(90) - claro.width, z(130)))
+    k = z(60) / logo.height
+    logo = logo.resize((int(logo.width * k), z(60)), Image.LANCZOS)
+    claro = Image.new("RGBA", (logo.width + z(36), logo.height + z(26)), (255, 255, 255, 255))
+    claro.alpha_composite(logo, (z(18), z(13)))
+    im.paste(claro.convert("RGB"), (W - z(90) - claro.width, z(1131 - 70) - claro.height))
     return im
 
 
