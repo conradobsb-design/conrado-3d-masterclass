@@ -17,6 +17,11 @@ mesmas funções da Casa C (`final3840_casac`), cada uma com a configuração da
 Uso (uma vez, sobre a final aprovada de 175b56e; o cache das etapas do motor da Casa B, de 26/10, dá o fundo dos
 jardins sem os rótulos e sem o tracejado):
   python3 revisao_casab_2910.py [--antes <png>] [--saida <png>]
+
+Depois, a adega (usuário, 29/10/26, com o recorte: "as garrafas estão em escala? Me parece que não."): a prateleira de
+vinhos refeita com as garrafas na escala real (`ajustes_casab.adega_b`, agora em metros), só dentro dela (a sombra dela
+no piso a final já tem). Uma vez, sobre a final de 0b25351:
+  python3 revisao_casab_2910.py --adega [--antes <png>] [--saida <png>]
 """
 import argparse
 import sys
@@ -47,6 +52,96 @@ BRISES_SUITES_TB = dict(Cc.BRISES_SUITES_TC, folhas_pt={
     "Suíte 2": [(2149.0, 527.2, 2282.8, 530.0), (2010.6, 530.0, 2144.4, 532.8)],
     "Suíte 3": [(2397.3, 823.1, 2400.1, 914.7), (2400.1, 919.2, 2402.9, 1010.8)],
     "Suíte Master": [(787.2, 602.0, 790.0, 709.7), (790.0, 714.2, 792.9, 822.0), (792.9, 826.5, 795.7, 934.2)]})
+
+# Item 2, depois (usuário, vendo a final: "são apenas 4 folhas: duas de bronze na parte externa e duas de vidro na parte
+# interna. não há mais que 4. Corrija."; na suíte 3: "aqui também"; na suíte master: "esse é o exemplo correto. mas tem um
+# erro entre as folhas da última (na parte de baixo). me parece que tem uma cortina entre a folha de bronze e de vidro."):
+# entre o plano de fora e o de dentro, o render deixava faixas cinza e contornos claro/escuro (os caixilhos antigos), que
+# liam como mais folhas, e no trecho de baixo da master um pedaço do desenho da cortina. Como na master (o exemplo do
+# usuário): o bronze, um filete do piso do quarto e o vidro fino. Em cada trecho (pt: a folha de fora e a de dentro), a
+# faixa das duas folhas e do vão entre elas é refeita com a madeira do quarto (a cor de cada linha no comprido das
+# réguas, `busca_px` adiante, pulando a cortina e o que não é madeira), a folha de dentro em vidro fino (o miolo claro e as
+# bordas cinza, como as outras esquadrias da Casa B) e, depois, as de fora em bronze (`brises_suites_tc`). `lado`: de que
+# lado do eixo da espessura fica o quarto. A sala íntima, com o mesmo desenho e em vidro, fica com as 4 folhas de vidro.
+VAOS_SUITES_TB = {"portas": {
+    "Suíte 1": ("y", 1, [((1729.4, 527.2, 1863.2, 530.0), (1729.4, 541.3, 1862.1, 544.2)),
+                         ((1867.8, 530.0, 2001.6, 532.8), (1866.6, 538.5, 1999.3, 541.3))]),
+    "Suíte 2": ("y", 1, [((2010.6, 530.0, 2144.4, 532.8), (2021.4, 541.3, 2149.8, 544.2)),
+                         ((2149.0, 527.2, 2282.8, 530.0), (2154.4, 538.5, 2282.8, 541.3))]),
+    "Suíte 3": ("x", -1, [((2397.3, 823.1, 2400.1, 914.7), (2385.9, 823.1, 2388.8, 914.7)),
+                          ((2400.1, 919.2, 2402.9, 1010.8), (2388.8, 919.2, 2391.6, 1010.8))]),
+    "Suíte Master": ("x", 1, [((787.2, 602.0, 790.0, 709.7), (795.7, 602.0, 798.5, 709.7)),
+                              ((790.0, 714.2, 792.9, 822.0), (798.5, 714.2, 801.4, 822.0)),
+                              ((792.9, 826.5, 795.7, 934.2), (801.4, 826.5, 804.2, 934.2))]),
+    "Sala íntima": ("y", 1, [((1369.4, 527.2, 1483.7, 530.0), (1369.4, 538.5, 1483.7, 541.3)),
+                             ((1488.2, 530.0, 1602.4, 532.8), (1488.2, 541.3, 1602.4, 544.2))])},
+    "vidro_fora": ("Sala íntima",), "busca_px": 40, "amostra_px": 3, "liso_px": {"y": 21, "x": 1},
+    "vidro": (219, 216, 211), "borda": (176, 177, 179), "larg_borda_px": 0.9, "ss": 8}
+
+
+def _madeira(px):
+    """O px é da madeira do quarto: amarronzado (R bem acima de B) e no tom médio (a cortina e a sombra dela, claras e
+    mais neutras, ficam de fora)."""
+    m = px.mean(axis=-1)
+    return (px[..., 2].astype(np.int16) - px[..., 0] > 35) & (m > 100) & (m < 165)
+
+
+def vaos_suites_tb(Q, img):
+    q = VAOS_SUITES_TB
+    out = img.copy()
+    k = q["ss"]
+    n = 0
+    for nome, (eixo, lado, pares) in q["portas"].items():
+        v = out if eixo == "y" else out.transpose(1, 0, 2)          # a espessura nas linhas
+        for fora, dentro in pares:
+            rs = []
+            for r in (fora, dentro):
+                (a, b), (c, d) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+                rs.append((a, b, c, d) if eixo == "y" else (b, a, d, c))   # (comprido0, esp0, comprido1, esp1)
+            (fa0, fe0, fa1, fe1), (da0, de0, da1, de1) = rs
+            c0, c1 = int(np.ceil(max(fa0, da0))), int(np.floor(min(fa1, da1)))
+            e0 = int(np.floor(min(fe0, de0))) - (1 if lado < 0 else 0)
+            e1 = int(np.ceil(max(fe1, de1))) + (1 if lado > 0 else 0)
+            # a cor da madeira em cada linha das réguas: os primeiros px de madeira adiante, para dentro do quarto
+            passos = range(e1, e1 + q["busca_px"]) if lado > 0 else range(e0 - 1, e0 - 1 - q["busca_px"], -1)
+            col = v[list(passos), c0:c1]                                  # (busca, comprido, 3)
+            ok = _madeira(col)
+            cores = np.zeros((c1 - c0, 3), np.float32)
+            todas = col[ok]
+            med = np.median(todas, axis=0) if len(todas) else np.float32((128, 140, 160))
+            for j in range(c1 - c0):
+                bons = col[ok[:, j], j][:q["amostra_px"]]
+                cores[j] = np.median(bons, axis=0) if len(bons) else med
+            # no comprido das réguas (as portas de cima: a faixa corre junto com elas) o tom é alisado, sem as emendas de
+            # uma régua para a outra; nas laterais, as réguas cruzam a faixa e cada linha fica com a sua
+            janela = q["liso_px"][eixo]
+            if janela > 1:
+                cores = cv2.blur(cv2.medianBlur(np.ascontiguousarray(np.round(cores)[:, None].astype(np.uint8)),
+                                                janela).astype(np.float32), (1, janela))[:, 0]
+            v[e0:e1, c0:c1] = np.clip(np.round(cores), 0, 255).astype(np.uint8)[None]
+            # as folhas de vidro (a de dentro; na sala íntima, as duas)
+            vidros = [(da0, de0, da1, de1)] + ([(fa0, fe0, fa1, fe1)] if nome in q["vidro_fora"] else [])
+            for (a0, s0, a1, s1) in vidros:
+                X0, Y0 = int(np.floor(a0)) - 2, int(np.floor(s0)) - 2
+                X1, Y1 = int(np.ceil(a1)) + 2, int(np.ceil(s1)) + 2
+                h, w = Y1 - Y0, X1 - X0
+
+                def ret(x0_, y0_, x1_, y1_):
+                    m = np.zeros((h * k, w * k), np.uint8)
+                    cv2.rectangle(m, (int(round((x0_ - X0) * k)), int(round((y0_ - Y0) * k))),
+                                  (int(round((x1_ - X0) * k)) - 1, int(round((y1_ - Y0) * k)) - 1), 255, -1)
+                    return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+                eb = q["larg_borda_px"]
+                A, M = ret(a0, s0, a1, s1), ret(a0 + eb, s0 + eb, a1 - eb, s1 - eb)
+                reg = v[Y0:Y1, X0:X1].astype(np.float32)
+                reg = reg * (1 - A) + np.float32(q["borda"]) * A
+                reg = reg * (1 - M) + np.float32(q["vidro"]) * M
+                v[Y0:Y1, X0:X1] = np.clip(reg, 0, 255).astype(np.uint8)
+            n += 1
+    print(f"    portas das suítes: {n} trechos com o vão entre os planos na madeira do quarto e a folha de dentro em vidro "
+          f"fino (só as 4 folhas de cada porta; 6 na master, como no PDF)")
+    return out
+
 
 # Itens 3 a 6: a "segunda linha" junto à folha aberta (o contorno fino de uma folha que a limpeza das esquadrias deixou
 # entre a folha e a face da parede, como a do Louceiro 2 da Casa C). Em px da final (x0, y0, x1, y1), com o deslocamento
@@ -120,10 +215,16 @@ def rotulos_jardins_tb(Q, img):
     return out
 
 
+def adega_tb(img):
+    Q = F.Quadro("Terreo")
+    with F.em_quadro(Q):
+        return F.B.adega_b(img, sombra_fora=False)
+
+
 def revisao_casab_2910(img):
     Q = F.Quadro("Terreo")
     img = folhas_linhas_tb(img)
-    img = Cc.brises_suites_tc(Q, img, BRISES_SUITES_TB)
+    img = Cc.brises_suites_tc(Q, vaos_suites_tb(Q, img), BRISES_SUITES_TB)
     img = Cc.cadeiras_contorno_tc(Q, img, CADEIRAS_MESAS_TB, camadas=("ARQ_LAYOUT HUMANIZAÇÃO", "ARQ_MOBILIÁRIO"))
     img = Cc.jogos_varanda_tc(Q, img, JOGOS_VARANDA_TB)
     return rotulos_jardins_tb(Q, img)
@@ -133,7 +234,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--antes", default=str(FINAL_B))
     ap.add_argument("--saida", default=str(FINAL_B))
+    ap.add_argument("--adega", action="store_true", help="só a adega com as garrafas na escala (depois da revisão)")
     a = ap.parse_args()
-    out = revisao_casab_2910(cv2.imread(a.antes))
+    out = (adega_tb if a.adega else revisao_casab_2910)(cv2.imread(a.antes))
     cv2.imwrite(a.saida, out)
     print(f"    {a.saida}")

@@ -1537,16 +1537,23 @@ def elevador_cabine(out):
 # Térreo 17: a adega. O PDF tem a prateleira de vinhos na parede de baixo (ARQ_BANCADAS, 3,30 x 0,40 m), com três nichos de
 # 0,40 m à esquerda (ARQ_REVESTIMENTOS); o motor fez um banco bege. Entra a prateleira em marcenaria areia com o veio, as
 # divisões dos nichos em traço fino e as garrafas deitadas, com o gargalo para a parede, como a adega da Casa E.
+# As garrafas na escala real (usuário, 29/10/26, com o recorte da adega: "as garrafas estão em escala? Me parece que
+# não."): antes as medidas eram px do render de 2000 (o corpo de 6,6 px, o passo de 2,6 px) e, no quadro de 3840 px, as
+# garrafas saíam com a metade do tamanho. Agora em metros (`garrafa_m`), como as da adega da Casa C (`final3840_casac.
+# ADEGA_C`): 0,075 de diâmetro, o corpo de 0,21, o ombro de 0,015 e o gargalo de 0,08 (0,03 de diâmetro), a cada 0,09,
+# centradas em cada nicho e no trecho depois deles, a 0,03 das divisões; a prateleira tem 0,40 m de fundo e a garrafa,
+# 0,31. `sombra_fora=False` refaz só a prateleira, sem a sombra dela no piso (que a final já tem).
 ADEGA_B = {"pt": (1820.1, 1416.1, 2006.1, 1438.8), "divisoes_pt": [1842.8, 1865.5, 1888.2], "madeira": (160, 186, 206),
-           "contorno": (110, 118, 124), "larg": 0.4, "passo": 2.6, "corpo": 6.6, "gargalo": 2.6, "larg_g": 1.9,
-           "larg_gargalo": 0.8, "folga": 1.0,
+           "contorno": (110, 118, 124), "larg": 0.4,
+           "garrafa_m": {"diam": 0.075, "corpo": 0.21, "ombro": 0.015, "gargalo": 0.08, "diam_gargalo": 0.03,
+                         "passo": 0.09, "folga": 0.03, "da_parede": 0.005},
            "vidros": [(26, 40, 28), (20, 32, 48), (30, 24, 46), (24, 34, 26), (22, 30, 40)], "brilho": 0.45,
-           "sombra": {"desloc": (-0.5, 0.6), "sigma": 0.5, "forca": 0.35}, "semente": 3}
+           "sombra": {"desloc": (-0.6, 0.7), "sigma": 0.6, "forca": 0.35}, "ss": 8, "semente": 3}
 
 
-def adega_b(out):
-    from retoque_terreo_casae import SS, linha_aa
-    q = ADEGA_B
+def adega_b(out, sombra_fora=True):
+    from retoque_terreo_casae import linha_aa
+    q, g = ADEGA_B, ADEGA_B["garrafa_m"]
     _, p2r = AJ.pdf_pavimento("Terreo")
     px_m = px_por_m("Terreo")
     H, W = out.shape[:2]
@@ -1557,8 +1564,8 @@ def adega_b(out):
     rng = np.random.default_rng(q["semente"])
     ve = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), sigmaX=9, sigmaY=0.6)
     mad = np.float32(q["madeira"])[None, None] * (1 + 0.06 * ve / max(ve.std(), 1e-6))[..., None]
-    sh = sombra_de(al, px_m, forca=0.25)
-    img *= (1 - sh[..., None])
+    if sombra_fora:
+        img *= (1 - sombra_de(al, px_m, forca=0.25)[..., None])
     img = img * (1 - al[..., None]) + mad * al[..., None]
     c = contorno_aa((H, W), r, q["larg"])[..., None]
     img = img * (1 - c) + np.float32(q["contorno"]) * c
@@ -1566,47 +1573,50 @@ def adega_b(out):
         (ax, ay), (bx, by) = p2r(xd, q["pt"][1]), p2r(xd, q["pt"][3])
         c = linha_aa((H, W), [(ax, ay), (bx, by)], q["larg"])[..., None]
         img = img * (1 - c) + np.float32(q["contorno"]) * c
-    # as garrafas: deitadas, o gargalo junto à parede de baixo, a base para o vão
+    # as garrafas: deitadas, o gargalo junto à parede de baixo, a base para o vão; em cada nicho e no trecho depois
     x0, y0, x1, y1 = r
     wx0, wy0, wx1, wy1 = int(x0) - 2, int(y0) - 2, int(np.ceil(x1)) + 3, int(np.ceil(y1)) + 3
     h, w = wy1 - wy0, wx1 - wx0
     U = al[wy0:wy1, wx0:wx1]
     reg = img[wy0:wy1, wx0:wx1]
-    s_ = q["sombra"]
-    p_, cp, gl, f = q["passo"], q["corpo"], q["gargalo"], q["folga"]
-    divs = [p2r(xd, y0)[0] for xd in q["divisoes_pt"]]
+    k, s_ = q["ss"], q["sombra"]
+    ponta = y1 - g["da_parede"] * px_m - wy0
+    dg, dc = g["diam_gargalo"] * px_m, g["diam"] * px_m
+    gl, om, cp = g["gargalo"] * px_m, g["ombro"] * px_m, g["corpo"] * px_m
+    bordas = [x0] + [p2r(xd, q["pt"][1])[0] for xd in q["divisoes_pt"]] + [x1]
     n = 0
-    x = x0 + f + p_ / 2
-    while x < x1 - f:
-        if any(abs(x - d) < 1.0 for d in divs):
-            x += p_
-            continue
-        cor = np.float32(q["vidros"][int(rng.integers(len(q["vidros"])))])
-        px, py = x, y1 - 0.3
-        ux, uy = 0, -1
-        pts_g = [(px, py), (px + ux * gl, py + uy * gl)]
-        pts_c = [(px + ux * (gl + 0.6), py + uy * (gl + 0.6)), (px + ux * (gl + cp), py + uy * (gl + cp))]
-        m = np.zeros((h * SS, w * SS), np.uint8)
-        for pts, larg in ((pts_g, q["larg_gargalo"]), (pts_c, q["larg_g"])):
-            pp = np.int32(np.round((np.float32(pts) - [wx0, wy0]) * SS))
-            cv2.line(m, tuple(pp[0]), tuple(pp[1]), 255, max(1, int(round(larg * SS))), cv2.LINE_AA)
-        pp = np.int32(np.round((np.float32([pts_g[1], pts_c[0]]) - [wx0, wy0]) * SS))
-        cv2.line(m, tuple(pp[0]), tuple(pp[1]), 255, max(1, int(round((q["larg_g"] + q["larg_gargalo"]) / 2 * SS))),
-                 cv2.LINE_AA)
-        a_ = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * U
-        sh = cv2.GaussianBlur(cv2.warpAffine(a_, np.float32([[1, 0, s_["desloc"][0]], [0, 1, s_["desloc"][1]]]), (w, h)),
-                              (0, 0), s_["sigma"]) * (1 - a_)
-        reg *= (1 - s_["forca"] * sh)[..., None]
-        reg = reg * (1 - a_[..., None]) + cor * a_[..., None]
-        bm = np.zeros((h * SS, w * SS), np.uint8)
-        pb = np.int32(np.round((np.float32(pts_c) + [0.35, 0] - [wx0, wy0]) * SS))
-        cv2.line(bm, tuple(pb[0]), tuple(pb[1]), 255, max(1, int(round(0.3 * SS))), cv2.LINE_AA)
-        ab = cv2.resize(bm.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None] * q["brilho"] * U[..., None]
-        reg = reg * (1 - ab) + (cor * 0.4 + 255 * 0.6) * ab
-        n += 1
-        x += p_
+    for a, b in zip(bordas[:-1], bordas[1:]):
+        xs = np.arange(a + (g["folga"] + g["diam"] / 2) * px_m, b - (g["folga"] + g["diam"] / 2) * px_m + 1e-6,
+                       g["passo"] * px_m)
+        xs += ((b - a) - (g["folga"] * 2 + g["diam"]) * px_m - (xs[-1] - xs[0])) / 2 if len(xs) else 0
+        for x in xs - wx0:
+            cor = np.float32(q["vidros"][int(rng.integers(len(q["vidros"])))])
+            mk = np.zeros((h * k, w * k), np.uint8)
+
+            def traco(ya, yb, larg, x=x, mk=mk):
+                cv2.line(mk, (int(round(x * k)), int(round(ya * k))), (int(round(x * k)), int(round(yb * k))), 255,
+                         max(1, int(round(larg * k))), cv2.LINE_AA)
+            traco(ponta - dg / 2, ponta - gl, dg)
+            traco(ponta - gl, ponta - gl - om, (dg + dc) / 2)
+            traco(ponta - gl - om - dc / 2, ponta - gl - om - cp + dc / 2, dc)       # as pontas do traço são redondas
+            a_ = cv2.resize(mk.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA) * U
+            sh = cv2.GaussianBlur(cv2.warpAffine(a_, np.float32([[1, 0, s_["desloc"][0]], [0, 1, s_["desloc"][1]]]),
+                                                 (w, h)), (0, 0), s_["sigma"]) * (1 - a_)
+            reg *= (1 - s_["forca"] * sh)[..., None]
+            reg = reg * (1 - a_[..., None]) + cor * a_[..., None]
+            # o brilho no comprido do corpo, do lado da luz (à direita)
+            bm = np.zeros((h * k, w * k), np.uint8)
+            xb = x + dc * 0.22
+            cv2.line(bm, (int(round(xb * k)), int(round((ponta - gl - om - 0.4) * k))),
+                     (int(round(xb * k)), int(round((ponta - gl - om - cp + 0.6) * k))), 255,
+                     max(1, int(round(0.45 * k))), cv2.LINE_AA)
+            ab = cv2.resize(bm.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None] * \
+                q["brilho"] * a_[..., None]
+            reg = reg * (1 - ab) + (cor * 0.4 + 255 * 0.6) * ab
+            n += 1
     img[wy0:wy1, wx0:wx1] = reg
-    print(f"    adega: prateleira de vinhos em marcenaria ({x1 - x0:.0f} x {y1 - y0:.0f} px), 3 nichos e {n} garrafas")
+    print(f"    adega: prateleira de vinhos em marcenaria ({(x1 - x0) / px_m:.2f} x {(y1 - y0) / px_m:.2f} m), 3 nichos e "
+          f"{n} garrafas na escala")
     return np.clip(img, 0, 255).astype(np.uint8)
 
 
