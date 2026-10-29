@@ -240,6 +240,11 @@ VIDRO_SAUNA_SB = {"nome": "da sauna (vidro fixo)",
                   "folhas": [((796.6, 798.2, 886.1, 801.0), "x"), ((791.7, 803.0, 794.6, 895.4), "y")],
                   "montante_pt": 0.0, "linhas": {"cor": (48, 50, 52), "faces_px": 0.9, "meio_px": 0.7, "largura_min_px": 4.8}}
 
+# Depois, com o recorte do canto de cima do vidro (usuário: "remova esse \"arco\" no piso"): no canto de fora do vão
+# (787,2 x 793,6 pt), um traço escuro da base em L, de canto redondo: no topo do vão (y 596 px) e descendo pela borda do
+# deck (x 954 px) até 606 px. Sai pelo entorno (inpaint): o Bege Bahia da garagem e do vão, a madeira do deck.
+ARCO_VAO_SAUNA_SB = {"px": [(955, 596, 967, 597), (955, 597, 957, 598), (954, 597, 955, 607)], "raio_px": 2}
+
 # 3e. "represente melhor esses degraus da sauna com o efeito sombra de cada um deles em forma de bancos": os dois níveis
 # (o da frente, 895,7-924,0 pt, e o de trás, junto à parede, 926,3-952,4; o espelho entre eles, 924,0-926,3) refeitos no
 # mesmo travertino bruto (`F.bancos_sauna`, a mesma textura), cada um mais claro que o de baixo (`nivel`), com a sombra de
@@ -282,6 +287,14 @@ def portas_vidro_sb(Q, img, portas):
         return FA.portas_vidro(Q, np.ascontiguousarray(img.copy()))
     finally:
         FA.PORTAS_VIDRO = pv
+
+
+def arco_vao_sauna_sb(img, q=ARCO_VAO_SAUNA_SB):
+    m = np.zeros(img.shape[:2], np.uint8)
+    for x0, y0, x1, y1 in q["px"]:
+        m[y0:y1, x0:x1] = 255
+    print(f"    sauna: o traço em L no canto de fora do vão sai ({int((m > 0).sum())} px, pelo entorno)")
+    return cv2.inpaint(img, m, q["raio_px"], cv2.INPAINT_TELEA)
 
 
 def bancos_sauna_sb(Q, img, q=BANCOS_SAUNA_SB):
@@ -347,6 +360,7 @@ def pedidos_sb(Q, img):
     out = linha_porta_bhs_sb(img)
     out = parede_deposito_sb(out)
     out = portas_vidro_sb(Q, out, [SOLEIRA_DEPOSITO_SB, VIDRO_SAUNA_SB])
+    out = arco_vao_sauna_sb(out)
     out = bancos_sauna_sb(Q, out)
     out = elevador_sb(Q, out)
     return rotulos_centro_sb(Q, out, dict(ROTULOS_CENTRO_SB, mover=("ELEVADOR",), obstaculos_pt=[]))

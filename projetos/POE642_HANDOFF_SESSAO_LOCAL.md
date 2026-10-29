@@ -3872,3 +3872,5 @@ Aplicados de uma vez sobre a final de 29ce96b (`POE642_CasaA/scripts/subsolo_cas
 - Elevador: a cabine do Térreo (aço claro, corrimãos nas três paredes sem porta, as folhas e a soleira em inox), nas mesmas coordenadas do PDF; o ELEVADOR no meio da cabine, maior e em preto.
 
 Só mudam esses 4 trechos; a prancha do Térreo sai igual. Antes e depois (o antes é a final de 29ce96b): `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2910c_{porta_bh_sauna,porta_deposito_parede_soleira,sauna_vidros_bancos,elevador_rotulo}_antes_depois.jpg`. Prancha do Subsolo e PDF da Casa B refeitos. Aguarda o OK da Casa B.
+
+Depois, com o recorte do canto de cima do vidro da sauna: "remova esse \"arco\" no piso". No canto de fora do vão (onde a garagem, o deck e o vão se encontram), um traço escuro da base em L, de canto redondo, no topo do vão e descendo pela borda do deck: sai, com o Bege Bahia e a madeira em volta (23 px; `arco_vao_sauna_sb`, dentro do `--pedidos`). Antes e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2910c_arco_canto_vidro_sauna_antes_depois.jpg`. Prancha do Subsolo e PDF refeitos.
