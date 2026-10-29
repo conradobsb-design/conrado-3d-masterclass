@@ -555,8 +555,11 @@ def shafts_ta(Q, img):
 # como está.
 # Do Térreo saem antes os rótulos (PISCINA, SPA, PRAINHA, DECK DE MADEIRA: o alfa de cada um, como em `_sem_rotulo`) e as
 # letras D das escadas (as manchas escuras e neutras do tamanho de uma letra, com o entorno).
+# O trecho de baixo do deck (pedido de 29/10 na 3ª leva: "faltando parte do deck nevoado, ao subir as escadas, na prancha
+# do subsolo"): no PDF, as réguas descem à esquerda da escada até a linha do gramado (1299 pt); a 3ª caixa do `deck_pt`.
 NEVOADO_TA = {"caixa_pt": (550.0, 530.0, 1160.0, 1235.0), "camada": "ARQ_CONTRAPISO",
-              "cores": [(0.89, 0.89, 0.89), (0.5, 0.87, 1.0)], "tol_cor": 0.02, "deck_pt": [(567.0, 703.7, 907.1, 1049.6), (567.0, 1049.6, 748.6, 1230.9)],
+              "cores": [(0.89, 0.89, 0.89), (0.5, 0.87, 1.0)], "tol_cor": 0.02,
+              "deck_pt": [(567.0, 703.7, 907.1, 1049.6), (567.0, 1049.6, 748.6, 1230.9), (567.0, 1230.9, 736.7, 1299.0)],
               "hachura": {"lum": 150, "croma": 18, "area_px": 50000}, "ss": 4,
               "letra": {"escuro_max": 120, "neutro_max": 30, "lado_max_px": 30, "folga_px": 2, "raio_px": 3}}
 

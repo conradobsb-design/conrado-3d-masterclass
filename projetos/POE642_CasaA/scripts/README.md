@@ -1673,18 +1673,38 @@ Retoques locais sobre as finais da revisão (commit 219b22b). Cada pedido veio c
     - A região: `regioes_px` (a faixa livre da garagem). Nos ambientes que vazam, o rótulo anda no máximo `aberto_px`.
     - O script imprime o corpo de cada rótulo e se foi em duas linhas.
   - **O 1º Pavimento:** o nublado do Térreo, onde ele mudou, acompanha as mudanças (`nublado_1pav_ta`).
+- **A 3ª leva (os pedidos vendo a entrega da 2ª, e os achados aprovados):** seções 15 a 17 do script.
+  - **As paredes do motorista (`paredes_motorista_ta`, `PAREDES_MOTORISTA_TA`):** conferidas uma a uma contra o PDF; as paredes estavam no contorno dele, e as falhas estavam nas pontas e junto delas.
+    - Em cada ponta de parede nos vãos das portas (`pontas_pt`: a da garagem, as duas do banho e as duas do quarto), o piso em volta é refeito do material de junto (`copiar_textura`). Entram a parede e os batentes do PDF (`batentes_pt`, as peças brancas da ARQ_PAREDE), no cinza das folhas, com o fio escuro. As folhas (`folhas_pt`) ficam como estão.
+    - O nicho do box do banho volta no desenho do PDF: as laterais e o fundo na cor da parede, a abertura no Bege Bahia do banho, um pouco mais claro, com o fio.
+    - Por fora da parede da direita do quarto, os tracinhos claros de um caixilho do render saem com o jardim de logo ao lado, refletido (`fora_px`).
+  - **O terraço gourmet (`gourmet_cadeiras_ta`):** as duas poltronas de baixo e a mesinha do render (rosadas) saem com o piso refeito. Entram as poltronas de contorno limpo, de frente para o sofá (a abertura para cima, como no PDF), e a mesinha em madeira.
+  - **O aparador do escritório (`aparador_ta`):** a peça de borda áspera sai com o piso. Volta no retângulo do PDF, em madeira, no tom dela.
+  - **A mesa de centro da sala de estar:** em madeira (`SALA_ESTAR_TA["mesa_madeira"]`; `_mesa_contorno_pdf` com `madeira`: o veio no comprido sobre o tom).
+  - **As poltronas do 1º Pavimento (`poltronas_1pav_ta`):** as 3 no modelo de contorno limpo.
+    - O lugar delas é refeito como na revisão: da final de antes dela (`--antes_1pav`), os passos de `revisao_casaa_2910` até os tapetes, as poltronas limpas e os sofás.
+    - Só os px que mudam entre as poltronas da revisão e as limpas passam para a final. Fora delas, a reconstrução é igual à final px a px; o script imprime quantos px fugiram disso (0).
+  - **As frentes dos banhos das suítes 1 e 2 (`banhos_1pav_ta`, `BANHOS_1PAV_TA`):** no PDF, o plano de fora das portas segue na frente do banho (duas folhas na suíte 1, uma na suíte 2, com as junções e a peça do canto). Estavam em vidro.
+    - A faixa entre a parede do banho e as folhas (`faixa_pt`) recebe o Bege Bahia da varanda de logo ao lado, refletido.
+    - A sombra curta é só a das peças novas. O plano inteiro é pintado de novo no bronze escovado (`revisao_casaa_2910.bronzes_fora_ta`, com as folhas e as junções novas).
+    - As janelas dos banhos voltam no padrão das janelas do Térreo (`janelas_ta` com `JANELAS_BANHOS_1PAV_TA`): o vão no cinza do peitoril, os requadros da parede nas pontas (`requadros`) e as duas folhas de vidro desencontradas.
+  - **O Subsolo:**
+    - O deck nevoado ganha o trecho de baixo, à esquerda da escada, até a linha do gramado: a 3ª caixa do `deck_pt` em `revisao_casaa_2910.NEVOADO_TA`.
+    - `grama_escada_ta` (`GRAMA_ESCADA_TA`): a grama encontra a escada e o deck numa linha reta, a do PDF (`linha_pt`). As primeiras linhas da grama recebem a grama de logo abaixo, refletida (`grama_px`); as últimas da escada e do deck, as de logo acima. Sai o fio claro com pintas que ficava entre elas.
 - **Os outros pavimentos:**
   - 1º Pavimento: `nublado_1pav_ta`, onde o Térreo mudou, sem os rótulos e sem os tracejados novos da pista (`fora_px`). Fora da pegada, soma a diferença entre o Térreo novo e o antigo, nublados (`entorno_esmaecido.NUBLADO`). Nos vazios, aplica a razão entre eles. Depois, o matelassê.
   - Subsolo: `revisao_casaa_2910.revisao_ta("Subsolo", ...)` sobre a final de antes da revisão, com o Térreo novo, para as peças nevoadas.
 - **Antes e depois:**
   - `antes_depois_pedidos_ta` grava as caixas de `ANTES_DEPOIS_PEDIDOS_TA` em `renders/POE642_CasaA_PH_<pavimento>_2910b_<trecho>_antes_depois.jpg`, contra as finais da revisão.
   - Com `--pasta_comparar`, grava também as caixas de `ANTES_DEPOIS_2A_TA` em `..._2910c_<trecho>_antes_depois.jpg`, contra as finais da 1ª leva (commit 387a97f).
+  - Com `--pasta_comparar_3a`, as de `ANTES_DEPOIS_3A_TA` em `..._2910d_<trecho>_antes_depois.jpg`, contra as finais da 2ª leva (commit cb0b471).
 - **Como refazer:**
 
   ```bash
-  # de POE642_CasaA/scripts/; <pasta> com as três finais do commit 219b22b e <pasta_1a> com as do 387a97f (os mesmos nomes)
+  # de POE642_CasaA/scripts/; <pasta> com as três finais do commit 219b22b, <pasta_1a> com as do 387a97f e <pasta_2a>
+  # com as do cb0b471 (os mesmos nomes)
   python3 pedidos_terreo_casaa_2910.py --pasta_antes <pasta> --antes_subsolo <a final do Subsolo do commit 1ccaaa3> \
-      --pasta_comparar <pasta_1a>
+      --antes_1pav <a final do 1º Pavimento do commit 1ccaaa3> --pasta_comparar <pasta_1a> --pasta_comparar_3a <pasta_2a>
   python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png \
       --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png \
       --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png

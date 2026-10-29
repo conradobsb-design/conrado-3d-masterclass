@@ -4128,4 +4128,38 @@ Achados para o OK (nada alterado):
 - As poltronas do 1º Pavimento ainda estão no modelo antigo, sem o contorno limpo.
 - A mesa de centro da sala de estar ficou no tom da da final (bege liso), agora no contorno do PDF.
 
+
+### Casa A: a 3ª leva dos pedidos de 29/10 (Térreo, 1º Pavimento e Subsolo)
+
+Pedidos do usuário vendo a 2ª leva (cb0b471), com os recortes:
+- "faça uma revisão nessas paredes. elas apresentam falhas. corrija uma a uma" (a ala do motorista: elevador, shaft, banho e quarto do motorista e garagem);
+- "no primeiro pavimento, corrija essas folhas de vidro para a de bronze. são todas de bronze na sequencia. Melhore o aspecto da janela do banho." (suíte 1);
+- "na suite 2, também temos o mesmo caso. folha de bronze em frente ao banho. melhore também o aspecto da janela do banho";
+- "corrigir essa falha entre o gramado e a escada, no subsolo";
+- "faltando parte do deck nevoado, ao subir as escadas, na prancha do subsolo.";
+- e o OK dos 4 achados da 2ª leva: "Pode alterar".
+
+O que foi feito (`POE642_CasaA/scripts/pedidos_terreo_casaa_2910.py`, seções 15 a 17, de novo sobre as finais de 219b22b; detalhes no README, "A 3ª leva"):
+1. Paredes do motorista: conferidas uma a uma contra o PDF. As paredes estavam no contorno dele; as falhas estavam nas pontas:
+   - as 5 pontas nos vãos das portas (garagem, banho e quarto) receberam os batentes do PDF, no cinza das folhas, com o piso limpo em volta;
+   - o nicho do box do banho, que era um borrão, voltou no desenho do PDF;
+   - por fora da parede da direita do quarto, saiu uma fila de tracinhos claros (caixilho do render que o PDF não tem).
+2. 1º Pavimento, suítes 1 e 2: as folhas em frente aos banhos (duas na suíte 1, uma na suíte 2, com as junções e a peça do canto) passaram de vidro para o bronze, numa peça só com as do quarto, como na suíte master. A faixa entre a parede do banho e as folhas ficou no Bege Bahia da varanda.
+3. Janelas dos banhos 1 e 2: no padrão das janelas do Térreo (o vão no cinza do peitoril, os requadros nas pontas, as duas folhas de vidro finas e desencontradas, com a sombra curta).
+4. Subsolo:
+   - o deck nevoado desce à esquerda da escada até a linha do gramado, como no PDF;
+   - a grama encontra a escada e o deck numa linha reta, sem o fio claro com pintas.
+5. Achados aprovados:
+   - terraço gourmet: as duas poltronas rosadas de baixo, que eram do render, no modelo padrão de contorno limpo, de frente para o sofá, e a mesinha em madeira;
+   - escritório: o aparador em madeira, no retângulo do PDF, sem a borda áspera;
+   - 1º Pavimento: as 3 poltronas (suíte 2, suíte master e sala íntima) no contorno limpo. O lugar delas foi refeito a partir da final de antes da revisão (`--antes_1pav`, 1ccaaa3), só nos px das poltronas;
+   - sala de estar: a mesa de centro em madeira, com o veio.
+
+Antes e depois (o antes é a final da 2ª leva, cb0b471):
+- `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_2910d_{paredes_motorista,gourmet_poltronas,escritorio_aparador,sala_estar_mesa_centro}_antes_depois.jpg`;
+- `..._1Pavimento_2910d_{suite1_banho_bronze,suite2_banho_bronze,poltrona_suite2,poltrona_suite_master,poltrona_sala_intima}_antes_depois.jpg`;
+- `..._Subsolo_2910d_deck_escada_grama_antes_depois.jpg`.
+
+Os `_2910b_` e `_2910c_` também foram regravados. As três pranchas, o PDF da Casa A e o book foram refeitos. Aguarda a validação.
+
 Pendências: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) aguarda o OK.
