@@ -3667,3 +3667,16 @@ O que foi feito:
 - **Poltronas:** as 4 (2 da varanda, 2 do living) trocadas pela concha creme da sala íntima do 1º Pavimento da Casa E, no centro e no tamanho das peças do PDF, viradas para a mesa de centro (varanda) e para o tapete (living), com a sombra das poltronas do Térreo da Casa E. Por baixo, o tapete, a borda escura dele, o Bege Bahia (varanda) e o travertino (living, na mesma linha, sem quebrar os estratos) refeitos sem resto das antigas. A poltrona da direita do estar da varanda, a da sala íntima e as do living em volta da mesa redonda ficam como estavam (não vieram nos recortes).
 
 Antes e depois (o antes é a final de 8c2a52b): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2810_{sombra_jogos_varanda,poltronas_varanda,poltronas_living}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa D refeitos (o Subsolo não muda). Aguarda o OK da Casa D; a seguir, a Casa C.
+
+### Pedidos de 29/10/26: entorno das poltronas, textura do tapete da varanda e contorno das cadeiras do escritório (Térreo da Casa D)
+
+O usuário, vendo a prancha do Térreo da Casa D:
+- com o recorte das duas poltronas novas da varanda gourmet e o do estar inteiro: "retoque o entorno das poltronas e traga textura para o tapete";
+- com o recorte da mesa da suíte 3/escritório (2 cadeiras à esquerda, 1 à direita): "melhore o contorno dessas cadeiras do escritório".
+
+O que foi feito:
+- **Entorno:** o preenchimento por baixo das 4 poltronas no modelo da Casa E deixava a poltrona antiga no miolo (o tom caía no px original longe do material livre), e o contorno cinza dela saía em meia-lua pela esquerda e por baixo das novas. Agora o tapete vem no tom dele até o miolo, o Bege Bahia no mesmo desenho do piso, na luz em volta, e a borda escura do tapete segue contínua; no living, saiu a mancha cinza no tapete junto à mesinha.
+- **Tapete da varanda:** a trama do tapete do bloco "Estar com tapete" da biblioteca (lã mesclada em carreiras deitadas), na escala real, no mesmo tom médio, só no tapete.
+- **Cadeiras do escritório:** sem a franja branca do recorte, com a silhueta macia e a beira fina mais escura; o piso em volta nas réguas da mesma fileira (saiu o retângulo escuro à esquerda das cadeiras de visita) e o traço da beira do tampo contínuo por cima delas. As cadeiras das mesas da suíte master e da suíte 1 usam o mesmo modelo e ficaram como estavam (não vieram no recorte).
+
+Antes e depois (o antes é a final de 744f1db): `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2910_{entorno_poltronas_varanda,entorno_poltronas_living,tapete_varanda_textura,cadeiras_escritorio_contorno}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa D refeitos (o Subsolo não muda). Aguarda o OK da Casa D; a seguir, a Casa C.

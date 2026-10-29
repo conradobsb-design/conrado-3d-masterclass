@@ -566,12 +566,24 @@ MOVEIS_TD = {
                         (-40, 0)),
                        ("suíte 1", (1132.7, 1594.3, 1167.8, 1627.8), (1104.9, 1577.0, 1246.6, 1605.4), (0, -1), True),
                        ("escritório", (2156.8, 1740.9, 2190.2, 1776.0), (2122.5, 1701.8, 2167.8, 1815.1), (-1, 0),
-                        False),
+                        False, (28, 0)),
                        ("escritório (visita de cima)", (2100.5, 1713.8, 2131.3, 1746.2),
-                        (2122.5, 1701.8, 2167.8, 1815.1), (1, 0), False),
+                        (2122.5, 1701.8, 2167.8, 1815.1), (1, 0), False, (-36, 0)),
                        ("escritório (visita de baixo)", (2100.5, 1770.7, 2131.3, 1803.1),
-                        (2122.5, 1701.8, 2167.8, 1815.1), (1, 0), False)],
-    "cadeira": {"bloco": "banqueta_linho", "largura_bloco_m": 0.45, "m": 0.56, "sob": 1 / 3, "folga_px": 7},
+                        (2122.5, 1701.8, 2167.8, 1815.1), (1, 0), False, (-36, 0))],
+    # o contorno das cadeiras do escritório (usuário, 29/10/26, com o recorte da mesa da suíte 3/escritório: "melhore o
+    # contorno dessas cadeiras do escritório"): no bloco em 4x, a franja clara do recorte sai (a cor da beira é a do
+    # miolo mais perto, `miolo_px4` para dentro; o alfa recua `recuo_px4` e fica macio em `suave_px4`) e a silhueta
+    # ganha a beira fina mais escura (`aro_px4`, até `aro_tom` da cor), como o contorno das outras peças; o piso em
+    # volta vem das réguas da mesma fileira, ao lado (`fundo` nas cadeiras do escritório: na etapa dos pisos o vinílico
+    # ali é outro, e ficava o retângulo escuro da cadeira antiga); a beira do tampo (`borda_mesa`, o traço cinza dele,
+    # `desloc_px` além da linha do PDF, como o traço que já está no render) volta por cima das cadeiras, `alem_pt` para
+    # cada lado delas (todo o trecho em que o piso foi refeito)
+    "cadeira": {"bloco": "banqueta_linho", "largura_bloco_m": 0.45, "m": 0.56, "sob": 1 / 3, "folga_px": 7,
+                "contorno": {"nomes": ("escritório",), "miolo_px4": 2, "recuo_px4": 1, "suave_px4": 0.7,
+                             "aro_px4": 3.0, "aro_tom": 0.74,
+                             "borda_mesa": {"cor": (100, 110, 122), "larg_px": 1.5, "desloc_px": (0.7, 0.5),
+                                            "alem_pt": 13.0}}},
     # os jogos de mesa da varanda gourmet (usuário, 27/10/26: "melhore o aspectos desses jogos de mesa. adicione um
     # freijó às mesas e cadeiras mais realistas e humanizadas"; depois, vendo o conjunto da biblioteca: "USE ESSA MESA E
     # CADEIRAS NA VARANDA, NO LUGAR DAQUELAS"): o conjunto de mesa de madeira com 6 cadeiras de couro
@@ -765,14 +777,28 @@ def diagonais_armarios_d(Q, img):
     return out
 
 
-def _cadeira_bloco(Q, frente, rng=None):
+def _cadeira_bloco(Q, frente, rng=None, contorno=None):
     """A cadeira de madeira e linho da biblioteca (`MOVEIS_TD["cadeira"]`) em 4x, girada para olhar em `frente` (no bloco,
     a frente do assento olha para cima e o encosto fica embaixo, `blocos.json`): (cor, alfa) em 1x, com o centro no
-    meio."""
+    meio. Com `contorno` (`MOVEIS_TD["cadeira"]["contorno"]`), a beira sem a franja do recorte e com o aro fino."""
     sys.path.insert(0, str(RAIZ / "_blocos"))
     import blocos
+    from scipy import ndimage
     q = MOVEIS_TD["cadeira"]
     cor, al = blocos.bloco(q["bloco"], 4 * q["m"] * Q.px_m / q["largura_bloco_m"])
+    if contorno:
+        k = contorno
+        cor, al = cor.astype(np.float32), np.clip(al, 0, 1).astype(np.float32)
+        n = 2 * k["miolo_px4"] + 1
+        miolo = cv2.erode((al > 0.98).astype(np.uint8), np.ones((n, n), np.uint8)) > 0
+        _, (iy, ix) = ndimage.distance_transform_edt(~miolo, return_indices=True)
+        cor = np.where(miolo[..., None], cor, cor[iy, ix])
+        n = 2 * k["recuo_px4"] + 1
+        al = cv2.GaussianBlur(cv2.erode(al, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (n, n))), (0, 0),
+                              k["suave_px4"])
+        d = ndimage.distance_transform_edt(al > 0.5)
+        aro = np.clip(1 - d / k["aro_px4"], 0, 1)
+        cor = cor * (1 - (1 - k["aro_tom"]) * aro)[..., None]
     ang = float(np.degrees(np.arctan2(-frente[0], -frente[1])))
     h, w = al.shape
     lado = int(np.ceil(max(h, w) * 1.45 / 4)) + 4
@@ -828,16 +854,18 @@ def _refaz_tampo(out, mesa_px, faixa, vertical):
     v[r0:r1, c0:c1] = ini[None] * (1 - t) + fim[None] * t + det[src]
 
 
-def cadeiras_mesas_d(Q, img, piso):
+def cadeiras_mesas_d(Q, img, piso, nomes=None):
     """As cadeiras das mesas de trabalho: a antiga sai (o piso da etapa dos pisos, ou o de `fundo`, fora da mesa; e o
     tampo refeito onde ela o cobria), a nova entra virada para a mesa, com 1/3 sob o tampo, e a sombra do tampo cai
-    sobre ela."""
+    sobre ela. Com `nomes`, só as cadeiras cujo nome começa por um deles."""
     import final3840_casaa as FA
     q, qc, s = MOVEIS_TD, MOVEIS_TD["cadeira"], F.PECAS["sombra"]
     out = img.astype(np.float32)
     P = piso.astype(np.float32)
     D_px = qc["m"] * Q.px_m
     for nome, cad, mesa, frente, refaz, *fundo in q["cadeiras_mesas"]:
+        if nomes and not nome.startswith(tuple(nomes)):
+            continue
         mesa_a = FA.ret_aa(Q, mesa)
         mx0, my0, mx1, my1 = F.ret_q(Q, mesa)
         vertical = (my1 - my0) > (mx1 - mx0)
@@ -865,7 +893,8 @@ def cadeiras_mesas_d(Q, img, piso):
         else:
             borda = Q.p2q(0, mesa[1] if frente[1] > 0 else mesa[3])[1]
             ccy = borda - frente[1] * D_px * (0.5 - qc["sob"])
-        cor, a = _cadeira_bloco(Q, frente)
+        ct = qc.get("contorno")
+        cor, a = _cadeira_bloco(Q, frente, contorno=ct if ct and nome.startswith(ct["nomes"]) else None)
         _pousar(out, cor, a, ccx, ccy, Q.px_m, cobre=mesa_a)
         # a sombra curta do tampo só sobre a cadeira (no piso, a mesa do render não tem sombra)
         d_ = s["dist_m"] * Q.px_m
@@ -876,6 +905,17 @@ def cadeiras_mesas_d(Q, img, piso):
         cad_a[int(ccy - h / 2):int(ccy - h / 2) + h, int(ccx - w / 2):int(ccx - w / 2) + w] = a
         alvo = np.clip(cad_a, 0, 1) * (1 - mesa_a)
         out *= (1 - sb * alvo)[..., None]
+        if ct and nome.startswith(ct["nomes"]):
+            # a beira do tampo passa por cima da cadeira (o piso de volta apagava o traço dela ali)
+            bm = ct["borda_mesa"]
+            ox, oy = (v / 1.0525 for v in bm["desloc_px"])
+            if frente[0]:
+                xb = (mesa[0] if frente[0] > 0 else mesa[2]) + ox
+                seg = (xb, max(cad[1] - bm["alem_pt"], mesa[1]), xb, min(cad[3] + bm["alem_pt"], mesa[3]))
+            else:
+                yb = (mesa[1] if frente[1] > 0 else mesa[3]) + oy
+                seg = (max(cad[0] - bm["alem_pt"], mesa[0]), yb, min(cad[2] + bm["alem_pt"], mesa[2]), yb)
+            out = _tracos_d(Q, out, [seg], bm["cor"], bm["larg_px"]).astype(np.float32)
         print(f"    cadeira do {nome}: a de madeira e linho da biblioteca, 1/3 sob o tampo, com a sombra dele")
     return np.clip(out, 0, 255).astype(np.uint8)
 
@@ -885,6 +925,19 @@ def bege_limpo_d(Q, piso, caixa, fora):
     ficam fora da legenda): o mesmo desenho (`textura("bege_bahia")` com a semente e o retângulo de `F.piso_textura`,
     guardado em `F.ETAPAS`) na luz do piso em volta (o piso dividido pelo desenho, liso, levado para dentro, fora de
     `fora`)."""
+    x0, y0, x1, y1 = caixa
+    Dd, bege = bege_desenho_d(Q, caixa)
+    sub = piso[y0:y1, x0:x1].astype(np.float32)
+    ok = (cv2.erode(bege[y0:y1, x0:x1].astype(np.uint8), np.ones((5, 5), np.uint8)) > 0) & ~fora[y0:y1, x0:x1]
+    sg = MOVEIS_TD["conjunto_varanda"]["luz_px"]
+    L = cv2.GaussianBlur(sub / Dd * ok[..., None], (0, 0), sg) / np.maximum(
+        cv2.GaussianBlur(ok.astype(np.float32), (0, 0), sg), 1e-4)[..., None]
+    return L * Dd
+
+
+def bege_desenho_d(Q, caixa):
+    """O desenho do Bege Bahia na `caixa` (px), em volta de 1 (`textura("bege_bahia")` com a semente e o retângulo de
+    `F.piso_textura`, guardado em `F.ETAPAS`), e a máscara do Bege Bahia do PDF."""
     x0, y0, x1, y1 = caixa
     arq = F.ETAPAS / f"{Q.chave}_bege_{x0}_{y0}_{x1}_{y1}.npy"
     bege = Q.cor([(232, 232, 232)], tol=6)
@@ -899,12 +952,7 @@ def bege_limpo_d(Q, piso, caixa, fora):
         T = textura("bege_bahia", Q.px_m, by1 - by0, bx1 - bx0, semente=700 + i).astype(np.float32)
         Dd = (T / T.reshape(-1, 3).mean(axis=0))[y0 - by0:y1 - by0, x0 - bx0:x1 - bx0]
         np.save(arq, Dd)
-    sub = piso[y0:y1, x0:x1].astype(np.float32)
-    ok = (cv2.erode(bege[y0:y1, x0:x1].astype(np.uint8), np.ones((5, 5), np.uint8)) > 0) & ~fora[y0:y1, x0:x1]
-    sg = MOVEIS_TD["conjunto_varanda"]["luz_px"]
-    L = cv2.GaussianBlur(sub / Dd * ok[..., None], (0, 0), sg) / np.maximum(
-        cv2.GaussianBlur(ok.astype(np.float32), (0, 0), sg), 1e-4)[..., None]
-    return L * Dd
+    return Dd, bege
 
 
 def tons_varanda_d(cor, al, q):
@@ -1160,7 +1208,7 @@ def moveis_td(Q, img):
     out = cadeiras_mesas_d(Q, out, piso)
     out = jantar_d(Q, out, piso)
     out = sombra_jogos_d(Q, jogos_mesa_d(Q, out, piso))
-    out = poltronas_modelo_e_d(Q, out)
+    out = tapete_trama_d(Q, poltronas_modelo_e_d(Q, out))
     out = diagonais_armarios_d(Q, out)
     return floreiras_td(Q, out)
 
@@ -1175,18 +1223,47 @@ def moveis_td(Q, img):
 # varanda, para o tapete no living), com a sombra e o contato das poltronas do Térreo da Casa E
 # (`POLTRONAS_TE["sombra"]`, `["sombra_contato"]`).
 # O buraco (a peça do PDF com `folga_px` e a sombra antiga para baixo e à esquerda, `sombra_px`; fora dele, a madeira da
-# mesinha do living, R − B acima de `madeira_rb`) é refeito com o que estava em volta: o tapete (dentro do retângulo do
+# mesinha do living, R − B acima de `madeira_rb` na caixa `madeira_pt`) é refeito com o que estava em volta: o tapete (dentro do retângulo do
 # PDF, `tapetes`, aquém da borda) e o piso de fora (o Bege Bahia na varanda, o travertino no living), cada um do seu, em
 # ladrilhos de grão com o tom do anel (`final3840_casae._material_por_ladrilhos`); a borda escura de 1 px do tapete
 # (`borda`: a linha "y" de baixo do tapete da varanda, a "x" da esquerda do do living) volta nos px dela, com a cor dos
 # trechos limpos da mesma borda. Só os px livres (o material dentro de `tol_lum` da mediana dele e longe dos objetos)
-# servem de fonte (o Bege Bahia é manchado: a tolerância é larga, e só as paredes e as peças ficam de fora). No living,
+# servem de fonte (o Bege Bahia é manchado: a tolerância é larga, e só as paredes e as peças ficam de fora; o tapete é
+# liso: a tolerância é curta, sem a sombra da mesinha). No living,
 # o travertino de fora do tapete vem da mesma linha, `fora_desloc` ao lado (os estratos são deitados).
+# O entorno (usuário, 29/10/26, com o recorte das duas da varanda: "retoque o entorno das poltronas"): o tom do tapete no
+# buraco vem só do tapete livre em desfoques crescentes (`_tom_em_escalas`; no miolo do buraco, longe do tapete livre, o
+# ladrilho caía no px original, e a antiga ficava, com o contorno cinza saindo por baixo da nova); o Bege Bahia de fora,
+# com `bege`, é o desenho do piso (`bege_desenho_d`, a mesma semente da biblioteca) na luz do Bege Bahia em volta, também
+# em desfoques crescentes (no alto do buraco, junto ao tapete, o Bege Bahia livre fica longe).
 POLTRONAS_E_D = {"pecas": [((1328.3, 1308.6, 1374.2, 1351.4), (0, -1)), ((1396.3, 1308.6, 1442.3, 1351.4), (0, -1)),
                            ((1687.7, 1268.4, 1735.5, 1311.4), (1, 0)), ((1687.7, 1353.4, 1735.5, 1396.5), (1, 0))],
-                 "tapetes": [{"pt": (1272.6, 1154.9, 1499.3, 1324.9), "borda": ("y", 1324.9)},
+                 "tapetes": [{"pt": (1272.6, 1154.9, 1499.3, 1324.9), "borda": ("y", 1324.9), "bege": True},
                              {"pt": (1713.6, 1235.1, 1997.1, 1433.5), "borda": ("x", 1713.6), "fora_desloc": (-40, 0)}],
-                 "folga_px": 5, "sombra_px": 3, "madeira_rb": 25, "tol_lum": 45, "esfuma_px": 2}
+                 "folga_px": 5, "sombra_px": 3, "madeira_rb": 25, "madeira_pt": [(1690.0, 1312.0, 1740.0, 1352.0)],
+                 "tol_lum": {"tapete": 12, "piso": 45}, "esfuma_px": 2}
+
+
+def _tom_em_escalas(out, buraco, livre, s0):
+    """`out` com o `buraco` no tom do material `livre` em volta: a média só do livre, no desfoque de `s0` e, onde ele
+    não alcança, nos de 2, 4, 8... vezes."""
+    res = out.copy()
+    ys, xs = np.nonzero(buraco)
+    m_ = 160
+    y0, y1 = max(ys.min() - m_, 0), min(ys.max() + m_ + 1, out.shape[0])
+    x0, x1 = max(xs.min() - m_, 0), min(xs.max() + m_ + 1, out.shape[1])
+    sub, falta = out[y0:y1, x0:x1], buraco[y0:y1, x0:x1].copy()
+    lv = livre[y0:y1, x0:x1].astype(np.float32)
+    r = res[y0:y1, x0:x1]
+    s = float(s0)
+    while falta.any() and s <= 64:
+        p = cv2.GaussianBlur(lv, (0, 0), s)
+        m = cv2.GaussianBlur(sub * lv[..., None], (0, 0), s)
+        ok = falta & (p > 1e-3)
+        r[ok] = m[ok] / p[ok][:, None]
+        falta &= ~ok
+        s *= 2
+    return res
 
 
 def poltronas_modelo_e_d(Q, img):
@@ -1197,7 +1274,11 @@ def poltronas_modelo_e_d(Q, img):
     H, W = img.shape[:2]
     out = img.astype(np.float32)
     L = out.mean(axis=2)
-    madeira = (out[..., 2] - out[..., 0]) > q["madeira_rb"]
+    # a madeira da mesinha do living (R − B acima de `madeira_rb`, só na caixa dela: o Bege Bahia também é quente)
+    madeira = np.zeros((H, W), bool)
+    for r in q["madeira_pt"]:
+        x0, y0, x1, y1 = F.ret_q(Q, r)
+        madeira[y0:y1, x0:x1] = (out[y0:y1, x0:x1, 2] - out[y0:y1, x0:x1, 0]) > q["madeira_rb"]
     # os buracos: a peça do PDF com folga e a sombra antiga
     buraco = np.zeros((H, W), bool)
     k = 2 * q["folga_px"] + 1
@@ -1243,10 +1324,24 @@ def poltronas_modelo_e_d(Q, img):
                 fonte[ys, xs] = out[ys + oy, xs + ox]
                 print(f"      poltronas no modelo da Casa E: {nome}, {int(parte.sum())} px da mesma linha, {ox} px ao lado")
                 continue
+            if nome == "piso" and tp.get("bege"):
+                # o desenho do Bege Bahia (a semente da biblioteca) na luz do Bege Bahia em volta, longe do tapete
+                ys, xs = np.nonzero(parte)
+                cx0, cy0, cx1, cy1 = xs.min() - 30, ys.min() - 30, xs.max() + 31, ys.max() + 31
+                fora_l = cv2.dilate((buraco | dentro | linha).astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
+                Dd, bege = bege_desenho_d(Q, (cx0, cy0, cx1, cy1))
+                ok_l = (cv2.erode(bege[cy0:cy1, cx0:cx1].astype(np.uint8), np.ones((5, 5), np.uint8)) > 0) & \
+                    ~fora_l[cy0:cy1, cx0:cx1]
+                luz = _tom_em_escalas(out[cy0:cy1, cx0:cx1] / Dd, parte[cy0:cy1, cx0:cx1], ok_l,
+                                      MOVEIS_TD["conjunto_varanda"]["luz_px"])
+                fonte[ys, xs] = (luz * Dd)[ys - cy0, xs - cx0]
+                print(f"      poltronas no modelo da Casa E: {nome}, {int(parte.sum())} px no desenho do Bege Bahia")
+                continue
             limpo = mat & ~proibido & zona
             med = np.median(L[limpo])
-            livre = limpo & (np.abs(L - med) < q["tol_lum"])
-            novo = E._material_por_ladrilhos(out, parte, livre, qe, 50.0)
+            livre = limpo & (np.abs(L - med) < q["tol_lum"][nome])
+            base = _tom_em_escalas(out, parte, livre, qe["tom_px"])
+            novo = E._material_por_ladrilhos(base, parte, livre, qe, 50.0)
             fonte[parte] = novo[parte]
             print(f"      poltronas no modelo da Casa E: {nome}, {int(parte.sum())} px em ladrilhos ({int(livre.sum())} livres)")
         lin = alvo & linha
@@ -1273,6 +1368,56 @@ def poltronas_modelo_e_d(Q, img):
         T.pousar_planta(out, c2, a2, float(cx), float(cy), t, qe["sombra"])
         T.pousar_planta(out, c2, a2, float(cx), float(cy), t, qe["sombra_contato"])
     print(f"    {len(q['pecas'])} poltronas no modelo da sala íntima da Casa E (varanda gourmet e living)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# A trama do tapete do estar da varanda gourmet (usuário, 29/10/26, com o recorte do tapete: "traga textura para o
+# tapete"): o relevo do tapete do bloco `conjunto_estar_tapete` da biblioteca (a lã mesclada em carreiras deitadas), só o
+# relevo (o tom do trecho `trecho` dividido pelo desfoque de `sigma_px`: a luz da foto sai), na escala real (a foto tem
+# `px_m_foto`), tecido sem repetição (o image quilting da biblioteca de texturas, retalhos de `p_px` e os espelhos, sem
+# giros: as carreiras ficam deitadas, no comprido do tapete), com `forca` e limitado a ±`limite`, multiplicado só no
+# tapete: dentro do retângulo do PDF (`tapetes_pt`) recuado `recuo_px` (a borda escura e a franja ficam), nos px da cor
+# do tapete (croma a até `croma_tol` da mediana, luz até `claro_tol` acima dela: as sombras das peças entram, as peças
+# não). O tom médio do tapete não muda.
+TAPETE_TRAMA_D = {"tapetes_pt": [(1272.6, 1154.9, 1499.3, 1324.9)], "recorte": "conjunto_estar_tapete",
+                  "trecho": (4, 8, 138, 48), "px_m_foto": 317 / 3.1, "sigma_px": 4.0, "forca": 1.4, "limite": 0.06,
+                  "p_px": 10, "semente": 29, "recuo_px": 3, "croma_tol": 6, "claro_tol": 8}
+
+
+def tapete_trama_d(Q, img):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    import texturas
+    q = TAPETE_TRAMA_D
+    foto = cv2.imread(str(RAIZ / "_blocos" / "recortes" / f"{q['recorte']}.png"))
+    x0, y0, x1, y1 = q["trecho"]
+    L = foto[y0:y1, x0:x1].astype(np.float32).mean(axis=2)
+    rel = L / cv2.GaussianBlur(L, (0, 0), q["sigma_px"])
+    e = Q.px_m / q["px_m_foto"]
+    rel = cv2.resize(rel, None, fx=e, fy=e, interpolation=cv2.INTER_AREA)
+    u8 = np.repeat(np.clip((rel - 1) * 510 + 128, 0, 255).astype(np.uint8)[..., None], 3, axis=2)
+    out = img.astype(np.float32)
+    for i, r in enumerate(q["tapetes_pt"]):
+        X0, Y0, X1, Y1 = F.ret_q(Q, r)
+        h, w = Y1 - Y0, X1 - X0
+        tec = texturas.quilting(texturas.variantes(u8, True), h, w, p=q["p_px"], sobra=max(3, q["p_px"] // 3),
+                                rng=np.random.default_rng(q["semente"] + i))[:h, :w]
+        t = np.clip(q["forca"] * (tec[..., 0].astype(np.float32) - 128) / 510, -q["limite"], q["limite"])
+        sub = out[Y0:Y1, X0:X1]
+        Ls = sub.mean(axis=2)
+        cr = sub - Ls[..., None]
+        k = q["recuo_px"]
+        cm = np.median(cr[k:-k, k:-k].reshape(-1, 3), axis=0)
+        lm = np.median(Ls[k:-k, k:-k])
+        tap = (np.abs(cr - cm).max(axis=2) < q["croma_tol"]) & (Ls < lm + q["claro_tol"])
+        # as peças: onde o que não é tapete se adensa (o bouclé tem pontos da cor do tapete)
+        obj = cv2.GaussianBlur((~tap).astype(np.float32), (0, 0), 2) > 0.35
+        obj = cv2.dilate(obj.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        m = np.zeros((h, w), np.float32)
+        m[k:-k, k:-k] = 1
+        m *= ~obj
+        m = cv2.GaussianBlur(m, (0, 0), 0.7) * m
+        out[Y0:Y1, X0:X1] = sub * (1 + t * m)[..., None]
+        print(f"    tapete {i + 1}: a trama do tapete do bloco {q['recorte']} na escala ({int(m.sum())} px)")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
