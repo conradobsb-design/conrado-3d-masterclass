@@ -914,6 +914,69 @@ def cadeiras_contorno_tc(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# As portas das suítes para as varandas (usuário, 29/10/26: "percebe um padrão varanda, onde tem duas folhas de brise
+# bronze escovado na parte mais externa e na parte interna duas folhas de vidro? em todas as suítes são assim."): nos
+# Quartos 1, 2 e 3 e na Suíte Master, o PDF tem 4 folhas de correr em dois planos. As duas do plano de fora (junto à
+# varanda) são brises de bronze escovado; as duas de dentro seguem em vidro. As de fora entram como os brises das
+# suítes do 1º Pavimento da Casa E (`retoque_1pav_casae.FACHADAS`): a folha em bronze, o contorno escuro, o brilho no
+# meio e a sombra curta, com o escovado (`escovado`: os fios no comprido da folha), por cima da folha de vidro que as
+# esquadrias desenharam (`folga_px` a mais de cada lado, para o contorno dela não ficar). `folhas_pt`: as do plano de
+# fora, por suíte.
+BRISES_SUITES_TC = {"folhas_pt": {"Quarto 3": [(1157.1, 529.4, 1234.5, 532.3), (1075.2, 532.3, 1152.6, 535.1)],
+                                  "Quarto 2": [(1338.5, 529.4, 1415.9, 532.3), (1256.6, 532.3, 1334.0, 535.1)],
+                                  "Quarto 1": [(1854.4, 532.3, 1926.1, 535.1), (1778.2, 535.1, 1849.9, 538.0)],
+                                  "Suíte Master": [(617.7, 782.9, 620.5, 891.4), (620.5, 896.0, 623.3, 1004.5)]},
+                    "bronze": (74, 106, 139), "borda": (44, 66, 90), "brilho": (112, 146, 180),
+                    "larg_borda_px": 0.35, "larg_brilho_px": 0.4, "escovado": 0.07, "folga_px": 0.3,
+                    "sombra": {"desloc": (-0.8, 1.0), "sigma": 0.8, "forca": 0.3}, "ss": 8, "semente": 2910}
+
+
+def brises_suites_tc(Q, img):
+    import retoque_1pav_casae as RE
+    q = BRISES_SUITES_TC
+    k, f = q["ss"], q["folga_px"]
+    rng = np.random.default_rng(q["semente"])
+    out = img.copy()
+    n = 0
+    for nome, folhas in q["folhas_pt"].items():
+        for r in folhas:
+            (a, b), (c, d) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+            a, b, c, d = a - f, b - f, c + f, d + f
+            X0, Y0, X1, Y1 = int(np.floor(a)) - 4, int(np.floor(b)) - 4, int(np.ceil(c)) + 4, int(np.ceil(d)) + 4
+            h, w = Y1 - Y0, X1 - X0
+            deitada = (c - a) >= (d - b)
+
+            def tela(pts, larg=None, fechado=True):
+                m = np.zeros((h * k, w * k), np.uint8)
+                pp = np.int32(np.round((np.float64(pts) - (X0, Y0)) * k))
+                if larg is None:
+                    cv2.fillPoly(m, [pp], 255, cv2.LINE_AA)
+                else:
+                    cv2.polylines(m, [pp], fechado, 255, max(1, int(round(larg * k))), cv2.LINE_AA)
+                return cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+
+            caixa = [(a, b), (c, b), (c, d), (a, d)]
+            A = tela(caixa)
+            s = q["sombra"]
+            out = RE.sombra(out, A, (X0, Y0, X1, Y1), s["desloc"], s["sigma"], s["forca"])
+            reg = out[Y0:Y1, X0:X1].astype(np.float32)
+            ruido = rng.normal(size=(h, w)).astype(np.float32)          # os fios do escovado, no comprido da folha
+            ruido = cv2.GaussianBlur(ruido, (0, 0), sigmaX=6.0 if deitada else 0.3, sigmaY=0.3 if deitada else 6.0)
+            ruido /= max(float(ruido.std()), 1e-6)
+            cor = np.float32(q["bronze"]) * (1 + q["escovado"] * ruido)[..., None]
+            reg = reg * (1 - A[..., None]) + cor * A[..., None]
+            meio = [(a, (b + d) / 2), (c, (b + d) / 2)] if deitada else [((a + c) / 2, b), ((a + c) / 2, d)]
+            L = tela(meio, q["larg_brilho_px"], fechado=False)[..., None]
+            reg = reg * (1 - L) + np.float32(q["brilho"]) * L
+            L = tela(caixa, q["larg_borda_px"])[..., None]
+            reg = reg * (1 - L) + np.float32(q["borda"]) * L
+            out[Y0:Y1, X0:X1] = np.clip(reg, 0, 255).astype(np.uint8)
+            n += 1
+    print(f"    portas das suítes para as varandas: {n} folhas de fora em brise de bronze escovado, as de dentro em vidro "
+          f"({', '.join(q['folhas_pt'])})")
+    return out
+
+
 # A adega (usuário, 27/10/26, vendo a final: "adicione a prateleira de vinhos como fizemos na outra casa, ao fundo da
 # adega. não sobreponha o rotulo nessa prateleira"; "as garrafas em escala"). No PDF da Casa C a adega (1,26 x 4,30 m,
 # as folhas de vidro na parede da esquerda) não tem nada dentro: a prateleira entra na parede do fundo, a da direita, de
@@ -2058,8 +2121,8 @@ def passos_terreo_c(Q, ini, M):
         ("elevador", lambda im: elevador_t(Q, im)),
         ("paredes", lambda im: F.paredes(Q, im, cor=cinza)),
         ("soleiras", lambda im: soleira_elevador(Q, soleiras_t(Q, im))),
-        ("esquadrias", lambda im: restos_folha_tc(Q, portas_jardins_t(Q, jardins_vidros_t(Q, pos_esquadrias_t(
-            Q, janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T), im))))),
+        ("esquadrias", lambda im: brises_suites_tc(Q, restos_folha_tc(Q, portas_jardins_t(Q, jardins_vidros_t(
+            Q, pos_esquadrias_t(Q, janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T), im)))))),
         ("cortinas", lambda im: trilho_hall_tc(Q, cortinas_t(Q, im), im)),
         ("escadas", lambda im: escada_estreita_t(Q, degraus_largos_t(Q, im))),
         ("projecoes", lambda im: projecoes_t(Q, im)),

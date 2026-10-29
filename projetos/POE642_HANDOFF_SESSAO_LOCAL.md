@@ -3736,3 +3736,11 @@ OK do usuário: "pode aplicar". Os 9 itens no Térreo:
 - **9, cadeiras dos quartos 1 e 3 e da suíte master:** o contorno liso e mais fino, com a beira um pouco mais escura que o estofado e as costuras macias; o piso em volta limpo.
 
 Antes e depois (o antes é a final de f9c1708): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_revisao_{x_varanda_bh_master1,x_bh_master2,x_closet_master1,x_closet_master2,hall_trilho,louceiro1,quarto2_porta,bh_master1_porta,cadeiras}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos. Aguarda o OK da Casa C; a seguir, a Casa B.
+
+### Pedido de 29/10/26: brises de bronze nas portas das suítes (Térreo da Casa C)
+
+O usuário: "percebe um padrão varanda, onde tem duas folhas de brise bronze escovado na parte mais externa e na parte interna duas folhas de vidro? em todas as suítes são assim."
+
+No PDF, as portas de correr dos Quartos 1, 2 e 3 e da Suíte Master para as varandas têm 4 folhas em dois planos (as outras portas de correr do Térreo têm um plano só). Na final, as 4 iam em vidro. Agora as duas de fora, junto à varanda, vão em brise de bronze escovado (a folha em bronze, o contorno escuro, o brilho no meio, o escovado no comprido e a sombra curta, como os brises do 1º Pavimento da Casa E), e as duas de dentro seguem em vidro.
+
+Antes e depois (o antes é a final de 14d555f): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_brises_{quartos_3_e_2,quarto_1,suite_master}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos.
