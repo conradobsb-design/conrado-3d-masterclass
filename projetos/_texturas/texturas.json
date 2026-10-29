@@ -1,0 +1,258 @@
+{
+  "_sobre": "Texturas de referência das plantas humanizadas (POE 642), as mesmas para todas as casas. Pedido do usuário (19/10/26): simular pedra, não porcelanato, na devida escala dos renders. 'largura_m' é a largura real que a imagem de uso cobre (estimada pelo que se vê na foto; ajustar aqui se o usuário passar a medida). A escala de cada render vem do PDF (1:50, 1 pt = 17,64 mm): a planta da Casa A em 2000 px tem 31,45 px/m; na prancha de 3840 px, 60 px/m.",
+  "escala_prancha_px_por_m": 60,
+  "materiais": {
+    "bege_bahia": {
+      "titulo": "1. Bege Bahia",
+      "original": "originais/bege_bahia.png",
+      "arquivo": "bege_bahia.jpg",
+      "largura_m": 0.6,
+      "nota": "foto de uma placa de mármore Bege Bahia; as manchas em nuvem têm 10 a 20 cm, o que dá uma placa de ~60 cm"
+    },
+    "travertino": {
+      "titulo": "2. Travertino",
+      "original": "originais/travertino.webp",
+      "arquivo": "travertino.jpg",
+      "largura_m": 1.2,
+      "nota": "veios horizontais de 5 a 20 cm e os poros, numa placa de ~1,20 m; o veio corre na horizontal da imagem",
+      "direcional": true
+    },
+    "quartzito_aura": {
+      "titulo": "3. Quartzito Aura",
+      "original": "originais/quartzito_aura.jpg",
+      "arquivo": "quartzito_aura.jpg",
+      "largura_m": 3.0,
+      "nota": "a chapa inteira (proporção 3,00 x 1,95 m, a de uma chapa de quartzito), com as ondas cinza e bege",
+      "direcional": true
+    },
+    "pedra_portuguesa": {
+      "titulo": "4. Pedra Portuguesa",
+      "original": "originais/pedra_portuguesa.webp",
+      "arquivo": "pedra_portuguesa.jpg",
+      "largura_m": 1.14,
+      "nota": "a foto é de uma calçada em perspectiva: a faixa do meio (57% da largura), vista de cima; com a calçada de ~2,00 m, as pedras dão 6 a 8 cm, o tamanho da pedra portuguesa",
+      "tratamento": {
+        "tipo": "vista_de_cima",
+        "borda_esq": [
+          [
+            235,
+            0
+          ],
+          [
+            0,
+            480
+          ]
+        ],
+        "borda_dir": [
+          [
+            590,
+            0
+          ],
+          [
+            818,
+            330
+          ]
+        ],
+        "base_y": 816,
+        "topo_y": 230,
+        "faixa_t": [
+          0.15,
+          0.72
+        ],
+        "alto_por_largura": 1.463
+      }
+    },
+    "granito_marrom": {
+      "titulo": "5. Granito Marrom",
+      "original": "originais/granito_marrom.png",
+      "arquivo": "granito_marrom.jpg",
+      "largura_m": 0.6,
+      "nota": "pedido do usuário: mais liso e menos escuro que a foto",
+      "tratamento": {
+        "tipo": "liso_e_claro",
+        "liso": 0.75,
+        "manchas": 0.6,
+        "clarear": 1.25
+      }
+    },
+    "madeira": {
+      "titulo": "6. Madeira (deck)",
+      "fonte": "referencia",
+      "recortes": [
+        [
+          442,
+          248,
+          485,
+          518
+        ]
+      ],
+      "arquivo": "madeira.jpg",
+      "direcional": true,
+      "nota": "o deck da piscina da referência: réguas de ~20 cm (5,12 px a 26 px/m, medidas por FFT em 21/10/26; antes estava ~15 cm, conta errada), contínuas, na vertical da imagem",
+      "amostra": {
+        "px_por_m": 26,
+        "lado_m": 10,
+        "retalho": 12
+      }
+    },
+    "vinilico": {
+      "titulo": "7. Vinílico",
+      "fonte": "referencia",
+      "recortes": [
+        [
+          376,
+          182,
+          436,
+          199
+        ],
+        [
+          556,
+          184,
+          600,
+          211
+        ],
+        [
+          559,
+          112,
+          575,
+          158
+        ],
+        [
+          265,
+          118,
+          287,
+          163
+        ]
+      ],
+      "arquivo": "vinilico.jpg",
+      "direcional": true,
+      "nota": "o piso dos quartos da referência: réguas de ~20 cm, mais claras e de tons alternados, na vertical da imagem (só trechos sem móveis, tapete ou sombra)",
+      "amostra": {
+        "px_por_m": 26,
+        "lado_m": 10,
+        "retalho": 12
+      }
+    },
+    "grama": {
+      "titulo": "8. Grama",
+      "fonte": "referencia",
+      "recortes": [
+        [
+          528,
+          2,
+          680,
+          42
+        ],
+        [
+          28,
+          2,
+          95,
+          78
+        ]
+      ],
+      "arquivo": "grama.jpg",
+      "nota": "o gramado da referência, fora da sombra das árvores: verde médio, manchas suaves de 0,5 a 1 m",
+      "amostra": {
+        "px_por_m": 26,
+        "lado_m": 12,
+        "retalho": 14
+      }
+    }
+  },
+  "amostra": {
+    "px_por_m": 320,
+    "lado_m": 3.0,
+    "retalho": 32,
+    "largura_max_uso": 1000
+  },
+  "referencia_planta": {
+    "original": "originais/referencia_planta.webp",
+    "px_por_m": 26,
+    "nota": "planta humanizada que o usuário mandou como referência da madeira, do vinílico, da grama e da vegetação externa (19/10/26). Escala medida nela mesma: a cama king (1,93 x 2,03 m) tem 50 x 53 px; o sedã (4,55 m), 118 px; a picape grande (6,0 m), 158 px; a porta (0,85 m), 22 px: 26 px/m (a planta da Casa A em 2000 px tem 31,45 px/m)."
+  },
+  "vegetacao": {
+    "_sobre": "plantas recortadas da referência, com fundo transparente: centro e raio da copa em px da referência (26 px/m)",
+    "px_por_m_sprite": 52,
+    "plantas": {
+      "arvore_1": {
+        "centro": [
+          90,
+          142
+        ],
+        "raio": 58,
+        "tipo": "árvore de copa redonda"
+      },
+      "arvore_2": {
+        "centro": [
+          90,
+          622
+        ],
+        "raio": 59,
+        "tipo": "árvore de copa redonda"
+      },
+      "arvore_3": {
+        "centro": [
+          72,
+          789
+        ],
+        "raio": 44,
+        "tipo": "árvore de copa redonda, menor"
+      },
+      "arbusto_1": {
+        "centro": [
+          679,
+          140
+        ],
+        "raio": 15,
+        "tipo": "arbusto redondo"
+      },
+      "arbusto_2": {
+        "centro": [
+          679,
+          175
+        ],
+        "raio": 15,
+        "tipo": "arbusto redondo"
+      },
+      "arbusto_3": {
+        "centro": [
+          525,
+          795
+        ],
+        "raio": 14,
+        "tipo": "arbusto redondo, mais claro"
+      },
+      "palmeira_1": {
+        "centro": [
+          677,
+          96
+        ],
+        "raio": 21,
+        "tipo": "palmeira de folhas finas, em leque"
+      },
+      "palmeira_2": {
+        "centro": [
+          266,
+          765
+        ],
+        "raio": 17,
+        "tipo": "palmeira baixa / agave"
+      },
+      "palmeira_3": {
+        "centro": [
+          429,
+          730
+        ],
+        "raio": 16,
+        "tipo": "palmeira baixa / agave"
+      }
+    },
+    "sombra": {
+      "dx": -0.12,
+      "dy": 0.12,
+      "desfoque": 0.08,
+      "opacidade": 0.45,
+      "nota": "na referência a luz vem do alto à direita: a sombra cai para baixo e à esquerda (frações do diâmetro)"
+    }
+  }
+}

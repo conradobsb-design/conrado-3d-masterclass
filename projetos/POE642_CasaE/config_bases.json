@@ -1,0 +1,1197 @@
+{
+ "_sobre": "Configuração das bases da Casa E (POE 642). Usa o mesmo gerar_bases.py da Casa A (projetos/POE642_CasaA/scripts), com --config apontando para este arquivo. Mesma folha (3370 x 2384 pt), mesmo recorte e mesmo enquadramento das Casas A, B, C e D.",
+ "layer_parede": "ARQ_PAREDE",
+ "cinza_parede": 0.357,
+ "cinza_parede_qualquer_layer": false,
+ "tolerancia_cor": 0.012,
+ "recorte": [
+  0.035,
+  0.095,
+  0.975,
+  0.955
+ ],
+ "largura_px": 6000,
+ "largura_visualizacao": 1800,
+ "saida_16x9": true,
+ "layers_ocultas": [],
+ "vidro": {
+  "espessura_max_pt": 4.0,
+  "comprimento_min_pt": 12.0,
+  "razao_min": 4.0,
+  "tolerancia_arco_pt": 1.5,
+  "tolerancia_raio": 0.3,
+  "largura_min_px": 6,
+  "contorno_px": 2
+ },
+ "_cinza_parede_qualquer_layer": "No PDF do cliente (Archicad) todas as paredes estão na ARQ_PAREDE; o cinza 0.357 fora dela são lascas de 1 pt nas bordas das bancadas (ARQ_BANCADAS), que não devem virar parede.",
+ "prefixo": "POE642_CasaE",
+ "pavimentos": {
+  "Terreo": {
+   "pagina": 0,
+   "rotacao": 0,
+   "layers_ocultas": [
+    "ARQ_TERRENO PLANEJADO"
+   ],
+   "_layers_ocultas": "Curvas de nível saem, como nas Casas A, B, C e D: fundo todo branco.",
+   "zonas_excluidas": {
+    "piscina, prainha e spa: só as bordas desenhadas, sem faixas de vidro": [
+     212,
+     486,
+     492,
+     705
+    ]
+   },
+   "_zonas_excluidas": "Como nas Casas C e D: as paredes da piscina na layer de parede não viram vidro em volta da água.",
+   "legenda": {
+    "_sobre": "Casa E · Térreo (materiais definidos pelo usuário em 15/10/26). Granito Marrom Tabaco #5A4232: o rosa #BFA79F (cozinha, área e circulação gourmet, BH e lavabo gourmet, serviço, DCE, garagem e a faixa de cima). Travertino #DCD9CA: o oliva #BAB596 (living, jantar, circulações internas, escritório, lavabo, hall, louceiro do piso). Bege Bahia #E8E8E8: o cinza #E4E4E4 (varanda, deck, blocos e degraus à esquerda, pisantes) e o WC DCE 1 (#E0E0E0). Pedra portuguesa caramelo #C49A6C: o acesso de veículos curvo (sem os hexágonos do PDF). Pilares (EST - Pilar, rosa-choque) em preto, como as paredes. Jardim interno #4F7A3A: o retângulo branco abaixo da escada. Louceiro em marcenaria areia #CBB89E: a faixa branca acima da escada. Bancos em bronze fosco #76604A: o L embaixo à esquerda e o retângulo estreito entre a piscina e os degraus. Piscina, prainha e spa #DFF6FE. Gramado #6E9150: o entorno do lote.",
+    "tolerancia_px": 10,
+    "poligonos": [
+     {
+      "nome": "acesso de veículos (hexágonos) → pedra portuguesa caramelo",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.894,
+       0.894,
+       0.894
+      ],
+      "bbox_vis": [
+       1205,
+       489,
+       1731,
+       815
+      ],
+      "cor_render": "#E4E4E4",
+      "para": "#C49A6C",
+      "cor_linha": "#C49A6C",
+      "_nota": "Os hexágonos do PDF somem na pedra portuguesa."
+     },
+     {
+      "nome": "área externa cinza (varanda, deck, blocos, pisantes) → Bege Bahia",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.894,
+       0.894,
+       0.894
+      ],
+      "cor_render": "#E4E4E4",
+      "para": "#E8E8E8"
+     },
+     {
+      "nome": "WC DCE 1 → Bege Bahia",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.878,
+       0.878,
+       0.878
+      ],
+      "cor_render": "#E0E0E0",
+      "para": "#E8E8E8"
+     }
+    ],
+    "trocas_cor": [
+     [
+      "#BFA79F",
+      "#5A4232"
+     ],
+     [
+      "#BAB596",
+      "#DCD9CA"
+     ],
+     [
+      "#7FDFFF",
+      "#DFF6FE"
+     ],
+     [
+      "#FF7FC0",
+      "#111111"
+     ]
+    ],
+    "retangulos": [
+     {
+      "nome": "jardim interno abaixo da escada → floreira",
+      "bbox_vis": [
+       877.1,
+       565.4,
+       1060.0,
+       605.3
+      ],
+      "so_branco": true,
+      "para": "#4F7A3A",
+      "cor_linha": "#4F7A3A"
+     },
+     {
+      "nome": "louceiro acima da escada → marcenaria areia",
+      "bbox_vis": [
+       880.0,
+       491.3,
+       1053.4,
+       513.5
+      ],
+      "so_branco": true,
+      "para": "#CBB89E",
+      "_nota": "Definido pelo usuário: a faixa branca entre paredes acima da escada é o louceiro (com a diagonal do PDF: armário até o teto)."
+     },
+     {
+      "nome": "banco entre a piscina e os degraus → bronze fosco",
+      "bbox_vis": [
+       280.2,
+       608.3,
+       305.0,
+       710.6
+      ],
+      "so_branco": true,
+      "para": "#76604A"
+     },
+     {
+      "nome": "banco em L embaixo à esquerda → bronze fosco",
+      "bbox_vis": [
+       285.0,
+       801.5,
+       463.4,
+       894.2
+      ],
+      "so_branco": true,
+      "para": "#76604A"
+     }
+    ],
+    "gramados": [
+     {
+      "nome": "entorno do lote → grama",
+      "bbox_vis": [
+       11,
+       10,
+       1727,
+       968
+      ],
+      "para": "#6E9150"
+     }
+    ]
+   },
+   "texturas": {
+    "_sobre": "Prévia de texturas do Térreo da Casa E: os materiais aprovados das Casas A a D (bbox em px de um render de 2000 px), e fontes geradas por código para a pedra portuguesa caramelo e o bronze fosco.",
+    "tolerancia": 4,
+    "_tolerancia": "4: as cores da legenda são exatas; as escadas #DDDACB entram no travertino.",
+    "materiais": [
+     {
+      "nome": "granito Marrom Tabaco (piso da cozinha do Térreo da Casa A)",
+      "cores": [
+       "#5A4232"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          997,
+          603,
+          1124,
+          633
+         ],
+         [
+          998,
+          690,
+          1108,
+          718
+         ]
+        ]
+       }
+      ],
+      "_fonte": "Só o piso: o trecho de baixo parava em y 732 e pegava o topo dos armários (faixa clara perto da ilha)."
+     },
+     {
+      "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+      "cores": [
+       "#E8E8E8"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          1350,
+          582,
+          1452,
+          848
+         ],
+         [
+          648,
+          636,
+          698,
+          848
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "travertino (hall do Subsolo da Casa A)",
+      "cores": [
+       "#DCD9CA"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+        "bbox": [
+         [
+          582,
+          580,
+          686,
+          775
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+      "cores": [
+       "#C8A27C"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          858,
+          638,
+          972,
+          684
+         ],
+         [
+          922,
+          719,
+          978,
+          826
+         ],
+         [
+          1012,
+          212,
+          1060,
+          268
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "gramado (Térreo da Casa A)",
+      "cores": [
+       "#6E9150"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          1530,
+          460,
+          1700,
+          690
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "piscina (água sobre pastilha, Térreo da Casa A)",
+      "cores": [
+       "#DFF6FE"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          582,
+          285,
+          678,
+          440
+         ]
+        ]
+       }
+      ],
+      "_fonte": "Só a água, sem as bordas: de x 684 em diante a amostra escurece (borda e sombra da parede) e deixava uma faixa escura na piscina."
+     },
+     {
+      "nome": "floreira do jardim de inverno (touceiras tropicais do Térreo da Casa A)",
+      "cores": [
+       "#4F7A3A"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          148,
+          95,
+          290,
+          230
+         ],
+         [
+          1433,
+          500,
+          1515,
+          705
+         ]
+        ]
+       }
+      ],
+      "_fonte": "Só as plantas: o primeiro trecho começava em x 120 e pegava o fundo branco à esquerda da floreira da Casa A, que virava faixas brancas no jardim de inverno."
+     },
+     {
+      "nome": "pedra portuguesa caramelo (acesso de veículos; fonte gerada por código, fontes_procedurais.py)",
+      "cores": [
+       "#C49A6C"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaE/bases/fontes/pedra_portuguesa_caramelo.png",
+        "bbox": [
+         [
+          0,
+          0,
+          420,
+          420
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "bronze fosco (bancos; fonte gerada por código, fontes_procedurais.py)",
+      "cores": [
+       "#76604A"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaE/bases/fontes/bronze_fosco.png",
+        "bbox": [
+         [
+          0,
+          0,
+          240,
+          240
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "louceiro em marcenaria areia (armário até o teto do Térreo retocado da Casa D, veio no comprido)",
+      "cores": [
+       "#CBB89E"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
+        "bbox": [
+         [
+          1128,
+          740,
+          1143,
+          797
+         ]
+        ]
+       }
+      ],
+      "girar": 90
+     }
+    ]
+   }
+  },
+  "1Pavimento": {
+   "pagina": 0,
+   "rotacao": 0,
+   "layers_ocultas": [
+    "ARQ_TERRENO PLANEJADO"
+   ],
+   "_layers_ocultas": "Curvas de nível saem, como no Térreo: fundo todo branco.",
+   "legenda": {
+    "_sobre": "Casa E · 1º Pavimento (materiais definidos pelo usuário em 16/10/26). Vinílico #A8784F (o mesmo da área íntima do 1º Pavimento da Casa A, Durafloor City Petra): o laranja #CC9966 do PDF (suítes, closets, closet master, rouparia, sala íntima, circulação). Quartzito Aura #EAD4BF (a cor da legenda do cliente): os cinco banhos (brancos com hachura fina no PDF). Bege Bahia #E8E8E8: as três varandas (cinza #E4E4E4) e a bancada da copinha. Armários (brancos com diagonal) em marcenaria areia #CBB89E. Escada em travertino #DCD9CA, como a do Térreo. Vazios (sobre o jardim interno e o hall de entrada) em #4A4A4A com o X claro, como na Casa A.",
+    "tolerancia_px": 10,
+    "poligonos": [
+     {
+      "nome": "varandas (cinza) → Bege Bahia",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.894,
+       0.894,
+       0.894
+      ],
+      "cor_render": "#E4E4E4",
+      "para": "#E8E8E8"
+     }
+    ],
+    "trocas_cor": [
+     [
+      "#CC9966",
+      "#A8784F"
+     ]
+    ],
+    "retangulos": [
+     {
+      "nome": "banho master → quartzito Aura",
+      "bbox_vis": [
+       807.3,
+       239.6,
+       913.6,
+       437.7
+      ],
+      "so_branco": true,
+      "para": "#EAD4BF",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_LAYOUT HUMANIZAÇÃO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO",
+      "apagar_hachura_quente": true
+     },
+     {
+      "nome": "banho da suíte 1 → quartzito Aura",
+      "bbox_vis": [
+       1137.5,
+       305.6,
+       1243.8,
+       363.6
+      ],
+      "so_branco": true,
+      "para": "#EAD4BF",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_LAYOUT HUMANIZAÇÃO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO",
+      "apagar_hachura_quente": true
+     },
+     {
+      "nome": "banho da suíte 2 → quartzito Aura",
+      "bbox_vis": [
+       1137.5,
+       503.7,
+       1243.8,
+       561.7
+      ],
+      "so_branco": true,
+      "para": "#EAD4BF",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_LAYOUT HUMANIZAÇÃO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO",
+      "apagar_hachura_quente": true
+     },
+     {
+      "nome": "banho da suíte 3 → quartzito Aura",
+      "bbox_vis": [
+       623.7,
+       601.9,
+       730.0,
+       650.3
+      ],
+      "so_branco": true,
+      "para": "#EAD4BF",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_LAYOUT HUMANIZAÇÃO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO",
+      "apagar_hachura_quente": true
+     },
+     {
+      "nome": "banho da suíte 4 → quartzito Aura",
+      "bbox_vis": [
+       623.7,
+       656.7,
+       730.0,
+       705.0
+      ],
+      "so_branco": true,
+      "para": "#EAD4BF",
+      "proteger_layers": [
+       "ARQ_LOUÇAS E METAIS",
+       "ARQ_BANCADAS",
+       "ARQ_LAYOUT HUMANIZAÇÃO",
+       "ARQ_ELEMENTOS FIXOS",
+       "ARQ_PAREDE",
+       "INS_INSTALAÇÕES HIDRÁULICAS"
+      ],
+      "apagar_linhas_layer": "ARQ_CONTRAPISO",
+      "apagar_hachura_quente": true
+     },
+     {
+      "nome": "closet master: armários de cima → marcenaria areia",
+      "bbox_vis": [
+       920.4,
+       304.0,
+       1060.2,
+       323.3
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "closet master: armários de baixo → marcenaria areia",
+      "bbox_vis": [
+       920.4,
+       362.0,
+       1060.2,
+       381.3
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "closet da suíte 1: armários em L → marcenaria areia",
+      "bbox_vis": [
+       1065.0,
+       305.6,
+       1132.7,
+       363.6
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "closet da suíte 2: armários em L → marcenaria areia",
+      "bbox_vis": [
+       1065.0,
+       503.7,
+       1132.7,
+       561.7
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "closet da suíte 3: armários → marcenaria areia",
+      "bbox_vis": [
+       734.9,
+       601.9,
+       802.5,
+       650.3
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "closet da suíte 4: armários → marcenaria areia",
+      "bbox_vis": [
+       734.9,
+       656.7,
+       802.5,
+       705.0
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "rouparia: prateleiras → marcenaria areia",
+      "bbox_vis": [
+       987.7,
+       386.1,
+       1060.2,
+       437.7
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "copinha: armário ao lado da bancada → marcenaria areia",
+      "bbox_vis": [
+       972.1,
+       494.3,
+       1060.2,
+       513.4
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     },
+     {
+      "nome": "copinha: bancada → Bege Bahia",
+      "bbox_vis": [
+       883.0,
+       494.3,
+       953.4,
+       513.4
+      ],
+      "so_branco": true,
+      "para": "#E8E8E8",
+      "_nota": "Pedido do usuário: bancada da copinha em Bege Bahia; a cuba (953,5 a 970,9) fica branca."
+     },
+     {
+      "nome": "escada → travertino",
+      "bbox_vis": [
+       875.6,
+       518.2,
+       1060.2,
+       565.3
+      ],
+      "so_branco": true,
+      "para": "#DCD9CA",
+      "cor_linha": "#A9A593",
+      "_nota": "Como a escada interna do Térreo (travertino); degraus, linha de caminhamento e seta em cinza-travertino."
+     },
+     {
+      "nome": "vazio sobre o jardim interno do Térreo (abaixo da escada)",
+      "bbox_vis": [
+       875.6,
+       565.4,
+       1060.2,
+       605.6
+      ],
+      "so_branco": true,
+      "para": "#4A4A4A",
+      "cor_linha": "#BDBDBD",
+      "_nota": "Mesma posição do jardim interno do Térreo (877,1 a 1060,0 × 565,4 a 605,3): pé-direito duplo, como os vazios da Casa A."
+     },
+     {
+      "nome": "vazio do hall de entrada",
+      "bbox_vis": [
+       1062.3,
+       716.4,
+       1200.5,
+       850.5
+      ],
+      "so_branco": true,
+      "para": "#4A4A4A",
+      "cor_linha": "#BDBDBD",
+      "_nota": "O X tracejado do PDF: pé-direito duplo do hall de entrada do Térreo."
+     }
+    ]
+   },
+   "texturas": {
+    "_sobre": "Prévia de texturas do 1º Pavimento da Casa E: os materiais aprovados das Casas A a D e do Térreo da Casa E (bbox em px de um render de 2000 px); o quartzito Aura é gerado por código.",
+    "tolerancia": 4,
+    "materiais": [
+     {
+      "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+      "cores": [
+       "#A8784F"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          858,
+          638,
+          972,
+          684
+         ],
+         [
+          922,
+          719,
+          978,
+          826
+         ],
+         [
+          1012,
+          212,
+          1060,
+          268
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "quartzito Aura (banhos; fonte gerada por código, fontes_procedurais.py: placas de 90 cm, pêssego claro com veios finos)",
+      "cores": [
+       "#EAD4BF"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaE/bases/fontes/quartzito_aura.png",
+        "bbox": [
+         [
+          0,
+          0,
+          420,
+          420
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+      "cores": [
+       "#E8E8E8"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          1350,
+          582,
+          1452,
+          848
+         ],
+         [
+          648,
+          636,
+          698,
+          848
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "travertino (escada; hall do Subsolo da Casa A)",
+      "cores": [
+       "#DCD9CA"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+        "bbox": [
+         [
+          582,
+          580,
+          686,
+          775
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "armários em marcenaria areia (armário até o teto do Térreo retocado da Casa D, veio no comprido)",
+      "cores": [
+       "#CBB89E"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
+        "bbox": [
+         [
+          1128,
+          740,
+          1143,
+          797
+         ]
+        ]
+       }
+      ],
+      "girar": 90
+     }
+    ]
+   }
+  },
+  "Subsolo": {
+   "pagina": 0,
+   "rotacao": 0,
+   "layers_ocultas": [
+    "ARQ_TERRENO PLANEJADO"
+   ],
+   "_layers_ocultas": "Curvas de nível saem, como no Térreo e no 1º Pavimento: fundo todo branco.",
+   "zonas_excluidas": {
+    "piscina e ofurô (bordas brancas): só as bordas desenhadas, sem faixas de vidro": [
+     324.9,
+     254.8,
+     391.4,
+     516.1
+    ],
+    "ofurô (bordas da direita e de baixo)": [
+     398.5,
+     411.0,
+     439.6,
+     516.1
+    ]
+   },
+   "_zonas_excluidas": "Como no Térreo: as bordas brancas da piscina e do ofurô (ARQ_PAREDE, 8 pt) não viram vidro. Fica fora das zonas o visor de vidro entre a piscina e a academia, que continua até o ofurô (x 807,6 a 819 pt no PDF, com o vidro no meio).",
+   "legenda": {
+    "_sobre": "Casa E · Subsolo (materiais aprovados pelo usuário em 16/10/26, no mesmo código de cores do Térreo e do 1º Pavimento). Vinílico #A8784F (o do 1º Pavimento): o laranja #CC9966 (academia; as réguas do PDF ficam, como no 1º Pavimento). Travertino #DCD9CA: o oliva #BAB596 (sauna, antessala com ducha, vestiário) e a escada. Granito Marrom Tabaco #5A4232: o rosa #BFA79F (DCE e a casa de máquinas de baixo). Bege Bahia #E8E8E8: o cinza #E0E0E0 (circulação, depósito, casa de máquinas da direita, WC DCE 2). Piscina e ofurô #DFF6FE, como a piscina do Térreo (usuário: o tanque comprido e o de baixo à esquerda são a piscina; o pequeno de baixo à direita, junto à sauna, é o ofurô). Banco da sauna em dois tons de Bege Bahia mais escuros, como na Casa D. Armário do DCE em marcenaria areia #CBB89E. Elevador branco. A circulação fica sem parede no alto, à esquerda da escada, como no PDF (usuário: 'não tem parede').",
+    "tolerancia_px": 10,
+    "poligonos": [
+     {
+      "nome": "circulação, depósito, casa de máquinas da direita e WC DCE 2 (cinza) → Bege Bahia",
+      "layer": "ARQ_CONTRAPISO",
+      "preenchimento_pdf": [
+       0.878,
+       0.878,
+       0.878
+      ],
+      "cor_render": "#E0E0E0",
+      "para": "#E8E8E8"
+     }
+    ],
+    "trocas_cor": [
+     [
+      "#BFA79F",
+      "#5A4232"
+     ],
+     [
+      "#BAB596",
+      "#DCD9CA"
+     ],
+     [
+      "#7FDFFF",
+      "#DFF6FE"
+     ],
+     [
+      "#CC9966",
+      "#A8784F"
+     ]
+    ],
+    "retangulos": [
+     {
+      "nome": "escada → travertino",
+      "bbox_vis": [
+       485.2,
+       221.8,
+       650.4,
+       260.3
+      ],
+      "so_cores": [
+       "#DDDACB"
+      ],
+      "para": "#DCD9CA",
+      "cor_linha": "#A9A593",
+      "_nota": "Como as escadas do Térreo e do 1º Pavimento: degraus e linha de caminhamento em cinza-travertino."
+     },
+     {
+      "nome": "banco da sauna, degrau da frente → Bege Bahia mais escuro",
+      "bbox_vis": [
+       437.9,
+       451.5,
+       500.9,
+       471.0
+      ],
+      "so_branco": true,
+      "para": "#DCDCDC",
+      "_nota": "Como na Casa D: dois tons da pedra para o banco se ler como banco (ARQ_ELEMENTOS FIXOS, y 1021,3 a 1055,5 pt)."
+     },
+     {
+      "nome": "banco da sauna, assento junto à parede → Bege Bahia ainda mais escuro",
+      "bbox_vis": [
+       437.9,
+       471.0,
+       500.9,
+       490.4
+      ],
+      "so_branco": true,
+      "para": "#D0D0D0"
+     },
+     {
+      "nome": "DCE: armário (branco com diagonal) → marcenaria areia",
+      "bbox_vis": [
+       750.9,
+       323.3,
+       789.5,
+       342.6
+      ],
+      "so_branco": true,
+      "para": "#CBB89E"
+     }
+    ]
+   },
+   "texturas": {
+    "_sobre": "Prévia de texturas do Subsolo da Casa E: as mesmas fontes do Térreo e do 1º Pavimento da Casa E (materiais aprovados das Casas A a D; bbox em px de um render de 2000 px); o banco da sauna como na Casa D.",
+    "tolerancia": 4,
+    "materiais": [
+     {
+      "nome": "vinílico (piso das suítes do 1º Pavimento da Casa A, área íntima)",
+      "cores": [
+       "#A8784F"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          858,
+          638,
+          972,
+          684
+         ],
+         [
+          922,
+          719,
+          978,
+          826
+         ],
+         [
+          1012,
+          212,
+          1060,
+          268
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "travertino (sauna, antessala, vestiário e escada; hall do Subsolo da Casa A)",
+      "cores": [
+       "#DCD9CA"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final.png",
+        "bbox": [
+         [
+          582,
+          580,
+          686,
+          775
+         ]
+        ]
+       }
+      ],
+      "so_espelho_vertical": true
+     },
+     {
+      "nome": "granito Marrom Tabaco (piso da cozinha do Térreo da Casa A)",
+      "cores": [
+       "#5A4232"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          997,
+          603,
+          1124,
+          633
+         ],
+         [
+          998,
+          690,
+          1108,
+          718
+         ]
+        ]
+       }
+      ],
+      "_fonte": "Só o piso: o trecho de baixo parava em y 732 e pegava o topo dos armários (faixa clara perto da ilha)."
+     },
+     {
+      "nome": "Bege Bahia (varandas do 1º Pavimento da Casa A)",
+      "cores": [
+       "#E8E8E8"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          1350,
+          582,
+          1452,
+          848
+         ],
+         [
+          648,
+          636,
+          698,
+          848
+         ]
+        ]
+       }
+      ]
+     },
+     {
+      "nome": "piscina e ofurô (água sobre pastilha, Térreo da Casa A)",
+      "cores": [
+       "#DFF6FE"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_Terreo_final_bege.png",
+        "bbox": [
+         [
+          582,
+          285,
+          678,
+          440
+         ]
+        ]
+       }
+      ],
+      "_fonte": "Só a água, sem as bordas: de x 684 em diante a amostra escurece (borda e sombra da parede) e deixava uma faixa escura na piscina."
+     },
+     {
+      "nome": "armário do DCE em marcenaria areia (armário até o teto do Térreo retocado da Casa D, veio no comprido)",
+      "cores": [
+       "#CBB89E"
+      ],
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaD/renders/POE642_CasaD_PH_Terreo_v1_retocado.png",
+        "bbox": [
+         [
+          1128,
+          740,
+          1143,
+          797
+         ]
+        ]
+       }
+      ],
+      "girar": 90
+     },
+     {
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          1350,
+          582,
+          1452,
+          848
+         ],
+         [
+          648,
+          636,
+          698,
+          848
+         ]
+        ]
+       }
+      ],
+      "nome": "banco da sauna em Bege Bahia: degrau da frente, um tom mais escuro",
+      "cores": [
+       "#DCDCDC"
+      ],
+      "bbox_vis": [
+       437.9,
+       451.5,
+       500.9,
+       471.0
+      ],
+      "escurecer": 0.93
+     },
+     {
+      "fontes": [
+       {
+        "arquivo": "POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_v7_final2.png",
+        "bbox": [
+         [
+          1350,
+          582,
+          1452,
+          848
+         ],
+         [
+          648,
+          636,
+          698,
+          848
+         ]
+        ]
+       }
+      ],
+      "nome": "banco da sauna em Bege Bahia: assento junto à parede, mais escuro",
+      "cores": [
+       "#D0D0D0"
+      ],
+      "bbox_vis": [
+       437.9,
+       471.0,
+       500.9,
+       490.4
+      ],
+      "escurecer": 0.88
+     }
+    ]
+   }
+  }
+ },
+ "entrega": {
+  "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
+  "_areas": "Áreas não informadas (usuário, 15/10/26): Térreo 'NÃO INFORMADO', sem linha de total, como na Casa D. 1º Pavimento (16/10/26) e Subsolo (16/10/26): também 'NÃO INFORMADO' (os PDFs trazem só as áreas dos ambientes, não a do pavimento). Ordem do quadro e do PDF como na Casa A: Subsolo, Térreo, 1º Pavimento.",
+  "_confirmado": "Endereço (Lotes 17, Unidade E) confirmado pelo usuário em 15/10/26; norte o mesmo das Casas A, B, C e D. Subsolo, Térreo e 1º Pavimento (o Subsolo entrou em 16/10/26, depois da aprovação da imagem final). O 1º Pavimento tem duas opções para o cliente (entorno em P&B ou só com as linhas do PDF): pranchas com sufixo _pb e _linhas e um PDF para cada opção. Depois veio a terceira, nublado (19/10/26), e, em 21/10/26, no fim do pente fino, o nublado virou a opção única: prancha sem sufixo e o PDF único (pdf.nome); as opções ficam no histórico.",
+  "casa": "CASA E",
+  "prefixo": "POE642_CasaE",
+  "pasta_bases": "bases",
+  "pasta_entrega": "entrega",
+  "largura_prancha": 3840,
+  "pavimentos": {
+   "Subsolo": {
+    "titulo": "SUBSOLO",
+    "linha_area": 0,
+    "base": "POE642_CasaE_BASE_Subsolo_v3_texturas_16x9.png"
+   },
+   "Terreo": {
+    "titulo": "TÉRREO",
+    "linha_area": 1,
+    "base": "POE642_CasaE_BASE_Terreo_v3_texturas_16x9.png"
+   },
+   "1Pavimento": {
+    "titulo": "1º PAVIMENTO",
+    "linha_area": 2,
+    "base": "POE642_CasaE_BASE_1Pavimento_v3_texturas_16x9.png"
+   }
+  },
+  "areas": [
+   [
+    "SUBSOLO",
+    "NÃO INFORMADO"
+   ],
+   [
+    "TÉRREO",
+    "NÃO INFORMADO"
+   ],
+   [
+    "1º PAVIMENTO",
+    "NÃO INFORMADO"
+   ]
+  ],
+  "projeto": [
+   [
+    "CLIENTE",
+    "PAULO OCTÁVIO"
+   ],
+   [
+    "ENDEREÇO",
+    "ML 10 – CONJUNTO 02, LOTES 17, UNIDADE E"
+   ],
+   [
+    "PROJETO",
+    "CASA E · UNIDADE AUTÔNOMA \"E\""
+   ],
+   [
+    "DATA INICIAL",
+    "15/10/26"
+   ]
+  ],
+  "pdf": {
+   "nome": "POE642_CasaE_Plantas_Humanizadas.pdf",
+   "ordem": [
+    "Subsolo",
+    "Terreo",
+    "1Pavimento"
+   ],
+   "titulo": "Casa E – Plantas Humanizadas (Subsolo, Térreo e 1º Pavimento)",
+   "assunto": "Paulo Octávio · ML 10 – Conjunto 02, Lotes 17, Unidade E",
+   "palavras": "planta humanizada, layout, Casa E"
+  }
+ }
+}
