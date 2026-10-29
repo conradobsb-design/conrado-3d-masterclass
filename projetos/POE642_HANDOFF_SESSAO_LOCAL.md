@@ -3760,3 +3760,21 @@ O usuário, com o recorte das duas mesas redondas da varanda gourmet: "vamos tro
 As 12 cadeiras do render (6 em cada mesa, estofadas em cinza com o traço do PDF) deram lugar às cadeiras de couro do conjunto padrão dos jogos da varanda (`mesa_redonda_6_couro`, as da Casa D), nas posições das cadeiras do PDF, com a sombra macia e a de contato no piso. As mesas de madeira da Casa C ficam, porque o pedido foi só das cadeiras; se o usuário quiser, as mesas também podem ir para a do conjunto (a madeira com o vidro no centro, como na Casa D). Sob as cadeiras antigas fica o travertino da mesma fileira, sem emenda e sem copiar a esquadria da varanda.
 
 Antes e depois (o antes é a final de 756385a): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_cadeiras_varanda_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos.
+
+**Casa C aprovada** (29/10/26): "casa c ok". As finais `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png` e `..._Subsolo_final_rotulos.png`, as pranchas e o PDF ficam como estão (e525a15), com tudo o que estava em validação: a porta do Louceiro 2, os 9 itens da revisão de 29/10, os brises das suítes, o traço entre a cortina e o vidro e as cadeiras da varanda gourmet. A seguir, a revisão da Casa B (Térreo e Subsolo), apresentada para o OK antes de alterar.
+
+### Revisão de 29/10/26: Casa B, Térreo e Subsolo (apresentada para o OK, nada alterado)
+
+Pedido do usuário: "vamos para casa D, depois C e depois B". Revisão trecho a trecho das finais contra a base do PDF e as REGRAS, com os pontos que apareceram nas Casas C e D: as 23 portas de giro uma a uma (a "segunda linha" junto à folha), os X tracejados, os trilhos das cortinas, as portas de correr das suítes, as cadeiras e os rótulos.
+- **Conforme:** o Subsolo inteiro (portas, sauna, BH serviço com o vaso branco, como combinado, BH sauna, academia, elevador); no Térreo, os X das claraboias em preto no fundo claro e o do jardim de inverno em branco, os trilhos das cortinas de parede a parede só dentro de cada ambiente, as outras portas de giro, a porta pivotante do hall, os vidros da borda da piscina, as soleiras.
+- **Para o OK (8), no Térreo:**
+  1. varanda gourmet: as 12 cadeiras das duas mesas redondas no desenho do PDF (estofado claro com o contorno cinza); proposta: as de couro do conjunto padrão, como acabou de entrar na Casa C (regra de 29/10, seção 8), com as mesas de madeira ficando;
+  2. (pergunta) as portas de correr das suítes (master, 1, 2 e 3) têm no PDF as folhas em dois planos, como as da Casa C (4 folhas; 6 na master); na Casa C as duas de fora são brise de bronze escovado e as de dentro, vidro. Aplicar o mesmo na Casa B? A sala íntima tem o mesmo desenho, mas não é suíte: fica em vidro, salvo indicação;
+  3. banho 1: uma linha escura entre a folha aberta e a parede (como a do Louceiro 2 da Casa C); sai;
+  4. banho 3: o mesmo, acima da folha; sai;
+  5. BH motorista: o mesmo, entre a folha e a parede; sai;
+  6. banho master (porta para o closet): uma faixa cinza dupla logo acima da folha, cópia do vidro do box que está na parede; sai;
+  7. as cadeiras das mesas da suíte master, da suíte 1 e da suíte 2: o contorno cinza grosso; proposta: o contorno limpo das Casas C e D, no mesmo modelo;
+  8. os rótulos do JARDIM DE INVERNO e do JARDIM (4,62 m²) cortados pelos tracejados brancos (o do JARDIM também sobre uma planta); o tracejado sai embaixo do texto, como na Casa C, e o do JARDIM vai para um trecho sem planta.
+
+Mapa: `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2910_revisao_mapa.jpg` (a final com os números e, em cada item, a final ao lado da base do PDF).
