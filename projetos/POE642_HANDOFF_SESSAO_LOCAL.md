@@ -3632,3 +3632,13 @@ Pedido do usuário: "vamos para casa D, depois C e depois B". Revisão trecho a 
   5. sala íntima, porta para a circulação da suíte 2: o mesmo traço escuro logo abaixo da folha aberta.
 
 Mapa: `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2810_revisao_mapa.jpg` (a final com os números e, em cada item, a final ao lado da base do PDF). A seguir, a revisão do Subsolo da Casa D.
+
+### Revisão de 28/10/26: Subsolo da Casa D (apresentada para o OK, nada alterado)
+
+A mesma revisão, no Subsolo (aprovado em 27/10), em 4 quadros e nos pontos ampliados; numeração seguida da do Térreo.
+- **Conforme:** WC DCE (box fechado, chuveiro, rótulo), DCE 1 (cama, armário com cabides), depósito/casa de máquinas, escada com o S, elevador, academia e aparelhos, portas de vidro do pátio, sauna e bancos, ducha, vestiário; as projeções (EST_LAJE) ficam sob as paredes. Procuradas as soleiras entre dois pisos iguais nas duas plantas: só a do Térreo já corrigida (circulação/sala íntima) e a do item 6.
+- **Para o OK (2):**
+  6. WC DCE ↔ DCE 1: a soleira de Bege Bahia no vão, entre dois pisos de granito, se lê como uma segunda folha fechada ao lado da aberta (o caso do pedido de 28/10 no Térreo). Proposta: o granito atravessa o vão; a folha e os batentes ficam;
+  7. pátio: a parede tracejada dupla do PDF em volta do pátio (ARQ_PAREDE, fora da planta: à esquerda, embaixo e no alto, ~1 m afastada do piso) não aparece; a hachura cobre, e só fica o traço de dentro no alto, onde ele coincide com a borda do piso. Proposta: as duas linhas tracejadas nos três lados, em preto, por cima da hachura.
+
+Mapa: `POE642_CasaD/renders/POE642_CasaD_PH_Subsolo_2810_revisao_mapa.jpg` (itens 6 a 8; o 8 é o canto de baixo do item 7).
