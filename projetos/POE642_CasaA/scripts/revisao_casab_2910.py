@@ -251,10 +251,12 @@ TAPETES_TB = dict(D.TAPETE_TRAMA_D, tapetes_pt=[("varanda", (1006.6, 987.6, 1290
 # sentido das fibras: `veio_m` ao longo, `fio_m` através, e as faixas largas e suaves de `faixas_m`), no tom de cada peça
 # (`TONS_TB`, BGR), com o chanfro (a quina virada para a luz, no alto à direita, mais clara; a do outro lado, mais
 # escura) e o aro fino escuro da silhueta. A nogueira e o castanho são os da referência da mesa do hall (o centro e os
-# painéis); o marrom, o da mesa da referência 2 (os tampos da varanda); o freijó, o das peças claras.
+# painéis); o marrom, o da mesa da referência 2 (os tampos da varanda); o freijó, o das peças claras; o ocre (usuário,
+# nos criados-mudos da suíte master: "criados mudos em tom madeira ocre."), o mel amarelado.
 MADEIRA_TB = {"ss": 8, "veio_m": 0.12, "fio_m": 0.003, "veio": 0.05, "faixas_m": (0.35, 0.025), "faixas": 0.035,
               "chanfro_m": 0.012, "chanfro": 0.12, "aro_px": 0.7, "aro": 0.35, "semente": 2910}
-TONS_TB = {"nogueira": (44, 64, 96), "castanho": (92, 124, 160), "marrom": (54, 78, 114), "freijo": (104, 144, 188)}
+TONS_TB = {"nogueira": (44, 64, 96), "castanho": (92, 124, 160), "marrom": (54, 78, 114), "freijo": (104, 144, 188),
+           "ocre": (62, 124, 182)}
 
 
 def _veio_tb(rng, h, w, ang, px_m, ss):
@@ -596,6 +598,50 @@ def espreguicadeiras_tb(Q, img):
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
+# 17. O sofá em L do estar do living (usuário, com o recorte do sofá: "mantenha a textura do recamier do sofá para o todo do
+# sofá. pode escurecer mais um pouco para distoar do tapete."): a chaise (o recamier, dentro do retângulo do tapete e no
+# tom dele) tinha recebido a trama do tapete (item 1), e o resto do sofá não. As três peças do PDF (os dois módulos e a
+# chaise, ARQ_MOBILIÁRIO) voltam ao que eram antes da trama e recebem, inteiras, a mesma trama (a do tapete do bloco
+# `conjunto_estar_tapete`, na escala, com a força e o limite de `TAPETES_TB`), no tom `tom` (BGR), um pouco abaixo do
+# tapete do living: cada px na luz que tinha (sobre a mediana do sofá), com os traços das almofadas.
+SOFA_LIVING_TB = {"pecas_pt": [(1545.9, 937.0, 1640.6, 1004.4), (1640.6, 937.0, 1735.3, 1004.4),
+                               (1735.3, 937.0, 1802.8, 1051.5)],
+                  "camada": "ARQ_MOBILIÁRIO", "tom": (184, 192, 203), "semente": 31, "ss": 4}
+
+
+def sofa_living_tb(Q, img, antes):
+    sys.path.insert(0, str(F.B.RAIZ / "_texturas"))
+    import texturas
+    q, qt, ss = SOFA_LIVING_TB, TAPETES_TB, SOFA_LIVING_TB["ss"]
+    ds = [_desenho_tb(Q, q["camada"], r) for r in q["pecas_pt"]]
+    rs = [d["rect"] for d in ds]
+    X0, Y0, X1, Y1 = F.ret_q(Q, (min(r.x0 for r in rs), min(r.y0 for r in rs), max(r.x1 for r in rs),
+                                  max(r.y1 for r in rs)))
+    X0, Y0, X1, Y1 = X0 - 1, Y0 - 1, X1 + 1, Y1 + 1
+    w, h = X1 - X0, Y1 - Y0
+    a = cv2.resize(D._mascara_pdf(Q, ds, X0, Y0, w, h, ss).astype(np.float32) / 255, (w, h),
+                   interpolation=cv2.INTER_AREA)[..., None]
+    # a trama do tapete, na escala (como `D.tapete_trama_d`)
+    foto = cv2.imread(str(F.B.RAIZ / "_blocos" / "recortes" / f"{qt['recorte']}.png"))
+    x0, y0, x1, y1 = qt["trecho"]
+    L = foto[y0:y1, x0:x1].astype(np.float32).mean(axis=2)
+    rel = L / cv2.GaussianBlur(L, (0, 0), qt["sigma_px"])
+    e = Q.px_m / qt["px_m_foto"]
+    rel = cv2.resize(rel, None, fx=e, fy=e, interpolation=cv2.INTER_AREA)
+    u8 = np.repeat(np.clip((rel - 1) * 510 + 128, 0, 255).astype(np.uint8)[..., None], 3, axis=2)
+    tec = texturas.quilting(texturas.variantes(u8, True), h, w, p=qt["p_px"], sobra=max(3, qt["p_px"] // 3),
+                            rng=np.random.default_rng(q["semente"]))[:h, :w]
+    t = np.clip(qt["forca"] * (tec[..., 0].astype(np.float32) - 128) / 510, -qt["limite"], qt["limite"])
+    base = antes[Y0:Y1, X0:X1].astype(np.float32)
+    med = np.median(base[a[..., 0] > 0.99], axis=0)
+    novo = base * (np.float32(q["tom"]) / np.maximum(med, 1))[None, None, :] * (1 + t)[..., None]
+    out = img.copy()
+    reg = img[Y0:Y1, X0:X1].astype(np.float32)
+    out[Y0:Y1, X0:X1] = np.clip(reg * (1 - a) + novo * a, 0, 255).astype(np.uint8)
+    print(f"    sofá do estar do living: as {len(ds)} peças com a trama da chaise, no tom um pouco abaixo do tapete")
+    return out
+
+
 # 7-9. As peças de madeira: o criado-mudo redondo do quarto do motorista (usuário: "adicione textura de madeira ao criado
 # mudo do quarto do motorista"), os dois criados-mudos da suíte master ("melhorar a representação dos criados mudos e do
 # cobreleito da suite master") e as duas mesas de apoio dos recamiers ("melhorar a representação desses recamiers e
@@ -607,9 +653,9 @@ PECAS_MADEIRA_TB = [
     {"nome": "criado-mudo do quarto do motorista", "camada": "ARQ_LAYOUT HUMANIZAÇÃO",
      "pt": (2672.4, 1599.7, 2694.8, 1622.4), "tom": "freijo"},
     {"nome": "criado-mudo da suíte master, à esquerda", "camada": "ARQ_LOUÇAS E METAIS",
-     "pt": (831.4, 920.5, 868.8, 945.0), "tom": "nogueira"},
+     "pt": (831.4, 920.5, 868.8, 945.0), "tom": "ocre"},
     {"nome": "criado-mudo da suíte master, à direita", "camada": "ARQ_LOUÇAS E METAIS",
-     "pt": (989.1, 920.5, 1026.5, 945.0), "tom": "nogueira"},
+     "pt": (989.1, 920.5, 1026.5, 945.0), "tom": "ocre"},
     {"nome": "mesa de apoio do recamier da esquerda", "camada": "ARQ_MOBILIÁRIO", "pt": (851.1, 649.3, 885.1, 672.0),
      "tom": "freijo", "vaos": [(879.5, 651.6, 882.9, 669.7)], "sobre": True},
     {"nome": "mesa de apoio do recamier da direita", "camada": "ARQ_MOBILIÁRIO", "pt": (953.0, 652.5, 987.0, 675.2),
@@ -883,7 +929,9 @@ CAMA_MASTER_TB = dict(F.CAMA_MASTER_F, so_cama=True, acolchoado=0.06, rolo_vol=(
 
 def pedidos_tb(img):
     Q = F.Quadro("Terreo")
+    antes = img
     img = D.tapete_trama_d(Q, img, q=TAPETES_TB)
+    img = sofa_living_tb(Q, img, antes)
     img = poltronas_varanda_tb(Q, img)
     img = poltrona_redonda_tb(Q, img)
     img = encostos_living_tb(Q, img)
