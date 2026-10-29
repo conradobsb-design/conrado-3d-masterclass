@@ -865,12 +865,14 @@ CADEIRAS_CONTORNO_TC = {"ss": 4, "aro_px4": 3, "aro_tom": 0.58, "costura_px4": 2
                         "costura_forca": 0.8, "margem_px": 6}
 
 
-def cadeiras_contorno_tc(Q, img):
+def cadeiras_contorno_tc(Q, img, pares=None, camadas=("ARQ_LAYOUT HUMANIZAÇÃO",)):
+    """`pares` (nome, cadeira, mesa em pt; os da Casa C se não vier) e as `camadas` das peças da cadeira no PDF: na
+    Casa B, a cadeira da suíte master está na ARQ_MOBILIÁRIO."""
     from scipy import ndimage
     q = CADEIRAS_CONTORNO_TC
     k, m_ = q["ss"], q["margem_px"]
     out = img.astype(np.float32)
-    for nome, cad, mesa in CADEIRAS_MESAS_TC["pares"]:
+    for nome, cad, mesa in (pares or CADEIRAS_MESAS_TC["pares"]):
         x0, y0, x1, y1 = F.ret_q(Q, cad)
         X0, Y0, X1, Y1 = x0 - m_, y0 - m_, x1 + m_, y1 + m_
         h, w = Y1 - Y0, X1 - X0
@@ -878,8 +880,8 @@ def cadeiras_contorno_tc(Q, img):
         tra4 = np.zeros_like(sil4)
         for d in Q.desenhos:
             r = d["rect"]
-            if d.get("layer") != "ARQ_LAYOUT HUMANIZAÇÃO" or not (r.x0 >= cad[0] - 0.5 and r.y0 >= cad[1] - 0.5
-                                                                  and r.x1 <= cad[2] + 0.5 and r.y1 <= cad[3] + 0.5):
+            if d.get("layer") not in camadas or not (r.x0 >= cad[0] - 0.5 and r.y0 >= cad[1] - 0.5
+                                                     and r.x1 <= cad[2] + 0.5 and r.y1 <= cad[3] + 0.5):
                 continue
             for c in Q.caminhos(d):
                 p = np.int32(np.round((c - (X0, Y0)) * k))
@@ -921,22 +923,22 @@ def cadeiras_contorno_tc(Q, img):
 # e o couro na cor da foto; a mesa de madeira da Casa C fica (do bloco, só as cadeiras: o tampo dele sai, `tampo_folga_px`
 # a mais). Antes, o piso onde estavam as cadeiras antigas (a caixa de cada uma, `folga_px`, com a sombra), fora da mesa:
 # o travertino das mesmas linhas, deslocado na horizontal até o trecho livre mais perto (`busca_px`; os estratos são
-# deitados e seguem contínuos), longe das peças do PDF e de qualquer traço em pé que já esteja na imagem (a esquadria
-# da varanda; o travertino só tem estratos deitados, então a borda vertical acima de `borda_sx` marca o que não é piso)
-# (`livre_px`), com a passagem macia (`suave_px`) para a emenda não
-# marcar. A franja clara do recorte da foto sai (a beira das cadeiras na cor do couro mais perto, `miolo_px` para
-# dentro). Por cima, a sombra curta e a macia das cadeiras, como nos jogos da varanda da Casa D (`SOMBRA_JOGOS_D`, só no
-# piso).
+# deitados e seguem contínuos), longe das peças do PDF (`livre_px`) e de qualquer traço em pé que já esteja na imagem
+# (a esquadria da varanda; o travertino só tem estratos deitados, então a borda vertical acima de `borda_sx` marca o que
+# não é piso), com a passagem macia (`suave_px`) para a emenda não marcar. A franja clara do recorte da foto sai (a
+# beira das cadeiras na cor do couro mais perto, `miolo_px` para dentro). Por cima, a sombra curta e a macia das
+# cadeiras, como nos jogos da varanda da Casa D (`SOMBRA_JOGOS_D`, só no piso). As cadeiras do PDF são as peças da
+# `camada` (na Casa B, a ARQ_MOBILIÁRIO) de 28 a 40 pt a menos de 80 pt do centro da mesa.
 JOGOS_VARANDA_TC = {"mesas_pt": [(1038.3, 1447.0, 1128.9, 1537.7), (1265.9, 1447.0, 1356.6, 1537.7)], "giros": [0, 180],
                     "folga_px": (13, 9, 9, 13), "busca_px": (40, 320), "livre_px": 6, "tampo_folga_px": 6,
-                    "suave_px": 3.0, "miolo_px": 6, "borda_sx": 140}
+                    "suave_px": 3.0, "miolo_px": 6, "borda_sx": 140, "camada": "ARQ_LAYOUT HUMANIZAÇÃO"}
 
 
-def jogos_varanda_tc(Q, img):
+def jogos_varanda_tc(Q, img, q=None):
     sys.path.insert(0, str(RAIZ / "_blocos"))
     import blocos
     import final3840_casad as D
-    q = JOGOS_VARANDA_TC
+    q = q or JOGOS_VARANDA_TC
     qb = D.MOVEIS_TD["conjunto_varanda"]
     cor, al = blocos.bloco(qb["bloco"], qb["px_m_bloco"])
     cor = D.tons_varanda_d(cor, al, qb)
@@ -960,7 +962,7 @@ def jogos_varanda_tc(Q, img):
         mcx, mcy = (mesa[0] + mesa[2]) / 2, (mesa[1] + mesa[3]) / 2
         tampo = Q.preencher(lambda d, m_=mesa: d.get("layer") == "ARQ_MOBILIÁRIO" and abs(d["rect"].x0 - m_[0]) < 0.5
                             and abs(d["rect"].y0 - m_[1]) < 0.5 and abs(d["rect"].x1 - m_[2]) < 0.5)
-        cads = [d["rect"] for d in pecas if d.get("layer") == "ARQ_LAYOUT HUMANIZAÇÃO"
+        cads = [d["rect"] for d in pecas if d.get("layer") == q["camada"]
                 and 28 <= max(d["rect"].width, d["rect"].height) <= 40
                 and abs((d["rect"].x0 + d["rect"].x1) / 2 - mcx) < 80 and abs((d["rect"].y0 + d["rect"].y1) / 2 - mcy) < 80]
         # o piso no lugar das cadeiras antigas
@@ -1016,9 +1018,9 @@ BRISES_SUITES_TC = {"folhas_pt": {"Quarto 3": [(1157.1, 529.4, 1234.5, 532.3), (
                     "sombra": {"desloc": (-0.8, 1.0), "sigma": 0.8, "forca": 0.3}, "ss": 8, "semente": 2910}
 
 
-def brises_suites_tc(Q, img):
+def brises_suites_tc(Q, img, q=None):
     import retoque_1pav_casae as RE
-    q = BRISES_SUITES_TC
+    q = q or BRISES_SUITES_TC
     k, f = q["ss"], q["folga_px"]
     rng = np.random.default_rng(q["semente"])
     out = img.copy()

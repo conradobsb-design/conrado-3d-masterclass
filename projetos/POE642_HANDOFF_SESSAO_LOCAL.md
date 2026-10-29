@@ -3778,3 +3778,19 @@ Pedido do usuário: "vamos para casa D, depois C e depois B". Revisão trecho a 
   8. os rótulos do JARDIM DE INVERNO e do JARDIM (4,62 m²) cortados pelos tracejados brancos (o do JARDIM também sobre uma planta); o tracejado sai embaixo do texto, como na Casa C, e o do JARDIM vai para um trecho sem planta.
 
 Mapa: `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2910_revisao_mapa.jpg` (a final com os números e, em cada item, a final ao lado da base do PDF).
+
+### A revisão da Casa B aplicada (29/10/26)
+
+OK do usuário: "aprovados os itens"; no item 2: "desenhe as folhas como na casa C, aplicando o mesmo padrão". Os 8 itens no Térreo, como retoques locais sobre a final aprovada (`POE642_CasaA/scripts/revisao_casab_2910.py`, com as funções da Casa C; a final da Casa B não sai mais só do motor, por causa das cortinas franzidas e dos acertos da piscina):
+1. varanda gourmet: as 12 cadeiras no conjunto de couro padrão, nas posições do PDF, com a sombra macia e a de contato; as mesas de madeira ficam;
+2. portas das suítes master, 1, 2 e 3: as folhas de fora em brise de bronze escovado, as de dentro em vidro (como na Casa C); a sala íntima fica em vidro;
+3. banho 1: sem a linha fina entre a folha e a parede;
+4. banho 3: o mesmo, acima da folha;
+5. BH motorista: o mesmo (o fio de dentro; a face da parede fica);
+6. banho master (porta para o closet): sem a faixa cinza acima da folha;
+7. as cadeiras das mesas da suíte master e das suítes 1 e 2 com o contorno limpo das Casas C e D;
+8. os rótulos do JARDIM DE INVERNO e do JARDIM sem o tracejado embaixo (o traço que encostava no texto sai inteiro); o JARDIM no meio do jardim, entre as plantas e os tracejados.
+
+Na Casa C, as funções parametrizadas dão o mesmo resultado (as etapas das cadeiras e dos móveis conferidas iguais ao cache).
+
+Antes e depois (o antes é a final de 175b56e): `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2910_revisao_{cadeiras_varanda,brises_suites_1_e_2,brises_suite_master,brises_suite_3,banho1_porta,banho3_porta,bh_motorista_porta,banho_master_porta,cadeira_suite1,cadeira_suite2,cadeira_suite_master,rotulo_jardim_inverno,rotulo_jardim}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa B refeitos. Aguarda o OK da Casa B.
