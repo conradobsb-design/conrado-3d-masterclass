@@ -414,13 +414,14 @@ JANTAR_TB = dict(D.JANTAR_TD, mesa_pt=(1537.2, 1280.3, 1735.6, 1348.4), lado_pt=
 
 
 # 5. As máquinas sob a bancada da área de serviço (usuário: "adicionar o tom metalico inox aos eletrodomestico que estão
-# sob a bancada"): no PDF, os dois quadrados de 0,60 m da ARQ_LAYOUT HUMANIZAÇÃO (a lavadora e a secadora, de frente para
-# a esquerda, com a linha da porta em `frente_pt`) sob a bancada; o render os cobria com ela e só a faixa da frente
-# aparecia. Entram em inox escovado (o aço da Casa B, `F.PECAS["louca"]["inox"]`), o escovado no comprido (de trás para
-# a frente), o painel da frente um tom acima, o dos comandos (atrás, `comandos`, da fração da profundidade) um abaixo,
-# o chanfro, o contorno fino e a sombra curta; a bancada fica nas sobras.
+# sob a bancada"; depois: "os eletrodomesticos ficam parcialmente para fora, o restante fica sob a bancada, dentro da
+# bancada. vamos mostrar apenas as pontas dos eletrodomesticos"): no PDF, os dois quadrados de 0,60 m da ARQ_LAYOUT
+# HUMANIZAÇÃO (a lavadora e a secadora, de frente para a esquerda, com a linha da porta em `frente_pt`) sob a bancada,
+# saindo dela pela frente. Só a ponta que sai (até a borda da bancada, `bancada_x_pt`) entra em inox escovado (o aço da
+# Casa B, `F.PECAS["louca"]["inox"]`), o escovado no comprido, o painel da porta um tom acima, o chanfro, o contorno
+# fino e a sombra curta; o resto fica sob a bancada.
 INOX_TB = {"maquinas_pt": [(1963.6, 1533.1, 1997.6, 1567.1), (1963.6, 1572.6, 1997.6, 1606.6)], "frente_pt": 1967.0,
-           "cor": (196, 199, 202), "escovado": 0.015, "painel": 1.05, "comandos": (0.80, 0.94, 0.94),
+           "bancada_x_pt": 1969.2, "cor": (196, 199, 202), "escovado": 0.015, "painel": 1.05,
            "contorno": (112, 116, 120), "aro": 0.45, "ss": 8, "semente": 41}
 
 
@@ -435,7 +436,9 @@ def maquinas_inox_tb(Q, img):
         w, h = X1 - X0, Y1 - Y0
         (a0, b0), (a1, b1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
         M = np.zeros((h * ss, w * ss), np.float32)
-        M[int(round((b0 - Y0) * ss)):int(round((b1 - Y0) * ss)), int(round((a0 - X0) * ss)):int(round((a1 - X0) * ss))] = 1
+        xb = Q.p2q(q["bancada_x_pt"], 0)[0]
+        M[int(round((b0 - Y0) * ss)):int(round((b1 - Y0) * ss)),
+          int(round((a0 - X0) * ss)):int(round((min(a1, xb) - X0) * ss))] = 1
         a1x = cv2.resize(M, (w, h), interpolation=cv2.INTER_AREA)
         out = _sombra_piso_tb(out, X0, Y0, a1x, Q.px_m, [F.PECAS["sombra"] | {"dx_m": -F.PECAS["sombra"]["dist_m"],
                                                                              "dy_m": F.PECAS["sombra"]["dist_m"]}])
@@ -444,13 +447,11 @@ def maquinas_inox_tb(Q, img):
         cor = np.float32(q["cor"]) * np.repeat(risco, w * ss, axis=1)[..., None]
         xf = (Q.p2q(q["frente_pt"], 0)[0] - X0) * ss
         cor[:, :int(round(xf))] *= q["painel"]
-        c0, c1, fc = q["comandos"]
-        cor[:, int(round((a0 - X0 + c0 * (a1 - a0)) * ss)):int(round((a0 - X0 + c1 * (a1 - a0)) * ss))] *= fc
         cor *= _relevo_tb(M, Q.px_m, ss)[..., None]
         cor = cor * (1 - q["aro"] * (M - cv2.erode(M, np.ones((ss // 2 + 1,) * 2, np.uint8))))[..., None] \
             + np.float32(q["contorno"]) * q["aro"] * (M - cv2.erode(M, np.ones((ss // 2 + 1,) * 2, np.uint8)))[..., None]
         out = _pintar_tb(out, X0, Y0, w, h, ss, M, cor)
-    print(f"    área de serviço: as {len(q['maquinas_pt'])} máquinas sob a bancada em inox escovado")
+    print(f"    área de serviço: as pontas das {len(q['maquinas_pt'])} máquinas, para fora da bancada, em inox escovado")
     return out
 
 
