@@ -1104,30 +1104,109 @@ def marcenaria_tb(Q, img):
 # entra o que falta, e as bordas que já estavam boas não mudam.
 SOMBRA_BLOCOS_TB = {"cresce_m": 0.02, "sig_m": 0.03, "forca": 0.30}
 
+# Depois (usuário, com o recorte das três lajes da direita: "o segundo degrau deve estar sobre o terceiro, dando o efeito
+# de descida de uma pedra para outra."; e, esclarecendo: "a pedra do meio precisa estar sobre a da esquerda. não mexa na
+# pedra da direita com a do meio."): a laje do meio (370,5-427,2 pt) estava abaixo da da esquerda (336,5-370,5), que o PDF
+# desenha depois: as duas só encostam, e a sombra de contato da da esquerda caía sobre a do meio, ao contrário da
+# descida. Depois, na pedra grande e na laje à esquerda dela (194,8-251,4 pt): "aqui acontece o mesmo erro: a da direita
+# deve sobrepor a da esquerda e não o contrário." `sobre`: os pares (a de cima, a de baixo) pedidos; a ordem de pintura
+# nova é a ordenação que respeita esses pares e, nos blocos que se sobrepõem de fato (mais de `sobrepoe_px` px em ss), a
+# ordem do PDF (as lajes da direita continuam sobre a pedra grande; a da direita, sobre a do meio), com o empate pela
+# ordem do PDF. Os blocos são refeitos como em `F.degraus_blocos` (a mesma textura e o mesmo tom de cada um, a sombra
+# curta), na ordem do PDF e na nova, e a final recebe a razão entre as duas nos px que mudam (o que veio depois por
+# cima, multiplicado, fica); a sombra de contato segue a nova ordem.
+ORDEM_BLOCOS_TB = {"sobre": [((370.5, 912.7, 427.2, 1162.1), (336.5, 929.7, 370.5, 1122.4)),
+                             ((251.4, 793.6, 517.9, 1064.6), (194.8, 807.8, 251.4, 977.9))],
+                   "sobrepoe_px": 16}
 
-def sombra_blocos_tb(Q, img):
-    q, b, k = SOMBRA_BLOCOS_TB, F.BLOCOS_F, F.BLOCOS_F["ss"]
+
+def _blocos_tb(Q):
+    b, k = F.BLOCOS_F, F.BLOCOS_F["ss"]
     cx0, cy0, cx1, cy1 = b["caixa_pt"]
     blocos = sorted([d for d in Q.desenhos if d.get("layer") == "ARQ_CONTRAPISO" and d["type"] == "f" and d.get("fill")
                      and len(d["items"]) == 4 and cx0 <= d["rect"].x0 and d["rect"].x1 <= cx1 and cy0 <= d["rect"].y0
                      and d["rect"].y1 <= cy1], key=lambda d: d.get("seqno", 0))
     X0, Y0, X1, Y1 = F.ret_q(Q, b["caixa_pt"])
     w, h = X1 - X0, Y1 - Y0
-    s, d_ = b["sombra"], b["sombra"]["dist_m"] * Q.px_m * k
-
-    def reduzir(a):
-        return cv2.resize(a.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
     ms = []
     for d in blocos:
         m = np.zeros((h * k, w * k), np.uint8)
         cv2.fillPoly(m, [np.int32(np.round((c - (X0, Y0)) * k)) for c in Q.caminhos(d) if len(c) >= 3], 255)
         ms.append(m.astype(np.float32) / 255)
+    n = len(blocos)
+    pares = {}                                     # (a de baixo, a de cima)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if np.minimum(ms[i], ms[j]).sum() > ORDEM_BLOCOS_TB["sobrepoe_px"]:
+                pares[(i, j)] = True
+    for cima_pt, baixo_pt in ORDEM_BLOCOS_TB["sobre"]:
+        ic, ib = [next(i for i, d in enumerate(blocos) if all(abs(v - u) < 0.2 for v, u in
+                                                             zip((d["rect"].x0, d["rect"].y0, d["rect"].x1, d["rect"].y1), r)))
+                  for r in (cima_pt, baixo_pt)]
+        pares.pop((ic, ib), None)
+        pares[(ib, ic)] = True
+    ordem, feitos = [], set()
+    while len(ordem) < n:                          # a ordenação, o empate pela ordem do PDF
+        i = min(i for i in range(n) if i not in feitos and all(a in feitos for a, b_ in pares if b_ == i))
+        ordem.append(i)
+        feitos.add(i)
+    return blocos, (X0, Y0, X1, Y1), ms, ordem
+
+
+def ordem_blocos_tb(Q, img):
+    sys.path.insert(0, str(F.B.RAIZ / "_texturas"))
+    from texturas import textura
+    b, k = F.BLOCOS_F, F.BLOCOS_F["ss"]
+    blocos, (X0, Y0, X1, Y1), ms, ordem = _blocos_tb(Q)
+    w, h = X1 - X0, Y1 - Y0
+    s, d_ = b["sombra"], b["sombra"]["dist_m"] * Q.px_m * k
+    rng = np.random.default_rng(b["semente"])
+    tom = [1 + b["tom"] * rng.uniform(-1, 1) for _ in blocos]          # o tom de cada bloco, na ordem do PDF
+
+    def reduzir(a):
+        return cv2.resize(a.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+    pecas = []
+    for i, mf in enumerate(ms):
+        sb = reduzir(cv2.GaussianBlur(cv2.warpAffine(mf, np.float32([[1, 0, -d_], [0, 1, d_]]), (w * k, h * k)),
+                                      (0, 0), s["sig_m"] * Q.px_m * k)) * s["forca"]
+        tex = textura(b["pedra"], Q.px_m, h, w, semente=b["semente"] + i).astype(np.float32) * tom[i]
+        pecas.append((reduzir(mf), sb, tex))
+    base = img[Y0:Y1, X0:X1].astype(np.float32)
+
+    def pintar(seq):
+        reg = base.copy()
+        for i in seq:
+            a, sb, tex = pecas[i]
+            reg *= (1 - sb * (1 - a))[..., None]
+            reg = reg * (1 - a[..., None]) + tex * a[..., None]
+        return reg
+    velho, novo = pintar(range(len(blocos))), pintar(ordem)
+    muda = np.abs(novo - velho).max(axis=2) > 0.5
+    razao = np.clip(novo / np.maximum(velho, 1.0), 0.2, 5.0)
+    reg = base.copy()
+    reg[muda] *= razao[muda]
+    out = img.copy()
+    out[Y0:Y1, X0:X1] = np.clip(reg, 0, 255).astype(np.uint8)
+    print(f"    degraus em blocos: a ordem de pintura {ordem} (os pares pedidos; {int(muda.sum())} px)")
+    return out
+
+
+def sombra_blocos_tb(Q, img):
+    q, b, k = SOMBRA_BLOCOS_TB, F.BLOCOS_F, F.BLOCOS_F["ss"]
+    blocos, (X0, Y0, X1, Y1), ms, ordem = _blocos_tb(Q)
+    w, h = X1 - X0, Y1 - Y0
+    s, d_ = b["sombra"], b["sombra"]["dist_m"] * Q.px_m * k
+
+    def reduzir(a):
+        return cv2.resize(a.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
     fator = np.ones((h, w), np.float32)
     cr = max(1, int(round(q["cresce_m"] * Q.px_m * k)))
-    for i, mf in enumerate(ms):
+    for j, i in enumerate(ordem):
+        mf = ms[i]
         a = reduzir(mf)
-        baixo = reduzir(np.maximum.reduce(ms[:i])) if i else np.zeros((h, w), np.float32)
-        cima = reduzir(np.maximum.reduce(ms[i + 1:])) if i + 1 < len(ms) else np.zeros((h, w), np.float32)
+        antes, depois = [ms[t] for t in ordem[:j]], [ms[t] for t in ordem[j + 1:]]
+        baixo = reduzir(np.maximum.reduce(antes)) if antes else np.zeros((h, w), np.float32)
+        cima = reduzir(np.maximum.reduce(depois)) if depois else np.zeros((h, w), np.float32)
         dire = reduzir(cv2.GaussianBlur(cv2.warpAffine(mf, np.float32([[1, 0, -d_], [0, 1, d_]]), (w * k, h * k)),
                                         (0, 0), s["sig_m"] * Q.px_m * k)) * s["forca"]
         cont = reduzir(cv2.GaussianBlur(cv2.dilate(mf, np.ones((2 * cr + 1,) * 2, np.uint8)), (0, 0),
@@ -1182,9 +1261,11 @@ def elevador_tb(Q, img):
 # o recinto achado passa de `vazou` vezes a área escrita no rótulo, e a busca parte do ponto do PDF, como antes (agora
 # com os carros como obstáculo). Na garagem, o ponto do PDF está sobre o carro do meio e o rótulo encostava no capô: a
 # busca parte do meio da faixa livre acima dos carros, sobre o do meio (`pontos_px`, entre o tracejado, a 1293 px, e o
-# capô, a 1372 px).
+# capô, a 1372 px). No quarto do motorista, o piso livre entre a cama e a parede tem ~1 m e o nome numa linha ia até o
+# criado-mudo redondo (2 px dele): em duas linhas, no mesmo corpo (`opcoes`, as opções do rótulo, como os ajustes à mão).
 ROTULOS_CENTRO_TB = {"manter": ("JARDIM DE INVERNO", "JARDIM", "SPA", "PISCINA", "PRAINHA", "SHAFT"),
-                     "entre": 1.15, "tol": 12, "folga_px": 1, "vazou": 1.6, "pontos_px": {"GARAGEM": (2534, 1331)}}
+                     "entre": 1.15, "tol": 12, "folga_px": 1, "vazou": 1.6, "pontos_px": {"GARAGEM": (2534, 1331)},
+                     "opcoes": {"QUARTO MOTORISTA": {"quebra": ["QUARTO", "MOTORISTA"]}}}
 
 
 def rotulos_centro_tb(Q, img):
@@ -1267,6 +1348,10 @@ def rotulos_centro_tb(Q, img):
     nomes = {r[0] for r in mover}
     try:
         aj = [a for a in Q.q["ajustes"] if a[0] in nomes]
+        for r1 in mover:                            # as opções pedidas (o último ajuste do mesmo rótulo vale)
+            if r1[0] in q["opcoes"]:
+                cx_, cy_ = Q.p2q(r1[2][0], r1[2][1])
+                aj.append((r1[0], (cx_ / esc, cy_ / esc), (0.0, 0.0), q["opcoes"][r1[0]]))
         out = F.rotulos(Q, out, [r for r in rot if r[0] in nomes], aj,
                         granito=F.A.granito(out, Q.q.get("granito_lum_max", 125)))
     finally:
@@ -1274,6 +1359,58 @@ def rotulos_centro_tb(Q, img):
     print(f"    rótulos: {len(mover)} no centro do ambiente (ou no livre mais perto dele), os carros como obstáculo; "
           f"o texto antigo saiu ({n_px} px); {len(cap['rot']) - len(mover)} ficam (jardins, piscinas e SHAFT)")
     return out
+
+
+# 26. O matelassê nas outras camas (usuário: "aplique o hachurado do cobre leito da cama da suite às demais camas."): o
+# cobre-leito da suíte master (`F.cama_master` com `acolchoado`) tem o pesponto em losangos de 12 cm e o relevo de cada
+# losango (a luz do alto à direita). Nas outras seis camas (a roupa de cama da biblioteca, `ajustes_casab.CAMAS_B`), o
+# mesmo matelassê, multiplicado sobre o edredom: da dobra do lençol aos pés, menos a manta ou faixa bordô atravessada
+# (as medidas de `elementos.ROUPA_CAMA` de cada tipo, com `folga_m`), dentro do colchão (a `borda` das camas); os
+# travesseiros, as almofadas, a dobra e a manta ficam lisos. O losango na mesma grade do PDF da master.
+MATELASSE_TB = {"passo_m": 0.12, "pesponto": 0.045, "largura_pt": 0.35, "acolchoado": CAMA_MASTER_TB["acolchoado"],
+                "folga_m": 0.015, "ss": 4, "fora": ("suíte master",)}
+
+
+def matelasse_camas_tb(Q, img):
+    sys.path.insert(0, str(F.B.RAIZ / "_texturas"))
+    import elementos
+    q, k = MATELASSE_TB, MATELASSE_TB["ss"]
+    out = img.astype(np.float32)
+    (ax, ay), (bx, by) = Q.q2p(0, 0), Q.q2p(1000, 1000)
+    sx_, sy_ = (bx - ax) / 1000, (by - ay) / 1000                 # pt por px
+    passo = q["passo_m"] * 56.69
+    feitas = []
+    for nome, r, cab, tipo in F.B.CAMAS_B["camas"]:
+        if nome in q["fora"]:
+            continue
+        p_ = elementos.ROUPA_CAMA[tipo]
+        e = F.B.CAMAS_B["borda"]
+        (u0, v0), (u1, v1) = Q.p2q(r[0] + e, r[1] + e), Q.p2q(r[2] - e, r[3] - e)
+        X0, Y0, X1, Y1 = int(np.floor(u0)) - 1, int(np.floor(v0)) - 1, int(np.ceil(u1)) + 2, int(np.ceil(v1)) + 2
+        w, h = X1 - X0, Y1 - Y0
+        xs = X0 + (np.arange(w * k)[None, :] + 0.5) / k
+        ys = Y0 + (np.arange(h * k)[:, None] + 0.5) / k
+        xpt, ypt = ax + xs * sx_, ay + ys * sy_
+        dentro = ((xs >= u0) & (xs <= u1) & (ys >= v0) & (ys <= v1)).astype(np.float32)
+        comp = ((u1 - u0) if cab in ("esq", "dir") else (v1 - v0)) / Q.px_m
+        X = {"esq": (xs - u0), "dir": (u1 - xs), "baixo": (v1 - ys), "cima": (ys - v0)}[cab] / Q.px_m
+        X = np.broadcast_to(X, dentro.shape)
+        m0, m1 = p_["manta"][0] * comp, p_["manta"][1] * comp
+        f_ = q["folga_m"]
+        zona = dentro * (X >= p_["dobra"][1] + f_) * ~((X > m0 - f_) & (X < m1 + f_))
+        u, v = (xpt + ypt) / passo, (xpt - ypt) / passo
+        lp = q["largura_pt"]
+        pesp = np.maximum(np.exp(-((u - np.round(u)) * passo / lp) ** 2), np.exp(-((v - np.round(v)) * passo / lp) ** 2))
+        alt = np.minimum(np.abs(u - np.round(u)), np.abs(v - np.round(v))) * 2
+        alt = cv2.GaussianBlur(np.clip(alt, 0, 1).astype(np.float32) ** 0.6, (0, 0), 0.3 * k)
+        gy, gx = np.gradient(alt * passo * Q.px_m / 56.69 * k)
+        fator = (1 - q["pesponto"] * pesp) * (1 + q["acolchoado"] * np.clip(gx * 0.7 - gy * 0.7, -1, 1))
+        zona = cv2.GaussianBlur(zona.astype(np.float32), (0, 0), 0.4 * k)
+        f = cv2.resize((1 + zona * (fator - 1)).astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+        out[Y0:Y1, X0:X1] *= f[..., None]
+        feitas.append(nome)
+    print(f"    matelassê da suíte master no edredom das outras camas ({'; '.join(feitas)})")
+    return np.clip(out, 0, 255).astype(np.uint8)
 
 
 def pedidos_tb(img):
@@ -1300,6 +1437,8 @@ def pedidos_tb(img):
     img = piso_cortina_tb(Q, img)
     img = marcenaria_tb(Q, img)
     img = estofados_pdf_tb(Q, img, ESTOFADOS_SUITES_TB, "suíte 1 e suíte 2")
+    img = matelasse_camas_tb(Q, img)
+    img = ordem_blocos_tb(Q, img)
     img = sombra_blocos_tb(Q, img)
     img = elevador_tb(Q, img)
     return rotulos_centro_tb(Q, img)
