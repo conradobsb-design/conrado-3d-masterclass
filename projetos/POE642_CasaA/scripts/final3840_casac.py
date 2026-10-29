@@ -853,6 +853,67 @@ def cadeiras_mesas_t(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# Revisão de 29/10/26, item 9 (OK do usuário: "pode aplicar"): as cadeiras das mesas de trabalho (quarto 1, quarto 3 e
+# suíte master) tinham o contorno cinza grosso e serrilhado do PDF (o traço de 2 px em 1x, em degraus). Como as cadeiras
+# da Casa D, no mesmo modelo: a silhueta do PDF em 4x (`ss`), com antialias; o estofado com a cor do miolo mais perto
+# (os traços velhos saem, a sombra do tampo fica); a beira, `aro_px4` em 4x, a `aro_tom` da cor; as costuras de dentro
+# do PDF em traço fino e macio (`costura_px4`, a `costura_tom` da cor); em volta, o piso refeito no anel por onde o traço
+# velho passava da silhueta (só ali: a sombra da peça em volta fica). O tampo da mesa (com 1 px de borda) e a parte da
+# cadeira sob ele não mudam. A beira vai mais escura que nas cadeiras da Casa D (o estofado claro sobre a madeira média:
+# a 74%, ela se perdia no piso).
+CADEIRAS_CONTORNO_TC = {"ss": 4, "aro_px4": 3, "aro_tom": 0.58, "costura_px4": 2, "costura_tom": 0.70,
+                        "costura_forca": 0.8, "margem_px": 6}
+
+
+def cadeiras_contorno_tc(Q, img):
+    from scipy import ndimage
+    q = CADEIRAS_CONTORNO_TC
+    k, m_ = q["ss"], q["margem_px"]
+    out = img.astype(np.float32)
+    for nome, cad, mesa in CADEIRAS_MESAS_TC["pares"]:
+        x0, y0, x1, y1 = F.ret_q(Q, cad)
+        X0, Y0, X1, Y1 = x0 - m_, y0 - m_, x1 + m_, y1 + m_
+        h, w = Y1 - Y0, X1 - X0
+        sil4 = np.zeros((h * k, w * k), np.uint8)
+        tra4 = np.zeros_like(sil4)
+        for d in Q.desenhos:
+            r = d["rect"]
+            if d.get("layer") != "ARQ_LAYOUT HUMANIZAÇÃO" or not (r.x0 >= cad[0] - 0.5 and r.y0 >= cad[1] - 0.5
+                                                                  and r.x1 <= cad[2] + 0.5 and r.y1 <= cad[3] + 0.5):
+                continue
+            for c in Q.caminhos(d):
+                p = np.int32(np.round((c - (X0, Y0)) * k))
+                if d["type"] in ("f", "fs") and len(c) >= 3:
+                    cv2.fillPoly(sil4, [p], 255)
+                if d["type"] in ("s", "fs") and len(c) >= 2:
+                    cv2.polylines(tra4, [p], False, 255, q["costura_px4"], cv2.LINE_AA)
+        ea = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * q["aro_px4"] + 1,) * 2)
+        aro4 = cv2.subtract(sil4, cv2.erode(sil4, ea))
+        cos4 = cv2.bitwise_and(tra4, cv2.erode(sil4, ea))                # só as costuras de dentro
+        rd = lambda a: cv2.resize(a.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+        A, R, L = rd(sil4), rd(aro4), rd(cos4) * q["costura_forca"]
+        reg = out[Y0:Y1, X0:X1]
+        livre = np.ones((h, w), bool)                                    # o tampo da mesa, com a borda, não muda
+        mx0, my0, mx1, my1 = F.ret_q(Q, mesa)
+        livre[max(0, my0 - Y0 - 1):max(0, my1 - Y0 + 1), max(0, mx0 - X0 - 1):max(0, mx1 - X0 + 1)] = False
+        # o estofado: o miolo sem os traços velhos (os do PDF, 1 px mais largos)
+        velho = cv2.dilate((rd(tra4) > 0.1).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+        miolo = cv2.erode((A > 0.99).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+        tecido = miolo & ~velho & livre
+        _, (iy, ix) = ndimage.distance_transform_edt(~tecido, return_indices=True)
+        C = reg[iy, ix]
+        # o piso: só onde o traço velho passava da silhueta
+        anel = velho | (A > 0.01)
+        piso = cv2.inpaint(np.clip(reg, 0, 255).astype(np.uint8), (anel & livre).astype(np.uint8) * 255, 2,
+                           cv2.INPAINT_TELEA).astype(np.float32)
+        cor = C * (1 - (1 - q["aro_tom"]) * R[..., None])
+        cor = cor * (1 - L[..., None]) + C * q["costura_tom"] * L[..., None]
+        novo = piso * (1 - A[..., None]) + cor * A[..., None]
+        reg[:] = np.where((anel & livre)[..., None], novo, reg)
+        print(f"    cadeira do {nome}: a silhueta do PDF em {k}x, o contorno liso e mais fino, as costuras macias")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
 # A adega (usuário, 27/10/26, vendo a final: "adicione a prateleira de vinhos como fizemos na outra casa, ao fundo da
 # adega. não sobreponha o rotulo nessa prateleira"; "as garrafas em escala"). No PDF da Casa C a adega (1,26 x 4,30 m,
 # as folhas de vidro na parede da esquerda) não tem nada dentro: a prateleira entra na parede do fundo, a da direita, de
@@ -1399,10 +1460,16 @@ def travertino_bruto_tc(Q, h, w, semente, veio, faixa, poros, poro_esc, forca=1.
 # em branco (o preenchimento branco do PDF). Agora: o piso por baixo (o travertino da varanda, `incluir` nos pisos); a
 # luz de cima, um clarão suave no retângulo; a moldura e o X em tracejado regular, com um traço inteiro em cada canto e
 # no cruzamento do X (o tracejado é repartido para caber exato em cada lado e em cada diagonal).
+# Revisão de 29/10/26, itens 1 a 4 (OK do usuário: "pode aplicar"; a regra de 28/10: "os tracejados são ou brancos ou
+# pretos, a depender do fundo"): o tracejado ia em cinza (78); agora em preto nítido nos pisos claros (a varanda master,
+# o BH master 2 e o BH master 1) e em branco na madeira (os closets master 1 e 2). `fundo`, um por retângulo.
 CLARABOIAS_T = {"rets": [(578.1, 468.9, 782.1, 506.2), (782.1, 616.0, 809.7, 679.9), (797.8, 1050.6, 866.2, 1079.2),
                          (703.8, 1087.9, 722.5, 1144.6), (592.1, 538.0, 728.2, 563.6)],
+                "fundo": ["claro", "madeira", "madeira", "claro", "claro"],
+                "tracos": {"claro": {"cor": (30, 30, 30), "forca": 0.95},
+                           "madeira": {"cor": (234, 234, 232), "forca": 0.92}},
                 "luz": 0.13, "luz_cor": (252, 252, 250), "luz_sig_px": 1.4,
-                "cor": (78, 78, 80), "larg_px": 1.35, "forca": 0.88, "traco_m": 0.15, "vao_m": 0.085, "ss": 4}
+                "larg_px": 1.35, "traco_m": 0.15, "vao_m": 0.085, "ss": 4}
 
 
 def _tracejado(m, p0, p1, traco, vao, larg, ss):
@@ -1427,7 +1494,8 @@ def claraboias_t(Q, img):
     q = CLARABOIAS_T
     out = img.astype(np.float32)
     ss = q["ss"]
-    for r in q["rets"]:
+    for r, fundo in zip(q["rets"], q["fundo"]):
+        tr_ = q["tracos"][fundo]
         x0, y0, x1, y1 = F.ret_q(Q, r)
         X0, Y0, X1, Y1 = x0 - 6, y0 - 6, x1 + 6, y1 + 6
         (a, b), (c, d) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
@@ -1443,9 +1511,10 @@ def claraboias_t(Q, img):
                        ((a, b), (c, d)), ((c, b), (a, d))):
             _tracejado(m, p0, p1, tr, va, q["larg_px"], ss)
         al = cv2.resize(m.astype(np.float32) / 255, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)[..., None]
-        al *= q["forca"]
-        reg[:] = reg * (1 - al) + np.float32(q["cor"]) * al
-    print(f"    claraboias: {len(q['rets'])} com o piso por baixo, a luz de cima e a moldura e o X em tracejado regular")
+        al *= tr_["forca"]
+        reg[:] = reg * (1 - al) + np.float32(tr_["cor"]) * al
+    print(f"    claraboias: {len(q['rets'])} com o piso por baixo, a luz de cima e a moldura e o X em tracejado regular "
+          f"(preto nos pisos claros, branco na madeira)")
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
@@ -1674,19 +1743,51 @@ def soleiras_t(Q, img):
 
 # 29/10, na mesma porta: o espelho da limpeza das esquadrias copiava a borda da parede da direita (a coluna de
 # antialias, cinza 140) para o meio da faixa entre a folha aberta e a parede, uma segunda linha ao longo da folha; e na
-# ponta de baixo da folha ficava o fim da folha antiga do render, um traço escuro. Nas faixas `rets` (pt), o travertino
-# das mesmas linhas, `desloca_px` à esquerda (os estratos são deitados e seguem contínuos).
-RESTOS_FOLHA_TC = {"rets": [(2213.4, 1006.3, 2218.6, 1063.7), (2206.7, 1063.2, 2212.9, 1063.7)], "desloca_px": -12}
+# ponta de baixo da folha ficava o fim da folha antiga do render, um traço escuro. Nas faixas `rets` (pt), o piso das
+# mesmas linhas, (dx, dy) px adiante (os estratos do travertino e as réguas da madeira são deitados e seguem contínuos).
+# Revisão de 29/10/26 (OK do usuário: "pode aplicar"), o mesmo em mais três portas:
+# - Louceiro 1 (item 6): o traço escuro na ponta de baixo da folha, a linha fraca entre ela e a parede (a borda da
+#   parede espelhada), os pontos escuros sob as orelhas dos batentes e a faixa escura do render sob as paredes do vão
+#   (no louceiro, 2 px abaixo da face do PDF); as frestas escuras entre os batentes e as paredes, com a soleira do vão;
+#   a beira direita da folha, em claro e escuro
+#   alternados na parte de baixo, no tom dela mais acima (`colunas`: x, linhas, linhas de referência, em px); e os dois
+#   batentes do PDF (`batentes`, pt), claros com o contorno fino, como os das portas de vidro (o da esquerda saía
+#   escuro);
+# - Quarto 2 (item 7): a linha escura entre a folha aberta e o armário (a borda do armário espelhada);
+# - BH master 1 (item 8): a pinta marrom junto ao topo da folha aberta, a beira da folha ali, e o ponto escuro do outro
+#   lado da parede, no closet master 1 (o fim da folha antiga da porta dele).
+RESTOS_FOLHA_TC = {"rets": [((2213.4, 1006.3, 2218.6, 1063.7), (-12, 0)), ((2206.7, 1063.2, 2212.9, 1063.7), (-12, 0)),
+                            ((2033.0, 865.7, 2040.1, 867.1), (-12, 0)), ((2042.5, 827.7, 2042.9, 867.1), (-2, 0)),
+                            ((1995.0, 827.7, 1999.3, 828.2), (0, 1)), ((2040.6, 827.7, 2042.9, 828.2), (0, 1)),
+                            ((1968.4, 825.8, 1996.4, 827.3), (0, 3)), ((2043.4, 825.8, 2045.8, 827.3), (0, 3)),
+                            ((1995.9, 822.0, 1997.4, 826.3), (6, 0)), ((2040.6, 822.0, 2041.0, 825.4), (-6, 0)),
+                            ((1478.5, 734.7, 1480.8, 766.5), (4, 0)),
+                            ((721.7, 716.6, 723.2, 726.6), (3, 0)), ((737.9, 727.1, 743.1, 729.5), (6, 0))],
+                   "colunas": [(2274, (655, 672), (636, 655)), (886, (517, 527), (528, 540))],
+                   "batentes": [(1997.3, 821.6, 1999.3, 825.8), (1994.2, 825.8, 1998.1, 826.9),
+                                (1994.7, 820.5, 1998.7, 821.6), (2037.8, 821.6, 2039.8, 825.8),
+                                (2038.9, 825.8, 2042.9, 826.9), (2038.4, 820.5, 2042.3, 821.6)]}
 
 
 def restos_folha_tc(Q, img):
+    import final3840_casaa as FA
+    q = RESTOS_FOLHA_TC
     out = img.copy()
-    d = RESTOS_FOLHA_TC["desloca_px"]
-    for r in RESTOS_FOLHA_TC["rets"]:
+    for r, (dx, dy) in q["rets"]:
         x0, y0, x1, y1 = F.ret_q(Q, r)
-        out[y0:y1, x0:x1] = img[y0:y1, x0 + d:x1 + d]
-    print(f"    Louceiro 2: sem a segunda linha atrás da folha e sem o traço na ponta dela ({len(RESTOS_FOLHA_TC['rets'])} "
-          f"faixas)")
+        out[y0:y1, x0:x1] = img[y0 + dy:y1 + dy, x0 + dx:x1 + dx]
+    for x, (a, b), (ra, rb) in q["colunas"]:
+        out[a:b, x] = np.median(out[ra:rb, x], axis=0).astype(np.uint8)
+    pv = FA.PORTAS_VIDRO
+    FA.PORTAS_VIDRO = dict(pv, portas=[{"nome": "batentes do Louceiro 1", "batentes": q["batentes"], "folhas": [],
+                                        "montante_pt": 0.6}])
+    try:
+        out = FA.portas_vidro(Q, out)
+    finally:
+        FA.PORTAS_VIDRO = pv
+    print(f"    portas do Louceiro 2, do Louceiro 1, do Quarto 2 e do BH master 1: sem a segunda linha atrás da folha "
+          f"nem os restos da folha antiga ({len(q['rets'])} faixas, {len(q['colunas'])} beiras); os batentes do "
+          f"Louceiro 1")
     return out
 
 
@@ -1831,6 +1932,21 @@ def trechos_cortina_tc(chave, orig):
     return sorted(trechos, key=lambda t: (t[0], t[2], t[3]))
 
 
+# Revisão de 29/10/26, item 5 (OK do usuário: "pode aplicar"): no hall, uma linha cinza fina e contínua de 1200 a
+# 1454 px, em 2389, que o PDF não tem: o trilho da cortina do vidro do jardim (de pé, em 2389,8 pt), que `F.cortinas`
+# levava "de parede a parede" para cima, atravessando o hall e o aparador até a parede de cima. O trilho vai só ao longo
+# do vidro: na faixa `pt`, volta o que havia antes das cortinas.
+TRILHO_HALL_TC = {"pt": (2145.0, 1365.1, 2151.2, 1606.8)}
+
+
+def trilho_hall_tc(Q, img, antes):
+    out = img.copy()
+    x0, y0, x1, y1 = F.ret_q(Q, TRILHO_HALL_TC["pt"])
+    out[y0:y1, x0:x1] = antes[y0:y1, x0:x1]
+    print("    hall: o trilho da cortina do jardim só ao longo do vidro, sem atravessar o hall")
+    return out
+
+
 def cortinas_t(Q, img):
     sys.path.insert(0, str(RAIZ / "_blocos"))
     import blocos
@@ -1933,7 +2049,7 @@ def passos_terreo_c(Q, ini, M):
                                               "estar: os dois vasos junto ao sofá curvo")),
         ("vasos", lambda im: F.vasos_cor(Q, im)),
         ("biblioteca", lambda im: biblioteca_c(Q, im)),
-        ("cadeiras", lambda im: cadeiras_mesas_t(Q, im)),
+        ("cadeiras", lambda im: cadeiras_contorno_tc(Q, cadeiras_mesas_t(Q, im))),
         ("moveis", lambda im: moveis_tc(Q, im)),
         ("carros", lambda im: F.carros(Q, im, M)),
         ("deck", lambda im: deck_detalhes_c(Q, im)),
@@ -1944,7 +2060,7 @@ def passos_terreo_c(Q, ini, M):
         ("soleiras", lambda im: soleira_elevador(Q, soleiras_t(Q, im))),
         ("esquadrias", lambda im: restos_folha_tc(Q, portas_jardins_t(Q, jardins_vidros_t(Q, pos_esquadrias_t(
             Q, janelas_s(Q, F.esquadrias_terreo(Q, im, parede=cinza), JANELAS_T), im))))),
-        ("cortinas", lambda im: cortinas_t(Q, im)),
+        ("cortinas", lambda im: trilho_hall_tc(Q, cortinas_t(Q, im), im)),
         ("escadas", lambda im: escada_estreita_t(Q, degraus_largos_t(Q, im))),
         ("projecoes", lambda im: projecoes_t(Q, im)),
         ("seta", lambda im: seta_t(Q, im)),

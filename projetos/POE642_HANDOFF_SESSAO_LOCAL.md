@@ -3724,3 +3724,15 @@ Pedido do usuário: "vamos para casa D, depois C e depois B". Revisão trecho a 
   9. as cadeiras das mesas do quarto 1, do quarto 3 e da suíte master: o contorno cinza grosso e serrilhado; proposta: o contorno limpo das cadeiras da Casa D (a beira macia e um pouco mais escura, sem franja), no mesmo modelo.
 
 Mapa: `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_revisao_mapa.jpg` (a final com os números e, em cada item, a final ao lado da base do PDF).
+
+### A revisão da Casa C aplicada (29/10/26)
+
+OK do usuário: "pode aplicar". Os 9 itens no Térreo:
+- **1 a 4, claraboias:** as cinco do PDF (varanda master, BH master 1, BH master 2, closets master 1 e 2) tinham a moldura e o X em tracejado cinza; agora em preto nos pisos claros e em branco na madeira.
+- **5, hall:** a linha cinza era o trilho da cortina do vidro do jardim, levado "de parede a parede" pelo hall e pelo aparador até a parede de cima; o trilho fica só ao longo do vidro.
+- **6, Louceiro 1:** como o Louceiro 2: a folha sem o tracejado claro e escuro na beira e sem o traço na ponta, sem a linha fraca atrás dela, os dois batentes claros do PDF; e, junto ao vão, as frestas escuras entre os batentes e as paredes e a faixa escura do render sob a parede (2 px abaixo da face do PDF), achadas ao aplicar.
+- **7, Quarto 2:** sem a linha escura entre a folha aberta e o armário.
+- **8, BH master 1:** sem a pinta marrom junto ao topo da folha e sem o ponto escuro do outro lado da parede, no closet master 1.
+- **9, cadeiras dos quartos 1 e 3 e da suíte master:** o contorno liso e mais fino, com a beira um pouco mais escura que o estofado e as costuras macias; o piso em volta limpo.
+
+Antes e depois (o antes é a final de f9c1708): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_revisao_{x_varanda_bh_master1,x_bh_master2,x_closet_master1,x_closet_master2,hall_trilho,louceiro1,quarto2_porta,bh_master1_porta,cadeiras}_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos. Aguarda o OK da Casa C; a seguir, a Casa B.
