@@ -1,4 +1,4 @@
-"""Casa A: os pedidos do usuário de 29/10/26 à noite, sobre as finais da revisão de 29/10 (`revisao_casaa_2910`).
+r"""Casa A: os pedidos do usuário de 29/10/26 à noite, sobre as finais da revisão de 29/10 (`revisao_casaa_2910`).
 
 Cada pedido veio com um recorte da planta do Térreo; aqui, um passo por pedido, na ordem de `pedidos_terreo_ta`. O
 Térreo novo segue para os outros dois pavimentos: no 1º Pavimento, o Térreo nublado em volta e nos vazios troca onde o
@@ -7,11 +7,13 @@ Térreo mudou (`nublado_1pav_ta`), e as camas ganham o matelassê; no Subsolo, a
 - `copiar_textura`: o buraco recebe o mesmo material de outro lugar da final, no deslocamento em que o entorno do buraco
   casa melhor (cv2.matchTemplate com máscara), trecho a trecho;
 - `espelhar_faixa`: uma faixa fina recebe o material de fora dela, refletido na borda (sem mancha, com o desenho dele);
-- `_piso_suave`: o buraco recebe o tom de fundo do piso em volta (média normalizada) e o desenho fino de uma faixa
-  deslocada (o veio do travertino continua, sem a caixa clara de um trecho copiado inteiro).
+- `piso_refeito` (a 2ª leva, seção 13): a zona dos móveis inteira recebe o travertino tecido de novo, emendado ao piso
+  de fora pela membrana (sem degrau de tom); por cima, os móveis de novo, com o contorno limpo e a sombra suave.
 
-Uso (sobre as finais da revisão, as do commit 219b22b; o Subsolo parte da final de antes da revisão, a do commit 1ccaaa3):
-  python3 pedidos_terreo_casaa_2910.py --pasta_antes <pasta com as finais de 219b22b> --antes_subsolo <png de 1ccaaa3>
+Uso (sobre as finais da revisão, as do commit 219b22b; o Subsolo parte da final de antes da revisão, a do commit 1ccaaa3;
+`--pasta_comparar`, opcional, com as finais da 1ª leva, a do commit 387a97f, para os antes e depois da 2ª leva):
+  python3 pedidos_terreo_casaa_2910.py --pasta_antes <finais de 219b22b> --antes_subsolo <png de 1ccaaa3> \
+      --pasta_comparar <finais de 387a97f>
 """
 import sys
 from pathlib import Path
@@ -399,7 +401,12 @@ ROTULOS_CENTRO_TA = {"manter": ("ELEVADOR", "SHAFT", "PROJ. CLARABOIA", "JARDIM"
                                     "ARQ_BANCADAS", "ARQ_ELEMENTOS FIXOS", "EST_PILAR", "DOC_TEXTOS",
                                     "ARQ_ESCADAS E RAMPAS"),
                      "folga_px": 3, "obst_px": 2, "escuro_lum": 125, "branco": (250, 250, 250), "vazou": 1.6,
-                     "tapete_m2": 3.0, "minimo": 0.45, "alvo_pdf": ("SALA DE ESTAR", "HALL INTERNO", "SALA DE JANTAR", "VARANDA")}
+                     "tapete_m2": 3.0, "minimo": 0.45, "alvo_pdf": ("SALA DE ESTAR", "HALL INTERNO", "SALA DE JANTAR", "VARANDA"),
+                     "tom_sigma_px": 4.0, "corpos": (1.3, 1.15, 1.0), "aberto_px": 30,
+                     # a garagem: a faixa livre acima dos carros, no meio do carro do centro; o quarto do motorista: o
+                     # piso livre abaixo da cama
+                     "regioes_px": {"GARAGEM": (2165, 1310, 2700, 1640)},
+                     "alvos_px": {"GARAGEM": (2432, 1329), "Q. MOTORISTA": (2463, 1266)}}
 
 
 def rotulos_tirar_ta(Q, img, q=None):
@@ -428,6 +435,15 @@ def rotulos_tirar_ta(Q, img, q=None):
     falhou = copiar_textura(out, buraco, valido, busca=150, trecho=14, anel=4, perto=4)
     if falhou.any():
         out = cv2.inpaint(out, (falhou * 255).astype(np.uint8), 3, cv2.INPAINT_TELEA)
+    # o tom: o do entorno (média normalizada, sem os traços e os pontos); do trecho copiado, só o desenho fino (sem o
+    # remendo mais claro ou mais escuro que o piso em volta)
+    s_ = q["tom_sigma_px"]
+    V = (~buraco & ~_salientes(img, k=21, lim=14)).astype(np.float32)
+    B = buraco.astype(np.float32)
+    I0, F = img.astype(np.float32), out.astype(np.float32)
+    tom_fora = cv2.GaussianBlur(I0 * V[..., None], (0, 0), s_) / np.maximum(cv2.GaussianBlur(V, (0, 0), s_), 1e-3)[..., None]
+    tom_copia = cv2.GaussianBlur(F * B[..., None], (0, 0), s_) / np.maximum(cv2.GaussianBlur(B, (0, 0), s_), 1e-3)[..., None]
+    out[buraco] = np.clip(np.round(F + tom_fora - tom_copia), 0, 255).astype(np.uint8)[buraco]
     print(f"    rótulos: {len(tirados)} tirados para os pedidos (o piso copiado do entorno; voltam no centro do "
           f"ambiente no fim)")
     return out, tirados, aj
@@ -437,16 +453,30 @@ def rotulos_centro_ta(Q, img, tirados, aj, q=None):
     import final3840_casab as F
     import retoque_1pav_casae as R1
     import revisao_casaa_2910 as R
+    import re
     q = q or ROTULOS_CENTRO_TA
     H, W = img.shape[:2]
     e2000 = W / 2000
     esc = FA.A.LARGURA / 2000
-    # o centro atual de cada rótulo (o desenho dele) e a caixa
-    caixas = []
+
+    def ajuste(r):
+        """O ajuste do rótulo na final (o desvio e as opções), se houver."""
+        ax, ay = Q.p2q(*r[2])
+        for a_ in aj:
+            if a_[0] == r[0] and np.hypot(ax - a_[1][0] * e2000, ay - a_[1][1] * e2000) < 25 * e2000:
+                op = a_[3] if len(a_) > 3 else {}
+                return a_[2], (op if isinstance(op, dict) else {"corpo": op})
+        return (0.0, 0.0), {}
+
+    def alfa(r, desvio, op):
+        ax, ay = Q.p2q(*r[2])
+        return R._alfa_rotulo(Q, (H, W), r, [(r[0], (ax / e2000, ay / e2000), desvio, op)])
+
+    # o centro atual de cada rótulo (o desenho dele, no corpo da final)
+    pontos = []
     for r in tirados:
-        a = R._alfa_rotulo(Q, (H, W), r, aj)
-        caixas.append(R._caixa(a))
-    pontos = [((c[0] + c[2]) / 2, (c[1] + c[3]) / 2) for c in caixas]
+        c = R._caixa(alfa(r, *ajuste(r)))
+        pontos.append(((c[0] + c[2]) / 2, (c[1] + c[3]) / 2))
     guardar = (F.vidros_box, F.duchas_box, Q.preencher)
     preencher = Q.preencher
 
@@ -465,7 +495,7 @@ def rotulos_centro_ta(Q, img, tirados, aj, q=None):
                        ss=2, fs=True) > 0.05
     for r in R._rotulos_pav(Q)[0]:                        # os rótulos que ficam também são obstáculo
         if r[0] in q["manter"]:
-            a_ = R._alfa_rotulo(Q, (H, W), r, aj)
+            a_ = alfa(r, *ajuste(r))
             if a_.max() > 0.3:
                 x0_, y0_, x1_, y1_ = R._caixa(a_)
                 obst[y0_:y1_, x0_:x1_] = True
@@ -482,8 +512,8 @@ def rotulos_centro_ta(Q, img, tirados, aj, q=None):
     obst = cv2.dilate(obst.astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
     novos, out = [], img.copy()
     lum = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    import re
-    for i, (r, c) in enumerate(zip(tirados, caixas)):
+    f = q["folga_px"]
+    for i, r in enumerate(tirados):
         area = [float(m_.group(1).replace(",", ".")) for t in r[1] for m_ in [re.search(r"A:\s*([\d,]+)", t[0])] if m_]
         # o recinto: das duas repartições (fechada também pelos vidros e caixilhos, ou só pelas paredes), a de área mais
         # perto da do rótulo
@@ -492,45 +522,54 @@ def rotulos_centro_ta(Q, img, tirados, aj, q=None):
         k_ = int(np.argmin([abs(np.log(max(z, 1e-3))) for z in razao]))
         reg = regs[k_]
         vazou = not area or not (q["minimo"] <= razao[k_] <= q["vazou"]) or reg.sum() < 50
-        if q.get("debug"):
-            print("      ", r[0], area, round(reg.sum() / Q.px_m ** 2, 2), vazou)
-        if vazou:                    # o recinto vazou (ambiente aberto) ou não fechou: o rótulo fica onde está
+        desvio, op = ajuste(r)
+        c0 = R._caixa(alfa(r, desvio, op))
+        if r[0] in q["regioes_px"]:                    # o ambiente aberto com a região livre dada (a garagem)
+            x0_, y0_, x1_, y1_ = q["regioes_px"][r[0]]
             reg = np.zeros_like(reg)
-            reg[c[1]:c[3], c[0]:c[2]] = True
+            reg[y0_:y1_, x0_:x1_] = True
+        elif vazou:                                    # o recinto vazou (ambiente aberto) ou não fechou: fica perto
+            m_ = q["aberto_px"]                        # de onde está
+            reg = np.zeros_like(reg)
+            reg[max(c0[1] - m_, 0):c0[3] + m_, max(c0[0] - m_, 0):c0[2] + m_] = True
         livre = reg & ~obst
-        w, h = c[2] - c[0], c[3] - c[1]
-        f = q["folga_px"]
-        cabe = cv2.erode(livre.astype(np.uint8), np.ones((h + 2 * f, w + 2 * f), np.uint8)).astype(bool)
-        if q.get("debug"):
-            dbg = np.zeros((H, W, 3), np.uint8)
-            dbg[reg] = (80, 80, 80)
-            dbg[livre] = (160, 160, 160)
-            dbg[cabe] = (0, 200, 0)
-            cv2.imwrite(q["debug"] + f"_{r[0].replace(' ', '_').replace('.', '')}.png", dbg)
+        # o corpo: o padrão (`corpos`[0]) onde cabe no piso livre; senão, o nome em duas linhas no mesmo corpo (quando
+        # ele tem duas palavras e a primeira não é abreviada); senão, o compacto
+        palavras = r[0].split()
+        quebra = len(palavras) == 2 and len(palavras[0]) > 2
+        tentativas = [(c_, qb) for c_ in q["corpos"] for qb in ((False, True) if quebra else (False,))]
+        for corpo, qb in tentativas:
+            op_c = {k2: v for k2, v in op.items() if k2 not in ("cor", "quebra")}
+            op_c["corpo"] = corpo
+            if qb:
+                op_c["quebra"] = palavras
+            c = R._caixa(alfa(r, desvio, op_c))
+            w, h = c[2] - c[0], c[3] - c[1]
+            cabe = cv2.erode(livre.astype(np.uint8), np.ones((h + 2 * f, w + 2 * f), np.uint8)).astype(bool)
+            if cabe.any():
+                break
         ys, xs = np.nonzero(reg)
-        gx, gy = xs.mean(), ys.mean()                    # o centro do ambiente (o recinto inteiro)
-        if r[0] in q["alvo_pdf"]:                        # nos ambientes abertos, o centro é o do texto do PDF
+        gx, gy = xs.mean(), ys.mean()                  # o centro do ambiente (o recinto inteiro)
+        if r[0] in q["alvos_px"]:                      # o centro da faixa livre dada (o quarto do motorista, a garagem)
+            gx, gy = q["alvos_px"][r[0]]
+        elif r[0] in q["alvo_pdf"]:                    # nos ambientes abertos, o centro é o do texto do PDF
             gx, gy = Q.p2q(*r[2])
+        cx0, cy0 = (c[0] + c[2]) / 2, (c[1] + c[3]) / 2
         ys2, xs2 = np.nonzero(cabe)
         if len(ys2):
             j = int(np.argmin((xs2 - gx) ** 2 + (ys2 - gy) ** 2))
             tx, ty = float(xs2[j]), float(ys2[j])
-        else:                                            # não cabe em nenhum lugar livre: fica onde está
-            tx, ty = pontos[i]
-        # o desvio novo: do centro atual ao alvo, somado ao desvio que o rótulo já tinha
-        cx0, cy0 = pontos[i]
-        ax, ay = Q.p2q(*r[2])
-        velho = next(((a[2], a[3] if len(a) > 3 else None) for a in aj if a[0] == r[0]
-                      and np.hypot(ax - a[1][0] * e2000, ay - a[1][1] * e2000) < 25 * e2000), ((0.0, 0.0), None))
-        dx, dy = velho[0][0] + (tx - cx0) / esc, velho[0][1] + (ty - cy0) / esc
-        novo = (r[0], (ax / e2000, ay / e2000), (dx, dy)) + ((velho[1],) if velho[1] is not None else ())
-        a = R._alfa_rotulo(Q, (H, W), r, [novo])
+        else:                                          # não cabe em nenhum lugar livre: fica onde está
+            tx, ty = cx0, cy0
+        d_novo = (desvio[0] + (tx - cx0) / esc, desvio[1] + (ty - cy0) / esc)
+        a = alfa(r, d_novo, op_c)
         x0, y0, x1, y1 = R._caixa(a)
         fundo = np.median(lum[y0:y1, x0:x1][a[y0:y1, x0:x1] < 0.05])
         cor = q["branco"] if fundo < q["escuro_lum"] else R1.ROTULOS["cor"]
         out = R._com_rotulo(out, a, cor)
-        novos.append((r[0], (round(cx0), round(cy0)), (round(tx), round(ty))))
-    print("    rótulos no centro do piso livre: " + "; ".join(f"{n} {a}->{b}" for n, a, b in novos))
+        novos.append(f"{r[0]} {corpo:.2f}x{' em 2 linhas' if qb else ''} ({round(pontos[i][0])}, {round(pontos[i][1])})"
+                     f"->({round(tx)}, {round(ty)})")
+    print("    rótulos no centro do piso livre: " + "; ".join(novos))
     return out
 
 
@@ -755,6 +794,39 @@ def AJ_folhas(Q):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# A sombra e a pintura das peças (as de `revisao_casab_2910`, com o arredondamento): a sombra macia vai até a borda da
+# caixa de desenho, que tem de ter a folga dela inteira (`SOMBRA_FOLGA_PX`: o desvio de 0,10 m e a cauda do desfoque);
+# truncada, a cauda escurecia a caixa em 1 nível e a borda dela aparecia no piso como um retângulo.
+SOMBRA_FOLGA_PX = 26
+
+
+def _sombra_piso(img, X0, Y0, a, px_m, sombras=None):
+    """A sombra macia e a de contato (`final3840_casad.SOMBRA_JOGOS_D`) do alfa `a` (com o canto em X0, Y0) no piso, fora
+    da peça; `a` já com a folga para a sombra."""
+    import final3840_casad as D
+    luz = np.ones(a.shape, np.float32)
+    for s in sombras or D.SOMBRA_JOGOS_D:
+        d = np.float32([[1, 0, s["dx_m"] * px_m], [0, 1, s["dy_m"] * px_m]])
+        luz *= 1 - cv2.GaussianBlur(cv2.warpAffine(a, d, a.shape[::-1], flags=cv2.INTER_LINEAR), (0, 0),
+                                    s["sig_m"] * px_m) * s["forca"]
+    h, w = a.shape
+    reg = img[Y0:Y0 + h, X0:X0 + w].astype(np.float32)
+    img[Y0:Y0 + h, X0:X0 + w] = np.clip(np.round(reg * (1 - (1 - luz) * (1 - a))[..., None]), 0, 255).astype(np.uint8)
+    return img
+
+
+def _pintar(img, X0, Y0, w, h, ss, M, cor):
+    """A `cor` (BGR, em ss) nos px da máscara `M` (0 a 1, em ss), levadas ao quadro em área (a borda antisserrilhada)."""
+    def red(x):
+        return cv2.resize(x, (w, h), interpolation=cv2.INTER_AREA)
+    a = red(M)
+    c = red(cor * M[..., None]) / np.maximum(a, 1e-4)[..., None]
+    reg = img[Y0:Y0 + h, X0:X0 + w].astype(np.float32)
+    img[Y0:Y0 + h, X0:X0 + w] = np.clip(np.round(reg * (1 - a[..., None]) + c * a[..., None]), 0, 255).astype(np.uint8)
+    return img
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # 10. As espreguiçadeiras (usuário: "melhorar o aspecto das espreguiçadeiras"): as duas do render (caixas lilás, tortas
 # em relação ao PDF, com rabichos e a sombra borrada) saem: a zona delas recebe o Bege Bahia de novo (tecido por quilting
 # com o Bege Bahia limpo logo acima, `fonte_px`, no tom do entorno). Entram as do PDF (ARQ_LAYOUT HUMANIZAÇÃO, o
@@ -804,10 +876,10 @@ def espreguicadeiras_ta(Q, img, q=None):
                 dobra = np.float32([Q.p2q(*p) for p in ps[:2]])
         pecas.append((canto, dobra))
     # 1. o Bege Bahia de novo na zona das antigas (e da sombra delas)
-    X0 = int(min(c[:, 0].min() for c, _ in pecas)) - 20
-    Y0 = int(min(c[:, 1].min() for c, _ in pecas)) - 20
-    X1 = int(max(c[:, 0].max() for c, _ in pecas)) + 20
-    Y1 = int(max(c[:, 1].max() for c, _ in pecas)) + 20
+    X0 = int(min(c[:, 0].min() for c, _ in pecas)) - SOMBRA_FOLGA_PX
+    Y0 = int(min(c[:, 1].min() for c, _ in pecas)) - SOMBRA_FOLGA_PX
+    X1 = int(max(c[:, 0].max() for c, _ in pecas)) + SOMBRA_FOLGA_PX
+    Y1 = int(max(c[:, 1].max() for c, _ in pecas)) + SOMBRA_FOLGA_PX
     w, h = X1 - X0, Y1 - Y0
     zona = np.zeros((h, w), np.uint8)
     dx, dy = q["desvio_sombra_px"]
@@ -836,7 +908,7 @@ def espreguicadeiras_ta(Q, img, q=None):
         cv2.fillPoly(M, [np.int32(np.round((c - (X0, Y0)) * ss))], 255)
         M = M.astype(np.float32) / 255
         a = cv2.resize(M, (w, h), interpolation=cv2.INTER_AREA)
-        out = RB._sombra_piso_tb(out, X0, Y0, a, k)
+        out = _sombra_piso(out, X0, Y0, a, k)
         dist = cv2.distanceTransform((M > 0.5).astype(np.uint8), cv2.DIST_L2, 5) / ss / k      # m
         mold = (M > 0.5) & (dist <= q["moldura_m"])
         alm = (M > 0.5) & (dist > q["moldura_m"])
@@ -850,7 +922,7 @@ def espreguicadeiras_ta(Q, img, q=None):
         Mm = mold.astype(np.float32)
         tom = np.float32(RB.TONS_TB[q["madeira"]])
         cor_m = tom[None, None, :] * (veio * RB._relevo_tb(M, k, ss))[..., None]
-        out = RB._pintar_tb(out, X0, Y0, w, h, ss, Mm, cor_m)
+        out = _pintar(out, X0, Y0, w, h, ss, Mm, cor_m)
         # a almofada: volume, encosto (do lado da dobra mais perto da ponta), vinco e linho
         Ma = alm.astype(np.float32)
         da = cv2.distanceTransform(alm.astype(np.uint8), cv2.DIST_L2, 5) / ss / k
@@ -870,7 +942,7 @@ def espreguicadeiras_ta(Q, img, q=None):
         lin = cv2.GaussianBlur(rng.normal(0, 1, M.shape).astype(np.float32), (0, 0), 0.8 * ss)
         fator *= 1 + q["linho"] * lin / max(float(lin.std()), 1e-6)
         cor_a = np.float32(q["almofada"])[None, None, :] * fator[..., None]
-        out = RB._pintar_tb(out, X0, Y0, w, h, ss, Ma, cor_a)
+        out = _pintar(out, X0, Y0, w, h, ss, Ma, cor_a)
     print("    espreguiçadeiras: as 2 do PDF, em madeira com a almofada de linho, o encosto e a dobra, a sombra no "
           "Bege Bahia")
     return out
@@ -878,46 +950,14 @@ def espreguicadeiras_ta(Q, img, q=None):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 11. As cadeiras do jantar (usuário: "substituir essas cadeiras pela nossa modelo, integrando suavemente ao piso. as
-# cadeiras devem ser com assento marrom"): o modelo padrão (a cadeira da mesa de 10 lugares da biblioteca,
-# `final3840_casad.jantar_d`, como em `revisao_casaa_2910.jantar_ta`) com o assento em couro marrom (`linho`: o tom na
-# luz da foto); o piso no lugar das antigas não é mais a faixa deslocada inteira (o tom dela destoava em caixas claras):
-# o tom de fundo vem do travertino em volta (a média normalizada, sem os móveis, `tom_sigma_px`) e só o desenho fino (os
-# veios) vem da faixa ao lado.
+# cadeiras devem ser com assento marrom"; depois: "corrigir piso, nas beiradas . note que ficou defeituoso." e "essas
+# imperfeições no piso precisam sair. no entorno das cadeiras, vemos manchas. o piso precisa ter perfeição e fluidez"):
+# o modelo padrão (a cadeira da mesa de 10 lugares da biblioteca, `final3840_casad.jantar_d`, como em
+# `revisao_casaa_2910.jantar_ta`) com o assento em couro marrom (`linho`: o tom na luz da foto). Em volta da mesa e das
+# cadeiras, até `margem_px` (as sombras e os restos das cadeiras antigas, as manchas cinza e a lilás junto ao tampo), o
+# travertino é refeito inteiro (`piso_refeito`); o tampo fica, com a beira na cor dele e a sombra macia no piso.
 JANTAR_MARROM_TA = {"linho": {"tom": (52, 80, 118), "gama": 1.0, "sat_madeira": (0.30, 0.15), "absoluto": True},
-                    "tom_sigma_px": 9.0, "detalhe_sigma_px": 3.0, "margem_px": 70, "transicao_px": 3.0, "escuro": 120}
-
-
-def _piso_suave(img, buraco, piso_lado, valido, q):
-    """No `buraco`, o tom de fundo do piso `valido` em volta (média normalizada) mais o desenho fino de `piso_lado`."""
-    ys, xs = np.nonzero(buraco)
-    m_ = q["margem_px"]
-    y0, y1, x0, x1 = max(ys.min() - m_, 0), ys.max() + m_, max(xs.min() - m_, 0), xs.max() + m_
-    I = img[y0:y1, x0:x1].astype(np.float32)
-    V = (valido[y0:y1, x0:x1] & ~buraco[y0:y1, x0:x1]).astype(np.float32)
-    s = q["tom_sigma_px"]
-    tom = tom_ok = None
-    for f_ in (1, 2.5, 6):                         # onde falta piso válido perto, a média de mais longe
-        num = cv2.GaussianBlur(I * V[..., None], (0, 0), s * f_)
-        den = cv2.GaussianBlur(V, (0, 0), s * f_)[..., None]
-        t_ = num / np.maximum(den, 1e-6)
-        ok_ = den[..., 0] > 0.04
-        if tom is None:
-            tom, tom_ok = t_, ok_
-        else:
-            tom = np.where((ok_ & ~tom_ok)[..., None], t_, tom)
-            tom_ok = tom_ok | ok_
-    if not tom_ok.all():
-        tom[~tom_ok] = np.median(I[V > 0], axis=0)
-    Pl = piso_lado[y0:y1, x0:x1].astype(np.float32)
-    det = Pl - cv2.GaussianBlur(Pl, (0, 0), q["detalhe_sigma_px"])
-    novo = tom + det
-    out = img.astype(np.float32)
-    # a transição: de 0 na borda do buraco a 1 a `transicao_px` px para dentro
-    b = buraco[y0:y1, x0:x1].astype(np.uint8)
-    al = np.clip(cv2.distanceTransform(b, cv2.DIST_L2, 3) / q["transicao_px"], 0, 1)[..., None]
-    reg = out[y0:y1, x0:x1]
-    out[y0:y1, x0:x1] = reg * (1 - al) + novo * al
-    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+                    "margem_px": 16, "semente": 2916}
 
 
 def jantar_marrom_ta(Q, img, q=None):
@@ -925,43 +965,43 @@ def jantar_marrom_ta(Q, img, q=None):
     q = q or JANTAR_MARROM_TA
     qj = dict(RA.JANTAR_TA, linho=q["linho"])
     mesa = qj["mesa_pt"]
+    forma = img.shape[:2]
     cads = [d for d in Q.desenhos if d.get("layer") == qj["camada_cadeiras"] and d["type"] in ("f", "fs")
             and mesa[0] - 35 <= d["rect"].x0 and d["rect"].x1 <= mesa[2] + 35
             and mesa[1] - 35 <= d["rect"].y0 and d["rect"].y1 <= mesa[3] + 35]
     assentos = [d for d in cads if qj["lado_pt"][0] <= min(d["rect"].width, d["rect"].height)
                 and max(d["rect"].width, d["rect"].height) <= qj["lado_pt"][1]]
-    caixas = []
-    for a in assentos:
-        r = a["rect"]
-        grupo = [d["rect"] for d in cads if d["rect"].x0 >= r.x0 - 4 and d["rect"].x1 <= r.x1 + 4
-                 and d["rect"].y0 >= r.y0 - 4 and d["rect"].y1 <= r.y1 + 4]
-        (x0, y0), (x1, y1) = Q.p2q(min(g.x0 for g in grupo), min(g.y0 for g in grupo)), \
-            Q.p2q(max(g.x1 for g in grupo), max(g.y1 for g in grupo))
-        f = qj["folga_px"]
-        caixas.append((int(np.floor(x0)) - f, int(np.floor(y0)) - f, int(np.ceil(x1)) + f, int(np.ceil(y1)) + f))
-    oc = RA._ocupado(Q, qj["livre_px"])
-    traco = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) < qj["traco_cinza"]
-    oc |= cv2.dilate((traco | RA._rotulos_mascara(Q, img.shape[:2])).astype(np.uint8), np.ones((7, 7), np.uint8)) > 0
-    # o tom de fundo: do piso em volta, sem os móveis, os rótulos e os traços escuros (os veios do travertino ficam)
-    valido = ~(RA._ocupado(Q, qj["livre_px"]) | (cv2.dilate(
-        ((cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) < q["escuro"]) | RA._rotulos_mascara(Q, img.shape[:2])).astype(
-            np.uint8), np.ones((7, 7), np.uint8)) > 0))
-    buraco = np.zeros(oc.shape, bool)
-    for x0, y0, x1, y1 in caixas:
-        oc[y0:y1, x0:x1] = True
-        buraco[y0:y1, x0:x1] = True
-    lado, n = RA._piso_ao_lado(img, caixas, oc, qj["busca_px"], qj["suave_px"])
-    # o tampo fica (as caixas encostam nele): o buraco é só fora da mesa
     d_m = next(d for d in Q.desenhos if d.get("layer") == qj["camada_mesa"] and d["type"] in ("f", "fs")
                and max(abs(a_ - b_) for a_, b_ in zip(d["rect"], mesa)) < 0.5)
-    tampo = Q.preencher(lambda d: d is d_m, ss=4) > 0.02
-    buraco &= ~cv2.dilate(tampo.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
-    piso = _piso_suave(img, buraco, lado, valido, q)
-    Qp = RA._QCamadas(Q, {**{(qj["camada_cadeiras"], tuple(a["rect"])): "ARQ_MOBILIÁRIO" for a in assentos},
+    tampo = Q.preencher(lambda d: d is d_m, ss=4)
+    pecas = np.zeros(forma, bool)
+    for d in cads:
+        r = d["rect"]
+        (x0, y0), (x1, y1) = Q.p2q(r.x0, r.y0), Q.p2q(r.x1, r.y1)
+        pecas[int(y0):int(np.ceil(y1)) + 1, int(x0):int(np.ceil(x1)) + 1] = True
+    zona = _dilatar(pecas | (tampo > 0.02), q["margem_px"]) & ~(tampo > 0.98) & ~_paredes_fixas(Q, forma)
+    zona &= ~_outros_moveis(Q, forma, [mesa] + [tuple(d["rect"]) for d in cads])
+    # o tampo: o miolo da final; a beira (antisserrilhada pelo PDF) na cor do miolo mais perto
+    ys, xs = np.nonzero(tampo > 0.001)
+    X0, Y0, X1, Y1 = xs.min() - 2, ys.min() - 2, xs.max() + 3, ys.max() + 3
+    a = tampo[Y0:Y1, X0:X1]
+    miolo = a > 0.98
+    reg = img[Y0:Y1, X0:X1].astype(np.float32)
+    _, rot = cv2.distanceTransformWithLabels((~miolo).astype(np.uint8), cv2.DIST_L2, 5, labelType=cv2.DIST_LABEL_PIXEL)
+    yy, xx = np.nonzero(miolo)
+    idx = np.zeros(rot.max() + 1, int)
+    idx[rot[yy, xx]] = np.arange(len(yy))
+    cor = reg.copy()
+    cor[~miolo] = reg[yy[idx[rot[~miolo]]], xx[idx[rot[~miolo]]]]
+    A, C = np.zeros(forma, np.float32), np.zeros(img.shape, np.float32)
+    A[Y0:Y1, X0:X1], C[Y0:Y1, X0:X1] = a, cor
+    out = piso_refeito(img, zona, q["semente"])
+    out = _colar_peca(Q, out, A, C, sombras=SOMBRA_MESA_TA)
+    Qp = RA._QCamadas(Q, {**{(qj["camada_cadeiras"], tuple(a_["rect"])): "ARQ_MOBILIÁRIO" for a_ in assentos},
                           (qj["camada_mesa"], mesa): "ARQ_MOBILIÁRIO"})
-    out = D_jantar(Qp, piso, piso, qj)
-    print(f"    mesa de jantar: {len(assentos)} cadeiras no modelo padrão, assento em couro marrom, o piso em volta no "
-          f"tom do travertino")
+    out = D_jantar(Qp, out, out, qj)
+    print(f"    mesa de jantar: {len(assentos)} cadeiras no modelo padrão, assento em couro marrom; o travertino em volta "
+          f"refeito ({int(zona.sum())} px), o tampo com a sombra macia")
     return out
 
 
@@ -974,17 +1014,18 @@ def D_jantar(Qp, img, piso, q):
 # 12. O estar da varanda (usuário: "precisamos melhorar muito esse ambiente. são duas mesas de centro que precisam ser
 # bem evidenciadas as suas partes. é uma sobre posta a outra, com tom e sobretom. corrija os contornos das poltronas e
 # adicione uma mesinha redonda de madeira entre elas conforme o pdf. melhore o aspecto do tapete e suas bordas. melhore o
-# aspecto do bancos estofado e seu entorno. abaixo dele, o piso está imperfeito."). O ambiente é refeito do piso para
-# cima, menos o sofá curvo (que fica, com a sombra dele, numa guarda de `guarda_sofa_px`):
-# - o piso (travertino) na zona: tecido por quilting com o travertino limpo da própria varanda (`fonte_piso_px`, só os
-#   espelhos na horizontal: os veios ficam deitados), no tom de fundo do piso em volta;
+# aspecto do bancos estofado e seu entorno. abaixo dele, o piso está imperfeito."; depois: "essa marca em L, começando
+# atrás do banco, precisa sair. o piso travertino bruto precisa ficar perfeito."). O ambiente é refeito do piso para
+# cima, com o sofá curvo de novo por cima (`_estofado`):
+# - o piso (travertino) na zona dos móveis, até `margem_px` deles (com a sombra antiga do banco, que fazia a marca em L):
+#   `piso_refeito`, emendado ao piso de fora sem degrau;
 # - o tapete do PDF (ARQ_LAYOUT HUMANIZAÇÃO), reto, no tom do tapete da final, com a trama do tapete da biblioteca
 #   (`final3840_casad.TAPETE_TRAMA_D`), a faixa de acabamento da borda (`faixa_m`, um tom abaixo) e a sombra curta da
 #   espessura dele no piso;
 # - as duas mesas de centro do PDF (ARQ_MOBILIÁRIO), uma sobre a outra, em carvalho: a de baixo no tom médio, a de cima
 #   no sobretom mais claro, cada uma com o veio, o chanfro e o aro; a de cima faz sombra na de baixo;
 # - as mesinhas redondas do PDF (entre as poltronas e na ponta do sofá) em madeira;
-# - as duas poltronas no modelo padrão (`revisao_casaa_2910.poltronas_ta`), de contorno limpo no piso novo;
+# - as duas poltronas no modelo padrão de contorno limpo (`poltronas_limpas_ta`);
 # - o banco estofado do PDF (DOC_TEXTOS): o quadro fino em madeira, o assento em linho com as três partes (os vincos nas
 #   costuras do PDF) e as duas almofadas das pontas, um tom acima e mais altas, cada peça com volume e sombra.
 VARANDA_TA = {"tapete_pt": (1415.6, 602.9, 1585.7, 744.6), "sofa_pt": (1510.0, 578.9, 1613.6, 692.9),
@@ -994,9 +1035,8 @@ VARANDA_TA = {"tapete_pt": (1415.6, 602.9, 1585.7, 744.6), "sofa_pt": (1510.0, 5
                                                                               (134, 168, 202))],
               "mesinha_tom": (92, 124, 160),
               "mesinhas_pt": [(1408.3, 663.8, 1425.3, 680.8), (1492.6, 590.7, 1509.6, 607.7)],
-              "janela_px": (1556, 340, 1812, 610), "zona_px": 12, "guarda_sofa_px": 9,
-              "fora_px": [(1778, 340, 1812, 402)],                  # a planta junto da ponta do sofá
-              "fonte_piso_px": [(1516, 365, 1582, 445), (1516, 480, 1582, 572)], "p_px": 24, "tom_sigma_px": 22,
+              "janela_px": (1556, 340, 1812, 610), "margem_px": 18,
+              "fora_px": [(1785, 340, 1812, 440)],                  # a planta junto da ponta do sofá
               "faixa_m": 0.035, "faixa": 0.06, "borda_sombra": 0.16, "semente": 2912,
               "banco": {"quadro_pt": (1448.2, 739.5, 1557.8, 763.0), "costuras_x_pt": (1484.7, 1521.3),
                         "almofadas_pt": [(1451.3, 741.1, 1467.7, 761.5), (1538.3, 741.1, 1554.6, 761.5)],
@@ -1035,92 +1075,47 @@ def _madeira_peca(Q, out, M, X0, Y0, w, h, ss, tom, ang, semente, sombra=True):
     k = Q.px_m
     a = cv2.resize(M, (w, h), interpolation=cv2.INTER_AREA)
     if sombra:
-        out = RB._sombra_piso_tb(out, X0, Y0, a, k)
+        out = _sombra_piso(out, X0, Y0, a, k)
     veio = RB._veio_tb(np.random.default_rng(semente), h * ss, w * ss, ang, k, ss)
     tom = RB.TONS_TB[tom] if isinstance(tom, str) else tom
     cor = np.float32(tom)[None, None, :] * (veio * RB._relevo_tb(M, k, ss))[..., None]
-    return RB._pintar_tb(out, X0, Y0, w, h, ss, M, cor)
+    return _pintar(out, X0, Y0, w, h, ss, M, cor)
 
 
 def varanda_estar_ta(Q, img, q=None):
-    sys.path.insert(0, str(AQUI.parent.parent / "_texturas"))
-    import texturas
-    import revisao_casaa_2910 as RA
     q = q or VARANDA_TA
-    H, W = img.shape[:2]
+    forma = img.shape[:2]
+    tap = FA.ret_aa(Q, q["tapete_pt"])
+    sofa = _mascara_ret(Q, "ARQ_LAYOUT HUMANIZAÇÃO", q["sofa_pt"], forma) > 0.02
+    lista = ([("DOC_TEXTOS", r) for r in q["poltronas_pt"] + [q["banco_pt"]]]
+             + [("ARQ_MOBILIÁRIO", r) for r, _ in q["mesas_pt"]] + [("ARQ_MOBILIÁRIO", r) for r in q["mesinhas_pt"]])
+    pecas = _pecas_pdf(Q, lista, forma) > 0.02
+    nomes = ("varanda, de cima", "varanda, de baixo")
+    peg = _pegada_poltronas(Q, nomes, forma)
+    zona = _dilatar((tap > 0.02) | sofa | pecas | peg, q["margem_px"])
     X0, Y0, X1, Y1 = q["janela_px"]
-    w, h = X1 - X0, Y1 - Y0
-    ss = 8
-    out = img.copy()
-    jan = np.s_[Y0:Y1, X0:X1]
-    # as máscaras (no quadro)
-    tap = FA.ret_aa(Q, q["tapete_pt"])[jan]
-    sofa = _mascara_ret(Q, "ARQ_LAYOUT HUMANIZAÇÃO", q["sofa_pt"], (H, W))[jan] > 0.02
-    pecas = np.zeros((h, w), bool)
-    for r in q["poltronas_pt"] + [q["banco_pt"]]:
-        pecas |= _mascara_ret(Q, "DOC_TEXTOS", r, (H, W))[jan] > 0.02
-    for r, _ in q["mesas_pt"]:
-        pecas |= _mascara_ret(Q, "ARQ_MOBILIÁRIO", r, (H, W))[jan] > 0.02
-    for r in q["mesinhas_pt"]:
-        pecas |= _mascara_ret(Q, "ARQ_MOBILIÁRIO", r, (H, W))[jan] > 0.02
-    k = 2 * q["zona_px"] + 1
-    zona = cv2.dilate(((tap > 0.02) | pecas).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
-    kg = 2 * q["guarda_sofa_px"] + 1
-    guarda = cv2.dilate(sofa.astype(np.uint8), np.ones((kg, kg), np.uint8)).astype(bool)
-    zona &= ~guarda
-    # as plantas em volta ficam
-    I8 = img[jan].astype(np.int16)
-    planta = (I8[..., 1] - I8[..., 2] > 6) & (I8[..., 1] > I8[..., 0])
-    planta = cv2.morphologyEx(planta.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((15, 15), np.uint8))
-    zona &= ~cv2.dilate(planta, np.ones((9, 9), np.uint8)).astype(bool)
+    jan = np.zeros(forma, bool)
+    jan[Y0:Y1, X0:X1] = True
+    zona &= jan & ~_paredes_fixas(Q, forma) & ~_plantas(img)
     for fx0, fy0, fx1, fy1 in q["fora_px"]:
-        zona[fy0 - Y0:fy1 - Y0, fx0 - X0:fx1 - X0] = False
-    # 1. o piso: quilting do travertino limpo da varanda, no tom de fundo do piso em volta
-    fontes = []
-    for fx0, fy0, fx1, fy1 in q["fonte_piso_px"]:
-        f_ = img[fy0:fy1, fx0:fx1]
-        fontes += [f_, np.ascontiguousarray(f_[:, ::-1])]
-    tec = texturas.quilting(fontes, h, w, p=q["p_px"], sobra=max(3, q["p_px"] // 3),
-                            rng=np.random.default_rng(q["semente"]))[:h, :w].astype(np.float32)
-    I = img[jan].astype(np.float32)
-    piso_ok = ~zona & ~cv2.dilate((sofa | pecas | (tap > 0.02)).astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
-    piso_ok &= I.mean(axis=2) > 150                                  # sem os traços, a parede e as plantas
-    s = q["tom_sigma_px"]
-    V = piso_ok.astype(np.float32)
-    tom = cv2.GaussianBlur(I * V[..., None], (0, 0), s) / np.maximum(cv2.GaussianBlur(V, (0, 0), s), 1e-3)[..., None]
-    lento = cv2.GaussianBlur(V, (0, 0), s) < 0.02
-    if lento.any():
-        tom[lento] = np.median(I[piso_ok], axis=0)
-    piso = tom + (tec - cv2.GaussianBlur(tec, (0, 0), 8))
-    # 2. o tapete: o tom da final, a trama, a faixa da borda e a sombra da espessura
-    miolo = cv2.erode((tap > 0.99).astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool) & ~pecas & ~guarda
-    miolo &= ~cv2.dilate(pecas.astype(np.uint8), np.ones((15, 15), np.uint8)).astype(bool)
-    cor_t = np.median(I[miolo], axis=0)
-    trama = _trama(Q, h, w, q["semente"] + 1)
-    dt = cv2.distanceTransform((tap > 0.5).astype(np.uint8), cv2.DIST_L2, 5)
-    faixa = np.clip(1 - (dt - q["faixa_m"] * Q.px_m) / 1.0, 0, 1)
-    faixa = np.where(dt > 0, faixa, 0)
-    tapete = cor_t[None, None, :] * (trama * (1 - q["faixa"] * faixa))[..., None]
-    sb = cv2.GaussianBlur(cv2.warpAffine(tap, np.float32([[1, 0, -1.2], [0, 1, 1.2]]), (w, h)), (0, 0), 1.0)
-    piso *= (1 - q["borda_sombra"] * sb * (1 - tap))[..., None]
-    novo = piso * (1 - tap[..., None]) + tapete * tap[..., None]
-    al = cv2.GaussianBlur(zona.astype(np.float32), (0, 0), 1.5)
-    al = np.maximum(al, cv2.erode(zona.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(np.float32))
-    reg = out[jan].astype(np.float32)
-    out[jan] = np.clip(np.round(reg * (1 - al[..., None]) + novo * al[..., None]), 0, 255).astype(np.uint8)
-    # 3. as mesas de centro (a de baixo primeiro) e as mesinhas
+        zona[fy0:fy1, fx0:fx1] = False
+    zona &= ~_outros_moveis(Q, forma, [q["tapete_pt"], q["sofa_pt"]] + [r for _, r in lista])
+    cor_t = _cor_tapete(img, tap, sofa | pecas | peg)
+    # 1. o piso e o tapete
+    out = piso_refeito(img, zona, q["semente"])
+    out = _tapete_novo(Q, out, tap, cor_t, q["semente"] + 1, q)
+    # 2. o sofá curvo, as mesas de centro (a de baixo primeiro) e as mesinhas
+    out = _estofado(Q, out, "sofá curvo da varanda")
     for i, (r, tom_m) in enumerate(q["mesas_pt"]):
-        out = _peca_madeira_pdf(Q, out, "ARQ_MOBILIÁRIO", r, tom_m, -55.0, q["semente"] + 10 + i, ss)
+        out = _peca_madeira_pdf(Q, out, "ARQ_MOBILIÁRIO", r, tom_m, -55.0, q["semente"] + 10 + i)
     for i, r in enumerate(q["mesinhas_pt"]):
-        out = _peca_madeira_pdf(Q, out, "ARQ_MOBILIÁRIO", r, q["mesinha_tom"], 30.0 + 40 * i, q["semente"] + 20 + i, ss)
-    # 4. as poltronas
-    base = RA.POLTRONAS_TA["Terreo"]
-    out = RA.poltronas_ta(Q, out, q=dict(base, pecas=[p for p in base["pecas"]
-                                                      if p[0] in ("varanda, de cima", "varanda, de baixo")]))
-    # 5. o banco estofado
+        out = _peca_madeira_pdf(Q, out, "ARQ_MOBILIÁRIO", r, q["mesinha_tom"], 30.0 + 40 * i, q["semente"] + 20 + i)
+    # 3. as poltronas e o banco estofado
+    out = poltronas_limpas_ta(Q, out, _pecas_poltronas(nomes))
     out = banco_estofado_ta(Q, out, q["banco_pt"], q["banco"], q["semente"] + 30)
-    print("    varanda: o estar refeito (o piso e o tapete novos, as 2 mesas de centro sobrepostas, as 2 mesinhas de "
-          "madeira, as 2 poltronas e o banco estofado)")
+    out = _tracejados_zona(Q, out, zona)
+    print(f"    varanda: o estar refeito (o piso, o tapete, o sofá curvo, as 2 mesas de centro sobrepostas, as 2 mesinhas "
+          f"de madeira, as 2 poltronas e o banco estofado; {int(zona.sum())} px de piso)")
     return out
 
 
@@ -1128,8 +1123,9 @@ def _peca_madeira_pdf(Q, out, camada, r, tom, ang, semente, ss=8, sombra=True):
     d = next(d for d in Q.desenhos if d.get("layer") == camada and d["type"] in ("f", "fs")
              and max(abs(a - b) for a, b in zip(d["rect"], r)) < 0.5)
     (x0, y0), (x1, y1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
-    X0, Y0 = int(np.floor(min(x0, x1))) - 12, int(np.floor(min(y0, y1))) - 12
-    X1, Y1 = int(np.ceil(max(x0, x1))) + 12, int(np.ceil(max(y0, y1))) + 12
+    f = SOMBRA_FOLGA_PX
+    X0, Y0 = int(np.floor(min(x0, x1))) - f, int(np.floor(min(y0, y1))) - f
+    X1, Y1 = int(np.ceil(max(x0, x1))) + f, int(np.ceil(max(y0, y1))) + f
     w, h = X1 - X0, Y1 - Y0
     M = np.zeros((h * ss, w * ss), np.uint8)
     for c in Q.caminhos(d):
@@ -1151,10 +1147,10 @@ def _ret_arred(r_px, raio_px, X0, Y0, h, w, ss):
 
 
 def banco_estofado_ta(Q, img, r, q, semente):
-    import revisao_casab_2910 as RB
     ss, k = 8, Q.px_m
     (x0, y0), (x1, y1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
-    X0, Y0, X1, Y1 = int(x0) - 14, int(y0) - 14, int(np.ceil(x1)) + 14, int(np.ceil(y1)) + 14
+    f = SOMBRA_FOLGA_PX
+    X0, Y0, X1, Y1 = int(x0) - f, int(y0) - f, int(np.ceil(x1)) + f, int(np.ceil(y1)) + f
     w, h = X1 - X0, Y1 - Y0
     out = img.copy()
     rng = np.random.default_rng(semente)
@@ -1179,117 +1175,562 @@ def banco_estofado_ta(Q, img, r, q, semente):
     tr = cv2.GaussianBlur(rng.normal(0, 1, assento.shape).astype(np.float32), (0, 0), 0.5 * ss)
     fator *= 1 + q["trama"] * tr / max(float(tr.std()), 1e-6)
     cor = np.float32(q["linho"])[None, None, :] * fator[..., None]
-    out = RB._pintar_tb(out, X0, Y0, w, h, ss, assento, cor)
+    out = _pintar(out, X0, Y0, w, h, ss, assento, cor)
     # as almofadas das pontas: um tom acima, mais altas (o miolo claro, a borda funda), com a sombra no assento
     for ra in q["almofadas_pt"]:
         (a0, b0), (a1, b1) = Q.p2q(*ra[:2]), Q.p2q(*ra[2:])
         Ma = _ret_arred((a0, b0, a1, b1), 2.4, X0, Y0, h, w, ss)
         aa = cv2.resize(Ma, (w, h), interpolation=cv2.INTER_AREA)
-        out = RB._sombra_piso_tb(out, X0, Y0, aa, k)
+        out = _sombra_piso(out, X0, Y0, aa, k)
         dist = cv2.distanceTransform((Ma > 0.5).astype(np.uint8), cv2.DIST_L2, 5) / ss / k
         t = np.minimum(1, dist / 0.07)
         f = (1 - q["almofada_volume"] * (1 - t) ** 2) * (1 + 0.04 * (t - 0.5))
         tr = cv2.GaussianBlur(rng.normal(0, 1, Ma.shape).astype(np.float32), (0, 0), 0.5 * ss)
         f *= 1 + q["trama"] * tr / max(float(tr.std()), 1e-6)
-        out = RB._pintar_tb(out, X0, Y0, w, h, ss, Ma, np.float32(q["almofada"])[None, None, :] * f[..., None])
+        out = _pintar(out, X0, Y0, w, h, ss, Ma, np.float32(q["almofada"])[None, None, :] * f[..., None])
     return out
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# 13. As mesinhas (usuário: "corrigir imperfeições da mesinha", "corrigir contornos" e "aqui nessa parte do sofá tem uma
-# mesinha em madeira a ser representada. adicione-a."): as do PDF (DOC_TEXTOS) que na final eram anéis vazados (as duas
-# redondas da sala de estar), um borrão de bordas serrilhadas com um caco cinza ao lado (a do centro do estar em X, sob a
-# projeção) ou faltavam (a de cantos arredondados junto à ponta do sofá da sala de estar) entram em madeira, como as da
-# varanda: o anel ou o borrão antigo sai (a faixa de `faixa_px` em volta da peça recebe o piso ou o tapete de fora,
-# refletido), e a peça do PDF entra com o veio, o chanfro, o aro e a sombra.
-MESINHAS_TA = {"pecas": [((1842.4, 632.7, 1862.2, 652.6), 8), ((1796.1, 763.5, 1815.9, 783.3), 8),
-                         ((1732.8, 686.0, 1757.1, 707.8), 4), ((1527.6, 927.7, 1547.4, 947.5), 12)],
-               "camada": "DOC_TEXTOS", "tom": (100, 134, 172), "semente": 2913, "escuro": 100,
-               "cacos_px": [(1705, 744, 1736, 760)], "tom_sigma_px": 5.0, "busca_px": (14, 160), "min_ext_pt": 100,
-               "tapete_m2": 2.5}
+# 13. O piso perfeito e fluido em volta dos móveis (pedidos do usuário vendo a entrega: "ainda não ficou bom. note que tem
+# imperfeição no piso, ao redor da mesa. o piso precisa ficar perfeito e fluido."; "essas imperfeições no piso precisam
+# sair. no entorno das cadeiras, vemos manchas. o piso precisa ter perfeição e fluidez"; "corrigir esses traços no tapete
+# e em volta da poltrona. o tapete tem que estar perfeito, tanto no seu interior quanto no contorno"; "corrija as
+# poltronas também"; "corrija o sofá, tapete e borda da mesa, sem essa mancha"; "essa marca em L, começando atrás do
+# banco, precisa sair. o piso travertino bruto precisa ficar perfeito."; "corrija o entorno dessa mesa lateral a
+# poltrona. está borrada. precisamos ver o contorno da mesa, o piso, o efeito suave da sombra.").
+# Os remendos de antes (o piso de um trecho ao lado, ou o tom médio do entorno) deixavam bordas: caixas mais claras, a
+# marca da zona, o desenho borrado. Agora, em cada ambiente, a zona dos móveis inteira (com as sombras e os restos das
+# peças antigas) recebe o travertino tecido de novo (`piso_refeito`) e, por cima, os móveis de novo, cada um com o
+# contorno limpo e a sombra suave.
+# - `piso_refeito`: o quilting do travertino limpo (`fontes_px`, os espelhos só na horizontal: os estratos ficam
+#   deitados), emendado ao piso de fora pela membrana (`_membrana`): a diferença entre o piso real e o tecido, na borda
+#   da zona (sem os traços e os pontos, `salto`), suavizada ao longo dela e levada para dentro, harmônica. O tom chega à
+#   borda igual ao de fora, sem degrau e sem mancha; dentro, o desenho é o do travertino.
+# - `poltronas_limpas_ta`: o modelo padrão (a poltrona da sala íntima da Casa E) com o contorno limpo (`_modelo_limpo`):
+#   a silhueta alisada, sem a franja castanha do bouclé da foto (a beira de `beira_px` com a cor do estofado de dentro)
+#   e com um fio um pouco mais escuro na beira; o lugar das antigas sai com o piso (`_pegada_poltronas`: a pegada exata
+#   delas, com a sombra, desenhando-as de novo num quadro neutro).
+# - `_tracejados_zona`: os traços das projeções que passam na zona de novo por cima, em preto ou branco pelo fundo.
+PISO_TA = {"fontes_px": [(1526, 358, 1580, 556), (1885, 884, 2155, 924)], "p_px": 24, "salto": 14, "suave_px": 2.0,
+           "tom_tol": 28}
+# a sombra das mesas de tampo grande (a de jantar, a de centro da sala de estar): mais curta e mais leve que a dos jogos
+SOMBRA_MESA_TA = [{"dx_m": -0.05, "dy_m": 0.05, "sig_m": 0.06, "forca": 0.24},
+                  {"dx_m": -0.015, "dy_m": 0.015, "sig_m": 0.02, "forca": 0.22}]
+POLTRONA_LIMPA_TA = {"beira_px": 3, "liso_px": 1.4, "escurecer": 0.10}
 
 
-def mesinhas_ta(Q, img, q=None):
-    import revisao_casaa_2910 as RA
-    q = q or MESINHAS_TA
-    H, W = img.shape[:2]
+def _membrana(c, dominio, fixo, reg=1e-4):
+    """A função harmônica em `dominio` (bool) que vale `c` (h x w x n) nos px de `fixo` vizinhos dele; onde o vizinho não
+    é nem domínio nem fixo, a borda é livre."""
+    from scipy import sparse
+    from scipy.sparse.linalg import splu
+    H, W = dominio.shape
+    ys, xs = np.nonzero(dominio)
+    n = len(ys)
+    idx = -np.ones((H, W), np.int64)
+    idx[ys, xs] = np.arange(n)
+    diag = np.full(n, reg)
+    b = np.zeros((n, c.shape[2]))
+    linhas, colunas = [], []
+    for dy, dx in ((0, 1), (0, -1), (1, 0), (-1, 0)):
+        yy, xx = ys + dy, xs + dx
+        ok = (yy >= 0) & (yy < H) & (xx >= 0) & (xx < W)
+        yy, xx = np.clip(yy, 0, H - 1), np.clip(xx, 0, W - 1)
+        j = np.where(ok, idx[yy, xx], -1)
+        viz = j >= 0
+        linhas.append(np.nonzero(viz)[0])
+        colunas.append(j[viz])
+        diag += viz
+        f = ok & ~viz & fixo[yy, xx]
+        diag += f
+        b[f] += c[yy[f], xx[f]]
+    borda = fixo & ~dominio
+    b += reg * (c[borda].mean(axis=0) if borda.any() else 0)
+    nv = sum(len(v) for v in linhas)
+    A = sparse.csc_matrix((np.concatenate([-np.ones(nv), diag]),
+                           (np.concatenate(linhas + [np.arange(n)]), np.concatenate(colunas + [np.arange(n)]))),
+                          shape=(n, n))
+    lu = splu(A)
+    out = np.zeros(c.shape, np.float32)
+    out[ys, xs] = np.stack([lu.solve(b[:, k]) for k in range(c.shape[2])], axis=1)
+    return out
+
+
+def piso_refeito(img, zona, semente, q=None):
+    """O travertino de novo na `zona` (bool, no quadro): o tecido das fontes, emendado ao piso de fora pela membrana."""
+    sys.path.insert(0, str(AQUI.parent.parent / "_texturas"))
+    import texturas
+    q = q or PISO_TA
+    H, W = zona.shape
+    ys, xs = np.nonzero(zona)
+    y0, y1, x0, x1 = max(ys.min() - 2, 0), min(ys.max() + 3, H), max(xs.min() - 2, 0), min(xs.max() + 3, W)
+    h, w = y1 - y0, x1 - x0
+    fontes = []
+    for a, b, c, d in q["fontes_px"]:
+        f_ = img[b:d, a:c]
+        fontes += [f_, np.ascontiguousarray(f_[:, ::-1])]
+    tec = texturas.quilting(fontes, h, w, p=q["p_px"], sobra=max(3, q["p_px"] // 3),
+                            rng=np.random.default_rng(semente))[:h, :w].astype(np.float32)
+    I = img[y0:y1, x0:x1].astype(np.float32)
+    Z = zona[y0:y1, x0:x1]
+    # a borda que vale: o piso de fora (perto do tom das fontes; sem as paredes, as plantas e os móveis), sem os traços e os
+    # pontos (os px que fogem do material em volta)
+    med = np.median(np.concatenate([f_.reshape(-1, 3) for f_ in fontes]).astype(np.float32), axis=0)
+    fixo = ~Z & ~_salientes(img[y0:y1, x0:x1], k=21, lim=q["salto"]) & (np.abs(I - med).max(axis=2) < q["tom_tol"])
+    V = fixo.astype(np.float32)
+    s = q["suave_px"]
+    c = cv2.GaussianBlur((I - tec) * V[..., None], (0, 0), s) / np.maximum(cv2.GaussianBlur(V, (0, 0), s),
+                                                                           1e-3)[..., None]
+    novo = np.clip(np.round(tec + _membrana(c, Z, fixo)), 0, 255).astype(np.uint8)
     out = img.copy()
-    # os móveis (sem os tapetes: o anel fica no tapete)
-    lim = q["tapete_m2"] * 56.69 ** 2
-    moveis = cv2.dilate((Q.preencher(lambda d: d.get("layer") in RA.CAMADAS_MOVEIS_TA
-                                     and d["rect"].width * d["rect"].height < lim) > 0.02).astype(np.uint8),
-                        np.ones((7, 7), np.uint8)).astype(bool)
-    pecas = np.zeros((H, W), bool)
-    faixas = np.zeros((H, W), bool)
-    caixas = []
-    for r, faixa_px in q["pecas"]:
-        m = _mascara_ret(Q, q["camada"], r, (H, W)) > 0.3
-        k = 2 * faixa_px + 1
-        faixa = cv2.dilate(m.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k))).astype(bool) & ~m
-        pecas |= m
-        faixas |= faixa
-        ys, xs = np.nonzero(faixa | m)
-        caixas.append((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1))
-    for x0, y0, x1, y1 in q["cacos_px"]:
-        faixas[y0:y1, x0:x1] = True
-        caixas.append((x0, y0, x1, y1))
-    # o anel, o borrão e o caco antigos: o tom de fundo do piso/tapete em volta (sem os móveis) e o desenho fino da faixa
-    # deslocada na horizontal até um trecho livre
-    oc = moveis | cv2.dilate((cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) < q["escuro"]).astype(np.uint8),
-                             np.ones((5, 5), np.uint8)).astype(bool)
-    lado, _ = RA._piso_ao_lado(img, caixas, oc | faixas | pecas, q["busca_px"], 1.0)
-    valido = ~(moveis | faixas | pecas) & (cv2.cvtColor(img, cv2.COLOR_BGR2GRAY) >= q["escuro"])
-    out = _piso_suave(img, faixas, lado, valido, {"margem_px": 40, "tom_sigma_px": q["tom_sigma_px"],
-                                                  "detalhe_sigma_px": 2.5, "transicao_px": 1.5})
-    # os tracejados compridos do PDF (o X da projeção) que passavam na faixa voltam; as mesinhas ficam por cima
-    segs = [sg for _, ext, ss_ in T.cadeias_tracejadas(Q, ["DOC_LINHAS E PROJEÇÕES"]) if ext >= q["min_ext_pt"]
-            for sg in ss_ if faixas[int(np.clip(Q.p2q((sg[0] + sg[2]) / 2, (sg[1] + sg[3]) / 2)[1], 0, H - 1)),
-                                    int(np.clip(Q.p2q((sg[0] + sg[2]) / 2, (sg[1] + sg[3]) / 2)[0], 0, W - 1))]]
-    if segs:
-        out, _ = T.preto_branco(Q, out, segs)
-    for i, (r, _) in enumerate(q["pecas"]):
-        out = _peca_madeira_pdf(Q, out, q["camada"], r, q["tom"], 25.0 + 37 * i, q["semente"] + i)
-    print(f"    mesinhas: {len(q['pecas'])} em madeira (as da sala de estar, a do estar em X e a nova junto ao sofá)"
-          + (f"; {len(segs)} traços do tracejado de volta" if segs else ""))
+    reg = out[y0:y1, x0:x1]
+    reg[Z] = novo[Z]
     return out
 
 
-# ----------------------------------------------------------------------------------------------------------------------
-# 14. A poltrona da sala de estar à direita do tapete (usuário: "rotacione 45º para a direita, apontando a poltrona para
-# a mesa de centro. conforme o pdf"): no PDF ela é girada (a peça de ARQ_LAYOUT HUMANIZAÇÃO tem o encosto no alto à
-# direita e a frente para baixo e à esquerda, para a mesa de centro); na final ela olhava para a esquerda. A antiga sai
-# (`revisao_casaa_2910.tirar_poltronas_ta`: o tapete e o piso refeitos no lugar dela), o tapete refeito ganha a trama
-# (só onde mudou) e a nova entra no modelo padrão girada para a `frente` do PDF, no lado `t_pt` (a caixa do PDF é a
-# diagonal da peça girada).
-POLTRONA_ESTAR_TA = {"nome": "sala de estar, à direita do tapete", "frente": (-0.71, 0.71), "t_pt": 47.0,
-                     "tapete_pt": (1699.0, 590.2, 1925.7, 816.7), "semente": 2914}
+def _paredes_fixas(Q, forma):
+    """O que nunca é piso refeito: as paredes e os pilares do PDF."""
+    m = Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "EST_PILAR") and d.get("fill") is not None, ss=2) > 0.02
+    return cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
 
 
-def poltrona_estar_ta(Q, img, q=None):
+def _plantas(img, perto=4):
+    I8 = img.astype(np.int16)
+    m = (I8[..., 1] - I8[..., 2] > 6) & (I8[..., 1] > I8[..., 0])
+    m = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((15, 15), np.uint8))
+    return cv2.dilate(m, np.ones((2 * perto + 1,) * 2, np.uint8)).astype(bool)
+
+
+def _dilatar(m, px):
+    return cv2.dilate(m.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * px + 1,) * 2)).astype(bool)
+
+
+_MODELO_LIMPO = {}
+
+
+def _modelo_limpo(q=None):
+    """(cor, alfa) da poltrona padrão com o contorno limpo."""
+    import final3840_casae as E
+    q = q or POLTRONA_LIMPA_TA
+    chave = tuple(sorted(q.items()))
+    if chave in _MODELO_LIMPO:
+        return _MODELO_LIMPO[chave]
+    cor, a = E._modelo_poltrona_1p(E.POLTRONAS_TE)
+    p = 4
+    a = np.pad(a, p)
+    cor = np.pad(cor, ((p, p), (p, p), (0, 0)), mode="edge")
+    ms = cv2.GaussianBlur((a > 0.5).astype(np.float32), (0, 0), q["liso_px"]) > 0.5
+    n, lab, st, _ = cv2.connectedComponentsWithStats(ms.astype(np.uint8))
+    ms = lab == 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+    b = q["beira_px"]
+    dentro = cv2.erode(ms.astype(np.uint8), np.ones((2 * b + 1,) * 2, np.uint8)).astype(bool)
+    _, rot = cv2.distanceTransformWithLabels((~dentro).astype(np.uint8), cv2.DIST_L2, 5,
+                                             labelType=cv2.DIST_LABEL_PIXEL)
+    ys, xs = np.nonzero(dentro)
+    idx = np.zeros(rot.max() + 1, int)
+    idx[rot[ys, xs]] = np.arange(len(ys))
+    c2 = cor.copy()
+    fora = ~dentro
+    c2[fora] = cor[ys[idx[rot[fora]]], xs[idx[rot[fora]]]]
+    d = cv2.distanceTransform(ms.astype(np.uint8), cv2.DIST_L2, 5)
+    t = np.clip(d / (b + 1.5), 0, 1)[..., None]
+    c2 = np.where(dentro[..., None], cor, cv2.GaussianBlur(c2 * (1 - t) + cor * t, (0, 0), 0.8))
+    c2 = c2 * (1 - q["escurecer"] * np.exp(-((d - 0.5) / 1.2) ** 2))[..., None]
+    al = np.clip(cv2.GaussianBlur(ms.astype(np.float32), (0, 0), 0.55), 0, 1)
+    yy, xx = np.nonzero(al > 0.01)
+    res = (c2[yy.min():yy.max() + 1, xx.min():xx.max() + 1].astype(np.float32),
+           al[yy.min():yy.max() + 1, xx.min():xx.max() + 1].astype(np.float32))
+    _MODELO_LIMPO[chave] = res
+    return res
+
+
+def poltronas_limpas_ta(Q, img, pecas):
+    """As poltronas (como em `revisao_casaa_2910.poltronas_ta`: nome, camada, retângulo pt, frente, lado pt) no modelo
+    limpo, com a sombra e o contato da Casa E."""
+    import final3840_casae as E
+    import retoque_terreo_casae as RT
+    qe = E.POLTRONAS_TE
+    out = img.astype(np.float32)
+    cor, a_m = _modelo_limpo()
+    fx, fy = qe["modelo"]["frente"]
+    for nome, _, r, (dx, dy), t_pt in pecas:
+        (ax, ay), (bx_, by) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        cx, cy = (ax + bx_) / 2, (ay + by) / 2
+        t = t_pt * Q.px_m / 56.69 if t_pt else max(bx_ - ax, by - ay)
+        ang = np.degrees(np.arctan2(dx, dy) - np.arctan2(fx, fy))
+        c2, a2 = E._girar_peca(cor, a_m, t / max(a_m.shape), ang)
+        RT.pousar_planta(out, c2, a2, float(cx), float(cy), t, qe["sombra"])
+        RT.pousar_planta(out, c2, a2, float(cx), float(cy), t, qe["sombra_contato"])
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def _pecas_poltronas(nomes, trocas=None):
     import revisao_casaa_2910 as RA
-    q = q or POLTRONA_ESTAR_TA
-    base = RA.POLTRONAS_TA["Terreo"]
-    peca = next(p for p in base["pecas"] if p[0] == q["nome"])
-    out = RA.tirar_poltronas_ta(Q, img, q=dict(base, pecas=[peca]))
-    # a trama no tapete refeito
-    mudou = np.abs(out.astype(np.int16) - img.astype(np.int16)).max(axis=2) > 2
-    tap = _mascara_ret(Q, "ARQ_MOBILIÁRIO", q["tapete_pt"], img.shape[:2])
-    ys, xs = np.nonzero(mudou)
-    if len(ys):
-        y0, y1, x0, x1 = ys.min() - 4, ys.max() + 5, xs.min() - 4, xs.max() + 5
-        t = _trama(Q, y1 - y0, x1 - x0, q["semente"])
-        m = cv2.GaussianBlur(cv2.dilate(mudou[y0:y1, x0:x1].astype(np.uint8), np.ones((3, 3), np.uint8))
-                             .astype(np.float32), (0, 0), 1.0) * tap[y0:y1, x0:x1]
-        sub = out[y0:y1, x0:x1].astype(np.float32)
-        out[y0:y1, x0:x1] = np.clip(np.round(sub * (1 + (t - 1) * m)[..., None]), 0, 255).astype(np.uint8)
-    nome, cam, r, _, _ = peca
-    out = RA.poltronas_ta(Q, out, q=dict(base, pecas=[(nome, cam, r, q["frente"], q["t_pt"])]))
-    print("    sala de estar: a poltrona à direita do tapete girada como no PDF, de frente para a mesa de centro")
+    trocas = trocas or {}
+    return [(p[0], p[1], p[2]) + trocas.get(p[0], (p[3], p[4])) for p in RA.POLTRONAS_TA["Terreo"]["pecas"]
+            if p[0] in nomes]
+
+
+def _pegada_poltronas(Q, nomes, forma):
+    """A pegada das poltronas da final (as da revisão, com a sombra): desenhadas de novo num quadro neutro."""
+    import revisao_casaa_2910 as RA
+    base = np.full(forma + (3,), 128, np.uint8)
+    r = RA.poltronas_ta(Q, base, q=dict(RA.POLTRONAS_TA["Terreo"], pecas=_pecas_poltronas(nomes)))
+    return np.abs(r.astype(np.int16) - 128).max(axis=2) > 1
+
+
+def _pecas_pdf(Q, pecas, forma, ss=4):
+    """A máscara (0..1) das peças do PDF (camada, retângulo pt): o preenchimento de cada uma."""
+    m = np.zeros(forma, np.float32)
+    for camada, r in pecas:
+        m = np.maximum(m, _mascara_ret(Q, camada, r, forma, ss=ss))
+    return m
+
+
+def _outros_moveis(Q, forma, fora_pt, folga_px=2):
+    """Os móveis do PDF que não são refeitos (os de fora das caixas `fora_pt`), com `folga_px`: ficam como estão."""
+    import revisao_casaa_2910 as RA
+
+    def dentro(r):
+        return any(a - 1 <= r.x0 and r.x1 <= c + 1 and b - 1 <= r.y0 and r.y1 <= d + 1 for a, b, c, d in fora_pt)
+    m = Q.preencher(lambda d: d.get("layer") in RA.CAMADAS_MOVEIS_TA and not dentro(d["rect"])
+                    and d["rect"].width * d["rect"].height < 2.5 * 56.69 ** 2, ss=2) > 0.05
+    return _dilatar(m, folga_px)
+
+
+def _tracejados_zona(Q, img, zona):
+    """Os traços das projeções (DOC_LINHAS E PROJEÇÕES) que passam na `zona`, de novo por cima, em preto ou branco pelo
+    fundo, só dentro dela (fora, os mesmos traços já estão na final)."""
+    par = FA.paredes_pdf(Q)
+    H, W = zona.shape
+    tracos = []
+    for _, _, segs in T.cadeias_tracejadas(Q, ["DOC_LINHAS E PROJEÇÕES"]):
+        for sg in segs:
+            pts = [Q.p2q(sg[0] + (sg[2] - sg[0]) * t, sg[1] + (sg[3] - sg[1]) * t) for t in np.linspace(0, 1, 7)]
+            pts = [(int(np.clip(u, 0, W - 1)), int(np.clip(v, 0, H - 1))) for u, v in pts]
+            if any(zona[v, u] for u, v in pts) and par[pts[3][1], pts[3][0]] <= 0.5:
+                tracos.append(sg)
+    if not tracos:
+        return img
+    novo, _ = T.preto_branco(Q, img, tracos)
+    m = cv2.GaussianBlur(_dilatar(zona, 3).astype(np.float32), (0, 0), 1.0)[..., None]
+    return np.clip(np.round(img * (1 - m) + novo * m), 0, 255).astype(np.uint8)
+
+
+def _tapete_novo(Q, img, tap, cor, semente, q, zona=None):
+    """O tapete (`tap`, 0..1 no quadro) por cima do piso: o tom `cor`, a trama da biblioteca, a faixa da borda um tom
+    abaixo e a sombra curta da espessura dele no piso."""
+    ys, xs = np.nonzero(tap > 0.001)
+    y0, y1, x0, x1 = ys.min() - 4, ys.max() + 5, xs.min() - 4, xs.max() + 5
+    t = tap[y0:y1, x0:x1]
+    h, w = t.shape
+    trama = _trama(Q, h, w, semente)
+    dt = cv2.distanceTransform((t > 0.5).astype(np.uint8), cv2.DIST_L2, 5)
+    faixa = np.where(dt > 0, np.clip(1 - (dt - q["faixa_m"] * Q.px_m) / 1.0, 0, 1), 0)
+    tapete = np.float32(cor)[None, None, :] * (trama * (1 - q["faixa"] * faixa))[..., None]
+    sb = cv2.GaussianBlur(cv2.warpAffine(t, np.float32([[1, 0, -1.2], [0, 1, 1.2]]), (w, h)), (0, 0), 1.0)
+    piso = img[y0:y1, x0:x1].astype(np.float32) * (1 - q["borda_sombra"] * sb * (1 - t))[..., None]
+    novo = piso * (1 - t[..., None]) + tapete * t[..., None]
+    out = img.copy()
+    out[y0:y1, x0:x1] = np.clip(np.round(novo), 0, 255).astype(np.uint8)
+    return out
+
+
+def _cor_tapete(img, tap, ocupado):
+    """O tom do tapete da final: a mediana do miolo dele, longe das peças."""
+    miolo = cv2.erode((tap > 0.99).astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool) & ~_dilatar(ocupado, 8)
+    return np.median(img[miolo].astype(np.float32), axis=0)
+
+
+def _relatorio(nome, zona):
+    print(f"    {nome}: piso refeito em {int(zona.sum())} px")
+
+
+# 13a. O estar sob a projeção da varanda: as 2 poltronas em X e a mesinha redonda entre elas (no lugar do borrão e do
+# caco cinza ao lado).
+PROJECAO_TA = {"poltronas": ("varanda, sob a projeção, de cima", "varanda, sob a projeção, de baixo"),
+               "mesinha": ("DOC_TEXTOS", (1527.6, 927.7, 1547.4, 947.5)), "mesinha_tom": (100, 134, 172),
+               "cacos_px": [(1705, 744, 1736, 760)], "margem_px": 10, "semente": 2918}
+
+
+def projecao_varanda_ta(Q, img, q=None):
+    q = q or PROJECAO_TA
+    forma = img.shape[:2]
+    pecas = _pecas_poltronas(q["poltronas"])
+    peg = _pegada_poltronas(Q, q["poltronas"], forma)
+    mes = _pecas_pdf(Q, [q["mesinha"]], forma) > 0.02
+    caco = np.zeros(forma, bool)
+    for x0, y0, x1, y1 in q["cacos_px"]:
+        caco[y0:y1, x0:x1] = True
+    zona = _dilatar(peg | _dilatar(mes, 6) | caco, q["margem_px"]) & ~_paredes_fixas(Q, forma)
+    zona &= ~_outros_moveis(Q, forma, [p[2] for p in pecas] + [q["mesinha"][1]])
+    out = piso_refeito(img, zona, q["semente"])
+    out = _peca_madeira_pdf(Q, out, q["mesinha"][0], q["mesinha"][1], q["mesinha_tom"], 136.0, q["semente"] + 1)
+    out = poltronas_limpas_ta(Q, out, pecas)
+    out = _tracejados_zona(Q, out, zona)
+    _relatorio("estar sob a projeção da varanda (2 poltronas e a mesinha de madeira)", zona)
+    return out
+
+
+# 13b. A sala de estar: o tapete redondo do PDF de novo (o miolo com a trama, a faixa da borda e a sombra curta), o
+# sofá curvo estofado de novo por cima dele, a mesa de centro no contorno do PDF (o tom da da final, com a borda nítida,
+# o chanfro e a sombra macia; a da final, de beira borrada e serrilhada, sai com o piso),
+# as 3 mesinhas de madeira (as 2 redondas e a de cantos arredondados na ponta do sofá) e as 3 poltronas limpas (a da
+# direita girada como no PDF, de frente para a mesa de centro).
+SALA_ESTAR_TA = {"tapete": ("ARQ_MOBILIÁRIO", (1699.0, 590.2, 1925.7, 816.7)), "sofa": "sofá curvo da sala de estar",
+                 "mesa_pt": (1783.5, 688.2, 1851.4, 728.0), "mesa_folga_px": 10, "mesa_rb": 18,
+                 "mesinhas": [("DOC_TEXTOS", (1842.4, 632.7, 1862.2, 652.6)),
+                              ("DOC_TEXTOS", (1796.1, 763.5, 1815.9, 783.3)),
+                              ("DOC_TEXTOS", (1732.8, 686.0, 1757.1, 707.8))],
+                 "mesinha_tom": (100, 134, 172),
+                 "poltronas": ("sala de estar, à direita do tapete", "sala de estar, embaixo, à esquerda",
+                               "sala de estar, embaixo, à direita"),
+                 "giro": {"sala de estar, à direita do tapete": ((-0.71, 0.71), 47.0)},
+                 "margem_px": 14, "semente": 2917, "faixa_m": 0.035, "faixa": 0.06, "borda_sombra": 0.16}
+
+
+def _peca_da_final(img, caixa, cor_fundo, rb_min):
+    """A peça (uma mesa da final, mais rosada que o fundo) na `caixa` px: (alfa, cor) no quadro. A cor da beira é a do
+    miolo mais perto (sem o fundo antigo misturado); o alfa, o da silhueta alisada, com a borda nítida."""
+    x0, y0, x1, y1 = caixa
+    reg = img[y0:y1, x0:x1].astype(np.float32)
+    rb = reg[..., 2] - reg[..., 0]
+    rb0 = float(cor_fundo[2] - cor_fundo[0])
+    m = rb > rb0 + rb_min
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8))
+    m = lab == 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+    cheio = m.astype(np.uint8).copy()
+    cv2.floodFill(cheio, np.zeros((cheio.shape[0] + 2, cheio.shape[1] + 2), np.uint8), (0, 0), 2)
+    m = cheio != 2
+    miolo = cv2.erode(m.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    # o contorno nítido: a silhueta alisada a 4 x e levada ao quadro em área (sem a beira borrada do render)
+    h, w = m.shape
+    m4 = cv2.GaussianBlur(cv2.resize(m.astype(np.float32), (w * 4, h * 4), interpolation=cv2.INTER_LINEAR), (0, 0),
+                          3.0) > 0.5
+    al = cv2.resize(m4.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+    _, rot = cv2.distanceTransformWithLabels((~miolo).astype(np.uint8), cv2.DIST_L2, 5, labelType=cv2.DIST_LABEL_PIXEL)
+    ys, xs = np.nonzero(miolo)
+    idx = np.zeros(rot.max() + 1, int)
+    idx[rot[ys, xs]] = np.arange(len(ys))
+    cor = reg.copy()
+    fora = ~miolo
+    cor[fora] = reg[ys[idx[rot[fora]]], xs[idx[rot[fora]]]]
+    A = np.zeros(img.shape[:2], np.float32)
+    C = np.zeros(img.shape, np.float32)
+    A[y0:y1, x0:x1], C[y0:y1, x0:x1] = al, cor
+    return A, C
+
+
+def _colar_peca(Q, out, A, C, folga=None, sombras=None):
+    """A peça (alfa A, cor C, no quadro) por cima, com a sombra macia no piso."""
+    folga = folga or SOMBRA_FOLGA_PX
+    ys, xs = np.nonzero(A > 0.001)
+    X0, Y0, X1, Y1 = xs.min() - folga, ys.min() - folga, xs.max() + folga + 1, ys.max() + folga + 1
+    a = A[Y0:Y1, X0:X1]
+    out = _sombra_piso(out, X0, Y0, a, Q.px_m, sombras)
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a[..., None]) + C[Y0:Y1, X0:X1] * a[..., None]), 0, 255
+                                ).astype(np.uint8)
+    return out
+
+
+def _mesa_contorno_pdf(Q, out, camada, r, cor, sombras=None, liso_px=1.2, ss=8):
+    """A mesa pelo contorno do PDF (só traços: os pontos deles em volta do centro, pela ordem do ângulo), alisado, no tom
+    `cor`, com o chanfro e a sombra macia; a borda nítida, antisserrilhada."""
+    import revisao_casab_2910 as RB
+    pts = [(p.x, p.y) for d in Q.desenhos if d.get("layer") == camada and d["type"] == "s"
+           and r[0] - 0.6 <= d["rect"].x0 and d["rect"].x1 <= r[2] + 0.6
+           and r[1] - 0.6 <= d["rect"].y0 and d["rect"].y1 <= r[3] + 0.6
+           for it in d["items"] for p in it[1:] if hasattr(p, "x")]
+    pts = np.float32(pts)
+    c = pts.mean(axis=0)
+    poli = np.float32([Q.p2q(*p) for p in pts[np.argsort(np.arctan2(pts[:, 1] - c[1], pts[:, 0] - c[0]))]])
+    f = SOMBRA_FOLGA_PX
+    X0, Y0 = int(poli[:, 0].min()) - f, int(poli[:, 1].min()) - f
+    X1, Y1 = int(np.ceil(poli[:, 0].max())) + f, int(np.ceil(poli[:, 1].max())) + f
+    w, h = X1 - X0, Y1 - Y0
+    M = np.zeros((h * ss, w * ss), np.uint8)
+    cv2.fillPoly(M, [np.int32(np.round((poli - (X0, Y0)) * ss))], 255)
+    M = (cv2.GaussianBlur(M.astype(np.float32) / 255, (0, 0), liso_px * ss) > 0.5).astype(np.float32)
+    out = _sombra_piso(out, X0, Y0, cv2.resize(M, (w, h), interpolation=cv2.INTER_AREA), Q.px_m, sombras)
+    cor_m = np.float32(cor)[None, None, :] * RB._relevo_tb(M, Q.px_m, ss)[..., None]
+    return _pintar(out, X0, Y0, w, h, ss, M, cor_m)
+
+
+def _estofado(Q, img, nome):
+    import revisao_casaa_2910 as RA
+    import revisao_casab_2910 as RB
+    for q in RA.ESTOFADOS_TA["Terreo"]:
+        es = [e for e in q["estofados"] if e[0] == nome]
+        if es:
+            return RB.estofados_pdf_tb(Q, img, dict(q, estofados=es), "Terreo")
+    raise KeyError(nome)
+
+
+def sala_estar_ta(Q, img, q=None):
+    import revisao_casaa_2910 as RA
+    q = q or SALA_ESTAR_TA
+    forma = img.shape[:2]
+    tap = _mascara_ret(Q, q["tapete"][0], q["tapete"][1], forma)
+    r_sofa = next(e[1][0] for qq in RA.ESTOFADOS_TA["Terreo"] for e in qq["estofados"] if e[0] == q["sofa"])
+    sofa = _mascara_ret(Q, "ARQ_LAYOUT HUMANIZAÇÃO", r_sofa, forma) > 0.02
+    mes = _pecas_pdf(Q, q["mesinhas"], forma) > 0.02
+    peg = _pegada_poltronas(Q, q["poltronas"], forma)
+    pecas = _pecas_poltronas(q["poltronas"], q["giro"])
+    (mx0, my0), (mx1, my1) = Q.p2q(*q["mesa_pt"][:2]), Q.p2q(*q["mesa_pt"][2:])
+    f = q["mesa_folga_px"]
+    caixa_mesa = (int(mx0) - f, int(my0) - f, int(np.ceil(mx1)) + f, int(np.ceil(my1)) + f)
+    ocupado = sofa | mes | peg
+    ocupado[caixa_mesa[1]:caixa_mesa[3], caixa_mesa[0]:caixa_mesa[2]] = True
+    cor_t = _cor_tapete(img, tap, ocupado)
+    A, C = _peca_da_final(img, caixa_mesa, cor_t, q["mesa_rb"])
+    zona = _dilatar((tap > 0.02) | sofa | mes | peg | (A > 0.01), q["margem_px"])
+    zona &= ~_paredes_fixas(Q, forma) & ~_plantas(img)
+    zona &= ~_outros_moveis(Q, forma, [q["tapete"][1], r_sofa, q["mesa_pt"]] + [r for _, r in q["mesinhas"]]
+                            + [p[2] for p in pecas])
+    out = piso_refeito(img, zona, q["semente"])
+    out = _tapete_novo(Q, out, tap, cor_t, q["semente"] + 1, q)
+    out = _estofado(Q, out, q["sofa"])
+    cor_mesa = np.median(C[A > 0.99], axis=0)
+    out = _mesa_contorno_pdf(Q, out, "ARQ_LAYOUT HUMANIZAÇÃO", q["mesa_pt"], cor_mesa, SOMBRA_MESA_TA)
+    for i, (camada, r) in enumerate(q["mesinhas"]):
+        out = _peca_madeira_pdf(Q, out, camada, r, q["mesinha_tom"], 25.0 + 37 * i, 2913 + i)
+    out = poltronas_limpas_ta(Q, out, pecas)
+    out = _tracejados_zona(Q, out, zona)
+    _relatorio("sala de estar (o tapete redondo, o sofá, a mesa de centro, 3 mesinhas e 3 poltronas)", zona)
+    return out
+
+
+# 13c. A sala de estar em X: o piso de todo o estar refeito (com a mancha clara entre as poltronas de baixo), a mesa
+# triangular no contorno do PDF (o tom da da final, com a borda nítida) e as 4 poltronas limpas.
+ESTAR_X_TA = {"poltronas": ("sala de estar, em X, no alto à esquerda", "sala de estar, em X, no alto à direita",
+                            "sala de estar, em X, embaixo à direita", "sala de estar, em X, embaixo à esquerda"),
+              "mesa": ("ARQ_MOBILIÁRIO", (1777.1, 914.9, 1819.3, 955.4)), "mesa_folga_px": 8, "mesa_rb": 18,
+              "margem_px": 6, "semente": 2919}
+
+
+def estar_x_ta(Q, img, q=None):
+    q = q or ESTAR_X_TA
+    forma = img.shape[:2]
+    pecas = _pecas_poltronas(q["poltronas"])
+    peg = _pegada_poltronas(Q, q["poltronas"], forma)
+    rets = [p[2] for p in pecas]
+    (x0, y0), (x1, y1) = Q.p2q(min(r[0] for r in rets), min(r[1] for r in rets)), \
+        Q.p2q(max(r[2] for r in rets), max(r[3] for r in rets))
+    caixa = np.zeros(forma, bool)
+    caixa[int(y0):int(np.ceil(y1)), int(x0):int(np.ceil(x1))] = True
+    # a mesa triangular da final sai com o piso e volta no contorno do PDF, no tom dela
+    (mx0, my0), (mx1, my1) = Q.p2q(*q["mesa"][1][:2]), Q.p2q(*q["mesa"][1][2:])
+    f = q["mesa_folga_px"]
+    caixa_mesa = (int(mx0) - f, int(my0) - f, int(np.ceil(mx1)) + f, int(np.ceil(my1)) + f)
+    fundo = np.median(img[caixa & ~peg].astype(np.float32), axis=0)
+    A, C = _peca_da_final(img, caixa_mesa, fundo, q["mesa_rb"])
+    zona = (_dilatar(peg, q["margem_px"]) | caixa | _dilatar(A > 0.01, 3)) & ~_paredes_fixas(Q, forma)
+    zona &= ~_outros_moveis(Q, forma, rets + [q["mesa"][1]])
+    out = piso_refeito(img, zona, q["semente"])
+    out = _mesa_contorno_pdf(Q, out, q["mesa"][0], q["mesa"][1], np.median(C[A > 0.99], axis=0), SOMBRA_MESA_TA)
+    out = poltronas_limpas_ta(Q, out, pecas)
+    out = _tracejados_zona(Q, out, zona)
+    _relatorio("sala de estar em X (a mesa triangular e as 4 poltronas)", zona)
+    return out
+
+
+# 13d. O escritório: a mesa lateral do PDF (dois tampos redondos, um sobre o outro, no lugar do borrão) em madeira, no
+# tom e no sobretom, com a sombra macia, e a poltrona limpa.
+ESCRITORIO_TA = {"poltrona": "escritório",
+                 "mesas": [("ARQ_LAYOUT HUMANIZAÇÃO", (2270.2, 753.0, 2287.2, 770.0), (100, 134, 172)),
+                           ("ARQ_LAYOUT HUMANIZAÇÃO", (2262.1, 763.3, 2279.1, 780.3), (134, 168, 202))],
+                 "margem_px": 10, "semente": 2920}
+
+
+def escritorio_ta(Q, img, q=None):
+    q = q or ESCRITORIO_TA
+    forma = img.shape[:2]
+    pecas = _pecas_poltronas((q["poltrona"],))
+    peg = _pegada_poltronas(Q, (q["poltrona"],), forma)
+    mes = _pecas_pdf(Q, [(c, r) for c, r, _ in q["mesas"]], forma) > 0.02
+    zona = _dilatar(peg | _dilatar(mes, 5), q["margem_px"]) & ~_paredes_fixas(Q, forma)
+    zona &= ~_outros_moveis(Q, forma, [p[2] for p in pecas] + [r for _, r, _ in q["mesas"]])
+    out = piso_refeito(img, zona, q["semente"])
+    for i, (camada, r, tom) in enumerate(q["mesas"]):
+        out = _peca_madeira_pdf(Q, out, camada, r, tom, 20.0 + 50 * i, q["semente"] + 1 + i)
+    out = poltronas_limpas_ta(Q, out, pecas)
+    out = _tracejados_zona(Q, out, zona)
+    _relatorio("escritório (a mesa lateral em dois tampos de madeira e a poltrona)", zona)
+    return out
+
+
+# 13e. A poltrona do terraço gourmet, junto aos brises (usuário: "rotacione 45º para a direita, apontando a poltrona para
+# a mesa de centro. conforme o pdf", e depois: "você não fez a rotação da poltrona da varanda que eu te pedi" e "a
+# poltrona fica proxima aos brises"): no PDF ela é girada, com o encosto no alto à esquerda e a frente para a mesa de
+# centro, embaixo à direita; na final olhava para baixo. A antiga sai com o piso (`piso_refeito`) e a nova entra limpa,
+# girada (`frente`), no lado `t_pt` (a caixa do PDF é a diagonal da peça girada).
+GOURMET_POLTRONA_TA = {"nome": "terraço gourmet", "frente": (0.71, 0.71), "t_pt": 56.0, "margem_px": 8,
+                       "semente": 2922}
+
+
+def gourmet_poltrona_ta(Q, img, q=None):
+    q = q or GOURMET_POLTRONA_TA
+    forma = img.shape[:2]
+    pecas = _pecas_poltronas((q["nome"],), {q["nome"]: (q["frente"], q["t_pt"])})
+    peg = _pegada_poltronas(Q, (q["nome"],), forma)
+    zona = _dilatar(peg, q["margem_px"]) & ~_paredes_fixas(Q, forma) & ~_outros_moveis(Q, forma, [pecas[0][2]])
+    out = piso_refeito(img, zona, q["semente"])
+    out = poltronas_limpas_ta(Q, out, pecas)
+    _relatorio("terraço gourmet (a poltrona girada como no PDF, de frente para a mesa de centro)", zona)
+    return out
+
+
+# 13f. O banho do motorista (usuário: "remova as manchas marrom atras da porta e no contorno do vaso sanitario"): o fio
+# marrom em volta do vaso (a borda do render) e o granito do quarto que entrava no vão da porta e sob a folha aberta saem
+# com o Bege Bahia do próprio banho (`piso_refeito` com as fontes do banho); o vaso volta com o miolo dele, a beira na
+# cor do miolo (antisserrilhada pelo PDF) e a sombra de contato leve. A bancada e a folha da porta ficam.
+BANHO_MOTORISTA_TA = {"vaso": ("ARQ_LOUÇAS E METAIS", (2071.5, 1381.2, 2092.8, 1412.3)),
+                      "bancada": ("ARQ_BANCADAS", (2103.6, 1381.2, 2143.3, 1403.8)),
+                      "caixas_px": [(2383, 1251, 2392, 1301), (2338, 1297, 2392, 1303)],
+                      "folha_px": (2341, 1293, 2385, 1297), "vaso_px": 4, "miolo_px": 2, "aro": 0.14,
+                      "fontes_px": [(2302, 1252, 2378, 1290)], "p_px": 16, "semente": 2923,
+                      "sombras": [{"dx_m": -0.02, "dy_m": 0.02, "sig_m": 0.02, "forca": 0.25}]}
+
+
+def banho_motorista_ta(Q, img, q=None):
+    q = q or BANHO_MOTORISTA_TA
+    forma = img.shape[:2]
+    vaso = _mascara_ret(Q, q["vaso"][0], q["vaso"][1], forma)
+    bancada = _dilatar(_mascara_ret(Q, q["bancada"][0], q["bancada"][1], forma) > 0.02, 1)
+    miolo = cv2.erode((vaso > 0.99).astype(np.uint8), np.ones((2 * q["miolo_px"] + 1,) * 2, np.uint8)).astype(bool)
+    zona = _dilatar(vaso > 0.02, q["vaso_px"]) & ~miolo
+    for x0, y0, x1, y1 in q["caixas_px"]:
+        zona[y0:y1, x0:x1] = True
+    fx0, fy0, fx1, fy1 = q["folha_px"]
+    folha = np.zeros(forma, bool)
+    folha[fy0:fy1, fx0:fx1] = True
+    zona &= ~_paredes_fixas(Q, forma) & ~bancada & ~folha
+    # o vaso: o miolo da final, levado à beira
+    ys, xs = np.nonzero(vaso > 0.001)
+    X0, Y0, X1, Y1 = xs.min() - 2, ys.min() - 2, xs.max() + 3, ys.max() + 3
+    reg = img[Y0:Y1, X0:X1].astype(np.float32)
+    m_ = miolo[Y0:Y1, X0:X1]
+    _, rot = cv2.distanceTransformWithLabels((~m_).astype(np.uint8), cv2.DIST_L2, 5, labelType=cv2.DIST_LABEL_PIXEL)
+    yy, xx = np.nonzero(m_)
+    idx = np.zeros(rot.max() + 1, int)
+    idx[rot[yy, xx]] = np.arange(len(yy))
+    cor = reg.copy()
+    cor[~m_] = reg[yy[idx[rot[~m_]]], xx[idx[rot[~m_]]]]
+    # a beira um pouco mais escura (o contorno da louça, sem o fio marrom)
+    d_ = cv2.distanceTransform((vaso[Y0:Y1, X0:X1] > 0.5).astype(np.uint8), cv2.DIST_L2, 5)
+    cor *= (1 - q["aro"] * np.exp(-((d_ - 0.5) / 1.0) ** 2))[..., None]
+    A, C = np.zeros(forma, np.float32), np.zeros(img.shape, np.float32)
+    A[Y0:Y1, X0:X1], C[Y0:Y1, X0:X1] = vaso[Y0:Y1, X0:X1], cor
+    out = piso_refeito(img, zona, q["semente"], dict(PISO_TA, fontes_px=q["fontes_px"], p_px=q["p_px"]))
+    out = _colar_peca(Q, out, A, C, sombras=q["sombras"])
+    _relatorio("banho do motorista (sem o marrom em volta do vaso, no vão da porta e sob a folha)", zona)
     return out
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# 15. O matelassê nas camas (usuário: "faltou os matelassê das camas. adicione-a em todas"): o mesmo das camas da Casa B
+# 14. O matelassê nas camas (usuário: "faltou os matelassê das camas. adicione-a em todas"): o mesmo das camas da Casa B
 # (`revisao_casab_2910.MATELASSE_TB`: o pesponto em losangos de 12 cm na grade do PDF e o relevo de cada losango, com a
 # luz do alto à direita), multiplicado sobre o edredom de cada cama da Casa A (a cama do motorista, no Térreo, e as seis
 # do 1º Pavimento, `ajustes_casaa.CAMA_MOTORISTA` e `CAMAS_1PAV`): da dobra do lençol aos pés, dentro do colchão (a
@@ -1367,8 +1808,12 @@ def pedidos_terreo_ta(img):
     out = espreguicadeiras_ta(Q, out)
     out = jantar_marrom_ta(Q, out)
     out = varanda_estar_ta(Q, out)
-    out = mesinhas_ta(Q, out)
-    out = poltrona_estar_ta(Q, out)
+    out = projecao_varanda_ta(Q, out)
+    out = sala_estar_ta(Q, out)
+    out = estar_x_ta(Q, out)
+    out = escritorio_ta(Q, out)
+    out = gourmet_poltrona_ta(Q, out)
+    out = banho_motorista_ta(Q, out)
     out = matelasse_ta(Q, out)
     sem_depois = out.copy()
     out = rotulos_centro_ta(Q, out, tirados, aj)
@@ -1427,15 +1872,25 @@ ANTES_DEPOIS_PEDIDOS_TA = {
     "Subsolo": {"nevoado_piscina": (1060, 470, 1520, 1100)}}
 
 
-def antes_depois_pedidos_ta(chave, antes, depois, max_lado=1800):
-    for nome, (x0, y0, x1, y1) in ANTES_DEPOIS_PEDIDOS_TA[chave].items():
+# Os da 2ª leva (os pedidos vendo a entrega), contra a final da 1ª (`--pasta_comparar`).
+ANTES_DEPOIS_2A_TA = {
+    "Terreo": {"estar_projecao_mesinha": (1640, 680, 1840, 840), "jantar_piso": (1880, 885, 2175, 1075),
+               "sala_estar_tapete_poltronas": (1850, 360, 2200, 650), "varanda_estar_banco": (1530, 325, 1835, 625),
+               "sala_estar_x": (1910, 650, 2125, 845), "escritorio_mesa_lateral": (2440, 470, 2620, 640),
+               "terraco_gourmet_poltrona": (1240, 1270, 1400, 1430), "banho_motorista": (2290, 1200, 2400, 1310),
+               "rotulos_garagem_motorista": (2080, 1080, 2920, 1720), "rotulos_servico": (1180, 1080, 2120, 1720)},
+    "1Pavimento": {"nublado_estar": (1380, 300, 2250, 1110)}}
+
+
+def antes_depois_pedidos_ta(chave, antes, depois, max_lado=1800, caixas=None, sufixo="2910b"):
+    for nome, (x0, y0, x1, y1) in (caixas or ANTES_DEPOIS_PEDIDOS_TA)[chave].items():
         a, d = antes[y0:y1, x0:x1], depois[y0:y1, x0:x1]
         lado = (x1 - x0) <= (y1 - y0) * 1.3
         junto = np.hstack([a, np.full((a.shape[0], 12, 3), 255, np.uint8), d]) if lado else \
             np.vstack([a, np.full((12, a.shape[1], 3), 255, np.uint8), d])
         k = min(3.0, max_lado / max(junto.shape[:2]))
         junto = cv2.resize(junto, None, fx=k, fy=k, interpolation=cv2.INTER_LANCZOS4 if k > 1 else cv2.INTER_AREA)
-        arq = FA.CASA / "renders" / f"POE642_CasaA_PH_{chave}_2910b_{nome}_antes_depois.jpg"
+        arq = FA.CASA / "renders" / f"POE642_CasaA_PH_{chave}_{sufixo}_{nome}_antes_depois.jpg"
         cv2.imwrite(str(arq), junto, [cv2.IMWRITE_JPEG_QUALITY, 90])
         print(f"    {arq.name}")
 
@@ -1448,6 +1903,8 @@ def main():
                     help="a pasta das finais de antes (por padrão, as próprias finais, sobrescritas)")
     ap.add_argument("--antes_subsolo", type=Path, required=True,
                     help="a final do Subsolo de antes da revisão de 29/10 (a que recebe o nevoado do Térreo novo)")
+    ap.add_argument("--pasta_comparar", type=Path, default=None,
+                    help="a pasta das finais da 1ª leva (para os antes e depois da 2ª leva, `_2910c_`)")
     a = ap.parse_args()
     finais = RA.FINAIS_TA
     antes = {k: cv2.imread(str(a.pasta_antes / v.name if a.pasta_antes else v)) for k, v in finais.items()}
@@ -1459,6 +1916,9 @@ def main():
         cv2.imwrite(str(finais[k]), out)
         print(finais[k])
         antes_depois_pedidos_ta(k, antes[k], out)
+        if a.pasta_comparar and k in ANTES_DEPOIS_2A_TA:
+            antes_depois_pedidos_ta(k, cv2.imread(str(a.pasta_comparar / finais[k].name)), out, caixas=ANTES_DEPOIS_2A_TA,
+                                    sufixo="2910c")
 
 
 if __name__ == "__main__":

@@ -1605,7 +1605,7 @@ Retoques locais sobre as finais da revisão (commit 219b22b). Cada pedido veio c
 - **Ferramentas comuns:**
   - `copiar_textura`: o buraco recebe o mesmo material de outro lugar, trecho a trecho, no deslocamento em que o anel em volta casa melhor (`cv2.matchTemplate` com máscara).
   - `espelhar_faixa`: uma faixa fina, encostada numa parede ou borda, recebe o material de fora dela, refletido.
-  - `_piso_suave`: o buraco recebe o tom de fundo do piso válido em volta (média normalizada, em 3 escalas: onde não há piso perto, a de mais longe) e só o desenho fino de uma faixa deslocada (os veios). Assim não fica a caixa clara de um trecho copiado inteiro. A transição é de `transicao_px`.
+  - `piso_refeito` (da 2ª leva, abaixo): a zona dos móveis inteira recebe o travertino tecido de novo, emendado ao piso de fora pela membrana. Substituiu o `_piso_suave` da 1ª leva (o tom médio do entorno e os veios de uma faixa ao lado), que deixava a marca da zona.
 - **A despensa (`despensa_ta`, `DESPENSA_TA`):** sem o armário em L do render. Cada braço (`pecas_px`) recebe um trecho inteiro de granito limpo da cozinha ou da área gourmet, o de cor e pintas mais perto do granito da despensa (`_peca_granito`). A rampa com o granito da despensa é de `transicao_px`; as paredes ficam. Roda antes de tirar os rótulos, porque o DESPENSA estava sobre o armário.
 - **Os rótulos (`rotulos_tirar_ta`, `rotulos_centro_ta`, `ROTULOS_CENTRO_TA`):**
   - Saem com o piso copiado do entorno (`copiar_textura`). A subtração pela cor deixava o texto fantasma, porque a final suavizou os rótulos depois de escritos.
@@ -1632,32 +1632,59 @@ Retoques locais sobre as finais da revisão (commit 219b22b). Cada pedido veio c
   - A sombra macia e a de contato vêm dos jogos da Casa D.
 - **As cadeiras do jantar (`jantar_marrom_ta`, `JANTAR_MARROM_TA`):**
   - O modelo padrão (`final3840_casad.jantar_d`), com o assento em couro marrom (`linho`).
-  - O piso no lugar das antigas vem de `_piso_suave`: o tom do travertino em volta, sem os móveis, os rótulos e os traços, e os veios da faixa ao lado.
-- **O estar da varanda (`varanda_estar_ta`, `banco_estofado_ta`, `VARANDA_TA`):** refeito do piso para cima; o sofá curvo fica, com a sombra dele.
-  - O piso: travertino por quilting com o da própria varanda, só os espelhos na horizontal.
+  - Em volta da mesa e das cadeiras, até `margem_px`, o travertino é refeito inteiro (`piso_refeito`, na 2ª leva). O tampo fica, com a beira na cor do miolo e a sombra macia das mesas grandes (`SOMBRA_MESA_TA`).
+- **O estar da varanda (`varanda_estar_ta`, `banco_estofado_ta`, `VARANDA_TA`):** refeito do piso para cima.
+  - O piso: `piso_refeito` na zona dos móveis, até `margem_px` deles. Na 1ª leva era o quilting sem a membrana, e ficava a marca em L da sombra antiga do banco.
+  - O sofá curvo: de novo por cima (`_estofado`), depois do tapete.
   - O tapete do PDF: com a trama da biblioteca (`final3840_casad.TAPETE_TRAMA_D`), a faixa de acabamento da borda um tom abaixo e a sombra curta.
   - As duas mesas de centro sobrepostas, em carvalho: a de baixo no tom médio e a de cima no sobretom mais claro. A de cima faz sombra na de baixo.
   - As 2 mesinhas redondas de madeira: entre as poltronas e na ponta do sofá.
-  - As 2 poltronas no modelo padrão (`revisao_casaa_2910.poltronas_ta`).
+  - As 2 poltronas no modelo padrão, de contorno limpo (`poltronas_limpas_ta`).
   - O banco estofado (DOC_TEXTOS): o quadro em madeira, o assento de linho em 3 partes, com os vincos nas costuras do PDF, e as 2 almofadas das pontas, um tom acima e mais altas.
   - A planta junto à ponta do sofá fica (`fora_px`).
-- **As mesinhas (`mesinhas_ta`, `MESINHAS_TA`):** 4 peças do PDF (DOC_TEXTOS) em madeira (`_peca_madeira_pdf`: veio, chanfro, aro e sombra):
-  - as duas redondas da sala de estar, que eram anéis vazados;
-  - a do centro do estar em X, sob a projeção, que era um borrão com um caco cinza ao lado;
-  - a de cantos arredondados junto à ponta do sofá da sala de estar, que faltava.
-
-  Antes, a faixa em volta de cada uma e o caco recebem o piso ou o tapete de `_piso_suave`. Os tapetes não contam como móvel. Os traços do X da projeção que passavam ali voltam.
-- **A poltrona da sala de estar (`poltrona_estar_ta`, `POLTRONA_ESTAR_TA`):** a da direita do tapete sai (`revisao_casaa_2910.tirar_poltronas_ta`). O tapete refeito ganha a trama, só onde mudou. A nova entra no modelo padrão, girada para a `frente` do PDF, de frente para a mesa de centro, com o lado `t_pt`.
+- **As mesinhas e a poltrona da sala de estar:** na 1ª leva eram `mesinhas_ta` e `poltrona_estar_ta`. Na 2ª leva, cada ambiente é refeito inteiro (`projecao_varanda_ta`, `sala_estar_ta`): as mesinhas de madeira do PDF (`_peca_madeira_pdf`: veio, chanfro, aro e sombra) e as poltronas limpas entram sobre o piso refeito.
 - **O matelassê (`matelasse_ta`, `MATELASSE_TA`):** o das camas da Casa B (`revisao_casab_2910.MATELASSE_TB`) sobre o edredom de cada cama, da dobra aos pés, dentro do colchão. No Térreo é a cama do motorista (`ajustes_casaa.CAMA_MOTORISTA`); no 1º Pavimento, as 6 camas (`CAMAS_1PAV`). As faixas e almofadas bordô e os traços escuros ficam lisos.
+- **A 2ª leva (os pedidos vendo a entrega da 1ª):** o usuário apontou o piso imperfeito em volta das mesinhas, das cadeiras do jantar, das poltronas e do tapete da sala, a marca em L atrás do banco da varanda, o entorno borrado da mesa lateral do escritório, os rótulos desorganizados (a GARAGEM e o Q. MOTORISTA), o marrom no banho do motorista e a poltrona do terraço gourmet que não tinha girado. A seção 13 do script refaz cada ambiente do piso para cima.
+  - **O piso (`piso_refeito`, `PISO_TA`):**
+    - O tecido: quilting (`texturas.quilting`) do travertino limpo de `fontes_px`, só com os espelhos na horizontal, para os estratos ficarem deitados.
+    - A emenda: a diferença entre o piso real e o tecido, na borda da zona, suavizada (`suave_px`) e levada para dentro pela membrana harmônica (`_membrana`, `scipy.sparse`).
+    - Só vale como borda o piso de fora: perto do tom das fontes (`tom_tol`), sem as paredes, as plantas, os móveis, os traços e os pontos (`salto`).
+    - Assim, o tom chega à borda igual ao de fora, sem degrau e sem mancha, e dentro o desenho é o do travertino.
+  - **A zona de cada ambiente:**
+    - A pegada dos móveis, até `margem_px`, com as sombras e os restos das peças antigas. A pegada das poltronas antigas é exata (`_pegada_poltronas`: elas desenhadas de novo num quadro neutro).
+    - Menos as paredes e os pilares do PDF (`_paredes_fixas`), as plantas (`_plantas`) e os outros móveis (`_outros_moveis`).
+    - Os traços das projeções que passam na zona voltam por cima (`_tracejados_zona`).
+  - **As poltronas (`poltronas_limpas_ta`, `POLTRONA_LIMPA_TA`):** o modelo padrão com o contorno limpo (`_modelo_limpo`). A silhueta é alisada, a beira de `beira_px` recebe a cor do estofado de dentro (sem a franja castanha do bouclé da foto) e a borda leva um fio um pouco mais escuro (`escurecer`).
+  - **As sombras:** `_sombra_piso` e `_pintar` arredondam a cor (o `astype` truncava e escurecia a caixa da peça em 1 nível). A margem é de `SOMBRA_FOLGA_PX`, para a sombra não ser cortada na caixa. As mesas de tampo grande levam `SOMBRA_MESA_TA`, mais curta e mais leve.
+  - **As mesas redesenhadas do PDF (`_mesa_contorno_pdf`):** o contorno do PDF fechado e alisado, no tom da mesa da final (`_peca_da_final`: a mediana do miolo), com a borda nítida, o chanfro e a sombra macia. Valem para a mesa de centro da sala de estar e a mesa triangular do estar em X; a da final, de beira borrada, sai com o piso.
+  - **Os ambientes:**
+    - `jantar_marrom_ta`: o piso em volta da mesa e das cadeiras; o tampo colado de novo (`_colar_peca`); as cadeiras no modelo padrão.
+    - `varanda_estar_ta`: o piso (sem a marca em L), o tapete, o sofá curvo, as 2 mesas de centro, as 2 mesinhas, as 2 poltronas e o banco estofado.
+    - `projecao_varanda_ta` (`PROJECAO_TA`): as 2 poltronas sob a projeção e a mesinha de madeira entre elas; o caco cinza sai.
+    - `sala_estar_ta` (`SALA_ESTAR_TA`): o tapete redondo (a trama, a faixa da borda, a sombra), o sofá curvo, a mesa de centro do PDF, as 3 mesinhas de madeira e as 3 poltronas. A da direita do tapete fica na diagonal do PDF (`giro`).
+    - `estar_x_ta` (`ESTAR_X_TA`): o piso do estar inteiro, a mesa triangular do PDF e as 4 poltronas.
+    - `escritorio_ta` (`ESCRITORIO_TA`): a mesa lateral do PDF (dois tampos redondos de madeira, no tom e no sobretom) e a poltrona.
+    - `gourmet_poltrona_ta` (`GOURMET_POLTRONA_TA`): a poltrona do terraço gourmet, junto aos brises, girada como no PDF (`frente`, o encosto no alto à esquerda, de frente para a mesa de centro). Na 1ª leva, o giro foi feito por engano na poltrona da sala de estar.
+    - `banho_motorista_ta` (`BANHO_MOTORISTA_TA`): o fio marrom em volta do vaso e o granito do quarto no vão da porta e sob a folha saem com o Bege Bahia do próprio banho (`piso_refeito` com as fontes dele). O vaso volta com a beira na cor do miolo, um aro um pouco mais escuro e a sombra de contato leve.
+  - **Os rótulos (`rotulos_tirar_ta`, `rotulos_centro_ta`):**
+    - Ao tirar: depois da cópia do entorno, o buraco recebe o tom do piso de fora (média normalizada de `tom_sigma_px`, sem o buraco e os traços); do trecho copiado fica só o desenho fino. Assim não fica o remendo creme onde estava o rótulo.
+    - O corpo: o padrão (1,3) onde cabe no piso livre; senão, o nome de duas palavras em duas linhas no mesmo corpo (como o BANHO VARANDA); só então 1,15 e 1,0 (`corpos`). Os rótulos ficam do mesmo tamanho sempre que cabem.
+    - O lugar: o px mais perto do alvo onde a caixa cabe inteira no livre. O alvo é `alvos_px` (a GARAGEM no meio do carro do centro, acima dos carros; o Q. MOTORISTA no piso abaixo da cama), senão o texto do PDF nos ambientes abertos, senão o centro do recinto.
+    - A região: `regioes_px` (a faixa livre da garagem). Nos ambientes que vazam, o rótulo anda no máximo `aberto_px`.
+    - O script imprime o corpo de cada rótulo e se foi em duas linhas.
+  - **O 1º Pavimento:** o nublado do Térreo, onde ele mudou, acompanha as mudanças (`nublado_1pav_ta`).
 - **Os outros pavimentos:**
   - 1º Pavimento: `nublado_1pav_ta`, onde o Térreo mudou, sem os rótulos e sem os tracejados novos da pista (`fora_px`). Fora da pegada, soma a diferença entre o Térreo novo e o antigo, nublados (`entorno_esmaecido.NUBLADO`). Nos vazios, aplica a razão entre eles. Depois, o matelassê.
   - Subsolo: `revisao_casaa_2910.revisao_ta("Subsolo", ...)` sobre a final de antes da revisão, com o Térreo novo, para as peças nevoadas.
-- **Antes e depois:** `antes_depois_pedidos_ta` grava as caixas de `ANTES_DEPOIS_PEDIDOS_TA` em `renders/POE642_CasaA_PH_<pavimento>_2910b_<trecho>_antes_depois.jpg`.
+- **Antes e depois:**
+  - `antes_depois_pedidos_ta` grava as caixas de `ANTES_DEPOIS_PEDIDOS_TA` em `renders/POE642_CasaA_PH_<pavimento>_2910b_<trecho>_antes_depois.jpg`, contra as finais da revisão.
+  - Com `--pasta_comparar`, grava também as caixas de `ANTES_DEPOIS_2A_TA` em `..._2910c_<trecho>_antes_depois.jpg`, contra as finais da 1ª leva (commit 387a97f).
 - **Como refazer:**
 
   ```bash
-  # de POE642_CasaA/scripts/; <pasta> com as três finais do commit 219b22b (os mesmos nomes)
-  python3 pedidos_terreo_casaa_2910.py --pasta_antes <pasta> --antes_subsolo <a final do Subsolo do commit 1ccaaa3>
+  # de POE642_CasaA/scripts/; <pasta> com as três finais do commit 219b22b e <pasta_1a> com as do 387a97f (os mesmos nomes)
+  python3 pedidos_terreo_casaa_2910.py --pasta_antes <pasta> --antes_subsolo <a final do Subsolo do commit 1ccaaa3> \
+      --pasta_comparar <pasta_1a>
   python3 rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png \
       --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png \
       --render 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png

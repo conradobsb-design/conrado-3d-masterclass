@@ -4079,3 +4079,53 @@ Achados para o OK (nada alterado):
 - No tapete da sala de estar, junto à poltrona girada, há um leve degrau de tom.
 
 Pendências: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) aguarda o OK.
+
+### Casa A: a 2ª leva dos pedidos de 29/10 (Térreo, vendo a entrega da 1ª; reflexo no 1º Pavimento)
+
+Pedidos do usuário, cada um com um recorte da 1ª leva (387a97f):
+- "ainda não ficou bom. note que tem imperfeição no piso, ao redor da mesa. o piso precisa ficar perfeito e fluido." (a mesinha do estar sob a projeção);
+- "essas imperfeições no piso precisam sair. no entorno das cadeiras, vemos manchas. o piso precisa ter perfeição e fluidez" (o jantar);
+- "corrigir esses traços no tapete e em volta da poltrona. o tapete tem que estar perfeito, tanto no seu interior quanto no contorno" (a sala de estar);
+- "corrija as poltronas também";
+- "corrija o sofá, tapete e borda da mesa, sem essa mancha" (a mesinha junto ao sofá da sala de estar);
+- "essa marca em L, começando atrás do banco, precisa sair. o piso travertino bruto precisa ficar perfeito." (o banco da varanda);
+- "corrija o entorno dessa mesa lateral a poltrona. está borrada. precisamos ver o contorno da mesa, o piso, o efeito suave da sombra." (o escritório);
+- "centralize os rótulos. corrija o da garagem e do q.motorista. preciso ver organização. rótulo precisa se mostrar organizado.";
+- "remova as manchas marrom atras da porta e no contorno do vaso sanitario" (o B. MOTORISTA);
+- "Além disso, você não fez a rotação da poltrona da varanda que eu te pedi. o que mais você não fez?" e "a poltrona fica proxima aos brises".
+
+O que foi feito (`POE642_CasaA/scripts/pedidos_terreo_casaa_2910.py`, seção 13 do script, de novo sobre as finais de 219b22b; detalhes no README, "A 2ª leva"):
+1. O piso em volta dos móveis (`piso_refeito`):
+   - A zona inteira de cada ambiente (os móveis, as sombras e os restos das peças antigas) recebe o travertino tecido de novo, com os estratos deitados.
+   - O tom emenda no piso de fora pela membrana, sem degrau. As paredes, as plantas e os traços não contam como borda; antes, eles faziam as manchas escuras junto às paredes.
+   - Foi aplicado no jantar, no estar da varanda (sem a marca em L), no estar sob a projeção, na sala de estar, no estar em X e no escritório.
+2. Os móveis de novo por cima:
+   - Poltronas: as dos 5 ambientes no modelo padrão de contorno limpo, sem a franja castanha.
+   - Mesas redesenhadas no contorno do PDF, com a borda nítida e a sombra macia: a mesa de centro da sala de estar, a mesa triangular do estar em X e a mesa lateral do escritório (dois tampos redondos de madeira).
+   - Mesinhas e tapete: as mesinhas de madeira, e o tapete redondo da sala de estar com a trama e a borda.
+   - Sofás e jantar: os sofás curvos refeitos; a mesa de jantar com o tampo colado de novo e as 8 cadeiras.
+3. As sombras: a caixa escura em volta das peças de madeira (a sombra cortada e o arredondamento) saiu.
+4. A poltrona do terraço gourmet, junto aos brises: girada como no PDF, com o encosto no alto à esquerda e de frente para a mesa de centro. Na 1ª leva, o giro foi feito por engano na poltrona da sala de estar. Essa ficou na diagonal do PDF.
+5. O banho do motorista: o fio marrom em volta do vaso e o granito no vão da porta e sob a folha saíram, com o Bege Bahia do próprio banho. O vaso tem a beira definida.
+6. Rótulos:
+   - Todos no corpo padrão. Onde não cabem, vão em duas linhas no mesmo corpo antes de diminuir (o BANHO VARANDA em duas linhas; o WC, a DESPENSA e o LAVABO voltaram ao corpo padrão).
+   - Só o B. MOTORISTA ficou a 1,15.
+   - A GARAGEM está acima dos carros, no meio do carro do centro; o Q. MOTORISTA, no piso abaixo da cama.
+   - Onde os rótulos saíram, o piso voltou no tom do de fora, sem o remendo creme do escritório.
+7. 1º Pavimento: o Térreo nublado acompanha as mudanças. O Subsolo foi refeito com o Térreo novo (sem mudança visível).
+
+Antes e depois (o antes é a final da 1ª leva, 387a97f):
+- `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_2910c_{estar_projecao_mesinha,jantar_piso,sala_estar_tapete_poltronas,varanda_estar_banco,sala_estar_x,escritorio_mesa_lateral,terraco_gourmet_poltrona,banho_motorista,rotulos_garagem_motorista,rotulos_servico}_antes_depois.jpg`;
+- `..._1Pavimento_2910c_nublado_estar_antes_depois.jpg`.
+
+Os `_2910b_` (contra 219b22b) também foram regravados. As três pranchas, o PDF da Casa A e o book foram refeitos. Aguarda a validação.
+
+Os dois achados da 1ª leva (a borda serrilhada das mesas do escritório e o degrau de tom no tapete da sala de estar) foram resolvidos nesta leva.
+
+Achados para o OK (nada alterado):
+- No terraço gourmet, as cadeiras rosadas e a mesinha de baixo são peças do render.
+- O aparador do escritório tem a borda áspera.
+- As poltronas do 1º Pavimento ainda estão no modelo antigo, sem o contorno limpo.
+- A mesa de centro da sala de estar ficou no tom da da final (bege liso), agora no contorno do PDF.
+
+Pendências: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) aguarda o OK.
