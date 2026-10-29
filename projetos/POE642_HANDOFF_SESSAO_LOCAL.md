@@ -3707,3 +3707,20 @@ O que foi feito:
 - A regra de 28/10 (sem soleira entre dois ambientes do mesmo piso) veio da Casa D; na Casa C, as portas entre dois travertinos têm soleira, e a do Louceiro 2 ficou igual a elas.
 
 Antes e depois (o antes é a final de f5b0499): `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_porta_louceiro2_antes_depois.jpg`. Prancha do Térreo e PDF da Casa C refeitos.
+
+### Revisão de 29/10/26: Casa C, Térreo e Subsolo (apresentada para o OK, nada alterado)
+
+Pedido do usuário: "vamos para casa D, depois C e depois B". Revisão trecho a trecho das finais contra a base do PDF e as REGRAS; depois do recorte do Louceiro 2, todas as portas de giro conferidas uma a uma (a mesma "segunda linha" aparece onde a limpeza das esquadrias espelha uma borda vizinha).
+- **Conforme:** o Subsolo inteiro; no Térreo, a porta pivotante do hall, a bancada da cozinha, as marcas fora do lote, as outras portas de giro. As soleiras entre dois ambientes do mesmo piso ficam (a da porta do Louceiro 2 acabou de entrar a pedido do usuário).
+- **Para o OK (9), no Térreo:**
+  1. varanda master e BH master 1: os X tracejados do PDF em cinza; em preto (fundo claro, regra de 28/10);
+  2. BH master 2: o X do chuveiro em cinza; em preto;
+  3. closet master 1: o X em cinza na madeira; em branco;
+  4. closet master 2: o mesmo; em branco;
+  5. hall: uma linha cinza fina, contínua, vertical (x 2389, y 1230 a 1460 px), que o PDF não tem; sai, com o travertino;
+  6. Louceiro 1: a folha com tracejado claro e escuro na parte de baixo e o traço escuro na ponta, uma linha fraca ao lado dela (a borda da parede espelhada) e o batente da esquerda escuro; como o Louceiro 2: a folha limpa, sem a linha e sem o traço, e os dois batentes claros do PDF;
+  7. Quarto 2: uma linha escura entre a folha aberta e o armário (a borda do armário espelhada, como no Louceiro 2); sai, com a madeira;
+  8. BH master 1: uma pinta marrom junto ao topo da folha aberta e um pontinho escuro do outro lado da parede, no closet; saem;
+  9. as cadeiras das mesas do quarto 1, do quarto 3 e da suíte master: o contorno cinza grosso e serrilhado; proposta: o contorno limpo das cadeiras da Casa D (a beira macia e um pouco mais escura, sem franja), no mesmo modelo.
+
+Mapa: `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2910_revisao_mapa.jpg` (a final com os números e, em cada item, a final ao lado da base do PDF).
