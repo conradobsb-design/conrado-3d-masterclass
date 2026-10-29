@@ -569,6 +569,191 @@ def recamiers_tb(Q, img):
     return out
 
 
+# 11. As duas poltronas à direita do tapete do estar da varanda (usuário: "substitua essas duas poltronas pela poltrona
+# padrão que adotamos nas outras casas, a de referencia é aquela da sala intima da casa E."): como na Casa D
+# (`D.poltronas_modelo_e_d`), a concha de estofado creme recortada da final do 1º Pavimento da Casa E
+# (`final3840_casae._modelo_poltrona_1p`), no centro e no maior lado da peça do PDF (ARQ_MOBILIÁRIO), com a abertura do
+# assento virada para a mesa de centro (`frente`) e a sombra e o contato das poltronas da Casa E. O buraco da antiga (a
+# peça com `folga_px` e a sombra dela, `sombra_px`, para baixo e à esquerda) é refeito linha a linha, porque o tapete
+# listrado e o travertino em estratos correm deitados: no tapete, o trecho da mesma linha mais perto à esquerda (até
+# `busca_px`) que seja todo tapete livre (sem as peças do PDF de até `objetos_m2`, com `perto_px` de folga para a sombra
+# delas; onde não há, o trecho livre mais perto, `recurso_px`, em vai e vem); fora dele, o da mesma linha à direita, no
+# travertino da legenda do PDF; a borda escura do tapete
+# (`borda_px`, as colunas a partir da linha do PDF), na mesma coluna, da linha limpa mais perto.
+POLTRONAS_VARANDA_TB = {"pecas": [((1262.7, 1006.5, 1311.3, 1055.4), (-0.95, 0.31)),
+                                  ((1257.8, 1087.7, 1306.4, 1136.6), (-0.97, -0.26))],
+                        "camada": "ARQ_MOBILIÁRIO", "tapete_pt": (1006.6, 987.6, 1290.1, 1186.1), "borda_px": 4,
+                        "objetos_m2": 10.0, "perto_px": 6, "folga_px": 5, "sombra_px": 3, "esfuma_px": 2,
+                        "busca_px": 200, "recurso_px": 12}
+
+
+def poltronas_varanda_tb(Q, img):
+    import final3840_casae as E
+    import retoque_terreo_casae as T
+    q, qe = POLTRONAS_VARANDA_TB, E.POLTRONAS_TE
+    H, W = img.shape[:2]
+    out = img.astype(np.float32)
+    zona = np.zeros((H, W), bool)
+    buraco = np.zeros((H, W), bool)
+    k = 2 * q["folga_px"] + 1
+    s = q["sombra_px"]
+    for r, _ in q["pecas"]:
+        a = Q.preencher(lambda d, r=r: d.get("layer") == q["camada"] and D._dentro_pt(d["rect"], r))
+        m = cv2.dilate((a > 0.05).astype(np.uint8), np.ones((k, k), np.uint8))
+        m |= cv2.warpAffine(m, np.float32([[1, 0, -s], [0, 1, s]]), (W, H))
+        buraco |= m.astype(bool)
+    # as outras peças do PDF (o sofá, a mesa de centro, o pufe; não o tapete), com folga para a sombra delas
+    m_pt = abs(Q.p2q(1, 0)[0] - Q.p2q(0, 0)[0]) / Q.px_m                # m por pt
+    obj = Q.preencher(lambda d: d.get("layer") in F.CAMADAS_PECAS and d["type"] in ("f", "fs")
+                      and d["rect"].width * d["rect"].height * m_pt ** 2 < q["objetos_m2"])
+    k = 2 * q["perto_px"] + 1
+    proibido = cv2.dilate(((obj > 0.05) | buraco).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+    x0, y0, _, y1 = F.ret_q(Q, q["tapete_pt"])
+    lx = int(np.floor(Q.p2q(q["tapete_pt"][2], 0)[0]))          # a 1ª coluna da borda escura
+    lb = lx + q["borda_px"]
+    trav = cv2.erode(Q.cor(next(pz[1] for pz in F.PISOS[Q.chave] if pz[3] == "travertino"), tol=6).astype(np.uint8),
+                     np.ones((5, 5), np.uint8)) > 0
+    fonte = out.copy()
+    n_tap = n_fora = n_borda = 0
+    for y in np.unique(np.nonzero(buraco)[0]):
+        xs = np.nonzero(buraco[y])[0]
+        for parte, (a, b), passo in (("tapete", (x0, lx), -1), ("fora", (lb, W), 1)):
+            sel = xs[(xs >= a) & (xs < b)]
+            if not len(sel) or not (y0 <= y < y1 or parte == "fora"):
+                continue
+            ha, hb = sel.min(), sel.max() + 1
+            achou = False
+            for d in range(1, q["busca_px"]):
+                fa, fb = ha + passo * d, hb + passo * d
+                if fa < a or fb > b:
+                    break
+                ok = ~proibido[y, fa:fb] & (True if parte == "tapete" else trav[y, fa:fb])
+                if ok.all():
+                    fonte[y, ha:hb] = out[y, fa:fb]
+                    achou = True
+                    break
+            if not achou:
+                # sem trecho livre do comprimento do buraco (o sofá ocupa a linha): o trecho livre mais perto, em vai
+                # e vem (a lista corre deitada; o que sobra fica quase todo sob a poltrona nova)
+                livre = ~proibido[y, a:b] & (True if parte == "tapete" else trav[y, a:b])
+                xs_l = np.nonzero(livre)[0] + a
+                xs_l = xs_l[(xs_l < ha) if passo < 0 else (xs_l >= hb)]
+                if len(xs_l):
+                    ref = xs_l.max() if passo < 0 else xs_l.min()
+                    run = [ref]
+                    while (run[-1] + passo) in set(xs_l.tolist()) and len(run) < q["recurso_px"]:
+                        run.append(run[-1] + passo)
+                    vv = run + run[-2:0:-1] if len(run) > 2 else run
+                    for i, x in enumerate(range(ha, hb) if passo > 0 else range(hb - 1, ha - 1, -1)):
+                        fonte[y, x] = out[y, vv[i % len(vv)]]
+                    achou = True
+            if achou:
+                if parte == "tapete":
+                    n_tap += hb - ha
+                else:
+                    n_fora += hb - ha
+        bx = xs[(xs >= lx) & (xs < lb)]
+        if len(bx) and y0 <= y < y1:
+            for d in range(1, q["busca_px"]):
+                for yy in (y - d, y + d):
+                    if y0 <= yy < y1 and not proibido[yy, lx:lb].any():
+                        fonte[y, lx:lb] = out[yy, lx:lb]
+                        n_borda += lb - lx
+                        break
+                else:
+                    continue
+                break
+    e = q["esfuma_px"]
+    al = cv2.GaussianBlur(cv2.dilate(buraco.astype(np.uint8), np.ones((2 * e + 1,) * 2, np.uint8)).astype(np.float32),
+                          (0, 0), e / 2)
+    al[buraco] = 1
+    out = out * (1 - al[..., None]) + fonte * al[..., None]
+    cor, a_m = E._modelo_poltrona_1p(qe)
+    fx, fy = qe["modelo"]["frente"]
+    for r, (dx, dy) in q["pecas"]:
+        (ax, ay), (bx_, by) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        cx, cy, t = (ax + bx_) / 2, (ay + by) / 2, max(bx_ - ax, by - ay)
+        ang = np.degrees(np.arctan2(dx, dy) - np.arctan2(fx, fy))
+        c2, a2 = E._girar_peca(cor, a_m, t / max(a_m.shape), ang)
+        T.pousar_planta(out, c2, a2, float(cx), float(cy), t, qe["sombra"])
+        T.pousar_planta(out, c2, a2, float(cx), float(cy), t, qe["sombra_contato"])
+    print(f"    {len(q['pecas'])} poltronas do estar da varanda no modelo da sala íntima da Casa E (o fundo da antiga: "
+          f"{n_tap} px de tapete, {n_fora} de travertino e {n_borda} da borda, das mesmas linhas e colunas)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# 12. A poltrona redonda à esquerda do tapete do estar da varanda (usuário: "traga a textura e revestimento estofada para
+# essa poltrona"): a peça do PDF (o assento redondo e o encosto, ARQ_MOBILIÁRIO) no estofado das poltronas da Casa D
+# (`D.estofado_d`: o linho off-white com volume e trama, os traços de dentro como vincos, sem o contorno técnico).
+POLTRONA_REDONDA_TB = {"pt": (940.0, 1090.3, 993.3, 1142.8), "camada": "ARQ_MOBILIÁRIO", "semente": 78}
+
+
+def poltrona_redonda_tb(Q, img):
+    q, me = POLTRONA_REDONDA_TB, D.MOVEIS_TD
+    pc = [d for d in Q.desenhos if d.get("layer") == q["camada"] and D._dentro_pt(d["rect"], q["pt"])]
+    fills = [d for d in pc if d["type"] in ("f", "fs")]
+    tr = [d for d in pc if d["type"] == "s" and max(d["rect"].width, d["rect"].height) >= me["costura_min_pt"]]
+    vs = [d for d in pc if d["type"] == "s" and max(d["rect"].width, d["rect"].height) >= me["estofado"]["vinco_min_pt"]]
+    out = D.estofado_d(Q, img.copy(), fills, tr, RECAMIERS_TB["cor"], np.random.default_rng(q["semente"]), vincos=vs)
+    print("    poltrona redonda do estar da varanda: estofado em linho com volume e trama")
+    return out
+
+
+# 13. As duas poltronas à esquerda do tapete do estar do living (usuário: "para essas duas poltronas, deixe os encostos
+# em tom vinho/bordô"): cada peça do PDF (ARQ_MOBILIÁRIO) dividida pelos traços dela: o encosto (a almofada curva das
+# costas e a casca de fora, as partes com o centro a menos de `encosto_x` da largura, do lado das costas, e as tiras
+# finas da casca até a ponta dos braços, até `casca_px` de espessura) no bordô (`tom`, na luz que a peça já tem: a de
+# cada px sobre a mediana do encosto, na potência `gama`); os braços e o assento ficam.
+ENCOSTOS_LIVING_TB = {"pecas_pt": [(1487.9, 1026.0, 1527.5, 1070.8), (1487.9, 1093.0, 1527.5, 1137.8)],
+                      "camada": "ARQ_MOBILIÁRIO", "encosto_x": 0.42, "casca_px": 1.6, "tom": (70, 60, 116),
+                      "gama": 1.0, "ss": 8}
+
+
+def encostos_living_tb(Q, img):
+    q, ss = ENCOSTOS_LIVING_TB, ENCOSTOS_LIVING_TB["ss"]
+    out = img.copy()
+    for r in q["pecas_pt"]:
+        d = _desenho_tb(Q, q["camada"], r)
+        tr = [t for t in Q.desenhos if t.get("layer") == q["camada"] and t["type"] == "s" and D._dentro_pt(t["rect"], r)]
+        X0, Y0, X1, Y1 = F.ret_q(Q, r)
+        X0, Y0, X1, Y1 = X0 - 2, Y0 - 2, X1 + 2, Y1 + 2
+        w, h = X1 - X0, Y1 - Y0
+        M = D._mascara_pdf(Q, [d], X0, Y0, w, h, ss) > 0
+        L = D._mascara_pdf(Q, tr, X0, Y0, w, h, ss, traco_px=0.4) > 0
+        n, lab, st, cen = cv2.connectedComponentsWithStats((M & ~L).astype(np.uint8), connectivity=4)
+        a0 = (Q.p2q(r[0], 0)[0] - X0) * ss
+        larg = (Q.p2q(r[2], 0)[0] - Q.p2q(r[0], 0)[0]) * ss
+        enc = np.zeros(M.shape, bool)
+        for i in range(1, n):
+            fino = min(st[i, 2], st[i, 3]) <= q["casca_px"] * ss * 2       # a casca de fora, até a ponta dos braços
+            if (cen[i][0] - a0) / larg < q["encosto_x"] or fino:
+                enc |= lab == i
+        # os traços entre duas partes do encosto e os de fora dele entram no tom (o traço vira o vinco escuro do bordô)
+        viz = cv2.dilate(enc.astype(np.uint8), np.ones((int(0.8 * ss) * 2 + 1,) * 2, np.uint8)).astype(bool)
+        resto = cv2.dilate(((M & ~L) & ~enc).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        enc_t = (enc | (viz & L & ~resto) | (viz & ~M)) & cv2.dilate(M.astype(np.uint8), np.ones((ss + 1,) * 2,
+                                                                                               np.uint8)).astype(bool)
+        a = cv2.resize(enc_t.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        Yl = reg.mean(axis=2)
+        miolo = cv2.resize(cv2.erode(enc.astype(np.uint8), np.ones((ss + 1,) * 2, np.uint8)).astype(np.float32),
+                           (w, h), interpolation=cv2.INTER_AREA) > 0.99
+        med = float(np.median(Yl[miolo])) if miolo.any() else float(Yl.max())
+        novo = np.float32(q["tom"]) * (np.clip(Yl / med, 0, 1.3) ** q["gama"])[..., None]
+        out[Y0:Y1, X0:X1] = np.clip(reg * (1 - a) + novo * a, 0, 255).astype(np.uint8)
+    print(f"    {len(q['pecas_pt'])} poltronas do estar do living: o encosto em bordô")
+    return out
+
+
+# 14. As floreiras dos caixotes dos banhos na fachada de cima (usuário, com o recorte da fachada: "nesses retangulos em
+# branco dos banhos, temos floreiras."): os dois caixotes do banho master, o do banho 1 e o do banho 2 (o miolo branco
+# dentro da parede, pt) com as floreiras da Casa D (`D.floreiras_td`: o fundo de casca, os seixos e as plantas da
+# biblioteca, `C.floreira_lavabo_t`), uma planta a cada `passo_m` do caixote.
+FLOREIRAS_TB = dict(D.FLOREIRAS_TD, miolos_pt=[(1069.0, 525.6, 1128.8, 544.6), (1284.5, 525.6, 1345.3, 544.6),
+                                               (1624.5, 525.6, 1708.0, 544.6), (2409.7, 525.6, 2493.2, 543.6)],
+                    passo_m=0.145, semente=2911)
+
+
 # 10. A cama da suíte master (o mesmo pedido, no cobre-leito): a cama do motor (`F.cama_master`) refeita sobre a final,
 # só ela (o banco aos pés e a sombra de fora ficam): o cobre-leito em matelassê com o relevo de cada losango
 # (`acolchoado`), e o rolo do cobre-leito dobrado no mesmo matelassê, com mais volume nas pontas (as dobras soltas do
@@ -579,6 +764,10 @@ CAMA_MASTER_TB = dict(F.CAMA_MASTER_F, so_cama=True, acolchoado=0.06, rolo_vol=(
 def pedidos_tb(img):
     Q = F.Quadro("Terreo")
     img = D.tapete_trama_d(Q, img, q=TAPETES_TB)
+    img = poltronas_varanda_tb(Q, img)
+    img = poltrona_redonda_tb(Q, img)
+    img = encostos_living_tb(Q, img)
+    img = D.floreiras_td(Q, img, FLOREIRAS_TB)
     img = mesa_hall_tb(Q, img)
     img = tampos_tb(Q, img)
     img = D.jantar_d(Q, img, img, q=JANTAR_TB)

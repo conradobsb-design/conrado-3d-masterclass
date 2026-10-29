@@ -2528,22 +2528,27 @@ FLOREIRAS_TD = {"miolos_pt": [(1658.6, 559.7, 1806.9, 570.7), (2058.0, 559.7, 22
                 "borda": (96, 104, 110), "borda_pt": 0.5, "seixos_m2": 0, "semente": 2710}
 
 
-def floreiras_td(Q, img):
-    q = FLOREIRAS_TD
+def floreiras_td(Q, img, q=None):
+    """`q`: a configuração (`FLOREIRAS_TD` por padrão); com `passo_m`, cada caixote tem uma planta a cada `passo_m` do
+    comprimento dele (no lugar de `n` em todos)."""
+    q = q or FLOREIRAS_TD
     guarda = C.FLOREIRA_LAVABO_T
     rng = np.random.default_rng(q["semente"])
     out = img
+    m_pt = abs(Q.p2q(1, 0)[0] - Q.p2q(0, 0)[0]) / Q.px_m
     try:
         for k, pt in enumerate(q["miolos_pt"]):
+            n = max(3, int(round(max(pt[2] - pt[0], pt[3] - pt[1]) * m_pt / q["passo_m"]))) if "passo_m" in q \
+                else q["n"]
             plantas = [(q["plantas"][(i + k) % len(q["plantas"])], float(rng.uniform(*q["d_m"])),
-                        ((i + 0.5) / q["n"] + float(rng.uniform(-0.02, 0.02)), float(rng.uniform(0.40, 0.60))),
-                        int(rng.integers(0, 360))) for i in range(q["n"])]
+                        ((i + 0.5) / n + float(rng.uniform(-0.02, 0.02)), float(rng.uniform(0.40, 0.60))),
+                        int(rng.integers(0, 360))) for i in range(n)]
             C.FLOREIRA_LAVABO_T = dict(guarda, pt=pt, borda=q["borda"], borda_pt=q["borda_pt"], seixos_m2=q["seixos_m2"],
                                        semente=q["semente"] + k, plantas=plantas)
             out = C.floreira_lavabo_t(Q, out)
     finally:
         C.FLOREIRA_LAVABO_T = guarda
-    print(f"    floreiras: os {len(q['miolos_pt'])} caixotes da fachada de cima com {q['n']} plantas cada")
+    print(f"    floreiras: os {len(q['miolos_pt'])} caixotes da fachada de cima, com as plantas")
     return out
 
 
