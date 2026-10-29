@@ -4008,3 +4008,74 @@ As projeções tracejadas que cruzam as peças trocadas no Térreo voltam por ci
 Antes e depois: `POE642_CasaA/renders/POE642_CasaA_PH_<pavimento>_2910_item<n>_<trecho>_antes_depois.jpg` (16 imagens: 9 do Térreo, 2 do Subsolo, 5 do 1º Pavimento). Refeitos as três pranchas, o PDF da Casa A e o book.
 
 Pendências: o item 11 aguarda o OK; o book segue com os textos provisórios (as áreas das Casas D e E, os textos das casas e o nome do empreendimento).
+
+### Casa A: os pedidos de 29/10 à noite (Térreo; reflexos no 1º Pavimento e no Subsolo)
+
+Pedidos do usuário, cada um com um recorte do Térreo:
+- "corrigir falha no tracejado - planta terrea da casa A";
+- "corrigir falha no tracejado e no contorno da pista de acesso à garagem. as bordas estão com falhas, do inicio ao fim";
+- "corrigir falhas na parede. essas imperfeições não podem aparecer", "corrigir imperfeições na borda da parede e na borda da janela", "corrigir imperfeições na parede e na quina" e "corrija as imperfeições das paredes";
+- "corrigir contornos. e rótulos de todos os ambientes centralizados.";
+- "melhorar o aspecto das espreguiçadeiras";
+- "corrigir imperfeições da mesinha";
+- "substituir essas cadeiras pela nossa modelo, integrando suavemente ao piso. as cadeiras devem ser com assento marrom" e "corrigir piso, nas beiradas . note que ficou defeituoso.";
+- "rotacione 45º para a direita, apontando a poltrona para a mesa de centro. conforme o pdf";
+- "arrume esse box. ele está passando pela parede. deve ficar reto e dentro de sua área, conforme o pdf. mantenha a folha contínua.";
+- "esse tracejado não existe.";
+- "tem um tracejado que não foi representado da laje. são dois tracejados paralelos. note que são dois tracejados mais pontilhados, mais próximos os tracejos. veja no pdf.";
+- "remova o traço da borda da piscina. note que ele só aparece em um trecho e depois não tem mais. por isso, remova qualquer traço de borda da piscina";
+- "aqui nessa parte do sofá tem uma mesinha em madeira a ser representada. adicione-a.";
+- "precisamos melhorar muito esse ambiente. são duas mesas de centro que precisam ser bem evidenciadas as suas partes. é uma sobre posta a outra, com tom e sobretom. corrija os contornos das poltronas e adicione uma mesinha redonda de madeira entre elas conforme o pdf. melhore o aspecto do tapete e suas bordas. melhore o aspecto do bancos estofado e seu entorno. abaixo dele, o piso está imperfeito.";
+- "essa linha preta ao meio da pedra na ilha da varanda não existe. remova-a.";
+- "melhore o aspecto dessa janela.";
+- "não há esse movel em L na despensa. remova-o";
+- "faltou os matelassê das camas. adicione-a em todas".
+
+O que foi feito (`POE642_CasaA/scripts/pedidos_terreo_casaa_2910.py`, uma vez, sobre as finais de 219b22b; detalhes no README, "Os pedidos de 29/10 à noite da Casa A"):
+1. Pista de acesso à garagem:
+   - A linha do afastamento do PDF (as 4 retas de traço longo) estava só no render, cinza e falhada. Agora está inteira, do início ao fim, em preto ou branco pelo fundo.
+   - O contorno de dentro da laje, paralelo ao de fora, entrou.
+   - As duas retas da hachura da pedra que atravessavam a pista até o muro saíram.
+   - A borda da pedra portuguesa com a grama foi refeita no contorno do PDF, do portão à garagem, com a linha fina contínua.
+   - Os tracejados passam por baixo das paredes e do portão, como no PDF.
+2. Paredes: os dentes, as franjas e as quinas fora do contorno do PDF receberam o piso ou a grama de fora; a parede voltou ao contorno do PDF.
+3. Janelas: de novo no desenho do PDF a do jardim de 17,46 m², as duas do escritório, a da quina da varanda e a da pia da cozinha. A da pia tem as duas folhas de correr desencontradas.
+4. Despensa: sem o armário em L, com o granito limpo no lugar.
+5. Ilha da varanda gourmet: sem a linha preta no meio da pedra.
+6. Piscina: sem o fio de borda no Bege Bahia, que só aparecia num trecho.
+7. Rótulos: todos os dos ambientes no centro do piso livre, fora dos móveis. Nos ambientes abertos (sala de estar, hall interno, sala de jantar, varanda), no ponto do PDF. Os dos jardins, da área de serviço descoberta e das peças ficam como estão.
+8. Box do banho varanda: uma folha só de vidro, reta, na linha do PDF, de face a face das paredes, sem entrar nelas.
+9. Espreguiçadeiras: as 2 do PDF, com a estrutura em freijó, a almofada de linho off-white, o encosto, a dobra e a sombra no Bege Bahia.
+10. Mesa de jantar: as 8 cadeiras no modelo padrão, com o assento em couro marrom. O piso em volta está no tom do travertino, com os veios, sem as caixas claras nas beiradas.
+11. Estar da varanda: refeito do piso para cima; o sofá curvo fica.
+    - As duas mesas de centro sobrepostas, em carvalho: a de baixo no tom médio, a de cima no sobretom mais claro, com a sombra de uma na outra.
+    - As mesinhas redondas de madeira: entre as poltronas e na ponta do sofá.
+    - As 2 poltronas no modelo padrão, com o contorno limpo.
+    - O tapete do PDF com a trama e a faixa da borda.
+    - O banco estofado: o quadro em madeira, o assento de linho em 3 partes e as 2 almofadas das pontas.
+    - O travertino refeito embaixo de tudo.
+12. Mesinhas:
+    - As duas redondas da sala de estar, que eram anéis vazados, e a do centro do estar em X, que era um borrão com um caco cinza ao lado, agora em madeira.
+    - A de cantos arredondados junto à ponta do sofá da sala de estar, que faltava, foi adicionada.
+13. Poltrona da sala de estar, à direita do tapete: girada como no PDF, de frente para a mesa de centro. O tapete foi refeito no lugar da antiga.
+14. Matelassê: o da Casa B no edredom da cama do motorista (Térreo) e das 6 camas do 1º Pavimento.
+15. Os outros pavimentos:
+    - 1º Pavimento: o Térreo nublado em volta e nos vazios trocado onde o Térreo mudou.
+    - Subsolo: as peças nevoadas do Térreo refeitas a partir do Térreo novo, sobre a final de 1ccaaa3, com `revisao_casaa_2910.revisao_ta`.
+
+Antes e depois (o antes é a final de 219b22b):
+- `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_2910b_{pista_borda_tracejados,paredes_janelas_despensa,box_banho_varanda,espreguicadeiras_piscina,jantar_cadeiras,varanda_estar,sala_estar_mesinhas_poltrona,estar_x_mesinha,ilha_varanda,cama_motorista}_antes_depois.jpg`;
+- `..._1Pavimento_2910b_{camas_matelasse,nublado_piscina}_antes_depois.jpg`;
+- `..._Subsolo_2910b_nevoado_piscina_antes_depois.jpg`.
+
+Refeitos as três pranchas, o PDF da Casa A e o book. Aguarda a validação.
+
+Leituras dos recortes (a confirmar com o usuário):
+- A "mesinha junto ao sofá" foi lida como a peça de cantos arredondados na ponta do sofá da sala de estar.
+- O giro da poltrona foi feito para a orientação do PDF, de frente para a mesa de centro.
+
+Achados para o OK (nada alterado):
+- As mesas laterais e os círculos do escritório têm a borda serrilhada.
+- No tapete da sala de estar, junto à poltrona girada, há um leve degrau de tom.
+
+Pendências: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) aguarda o OK.
