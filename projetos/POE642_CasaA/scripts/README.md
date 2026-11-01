@@ -1542,6 +1542,8 @@ Pedido do usuário, vendo o Subsolo antes do OK da Casa B: "preciso que represen
 
 ### O book de entrega: `book_entrega.py` (29/10)
 
+- **Áreas das Casas D e E (01/11/26):** as do usuário (D: Subsolo 185,09 m², Térreo 868,53 m²; E: Subsolo 217,68 m², Térreo 490,15 m², 1º Pavimento 375,69 m²), com o Total (a soma), em `CASAS` e na chave `entrega.areas` das configs das duas casas; as pranchas saem de `rodape_entrega.py` como antes (só o quadro do rodapé muda).
+
 Modelo 2 (editorial), escolhido pelo usuário ("modelo 2"). Junta as 12 plantas aprovadas das Casas A–E num PDF A3 deitado: `POE642_Book/POE642_Book_Plantas_Humanizadas.pdf`, mais a prévia `POE642_Book_previa.jpg`.
 
 As páginas são desenhadas em PIL a 200 dpi (3307 × 2339 px). O desenho é feito em unidades de uma página de 1600 px e convertido por `z()`. O PDF é montado com pymupdf; cada página entra como JPEG em memória.

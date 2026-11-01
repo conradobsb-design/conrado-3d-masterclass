@@ -4193,3 +4193,13 @@ Pendências:
 - Casa B: o lado direito do mesmo retângulo tracejado (x = 1396,6 pt, junto ao living) ficou; aguarda o OK para sair também.
 - Casa A: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) e a forma do B. SERVIÇO aguardam o usuário.
 
+
+### Casas D e E: o quadro de áreas (01/11)
+
+Áreas enviadas pelo usuário: Casa D, Subsolo 185,09 m² e Térreo 868,53 m²; Casa E, Subsolo 217,68 m², Térreo 490,15 m² e 1º Pavimento 375,69 m² ("atualize as pranchas e o book com os dados da casa D e E").
+
+O que foi feito:
+- `POE642_CasaD/config_bases.json` e `POE642_CasaE/config_bases.json` (`entrega.areas` e a nota `_areas`): os valores no lugar de "NÃO INFORMADO" e a linha TOTAL, como nas Casas A, B e C (a soma: D 1.053,62 m²; E 1.083,52 m²). A ordem das linhas fica a de antes (D: Térreo, Subsolo; E: Subsolo, Térreo, 1º Pavimento).
+- `book_entrega.py` (`CASAS["D"]` e `CASAS["E"]`): as mesmas áreas, com o Total.
+- Pranchas das Casas D (2) e E (3) refeitas com `rodape_entrega.py --no-quadro` (as finais de sempre: D `..._final_rotulos.png`; E `..._v1_final.png`); conferido que só o quadro de áreas do rodapé muda (as plantas iguais, px a px). PDFs das Casas D e E e book refeitos.
+

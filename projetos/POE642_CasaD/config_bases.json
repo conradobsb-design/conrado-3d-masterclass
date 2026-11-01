@@ -719,7 +719,7 @@
  },
  "entrega": {
   "_sobre": "Dados do rodapé e das pranchas de entrega (rodape_entrega.py e pdf_entrega.py). Pastas relativas a esta config.",
-  "_areas": "Áreas não informadas pelo usuário em 15/10/26: Térreo e Subsolo com 'NÃO INFORMADO', sem linha de total (a soma dos ambientes do PDF não é a área do quadro).",
+  "_areas": "Quadro de áreas enviado pelo usuário em 01/11/26 (Subsolo 185,09 m², Térreo 868,53 m²); o total, 1.053,62 m², é a soma, com a linha TOTAL como nas Casas A, B e C. Antes (15/10/26), sem as áreas: 'NÃO INFORMADO' e sem total.",
   "_confirmado": "Endereço (Lotes 17, Unidade D) confirmado pelo usuário em 15/10/26; norte o mesmo das Casas A, B e C.",
   "casa": "CASA D",
   "prefixo": "POE642_CasaD",
@@ -741,11 +741,15 @@
   "areas": [
    [
     "TÉRREO",
-    "NÃO INFORMADO"
+    "868,53 m²"
    ],
    [
     "SUBSOLO",
-    "NÃO INFORMADO"
+    "185,09 m²"
+   ],
+   [
+    "TOTAL",
+    "1.053,62 m²"
    ]
   ],
   "projeto": [

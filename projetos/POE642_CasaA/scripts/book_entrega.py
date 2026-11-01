@@ -59,12 +59,12 @@ CASAS = {
                    " a piscina com prainha e spa, a suíte master, três quartos, o escritório e a garagem. No subsolo, "
                    "academia, sauna, depósito e varanda.")},
     "D": {"pavs": ["Subsolo", "Térreo"],
-          "areas": [("Térreo", "não informado"), ("Subsolo", "não informado")],
+          "areas": [("Térreo", "868,53 m²"), ("Subsolo", "185,09 m²"), ("Total", "1.053,62 m²")],
           "texto": ("No térreo, o living e o jantar, a varanda gourmet, a piscina com prainha e spa, o gourmet e a "
                    "cozinha, a suíte master, duas suítes, a suíte com escritório, a sala íntima e a garagem. No subsolo,"
                    " academia, sauna, vestiário e depósito.")},
     "E": {"pavs": ["Subsolo", "Térreo", "1º Pavimento"],
-          "areas": [("Subsolo", "não informado"), ("Térreo", "não informado"), ("1º Pavimento", "não informado")],
+          "areas": [("Subsolo", "217,68 m²"), ("Térreo", "490,15 m²"), ("1º Pavimento", "375,69 m²"), ("Total", "1.083,52 m²")],
           "texto": ("No térreo, o living e a sala de jantar, a varanda, a piscina com prainha e spa, a área gourmet, o "
                    "escritório e a garagem. No 1º pavimento, a suíte master, mais quatro suítes e a sala íntima. No "
                    "subsolo, academia, sauna, vestiário e piscina.")},
