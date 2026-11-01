@@ -4208,5 +4208,9 @@ O que foi feito:
 
 OK do usuário: "pode tirar o outro tracejado da casa B também". O lado direito do retângulo tracejado da ARQ_BANCADAS entre os dois pilares (x = 1396,6 pt, px 1597-1599 da final, de baixo do pilar de cima ao pilar de baixo) saiu, com o travertino da mesma linha, 4 px à direita; a faixa inteira (a borda suavizada do traço deixava um fio). É a 3ª faixa de `TRACEJADO_LIVING_TB` (`revisao_casab_2910.py --tracejado`, item 27), que, refeito sobre a final de f14d295 ou sobre a de 15174e3, dá a mesma imagem. O antes e depois `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2910b_tracejado_folhas_living_antes_depois.jpg` foi regravado (os dois lados, contra f14d295). Prancha do Térreo, PDF da Casa B e book refeitos. Aguarda a validação.
 
-Pendências: o item 11 da revisão da Casa A (o piso entre o bronze e o vidro das suítes 1 e 2) e a forma do B. SERVIÇO aguardam o usuário.
+Pendências: nenhuma (ver a seção seguinte).
 
+
+### Fechamento para a entrega à Paulo Octávio (01/11)
+
+Usuário: "desconsidere esses itens. Amanhã envio os materiais para a Paulo Octavio." As duas pendências da Casa A foram descartadas e ficam como estão: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) e a forma do rótulo B. SERVIÇO (1,15×, centrado na largura do banho). Os materiais da entrega são os do commit 0accf13: as 12 pranchas `POE642_Casa?/entrega/POE642_Casa?_PH_<pavimento>_entrega.png`, os 5 PDFs `POE642_Casa?/entrega/POE642_Casa?_Plantas_Humanizadas.pdf` e o book `POE642_Book/POE642_Book_Plantas_Humanizadas.pdf`, todos enviados ao usuário.
