@@ -30,7 +30,8 @@ pia da cozinha só com as duas folhas. Uma vez, sobre a final de d83aee4:
   python3 revisao_casab_2910.py --pedidos [--antes <png>] [--saida <png>]
 
 Depois, o tracejado junto às folhas de vidro entre a varanda gourmet e o living (usuário, com o recorte: "na casa B,
-terreo, esse tracejado não existe."; `tracejado_living_tb`, item 27). Uma vez, sobre a final de f14d295:
+terreo, esse tracejado não existe."; depois, "pode tirar o outro tracejado da casa B também"; `tracejado_living_tb`,
+item 27: os dois lados do retângulo tracejado). Uma vez, sobre a final de f14d295:
   python3 revisao_casab_2910.py --tracejado [--antes <png>] [--saida <png>]
 """
 import argparse
@@ -1425,9 +1426,12 @@ def matelasse_camas_tb(Q, img):
 # faixa acinzentada até o primeiro (px 1557-1560, o travertino ali sem o rosado). Em cada faixa (caixa em px, `desloc`,
 # `limiar`), os px com o cinza abaixo do limiar recebem o travertino da mesma linha, `desloc` px à direita, já depois do
 # tracejado (os estratos correm na horizontal); a faixa acinzentada sai inteira. As folhas e os nós das junções ficam: a
-# 1ª junção (px 893-897) e a 3ª (1123-1125), que encostam nas faixas, ficam fora das linhas. O lado direito do retângulo
-# (x = 1396,6 pt, px 1597-1598) fica até o OK.
-TRACEJADO_LIVING_TB = {"faixas_px": [((1561, 898, 1564, 1240), 6, 205), ((1557, 1126, 1561, 1238), 8, 256)]}
+# 1ª junção (px 893-897) e a 3ª (1123-1125), que encostam nas faixas, ficam fora das linhas. Depois (usuário, 01/11/26,
+# com o OK: "pode tirar o outro tracejado da casa B também"): o lado direito do retângulo (x = 1396,6 pt, px 1597-1599),
+# de baixo do pilar de cima (a sombra dele, px 776-777, fica) até o pilar de baixo, a faixa inteira (a borda suavizada
+# do traço deixava um fio) com o travertino 4 px à direita.
+TRACEJADO_LIVING_TB = {"faixas_px": [((1561, 898, 1564, 1240), 6, 205), ((1557, 1126, 1561, 1238), 8, 256),
+                                     ((1597, 778, 1600, 1244), 4, 256)]}
 
 
 def tracejado_living_tb(img):

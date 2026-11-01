@@ -4190,7 +4190,7 @@ O que foi feito:
 Antes e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2910b_tracejado_folhas_living_antes_depois.jpg` e `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2910c_tapete_sala_intima_textura_antes_depois.jpg`. Pranchas do Térreo, PDFs das Casas B e D e book refeitos. Aguarda a validação.
 
 Pendências:
-- Casa B: o lado direito do mesmo retângulo tracejado (x = 1396,6 pt, junto ao living) ficou; aguarda o OK para sair também.
+- Casa B: o lado direito do mesmo retângulo tracejado (x = 1396,6 pt, junto ao living) saiu depois, com o OK (ver abaixo).
 - Casa A: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) e a forma do B. SERVIÇO aguardam o usuário.
 
 
@@ -4202,4 +4202,11 @@ O que foi feito:
 - `POE642_CasaD/config_bases.json` e `POE642_CasaE/config_bases.json` (`entrega.areas` e a nota `_areas`): os valores no lugar de "NÃO INFORMADO" e a linha TOTAL, como nas Casas A, B e C (a soma: D 1.053,62 m²; E 1.083,52 m²). A ordem das linhas fica a de antes (D: Térreo, Subsolo; E: Subsolo, Térreo, 1º Pavimento).
 - `book_entrega.py` (`CASAS["D"]` e `CASAS["E"]`): as mesmas áreas, com o Total.
 - Pranchas das Casas D (2) e E (3) refeitas com `rodape_entrega.py --no-quadro` (as finais de sempre: D `..._final_rotulos.png`; E `..._v1_final.png`); conferido que só o quadro de áreas do rodapé muda (as plantas iguais, px a px). PDFs das Casas D e E e book refeitos.
+
+
+### Casa B: o outro lado do tracejado do living (01/11)
+
+OK do usuário: "pode tirar o outro tracejado da casa B também". O lado direito do retângulo tracejado da ARQ_BANCADAS entre os dois pilares (x = 1396,6 pt, px 1597-1599 da final, de baixo do pilar de cima ao pilar de baixo) saiu, com o travertino da mesma linha, 4 px à direita; a faixa inteira (a borda suavizada do traço deixava um fio). É a 3ª faixa de `TRACEJADO_LIVING_TB` (`revisao_casab_2910.py --tracejado`, item 27), que, refeito sobre a final de f14d295 ou sobre a de 15174e3, dá a mesma imagem. O antes e depois `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2910b_tracejado_folhas_living_antes_depois.jpg` foi regravado (os dois lados, contra f14d295). Prancha do Térreo, PDF da Casa B e book refeitos. Aguarda a validação.
+
+Pendências: o item 11 da revisão da Casa A (o piso entre o bronze e o vidro das suítes 1 e 2) e a forma do B. SERVIÇO aguardam o usuário.
 
