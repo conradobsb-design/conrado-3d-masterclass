@@ -1431,13 +1431,16 @@ def poltronas_modelo_e_d(Q, img):
 # não). O tom médio do tapete não muda. Depois (usuário, 29/10/26: "adicione textura ao tapete", com o recorte do estar do
 # living, e "adicione textura aos tapetes das suites"): o do living e os das 4 suítes (o orgânico da master, os das camas
 # da suíte 1 e da 2, o do estar da suíte 3/escritório); fora o da varanda, a cor do tapete é a mediana da faixa junto à
-# borda (`anel_px` para dentro do recuo), porque a cama cobre o miolo.
+# borda (`anel_px` para dentro do recuo), porque a cama cobre o miolo. Depois (usuário, 29/10/26: "faltou a textura no
+# tapete da sala intima do terreo da casa D. adicione-a."): o da sala íntima (ARQ_LOUÇAS E METAIS), no fim da lista (a
+# semente dos outros não muda), com a cor da faixa junto à borda (o sofá em L e a mesa de centro cobrem o miolo).
 TAPETE_TRAMA_D = {"tapetes_pt": [("varanda", (1272.6, 1154.9, 1499.3, 1324.9)),
                                   ("living", (1713.6, 1235.1, 1997.1, 1433.5)),
                                   ("suíte master", (610.3, 1519.2, 780.3, 1660.9)),
                                   ("suíte 1", (1094.8, 1672.6, 1208.2, 1814.3)),
                                   ("suíte 2", (1630.9, 1671.3, 1744.3, 1813.0)),
-                                  ("suíte 3/escritório", (2069.4, 1523.3, 2239.5, 1636.7))],
+                                  ("suíte 3/escritório", (2069.4, 1523.3, 2239.5, 1636.7)),
+                                  ("sala íntima", (1310.1, 1563.4, 1480.2, 1790.2))],
                   "anel_px": 10, "recorte": "conjunto_estar_tapete",
                   "trecho": (4, 8, 138, 48), "px_m_foto": 317 / 3.1, "sigma_px": 4.0, "forca": 1.4, "limite": 0.06,
                   "p_px": 10, "semente": 29, "recuo_px": 3, "croma_tol": 6, "claro_tol": 8, "miolo": ("varanda",)}

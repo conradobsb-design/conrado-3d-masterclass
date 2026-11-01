@@ -4177,3 +4177,19 @@ O que foi feito (`pedidos_terreo_casaa_2910.py`, seção 18, sobre as finais de 
 Antes e depois (o antes é a final de 0a17741): `POE642_CasaA/renders/POE642_CasaA_PH_1Pavimento_2910e_{rotulos_suites_2_3,rotulo_b_servico}_antes_depois.jpg` e `..._Subsolo_2910e_rotulos_banhos_antes_depois.jpg`. Pranchas, PDF da Casa A e book refeitos. Aguarda a validação.
 
 Pendências: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) aguarda o OK.
+
+
+### Casa B: o tracejado junto às folhas do living e Casa D: a trama no tapete da sala íntima (29/10)
+
+Pedidos do usuário: "na casa B, terreo, esse tracejado não existe." (com o recorte das folhas de vidro entre a varanda gourmet e o living) e "faltou a textura no tapete da sala intima do terreo da casa D. adicione-a."
+
+O que foi feito:
+- Casa B, Térreo (`revisao_casab_2910.py --tracejado`, item 27, uma vez sobre a final de f14d295): o tracejado preto colado às 4 folhas em degrau era o lado esquerdo do retângulo tracejado da ARQ_BANCADAS entre os dois pilares (x = 1362,6 pt), desenhado pelo motor no travertino. Ele saiu, e também, na folha de baixo, um segundo tracejado mais claro, com a faixa acinzentada até o primeiro. No lugar, o travertino da mesma linha (os estratos correm na horizontal). As folhas e os nós das junções ficaram como estavam.
+- Casa D, Térreo (`final3840_casad.tapete_trama_d(Q, final, nomes=("sala íntima",))`, sobre a final de cf6e28d): o tapete da sala íntima (ARQ_LOUÇAS E METAIS) entrou no fim de `TAPETE_TRAMA_D["tapetes_pt"]` (a semente dos outros não muda) e recebeu a mesma trama dos outros tapetes da casa, no mesmo tom médio, só no tapete.
+
+Antes e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2910b_tracejado_folhas_living_antes_depois.jpg` e `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_2910c_tapete_sala_intima_textura_antes_depois.jpg`. Pranchas do Térreo, PDFs das Casas B e D e book refeitos. Aguarda a validação.
+
+Pendências:
+- Casa B: o lado direito do mesmo retângulo tracejado (x = 1396,6 pt, junto ao living) ficou; aguarda o OK para sair também.
+- Casa A: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) e a forma do B. SERVIÇO aguardam o usuário.
+

@@ -28,6 +28,10 @@ madeira, a mesa de jantar escura com as cadeiras do padrão, os tampos da varand
 e das mesas de apoio, os recamiers e o cobre-leito da suíte master, as máquinas da área de serviço em inox e a janela da
 pia da cozinha só com as duas folhas. Uma vez, sobre a final de d83aee4:
   python3 revisao_casab_2910.py --pedidos [--antes <png>] [--saida <png>]
+
+Depois, o tracejado junto às folhas de vidro entre a varanda gourmet e o living (usuário, com o recorte: "na casa B,
+terreo, esse tracejado não existe."; `tracejado_living_tb`, item 27). Uma vez, sobre a final de f14d295:
+  python3 revisao_casab_2910.py --tracejado [--antes <png>] [--saida <png>]
 """
 import argparse
 import re
@@ -1414,6 +1418,33 @@ def matelasse_camas_tb(Q, img):
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
+# 27. O tracejado junto às folhas de vidro entre a varanda gourmet e o living (usuário, com o recorte das folhas: "na
+# casa B, terreo, esse tracejado não existe."): o lado esquerdo do retângulo tracejado da ARQ_BANCADAS entre os dois
+# pilares (x = 1362,6 pt, de 963,7 a 1408,7 pt) corria colado às 4 folhas em degrau (a 1ª o cobre; aparece da 1ª junção
+# até o pilar de baixo, px 1561-1563), e na 4ª folha um segundo tracejado mais claro, no mesmo passo (px 1557), numa
+# faixa acinzentada até o primeiro (px 1557-1560, o travertino ali sem o rosado). Em cada faixa (caixa em px, `desloc`,
+# `limiar`), os px com o cinza abaixo do limiar recebem o travertino da mesma linha, `desloc` px à direita, já depois do
+# tracejado (os estratos correm na horizontal); a faixa acinzentada sai inteira. As folhas e os nós das junções ficam: a
+# 1ª junção (px 893-897) e a 3ª (1123-1125), que encostam nas faixas, ficam fora das linhas. O lado direito do retângulo
+# (x = 1396,6 pt, px 1597-1598) fica até o OK.
+TRACEJADO_LIVING_TB = {"faixas_px": [((1561, 898, 1564, 1240), 6, 205), ((1557, 1126, 1561, 1238), 8, 256)]}
+
+
+def tracejado_living_tb(img):
+    q = TRACEJADO_LIVING_TB
+    out = img.copy()
+    cinza = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    n = 0
+    for (x0, y0, x1, y1), desloc, limiar in q["faixas_px"]:
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                if cinza[y, x] < limiar:
+                    out[y, x] = img[y, x + desloc]
+                    n += 1
+    print(f"    o tracejado junto às folhas do living saiu ({n} px), com o travertino da mesma linha")
+    return out
+
+
 def pedidos_tb(img):
     Q = F.Quadro("Terreo")
     antes = img
@@ -1460,7 +1491,9 @@ if __name__ == "__main__":
     ap.add_argument("--saida", default=str(FINAL_B))
     ap.add_argument("--adega", action="store_true", help="só a adega com as garrafas na escala (depois da revisão)")
     ap.add_argument("--pedidos", action="store_true", help="os pedidos de 29/10 depois da revisão (sobre d83aee4)")
+    ap.add_argument("--tracejado", action="store_true", help="só o tracejado junto às folhas do living (sobre f14d295)")
     a = ap.parse_args()
-    out = (adega_tb if a.adega else pedidos_tb if a.pedidos else revisao_casab_2910)(cv2.imread(a.antes))
+    etapa = adega_tb if a.adega else pedidos_tb if a.pedidos else tracejado_living_tb if a.tracejado else revisao_casab_2910
+    out = etapa(cv2.imread(a.antes))
     cv2.imwrite(a.saida, out)
     print(f"    {a.saida}")
