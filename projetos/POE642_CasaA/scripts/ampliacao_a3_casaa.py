@@ -1,0 +1,364 @@
+"""A ampliação A3 do Subsolo da Casa A, em 4K pelo Nano Banana Pro.
+
+Pedido do usuário (05/11/26): "preciso que você gere uma imagem ampliada em A3, ocupando a A3 inteira da prancha A em 4k
+pelo nano banana pro. só a imagem em alta resolução."
+
+A planta da final (`renders/POE642_CasaA_PH_Subsolo_final_rotulos.png`, 3840 x 2160) ocupa uns 1674 x 778 px do quadro;
+na A3 deitada (420 x 297 mm, 4961 x 3508 px a 300 dpi) ela vai na largura toda, com `margem_px` de cada lado (a planta é
+mais larga que a A3, sobra branco em cima e embaixo). A IA amplia a imagem, mas texto miúdo ela redesenha errado (troca
+números de área); por isso os textos saem antes e voltam depois, desenhados de novo no tamanho da A3:
+  1. `preparar`: os rótulos dos ambientes (o corpo, a quebra e o lugar de cada um achados na própria final, pelo desenho
+     do `retoque_1pav_casae.rotulos_ambientes`) e a seta e o "SOBE PARA O / DECK" da escada (`cliente_subsolo_casaa_0511`)
+     saem da imagem (o fundo sob o texto pela conta do alfa, e o miolo do traço pelo entorno); o recorte da planta em 4:3
+     (a proporção da IA mais perto da A3, sem distorcer) é a entrada do Nano Banana Pro, em 4K.
+  2. `montar`: a saída da IA é alinhada à entrada (ECC afim, na escala da entrada), recortada na proporção da A3 e levada
+     a 4961 x 3508 px; o fundo fora da planta volta ao branco puro; os rótulos e a escada são desenhados de novo, no corpo
+     da A3 (o mesmo desenho da final, na escala 4961 / largura do recorte).
+
+  python3 ampliacao_a3_casaa.py preparar
+  python3 ampliacao_a3_casaa.py montar <saida do Nano Banana Pro>
+
+Saídas: `entrega/POE642_CasaA_PH_Subsolo_A3_4K.png` (300 dpi) e, nas renders, a entrada da IA, a prévia e a conferência
+(a final ampliada sem IA ao lado da A3, em recortes).
+"""
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+import cv2
+import numpy as np
+
+AQUI = Path(__file__).resolve().parent
+sys.path.insert(0, str(AQUI))
+import final3840_casaa as FA                    # noqa: E402
+import retoque_1pav_casae as R1                 # noqa: E402
+
+FINAL_SUB = FA.CASA / "renders" / "POE642_CasaA_PH_Subsolo_final_rotulos.png"
+ENTRADA_IA = FA.CASA / "renders" / "POE642_CasaA_PH_Subsolo_A3_entrada_ia.png"
+AJUSTE_ROT = FA.CASA / "renders" / "POE642_CasaA_PH_Subsolo_A3_rotulos.json"
+SAIDA_A3 = FA.CASA / "entrega" / "POE642_CasaA_PH_Subsolo_A3_4K.png"
+
+# A3 deitada a 300 dpi; a margem de cada lado da planta (px da A3); o branco do fundo (o que passa dele é fundo); a
+# proporção da IA (a mais perto de √2 entre as do Nano Banana Pro); o miolo do traço (alfa) que vem do entorno.
+A3 = {"px": (4961, 3508), "dpi": 300, "margem_px": 150, "branco": 245, "ia": (4, 3), "cheio": 0.85,
+      # o branco puro fora da planta: o fundo a mais de `fundo_folga_px` (px da final) dela
+      "fundo_folga_px": 3,
+      # a busca do corpo de cada rótulo (frações do corpo da regra e os corpos das buscas dos pedidos) e o raio (px)
+      "corpos": (1.3, 1.105, 0.936, 0.806, 1.15, 1.0, 0.9, 0.85, 0.78), "raio_px": 260, "score_min": 0.75,
+      # abaixo desta correlação o texto da final não casa px a px com o desenho (está borrado): sai inteiro, pelo piso
+      # vizinho (`tirar`, copiar)
+      "casa_px": 0.95,
+      # os tons (a baixa frequência) da final, com este desfoque (px da final); o miolo dos shafts (px da A3 para dentro
+      # da caixa do PDF) que volta da final ampliada
+      "tom_sigma_px": 2.5, "shaft_dentro_px": 4}
+
+# As caixas dos shafts do Subsolo, em pt (`revisao_casaa_2910.ELEVADOR_TA`), com o X tracejado da revisão de 29/10
+SHAFTS_PT = [(2021.2, 1230.9, 2143.1, 1287.5), (2114.8, 1287.6, 2143.1, 1372.7)]
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Os textos da final: os rótulos (achados na imagem) e a escada (a mesma conta do `cliente_subsolo_casaa_0511`)
+def _rotulos(Q):
+    q = FA.A.PAVIMENTOS[Q.chave]
+    return [r for r in R1.rotulos_pdf(Q.pg) if r[0] in q.get("incluir", ()) or not any(f in r[0] for f in FA.A.FORA)]
+
+
+def _alfa_um(Q, r, opc, dx, dy, forma, pdf2img=None, esc=None, W=None):
+    """O alfa (0..1) do rótulo r com as opções `opc`, deslocado (dx, dy) px do quadro de 3840 (na escala de `pdf2img`)."""
+    pdf2img = pdf2img or Q.p2q
+    esc0 = Q.W / 2000
+    esc = esc or esc0
+    W = W or forma[1]
+    cx, cy = pdf2img(*r[2])
+    aj = [(r[0], (cx * 2000 / W, cy * 2000 / W), (dx / esc0, dy / esc0), dict(opc, cor=(255, 255, 255)))]
+    o = R1.rotulos_ambientes(np.zeros(forma + (3,), np.uint8), [r], pdf2img, escala_desvio=esc, granito=None,
+                             ajustes=aj)
+    return o[..., 1].astype(np.float32) / 255
+
+
+def ajustar_rotulos(Q, img):
+    """Cada rótulo da final: o corpo e a quebra (entre as opções das buscas) e o desvio (px) que casam o desenho com a
+    imagem (correlação normalizada do alfa com o escuro da imagem, na vizinhança do ponto do PDF)."""
+    q = A3
+    H, W = img.shape[:2]
+    escuro = 255 - cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    out = []
+    for r in _rotulos(Q):
+        pal = r[1][0][0].split()
+        opcs = []
+        for c in q["corpos"]:
+            opcs.append({"corpo": c})
+            if len(pal) >= 2:
+                m = (len(pal) + 1) // 2
+                opcs.append({"corpo": c, "quebra": [" ".join(pal[:m]), " ".join(pal[m:])]})
+        melhor = None
+        for opc in opcs:
+            a = _alfa_um(Q, r, opc, 0, 0, (H, W))
+            ys, xs = np.nonzero(a > 0.02)
+            x0, y0, x1, y1 = xs.min() - 2, ys.min() - 2, xs.max() + 3, ys.max() + 3
+            R_ = q["raio_px"]
+            wx0, wy0, wx1, wy1 = max(0, x0 - R_), max(0, y0 - R_), min(W, x1 + R_), min(H, y1 + R_)
+            s = cv2.matchTemplate(escuro[wy0:wy1, wx0:wx1], a[y0:y1, x0:x1], cv2.TM_CCOEFF_NORMED)
+            _, mx, _, (lx, ly) = cv2.minMaxLoc(s)
+            if melhor is None or mx > melhor[0]:
+                melhor = (float(mx), opc, int(wx0 + lx - x0), int(wy0 + ly - y0))
+        sc, opc, dx, dy = melhor
+        a = _alfa_um(Q, r, opc, dx, dy, (H, W))
+        lum = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)[a > 0.9]
+        cor = R1.ROTULOS["branco"] if np.median(lum) > 128 else R1.ROTULOS["cor"]
+        print(f"    {r[0]:12s} casa {sc:.3f}  corpo {opc['corpo']:.3f}{'  quebra ' + '/'.join(opc['quebra']) if 'quebra' in opc else ''}"
+              f"  desvio ({dx}, {dy}) px  {'branco' if cor == R1.ROTULOS['branco'] else 'preto'}")
+        if sc < q["score_min"]:
+            raise SystemExit(f"o rótulo {r[0]} não casou com a imagem ({sc:.3f})")
+        out.append({"nome": r[0], "pdf": list(r[2]), "opc": opc, "desvio": [dx, dy], "cor": list(cor), "casa": sc})
+    return out
+
+
+def _r_do_nome(Q, nome, pdf):
+    return min((r for r in _rotulos(Q) if r[0] == nome), key=lambda r: np.hypot(r[2][0] - pdf[0], r[2][1] - pdf[1]))
+
+
+def _alfa_texto(texto, fonte, ox, oy, caixa, ss=4):
+    from PIL import Image, ImageDraw
+    X0, Y0, W, H = caixa
+    t = Image.new("L", (W * ss, H * ss), 0)
+    ImageDraw.Draw(t).text(((ox - X0) * ss, (oy - Y0) * ss), texto, font=fonte, fill=255, anchor="ls")
+    return np.asarray(t.resize((W, H), Image.LANCZOS), np.float32) / 255
+
+
+def escada_camadas(forma, s=1.0, x0=0.0, y0=0.0):
+    """A seta (triângulo cheio) e as linhas do "SOBE PARA O / DECK" da escada (`cliente_subsolo_casaa_0511.escada_cs`),
+    como [(alfa no quadro `forma`, cor BGR)], no quadro de 3840 levado por u = (x - x0) s, v = (y - y0) s."""
+    from PIL import ImageFont
+    from rodape_entrega import FONTES
+    import cliente_subsolo_casaa_0511 as CS
+    e, q = FA.ESCADA_A, CS.ESCADA_CS
+    H, W = forma
+    camadas = []
+    k = q["ss"]
+    pts = (np.float32(q["triangulo"]) - [x0, y0]) * s
+    bx0, by0 = np.floor(pts.min(axis=0)).astype(int) - 2
+    bx1, by1 = np.ceil(pts.max(axis=0)).astype(int) + 3
+    m = np.zeros(((by1 - by0) * k, (bx1 - bx0) * k), np.uint8)
+    cv2.fillPoly(m, [np.int32(np.round((pts - [bx0, by0]) * k))], 255, cv2.LINE_AA)
+    a = np.zeros((H, W), np.float32)
+    a[by0:by1, bx0:bx1] = cv2.resize(m.astype(np.float32) / 255, (bx1 - bx0, by1 - by0), interpolation=cv2.INTER_AREA)
+    camadas.append((a, q["cor_seta"]))
+    corpo = e["corpo_px"] * s
+    fonte = ImageFont.truetype(str(FONTES / e["fonte"]), int(round(corpo * 4)))
+    tx, ty = q["origem_px"]
+    for i, linha in enumerate(q["texto"]):
+        ox, oy = (tx - x0) * s, (ty + i * q["entrelinha_px"] - y0) * s
+        Wt, Ht = int(fonte.getlength(linha) / 4) + int(12 * s), int(corpo * 3)
+        X0, Y0 = int(ox) - int(4 * s), int(oy) - int(corpo * 2)
+        a = np.zeros((H, W), np.float32)
+        a[Y0:Y0 + Ht, X0:X0 + Wt] = _alfa_texto(linha, fonte, ox, oy, (X0, Y0, Wt, Ht))
+        camadas.append((a, e["cor_texto"]))
+    return camadas
+
+
+def rotulos_camadas(Q, ajustes, forma, pdf2img=None, s=1.0):
+    """Os rótulos ajustados, como [(alfa, cor)], no quadro `forma` (pdf2img e s: a A3)."""
+    esc = Q.W / 2000 * s
+    out = []
+    for aj in ajustes:
+        r = _r_do_nome(Q, aj["nome"], aj["pdf"])
+        dx, dy = aj["desvio"]
+        out.append((_alfa_um(Q, r, aj["opc"], dx, dy, forma, pdf2img=pdf2img, esc=esc), tuple(aj["cor"])))
+    return out
+
+
+def tirar(img, camadas, cheio, copiar=()):
+    """O fundo sob cada texto (alfa a, cor c): (img - c a) / (1 - a); o miolo (a > cheio) vem do entorno (inpaint).
+    Os textos em `copiar` (índices das camadas: o desenho não casa px a px com a imagem, o texto da final está mais
+    borrado) saem inteiros: o piso logo acima ou abaixo, deslocado na vertical, entra no lugar (máscara esfumada)."""
+    f = img.astype(np.float32)
+    miolo = np.zeros(img.shape[:2], np.uint8)
+    for i, (a, c) in enumerate(camadas):
+        if i in copiar:
+            continue
+        al = a[..., None]
+        f = np.where(al > 0.002, (f - np.float32(c) * al) / np.maximum(1 - al, 1e-3), f)
+        miolo |= (a > cheio).astype(np.uint8)
+    f = np.clip(np.round(f), 0, 255).astype(np.uint8)
+    out = cv2.inpaint(f, cv2.dilate(miolo, np.ones((3, 3), np.uint8)) * 255, 3, cv2.INPAINT_TELEA)
+    outros = np.max([a for j, (a, _) in enumerate(camadas) if j not in copiar] + [np.zeros(img.shape[:2])],
+                    axis=0) > 0.02
+    for i in copiar:
+        a = camadas[i][0]
+        # linha a linha, de cima para baixo: cada linha recebe o piso logo acima (já limpo, na 2ª linha) ou abaixo,
+        # deslocado na vertical; a fonte não pode ter nada escuro (parede, peça) nem outro texto
+        linhas = (a > 0.02).any(axis=1)
+        idx = np.nonzero(linhas)[0]
+        for grupo in np.split(idx, np.nonzero(np.diff(idx) > 1)[0] + 1):
+            al = np.zeros_like(a)
+            al[grupo[0]:grupo[-1] + 1] = a[grupo[0]:grupo[-1] + 1]
+            m = cv2.dilate((al > 0.02).astype(np.uint8), np.ones((7, 7), np.uint8))
+            ys, xs = np.nonzero(m)
+            y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+            h = y1 - y0
+            resto = (a > 0.02).copy()
+            resto[:y1] = False                                          # as linhas de baixo, ainda com texto
+            g = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY)
+            melhor = None
+            for d in (-(h + 2), -(h + 6), h + 2, h + 6):
+                fy0, fy1 = y0 + d, y1 + d
+                if fy0 < 0 or fy1 > img.shape[0]:
+                    continue
+                ruim = (g[fy0:fy1, x0:x1] < 150).sum() + 100 * (outros | resto)[fy0:fy1, x0:x1].sum()
+                if melhor is None or ruim < melhor[0]:
+                    melhor = (ruim, d)
+            ruim, d = melhor
+            mf = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 1.5)[y0:y1, x0:x1, None]
+            out[y0:y1, x0:x1] = np.clip(np.round(out[y0:y1, x0:x1] * (1 - mf) + out[y0 + d:y1 + d, x0:x1] * mf), 0,
+                                        255).astype(np.uint8)
+            print(f"    o texto {i}, linha {y0}-{y1}: saiu inteira, o piso deslocado {d} px na vertical"
+                  f"{'' if ruim == 0 else f' (fonte com {ruim} px ruins)'}")
+    return out
+
+
+def pintar(img, camadas):
+    f = img.astype(np.float32)
+    for a, c in camadas:
+        al = a[..., None]
+        f = f * (1 - al) + np.float32(c) * al
+    return np.clip(np.round(f), 0, 255).astype(np.uint8)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Os recortes: a planta (o que não é branco) no meio da A3, com a margem; o recorte da IA na mesma largura, em 4:3
+def recortes(img):
+    q = A3
+    Wa, Ha = q["px"]
+    g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ys, xs = np.nonzero(g < q["branco"])
+    x0, y0, x1, y1 = int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
+    Wc = int(round((x1 - x0) * Wa / (Wa - 2 * q["margem_px"])))
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    X0 = int(round(cx - Wc / 2))
+    Hia = int(round(Wc * q["ia"][1] / q["ia"][0]))
+    Yia = int(round(cy - Hia / 2))
+    Ha3 = Wc * Ha / Wa                                  # a altura (px da final) da A3
+    Ya3 = Yia + (Hia - Ha3) / 2
+    s = Wa / Wc
+    if Yia < 0 or Yia + Hia > img.shape[0] or X0 < 0 or X0 + Wc > img.shape[1]:
+        raise SystemExit("o recorte sai do quadro")
+    return {"planta": (x0, y0, x1, y1), "X0": X0, "Wc": Wc, "Yia": Yia, "Hia": Hia, "Ya3": Ya3, "s": s}
+
+
+def preparar():
+    img = cv2.imread(str(FINAL_SUB))
+    Q = FA.QuadroA("Subsolo")
+    print("[Subsolo] os rótulos da final, achados na imagem:")
+    aj = ajustar_rotulos(Q, img)
+    camadas = rotulos_camadas(Q, aj, img.shape[:2]) + escada_camadas(img.shape[:2])
+    limpa = tirar(img, camadas, A3["cheio"], copiar=[i for i, r in enumerate(aj) if r["casa"] < A3["casa_px"]])
+    rc = recortes(img)
+    X0, Wc, Yia, Hia = rc["X0"], rc["Wc"], rc["Yia"], rc["Hia"]
+    entrada = limpa[Yia:Yia + Hia, X0:X0 + Wc]
+    cv2.imwrite(str(ENTRADA_IA), entrada)
+    AJUSTE_ROT.write_text(json.dumps({"rotulos": aj, "recortes": rc}, ensure_ascii=False, indent=1) + "\n")
+    # conferência: o fundo sob os textos
+    x0, y0, x1, y1 = rc["planta"]
+    lado = np.hstack([img[y0:y1, x0:x1], limpa[y0:y1, x0:x1]])
+    cv2.imwrite(str(FA.CASA / "renders" / "POE642_CasaA_PH_Subsolo_A3_sem_textos.jpg"), lado,
+                [cv2.IMWRITE_JPEG_QUALITY, 92])
+    print(f"    a planta {x0},{y0} - {x1},{y1}; o recorte da IA {X0},{Yia} {Wc}x{Hia} (4:3); a A3: {rc['s']:.3f}x")
+    print(f"    {ENTRADA_IA}")
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def montar(saida_ia):
+    q = A3
+    Wa, Ha = q["px"]
+    img = cv2.imread(str(FINAL_SUB))
+    entrada = cv2.imread(str(ENTRADA_IA))
+    d = json.loads(AJUSTE_ROT.read_text())
+    rc, aj = d["recortes"], d["rotulos"]
+    X0, Wc, Yia, Hia, Ya3, s = rc["X0"], rc["Wc"], rc["Yia"], rc["Hia"], rc["Ya3"], rc["s"]
+    ia = cv2.imread(str(saida_ia))
+    Hi, Wi = ia.shape[:2]
+    print(f"[Subsolo] a saída da IA: {Wi}x{Hi}")
+    # o alinhamento: a saída na escala da entrada, ECC afim (a entrada é o molde)
+    peq = cv2.resize(ia, (Wc, Hia), interpolation=cv2.INTER_AREA)
+    g0 = cv2.GaussianBlur(cv2.cvtColor(entrada, cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    g1 = cv2.GaussianBlur(cv2.cvtColor(peq, cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    M = np.eye(2, 3, dtype=np.float32)
+    _, M = cv2.findTransformECC(g0, g1, M, cv2.MOTION_AFFINE,
+                                (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 300, 1e-7), None, 5)
+    print(f"    alinhamento (entrada -> saída, px da entrada): [[{M[0, 0]:.4f} {M[0, 1]:.4f} {M[0, 2]:.2f}]"
+          f" [{M[1, 0]:.4f} {M[1, 1]:.4f} {M[1, 2]:.2f}]]")
+    # A3 (u, v) -> entrada (x, y) = (u / s, v / s + Ya3 - Yia) -> saída pequena (M) -> saída (Wi / Wc, Hi / Hia)
+    Au = np.array([[1 / s, 0, 0], [0, 1 / s, Ya3 - Yia], [0, 0, 1]], np.float64)
+    Mm = np.vstack([M.astype(np.float64), [0, 0, 1]])
+    Sg = np.diag([Wi / Wc, Hi / Hia, 1.0])
+    T = (Sg @ Mm @ Au)[:2]
+    a3 = cv2.warpAffine(ia, T, (Wa, Ha), flags=cv2.INTER_LANCZOS4 | cv2.WARP_INVERSE_MAP,
+                        borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
+    # os tons da final aprovada: a IA clareou a madeira da academia e mudou o cinza do depósito e o elevador. A baixa
+    # frequência (desfoque de `tom_sigma_px`, px da final) vem da entrada ampliada; o detalhe fino fica o da IA
+    Fe = np.array([[s, 0, 0], [0, s, -s * (Ya3 - Yia)]], np.float64)
+    ref = cv2.warpAffine(entrada, Fe, (Wa, Ha), flags=cv2.INTER_LANCZOS4, borderValue=(255, 255, 255))
+    sg = q["tom_sigma_px"] * s
+    f = a3.astype(np.float32)
+    f += cv2.GaussianBlur(ref.astype(np.float32), (0, 0), sg) - cv2.GaussianBlur(f, (0, 0), sg)
+    a3 = np.clip(np.round(f), 0, 255).astype(np.uint8)
+    # os shafts: o X tracejado da final (a IA o fez em traço contínuo), da entrada ampliada, no miolo de cada caixa
+    Q = FA.QuadroA("Subsolo")
+    for p0, q0, p1, q1 in SHAFTS_PT:
+        (u0, v0), (u1, v1) = Q.p2q(p0, q0), Q.p2q(p1, q1)
+        k = q["shaft_dentro_px"]
+        u0, u1 = sorted(((u0 - X0) * s, (u1 - X0) * s))
+        v0, v1 = sorted(((v0 - Ya3) * s, (v1 - Ya3) * s))
+        u0, v0, u1, v1 = int(np.ceil(u0)) + k, int(np.ceil(v0)) + k, int(u1) - k, int(v1) - k
+        a3[v0:v1, u0:u1] = ref[v0:v1, u0:u1]
+    # o fundo: branco puro fora da planta (a máscara da final, levada à A3)
+    g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    fundo = (g >= 254).astype(np.uint8)
+    n, lab = cv2.connectedComponents(fundo)
+    canto = lab[0, 0]
+    fundo = (lab == canto).astype(np.uint8)
+    k = 2 * q["fundo_folga_px"] + 1
+    fundo = cv2.erode(fundo, np.ones((k, k), np.uint8))
+    Fq = np.array([[s, 0, -s * X0], [0, s, -s * Ya3]], np.float64)
+    fa3 = cv2.warpAffine(fundo.astype(np.float32), Fq, (Wa, Ha), flags=cv2.INTER_LINEAR, borderValue=1.0)
+    fa3 = cv2.GaussianBlur(fa3, (0, 0), 2.0)[..., None]
+    a3 = np.clip(np.round(a3 * (1 - fa3) + 255 * fa3), 0, 255).astype(np.uint8)
+    # os textos de novo, no corpo da A3
+    def p2a(x, y):
+        u, v = Q.p2q(x, y)
+        return (u - X0) * s, (v - Ya3) * s
+    camadas = rotulos_camadas(Q, aj, (Ha, Wa), pdf2img=p2a, s=s) + escada_camadas((Ha, Wa), s, X0, Ya3)
+    a3 = pintar(a3, camadas)
+    from PIL import Image
+    SAIDA_A3.parent.mkdir(parents=True, exist_ok=True)
+    Image.fromarray(cv2.cvtColor(a3, cv2.COLOR_BGR2RGB)).save(SAIDA_A3, dpi=(q["dpi"], q["dpi"]), optimize=True)
+    cv2.imwrite(str(FA.CASA / "renders" / "POE642_CasaA_PH_Subsolo_A3_4K_previa.jpg"),
+                cv2.resize(a3, (2000, round(2000 * Ha / Wa)), interpolation=cv2.INTER_AREA), [cv2.IMWRITE_JPEG_QUALITY, 90])
+    # conferência: a final ampliada sem IA (Lanczos) e a A3, lado a lado, em recortes (px da final)
+    ref = cv2.warpAffine(img, Fq, (Wa, Ha), flags=cv2.INTER_LANCZOS4, borderValue=(255, 255, 255))
+    blocos = []
+    for nome, (x0, y0, x1, y1) in CONFERENCIA.items():
+        u0, v0, u1, v1 = [int(round(t)) for t in ((x0 - X0) * s, (y0 - Ya3) * s, (x1 - X0) * s, (y1 - Ya3) * s)]
+        par = np.hstack([ref[v0:v1, u0:u1], np.full((v1 - v0, 12, 3), 255, np.uint8), a3[v0:v1, u0:u1]])
+        blocos.append(cv2.copyMakeBorder(par, 0, 12, 0, 0, cv2.BORDER_CONSTANT, value=(255, 255, 255)))
+        cv2.imwrite(str(FA.CASA / "renders" / f"POE642_CasaA_PH_Subsolo_A3_conferencia_{nome}.jpg"), par,
+                    [cv2.IMWRITE_JPEG_QUALITY, 90])
+    print(f"    {SAIDA_A3} {Wa}x{Ha} ({q['dpi']} dpi)")
+
+
+# Os recortes da conferência (px da final)
+CONFERENCIA = {"academia_banhos": (1300, 1050, 1900, 1650), "escada_grama": (720, 1040, 1180, 1400),
+               "deposito_circulacao": (1080, 866, 1900, 1060), "hall_elevador": (1880, 1040, 2393, 1230)}
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="etapa", required=True)
+    sub.add_parser("preparar")
+    m = sub.add_parser("montar")
+    m.add_argument("saida_ia", type=Path)
+    a = ap.parse_args()
+    preparar() if a.etapa == "preparar" else montar(a.saida_ia)
