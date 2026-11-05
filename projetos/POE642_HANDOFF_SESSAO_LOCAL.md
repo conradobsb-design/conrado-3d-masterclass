@@ -4214,3 +4214,19 @@ Pendências: nenhuma (ver a seção seguinte).
 ### Fechamento para a entrega à Paulo Octávio (01/11)
 
 Usuário: "desconsidere esses itens. Amanhã envio os materiais para a Paulo Octavio." As duas pendências da Casa A foram descartadas e ficam como estão: o item 11 da revisão (o piso entre o bronze e o vidro das suítes 1 e 2) e a forma do rótulo B. SERVIÇO (1,15×, centrado na largura do banho). Os materiais da entrega são os do commit 0accf13: as 12 pranchas `POE642_Casa?/entrega/POE642_Casa?_PH_<pavimento>_entrega.png`, os 5 PDFs `POE642_Casa?/entrega/POE642_Casa?_Plantas_Humanizadas.pdf` e o book `POE642_Book/POE642_Book_Plantas_Humanizadas.pdf`, todos enviados ao usuário.
+
+
+### Casa A, Subsolo: as alterações do cliente (05/11)
+
+O cliente (Paulo Octávio) mandou as alterações da Casa A, começando pelo Subsolo, cada uma com o recorte da planta: diminuir a escala da grama; a seta na escada e a descrição "Sobe para o Deck" (o usuário: "seta na escada é assim", com o triângulo cheio na escada); tirar o deck e a piscina de cima, "deixar apenas o subsolo mesmo"; as prateleiras do depósito numa cor neutra única, sem textura; sem hachura, em branco, "sem fundo"; o Bege Bahia menos manchado; e, do usuário, tirar as linhas claras na madeira da academia.
+
+O que foi feito (`cliente_subsolo_casaa_0511.py`, sobre a final de c1f7ff5; detalhes no README):
+- Em volta do Subsolo, tudo branco: sem a hachura, sem o contorno do lote e sem as peças do Térreo nevoadas (deck, piscina, spa, pisantes, espreguiçadeiras). Na borda, as sobras do nevoado e da hachura também saíram.
+- A grama: a da biblioteca, na metade da escala real e na resolução da prancha (era a do Térreo de 2000 px ampliada, em manchas grandes e borradas), no mesmo tom.
+- A escada: o triângulo cheio no degrau de baixo, com a ponta para onde ela sobe, e "SOBE PARA O DECK" no lugar do S (em caixa alta, como os rótulos e o S).
+- O depósito: as duas prateleiras num cinza quente claro, sem o veio do freijó.
+- O Bege Bahia dos pisos (pátio, circulação, depósito, banho de serviço): as manchas com 45% do contraste; a luz, as sombras e o tom iguais. Os degraus da escada ficam como estavam.
+- A academia: sem a projeção clara em U junto à parede de baixo.
+
+Antes e depois (o antes é a final de c1f7ff5): `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_0511_{planta,escada_grama,deposito,academia_linhas}_antes_depois.jpg`. Prancha do Subsolo, PDF da Casa A e book refeitos. Aguarda a validação; as alterações do Térreo e do 1º Pavimento da Casa A vêm a seguir.
+
