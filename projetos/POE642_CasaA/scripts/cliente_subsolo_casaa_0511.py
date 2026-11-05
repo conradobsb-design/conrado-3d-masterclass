@@ -108,7 +108,21 @@ def borda_cs(Q, img, p):
 # (`final3840_casaa.MARCAS_BEGE`), o desenho é o do trecho ao lado, na mesma mistura. Os objetos pintados depois do
 # piso (rótulos, portas, soleiras, prateleiras) ficam de fora: os px em que a final dividida pelo desenho foge da luz
 # em volta (`desvio`), com `folga_px`.
-BEGE_CS = {"forca": 0.45, "sig_px": 4.0, "desvio": 0.06, "folga_px": 2}
+# Depois (usuário, com o recorte do depósito: "vamos corrigir esse erro no L da prateleira. tem um borrão antigo do
+# material anterior"): junto às prateleiras ficava a borda do freijó misturada ao piso (os px de cobertura parcial) e a
+# faixa de piso de fora da suavização, com a sombra antiga. Na faixa das prateleiras (a cobertura delas crescida
+# `faixa_px`), o piso é refeito pelo modelo: a luz de cada canal no piso limpo em volta (sem a faixa, normalizada em
+# `sig_px`) vezes o desenho suavizado. As prateleiras e a sombra curta delas são pintadas de novo depois
+# (`prateleiras_cs`).
+BEGE_CS = {"forca": 0.45, "sig_px": 4.0, "desvio": 0.06, "folga_px": 2, "faixa_px": 5}
+
+
+def faixa_prateleiras(Q, folga_px):
+    c = np.zeros((Q.H, Q.W), np.float32)
+    for r, _ in FA.DEPOSITO["pecas"]:
+        c = np.maximum(c, FA.ret_aa(Q, r))
+    k = 2 * folga_px + 1
+    return cv2.dilate((c > 0).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
 
 
 def bege_cs(Q, img):
@@ -140,8 +154,16 @@ def bege_cs(Q, img):
     Dn = 1 + q["forca"] * (D - 1)
     out = img.copy()
     out[ok] = np.clip(np.round(cur[ok] * Dn[ok] / D[ok]), 0, 255).astype(np.uint8)
+    # a faixa das prateleiras: o piso pelo modelo (a luz de cada canal no piso limpo em volta)
+    faixa = faixa_prateleiras(Q, q["faixa_px"]) & m
+    limpo = (ok & ~faixa).astype(np.float32)
+    den = np.maximum(cv2.GaussianBlur(limpo, (0, 0), q["sig_px"]), 1e-3)
+    luz_c = np.stack([cv2.GaussianBlur((cur[..., c] / D[..., c]) * limpo, (0, 0), q["sig_px"]) / den
+                      for c in range(3)], axis=2)
+    out[faixa] = np.clip(np.round(luz_c[faixa] * Dn[faixa]), 0, 255).astype(np.uint8)
     print(f"    Bege Bahia: as manchas a {q['forca']:.0%} do contraste ({int(ok.sum())} px; "
-          f"{int((m & ~ok).sum())} px de objetos e bordas ficam)")
+          f"{int((m & ~ok & ~faixa).sum())} px de objetos e bordas ficam); na faixa das prateleiras, o piso refeito "
+          f"({int(faixa.sum())} px)")
     return out
 
 
@@ -173,16 +195,19 @@ def projecao_cs(Q, img):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 4. As prateleiras do depósito (os dois braços de `final3840_casaa.DEPOSITO`, que eram em freijó com o veio): uma cor
-# neutra só, sem textura, no mesmo desenho; a sombra curta no Bege Bahia fica a de antes.
+# neutra só, sem textura, no mesmo desenho, sobre o piso refeito na faixa delas (`bege_cs`), com a sombra curta delas no
+# Bege Bahia de novo (a de `armarios_deposito`: `sombra`, 1,4 px, sigma 1,4).
 PRATELEIRAS_CS = {"cor": (186, 191, 195)}         # BGR: o cinza quente claro (RGB ~195, 191, 186)
 
 
 def prateleiras_cs(Q, img):
-    out = np.ascontiguousarray(img.copy())
-    for r, _ in FA.DEPOSITO["pecas"]:
-        tl = FA.tela(out, Q, r, folga=6)
-        tl.pintar(tl.ret(r), PRATELEIRAS_CS["cor"])
-        out = tl.gravar()
+    rs = [r for r, _ in FA.DEPOSITO["pecas"]]
+    caixa = (min(r[0] for r in rs), min(r[1] for r in rs), max(r[2] for r in rs), max(r[3] for r in rs))
+    tl = FA.tela(np.ascontiguousarray(img.copy()), Q, caixa, folga=6)
+    m = np.max([tl.ret(r) for r in rs], axis=0)                 # o L numa peça só (sem a sombra de um braço no outro)
+    FA.sombra_q(tl, m, forca=FA.DEPOSITO["sombra"], dist=1.4, sigma=1.4)
+    tl.pintar(m, PRATELEIRAS_CS["cor"])
+    out = tl.gravar()
     print(f"    depósito: as {len(FA.DEPOSITO['pecas'])} prateleiras numa cor neutra só, sem textura")
     return out
 
@@ -191,8 +216,11 @@ def prateleiras_cs(Q, img):
 # 1. A grama (o gramado ao pé da escada do deck; era a grama do Térreo de 2000 px, ampliada, em manchas grandes e
 # borradas): a grama da biblioteca de texturas (`texturas.textura("grama")`) tecida de novo na resolução da prancha, na
 # metade da escala real (`escala`), no tom mediano da grama de antes. Só no verde da caixa dele (fechado e sem furos);
-# na borda da pegada, a grama nova com o branco de fora na mesma proporção.
-GRAMA_CS = {"caixa": (700, 1110, 1100, 1660), "escala": 0.5, "semente": 5, "desfoque": 0.5, "verde": 8}
+# na borda da pegada, a grama nova com o branco de fora na mesma proporção. Depois (usuário, com o recorte de uma grama
+# verde-oliva acinzentada: "traga o tom da grama para mais próximo dessa referência"): o tom mediano é o da referência
+# (`tom`), menos saturado e mais claro que o de antes (RGB ~106, 119, 71).
+GRAMA_CS = {"caixa": (700, 1110, 1100, 1660), "escala": 0.5, "semente": 5, "desfoque": 0.5, "verde": 8,
+            "tom": (101, 127, 121)}                       # BGR: o verde-oliva acinzentado (RGB ~121, 127, 101)
 
 
 def grama_cs(Q, img, p):
@@ -206,7 +234,7 @@ def grama_cs(Q, img, p):
     verde = (ri[..., 1] > ri[..., 2] + q["verde"]) & (ri[..., 1] > ri[..., 0] + q["verde"])
     verde = ndimage.binary_fill_holes(cv2.morphologyEx(verde.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8)))
     pr = p[y0:y1, x0:x1]
-    alvo = np.median(reg[verde & (pr > 0.99)], axis=0)
+    alvo = np.float32(q["tom"])
     T = textura("grama", Q.px_m * q["escala"], y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32)
     T = cv2.GaussianBlur(T, (0, 0), q["desfoque"])
     T = T * (alvo / np.median(T[verde], axis=0))
@@ -214,7 +242,42 @@ def grama_cs(Q, img, p):
     out = img.copy()
     sub = out[y0:y1, x0:x1]
     sub[verde] = np.clip(np.round(novo[verde]), 0, 255).astype(np.uint8)
-    print(f"    grama: a da biblioteca na metade da escala ({int(verde.sum())} px), no tom de antes")
+    print(f"    grama: a da biblioteca na metade da escala ({int(verde.sum())} px), no verde-oliva da referência")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Depois (usuário: "suavize também os degraus da escada"): os degraus em Bege Bahia (`final3840_casaa.degraus_bege`) são o
+# tom de cada degrau e o sombreamento de subida vezes o desenho da foto, 1 + forca (T / média(T) - 1), na janela da tela
+# dos degraus (`DEGRAUS_A`); depois do corte, esmaecidos para o branco (`esmaecer`). O desenho, refeito igual, troca por
+# 1 + forca `forca` (T / média(T) - 1), a mesma fração do piso (`BEGE_CS`): o tom, a sombra dos espelhos e o trecho
+# esmaecido ficam. As duas linhas de baixo vieram de 4 px acima (`pedidos_terreo_casaa_2910.grama_escada_ta`), e o
+# desenho delas também; a linha da grama (misturada) e os px da borda dos degraus ficam como estão.
+def degraus_cs(Q, img):
+    sys.path.insert(0, str(FA.A.RAIZ / "_texturas"))
+    from texturas import textura
+    q = FA.DEGRAUS_A
+    g = PT.GRAMA_ESCADA_TA
+    tl = FA.tela(img.copy(), Q, q["pt"], folga=2)
+    T = textura("bege_bahia", Q.px_m, tl.h, tl.w, semente=q["semente"]).astype(np.float32)
+    Tn = T / T.reshape(-1, 3).mean(axis=0) - 1
+    yi = int(np.floor(Q.p2q(0, g["linha_pt"])[1]))
+    for r in range(yi - g["acima_px"], yi):
+        Tn[r - tl.y0] = Tn[r - tl.y0 - g["desloc_px"]]
+    fator = (1 + q["forca"] * BEGE_CS["forca"] * Tn) / (1 + q["forca"] * Tn)
+    X, Y = tl.grade()
+    (cx0, cy0), (cx1, cy1) = q["corte"]
+    alem = (X < cx0 + (cx1 - cx0) / (cy1 - cy0) * (Y - cy0))[..., None]
+    e = q["esmaecer"]
+    reg = tl.reg
+    base = np.where(alem, (reg - 255 * e) / (1 - e), reg) * fator
+    novo = np.where(alem, base * (1 - e) + 255 * e, base)
+    dentro = tl.reduzir(tl.ret(q["pt"])) >= 0.999
+    dentro[yi - tl.y0:] = False
+    out = img.copy()
+    sub = out[tl.y0:tl.y1, tl.x0:tl.x1]
+    sub[dentro] = np.clip(np.round(novo[dentro]), 0, 255).astype(np.uint8)
+    print(f"    degraus: as manchas do Bege Bahia a {BEGE_CS['forca']:.0%} do contraste ({int(dentro.sum())} px)")
     return out
 
 
@@ -222,10 +285,11 @@ def grama_cs(Q, img, p):
 # 2. A escada do deck: no lugar do S (`final3840_casaa.ESCADA_A`, na origem do texto do PDF, no pátio), a seta e a
 # descrição. A seta é o triângulo cheio no degrau de baixo, com a ponta para onde a escada sobe (à esquerda), como no
 # recorte do usuário; a descrição, "SOBE PARA O DECK", em caixa alta como os rótulos e o S de antes, na mesma fonte, cor
-# e corpo do S, com a linha do meio na altura do triângulo. O S sai com o pátio das mesmas colunas, `desloc_s` px
-# abaixo (a sombra do espelho do 1º degrau corre na vertical, então ela continua igual).
+# e corpo do S, em duas linhas (usuário: "quebre a linha em 'Sobe para o / Deck'"), alinhada à esquerda, com o meio do
+# bloco na altura do triângulo. O S sai com o pátio das mesmas colunas, `desloc_s` px abaixo (a sombra do espelho do 1º
+# degrau corre na vertical, então ela continua igual).
 ESCADA_CS = {"triangulo": [(1062.0, 1094.0), (1076.0, 1086.0), (1076.0, 1102.0)], "cor_seta": (30, 30, 30), "ss": 8,
-             "texto": "SOBE PARA O DECK", "origem_px": (1088.0, 1100.0), "desloc_s": 18}
+             "texto": ("SOBE PARA O", "DECK"), "origem_px": (1088.0, 1090.0), "entrelinha_px": 20, "desloc_s": 18}
 
 
 def _alfa_texto(texto, fonte, corpo, ox, oy, caixa):
@@ -262,15 +326,18 @@ def escada_cs(Q, img):
     a = cv2.resize(m.astype(np.float32) / 255, (bx1 - bx0, by1 - by0), interpolation=cv2.INTER_AREA)[..., None]
     reg = out[by0:by1, bx0:bx1].astype(np.float32)
     out[by0:by1, bx0:bx1] = np.clip(np.round(reg * (1 - a) + np.float32(q["cor_seta"]) * a), 0, 255).astype(np.uint8)
-    # a descrição
+    # a descrição, linha a linha
     tx, ty = q["origem_px"]
-    larg = int(fonte.getlength(q["texto"]) / 4) + 12
-    W, H = larg, e["corpo_px"] * 3
-    X0, Y0 = int(tx) - 4, int(ty) - e["corpo_px"] * 2
-    a = _alfa_texto(q["texto"], fonte, e["corpo_px"], tx, ty, (X0, Y0, W, H))[..., None]
-    reg = out[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
-    out[Y0:Y0 + H, X0:X0 + W] = np.clip(np.round(reg * (1 - a) + np.float32(e["cor_texto"]) * a), 0, 255).astype(np.uint8)
-    print(f"    escada: o S saiu; a seta (triângulo cheio) no degrau de baixo e \"{q['texto']}\" no lugar do S")
+    for i, linha in enumerate(q["texto"]):
+        ly = ty + i * q["entrelinha_px"]
+        W, H = int(fonte.getlength(linha) / 4) + 12, e["corpo_px"] * 3
+        X0, Y0 = int(tx) - 4, int(ly) - e["corpo_px"] * 2
+        a = _alfa_texto(linha, fonte, e["corpo_px"], tx, ly, (X0, Y0, W, H))[..., None]
+        reg = out[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
+        out[Y0:Y0 + H, X0:X0 + W] = np.clip(np.round(reg * (1 - a) + np.float32(e["cor_texto"]) * a), 0,
+                                            255).astype(np.uint8)
+    print(f"    escada: o S saiu; a seta (triângulo cheio) no degrau de baixo e \"{' / '.join(q['texto'])}\" no lugar "
+          "do S")
     return out
 
 
@@ -288,6 +355,7 @@ def cliente_subsolo_cs(img):
     img = bege_cs(Q, img)
     img = prateleiras_cs(Q, img)
     img = grama_cs(Q, img, p)
+    img = degraus_cs(Q, img)
     return escada_cs(Q, img)
 
 

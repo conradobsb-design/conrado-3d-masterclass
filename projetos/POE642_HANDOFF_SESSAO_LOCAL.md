@@ -4230,3 +4230,5 @@ O que foi feito (`cliente_subsolo_casaa_0511.py`, sobre a final de c1f7ff5; deta
 
 Antes e depois (o antes é a final de c1f7ff5): `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_0511_{planta,escada_grama,deposito,academia_linhas}_antes_depois.jpg`. Prancha do Subsolo, PDF da Casa A e book refeitos. Aguarda a validação; as alterações do Térreo e do 1º Pavimento da Casa A vêm a seguir.
 
+Depois, ainda em 05/11 (pedidos do usuário vendo o resultado): os degraus da escada também com o Bege Bahia menos manchado (a mesma fração do piso); "SOBE PARA O / DECK" em duas linhas; no L das prateleiras do depósito, sem o borrão do freijó na borda (o piso refeito junto delas e o L pintado como uma peça só, com a sombra curta); a grama no verde-oliva acinzentado da referência que o usuário mandou (RGB ~121, 127, 101). Final, antes e depois, prancha do Subsolo, PDF da Casa A e book refeitos, sempre a partir da final de c1f7ff5.
+
