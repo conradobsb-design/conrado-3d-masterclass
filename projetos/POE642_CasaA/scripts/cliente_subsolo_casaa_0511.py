@@ -342,8 +342,49 @@ def escada_cs(Q, img):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# Depois (usuário, com o recorte das duas bicicletas ergométricas: "ficou faltando o pedal do lado direito da bicleta
+# ergométrica. vemos o pedal do lado esquerdo de cada uma delas, mas não o direito"): em cada bicicleta, o pé de vela
+# com o pedal de baixo (`caixa`, px da final, logo abaixo do quadro) é girado 180° em torno do eixo do pedivela (`eixo2`:
+# o dobro do eixo, no meio do quadro e na coluna do pé de vela) e pousado do outro lado, como num pedivela de verdade.
+# A peça é o escuro (`escuro`) ligado do pé de vela e do pedal, com a borda esfumada (`borda_sig`; a sombra do quadro em
+# volta do pé de vela fica de fora), na cor dos px mais escuros dele (abaixo do quantil `cor_q`); depois, a sombra
+# curta dos aparelhos (`final3840_casaa.APARELHOS["sombra"]`: força, distância e desfoque, para baixo e à esquerda).
+PEDAIS_CS = {"pecas": [((1510, 1347, 1531, 1361), (3039, 2685)), ((1508, 1407, 1529, 1421), (3036, 2806))],
+             "escuro": 80, "borda_sig": 0.6, "cor_q": 30}
+
+
+def pedais_cs(Q, img):
+    q = PEDAIS_CS
+    forca, dist, sig = FA.APARELHOS["sombra"]
+    out = img.astype(np.float32)
+    for (x0, y0, x1, y1), (sx, sy) in q["pecas"]:
+        reg = img[y0:y1, x0:x1].astype(np.float32)
+        lum = reg.mean(axis=2)
+        n, lab, st, _ = cv2.connectedComponentsWithStats((lum < q["escuro"]).astype(np.uint8))
+        miolo = lab == 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+        a = np.clip(cv2.GaussianBlur(miolo.astype(np.float32), (0, 0), q["borda_sig"]) * 1.25, 0, 1)
+        cor = np.median(reg[miolo & (lum <= np.percentile(lum[miolo], q["cor_q"]))], axis=0)
+        A = a[::-1, ::-1]
+        h, w = A.shape
+        X0, Y0 = sx - (x1 - 1), sy - (y1 - 1)
+        dst = out[Y0:Y0 + h, X0:X0 + w]
+        out[Y0:Y0 + h, X0:X0 + w] = dst * (1 - A[..., None]) + cor * A[..., None]
+        # a sombra curta da peça nova, numa janela com folga
+        f = int(np.ceil(dist + 3 * sig)) + 1
+        S = np.zeros((h + 2 * f, w + 2 * f), np.float32)
+        S[f:f + h, f:f + w] = A
+        Af = S.copy()
+        S = cv2.GaussianBlur(cv2.warpAffine(S, np.float32([[1, 0, -dist], [0, 1, dist]]), S.shape[::-1]), (0, 0), sig)
+        win = out[Y0 - f:Y0 + h + f, X0 - f:X0 + w + f]
+        out[Y0 - f:Y0 + h + f, X0 - f:X0 + w + f] = win * (1 - forca * S * (1 - Af))[..., None]
+    print(f"    academia: o pedal do outro lado nas {len(q['pecas'])} bicicletas ergométricas (o de baixo girado 180°)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 ANTES_DEPOIS_CS = {"Subsolo": {"planta": (640, 780, 2440, 1700), "escada_grama": (700, 1020, 1300, 1660),
-                               "deposito": (1330, 855, 1890, 1065), "academia_linhas": (1500, 1440, 1900, 1530)}}
+                               "deposito": (1330, 855, 1890, 1065), "academia_linhas": (1500, 1440, 1900, 1530),
+                               "bicicletas": (1440, 1295, 1590, 1445)}}
 
 
 def cliente_subsolo_cs(img):
@@ -352,6 +393,7 @@ def cliente_subsolo_cs(img):
     img = fundo_branco_cs(Q, img, p)
     img = borda_cs(Q, img, p)
     img = projecao_cs(Q, img)
+    img = pedais_cs(Q, img)
     img = bege_cs(Q, img)
     img = prateleiras_cs(Q, img)
     img = grama_cs(Q, img, p)
