@@ -233,6 +233,8 @@ DANAE = {"tom": (172, 189, 200), "camadas": [(0.030, 0.6), (0.022, 6.0)], "molha
 # passos deles.
 TRACEJADOS_TA = {"laje_px": {"h": (299, 335, 1177, 1213, 1637, 1672), "v": (2635, 2599, 1521, 1485)}, "tol_px": 3,
                  "laje_extra_px": [((1219, 1177), (1219, 1675))], "banda_px": 3, "pergolado_px": 8,
+                 "pergolado_fontes_px": [(1290, 345, 1450, 470), (1100, 1180, 1185, 1560)], "pergolado_bege_px": (1400, 1100),
+                 "pergolado_semente": 3105, "croma_obj": 10, "lum_obj": 140,
                  "fora_px": [(2250, 1112, 2350, 1212), (2540, 880, 2770, 910)],
                  "neutro": 34, "escuro": 125, "claro": 205, "salto_lum": 14, "moveis_m2": 3.0}
 
@@ -297,12 +299,13 @@ def _orientacao(p0, p1):
     return "h" if min(a, 180 - a) < 10 else ("v" if abs(a - 90) < 10 else f"d{round(a)}")
 
 
-def apagar_retas(img, retas, fixo, mat, pular, q):
+def apagar_retas(img, retas, fixo, moveis, mat, pular, q):
     """Os tracejados saem, por grupos de mesma direção (as horizontais, as verticais e cada diagonal), um grupo depois
-    do outro (no cruzamento, o grupo seguinte já acha o material limpo). Em cada reta, os px do traço (neutros, escuros
-    ou claros, que fogem da mediana em volta, com 1 px de antialias; nas `cheia`, a faixa inteira) recebem o px mais
-    perto, na normal da reta, que não é traço, do mesmo material e fora do que fica (`fixo`); o que sobra, o px fora
-    dos traços mais perto. Devolve a imagem e o número de px trocados."""
+    do outro (no cruzamento, o grupo seguinte já acha o material limpo). No piso, a faixa inteira de cada reta recebe o
+    piso de logo ao lado, transladado na normal da reta (2h + 2 px, depois mais longe), do mesmo material e fora das
+    faixas, do que fica (`fixo`: paredes e rótulos) e dos móveis; sobre os móveis e os carros (`moveis` e o claro sem
+    cor), só os px do traço (neutros, escuros ou claros, que fogem da mediana em volta, com 1 px de antialias), por
+    inpaint, sem trazer piso para dentro deles. Devolve a imagem e o número de px trocados."""
     out = img.copy()
     H, W = img.shape[:2]
     grupos = {}
@@ -313,21 +316,23 @@ def apagar_retas(img, retas, fixo, mat, pular, q):
         o = out.astype(np.float32)
         lum = o.mean(axis=2)
         croma = o.max(axis=2) - o.min(axis=2)
-        med = cv2.medianBlur(out, 11).astype(np.float32).mean(axis=2)
+        mo = cv2.medianBlur(out, 11).astype(np.float32)
+        med, croma_med = mo.mean(axis=2), mo.max(axis=2) - mo.min(axis=2)
+        obj = moveis | ((croma_med < q["croma_obj"]) & (med > q["lum_obj"]))
         Tg = np.zeros((H, W), bool)
+        Ti = np.zeros((H, W), bool)
         faixas = []
-        for p0, p1, h, cheia in grupo:
+        for p0, p1, h, _ in grupo:
             mb = np.zeros((H, W), np.uint8)
             cv2.line(mb, tuple(int(round(c)) for c in p0), tuple(int(round(c)) for c in p1), 1, 2 * h + 1)
             mb = mb.astype(bool) & ~fixo & ~pular
-            if cheia:
-                t = mb
-            else:
-                t = mb & (croma < q["neutro"]) & ((lum < q["escuro"]) | (lum > q["claro"])) & \
-                    (np.abs(lum - med) > q["salto_lum"])
-                t = dilatar(t, 1) & mb
+            traco = dilatar((croma < q["neutro"]) & ((lum < q["escuro"]) | (lum > q["claro"])) &
+                            (np.abs(lum - med) > q["salto_lum"]), 1) & mb
+            Ti |= traco & obj
+            t = mb & ~obj
             Tg |= t
             faixas.append((p0, p1, h, t))
+        Tall = Tg | Ti
         feito = np.zeros((H, W), bool)
         for p0, p1, h, t in faixas:
             ys, xs = np.nonzero(t & ~feito)
@@ -339,13 +344,13 @@ def apagar_retas(img, retas, fixo, mat, pular, q):
             sg = np.where((xs - p0[0]) * nx + (ys - p0[1]) * ny >= 0, 1.0, -1.0)
             sy, sx = np.full(len(ys), -1), np.full(len(ys), -1)
             pend = np.ones(len(ys), bool)
-            for k in range(1, 2 * h + 14):
+            for k in (2 * h + 2, 2 * h + 4, 3 * h + 4, 4 * h + 5, 5 * h + 8):
                 for lado in (1.0, -1.0):
                     cy = np.round(ys + ny * sg * lado * k).astype(int)
                     cx = np.round(xs + nx * sg * lado * k).astype(int)
                     dentro = (cy >= 0) & (cy < H) & (cx >= 0) & (cx < W)
                     cy_, cx_ = np.clip(cy, 0, H - 1), np.clip(cx, 0, W - 1)
-                    ok = pend & dentro & ~Tg[cy_, cx_] & ~fixo[cy_, cx_] & ~pular[cy_, cx_] & \
+                    ok = pend & dentro & ~Tall[cy_, cx_] & ~fixo[cy_, cx_] & ~pular[cy_, cx_] & ~obj[cy_, cx_] & \
                         (mat[cy_, cx_] == mat[ys, xs])
                     sy[ok], sx[ok] = cy[ok], cx[ok]
                     pend &= ~ok
@@ -355,30 +360,47 @@ def apagar_retas(img, retas, fixo, mat, pular, q):
             out[ys[v], xs[v]] = out[sy[v], sx[v]]
             feito[ys[v], xs[v]] = True
             n_troca += int(v.sum())
-        # o que não achou fonte na normal: o px fora dos traços mais perto, do mesmo material
-        resto = Tg & ~feito
+        resto = (Tg & ~feito) | Ti
         if resto.any():
-            _, (iy, ix) = ndimage.distance_transform_edt(Tg | fixo | pular, return_indices=True)
-            ys, xs = np.nonzero(resto)
-            ok = mat[iy[ys, xs], ix[ys, xs]] == mat[ys, xs]
-            out[ys[ok], xs[ok]] = out[iy[ys[ok], xs[ok]], ix[ys[ok], xs[ok]]]
-            n_troca += int(ok.sum())
+            out = cv2.inpaint(out, (resto * 255).astype(np.uint8), 3, cv2.INPAINT_TELEA)
+            n_troca += int(resto.sum())
     return out, n_troca
+
+
+def pergolado_ta(Q, img, fixo, pular, q):
+    """A grade do pergolado do render (as vigas: a faixa clara entre os dois traços de cada uma) sai com o piso refeito
+    (`pedidos_terreo_casaa_2910.piso_refeito`: o Bege Bahia tecido das `fontes_px`, emendado ao piso de fora pela
+    membrana), no retângulo da grade, só no Bege Bahia (fora da água, das paredes e dos rótulos)."""
+    import pedidos_terreo_casaa_2910 as P
+    pts = np.array([Q.p2q(x, y) for _, _, segs in T.cadeias_tracejadas(Q, ["ARQ_PERGOLADO"])
+                    for s in segs for x, y in ((s[0], s[1]), (s[2], s[3]))])
+    x0, y0 = np.floor(pts.min(axis=0)).astype(int) - q["pergolado_px"]
+    x1, y1 = np.ceil(pts.max(axis=0)).astype(int) + q["pergolado_px"]
+    mat = materiais(Q)
+    zona = np.zeros(img.shape[:2], bool)
+    zona[y0:y1, x0:x1] = True
+    rotulo_bege = mat[q["pergolado_bege_px"][1], q["pergolado_bege_px"][0]]
+    zona &= (mat == rotulo_bege) & ~fixo & ~pular
+    out = P.piso_refeito(img, zona, q["pergolado_semente"], dict(P.PISO_TA, fontes_px=q["pergolado_fontes_px"],
+                                                                  tom_tol=40))
+    return out, int(zona.sum())
 
 
 def tracejados_ta(Q, img, q=None):
     q = q or TRACEJADOS_TA
-    retas = _retas_tracejadas(Q, q)
+    retas = [r for r in _retas_tracejadas(Q, q) if not r[3]]
     par = FA.paredes_pdf(Q) > 0.05
     rots = rotulos_na_imagem(Q, img)
     rot = np.zeros(img.shape[:2], np.float32)
     for _, al, _, _ in rots:
         rot = np.maximum(rot, al)
-    fixo = dilatar(par, 1) | dilatar(rot > 0.02, 1) | moveis_pdf(Q, q)
+    fixo = dilatar(par, 1) | dilatar(rot > 0.02, 1)
     pular = gramado_mascara(Q, img) | (agua_mascara(Q) > 0)
-    out, n = apagar_retas(img, retas, fixo, materiais(Q), pular, q)
-    print(f"    tracejados: {len(retas)} retas (afastamentos, laje da cobertura, pergolado, X e molduras), {n} px de "
-          f"traço trocados pelo material de perto; na grama e na água, nos passos deles")
+    out, n_p = pergolado_ta(Q, img, fixo, pular, q)
+    out, n = apagar_retas(out, retas, fixo, moveis_pdf(Q, q), materiais(Q), pular, q)
+    print(f"    tracejados: {len(retas)} retas (afastamentos, laje da cobertura, X e molduras), {n} px trocados pelo "
+          f"piso de perto (sobre os móveis e os carros, só o traço); a grade do pergolado com o piso refeito "
+          f"({n_p} px); na grama e na água, nos passos deles")
     return out
 
 
