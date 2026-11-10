@@ -4305,6 +4305,6 @@ Pedidos do usuário com os recortes (todos aplicados direto, por serem pedidos d
 
 Regras novas (POE642_REGRAS.md): rótulos centralizados em todas as plantas (seção 12, explícita); o 12K também na letra manuscrita (opção B, Kalam) em todas as plantas (seção 13).
 
-Ficou para perguntar: a barra branca abaixo da 1ª pedra do acesso é, no PDF, um rasgo com X (vazio) dentro da viga entre o hall externo e o jardim; ficou como está. O X da área de serviço descoberta ficou fino e claro, como o cliente pediu antes ("Deixar as linhas tracejadas mais finas e mais claras"); o que saiu foi o tracejado branco da borda do gramado.
+Respostas do usuário (10/11): o X da área de serviço descoberta fica fino e claro (o que saiu foi o tracejado branco da borda do gramado); a barra branca abaixo da 1ª pedra do acesso (no PDF, um rasgo com X dentro da viga entre o hall externo e o jardim) vira vazio no Bege do hall, com o X fino; o spa fica com o banco cinza e o fundo azul. Depois, também: a cuba do lavatório, o aparador do escritório no tom padrão dos armários, as duas mesinhas em tom e sobretom, a porta do escritório e a regra das portas quina a quina com a parede em todas as plantas.
 
 Como refazer: `terreo_casaa_1011.py --antes <passo_gramado> --de piscina --passos <pasta>` (os passos 3 a 14, com `contornos` antes de `tracejados_finos`); o 12K: `ampliacao_12k_terreo_casaa.py preparar --passos <pasta>`, o Nano Banana Pro 4K 16:9, `corrigir`, o Topaz High Fidelity V2 e `montar12k <topaz> --opcao AB`.

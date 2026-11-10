@@ -1398,7 +1398,7 @@ def shaft_ta(Q, img, q=None):
 # do lavabo; o shaft). Não passam sobre os rótulos nem sobre os móveis do PDF.
 FINOS_TA = {"larg_px": 0.9, "escuro": (112, 112, 112), "claro": (205, 205, 205), "limiar": 125,
             "vazios_px": [(1505, 600, 2160, 888), (1700, 1638, 1918, 1935), (2248, 345, 2352, 392),
-                          (2348, 1110, 2392, 1214)], "vazio_esquerda_pt": 1315.4, "folga_rotulo": 6,
+                          (2348, 1110, 2392, 1214), (2540, 884, 2770, 908)], "vazio_esquerda_pt": 1315.4, "folga_rotulo": 6,
             "pontos_px": 18, "pontos_dif": 12, "pontos_area": 10}
 
 
@@ -1478,9 +1478,9 @@ def tracejados_finos_ta(Q, img, q=None):
 CONTORNOS_TA = {
     "carro": {"fonte_px": (2354, 1341, 2516, 1649), "dx": 169, "topo_px": (2354, 1324, 2516, 1341), "dx_topo": 335,
               "funde_px": 6},
-    "pedras": {"fonte_px": (2612, 604, 2777, 871), "destino_x": 3269, "pedra4_px": (3254, 606, 3263, 868),
-               "pedra4_espelho": 3253},
-    "acesso": {"x_borda": 3434, "x_ajuste": (3330, 3412), "x_novo": 3413, "y_px": (1250, 1640)},
+    "pedras": {"fonte_px": (2612, 596, 2777, 871), "destino_x": 3269, "pedra4_px": (3247, 600, 3264, 871),
+               "pedra4_fonte_x": 3079},
+    "acesso": {"x_borda": 3434, "x_ajuste": (3290, 3376), "x_novo": 3377, "y_px": (1250, 1640)},
     "muro": {"cunha_px": (3020, 1890, 3130, 1945), "linha_topo": 1924, "modelo_x": 3000, "grama_dx": 110,
              "ponta_px": (3416, 1890, 3435, 1950), "modelo_ponta_x": 3400},
     "faixa": {"tracejado_px": (1912, 1636, 2172, 1649), "pontos_px": (1690, 1636, 1930, 1700), "pontos_dif": 28,
@@ -1517,6 +1517,9 @@ CONTORNOS_TA = {
                    "mesas_pt": [((2270.6, 771.8, 8.5), (130, 160, 194)), ((2278.7, 761.5, 8.5), (74, 100, 132))],
                    "porta_limpar_px": (2356, 582, 2412, 587), "porta_fonte_dy": -9,
                    "folha_px": (2355.0, 586.4, 2408.0, 589.4), "folha": (222, 224, 226), "face": (92, 94, 97)},
+    # o rasgo branco na viga entre o hall externo e o jardim (no PDF, um vazio com X tracejado; usuário: "Vazio com X
+    # fino"): o branco no tom do piso do hall (o Bege Bahia), e o X fino e claro dos vazios (`FINOS_TA`)
+    "vazio_viga": {"caixa_px": (2540, 884, 2770, 908), "fonte_px": (2470, 815, 2590, 830)},
     "parede": 79, "parede_nova": 52, "parede_tol": 12,
     "muros_px": [(262, 130, 3450, 175), (262, 1915, 3450, 1952), (262, 130, 292, 1952)],
 }
@@ -1547,10 +1550,10 @@ def _carro(out, q):
 def _pedras(out, q):
     a, b, c, d = q["fonte_px"]
     out[b:d, q["destino_x"]:q["destino_x"] + (c - a)] = out[b:d, a:c].copy()
+    # a ponta direita da 4ª pedra (onde passava o tracejado) é a ponta direita da 3ª, com a borda dela
     x0, y0, x1, y1 = q["pedra4_px"]
-    e = q["pedra4_espelho"]
-    for i, x in enumerate(range(x0, x1)):
-        out[y0:y1, x] = out[y0:y1, e - i]
+    fx = q["pedra4_fonte_x"]
+    out[y0:y1, x0:x1] = out[y0:y1, fx:fx + (x1 - x0)].copy()
     return out
 
 
@@ -1786,9 +1789,9 @@ def _ralos(Q, out, ralos):
         FA.sombra_q(tl, m, forca=0.18, dist=0.5, sigma=0.5)
         tl.pintar(m, FA.CROMO["meio"])
         miolo = tl.vazia()
-        cv2.circle(miolo, (int(px_), int(py_)), int(rr * 0.45), 255, -1, cv2.LINE_AA)
-        tl.pintar(miolo, FA.CROMO["escuro"])
-        tl.contorno(m, 0.25, FA.CROMO["contorno"])
+        cv2.circle(miolo, (int(px_), int(py_)), int(rr * 0.55), 255, -1, cv2.LINE_AA)
+        tl.pintar(miolo, (78, 82, 86))
+        tl.contorno(m, 0.45, (70, 74, 78))
         out = tl.gravar()
     return out
 
@@ -1834,6 +1837,19 @@ def _escritorio(Q, out, q):
     return tl.gravar()
 
 
+def _vazio_viga(out, q):
+    x0, y0, x1, y1 = q["caixa_px"]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    branco = (reg.mean(axis=2) > 232) & (reg.max(axis=2) - reg.min(axis=2) < 16)
+    a, b, c, d = q["fonte_px"]
+    fonte = out[b:d, a:c]
+    reps = (int(np.ceil((y1 - y0) / fonte.shape[0])), int(np.ceil((x1 - x0) / fonte.shape[1])))
+    tecido = np.tile(np.concatenate([fonte, fonte[:, ::-1]], axis=1), (reps[0], reps[1]))[: y1 - y0, : x1 - x0]
+    sub = out[y0:y1, x0:x1]
+    sub[branco] = tecido[branco]
+    return out
+
+
 def _paredes_escuras(Q, out, q):
     v0, v1, tol = q["parede"], q["parede_nova"], q["parede_tol"]
     zona = dilatar(FA.paredes_pdf(Q) > 0.05, 3)
@@ -1865,6 +1881,7 @@ def contornos_ta(Q, img, q=None):
     out = _janela(Q, out, q["janela"], vidro)
     out = _lavabo_rotulos(Q, out, q["lavabo"])
     out = _residuos(out, q["residuos_px"])
+    out = _vazio_viga(out, q["vazio_viga"])
     out = np.clip(np.round(_escritorio(Q, out, q["escritorio"])), 0, 255).astype(np.uint8)
     out = np.clip(np.round(_ralos(Q, out, q["ralos_pt"])), 0, 255).astype(np.uint8)
     out = np.clip(np.round(_porta_servico(Q, out, q["porta_servico"])), 0, 255).astype(np.uint8)
