@@ -346,9 +346,22 @@ def _itens_manuscrita(Q, b, s, X0, Ya3):
     def loc(x, y):
         u, v = Q.p2q(x, y)
         return (u - X0) * s, (v - Ya3) * s
+    from PIL import ImageFont
     k = (RM._altura_maiuscula(FONTES / f"Inter-{R1.ROTULOS['fonte']}.otf") / RM._altura_maiuscula(RM.FONTE)
          * RM.MANUSCRITA["altura"])
-    return [(t, c * k, x, y, "ms") for t, c, x, y in RM.linhas_rotulo(Q, b, pdf2img=loc, escala_desvio=Q.W / 2000 * s)]
+    q = R1.ROTULOS
+
+    def largura(fonte, texto, corpo):
+        return ImageFont.truetype(str(fonte), max(4, int(round(corpo * 4)))).getlength(texto) / 4
+
+    # a linha na Kalam não passa da largura que ocupava na Inter (a opção A): a Kalam é mais larga na mesma altura das
+    # maiúsculas, e num vão estreito (o PROJ. CLARABOIA do lavabo, 10/11) passaria por cima da parede
+    itens = []
+    for t, c, x, y in RM.linhas_rotulo(Q, b, pdf2img=loc, escala_desvio=Q.W / 2000 * s):
+        peso = q["fonte"] if t.startswith("A:") else q.get("fonte_nome", q["fonte"])
+        teto = largura(FONTES / f"Inter-{peso}.otf", t, c) / max(largura(RM.FONTE, t, c * k), 1e-6)
+        itens.append((t, c * k * min(1.0, teto), x, y, "ms"))
+    return itens
 
 
 def _itens_anotacao_manuscrita(dados, s, X0, Ya3):
