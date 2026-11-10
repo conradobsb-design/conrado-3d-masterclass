@@ -4273,3 +4273,22 @@ Depois (usuário: "QUERO QUE O VÉRTICE DA PORTA ENCONTRE COM O VÉRTICE DA PARE
 ### Regra: o tom de armários e prateleiras vale para todas as casas (10/11)
 
 Usuário: "O TOM VAI VALER PARA TODAS AS CASAS, COMO REGRA. SÓ DEIXE REGISTRADO, MAS VAMOS AGORA PARA O TERREO DA CASA A." Registrado no `POE642_REGRAS.md` (armários): RGB 208, 178, 156 em armários e prateleiras de todas as casas; aplicado só no depósito do Subsolo da Casa A, nas outras plantas quando cada uma for revista. Próximo passo: a lista de correções do Térreo da Casa A, que o usuário vai mandar.
+
+### Casa A, Térreo: as correções do cliente (10/11)
+
+O cliente (Paulo Octávio) mandou a lista do Térreo da Casa A com os recortes da planta; o usuário respondeu as dúvidas ("Arbustos e 4 árvores"; "NA ESCADA DE PLACAS ESCALONADAS - DESCE PARA O DECK / NA ESCADA ABAIXO DO SPA - DESCE PARA O SUBSOLO"; "USAR COMO REFERENCIA O TOM DA PISCINA E PRAINHA DA IMAGEM 3. E O REVESTIMENTO BARLAVENTO PORTOBELO"; "USE O MESMO TOM DE GRAMA DO SUBSOLO"; "USAR O TRIANGULO COMO SETA E REMOVER A SETA QUE HAVIA") e, no meio, pediu o Bege Bahia menos manchado do Subsolo como regra para todas as plantas de todas as casas.
+
+O que foi feito (`terreo_casaa_1011.py`, sobre a final do Térreo de 58ea098; detalhes no README):
+- Tracejados: saem todos (afastamentos, contornos do telhado, projeções); ficam só os X e as molduras dos vazios (varanda e sala de estar, área de serviço descoberta, claraboia, shaft) e o pergolado, finos e claros.
+- Gramado: a grama padrão do Subsolo em todo o lote, 4 árvores pequenas nos cantos e arbustos baixos junto aos muros; o jardim de 4,79 m² com três plantas de tamanhos diferentes.
+- Piscina, prainha e spa no tom sóbrio da foto do cliente, com o Barlavento.
+- Bege Bahia com as manchas a 45% (a regra do Subsolo).
+- Piso marrom (cozinha, gourmet, serviço, despensa, gás, motorista, garagem) na amostra do cliente, mais clara e uniforme; as bancadas tabaco ficam.
+- Bancadas: ilha e pia da cozinha e bancada dos tanques em Dekton Danae (o tom é o da descrição do fabricante: a foto não pôde ser baixada); lavatório todo em marrom tabaco com a cuba mais escura; a churrasqueira na área gourmet; no lavabo, a pedra lateral na cor da cuba.
+- 5 banquetas na área gourmet, num tom mais escuro que o piso; o pilar do terraço gourmet no desenho do PDF.
+- Soleira na entrada (como a da Casa C); sem soleira entre a sala e o escritório; a seta antiga da entrada sai e entra o triângulo no centro da abertura da porta.
+- Escadas: triângulo e descrição em todas ("DESCE PARA O / DECK", "DESCE PARA O / SUBSOLO", "SOBE PARA O / 1º PAVIMENTO" na do jardim e na caracol); o guarda-corpo de vidro na escada do jardim; a caracol redesenhada (degraus em linhas, tracejados só nos degraus de cima, sem a linha de corte e sem o X).
+- Sem o nome SHAFT.
+- 1º Pavimento: o Térreo nublado refeito onde o Térreo mudou (`--um_pav`).
+
+Antes e depois: `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_1011_<trecho>_antes_depois.jpg`. Prancha do Térreo e do 1º Pavimento, PDF da Casa A e book refeitos. Regras novas no `POE642_REGRAS.md` (Bege Bahia em todas as casas; Dekton Danae; piso marrom da amostra; grama padrão no Térreo A; triângulo e descrição em todas as escadas; na Casa A, só os vazios tracejados, poucas árvores e a piscina no tom da foto). Para o OK do usuário: estender às outras casas os tracejados só dos vazios e o tom sóbrio da piscina.

@@ -174,8 +174,13 @@ def alfa_texto(linhas, x, y_meio, alinhar="esquerda", corpo=None, entrelinha=Non
     return np.asarray(t.resize((W, H), Image.LANCZOS), np.float32) / 255
 
 
+ANOTAR = {"sim": True}     # False: sem os triângulos e as descrições (o Térreo para o nublado do 1º Pavimento)
+
+
 def triangulo(out, pts, cor=(30, 30, 30), ss=8):
     """O triângulo cheio (a seta das escadas), antisserrilhado."""
+    if not ANOTAR["sim"]:
+        return out
     pts = np.float32(pts)
     bx0, by0 = np.floor(pts.min(axis=0)).astype(int) - 2
     bx1, by1 = np.ceil(pts.max(axis=0)).astype(int) + 3
@@ -667,14 +672,21 @@ def bege_ta(Q, img, q=None):
     tl = tom.mean(axis=2)
     gx, gy = cv2.Sobel(tl, cv2.CV_32F, 1, 0, ksize=3), cv2.Sobel(tl, cv2.CV_32F, 0, 1, ksize=3)
     aresta = dilatar(np.hypot(gx, gy) / 8 > q["aresta"], q["aresta_px"])
-    D = im[y0:y1, x0:x1] / np.maximum(tom, 1)
+    # sob os rótulos (e 2 px em volta), o piso vem da imagem tapada: o rótulo volta inteiro por cima, no alfa dele
+    # (compor sobre o rótulo antigo engrossava a borda das letras)
+    tt = dilatar(texto > 0.02, 2) & B
+    t = tt[y0:y1, x0:x1]
+    D = np.where(t[..., None], sub.astype(np.float32), im[y0:y1, x0:x1]) / np.maximum(tom, 1)
     novo = tom * (1 + q["forca"] * (D - 1))
     m = (piso[y0:y1, x0:x1] & ~aresta).astype(np.float32)
     m = cv2.GaussianBlur(m, (0, 0), 0.8) * piso[y0:y1, x0:x1]
+    m = np.maximum(m, t.astype(np.float32))
     out = im.copy()
     out[y0:y1, x0:x1] = im[y0:y1, x0:x1] * (1 - m[..., None]) + novo * m[..., None]
     for _, al, claro, _ in rots:
-        out = compor(out, al, cor_rotulo(out, al))
+        al = al * tt                                   # só onde o piso foi refeito (fora dele, o rótulo está inteiro)
+        if al.max() > 0.02:
+            out = compor(out, al, cor_rotulo(out, al))
     print(f"    Bege Bahia: as manchas a {q['forca']:.0%} do contraste em {piso.sum() / Q.px_m ** 2:.0f} m² (a regra do "
           f"Subsolo); rótulos de volta: {', '.join(r[0] for r, _, _, _ in rots) or 'nenhum'}")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
@@ -1035,6 +1047,8 @@ ESCADAS_TA = {
 
 
 def _texto_escada(out, linhas, x, y, alinhar, cor):
+    if not ANOTAR["sim"]:
+        return out.astype(np.float32)
     a = alfa_texto(linhas, x, y, alinhar, forma=out.shape[:2])
     return compor(out.astype(np.float32), a, cor)
 
@@ -1132,13 +1146,47 @@ def escadas_ta(Q, img, q=None):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 11. O shaft (cliente: "Tirar o nome shaft"): o rótulo SHAFT sai (o fundo claro de dentro do shaft, do entorno).
-def shaft_ta(Q, img):
+# Nos dois vazios pequenos (a claraboia do lavabo e o shaft), o X antigo, curto e inclinado, não sai inteiro no passo 1
+# (a faixa vizinha cai no outro braço do X ou na moldura; no shaft, o rótulo protegia os traços junto dele): sem o
+# rótulo, o que sobra dentro da caixa (`caixas_px`, fora das paredes do PDF), neutro e bem mais escuro ou mais claro
+# que o piso de perto (a mediana de `mediana_px`), sai por inpaint. O X fino volta no passo 12.
+SHAFT_TA = {"caixas_px": [(2252, 355, 2350, 391), (2350, 1112, 2390, 1212)], "escuro": 18, "claro": 16, "croma": 22,
+            "mediana_px": 15, "margem_px": 8}
+
+
+def _restos_caixa(Q, img, caixa, q):
+    x0, y0, x1, y1 = caixa
+    m = q["margem_px"]
+    X0, Y0, X1, Y1 = x0 - m, y0 - m, x1 + m, y1 + m
+    sub = img[Y0:Y1, X0:X1]
+    f = sub.astype(np.float32)
+    lum, croma = f.mean(axis=2), f.max(axis=2) - f.min(axis=2)
+    med = cv2.medianBlur(sub, q["mediana_px"]).astype(np.float32).mean(axis=2)
+    par = dilatar(FA.paredes_pdf(Q) > 0.05, 2)[Y0:Y1, X0:X1]
+    dentro = np.zeros(lum.shape, bool)
+    dentro[m:m + y1 - y0, m:m + x1 - x0] = True
+    livre = dentro & ~par
+    sujo = livre & (croma < q["croma"]) & ((lum < med - q["escuro"]) | (lum > med + q["claro"]))
+    sujo = dilatar(sujo, 1) & livre
+    out = img.copy()
+    if sujo.any():
+        out[Y0:Y1, X0:X1] = cv2.inpaint(sub, (sujo * 255).astype(np.uint8), 3, cv2.INPAINT_TELEA)
+    return out, int(sujo.sum())
+
+
+def shaft_ta(Q, img, q=None):
+    q = q or SHAFT_TA
     out = img.copy()
     rots = [a for a in rotulos_na_imagem(Q, img) if a[0][0] == "SHAFT"]
     for _, al, _, _ in rots:
         m = (dilatar(al > 0.02, 1) * 255).astype(np.uint8)
         out = cv2.inpaint(out, m, 3, cv2.INPAINT_TELEA)
-    print(f"    shaft: {'sem o nome SHAFT' if rots else 'o rótulo SHAFT não foi achado'}")
+    n = 0
+    for caixa in q["caixas_px"]:
+        out, k = _restos_caixa(Q, out, caixa, q)
+        n += k
+    print(f"    shaft: {'sem o nome SHAFT' if rots else 'o rótulo SHAFT não foi achado'}; os restos do X antigo na "
+          f"claraboia e no shaft ({n} px)")
     return out
 
 
@@ -1151,7 +1199,24 @@ def shaft_ta(Q, img):
 # do lavabo; o shaft). Não passam sobre os rótulos nem sobre os móveis do PDF.
 FINOS_TA = {"larg_px": 0.9, "escuro": (112, 112, 112), "claro": (205, 205, 205), "limiar": 125,
             "vazios_px": [(1505, 600, 2160, 888), (1700, 1638, 1918, 1935), (2248, 345, 2352, 392),
-                          (2348, 1110, 2392, 1214)], "vazio_esquerda_pt": 1315.4, "folga_rotulo": 6}
+                          (2348, 1110, 2392, 1214)], "vazio_esquerda_pt": 1315.4, "folga_rotulo": 6,
+            "pontos_px": 18, "pontos_dif": 12, "pontos_area": 10}
+
+
+def _pontos_cantos(Q, img, q):
+    lum = img.astype(np.float32).mean(axis=2)
+    med = cv2.medianBlur(img, 9).astype(np.float32).mean(axis=2)
+    cantos = np.zeros(lum.shape, np.uint8)
+    for p0, p1, _, _ in _retas_tracejadas(Q, TRACEJADOS_TA):
+        if _orientacao(p0, p1).startswith("d"):
+            for c in (p0, p1):
+                cv2.circle(cantos, (int(round(c[0])), int(round(c[1]))), q["pontos_px"], 1, -1)
+    escuro = cantos.astype(bool) & (lum < med - q["pontos_dif"]) & ~(FA.paredes_pdf(Q) > 0.05) & ~moveis_pdf(Q)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(escuro.astype(np.uint8), connectivity=8)
+    pts = np.isin(lab, [i for i in range(1, n) if st[i, 4] <= q["pontos_area"]])
+    if not pts.any():
+        return img
+    return cv2.inpaint(img, (dilatar(pts, 1) * 255).astype(np.uint8), 3, cv2.INPAINT_TELEA)
 
 
 def tracejados_finos_ta(Q, img, q=None):
@@ -1166,6 +1231,8 @@ def tracejados_finos_ta(Q, img, q=None):
     segs += [(x, s[1], x, s[3]) for k, _, ss in T.cadeias_tracejadas(Q, ["DOC_LINHAS E PROJEÇÕES"])
              if k[1] == 90.0 and round(k[2]) == -1922 for s in ss]
     segs += [s for _, _, ss in T.cadeias_tracejadas(Q, ["ARQ_PERGOLADO"]) for s in ss]
+    # os pontinhos escuros que sobraram nas pontas dos X (manchas de até `pontos_area` px, bem mais escuras que o piso)
+    img = _pontos_cantos(Q, img, q)
     # fora dos rótulos (com folga) e dos móveis
     rots = rotulos_na_imagem(Q, img)
     tapa = np.zeros(img.shape[:2], bool)
@@ -1205,6 +1272,41 @@ def correcoes_ta(img, de=None, ate=None, salvar_passos=None):
     return out
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# O 1º Pavimento mostra o Térreo nublado fora da pegada e nos vazios, sem os rótulos, as letras e setas das escadas e as
+# projeções do Térreo (`POE642_REGRAS.md`, seção 11). Ele é refeito onde o Térreo mudou, pela conta de
+# `pedidos_terreo_casaa_2910.nublado_1pav_ta` (a diferença entre o Térreo novo e o antigo, nublados), com os dois Térreos
+# sem o que o nublado não leva: o antigo é o passo dos tracejados (a final de antes sem nenhum tracejado), sem as letras
+# S e D, sem a seta da entrada e sem o nome SHAFT; o novo é o passo do shaft refeito sem os triângulos e as descrições
+# (`ANOTAR`), antes dos tracejados finos. Os rótulos, iguais nos dois, se cancelam. A caracol e o shaft são do desenho
+# do 1º Pavimento (`fora_px`, com a pista de antes).
+NUBLADO_1011 = {"fora_px": [(1860, 1560, 3460, 1960), (1770, 1490, 1990, 1680), (2240, 335, 2360, 400)]}
+
+
+def terreos_sem_anotacoes(passo_tracejados, passo_soleiras):
+    Q = FA.QuadroA("Terreo")
+    ANOTAR["sim"] = False
+    try:
+        velho = passo_tracejados.copy()
+        q = ESCADAS_TA
+        x0, y0, x1, y1 = T.PISANTES["blocos"][-1]
+        centros = {"pisantes": Q.p2q((x0 + x1) / 2, (y0 + y1) / 2), "deck": Q.p2q(*T.DECK_T["centro"]),
+                   "jardim": Q.p2q(*T.ESCADA_U["centro"])}
+        for nome in ("pisantes", "deck", "jardim"):
+            velho = tirar_letra(Q, velho, q[nome]["letra"][0], centros[nome], q[nome]["letra"][1])
+        with contextlib.redirect_stdout(io.StringIO()):
+            velho = shaft_ta(Q, entrada_ta(Q, velho))
+            novo = shaft_ta(Q, escadas_ta(Q, entrada_ta(Q, passo_soleiras)))
+    finally:
+        ANOTAR["sim"] = True
+    return velho, novo
+
+
+def nublado_1pav_1011(img_1pav, velho, novo):
+    import pedidos_terreo_casaa_2910 as P
+    return P.nublado_1pav_ta(img_1pav, velho, novo, dict(P.NUBLADO_1PAV_TA, fora_px=NUBLADO_1011["fora_px"]))
+
+
 # os antes e depois (contra a final do commit 58ea098), em renders/POE642_CasaA_PH_Terreo_1011_<trecho>_antes_depois.jpg
 ANTES_DEPOIS_1011 = {"Terreo": {"planta": (270, 140, 3440, 1960), "vazios_varanda_estar": (1480, 580, 2180, 910),
                                 "pergolado": (1180, 840, 1560, 1240), "pisantes_deck": (700, 320, 1240, 470),
@@ -1223,6 +1325,7 @@ def main():
     ap.add_argument("--saida")
     ap.add_argument("--passos")
     ap.add_argument("--antes_depois", action="store_true", help="grava os recortes de ANTES_DEPOIS_1011 em renders/")
+    ap.add_argument("--um_pav", help="a final do 1º Pavimento de antes: o Térreo nublado é refeito (pede --passos)")
     a = ap.parse_args()
     img = cv2.imread(a.antes)
     out = correcoes_ta(img, a.de, a.ate, a.passos)
@@ -1230,6 +1333,12 @@ def main():
     if a.antes_depois:
         import pedidos_terreo_casaa_2910 as P
         P.antes_depois_pedidos_ta("Terreo", img, out, caixas=ANTES_DEPOIS_1011, sufixo="1011")
+    if a.um_pav:
+        pasta = Path(a.passos)
+        velho, novo = terreos_sem_anotacoes(cv2.imread(str(pasta / "passo_tracejados.png")),
+                                            cv2.imread(str(pasta / "passo_soleiras.png")))
+        um = nublado_1pav_1011(cv2.imread(a.um_pav), velho, novo)
+        cv2.imwrite(str(FA.CASA / "renders" / "POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png"), um)
 
 
 if __name__ == "__main__":
