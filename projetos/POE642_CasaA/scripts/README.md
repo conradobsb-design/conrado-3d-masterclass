@@ -1812,3 +1812,5 @@ Pedidos do usuário, com os recortes do JPG em 12K: "1- CORRIGIR ESSA FALHA NA P
 - **Ampliação:** `CORRIGIR_PX` ganhou os portais do depósito e do BH. da sauna; Topaz de novo (job 1a3ec854-ee1c-4362-9183-0d58083600a4).
 - **Antes e depois (contra a final de 32959cc):** `renders/POE642_CasaA_PH_Subsolo_1011_{portais_bh_fem_masc,portal_bh_serv,portal_deposito,portal_bh_sauna}_antes_depois.jpg`.
 
+- **Depois: vértice com vértice (usuário: "QUERO QUE O VÉRTICE DA PORTA ENCONTRE COM O VÉRTICE DA PAREDE. [...] NÃO ENCOSTE O LADO, MAS SIM O VÉRTICE COM VÉRTICE."):** a ponte da parede vai só até a face de dentro da folha (não mais até a de fora): a quina da folha encontra a quina da ponta da parede e as duas se tocam só no vértice. As pontes: BH. SERV. 1190,1–1199,0 x 1037,0–1040,0; BH. FEM. 1494,6–1497,6 x 1499,7–1514,7; BH. MASC. 1861,8–1864,8 x 1499,7–1514,7; depósito 1333,4–1345,3 x 1024,9–1027,9; BH. da sauna 1378,2–1387,1 x 1565,4–1568,4. Topaz de novo (job 75de5331-92e7-4ef1-8fa6-01f40b3f9685).
+

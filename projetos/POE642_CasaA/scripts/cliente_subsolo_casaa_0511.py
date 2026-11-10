@@ -396,13 +396,13 @@ def _ligar_folha(cinza, brancas, vaos, tol=0.3):
             xe = G[2] if direita else G[0]
             fim = [c for c in cinza if abs((c[2] if direita else c[0]) - xe) < 0.6 and c[1] < G[3] + 30 and c[3] > G[1] - 30]
             y0, y1 = min(c[1] for c in fim), max(c[3] for c in fim)
-            pontes.append((xe, y0, F[2], y1) if direita else (F[0], y0, xe, y1))
+            pontes.append((xe, y0, F[0], y1) if direita else (F[2], y0, xe, y1))
         else:                                               # a parede avança em y
             abaixo = F[1] >= G[3] - tol
             ye = G[3] if abaixo else G[1]
             fim = [c for c in cinza if abs((c[3] if abaixo else c[1]) - ye) < 0.6 and c[0] < G[2] + 30 and c[2] > G[0] - 30]
             x0, x1 = min(c[0] for c in fim), max(c[2] for c in fim)
-            pontes.append((x0, ye, x1, F[3]) if abaixo else (x0, F[1], x1, ye))
+            pontes.append((x0, ye, x1, F[1]) if abaixo else (x0, F[3], x1, ye))
     return cinza + pontes, brancas, vaos + pontas, pontes
 
 
@@ -428,7 +428,8 @@ def portais_cs(Q, img, rotulos=None):
         # DA PAREDE"): a folha da porta (a peça branca grande que encosta no marco: a folha aberta a 90° das portas de
         # abrir, a folha das portas de correr) ligava na parede pelo batente; sem ele, ficava a ~3 px da ponta. A peça
         # branca pequena alinhada com a folha, na ponta dela, é parte da folha (fica); e a ponta da parede avança, na
-        # espessura dela, até a face de fora da folha (`_ligar_folha`), para a folha ficar com a ponta na ponta da parede
+        # espessura dela, até a face de dentro da folha (`_ligar_folha`): a quina da folha encontra a quina da ponta da
+        # parede, vértice com vértice (usuário: "É A PONTA COM PONTA. NÃO ENCOSTE O LADO, MAS SIM O VÉRTICE COM VÉRTICE")
         cinza, brancas, vaos, pontes = _ligar_folha(cinza, brancas, vaos)
 
         def sup(rets):
