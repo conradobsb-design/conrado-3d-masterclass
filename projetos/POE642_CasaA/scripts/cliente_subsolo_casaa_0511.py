@@ -450,7 +450,11 @@ def cliente_subsolo_cs(img):
     img = grama_cs(Q, img, p)
     img = sauna_cs(Q, img)
     img = degraus_cs(Q, img)
-    return escada_cs(Q, img)
+    img = escada_cs(Q, img)
+    # depois (usuário, 10/11/26): "PARA BANHO USE BH."; "CENTRALIZE "SAUNA" DENTRO DO AMBIENTE"; "CENTRALIZE TODOS OS
+    # RÓTULOS" (`rotulos_subsolo_casaa`: a especificação dos rótulos, gravada para a opção manuscrita e a ampliação)
+    import rotulos_subsolo_casaa as RS
+    return RS.aplicar(Q, img)
 
 
 if __name__ == "__main__":

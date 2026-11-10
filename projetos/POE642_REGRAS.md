@@ -427,6 +427,10 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **[27/10] Em branco, quando o usuário pede** (na Casa D, no DCE TÉRREO: "rótulo em branco"): o rótulo pedido sai em branco qualquer que seja o fundo (no piso de madeira do DCE, a conta do contraste dava o preto).
 - **[27/10] No box, quando o PDF o põe lá e o usuário pede** (na Casa D, no WC DCE: "o rótulo aqui está sobre a porta. preciso que coloque dentro do box como está no pdf, com fonte mais reduzida"): o rótulo fica no ponto do PDF, dentro do box, com o corpo menor (62% do da regra), em vez da busca do lugar livre fora dele (a regra de 22/10, "não precisa ficar dentro do box", segue para os outros banhos).
 
+- **[10/11] Banho se escreve BH.** (usuário, na Casa A: "PARA BANHO USE BH."): BH. SERV., BH. FEM., BH. MASC. (como o BH. GOURMET da Casa D), com o nome centrado onde o antigo estava; com a abreviação, o nome que ia em duas linhas volta a uma só.
+- **[10/11] Todo rótulo no centro do ambiente** (usuário, na Casa A: "CENTRALIZE "SAUNA" DENTRO DO AMBIENTE"; "CENTRALIZE TODOS OS RÓTULOS"): o bloco (nome e área) no centro do piso livre do recinto, fora dos objetos (louças, aparelhos, bancadas, bancos, prateleiras) e do box; onde o bloco não cabe livre no centro, no ponto livre mais perto dele (`rotulos_subsolo_casaa.centralizar`, a regra do Térreo da Casa A sobre a especificação dos rótulos).
+- **[10/11] Duas opções de letra nos rótulos** (usuário: "QUERO TER DUAS OPÇÕES. COM A FONTE ATUAL E A FONTE DA LETRA IGUAL A ESSA DA IMAGEM"): A, a Inter (a atual); B, a Kalam (manuscrita, como o título "Katherine Backyard" da referência), nos mesmos lugares (`rotulos_manuscritos_casaa.py`). O rodapé fica na fonte atual. Até o usuário escolher, PDF e book vão com a A.
+
 ## 13. Pranchas e PDF
 
 - **Prancha:** 3840 × 2600, no mesmo quadro.

@@ -11,7 +11,7 @@ Hallelujah, Handlee, Indie Flower, Kalam, Patrick Hand, Sue Ellen Francisco), a 
 estreita e mais inclinada.
 
 A opção A é a final como está (Inter). A opção B parte dela:
-  1. os rótulos (achados na imagem, como em `ampliacao_a3_casaa.ajustar_rotulos`) e o "SOBE PARA O / DECK" da escada
+  1. os rótulos (pela especificação de `rotulos_subsolo_casaa`, a mesma da final) e o "SOBE PARA O / DECK" da escada
      saem (`ampliacao_a3_casaa.tirar`: o fundo pela conta do alfa e o miolo do traço pelo entorno);
   2. cada linha volta na Kalam, no mesmo lugar: o centro da linha em Inter (as linhas presas pela esquerda, como o nome
      e a área, viram centradas no mesmo meio) e a mesma linha de base, a altura das maiúsculas `altura` x a da Inter (a
@@ -37,6 +37,7 @@ sys.path.insert(0, str(AQUI))
 import ampliacao_a3_casaa as AM                # noqa: E402
 import final3840_casaa as FA                    # noqa: E402
 import retoque_1pav_casae as R1                 # noqa: E402
+import rotulos_subsolo_casaa as RS              # noqa: E402
 
 FONTE = FA.CASA / "entrega" / "assets" / "fontes" / "Kalam-Regular.woff"
 MANUSCRITA = {"altura": 1.12, "ss": 4,
@@ -62,9 +63,8 @@ def linhas_rotulo(Q, aj, pdf2img=None, escala_desvio=None):
     q = R1.ROTULOS
     pdf2img = pdf2img or Q.p2q
     esc = escala_desvio or Q.W / 2000
-    r = AM._r_do_nome(Q, aj["nome"], aj["pdf"])
+    r, opc = RS.r_do_ajuste(Q, aj)                 # o texto da especificação (BH., 10/11)
     nome, linhas, (pcx, pcy), caixa = r
-    opc = aj["opc"]
     e = opc.get("corpo", q["escala"])
     dx, dy = aj["desvio"][0] / (Q.W / 2000) * esc, aj["desvio"][1] / (Q.W / 2000) * esc
     (ax_, ay_), (bx_, by_) = pdf2img(0, 0), pdf2img(100, 0)
@@ -125,9 +125,10 @@ def manuscrita(chave, img):
     Q = FA.QuadroA(chave)
     from rodape_entrega import FONTES
     k_rot = _altura_maiuscula(FONTES / f"Inter-{R1.ROTULOS['fonte']}.otf") / _altura_maiuscula(FONTE) * q["altura"]
-    print(f"[{chave}] os rótulos da final, achados na imagem:")
-    aj = AM.ajustar_rotulos(Q, img)
-    camadas = AM.rotulos_camadas(Q, aj, img.shape[:2])
+    # os rótulos da final: a especificação gravada (`rotulos_subsolo_casaa`, com os pedidos de 10/11)
+    aj = RS.ler_spec()
+    print(f"[{chave}] {len(aj)} rótulos da especificação ({RS.SPEC.name})")
+    camadas = RS.camadas(Q, aj, img.shape[:2])
     escada = q["escada"] and chave == "Subsolo"
     if escada:
         camadas += AM.escada_camadas(img.shape[:2])

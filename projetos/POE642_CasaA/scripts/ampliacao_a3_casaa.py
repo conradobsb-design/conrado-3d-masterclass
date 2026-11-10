@@ -251,9 +251,15 @@ def recortes(img):
 def preparar():
     img = cv2.imread(str(FINAL_SUB))
     Q = FA.QuadroA("Subsolo")
-    print("[Subsolo] os rótulos da final, achados na imagem:")
-    aj = ajustar_rotulos(Q, img)
-    camadas = rotulos_camadas(Q, aj, img.shape[:2]) + escada_camadas(img.shape[:2])
+    import rotulos_subsolo_casaa as RS
+    if RS.SPEC.exists():                       # os rótulos da final pela especificação (com os pedidos de 10/11)
+        aj = RS.ler_spec()
+        print(f"[Subsolo] {len(aj)} rótulos da especificação ({RS.SPEC.name})")
+        camadas = RS.camadas(Q, aj, img.shape[:2]) + escada_camadas(img.shape[:2])
+    else:
+        print("[Subsolo] os rótulos da final, achados na imagem:")
+        aj = ajustar_rotulos(Q, img)
+        camadas = rotulos_camadas(Q, aj, img.shape[:2]) + escada_camadas(img.shape[:2])
     limpa = tirar(img, camadas, A3["cheio"], copiar=[i for i, r in enumerate(aj) if r["casa"] < A3["casa_px"]])
     rc = recortes(img)
     X0, Wc, Yia, Hia = rc["X0"], rc["Wc"], rc["Yia"], rc["Hia"]
@@ -330,7 +336,8 @@ def montar(saida_ia):
     def p2a(x, y):
         u, v = Q.p2q(x, y)
         return (u - X0) * s, (v - Ya3) * s
-    camadas = rotulos_camadas(Q, aj, (Ha, Wa), pdf2img=p2a, s=s) + escada_camadas((Ha, Wa), s, X0, Ya3)
+    import rotulos_subsolo_casaa as RS
+    camadas = RS.camadas(Q, aj, (Ha, Wa), pdf2img=p2a, s=s) + escada_camadas((Ha, Wa), s, X0, Ya3)
     a3 = pintar(a3, camadas)
     from PIL import Image
     SAIDA_A3.parent.mkdir(parents=True, exist_ok=True)

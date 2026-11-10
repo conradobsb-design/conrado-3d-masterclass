@@ -4251,3 +4251,7 @@ Usuário: "VOU PRECISAR DA IMAGEM, SÓ DA IMAGEM, EM JPG PARA O CLIENTE PODER TR
 ### Casa A, Subsolo: duas opções de letra nos rótulos (10/11)
 
 Pedido do usuário: "E ME MANDE UMA VERSÃO TAMBÉM COM TIPO DE FONTE. QUERO TER DUAS OPÇÕES. COM A FONTE ATUAL E A FONTE DA LETRA IGUAL A ESSA A DA IMAGEM" (o recorte do título "Katherine Backyard"). Opção A: a final como está (Inter). Opção B: os rótulos e o texto da escada na Kalam Regular (manuscrita, OFL), nos mesmos lugares (`rotulos_manuscritos_casaa.py`); prancha B em `POE642_CasaA/entrega/POE642_CasaA_PH_Subsolo_entrega_manuscrita.png` e a comparação em `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_rotulos_opcoes_A_B.jpg`. O rodapé fica na fonte atual nas duas. O PDF e o book continuam com a A até o usuário escolher; escolhida a B, ela vale para as outras plantas.
+
+### Casa A, Subsolo: BH. e rótulos centralizados (10/11)
+
+Pedidos do usuário: "PARA BANHO USE BH."; "CENTRALIZE "SAUNA" DENTRO DO AMBIENTE"; "CENTRALIZE TODOS OS RÓTULOS". Feito nas duas opções de letra (A, Inter; B, Kalam): BH. SERV., BH. FEM., BH. MASC.; cada rótulo no centro do piso livre do seu ambiente, fora dos objetos (o BH. SERV. já estava no ponto livre mais central). A especificação dos rótulos fica em `POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_rotulos_spec.json` (`rotulos_subsolo_casaa.py`). Regras novas no `POE642_REGRAS.md` (seção 12). Final, pranchas A e B, PDF da Casa A e book refeitos.
