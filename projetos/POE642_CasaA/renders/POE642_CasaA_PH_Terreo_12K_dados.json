@@ -493,10 +493,13 @@
     600.1947
    ],
    "opc": {
-    "corpo": 1.3
+    "corpo": 1.3,
+    "quebra": [
+     "CLARABOIA"
+    ]
    },
    "desvio": [
-    7.0,
+    12.0,
     7.0
    ],
    "cor": [
