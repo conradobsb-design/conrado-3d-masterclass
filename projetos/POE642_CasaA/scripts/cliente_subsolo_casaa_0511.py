@@ -320,7 +320,10 @@ def sauna_cs(Q, img):
 # (`faixas`: a caixa, em px da final, e as linhas onde fica como está, a do vidro do box); o contorno ao lado do vão de
 # recolhimento (a peça branca grande da parede) é o mesmo das faces cinza.
 PORTAIS_CS = {"portais": {"bh_serv": (1182, 984, 1208, 1048), "bh_fem": (1486, 1494, 1562, 1521),
-                          "bh_masc": (1798, 1494, 1873, 1521)},
+                          "bh_masc": (1798, 1494, 1873, 1521),
+                          # depois (OK do usuário, 10/11/26: "PODE CORRIGIR OS DOIS PORTAIS TAMBÉM"): o mesmo resto do
+                          # marco nos portais do depósito e do BH. da sauna
+                          "deposito": (1326, 960, 1352, 1036), "bh_sauna": (1371, 1513, 1394, 1575)},
               "faixas": {"bh_serv": [((1183.5, 884.7, 1190.1, 992.2), [(941.5, 947.5)])]},
               "peca_max_px": 20.0, "folga_px": 1.5, "ponta_px": 2.0, "passo_px": 6, "piso_min": 140, "cor_parede": 80,
               "contorno": (1.0, 45), "ss": 8, "borda_px": 0.7, "margem_px": 24, "vidro_min": 145}
@@ -348,6 +351,61 @@ def _pecas_parede(Q, caixa):
     return cinza, brancas, vaos
 
 
+def _encosta(a, b, tol=0.3):
+    return a[0] <= b[2] + tol and b[0] <= a[2] + tol and a[1] <= b[3] + tol and b[1] <= a[3] + tol
+
+
+def _ligar_folha(cinza, brancas, vaos, tol=0.3):
+    """As folhas das portas ligadas à ponta da parede: devolve (cinza com as pontes, marco, vãos com as pontas das
+    folhas, pontes)."""
+    folhas = [v for v in vaos if any(_encosta(b, v, tol) for b in brancas)]
+    pontas = []
+    for b in brancas:                                       # a peça alinhada com a folha, na ponta dela
+        for v in folhas:
+            fino_x, fino_y = v[2] - v[0] < v[3] - v[1], v[3] - v[1] <= v[2] - v[0]
+            if fino_y and abs(b[1] - min(f[1] for f in folhas if _encosta(f, v, tol))) < 0.3 \
+                    and abs(b[3] - max(f[3] for f in folhas if _encosta(f, v, tol))) < 0.3 and _encosta(b, v, tol):
+                pontas.append(b)
+                break
+            if fino_x and abs(b[0] - min(f[0] for f in folhas if _encosta(f, v, tol))) < 0.3 \
+                    and abs(b[2] - max(f[2] for f in folhas if _encosta(f, v, tol))) < 0.3 and _encosta(b, v, tol):
+                pontas.append(b)
+                break
+    brancas = [b for b in brancas if b not in pontas]
+    # a folha inteira (as tiras que se tocam e a ponta), e a ponte até a parede mais perto
+    grupos = []
+    for r in folhas + pontas:
+        for g in grupos:
+            if any(_encosta(r, s, tol) for s in g):
+                g.append(r)
+                break
+        else:
+            grupos.append([r])
+    pontes = []
+    for g in grupos:
+        F = (min(r[0] for r in g), min(r[1] for r in g), max(r[2] for r in g), max(r[3] for r in g))
+        if any(_encosta(F, c, tol) for c in cinza):
+            continue
+
+        def gap(c):
+            return max(c[0] - F[2], F[0] - c[2], 0), max(c[1] - F[3], F[1] - c[3], 0)
+        G = min(cinza, key=lambda c: sum(v * v for v in gap(c)))
+        gx, gy = gap(G)
+        if gx >= gy:                                        # a parede avança em x, na espessura dela na ponta
+            direita = F[0] >= G[2] - tol
+            xe = G[2] if direita else G[0]
+            fim = [c for c in cinza if abs((c[2] if direita else c[0]) - xe) < 0.6 and c[1] < G[3] + 30 and c[3] > G[1] - 30]
+            y0, y1 = min(c[1] for c in fim), max(c[3] for c in fim)
+            pontes.append((xe, y0, F[2], y1) if direita else (F[0], y0, xe, y1))
+        else:                                               # a parede avança em y
+            abaixo = F[1] >= G[3] - tol
+            ye = G[3] if abaixo else G[1]
+            fim = [c for c in cinza if abs((c[3] if abaixo else c[1]) - ye) < 0.6 and c[0] < G[2] + 30 and c[2] > G[0] - 30]
+            x0, x1 = min(c[0] for c in fim), max(c[2] for c in fim)
+            pontes.append((x0, ye, x1, F[3]) if abaixo else (x0, F[1], x1, ye))
+    return cinza + pontes, brancas, vaos + pontas, pontes
+
+
 def portais_cs(Q, img, rotulos=None):
     """`rotulos`: o alfa dos rótulos (px que ficam como estão)."""
     q = PORTAIS_CS
@@ -366,6 +424,12 @@ def portais_cs(Q, img, rotulos=None):
         h, w = Y1 - Y0, X1 - X0
         cinza, brancas, vaos = _pecas_parede(Q, (X0, Y0, X1, Y1))
         brancas = [r for r in brancas if r[2] >= caixa[0] and r[0] <= caixa[2] and r[3] >= caixa[1] and r[1] <= caixa[3]]
+        # (usuário, 10/11/26: "NÃO PODEMOS TER PORTAS "FLUTUANTES", ELAS PRECISAM ESTAR COM A SUA PONTA LIGADA A PONTA
+        # DA PAREDE"): a folha da porta (a peça branca grande que encosta no marco: a folha aberta a 90° das portas de
+        # abrir, a folha das portas de correr) ligava na parede pelo batente; sem ele, ficava a ~3 px da ponta. A peça
+        # branca pequena alinhada com a folha, na ponta dela, é parte da folha (fica); e a ponta da parede avança, na
+        # espessura dela, até a face de fora da folha (`_ligar_folha`), para a folha ficar com a ponta na ponta da parede
+        cinza, brancas, vaos, pontes = _ligar_folha(cinza, brancas, vaos)
 
         def sup(rets):
             m = np.zeros((h * ss, w * ss), np.uint8)
@@ -404,7 +468,11 @@ def portais_cs(Q, img, rotulos=None):
         # os vidros desenhados na final (os boxes e as divisórias: cinza frio, claro) ficam como estão
         jf = out[Y0:Y1, X0:X1].astype(np.int32)
         frio = ((jf[..., 0] - jf[..., 2]) >= -3) & ((jf[..., 1] - jf[..., 2]) >= -3) & (jf.mean(axis=2) >= q["vidro_min"])
-        refazer &= ~(frio & (aC < 0.02))
+        marco_px = np.zeros((h, w), np.float32)                                # as peças do marco, sem folga
+        for (x0, y0, x1, y1) in brancas:
+            marco_px = np.maximum(marco_px, _cobertura((h, w), x0 - X0, y0 - Y0, x1 - X0, y1 - Y0))
+        refazer &= ~(frio & (aU < 0.5) & (marco_px <= 0.5))     # o marco branco sai; o vidro e a folha da porta ficam,
+        #                                                      até a face da parede (sem o contorno por cima)
         if rotulos is not None:
             refazer &= ~(rotulos[Y0:Y1, X0:X1] > 0.02)
         # o piso por baixo: copiado do piso vizinho, para longe da peça de parede mais perto (no eixo em que o px está
@@ -444,7 +512,7 @@ def portais_cs(Q, img, rotulos=None):
         novo = np.where((aC - aU)[..., None] > 0.02, jan, novo)                 # o vão de recolhimento fica como está
         peso = cv2.GaussianBlur(refazer.astype(np.float32), (0, 0), q["borda_px"])[..., None]
         out[Y0:Y1, X0:X1] = np.clip(np.round(jan * (1 - peso) + novo * peso), 0, 255).astype(np.uint8)
-        notas.append(f"{nome}: {len(brancas)} peças do marco, {int(refazer.sum())} px refeitos")
+        notas.append(f"{nome}: {len(brancas)} peças do marco, {len(pontes)} folha(s) ligada(s), {int(refazer.sum())} px refeitos")
     print("    portais: as pontas das paredes refeitas sem o marco: " + "; ".join(notas))
     return out
 
@@ -590,7 +658,8 @@ ANTES_DEPOIS_CS = {"Subsolo": {"planta": (640, 780, 2440, 1700), "escada_grama":
                                "bicicletas": (1440, 1295, 1590, 1445)}}
 # os antes e depois de 10/11/26 (os portais e a sauna), contra a final de 32959cc
 ANTES_DEPOIS_1011 = {"Subsolo": {"portais_bh_fem_masc": (1470, 1480, 1890, 1540), "portal_bh_serv": (1150, 960, 1240, 1060),
-                                 "sauna": (1180, 1490, 1420, 1650), "prateleiras_deposito": (1330, 855, 1890, 1065)}}
+                                 "sauna": (1180, 1490, 1420, 1650), "prateleiras_deposito": (1330, 855, 1890, 1065),
+                                 "portal_deposito": (1300, 945, 1400, 1045), "portal_bh_sauna": (1345, 1500, 1435, 1590)}}
 
 
 def cliente_subsolo_cs(img):

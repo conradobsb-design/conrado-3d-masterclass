@@ -377,6 +377,10 @@ CORRIGIR_PX = {"sauna": (1188, 1506, 1382, 1634), "bancada_bh_serv": (1100, 988,
                "portal_bh_fem_esq": (1486, 1492, 1504, 1522), "portal_bh_fem_dir": (1545, 1492, 1563, 1522),
                "portal_bh_masc_esq": (1797, 1492, 1815, 1522), "portal_bh_masc_dir": (1853, 1492, 1871, 1522),
                "portal_bh_serv_cima": (1178, 876, 1209, 1001), "portal_bh_serv_baixo": (1181, 1028, 1209, 1049),
+               # depois (OK do usuário: "PODE CORRIGIR OS DOIS PORTAIS TAMBÉM"; e "NÃO PODEMOS TER PORTAS "FLUTUANTES""):
+               # os portais do depósito e do BH. da sauna, com as folhas ligadas à ponta da parede
+               "portal_deposito_cima": (1326, 959, 1352, 977), "portal_deposito_baixo": (1326, 1015, 1356, 1036),
+               "portal_bh_sauna_cima": (1371, 1512, 1394, 1530), "portal_bh_sauna_baixo": (1371, 1555, 1398, 1575),
                # a face esquerda da parede do BH. SERV. (do nicho ao portal), refeita na final: a IA a tinha feito
                # ondulada, com um ponto escuro junto ao nicho; e as prateleiras do depósito, no tom novo (o dos armários)
                "prateleiras_deposito_cima": (1342, 876, 1832, 912), "prateleiras_deposito_lado": (1826, 876, 1874, 1049)}
