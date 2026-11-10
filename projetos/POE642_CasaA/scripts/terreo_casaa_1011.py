@@ -49,6 +49,7 @@ import final3840_casaa as FA                                    # noqa: E402
 import final3840_casaa_terreo as T                              # noqa: E402
 
 FINAL = FA.CASA / "renders" / "POE642_CasaA_PH_Terreo_final_rotulos.png"
+ROTULOS_LAVABO = FA.CASA / "renders" / "POE642_CasaA_PH_Terreo_rotulos_lavabo.json"
 RAIZ = FA.A.RAIZ
 
 
@@ -591,13 +592,54 @@ def gramado_ta(Q, img, q=None):
 # ----------------------------------------------------------------------------------------------------------------------
 # 3. A água: a piscina e o spa no tom da água da foto do cliente (BGR ~118, 117, 106: o cinza-esverdeado escuro, sem os
 # brilhos) e a prainha (abaixo do degrau do PDF, `prainha_y_pt`) no cinza claro da parte rasa da foto (~141, 145, 146).
-# O desenho do Barlavento fica: a luz relativa de cada px da água antiga (as pastilhas, o rejunte, os degraus, a sombra
-# das bordas e a rede das cáusticas) passa ao tom novo com o contraste de `ganho`; os traços escuros sobre a água (o
-# pergolado; ele volta no fim, fino e claro) e os rótulos saem (a luz deles é a da água de perto); os rótulos voltam no
-# mesmo desenho, em branco na água escura e em preto na prainha. A água fica nos retângulos do PDF, com a cobertura
-# exata da borda.
-PISCINA_TA = {"tom": (118, 117, 106), "tom_prainha": (141, 145, 146), "prainha_y_pt": 1049.5, "ganho": 0.85,
-              "base": (0.55, 1.55), "traco_rel": -0.22, "ref_sig": 25.0}
+# Depois (usuário, 10/11, com 3 fotos de uma piscina vista de cima: "CONSEGUIMOS DEIXAR O TOM DA PISCINA E DA PRAINHA/SPA
+# MAIS PARECIDO COM ESTES"): a água funda no azul-ardósia escuro das fotos (`tom`), com o grão fino do revestimento
+# (`grao_*`), manchas largas de luz (`manchas_*`), as cáusticas finas e curtas em grupos (as linhas onde um ruído de banda
+# estreita passa por zero, `caus_*`, quebradas e com densidade variável) e a sombra das bordas (mais forte na esquerda e
+# em cima, como nas fotos); a parte rasa no cinza neutro das fotos (`tom_rasa`), com mais grão e cáusticas fracas: a
+# prainha e o banco do spa (o anel do PDF em volta do quadrado do fundo); o degrau entre a prainha e a piscina com a
+# sombra fina do lado fundo. Os traços sobre a água saem (o pergolado volta no fim, fino e claro); os rótulos voltam no
+# mesmo desenho, em branco na água escura e em preto na rasa. A água fica nos retângulos do PDF, com a cobertura exata.
+PISCINA_TA = {"tom": (106, 99, 80), "tom_rasa": (137, 140, 139), "prainha_y_pt": 1049.5,
+              "spa_pt": (748.5, 1049.5, 907.2, 1219.6), "spa_fundo_bgr": (255, 247, 223), "semente": 4210,
+              "funda": {"grao_sig": 0.5, "grao_a": 0.07, "manchas_sig": 30.0, "manchas_a": 0.08, "caus_sig": 3.0,
+                        "caus_larg": 0.17, "quebra_sig": 4.0, "quebra_b": 0.5, "dens_sig": 24.0, "dens_k": 0.7,
+                        "dens_b": 0.72, "caus_a": 0.5, "caus_cor": (228, 232, 226)},
+              "rasa": {"grao_sig": 0.5, "grao_a": 0.12, "manchas_sig": 30.0, "manchas_a": 0.04, "caus_sig": 3.0,
+                       "caus_larg": 0.15, "quebra_sig": 4.0, "quebra_b": 0.4, "dens_sig": 24.0, "dens_k": 0.8,
+                       "dens_b": 0.4, "caus_a": 0.3, "caus_cor": (232, 234, 232)},
+              # a sombra das bordas: (força, alcance em px) na esquerda, em cima, na direita e embaixo
+              "sombra": {"funda": ((0.30, 14), (0.18, 10), (0.10, 6), (0.10, 6)),
+                         "rasa": ((0.16, 8), (0.10, 6), (0.06, 4), (0.06, 4))},
+              "degrau": (0.22, 2.0)}
+
+
+def _ruido(rng, h, w, sig):
+    n = cv2.GaussianBlur(rng.standard_normal((h, w)).astype(np.float32), (0, 0), sig)
+    return n / (n.std() + 1e-6)
+
+
+def agua_textura(h, w, tom, q, rng):
+    """A água das fotos do cliente: o tom com o grão, as manchas largas e as cáusticas finas (BGR float)."""
+    grao = _ruido(rng, h, w, q["grao_sig"])
+    manchas = _ruido(rng, h, w, q["manchas_sig"])
+    linhas = np.exp(-(_ruido(rng, h, w, q["caus_sig"]) / q["caus_larg"]) ** 2)
+    quebra = np.clip(_ruido(rng, h, w, q["quebra_sig"]) * 0.9 + q["quebra_b"], 0, 1)
+    dens = np.clip(_ruido(rng, h, w, q["dens_sig"]) * q["dens_k"] + q["dens_b"], 0, 1)
+    a = (linhas * quebra * dens * q["caus_a"])[..., None]
+    base = np.float32(tom)[None, None] * (1 + q["grao_a"] * grao + q["manchas_a"] * manchas)[..., None]
+    return base * (1 - a) + np.float32(q["caus_cor"]) * a
+
+
+def _sombra_bordas(h, w, ret, forcas):
+    """1 menos a sombra das 4 bordas do retângulo `ret` (x0, y0, x1, y1 em px), em (h, w)."""
+    yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+    x0, y0, x1, y1 = ret
+    d = (xx - x0, yy - y0, x1 - xx, y1 - yy)
+    s = np.zeros((h, w), np.float32)
+    for (f, alc), di in zip(forcas, d):
+        s += f * np.exp(-np.clip(di, 0, None) / alc)
+    return np.clip(1 - s, 0.3, 1)
 
 
 def piscina_ta(Q, img, q=None):
@@ -606,34 +648,39 @@ def piscina_ta(Q, img, q=None):
     cob = agua_mascara(Q)
     agua = cob > 0
     rots = rotulos_na_imagem(Q, img, dentro=agua)
-    texto = np.zeros(agua.shape, np.float32)
-    for _, al, _, _ in rots:
-        texto = np.maximum(texto, al)
-    im = img.astype(np.float32)
-    Y = im.mean(axis=2)
-    ok = agua & (cob > 0.99) & (texto < 0.02)
-    ref = nconv(Y, ok, q["ref_sig"])
-    rel = Y / np.maximum(ref, 1) - 1
-    traco = dilatar((rel < q["traco_rel"]) & agua, 1) | dilatar(texto > 0.02, 1)
-    # nos traços, a luz relativa da água de perto
-    limpo = ok & ~traco
-    rel_l = nconv(rel, limpo, 2.0)
-    rel = np.where(traco, rel_l, rel)
-    base = np.clip(1 + q["ganho"] * rel, *q["base"])
+    H, W = agua.shape
+    rng = np.random.default_rng(q["semente"])
+    funda_t = agua_textura(H, W, q["tom"], q["funda"], rng)
+    rasa_t = agua_textura(H, W, q["tom_rasa"], q["rasa"], rng)
+    # as partes: a piscina funda, a prainha (abaixo do degrau) e o spa (o banco no anel, o fundo no quadrado do PDF)
+    xs0, ys0, xs1, ys1 = [float(v) for v in ret_q(Q, PT.BORDAS["A-Terreo"]["agua"][0])]
     yp = Q.p2q(0, q["prainha_y_pt"])[1]
-    xs0, _, xs1, _ = ret_q(Q, PT.BORDAS["A-Terreo"]["agua"][0])
-    prainha = np.zeros(agua.shape, bool)
-    prainha[int(round(yp)):, int(xs0):int(np.ceil(xs1))] = True
-    prainha &= agua
-    tom = np.where(prainha[..., None], np.float32(q["tom_prainha"]), np.float32(q["tom"]))
-    novo = tom * base[..., None]
+    sx0, sy0, sx1, sy1 = [float(v) for v in ret_q(Q, q["spa_pt"])]
+    yy, xx = np.mgrid[0:H, 0:W]
+    na_piscina = (xx >= xs0 - 1) & (xx <= xs1 + 1) & (yy >= ys0 - 1) & (yy <= ys1 + 1)
+    no_spa = (xx >= sx0 - 1) & (xx <= sx1 + 1) & (yy >= sy0 - 1) & (yy <= sy1 + 1)
+    prainha = na_piscina & (yy >= yp)
+    fundo_spa = no_spa & T.F.fechar(np.all(Q.chapada == np.uint8(q["spa_fundo_bgr"]), axis=2), 3)
+    ys_, xs_ = np.where(fundo_spa)
+    fs = (float(xs_.min()), float(ys_.min()), float(xs_.max() + 1), float(ys_.max() + 1))
+    rasa = prainha | (no_spa & ~fundo_spa)
+    sombra = np.ones((H, W), np.float32)
+    sombra = np.where(na_piscina & ~prainha, _sombra_bordas(H, W, (xs0, ys0, xs1, yp), q["sombra"]["funda"]), sombra)
+    sombra = np.where(prainha, _sombra_bordas(H, W, (xs0, yp, xs1, ys1), q["sombra"]["rasa"]), sombra)
+    sombra = np.where(no_spa & ~fundo_spa, _sombra_bordas(H, W, (sx0, sy0, sx1, sy1), q["sombra"]["rasa"]), sombra)
+    sombra = np.where(fundo_spa, _sombra_bordas(H, W, fs, q["sombra"]["funda"]), sombra)
+    # o degrau da prainha: a sombra fina do lado fundo
+    f, alc = q["degrau"]
+    sombra = np.where(na_piscina & (yy < yp), sombra * (1 - f * np.exp(-np.clip(yp - yy, 0, None) / alc)), sombra)
+    novo = np.where(rasa[..., None], rasa_t, funda_t) * sombra[..., None]
+    im = img.astype(np.float32)
     out = im * (1 - cob[..., None]) + novo * cob[..., None]
     nomes = []
     for r, al, _, _ in rots:
         out = compor(out, al, cor_rotulo(out, al))
         nomes.append(r[0])
-    print(f"    água: a piscina e o spa no tom da foto (BGR {q['tom']}) e a prainha no cinza claro ({q['tom_prainha']}), "
-          f"com o desenho do Barlavento; os traços sobre a água saem; rótulos de volta: {', '.join(nomes)}")
+    print(f"    água: a funda no azul-ardósia das fotos (BGR {q['tom']}) e a rasa (prainha e banco do spa) no cinza "
+          f"({q['tom_rasa']}), com o grão, as cáusticas finas e a sombra das bordas; rótulos de volta: {', '.join(nomes)}")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
@@ -809,12 +856,54 @@ BANCADAS_TA = {"semente": 3120, "cuba_esc": 0.78,
                "churrasqueira_pt": (1315.4, 1557.1, 1391.9, 1596.6), "inox": (190, 193, 196), "grelha": (40, 40, 42),
                "barra": (96, 98, 100), "barra_px": (1.0, 4.0), "aro_px": 3.0,
                "lavabo_cuba_pt": (2077.9, 615.8, 2106.3, 670.2), "lavabo_lateral_pt": (2089.3, 670.2, 2106.3, 715.0),
-               "lavabo_camadas": [(0.010, 0.6), (0.022, 5.0)]}
+               "lavabo_camadas": [(0.010, 0.6), (0.022, 5.0)],
+               # depois (usuário: "MELHORAR A BANCADA. ELA NÃO TEM ESSA LINHA NA HORIZONTAL ANTES DA CUBA. E ELA DEVERIA
+               # IR E FAZER UM CONTORNO EM VOLTA DA CUBA ESCULPIDA"): a bancada é uma peça só, em L (a parte larga da
+               # cuba e a estreita de baixo), sem a linha entre elas; a cuba esculpida fica dentro da parte larga, com a
+               # borda da bancada em volta (`cuba_folga_pt`: esquerda, cima, direita/parede, baixo), mais escura e com o
+               # fundo côncavo (`cuba_tons`), o ralo e a torneira na parede
+               "cuba_folga_pt": (2.6, 2.6, 2.0, 2.6), "cuba_raio_pt": 3.2, "cuba_tons": (0.80, 0.93), "ralo_pt": 0.9}
 
 
 def _danae_fn(semente, mult=1.0):
     return lambda tl: danae(tl.h, tl.w, semente) * mult
 
+
+
+def cuba_esculpida(Q, out, c, textura, escurecer, raio_pt=3.0):
+    """A cuba esculpida na pedra da bancada: a bacia (`c["bacia"]`, cantos de `raio_pt`) lisa e `escurecer` x o tom da
+    pedra, com o fundo côncavo (mais escuro junto às bordas, sobretudo a de cima e a da esquerda), a borda fina, o lábio
+    claro embaixo e à direita e o ralo cromado no meio."""
+    tl = FA.tela(out, Q, c["cuba"], folga=4)
+    G = textura(tl)
+    liso = cv2.GaussianBlur(G.astype(np.float32), (0, 0), 1.6)
+    b = tl.ret(c["bacia"], raio_pt)
+    d = cv2.resize(cv2.distanceTransform(b, cv2.DIST_L2, 5).astype(np.float32) / 8, (tl.w, tl.h),
+                   interpolation=cv2.INTER_AREA)
+    X, Y = tl.grade()
+    x0, y0, x1, y1 = c["bacia"]
+    lado = np.clip(((x1 - X) / (x1 - x0) + (y1 - Y) / (y1 - y0)) / 2, 0, 1)        # 1 no alto à esquerda
+    prof = (0.84 + 0.16 * (1 - np.exp(-d / 2.4))) * (1 - 0.10 * lado * np.exp(-d / 3.0))
+    tl.pintar_img(b, liso * escurecer * prof[..., None])
+    labio = b & ~cv2.erode(b, np.ones((5, 5), np.uint8))
+    lab = tl.vazia()
+    lab[labio > 0] = 255
+    ys, xs = np.nonzero(lab)
+    if len(ys):
+        cxs, cys = tl.pt((x0 + x1) / 2, (y0 + y1) / 2)
+        fora = (ys < cys) | (xs < cxs - (xs.max() - xs.min()) * 0.1)
+        lab[ys[fora], xs[fora]] = 0
+    tl.pintar(lab, tuple(float(v) for v in np.median(G.reshape(-1, 3), axis=0) * 1.18), 0.55)
+    tl.contorno(b, 0.35, (34, 44, 58))
+    v = tl.vazia()
+    cx, cy = tl.pt((x0 + x1) / 2, (y0 + y1) / 2)
+    cv2.circle(v, (int(cx), int(cy)), int(1.05 * FA.PT_PX * 8), 255, -1, cv2.LINE_AA)
+    tl.pintar(v, FA.CROMO["meio"])
+    miolo = tl.vazia()
+    cv2.circle(miolo, (int(cx), int(cy)), int(0.45 * FA.PT_PX * 8), 255, -1, cv2.LINE_AA)
+    tl.pintar(miolo, FA.CROMO["escuro"])
+    tl.contorno(v, 0.3, FA.CROMO["contorno"])
+    return tl.gravar()
 
 def bancadas_ta(Q, img, q=None):
     import ajustes_casaa as AJ
@@ -846,7 +935,10 @@ def bancadas_ta(Q, img, q=None):
     lv = T.LOUCAS["lavatorio"]
     tab = lambda k, sem: (lambda tl_: FA._granito(Q, tl_, sem) * i["escurecer"] * k)
     out = FA.bancada_pedra(Q, out, lv["bancada"], tab(1.0, lv["semente"]), i["borda"], i["larg"], i["sombra"])
-    out = FA.cuba_pedra(Q, out, lv, tab(q["cuba_esc"], lv["semente"] + 1), FA.GRANITO_CUBA)
+    # (usuário, 10/11: "MELHORAR A REPRESENTAÇÃO DESSA CUBA"): a cuba esculpida na própria bancada, sem o aro de outro
+    # tom: a bacia de cantos redondos, lisa (a pedra sem os pontos claros), um tom abaixo, com o fundo côncavo, a borda
+    # fina, o lábio claro embaixo e o ralo cromado
+    out = cuba_esculpida(Q, out, lv, tab(1.0, lv["semente"] + 1), q["cuba_esc"])
     out = FA.torneira(Q, out, lv["torneira"], lv["base"])
     # a churrasqueira
     r = q["churrasqueira_pt"]
@@ -863,20 +955,37 @@ def bancadas_ta(Q, img, q=None):
     tl.reg = np.where(barras[..., None], np.float32(q["barra"]), tl.reg)
     tl.contorno(m, 0.4, (110, 112, 114))
     out = tl.gravar()
-    # lavabo: a pedra lateral na cor e no desenho da bancada da cuba
+    # lavabo: a bancada inteira em L, na cor da cuba antiga, com a cuba esculpida dentro (sem a linha entre as partes)
     x0, y0, x1, y1 = (int(round(v)) for v in ret_q(Q, q["lavabo_cuba_pt"]))
     cuba = img[y0 + 3:y1 - 3, x0 + 3:x1 - 3].astype(np.float32)
     tom = np.median(cuba.reshape(-1, 3), axis=0)
-    lx0, ly0, lx1, ly1 = ret_q(Q, q["lavabo_lateral_pt"])
-    tl = FA.tela(out, Q, q["lavabo_lateral_pt"], folga=4)
-    m = tl.ret(q["lavabo_lateral_pt"])
+    c, l_ = q["lavabo_cuba_pt"], q["lavabo_lateral_pt"]
+    caixa = (min(c[0], l_[0]), c[1], max(c[2], l_[2]), l_[3])
+    tl = FA.tela(out, Q, caixa, folga=4)
+    m = np.maximum(tl.ret(c), tl.ret(l_))
     FA.sombra_q(tl, m, forca=T.LAVABO["sombra"], dist=1.3, sigma=1.3)
-    tl.pintar_img(m, danae(tl.h, tl.w, q["semente"] + 7, dict(DANAE, tom=tuple(float(v) for v in tom),
-                                                                camadas=q["lavabo_camadas"])))
+    pedra = danae(tl.h, tl.w, q["semente"] + 7, dict(DANAE, tom=tuple(float(v) for v in tom), camadas=q["lavabo_camadas"]))
+    tl.pintar_img(m, pedra)
     k = max(1, int(round(T.LAVABO["larg_px"] * 8)))
     borda = m & ~cv2.erode(m, np.ones((k, k), np.uint8))
     tl.pintar_img(borda, tl.reg * T.LAVABO["borda"])
+    fe, fc, fd, fb = q["cuba_folga_pt"]
+    bac = (c[0] + fe, c[1] + fc, c[2] - fd, c[3] - fb)
+    mb = tl.ret(bac, q["cuba_raio_pt"])
+    dist = cv2.distanceTransform((mb > 0).astype(np.uint8), cv2.DIST_L2, 5).astype(np.float32)
+    dist = cv2.resize(dist, (tl.w, tl.h), interpolation=cv2.INTER_AREA) / 8.0       # em px do quadro
+    t0, t1 = q["cuba_tons"]
+    fundo = t0 + (t1 - t0) * (1 - np.exp(-dist / 2.5))                             # côncavo: escuro na borda
+    tl.pintar_img(mb, pedra * fundo[..., None])
+    tl.contorno(mb, 0.35, tuple(float(v) * 0.62 for v in tom))
+    cx, cy = (bac[0] + bac[2]) / 2, (bac[1] + bac[3]) / 2
+    ralo = tl.vazia()
+    px_, py_ = tl.pt(cx - 0.5, cy)
+    cv2.circle(ralo, (int(px_), int(py_)), int(q["ralo_pt"] * FA.PT_PX * 8), 255, -1, cv2.LINE_AA)
+    tl.pintar(ralo, (150, 152, 156))
+    tl.contorno(ralo, 0.25, (95, 97, 100))
     out = tl.gravar()
+    out = FA.torneira(Q, out, (c[2] - fd - 3.2, cy - 0.45, c[2] - 0.4, cy + 0.45), (c[2] - 1.0, cy, 1.1))
     print("    bancadas: a ilha e a bancada da pia da cozinha e a bancada dos tanques no Dekton Danae; o lavatório em "
           "marrom tabaco, a cuba mais escura; a churrasqueira no PDF; a pedra lateral do lavabo na cor da cuba "
           f"(BGR {tuple(int(v) for v in tom)})")
@@ -960,13 +1069,45 @@ def pilar_ta(Q, img, q=None):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 8. As soleiras:
-# - a da entrada (cliente: "Representar uma soleira na entrada igual a casa C"): no vão da porta pivotante
-#   (`entrada_px`), a própria faixa da soleira da entrada da Casa C (`casa_c`, da final dela): a pedra clara e lisa, com
-#   a face fina de cada lado;
+# - a da entrada (cliente: "Representar uma soleira na entrada igual a casa C"): no vão da porta pivotante, de batente
+#   a batente (`entrada_px`; usuário: "A SOLEIRA VAI DE FORA A FORA"), a própria faixa da soleira da entrada da Casa C
+#   (`casa_c`, da final dela): a pedra clara e lisa, com a face fina de cada lado; a folha da porta fica por cima;
 # - a da sala para o escritório (cliente: "Não tem soleira entre a sala e o escritório"): a faixa clara no vão
 #   (`escritorio_px`) sai; o travertino atravessa o vão.
-SOLEIRAS_TA = {"entrada_px": (2444, 686, 2457, 843), "casa_c": "_texturas/originais/soleira_entrada_casac.png",
+# Depois (usuário: "CORRIGIR BATENTE E A PEDRA DO HALL EXTERNO. ELA É RENTE A PAREDE", com o recorte do PDF): os dois
+# batentes da porta pivotante no desenho do PDF (de 2440 a 2457 px; o de cima da parede até 647, o de baixo de 843 até a
+# parede), na cor das paredes, como os da entrada da Casa C (`batentes_px`); a soleira de batente a batente na largura
+# deles; e a pedra (o Bege Bahia) do hall externo até a parede de baixo (`hall_px`: a faixa de grama entre a pedra e a
+# parede sai; a pedra continua, espelhada da faixa de cima).
+SOLEIRAS_TA = {"entrada_px": (2441, 647, 2457, 843), "folha_y": (681, 686),
+               "casa_c": "_texturas/originais/soleira_entrada_casac.png",
+               "batentes_px": [(2441, 609, 2457, 647), (2441, 843, 2457, 879)], "parede": (79, 79, 79),
+               "hall_px": (2458, 850, 2605, 890),
                "escritorio_px": (2343, 529, 2359, 589), "semente": 3140}
+
+
+def _pedra_ate_parede(out, ret, parede):
+    """Em cada coluna de `ret`, a pedra clara desce até a parede cinza: os px entre o fim da pedra e o topo da parede
+    recebem a pedra espelhada de cima."""
+    x0, y0, x1, y1 = ret
+    n = 0
+    for x in range(x0, x1):
+        col = out[y0:y1, x].astype(np.float32)
+        lum = col.mean(axis=1)
+        cin = (np.abs(col - np.float32(parede)).max(axis=1) < 14).astype(np.uint8)
+        corrida = np.convolve(cin, np.ones(5, np.uint8), mode="valid") == 5      # a parede: 5 px cinza seguidos
+        iw = np.where(corrida)[0]
+        if not len(iw):
+            continue
+        yw = y0 + int(iw[0])
+        ip = np.where(lum[:iw[0]] > 170)[0]
+        if not len(ip):
+            continue
+        yf = y0 + int(ip[-1]) - 2                     # sem a luz da beirada antiga
+        for i, y in enumerate(range(yf + 1, yw)):
+            out[y, x] = out[max(yf - i, 0), x]
+            n += 1
+    return n
 
 
 def soleiras_ta(Q, img, q=None):
@@ -983,11 +1124,20 @@ def soleiras_ta(Q, img, q=None):
     # a da entrada (cliente: "Representar uma soleira na entrada igual a casa C"): a faixa da soleira da entrada da
     # Casa C (`casa_c`, 13 px de face a face: a face de 1 px do lado de dentro, a pedra lisa clara, a face de 2 px do
     # lado de fora), na mesma largura, esticada no comprimento do vão
+    # (usuário: "A SOLEIRA VAI DE FORA A FORA. NÃO PARA NA PORTA"): de batente a batente, passando sob a folha da porta
+    # pivotante, que fica por cima (`folha_y`, as linhas da barra cinza dela)
     x0, y0, x1, y1 = q["entrada_px"]
     c = cv2.imread(str(RAIZ / q["casa_c"]))
     out[y0:y1, x0:x1] = cv2.resize(c, (x1 - x0, y1 - y0), interpolation=cv2.INTER_LINEAR)
+    f0, f1 = q["folha_y"]
+    out[f0:f1, x0:x1] = img[f0:f1, x0:x1]
+    # os batentes na cor das paredes, como na entrada da Casa C; a pedra do hall externo rente à parede de baixo
+    for b0, c0, b1, c1 in q["batentes_px"]:
+        out[c0:c1, b0:b1] = np.uint8(q["parede"])
+    n = _pedra_ate_parede(out, q["hall_px"], q["parede"])
     print(f"    soleiras: sem a da sala para o escritório ({int(zona.sum())} px de travertino refeito); a da entrada no vão "
-          "da porta pivotante, como a da Casa C")
+          f"da porta pivotante, como a da Casa C, entre os batentes na cor da parede; o hall externo rente à parede "
+          f"({n} px de pedra)")
     return out
 
 
@@ -1040,13 +1190,71 @@ ESCADAS_TA = {
              "alinhar": "direita", "letra": ("D", (0, -22))},
     "jardim": {"texto": ("SOBE PARA O", "1º PAVIMENTO"), "dir": (1, 0), "tri_px": (2266.0, 948.0),
                "txt_px": (2282.0, 948.0), "alinhar": "esquerda", "letra": ("S", (0, 24)),
-               "guarda_corpo_pt": [((2021.2, 1162.9), (2174.3, 1162.9)), ((2019.5, 1185.6), (2174.3, 1185.6)),
-                                   ((2174.3, 1162.9), (2174.3, 1185.6))],
-               "vidro": (214, 220, 224), "vidro_face": (120, 126, 130), "vidro_px": 2.0},
+               # o guarda-corpo de vidro (usuário: "FALTOU A BOA REPRESENTAÇÃO DO GUARDA CORPO NO CONTORNO"): as lâminas
+               # brancas de 1,1 pt da ARQ_ELEMENTOS FIXOS do PDF, em todo o contorno da escada (em cima, na direita e
+               # embaixo) e em volta da floreira do meio, emendadas onde a linha de corte as interrompe; no desenho da
+               # regra [22/10] (o da Casa B): o vidro claro, as duas faces em linha fina, o brilho no meio e a sombra
+               # curta, com 2,4 px no mínimo e as pontas passando `ponta_px` para as quinas fecharem.
+               "guarda_corpo_ret_pt": [(2021.2, 1097.1, 2240.1, 1098.3), (2238.9, 1097.1, 2240.1, 1251.3),
+                                       (2019.5, 1250.2, 2240.1, 1251.3), (2021.2, 1159.5, 2177.7, 1160.6),
+                                       (2176.6, 1159.5, 2177.7, 1189.0), (2019.5, 1187.8, 2177.7, 1189.0)],
+               "vidro": {"vidro": (226, 219, 206), "alfa": 0.95, "contorno": (96, 100, 104), "larg_min_px": 2.4,
+                         "linha_px": 0.6, "brilho": 0.5, "sombra": 0.18, "ponta_px": 0.6}},
     "caracol": {"texto": ("SOBE PARA O", "1º PAVIMENTO"), "txt_px": (1916.0, 1604.0), "alinhar": "direita", "tom": (166, 186, 208),
                 "tons": (0.90, 1.0), "linha": (96, 96, 98), "linha_px": 0.8, "traco_pt": (4.0, 3.0), "tri": (13.0, 15.0)},
     "cor_texto": (45, 45, 45)}
 
+
+
+def vidro_laminas(Q, img, rets_pt, q):
+    """As lâminas de vidro do guarda-corpo (regra [22/10], o desenho da Casa B, `final3840_casab.guarda_corpo`): cada
+    retângulo do PDF (pt) como o vidro claro, as duas faces em linha fina, o brilho no meio e a sombra curta."""
+    ss = 8
+    out = img.astype(np.float32)
+    for r in rets_pt:
+        (x0, y0), (x1, y1) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        deitado = x1 - x0 > y1 - y0
+        if deitado and y1 - y0 < q["larg_min_px"]:
+            c_ = (y0 + y1) / 2
+            y0, y1 = c_ - q["larg_min_px"] / 2, c_ + q["larg_min_px"] / 2
+        if not deitado and x1 - x0 < q["larg_min_px"]:
+            c_ = (x0 + x1) / 2
+            x0, x1 = c_ - q["larg_min_px"] / 2, c_ + q["larg_min_px"] / 2
+        if deitado:
+            x0, x1 = x0 - q["ponta_px"], x1 + q["ponta_px"]
+        else:
+            y0, y1 = y0 - q["ponta_px"], y1 + q["ponta_px"]
+        X0, Y0, X1, Y1 = int(x0) - 3, int(y0) - 3, int(np.ceil(x1)) + 4, int(np.ceil(y1)) + 4
+        w, h = X1 - X0, Y1 - Y0
+        m = np.zeros((h * ss, w * ss), np.uint8)
+        a0, b0, a1, b1 = [int(round(v * ss)) for v in (x0 - X0, y0 - Y0, x1 - X0, y1 - Y0)]
+        cv2.rectangle(m, (a0, b0), (a1 - 1, b1 - 1), 255, -1)
+        lt = max(1, int(round(q["linha_px"] * ss)))
+        bordas = np.zeros_like(m)
+        meio = np.zeros_like(m)
+        if deitado:
+            bordas[b0:b0 + lt, a0:a1] = 255
+            bordas[b1 - lt:b1, a0:a1] = 255
+            c_ = (b0 + b1) // 2
+            meio[c_ - lt // 2:c_ + lt // 2 + 1, a0 + lt:a1 - lt] = 255
+        else:
+            bordas[b0:b1, a0:a0 + lt] = 255
+            bordas[b0:b1, a1 - lt:a1] = 255
+            c_ = (a0 + a1) // 2
+            meio[b0 + lt:b1 - lt, c_ - lt // 2:c_ + lt // 2 + 1] = 255
+
+        def reduzir(x):
+            return cv2.resize(x.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+        av, ab, am = reduzir(m), reduzir(bordas), reduzir(meio)
+        reg = out[Y0:Y1, X0:X1]
+        sb = cv2.GaussianBlur(cv2.warpAffine(av, np.float32([[1, 0, -0.7], [0, 1, 0.7]]), (w, h)), (0, 0), 0.5)
+        reg *= (1 - q["sombra"] * sb * (1 - av))[..., None]
+        al = av[..., None] * q["alfa"]
+        reg[:] = reg * (1 - al) + np.float32(q["vidro"]) * al
+        reg[:] = reg * (1 - ab[..., None]) + np.float32(q["contorno"]) * ab[..., None]
+        am = am[..., None] * q["brilho"]
+        reg[:] = reg * (1 - am) + 250 * am
+    return out
 
 def _texto_escada(out, linhas, x, y, alinhar, cor):
     if not ANOTAR["sim"]:
@@ -1116,20 +1324,9 @@ def escadas_ta(Q, img, q=None):
         tx, ty = e["tri_px"]
         out = triangulo(out, seta_tri(tx, ty, e["dir"]))
         out = _texto_escada(out, e["texto"], *e["txt_px"], e["alinhar"], cor)
-    # o guarda-corpo da escada do jardim: o vidro fino com as faces
+    # o guarda-corpo da escada do jardim: as lâminas de vidro do PDF no contorno
     j = q["jardim"]
-    for p0, p1 in j["guarda_corpo_pt"]:
-        a, b = Q.p2q(*p0), Q.p2q(*p1)
-        m = np.zeros(out.shape[:2], np.uint8)
-        S = 4
-        mm = np.zeros((out.shape[0] * S, out.shape[1] * S), np.uint8)
-        cv2.line(mm, (int(a[0] * S), int(a[1] * S)), (int(b[0] * S), int(b[1] * S)), 255,
-                 int(round(j["vidro_px"] * S)), cv2.LINE_AA)
-        al = cv2.resize(mm.astype(np.float32) / 255, (out.shape[1], out.shape[0]), interpolation=cv2.INTER_AREA)
-        borda = np.clip(al - cv2.erode(al, np.ones((3, 3), np.float32)), 0, 1)
-        out = compor(out, al, j["vidro"])
-        out = compor(out, borda * 0.8, j["vidro_face"])
-        _ = m
+    out = vidro_laminas(Q, out, j["guarda_corpo_ret_pt"], j["vidro"])
     # a caracol: o triângulo no 1º degrau, para onde ela sobe (anti-horário), e a descrição
     c = T.CARACOL
     ccx, ccy = Q.p2q(*c["centro"])
@@ -1250,10 +1447,440 @@ def tracejados_finos_ta(Q, img, q=None):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# 14. Os contornos e os acertos pedidos depois da rodada de 10/11 (usuário, com recortes da planta):
+# - carro: "CORRIGIR CONTORNO DO CARRO E O ERRO NA GARAGEM, NA PARTE DE BAIXO TEM UM DENTE QUE NÃO EXISTE": o 3º carro
+#   ficou com a borda direita serrilhada e um anel do granito antigo em volta, que descia até a pedra portuguesa (o
+#   dente); os carros são iguais, então o 3º é o 2º com o piso em volta (`carro`: o bloco do 2º, deslocado `dx`, com as
+#   bordas fundidas em `funde_px`; a faixa de cima, sem o rótulo GARAGEM, vem do 1º);
+# - pedras: "CORRIGIR OS ERROS NAS PEDRAS": a 5ª pedra do acesso subia 5 px e tinha a direita serrilhada (ela é a 1ª,
+#   que tem a mesma largura, com a grama em volta); a 4ª tinha um filete branco na direita, onde passava o tracejado
+#   (a pedra espelhada da coluna ao lado);
+# - acesso: "CORRIGIR CONTORNO DO ACESSO À GARAGEM DESDE O INÍCIO E O MURO (NA PARTE DE BAIXO)": no início (a direita
+#   do lote) a pedra portuguesa parava 3 px antes da grama e a borda de cima tinha um dente; a pedra vai até a borda do
+#   lote, com as bordas de cima e de baixo continuando as curvas; no muro de baixo, a cunha cinza entre a curva da pista
+#   e o muro vira grama, o muro fica inteiro (sem os pontos brancos e sem a pista entrando nele) e a ponta direita
+#   fecha reta na borda do lote;
+# - faixa de baixo: "REMOVER OS TRACEJADOS E CORRIGIR CONTORNOS": o tracejado branco na borda do gramado entre a área de
+#   serviço descoberta e a garagem sai; os pontinhos escuros nas pontas dos X e dos portões saem;
+# - deck e escada: "CORRIGIR CONTORNO DA ESCADA E DECK (SE HOUVER)": o deck descia 4 px abaixo da escada (no PDF as
+#   duas acabam juntas): a borda de baixo do deck sobe até a da escada; a faixa rosada entre a escada e o guarda-corpo
+#   do terraço (branca no PDF) vira grama;
+# - guarda-corpos: "AQUI TEM UM GUARDA CORPO" (a borda de cima do terraço, com o recorte do PDF): pela regra [22/10]
+#   (todo guarda-corpo do PDF em vidro), todas as lâminas da ARQ_ELEMENTOS FIXOS do terraço: a de cima, a da esquerda
+#   (junto à escada do Subsolo e ao gramado), e as de baixo;
+# - janela: "FALTOU REPRESENTAR A JANELA AQUI": a janela da parede de cima da sala de estar (o vão do PDF): o peitoril
+#   claro com o vidro no meio, no desenho dos vidros;
+# - lavabo: "MELHORE O RÓTULO E CENTRALIZE-O TAMBÉM. O RÓTULO DA CLARABOIA NÃO DÁ PARA LER DIREITO": LAVABO no corpo
+#   dos outros rótulos, no centro do piso livre (entre a parede e a bancada, abaixo da claraboia); PROJ. CLARABOIA no
+#   mesmo corpo, logo abaixo da projeção, no centro do lavabo;
+# - paredes: "O TOM DAS PAREDES PRECISA FICAR UM CINZA MAIS ESCURO": as paredes do PDF, os batentes e os muros do lote,
+#   do cinza 79 para `parede_nova` (as bordas antisserrilhadas na mesma proporção).
+CONTORNOS_TA = {
+    "carro": {"fonte_px": (2354, 1341, 2516, 1649), "dx": 169, "topo_px": (2354, 1324, 2516, 1341), "dx_topo": 335,
+              "funde_px": 6},
+    "pedras": {"fonte_px": (2612, 604, 2777, 871), "destino_x": 3269, "pedra4_px": (3254, 606, 3263, 868),
+               "pedra4_espelho": 3253},
+    "acesso": {"x_borda": 3434, "x_ajuste": (3330, 3412), "x_novo": 3413, "y_px": (1250, 1640)},
+    "muro": {"cunha_px": (3020, 1890, 3130, 1945), "linha_topo": 1924, "modelo_x": 3000, "grama_dx": 110,
+             "ponta_px": (3416, 1890, 3435, 1950), "modelo_ponta_x": 3400},
+    "faixa": {"tracejado_px": (1912, 1636, 2172, 1649), "pontos_px": (1690, 1636, 1930, 1700), "pontos_dif": 28,
+              "pontos_area": 30},
+    "deck": {"x_px": (722, 904), "y_px": (1118, 1150), "base_escada": 1131, "faixa_px": (1084, 1056, 1097, 1132)},
+    "guarda_corpo_pt": [(907.2, 547.2, 1389.1, 548.6), (920.8, 1233.2, 1156.7, 1234.3),
+                        (920.8, 1233.2, 921.9, 1784.2), (920.8, 1783.1, 1037.6, 1784.2)],
+    "janela": {"vao_px": (1884, 359, 1947, 372), "peitoril": (214, 214, 212), "vidro_pt": (1668.9, 572.1, 1727.2, 575.0),
+               "batentes_px": [(1882, 359, 1885, 372), (1946, 359, 1949, 372)]},
+    "lavabo": {"caixa_px": (2252, 350, 2352, 520), "lavabo_centro": (2286.5, 465.0), "claraboia_centro": (2301.5, 401.0),
+               "lavabo": {"nome": "LAVABO", "pdf": [2053.0685, 635.3293]},
+               "claraboia": {"nome": "PROJ. CLARABOIA", "pdf": [2053.5996, 600.1947]},
+               "padrao": {"nome": "ESCRITÓRIO", "pdf": [2225.7157, 708.6874]}, "semente": 3170},
+    # "LIMPA ESSE ERRO AO LADO DA PLANTA": o resto do desenho branco da planta do PDF entre o vidro e a planta
+    "residuos_px": [(1876, 1073, 1888, 1093)],
+    # "MELHORAR A REPRESENTAÇÃO DO MARMORE BEGE BAHIA ENTRE OS QUADRADOS": nas faixas das vigas do pergolado (entre as
+    # duas linhas tracejadas de cada viga), o Bege Bahia de dentro dos quadrados, trecho a trecho (`copiar_textura`)
+    "pergolado": {"caixa_px": (1205, 865, 1530, 1222), "faixa_max_px": 18, "trecho": 14, "busca": 140},
+    # "MELHORAR A REPRESENTAÇÃO DA PAREDE ATRÁS DA PORTA DA ÁREA DE SERVIÇO" (a porta para a cozinha, aberta junto à
+    # parede): entre a parede e a folha, o granito limpo (sem a linha clara e sem a sombra pontilhada embaixo da folha,
+    # o granito de `fonte_dy` px abaixo); a folha nítida no retângulo do PDF (o cinza claro com a face fina) e a sombra
+    # curta e lisa
+    "porta_servico": {"x_px": (1984, 2043), "limpar_y": [(1453, 1460), (1464, 1470)], "fonte_dy": 14,
+                      "folha_px": (1987.0, 1460.5, 2042.0, 1464.5), "folha": (222, 224, 226), "face": (92, 94, 97)},
+    # "NESSAS PIAS: ÁREA GOURMET, COZINHA PRECISAMOS REPRESENTAR O RALO DE CADA UMA DELAS": os ralos do PDF (ARQ_LOUÇAS E
+    # METAIS, os círculos pequenos no fundo das cubas), em cromado com o anel fino e o miolo escuro (pt: centro e raio)
+    "ralos_pt": [(1515.35, 1580.0, 1.0), (1919.15, 1503.0, 1.0), (1919.15, 1548.45, 1.0)],
+    # escritório (usuário: "MELHORE A REPRESENTAÇÃO DESSAS MESAS REDONDAS LATERAIS, PONHA UM TOM O SOBRETOM NELAS. E ALTERE
+    # O TOM DO ARMARIO PARA O TOM JÁ DEFINIDO. E MELHORE A REPRESENTAÇÃO DA PORTA DO ESCRITÓRIO"): o aparador no tom
+    # padrão dos armários (regra de 10/11: RGB 208, 178, 156, quase liso, o do armário junto ao lavabo); as duas mesinhas
+    # redondas do PDF, a de baixo no sobretom claro e a de cima no tom de nogueira, com a sombra de uma sobre a outra; a
+    # folha da porta (aberta junto à parede de baixo, como no PDF) nítida e presa ao batente
+    "escritorio": {"aparador_pt": (2182.8, 766.0, 2250.8, 793.3), "armario": (156, 178, 208),
+                   "mesas_pt": [((2270.6, 771.8, 8.5), (130, 160, 194)), ((2278.7, 761.5, 8.5), (74, 100, 132))],
+                   "porta_limpar_px": (2356, 582, 2412, 587), "porta_fonte_dy": -9,
+                   "folha_px": (2355.0, 586.4, 2408.0, 589.4), "folha": (222, 224, 226), "face": (92, 94, 97)},
+    "parede": 79, "parede_nova": 52, "parede_tol": 12,
+    "muros_px": [(262, 130, 3450, 175), (262, 1915, 3450, 1952), (262, 130, 292, 1952)],
+}
+
+
+def _fundir_bloco(out, src, x0, y0, funde):
+    """Cola `src` em (x0, y0) com as bordas fundidas em `funde` px."""
+    h, w = src.shape[:2]
+    a = np.ones((h, w), np.float32)
+    if funde > 0:
+        r = np.minimum.reduce([np.arange(w)[None, :].repeat(h, 0), np.arange(w)[::-1][None, :].repeat(h, 0)])
+        a = np.clip((r + 1) / (funde + 1), 0, 1).astype(np.float32)
+    reg = out[y0:y0 + h, x0:x0 + w].astype(np.float32)
+    out[y0:y0 + h, x0:x0 + w] = np.round(reg * (1 - a[..., None]) + src.astype(np.float32) * a[..., None])
+    return out
+
+
+def _carro(out, q):
+    a, b, c, d = q["fonte_px"]
+    bloco = out[b:d, a:c].copy()
+    t0, t1, t2, t3 = q["topo_px"]
+    topo = out[t1:t3, t0 - q["dx_topo"] + q["dx"]:t2 - q["dx_topo"] + q["dx"]].copy()
+    out = _fundir_bloco(out, bloco, a + q["dx"], b, q["funde_px"])
+    out = _fundir_bloco(out, topo, t0 + q["dx"], t1, q["funde_px"])
+    return out
+
+
+def _pedras(out, q):
+    a, b, c, d = q["fonte_px"]
+    out[b:d, q["destino_x"]:q["destino_x"] + (c - a)] = out[b:d, a:c].copy()
+    x0, y0, x1, y1 = q["pedra4_px"]
+    e = q["pedra4_espelho"]
+    for i, x in enumerate(range(x0, x1)):
+        out[y0:y1, x] = out[y0:y1, e - i]
+    return out
+
+
+def _bordas_pista(out, x0, x1, y0, y1):
+    """As bordas de cima e de baixo da pista (o 1º e o último px claros de cada coluna)."""
+    cols, tops, bots = [], [], []
+    for x in range(x0, x1):
+        col = out[y0:y1, x].astype(np.float32)
+        p = np.where(col.mean(axis=1) > 150)[0]
+        if len(p) > 20:
+            cols.append(x)
+            tops.append(y0 + p[0])
+            bots.append(y0 + p[-1])
+    return np.array(cols, np.float32), np.array(tops, np.float32), np.array(bots, np.float32)
+
+
+def _acesso(out, q):
+    a = q["acesso"]
+    y0, y1 = a["y_px"]
+    xs, tops, bots = _bordas_pista(out, *a["x_ajuste"], y0, y1)
+    pt = np.polyfit(xs, tops, 2)
+    pb = np.polyfit(xs, bots, 2)
+    img = out.copy()
+    for x in range(a["x_novo"], a["x_borda"] + 1):
+        yt, yb = np.polyval(pt, x), np.polyval(pb, x)
+        for y in range(y0, y1):
+            dentro = min(y - yt, yb - y) + 0.5            # > 0 dentro da pista, com a meia transição de 1 px
+            al = float(np.clip(dentro, 0, 1))
+            pista = img[y, x - 18].astype(np.float32)
+            grama = img[y - 60 if y < yt else min(y + 60, out.shape[0] - 1), x].astype(np.float32)
+            out[y, x] = np.round(pista * al + grama * (1 - al))
+    # o muro de baixo: a cunha cinza vira grama, o muro inteiro e a ponta reta
+    m = q["muro"]
+    x0, ya, x1, yb2 = m["cunha_px"]
+    mod = img[m["linha_topo"]:yb2, m["modelo_x"]].copy()
+    for x in range(x0, x1):
+        col = out[ya:m["linha_topo"], x].astype(np.float32)
+        cinza = (col.max(axis=1) - col.min(axis=1) < 14) & (col.mean(axis=1) < 130)
+        gx = min(x + m["grama_dx"], out.shape[1] - 1)
+        for i in np.where(cinza)[0]:
+            out[ya + i, x] = img[ya + i, gx]
+        out[m["linha_topo"]:yb2, x] = mod
+    x0, ya, x1, yb2 = m["ponta_px"]
+    modp = img[ya:yb2, m["modelo_ponta_x"]].copy()
+    for x in range(x0, x1):
+        topo_muro = m["linha_topo"] - 1
+        out[topo_muro:yb2, x] = modp[topo_muro - ya:]
+    return out
+
+
+def _faixa(Q, out, q):
+    x0, y0, x1, y1 = q["tracejado_px"]
+    reg = out[y0:y1, x0:x1].astype(np.float32)
+    branco = (reg.mean(axis=2) > 185) & (reg.max(axis=2) - reg.min(axis=2) < 30)
+    m = np.zeros(out.shape[:2], np.uint8)
+    m[y0:y1, x0:x1] = dilatar(branco, 1)
+    out = cv2.inpaint(out, m * 255, 2, cv2.INPAINT_TELEA)
+    x0, y0, x1, y1 = q["pontos_px"]
+    reg = out[y0:y1, x0:x1]
+    lum = reg.astype(np.float32).mean(axis=2)
+    med = cv2.medianBlur(reg, 9).astype(np.float32).mean(axis=2)
+    escuro = (lum < med - q["pontos_dif"]).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(escuro, connectivity=8)
+    pts = np.isin(lab, [i for i in range(1, n) if st[i, 4] <= q["pontos_area"]])
+    pts &= ~(FA.paredes_pdf(Q)[y0:y1, x0:x1] > 0.05)
+    m = np.zeros(out.shape[:2], np.uint8)
+    m[y0:y1, x0:x1] = dilatar(pts, 1)
+    return cv2.inpaint(out, m * 255, 3, cv2.INPAINT_TELEA)
+
+
+def _deck(out, q):
+    x0, x1 = q["x_px"]
+    y0, y1 = q["y_px"]
+    img = out.copy()
+    alvo = q["base_escada"]
+    for x in range(x0, x1):
+        col = img[y0:y1, x].astype(np.float32)
+        verde = (col[:, 1] > col[:, 0] + 8) & (col.mean(axis=1) < 130)
+        g = np.where(verde)[0]
+        if not len(g):
+            continue
+        base = y0 + int(g[0]) - 1                      # o último px do deck
+        dy = base - alvo
+        if dy <= 0:
+            continue
+        for y in range(alvo - 6, alvo + 1):            # a borda (com a sombra) sobe dy px
+            out[y, x] = img[y + dy, x]
+        for y in range(alvo + 1, base + 1):            # a grama de baixo sobe junto
+            out[y, x] = img[min(y + dy + 6, out.shape[0] - 1), x]
+    fx0, fy0, fx1, fy1 = q["faixa_px"]
+    for x in range(fx0, fx1):
+        for y in range(fy0, fy1):
+            out[y, x] = img[min(y + (fy1 - fy0) + 4, out.shape[0] - 1), x]
+    return out
+
+
+def _janela(Q, out, q, vidro):
+    x0, y0, x1, y1 = q["vao_px"]
+    out[y0:y1, x0:x1] = np.uint8(q["peitoril"])
+    for a, b, c, d in q["batentes_px"]:
+        out[b:d, a:c] = np.uint8((79, 79, 79))
+    return np.clip(np.round(vidro_laminas(Q, out, [q["vidro_pt"]], vidro)), 0, 255).astype(np.uint8)
+
+
+def _alfa_rot(Q, b, opc, dx, dy, forma):
+    import ampliacao_12k_terreo_casaa as Z
+    return Z.alfa_rotulo(Q, dict(b, opc=opc, desvio=[dx, dy]), forma)
+
+
+def _altura_maiuscula(al):
+    ys = np.nonzero(al.max(axis=1) > 0.4)[0]
+    return ys.max() - ys.min() + 1 if len(ys) else 0
+
+
+def _lavabo_rotulos(Q, out, q):
+    import pedidos_terreo_casaa_2910 as P
+    forma = out.shape[:2]
+    x0, y0, x1, y1 = q["caixa_px"]
+    dentro = np.zeros(forma, bool)
+    dentro[y0:y1, x0:x1] = True
+    rots = [r for r in rotulos_na_imagem(Q, out, dentro=dentro) if r[0][0] in ("LAVABO", "PROJ. CLARABOIA")]
+    zona = np.zeros(forma, bool)
+    for _, al, _, _ in rots:
+        zona |= dilatar(al > 0.02, 2)
+    if zona.any():
+        out = P.piso_refeito(out, zona, q["semente"])
+    # o corpo padrão dos rótulos (seção 12, [29/10]: 1,3×); a PROJ. CLARABOIA, de texto menor no PDF, no corpo em que a
+    # altura das letras dela fica igual à do nome LAVABO
+    def h_nome(a):
+        ys = np.nonzero(a.max(axis=1) > 0.4)[0]
+        if not len(ys):
+            return 0
+        quebras = np.nonzero(np.diff(ys) > 2)[0]
+        fim = ys[quebras[0]] if len(quebras) else ys[-1]
+        return fim - ys[0] + 1
+    h_ref = h_nome(_alfa_rot(Q, q["lavabo"], {"corpo": 1.3}, 0, 0, forma))
+    res = out.astype(np.float32)
+    feitos = []
+    for chave, centro in (("lavabo", q["lavabo_centro"]), ("claraboia", q["claraboia_centro"])):
+        b = q[chave]
+        opc = {"corpo": 1.3}
+        a0 = _alfa_rot(Q, b, opc, 0, 0, forma)
+        if chave == "claraboia":
+            h1 = h_nome(a0)
+            if h1 > 0 and h_ref > 0:
+                opc["corpo"] = round(float(np.clip(h_ref / h1 * 1.3, 0.8, 2.4)), 2)
+                a0 = _alfa_rot(Q, b, opc, 0, 0, forma)
+        ys, xs = np.nonzero(a0 > 0.3)
+        cx, cy = (xs.min() + xs.max()) / 2, (ys.min() + ys.max()) / 2
+        al = _alfa_rot(Q, b, opc, centro[0] - cx, centro[1] - cy, forma)
+        res = compor(res, al, ROTULO_ESCURO)
+        feitos.append({"nome": b["nome"], "pdf": b["pdf"], "opc": opc, "desvio": [float(centro[0] - cx),
+                       float(centro[1] - cy)], "cor": list(ROTULO_ESCURO), "nota": 1.0})
+        print(f"      {b['nome']}: corpo {opc['corpo']}, centro {centro}")
+    # o desenho deles fica gravado para o 12K (a busca pela forma não testa esses corpos)
+    import json
+    ROTULOS_LAVABO.write_text(json.dumps(feitos, ensure_ascii=False, indent=1))
+    return np.clip(np.round(res), 0, 255).astype(np.uint8)
+
+
+def _residuos(out, caixas):
+    for x0, y0, x1, y1 in caixas:
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        verde = (reg[..., 1] > reg[..., 0] + 15) & (reg.mean(axis=2) < 150)
+        m = np.zeros(out.shape[:2], np.uint8)
+        m[y0:y1, x0:x1] = (~verde & (reg.mean(axis=2) < 200)).astype(np.uint8)
+        out = cv2.inpaint(out, m * 255, 3, cv2.INPAINT_TELEA)
+    return out
+
+
+def _pergolado_bege(Q, out, q):
+    import pedidos_terreo_casaa_2910 as P
+    x0, y0, x1, y1 = q["caixa_px"]
+    H, W = out.shape[:2]
+    linhas = np.zeros((H, W), np.uint8)
+    tracos = np.zeros((H, W), np.uint8)
+    for _, _, segs in T.cadeias_tracejadas(Q, ["ARQ_PERGOLADO"]):
+        a0, b0, a1, b1 = P._linha_inteira(segs)
+        (u0, v0), (u1, v1) = Q.p2q(a0, b0), Q.p2q(a1, b1)
+        cv2.line(linhas, (int(round(u0)), int(round(v0))), (int(round(u1)), int(round(v1))), 1, 1)
+        for sg in segs:
+            (c0, d0), (c1, d1) = Q.p2q(sg[0], sg[1]), Q.p2q(sg[2], sg[3])
+            cv2.line(tracos, (int(round(c0)), int(round(d0))), (int(round(c1)), int(round(d1))), 1, 2)
+    livre = np.zeros((H, W), np.uint8)
+    livre[y0:y1, x0:x1] = 1 - linhas[y0:y1, x0:x1]
+    n, lab, st, _ = cv2.connectedComponentsWithStats(livre, connectivity=4)
+    faixas = np.zeros((H, W), bool)
+    celulas = np.zeros((H, W), bool)
+    for i in range(1, n):
+        bx, by, bw, bh, ar = st[i]
+        if bx <= x0 or by <= y0 or bx + bw >= x1 or by + bh >= y1:
+            continue
+        if min(bw, bh) <= q["faixa_max_px"]:
+            faixas |= lab == i
+        else:
+            celulas |= lab == i
+    fixo = (agua_mascara(Q) > 0) | moveis_pdf(Q) | dilatar(tracos > 0, 1)
+    rots = rotulos_na_imagem(Q, out, dentro=np.pad(np.ones((y1 - y0, x1 - x0), bool), ((y0, H - y1), (x0, W - x1))))
+    for _, al, _, _ in rots:
+        fixo |= dilatar(al > 0.02, 3)
+    buraco = faixas & ~fixo
+    valido = cv2.erode(celulas.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool) & ~fixo
+    falhou = P.copiar_textura(out, buraco, valido, busca=q["busca"], trecho=q["trecho"])
+    if falhou.any():
+        out = cv2.inpaint(out, (falhou * 255).astype(np.uint8), 3, cv2.INPAINT_TELEA)
+    print(f"      pergolado: {int(buraco.sum())} px das faixas das vigas no Bege dos quadrados")
+    return out
+
+
+def _porta_servico(Q, out, q):
+    x0, x1 = q["x_px"]
+    img = out.copy()
+    for a, b in q["limpar_y"]:
+        out[a:b, x0:x1] = img[a + q["fonte_dy"]:b + q["fonte_dy"], x0:x1]
+    fx0, fy0, fx1, fy1 = q["folha_px"]
+    (p0, p1), (p2, p3) = Q.q2p(fx0, fy0), Q.q2p(fx1, fy1)
+    r = (min(p0, p2), min(p1, p3), max(p0, p2), max(p1, p3))
+    tl = FA.tela(out, Q, r, folga=4)
+    m = tl.ret(r, 0.3)
+    FA.sombra_q(tl, m, forca=0.25, dist=0.9, sigma=0.9)
+    tl.pintar(m, q["folha"])
+    tl.contorno(m, 0.35, q["face"])
+    return tl.gravar()
+
+
+def _ralos(Q, out, ralos):
+    for cx, cy, r in ralos:
+        tl = FA.tela(out, Q, (cx - r - 1, cy - r - 1, cx + r + 1, cy + r + 1), folga=4)
+        m = tl.vazia()
+        px_, py_ = tl.pt(cx, cy)
+        rr = r * FA.PT_PX * 8
+        cv2.circle(m, (int(px_), int(py_)), int(rr), 255, -1, cv2.LINE_AA)
+        FA.sombra_q(tl, m, forca=0.18, dist=0.5, sigma=0.5)
+        tl.pintar(m, FA.CROMO["meio"])
+        miolo = tl.vazia()
+        cv2.circle(miolo, (int(px_), int(py_)), int(rr * 0.45), 255, -1, cv2.LINE_AA)
+        tl.pintar(miolo, FA.CROMO["escuro"])
+        tl.contorno(m, 0.25, FA.CROMO["contorno"])
+        out = tl.gravar()
+    return out
+
+
+def _escritorio(Q, out, q):
+    rng = np.random.default_rng(3190)
+    # o aparador no tom padrão dos armários, quase liso (um veio leve no comprido)
+    r = q["aparador_pt"]
+    tl = FA.tela(out, Q, r, folga=4)
+    m = tl.ret(r, 0.3)
+    FA.sombra_q(tl, m, forca=0.22, dist=1.0, sigma=1.0)
+    veio = cv2.GaussianBlur(rng.standard_normal((tl.h, 1)).astype(np.float32), (0, 0), 1.2)
+    veio = np.repeat(veio / (veio.std() + 1e-6), tl.w, axis=1)
+    tl.pintar_img(m, np.float32(q["armario"])[None, None] * (1 + 0.018 * veio)[..., None])
+    tl.contorno(m, 0.35, tuple(v * 0.8 for v in q["armario"]))
+    out = tl.gravar()
+    # as mesinhas: a de baixo e a de cima, cada uma com o tampo de borda mais escura e o miolo mais claro
+    for (cx, cy, rr), cor in q["mesas_pt"]:
+        tl = FA.tela(out, Q, (cx - rr - 1, cy - rr - 1, cx + rr + 1, cy + rr + 1), folga=4)
+        m = tl.vazia()
+        px_, py_ = tl.pt(cx, cy)
+        R = rr * FA.PT_PX * 8
+        cv2.circle(m, (int(px_), int(py_)), int(R), 255, -1, cv2.LINE_AA)
+        FA.sombra_q(tl, m, forca=0.30, dist=1.1, sigma=1.1)
+        X, Y = tl.grade()
+        d = np.hypot(X - cx, Y - cy) / rr
+        tom = np.float32(cor)[None, None] * (1.05 - 0.10 * np.clip(d, 0, 1) ** 2)[..., None] \
+            * (1 + 0.012 * np.cos(d * 26))[..., None]
+        tl.pintar_img(m, tom)
+        tl.contorno(m, 0.35, tuple(v * 0.7 for v in cor))
+        out = tl.gravar()
+    # a porta: o traço fraco antigo sai (o travertino de cima) e a folha entra nítida, do batente ao fim do vão
+    x0, y0, x1, y1 = q["porta_limpar_px"]
+    out[y0:y1, x0:x1] = out[y0 + q["porta_fonte_dy"]:y1 + q["porta_fonte_dy"], x0:x1]
+    fx0, fy0, fx1, fy1 = q["folha_px"]
+    (p0, p1), (p2, p3) = Q.q2p(fx0, fy0), Q.q2p(fx1, fy1)
+    r = (min(p0, p2), min(p1, p3), max(p0, p2), max(p1, p3))
+    tl = FA.tela(out, Q, r, folga=4)
+    m = tl.ret(r, 0.3)
+    FA.sombra_q(tl, m, forca=0.25, dist=0.9, sigma=0.9)
+    tl.pintar(m, q["folha"])
+    tl.contorno(m, 0.35, q["face"])
+    return tl.gravar()
+
+
+def _paredes_escuras(Q, out, q):
+    v0, v1, tol = q["parede"], q["parede_nova"], q["parede_tol"]
+    zona = dilatar(FA.paredes_pdf(Q) > 0.05, 3)
+    for a, b, c, d in q["muros_px"] + SOLEIRAS_TA["batentes_px"] + CONTORNOS_TA["janela"]["batentes_px"]:
+        zona[b:d, a:c] = True
+    im = out.astype(np.float32)
+    lum = im.mean(axis=2)
+    cin = (im.max(axis=2) - im.min(axis=2) < tol)
+    cheio = zona & cin & (np.abs(lum - v0) < 22)
+    borda = zona & dilatar(cheio, 2) & ~cheio & (lum < 215)
+    s = np.zeros(lum.shape, np.float32)
+    s[cheio] = 1.0
+    s[borda] = np.clip((215 - lum[borda]) / (215 - v0), 0, 1)
+    novo = im - (v0 - v1) * s[..., None]
+    print(f"      paredes: {int(cheio.sum())} px do cinza {v0} para {v1} ({int(borda.sum())} px de borda)")
+    return np.clip(np.round(novo), 0, 255).astype(np.uint8)
+
+
+def contornos_ta(Q, img, q=None):
+    q = q or CONTORNOS_TA
+    out = np.ascontiguousarray(img.copy())
+    out = _carro(out, q["carro"])
+    out = _pedras(out, q["pedras"])
+    out = _acesso(out, q)
+    out = _faixa(Q, out, q["faixa"])
+    out = _deck(out, q["deck"])
+    vidro = ESCADAS_TA["jardim"]["vidro"]
+    out = np.clip(np.round(vidro_laminas(Q, out, q["guarda_corpo_pt"], vidro)), 0, 255).astype(np.uint8)
+    out = _janela(Q, out, q["janela"], vidro)
+    out = _lavabo_rotulos(Q, out, q["lavabo"])
+    out = _residuos(out, q["residuos_px"])
+    out = np.clip(np.round(_escritorio(Q, out, q["escritorio"])), 0, 255).astype(np.uint8)
+    out = np.clip(np.round(_ralos(Q, out, q["ralos_pt"])), 0, 255).astype(np.uint8)
+    out = np.clip(np.round(_porta_servico(Q, out, q["porta_servico"])), 0, 255).astype(np.uint8)
+    out = _pergolado_bege(Q, out, q["pergolado"])
+    out = _paredes_escuras(Q, out, q)
+    print("    contornos: o 3º carro e o piso em volta; as pedras do acesso; o início da pista e o muro de baixo; a faixa "
+          "de baixo sem o tracejado; o deck rente à escada; os guarda-corpos do terraço; a janela da sala de estar; "
+          "os rótulos do lavabo; as paredes no cinza mais escuro")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("tracejados", tracejados_ta), ("gramado", gramado_ta), ("piscina", piscina_ta),
           ("bege", bege_ta), ("piso_marrom", piso_marrom_ta), ("bancadas", bancadas_ta), ("banquetas", banquetas_ta), ("pilar", pilar_ta),
           ("soleiras", soleiras_ta), ("entrada", entrada_ta), ("escadas", escadas_ta), ("shaft", shaft_ta),
-          ("tracejados_finos", tracejados_finos_ta)]
+          ("contornos", contornos_ta), ("tracejados_finos", tracejados_finos_ta)]
 
 
 def correcoes_ta(img, de=None, ate=None, salvar_passos=None):

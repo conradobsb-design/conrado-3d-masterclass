@@ -43,7 +43,9 @@ FINAL = R / "POE642_CasaA_PH_Terreo_final_rotulos.png"
 ENTRADA_IA = R / "POE642_CasaA_PH_Terreo_12K_entrada_ia.png"
 TRACOS = R / "POE642_CasaA_PH_Terreo_12K_tracejados.png"       # o alfa (x255) e a cor dos tracejados finos
 DADOS = R / "POE642_CasaA_PH_Terreo_12K_dados.json"
-SAIDA = FA.CASA / "entrega" / "POE642_CasaA_PH_Terreo_12K.jpg"
+# as duas opções de letra (regra de 10/11: "INCLUSIVE TRAZER UMA IMAGEM 12K COM A OUTRA FONTE DE LETRA TAMBÉM É UMA REGRA
+# PARA TODAS PLANTAS A PARTIR DE AGORA"): A na Inter das pranchas, B na Kalam (`rotulos_manuscritos_casaa`)
+SAIDA = FA.CASA / "entrega" / "POE642_CasaA_PH_Terreo_12K_opcao_{opcao}.jpg"
 
 G12 = {"a3": (4961, 3508), "margem_px": 150, "ia": (16, 9), "branco": 245, "cheio": 0.85, "tom_sigma_px": 2.5,
        "fundo_folga_px": 3, "folga_texto_px": 2, "largura": 12288, "janela_px": 260, "qualidade": 95, "traco_min": 0.04}
@@ -181,7 +183,9 @@ def recortes(img):
 def preparar(passos):
     Q = FA.QuadroA("Terreo")
     img = cv2.imread(str(FINAL))
-    base = cv2.imread(str(Path(passos) / "passo_shaft.png"))
+    # o passo antes dos tracejados finos (os contornos de 10/11, depois do shaft)
+    base_arq = Path(passos) / "passo_contornos.png"
+    base = cv2.imread(str(base_arq if base_arq.exists() else Path(passos) / "passo_shaft.png"))
     # os tracejados finos: o alfa (a final entre o passo do shaft e a cor do traço) e a cor (cinza escuro ou claro)
     f, b = img.astype(np.float32), base.astype(np.float32)
     esc, cla = np.float32(TA.FINOS_TA["escuro"]), np.float32(TA.FINOS_TA["claro"])
@@ -196,6 +200,11 @@ def preparar(passos):
     cv2.imwrite(str(TRACOS), tr)
     # os textos e os símbolos saem do passo do shaft (o fundo pela conta do alfa, o miolo pelo entorno)
     rots = rotulos(Q, img)
+    # os do lavabo (LAVABO e PROJ. CLARABOIA, centralizados em 10/11) no desenho gravado pela etapa dos contornos
+    if TA.ROTULOS_LAVABO.exists():
+        lav = json.loads(TA.ROTULOS_LAVABO.read_text())
+        nomes = {b_["nome"] for b_ in lav}
+        rots = [b_ for b_ in rots if b_["nome"] not in nomes] + lav
     camadas = [(alfa_rotulo(Q, b_, img.shape[:2]), tuple(b_["cor"])) for b_ in rots]
     anot = anotacoes(Q)
     camadas += [(alfa_anotacao(t, d, img.shape[:2]), tuple(c)) for t, d, c in anot]
@@ -316,7 +325,49 @@ def corrigir_ia(saida_ia, destino):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-def montar12k(saida_topaz, largura=None):
+def _itens_manuscrita(Q, b, s, X0, Ya3):
+    """As linhas do rótulo b na Kalam, em px do 12K: [(texto, corpo, x, y, âncora)]."""
+    import rotulos_manuscritos_casaa as RM
+    import retoque_1pav_casae as R1
+    from rodape_entrega import FONTES
+
+    def loc(x, y):
+        u, v = Q.p2q(x, y)
+        return (u - X0) * s, (v - Ya3) * s
+    k = (RM._altura_maiuscula(FONTES / f"Inter-{R1.ROTULOS['fonte']}.otf") / RM._altura_maiuscula(RM.FONTE)
+         * RM.MANUSCRITA["altura"])
+    return [(t, c * k, x, y, "ms") for t, c, x, y in RM.linhas_rotulo(Q, b, pdf2img=loc, escala_desvio=Q.W / 2000 * s)]
+
+
+def _itens_anotacao_manuscrita(dados, s, X0, Ya3):
+    """As descrições das escadas na Kalam (o mesmo meio de linha e o mesmo alinhamento), em px do 12K."""
+    import rotulos_manuscritos_casaa as RM
+    from rodape_entrega import FONTES
+    e = FA.ESCADA_A
+    linhas, x, y, alinhar = dados
+    k = RM._altura_maiuscula(FONTES / e["fonte"]) / RM._altura_maiuscula(RM.FONTE) * RM.MANUSCRITA["altura"]
+    corpo = e["corpo_px"]
+    entre = round(corpo * 1.18)
+    anc = {"esquerda": "lm", "direita": "rm", "centro": "mm"}[alinhar]
+    n = len(linhas)
+    return [(ln, corpo * k * s, (x - X0) * s, (y + (i - (n - 1) / 2) * entre - Ya3) * s, anc)
+            for i, ln in enumerate(linhas)]
+
+
+def _desenhar_janela(out, itens, cor, reforco):
+    import rotulos_manuscritos_casaa as RM
+    xs = [x for _, _, x, _, _ in itens]
+    ys = [y for _, _, _, y, _ in itens]
+    c = max(it[1] for it in itens)
+    larg = max(len(t) for t, _, _, _, _ in itens) * c * 0.9
+    bx, by = max(0, int(min(xs) - larg - 4 * c)), max(0, int(min(ys) - 3 * c))
+    bx1, by1 = min(out.shape[1], int(max(xs) + larg + 4 * c)), min(out.shape[0], int(max(ys) + 3 * c))
+    janela = out[by:by1, bx:bx1]
+    loc = [(t, cc, x - bx, y - by, a) for t, cc, x, y, a in itens]
+    out[by:by1, bx:bx1] = RM.desenhar(janela, loc, cor, reforco_px=reforco)
+
+
+def montar12k(saida_topaz, largura=None, opcao="A"):
     from PIL import Image
     q = G12
     L = largura or q["largura"]
@@ -392,13 +443,21 @@ def montar12k(saida_topaz, largura=None):
         out[by:by + h, bx:bx + w] = np.clip(np.round(reg * (1 - a[..., None]) + np.float32(cor) * a[..., None]), 0,
                                             255).astype(np.uint8)
     meia = q["janela_px"] * s
+    import rotulos_manuscritos_casaa as RM
+    reforco = RM.MANUSCRITA["reforco_px"] * s
     for b in rots:
+        if opcao == "B":
+            _desenhar_janela(out, _itens_manuscrita(Q, b, s, X0, Ya3), tuple(b["cor"]), reforco)
+            continue
         u, v = Q.p2q(*b["pdf"])
         cx, cy = (u + b["desvio"][0] - X0) * s, (v + b["desvio"][1] - Ya3) * s
         bx, by, bx1, by1 = janela(cx, cy, meia)
         a = alfa_rotulo(Q, b, (by1 - by, bx1 - bx), s, X0 + bx / s, Ya3 + by / s)
         com_alfa(a, b["cor"], bx, by)
     for tipo, dados, cor in anot:
+        if opcao == "B" and tipo == "txt":
+            _desenhar_janela(out, _itens_anotacao_manuscrita(dados, s, X0, Ya3), tuple(cor), reforco)
+            continue
         if tipo == "tri":
             cx, cy = np.mean(np.float32(dados), axis=0)
         else:
@@ -408,21 +467,22 @@ def montar12k(saida_topaz, largura=None):
         bx, by, bx1, by1 = janela(cx, cy, meia)
         a = alfa_anotacao(tipo, dados, (by1 - by, bx1 - bx), s, X0 + bx / s, Ya3 + by / s)
         com_alfa(a, cor, bx, by)
-    SAIDA.parent.mkdir(parents=True, exist_ok=True)
+    saida = Path(str(SAIDA).format(opcao=opcao))
+    saida.parent.mkdir(parents=True, exist_ok=True)
     dpi = int(round(L / (420 / 25.4)))
-    Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(SAIDA, quality=q["qualidade"], subsampling=0,
+    Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(saida, quality=q["qualidade"], subsampling=0,
                                                                dpi=(dpi, dpi), optimize=True)
-    cv2.imwrite(str(R / "POE642_CasaA_PH_Terreo_12K_previa.jpg"),
+    cv2.imwrite(str(R / f"POE642_CasaA_PH_Terreo_12K_opcao_{opcao}_previa.jpg"),
                 cv2.resize(out, (2000, round(2000 * Hh / L)), interpolation=cv2.INTER_AREA), [cv2.IMWRITE_JPEG_QUALITY, 90])
     for nome, (x0, y0, x1, y1) in CONFERENCIA.items():
         u0, v0, u1, v1 = [int(round(t_)) for t_ in ((x0 - X0) * s, (y0 - Ya3) * s, (x1 - X0) * s, (y1 - Ya3) * s)]
         cr = out[v0:v1, u0:u1]
         ref = cv2.resize(img[y0:y1, x0:x1], (cr.shape[1], cr.shape[0]), interpolation=cv2.INTER_LANCZOS4)
         par = np.hstack([ref, np.full((cr.shape[0], 24, 3), 255, np.uint8), cr])
-        cv2.imwrite(str(R / f"POE642_CasaA_PH_Terreo_12K_conferencia_{nome}.jpg"),
+        cv2.imwrite(str(R / f"POE642_CasaA_PH_Terreo_12K_opcao_{opcao}_conferencia_{nome}.jpg"),
                     cv2.resize(par, (par.shape[1] // 2, par.shape[0] // 2), interpolation=cv2.INTER_AREA),
                     [cv2.IMWRITE_JPEG_QUALITY, 90])
-    print(f"    {SAIDA} {L}x{Hh} ({dpi} dpi na A3), {SAIDA.stat().st_size / 1e6:.1f} MB")
+    print(f"    {saida} {L}x{Hh} ({dpi} dpi na A3), {saida.stat().st_size / 1e6:.1f} MB")
 
 
 # Os recortes da conferência (px da final): a final ampliada sem IA ao lado do 12K
@@ -444,6 +504,7 @@ if __name__ == "__main__":
     m_ = sub.add_parser("montar12k")
     m_.add_argument("saida_topaz", type=Path)
     m_.add_argument("--largura", type=int, default=None)
+    m_.add_argument("--opcao", choices=("A", "B", "AB"), default="AB")
     a = ap.parse_args()
     if a.etapa == "preparar":
         preparar(a.passos)
@@ -452,4 +513,5 @@ if __name__ == "__main__":
     elif a.etapa == "corrigir":
         corrigir_ia(a.saida_ia, a.destino)
     else:
-        montar12k(a.saida_topaz, a.largura)
+        for op in a.opcao:
+            montar12k(a.saida_topaz, a.largura, op)
