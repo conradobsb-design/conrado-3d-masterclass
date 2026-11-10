@@ -1844,7 +1844,7 @@ def _vazio_viga(out, q):
     a, b, c, d = q["fonte_px"]
     fonte = out[b:d, a:c]
     reps = (int(np.ceil((y1 - y0) / fonte.shape[0])), int(np.ceil((x1 - x0) / fonte.shape[1])))
-    tecido = np.tile(np.concatenate([fonte, fonte[:, ::-1]], axis=1), (reps[0], reps[1]))[: y1 - y0, : x1 - x0]
+    tecido = np.tile(np.concatenate([fonte, fonte[:, ::-1]], axis=1), (reps[0], reps[1], 1))[: y1 - y0, : x1 - x0]
     sub = out[y0:y1, x0:x1]
     sub[branco] = tecido[branco]
     return out
