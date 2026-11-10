@@ -618,6 +618,61 @@ def piscina_ta(Q, img, q=None):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# 3b. O Bege Bahia menos manchado (a regra do Subsolo da Casa A, 05/11: cliente, "Deixar a representação do Bege Bahia
+# menos manchado (para melhor representação)"; usuário, 10/11: "Isso vai se repetir para todas as plantas ... tem que
+# ser como regra"): nos pisos de Bege Bahia (o cinza 232 da base chapada: o hall externo, o deck da piscina e a pedra
+# em volta dela, o pergolado, os pisantes, o lance do deck, a pedra junto ao terraço gourmet; e o banho do motorista),
+# as manchas a `forca` do contraste, como no Subsolo (45%); a luz, as sombras, o tom e o degrau de cada pedra ficam.
+# O tom do lugar é a mediana de `mediana_px` (com as peças tapadas antes: as espreguiçadeiras, os pilares, as plantas,
+# os rótulos); o desenho é a imagem sobre esse tom, e é ele que cai para `forca`. Junto às arestas do tom (as bordas dos
+# degraus e das sombras, `aresta`), fica o px de antes. Os rótulos voltam no mesmo desenho.
+BEGE_TA = {"chapada": (232, 232, 232), "forca": 0.45, "mediana_px": 25, "croma_obj": 22, "lum_obj": 120,
+           "area_obj": 30, "aresta": 10.0, "aresta_px": 2}
+
+
+def bege_ta(Q, img, q=None):
+    q = q or BEGE_TA
+    im = img.astype(np.float32)
+    B = T.F.fechar(np.all(Q.chapada == np.uint8(q["chapada"]), axis=2), 5) | (FA.ret_aa(Q, T.GRANITO_T["bege"]) > 0.5)
+    B &= ~(FA.paredes_pdf(Q) > 0.3)
+    rots = rotulos_na_imagem(Q, img, dentro=B)
+    texto = np.zeros(B.shape, np.float32)
+    for _, al, _, _ in rots:
+        texto = np.maximum(texto, al)
+    f = cv2.GaussianBlur(im, (0, 0), 0.7)
+    lum, croma = f.mean(axis=2), f.max(axis=2) - f.min(axis=2)
+    verde = f[..., 1] > f[..., 2] + 4
+    obj = T.manchas(B & ((croma < q["croma_obj"]) | (lum < q["lum_obj"]) | verde), q["area_obj"], 4000)
+    obj |= dilatar(texto > 0.02, 2) | (moveis_pdf(Q) & B)
+    obj = dilatar(obj, 1)
+    piso = B & ~obj
+    # o tom do lugar: as peças tapadas (inpaint) e a mediana
+    ys, xs = np.nonzero(B)
+    y0, y1 = max(ys.min() - 30, 0), min(ys.max() + 31, Q.H)
+    x0, x1 = max(xs.min() - 30, 0), min(xs.max() + 31, Q.W)
+    sub = img[y0:y1, x0:x1].copy()
+    fora = ~piso[y0:y1, x0:x1]
+    sub = cv2.inpaint(sub, (fora * 255).astype(np.uint8), 5, cv2.INPAINT_TELEA)
+    tom = cv2.medianBlur(sub, q["mediana_px"]).astype(np.float32)
+    tom = cv2.GaussianBlur(tom, (0, 0), 1.5)
+    # as arestas do tom (as bordas dos degraus e das sombras) ficam como estão
+    tl = tom.mean(axis=2)
+    gx, gy = cv2.Sobel(tl, cv2.CV_32F, 1, 0, ksize=3), cv2.Sobel(tl, cv2.CV_32F, 0, 1, ksize=3)
+    aresta = dilatar(np.hypot(gx, gy) / 8 > q["aresta"], q["aresta_px"])
+    D = im[y0:y1, x0:x1] / np.maximum(tom, 1)
+    novo = tom * (1 + q["forca"] * (D - 1))
+    m = (piso[y0:y1, x0:x1] & ~aresta).astype(np.float32)
+    m = cv2.GaussianBlur(m, (0, 0), 0.8) * piso[y0:y1, x0:x1]
+    out = im.copy()
+    out[y0:y1, x0:x1] = im[y0:y1, x0:x1] * (1 - m[..., None]) + novo * m[..., None]
+    for _, al, claro, _ in rots:
+        out = compor(out, al, cor_rotulo(out, al))
+    print(f"    Bege Bahia: as manchas a {q['forca']:.0%} do contraste em {piso.sum() / Q.px_m ** 2:.0f} m² (a regra do "
+          f"Subsolo); rótulos de volta: {', '.join(r[0] for r, _, _, _ in rots) or 'nenhum'}")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # 4. O piso marrom (a amostra do cliente: o marrom médio e uniforme, RGB ~135, 108, 87, de manchas suaves e sem as pintas
 # do granito): no granito do piso (a cor malva da base chapada: cozinha, área gourmet, serviço, despensa, gás, quarto do
 # motorista e garagem; o banho do motorista é Bege Bahia), a amostra tecida por image quilting, no tom dela. A luz da
@@ -1117,7 +1172,7 @@ def tracejados_finos_ta(Q, img, q=None):
 
 # ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("tracejados", tracejados_ta), ("gramado", gramado_ta), ("piscina", piscina_ta),
-          ("piso_marrom", piso_marrom_ta), ("bancadas", bancadas_ta), ("banquetas", banquetas_ta), ("pilar", pilar_ta),
+          ("bege", bege_ta), ("piso_marrom", piso_marrom_ta), ("bancadas", bancadas_ta), ("banquetas", banquetas_ta), ("pilar", pilar_ta),
           ("soleiras", soleiras_ta), ("entrada", entrada_ta), ("escadas", escadas_ta), ("shaft", shaft_ta),
           ("tracejados_finos", tracejados_finos_ta)]
 
