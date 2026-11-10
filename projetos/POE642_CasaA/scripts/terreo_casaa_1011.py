@@ -448,7 +448,7 @@ def tracejados_ta(Q, img, q=None):
 # biblioteca (para baixo e à esquerda). No jardim de 4,79 m², as 3 plantas em tamanhos diferentes (`jardim_479`). O
 # jardim interno da escada (17,46 m², o verde da base) recebe o tom da grama nova, só nos px de grama. Os rótulos sobre o
 # gramado (o JARDIM de 4,79 m²) saem e voltam em branco.
-GRAMADO_TA = {"lote_px": (300, 186, 3398, 1912), "verde": -4, "verde_azul": 10, "faixa_px": 4, "fechar": 7, "buraco_max": 9000, "area_min": 3000,
+GRAMADO_TA = {"lote_px": (300, 186, 3398, 1912), "mascara_px": (262, 140, 3450, 1960), "muro_px": 8, "verde": -4, "verde_azul": 10, "faixa_px": 4, "fechar": 7, "buraco_max": 9000, "area_min": 3000,
               "semente": 7, "semente_plantas": 11, "suave": 0.7,
               "arvores": [("arvore_3", (420, 310), 2.6), ("arvore_1", (3280, 310), 2.8), ("arvore_2", (420, 1795), 2.6),
                           ("arvore_3", (3260, 1190), 2.4)],
@@ -461,7 +461,9 @@ GRAMADO_TA = {"lote_px": (300, 186, 3398, 1912), "verde": -4, "verde_azul": 10, 
 
 def gramado_mascara(Q, img, q=None):
     q = q or GRAMADO_TA
-    x0, y0, x1, y1 = q["lote_px"]
+    # a caixa passa dos muros (usuário: "VAMOS CORRIGIR O GRAMADO ATÉ O MURO"): o limite é o verde do render, que vai
+    # até a face de dentro dos muros e até a linha do lote; `lote_px` fica só para pôr os arbustos junto aos muros
+    x0, y0, x1, y1 = q["mascara_px"]
     lote = np.zeros(img.shape[:2], bool)
     lote[y0:y1, x0:x1] = True
     # o branco da base com as linhas finas dela fechadas (os tracejados e os contornos que cruzam o gramado)
@@ -476,6 +478,11 @@ def gramado_mascara(Q, img, q=None):
     m |= np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= q["buraco_max"]])
     n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
     m = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_min"]])
+    # junto aos muros, o render vai uns px além da base (a grama até a face do muro que ele desenha): o verde do render
+    # colado ao gramado entra, fora do branco da base; o muro (cinza neutro) segue sendo o limite
+    vr = (I[..., 1] >= I[..., 2] + q["verde"]) & (I[..., 1] >= I[..., 0] + q["verde_azul"]) & lote
+    for _ in range(q["muro_px"]):
+        m |= dilatar(m, 1) & vr
     # as faixas dos tracejados tirados que caem no branco da base junto ao gramado (o traço na divisa com a pedra)
     fx = np.zeros(m.shape, np.uint8)
     for p0, p1, _, _ in _retas_tracejadas(Q, TRACEJADOS_TA):
@@ -953,12 +960,13 @@ def pilar_ta(Q, img, q=None):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 8. As soleiras:
-# - a da entrada (cliente: "Representar uma soleira na entrada igual a casa C"): no vão da porta pivotante, entre os
-#   batentes do PDF (`entrada_pt`), a faixa de pedra clara da Casa C (`tom`), com as faces em cinza fino;
+# - a da entrada (cliente: "Representar uma soleira na entrada igual a casa C"): no vão da porta pivotante
+#   (`entrada_px`), a própria faixa da soleira da entrada da Casa C (`casa_c`, da final dela): a pedra clara e lisa, com
+#   a face fina de cada lado;
 # - a da sala para o escritório (cliente: "Não tem soleira entre a sala e o escritório"): a faixa clara no vão
 #   (`escritorio_px`) sai; o travertino atravessa o vão.
-SOLEIRAS_TA = {"entrada_px": (2444.0, 686.0, 2456.5, 843.0), "tom": (196, 210, 222), "face": (150, 150, 150),
-               "face_px": 0.6, "escritorio_px": (2343, 529, 2359, 589), "semente": 3140}
+SOLEIRAS_TA = {"entrada_px": (2444, 686, 2457, 843), "casa_c": "_texturas/originais/soleira_entrada_casac.png",
+               "escritorio_px": (2343, 529, 2359, 589), "semente": 3140}
 
 
 def soleiras_ta(Q, img, q=None):
@@ -972,18 +980,12 @@ def soleiras_ta(Q, img, q=None):
     zona = np.zeros(img.shape[:2], bool)
     zona[y0:y1, x0:x1] = reg.mean(axis=2) > 140
     out = P.piso_refeito(out, zona, q["semente"])
-    # a da entrada
-    (ax, ay), (bx, by) = Q.q2p(*q["entrada_px"][:2]), Q.q2p(*q["entrada_px"][2:])
-    r = (min(ax, bx), min(ay, by), max(ax, bx), max(ay, by))
-    tl = FA.tela(out, Q, r, folga=4)
-    m = tl.ret(r)
-    sys.path.insert(0, str(RAIZ / "_texturas"))
-    from texturas import textura
-    Tb = textura("bege_bahia", Q.px_m, tl.h, tl.w, semente=q["semente"]).astype(np.float32)
-    Tb = Tb / Tb.reshape(-1, 3).mean(axis=0) * np.float32(q["tom"])
-    tl.pintar_img(m, Tb)
-    tl.contorno(m, q["face_px"], q["face"])
-    out = tl.gravar()
+    # a da entrada (cliente: "Representar uma soleira na entrada igual a casa C"): a faixa da soleira da entrada da
+    # Casa C (`casa_c`, 13 px de face a face: a face de 1 px do lado de dentro, a pedra lisa clara, a face de 2 px do
+    # lado de fora), na mesma largura, esticada no comprimento do vão
+    x0, y0, x1, y1 = q["entrada_px"]
+    c = cv2.imread(str(RAIZ / q["casa_c"]))
+    out[y0:y1, x0:x1] = cv2.resize(c, (x1 - x0, y1 - y0), interpolation=cv2.INTER_LINEAR)
     print(f"    soleiras: sem a da sala para o escritório ({int(zona.sum())} px de travertino refeito); a da entrada no vão "
           "da porta pivotante, como a da Casa C")
     return out

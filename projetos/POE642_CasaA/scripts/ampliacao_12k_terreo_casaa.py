@@ -1,0 +1,436 @@
+"""O JPG em 12K do Térreo da Casa A (usuário, 10/11/26: "GERE A IMAGEM EM 12K JPG. ISSO É REGRA PARA TODAS AS PLANTAS").
+
+Só a imagem (sem rodapé), na proporção da A3 deitada (12288 x 8689 px), como a do Subsolo (`ampliacao_a3_casaa.py`):
+  1. `preparar`: da final (`renders/POE642_CasaA_PH_Terreo_final_rotulos.png`) saem os textos e os símbolos, que a IA
+     redesenha errado: os rótulos dos ambientes (achados na imagem pela forma, `terreo_casaa_1011.rotulos_na_imagem`,
+     com os ajustes de cada um), os triângulos e as descrições das escadas e o triângulo da entrada
+     (`terreo_casaa_1011.ESCADAS_TA` e `ENTRADA_TA`). Os tracejados finos dos vazios e do pergolado também saem: a
+     entrada da IA parte do passo do shaft (a final antes dos tracejados finos); o alfa deles é a diferença entre a
+     final e esse passo. A entrada da IA é o recorte da planta em 16:9 (a proporção da IA mais perto da planta do
+     Térreo, mais larga que a A3), com a margem da A3 de cada lado.
+  2. A entrada no Nano Banana Pro (4K, 16:9), com o prompt de ampliação fiel (`PROMPT`).
+  3. `corrigir`: os trechos que a IA inventou (`CORRIGIR_PX`, conferidos no mapa das diferenças) voltam da entrada.
+  4. A saída corrigida no Topaz (High Fidelity V2), a 12288 de largura.
+  5. `montar12k`: a saída do Topaz alinhada à entrada (ECC afim), na A3 deitada; os tons da final de volta (a baixa
+     frequência); o fundo fora da planta em branco puro; os tracejados finos de volta (o alfa deles ampliado); os
+     rótulos, as descrições e os triângulos desenhados direto no corpo de 12K, numa janela em volta de cada um.
+
+  python3 ampliacao_12k_terreo_casaa.py preparar --passos <pasta dos passos de terreo_casaa_1011.py>
+  python3 ampliacao_12k_terreo_casaa.py diferencas <saída do Nano Banana Pro>
+  python3 ampliacao_12k_terreo_casaa.py corrigir <saída do Nano Banana Pro> <corrigida>
+  python3 ampliacao_12k_terreo_casaa.py montar12k <saída do Topaz>
+"""
+
+import argparse
+import contextlib
+import io
+import json
+import sys
+from pathlib import Path
+
+import cv2
+import numpy as np
+
+AQUI = Path(__file__).resolve().parent
+sys.path.insert(0, str(AQUI))
+import final3840_casaa as FA                    # noqa: E402
+import final3840_casaa_terreo as T              # noqa: E402
+import ampliacao_a3_casaa as AM                 # noqa: E402
+import terreo_casaa_1011 as TA                  # noqa: E402
+
+R = FA.CASA / "renders"
+FINAL = R / "POE642_CasaA_PH_Terreo_final_rotulos.png"
+ENTRADA_IA = R / "POE642_CasaA_PH_Terreo_12K_entrada_ia.png"
+TRACOS = R / "POE642_CasaA_PH_Terreo_12K_tracejados.png"       # o alfa (x255) e a cor dos tracejados finos
+DADOS = R / "POE642_CasaA_PH_Terreo_12K_dados.json"
+SAIDA = FA.CASA / "entrega" / "POE642_CasaA_PH_Terreo_12K.jpg"
+
+G12 = {"a3": (4961, 3508), "margem_px": 150, "ia": (16, 9), "branco": 245, "cheio": 0.85, "tom_sigma_px": 2.5,
+       "fundo_folga_px": 3, "folga_texto_px": 2, "largura": 12288, "janela_px": 260, "qualidade": 95, "traco_min": 0.04}
+
+PROMPT = ("High-fidelity 4K upscale of the reference image, which is a top-down architectural humanized floor plan "
+          "(orthographic, viewed straight from above). Reproduce the reference EXACTLY: identical composition, framing, "
+          "layout, scale and position of every element; same dark gray walls, black pillars, doors, glass partitions, "
+          "stairs and stepping stones, pool, spa and wooden deck, furniture (armchairs, sofas, round tables, dining "
+          "table, bar stools, sun loungers), kitchen and gourmet countertops, cooktops, stainless steel appliances, "
+          "bathroom fixtures, spiral staircase, elevator, the three cars in the garage, the trees and shrubs, and the "
+          "pure white background. Do not add, remove, move, rotate, resize or redesign anything. Do not add any text, "
+          "labels, numbers, arrows, triangles, symbols, dashed lines or people. Only increase resolution and detail: "
+          "crisp straight wall edges and lines, sharp furniture edges, and fine realistic material textures matching "
+          "the existing colors and tones exactly: smooth light beige marble (Bege Bahia) with soft low-contrast veining, "
+          "light raw travertine indoors, the uniform medium brown stone floor in the kitchen, gourmet and garage, warm "
+          "wood deck boards (same direction and tone), the sober gray-green pool water with the small mosaic tile "
+          "pattern, Portuguese stone paving on the driveway, and the dark olive-green lawn with very fine grass grain "
+          "at the same small scale. Keep colors, brightness and contrast the same as the reference. Clean, "
+          "photographic architectural presentation quality, no artifacts, no noise.")
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Os textos e os símbolos da final
+def rotulos(Q, img):
+    """[(nome, pdf, opc, (dx, dy) px do quadro, cor BGR)] dos rótulos achados na final: o desenho de cada um (corpo,
+    quebra, desvio) é o de `pedidos_terreo_casaa_2910._achar_rotulo`, na polaridade de melhor nota."""
+    import revisao_casaa_2910 as RV
+    import pedidos_terreo_casaa_2910 as P
+    rot, aj = RV._rotulos_pav(Q)
+    q = dict(P.ROTULOS_OUTROS_TA, minimo_forma=0.0)
+    cinza = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    e = img.shape[1] / 2000
+    out = []
+    for r in rot:
+        melhor = None
+        for claro in (False, True):
+            src = (255 - img) if claro else img
+            with contextlib.redirect_stdout(io.StringIO()):
+                al, aj2 = P._achar_rotulo(Q, src, r, aj, q, busca=250)
+            if al.max() < 0.3:
+                continue
+            x0, y0, x1, y1 = RV._caixa(al)
+            g = cinza[y0:y1, x0:x1] if claro else 255 - cinza[y0:y1, x0:x1]
+            a = al[y0:y1, x0:x1]
+            nota = float(np.corrcoef(a.ravel(), g.ravel())[0, 1]) if a.std() > 0 and g.std() > 0 else 0.0
+            if melhor is None or nota > melhor[0]:
+                ax, ay = Q.p2q(*r[2])
+                ent = [a_ for a_ in aj2 if a_[0] == r[0] and np.hypot(a_[1][0] - ax / e, a_[1][1] - ay / e) < 1e-3]
+                melhor = (nota, al, claro, ent[0] if ent else None)
+        if melhor is None or melhor[0] < 0.6 or melhor[3] is None:
+            continue
+        nota, al, claro, ent = melhor
+        opc = dict(ent[3]) if len(ent) > 3 and isinstance(ent[3], dict) else ({"corpo": ent[3]} if len(ent) > 3 else {})
+        opc.pop("cor", None)
+        dx, dy = ent[2][0] * Q.W / 2000, ent[2][1] * Q.W / 2000
+        cor = TA.ROTULO_CLARO if claro else TA.ROTULO_ESCURO
+        out.append({"nome": r[0], "pdf": list(r[2]), "opc": opc, "desvio": [float(dx), float(dy)], "cor": list(cor),
+                    "nota": round(nota, 3)})
+    return out
+
+
+def _r(Q, b):
+    return AM._r_do_nome(Q, b["nome"], b["pdf"])
+
+
+def alfa_rotulo(Q, b, forma, s=1.0, x0=0.0, y0=0.0):
+    """O alfa do rótulo b no quadro `forma`, levado por u = (x - x0) s, v = (y - y0) s."""
+    def loc(x, y):
+        u, v = Q.p2q(x, y)
+        return (u - x0) * s, (v - y0) * s
+    return AM._alfa_um(Q, _r(Q, b), b["opc"], b["desvio"][0], b["desvio"][1], forma, pdf2img=loc, esc=Q.W / 2000 * s)
+
+
+def anotacoes(Q):
+    """Os símbolos e as descrições, em px do quadro: [("tri", pts, cor)] e [("txt", (linhas, x, y, alinhar), cor)]."""
+    q = TA.ESCADAS_TA
+    out = []
+    for nome in ("pisantes", "deck", "jardim"):
+        e = q[nome]
+        out.append(("tri", [list(map(float, p)) for p in TA.seta_tri(*e["tri_px"], e["dir"])], (30, 30, 30)))
+        out.append(("txt", (list(e["texto"]), *e["txt_px"], e["alinhar"]), q["cor_texto"]))
+    c = T.CARACOL
+    ccx, ccy = Q.p2q(*c["centro"])
+    rm = (c["r_pilar"] + c["r_degrau"]) / 2 * FA.PT_PX
+    ang = np.radians(c["a0"] + c["passo"] / 2)
+    tx, ty = ccx + rm * np.cos(ang), ccy - rm * np.sin(ang)
+    pts = TA.seta_tri(tx, ty, (-np.sin(ang), -np.cos(ang)), *q["caracol"]["tri"])
+    out.append(("tri", [list(map(float, p)) for p in pts], (30, 30, 30)))
+    cc = q["caracol"]
+    out.append(("txt", (list(cc["texto"]), *cc["txt_px"], cc["alinhar"]), TA.ROTULO_CLARO))
+    e = TA.ENTRADA_TA
+    a0, a1 = e["abertura_px"]
+    cx = e["x_soleira_px"] + e["recuo_px"] + e["comp"] / 2
+    pts = TA.seta_tri(cx, (a0 + a1) / 2, (-1, 0), e["comp"], e["larg"])
+    out.append(("tri", [list(map(float, p)) for p in pts], (30, 30, 30)))
+    return out
+
+
+def alfa_anotacao(tipo, dados, forma, s=1.0, x0=0.0, y0=0.0, ss=8):
+    H, W = forma
+    if tipo == "tri":
+        p = (np.float32(dados) - [x0, y0]) * s
+        bx0, by0 = np.floor(p.min(axis=0)).astype(int) - 2
+        bx1, by1 = np.ceil(p.max(axis=0)).astype(int) + 3
+        m = np.zeros(((by1 - by0) * ss, (bx1 - bx0) * ss), np.uint8)
+        cv2.fillPoly(m, [np.int32(np.round((p - [bx0, by0]) * ss))], 255, cv2.LINE_AA)
+        a = np.zeros((H, W), np.float32)
+        sub = cv2.resize(m.astype(np.float32) / 255, (bx1 - bx0, by1 - by0), interpolation=cv2.INTER_AREA)
+        ya, yb, xa, xb = max(0, by0), min(H, by1), max(0, bx0), min(W, bx1)
+        a[ya:yb, xa:xb] = sub[ya - by0:yb - by0, xa - bx0:xb - bx0]
+        return a
+    linhas, x, y, alinhar = dados
+    corpo = FA.ESCADA_A["corpo_px"]
+    return TA.alfa_texto(linhas, (x - x0) * s, (y - y0) * s, alinhar, corpo=int(round(corpo * s)),
+                         entrelinha=round(corpo * 1.18) * s, forma=forma)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def recortes(img):
+    q = G12
+    Wa, _ = q["a3"]
+    g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ys, xs = np.nonzero(g < q["branco"])
+    x0, y0, x1, y1 = int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
+    Wc = int(round((x1 - x0) * Wa / (Wa - 2 * q["margem_px"])))
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    X0 = int(round(cx - Wc / 2))
+    Hia = int(round(Wc * q["ia"][1] / q["ia"][0]))
+    Yia = int(round(cy - Hia / 2))
+    if Yia < 0 or Yia + Hia > img.shape[0] or X0 < 0 or X0 + Wc > img.shape[1] or y1 - y0 > Hia:
+        raise SystemExit(f"o recorte sai do quadro ou corta a planta: {X0},{Yia} {Wc}x{Hia}, planta {x0},{y0}-{x1},{y1}")
+    return {"planta": (x0, y0, x1, y1), "X0": X0, "Wc": Wc, "Yia": Yia, "Hia": Hia}
+
+
+def preparar(passos):
+    Q = FA.QuadroA("Terreo")
+    img = cv2.imread(str(FINAL))
+    base = cv2.imread(str(Path(passos) / "passo_shaft.png"))
+    # os tracejados finos: o alfa (a final entre o passo do shaft e a cor do traço) e a cor (cinza escuro ou claro)
+    f, b = img.astype(np.float32), base.astype(np.float32)
+    esc, cla = np.float32(TA.FINOS_TA["escuro"]), np.float32(TA.FINOS_TA["claro"])
+    a_esc = np.clip(((b - f) / np.maximum(b - esc, 1)).mean(axis=2), 0, 1)
+    a_cla = np.clip(((f - b) / np.maximum(cla - b, 1)).mean(axis=2), 0, 1)
+    escuro = a_esc >= a_cla
+    alfa = np.where(escuro, a_esc, a_cla)
+    alfa[alfa < G12["traco_min"]] = 0
+    tr = np.zeros(img.shape, np.uint8)
+    tr[..., 0] = np.round(alfa * 255).astype(np.uint8)
+    tr[..., 1] = np.where(escuro, 0, 255).astype(np.uint8)
+    cv2.imwrite(str(TRACOS), tr)
+    # os textos e os símbolos saem do passo do shaft (o fundo pela conta do alfa, o miolo pelo entorno)
+    rots = rotulos(Q, img)
+    camadas = [(alfa_rotulo(Q, b_, img.shape[:2]), tuple(b_["cor"])) for b_ in rots]
+    anot = anotacoes(Q)
+    camadas += [(alfa_anotacao(t, d, img.shape[:2]), tuple(c)) for t, d, c in anot]
+    limpa = AM.tirar(base, camadas, G12["cheio"])
+    # onde o desenho achado não casa px a px com o da final, sobra a sombra do texto: a área de cada texto (com folga)
+    # vem toda do entorno (a IA refaz a textura; no 12K o texto volta por cima)
+    txt = np.zeros(img.shape[:2], np.uint8)
+    for (a, _), t in zip(camadas, ["rot"] * len(rots) + [t_ for t_, _, _ in anot]):
+        if t != "tri":
+            txt |= (a > 0.02).astype(np.uint8)
+    k = 2 * G12["folga_texto_px"] + 1
+    limpa = cv2.inpaint(limpa, cv2.dilate(txt, np.ones((k, k), np.uint8)) * 255, 4, cv2.INPAINT_TELEA)
+    rc = recortes(img)
+    X0, Wc, Yia, Hia = rc["X0"], rc["Wc"], rc["Yia"], rc["Hia"]
+    cv2.imwrite(str(ENTRADA_IA), limpa[Yia:Yia + Hia, X0:X0 + Wc])
+    DADOS.write_text(json.dumps({"rotulos": rots, "anotacoes": anot, "recortes": rc}, ensure_ascii=False, indent=1)
+                     + "\n")
+    # conferência: o desenho de volta sobre a limpa, contra a final (o quanto o redesenho bate)
+    volta = AM.pintar(limpa, camadas)
+    dif = np.abs(volta.astype(np.int16) - base.astype(np.int16)).max(axis=2)
+    print(f"[Térreo] {len(rots)} rótulos ({', '.join(b_['nome'] for b_ in rots)}), {len(anot)} símbolos e descrições;"
+          f" o redesenho contra a final: {int((dif > 24).sum())} px com mais de 24 de diferença")
+    x0, y0, x1, y1 = rc["planta"]
+    cv2.imwrite(str(R / "POE642_CasaA_PH_Terreo_12K_sem_textos.jpg"),
+                np.hstack([img[y0:y1, x0:x1], limpa[y0:y1, x0:x1]]), [cv2.IMWRITE_JPEG_QUALITY, 90])
+    print(f"    a planta {x0},{y0} - {x1},{y1}; o recorte da IA {X0},{Yia} {Wc}x{Hia} (16:9)")
+    print(f"    {ENTRADA_IA}")
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def _alinhar(ia, entrada):
+    Hc, Wc = entrada.shape[:2]
+    peq = cv2.resize(ia, (Wc, Hc), interpolation=cv2.INTER_AREA)
+    g0 = cv2.GaussianBlur(cv2.cvtColor(entrada, cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    g1 = cv2.GaussianBlur(cv2.cvtColor(peq, cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    M = np.eye(2, 3, dtype=np.float32)
+    _, M = cv2.findTransformECC(g0, g1, M, cv2.MOTION_AFFINE,
+                                (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 300, 1e-7), None, 5)
+    return M
+
+
+def diferencas(saida_ia):
+    """O mapa das diferenças de estrutura (passa-banda) entre a saída da IA e a entrada, na escala da entrada: onde ela
+    inventou ou tirou peças. Grava o mapa e lista as manchas maiores (px da final)."""
+    entrada = cv2.imread(str(ENTRADA_IA))
+    rc = json.loads(DADOS.read_text())["recortes"]
+    ia = cv2.imread(str(saida_ia))
+    M = _alinhar(ia, entrada)
+    Hc, Wc = entrada.shape[:2]
+    Hi, Wi = ia.shape[:2]
+    Tm = (np.diag([Wi / Wc, Hi / Hc, 1.0]) @ np.vstack([M.astype(np.float64), [0, 0, 1]]))[:2]
+    peq = cv2.warpAffine(ia, Tm, (Wc, Hc), flags=cv2.INTER_AREA | cv2.WARP_INVERSE_MAP, borderValue=(255, 255, 255))
+
+    def banda(x):
+        g = cv2.cvtColor(x, cv2.COLOR_BGR2LAB).astype(np.float32)
+        return cv2.GaussianBlur(g, (0, 0), 1.0) - cv2.GaussianBlur(g, (0, 0), 6.0)
+    d = np.abs(banda(peq) - banda(entrada)).max(axis=2)
+    d += np.abs(cv2.GaussianBlur(cv2.cvtColor(peq, cv2.COLOR_BGR2LAB).astype(np.float32), (0, 0), 3)
+                - cv2.GaussianBlur(cv2.cvtColor(entrada, cv2.COLOR_BGR2LAB).astype(np.float32), (0, 0), 3)).max(axis=2)
+    m = cv2.GaussianBlur(d, (0, 0), 4) > 14
+    n, lab, st, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8))
+    manchas = sorted([(int(st[i, 4]), int(st[i, 0]) + rc["X0"], int(st[i, 1]) + rc["Yia"],
+                       int(st[i, 0] + st[i, 2]) + rc["X0"], int(st[i, 1] + st[i, 3]) + rc["Yia"])
+                      for i in range(1, n) if st[i, 4] > 150], reverse=True)
+    viz = np.hstack([entrada, peq, cv2.applyColorMap(np.clip(d * 6, 0, 255).astype(np.uint8), cv2.COLORMAP_JET)])
+    cv2.imwrite(str(R / "POE642_CasaA_PH_Terreo_12K_diferencas.jpg"), viz, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    for a, *b in manchas[:40]:
+        print(f"    {a:6d} px  {b}")
+    return manchas
+
+
+# Os trechos que a IA inventou (px da final), conferidos no mapa das diferenças; voltam da entrada ampliada
+CORRIGIR_PX = {}
+CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0}
+
+
+def corrigir_ia(saida_ia, destino):
+    q = CORRECAO
+    ia = cv2.imread(str(saida_ia))
+    entrada = cv2.imread(str(ENTRADA_IA))
+    rc = json.loads(DADOS.read_text())["recortes"]
+    X0, Yia = rc["X0"], rc["Yia"]
+    Hi, Wi = ia.shape[:2]
+    Hc, Wc = entrada.shape[:2]
+    M = _alinhar(ia, entrada)
+    Tm = (np.diag([Wi / Wc, Hi / Hc, 1.0]) @ np.vstack([M.astype(np.float64), [0, 0, 1]]))[:2]
+    ref = cv2.warpAffine(entrada, Tm, (Wi, Hi), flags=cv2.INTER_LANCZOS4, borderValue=(255, 255, 255)).astype(np.float32)
+    f_, r_ = q["nitidez"]
+    ref = np.clip(ref + f_ * (ref - cv2.GaussianBlur(ref, (0, 0), r_)), 0, 255)
+    m = np.zeros((Hi, Wi), np.float32)
+    for nome, (x0, y0, x1, y1) in CORRIGIR_PX.items():
+        pts = np.float32([[x0 - X0, y0 - Yia], [x1 - X0, y0 - Yia], [x1 - X0, y1 - Yia], [x0 - X0, y1 - Yia]])
+        pq = cv2.transform(pts[None], Tm)[0]
+        cv2.fillConvexPoly(m, np.int32(np.round(pq)), 1.0)
+    m = cv2.GaussianBlur(m, (0, 0), q["borda_px"] * Wi / Wc / 2.7)[..., None]
+    out = np.clip(np.round(ia * (1 - m) + ref * m), 0, 255).astype(np.uint8)
+    cv2.imwrite(str(destino), out)
+    print(f"    a saída da IA corrigida em {len(CORRIGIR_PX)} trechos ({', '.join(CORRIGIR_PX) or 'nenhum'}): {destino}")
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+def montar12k(saida_topaz, largura=None):
+    from PIL import Image
+    q = G12
+    L = largura or q["largura"]
+    Wa0, Ha0 = q["a3"]
+    Hh = int(round(L * Ha0 / Wa0))
+    Q = FA.QuadroA("Terreo")
+    img = cv2.imread(str(FINAL))
+    entrada = cv2.imread(str(ENTRADA_IA))
+    d = json.loads(DADOS.read_text())
+    rc, rots, anot = d["recortes"], d["rotulos"], d["anotacoes"]
+    X0, Wc, Yia, Hia = rc["X0"], rc["Wc"], rc["Yia"], rc["Hia"]
+    Ya3 = Yia + (Hia - Wc * Ha0 / Wa0) / 2            # o topo da A3 (px da final): a A3 é mais alta que o 16:9
+    s = L / Wc
+    ia = cv2.imread(str(saida_topaz))
+    Hi, Wi = ia.shape[:2]
+    print(f"[Térreo] a saída ampliada: {Wi}x{Hi}; o JPG: {L}x{Hh} ({s:.3f}x a final)")
+    M = _alinhar(ia, entrada)
+    print(f"    alinhamento (entrada -> saída): [[{M[0, 0]:.4f} {M[0, 1]:.4f} {M[0, 2]:.2f}] "
+          f"[{M[1, 0]:.4f} {M[1, 1]:.4f} {M[1, 2]:.2f}]]")
+    Au = np.array([[1 / s, 0, 0], [0, 1 / s, Ya3 - Yia], [0, 0, 1]], np.float64)
+    Tm = (np.diag([Wi / Wc, Hi / Hia, 1.0]) @ np.vstack([M.astype(np.float64), [0, 0, 1]]) @ Au)[:2]
+    out = cv2.warpAffine(ia, Tm, (L, Hh), flags=cv2.INTER_LANCZOS4 | cv2.WARP_INVERSE_MAP,
+                         borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
+    del ia
+    # os tons da final: a baixa frequência na escala da entrada, ampliada (em faixas)
+    hb = int(round(Hh / s))
+    ref0 = cv2.warpAffine(entrada, np.array([[1, 0, 0], [0, 1, -(Ya3 - Yia)]], np.float64), (Wc, hb),
+                          flags=cv2.INTER_LINEAR, borderValue=(255, 255, 255)).astype(np.float32)
+    peq = cv2.resize(out, (Wc, hb), interpolation=cv2.INTER_AREA).astype(np.float32)
+    sg = q["tom_sigma_px"]
+    corr = cv2.resize(cv2.GaussianBlur(ref0, (0, 0), sg) - cv2.GaussianBlur(peq, (0, 0), sg), (L, Hh),
+                      interpolation=cv2.INTER_CUBIC)
+    for y in range(0, Hh, 1024):
+        out[y:y + 1024] = np.clip(np.round(out[y:y + 1024].astype(np.float32) + corr[y:y + 1024]), 0, 255
+                                  ).astype(np.uint8)
+    del corr
+    Fq = np.array([[s, 0, -s * X0], [0, s, -s * Ya3]], np.float64)
+    # o fundo: branco puro fora da planta
+    gq = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    fundo = (gq >= 254).astype(np.uint8)
+    _, lab = cv2.connectedComponents(fundo)
+    fundo = (lab == lab[0, 0]).astype(np.uint8)
+    kk = 2 * q["fundo_folga_px"] + 1
+    fundo = cv2.erode(fundo, np.ones((kk, kk), np.uint8)).astype(np.float32)
+    tr = cv2.imread(str(TRACOS))
+    alfa_tr = tr[..., 0].astype(np.float32) / 255
+    cor_tr = np.where(tr[..., 1] > 127, np.float32(TA.FINOS_TA["claro"][0]), np.float32(TA.FINOS_TA["escuro"][0]))
+    sf = 2.0 * L / Wa0
+    for y in range(0, Hh, 1024):
+        y1 = min(Hh, y + 1024)
+        pad = int(4 * sf) + 2
+        ya, yb = max(0, y - pad), min(Hh, y1 + pad)
+        Ft = Fq.copy()
+        Ft[1, 2] -= ya
+        fa = cv2.warpAffine(fundo, Ft, (L, yb - ya), flags=cv2.INTER_LINEAR, borderValue=1.0)
+        fa = cv2.GaussianBlur(fa, (0, 0), sf)[y - ya:y1 - ya, :, None]
+        reg = out[y:y1].astype(np.float32) * (1 - fa) + 255 * fa
+        # os tracejados finos: o alfa ampliado (cúbico), na cor deles
+        Ft = Fq.copy()
+        Ft[1, 2] -= y
+        at = np.clip(cv2.warpAffine(alfa_tr, Ft, (L, y1 - y), flags=cv2.INTER_CUBIC, borderValue=0.0), 0, 1)[..., None]
+        ct = cv2.warpAffine(cor_tr, Ft, (L, y1 - y), flags=cv2.INTER_NEAREST, borderValue=0.0)[..., None]
+        reg = reg * (1 - at) + ct * at
+        out[y:y1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+
+    # os textos e os símbolos, numa janela em volta de cada um
+    def janela(cx, cy, meia):
+        return (max(0, int(cx - meia)), max(0, int(cy - meia / 2)), min(L, int(cx + meia)), min(Hh, int(cy + meia / 2)))
+
+    def com_alfa(a, cor, bx, by):
+        h, w = a.shape[:2]
+        reg = out[by:by + h, bx:bx + w].astype(np.float32)
+        out[by:by + h, bx:bx + w] = np.clip(np.round(reg * (1 - a[..., None]) + np.float32(cor) * a[..., None]), 0,
+                                            255).astype(np.uint8)
+    meia = q["janela_px"] * s
+    for b in rots:
+        u, v = Q.p2q(*b["pdf"])
+        cx, cy = (u + b["desvio"][0] - X0) * s, (v + b["desvio"][1] - Ya3) * s
+        bx, by, bx1, by1 = janela(cx, cy, meia)
+        a = alfa_rotulo(Q, b, (by1 - by, bx1 - bx), s, X0 + bx / s, Ya3 + by / s)
+        com_alfa(a, b["cor"], bx, by)
+    for tipo, dados, cor in anot:
+        if tipo == "tri":
+            cx, cy = np.mean(np.float32(dados), axis=0)
+        else:
+            _, x, y, alinhar = dados
+            cx, cy = x + {"esquerda": 60, "direita": -60, "centro": 0}[alinhar], y
+        cx, cy = (cx - X0) * s, (cy - Ya3) * s
+        bx, by, bx1, by1 = janela(cx, cy, meia)
+        a = alfa_anotacao(tipo, dados, (by1 - by, bx1 - bx), s, X0 + bx / s, Ya3 + by / s)
+        com_alfa(a, cor, bx, by)
+    SAIDA.parent.mkdir(parents=True, exist_ok=True)
+    dpi = int(round(L / (420 / 25.4)))
+    Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(SAIDA, quality=q["qualidade"], subsampling=0,
+                                                               dpi=(dpi, dpi), optimize=True)
+    cv2.imwrite(str(R / "POE642_CasaA_PH_Terreo_12K_previa.jpg"),
+                cv2.resize(out, (2000, round(2000 * Hh / L)), interpolation=cv2.INTER_AREA), [cv2.IMWRITE_JPEG_QUALITY, 90])
+    for nome, (x0, y0, x1, y1) in CONFERENCIA.items():
+        u0, v0, u1, v1 = [int(round(t_)) for t_ in ((x0 - X0) * s, (y0 - Ya3) * s, (x1 - X0) * s, (y1 - Ya3) * s)]
+        cr = out[v0:v1, u0:u1]
+        ref = cv2.resize(img[y0:y1, x0:x1], (cr.shape[1], cr.shape[0]), interpolation=cv2.INTER_LANCZOS4)
+        par = np.hstack([ref, np.full((cr.shape[0], 24, 3), 255, np.uint8), cr])
+        cv2.imwrite(str(R / f"POE642_CasaA_PH_Terreo_12K_conferencia_{nome}.jpg"),
+                    cv2.resize(par, (par.shape[1] // 2, par.shape[0] // 2), interpolation=cv2.INTER_AREA),
+                    [cv2.IMWRITE_JPEG_QUALITY, 90])
+    print(f"    {SAIDA} {L}x{Hh} ({dpi} dpi na A3), {SAIDA.stat().st_size / 1e6:.1f} MB")
+
+
+# Os recortes da conferência (px da final): a final ampliada sem IA ao lado do 12K
+CONFERENCIA = {"piscina_deck": (700, 320, 1360, 1150), "varanda_estar": (1480, 330, 2180, 910),
+               "gourmet_cozinha": (1180, 1100, 2200, 1680), "hall_lavabo_escritorio": (2200, 330, 2640, 900),
+               "garagem": (2180, 1100, 2720, 1660)}
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="etapa", required=True)
+    p = sub.add_parser("preparar")
+    p.add_argument("--passos", required=True, help="a pasta dos passos de terreo_casaa_1011.py (passo_shaft.png)")
+    d_ = sub.add_parser("diferencas")
+    d_.add_argument("saida_ia", type=Path)
+    c_ = sub.add_parser("corrigir")
+    c_.add_argument("saida_ia", type=Path)
+    c_.add_argument("destino", type=Path)
+    m_ = sub.add_parser("montar12k")
+    m_.add_argument("saida_topaz", type=Path)
+    m_.add_argument("--largura", type=int, default=None)
+    a = ap.parse_args()
+    if a.etapa == "preparar":
+        preparar(a.passos)
+    elif a.etapa == "diferencas":
+        diferencas(a.saida_ia)
+    elif a.etapa == "corrigir":
+        corrigir_ia(a.saida_ia, a.destino)
+    else:
+        montar12k(a.saida_topaz, a.largura)
