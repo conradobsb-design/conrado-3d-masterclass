@@ -1960,7 +1960,12 @@ ANTES_DEPOIS_1011 = {"Terreo": {"planta": (270, 140, 3440, 1960), "vazios_varand
                                 "gourmet": (1180, 1180, 1800, 1680), "cozinha_servico": (1700, 1100, 2200, 1660),
                                 "caracol": (1760, 1480, 2060, 1660), "entrada_escritorio": (2240, 460, 2640, 880),
                                 "lavabo_shaft": (2220, 330, 2420, 560), "escada_jardim": (2240, 860, 2560, 1110),
-                                "jardim_479": (1430, 1600, 1730, 1780)}}
+                                "jardim_479": (1430, 1600, 1730, 1780),
+                                # a leva de 10/11 à noite
+                                "garagem": (2180, 1310, 2720, 1665), "pedras_hall": (2400, 560, 3440, 910),
+                                "acesso_muro": (2880, 1260, 3440, 1960), "faixa_baixo": (1440, 1540, 2900, 1960),
+                                "escritorio": (2330, 330, 2610, 620), "terraco_guarda_corpo": (1040, 320, 1620, 420),
+                                "janela_estar": (1740, 320, 2000, 430), "lavatorio": (1440, 1420, 1660, 1500)}}
 
 
 def main():
