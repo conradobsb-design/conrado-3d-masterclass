@@ -361,11 +361,232 @@ CONFERENCIA = {"academia_banhos": (1300, 1050, 1900, 1650), "escada_grama": (720
                "deposito_circulacao": (1080, 866, 1900, 1060), "hall_elevador": (1880, 1040, 2393, 1230)}
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# A correção da saída da IA antes da ampliação a 12K (o mapa das diferenças de estrutura entre a saída e a entrada
+# ampliada mostrou o que ela inventou, em 10/11/26): a sauna com bancos em degraus em L (o PDF tem um banco só, junto à
+# parede de baixo), a bancada de granito do BH. SERV. com veio de madeira e os chuveiros quadrados (com a grade de furos)
+# trocados por placas lisas ou redondos. Nesses trechos (`CORRIGIR_PX`, px da final) entra a entrada ampliada (Lanczos)
+# com nitidez (`nitidez`: força e raio do unsharp), com a borda esfumada; o resto (os aparelhos da academia, redesenhados
+# fiéis e mais nítidos) fica o da IA.
+CORRIGIR_PX = {"sauna": (1188, 1506, 1382, 1634), "bancada_bh_serv": (1100, 988, 1136, 1049),
+               "chuveiro_bh_serv": (1105, 897, 1128, 922), "chuveiro_bh_sauna": (1422, 1596, 1444, 1636),
+               "chuveiro_bh_fem": (1657, 1596, 1679, 1636)}
+CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0}
+
+
+def corrigir_ia(saida_ia, destino):
+    """A saída da IA com os trechos de `CORRIGIR_PX` vindos da entrada ampliada (no quadro da saída, pelo ECC)."""
+    q = CORRECAO
+    ia = cv2.imread(str(saida_ia))
+    entrada = cv2.imread(str(ENTRADA_IA))
+    rc = json.loads(AJUSTE_ROT.read_text())["recortes"]
+    X0, Yia = rc["X0"], rc["Yia"]
+    Hi, Wi = ia.shape[:2]
+    Hc, Wc = entrada.shape[:2]
+    peq = cv2.resize(ia, (Wc, Hc), interpolation=cv2.INTER_AREA)
+    g0 = cv2.GaussianBlur(cv2.cvtColor(entrada, cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    g1 = cv2.GaussianBlur(cv2.cvtColor(peq, cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    M = np.eye(2, 3, dtype=np.float32)
+    _, M = cv2.findTransformECC(g0, g1, M, cv2.MOTION_AFFINE,
+                                (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 300, 1e-7), None, 5)
+    T = (np.diag([Wi / Wc, Hi / Hc, 1.0]) @ np.vstack([M.astype(np.float64), [0, 0, 1]]))[:2]
+    ref = cv2.warpAffine(entrada, T, (Wi, Hi), flags=cv2.INTER_LANCZOS4, borderValue=(255, 255, 255)).astype(np.float32)
+    f_, r_ = q["nitidez"]
+    ref = np.clip(ref + f_ * (ref - cv2.GaussianBlur(ref, (0, 0), r_)), 0, 255)
+    m = np.zeros((Hi, Wi), np.float32)
+    for nome, (x0, y0, x1, y1) in CORRIGIR_PX.items():
+        pts = np.float32([[x0 - X0, y0 - Yia], [x1 - X0, y0 - Yia], [x1 - X0, y1 - Yia], [x0 - X0, y1 - Yia]])
+        pq = cv2.transform(pts[None], T)[0]
+        cv2.fillConvexPoly(m, np.int32(np.round(pq)), 1.0)
+    m = cv2.GaussianBlur(m, (0, 0), q["borda_px"] * Wi / Wc / 2.7)[..., None]
+    out = np.clip(np.round(ia * (1 - m) + ref * m), 0, 255).astype(np.uint8)
+    cv2.imwrite(str(destino), out)
+    print(f"    a saída da IA corrigida em {len(CORRIGIR_PX)} trechos ({', '.join(CORRIGIR_PX)}): {destino}")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# O JPG em 12K das duas opções de letra (usuário, 10/11/26: "PODE GERAR O ARQUIVO JPG 12K DAS DUAS OPÇÕES"; antes: "VOU
+# PRECISAR DA IMAGEM, SÓ DA IMAGEM, EM JPG PARA O CLIENTE PODER TRABALHAR EM CIMA DELA PARA O BOOK DELA"). A saída do
+# Nano Banana Pro (4K) é levada a 12K pelo Topaz (High Fidelity V2, no Higgsfield) e montada como a A3 de `montar`, na
+# proporção da A3 deitada (`GRANDE["largura"]` x largura / √2), sem passar a imagem inteira por float: a correção dos tons
+# sai na escala da entrada e é ampliada; os rótulos e a escada são desenhados numa janela em volta de cada um, na Inter
+# (opção A, `rotulos_subsolo_casaa.camadas`) e na Kalam (opção B, `rotulos_manuscritos_casaa`).
+GRANDE = {"largura": 12288, "janela_px": (1400, 600), "qualidade": 95,
+          "saida": FA.CASA / "entrega" / "POE642_CasaA_PH_Subsolo_12K_opcao_{opcao}.jpg"}
+
+
+def montar_grande(saida_topaz, largura=None):
+    import rotulos_subsolo_casaa as RS
+    import rotulos_manuscritos_casaa as RM
+    from PIL import Image
+    q, g = A3, GRANDE
+    L = largura or g["largura"]
+    Wa0, Ha0 = q["px"]
+    Hh = int(round(L * Ha0 / Wa0))
+    img = cv2.imread(str(FINAL_SUB))
+    entrada = cv2.imread(str(ENTRADA_IA))
+    d = json.loads(AJUSTE_ROT.read_text())
+    rc, aj = d["recortes"], d["rotulos"]
+    X0, Wc, Yia, Hia, Ya3 = rc["X0"], rc["Wc"], rc["Yia"], rc["Hia"], rc["Ya3"]
+    s = L / Wc
+    ia = cv2.imread(str(saida_topaz))
+    Hi, Wi = ia.shape[:2]
+    print(f"[Subsolo] a saída ampliada: {Wi}x{Hi}; o JPG: {L}x{Hh} ({s:.3f}x a final)")
+    peq = cv2.resize(ia, (Wc, Hia), interpolation=cv2.INTER_AREA)
+    g0 = cv2.GaussianBlur(cv2.cvtColor(entrada, cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    g1 = cv2.GaussianBlur(cv2.cvtColor(peq, cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    M = np.eye(2, 3, dtype=np.float32)
+    _, M = cv2.findTransformECC(g0, g1, M, cv2.MOTION_AFFINE,
+                                (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 300, 1e-7), None, 5)
+    print(f"    alinhamento (entrada -> saída, px da entrada): [[{M[0, 0]:.4f} {M[0, 1]:.4f} {M[0, 2]:.2f}]"
+          f" [{M[1, 0]:.4f} {M[1, 1]:.4f} {M[1, 2]:.2f}]]")
+    Au = np.array([[1 / s, 0, 0], [0, 1 / s, Ya3 - Yia], [0, 0, 1]], np.float64)
+    Mm = np.vstack([M.astype(np.float64), [0, 0, 1]])
+    Sg = np.diag([Wi / Wc, Hi / Hia, 1.0])
+    T = (Sg @ Mm @ Au)[:2]
+    a3 = cv2.warpAffine(ia, T, (L, Hh), flags=cv2.INTER_LANCZOS4 | cv2.WARP_INVERSE_MAP,
+                        borderMode=cv2.BORDER_CONSTANT, borderValue=(255, 255, 255))
+    del ia
+    # os tons da final: a baixa frequência na escala da entrada (a faixa da A3 dela), ampliada
+    hb = int(round(Hh / s))
+    Fe0 = np.array([[1, 0, 0], [0, 1, -(Ya3 - Yia)]], np.float64)
+    ref0 = cv2.warpAffine(entrada, Fe0, (Wc, hb), flags=cv2.INTER_LINEAR, borderValue=(255, 255, 255)).astype(np.float32)
+    a3p = cv2.resize(a3, (Wc, hb), interpolation=cv2.INTER_AREA).astype(np.float32)
+    sg = q["tom_sigma_px"]
+    corr = cv2.GaussianBlur(ref0, (0, 0), sg) - cv2.GaussianBlur(a3p, (0, 0), sg)
+    corr = cv2.resize(corr, (L, Hh), interpolation=cv2.INTER_CUBIC)
+    for y in range(0, Hh, 1024):
+        a3[y:y + 1024] = np.clip(np.round(a3[y:y + 1024].astype(np.float32) + corr[y:y + 1024]), 0, 255).astype(np.uint8)
+    del corr
+    # os shafts com o X tracejado (da entrada ampliada)
+    Q = FA.QuadroA("Subsolo")
+    for p0, q0, p1, q1 in SHAFTS_PT:
+        (u0, v0), (u1, v1) = Q.p2q(p0, q0), Q.p2q(p1, q1)
+        k = int(round(q["shaft_dentro_px"] * s / (Wa0 / Wc)))
+        u0, u1 = sorted(((u0 - X0) * s, (u1 - X0) * s))
+        v0, v1 = sorted(((v0 - Ya3) * s, (v1 - Ya3) * s))
+        u0, v0, u1, v1 = int(np.ceil(u0)) + k, int(np.ceil(v0)) + k, int(u1) - k, int(v1) - k
+        Mb = np.array([[s, 0, -s * 0 - u0], [0, s, -s * (Ya3 - Yia) - v0]], np.float64)
+        a3[v0:v1, u0:u1] = cv2.warpAffine(entrada, Mb, (u1 - u0, v1 - v0), flags=cv2.INTER_LANCZOS4)
+    # o fundo: branco puro fora da planta
+    gq = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    fundo = (gq >= 254).astype(np.uint8)
+    _, lab = cv2.connectedComponents(fundo)
+    fundo = (lab == lab[0, 0]).astype(np.uint8)
+    kk = 2 * q["fundo_folga_px"] + 1
+    fundo = cv2.erode(fundo, np.ones((kk, kk), np.uint8))
+    Fq = np.array([[s, 0, -s * X0], [0, s, -s * Ya3]], np.float64)
+    sf = 2.0 * L / Wa0
+    for y in range(0, Hh, 1024):
+        y1 = min(Hh, y + 1024)
+        pad = int(4 * sf) + 2
+        ya, yb = max(0, y - pad), min(Hh, y1 + pad)
+        Ft = Fq.copy()
+        Ft[1, 2] -= ya
+        fa = cv2.warpAffine(fundo.astype(np.float32), Ft, (L, yb - ya), flags=cv2.INTER_LINEAR, borderValue=1.0)
+        fa = cv2.GaussianBlur(fa, (0, 0), sf)[y - ya:y1 - ya, :, None]
+        a3[y:y1] = np.clip(np.round(a3[y:y1] * (1 - fa) + 255 * fa), 0, 255).astype(np.uint8)
+    base = a3
+
+    def p2a(x, y):
+        u, v = Q.p2q(x, y)
+        return (u - X0) * s, (v - Ya3) * s
+
+    def janela(cx, cy):
+        jw, jh = g["janela_px"]
+        jw, jh = int(jw * s / 6.9), int(jh * s / 6.9)
+        bx, by = int(cx - jw / 2), int(cy - jh / 2)
+        return max(0, bx), max(0, by), min(L, bx + jw), min(Hh, by + jh)
+
+    def com_alfa(out, a, cor, bx, by):
+        h, w = a.shape[:2]
+        reg = out[by:by + h, bx:bx + w].astype(np.float32)
+        al = a[..., None] if a.ndim == 2 else a
+        out[by:by + h, bx:bx + w] = np.clip(np.round(reg * (1 - al) + np.float32(cor) * al), 0, 255).astype(np.uint8)
+
+    import cliente_subsolo_casaa_0511 as CS
+    tx, ty = CS.ESCADA_CS["origem_px"]
+    ex, ey = (tx - X0) * s, (ty - Ya3) * s
+    ebx, eby, ebx1, eby1 = int(ex - 60 * s), int(ey - 40 * s), int(ex + 140 * s), int(ey + 60 * s)
+    for opcao in ("A", "B"):
+        out = base.copy()
+        for b in aj:
+            r, opc = RS.r_do_ajuste(Q, b)
+            cx, cy = p2a(*r[2])
+            cx, cy = cx + b["desvio"][0] * s, cy + b["desvio"][1] * s
+            bx, by, bx1, by1 = janela(cx, cy)
+            if opcao == "A":
+                loc = (lambda bx_, by_: (lambda x, y: (p2a(x, y)[0] - bx_, p2a(x, y)[1] - by_)))(bx, by)
+                a = _alfa_um(Q, r, opc, b["desvio"][0], b["desvio"][1], (by1 - by, bx1 - bx), pdf2img=loc,
+                             esc=Q.W / 2000 * s)
+                com_alfa(out, a, b["cor"], bx, by)
+            else:
+                k_rot = RM._altura_maiuscula(FONTES_INTER(R1.ROTULOS["fonte"])) / RM._altura_maiuscula(RM.FONTE) * \
+                    RM.MANUSCRITA["altura"]
+                itens = [(t_, c_ * k_rot, x_ - bx, y_ - by, "ms")
+                         for t_, c_, x_, y_ in RM.linhas_rotulo(Q, b, pdf2img=p2a, escala_desvio=Q.W / 2000 * s)]
+                sub = out[by:by1, bx:bx1]
+                out[by:by1, bx:bx1] = RM.desenhar(sub, itens, tuple(b["cor"]),
+                                                  reforco_px=RM.MANUSCRITA["reforco_px"] * s)
+        # a escada: a seta e o texto (na Inter da final, ou na Kalam)
+        ebx_, eby_ = max(0, ebx), max(0, eby)
+        cam = escada_camadas((eby1 - eby_, ebx1 - ebx_), s, X0 + ebx_ / s, Ya3 + eby_ / s)
+        if opcao == "A":
+            for a, cor in cam:
+                com_alfa(out, a, cor, ebx_, eby_)
+        else:
+            com_alfa(out, cam[0][0], cam[0][1], ebx_, eby_)
+            e = FA.ESCADA_A
+            k_esc = RM._altura_maiuscula(FONTES_DIR() / e["fonte"]) / RM._altura_maiuscula(RM.FONTE) * \
+                RM.MANUSCRITA["altura"]
+            itens = [(linha, e["corpo_px"] * s * k_esc, ex - ebx_, ey + i * CS.ESCADA_CS["entrelinha_px"] * s - eby_, "ls")
+                     for i, linha in enumerate(CS.ESCADA_CS["texto"])]
+            sub = out[eby_:eby1, ebx_:ebx1]
+            out[eby_:eby1, ebx_:ebx1] = RM.desenhar(sub, itens, e["cor_texto"], reforco_px=RM.MANUSCRITA["reforco_px"] * s)
+        arq = Path(str(g["saida"]).format(opcao=opcao))
+        dpi = int(round(L / (420 / 25.4)))
+        Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(arq, quality=g["qualidade"], subsampling=0,
+                                                                    dpi=(dpi, dpi), optimize=True)
+        prev = cv2.resize(out, (2000, round(2000 * Hh / L)), interpolation=cv2.INTER_AREA)
+        cv2.imwrite(str(FA.CASA / "renders" / f"POE642_CasaA_PH_Subsolo_12K_opcao_{opcao}_previa.jpg"), prev,
+                    [cv2.IMWRITE_JPEG_QUALITY, 90])
+        for nome, (x0, y0, x1, y1) in CONFERENCIA.items():
+            u0, v0, u1, v1 = [int(round(t_)) for t_ in ((x0 - X0) * s, (y0 - Ya3) * s, (x1 - X0) * s, (y1 - Ya3) * s)]
+            cr = out[v0:v1, u0:u1]
+            cv2.imwrite(str(FA.CASA / "renders" / f"POE642_CasaA_PH_Subsolo_12K_opcao_{opcao}_conferencia_{nome}.jpg"),
+                        cv2.resize(cr, (cr.shape[1] // 2, cr.shape[0] // 2), interpolation=cv2.INTER_AREA),
+                        [cv2.IMWRITE_JPEG_QUALITY, 90])
+        print(f"    {arq} {L}x{Hh} ({dpi} dpi na A3), {arq.stat().st_size / 1e6:.1f} MB")
+
+
+def FONTES_DIR():
+    from rodape_entrega import FONTES
+    return FONTES
+
+
+def FONTES_INTER(peso):
+    return FONTES_DIR() / f"Inter-{peso}.otf"
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="etapa", required=True)
     sub.add_parser("preparar")
     m = sub.add_parser("montar")
     m.add_argument("saida_ia", type=Path)
+    m3 = sub.add_parser("corrigir", help="a saída da IA (4K) com os trechos inventados vindos da entrada")
+    m3.add_argument("saida_ia", type=Path)
+    m3.add_argument("destino", type=Path)
+    m2 = sub.add_parser("montar12k", help="a saída do Topaz (12K) -> os JPGs das opções A e B")
+    m2.add_argument("saida_topaz", type=Path)
+    m2.add_argument("--largura", type=int, default=None)
     a = ap.parse_args()
-    preparar() if a.etapa == "preparar" else montar(a.saida_ia)
+    if a.etapa == "preparar":
+        preparar()
+    elif a.etapa == "montar":
+        montar(a.saida_ia)
+    elif a.etapa == "corrigir":
+        corrigir_ia(a.saida_ia, a.destino)
+    else:
+        montar_grande(a.saida_topaz, a.largura)
