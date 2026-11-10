@@ -1472,7 +1472,8 @@ def tracejados_finos_ta(Q, img, q=None):
 #   claro com o vidro no meio, no desenho dos vidros;
 # - lavabo: "MELHORE O RÓTULO E CENTRALIZE-O TAMBÉM. O RÓTULO DA CLARABOIA NÃO DÁ PARA LER DIREITO": LAVABO no corpo
 #   dos outros rótulos, no centro do piso livre (entre a parede e a bancada, abaixo da claraboia); PROJ. CLARABOIA no
-#   mesmo corpo, logo abaixo da projeção, no centro do lavabo;
+#   mesmo corpo, logo abaixo da projeção, no centro do lavabo; depois (usuário, 10/11: "APENAS 'CLARABOIA'", porque
+#   numa linha o PROJ. CLARABOIA encostava nas duas paredes do lavabo): só CLARABOIA (`quebra` de uma linha só);
 # - paredes: "O TOM DAS PAREDES PRECISA FICAR UM CINZA MAIS ESCURO": as paredes do PDF, os batentes e os muros do lote,
 #   do cinza 79 para `parede_nova` (as bordas antisserrilhadas na mesma proporção).
 CONTORNOS_TA = {
@@ -1492,7 +1493,7 @@ CONTORNOS_TA = {
                "batentes_px": [(1882, 359, 1885, 372), (1946, 359, 1949, 372)]},
     "lavabo": {"caixa_px": (2252, 350, 2352, 520), "lavabo_centro": (2286.5, 465.0), "claraboia_centro": (2301.5, 401.0),
                "lavabo": {"nome": "LAVABO", "pdf": [2053.0685, 635.3293]},
-               "claraboia": {"nome": "PROJ. CLARABOIA", "pdf": [2053.5996, 600.1947]},
+               "claraboia": {"nome": "PROJ. CLARABOIA", "pdf": [2053.5996, 600.1947], "texto": ["CLARABOIA"]},
                "padrao": {"nome": "ESCRITÓRIO", "pdf": [2225.7157, 708.6874]}, "semente": 3170},
     # "LIMPA ESSE ERRO AO LADO DA PLANTA": o resto do desenho branco da planta do PDF entre o vidro e a planta
     "residuos_px": [(1876, 1073, 1888, 1093)],
@@ -1693,8 +1694,10 @@ def _lavabo_rotulos(Q, out, q):
     res = out.astype(np.float32)
     feitos = []
     for chave, centro in (("lavabo", q["lavabo_centro"]), ("claraboia", q["claraboia_centro"])):
-        b = q[chave]
+        b = {k: v for k, v in q[chave].items() if k != "texto"}
         opc = {"corpo": 1.3}
+        if "texto" in q[chave]:
+            opc["quebra"] = list(q[chave]["texto"])        # o texto trocado, centrado no nome do PDF
         a0 = _alfa_rot(Q, b, opc, 0, 0, forma)
         if chave == "claraboia":
             h1 = h_nome(a0)
