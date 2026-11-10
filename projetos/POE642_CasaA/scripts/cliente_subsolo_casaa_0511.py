@@ -219,8 +219,11 @@ def prateleiras_cs(Q, img):
 # na borda da pegada, a grama nova com o branco de fora na mesma proporção. Depois (usuário, com o recorte de uma grama
 # verde-oliva acinzentada: "traga o tom da grama para mais próximo dessa referência"): o tom mediano é o da referência
 # (`tom`), menos saturado e mais claro que o de antes (RGB ~106, 119, 71).
-GRAMA_CS = {"caixa": (700, 1110, 1100, 1660), "escala": 0.5, "semente": 5, "desfoque": 0.5, "verde": 8,
-            "tom": (101, 127, 121)}                       # BGR: o verde-oliva acinzentado (RGB ~121, 127, 101)
+# Depois (usuário, 07/11/26, com a planta de um quintal: "USE ESSA ESCALA E COR DE GRAMA. USAREMOS ESSA GRAMA COMO
+# PADRÃO PARA AS DEMAIS"): a grama padrão da biblioteca (`texturas.textura("grama_padrao")`, tecida do gramado da
+# referência, a 62 px/m medidos nela), na escala real e na cor dela (RGB ~79, 75, 39), sem retoque de tom nem desfoque.
+GRAMA_CS = {"caixa": (700, 1110, 1100, 1660), "textura": "grama_padrao", "escala": 1.0, "semente": 5, "desfoque": 0.0,
+            "verde": 8, "tom": None}                      # tom None: a cor da própria textura
 
 
 def grama_cs(Q, img, p):
@@ -234,15 +237,63 @@ def grama_cs(Q, img, p):
     verde = (ri[..., 1] > ri[..., 2] + q["verde"]) & (ri[..., 1] > ri[..., 0] + q["verde"])
     verde = ndimage.binary_fill_holes(cv2.morphologyEx(verde.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8)))
     pr = p[y0:y1, x0:x1]
-    alvo = np.float32(q["tom"])
-    T = textura("grama", Q.px_m * q["escala"], y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32)
-    T = cv2.GaussianBlur(T, (0, 0), q["desfoque"])
-    T = T * (alvo / np.median(T[verde], axis=0))
+    T = textura(q["textura"], Q.px_m * q["escala"], y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32)
+    if q["desfoque"]:
+        T = cv2.GaussianBlur(T, (0, 0), q["desfoque"])
+    if q["tom"] is not None:
+        T = T * (np.float32(q["tom"]) / np.median(T[verde], axis=0))
     novo = T * pr[..., None] + 255 * (1 - pr[..., None])
     out = img.copy()
     sub = out[y0:y1, x0:x1]
     sub[verde] = np.clip(np.round(novo[verde]), 0, 255).astype(np.uint8)
-    print(f"    grama: a da biblioteca na metade da escala ({int(verde.sum())} px), no verde-oliva da referência")
+    print(f"    grama: a {q['textura']} da biblioteca, escala {q['escala']} ({int(verde.sum())} px), "
+          f"{'na cor dela' if q['tom'] is None else 'no tom ' + str(q['tom'])}")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# A sauna (usuário, 07/11/26, com uma referência anotada: "Quando tiver dois tons muito parecidos. Fazer esse jogo de cores
+# para destacar o que está mais em cima e mais embaixo"; "FAÇA ESSE JOGO DE TOM NO BANCO DA SAUNA, POIS TANTO O BANCO
+# QUANTO O PISO DA SAUNA SÃO EM TRAVERTINO BRUTO"): o banco (`final3840_casaa.SAUNA`, o mais alto) mais claro que o piso
+# (`banco_sobre_piso` x o piso de antes, canal a canal: o mesmo tom do travertino, os veios e a quina como estavam) e o
+# piso da sauna (o mais baixo; `piso_px`, entre os vidros, a parede da direita e a frente do banco) mais escuro
+# (`piso`); ao longo da frente do banco, no piso, a sombra de contato um pouco mais larga (`contato`: força e px).
+SAUNA_CS = {"banco_sobre_piso": 1.03, "piso": 0.93, "piso_px": (1197.0, 1514.0, 1378.0, None), "contato": (0.14, 5.0),
+            "aresta_px": 2}
+
+
+def _cobertura(forma, x0, y0, x1, y1):
+    """A fração de cada px (0..1) dentro do retângulo (px, bordas fracionárias)."""
+    H, W = forma
+    cx = np.clip(np.minimum(np.arange(W) + 1, x1) - np.maximum(np.arange(W), x0), 0, 1)
+    cy = np.clip(np.minimum(np.arange(H) + 1, y1) - np.maximum(np.arange(H), y0), 0, 1)
+    return (cy[:, None] * cx[None, :]).astype(np.float32)
+
+
+def sauna_cs(Q, img):
+    q = SAUNA_CS
+    (bx0, by0), (bx1, by1) = Q.p2q(*FA.SAUNA["pt"][:2]), Q.p2q(*FA.SAUNA["pt"][2:])
+    px0, py0, px1, _ = q["piso_px"]
+    forma = img.shape[:2]
+    f = img.astype(np.float32)
+    banco = _cobertura(forma, bx0, by0, bx1, by1)
+    piso = _cobertura(forma, px0, py0, px1, by0)
+    lum = f.mean(axis=2)
+    m_piso = (piso > 0.99) & (lum > 150)                          # o piso sem o texto do rótulo
+    m_banco = _cobertura(forma, bx0, by0 + q["aresta_px"], bx1, by1) > 0.99
+    tom_piso, tom_banco = f[m_piso].mean(axis=0), f[m_banco].mean(axis=0)
+    k = tom_piso * q["banco_sobre_piso"] / tom_banco
+    out = f * (1 + (k - 1) * banco[..., None])
+    out *= (1 + (q["piso"] - 1) * piso)[..., None]
+    # a sombra de contato no piso, logo acima da frente do banco
+    Y = np.arange(forma[0], dtype=np.float32)[:, None] + 0.5
+    d = by0 - Y
+    s = q["contato"][0] * np.clip(1 - d / q["contato"][1], 0, 1) * (d > 0)
+    out *= (1 - s * _cobertura(forma, bx0, 0, bx1, forma[0]))[..., None]
+    out = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    print(f"    sauna: o banco de RGB {tuple(int(c) for c in tom_banco[::-1])} para "
+          f"{tuple(int(c) for c in (tom_banco * k)[::-1])}, o piso de {tuple(int(c) for c in tom_piso[::-1])} para "
+          f"{tuple(int(c) for c in (tom_piso * q['piso'])[::-1])}, com a sombra de contato")
     return out
 
 
@@ -397,6 +448,7 @@ def cliente_subsolo_cs(img):
     img = bege_cs(Q, img)
     img = prateleiras_cs(Q, img)
     img = grama_cs(Q, img, p)
+    img = sauna_cs(Q, img)
     img = degraus_cs(Q, img)
     return escada_cs(Q, img)
 

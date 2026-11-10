@@ -157,6 +157,32 @@
         "lado_m": 12,
         "retalho": 14
       }
+    },
+    "grama_padrao": {
+      "titulo": "9. Grama padrão",
+      "fonte": "referencia",
+      "referencia": "referencia_grama_padrao",
+      "recortes": [
+        [
+          140,
+          636,
+          255,
+          825
+        ],
+        [
+          75,
+          636,
+          140,
+          695
+        ]
+      ],
+      "arquivo": "grama_padrao.jpg",
+      "nota": "o gramado da referência de 07/11/26, fora da palmeira, das bordas e da sombra do canteiro: verde-oliva escuro (RGB ~79, 75, 39), grão fino de 3 a 5 cm, na escala e na cor da referência",
+      "amostra": {
+        "px_por_m": 62,
+        "lado_m": 10,
+        "retalho": 16
+      }
     }
   },
   "amostra": {
@@ -254,5 +280,10 @@
       "opacidade": 0.45,
       "nota": "na referência a luz vem do alto à direita: a sombra cai para baixo e à esquerda (frações do diâmetro)"
     }
+  },
+  "referencia_grama_padrao": {
+    "original": "originais/referencia_grama_padrao.webp",
+    "px_por_m": 62,
+    "nota": "planta humanizada de um quintal que o usuário mandou em 07/11/26 como a grama padrão das plantas (\"USE ESSA ESCALA E COR DE GRAMA. USAREMOS ESSA GRAMA COMO PADRÃO PARA AS DEMAIS\"). Escala medida nela: o gramado tem 10 pés (3,05 m) de largura e 190 px (x 68 a 258): 62 px/m."
   }
 }

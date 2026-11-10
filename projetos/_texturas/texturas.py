@@ -17,6 +17,9 @@ escuro)".
   use também a vegetação externa como referencia dessa imagem também. Importante preservar a escala. Use a grama
   como referência também"). A escala foi medida nela (camas, carros e portas: 26 px/m); as texturas saem de recortes
   limpos (o deck, o piso dos quartos e o gramado fora da sombra), na escala dela.
+- A grama padrão (`grama_padrao`; usuário, 07/11/26: "USE ESSA ESCALA E COR DE GRAMA. USAREMOS ESSA GRAMA COMO
+  PADRÃO PARA AS DEMAIS") vem de outra referência, `originais/referencia_grama_padrao.webp` (62 px/m, medidos nos 10
+  pés do gramado), na cor dela.
 - `vegetacao()` recorta da referência as árvores, os arbustos e as palmeiras, com fundo transparente, em
   `vegetacao/`; `pousar(fundo, nome, cx, cy, px_por_m)` põe uma delas num render, no tamanho real e com a sombra.
 - `textura(nome, px_por_m, alto, largo)` devolve a textura na escala do render: a imagem é reduzida para que a
@@ -25,6 +28,7 @@ escuro)".
 
 Uso:
   python3 texturas.py              # prepara as texturas de uso, as plantas e a cartela (cartela_texturas.jpg)
+  python3 texturas.py --so grama_padrao   # só a textura e a amostra destes materiais
 """
 import json
 from pathlib import Path
@@ -82,7 +86,7 @@ def variantes(img, direcional):
     return [np.ascontiguousarray(v) for v in vs]
 
 
-def preparar():
+def preparar(so=None):
     """As texturas de uso (o tratamento de cada foto) e, de cada uma, a amostra grande: 3 x 3 m tecidos na resolução
     de trabalho (retalhos pequenos perto da foto, para a pedra variar de verdade), que é de onde sai a textura em
     qualquer escala. Sem ela, numa escala pequena a foto de 60 cm vira poucos px e o quilting só a repete em espelho,
@@ -90,9 +94,11 @@ def preparar():
     cfg = json.loads(CONFIG.read_text())
     (AQUI / "amostras").mkdir(exist_ok=True)
     for nome, m in cfg["materiais"].items():
+        if so and nome not in so:
+            continue
         a = {**cfg["amostra"], **m.get("amostra", {})}
         if m.get("fonte") == "referencia":
-            ref = cfg["referencia_planta"]
+            ref = cfg[m.get("referencia", "referencia_planta")]   # a grama padrão vem de outra referência (07/11/26)
             planta = ler(AQUI / ref["original"])
             fontes = [planta[y0:y1, x0:x1] for x0, y0, x1, y1 in m["recortes"]]
             img, px_m = max(fontes, key=lambda f: f.size), ref["px_por_m"]
@@ -342,6 +348,11 @@ def cartela():
 
 
 if __name__ == "__main__":
-    preparar()
-    vegetacao()
-    cartela()
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--so", nargs="+", help="prepara só estes materiais (sem a vegetação e a cartela)")
+    args = ap.parse_args()
+    preparar(args.so)
+    if not args.so:
+        vegetacao()
+        cartela()
