@@ -4292,3 +4292,9 @@ O que foi feito (`terreo_casaa_1011.py`, sobre a final do Térreo de 58ea098; de
 - 1º Pavimento: fica para a sequência (usuário: "DEIXE O 1 º PAVIMENTO PARA SEQUENCIA. FOQUE NO TERREO"). A final, a prancha e o nublado do Térreo nele ficam como estão; a atualização do nublado já está no script (`--um_pav`), para quando o 1º Pavimento for revisto.
 
 Antes e depois: `POE642_CasaA/renders/POE642_CasaA_PH_Terreo_1011_<trecho>_antes_depois.jpg`. Prancha do Térreo, PDF da Casa A e book refeitos. Regras novas no `POE642_REGRAS.md` (Bege Bahia em todas as casas; Dekton Danae; piso marrom da amostra; grama padrão no Térreo A; triângulo e descrição em todas as escadas; na Casa A, só os vazios tracejados, poucas árvores e a piscina no tom da foto). Para o OK do usuário: estender às outras casas os tracejados só dos vazios e o tom sóbrio da piscina.
+
+### Casa A, Térreo: gramado até o muro, soleira da Casa C e o JPG em 12K (10/11)
+
+Pedidos do usuário: "VAMOS CORRIGIR O GRAMADO ATÉ O MURO."; "E GERE A IMAGEM EM 12K JPG. ISSO É REGRA PARA TODAS AS PLANTAS"; e, com o recorte do cliente: "Representar uma soleira na entrada igual a casa C".
+
+Feito: a grama vai até a face de dentro dos muros e até a linha do lote (saiu a faixa da grama antiga); a soleira da entrada é a faixa da soleira da Casa C (pedra clara e lisa, com a face fina de cada lado). Final, antes e depois, prancha do Térreo, PDF da Casa A e book refeitos. O JPG em 12K do Térreo: `POE642_CasaA/entrega/POE642_CasaA_PH_Terreo_12K.jpg` (12288 x 8689, A3 deitada), pelo caminho do Subsolo (Nano Banana Pro em 4K, os trechos que a IA trocou de volta da final, Topaz a 12K, os tons, os tracejados e os textos da final), com o script novo `ampliacao_12k_terreo_casaa.py` (README). Regras novas no `POE642_REGRAS.md`: o JPG em 12K em todas as plantas (seção 13), o gramado até o muro (seção 10) e a soleira de entrada como a da Casa C (seção 4). O 1º Pavimento segue para a sequência.

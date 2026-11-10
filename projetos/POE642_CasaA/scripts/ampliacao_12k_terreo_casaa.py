@@ -267,9 +267,22 @@ def diferencas(saida_ia):
     return manchas
 
 
-# Os trechos que a IA inventou (px da final), conferidos no mapa das diferenças; voltam da entrada ampliada
-CORRIGIR_PX = {}
-CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0}
+# Os trechos que a IA inventou ou trocou (px da final), conferidos no mapa das diferenças e nos recortes (10/11/26):
+# voltam da entrada ampliada (Lanczos, com nitidez), com a borda esfumada; o resto (as árvores, as plantas, os móveis,
+# mais nítidos e fiéis) fica o da IA. A IA tinha: posto todos os degraus da caracol em linha cheia (sem o tracejado dos
+# de cima); trocado os dois cooktops (bocas quadradas) e a cuba do lavabo; alisado o marrom tabaco da bancada gourmet;
+# feito a prainha com uma grade forte de pastilhas e a piscina sem o desenho; e trocado o leque da pedra portuguesa
+# por um cascalho claro. A água e a pedra portuguesa vão pelas máscaras (`CORRIGIR_MASCARAS`), não por caixas.
+CORRIGIR_PX = {"caracol": (1918, 1512, 2036, 1632), "cooktop_cozinha": (1964, 1280, 2022, 1318),
+               "gourmet": (1476, 1266, 1804, 1444), "lavabo": (2296, 396, 2362, 522)}
+CORRIGIR_MASCARAS = {"agua": "agua", "pedra_portuguesa": (85, 138, 185)}
+CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0, "folga_mascara_px": 2}
+
+
+def _mascara(Q, chave):
+    if chave == "agua":
+        return TA.agua_mascara(Q) > 0.5
+    return np.all(Q.chapada == np.uint8(chave), axis=2)
 
 
 def corrigir_ia(saida_ia, destino):
@@ -290,10 +303,16 @@ def corrigir_ia(saida_ia, destino):
         pts = np.float32([[x0 - X0, y0 - Yia], [x1 - X0, y0 - Yia], [x1 - X0, y1 - Yia], [x0 - X0, y1 - Yia]])
         pq = cv2.transform(pts[None], Tm)[0]
         cv2.fillConvexPoly(m, np.int32(np.round(pq)), 1.0)
+    Q = FA.QuadroA("Terreo")
+    k = 2 * q["folga_mascara_px"] + 1
+    for nome, chave in CORRIGIR_MASCARAS.items():
+        mq = cv2.dilate(_mascara(Q, chave).astype(np.uint8), np.ones((k, k), np.uint8))[Yia:Yia + Hc, X0:X0 + Wc]
+        m = np.maximum(m, cv2.warpAffine(mq.astype(np.float32), Tm, (Wi, Hi), flags=cv2.INTER_LINEAR))
     m = cv2.GaussianBlur(m, (0, 0), q["borda_px"] * Wi / Wc / 2.7)[..., None]
     out = np.clip(np.round(ia * (1 - m) + ref * m), 0, 255).astype(np.uint8)
     cv2.imwrite(str(destino), out)
-    print(f"    a saída da IA corrigida em {len(CORRIGIR_PX)} trechos ({', '.join(CORRIGIR_PX) or 'nenhum'}): {destino}")
+    print(f"    a saída da IA corrigida em {len(CORRIGIR_PX)} trechos ({', '.join(CORRIGIR_PX) or 'nenhum'}) e nas "
+          f"máscaras ({', '.join(CORRIGIR_MASCARAS)}): {destino}")
 
 
 # ----------------------------------------------------------------------------------------------------------------------

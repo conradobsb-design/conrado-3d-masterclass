@@ -92,6 +92,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 
 ## 4. Portas, janelas, vidros e soleiras
 
+- **[10/11] Soleira de entrada igual à da Casa C** (cliente, no Térreo da Casa A: "Representar uma soleira na entrada igual a casa C"): a faixa de pedra clara e lisa da soleira da entrada da Casa C, com a face fina de cada lado, no vão da porta (`_texturas/originais/soleira_entrada_casac.png`).
 - **[19/10] R3. Nunca mostrar o arco da porta.**
   - Porta de giro: só a folha (branca, fina, na espessura do PDF, com contorno fino) e o batente.
   - [22/10] Nem resto do arco: onde ele estava, o piso segue limpo, sem pintas (usuário, na porta da suíte 3 da Casa B: "tem um erro nessa porta"). E a limpeza em volta da folha não copia o móvel vizinho para junto dela (lá, uma lasca do guarda-roupa sob a folha aberta).
@@ -344,6 +345,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 
 ## 10. Área externa
 
+- **[10/11] Gramado até o muro** (usuário, no Térreo da Casa A: "VAMOS CORRIGIR O GRAMADO ATÉ O MURO"): a grama vai até a face de dentro dos muros e até a linha do lote, sem faixa da grama antiga entre ela e o muro.
 - **[27/10] Pisantes com a borda reta do PDF** (usuário, na Casa D, no pisante junto ao hall: "tem um traço branco no contorno de baixo do bloco de pedra no acesso a casa. formando um dente que não existe. corrija, deixando-o reto"): o contorno de cada bloco de pedra é o do PDF, reto, sem o Bege Bahia passando da borda.
   - **[28/10] Sem as manchas da vegetação antiga** (revisão do Térreo da Casa E, OK do usuário no item 2; depois, "essas manchas nas pedras da vegetação antiga precisam ser removidas"): cada pisante no retângulo do PDF, em Bege Bahia limpo, no tom dos outros, com a sombra curta; as folhas e as sombras das plantas do render sobre as pedras saem, também na pedra grande do acesso (a borda junto à grama e o canto de baixo); em volta, a grama, sem a borda clara nem restos da pedra.
 - **[28/10] Contorno do Bege Bahia junto à grama, sem resquícios** (usuário, no Térreo da Casa A: "limpe esses resquicios"; "corrija o contorno do marmore bege bahia, removendo esses resquicios"): a borda da pedra contra a grama é uma linha reta, sem as pecinhas cinza-rosadas do render que avançam sobre a grama, sem tufos de folhas sobre a pedra e sem riscos claros na grama entre as placas; fora do lote, o branco da prancha, sem a faixa rosada. Os tracejados de projeção que cruzam a borda ficam.
@@ -443,6 +445,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 
 ## 13. Pranchas e PDF
 
+- **[10/11] O JPG em 12K em todas as plantas** (usuário: "E GERE A IMAGEM EM 12K JPG. ISSO É REGRA PARA TODAS AS PLANTAS"; antes, no Subsolo da Casa A: "VOU PRECISAR DA IMAGEM, SÓ DA IMAGEM, EM JPG PARA O CLIENTE PODER TRABALHAR EM CIMA DELA PARA O BOOK DELA"): cada planta fechada sai também como JPG só da imagem (sem rodapé), com 12288 px de largura, na proporção da A3 deitada (12288 x 8689), além da prancha, do PDF e do book. Caminho: os textos e os símbolos saem da final; a imagem limpa no Nano Banana Pro (4K); os trechos que a IA inventou ou trocou voltam da final (conferidos no mapa das diferenças); o Topaz (High Fidelity V2) leva a 12K; os tons da final e os tracejados voltam; os rótulos, as descrições e os triângulos são desenhados direto em 12K. Feito no Subsolo (`ampliacao_a3_casaa.py`) e no Térreo da Casa A (`ampliacao_12k_terreo_casaa.py`).
 - **Prancha:** 3840 × 2600, no mesmo quadro.
 - **Rodapé no padrão do carimbo:**
   - Inter;
