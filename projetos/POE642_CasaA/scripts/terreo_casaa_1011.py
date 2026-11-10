@@ -1497,6 +1497,12 @@ CONTORNOS_TA = {
                "padrao": {"nome": "ESCRITÓRIO", "pdf": [2225.7157, 708.6874]}, "semente": 3170},
     # "LIMPA ESSE ERRO AO LADO DA PLANTA": o resto do desenho branco da planta do PDF entre o vidro e a planta
     "residuos_px": [(1876, 1073, 1888, 1093)],
+    # os dois resíduos que sobraram (achados na conferência do 12K; usuário, 10/11: "PODE LIMPAR OS DOIS RESÍDUOS
+    # TAMBÉM"): o traço escuro de 2 px na ponta direita da pedra do hall externo, colado à parede de baixo (refeito pela
+    # pedra das colunas dos lados, linha a linha), e a mancha clara no granito logo abaixo da ponta da parede atrás da
+    # porta da área de serviço, à direita da folha (refeita pelo granito de `fonte_dy` px abaixo)
+    "residuos_finos": [{"px": (2598, 867, 2600, 879), "modo": "lados"},
+                       {"px": (2043, 1459, 2050, 1462), "modo": "abaixo", "fonte_dy": 6}],
     # "MELHORAR A REPRESENTAÇÃO DO MARMORE BEGE BAHIA ENTRE OS QUADRADOS": nas faixas das vigas do pergolado (entre as
     # duas linhas tracejadas de cada viga), o Bege Bahia de dentro dos quadrados, trecho a trecho (`copiar_textura`)
     "pergolado": {"caixa_px": (1205, 865, 1530, 1222), "faixa_max_px": 18, "trecho": 14, "busca": 140},
@@ -1853,6 +1859,23 @@ def _vazio_viga(out, q):
     return out
 
 
+def _residuos_finos(out, itens):
+    out = out.copy()
+    for it in itens:
+        x0, y0, x1, y1 = it["px"]
+        if it["modo"] == "lados":
+            esq = out[y0:y1, x0 - 1].astype(np.float32)
+            dir_ = out[y0:y1, x1].astype(np.float32)
+            n = x1 - x0
+            for k in range(n):
+                t = (k + 1) / (n + 1)
+                out[y0:y1, x0 + k] = np.round(esq * (1 - t) + dir_ * t).astype(np.uint8)
+        else:
+            dy = it["fonte_dy"]
+            out[y0:y1, x0:x1] = out[y0 + dy:y1 + dy, x0:x1]
+    return out
+
+
 def _paredes_escuras(Q, out, q):
     v0, v1, tol = q["parede"], q["parede_nova"], q["parede_tol"]
     zona = dilatar(FA.paredes_pdf(Q) > 0.05, 3)
@@ -1890,9 +1913,10 @@ def contornos_ta(Q, img, q=None):
     out = np.clip(np.round(_porta_servico(Q, out, q["porta_servico"])), 0, 255).astype(np.uint8)
     out = _pergolado_bege(Q, out, q["pergolado"])
     out = _paredes_escuras(Q, out, q)
+    out = _residuos_finos(out, q["residuos_finos"])
     print("    contornos: o 3º carro e o piso em volta; as pedras do acesso; o início da pista e o muro de baixo; a faixa "
           "de baixo sem o tracejado; o deck rente à escada; os guarda-corpos do terraço; a janela da sala de estar; "
-          "os rótulos do lavabo; as paredes no cinza mais escuro")
+          "os rótulos do lavabo; as paredes no cinza mais escuro; os dois resíduos (hall externo e porta de serviço)")
     return out
 
 
