@@ -13,19 +13,21 @@ Um passo por pedido, sobre a final do Térreo de antes (a do commit 58ea098, a m
 3. `piscina_ta`: a piscina, a prainha e o spa no tom da foto do cliente (cliente: "Deixar o tom de azul para a piscina
    mais sóbrio"; usuário: "USAR COMO REFERENCIA O TOM DA PISCINA E PRAINHA DA IMAGEM 3. E O REVESTIMENTO BARLAVENTO
    PORTOBELO"), com o desenho do Barlavento.
-4. `piso_marrom_ta`: o granito do piso no marrom da amostra do cliente ("mais uniforme ... e mais sóbrio"; "deixar a
+4. `bege_ta`: o Bege Bahia menos manchado, como no Subsolo (usuário: "Isso vai se repetir para todas as plantas da
+   casa, de todas as casas daqui para frente"): as manchas a 45% do contraste; a luz, as sombras e o tom iguais.
+5. `piso_marrom_ta`: o granito do piso no marrom da amostra do cliente ("mais uniforme ... e mais sóbrio"; "deixar a
    tonalidade do piso mais claro").
-5. `bancadas_ta`: a ilha e a bancada da pia da cozinha e a bancada dos tanques em Dekton Danae; o lavatório (bancada e
+6. `bancadas_ta`: a ilha e a bancada da pia da cozinha e a bancada dos tanques em Dekton Danae; o lavatório (bancada e
    cuba) em marrom tabaco, a cuba mais escura; a churrasqueira na bancada da área gourmet; no lavabo, a pedra lateral
    na cor da cuba.
-6. `banquetas_ta`: 5 banquetas na ilha da área gourmet, num tom mais destacado do piso.
-7. `pilar_ta`: o pilar do canto do terraço gourmet no desenho do PDF.
-8. `soleiras_ta`: a soleira na entrada (como a da Casa C); sem a soleira entre a sala e o escritório.
-9. `entrada_ta`: a seta antiga sai; o triângulo no centro da abertura da porta.
-10. `escadas_ta`: o triângulo e a descrição em todas as escadas; a caracol com os degraus em linhas, o tracejado só nos
+7. `banquetas_ta`: 5 banquetas na ilha da área gourmet, num tom mais destacado do piso.
+8. `pilar_ta`: o pilar do canto do terraço gourmet no desenho do PDF.
+9. `soleiras_ta`: a soleira na entrada (como a da Casa C); sem a soleira entre a sala e o escritório.
+10. `entrada_ta`: a seta antiga sai; o triângulo no centro da abertura da porta.
+11. `escadas_ta`: o triângulo e a descrição em todas as escadas; a caracol com os degraus em linhas, o tracejado só nos
     degraus de cima, sem a linha de corte; o guarda-corpo da escada do jardim.
-11. `shaft_ta`: sem o nome SHAFT.
-12. `tracejados_finos_ta`: os X dos vazios (varanda e sala de estar, área de serviço descoberta, claraboia, shaft) e o
+12. `shaft_ta`: sem o nome SHAFT.
+13. `tracejados_finos_ta`: os X dos vazios (varanda e sala de estar, área de serviço descoberta, claraboia, shaft) e o
     pergolado, finos e claros.
 
 Uso (de POE642_CasaA/scripts/):
@@ -234,7 +236,7 @@ DANAE = {"tom": (172, 189, 200), "camadas": [(0.030, 0.6), (0.022, 6.0)], "molha
 TRACEJADOS_TA = {"laje_px": {"h": (299, 335, 1177, 1213, 1637, 1672), "v": (2635, 2599, 1521, 1485)}, "tol_px": 3,
                  "laje_extra_px": [((1219, 1177), (1219, 1675))], "banda_px": 3, "pergolado_px": 8,
                  "pergolado_fontes_px": [(1290, 345, 1450, 470), (1100, 1180, 1185, 1560)], "pergolado_bege_px": (1400, 1100),
-                 "pergolado_semente": 3105, "croma_obj": 10, "lum_obj": 140, "ponta_px": 5, "canto_px": 11, "canto_dif": 22,
+                 "pergolado_semente": 3105, "croma_obj": 10, "lum_obj": 140, "ponta_px": 5, "canto_px": 18, "canto_dif": 22, "claro_montante": 120, "preto_traco": 100,
                  "fora_px": [(2250, 1112, 2350, 1212), (2540, 880, 2770, 910)],
                  "neutro": 34, "escuro": 125, "claro": 205, "salto_lum": 14, "moveis_m2": 3.0}
 
@@ -405,7 +407,8 @@ def tracejados_ta(Q, img, q=None):
     fixo = dilatar(par, 1) | dilatar(rot > 0.02, 1)
     pular = gramado_mascara(Q, img) | (agua_mascara(Q) > 0)
     out, n_p = pergolado_ta(Q, img, fixo, pular, q)
-    out, n = apagar_retas(out, retas, fixo, moveis_pdf(Q, q), materiais(Q), pular, q)
+    moveis = moveis_pdf(Q, q)
+    out, n = apagar_retas(out, retas, fixo, moveis, materiais(Q), pular, q)
     # as pontas dos X (o traço do render engrossava no canto, em ponta de seta): no disco de `canto_px` em volta de
     # cada ponta das diagonais, o que é bem mais escuro que o piso em volta sai por inpaint
     o = out.astype(np.float32)
@@ -416,8 +419,13 @@ def tracejados_ta(Q, img, q=None):
         if _orientacao(p0, p1).startswith("d"):
             for c in (p0, p1):
                 cv2.circle(cantos, (int(round(c[0])), int(round(c[1]))), q["canto_px"], 1, -1)
-    sujo = cantos.astype(bool) & (lum < med - q["canto_dif"]) & ~fixo & ~pular
-    sujo = dilatar(sujo, 1) & cantos.astype(bool) & ~fixo & ~pular
+    livre = cantos.astype(bool) & ~fixo & ~pular & ~moveis
+    sujo = livre & (lum < med - q["canto_dif"])
+    sujo = dilatar(sujo, 1) & livre
+    # e o pedaço do traço sobre os montantes cinza do PDF (claros: não é parede preta), fora dos rótulos
+    sobre = (cantos.astype(bool) & dilatar(par, 1) & ~dilatar(rot > 0.02, 2) & (med > q["claro_montante"])
+             & (lum < q["preto_traco"]))
+    sujo |= sobre
     if sujo.any():
         out = cv2.inpaint(out, (sujo * 255).astype(np.uint8), 3, cv2.INPAINT_TELEA)
     print(f"    tracejados: {len(retas)} retas (afastamentos, laje da cobertura, X e molduras), {n} px trocados pelo "
@@ -781,7 +789,8 @@ def piso_marrom_ta(Q, img, q=None):
 BANCADAS_TA = {"semente": 3120, "cuba_esc": 0.78,
                "churrasqueira_pt": (1315.4, 1557.1, 1391.9, 1596.6), "inox": (190, 193, 196), "grelha": (40, 40, 42),
                "barra": (96, 98, 100), "barra_px": (1.0, 4.0), "aro_px": 3.0,
-               "lavabo_cuba_pt": (2077.9, 615.8, 2106.3, 670.2), "lavabo_lateral_pt": (2089.3, 670.2, 2106.3, 715.0)}
+               "lavabo_cuba_pt": (2077.9, 615.8, 2106.3, 670.2), "lavabo_lateral_pt": (2089.3, 670.2, 2106.3, 715.0),
+               "lavabo_camadas": [(0.010, 0.6), (0.022, 5.0)]}
 
 
 def _danae_fn(semente, mult=1.0):
@@ -843,7 +852,8 @@ def bancadas_ta(Q, img, q=None):
     tl = FA.tela(out, Q, q["lavabo_lateral_pt"], folga=4)
     m = tl.ret(q["lavabo_lateral_pt"])
     FA.sombra_q(tl, m, forca=T.LAVABO["sombra"], dist=1.3, sigma=1.3)
-    tl.pintar_img(m, danae(tl.h, tl.w, q["semente"] + 7, dict(DANAE, tom=tuple(float(v) for v in tom))))
+    tl.pintar_img(m, danae(tl.h, tl.w, q["semente"] + 7, dict(DANAE, tom=tuple(float(v) for v in tom),
+                                                                camadas=q["lavabo_camadas"])))
     k = max(1, int(round(T.LAVABO["larg_px"] * 8)))
     borda = m & ~cv2.erode(m, np.ones((k, k), np.uint8))
     tl.pintar_img(borda, tl.reg * T.LAVABO["borda"])
@@ -1195,6 +1205,16 @@ def correcoes_ta(img, de=None, ate=None, salvar_passos=None):
     return out
 
 
+# os antes e depois (contra a final do commit 58ea098), em renders/POE642_CasaA_PH_Terreo_1011_<trecho>_antes_depois.jpg
+ANTES_DEPOIS_1011 = {"Terreo": {"planta": (270, 140, 3440, 1960), "vazios_varanda_estar": (1480, 580, 2180, 910),
+                                "pergolado": (1180, 840, 1560, 1240), "pisantes_deck": (700, 320, 1240, 470),
+                                "piscina_prainha": (700, 480, 1360, 1060), "escada_subsolo": (740, 1020, 1130, 1150),
+                                "gourmet": (1180, 1180, 1800, 1680), "cozinha_servico": (1700, 1100, 2200, 1660),
+                                "caracol": (1760, 1480, 2060, 1660), "entrada_escritorio": (2240, 460, 2640, 880),
+                                "lavabo_shaft": (2220, 330, 2420, 560), "escada_jardim": (2240, 860, 2560, 1110),
+                                "jardim_479": (1430, 1600, 1730, 1780)}}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--antes", required=True)
@@ -1202,10 +1222,14 @@ def main():
     ap.add_argument("--ate")
     ap.add_argument("--saida")
     ap.add_argument("--passos")
+    ap.add_argument("--antes_depois", action="store_true", help="grava os recortes de ANTES_DEPOIS_1011 em renders/")
     a = ap.parse_args()
     img = cv2.imread(a.antes)
     out = correcoes_ta(img, a.de, a.ate, a.passos)
     cv2.imwrite(a.saida or str(FINAL), out)
+    if a.antes_depois:
+        import pedidos_terreo_casaa_2910 as P
+        P.antes_depois_pedidos_ta("Terreo", img, out, caixas=ANTES_DEPOIS_1011, sufixo="1011")
 
 
 if __name__ == "__main__":
