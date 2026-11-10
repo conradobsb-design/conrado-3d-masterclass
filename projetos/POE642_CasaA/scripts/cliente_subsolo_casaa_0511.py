@@ -197,7 +197,11 @@ def projecao_cs(Q, img):
 # 4. As prateleiras do depósito (os dois braços de `final3840_casaa.DEPOSITO`, que eram em freijó com o veio): uma cor
 # neutra só, sem textura, no mesmo desenho, sobre o piso refeito na faixa delas (`bege_cs`), com a sombra curta delas no
 # Bege Bahia de novo (a de `armarios_deposito`: `sombra`, 1,4 px, sigma 1,4).
-PRATELEIRAS_CS = {"cor": (186, 191, 195)}         # BGR: o cinza quente claro (RGB ~195, 191, 186)
+# Depois (usuário, 10/11/26, com o recorte do Térreo marcado "Usar essa cor padronizada para as prateleiras e armários":
+# "USAR ESSE TOM DE COR PARA PRATELEIRA DO DEPÓSITO. ELA VAI SER PADRÃO PARA OS ARMARIOS E PRATELEIRAS DA CASA A."): o
+# tom do armário comprido junto ao lavabo do Térreo (a mediana do miolo dele na final do Térreo, RGB 208, 178, 156,
+# quase liso), ainda numa cor só, sem textura. Antes era o cinza quente claro (RGB ~195, 191, 186).
+PRATELEIRAS_CS = {"cor": (156, 178, 208)}         # BGR (RGB 208, 178, 156)
 
 
 def prateleiras_cs(Q, img):
@@ -208,7 +212,7 @@ def prateleiras_cs(Q, img):
     FA.sombra_q(tl, m, forca=FA.DEPOSITO["sombra"], dist=1.4, sigma=1.4)
     tl.pintar(m, PRATELEIRAS_CS["cor"])
     out = tl.gravar()
-    print(f"    depósito: as {len(FA.DEPOSITO['pecas'])} prateleiras numa cor neutra só, sem textura")
+    print(f"    depósito: as {len(FA.DEPOSITO['pecas'])} prateleiras numa cor só, sem textura, RGB {PRATELEIRAS_CS['cor'][::-1]}")
     return out
 
 
@@ -254,11 +258,14 @@ def grama_cs(Q, img, p):
 # ----------------------------------------------------------------------------------------------------------------------
 # A sauna (usuário, 07/11/26, com uma referência anotada: "Quando tiver dois tons muito parecidos. Fazer esse jogo de cores
 # para destacar o que está mais em cima e mais embaixo"; "FAÇA ESSE JOGO DE TOM NO BANCO DA SAUNA, POIS TANTO O BANCO
-# QUANTO O PISO DA SAUNA SÃO EM TRAVERTINO BRUTO"): o banco (`final3840_casaa.SAUNA`, o mais alto) mais claro que o piso
-# (`banco_sobre_piso` x o piso de antes, canal a canal: o mesmo tom do travertino, os veios e a quina como estavam) e o
-# piso da sauna (o mais baixo; `piso_px`, entre os vidros, a parede da direita e a frente do banco) mais escuro
-# (`piso`); ao longo da frente do banco, no piso, a sombra de contato um pouco mais larga (`contato`: força e px).
-SAUNA_CS = {"banco_sobre_piso": 1.03, "piso": 0.93, "piso_px": (1197.0, 1514.0, 1378.0, None), "contato": (0.14, 5.0),
+# QUANTO O PISO DA SAUNA SÃO EM TRAVERTINO BRUTO"). Corrigido em 10/11/26 (usuário: "O TOM MAIS ESCURO É EM CIMA (NO
+# BANCO), NÃO NO PISO DA SAUNA. ESSA É A REGRA, NA PARTE DE CIMA, SE FOR O MESMO MATERIAL, O TOM FICA MAIS ESCURO."):
+# o banco (`final3840_casaa.SAUNA`, o mais alto) mais escuro que o piso (`banco_sobre_piso` x o tom do piso, canal a
+# canal: o mesmo tom do travertino, os veios e a quina como estavam) e o piso da sauna (o mais baixo; `piso_px`, entre
+# os vidros, a parede da direita e a frente do banco) no tom dele (`piso`, 1: como o dos banhos); ao longo da frente do
+# banco, no piso, a sombra de contato um pouco mais larga (`contato`: força e px). Na versão de 07/11 era o contrário
+# (o banco 1,03 x o piso e o piso a 0,93).
+SAUNA_CS = {"banco_sobre_piso": 0.90, "piso": 1.0, "piso_px": (1197.0, 1514.0, 1378.0, None), "contato": (0.14, 5.0),
             "aresta_px": 2}
 
 
@@ -294,6 +301,151 @@ def sauna_cs(Q, img):
     print(f"    sauna: o banco de RGB {tuple(int(c) for c in tom_banco[::-1])} para "
           f"{tuple(int(c) for c in (tom_banco * k)[::-1])}, o piso de {tuple(int(c) for c in tom_piso[::-1])} para "
           f"{tuple(int(c) for c in (tom_piso * q['piso'])[::-1])}, com a sombra de contato")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Depois (usuário, 10/11/26, com os recortes do JPG em 12K das pontas da parede entre a academia e o BH. FEM./BH. MASC. e
+# da parede do BH. SERV.: "CORRIGIR ESSA FALHA NA PAREDE (NO PORTAL)"). Nos portais, o PDF tem o marco da porta: o
+# batente (uma faixa de ~2 px no vão, junto à ponta da parede) e as guarnições (4,2 x 1,2 px, saindo das duas faces da
+# parede). A folha da porta não é desenhada, e esses restos ficavam na ponta da parede como um risco escuro e uma faixa
+# irregular, que a IA da ampliação transformou num pé inclinado. Nos portais apontados (`portais`, px da final), em volta
+# das peças brancas do marco no PDF (ARQ_PAREDE cheias de branco, com o maior lado até `peca_max_px`, crescidas
+# `folga_px` e mais `ponta_px`), a ponta é desenhada de novo: o piso por baixo vem do piso vizinho, copiado de `passo_px`
+# em `passo_px` para longe da peça de parede mais perto (só de px de piso, claros), para manter a textura; a
+# parede, das peças cinza do PDF (o cinza da final, `cor_parede`), com o contorno escuro das outras faces (`contorno`:
+# largura e cor), em supersampling `ss`; a borda da área refeita, esfumada (`borda_px`). A ponta fica reta, no desenho do PDF.
+# No BH. SERV., a face esquerda da parede (do nicho ao portal) tinha um traço esverdeado a 1 px da face, que a IA tinha
+# feito ondulado e com um ponto escuro (o risco de 5 px da linha do nicho, saindo da parede): ela é refeita também
+# (`faixas`: a caixa, em px da final, e as linhas onde fica como está, a do vidro do box); o contorno ao lado do vão de
+# recolhimento (a peça branca grande da parede) é o mesmo das faces cinza.
+PORTAIS_CS = {"portais": {"bh_serv": (1182, 984, 1208, 1048), "bh_fem": (1486, 1494, 1562, 1521),
+                          "bh_masc": (1798, 1494, 1873, 1521)},
+              "faixas": {"bh_serv": [((1183.5, 884.7, 1190.1, 992.2), [(941.5, 947.5)])]},
+              "peca_max_px": 20.0, "folga_px": 1.5, "ponta_px": 2.0, "passo_px": 6, "piso_min": 140, "cor_parede": 80,
+              "contorno": (1.0, 45), "ss": 8, "borda_px": 0.7, "margem_px": 24, "vidro_min": 145}
+
+
+def _pecas_parede(Q, caixa):
+    """As peças cheias da ARQ_PAREDE na caixa (px): (cinza, brancas pequenas, brancas grandes), como (x0, y0, x1, y1)."""
+    X0, Y0, X1, Y1 = caixa
+    cinza, brancas, vaos = [], [], []
+    for d in Q.desenhos:
+        if d.get("layer") != "ARQ_PAREDE" or d["type"] != "f" or not d.get("fill"):
+            continue
+        for c in Q.caminhos(d):
+            c = np.asarray(c)
+            if len(c) < 3:
+                continue
+            r = (c[:, 0].min(), c[:, 1].min(), c[:, 0].max(), c[:, 1].max())
+            if r[2] < X0 or r[0] > X1 or r[3] < Y0 or r[1] > Y1:
+                continue
+            f = d["fill"]
+            if min(f) > 0.95:
+                (brancas if max(r[2] - r[0], r[3] - r[1]) <= PORTAIS_CS["peca_max_px"] else vaos).append(r)
+            elif abs(f[0] - 0.36) < 0.02:
+                cinza.append(r)
+    return cinza, brancas, vaos
+
+
+def portais_cs(Q, img, rotulos=None):
+    """`rotulos`: o alfa dos rótulos (px que ficam como estão)."""
+    q = PORTAIS_CS
+    out = img.copy()
+    Hi, Wi = img.shape[:2]
+    ss, mg = q["ss"], q["margem_px"]
+    notas = []
+    for nome, caixa in q["portais"].items():
+        faixas = q["faixas"].get(nome, [])
+        x0s = [caixa[0]] + [int(np.floor(f[0][0])) - 2 for f in faixas]
+        y0s = [caixa[1]] + [int(np.floor(f[0][1])) - 2 for f in faixas]
+        x1s = [caixa[2]] + [int(np.ceil(f[0][2])) + 2 for f in faixas]
+        y1s = [caixa[3]] + [int(np.ceil(f[0][3])) + 2 for f in faixas]
+        X0, Y0 = max(min(x0s) - mg, 0), max(min(y0s) - mg, 0)                  # a janela, com margem para a cópia
+        X1, Y1 = min(max(x1s) + mg, Wi), min(max(y1s) + mg, Hi)
+        h, w = Y1 - Y0, X1 - X0
+        cinza, brancas, vaos = _pecas_parede(Q, (X0, Y0, X1, Y1))
+        brancas = [r for r in brancas if r[2] >= caixa[0] and r[0] <= caixa[2] and r[3] >= caixa[1] and r[1] <= caixa[3]]
+
+        def sup(rets):
+            m = np.zeros((h * ss, w * ss), np.uint8)
+            for (x0, y0, x1, y1) in rets:
+                a, b = int(round((x0 - X0) * ss)), int(round((x1 - X0) * ss))
+                c, d = int(round((y0 - Y0) * ss)), int(round((y1 - Y0) * ss))
+                m[max(c, 0):max(d, 0), max(a, 0):max(b, 0)] = 1
+            return m
+        # as peças brancas grandes: só o vão de recolhimento dentro de uma faixa ganha o contorno da parede; as
+        # outras (a divisória de vidro dos banhos) ficam como estão, fora da área refeita e da cópia
+        vaos_faixa = [v for v in vaos if any(v[0] < f[0][2] and v[2] > f[0][0] and v[1] < f[0][3] and v[3] > f[0][1]
+                                             for f in faixas)]
+        U, corpo = sup(cinza), sup(cinza + vaos_faixa)
+        aV = sup(vaos).reshape(h, ss, w, ss).mean(axis=(1, 3))
+        r = int(round(q["contorno"][0] * ss))
+        O = cv2.dilate(corpo, np.ones((2 * r + 1, 2 * r + 1), np.uint8)) & (1 - corpo)
+        aU = U.reshape(h, ss, w, ss).mean(axis=(1, 3))
+        aO = O.reshape(h, ss, w, ss).mean(axis=(1, 3))
+        aC = corpo.reshape(h, ss, w, ss).mean(axis=(1, 3))
+        # o marco (as peças brancas pequenas, crescidas) e a área refeita: em volta dele e as faixas
+        marco = np.zeros((h, w), np.float32)
+        f_ = q["folga_px"]
+        for (x0, y0, x1, y1) in brancas:
+            marco = np.maximum(marco, _cobertura((h, w), x0 - X0 - f_, y0 - Y0 - f_, x1 - X0 + f_, y1 - Y0 + f_))
+        k = int(np.ceil(q["ponta_px"])) * 2 + 1
+        refazer = cv2.dilate((marco > 0.05).astype(np.uint8), np.ones((k, k), np.uint8)).astype(bool)
+        dentro = np.zeros((h, w), bool)
+        dentro[caixa[1] - Y0:caixa[3] - Y0, caixa[0] - X0:caixa[2] - X0] = True
+        refazer &= dentro
+        for (fx0, fy0, fx1, fy1), fica in faixas:
+            fx = _cobertura((h, w), fx0 - X0, fy0 - Y0, fx1 - X0, fy1 - Y0) > 0.5
+            for (ly0, ly1) in fica:
+                fx[int(np.floor(ly0 - Y0)):int(np.ceil(ly1 - Y0)), :] = False
+            refazer |= fx & (aC < 0.5)
+        refazer &= ~(aV > 0.02) | (aC > 0.02)
+        # os vidros desenhados na final (os boxes e as divisórias: cinza frio, claro) ficam como estão
+        jf = out[Y0:Y1, X0:X1].astype(np.int32)
+        frio = ((jf[..., 0] - jf[..., 2]) >= -3) & ((jf[..., 1] - jf[..., 2]) >= -3) & (jf.mean(axis=2) >= q["vidro_min"])
+        refazer &= ~(frio & (aC < 0.02))
+        if rotulos is not None:
+            refazer &= ~(rotulos[Y0:Y1, X0:X1] > 0.02)
+        # o piso por baixo: copiado do piso vizinho, para longe da peça de parede mais perto (no eixo em que o px está
+        # fora dela; nos cantos, no eixo da maior distância), só de px de piso (fora da parede, do marco e da área
+        # refeita, e claros: `piso_min`, para não copiar linhas)
+        jan = out[Y0:Y1, X0:X1]
+        lum = jan.astype(np.float32).mean(axis=2)
+        livre = (aC + aO < 0.02) & (aV < 0.02) & ~(marco > 0.05) & ~refazer & (lum > q["piso_min"])
+        if rotulos is not None:
+            livre &= ~(rotulos[Y0:Y1, X0:X1] > 0.0)
+        fundo = jan.astype(np.float32).copy()
+        passo = q["passo_px"]
+        corpos = cinza + vaos_faixa
+        ys, xs = np.nonzero(refazer)
+        for y, x in zip(ys, xs):
+            px, py = X0 + x + 0.5, Y0 + y + 0.5
+
+            def fora(g):
+                return (max(g[0] - px, 0, px - g[2]), max(g[1] - py, 0, py - g[3]))
+            g = min(corpos, key=lambda g: sum(v * v for v in fora(g)))
+            ox, oy = fora(g)
+            if ox == 0 and oy == 0:
+                continue
+            if ox >= oy:
+                dx, dy = (1 if px > g[2] else -1), 0
+            else:
+                dx, dy = 0, (1 if py > g[3] else -1)
+            for m in range(1, 8):
+                sx, sy = x + dx * passo * m, y + dy * passo * m
+                if not (0 <= sx < w and 0 <= sy < h):
+                    break
+                if livre[sy, sx]:
+                    fundo[y, x] = jan[sy, sx]
+                    break
+        cp, (lc, cc) = q["cor_parede"], q["contorno"]
+        novo = fundo * (1 - aU - aO)[..., None] + cp * aU[..., None] + cc * aO[..., None]
+        novo = np.where((aC - aU)[..., None] > 0.02, jan, novo)                 # o vão de recolhimento fica como está
+        peso = cv2.GaussianBlur(refazer.astype(np.float32), (0, 0), q["borda_px"])[..., None]
+        out[Y0:Y1, X0:X1] = np.clip(np.round(jan * (1 - peso) + novo * peso), 0, 255).astype(np.uint8)
+        notas.append(f"{nome}: {len(brancas)} peças do marco, {int(refazer.sum())} px refeitos")
+    print("    portais: as pontas das paredes refeitas sem o marco: " + "; ".join(notas))
     return out
 
 
@@ -436,6 +588,9 @@ def pedais_cs(Q, img):
 ANTES_DEPOIS_CS = {"Subsolo": {"planta": (640, 780, 2440, 1700), "escada_grama": (700, 1020, 1300, 1660),
                                "deposito": (1330, 855, 1890, 1065), "academia_linhas": (1500, 1440, 1900, 1530),
                                "bicicletas": (1440, 1295, 1590, 1445)}}
+# os antes e depois de 10/11/26 (os portais e a sauna), contra a final de 32959cc
+ANTES_DEPOIS_1011 = {"Subsolo": {"portais_bh_fem_masc": (1470, 1480, 1890, 1540), "portal_bh_serv": (1150, 960, 1240, 1060),
+                                 "sauna": (1180, 1490, 1420, 1650), "prateleiras_deposito": (1330, 855, 1890, 1065)}}
 
 
 def cliente_subsolo_cs(img):
@@ -454,7 +609,11 @@ def cliente_subsolo_cs(img):
     # depois (usuário, 10/11/26): "PARA BANHO USE BH."; "CENTRALIZE "SAUNA" DENTRO DO AMBIENTE"; "CENTRALIZE TODOS OS
     # RÓTULOS" (`rotulos_subsolo_casaa`: a especificação dos rótulos, gravada para a opção manuscrita e a ampliação)
     import rotulos_subsolo_casaa as RS
-    return RS.aplicar(Q, img)
+    img = RS.aplicar(Q, img)
+    # depois (10/11/26, "CORRIGIR ESSA FALHA NA PAREDE (NO PORTAL)"): as pontas das paredes nos portais, por último, com
+    # os rótulos já no lugar e fora da área refeita (o "m²" do BH. SERV. encosta na faixa da parede)
+    rot = np.max([a for a, _ in RS.camadas(Q, RS.ler_spec(), img.shape[:2])], axis=0)
+    return portais_cs(Q, img, rotulos=rot)
 
 
 if __name__ == "__main__":

@@ -370,7 +370,16 @@ CONFERENCIA = {"academia_banhos": (1300, 1050, 1900, 1650), "escada_grama": (720
 # fiéis e mais nítidos) fica o da IA.
 CORRIGIR_PX = {"sauna": (1188, 1506, 1382, 1634), "bancada_bh_serv": (1100, 988, 1136, 1049),
                "chuveiro_bh_serv": (1105, 897, 1128, 922), "chuveiro_bh_sauna": (1422, 1596, 1444, 1636),
-               "chuveiro_bh_fem": (1657, 1596, 1679, 1636)}
+               "chuveiro_bh_fem": (1657, 1596, 1679, 1636),
+               # depois (usuário, 10/11/26, nos recortes do 12K: "CORRIGIR ESSA FALHA NA PAREDE (NO PORTAL)"): a IA
+               # tinha feito um pé inclinado na ponta das paredes dos portais, a partir do risco do marco da porta que a
+               # final tinha ali (tirado da final por `cliente_subsolo_casaa_0511.portais_cs`); as pontas vêm da final
+               "portal_bh_fem_esq": (1486, 1492, 1504, 1522), "portal_bh_fem_dir": (1545, 1492, 1563, 1522),
+               "portal_bh_masc_esq": (1797, 1492, 1815, 1522), "portal_bh_masc_dir": (1853, 1492, 1871, 1522),
+               "portal_bh_serv_cima": (1178, 876, 1209, 1001), "portal_bh_serv_baixo": (1181, 1028, 1209, 1049),
+               # a face esquerda da parede do BH. SERV. (do nicho ao portal), refeita na final: a IA a tinha feito
+               # ondulada, com um ponto escuro junto ao nicho; e as prateleiras do depósito, no tom novo (o dos armários)
+               "prateleiras_deposito_cima": (1342, 876, 1832, 912), "prateleiras_deposito_lado": (1826, 876, 1874, 1049)}
 CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0}
 
 
