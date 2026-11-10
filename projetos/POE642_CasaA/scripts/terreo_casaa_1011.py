@@ -232,21 +232,23 @@ DANAE = {"tom": (172, 189, 200), "camadas": [(0.030, 0.6), (0.022, 6.0)], "molha
 # paredes, os pilares, os rótulos e os móveis do PDF. Na grama e na água, nada: o gramado e a água são refeitos nos
 # passos deles.
 TRACEJADOS_TA = {"laje_px": {"h": (299, 335, 1177, 1213, 1637, 1672), "v": (2635, 2599, 1521, 1485)}, "tol_px": 3,
-                 "laje_extra_px": [((1219, 1177), (1219, 1675))], "banda_px": 3,
+                 "laje_extra_px": [((1219, 1177), (1219, 1675))], "banda_px": 3, "pergolado_px": 8,
                  "fora_px": [(2250, 1112, 2350, 1212), (2540, 880, 2770, 910)],
                  "neutro": 34, "escuro": 125, "claro": 205, "salto_lum": 14, "moveis_m2": 3.0}
 
 
 def _retas_tracejadas(Q, q):
-    """As retas dos tracejados, em px: [(p0, p1)]."""
+    """As retas dos tracejados, em px: [(p0, p1, h, cheia)]: h, a meia largura da faixa; `cheia`, a faixa inteira sai
+    (as vigas do pergolado do render: a faixa clara entre os dois traços de cada viga)."""
     import pedidos_terreo_casaa_2910 as P
     par = FA.paredes_pdf(Q)
+    h, hp = q["banda_px"], q["pergolado_px"]
     retas = []
     for a, o in P.TRACEJADOS_TA["afastamento"]:
         g = P._segs_doc(Q, a, o, "DOC_LINHAS E PROJEÇÕES")
         if g:
             x0, y0, x1, y1 = P._linha_inteira(g)
-            retas.append((Q.p2q(x0, y0), Q.p2q(x1, y1)))
+            retas.append((Q.p2q(x0, y0), Q.p2q(x1, y1), h, False))
     for (cam, a, off), ext, segs in T.cadeias_tracejadas(Q, ["ARQ_CONTRAPISO"], min_ext=40):
         if a not in (0.0, 90.0):
             continue
@@ -254,10 +256,10 @@ def _retas_tracejadas(Q, q):
         pos = p[0][1] if a == 0.0 else p[0][0]
         if any(abs(pos - t) <= q["tol_px"] for t in q["laje_px"]["h" if a == 0.0 else "v"]):
             x0, y0, x1, y1 = P._linha_inteira(segs)
-            retas.append((Q.p2q(x0, y0), Q.p2q(x1, y1)))
+            retas.append((Q.p2q(x0, y0), Q.p2q(x1, y1), h, False))
     for _, _, segs in T.cadeias_tracejadas(Q, ["ARQ_PERGOLADO"]):
         x0, y0, x1, y1 = P._linha_inteira(segs)
-        retas.append((Q.p2q(x0, y0), Q.p2q(x1, y1)))
+        retas.append((Q.p2q(x0, y0), Q.p2q(x1, y1), hp, True))
     for _, _, segs in T.cadeias_tracejadas(Q, ["DOC_LINHAS E PROJEÇÕES"], min_n=2, min_ext=20):
         x0, y0, x1, y1 = P._linha_inteira(segs)
         (u0, v0), (u1, v1) = Q.p2q(x0, y0), Q.p2q(x1, y1)
@@ -266,8 +268,8 @@ def _retas_tracejadas(Q, q):
             continue
         if any(a <= um <= c and b <= vm <= d for a, b, c, d in q["fora_px"]):
             continue
-        retas.append(((u0, v0), (u1, v1)))
-    retas += [(tuple(map(float, a)), tuple(map(float, b))) for a, b in q["laje_extra_px"]]
+        retas.append(((u0, v0), (u1, v1), h, False))
+    retas += [(tuple(map(float, a)), tuple(map(float, b)), h, False) for a, b in q["laje_extra_px"]]
     return retas
 
 
@@ -290,69 +292,78 @@ def moveis_pdf(Q, q=None):
     return dilatar(m, 1)
 
 
-def apagar_retas(img, retas, h, fixo, mat, pular, q):
-    """Os px de traço das retas (px) recebem o material de fora da faixa, na normal da reta; devolve a imagem e o
-    número de px trocados."""
+def _orientacao(p0, p1):
+    a = np.degrees(np.arctan2(p1[1] - p0[1], p1[0] - p0[0])) % 180
+    return "h" if min(a, 180 - a) < 10 else ("v" if abs(a - 90) < 10 else f"d{round(a)}")
+
+
+def apagar_retas(img, retas, fixo, mat, pular, q):
+    """Os tracejados saem, por grupos de mesma direção (as horizontais, as verticais e cada diagonal), um grupo depois
+    do outro (no cruzamento, o grupo seguinte já acha o material limpo). Em cada reta, os px do traço (neutros, escuros
+    ou claros, que fogem da mediana em volta, com 1 px de antialias; nas `cheia`, a faixa inteira) recebem o px mais
+    perto, na normal da reta, que não é traço, do mesmo material e fora do que fica (`fixo`); o que sobra, o px fora
+    dos traços mais perto. Devolve a imagem e o número de px trocados."""
     out = img.copy()
-    im = img.astype(np.float32)
-    lum = im.mean(axis=2)
-    croma = im.max(axis=2) - im.min(axis=2)
-    H, W = lum.shape
-    faixas = []
-    banda = np.zeros((H, W), np.uint8)
-    for p0, p1 in retas:
-        mb = np.zeros((H, W), np.uint8)
-        cv2.line(mb, tuple(int(round(c)) for c in p0), tuple(int(round(c)) for c in p1), 1, 2 * h + 1)
-        faixas.append((p0, p1, mb.astype(bool)))
-        banda |= mb
-    banda = banda.astype(bool)
+    H, W = img.shape[:2]
+    grupos = {}
+    for r in retas:
+        grupos.setdefault(_orientacao(r[0], r[1]), []).append(r)
     n_troca = 0
-    for p0, p1, mb in faixas:
-        sel = mb & ~fixo & ~pular
-        ys, xs = np.nonzero(sel)
-        if not len(ys):
-            continue
-        dx, dy = p1[0] - p0[0], p1[1] - p0[1]
-        L = max(np.hypot(dx, dy), 1e-6)
-        nx, ny = -dy / L, dx / L
-        s = (xs - p0[0]) * nx + (ys - p0[1]) * ny
-        sg = np.where(s >= 0, 1.0, -1.0)
-        sy, sx = np.full(len(ys), -1), np.full(len(ys), -1)
-        pend = np.ones(len(ys), bool)
-        for k in (2 * h + 2, 2 * h + 4, 3 * h + 4, 4 * h + 5):
-            for lado in (1.0, -1.0):
-                cy = np.round(ys + ny * sg * lado * k).astype(int)
-                cx = np.round(xs + nx * sg * lado * k).astype(int)
-                dentro = (cy >= 0) & (cy < H) & (cx >= 0) & (cx < W)
-                cy_, cx_ = np.clip(cy, 0, H - 1), np.clip(cx, 0, W - 1)
-                ok = pend & dentro & ~banda[cy_, cx_] & ~fixo[cy_, cx_] & (mat[cy_, cx_] == mat[ys, xs])
-                sy[ok], sx[ok] = cy[ok], cx[ok]
-                pend &= ~ok
-        val = ~pend
-        ys, xs, sy, sx = ys[val], xs[val], sy[val], sx[val]
-        lv, lw = lum[ys, xs], lum[sy, sx]
-        traco = (croma[ys, xs] < q["neutro"]) & ((lv < q["escuro"]) | (lv > q["claro"])) & \
-            (np.abs(lv - lw) > q["salto_lum"])
-        D = np.zeros((H, W), bool)
-        D[ys[traco], xs[traco]] = True
-        D = dilatar(D, 1)
-        dif = np.abs(im[ys, xs] - im[sy, sx]).max(axis=1) > 8
-        troca = D[ys, xs] & (traco | dif)
-        out[ys[troca], xs[troca]] = img[sy[troca], sx[troca]]
-        n_troca += int(troca.sum())
-    # os cruzamentos (o px que está em duas faixas não acha fonte na normal de nenhuma): o traço que sobrou recebe o px
-    # de fora das faixas mais perto, do mesmo material
-    o = out.astype(np.float32)
-    lo, co = o.mean(axis=2), o.max(axis=2) - o.min(axis=2)
-    med = cv2.medianBlur(out, 9).astype(np.float32).mean(axis=2)
-    resto = banda & ~fixo & ~pular & (co < q["neutro"]) & ((lo < q["escuro"]) | (lo > q["claro"])) & \
-        (np.abs(lo - med) > q["salto_lum"])
-    resto = dilatar(resto, 1) & banda & ~fixo & ~pular
-    _, (iy, ix) = ndimage.distance_transform_edt(banda | fixo, return_indices=True)
-    ys, xs = np.nonzero(resto)
-    ok = mat[iy[ys, xs], ix[ys, xs]] == mat[ys, xs]
-    out[ys[ok], xs[ok]] = out[iy[ys[ok], xs[ok]], ix[ys[ok], xs[ok]]]
-    return out, n_troca + int(ok.sum())
+    for _, grupo in sorted(grupos.items()):
+        o = out.astype(np.float32)
+        lum = o.mean(axis=2)
+        croma = o.max(axis=2) - o.min(axis=2)
+        med = cv2.medianBlur(out, 11).astype(np.float32).mean(axis=2)
+        Tg = np.zeros((H, W), bool)
+        faixas = []
+        for p0, p1, h, cheia in grupo:
+            mb = np.zeros((H, W), np.uint8)
+            cv2.line(mb, tuple(int(round(c)) for c in p0), tuple(int(round(c)) for c in p1), 1, 2 * h + 1)
+            mb = mb.astype(bool) & ~fixo & ~pular
+            if cheia:
+                t = mb
+            else:
+                t = mb & (croma < q["neutro"]) & ((lum < q["escuro"]) | (lum > q["claro"])) & \
+                    (np.abs(lum - med) > q["salto_lum"])
+                t = dilatar(t, 1) & mb
+            Tg |= t
+            faixas.append((p0, p1, h, t))
+        feito = np.zeros((H, W), bool)
+        for p0, p1, h, t in faixas:
+            ys, xs = np.nonzero(t & ~feito)
+            if not len(ys):
+                continue
+            dx, dy = p1[0] - p0[0], p1[1] - p0[1]
+            L = max(np.hypot(dx, dy), 1e-6)
+            nx, ny = -dy / L, dx / L
+            sg = np.where((xs - p0[0]) * nx + (ys - p0[1]) * ny >= 0, 1.0, -1.0)
+            sy, sx = np.full(len(ys), -1), np.full(len(ys), -1)
+            pend = np.ones(len(ys), bool)
+            for k in range(1, 2 * h + 14):
+                for lado in (1.0, -1.0):
+                    cy = np.round(ys + ny * sg * lado * k).astype(int)
+                    cx = np.round(xs + nx * sg * lado * k).astype(int)
+                    dentro = (cy >= 0) & (cy < H) & (cx >= 0) & (cx < W)
+                    cy_, cx_ = np.clip(cy, 0, H - 1), np.clip(cx, 0, W - 1)
+                    ok = pend & dentro & ~Tg[cy_, cx_] & ~fixo[cy_, cx_] & ~pular[cy_, cx_] & \
+                        (mat[cy_, cx_] == mat[ys, xs])
+                    sy[ok], sx[ok] = cy[ok], cx[ok]
+                    pend &= ~ok
+                if not pend.any():
+                    break
+            v = ~pend
+            out[ys[v], xs[v]] = out[sy[v], sx[v]]
+            feito[ys[v], xs[v]] = True
+            n_troca += int(v.sum())
+        # o que não achou fonte na normal: o px fora dos traços mais perto, do mesmo material
+        resto = Tg & ~feito
+        if resto.any():
+            _, (iy, ix) = ndimage.distance_transform_edt(Tg | fixo | pular, return_indices=True)
+            ys, xs = np.nonzero(resto)
+            ok = mat[iy[ys, xs], ix[ys, xs]] == mat[ys, xs]
+            out[ys[ok], xs[ok]] = out[iy[ys[ok], xs[ok]], ix[ys[ok], xs[ok]]]
+            n_troca += int(ok.sum())
+    return out, n_troca
 
 
 def tracejados_ta(Q, img, q=None):
@@ -365,9 +376,9 @@ def tracejados_ta(Q, img, q=None):
         rot = np.maximum(rot, al)
     fixo = dilatar(par, 1) | dilatar(rot > 0.02, 1) | moveis_pdf(Q, q)
     pular = gramado_mascara(Q, img) | (agua_mascara(Q) > 0)
-    out, n = apagar_retas(img, retas, q["banda_px"], fixo, materiais(Q), pular, q)
+    out, n = apagar_retas(img, retas, fixo, materiais(Q), pular, q)
     print(f"    tracejados: {len(retas)} retas (afastamentos, laje da cobertura, pergolado, X e molduras), {n} px de "
-          f"traço trocados pelo material de fora; na grama e na água, nos passos deles")
+          f"traço trocados pelo material de perto; na grama e na água, nos passos deles")
     return out
 
 
@@ -383,7 +394,7 @@ def tracejados_ta(Q, img, q=None):
 GRAMADO_TA = {"lote_px": (300, 186, 3398, 1912), "verde": -4, "verde_azul": 10, "faixa_px": 4, "fechar": 7, "buraco_max": 9000, "area_min": 3000,
               "semente": 7, "semente_plantas": 11, "suave": 0.7,
               "arvores": [("arvore_3", (420, 310), 2.6), ("arvore_1", (3280, 310), 2.8), ("arvore_2", (420, 1795), 2.6),
-                          ("arvore_3", (3280, 1795), 2.4)],
+                          ("arvore_3", (3260, 1190), 2.4)],
               "arbustos": ("arbusto_1", "arbusto_2", "arbusto_3"), "arbusto_m": (0.85, 1.25), "passo_m": (4.8, 7.0),
               "recuo_m": 0.85, "longe_arvore_m": 3.6, "par": 0.35,
               "jardim_479": [("palmeira_1", (1510, 1688), 1.45), ("palmeira_3", (1662, 1694), 1.0),
@@ -396,7 +407,9 @@ def gramado_mascara(Q, img, q=None):
     x0, y0, x1, y1 = q["lote_px"]
     lote = np.zeros(img.shape[:2], bool)
     lote[y0:y1, x0:x1] = True
-    branco = np.all(Q.chapada == 255, axis=2) & lote
+    # o branco da base com as linhas finas dela fechadas (os tracejados e os contornos que cruzam o gramado)
+    branco = cv2.morphologyEx(np.all(Q.chapada == 255, axis=2).astype(np.uint8), cv2.MORPH_CLOSE,
+                              np.ones((5, 5), np.uint8)).astype(bool) & lote
     I = img.astype(np.int16)
     verde = (I[..., 1] >= I[..., 2] + q["verde"]) & (I[..., 1] >= I[..., 0] + q["verde_azul"]) & branco
     k = q["fechar"]
@@ -408,7 +421,7 @@ def gramado_mascara(Q, img, q=None):
     m = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_min"]])
     # as faixas dos tracejados tirados que caem no branco da base junto ao gramado (o traço na divisa com a pedra)
     fx = np.zeros(m.shape, np.uint8)
-    for p0, p1 in _retas_tracejadas(Q, TRACEJADOS_TA):
+    for p0, p1, _, _ in _retas_tracejadas(Q, TRACEJADOS_TA):
         cv2.line(fx, tuple(int(round(c)) for c in p0), tuple(int(round(c)) for c in p1), 1, 2 * q["faixa_px"] + 1)
     return m | (fx.astype(bool) & branco & dilatar(m, 2 * q["faixa_px"]))
 
