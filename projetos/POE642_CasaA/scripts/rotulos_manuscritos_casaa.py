@@ -21,7 +21,8 @@ A opção A é a final como está (Inter). A opção B parte dela:
   python3 rotulos_manuscritos_casaa.py                 # Subsolo: a final e a prancha da opção B (sufixo _manuscrita)
 
 Saída: `renders/POE642_CasaA_PH_<pavimento>_final_rotulos_manuscrita.png`, a comparação das duas opções em
-`renders/POE642_CasaA_PH_<pavimento>_rotulos_opcoes_A_B.jpg` e a prancha `entrega/POE642_CasaA_PH_<pavimento>_entrega_manuscrita.png`.
+`renders/POE642_CasaA_PH_<pavimento>_rotulos_opcoes_A_B.jpg` (e cada uma num arquivo,
+`..._rotulos_opcao_A_fonte_atual.jpg` e `..._rotulos_opcao_B_letra_manuscrita.jpg`) e a prancha `entrega/POE642_CasaA_PH_<pavimento>_entrega_manuscrita.png`.
 """
 
 import argparse
@@ -170,6 +171,11 @@ def comparar(chave, a, b):
     arq = FA.CASA / "renders" / f"POE642_CasaA_PH_{chave}_rotulos_opcoes_A_B.jpg"
     cv2.imwrite(str(arq), junto, [cv2.IMWRITE_JPEG_QUALITY, 92])
     print(f"    {arq.name}")
+    # cada opção num arquivo (usuário, 10/11/26: "AS DUAS OPÇÕES DE LETRAS EM ARQUIVOS SEPARADOS")
+    for sufixo, bloco in (("opcao_A_fonte_atual", blocos[0]), ("opcao_B_letra_manuscrita", blocos[1])):
+        arq = FA.CASA / "renders" / f"POE642_CasaA_PH_{chave}_rotulos_{sufixo}.jpg"
+        cv2.imwrite(str(arq), bloco, [cv2.IMWRITE_JPEG_QUALITY, 95])
+        print(f"    {arq.name}")
 
 
 FINAIS = {"Subsolo": FA.CASA / "renders" / "POE642_CasaA_PH_Subsolo_final_rotulos.png"}
