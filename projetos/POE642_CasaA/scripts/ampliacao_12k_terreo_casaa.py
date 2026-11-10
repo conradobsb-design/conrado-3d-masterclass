@@ -282,8 +282,20 @@ def diferencas(saida_ia):
 # de cima); trocado os dois cooktops (bocas quadradas) e a cuba do lavabo; alisado o marrom tabaco da bancada gourmet;
 # feito a prainha com uma grade forte de pastilhas e a piscina sem o desenho; e trocado o leque da pedra portuguesa
 # por um cascalho claro. A água e a pedra portuguesa vão pelas máscaras (`CORRIGIR_MASCARAS`), não por caixas.
+# Na leva de 10/11 à noite (a entrada nova, com a piscina, as paredes, os guarda-corpos e o escritório refeitos), a IA
+# também: tirou o X e os puxadores do elevador e trocou a roupa de cama e a cuba do motorista; juntou as duas mesas
+# laterais do escritório numa só e listrou o aparador; trocou a cuba esculpida do lavabo por uma de granito e a do
+# lavatório por um ralo linear; tirou os ralos e trocou as torneiras das pias da cozinha; fez das prateleiras da garagem
+# um armário rosado; pôs um puxador de porta no vidro da sala de estar e mudou a janela nova; e apagou parte do vidro do
+# jardim junto ao elevador. Esses trechos voltam da entrada; o resto da IA (a vegetação, as janelas, o deck, a escada do
+# jardim mais limpa, os resíduos que ela tirou) fica.
 CORRIGIR_PX = {"caracol": (1918, 1512, 2036, 1632), "cooktop_cozinha": (1964, 1280, 2022, 1318),
-               "gourmet": (1476, 1266, 1804, 1444), "lavabo": (2296, 396, 2362, 522)}
+               "gourmet": (1476, 1266, 1804, 1444), "lavabo": (2296, 350, 2362, 522),
+               "elevador_motorista": (2244, 1096, 2456, 1298), "escritorio_mesas": (2500, 548, 2546, 594),
+               "escritorio_aparador": (2420, 562, 2504, 601), "lavatorio": (1468, 1440, 1625, 1508),
+               "pias_cozinha": (2122, 1326, 2168, 1410), "prateleiras_garagem": (2494, 1114, 2537, 1230),
+               "janela_estar": (1880, 354, 1952, 378), "vidro_estar": (1864, 372, 1882, 440),
+               "vidro_jardim": (2250, 980, 2400, 1018)}
 CORRIGIR_MASCARAS = {"agua": "agua", "pedra_portuguesa": (85, 138, 185)}
 CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0, "folga_mascara_px": 2}
 
