@@ -4269,3 +4269,7 @@ Pedidos do usuário, vendo o JPG em 12K: "CORRIGIR ESSA FALHA NA PAREDE (NO PORT
 OK do usuário: "PODE CORRIGIR OS DOIS PORTAIS TAMBÉM" (depósito e BH. da sauna); e, no meio: "NÃO PODEMOS TER PORTAS "FLUTUANTES", ELAS PRECISAM ESTAR COM A SUA PONTA LIGADA A PONTA DA PAREDE." Feito: os dois portais sem o resto do marco; em todos os portais a folha da porta (a de abrir, aberta a 90°, e a de correr) encosta na ponta da parede, que avança na espessura dela até a folha (o batente tirado antes deixava a folha a ~3 px). Regra nova no `POE642_REGRAS.md`. Final, pranchas A e B, PDF da Casa A, book, A3 em 4K e os JPGs em 12K refeitos. Ainda para o OK do usuário: o tom padrão nos outros armários e prateleiras da Casa A (Térreo e 1º Pavimento).
 
 Depois (usuário: "QUERO QUE O VÉRTICE DA PORTA ENCONTRE COM O VÉRTICE DA PAREDE. [...] NÃO ENCOSTE O LADO, MAS SIM O VÉRTICE COM VÉRTICE."): a parede avança só até a face de dentro da folha; folha e parede se tocam só na quina, nos cinco portais. Final, pranchas, PDF, book, A3 e 12K refeitos.
+
+### Regra: o tom de armários e prateleiras vale para todas as casas (10/11)
+
+Usuário: "O TOM VAI VALER PARA TODAS AS CASAS, COMO REGRA. SÓ DEIXE REGISTRADO, MAS VAMOS AGORA PARA O TERREO DA CASA A." Registrado no `POE642_REGRAS.md` (armários): RGB 208, 178, 156 em armários e prateleiras de todas as casas; aplicado só no depósito do Subsolo da Casa A, nas outras plantas quando cada uma for revista. Próximo passo: a lista de correções do Térreo da Casa A, que o usuário vai mandar.
