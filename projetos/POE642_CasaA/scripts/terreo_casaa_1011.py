@@ -234,7 +234,7 @@ DANAE = {"tom": (172, 189, 200), "camadas": [(0.030, 0.6), (0.022, 6.0)], "molha
 TRACEJADOS_TA = {"laje_px": {"h": (299, 335, 1177, 1213, 1637, 1672), "v": (2635, 2599, 1521, 1485)}, "tol_px": 3,
                  "laje_extra_px": [((1219, 1177), (1219, 1675))], "banda_px": 3, "pergolado_px": 8,
                  "pergolado_fontes_px": [(1290, 345, 1450, 470), (1100, 1180, 1185, 1560)], "pergolado_bege_px": (1400, 1100),
-                 "pergolado_semente": 3105, "croma_obj": 10, "lum_obj": 140, "ponta_px": 5,
+                 "pergolado_semente": 3105, "croma_obj": 10, "lum_obj": 140, "ponta_px": 5, "canto_px": 11, "canto_dif": 22,
                  "fora_px": [(2250, 1112, 2350, 1212), (2540, 880, 2770, 910)],
                  "neutro": 34, "escuro": 125, "claro": 205, "salto_lum": 14, "moveis_m2": 3.0}
 
@@ -406,6 +406,20 @@ def tracejados_ta(Q, img, q=None):
     pular = gramado_mascara(Q, img) | (agua_mascara(Q) > 0)
     out, n_p = pergolado_ta(Q, img, fixo, pular, q)
     out, n = apagar_retas(out, retas, fixo, moveis_pdf(Q, q), materiais(Q), pular, q)
+    # as pontas dos X (o traço do render engrossava no canto, em ponta de seta): no disco de `canto_px` em volta de
+    # cada ponta das diagonais, o que é bem mais escuro que o piso em volta sai por inpaint
+    o = out.astype(np.float32)
+    lum = o.mean(axis=2)
+    med = cv2.medianBlur(out, 15).astype(np.float32).mean(axis=2)
+    cantos = np.zeros(lum.shape, np.uint8)
+    for p0, p1, _, _ in retas:
+        if _orientacao(p0, p1).startswith("d"):
+            for c in (p0, p1):
+                cv2.circle(cantos, (int(round(c[0])), int(round(c[1]))), q["canto_px"], 1, -1)
+    sujo = cantos.astype(bool) & (lum < med - q["canto_dif"]) & ~fixo & ~pular
+    sujo = dilatar(sujo, 1) & cantos.astype(bool) & ~fixo & ~pular
+    if sujo.any():
+        out = cv2.inpaint(out, (sujo * 255).astype(np.uint8), 3, cv2.INPAINT_TELEA)
     print(f"    tracejados: {len(retas)} retas (afastamentos, laje da cobertura, X e molduras), {n} px trocados pelo "
           f"piso de perto (sobre os móveis e os carros, só o traço); a grade do pergolado com o piso refeito "
           f"({n_p} px); na grama e na água, nos passos deles")
@@ -427,9 +441,9 @@ GRAMADO_TA = {"lote_px": (300, 186, 3398, 1912), "verde": -4, "verde_azul": 10, 
                           ("arvore_3", (3260, 1190), 2.4)],
               "arbustos": ("arbusto_1", "arbusto_2", "arbusto_3"), "arbusto_m": (0.85, 1.25), "passo_m": (4.8, 7.0),
               "recuo_m": 0.85, "longe_arvore_m": 3.6, "par": 0.35,
-              "jardim_479": [("palmeira_1", (1510, 1688), 1.45), ("palmeira_3", (1662, 1694), 1.0),
-                             ("arbusto_3", (1628, 1716), 0.55)],
-              "jardim_interno": (80, 145, 110)}
+              "jardim_479": [("palmeira_1", (1510, 1684), 1.1), ("palmeira_3", (1662, 1686), 0.85),
+                             ("arbusto_3", (1563, 1709), 0.5)],
+              "jardim_interno": (80, 145, 110), "jardim_479_px": (1440, 1620, 1720, 1760)}
 
 
 def gramado_mascara(Q, img, q=None):
@@ -537,8 +551,14 @@ def gramado_ta(Q, img, q=None):
                         _pousar(out, q["arbustos"][rng.integers(len(q["arbustos"]))], cx2, cy2, d2, px)
                         n_arb += 1
             t += rng.uniform(*q["passo_m"]) * px
+    # no jardim de 4,79 m², as plantas só dentro dele (sem passar sobre as paredes)
+    dentro = cv2.erode((m | ji).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(np.float32)
+    tmp = out.copy()
     for nome, (cx, cy), d in q["jardim_479"]:
-        _pousar(out, nome, cx, cy, d, px)
+        _pousar(tmp, nome, cx, cy, d, px)
+    a = cv2.GaussianBlur(dentro, (0, 0), 0.6)[..., None]
+    x0j, y0j, x1j, y1j = q["jardim_479_px"]
+    out[y0j:y1j, x0j:x1j] = (tmp * a + out * (1 - a))[y0j:y1j, x0j:x1j]
     for _, al, _, _ in rots:
         out = compor(out, al, ROTULO_CLARO)
     print(f"    gramado: a grama do Subsolo em {m.sum() / px ** 2:.0f} m² do lote, sem as árvores do render; "
@@ -768,7 +788,7 @@ def bancadas_ta(Q, img, q=None):
     tl = FA.tela(out, Q, q["lavabo_lateral_pt"], folga=4)
     m = tl.ret(q["lavabo_lateral_pt"])
     FA.sombra_q(tl, m, forca=T.LAVABO["sombra"], dist=1.3, sigma=1.3)
-    tl.pintar(m, tuple(float(v) for v in tom))
+    tl.pintar_img(m, danae(tl.h, tl.w, q["semente"] + 7, dict(DANAE, tom=tuple(float(v) for v in tom))))
     k = max(1, int(round(T.LAVABO["larg_px"] * 8)))
     borda = m & ~cv2.erode(m, np.ones((k, k), np.uint8))
     tl.pintar_img(borda, tl.reg * T.LAVABO["borda"])
