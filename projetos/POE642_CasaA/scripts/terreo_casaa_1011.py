@@ -234,7 +234,7 @@ DANAE = {"tom": (172, 189, 200), "camadas": [(0.030, 0.6), (0.022, 6.0)], "molha
 TRACEJADOS_TA = {"laje_px": {"h": (299, 335, 1177, 1213, 1637, 1672), "v": (2635, 2599, 1521, 1485)}, "tol_px": 3,
                  "laje_extra_px": [((1219, 1177), (1219, 1675))], "banda_px": 3, "pergolado_px": 8,
                  "pergolado_fontes_px": [(1290, 345, 1450, 470), (1100, 1180, 1185, 1560)], "pergolado_bege_px": (1400, 1100),
-                 "pergolado_semente": 3105, "croma_obj": 10, "lum_obj": 140,
+                 "pergolado_semente": 3105, "croma_obj": 10, "lum_obj": 140, "ponta_px": 5,
                  "fora_px": [(2250, 1112, 2350, 1212), (2540, 880, 2770, 910)],
                  "neutro": 34, "escuro": 125, "claro": 205, "salto_lum": 14, "moveis_m2": 3.0}
 
@@ -313,6 +313,13 @@ def apagar_retas(img, retas, fixo, moveis, mat, pular, q):
         grupos.setdefault(_orientacao(r[0], r[1]), []).append(r)
     n_troca = 0
     for _, grupo in sorted(grupos.items()):
+        # as retas um pouco mais longas nas pontas (o traço do canto passa do último ponto do PDF)
+        ext = q["ponta_px"]
+        grupo = [((p0[0] - (p1[0] - p0[0]) / max(np.hypot(p1[0] - p0[0], p1[1] - p0[1]), 1e-6) * ext,
+                   p0[1] - (p1[1] - p0[1]) / max(np.hypot(p1[0] - p0[0], p1[1] - p0[1]), 1e-6) * ext),
+                  (p1[0] + (p1[0] - p0[0]) / max(np.hypot(p1[0] - p0[0], p1[1] - p0[1]), 1e-6) * ext,
+                   p1[1] + (p1[1] - p0[1]) / max(np.hypot(p1[0] - p0[0], p1[1] - p0[1]), 1e-6) * ext), h, c)
+                 for p0, p1, h, c in grupo]
         o = out.astype(np.float32)
         lum = o.mean(axis=2)
         croma = o.max(axis=2) - o.min(axis=2)
@@ -388,7 +395,8 @@ def pergolado_ta(Q, img, fixo, pular, q):
 
 def tracejados_ta(Q, img, q=None):
     q = q or TRACEJADOS_TA
-    retas = [r for r in _retas_tracejadas(Q, q) if not r[3]]
+    # as do pergolado também passam pela limpeza fina, depois do piso refeito (o traço que sobra fora do Bege Bahia)
+    retas = [(r[0], r[1], q["banda_px"], False) for r in _retas_tracejadas(Q, q)]
     par = FA.paredes_pdf(Q) > 0.05
     rots = rotulos_na_imagem(Q, img)
     rot = np.zeros(img.shape[:2], np.float32)
