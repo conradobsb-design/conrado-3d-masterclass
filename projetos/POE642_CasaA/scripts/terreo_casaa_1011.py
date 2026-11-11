@@ -600,18 +600,54 @@ def gramado_ta(Q, img, q=None):
 # prainha e o banco do spa (o anel do PDF em volta do quadrado do fundo); o degrau entre a prainha e a piscina com a
 # sombra fina do lado fundo. Os traços sobre a água saem (o pergolado volta no fim, fino e claro); os rótulos voltam no
 # mesmo desenho, em branco na água escura e em preto na rasa. A água fica nos retângulos do PDF, com a cobertura exata.
-PISCINA_TA = {"tom": (106, 99, 80), "tom_rasa": (137, 140, 139), "prainha_y_pt": 1049.5,
+# Depois (usuário, 10/11, no prompt v34: "Preciso que o revestimento das piscinas apareça na planta humanizada"; e, na
+# pergunta do tom: "Turquesa #7CC8D4 do item novo"): a água turquesa clara, límpida e luminosa #7CC8D4 sobre o
+# revestimento Barlavento, que aparece através dela: pastilhas cinza-esverdeadas claras #B7CFC9 de `peca_cm`, cada uma
+# num tom um pouco diferente (`peca_var`), com as juntas finas e regulares (`junta`, a fração da peça de cada lado,
+# escurecidas a `junta_f`) e a grade alinhada à borda de cada tanque; nas partes fundas a água um pouco mais intensa
+# (`tom`) e as pastilhas menos marcadas (`contraste`), na prainha e no banco do spa a água mais rasa e mais clara
+# (`tom_rasa`, o turquesa misturado ao tom da pastilha) e as pastilhas mais visíveis; as ondulações sutis (a grade
+# levemente deslocada pela refração, `onda`, e as cáusticas fracas), sem reflexo forte, brilho de sol nem sombra (só um
+# esfumado mínimo junto às bordas e o fio do degrau da prainha). O azul e as pastilhas ficam só nos retângulos da água.
+PISCINA_TA = {"tom": (204, 192, 114), "tom_rasa": (207, 203, 150), "pastilha": (201, 207, 183), "peca_cm": 14.5,
+              "junta": 0.075, "junta_f": 0.84, "peca_var": 0.025, "grao_a": 0.015, "onda": (7.0, 0.35),
+              "contraste": {"funda": 0.55, "rasa": 1.0},
+              "prainha_y_pt": 1049.5,
               "spa_pt": (748.5, 1049.5, 907.2, 1219.6), "spa_fundo_bgr": (255, 247, 223), "semente": 4210,
-              "funda": {"grao_sig": 0.5, "grao_a": 0.07, "manchas_sig": 30.0, "manchas_a": 0.08, "caus_sig": 3.0,
-                        "caus_larg": 0.17, "quebra_sig": 4.0, "quebra_b": 0.5, "dens_sig": 24.0, "dens_k": 0.7,
-                        "dens_b": 0.72, "caus_a": 0.5, "caus_cor": (228, 232, 226)},
-              "rasa": {"grao_sig": 0.5, "grao_a": 0.12, "manchas_sig": 30.0, "manchas_a": 0.04, "caus_sig": 3.0,
-                       "caus_larg": 0.15, "quebra_sig": 4.0, "quebra_b": 0.4, "dens_sig": 24.0, "dens_k": 0.8,
-                       "dens_b": 0.4, "caus_a": 0.3, "caus_cor": (232, 234, 232)},
-              # a sombra das bordas: (força, alcance em px) na esquerda, em cima, na direita e embaixo
-              "sombra": {"funda": ((0.30, 14), (0.18, 10), (0.10, 6), (0.10, 6)),
-                         "rasa": ((0.16, 8), (0.10, 6), (0.06, 4), (0.06, 4))},
-              "degrau": (0.22, 2.0)}
+              "funda": {"grao_sig": 0.5, "grao_a": 0.0, "manchas_sig": 30.0, "manchas_a": 0.03, "caus_sig": 3.0,
+                        "caus_larg": 0.15, "quebra_sig": 4.0, "quebra_b": 0.4, "dens_sig": 24.0, "dens_k": 0.7,
+                        "dens_b": 0.5, "caus_a": 0.12, "caus_cor": (240, 242, 226)},
+              "rasa": {"grao_sig": 0.5, "grao_a": 0.0, "manchas_sig": 30.0, "manchas_a": 0.02, "caus_sig": 3.0,
+                       "caus_larg": 0.13, "quebra_sig": 4.0, "quebra_b": 0.3, "dens_sig": 24.0, "dens_k": 0.8,
+                       "dens_b": 0.3, "caus_a": 0.07, "caus_cor": (242, 244, 234)},
+              # o esfumado das bordas: (força, alcance em px) na esquerda, em cima, na direita e embaixo
+              "sombra": {"funda": ((0.06, 3), (0.05, 3), (0.04, 3), (0.04, 3)),
+                         "rasa": ((0.04, 3), (0.03, 3), (0.03, 3), (0.03, 3))},
+              "degrau": (0.16, 1.6)}
+
+
+def pastilhas_rel(h, w, lado_px, q, rng, ss=4):
+    """O Barlavento visto através da água, relativo (média 1), em (h, w) px com a grade a partir de (0, 0): cada peça
+    num tom, o grão fino, as juntas escurecidas e a grade levemente ondulada pela refração."""
+    H, W = h * ss, w * ss
+    lado = lado_px * ss
+    sig, amp = q["onda"]
+    desl = []
+    for _ in range(2):
+        n = cv2.GaussianBlur(rng.standard_normal((h, w)).astype(np.float32), (0, 0), sig)
+        desl.append(cv2.resize(n / (n.std() + 1e-6) * amp * ss, (W, H), interpolation=cv2.INTER_LINEAR))
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    yy, xx = yy + desl[0], xx + desl[1]
+    i, j = np.floor(yy / lado).astype(np.int32) + 1, np.floor(xx / lado).astype(np.int32) + 1
+    tom = np.clip(1 + q["peca_var"] * rng.standard_normal((int(i.max()) + 2, int(j.max()) + 2)), 0.9, 1.1)
+    img = tom[np.clip(i, 0, None), np.clip(j, 0, None)].astype(np.float32)
+    fy, fx = (yy / lado) % 1, (xx / lado) % 1
+    junta = np.minimum(np.minimum(fy, 1 - fy), np.minimum(fx, 1 - fx)) < q["junta"]
+    img = np.where(junta, img * q["junta_f"], img)
+    g = cv2.GaussianBlur(rng.standard_normal((H, W)).astype(np.float32), (0, 0), 0.6 * ss)
+    img = img * (1 + q["grao_a"] * g / (g.std() + 1e-6))
+    img = cv2.resize(img, (w, h), interpolation=cv2.INTER_AREA)
+    return img / img.mean()
 
 
 def _ruido(rng, h, w, sig):
@@ -672,6 +708,16 @@ def piscina_ta(Q, img, q=None):
     # o degrau da prainha: a sombra fina do lado fundo
     f, alc = q["degrau"]
     sombra = np.where(na_piscina & (yy < yp), sombra * (1 - f * np.exp(-np.clip(yp - yy, 0, None) / alc)), sombra)
+    # o Barlavento: a grade de cada tanque a partir do canto de cima à esquerda (a piscina e a prainha numa grade só)
+    lado = q["peca_cm"] / 100 * Q.px_m
+    rel = np.ones((H, W), np.float32)
+    for x0, y0, x1, y1 in ((xs0, ys0, xs1, ys1), (sx0, sy0, sx1, sy1)):
+        a0, b0 = int(np.floor(x0)) - 1, int(np.floor(y0)) - 1
+        a1, b1 = int(np.ceil(x1)) + 2, int(np.ceil(y1)) + 2
+        rel[b0:b1, a0:a1] = pastilhas_rel(b1 - b0, a1 - a0, lado, q, rng)
+    cf, cr = q["contraste"]["funda"], q["contraste"]["rasa"]
+    funda_t = funda_t * (1 + cf * (rel - 1))[..., None]
+    rasa_t = rasa_t * (1 + cr * (rel - 1))[..., None]
     novo = np.where(rasa[..., None], rasa_t, funda_t) * sombra[..., None]
     im = img.astype(np.float32)
     out = im * (1 - cob[..., None]) + novo * cob[..., None]
@@ -679,8 +725,9 @@ def piscina_ta(Q, img, q=None):
     for r, al, _, _ in rots:
         out = compor(out, al, cor_rotulo(out, al))
         nomes.append(r[0])
-    print(f"    água: a funda no azul-ardósia das fotos (BGR {q['tom']}) e a rasa (prainha e banco do spa) no cinza "
-          f"({q['tom_rasa']}), com o grão, as cáusticas finas e a sombra das bordas; rótulos de volta: {', '.join(nomes)}")
+    print(f"    água: turquesa sobre o Barlavento (pastilhas de {q['peca_cm']} cm, {lado:.1f} px, juntas finas): a funda "
+          f"(BGR {q['tom']}) e a rasa, prainha e banco do spa (BGR {q['tom_rasa']}), com as pastilhas mais visíveis; "
+          f"ondulação e cáusticas sutis; rótulos de volta: {', '.join(nomes)}")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
