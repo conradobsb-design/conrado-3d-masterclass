@@ -22,17 +22,17 @@ import numpy as np
 RAIZ = Path(__file__).resolve().parents[2]
 
 PAISAGISMO = {
-    "alvo": 0.20,                                   # a fração do gramado em canteiro (o resto, 80%, grama)
+    "alvo": 0.14,                                   # a fração do gramado em canteiro (usuário: 80% ou mais em grama, "sem exageros no paisagismo")
     "semente": 1111,
     # os verdes dos arbustos: o tom médio (BGR) de cada variedade, no grupo das copas das árvores da biblioteca
-    "verdes": {"verde_escuro": (52, 92, 62), "verde_oliva": (58, 108, 92), "verde_azulado": (78, 108, 70)},
+    "verdes": {"verde_escuro": (50, 88, 74), "verde_copa": (60, 102, 88), "verde_azulado": (68, 100, 80)},
     "flor_branca": (226, 234, 238),
-    "arbusto_m": (0.9, 1.4), "florido": 0.0, "denso": 0.62,
-    "arvore_m": (3.2, 3.8),
+    "arbusto_m": (0.7, 1.6), "florido": 0.0, "denso": 0.58,
+    "arvore_m": (2.8, 3.2), "arvore_nitidez": 1.2,
     "canteiro": {"fundo": (34, 52, 46), "fundo_ruido": 0.10, "borda_px": 1.6},
-    "A": {"faixa_m": 0.85, "faixa_var_m": 0.35, "var_escala_m": 7.0, "canto_m": 2.6},
+    "A": {"faixa_m": 0.85, "faixa_var_m": 0.35, "var_escala_m": 7.0, "canto_m": 2.4, "trechos": -0.25, "trecho_m": 9.0},
     "B": {"comp_m": (7.5, 10.5), "fundo_m": (2.2, 3.0), "canto_m": 3.2},
-    "grama": {"manchas": [(1.5, 0.035), (4.0, 0.045), (9.0, 0.035)], "matiz": (5.0, 3.0), "fio": 1.35,
+    "grama": {"manchas": [(1.5, 0.025), (4.0, 0.03), (9.0, 0.02)], "matiz": (5.0, 2.0), "fio": 1.35,
               "fio_sig_m": 0.25, "contato_m": 0.45, "contato": 0.16, "canteiro_contato": 0.10},
 }
 
@@ -60,11 +60,21 @@ def _sprite(nome):
     return cor, al, d
 
 
-def _tingir(cor, al, alvo, mistura=0.85):
+def _tingir(cor, al, alvo, mistura=0.85, volume=True):
     L = cor.mean(axis=2)
     Lm = float(L[al > 0.5].mean())
-    novo = np.float32(alvo)[None, None, :] * (L / Lm)[..., None]
-    return cor * (1 - mistura) + novo * mistura
+    novo = np.float32(alvo)[None, None, :] * np.minimum(L / Lm, 1.25)[..., None]
+    res = cor * (1 - mistura) + novo * mistura
+    if volume:
+        # a borda da copa mais escura (o recorte tem um contorno claro) e o volume com a luz do alto à direita
+        h, w = al.shape
+        d0 = 2 * np.sqrt((al > 0.5).sum() / np.pi)
+        e = cv2.distanceTransform((al > 0.5).astype(np.uint8), cv2.DIST_L2, 5)
+        borda = 0.72 + 0.28 * np.clip(e / (0.14 * d0), 0, 1)
+        yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
+        luz = ((xx - w / 2) - (yy - h / 2)) / (0.5 * d0 * np.sqrt(2))
+        res = res * (borda * (1 + 0.10 * np.clip(luz, -1, 1)))[..., None]
+    return res
 
 
 def _flor_branca(cor, al, branco, folha):
@@ -159,8 +169,8 @@ def grama_realista(img, m, px_m, q=None, canteiro=None, muro=None, rng=None):
     # o tom médio da grama fica o de antes (usuário: "preserve 80% da área em grama realista no tom que já temos"):
     # a mediana fora da sombra de contato volta à mediana de antes
     longe = mm & (escuro < 0.01) if (muro is not None or canteiro is not None) else mm
-    antes = np.median(img[y0:y1, x0:x1][longe].astype(np.float32), axis=0)
-    agora = np.median(sub[longe], axis=0)
+    antes = img[y0:y1, x0:x1][longe].astype(np.float32).mean(axis=0)
+    agora = sub[longe].mean(axis=0)
     sub = sub * (antes / np.maximum(agora, 1))[None, None, :]
     out[y0:y1, x0:x1] = np.where(mm[..., None], sub, out[y0:y1, x0:x1])
     return out
@@ -191,10 +201,12 @@ def canteiros(m, lote, px_m, opcao, arvores_px, q=None, rng=None):
         canto = np.zeros((H, W), bool)
         for cx, cy in arvores_px:
             canto |= (xx - cx) ** 2 + (yy - cy) ** 2 <= (a["canto_m"] * px_m) ** 2
+        # a faixa em trechos (não contínua: a grama chega ao muro entre eles)
+        trecho = ruido((H, W), a["trecho_m"] * px_m, rng) > a["trechos"]
         lo, hi = 0.2, 3.0
         for _ in range(18):                         # a largura média que dá o alvo
             f = (lo + hi) / 2
-            c = m & ((dm < (f * a["faixa_m"] + a["faixa_var_m"] * var) * px_m) | canto)
+            c = m & (((dm < (f * a["faixa_m"] + a["faixa_var_m"] * var) * px_m) & trecho) | canto)
             lo, hi = (f, hi) if c.sum() < alvo else (lo, f)
         return c
     b = q["B"]
@@ -300,6 +312,8 @@ def paisagismo(img, m, px_m, lote, arvores, opcao="A", q=None, limite=None, rotu
     for nome, cx, cy, d in pos:
         c, a, dd0 = _sprite(nome)
         c2, a2 = _colocar(c, a, dd0, d * px_m, rng.uniform(0, 360))
+        # o recorte da árvore é ampliado da referência (26 px/m): a nitidez de volta, como a dos arbustos
+        c2 = np.clip(c2 + q["arvore_nitidez"] * (c2 - cv2.GaussianBlur(c2, (0, 0), 1.6)), 0, 255)
         arv.append((c2, a2, cx, cy, d * px_m))
     out = _camada(out, arv, lim, sombra)
     print(f"    paisagismo {opcao}: canteiros em {cant.sum() / m.sum() * 100:.1f}% do gramado "
