@@ -4314,3 +4314,12 @@ Feito (10/11, noite): a final instalada, os 21 antes/depois (`renders/POE642_Cas
 O PROJ. CLARABOIA, numa linha no corpo 1,3, ocupava o vão inteiro do lavabo (encostava nas duas paredes). Resposta do usuário (10/11): "APENAS 'CLARABOIA'". Feito: o rótulo é só CLARABOIA, no mesmo corpo e no mesmo centro (`CONTORNOS_TA["lavabo"]["claraboia"]["texto"]`, a `quebra` de uma linha), na final, na prancha, no PDF, no book e no 12K A e B.
 
 Os dois resíduos pequenos da final em 3840 px (um risquinho escuro na ponta direita da pedra do hall externo, x 2598-2599, y 867-878; uma mancha clara no granito abaixo da ponta da parede atrás da porta da área de serviço, x 2043-2049, y 1459-1461), com o OK do usuário ("PODE LIMPAR OS DOIS RESÍDUOS TAMBÉM"): limpos no fim do passo `contornos` (`CONTORNOS_TA["residuos_finos"]`, `_residuos_finos`). Final, antes/depois, prancha, PDF, book e 12K A e B refeitos (o 12K sobre a mesma saída do Topaz: só os rótulos mudaram).
+
+### Casa A, Térreo: os retoques de 11/11 (12 pedidos com recortes)
+
+Pedidos do usuário (aplicados direto): as duas falhas na curva do acesso; o tracejado horizontal junto ao contorno (WC, jardim de 4,79 m², gás); o rótulo LAVABO mais acima, central, fora da porta; o acabamento do armário ao lado do lavabo e a parede; ralo em cada pia da cozinha e na do gourmet; o tom mais claro na parte da caracol que pertence ao 1º Pavimento; o borrão na grama junto ao motorista e os resíduos do piso antigo na garagem; a parede embaixo do aparador do hall interno; as 5 pedras do acesso e as bordas; nenhuma porta flutuante (todas quina a quina).
+
+Feito: final, 12 antes/depois (`POE642_CasaA/renders/POE642_CasaA_PH_Terreo_1111_*_antes_depois.jpg`), prancha do Térreo, PDF da Casa A, book e o 12K A e B (Topaz novo sobre a mesma saída do Nano Banana Pro, com os trechos retocados vindos da entrada nova). Nas portas: as 7 de abrir que paravam a ~3 px da parede ligadas pela ponta da parede; a de correr da cozinha fechada de batente a batente; a folha da porta do lavabo redesenhada. Regras novas no `POE642_REGRAS.md` (seção 4: revisar todas as portas, a de correr fechada; seção 5: a parte de cima da caracol mais clara; seção 7: ralo visível em cada cuba).
+
+O 1º Pavimento segue para a sequência: o Térreo nublado nele ainda não tem esses retoques (`terreo_casaa_1011.py --um_pav` refaz).
+

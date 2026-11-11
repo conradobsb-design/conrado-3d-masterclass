@@ -298,7 +298,17 @@ CORRIGIR_PX = {"caracol": (1918, 1512, 2036, 1632), "cooktop_cozinha": (1964, 12
                "escritorio_aparador": (2420, 562, 2504, 601), "lavatorio": (1468, 1440, 1625, 1508),
                "pias_cozinha": (2122, 1326, 2168, 1410), "prateleiras_garagem": (2494, 1114, 2537, 1230),
                "janela_estar": (1880, 354, 1952, 378), "vidro_estar": (1864, 372, 1882, 440),
-               "vidro_jardim": (2250, 980, 2400, 1018)}
+               "vidro_jardim": (2250, 980, 2400, 1018),
+               # os retoques de 11/11 (`terreo_casaa_1011.RETOQUES_1111` e as bordas da pista em `_acesso`): a saída da
+               # IA é a mesma; esses trechos, refeitos na final, voltam da entrada nova
+               "curva_acesso_cima": (3326, 1316, 3440, 1366), "curva_acesso_baixo": (3326, 1552, 3440, 1684),
+               "tracejado_jardim": (1236, 1634, 1708, 1650), "armario_lavabo": (2188, 364, 2262, 616),
+               "porta_lavabo": (2256, 455, 2278, 524), "grama_motorista": (2544, 1150, 2702, 1322),
+               "parede_hall": (2244, 866, 2548, 892), "pedras_acesso": (2606, 598, 3436, 878),
+               "porta_correr_cozinha": (2140, 1145, 2186, 1300), "porta_1_3": (1585, 1535, 1682, 1630),
+               "porta_6": (1975, 1445, 2062, 1475), "porta_7": (2044, 1510, 2072, 1582),
+               "porta_9": (2225, 1240, 2252, 1326), "porta_13": (2330, 1284, 2405, 1310),
+               "garagem_ponta": (2455, 1294, 2480, 1324), "porta_18": (2512, 1240, 2539, 1326)}
 CORRIGIR_MASCARAS = {"agua": "agua", "pedra_portuguesa": (85, 138, 185)}
 CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0, "folga_mascara_px": 2}
 
