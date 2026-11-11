@@ -523,7 +523,72 @@ def paineis_1p(Q, img, q=None):
 # 7. A bancada junto ao quarto de serviço (cliente: "Cor da bancada é no Dekton Danae"): a bancada do PDF (ARQ_BANCADAS)
 # no Dekton Danae do Térreo (`terreo_casaa_1011.danae`), em volta da cuba redonda (que fica), com o contorno fino.
 BANCADA_1P = {"bancada_pt": (1695.2, 1449.2, 1768.9, 1483.2), "cuba_pt": (1713.35, 1466.2, 9.9), "semente": 1117,
-              "contorno": (140, 146, 150)}
+              "contorno": (140, 146, 150),
+              # usuário, vendo a final: "Melhore a representação da Cuba, torneira e ralo da Cuba": a cuba redonda
+              # de louça (a aba, a bacia em degradê da borda ao fundo com a sombra por dentro do lado da luz, a sombra
+              # curta na bancada), o ralo cromado no fundo e a torneira de mesa cromada atrás (do lado da parede de
+              # baixo): a base redonda, a bica até o terço de trás da bacia e a alavanca para a direita (pt).
+              "aba_pt": 1.4, "sombra_bacia": 0.16, "ralo_pt": 1.45,
+              "torneira": {"recuo_pt": 3.4, "base_pt": 1.9, "bica_larg_pt": 1.8, "bica_ate": 0.28,
+                           "alavanca_pt": (1.2, 4.8, 1.3)}}
+
+
+def _cuba_redonda(Q, out, cx, cy, r, q):
+    """A cuba redonda de louça: a aba branca, a bacia da borda ao fundo (BACIA_BORDA -> BACIA_FUNDO), mais escura junto
+    à borda do alto à direita (a luz vem de lá e a borda faz sombra por dentro), a sombra curta na bancada e o ralo
+    cromado no fundo (o anel, o miolo escuro com a grelha e o brilho)."""
+    from retoque_terreo_casab import BACIA_BORDA, BACIA_FUNDO, LOUCA, LOUCA_CONTORNO
+    tl = FA.tela(out, Q, (cx - r - 2, cy - r - 2, cx + r + 2, cy + r + 2), folga=4)
+    k = FA.PT_PX * 8
+    u, v = tl.pt(cx, cy)
+    c = (int(round(u)), int(round(v)))
+    disco = tl.vazia()
+    cv2.circle(disco, c, int(round(r * k)), 255, -1, cv2.LINE_AA)
+    FA.sombra_q(tl, disco, forca=0.24, dist=0.9, sigma=1.0)
+    tl.pintar(disco, LOUCA)
+    rb = r - q["aba_pt"]
+    bacia = tl.vazia()
+    cv2.circle(bacia, c, int(round(rb * k)), 255, -1, cv2.LINE_AA)
+    X, Y = tl.grade()
+    t = np.clip(np.hypot(X - cx, Y - cy) / rb, 0, 1)
+    lado = np.clip(0.5 + 0.5 * ((X - cx) - (Y - cy)) / (rb * 1.414), 0, 1)          # 1 no alto à direita
+    f = np.float32(BACIA_FUNDO)[None, None] * (1 - t[..., None] ** 1.6) + np.float32(BACIA_BORDA)[None, None] * t[..., None] ** 1.6
+    f *= (1 - q["sombra_bacia"] * np.clip((t - 0.45) / 0.55, 0, 1) * (0.25 + 0.75 * lado))[..., None]
+    tl.pintar_img(bacia, f)
+    tl.contorno(disco, 0.4, LOUCA_CONTORNO)
+    tl.contorno(bacia, 0.3, (190, 193, 195))
+    # o ralo: o anel cromado, o miolo escuro com a grelha em cruz e o brilho do alto à direita
+    rr = q["ralo_pt"] * k
+    anel = tl.vazia()
+    cv2.circle(anel, c, int(round(rr)), 255, -1, cv2.LINE_AA)
+    FA.sombra_q(tl, anel, forca=0.15, dist=0.4, sigma=0.4)
+    tl.pintar(anel, FA.CROMO["meio"])
+    miolo = tl.vazia()
+    cv2.circle(miolo, c, int(round(rr * 0.62)), 255, -1, cv2.LINE_AA)
+    tl.pintar(miolo, (84, 88, 92))
+    grelha = tl.vazia()
+    e = int(round(rr * 0.62))
+    cv2.line(grelha, (c[0] - e, c[1]), (c[0] + e, c[1]), 255, max(1, int(round(0.22 * k))), cv2.LINE_AA)
+    cv2.line(grelha, (c[0], c[1] - e), (c[0], c[1] + e), 255, max(1, int(round(0.22 * k))), cv2.LINE_AA)
+    tl.pintar(grelha, FA.CROMO["meio"])
+    brilho = tl.vazia()
+    cv2.ellipse(brilho, c, (int(round(rr * 0.82)), int(round(rr * 0.82))), 0, -80, -10, 255,
+                max(1, int(round(0.25 * k))), cv2.LINE_AA)
+    tl.pintar(brilho, FA.CROMO["claro"], 0.9)
+    tl.contorno(anel, 0.3, FA.CROMO["contorno"])
+    return tl.gravar()
+
+
+def _torneira_mesa(Q, out, cx, cy, r, q):
+    """A torneira de mesa atrás da cuba (do lado da parede, y maior): a base redonda cromada, a bica até o terço de trás
+    da bacia (`FA.torneira`, com o brilho e a sombra curta) e a alavanca para a direita."""
+    t = q["torneira"]
+    by = cy + r + t["recuo_pt"]
+    w = t["bica_larg_pt"] / 2
+    bica = (cx - w, cy + r * t["bica_ate"], cx + w, by)
+    out = FA.torneira(Q, out, bica, (cx, by, t["base_pt"]))
+    x0, x1, larg = t["alavanca_pt"]
+    return FA.placa_cromada(Q, out, (cx + x0, by - larg / 2, cx + x1, by + larg / 2), raio_pt=0.5)
 
 
 def bancada_1p(Q, img, q=None):
@@ -537,8 +602,12 @@ def bancada_1p(Q, img, q=None):
     m = cv2.bitwise_and(m, cv2.bitwise_not(c))
     tl.pintar_img(m, TA.danae(tl.h, tl.w, q["semente"]))
     tl.contorno(m, 0.35, q["contorno"])
-    print("    bancada: a do quarto de serviço no Dekton Danae, em volta da cuba")
-    return tl.gravar()
+    out = tl.gravar()
+    out = _cuba_redonda(Q, out, cx, cy, r, q)
+    out = _torneira_mesa(Q, out, cx, cy, r, q)
+    print("    bancada: a do quarto de serviço no Dekton Danae, com a cuba redonda de louça (aba, bacia, ralo cromado) e a "
+          "torneira de mesa cromada (base, bica e alavanca)")
+    return out
 
 
 # ----------------------------------------------------------------------------------------------------------------------
