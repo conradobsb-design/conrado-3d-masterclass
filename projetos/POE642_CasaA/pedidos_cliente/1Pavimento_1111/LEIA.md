@@ -17,5 +17,7 @@ Usuário: "já vou deixar as alterações, além das que definimos como regra do
 13. `13_seta_descricao_guarda_corpo_escadas.png` — "Colocar a seta e a descrição em todas as escadas. Representar o guarda-corpo."
 14. `14_painel_amadeirado_2.png` — "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado." (outro trecho do painel)
 15. `15_porta_encostada_na_parede.png` — "Encostar essa porta mais na parede, ela tá solta." E o usuário: "revisar todas as portas, quina a quina para todas as portas com suas respectivas paredes." (a regra de 11/11 do Térreo: nenhuma porta flutuante)
+16. `16_caracol_seta_e_descricao.png` — "Colocar a seta na escada e a descrição Desce para 'tal espaço'" (a caracol junto à saleta: DESCE PARA A ÁREA DE SERVIÇO, conferir no Térreo)
+17. `17_banho_master_vegetacao_e_tracejados.png` — "Diminuir o tamanho dessa vegetação" (a floreira junto à banheira do banho master) e "Remover as linhas tracejadas." (no banho master)
 
 Além destes, as regras já definidas (POE642_REGRAS.md) que valem para o 1º Pavimento (o Térreo nublado novo, a água C, os tracejados finos, os rótulos centralizados etc.).
