@@ -2046,7 +2046,8 @@ def _deck(out, q):
     alvo = q["base_escada"]
     for x in range(x0, x1):
         col = img[y0:y1, x].astype(np.float32)
-        verde = (col[:, 1] > col[:, 0] + 8) & (col.mean(axis=1) < 130)
+        # a grama (o verde acima do vermelho; as juntas escuras da madeira nova, 11/11, têm o vermelho acima)
+        verde = (col[:, 1] > col[:, 0] + 8) & (col.mean(axis=1) < 130) & (col[:, 1] > col[:, 2])
         g = np.where(verde)[0]
         if not len(g):
             continue
@@ -2850,6 +2851,13 @@ ANTES_DEPOIS_1111 = {"Terreo": {"curva_acesso": (3280, 1300, 3440, 1700), "trace
                                 "grama_garagem": (2500, 1120, 2720, 1340), "parede_hall": (2230, 830, 2560, 910),
                                 "pedras": (2590, 590, 3440, 890), "porta_correr_cozinha": (2130, 1140, 2200, 1305),
                                 "portas_servico": (1580, 1440, 2075, 1630), "portas_motorista": (2220, 1240, 2545, 1330)}}
+# a 2ª leva de 11/11 (contra a final de 62c82e2), em renders/..._1111b_<trecho>_antes_depois.jpg: o deck em madeira
+# nova, a água opção C (com a parte rasa), os rótulos recentralizados, o tracejado do gás, o guarda-corpo e o travertino
+ANTES_DEPOIS_1111B = {"Terreo": {"planta": (270, 140, 3440, 1960), "piscina_deck": (700, 480, 1360, 1150),
+                                 "spa_prainha": (900, 840, 1260, 1010), "varanda_sala": (1480, 580, 2200, 720),
+                                 "gourmet_servico": (1440, 1290, 2180, 1660), "gas_descoberta": (1680, 1590, 2120, 1700),
+                                 "hall_escada_jardim": (2240, 680, 2620, 1110), "motorista": (2220, 1240, 2545, 1350),
+                                 "lavabo": (2220, 330, 2420, 560)}}
 
 
 def main():
@@ -2860,9 +2868,15 @@ def main():
     ap.add_argument("--saida")
     ap.add_argument("--passos")
     ap.add_argument("--antes_depois", action="store_true", help="grava os recortes de ANTES_DEPOIS_1011 em renders/")
+    ap.add_argument("--antes_depois_1111b", help="a final de antes (62c82e2): grava os recortes de ANTES_DEPOIS_1111B")
     ap.add_argument("--um_pav", help="a final do 1º Pavimento de antes: o Térreo nublado é refeito (pede --passos)")
     a = ap.parse_args()
     img = cv2.imread(a.antes)
+    if a.antes_depois_1111b:
+        import pedidos_terreo_casaa_2910 as P
+        P.antes_depois_pedidos_ta("Terreo", cv2.imread(a.antes_depois_1111b), img, caixas=ANTES_DEPOIS_1111B,
+                                  sufixo="1111b")
+        return
     out = correcoes_ta(img, a.de, a.ate, a.passos)
     cv2.imwrite(a.saida or str(FINAL), out)
     if a.antes_depois:
