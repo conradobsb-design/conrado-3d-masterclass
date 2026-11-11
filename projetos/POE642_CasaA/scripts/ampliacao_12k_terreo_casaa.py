@@ -217,6 +217,9 @@ def preparar(passos):
             txt |= (a > 0.02).astype(np.uint8)
     k = 2 * G12["folga_texto_px"] + 1
     limpa = cv2.inpaint(limpa, cv2.dilate(txt, np.ones((k, k), np.uint8)) * 255, 4, cv2.INPAINT_TELEA)
+    # a água (piscina, prainha e spa) sem os rótulos: o desenho do passo da piscina de novo (a semente é fixa), em vez
+    # do texto tirado de cima das pastilhas, que borrava a grade (10/11, o Barlavento visível)
+    limpa = TA.piscina_ta(Q, limpa, com_rotulos=False)
     rc = recortes(img)
     X0, Wc, Yia, Hia = rc["X0"], rc["Wc"], rc["Yia"], rc["Hia"]
     cv2.imwrite(str(ENTRADA_IA), limpa[Yia:Yia + Hia, X0:X0 + Wc])

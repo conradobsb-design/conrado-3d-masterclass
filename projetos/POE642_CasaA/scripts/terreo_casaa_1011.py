@@ -678,12 +678,14 @@ def _sombra_bordas(h, w, ret, forcas):
     return np.clip(1 - s, 0.3, 1)
 
 
-def piscina_ta(Q, img, q=None):
+def piscina_ta(Q, img, q=None, com_rotulos=True):
+    """A água nova sobre `img`; com `com_rotulos=False`, sem os rótulos de volta (a entrada da IA do 12K: o mesmo
+    desenho, porque a semente é fixa, sem o borrão de tirar o texto de cima das pastilhas)."""
     import piscinas_turquesa as PT
     q = q or PISCINA_TA
     cob = agua_mascara(Q)
     agua = cob > 0
-    rots = rotulos_na_imagem(Q, img, dentro=agua)
+    rots = rotulos_na_imagem(Q, img, dentro=agua) if com_rotulos else []
     H, W = agua.shape
     rng = np.random.default_rng(q["semente"])
     funda_t = agua_textura(H, W, q["tom"], q["funda"], rng)
