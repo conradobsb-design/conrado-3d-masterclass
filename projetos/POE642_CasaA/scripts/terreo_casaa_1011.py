@@ -2570,6 +2570,54 @@ def retoques_1111(Q, out, q=None):
     return out
 
 
+# 14b. Os pisos claros (revisão de 11/11, OK do usuário: "ok para os 3 itens dos pisos"; pedido: "revise os pisos da
+# casa: marmore bege bahia e marmore travertino bruto, apenas", "não mexa no piso marrom existente"):
+# - travertino do lavabo, do lavatório, do banho varanda e do WC no tom da varanda e da sala (`alvo` BGR): estavam 2 a
+#   5% mais escuros; só os px do piso (no tom dele, fora das paredes), as peças ficam;
+# - o banho do motorista continua em Bege Bahia (pedido de 26/10);
+# - o Bege Bahia das pedras do acesso e do hall externo fica como está: medidas só no piso (sem as bordas com a grama,
+#   que inflavam a primeira conta), as manchas delas são as do deck da piscina (desvio de ~2,5 a 3 nas duas escalas).
+PISOS_1111 = {"travertino": {"alvo": (205, 217, 229), "tol": 30, "sig_px": 14.0, "funde_px": 12.0, "max": 1.08,
+                             "bancada_bgr": (211, 214, 214),
+                             "rets": {"lavabo": (2257, 356, 2345, 514), "lavatorio": (1480, 1445, 1612, 1555),
+                                      "banho_varanda": (1614, 1445, 1700, 1632), "wc": (1480, 1557, 1610, 1640)}}}
+
+
+def pisos_1111(Q, out, q=None):
+    """O travertino dos ambientes pequenos no tom da varanda: a luz local do piso (a média dele em volta, `sig_px`, só
+    nos px do piso) vai ao `alvo`, só clareando, com a correção esfumada (`funde_px`) para fora dos retângulos, sem
+    emenda onde o ambiente é aberto (o lavatório para o terraço e para o WC)."""
+    q = q or PISOS_1111
+    with contextlib.redirect_stdout(io.StringIO()):
+        parede = FA.paredes_pdf(Q) > 0.05
+    t = q["travertino"]
+    H, W = out.shape[:2]
+    nucleo = np.zeros((H, W), np.float32)
+    for x0, y0, x1, y1 in t["rets"].values():
+        nucleo[y0:y1, x0:x1] = 1
+    peso = np.clip(cv2.GaussianBlur(nucleo, (0, 0), t["funde_px"]) * 2, 0, 1) * np.maximum(nucleo, 0)
+    peso = np.maximum(peso, cv2.GaussianBlur(nucleo, (0, 0), t["funde_px"]))
+    im = out.astype(np.float32)
+    alvo = np.float32(t["alvo"])
+    # o piso: no tom dele, fora das paredes e das peças (as do PDF e as bancadas e cubas dos banhos, com folga)
+    pecas = dilatar(moveis_pdf(Q) | np.all(Q.chapada == np.uint8(t["bancada_bgr"]), axis=2), 2)
+    piso = (np.abs(im - alvo).max(axis=2) < t["tol"]) & ~parede & ~pecas & (peso > 0.01)
+    pf = piso.astype(np.float32)
+    num = cv2.GaussianBlur(im * pf[..., None], (0, 0), t["sig_px"])
+    den = cv2.GaussianBlur(pf, (0, 0), t["sig_px"])[..., None]
+    local = num / np.maximum(den, 1e-4)
+    fator = np.clip(alvo / np.maximum(local, 1), 1.0, t["max"])
+    f = 1 + (fator - 1) * peso[..., None]
+    res = np.where(piso[..., None], im * f, im)
+    meds = []
+    for nome, (x0, y0, x1, y1) in t["rets"].items():
+        m = piso[y0:y1, x0:x1]
+        meds.append(f"{nome} {tuple(int(v) for v in np.median(im[y0:y1, x0:x1][m], axis=0))}->"
+                    f"{tuple(int(v) for v in np.median(res[y0:y1, x0:x1][m], axis=0))}")
+    print(f"      pisos: travertino no tom da varanda {t['alvo']} ({'; '.join(meds)})")
+    return np.clip(np.round(res), 0, 255).astype(np.uint8)
+
+
 # 15. Os rótulos de 11/11 (usuário, nos recortes da varanda e sala, da cozinha/gourmet/serviço/despensa e do deck:
 # "limpe residuos e alinhe os rotulos"; "centralize e alinhe os rótulos. mantenha os mesmos tamanho de fonte, sempre que
 # possível"; "alinhe e centralize rótulos"): cada rótulo de `centros` sai do lugar (o piso de baixo vem de um trecho do
@@ -2714,6 +2762,7 @@ def contornos_ta(Q, img, q=None):
     out = _paredes_escuras(Q, out, q)
     out = _residuos_finos(out, q["residuos_finos"])
     out = retoques_1111(Q, out)
+    out = pisos_1111(Q, out)
     out = rotulos_1111(Q, out)
     print("    contornos: o 3º carro e o piso em volta; as pedras do acesso; o início da pista e o muro de baixo; a faixa "
           "de baixo sem o tracejado; o deck rente à escada; os guarda-corpos do terraço; a janela da sala de estar; "
