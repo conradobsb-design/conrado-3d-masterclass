@@ -18,6 +18,7 @@ um. Coordenadas em px do quadro de 3840 (o mesmo do PDF, `final3840_casab.Quadro
 import argparse
 import contextlib
 import io
+import json
 import sys
 from pathlib import Path
 
@@ -34,6 +35,7 @@ import final3840_casaa as FA                     # noqa: E402
 B = F.B
 RENDERS = B.CASA_B / "renders"
 FINAL = RENDERS / "POE642_CasaB_PH_Subsolo_final_rotulos.png"
+ROTULOS_JSON = Path(__file__).resolve().parents[2] / "POE642_CasaB" / "renders" / "POE642_CasaB_PH_Subsolo_rotulos_1211.json"
 PEGADA = RENDERS / "POE642_CasaB_PH_Subsolo_pegada_mascara.png"
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -785,6 +787,7 @@ def rotulos_sb(Q, img, q=ROTULOS_SB2):
     I_obst = cv2.integral(obst.astype(np.uint8))
     esc = Q.W / 2000
     out = img.copy()
+    specs = []
 
     def soma(I, a, b_, c, d):
         return int(I[d, c] - I[b_, c] - I[d, a] + I[b_, a])
@@ -836,9 +839,13 @@ def rotulos_sb(Q, img, q=ROTULOS_SB2):
         o2 = dict(opc, cor=F.cor_do_fundo(out, a0, b0, a1, b1))
         out = R1.rotulos_ambientes(out, [r1], Q.p2q, escala_desvio=esc, granito=None,
                                    ajustes=[(nome, (cx / esc, cy / esc), (dx / esc, dy / esc), o2)], halo=None)
+        specs.append({"nome": nome, "pdf": [float(v) for v in r1[2]], "opc": {k: v for k, v in opc.items()},
+                      "desvio": [float(dx), float(dy)], "cor": [int(c) for c in o2["cor"]]})
         print(f"      {nome}: o meio do piso livre em ({tx:.0f}, {ty:.0f}) px; a caixa em ({a0}, {b0})-({a1}, {b1}) "
               f"{'livre' if melhor[0] < 1000 else 'tocando'}, corpo {fc}")
-    print(f"    rótulos: {len(q['desenhar'])} nomes no meio do piso livre de cada ambiente")
+    # o desenho de cada rótulo (para o 12K: `ampliacao_12k_subsolo_casab.py`)
+    ROTULOS_JSON.write_text(json.dumps(specs, ensure_ascii=False, indent=1) + "\n")
+    print(f"    rótulos: {len(q['desenhar'])} nomes no meio do piso livre de cada ambiente ({ROTULOS_JSON.name})")
     return out
 
 
