@@ -5,8 +5,9 @@ seguida").
 O mesmo roteiro do Térreo (`ampliacao_12k_terreo_casaa.py`, que este módulo usa com os nomes e as caixas do 1º
 Pavimento), com duas diferenças na preparação:
   - os triângulos e as descrições das escadas (a em U e a caracol, `um_pav_casaa_1111.ESCADAS_1P`) saem refazendo os
-    dois últimos passos da final (`escadas` e `floreira`, a partir do passo `portas`) sem as anotações
-    (`terreo_casaa_1011.ANOTAR`): a escada fica com o D apagado e os guarda-corpos, sem o desenho por cima;
+    passos `escadas` e `floreira` (a partir do passo `portas`) sem as anotações (`terreo_casaa_1011.ANOTAR`): o que
+    muda contra o passo `floreira` com as anotações entra na final (os passos de depois, pisos e retoques, não tocam
+    nas escadas): a escada fica com o D apagado e os guarda-corpos, sem o desenho por cima;
   - os tracejados finos ficam na entrada da IA (no 1º Pavimento eles vêm no começo da final, com o Térreo nublado),
     então o alfa dos tracejados é vazio (o 12K não redesenha nenhum).
 Os rótulos saem da final pela conta do alfa (`ampliacao_a3_casaa.tirar`) e voltam desenhados direto no 12K.
@@ -98,14 +99,21 @@ def anotacoes_1p(Q):
 def preparar(passos):
     Q = _quadro()
     img = cv2.imread(str(Z.FINAL))
-    # a final sem os triângulos e as descrições: os passos `escadas` e `floreira` de novo, a partir do passo `portas`
-    base = cv2.imread(str(Path(passos) / "passo_portas.png"))
+    # a final sem os triângulos e as descrições: os passos `escadas` e `floreira` de novo, a partir do passo `portas`,
+    # sem as anotações; o que eles mudam (contra o passo `floreira` com as anotações) entra na final, que tem os passos
+    # seguintes (`pisos_1111e`, `retoques_1111e`), que não tocam nas escadas
+    sem = cv2.imread(str(Path(passos) / "passo_portas.png"))
     TA.ANOTAR["sim"] = False
     try:
         with contextlib.redirect_stdout(io.StringIO()):
-            base = U.floreira_1p(Q, U.escadas_1p(Q, base))
+            sem = U.floreira_1p(Q, U.escadas_1p(Q, sem))
     finally:
         TA.ANOTAR["sim"] = True
+    com = cv2.imread(str(Path(passos) / "passo_floreira.png"))
+    anot = cv2.dilate((np.abs(sem.astype(np.int16) - com.astype(np.int16)).max(axis=2) > 0).astype(np.uint8),
+                      np.ones((5, 5), np.uint8)) > 0
+    base = img.copy()
+    base[anot] = sem[anot]
     dif = np.abs(base.astype(np.int16) - img.astype(np.int16)).max(axis=2)
     # sem tracejados a redesenhar: o alfa vazio
     cv2.imwrite(str(Z.TRACOS), np.zeros(img.shape, np.uint8))
