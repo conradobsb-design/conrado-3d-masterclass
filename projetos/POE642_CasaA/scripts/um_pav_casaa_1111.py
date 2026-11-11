@@ -71,7 +71,8 @@ def ret_alfa(Q, r_px, ss=4, borda=0.0):
 # leve). Entra fora da pegada do pavimento (o lote e o tracejado branco antigos somem), nos dois vazios (do PDF, de
 # moldura a moldura; a viga entre eles fica) e no poço da escada em U (fora dos degraus do 1º Pavimento; os degraus 1 a
 # 7, até a linha de corte, são do Térreo). A linha de corte e o contorno do vão entre os lances voltam por cima.
-NUBLADO_1P = {"vazios_pt": [(1315.4, 805.7, 1655.6, 1060.8), (1666.9, 805.7, 1925.4, 1060.8)],
+NUBLADO_1P = {"corte": {"cor": (150, 150, 150), "larg_px": 0.85},
+              "vazios_pt": [(1315.4, 805.7, 1655.6, 1060.8), (1666.9, 805.7, 1925.4, 1060.8)],
               "poco_px": (2253.0, 891.0, 2533.0, 1106.0), "borda_px": 0.6,
               "vao": ((132, 138, 147), 0.9)}
 
@@ -131,8 +132,15 @@ def nublado_1p(Q, img, q=None):
     m = mascara_terreo(Q, q)[..., None]
     out = img.astype(np.float32) * (1 - m) + t * m
     out = np.clip(np.round(out), 0, 255).astype(np.uint8)
-    # a linha de corte do Térreo na escada em U e o contorno fino do vão entre os lances, por cima
-    out = P1.linha_corte(Q, out)
+    # a linha de corte do Térreo na escada em U, suavizada (usuário, vendo a final: "pode remover a linha preta, mas
+    # preserve a divisão. ou suavize a linha preta": a divisão fica, num cinza médio mais fino, em vez do grafite), e o
+    # contorno fino do vão entre os lances, por cima
+    guarda = P1.CORTE_U
+    P1.CORTE_U = dict(guarda, **q["corte"])
+    try:
+        out = P1.linha_corte(Q, out)
+    finally:
+        P1.CORTE_U = guarda
     e = P1.ESCADA_U_1P
     l1, pa, l2 = e["lanco1"], e["patamar"], e["lanco2"]
     cor, larg = q["vao"]
@@ -468,55 +476,134 @@ def vazios_1p(Q, img, q=None):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# 6. Os painéis amadeirados entre as varandas e os quartos (cliente: "Representar melhor o painel amadeirado que tem
-# aqui entre a varanda e o quarto"; "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado"): o
-# painel do trilho de fora (a faixa marrom de ~0,1 m na final, junto à varanda de 6,36 m², à de 7,15 m² e à de 39 m²)
-# vira um ripado de madeira escura, nogueira, com as ripas marcadas (a junta escura a cada `ripa_px`), a aresta de cima
-# iluminada, o contorno escuro dos dois lados e a sombra curta na varanda, num tom bem diferente do piso vinílico.
-PAINEIS_1P = {"faixas_px": [(1589.5, 346.0, 1596.5, 594.0), (1594.6, 899.0, 1600.2, 1000.0),
-                            (1589.5, 1000.0, 1596.5, 1210.0), (2550.4, 1222.0, 2556.6, 1547.0)],
-              "madeira": (52, 82, 122), "junta": (30, 46, 70), "ripa_px": 3.6, "junta_px": 0.9, "luz": 0.16,
-              "contorno": (34, 40, 48), "contorno_px": 0.7, "sombra": 0.20, "veio": 0.08, "semente": 1116}
+# 6. As folhas amadeiradas das portas das suítes para as varandas (cliente: "Representar melhor o painel amadeirado que tem
+# aqui entre a varanda e o quarto"; "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado";
+# usuário, vendo a final: "aqui são duas folhas amadeiradas" (suíte 2), "aqui são quatro folhas amadeiradas. corrija os
+# resíduos limpando a imagem" (suíte master), "corrija o amadeirado aqui também" (suíte 1)): o plano de fora das portas
+# das suítes, folha por folha como no PDF (`revisao_casaa_2910.BRISES_SUITES_TA` e as folhas da frente dos banhos,
+# `pedidos_terreo_casaa_2910.BANHOS_1PAV_TA`), cada uma no seu trilho (os trilhos se alternam) e com o seu contorno, em
+# ripado de nogueira (as ripas marcadas, o veio no comprido, a aresta da luz), com as junções do PDF na mesma madeira,
+# mais escura, e a sombra curta na varanda. Antes, a faixa do plano de fora é limpa (a faixa contínua de antes, o
+# bronze antigo e os restos): do lado da varanda e na frente dos banhos, o Bege Bahia da varanda ao lado; entre os
+# trilhos, no vão do quarto, o piso do quarto de logo ao lado. Suítes 3 (2 folhas), 2 (2 + 1 do banho), master (2 + 2 da
+# frente do banho master) e 1 (2 + 2 do banho 1).
+FOLHAS_1P = {"madeira": (52, 82, 122), "junta": (30, 46, 70), "juncao": 0.80, "ripa_px": 3.6, "junta_px": 0.9,
+             "junta_forca": 0.75, "luz": 0.16, "veio": 0.08, "contorno": (34, 40, 48), "contorno_px": 0.6,
+             "folga_px": 0.7, "sombra": 0.26, "sombra_px": (-0.9, 1.1, 0.9), "margem_fora_px": 4, "fonte_px": 3,
+             "semente": 1116, "suites": ("Suíte 3", "Suíte 2", "Suíte Master", "Suíte 1")}
 
 
-def paineis_1p(Q, img, q=None):
-    q = q or PAINEIS_1P
-    out = img.astype(np.float32)
+def _cobertura(r, X0, Y0, w, h):
+    """O retângulo r (px do quadro, fracionário) como cobertura exata de cada px da janela (0 a 1)."""
+    xs = np.arange(X0, X0 + w, dtype=np.float32)
+    ys = np.arange(Y0, Y0 + h, dtype=np.float32)
+    cx = np.clip(np.minimum(xs + 1, r[2]) - np.maximum(xs, r[0]), 0, 1)
+    cy = np.clip(np.minimum(ys + 1, r[3]) - np.maximum(ys, r[1]), 0, 1)
+    return cy[:, None] * cx[None, :]
+
+
+def _pecas_fora(Q, nome):
+    """As folhas e as junções do plano de fora de uma suíte (px do quadro), o lado da varanda e as linhas do quarto."""
+    import pedidos_terreo_casaa_2910 as P
+    import revisao_casaa_2910 as RA
+
+    def px(r):
+        (a, b), (c, d) = Q.p2q(r[0], r[1]), Q.p2q(r[2], r[3])
+        return min(a, c), min(b, d), max(a, c), max(b, d)
+    folhas = [px(r) for r in RA.BRISES_SUITES_TA["folhas_pt"][nome]]
+    juncoes = [px(r) for r in RA.JUNCOES_TA[nome]["fora"]]
+    if nome in P.BANHOS_1PAV_TA:
+        folhas += [px(r) for r in P.BANHOS_1PAV_TA[nome]["folhas"]]
+        juncoes += [px(r) for r in P.BANHOS_1PAV_TA[nome]["juncoes"]]
+    lado = RA.VAOS_SUITES_TA["portas"][nome][1]                 # +1: a varanda à esquerda; -1: à direita
+    quarto = tuple(Q.p2q(0, y)[1] for y in RA.JUNCOES_TA[nome]["batentes"])
+    return folhas, juncoes, lado, quarto
+
+
+def _limpar_faixa(out, par, folhas, pecas, lado, quarto, q):
+    """A faixa do plano de fora limpa: o Bege Bahia da varanda ao lado (fora do trilho e em frente aos banhos) e, entre
+    os trilhos, no vão do quarto, o piso do quarto das `fonte_px` colunas de logo ao lado, repetidas."""
+    m = q["margem_fora_px"]
+    if lado > 0:
+        t = int(np.floor(min(r[0] for r in folhas)))
+        L, R = t - m, int(np.ceil(max(r[2] for r in folhas))) + 1
+    else:
+        t = int(np.ceil(max(r[2] for r in folhas))) - 1
+        L, R = int(np.floor(min(r[0] for r in folhas))) - 1, t + m
+    Y0 = int(np.floor(min(r[1] for r in pecas))) - 3
+    Y1 = int(np.ceil(max(r[3] for r in pecas))) + 3
+    d = R - L + 3
+    n = 0
+    for y in range(Y0, Y1):
+        no_quarto = quarto[0] <= y + 0.5 <= quarto[1]
+        for x in range(L, R + 1):
+            if par[y, x]:
+                continue
+            fora_trilho = (x < t) if lado > 0 else (x > t)
+            if fora_trilho or not no_quarto:
+                src = x - d if lado > 0 else x + d                      # o Bege Bahia da varanda
+            else:
+                k = q["fonte_px"]                                       # o piso do quarto, de logo ao lado
+                src = R + 1 + (x - t) % k if lado > 0 else L - 1 - (t - x) % k
+            if not par[y, src]:
+                out[y, x] = out[y, src]
+                n += 1
+    return n
+
+
+def folhas_1p(Q, img, q=None):
+    q = q or FOLHAS_1P
+    par = FA.paredes_pdf(Q) > 0.3
+    out = img.copy()
     rng = np.random.default_rng(q["semente"])
-    ss = 8
-    for x0, y0, x1, y1 in q["faixas_px"]:
-        X0, Y0, X1, Y1 = int(np.floor(x0)) - 4, int(np.floor(y0)) - 2, int(np.ceil(x1)) + 4, int(np.ceil(y1)) + 2
-        h, w = Y1 - Y0, X1 - X0
-        ys, xs = np.mgrid[0:h * ss, 0:w * ss].astype(np.float32) / ss
-        xs += X0
-        ys += Y0
-        dentro = (xs >= x0) & (xs < x1) & (ys >= y0) & (ys < y1)
-        # as ripas: ao longo da faixa (a faixa é vertical), a junta escura a cada ripa
-        fase = np.mod(ys - y0, q["ripa_px"])
-        junta = dentro & (fase < q["junta_px"])
-        # a luz de cima: a aresta da direita (a luz vem do alto à direita) um pouco mais clara
-        rel = np.clip((xs - x0) / max(x1 - x0, 1e-3), 0, 1)
-        luz = 1 + q["luz"] * (rel - 0.5)
-        veio = cv2.GaussianBlur(rng.normal(0, 1, ys.shape).astype(np.float32), (0, 0), sigmaX=1.0, sigmaY=6.0)
+    contas = []
+    for nome in q["suites"]:
+        folhas, juncoes, lado, quarto = _pecas_fora(Q, nome)
+        pecas = folhas + juncoes
+        nl = _limpar_faixa(out, par, folhas, pecas, lado, quarto, q)
+        f = q["folga_px"]
+        X0 = int(np.floor(min(r[0] for r in pecas))) - 6
+        Y0 = int(np.floor(min(r[1] for r in pecas))) - 6
+        X1 = int(np.ceil(max(r[2] for r in pecas))) + 6
+        Y1 = int(np.ceil(max(r[3] for r in pecas))) + 6
+        w, h = X1 - X0, Y1 - Y0
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        cresce = [(r[0] - f, r[1], r[2] + f, r[3]) if (r[3] - r[1]) > (r[2] - r[0]) else
+                  (r[0], r[1] - f, r[2], r[3] + f) for r in pecas]
+        A = np.zeros((h, w), np.float32)
+        for r in cresce:
+            A = np.maximum(A, _cobertura(r, X0, Y0, w, h))
+        # a sombra curta das peças na varanda (fora delas)
+        dx, dy, sg = q["sombra_px"]
+        sb = cv2.GaussianBlur(cv2.warpAffine(A, np.float32([[1, 0, dx], [0, 1, dy]]), (w, h)), (0, 0), sg)
+        reg *= (1 - q["sombra"] * sb * (1 - A) * (~par[Y0:Y1, X0:X1]))[..., None]
+        ys = (np.arange(h, dtype=np.float32) + Y0 + 0.5)[:, None] * np.ones((1, w), np.float32)
+        xs = (np.arange(w, dtype=np.float32) + X0 + 0.5)[None, :] * np.ones((h, 1), np.float32)
+        veio = cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0), sigmaX=0.6, sigmaY=6.0)
         veio /= max(float(veio.std()), 1e-6)
-        cor = np.float32(q["madeira"])[None, None, :] * (luz * (1 + q["veio"] * veio))[..., None]
-        cor = np.where(junta[..., None], np.float32(q["junta"]), cor)
-        borda = dentro & ((xs - x0 < q["contorno_px"]) | (x1 - xs <= q["contorno_px"]) |
-                          (ys - y0 < q["contorno_px"]) | (y1 - ys <= q["contorno_px"]))
-        cor = np.where(borda[..., None], np.float32(q["contorno"]), cor)
-
-        def red(a):
-            return cv2.resize(a.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
-        a = red(dentro)
-        c = cv2.resize(cor * dentro[..., None], (w, h), interpolation=cv2.INTER_AREA) / np.maximum(a, 1e-4)[..., None]
-        reg = out[Y0:Y1, X0:X1]
-        # a sombra curta na varanda (para baixo e à esquerda)
-        sb = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, -1.4], [0, 1, 1.4]]), (w, h)), (0, 0), 1.1)
-        reg *= (1 - q["sombra"] * sb * (1 - a))[..., None]
-        reg[:] = reg * (1 - a[..., None]) + c * a[..., None]
-    print(f"    painéis amadeirados: {len(q['faixas_px'])} trechos em ripado de nogueira (varandas de 6,36, 7,15 e "
-          f"39 m²), com as ripas, o contorno e a sombra")
-    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+        nf = len(folhas)
+        # as junções primeiro (madeira mais escura), depois as folhas, cada uma com o seu contorno
+        for i, r in sorted(enumerate(cresce), key=lambda t: t[0] < nf):
+            a = _cobertura(r, X0, Y0, w, h)
+            cp = q["contorno_px"]
+            dentro = _cobertura((r[0] + cp, r[1] + cp, r[2] - cp, r[3] - cp), X0, Y0, w, h)
+            rel = np.clip((xs - r[0]) / max(r[2] - r[0], 1e-3), 0, 1)
+            luz = 1 + q["luz"] * (rel - 0.5) * lado
+            cor = np.float32(q["madeira"])[None, None] * (luz * (1 + q["veio"] * veio))[..., None]
+            if i < nf:
+                fase = np.mod(ys - r[1], q["ripa_px"])
+                jt = np.clip(1 - np.abs(fase - q["junta_px"] / 2) / (q["junta_px"] / 2 + 0.5), 0, 1) * q["junta_forca"]
+                cor = cor * (1 - jt[..., None]) + np.float32(q["junta"]) * jt[..., None]
+            else:
+                cor *= q["juncao"]
+            reg = reg * (1 - a[..., None]) + cor * a[..., None]
+            borda = np.clip(a - dentro, 0, 1)[..., None]
+            reg = reg * (1 - borda) + np.float32(q["contorno"]) * borda
+        out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+        contas.append(f"{nome} ({nf} folhas, {len(juncoes)} junções, {nl} px limpos)")
+    print(f"    folhas amadeiradas: o plano de fora das portas das suítes folha por folha, em ripado de nogueira: "
+          f"{'; '.join(contas)}")
+    return out
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -923,7 +1010,7 @@ def floreira_1p(Q, img, q=None):
 
 
 PASSOS = [("nublado", nublado_1p), ("tracejados", tracejados_1p), ("bege", bege_1p), ("pergolado", pergolado_1p),
-          ("contorno", contorno_1p), ("vazios", vazios_1p), ("paineis", paineis_1p), ("bancada", bancada_1p),
+          ("contorno", contorno_1p), ("vazios", vazios_1p), ("folhas", folhas_1p), ("bancada", bancada_1p),
           ("tapete", tapete_1p), ("closets", closets_1p), ("portas", portas_1p), ("escadas", escadas_1p),
           ("floreira", floreira_1p)]
 
