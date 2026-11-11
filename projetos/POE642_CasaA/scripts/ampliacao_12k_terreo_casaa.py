@@ -314,7 +314,14 @@ CORRIGIR_PX = {"caracol": (1918, 1512, 2036, 1632), "cooktop_cozinha": (1964, 12
                "porta_correr_cozinha": (2140, 1145, 2186, 1300), "porta_1_3": (1585, 1535, 1682, 1630),
                "porta_6": (1975, 1445, 2062, 1475), "porta_7": (2044, 1510, 2072, 1582),
                "porta_9": (2225, 1240, 2252, 1326), "porta_13": (2330, 1284, 2405, 1310),
-               "garagem_ponta": (2455, 1294, 2480, 1324), "porta_18": (2512, 1240, 2539, 1326)}
+               "garagem_ponta": (2455, 1294, 2480, 1324), "porta_18": (2512, 1240, 2539, 1326),
+               # os pedidos de 11/11, 2ª leva: o deck em madeira nova; os guarda-corpos da escada do jardim na borda;
+               # a faixa de baixo (o traço da área descoberta, o portão de vidro torto e as pedras inventadas da IA no
+               # acesso à garagem, com a mancha escura junto à grama); os pontos azulados nas pontas dos X da varanda e
+               # da sala de estar ("limpe residuos e alinhe os rotulos"; "corrija as imperfeições desse portão em vidro";
+               # "limpe residuos e corrija o piso de acesso a garagem")
+               "deck_1111": (720, 500, 1090, 1135), "guarda_corpo_1111": (2245, 905, 2495, 1090),
+               "faixa_baixo_1111": (1690, 1636, 3440, 1960), "varanda_sala_1111": (1500, 595, 2165, 775)}
 CORRIGIR_MASCARAS = {"agua": "agua", "pedra_portuguesa": (85, 138, 185)}
 CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0, "folga_mascara_px": 2}
 

@@ -663,7 +663,16 @@ AGUA_OPCOES = {
           "ondas": {"sig_px": 1.35, "larg": 0.2, "quebra_sig": 1.6, "quebra_b": 0.3, "dens_sig_m": 0.45,
                     "dens_k": 0.55, "dens_b": 0.6, "forca": 2.2, "ss": 4, "cor": (240, 246, 244)},
           "sol": {"luz": 1.05, "pontos_m2": 1.5, "sig": 0.6, "forca": (0.4, 0.85), "grandes": 0.05,
-                  "sig_grande": 1.6, "forca_grande": (0.2, 0.4), "cor": (252, 255, 255)}},
+                  "sig_grande": 1.6, "forca_grande": (0.2, 0.4), "cor": (252, 255, 255)},
+          # a parte rasa (usuário, 11/11: "precisamos dar um efeito diferente nas prainhas, pois elas são mais rasas. e
+          # precisamos dar um efeito na parte mais rasa do spa ... as divisórias nas prainhas e na parte mais rasa dos
+          # spas precisam estar bem definidas, sem falhas"): a água mais clara e transparente (o tom raso de cada casa),
+          # as pastilhas mais nítidas, a rede de cáusticas do fundo raso nítida e clara (células menores), as ondinhas
+          # e os brilhos mais fracos; nos degraus, a sombra do lado fundo e a quina clara do lado raso, contínuas, sem
+          # ondinha nem brilho por cima
+          "rasa": {"camadas": [(0.42, 0.9, 0.42), (0.24, 0.7, 0.2)], "quebra_b": 0.75, "halo": 0.35,
+                   "ondas_f": 0.45, "sol_f": 0.5,
+                   "degrau": {"sombra": (0.3, 2.2), "quina": (0.5, 1.0), "cor_quina": (226, 232, 224), "livre_px": 2.5}}},
 }
 AGUA_OPCAO = "C"           # usuário, 11/11: "gostei da opção C da piscina"
 
@@ -706,8 +715,35 @@ def _mistura(a, b, t):
     return tuple(float(x) * (1 - t) + float(y) * t for x, y in zip(a, b))
 
 
-def agua_caustica(Q, novo, rasa, op, ret, agua=None):
-    """As cáusticas da opção `op` sobre a água `novo` (BGR float) no retângulo `ret` (x0, y0, x1, y1) em px."""
+def _degraus(prof, q):
+    """Os degraus entre as profundidades de `prof` (0 o raso, 1 o fundo): a sombra no lado mais fundo (a partir da
+    borda do mais raso, `sombra`: força e alcance em px), o filete claro da quina no lado mais raso (`quina`: força e
+    largura em px) e a faixa em volta deles em que as ondinhas e os brilhos não entram (`livre_px`)."""
+    sombra = np.zeros(prof.shape, np.float32)
+    quina = np.zeros(prof.shape, np.float32)
+    livre = np.zeros(prof.shape, bool)
+    niveis = np.unique(np.round(prof[prof >= 0], 2))
+    fs, alc = q["sombra"]
+    fq, lq = q["quina"]
+    for L in niveis:
+        este = np.abs(prof - L) < 0.005
+        mais_raso = (prof >= 0) & (prof < L - 0.005)
+        mais_fundo = prof > L + 0.005
+        if mais_raso.any():
+            d = cv2.distanceTransform((~mais_raso).astype(np.uint8), cv2.DIST_L2, 5)
+            sombra = np.where(este, np.maximum(sombra, fs * np.exp(-np.maximum(d - 0.5, 0) / alc)), sombra)
+            livre |= este & (d <= q["livre_px"])
+        if mais_fundo.any():
+            d = cv2.distanceTransform((~mais_fundo).astype(np.uint8), cv2.DIST_L2, 5)
+            quina = np.where(este, np.maximum(quina, fq * np.clip(lq + 0.5 - d, 0, 1)), quina)
+            livre |= este & (d <= q["livre_px"])
+    return sombra, quina, livre
+
+
+def agua_caustica(Q, novo, rasa, op, ret, agua=None, prof=None):
+    """As cáusticas da opção `op` sobre a água `novo` (BGR float) no retângulo `ret` (x0, y0, x1, y1) em px; `prof`,
+    a profundidade (0 o raso, 1 o fundo, -1 fora; sem ela, 1 menos `rasa`): na parte rasa a rede de `op["rasa"]`, as
+    ondinhas e os brilhos mais fracos, e os degraus entre as partes, nítidos e contínuos (`_degraus`)."""
     rng = np.random.default_rng(op["semente"])
     x0, y0, x1, y1 = ret
     h, w = y1 - y0, x1 - x0
@@ -721,11 +757,29 @@ def agua_caustica(Q, novo, rasa, op, ret, agua=None):
     raso = rasa[y0:y1, x0:x1].astype(np.float32)
     suave = cv2.GaussianBlur(rede, (0, 0), op["funda_desfoque"])
     rede = np.where(raso > 0, np.clip(rede * op["rasa_f"], 0, 1), suave)
+    r = op.get("rasa")
+    if r:
+        P = (1 - raso) if prof is None else np.clip(prof[y0:y1, x0:x1], 0, 1).astype(np.float32)
+        Pc = (1 - raso) if prof is None else prof[y0:y1, x0:x1]
+        rng_r = np.random.default_rng(op["semente"] + 7)
+        rr = np.zeros((h, w), np.float32)
+        for cel_m, larg, forca in r["camadas"]:
+            rr = np.maximum(rr, forca * rede_caustica(h, w, cel_m * Q.px_m, larg, op["torcao"], rng_r))
+        rr *= np.clip(_ruido(rng_r, h, w, qs * Q.px_m / 6) * 0.5 + r["quebra_b"], 0.3, 1)
+        rr = np.clip(rr + r["halo"] * cv2.GaussianBlur(rr, (0, 0), 1.2), 0, 1)
+        rede = rede * P + rr * (1 - P)
+        sombra, quina, livre = _degraus(Pc, r["degrau"])
+        livre_f = cv2.GaussianBlur(livre.astype(np.float32), (0, 0), 0.8)
+    else:
+        P, livre_f = np.ones((h, w), np.float32), np.zeros((h, w), np.float32)
     sub = novo[y0:y1, x0:x1]
-    a = rede[..., None]
+    a = (rede * (1 - livre_f))[..., None]
     sub = sub * (1 - a) + np.float32(op["cor"]) * a
     if op.get("ondas"):
-        o = ondas_brilho(h, w, op["ondas"], rng, Q.px_m)[..., None]
+        o = ondas_brilho(h, w, op["ondas"], rng, Q.px_m)
+        if r:
+            o = o * (r["ondas_f"] + (1 - r["ondas_f"]) * P) * (1 - livre_f)
+        o = o[..., None]
         sub = sub * (1 - o) + np.float32(op["ondas"]["cor"]) * o
     sol = op.get("sol")
     if sol:
@@ -734,6 +788,8 @@ def agua_caustica(Q, novo, rasa, op, ret, agua=None):
         sub = sub * sol["luz"]
         dentro = agua[y0:y1, x0:x1] if agua is not None else np.ones((h, w), bool)
         peso = (rede ** 2 + 0.03) * np.clip(_ruido(rng, h, w, 1.2 * Q.px_m) * 0.8 + 0.5, 0.05, 1) * dentro
+        if r:
+            peso = peso * (r["sol_f"] + (1 - r["sol_f"]) * P) * (1 - livre_f)
         n = int(round(sol["pontos_m2"] * dentro.sum() / Q.px_m ** 2))
         pr = peso.astype(np.float64).ravel()
         idx = rng.choice(pr.size, size=n, replace=False, p=pr / pr.sum())
@@ -743,8 +799,12 @@ def agua_caustica(Q, novo, rasa, op, ret, agua=None):
             imp = np.zeros(h * w, np.float32)
             np.add.at(imp, idx[sel], rng.uniform(f0, f1, sel.sum()).astype(np.float32))
             brilho += cv2.GaussianBlur(imp.reshape(h, w), (0, 0), sig) * (2 * np.pi * sig ** 2)
-        b = np.clip(brilho, 0, 1)[..., None]
+        b = (np.clip(brilho, 0, 1) * (1 - livre_f))[..., None]
         sub = sub * (1 - b) + np.float32(sol["cor"]) * b
+    if r:
+        # os degraus por cima de tudo: a sombra do lado fundo e a quina clara do lado raso, de ponta a ponta
+        sub = sub * (1 - sombra[..., None])
+        sub = sub * (1 - quina[..., None]) + np.float32(r["degrau"]["cor_quina"]) * quina[..., None]
     novo[y0:y1, x0:x1] = sub
     return novo
 
@@ -851,7 +911,9 @@ def piscina_ta(Q, img, q=None, com_rotulos=True, opcao=None):
     novo = np.where(rasa[..., None], rasa_t, funda_t) * sombra[..., None]
     if op:
         ys_, xs_ = np.nonzero(agua)
-        novo = agua_caustica(Q, novo, rasa, op, (xs_.min() - 2, ys_.min() - 2, xs_.max() + 3, ys_.max() + 3), agua)
+        prof = np.where(agua, np.where(rasa, 0.0, 1.0), -1.0).astype(np.float32)   # a prainha e o banco do spa rasos
+        novo = agua_caustica(Q, novo, rasa, op, (xs_.min() - 2, ys_.min() - 2, xs_.max() + 3, ys_.max() + 3), agua,
+                             prof)
     im = img.astype(np.float32)
     out = im * (1 - cob[..., None]) + novo * cob[..., None]
     nomes = []

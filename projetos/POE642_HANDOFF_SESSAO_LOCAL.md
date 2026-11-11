@@ -4323,3 +4323,11 @@ Feito: final, 12 antes/depois (`POE642_CasaA/renders/POE642_CasaA_PH_Terreo_1111
 
 O 1º Pavimento segue para a sequência: o Térreo nublado nele ainda não tem esses retoques (`terreo_casaa_1011.py --um_pav` refaz).
 
+
+### Casa A, Térreo: 2ª leva de 11/11 (deck, água C, rótulos, traços) e a água C em todas as piscinas
+
+Pedidos do usuário com os recortes: madeira do deck mais realista e "não pode parecer velha"; o efeito de água da foto na piscina, sem mexer no revestimento, com o sol e os pontos brilhantes — três opções (A, B e C), escolhida a C ("gostei da opção C da piscina") e estendida a todas as casas ("essa opção vai ser utilizada para todas as piscinas de todas as casas"); rótulos centralizados, alinhados e no mesmo corpo (varanda/sala, gourmet/cozinha/serviço/despensa, deck); o tracejado horizontal da área descoberta; o guarda-corpo da escada do jardim na borda; as descrições sobe/desce menores; no 12K, o portão de vidro, o acesso à garagem e os resíduos.
+
+Feito: nas Casas B, C, D e E (Térreos e o Subsolo da Casa E), a água C sobre a final, as pranchas e os PDFs (antes e depois em `POE642_Casa*/renders/*_piscina_aguaC_antes_depois.jpg`); a regra nova no `POE642_REGRAS.md` (seção 10). Na Casa A, a rodada da final parte do passo `piscina` (`run7/passo_gramado`), com o deck em réguas de 20 cm em tom de madeira nova, os rótulos recentralizados (`rotulos_1111`) e os traços; depois prancha, PDF, book e o 12K (caixas novas em `CORRIGIR_PX`). Detalhes no README dos scripts ("a 2ª leva de 11/11").
+
+Em aberto, para o OK do usuário: a revisão dos pisos de Bege Bahia e travertino bruto (lista apresentada; o marrom fica). Os 1º Pavimentos (A e E) seguem com o Térreo esmaecido de antes (a água antiga sob o véu) até serem refeitos.
