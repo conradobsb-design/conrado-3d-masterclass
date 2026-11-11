@@ -509,33 +509,9 @@ def _cabe(m_ok, cx, cy, r):
     return disco.sum() > 0 and bool(sub[disco].all()) and int(cy - r) >= 0 and int(cx - r) >= 0
 
 
-def gramado_ta(Q, img, q=None):
-    sys.path.insert(0, str(RAIZ / "_texturas"))
-    from texturas import textura
-    q = q or GRAMADO_TA
-    m = gramado_mascara(Q, img, q)
-    rots = rotulos_na_imagem(Q, img, dentro=dilatar(m, 2))
-    ys, xs = np.nonzero(m)
-    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
-    G = textura("grama_padrao", Q.px_m, y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32)
-    novo = img.astype(np.float32).copy()
-    novo[y0:y1, x0:x1] = G
-    out = T.F.pousar(img.astype(np.float32), novo, m, suave=q["suave"])
-    # o jardim interno da escada: o tom da grama nova, só na grama (o verde)
-    # (o trecho esmaecido da escada é um véu claro sobre a grama: o px sobe para a grama nova na fração de grama dele)
-    tom_novo = np.median(G.reshape(-1, 3), axis=0)
-    ji = T.F.fechar(np.all(Q.chapada == np.uint8(q["jardim_interno"]), axis=2), 5)
-    I = img.astype(np.float32)
-    pedra = I[..., 2] > I[..., 1] + 2
-    verde_ji = ji & ~pedra & (I[..., 1] - I[..., 2] > 9)
-    g_velho = np.median(I[verde_ji], axis=0)
-    claro = ji & ~pedra & (I.mean(axis=2) > np.percentile(I[ji & ~pedra].mean(axis=1), 90))
-    veu = np.median(I[claro], axis=0)
-    d = veu - g_velho
-    t = np.clip(((I - g_velho) * d).sum(axis=2) / max(float((d * d).sum()), 1e-3), 0, 1)
-    w = (ji & ~pedra).astype(np.float32) * (1 - t)
-    out = np.where((ji & ~pedra)[..., None], out + (tom_novo - g_velho) * w[..., None], out)
-    # as plantas: as 4 árvores dos cantos e os arbustos junto aos muros
+
+def _plantas_1011(Q, out, m, q):
+    """As 4 árvores dos cantos e os arbustos junto aos muros (a versão de 10/11)."""
     ok = cv2.erode(m.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
     rng = np.random.default_rng(q["semente_plantas"])
     px = Q.px_m
@@ -572,6 +548,44 @@ def gramado_ta(Q, img, q=None):
                         _pousar(out, q["arbustos"][rng.integers(len(q["arbustos"]))], cx2, cy2, d2, px)
                         n_arb += 1
             t += rng.uniform(*q["passo_m"]) * px
+    return out, arvores, n_arb
+
+
+def gramado_ta(Q, img, q=None):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    q = q or GRAMADO_TA
+    m = gramado_mascara(Q, img, q)
+    rots = rotulos_na_imagem(Q, img, dentro=dilatar(m, 2))
+    ys, xs = np.nonzero(m)
+    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    G = textura("grama_padrao", Q.px_m, y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32)
+    novo = img.astype(np.float32).copy()
+    novo[y0:y1, x0:x1] = G
+    out = T.F.pousar(img.astype(np.float32), novo, m, suave=q["suave"])
+    # o jardim interno da escada: o tom da grama nova, só na grama (o verde)
+    # (o trecho esmaecido da escada é um véu claro sobre a grama: o px sobe para a grama nova na fração de grama dele)
+    tom_novo = np.median(G.reshape(-1, 3), axis=0)
+    ji = T.F.fechar(np.all(Q.chapada == np.uint8(q["jardim_interno"]), axis=2), 5)
+    I = img.astype(np.float32)
+    pedra = I[..., 2] > I[..., 1] + 2
+    verde_ji = ji & ~pedra & (I[..., 1] - I[..., 2] > 9)
+    g_velho = np.median(I[verde_ji], axis=0)
+    claro = ji & ~pedra & (I.mean(axis=2) > np.percentile(I[ji & ~pedra].mean(axis=1), 90))
+    veu = np.median(I[claro], axis=0)
+    d = veu - g_velho
+    t = np.clip(((I - g_velho) * d).sum(axis=2) / max(float((d * d).sum()), 1e-3), 0, 1)
+    w = (ji & ~pedra).astype(np.float32) * (1 - t)
+    out = np.where((ji & ~pedra)[..., None], out + (tom_novo - g_velho) * w[..., None], out)
+    px = Q.px_m
+    if q.get("paisagismo"):
+        # 11/11: o paisagismo novo (`paisagismo.py`): a grama realista, os canteiros (~20% do gramado) e as plantas
+        import paisagismo as PG
+        out, _ = PG.paisagismo(out, m, Q.px_m, q["lote_px"], q["arvores"], q["paisagismo"])
+        arvores, n_arb = q["arvores"], -1
+    else:
+        out, arvores, n_arb = _plantas_1011(Q, out, m, q)
+    ji = T.F.fechar(np.all(Q.chapada == np.uint8(q["jardim_interno"]), axis=2), 5)
     # no jardim de 4,79 m², as plantas só dentro dele (sem passar sobre as paredes)
     dentro = cv2.erode((m | ji).astype(np.uint8), np.ones((3, 3), np.uint8)).astype(np.float32)
     tmp = out.copy()
@@ -2619,6 +2633,117 @@ def pisos_1111(Q, out, q=None):
     return np.clip(np.round(res), 0, 255).astype(np.uint8)
 
 
+
+# 14b. Os tapetes (usuário, 11/11: "precisamos mudar o tom do tapete para que não se confunda com o piso"): os dois do
+# Térreo (o retangular do estar da varanda e o redondo da sala de estar) estavam no tom do travertino. O tapete é o
+# preenchimento dele no PDF menos as peças em cima: as do PDF (sofás, poltronas, mesas) dão os px certos de peça e de
+# tapete longe delas; perto das peças, um classificador gaussiano (a cor, o contraste local, a direção da trama e o
+# desvio) decide, e o tapete ainda entra na sombra das peças enquanto o tom só escurece (até o contorno da peça); a
+# madeira das mesas (R - B > 40) e o tracejado cinza ficam por cima. O tom novo (`opcoes`, BGR) com a luz de cada px
+# (a sombra e a trama, `relevo` x o contraste de antes); a linha do tapete com o anti-aliasing do PDF.
+TAPETES_1111 = {"opcao": None,
+                "opcoes": {"A": (128, 145, 160), "B": (96, 101, 105), "C": (90, 118, 176), "D": (98, 128, 122)},
+                "nomes": {"A": "taupe", "B": "grafite quente", "C": "terracota suave", "D": "verde-oliva"},
+                "tapetes": [("varanda", "ARQ_LAYOUT HUMANIZAÇÃO", (1415.6, 602.9, 1585.7, 744.6)),
+                            ("sala de estar", "ARQ_MOBILIÁRIO", (1699.0, 590.2, 1925.7, 816.7))],
+                "pecas_lado_pt": 215, "zona_px": 9, "madeira_rb": 40, "relevo": 1.8, "sombra_passos": 14,
+                "furo_px": 90}
+
+
+def _tapete_atributos(im):
+    L = im.mean(axis=2)
+    cor = cv2.GaussianBlur(im, (0, 0), 1.0)
+    loc = cv2.GaussianBlur(L, (0, 0), 1.0) - cv2.GaussianBlur(L, (0, 0), 4.0)
+    gx = cv2.Sobel(L, cv2.CV_32F, 1, 0, ksize=3)
+    gy = cv2.Sobel(L, cv2.CV_32F, 0, 1, ksize=3)
+    ex, ey = cv2.GaussianBlur(gx * gx, (0, 0), 2.5), cv2.GaussianBlur(gy * gy, (0, 0), 2.5)
+    sd = np.sqrt(np.maximum(cv2.GaussianBlur(L * L, (0, 0), 2.5) - cv2.GaussianBlur(L, (0, 0), 2.5) ** 2, 0))
+    return np.dstack([cor, loc[..., None], ((ey - ex) / (ey + ex + 50))[..., None] * 20, sd[..., None]])
+
+
+def _gauss(X):
+    C = np.cov(X.T) + np.eye(X.shape[1])
+    return X.mean(0), np.linalg.inv(C), np.linalg.slogdet(C)[1]
+
+
+def _verossim(X, g):
+    mu, Ci, ld = g
+    d = X - mu
+    return -0.5 * (np.einsum("ij,jk,ik->i", d, Ci, d) + ld)
+
+
+def tapetes_1111(Q, out, q=None):
+    q = q or TAPETES_1111
+    if not q.get("opcao"):
+        return out
+    im = out.astype(np.float32)
+    L = im.mean(axis=2)
+    tapetes = q["tapetes"]
+
+    def eh_tapete(d):
+        return any(d.get("layer") == c and max(abs(u - v) for u, v in zip(d["rect"], r)) < 0.5 for _, c, r in tapetes)
+
+    def peca(d):
+        R = d["rect"]
+        return (not eh_tapete(d) and R.width * R.height > 4 and R.width < q["pecas_lado_pt"] and
+                R.height < q["pecas_lado_pt"] and
+                any(R.x0 < r[2] and R.x1 > r[0] and R.y0 < r[3] and R.y1 > r[1] for _, _, r in tapetes))
+    with contextlib.redirect_stdout(io.StringIO()):
+        pecas = Q.preencher(peca, ss=2, fs=True) > 0.5
+    F_ = _tapete_atributos(im)
+    madeira = cv2.dilate(((im[..., 2] - im[..., 0]) > q["madeira_rb"]).astype(np.uint8),
+                         np.ones((3, 3), np.uint8)).astype(bool)
+    k4 = np.array([[0, 1, 0], [1, 1, 1], [0, 1, 0]], np.uint8)
+    res = im.copy()
+    bgr = np.float32(q["opcoes"][q["opcao"]])
+    feitos = []
+    for nome, c, r in tapetes:
+        with contextlib.redirect_stdout(io.StringIO()):
+            m = np.clip(Q.preencher(lambda d, c=c, r=r: d.get("layer") == c and
+                                    max(abs(u - v) for u, v in zip(d["rect"], r)) < 0.5, ss=2, fs=True), 0, 1)
+        lm0 = np.median(L[(m > 0.5) & ~pecas])
+        nuc = (m > 0.5) & ~madeira & ~(L < lm0 - 70)
+        z = q["zona_px"]
+        zona = cv2.dilate(pecas.astype(np.uint8), np.ones((z, z), np.uint8)).astype(bool) & nuc
+        certo_t = nuc & ~zona
+        certo_p = cv2.erode(pecas.astype(np.uint8), np.ones((z, z), np.uint8)).astype(bool) & nuc
+        ys, xs = np.nonzero(zona)
+        lr = _verossim(F_[ys, xs], _gauss(F_[certo_t])) - _verossim(F_[ys, xs], _gauss(F_[certo_p]))
+        p = certo_t.astype(np.float32)
+        p[ys, xs] = (lr > 0).astype(np.float32)
+        p = ndimage.median_filter(p, 5) * nuc
+        lab, _ = ndimage.label(p > 0.5)
+        ok_ = np.unique(lab[certo_t & (p > 0.5)])
+        tap = ndimage.binary_opening(np.isin(lab, ok_[ok_ > 0]), np.ones((3, 3)))
+        lm = np.median(L[tap])
+        # a sombra das peças sobre o tapete
+        Lc = np.where(tap, L, -1.0).astype(np.float32)
+        for _ in range(q["sombra_passos"]):
+            viz = cv2.dilate(Lc, k4)
+            cand = (viz > 0) & ~tap & (m > 0.5) & ~madeira & (L <= viz + 1.5) & (L > 60)
+            if not cand.any():
+                break
+            tap |= cand
+            Lc = np.where(cand, L, Lc)
+        # os furinhos claros que sobram no meio do tapete
+        furo = (m > 0.5) & ~tap & ~madeira & (L > lm - 15)
+        lab, n = ndimage.label(furo)
+        if n:
+            idx = np.arange(1, n + 1)
+            area = ndimage.sum(np.ones_like(L), lab, index=idx)
+            junto = ndimage.maximum(dilatar(tap, 1).astype(np.float32), lab, index=idx)
+            tap |= np.isin(lab, idx[(area <= q["furo_px"]) & (junto > 0)])
+        cr = im - L[..., None]
+        traco = (np.abs(cr).max(axis=2) < 6) & (L < lm - 25)
+        k = cv2.GaussianBlur((tap & ~traco).astype(np.float32), (0, 0), 0.6)
+        soft = np.clip(np.minimum(k, np.where(m < 0.5, m * 2, 1)) * (m > 0.02), 0, 1)
+        novo = bgr[None, None, :] * (1 + q["relevo"] * (L / lm - 1))[..., None]
+        res = res * (1 - soft[..., None]) + novo * soft[..., None]
+        feitos.append(f"{nome} ({tap.sum()} px)")
+    print(f"      tapetes: o tom {q['opcao']} ({q['nomes'][q['opcao']]}, BGR {q['opcoes'][q['opcao']]}) em "
+          f"{', '.join(feitos)}")
+    return np.clip(np.round(res), 0, 255).astype(np.uint8)
+
 # 15. Os rótulos de 11/11 (usuário, nos recortes da varanda e sala, da cozinha/gourmet/serviço/despensa e do deck:
 # "limpe residuos e alinhe os rotulos"; "centralize e alinhe os rótulos. mantenha os mesmos tamanho de fonte, sempre que
 # possível"; "alinhe e centralize rótulos"): cada rótulo de `centros` sai do lugar (o piso de baixo vem de um trecho do
@@ -2764,6 +2889,7 @@ def contornos_ta(Q, img, q=None):
     out = _residuos_finos(out, q["residuos_finos"])
     out = retoques_1111(Q, out)
     out = pisos_1111(Q, out)
+    out = tapetes_1111(Q, out)
     out = rotulos_1111(Q, out)
     print("    contornos: o 3º carro e o piso em volta; as pedras do acesso; o início da pista e o muro de baixo; a faixa "
           "de baixo sem o tracejado; o deck rente à escada; os guarda-corpos do terraço; a janela da sala de estar; "
