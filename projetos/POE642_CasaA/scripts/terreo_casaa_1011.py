@@ -2987,6 +2987,11 @@ ANTES_DEPOIS_1111 = {"Terreo": {"curva_acesso": (3280, 1300, 3440, 1700), "trace
                                 "grama_garagem": (2500, 1120, 2720, 1340), "parede_hall": (2230, 830, 2560, 910),
                                 "pedras": (2590, 590, 3440, 890), "porta_correr_cozinha": (2130, 1140, 2200, 1305),
                                 "portas_servico": (1580, 1440, 2075, 1630), "portas_motorista": (2220, 1240, 2545, 1330)}}
+# a 3ª leva de 11/11 (contra a final de fddcf00): a sala nos tons da vista 3D e a área verde B
+ANTES_DEPOIS_1111C = {"Terreo": {"planta": (270, 140, 3440, 1960), "sala": (1580, 370, 2200, 1060),
+                                 "poltronas_x": (1905, 650, 2125, 845), "canto_fundo_cima": (280, 170, 1000, 640),
+                                 "canto_frente_cima": (2900, 150, 3440, 620), "canto_fundo_baixo": (280, 1500, 1000, 1960),
+                                 "frente_acesso": (2880, 900, 3440, 1400)}}
 # a 2ª leva de 11/11 (contra a final de 62c82e2), em renders/..._1111b_<trecho>_antes_depois.jpg: o deck em madeira
 # nova, a água opção C (com a parte rasa), os rótulos recentralizados, o tracejado do gás, o guarda-corpo e o travertino
 ANTES_DEPOIS_1111B = {"Terreo": {"planta": (270, 140, 3440, 1960), "piscina_deck": (700, 480, 1360, 1150),
@@ -3005,9 +3010,15 @@ def main():
     ap.add_argument("--passos")
     ap.add_argument("--antes_depois", action="store_true", help="grava os recortes de ANTES_DEPOIS_1011 em renders/")
     ap.add_argument("--antes_depois_1111b", help="a final de antes (62c82e2): grava os recortes de ANTES_DEPOIS_1111B")
+    ap.add_argument("--antes_depois_1111c", help="a final de antes (fddcf00): grava os recortes de ANTES_DEPOIS_1111C")
     ap.add_argument("--um_pav", help="a final do 1º Pavimento de antes: o Térreo nublado é refeito (pede --passos)")
     a = ap.parse_args()
     img = cv2.imread(a.antes)
+    if a.antes_depois_1111c:
+        import pedidos_terreo_casaa_2910 as P
+        P.antes_depois_pedidos_ta("Terreo", cv2.imread(a.antes_depois_1111c), img, caixas=ANTES_DEPOIS_1111C,
+                                  sufixo="1111c")
+        return
     if a.antes_depois_1111b:
         import pedidos_terreo_casaa_2910 as P
         P.antes_depois_pedidos_ta("Terreo", cv2.imread(a.antes_depois_1111b), img, caixas=ANTES_DEPOIS_1111B,
