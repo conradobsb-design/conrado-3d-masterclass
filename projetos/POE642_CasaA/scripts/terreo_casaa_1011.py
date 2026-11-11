@@ -457,7 +457,14 @@ GRAMADO_TA = {"lote_px": (300, 186, 3398, 1912), "mascara_px": (262, 140, 3450, 
               "recuo_m": 0.85, "longe_arvore_m": 3.6, "par": 0.35,
               "jardim_479": [("palmeira_1", (1510, 1684), 1.1), ("palmeira_3", (1662, 1686), 0.85),
                              ("arbusto_3", (1563, 1709), 0.5)],
-              "jardim_interno": (80, 145, 110), "jardim_479_px": (1440, 1620, 1720, 1760)}
+              "jardim_interno": (80, 145, 110), "jardim_479_px": (1440, 1620, 1720, 1760),
+              # 11/11 (usuário: "opção B na área verde"; "remova a árvore da frente da casa ... na parte superior uma
+              # palmeira"; "no fundo coloque menos arbusto em volta das árvores"): o paisagismo B de `paisagismo.py`,
+              # com as plantas (nome, centro px, copa m, raio do maciço m): as duas árvores do fundo com maciços
+              # menores, a palmeira no canto de cima da frente, sem a árvore da frente da casa (junto ao acesso)
+              "paisagismo": "B",
+              "paisagismo_plantas": [("arvore_3", (420, 310), 3.0, 2.1), ("palmeira", (3280, 310), 3.8, 2.5),
+                                     ("arvore_2", (420, 1795), 3.0, 2.1)]}
 
 
 def gramado_mascara(Q, img, q=None):
@@ -581,8 +588,9 @@ def gramado_ta(Q, img, q=None):
     if q.get("paisagismo"):
         # 11/11: o paisagismo novo (`paisagismo.py`): a grama realista, os canteiros (~20% do gramado) e as plantas
         import paisagismo as PG
-        out, _ = PG.paisagismo(out, m, Q.px_m, q["lote_px"], q["arvores"], q["paisagismo"])
-        arvores, n_arb = q["arvores"], -1
+        plantas = q.get("paisagismo_plantas") or q["arvores"]
+        out, _ = PG.paisagismo(out, m, Q.px_m, q["lote_px"], plantas, q["paisagismo"])
+        arvores, n_arb = plantas, -1
     else:
         out, arvores, n_arb = _plantas_1011(Q, out, m, q)
     ji = T.F.fechar(np.all(Q.chapada == np.uint8(q["jardim_interno"]), axis=2), 5)
@@ -2889,7 +2897,9 @@ def contornos_ta(Q, img, q=None):
     out = _residuos_finos(out, q["residuos_finos"])
     out = retoques_1111(Q, out)
     out = pisos_1111(Q, out)
-    out = tapetes_1111(Q, out)
+    # 11/11: a sala de estar nos tons da vista 3D do usuário (os tapetes, o sofá, as poltronas e as mesas)
+    import sala_1111 as SL
+    out = SL.sala_1111(Q, out)
     out = rotulos_1111(Q, out)
     print("    contornos: o 3º carro e o piso em volta; as pedras do acesso; o início da pista e o muro de baixo; a faixa "
           "de baixo sem o tracejado; o deck rente à escada; os guarda-corpos do terraço; a janela da sala de estar; "

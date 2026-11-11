@@ -31,7 +31,7 @@ PAISAGISMO = {
     "arvore_m": (2.8, 3.2), "arvore_nitidez": 1.2,
     "canteiro": {"fundo": (34, 52, 46), "fundo_ruido": 0.10, "borda_px": 1.6},
     "A": {"faixa_m": 0.85, "faixa_var_m": 0.35, "var_escala_m": 7.0, "canto_m": 2.4, "trechos": -0.25, "trecho_m": 9.0},
-    "B": {"comp_m": (7.5, 10.5), "fundo_m": (2.2, 3.0), "canto_m": 3.2},
+    "B": {"comp_m": (7.5, 10.5), "fundo_m": (2.2, 3.0), "canto_m": 3.2, "so_cantos": True},
     "grama": {"manchas": [(1.5, 0.025), (4.0, 0.03), (9.0, 0.02)], "matiz": (5.0, 2.0), "fio": 1.35,
               "fio_sig_m": 0.25, "contato_m": 0.45, "contato": 0.16, "canteiro_contato": 0.10},
 }
@@ -86,6 +86,61 @@ def _flor_branca(cor, al, branco, folha):
     flor = np.float32(branco)[None, None, :] * np.clip(L / Lf, 0.6, 1.1)[..., None]
     verde = _tingir(cor, al, folha, 0.9)
     return verde * (1 - rosa[..., None]) + flor * rosa[..., None]
+
+
+def palmeira(d_px, rng, cor=(48, 104, 78), folhas=(10, 13)):
+    """A copa de uma palmeira vista do alto (desenhada): folhas pinadas saindo do centro, as de baixo mais longas e
+    escuras, as de cima mais curtas e claras, os folíolos dos dois lados da raque, mais longos no meio da folha; a luz
+    do alto à direita. Devolve (cor BGR float32, alfa 0..1), num quadrado de lado ~d_px."""
+    ss = 3
+    lado = int(np.ceil(d_px * 1.08)) + 4
+    L = lado * ss
+    c0 = L / 2
+    R = d_px / 2 * ss
+    acum = np.zeros((L, L, 3), np.float32)
+    alfa = np.zeros((L, L), np.float32)
+    n = int(rng.integers(*folhas))
+    base = np.float32(cor)
+    camadas = [(n, 1.0, 0.8), (int(n * 0.6), 0.68, 1.05)]
+    for nf, comp, luz in camadas:
+        ang0 = rng.uniform(0, 2 * np.pi)
+        for i in range(nf):
+            a = ang0 + 2 * np.pi * i / nf + rng.uniform(-0.15, 0.15)
+            Lf = R * comp * rng.uniform(0.85, 1.0)
+            curva = rng.uniform(-0.25, 0.25)
+            pts = []
+            for t in np.linspace(0, 1, 34):
+                aa = a + curva * t * t
+                pts.append((c0 + np.cos(aa) * Lf * t, c0 + np.sin(aa) * Lf * t, aa))
+            # a iluminação da folha: mais clara virada para o alto à direita
+            sol = 1 + 0.12 * (np.cos(a) * 0.7 - np.sin(a) * 0.7)
+            tom = np.clip(base * luz * sol * rng.uniform(0.92, 1.08), 0, 255)
+            if comp == 1.0 and rng.random() < 0.3:
+                tom = np.clip(tom * np.float32((0.85, 1.0, 1.25)), 0, 255)
+            m = np.zeros((L, L), np.uint8)
+            # a raque
+            for (x0, y0, _), (x1, y1, _) in zip(pts[:-1], pts[1:]):
+                cv2.line(m, (int(x0), int(y0)), (int(x1), int(y1)), 255, max(1, int(ss * 1.2)), cv2.LINE_AA)
+            # os folíolos: dos dois lados, a ~50 graus da raque, o comprimento em arco ao longo da folha
+            for k, (x, y, aa) in enumerate(pts[2:-1]):
+                t = (k + 2) / len(pts)
+                fl = Lf * 0.24 * np.sin(np.pi * min(1, t * 1.1)) * rng.uniform(0.75, 1.1)
+                if fl < ss:
+                    continue
+                for lado_ in (-1, 1):
+                    b = aa + lado_ * np.radians(rng.uniform(32, 44))
+                    x2, y2 = x + np.cos(b) * fl, y + np.sin(b) * fl
+                    cv2.line(m, (int(x), int(y)), (int(x2), int(y2)), 255, max(1, int(ss * 0.7)), cv2.LINE_AA)
+            mf = m.astype(np.float32) / 255
+            acum = acum * (1 - mf[..., None]) + tom[None, None, :] * mf[..., None]
+            alfa = np.maximum(alfa, mf)
+    # o miolo (a base das folhas) mais escuro e o contraste fino das folhas
+    yy, xx = np.mgrid[0:L, 0:L].astype(np.float32)
+    rr = np.hypot(xx - c0, yy - c0) / R
+    acum *= (0.7 + 0.3 * np.clip(rr / 0.35, 0, 1))[..., None]
+    al = cv2.resize(alfa, (lado, lado), interpolation=cv2.INTER_AREA)
+    cor_ = cv2.resize(acum * alfa[..., None], (lado, lado), interpolation=cv2.INTER_AREA) / np.maximum(al, 1e-3)[..., None]
+    return cor_, np.clip(al, 0, 1)
 
 
 def _colocar(cor, al, d0, d_px, giro):
@@ -199,7 +254,8 @@ def canteiros(m, lote, px_m, opcao, arvores_px, q=None, rng=None):
     if opcao == "A":
         a = q["A"]
         canto = np.zeros((H, W), bool)
-        for cx, cy in arvores_px:
+        for item in arvores_px:
+            cx, cy = item[:2]
             canto |= (xx - cx) ** 2 + (yy - cy) ** 2 <= (a["canto_m"] * px_m) ** 2
         # a faixa em trechos (não contínua: a grama chega ao muro entre eles)
         trecho = ruido((H, W), a["trecho_m"] * px_m, rng) > a["trechos"]
@@ -213,8 +269,14 @@ def canteiros(m, lote, px_m, opcao, arvores_px, q=None, rng=None):
     # os maciços: encostados nos muros, os 4 dos cantos (com as árvores) e os outros ao longo dos muros, onde o
     # gramado tem fundo para eles
     centros = []
-    for cx, cy in arvores_px:
-        centros.append((cx, cy, b["canto_m"], b["canto_m"], 0.0))
+    for item in arvores_px:
+        cx, cy = item[:2]
+        rm = item[2] if len(item) > 2 and item[2] else b["canto_m"]
+        centros.append((cx, cy, rm, rm, 0.0))
+    if b.get("so_cantos"):
+        passos_ok = False
+    else:
+        passos_ok = True
     passos = []
     for (ax, ay), (bx, by), nx, ny in (((x0, y0), (x1, y0), 0, 1), ((x0, y1), (x1, y1), 0, -1),
                                        ((x0, y0), (x0, y1), 1, 0), ((x1, y0), (x1, y1), -1, 0)):
@@ -227,12 +289,12 @@ def canteiros(m, lote, px_m, opcao, arvores_px, q=None, rng=None):
     c = np.zeros((H, W), bool)
     for cx, cy, rx, ry, _ in centros:
         c |= m & (((xx - cx) / (rx * px_m)) ** 2 + ((yy - cy) / (ry * px_m)) ** 2 <= 1)
-    for wx, wy, nx, ny in passos:
+    for wx, wy, nx, ny in (passos if passos_ok else []):
         if c.sum() >= alvo:
             break
         comp = rng.uniform(*b["comp_m"]) / 2 * px_m
         fundo = rng.uniform(*b["fundo_m"]) * px_m
-        if any(np.hypot(wx - u, wy - v) < 6 * px_m for u, v in arvores_px):
+        if any(np.hypot(wx - it[0], wy - it[1]) < 6 * px_m for it in arvores_px):
             continue
         # o eixo ao longo do muro e o fundo para dentro do lote
         al_x, al_y = (1, 0) if nx == 0 else (0, 1)
@@ -256,16 +318,19 @@ def paisagismo(img, m, px_m, lote, arvores, opcao="A", q=None, limite=None, rotu
     # as árvores: no lugar de antes, andando para dentro se a copa não couber
     H, W = m.shape
     pos = []
-    for i, (nome, (cx, cy), _) in enumerate(arvores):
-        d = rng.uniform(*q["arvore_m"])
+    macicos = {}
+    for i, arv_ in enumerate(arvores):
+        nome, (cx, cy), d_dado = arv_[:3]
+        d = d_dado if len(arv_) > 3 else rng.uniform(*q["arvore_m"])
         r = d / 2 * px_m * 0.75
         for passo in range(0, 160, 8):
             ux = cx + (passo if cx < W / 2 else -passo)
             uy = cy + (passo if cy < H / 2 else -passo)
             if _cabe(ok, ux, uy, r):
                 pos.append((nome, ux, uy, d))
+                macicos[len(pos) - 1] = arv_[3] if len(arv_) > 3 else None
                 break
-    cant = canteiros(m, lote, px_m, opcao, [(x, y) for _, x, y, _ in pos], q, rng)
+    cant = canteiros(m, lote, px_m, opcao, [(x, y, macicos[i]) for i, (_, x, y, _) in enumerate(pos)], q, rng)
     # a sombra de contato: junto a tudo o que não é grama (muros, casa, pisos) e aos canteiros
     out = grama_realista(img, m, px_m, q["grama"], canteiro=cant, muro=~m, rng=rng)
     # o chão do canteiro: a sombra verde-escura sob as folhagens, com a borda macia
@@ -310,6 +375,10 @@ def paisagismo(img, m, px_m, lote, arvores, opcao="A", q=None, limite=None, rotu
     # as árvores por cima (a sombra delas sobre os arbustos e a grama)
     arv = []
     for nome, cx, cy, d in pos:
+        if nome == "palmeira":
+            c2, a2 = palmeira(d * px_m, rng)
+            arv.append((c2, a2, cx, cy, d * px_m))
+            continue
         c, a, dd0 = _sprite(nome)
         c2, a2 = _colocar(c, a, dd0, d * px_m, rng.uniform(0, 360))
         # o recorte da árvore é ampliado da referência (26 px/m): a nitidez de volta, como a dos arbustos
