@@ -48,7 +48,8 @@ DADOS = R / "POE642_CasaA_PH_Terreo_12K_dados.json"
 SAIDA = FA.CASA / "entrega" / "POE642_CasaA_PH_Terreo_12K_opcao_{opcao}.jpg"
 
 G12 = {"a3": (4961, 3508), "margem_px": 150, "ia": (16, 9), "branco": 245, "cheio": 0.85, "tom_sigma_px": 2.5,
-       "fundo_folga_px": 3, "folga_texto_px": 2, "largura": 12288, "janela_px": 260, "qualidade": 95, "traco_min": 0.04}
+       "fundo_folga_px": 3, "folga_texto_px": 2, "largura": 12288, "janela_px": 260, "qualidade": 95, "traco_min": 0.04,
+       "kalam_estreitos": ["PROJ. CLARABOIA"]}
 
 PROMPT = ("High-fidelity 4K upscale of the reference image, which is a top-down architectural humanized floor plan "
           "(orthographic, viewed straight from above). Reproduce the reference EXACTLY: identical composition, framing, "
@@ -69,12 +70,15 @@ PROMPT = ("High-fidelity 4K upscale of the reference image, which is a top-down 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Os textos e os símbolos da final
-def rotulos(Q, img):
+def rotulos(Q, img, nomes=None):
     """[(nome, pdf, opc, (dx, dy) px do quadro, cor BGR)] dos rótulos achados na final: o desenho de cada um (corpo,
-    quebra, desvio) é o de `pedidos_terreo_casaa_2910._achar_rotulo`, na polaridade de melhor nota."""
+    quebra, desvio) é o de `pedidos_terreo_casaa_2910._achar_rotulo`, na polaridade de melhor nota; com `nomes`, só os
+    desses nomes."""
     import revisao_casaa_2910 as RV
     import pedidos_terreo_casaa_2910 as P
     rot, aj = RV._rotulos_pav(Q)
+    if nomes is not None:
+        rot = [r for r in rot if r[0] in nomes]
     q = dict(P.ROTULOS_OUTROS_TA, minimo_forma=0.0)
     cinza = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY).astype(np.float32)
     e = img.shape[1] / 2000
@@ -158,7 +162,7 @@ def alfa_anotacao(tipo, dados, forma, s=1.0, x0=0.0, y0=0.0, ss=8):
         a[ya:yb, xa:xb] = sub[ya - by0:yb - by0, xa - bx0:xb - bx0]
         return a
     linhas, x, y, alinhar = dados
-    corpo = FA.ESCADA_A["corpo_px"]
+    corpo = TA.ESCADAS_TA.get("corpo_desc_px") or FA.ESCADA_A["corpo_px"]
     return TA.alfa_texto(linhas, (x - x0) * s, (y - y0) * s, alinhar, corpo=int(round(corpo * s)),
                          entrelinha=round(corpo * 1.18) * s, forma=forma)
 
@@ -201,10 +205,12 @@ def preparar(passos):
     # os textos e os símbolos saem do passo do shaft (o fundo pela conta do alfa, o miolo pelo entorno)
     rots = rotulos(Q, img)
     # os do lavabo (LAVABO e PROJ. CLARABOIA, centralizados em 10/11) no desenho gravado pela etapa dos contornos
-    if TA.ROTULOS_LAVABO.exists():
-        lav = json.loads(TA.ROTULOS_LAVABO.read_text())
-        nomes = {b_["nome"] for b_ in lav}
-        rots = [b_ for b_ in rots if b_["nome"] not in nomes] + lav
+    # e os recentralizados de 11/11 (`terreo_casaa_1011.rotulos_1111`), no desenho gravado (o corpo do B. MOTORISTA)
+    for arq in (TA.ROTULOS_LAVABO, TA.ROTULOS_1111_JSON):
+        if arq.exists():
+            lav = json.loads(arq.read_text())
+            nomes = {b_["nome"] for b_ in lav}
+            rots = [b_ for b_ in rots if b_["nome"] not in nomes] + lav
     camadas = [(alfa_rotulo(Q, b_, img.shape[:2]), tuple(b_["cor"])) for b_ in rots]
     anot = anotacoes(Q)
     camadas += [(alfa_anotacao(t, d, img.shape[:2]), tuple(c)) for t, d, c in anot]
@@ -350,8 +356,9 @@ def corrigir_ia(saida_ia, destino):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-def _itens_manuscrita(Q, b, s, X0, Ya3):
-    """As linhas do rótulo b na Kalam, em px do 12K: [(texto, corpo, x, y, âncora)]."""
+def _itens_manuscrita(Q, b, s, X0, Ya3, fator=None):
+    """As linhas do rótulo b na Kalam, em px do 12K: [(texto, corpo, x, y, âncora)]; com `fator`, todas as linhas no
+    mesmo fator do corpo (o mesmo tamanho em todos os rótulos, 11/11), sem ele cada linha no teto dela."""
     import rotulos_manuscritos_casaa as RM
     import retoque_1pav_casae as R1
     from rodape_entrega import FONTES
@@ -373,8 +380,20 @@ def _itens_manuscrita(Q, b, s, X0, Ya3):
     for t, c, x, y in RM.linhas_rotulo(Q, b, pdf2img=loc, escala_desvio=Q.W / 2000 * s):
         peso = q["fonte"] if t.startswith("A:") else q.get("fonte_nome", q["fonte"])
         teto = largura(FONTES / f"Inter-{peso}.otf", t, c) / max(largura(RM.FONTE, t, c * k), 1e-6)
-        itens.append((t, c * k * min(1.0, teto), x, y, "ms"))
-    return itens
+        itens.append((t, c * k * (min(1.0, teto) if fator is None else fator), x, y, "ms", teto))
+    if fator == "tetos":
+        return [it[5] for it in itens]
+    return [it[:5] for it in itens]
+
+
+def fator_manuscrita(Q, rots, s, X0, Ya3):
+    """O fator único do corpo na Kalam (usuário, 11/11: "centralize e alinhe os rótulos. mantenha os mesmos tamanho de
+    fonte, sempre que possível"): o menor teto (a largura da linha na Inter sobre a da Kalam) entre os rótulos comuns,
+    para todos; os de `kalam_estreitos` (num vão estreito, como a PROJ. CLARABOIA) podem ficar abaixo dele."""
+    tetos = {b["nome"]: min(_itens_manuscrita(Q, b, s, X0, Ya3, fator="tetos")) for b in rots}
+    est = set(G12.get("kalam_estreitos", ()))
+    f = min(1.0, min(v for n, v in tetos.items() if n not in est))
+    return f, {n: min(f, v) for n, v in tetos.items() if n in est}
 
 
 def _itens_anotacao_manuscrita(dados, s, X0, Ya3):
@@ -384,7 +403,7 @@ def _itens_anotacao_manuscrita(dados, s, X0, Ya3):
     e = FA.ESCADA_A
     linhas, x, y, alinhar = dados
     k = RM._altura_maiuscula(FONTES / e["fonte"]) / RM._altura_maiuscula(RM.FONTE) * RM.MANUSCRITA["altura"]
-    corpo = e["corpo_px"]
+    corpo = TA.ESCADAS_TA.get("corpo_desc_px") or e["corpo_px"]       # o corpo das descrições na final (11/11)
     entre = round(corpo * 1.18)
     anc = {"esquerda": "lm", "direita": "rm", "centro": "mm"}[alinhar]
     n = len(linhas)
@@ -483,9 +502,14 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
     meia = q["janela_px"] * s
     import rotulos_manuscritos_casaa as RM
     reforco = RM.MANUSCRITA["reforco_px"] * s
+    if opcao == "B":
+        fk, fk_est = fator_manuscrita(Q, rots, s, X0, Ya3)
+        print(f"    Kalam: o mesmo fator {fk:.3f} em todos os rótulos"
+              + (f" (menos {', '.join(f'{n} {v:.3f}' for n, v in fk_est.items())})" if fk_est else ""))
     for b in rots:
         if opcao == "B":
-            _desenhar_janela(out, _itens_manuscrita(Q, b, s, X0, Ya3), tuple(b["cor"]), reforco)
+            _desenhar_janela(out, _itens_manuscrita(Q, b, s, X0, Ya3, fator=fk_est.get(b["nome"], fk)),
+                             tuple(b["cor"]), reforco)
             continue
         u, v = Q.p2q(*b["pdf"])
         cx, cy = (u + b["desvio"][0] - X0) * s, (v + b["desvio"][1] - Ya3) * s
