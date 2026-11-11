@@ -128,7 +128,8 @@ def anotacoes_1p(Q):
     ang = np.radians(c["ang"])
     rm = c["raio_pt"] * FA.PT_PX
     tx, ty = cx + rm * np.cos(ang), cy - rm * np.sin(ang)
-    pts = TA.seta_tri(tx, ty, (np.sin(ang), np.cos(ang)), *c["tri"])
+    sg = c.get("sentido", 1)
+    pts = TA.seta_tri(tx, ty, (sg * np.sin(ang), sg * np.cos(ang)), *c["tri"])
     out += [("tri", [list(map(float, p)) for p in pts], (30, 30, 30)),
             ("txt", (list(c["texto"]), *c["txt_px"], c["alinhar"]), q["cor_texto"])]
     return out

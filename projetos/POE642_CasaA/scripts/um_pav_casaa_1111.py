@@ -1312,6 +1312,7 @@ ESCADAS_1P = {"u": {"letra": ("D", (0, 24)), "tri_px": (2264.0, 1046.0), "dir": 
                                         (2021.2, 1097.1, 2240.1, 1098.3), (2238.9, 1097.1, 2240.1, 1251.3),
                                         (2019.5, 1250.2, 2240.1, 1251.3)]},
               "caracol": {"apagar_px": (2001, 1552, 2019, 1570), "ang": 9.85, "raio_pt": 28.0, "tri": (13.0, 15.0),
+                          "sentido": -1,
                           "txt_px": (2052.0, 1604.0), "texto": ("DESCE PARA A", "ÁREA DE SERVIÇO"),
                           "alinhar": "esquerda",
                           "guarda_corpo_pt": [(1808.6, 1715.1, 1819.7, 1716.2), (1818.6, 1715.1, 1819.7, 1775.2),
@@ -1339,7 +1340,8 @@ def escadas_1p(Q, img, q=None):
     ang = np.radians(c["ang"])
     rm = c["raio_pt"] * FA.PT_PX
     tx, ty = cx + rm * np.cos(ang), cy - rm * np.sin(ang)
-    out = TA.triangulo(out, TA.seta_tri(tx, ty, (np.sin(ang), np.cos(ang)), *c["tri"]))
+    sg = c.get("sentido", 1)                              # 1: horário; -1: anti-horário (a descida para a esquerda)
+    out = TA.triangulo(out, TA.seta_tri(tx, ty, (sg * np.sin(ang), sg * np.cos(ang)), *c["tri"]))
     out = TA._texto_escada(out, c["texto"], *c["txt_px"], c["alinhar"], q["cor_texto"])
     print("    escadas: o triângulo e a descrição nas duas (DESCE PARA O HALL INTERNO, na em U; DESCE PARA A ÁREA DE "
           "SERVIÇO, na caracol), sem o D; os guarda-corpos de vidro da escada em U e da abertura da caracol")
@@ -2019,12 +2021,285 @@ def pisos_1111e(Q, img, q=None):
     return out
 
 
+# 19. Os degraus da escada em U no mesmo travertino dos pisos (usuário, 11/11 à noite: "sim, aplique o mesmo acabamento
+# nos degraus da escada em U"): só a parte do 1º Pavimento (os degraus coloridos dos dois lanços e o patamar; os do
+# Térreo, enevoados, ficam), só no que é pedra: fora as linhas dos espelhos, a linha de corte, o guarda-corpo, o
+# triângulo e o texto (o que foge do tom da pedra, com `folga_px`). Cada degrau (e o patamar) é uma peça: o
+# travertino de `pisos_1111e` (os estratos e os poros, sem manchas), com o veio no comprimento da peça e uma semente
+# por peça (pela posição), num tom só para a escada inteira (a luz larga da pedra, achatada em `plano`; usuário, vendo
+# a 1ª versão, com as peças em tons diferentes).
+DEGRAUS_1111E = {"caixa_px": (2250, 888, 2490, 1108), "desvio": 22, "croma": 0.03, "claro_max": 232,
+                 "folga_px": 1, "mediana_px": 7, "linha": 14, "escuro": 110, "poro_max": (30, 7), "quente_min": 12,
+                 "luz_m": 0.6,
+                 "plano": 1.0,
+                 "area_min": 80, "lado_min": 5, "semente": 1119}
+
+
+def degraus_1111e(Q, img, q=None):
+    import final3840_casab as F
+    q = q or DEGRAUS_1111E
+    qt = PISOS_1111E["travertino"]
+    out = img.astype(np.float32)
+    H, W = img.shape[:2]
+    x0, y0, x1, y1 = q["caixa_px"]
+    caixa = np.zeros((H, W), bool)
+    caixa[y0:y1, x0:x1] = True
+    par = dilatar(FA.paredes_pdf(Q) > 0.3, 1)
+    mat = caixa & (Q.chapada == qt["chapada"]).all(axis=2) & ~par
+    I = out
+    lum = I.mean(axis=2)
+    pedra = mat & (lum < q["claro_max"])
+    L = F.luz_robusta(img, pedra, 0.4 * Q.px_m, desvio=q["desvio"])
+    n = I / np.maximum(I.sum(axis=2, keepdims=True), 1)
+    nL = L / np.maximum(L.sum(axis=2, keepdims=True), 1)
+    # é pedra o que tem o matiz dela (os degraus mais escuros do render entram); as linhas finas (os espelhos, a linha
+    # de corte, o texto, o triângulo: mais escuras que a mediana de perto) e os guarda-corpos ficam
+    lm = cv2.medianBlur(np.clip(lum, 0, 255).astype(np.uint8), q["mediana_px"]).astype(np.float32)
+    finas = (lum < lm - q["linha"]) & caixa
+    # os poros do desenho antigo (manchas pequenas, sem comprimento) não são linhas: entram na pedra
+    nl, ll, sl, _ = cv2.connectedComponentsWithStats(finas.astype(np.uint8), 8)
+    poro = np.zeros(nl, bool)
+    poro[1:] = (sl[1:, 4] <= q["poro_max"][0]) & (np.maximum(sl[1:, 2], sl[1:, 3]) <= q["poro_max"][1])
+    finas &= ~poro[ll]
+    linhas = dilatar(finas | (lum < q["escuro"]), q["folga_px"])
+    gc = np.zeros((H, W), np.uint8)
+    for r_ in ESCADAS_1P["u"]["guarda_corpo_pt"]:
+        (ga, gb), (gc_, gd) = Q.p2q(r_[0], r_[1]), Q.p2q(r_[2], r_[3])
+        cv2.rectangle(gc, (int(min(ga, gc_)) - 2, int(min(gb, gd)) - 2), (int(max(ga, gc_)) + 2, int(max(gb, gd)) + 2), 1, -1)
+    quente = (I[..., 2] - I[..., 0]) >= q["quente_min"]           # a pedra é quente; o Térreo enevoado, cinza
+    ok = pedra & quente & (np.abs(n - nL).max(axis=2) < q["croma"]) & ~linhas & (gc == 0)
+    nc, lab, st, _ = cv2.connectedComponentsWithStats(ok.astype(np.uint8), 4)
+    # um tom só para a escada: a luz larga da pedra, achatada em `plano` para a mediana
+    Lg = F.luz_robusta(img, ok, q["luz_m"] * Q.px_m, desvio=q["desvio"])
+    med = np.median(I[ok], axis=0)
+    Lg = Lg * (1 - q["plano"]) + med[None, None] * q["plano"]
+    pecas = 0
+    for i in range(1, nc):
+        x, y, w, h, a = st[i]
+        if a < q["area_min"] or min(w, h) < q["lado_min"]:
+            continue
+        m = lab[y:y + h, x:x + w] == i
+        Lp = Lg[y:y + h, x:x + w]
+        sem = q["semente"] + 7 * int(x) + 13 * int(y)
+        if h >= w:
+            T = FA.travertino_bruto(Q, w, h, sem, qt["veio"], qt["faixa"], qt["poros"], qt["poro_esc"],
+                                    forca=qt["forca"]).T[..., None]
+        else:
+            T = FA.travertino_bruto(Q, h, w, sem, qt["veio"], qt["faixa"], qt["poros"], qt["poro_esc"],
+                                    forca=qt["forca"])[..., None]
+        T = T / max(float(T[m].mean()), 1e-3)                 # cada peça na média 1 (a foto varia de um trecho a outro)
+        al = (cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.5) * m)[..., None]
+        reg = out[y:y + h, x:x + w]
+        reg[:] = reg * (1 - al) + Lp * T * al
+        pecas += 1
+    print(f"    degraus da escada em U: {pecas} peças (os degraus coloridos e o patamar) no travertino dos pisos, com o "
+          f"veio no comprimento; os enevoados, as linhas, o guarda-corpo, o triângulo e o texto ficam")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# 20. Os retoques de 11/11, mais tarde (usuário, com recortes):
+# - "a sombra de descida para esquerda não ficou bom. até acho que está ao contrário. corrija" (a caracol): o D do PDF
+#   fica no degrau junto aos 0°, onde a descida começa, e ela segue no sentido anti-horário (para a esquerda, para o
+#   trecho do Térreo); os cinco degraus do 1º Pavimento passam a escurecer nesse sentido (o junto aos 0°, o mais alto,
+#   no tom cheio; o junto aos 93,1°, `tons`[0]), com a sombra curta do espelho do degrau de cima (o do lado dos 0°) no
+#   de baixo. A conta é a razão entre o fator novo e o de `final3840_casaa_1pav.caracol` (o tom de cada degrau e a
+#   sombra do espelho), em 4x, só no trecho cheio, fora das guardas, do anel, do pilar e do triângulo. O triângulo vira
+#   para o mesmo sentido (`ESCADAS_1P["caracol"]["sentido"]`);
+# - "revise portas e remova os arcos de movimento delas" e "essa porta precisa ser representada novamente" (a da suíte
+#   3, cuja folha tinha sumido no vinílico): as 11 folhas de giro (`folhas_px`, os retângulos brancos da ARQ_PAREDE do
+#   PDF, abertas junto à parede) redesenhadas no mesmo desenho: o piso de baixo limpo (o de `desloc_px` px para o lado
+#   de fora da parede, numa régua do vinílico), a folha fina em madeira clara com o veio no comprido, o contorno e a
+#   sombra curta; sem arco nenhum (os arcos do PDF não entram; no 12K, voltam da final, `pecas`);
+# - "melhore a representação dessas portas de vidro e remova os resíduos existentes" (a janela de correr da saleta,
+#   junto à caracol): o vão limpo (a soleira em travertino, `saleta`), as faces da parede em linha fina, os batentes em
+#   alumínio e as duas folhas de correr do PDF, desencontradas, cada uma no perfil de alumínio com o vidro no desenho
+#   das regras (`terreo_casaa_1011.vidro_laminas`);
+# - "faltou a representação dessa cadeira de escritório" (a escrivaninha da suíte 3): o semicírculo branco do render
+#   sai (o vinílico da mesma fiada, `cadeira_velha_px`) e entra a cadeira de madeira e linho da biblioteca, virada
+#   para a mesa (para baixo), 1/3 sob o tampo, com a sombra curta dele (como a da suíte 1).
+RETOQUES_1111F = {
+    "caracol": {"tons": (0.84, 1.0), "escuro_max": 90, "ss": 4},
+    "folhas_px": [(2426.1, 1312.2, 2479.8, 1314.6), (2107.2, 1332.5, 2109.6, 1386.3),
+                  (2172.3, 1332.5, 2174.7, 1386.3), (2058.8, 479.3, 2112.6, 481.7), (1972.3, 586.8, 2026.0, 589.2),
+                  (1748.4, 986.8, 1802.1, 989.2), (1972.9, 1153.4, 1975.2, 1207.2), (1849.9, 1225.1, 1903.6, 1227.5),
+                  (2107.2, 1434.1, 2109.6, 1487.8), (1682.7, 1472.9, 1736.4, 1475.2), (2163.3, 1560.0, 2205.1, 1562.4)],
+    "folha": {"madeira": (134, 166, 202), "contorno": (58, 72, 92), "contorno_alfa": 0.95, "veio": 0.05,
+              "raio_px": 0.5, "sombra": 0.28, "sombra_px": (-0.8, 1.0, 0.9), "limpa_px": 3, "desloc_px": 12},
+    "saleta": {"vao_px": (1912.6, 1629.9, 2136.5, 1644.2), "soleira": (200, 210, 220),
+               "faces": (135, 135, 138), "batentes_px": [(1912.6, 1631.1, 1914.9, 1643.0),
+                                                        (2134.1, 1631.1, 2136.5, 1643.0)],
+               "folhas_px": [((1914.9, 1640.0, 2026.9, 1643.0), (1919.7, 2022.1)),
+                             ((2022.1, 1637.1, 2134.1, 1640.0), (2026.9, 2129.3))],
+               "aluminio": (178, 181, 186), "aluminio_contorno": (118, 120, 126)},
+    "cadeira_s3": {"mesa_px": (1624.3, 562.3, 1781.2, 598.1), "ccx": 1664.8, "frente": (0, 1),
+                   "cadeira_velha_px": (1644, 534, 1687, 563), "desloc_px": 46},
+    "semente": 1161}
+
+
+def _cadeira_mesa(Q, out, mesa_px, ccx, frente):
+    """A cadeira de madeira e linho da biblioteca (`final3840_casad._cadeira_bloco`) virada para a mesa (`frente`), 1/3
+    sob o tampo, e a sombra curta do tampo sobre ela; `out` em float32, mudado no lugar."""
+    import final3840_casad as D
+    H, W = out.shape[:2]
+    k = Q.px_m
+    mx0, my0, mx1, my1 = mesa_px
+    X0, Y0 = int(np.floor(mx0)), int(np.floor(my0))
+    mesa_a = np.zeros((H, W), np.float32)
+    mesa_a[Y0:int(np.ceil(my1)), X0:int(np.ceil(mx1))] = _cobertura((mx0, my0, mx1, my1), X0, Y0,
+                                                                     int(np.ceil(mx1)) - X0, int(np.ceil(my1)) - Y0)
+    qc = D.MOVEIS_TD["cadeira"]
+    D_px = qc["m"] * k
+    ccy = (my1 + D_px * (0.5 - qc["sob"])) if frente[1] < 0 else (my0 - D_px * (0.5 - qc["sob"]))
+    cor, a = D._cadeira_bloco(Q, frente, contorno=qc["contorno"])
+    D._pousar(out, cor, a, ccx, ccy, k, cobre=mesa_a)
+    s_ = D.F.PECAS["sombra"]
+    d_ = s_["dist_m"] * k
+    sb = cv2.GaussianBlur(cv2.warpAffine(mesa_a, np.float32([[1, 0, -d_], [0, 1, d_]]), (W, H)), (0, 0),
+                          s_["sig_m"] * k) * s_["forca"]
+    cad_a = np.zeros((H, W), np.float32)
+    h_, w_ = a.shape
+    cad_a[int(ccy - h_ / 2):int(ccy - h_ / 2) + h_, int(ccx - w_ / 2):int(ccx - w_ / 2) + w_] = a
+    out *= (1 - sb * np.clip(cad_a, 0, 1) * (1 - mesa_a))[..., None]
+
+
+def _caracol_descida(Q, img, q):
+    import final3840_casaa_1pav as P1x
+    qc, qt = P1x.CARACOL_1P, T.CARACOL
+    ss = q["ss"]
+    cx, cy = qc["centro"]
+    R = qc["r_anel"] * FA.PT_PX + 4
+    pcx, pcy = Q.p2q(cx, cy)
+    X0, Y0 = int(pcx - R), int(pcy - R)
+    w = h = int(2 * R) + 2
+    ys, xs = np.mgrid[0:h * ss, 0:w * ss].astype(np.float32)
+    (ax, ay), (bx, by) = Q.q2p(X0, Y0), Q.q2p(X0 + 1, Y0 + 1)
+    Xs, Ys = ax + (xs + 0.5) / ss * (bx - ax), ay + (ys + 0.5) / ss * (by - ay)
+    r = np.hypot(Xs - cx, Ys - cy)
+    th = np.degrees(np.arctan2(-(Ys - cy), Xs - cx)) % 360
+    b = np.array(qc["cheio"])
+    n = len(b) - 1
+    kk = np.clip(np.searchsorted(b, th) - 1, 0, n - 1)
+    fs, alc = qt["espelho"]
+    t0, t1 = qc["tons"]
+    velho = (t0 + (t1 - t0) * kk / (n - 1)) * np.where(
+        kk < n - 1, 1 - fs * np.exp(-np.maximum((b[np.minimum(kk + 1, n)] - th) * np.pi / 180 * r * FA.PT_PX, 0) / alc), 1)
+    n0, n1 = q["tons"]
+    novo = (n1 - (n1 - n0) * kk / (n - 1)) * np.where(
+        kk > 0, 1 - fs * np.exp(-np.maximum((th - b[kk]) * np.pi / 180 * r * FA.PT_PX, 0) / alc), 1)
+    cheio = ((r >= qc["r_pilar"] + 0.6) & (r <= qc["r_anel"] - 1.0) & (th > b[0] + 0.8) & (th < b[-1] - 0.8))
+    razao = np.where(cheio, novo / np.maximum(velho, 1e-3), 1.0)
+    rz = cv2.resize(razao.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+    reg = img[Y0:Y0 + h, X0:X0 + w].astype(np.float32)
+    escuro = dilatar(reg.mean(axis=2) < q["escuro_max"], 1)
+    viz = ~escuro
+    rzv = cv2.GaussianBlur(rz * viz, (0, 0), 2.0) / np.maximum(cv2.GaussianBlur(viz.astype(np.float32), (0, 0), 2.0), 1e-4)
+    rz = np.where(escuro, rzv, rz).astype(np.float32)
+    out = img.copy()
+    out[Y0:Y0 + h, X0:X0 + w] = np.clip(np.round(reg * rz[..., None]), 0, 255).astype(np.uint8)
+    return out
+
+
+def retoques_1111f(Q, img, q=None):
+    import pedidos_terreo_casaa_2910 as P
+    q = q or RETOQUES_1111F
+    H, W = img.shape[:2]
+    par = FA.paredes_pdf(Q) > 0.3
+    # 1. a caracol: a descida para a esquerda
+    out = _caracol_descida(Q, img, q["caracol"])
+    # 2. as folhas das portas de giro: o piso de baixo limpo e a folha de novo
+    qf = q["folha"]
+    ss = 8
+    rng = np.random.default_rng(q["semente"])
+    for x0, y0, x1, y1 in q["folhas_px"]:
+        deitada = (x1 - x0) > (y1 - y0)
+        e = qf["limpa_px"]
+        a0, b0, a1, b1 = int(np.floor(x0)) - e, int(np.floor(y0)) - e, int(np.ceil(x1)) + e, int(np.ceil(y1)) + e
+        d = qf["desloc_px"]
+        if deitada:
+            cima = par[b0 - 4:b0, a0:a1].mean() if b0 >= 4 else 1.0
+            baixo = par[b1:b1 + 4, a0:a1].mean()
+            dy = -d if cima < baixo else d
+            fonte = out[b0 + dy:b1 + dy, a0:a1].copy()
+        else:
+            esq = par[b0:b1, a0 - 4:a0].mean()
+            dir_ = par[b0:b1, a1:a1 + 4].mean()
+            dx = -d if esq < dir_ else d
+            fonte = out[b0:b1, a0 + dx:a1 + dx].copy()
+        reg = out[b0:b1, a0:a1]
+        cinza = (reg.max(axis=2).astype(np.int16) - reg.min(axis=2)) < 15
+        livre = ~par[b0:b1, a0:a1] & ~(cinza & (reg.max(axis=2) < 110))     # a parede pintada também fica
+        reg[livre] = fonte[livre]
+        # a folha (em 8x): madeira clara, o veio no comprido, o contorno e a sombra curta
+        X0, Y0 = a0 - 3, b0 - 3
+        w, h = a1 - a0 + 6, b1 - b0 + 6
+        m = P._ret_arred((x0, y0, x1, y1), qf["raio_px"], X0, Y0, h, w, ss)
+        al = cv2.resize(m, (w, h), interpolation=cv2.INTER_AREA)
+        sx, sy, sg = qf["sombra_px"]
+        sb = cv2.GaussianBlur(cv2.warpAffine(al, np.float32([[1, 0, sx], [0, 1, sy]]), (w, h)), (0, 0), sg)
+        r_ = out[Y0:Y0 + h, X0:X0 + w].astype(np.float32)
+        r_ *= (1 - qf["sombra"] * sb * (1 - al))[..., None]
+        out[Y0:Y0 + h, X0:X0 + w] = np.clip(np.round(r_), 0, 255).astype(np.uint8)
+        n_ = cv2.GaussianBlur(rng.normal(0, 1, m.shape).astype(np.float32), (0, 0),
+                              sigmaX=(6.0 if deitada else 0.6) * ss, sigmaY=(0.6 if deitada else 6.0) * ss)
+        n_ = 1 + qf["veio"] * n_ / max(float(n_.std()), 1e-6)
+        out = P._pintar(out, X0, Y0, w, h, ss, m, np.float32(qf["madeira"])[None, None] * n_[..., None])
+        borda = np.clip(m - cv2.erode(m, np.ones((5, 5), np.uint8)), 0, 1) * qf["contorno_alfa"]
+        out = P._pintar(out, X0, Y0, w, h, ss, borda, np.float32(qf["contorno"])[None, None] * np.ones_like(borda)[..., None])
+    # 3. as portas de vidro da saleta
+    qs = q["saleta"]
+    vx0, vy0, vx1, vy1 = qs["vao_px"]
+    A0, B0, A1, B1 = int(np.floor(vx0)), int(np.floor(vy0)), int(np.ceil(vx1)), int(np.ceil(vy1)) + 1
+    wv, hv = A1 - A0, B1 - B0
+    Tx = FA.travertino_bruto(Q, hv, wv, q["semente"] + 7, 0.008, 0.012, 6, 0.05, forca=0.8)
+    cob = _cobertura((vx0, vy0, vx1, vy1), A0, B0, wv, hv)[..., None]
+    reg = out[B0:B1, A0:A1].astype(np.float32)
+    reg = reg * (1 - cob) + np.float32(qs["soleira"])[None, None] * Tx[..., None] * cob
+    out[B0:B1, A0:A1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    of = out.astype(np.float32)
+    for yy in (vy0, vy1):                                                # as faces da parede, em linha fina
+        a = _cobertura((vx0, yy - 0.45, vx1, yy + 0.45), A0, B0 - 1, wv, hv + 2)[..., None]
+        of[B0 - 1:B1 + 1, A0:A1] = of[B0 - 1:B1 + 1, A0:A1] * (1 - a) + np.float32(qs["faces"]) * a
+    def _ret(rr, cor, contorno):
+        rx0, ry0, rx1, ry1 = rr
+        X0, Y0 = int(np.floor(rx0)) - 1, int(np.floor(ry0)) - 1
+        w, h = int(np.ceil(rx1)) - X0 + 2, int(np.ceil(ry1)) - Y0 + 2
+        a = _cobertura(rr, X0, Y0, w, h)[..., None]
+        of[Y0:Y0 + h, X0:X0 + w] = of[Y0:Y0 + h, X0:X0 + w] * (1 - a) + np.float32(cor) * a
+        dentro = _cobertura((rx0 + 0.5, ry0 + 0.5, rx1 - 0.5, ry1 - 0.5), X0, Y0, w, h)[..., None]
+        borda = np.clip(a - dentro, 0, 1) * 0.8
+        of[Y0:Y0 + h, X0:X0 + w] = of[Y0:Y0 + h, X0:X0 + w] * (1 - borda) + np.float32(contorno) * borda
+    for rr in qs["batentes_px"]:
+        _ret(rr, qs["aluminio"], qs["aluminio_contorno"])
+    vidros = []
+    for (fx0, fy0, fx1, fy1), (gx0, gx1) in qs["folhas_px"]:
+        _ret((fx0, fy0, fx1, fy1), qs["aluminio"], qs["aluminio_contorno"])
+        (p0x, p0y), (p1x, p1y) = Q.q2p(gx0, fy0 + 0.35), Q.q2p(gx1, fy1 - 0.35)
+        vidros.append((min(p0x, p1x), min(p0y, p1y), max(p0x, p1x), max(p0y, p1y)))
+    out = np.clip(np.round(of), 0, 255).astype(np.uint8)
+    out = np.clip(np.round(TA.vidro_laminas(Q, out, vidros, dict(TA.ESCADAS_TA["jardim"]["vidro"], ponta_px=0.0))),
+                  0, 255).astype(np.uint8)
+    # 4. a cadeira da escrivaninha da suíte 3
+    qc = q["cadeira_s3"]
+    c0, d0, c1, d1 = qc["cadeira_velha_px"]
+    dl = qc["desloc_px"]
+    out[d0:d1, c0:c1] = out[d0:d1, c0 + dl:c1 + dl]
+    of = out.astype(np.float32)
+    _cadeira_mesa(Q, of, qc["mesa_px"], qc["ccx"], qc["frente"])
+    out = np.clip(np.round(of), 0, 255).astype(np.uint8)
+    print(f"    retoques de 11/11 (mais tarde): a caracol escurecendo para a esquerda (a descida); {len(q['folhas_px'])} "
+          f"folhas de giro redesenhadas, sem arcos (a da suíte 3 de volta); as portas de vidro da saleta (vão limpo, "
+          f"batentes, duas folhas de correr); a cadeira da escrivaninha da suíte 3")
+    return out
+
+
 PASSOS = [("nublado", nublado_1p), ("tracejados", tracejados_1p), ("bege", bege_1p), ("pergolado", pergolado_1p),
           ("contorno", contorno_1p), ("vazios", vazios_1p), ("shafts", shafts_1p), ("folhas", folhas_1p),
           ("guarda_corpos", guarda_corpos_1p), ("bancada", bancada_1p), ("cubas", cubas_1p), ("tapete", tapete_1p),
           ("sala_intima", sala_intima_1p), ("closets", closets_1p), ("armarios", armarios_1p), ("bancos", bancos_1p),
           ("mesinhas_master", mesinhas_master_1p), ("portas", portas_1p), ("escadas", escadas_1p),
-          ("floreira", floreira_1p), ("pisos_1111e", pisos_1111e), ("retoques_1111e", retoques_1111e)]
+          ("floreira", floreira_1p), ("pisos_1111e", pisos_1111e), ("retoques_1111e", retoques_1111e),
+          ("degraus_1111e", degraus_1111e), ("retoques_1111f", retoques_1111f)]
 
 
 def correcoes(img, de=None, ate=None, salvar_passos=None):
@@ -2091,6 +2366,16 @@ ANTES_DEPOIS_1111E_1P = {"1Pavimento": {
     "travertino_banho1": (2470, 1180, 2560, 1330), "travertino_banho2": (1690, 860, 1830, 960),
     "travertino_banho3": (1990, 330, 2120, 440), "travertino_sala_circulacao": (1980, 640, 2260, 1000)}}
 
+# a 6ª leva de 11/11 (contra a final de 279ec5c): os degraus da escada em U no travertino novo, a caracol escurecendo
+# para a esquerda, as 11 folhas de giro sem arcos (a da suíte 3 de volta), as portas de vidro da saleta e a cadeira da
+# escrivaninha da suíte 3, em renders/..._1111f_<trecho>_antes_depois.jpg
+ANTES_DEPOIS_1111F_1P = {"1Pavimento": {
+    "planta": (1150, 260, 2830, 1720), "escada_u": (2240, 870, 2500, 1120),
+    "caracol_saleta": (1900, 1470, 2150, 1660), "suite3_porta_cadeira": (1580, 480, 2060, 640),
+    "porta_banho3": (2030, 440, 2140, 520), "portas_suite2_banho2_master": (1720, 950, 2010, 1260),
+    "portas_circulacao": (2040, 1290, 2240, 1600), "porta_banho_suite1": (2380, 1270, 2520, 1350),
+    "porta_banho_master": (1650, 1440, 1770, 1510)}}
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -2100,7 +2385,7 @@ def main():
     ap.add_argument("--saida")
     ap.add_argument("--passos")
     ap.add_argument("--antes_depois", action="store_true",
-                    help="grava os recortes de ANTES_DEPOIS_1111E_1P em renders/ (antes: a imagem de --antes, ou a de "
+                    help="grava os recortes de ANTES_DEPOIS_1111F_1P em renders/ (antes: a imagem de --antes, ou a de "
                          "--antes_ref)")
     ap.add_argument("--antes_ref", help="a imagem de antes dos recortes (a final instalada), no lugar de --antes")
     a = ap.parse_args()
@@ -2110,7 +2395,7 @@ def main():
     if a.antes_depois:
         import pedidos_terreo_casaa_2910 as P
         ref = cv2.imread(a.antes_ref) if a.antes_ref else antes
-        P.antes_depois_pedidos_ta("1Pavimento", ref, out, caixas=ANTES_DEPOIS_1111E_1P, sufixo="1111e")
+        P.antes_depois_pedidos_ta("1Pavimento", ref, out, caixas=ANTES_DEPOIS_1111F_1P, sufixo="1111f")
 
 
 if __name__ == "__main__":
