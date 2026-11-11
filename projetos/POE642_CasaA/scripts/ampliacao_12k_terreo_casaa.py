@@ -325,16 +325,20 @@ CORRIGIR_PX = {"caracol": (1918, 1512, 2036, 1632), "cooktop_cozinha": (1964, 12
                # 11/11, 3ª leva: a sala nos tons da vista 3D (os dois tapetes, o sofá, as poltronas, as mesas)
                "sala_1111": (1590, 375, 2165, 845)}
 # o gramado inteiro (11/11: a grama realista e o paisagismo B, com a palmeira) volta da entrada nova pela máscara do
-# gramado (`terreo_casaa_1011.gramado_mascara` sobre a final)
+# gramado (`terreo_casaa_1011.gramado_mascara` sobre a final). As manchas da grama realista são mais oliva (o verde um
+# pouco abaixo do vermelho) que o limite da máscara (`verde` -4): nelas a máscara furava e dois arbustos antigos da IA
+# ficavam no gramado do fundo; aqui o limite desce para `gramado_verde` (a máscara do passo do gramado, quase igual)
 CORRIGIR_MASCARAS = {"agua": "agua", "pedra_portuguesa": (85, 138, 185), "gramado": "gramado"}
-CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0, "folga_mascara_px": 2}
+CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0, "folga_mascara_px": 2, "gramado_verde": -10}
 
 
 def _mascara(Q, chave):
     if chave == "agua":
         return TA.agua_mascara(Q) > 0.5
     if chave == "gramado":
-        return TA.gramado_mascara(Q, cv2.imread(str(FA.CASA / "renders" / "POE642_CasaA_PH_Terreo_final_rotulos.png")))
+        img = cv2.imread(str(FA.CASA / "renders" / "POE642_CasaA_PH_Terreo_final_rotulos.png"))
+        return (TA.gramado_mascara(Q, img)
+                | TA.gramado_mascara(Q, img, dict(TA.GRAMADO_TA, verde=CORRECAO["gramado_verde"])))
     return np.all(Q.chapada == np.uint8(chave), axis=2)
 
 
@@ -393,7 +397,8 @@ def _itens_manuscrita(Q, b, s, X0, Ya3, fator=None):
     for t, c, x, y in RM.linhas_rotulo(Q, b, pdf2img=loc, escala_desvio=Q.W / 2000 * s):
         peso = q["fonte"] if t.startswith("A:") else q.get("fonte_nome", q["fonte"])
         teto = largura(FONTES / f"Inter-{peso}.otf", t, c) / max(largura(RM.FONTE, t, c * k), 1e-6)
-        itens.append((t, c * k * (min(1.0, teto) if fator is None else fator), x, y, "ms", teto))
+        f_ = min(1.0, teto) if fator is None else (1.0 if fator == "tetos" else fator)
+        itens.append((t, c * k * f_, x, y, "ms", teto))
     if fator == "tetos":
         return [it[5] for it in itens]
     return [it[:5] for it in itens]
