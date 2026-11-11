@@ -1027,8 +1027,8 @@ def piso_marrom_ta(Q, img, q=None):
 # faixas antigas: a luz é medida numa janela maior que a régua) passa ao deck novo; o rótulo volta por cima.
 # Depois (usuário, 11/11: "a madeira do deck não pode parecer velha"): o tom de madeira nova, recém-oleada (o mel quente
 # de `tom`, no lugar do bege acinzentado), o veio e o grão mais discretos, as juntas e os topos mais leves e as peças
-# quase no mesmo tom (sem as manchas e o cinza de madeira gasta).
-DECK_TA = {"cores": [(99, 136, 174), (74, 106, 140)], "fechar": 3, "tom": (100, 143, 194), "regua_cm": 14.0,
+# quase no mesmo tom (sem as manchas e o cinza de madeira gasta). A régua de ~20 cm da referência (regras, seção 3).
+DECK_TA = {"cores": [(99, 136, 174), (74, 106, 140)], "fechar": 3, "tom": (100, 143, 194), "regua_cm": 20.0,
            "var_regua": 0.03, "var_peca": 0.03, "matiz": 0.006, "comp_m": (1.6, 3.4), "junta_px": 0.9,
            "junta_f": 0.66, "topo_px": 0.7, "topo_f": 0.86, "veio": (0.045, 18.0, 0.4), "grao": (0.012, 0.6),
            "onda": (0.025, (70.0, 170.0)), "bisel": (0.035, -0.06), "ss": 3, "luz_sig_px": 7.0, "base_sig_m": 1.0,

@@ -31,6 +31,9 @@ As bordas retas pelo PDF ("corrija as bordas deixando as perfeitas", na Casa A),
 
 Os vidros da borda no desenho do da Casa C (`vidros_borda`, `VIDROS_BORDA`), depois das bordas:
   python3 piscinas_turquesa.py B-Terreo --vidros
+
+A água da opção C (11/11/26, para todas as piscinas), por cima da final (`agua_c`, `AGUA_C`):
+  python3 piscinas_turquesa.py B-Terreo | C-Terreo | D-Terreo | E-Terreo | E-Subsolo --agua-c [--saida <png>]
 """
 import argparse
 import shutil
@@ -588,6 +591,69 @@ def _bordas_px(planta, Q=None):
     return corpos, pedra, b.get("pedra_tom"), b.get("pedra_grao", 2.5), prot
 
 
+# A água da opção C (usuário, 11/11/26, na Casa A: "gostei da opção C da piscina"; "essa opção vai ser utilizada para
+# todas as piscinas de todas as casas"): sobre a água de cada final, sem mexer no revestimento (as pastilhas, o rejunte,
+# os degraus e as sombras ficam no desenho de cada px), o tom da opção C do Térreo da Casa A (`AGUA_C["tom"]`: o
+# turquesa da Casa A levado ao cinza-esverdeado da foto, `terreo_casaa_1011.AGUA_OPCOES["C"]`) e, por cima, o resto da
+# rede de cáusticas, as ondinhas com o brilho do sol e os poucos pontos brilhantes (`terreo_casaa_1011.agua_caustica`,
+# a mesma rotina e os mesmos números da Casa A). A água é achada pela cor (o miolo ciano de `TURQUESA`, em manchas de
+# pelo menos `area_min` px); o que não é ciano dentro dela (os rótulos, os tracejados, os vidros, as espreguiçadeiras)
+# fica como está.
+AGUA_C = {"tom": (160.4, 153.4, 103.9), "opcao": "C", "funde_px": 0.6, "janela_px": 21, "larga_sig": 8.0,
+          "fino": (0.6, 1.0), "fino_limiar": 0.08, "larga": (0.8, 1.3), "semente": 4250}
+FINAIS.update({"E-Terreo": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_final.png",
+               "E-Subsolo": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_final.png"})
+
+
+def agua_c(img, q=None, px_m=None):
+    """A água de `img` (BGR uint8) na opção C; devolve (imagem, m² de água por mancha)."""
+    import types
+    import terreo_casaa_1011 as TA
+    q = q or AGUA_C
+    t = TURQUESA
+    px_m = px_m or t["px_m"]
+    a = img.astype(np.float32)
+    b, g, r = a[..., 0], a[..., 1], a[..., 2]
+    dbr, dgr, bmin = t["ciano"]
+    ciano = (b - r > dbr) & (g - r > dgr) & (b > bmin)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(ciano.astype(np.uint8), 8)
+    agua = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= t["area_min"]])
+    if not agua.any():
+        return img, []
+    # o tom: o da opção C, com a luz de cada px (sem cor: o canal a canal levava o claro das cáusticas antigas ao rosa).
+    # A luz é a larga (a mediana em `janela_px`: a prainha mais clara, as sombras das bordas) vezes o desenho fino (as
+    # pastilhas e o rejunte, mais escuros), sem o claro das cáusticas antigas (o fino fica até `fino`)
+    lum = a.mean(axis=2)
+    med = float(np.median(lum[agua]))
+    l8 = np.where(agua, lum, med).clip(0, 255).astype(np.uint8)
+    larga = cv2.GaussianBlur(cv2.medianBlur(l8, q["janela_px"]).astype(np.float32), (0, 0), q["larga_sig"])
+    fino = np.clip(lum / np.maximum(larga, 1), q["fino"][0], 1.0)
+    fino = 1 - np.maximum(0, (1 - fino) - q["fino_limiar"])          # só os traços escuros (degraus, juntas) ficam
+    luz = np.clip(larga / med, *q["larga"]) * fino
+    # o Barlavento da Casa A (`terreo_casaa_1011.pastilhas_rel`: as peças de 14,5 cm, o rejunte fino), em cada piscina
+    # com a grade a partir do canto de cima à esquerda dela, no contraste da água funda da Casa A
+    pq = TA.PISCINA_TA
+    lado = pq["peca_cm"] / 100 * px_m
+    rng = np.random.default_rng(q["semente"])
+    nn, lab_a, st_a, _ = cv2.connectedComponentsWithStats(agua.astype(np.uint8), 8)
+    for i in range(1, nn):
+        x, y, w, h = st_a[i, :4]
+        rel = TA.pastilhas_rel(h + 2, w + 2, lado, pq, rng)[1:h + 1, 1:w + 1]
+        sub = lab_a[y:y + h, x:x + w] == i
+        luz[y:y + h, x:x + w][sub] *= (1 + pq["contraste"]["funda"] * (rel - 1))[sub]
+    novo = np.float32(q["tom"])[None, None] * luz[..., None]
+    op = TA.AGUA_OPCOES[q["opcao"]]
+    Qn = types.SimpleNamespace(px_m=px_m)
+    ys, xs = np.nonzero(agua)
+    ret = (max(xs.min() - 2, 0), max(ys.min() - 2, 0), min(xs.max() + 3, img.shape[1]), min(ys.max() + 3, img.shape[0]))
+    novo = TA.agua_caustica(Qn, novo, np.zeros(agua.shape, bool), op, ret, agua)
+    m = cv2.GaussianBlur(agua.astype(np.float32), (0, 0), q["funde_px"]) * agua
+    out = a * (1 - m[..., None]) + novo * m[..., None]
+    _, lab2, st2, _ = cv2.connectedComponentsWithStats(agua.astype(np.uint8), 8)
+    areas = [round(st2[i, cv2.CC_STAT_AREA] / px_m ** 2, 1) for i in range(1, st2.shape[0])]
+    return np.clip(np.round(out), 0, 255).astype(np.uint8), areas
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("planta", choices=sorted(set(FINAIS) | set(BORDAS)))
@@ -596,11 +662,19 @@ def main():
     ap.add_argument("--rede", type=Path, help="com --bordas: a final de antes do turquesa, para a rede das cáusticas "
                     "seguir contínua até a beira")
     ap.add_argument("--vidros", action="store_true", help="só os vidros da borda (`VIDROS_BORDA`), no desenho da Casa C")
+    ap.add_argument("--agua-c", action="store_true", help="a água da opção C (`AGUA_C`), sem mexer no revestimento")
+    ap.add_argument("--saida", type=Path, help="grava aqui em vez de regravar a final")
     a = ap.parse_args()
     final = FINAIS[a.planta]
     if a.antes:
         shutil.copyfile(final, a.antes)
     img = cv2.imread(str(final))
+    if a.agua_c:
+        novo, areas = agua_c(img)
+        dest = a.saida or final
+        cv2.imwrite(str(dest), novo)
+        print(f"{a.planta}: a água da opção C em {len(areas)} piscinas ({', '.join(map(str, areas))} m²) -> {dest}")
+        return
     if a.vidros:
         vp = _vidros_px(a.planta)
         cv2.imwrite(str(final), vidros_borda(img, vp))
