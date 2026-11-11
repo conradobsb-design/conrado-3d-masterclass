@@ -1874,7 +1874,10 @@ PISOS_1111E = {
                  "topo": 0.86, "direcao": "h", "semente": 1112,
                  # usuário (11/11, com a foto de um vinílico de carvalho claro): "vamos trazer esse piso vinílico em sua
                  # respectiva escala para os ambientes que possuem piso vinílico. vamos testar e se der certo adotaremos
-                 # para todas as outras plantas" -> as réguas da própria foto (`_reguas_amostra`), cada uma com 20 cm
+                 # para todas as outras plantas" -> as réguas da própria foto (`_reguas_amostra`); vendo o teste (20 cm):
+                 # "sim, aplique em todas as plantas com vinílico, mas com uma escala mais reduzida" -> 12 cm
+                 # (`regua_m` abaixo, o mesmo de `vinilico_foto.VINILICO_FOTO`)
+                 "regua_foto_m": 0.12,
                  "amostra": {"arquivo": "_texturas/originais/amostra_vinilico_carvalho_1111.png", "fiada_px": 20.8,
                              "fase_px": 7.0, "apara_px": 1.5, "junta_min": 3.0, "janela_px": 5, "peca_min_px": 18,
                              "sem_repetir": 6,
@@ -1971,7 +1974,7 @@ def _reguas_amostra(h, w, px_m, q, rng):
     pecas = _pecas_amostra(qa)
     k = 4
     Hk, Wk = h * k, w * k
-    larg = q["regua_m"] * px_m * k
+    larg = q.get("regua_foto_m", q["regua_m"]) * px_m * k
     D = np.zeros((Hk, Wk, 3), np.float32)
     ult = []
     y = -rng.uniform(0, larg)
@@ -2057,6 +2060,11 @@ def pisos_1111e(Q, img, q=None):
         dev = np.abs(I - L).max(axis=2)
         piso = mat & ~pdf & (err < q["croma"]) & ((dev < q["desvio"]) | ((r > q["sombra_min"]) & (r < 1.0)))
         piso |= mat & forcar
+        if nome == "vinilico" and "amostra" in qm:      # os fiapos do piso antigo (veios claros de 1 px) entram
+            nb, labb, stb, _ = cv2.connectedComponentsWithStats((mat & ~pdf & ~piso).astype(np.uint8), 8)
+            peq = np.zeros(nb, bool)
+            peq[1:] = stb[1:, cv2.CC_STAT_AREA] <= 60
+            piso |= peq[labb]
         # cada ambiente (componente) com a sua luz achatada e a direção das tábuas
         nc, lab, st, _ = cv2.connectedComponentsWithStats(mat.astype(np.uint8), 8)
         perto = cv2.GaussianBlur(dilatar(mat & ~piso, int(round(q["perto_m"] * k))).astype(np.float32), (0, 0), 3.0)
@@ -2108,7 +2116,8 @@ def pisos_1111e(Q, img, q=None):
             fora |= dilatar(a > 0.002, 2)
     out = AM.pintar(out, volta)
     out[fora] = img[fora]
-    vin = ("réguas da foto do carvalho claro, 20 cm cada, emendadas junta a junta" if "amostra" in q["vinilico"]
+    vin = (f"réguas da foto do carvalho claro, {q['vinilico'].get('regua_foto_m', 0.2) * 100:.0f} cm cada, emendadas junta a junta"
+           if "amostra" in q["vinilico"]
            else "réguas de 20 cm com juntas finas, bisel e veio")
     print(f"    pisos: vinílico em {feitos['vinilico'][0]} ambientes ({feitos['vinilico'][1]} px), {vin}; travertino bruto em {feitos['travertino'][0]} ambientes "
           f"({feitos['travertino'][1]} px), sem manchas e sem rejuntes; {len(volta)} rótulos redesenhados por cima")
