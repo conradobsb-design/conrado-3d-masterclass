@@ -321,14 +321,20 @@ CORRIGIR_PX = {"caracol": (1918, 1512, 2036, 1632), "cooktop_cozinha": (1964, 12
                # da sala de estar ("limpe residuos e alinhe os rotulos"; "corrija as imperfeições desse portão em vidro";
                # "limpe residuos e corrija o piso de acesso a garagem")
                "deck_1111": (720, 500, 1090, 1135), "guarda_corpo_1111": (2245, 905, 2495, 1090),
-               "faixa_baixo_1111": (1690, 1636, 3440, 1960), "varanda_sala_1111": (1500, 595, 2165, 775)}
-CORRIGIR_MASCARAS = {"agua": "agua", "pedra_portuguesa": (85, 138, 185)}
+               "faixa_baixo_1111": (1690, 1636, 3440, 1960), "varanda_sala_1111": (1500, 595, 2165, 775),
+               # 11/11, 3ª leva: a sala nos tons da vista 3D (os dois tapetes, o sofá, as poltronas, as mesas)
+               "sala_1111": (1590, 375, 2165, 845)}
+# o gramado inteiro (11/11: a grama realista e o paisagismo B, com a palmeira) volta da entrada nova pela máscara do
+# gramado (`terreo_casaa_1011.gramado_mascara` sobre a final)
+CORRIGIR_MASCARAS = {"agua": "agua", "pedra_portuguesa": (85, 138, 185), "gramado": "gramado"}
 CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0, "folga_mascara_px": 2}
 
 
 def _mascara(Q, chave):
     if chave == "agua":
         return TA.agua_mascara(Q) > 0.5
+    if chave == "gramado":
+        return TA.gramado_mascara(Q, cv2.imread(str(FA.CASA / "renders" / "POE642_CasaA_PH_Terreo_final_rotulos.png")))
     return np.all(Q.chapada == np.uint8(chave), axis=2)
 
 
