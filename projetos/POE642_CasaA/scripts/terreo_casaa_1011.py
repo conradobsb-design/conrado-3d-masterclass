@@ -1250,7 +1250,10 @@ ESCADAS_TA = {
                "vidro": {"vidro": (226, 219, 206), "alfa": 0.95, "contorno": (96, 100, 104), "larg_min_px": 2.4,
                          "linha_px": 0.6, "brilho": 0.5, "sombra": 0.18, "ponta_px": 0.6}},
     "caracol": {"texto": ("SOBE PARA O", "1º PAVIMENTO"), "txt_px": (1916.0, 1604.0), "alinhar": "direita", "tom": (166, 186, 208),
-                "tons": (0.90, 1.0), "linha": (96, 96, 98), "linha_px": 0.8, "traco_pt": (4.0, 3.0), "tri": (13.0, 15.0)},
+                "tons": (0.90, 1.0), "linha": (96, 96, 98), "linha_px": 0.8, "traco_pt": (4.0, 3.0), "tri": (13.0, 15.0),
+                # (11/11, "TOM MAIS CLARO PARA PARTE DA ESCADA QUE PERTENCE AO 1º PAVIMENTO"): os degraus inteiros acima
+                # do corte (do `degrau_1pav` em diante, os de linhas tracejadas) clareados para o véu claro
+                "degrau_1pav": 9, "claro_1pav": ((236, 236, 234), 0.45)},
     "cor_texto": (45, 45, 45)}
 
 
@@ -1336,6 +1339,10 @@ def caracol_novo(Q, img, q):
     a_deg = red(degrau)[..., None]
     fr = (red(f * degrau) / np.maximum(red(degrau), 1e-4))[..., None]
     tl.reg = tl.reg * (1 - a_deg) + np.float32(q["tom"]) * fr * a_deg
+    if q.get("degrau_1pav") is not None:
+        veu, a_v = q["claro_1pav"]
+        a_1p = red(degrau & (k >= q["degrau_1pav"]))[..., None] * a_v
+        tl.reg = tl.reg * (1 - a_1p) + np.float32(veu) * a_1p
     # as linhas dos degraus (os espelhos, radiais): cheias até o corte, tracejadas depois
     lpx = q["linha_px"] / FA.PT_PX
     dist_esp = np.abs(((th + c["passo"] / 2) % c["passo"]) - c["passo"] / 2) * np.pi / 180 * r
@@ -1530,7 +1537,12 @@ CONTORNOS_TA = {
               "funde_px": 6},
     "pedras": {"fonte_px": (2612, 596, 2777, 871), "destino_x": 3269, "pedra4_px": (3247, 600, 3264, 871),
                "pedra4_fonte_x": 3079},
-    "acesso": {"x_borda": 3434, "x_ajuste": (3290, 3376), "x_novo": 3377, "y_px": (1250, 1640)},
+    # (11/11, "CORRIGIR ESSA FALHA" nas duas bordas da curva) as bordas de cima e de baixo da pista são ajustadas pela
+    # parábola das bordas reais de `x_fit_topo`/`x_fit_base` (fora do dente da ponta) e refeitas de `x_ini` até a borda
+    # do lote; a pedra nova vem da mesma coluna, mais para dentro da pista (antes vinha de 18 px à esquerda, e a grama
+    # da coluna de lá entrava na borda de cima: o degrau em x 3377), e a grama nova, de mais para fora
+    "acesso": {"x_borda": 3434, "x_fit_topo": (3300, 3413), "x_fit_base": (3300, 3429), "x_ini": 3340,
+               "y_px": (1250, 1760), "busca": 40},
     "muro": {"cunha_px": (3020, 1890, 3130, 1945), "linha_topo": 1924, "modelo_x": 3000, "grama_dx": 110,
              "ponta_px": (3416, 1890, 3435, 1950), "modelo_ponta_x": 3400},
     "faixa": {"tracejado_px": (1912, 1636, 2172, 1649), "pontos_px": (1690, 1636, 1930, 1700), "pontos_dif": 28,
@@ -1540,7 +1552,7 @@ CONTORNOS_TA = {
                         (920.8, 1233.2, 921.9, 1784.2), (920.8, 1783.1, 1037.6, 1784.2)],
     "janela": {"vao_px": (1884, 359, 1947, 372), "peitoril": (214, 214, 212), "vidro_pt": (1668.9, 572.1, 1727.2, 575.0),
                "batentes_px": [(1882, 359, 1885, 372), (1946, 359, 1949, 372)]},
-    "lavabo": {"caixa_px": (2252, 350, 2352, 520), "lavabo_centro": (2286.5, 465.0), "claraboia_centro": (2301.5, 401.0),
+    "lavabo": {"caixa_px": (2252, 350, 2352, 520), "lavabo_centro": (2285.5, 440.0), "claraboia_centro": (2301.5, 401.0),
                "lavabo": {"nome": "LAVABO", "pdf": [2053.0685, 635.3293]},
                "claraboia": {"nome": "PROJ. CLARABOIA", "pdf": [2053.5996, 600.1947], "texto": ["CLARABOIA"]},
                "padrao": {"nome": "ESCRITÓRIO", "pdf": [2225.7157, 708.6874]}, "semente": 3170},
@@ -1563,7 +1575,10 @@ CONTORNOS_TA = {
                       "folha_px": (1987.0, 1460.5, 2042.0, 1464.5), "folha": (222, 224, 226), "face": (92, 94, 97)},
     # "NESSAS PIAS: ÁREA GOURMET, COZINHA PRECISAMOS REPRESENTAR O RALO DE CADA UMA DELAS": os ralos do PDF (ARQ_LOUÇAS E
     # METAIS, os círculos pequenos no fundo das cubas), em cromado com o anel fino e o miolo escuro (pt: centro e raio)
-    "ralos_pt": [(1515.35, 1580.0, 1.0), (1919.15, 1503.0, 1.0), (1919.15, 1548.45, 1.0)],
+    # (11/11, "ADICIONAR RALO EM CADA UMA DAS PIAS DA COZINHA" / "ADICIONAR RALO NA PIA DO GOURMET"): os ralos do PDF,
+    # de 1 pt, ficavam embaixo da base da torneira e não apareciam; cada ralo tem 5 px (~9 cm) e fica no eixo da bica,
+    # logo depois da ponta dela, no fundo da cuba (px: centro e raio)
+    "ralos_px": [(1722.3, 1417.5, 2.6), (2126.5, 1344.2, 2.6), (2127.0, 1392.3, 2.6)],
     # escritório (usuário: "MELHORE A REPRESENTAÇÃO DESSAS MESAS REDONDAS LATERAIS, PONHA UM TOM O SOBRETOM NELAS. E ALTERE
     # O TOM DO ARMARIO PARA O TOM JÁ DEFINIDO. E MELHORE A REPRESENTAÇÃO DA PORTA DO ESCRITÓRIO"): o aparador no tom
     # padrão dos armários (regra de 10/11: RGB 208, 178, 156, quase liso, o do armário junto ao lavabo); as duas mesinhas
@@ -1629,18 +1644,37 @@ def _bordas_pista(out, x0, x1, y0, y1):
 def _acesso(out, q):
     a = q["acesso"]
     y0, y1 = a["y_px"]
-    xs, tops, bots = _bordas_pista(out, *a["x_ajuste"], y0, y1)
-    pt = np.polyfit(xs, tops, 2)
-    pb = np.polyfit(xs, bots, 2)
     img = out.copy()
-    for x in range(a["x_novo"], a["x_borda"] + 1):
+    xs, tops, _ = _bordas_pista(img, *a["x_fit_topo"], y0, y1)
+    pt = np.polyfit(xs, tops, 2)
+    xs, _, bots = _bordas_pista(img, *a["x_fit_base"], y0, y1)
+    pb = np.polyfit(xs, bots, 2)
+    lum = img.astype(np.float32).mean(axis=2)
+    viz = lambda m: m & np.roll(m, 1, 0) & np.roll(m, -1, 0) & np.roll(m, 1, 1) & np.roll(m, -1, 1)
+    pista_n, grama_n = viz(lum > 150), viz(lum < 120)   # sem a franja antisserrilhada
+    H = out.shape[0]
+
+    def fonte(m, x, y, passo):
+        for dx in (0, 4, 8, 12, 16, 20):
+            for k in range(0, a["busca"]):
+                yy = int(np.clip(y + passo * k, 0, H - 1))
+                if m[yy, x - dx]:
+                    return img[yy, x - dx].astype(np.float32)
+        return None
+
+    for x in range(a["x_ini"], a["x_borda"] + 1):
         yt, yb = np.polyval(pt, x), np.polyval(pb, x)
-        for y in range(y0, y1):
-            dentro = min(y - yt, yb - y) + 0.5            # > 0 dentro da pista, com a meia transição de 1 px
-            al = float(np.clip(dentro, 0, 1))
-            pista = img[y, x - 18].astype(np.float32)
-            grama = img[y - 60 if y < yt else min(y + 60, out.shape[0] - 1), x].astype(np.float32)
-            out[y, x] = np.round(pista * al + grama * (1 - al))
+        meio = (yt + yb) / 2
+        for y in range(int(yt) - 10, int(yb) + 11):
+            al = float(np.clip(min(y - yt, yb - y) + 0.5, 0, 1))   # 1 dentro da pista, meia transição de 1 px
+            if al >= 1 and pista_n[y, x] or al <= 0 and grama_n[y, x]:
+                continue
+            pe = fonte(pista_n, x, y, 1 if y < meio else -1) if al > 0 else None
+            gr = fonte(grama_n, x, y, -1 if y < meio else 1) if al < 1 else None
+            if al > 0 and pe is None or al < 1 and gr is None:
+                continue
+            v = (pe * al if al > 0 else 0) + (gr * (1 - al) if al < 1 else 0)
+            out[y, x] = np.round(v)
     # o muro de baixo: a cunha cinza vira grama, o muro inteiro e a ponta reta
     m = q["muro"]
     x0, ya, x1, yb2 = m["cunha_px"]
@@ -1943,6 +1977,267 @@ def _paredes_escuras(Q, out, q):
     return np.clip(np.round(novo), 0, 255).astype(np.uint8)
 
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+# Os retoques de 11/11 (pedidos do usuário com os recortes da planta e do 12K), no fim do passo `contornos`:
+# - tracejado: "REMOVER ESSE TRACEJADO JUNTO AO CONTORNO / TRACEJADO NA HORIZONTAL": na borda de baixo do travertino
+#   junto ao gramado (à esquerda do jardim de 4,79 m²), a última linha alternava travertino e grama (o tracejado); ela
+#   fica toda no travertino. No jardim e na ponta da parede do gás, o filete branco entre a parede e a grama vira grama
+#   (e parede, na ponta);
+# - armário: "CORRIGIR ACABAMENTO DO ARMARIO E RETOQUE NA PAREDE" (o armário alto à esquerda do lavabo): o topo
+#   esbranquiçado, a borda da esquerda com degrau e a faixa dupla junto à parede saem; o armário fica um retângulo limpo
+#   na madeira dele (o miolo, espelhado nas bordas), com o contorno fino mais escuro, encostado na parede (a 1ª coluna da
+#   parede na cobertura do PDF); a parede do lavabo no cinza das paredes, sem as pontas claras;
+# - parede do hall: "RETOCAR PAREDE" (a parede embaixo do aparador do hall interno, sobre o jardim da escada): o topo
+#   dela variava entre 875 e 878 px, com uma faixa cinza; fica reto na linha do PDF (meia cobertura em 878, cheia de 879
+#   para baixo), o piso acima limpo (o travertino 6 px acima; embaixo do aparador, o travertino ao lado dele) e uma
+#   sombra de contato leve sob o aparador;
+# - grama: "CORRIGIR BORRÃO E RETOCAR O PISO DA GARAGEM, REMOVENDO RESIDUOS DO PISO ANTERIOR": os dois borrões cinza na
+#   grama junto à parede do quarto do motorista viram a grama 50 px à direita (com a borda esfumada); a faixa roxa do
+#   piso antigo entre a grama e a garagem sai: a grama até 1313 px e o piso da garagem a partir de 1314, sem os pontos
+#   claros;
+# - pedras: "RETOCAR AS PEDRAS E SUAS BORDAS" (as 5 pedras do acesso ao hall externo, no 12K): cada pedra vira um
+#   retângulo limpo (y 608-866, as bordas da esquerda da 2ª e da 3ª sem os dentes), na textura do miolo dela espelhada
+#   nas bordas, com o contorno fino; a 4ª, que tinha a emenda da faixa copiada da 3ª, é a 2ª espelhada; e a grama em
+#   volta sem os restos claros (cada px claro a até 3 px da pedra vira a grama mais perto, para fora);
+# - portas: "NÃO PODEMOS TER NENHUMA PORTA 'FLUTUANTE'. REVISE TODAS E GARANTA QUINA A QUINA ENTRE A PORTA E A PAREDE"
+#   (regra de 10/11, a mesma do Subsolo): nas portas de abrir em que a folha parava a ~3 px da ponta da parede (1, 3,
+#   6, 7, 9, 13 e 18 da lista das folhas do PDF), a ponta da parede avança, na espessura dela, até a face de dentro da
+#   folha (`cliente_subsolo_casaa_0511.portais_cs`, as pontes da ARQ_PAREDE), e a ponta da parede da garagem perde o
+#   marco claro; a porta de correr entre a cozinha e o hall (a folha aberta pela metade, solta no vão) fica fechada, de
+#   batente a batente: a folha no vão, com as quinas nas dos dois batentes, e a parte que corria junto à parede sai.
+RETOQUES_1111 = {
+    "tracejado": {"y": 1643, "trav_x": (1240, 1482), "jardim_x": (1482, 1705), "grama_dy": 3},
+    "armario": {"ret": (2194, 372, 2242, 609), "miolo": (2199, 378, 2228, 603), "contorno": (0.80, 0.93),
+                "parede_caixa": (2236, 340, 2262, 615), "parede_col_25": 2243},
+    "parede_hall": {"x": (2248, 2546), "y_meia": 878, "faixa": (875, 877), "fonte_dy": -6,
+                    "aparador_x": (2272, 2397), "aparador_fonte_x": (2400, 2423), "sombra": 0.9},
+    "grama": {"borroes_px": [(2547, 1160, 2577, 1198), (2547, 1255, 2588, 1308)], "fonte_dx": 50, "funde_px": 4,
+              "borda": {"x": (2547, 2700), "y_grama": 1313, "faixa": (1306, 1319), "grama_dy": -9, "piso_dy": 8}},
+    "pedras": {"rets": [(2615, 608, 2772, 866), (2781, 608, 2932, 866), (2945, 608, 3095, 866), (3108, 608, 3263, 866),
+                        (3272, 608, 3429, 866)], "inset": 4, "contorno": (0.86, 0.95), "refazer": {3: 1},
+               "anel_px": 3, "busca_px": 10},
+    "portas": {"caixas": {"porta_1": (1590, 1541, 1624, 1627), "porta_3": (1593, 1539, 1678, 1573),
+                          "porta_6": (1981, 1451, 2057, 1471), "porta_7": (2048, 1514, 2067, 1579),
+                          "porta_9": (2229, 1245, 2248, 1322), "porta_13": (2336, 1288, 2401, 1307),
+                          "porta_18": (2516, 1245, 2535, 1322), "garagem_ponta": (2460, 1298, 2476, 1320)},
+               "garagem_fio": {"x": (2468, 2473), "y": (1303, 1318), "fonte_dx": 7},
+               "correr": {"folha_x": (2164, 2168), "vao_y": (1160, 1228), "perfil_y": (1245, 1270),
+                          "batentes": [(1158, 1159), (1229, 1232)], "batente_x": (2152, 2168),
+                          "limpar": [(2153, 1196, 2164, 1229), (2164, 1233, 2170, 1296), (2164, 1155, 2171, 1158),
+                                     (2153, 1160, 2164, 1164)], "piso_dx": 16, "quina": (2163, 1154, 1158)},
+               # a porta do lavabo (aberta junto à parede da esquerda): a folha estava apagada pela metade (um degradê
+               # largo, com um vão no meio) e, com o rótulo subindo, ficava solta; ela volta nítida no retângulo do PDF,
+               # e a ponta da parede de baixo chega à quina dela
+               "lavabo": {"limpar": (2262, 459, 2273, 513), "piso_dx": 14, "folha_px": (2264.7, 460.8, 2267.0, 514.5),
+                          "folha": (222, 224, 226), "face": (92, 94, 97), "ponta": (2258, 513, 2264, 523),
+                          "ponta_col": (2264, 514, 523, 0.7)},
+               "claros": {"mediana": 5, "acima": 25, "subiu": 20}},
+}
+
+
+def _grama_px(px):
+    px = np.asarray(px, np.int32)
+    return (px[..., 1] - px[..., 0] > 20) & (px.mean(axis=-1) < 115)
+
+
+def _r_tracejado(out, q):
+    y = q["y"]
+    im = out.astype(np.int32)
+    lum = im.mean(axis=2)
+    sat = im.max(axis=2) - im.min(axis=2)
+    for x in range(*q["trav_x"]):
+        if lum[y, x] < 150 and lum[y - 1, x] > 180:
+            out[y, x] = out[y - 2, x]
+    for x in range(*q["jardim_x"]):
+        if lum[y, x] > 170 and sat[y, x] < 25:
+            out[y, x] = out[y + q["grama_dy"], x]
+        if lum[y - 1, x] > 120 and sat[y - 1, x] < 25 and lum[y - 2, x] < 70:
+            out[y - 1, x] = out[y + q["grama_dy"], x]
+    return out
+
+
+def _r_armario(Q, out, q, P, parede):
+    x0, y0, x1, y1 = q["ret"]
+    a, b, c, d = q["miolo"]
+    miolo = out[b:d + 1, a:c + 1].astype(np.float32)
+    lado = np.pad(miolo, ((b - y0, y1 - d), (a - x0, x1 - c), (0, 0)), mode="reflect")
+    f0, f1 = q["contorno"]
+    lado[[0, -1], :] *= f0
+    lado[:, [0, -1]] *= f0
+    lado[[1, -2], 1:-1] *= f1
+    lado[1:-1, [1, -2]] *= f1
+    out[y0:y1 + 1, x0:x1 + 1] = np.clip(np.round(lado), 0, 255).astype(np.uint8)
+    # a parede do lavabo: o cinza das paredes onde o PDF tem parede cheia; a 1ª coluna, na cobertura dela
+    X0, Y0, X1, Y1 = q["parede_caixa"]
+    cheia = P[Y0:Y1, X0:X1] >= 0.99
+    reg = out[Y0:Y1, X0:X1]
+    reg[cheia] = parede
+    xc = q["parede_col_25"]
+    for y in range(y0, y1 + 1):
+        al = float(P[y, xc])
+        out[y, xc] = np.round(out[y, xc - 1].astype(np.float32) * (1 - al) + parede.astype(np.float32) * al)
+    return out
+
+
+def _r_parede_hall(out, q, P, parede):
+    ym = q["y_meia"]
+    f0, f1 = q["faixa"]
+    a0, a1 = q["aparador_x"]
+    s0, s1 = q["aparador_fonte_x"]
+    for x in range(*q["x"]):
+        if not (P[ym - 1, x] < 0.1 and P[ym + 1, x] > 0.9):
+            continue
+        for y in range(f0, f1 + 1):
+            if a0 <= x < a1:
+                out[y, x] = out[y - 6, s0 + (x - a0) % (s1 - s0)]
+            else:
+                out[y, x] = out[y + q["fonte_dy"], x]
+        if a0 <= x < a1:
+            out[f0, x] = np.round(out[f0, x].astype(np.float32) * q["sombra"])
+        al = float(P[ym, x])
+        out[ym, x] = np.round(out[ym - 1, x].astype(np.float32) * (1 - al) + parede.astype(np.float32) * al)
+        out[ym + 1:ym + 12, x] = parede
+    return out
+
+
+def _r_grama(out, q):
+    dx, fu = q["fonte_dx"], q["funde_px"]
+    for x0, y0, x1, y1 in q["borroes_px"]:
+        src = out[y0:y1, x0 + dx:x1 + dx].astype(np.float32)
+        h, w = src.shape[:2]
+        yy, xx = np.mgrid[0:h, 0:w]
+        dist = np.minimum.reduce([yy, h - 1 - yy, w - 1 - xx]).astype(np.float32)   # a esquerda encosta na parede
+        al = np.clip((dist + 1) / (fu + 1), 0, 1)[..., None]
+        reg = out[y0:y1, x0:x1].astype(np.float32)
+        out[y0:y1, x0:x1] = np.round(reg * (1 - al) + src * al).astype(np.uint8)
+    b = q["borda"]
+    yg = b["y_grama"]
+    f0, f1 = b["faixa"]
+    for x in range(*b["x"]):
+        for y in range(f0, f1 + 1):
+            out[y, x] = out[y + b["grama_dy"], x] if y <= yg else out[y + b["piso_dy"], x]
+    return out
+
+
+def _r_pedras(out, q):
+    ins, (c0, c1) = q["inset"], q["contorno"]
+    img = out.copy()
+    miolos = []
+    for x0, y0, x1, y1 in q["rets"]:
+        miolos.append(img[y0 + ins:y1 - ins + 1, x0 + ins:x1 - ins + 1].astype(np.float32))
+    for i, (x0, y0, x1, y1) in enumerate(q["rets"]):
+        m = miolos[i]
+        if i in q["refazer"]:
+            j = q["refazer"][i]
+            m = cv2.resize(miolos[j][:, ::-1], (m.shape[1], m.shape[0]), interpolation=cv2.INTER_LINEAR)
+        lado = np.pad(m, ((ins, ins), (ins, ins), (0, 0)), mode="reflect")
+        lado[[0, -1], :] *= c0
+        lado[:, [0, -1]] *= c0
+        lado[[1, -2], 1:-1] *= c1
+        lado[1:-1, [1, -2]] *= c1
+        out[y0:y1 + 1, x0:x1 + 1] = np.clip(np.round(lado), 0, 255).astype(np.uint8)
+    # a grama em volta: os px claros a até `anel_px` da pedra viram a grama mais perto, para fora
+    H, W = out.shape[:2]
+    pedra = np.zeros((H, W), bool)
+    for x0, y0, x1, y1 in q["rets"]:
+        pedra[y0:y1 + 1, x0:x1 + 1] = True
+    an = q["anel_px"]
+    for x0, y0, x1, y1 in q["rets"]:
+        for y in range(y0 - an, y1 + an + 1):
+            for x in range(x0 - an, x1 + an + 1):
+                if pedra[y, x] or _grama_px(out[y, x]):
+                    continue
+                dx = -1 if x < x0 else (1 if x > x1 else 0)
+                dy = -1 if y < y0 else (1 if y > y1 else 0)
+                for k in range(1, q["busca_px"] + 1):
+                    yy, xx = y + dy * k, x + dx * k
+                    if 0 <= yy < H and 0 <= xx < W and not pedra[yy, xx] and _grama_px(out[yy, xx]):
+                        out[y, x] = out[yy, xx]
+                        break
+    return out
+
+
+def _r_portas(Q, out, q, parede):
+    import cliente_subsolo_casaa_0511 as CS
+    antes = CS.PORTAIS_CS
+    CS.PORTAIS_CS = dict(antes, portais=q["caixas"], faixas={}, cor_parede=int(parede[0]),
+                         contorno=(0.0, int(parede[0])), piso_min=70)
+    velho = out.copy()
+    try:
+        with contextlib.redirect_stdout(io.StringIO()):
+            out = CS.portais_cs(Q, out)
+    finally:
+        CS.PORTAIS_CS = antes
+    # os px claros que a cópia do piso deixou nas quinas (mais claros que a mediana em volta e que antes) saem
+    cl = q["claros"]
+    for x0, y0, x1, y1 in q["caixas"].values():
+        reg = out[y0:y1, x0:x1]
+        med = cv2.medianBlur(np.ascontiguousarray(reg), cl["mediana"])
+        lr, lm = reg.astype(np.float32).mean(axis=2), med.astype(np.float32).mean(axis=2)
+        lv = velho[y0:y1, x0:x1].astype(np.float32).mean(axis=2)
+        m = (lr > lm + cl["acima"]) & (lr > lv + cl["subiu"])
+        reg[m] = med[m]
+    g = q["garagem_fio"]
+    for x in range(*g["x"]):
+        for y in range(*g["y"]):
+            if out[y, x].astype(np.int32).mean() > 70:
+                out[y, x] = out[y, x + g["fonte_dx"]]
+    # a porta de correr da cozinha, fechada de batente a batente
+    c = q["correr"]
+    img = out.copy()
+    for x0, y0, x1, y1 in c["limpar"]:
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                out[y, x] = img[y, x + c["piso_dx"]]
+    p0, p1 = c["perfil_y"]
+    perfil = img[p0:p1, c["folha_x"][0]:c["folha_x"][1] + 1]
+    v0, v1 = c["vao_y"]
+    for i, y in enumerate(range(v0, v1 + 1)):
+        out[y, c["folha_x"][0]:c["folha_x"][1] + 1] = perfil[i % (p1 - p0)]
+    for b0, b1 in c["batentes"]:
+        out[b0:b1 + 1, c["batente_x"][0]:c["batente_x"][1] + 1] = parede
+    qx, qy0, qy1 = c["quina"]
+    out[qy0 + 1:qy1, qx] = out[qy0, qx]
+    # a porta do lavabo
+    lv = q["lavabo"]
+    x0, y0, x1, y1 = lv["limpar"]
+    out[y0:y1, x0:x1] = out[y0:y1, x0 + lv["piso_dx"]:x1 + lv["piso_dx"]]
+    with contextlib.redirect_stdout(io.StringIO()):
+        P = FA.paredes_pdf(Q)
+    a, b, c_, d = lv["ponta"]
+    ponta = P[b:d, a:c_] >= 0.6
+    out[b:d, a:c_][ponta] = parede
+    xc, yc0, yc1, al = lv["ponta_col"]
+    out[yc0:yc1, xc] = np.round(out[yc0:yc1, xc].astype(np.float32) * (1 - al) + parede.astype(np.float32) * al)
+    fx0, fy0, fx1, fy1 = lv["folha_px"]
+    (p0, p1), (p2, p3) = Q.q2p(fx0, fy0), Q.q2p(fx1, fy1)
+    r = (min(p0, p2), min(p1, p3), max(p0, p2), max(p1, p3))
+    tl = FA.tela(out, Q, r, folga=4)
+    m = tl.ret(r, 0.3)
+    FA.sombra_q(tl, m, forca=0.25, dist=0.9, sigma=0.9)
+    tl.pintar(m, lv["folha"])
+    tl.contorno(m, 0.35, lv["face"])
+    out = np.clip(np.round(tl.gravar()), 0, 255).astype(np.uint8)
+    return out
+
+
+def retoques_1111(Q, out, q=None):
+    q = q or RETOQUES_1111
+    with contextlib.redirect_stdout(io.StringIO()):
+        P = FA.paredes_pdf(Q)
+    parede = out[885, 2300].copy()
+    out = _r_tracejado(out, q["tracejado"])
+    out = _r_armario(Q, out, q["armario"], P, parede)
+    out = _r_parede_hall(out, q["parede_hall"], P, parede)
+    out = _r_grama(out, q["grama"])
+    out = _r_pedras(out, q["pedras"])
+    out = _r_portas(Q, out, q["portas"], parede)
+    print("      retoques de 11/11: o tracejado junto ao jardim, o armário do lavabo, a parede do hall, a grama do "
+          "motorista e a borda da garagem, as 5 pedras do acesso e as portas quina a quina (e a de correr fechada)")
+    return out
+
+
 def contornos_ta(Q, img, q=None):
     q = q or CONTORNOS_TA
     out = np.ascontiguousarray(img.copy())
@@ -1958,11 +2253,13 @@ def contornos_ta(Q, img, q=None):
     out = _residuos(out, q["residuos_px"])
     out = _vazio_viga(out, q["vazio_viga"])
     out = np.clip(np.round(_escritorio(Q, out, q["escritorio"])), 0, 255).astype(np.uint8)
-    out = np.clip(np.round(_ralos(Q, out, q["ralos_pt"])), 0, 255).astype(np.uint8)
+    ralos_pt = [(*Q.q2p(x, y), r / FA.PT_PX) for x, y, r in q["ralos_px"]]
+    out = np.clip(np.round(_ralos(Q, out, ralos_pt)), 0, 255).astype(np.uint8)
     out = np.clip(np.round(_porta_servico(Q, out, q["porta_servico"])), 0, 255).astype(np.uint8)
     out = _pergolado_bege(Q, out, q["pergolado"])
     out = _paredes_escuras(Q, out, q)
     out = _residuos_finos(out, q["residuos_finos"])
+    out = retoques_1111(Q, out)
     print("    contornos: o 3º carro e o piso em volta; as pedras do acesso; o início da pista e o muro de baixo; a faixa "
           "de baixo sem o tracejado; o deck rente à escada; os guarda-corpos do terraço; a janela da sala de estar; "
           "os rótulos do lavabo; as paredes no cinza mais escuro; os dois resíduos (hall externo e porta de serviço)")
@@ -2042,6 +2339,13 @@ ANTES_DEPOIS_1011 = {"Terreo": {"planta": (270, 140, 3440, 1960), "vazios_varand
                                 "acesso_muro": (2880, 1260, 3440, 1960), "faixa_baixo": (1440, 1540, 2900, 1960),
                                 "escritorio": (2330, 330, 2610, 620), "terraco_guarda_corpo": (1040, 320, 1620, 420),
                                 "janela_estar": (1740, 320, 2000, 430), "lavatorio": (1440, 1420, 1660, 1500)}}
+# os antes e depois dos retoques de 11/11 (contra a final de 41f6731), em renders/..._1111_<trecho>_antes_depois.jpg
+ANTES_DEPOIS_1111 = {"Terreo": {"curva_acesso": (3280, 1300, 3440, 1700), "tracejado_jardim": (1230, 1600, 1720, 1680),
+                                "lavabo_armario": (2180, 330, 2370, 625), "ralos_cozinha": (2100, 1315, 2180, 1420),
+                                "ralo_gourmet": (1680, 1390, 1770, 1450), "caracol": (1900, 1500, 2050, 1645),
+                                "grama_garagem": (2500, 1120, 2720, 1340), "parede_hall": (2230, 830, 2560, 910),
+                                "pedras": (2590, 590, 3440, 890), "porta_correr_cozinha": (2130, 1140, 2200, 1305),
+                                "portas_servico": (1580, 1440, 2075, 1630), "portas_motorista": (2220, 1240, 2545, 1330)}}
 
 
 def main():
