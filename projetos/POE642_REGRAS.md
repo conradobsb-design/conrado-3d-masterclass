@@ -144,6 +144,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **[28/10] A porta de vidro da adega pelo PDF** (revisão do Térreo da Casa E, OK do usuário no item 1): no vão da adega, o render deixou uma faixa cinza borrada e um dente claro no lugar da porta. A porta vai como as de correr do Subsolo: a soleira de Bege Bahia no vão, os batentes brancos, o vidro fixo da esquerda e as duas folhas de correr, cada uma no plano dela, com os montantes e a sombra curta; o piso dos dois lados vai até a porta, sem a faixa.
 - **[29/10] As pontas das paredes nos vãos com os batentes do PDF** (usuário, na ala do motorista da Casa A: "faça uma revisão nessas paredes. elas apresentam falhas. corrija uma a uma"): conferir as paredes uma a uma contra o PDF. Nos vãos das portas, a ponta da parede leva os batentes do PDF (as peças brancas da ARQ_PAREDE) no cinza das folhas, com o fio escuro, e o piso em volta limpo, sem restos do render. Nichos de box e peças pequenas da parede no desenho do PDF. Nada de caixilho do render por fora de parede onde o PDF não tem janela.
 - **[29/10] As folhas de bronze seguem na frente do banho** (usuário, nas suítes 1 e 2 do 1º Pavimento da Casa A: "corrija essas folhas de vidro para a de bronze. são todas de bronze na sequencia"; "na suite 2, também temos o mesmo caso. folha de bronze em frente ao banho"): quando o plano de fora da porta da suíte continua na frente do banho, as folhas e as junções dali são do mesmo bronze, numa peça só com as do quarto, como na suíte master. A janela do banho, no meio da parede, fica no padrão das janelas: o vão no cinza do peitoril, os requadros nas pontas e as folhas de vidro finas e claras.
+- [11/11] **Portas de correr com painel amadeirado (1º Pav. da Casa A):** o plano de fora desenhado folha por folha, na quantidade do PDF ("aqui são duas folhas amadeiradas"; "quatro folhas"), em ripado de nogueira com junta, contorno fino e sombra curta; a faixa entre as folhas e o vidro limpa (o Bege Bahia da varanda fora do trilho, o piso do quarto no vão), sem resíduos do desenho anterior.
+- [11/11] **Guarda-corpos de vidro das varandas:** em todos os trechos do PDF, no desenho dos vidros (faces finas, brilho, sombra curta), indo até o fim, encostando na parede ("o guarda corpo vai até o final, encostando na parede"); a borda entre o vidro e o contorno da casa limpa, com o contorno inteiro.
 
 ## 5. Escadas
 
@@ -199,6 +201,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - **Como ler a cuba no PDF:** na ARQ_LOUÇAS E METAIS, os preenchimentos pequenos (as duas bordas encaixadas); na ARQ_BANCADAS, o retângulo com o aro fino (tiras de até 3,5 cm) encostado nos quatro lados. A peça de pedra entre duas cubas não tem aro em todos os lados e fica em pedra.
 - **Área molhada da bancada:** demarcada em traço cinza fino.
 - **Banheira:** com a torneira de piso, quando o PDF tem.
+- [11/11] **Cubas esculpidas em travertino bruto:** a bacia mostra a pedra (os poros e os estratos do travertino bruto, mais escura e côncava), não um fundo liso; a torneira de mesa com base, bica larga, arejador na ponta e alavanca cromada de lado.
 
 ## 7. Cozinha, serviço e marcenaria
 
@@ -305,6 +308,9 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **Academia: cada peça pelo que ela é.**
   - **[28/10] Barra de alongamento, não TV** (usuário, no Subsolo da Casa E: "NÃO É TV É UMA BARRA COM BARRAS AO MEIO PARA ALONGAMENTO"): a peça junto à parede do DCE (a moldura da ARQ_MARCENARIA, presa na parede, com as barras da ARQ_ MOB COMUM ao meio) é a barra de alongamento. A moldura vai em madeira, e as barras do meio cromadas, como tubos, com os traços finos do PDF e a sombra curta. Não vai como TV, nem só como a barra escura do meio. Na dúvida sobre o que um bloco do PDF representa, pergunte antes de desenhar.
 - **[11/11] Guarda-roupas em L ou U numa peça só** (cliente, no 1º Pavimento da Casa A: os cabides "se encontrando no L do guarda-roupa", sem a lateral entre os trechos): cada trecho com os cabides até o canto, os varões se encontrando no centro do canto, a moldura só nas bordas de fora. Feito nos 4 closets do 1º Pavimento da Casa A (`um_pav_casaa_1111.py`).
+- [11/11] **Bancos ao pé da cama:** estofados, com base de madeira num aro fino, assento com volume (borda arredondada mais escura do lado oposto à luz), vivo, vinco entre as almofadas nos bancos longos, trama do tecido e sombra macia no tapete (não na cama).
+- [11/11] **Contorno dos armários:** sem a faixa escura nem as manchas da sombra antiga junto às portas; a mesma sombra curta e macia em todos e o contorno fino e nítido onde a peça encontra o piso.
+- [11/11] **Estofados das salas (sofá em L, poltronas):** peça a peça (encosto, almofadas do encosto, almofadas do assento separadas pela costura, braços), cada uma com volume e trama; almofadas soltas em tons de acento; mesa de centro em madeira e mesinhas com contorno limpo; o tapete sob as peças refeito com a trama dele, sem as bordas serrilhadas e sombras borradas das peças antigas.
 
 ## 9. Estrutura, projeções e brises
 
@@ -349,6 +355,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - **[27/10] O tracejado fecha nas pontas** (usuário, na Casa D: "faltou o fechamento da projeção em tracejado branco"): onde o PDF fecha a projeção (as linhas de pé e o trecho de volta na ponta), o tracejado branco também fecha; a linha não termina solta.
     - **[27/10] Mas não entra no piso** (usuário, depois: "dentro da área do bege bahia não tem tracejado. ele termina logo acima, no encontro com o piso bege bahia. dali para baixo já não tem mais, assim como o pdf"): o que o PDF cobre com o piso (as linhas de pé sob o deck) não aparece; o tracejado vai só até a borda do piso.
 - **[11/11] No 1º Pavimento, o pergolado de baixo na cor dele, esfumaçado** (cliente, Casa A: "Como essa planta é do 1º pavimento, nós não vemos o pergolado tracejado, vemos ele na cor dele. Só que com o tom mais 'apagado'"; usuário: "Pergolado esfumaçado, conforme orientação, por estar abaixo do 1° pavimento"): as vigas cheias na madeira, esfumaçadas (~60% de véu branco, bordas desfocadas ~2 px, sombra difusa), cada viga até a borda da casa (a ponta tracejada sob a laje some sob o nublado); e sem tracejado do telhado, do afastamento e do lote dentro da pegada (ficam só os X e as molduras dos vazios, finos e claros). Painel amadeirado das varandas em ripado de nogueira. Feito no 1º Pavimento da Casa A.
+- [11/11] **Shafts:** o vão do shaft limpo (fundo branco, sem retângulos nem riscos do render) e o X tracejado de canto a canto, fino e simétrico (um traço cruza o centro, o mesmo passo para os dois lados), em cinza-escuro; as paredes em volta no desenho do PDF.
 
 ## 10. Área externa
 

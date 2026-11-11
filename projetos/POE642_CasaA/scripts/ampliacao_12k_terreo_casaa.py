@@ -39,6 +39,14 @@ import ampliacao_a3_casaa as AM                 # noqa: E402
 import terreo_casaa_1011 as TA                  # noqa: E402
 
 R = FA.CASA / "renders"
+# o pavimento (o 1º Pavimento usa este mesmo roteiro: `ampliacao_12k_1pav_casaa.py` troca estes nomes e as caixas)
+PAV, NOME_PAV = "Terreo", "Térreo"
+
+
+def quadro():
+    return FA.QuadroA(PAV)
+
+
 FINAL = R / "POE642_CasaA_PH_Terreo_final_rotulos.png"
 ENTRADA_IA = R / "POE642_CasaA_PH_Terreo_12K_entrada_ia.png"
 TRACOS = R / "POE642_CasaA_PH_Terreo_12K_tracejados.png"       # o alfa (x255) e a cor dos tracejados finos
@@ -279,7 +287,7 @@ def diferencas(saida_ia):
                        int(st[i, 0] + st[i, 2]) + rc["X0"], int(st[i, 1] + st[i, 3]) + rc["Yia"])
                       for i in range(1, n) if st[i, 4] > 150], reverse=True)
     viz = np.hstack([entrada, peq, cv2.applyColorMap(np.clip(d * 6, 0, 255).astype(np.uint8), cv2.COLORMAP_JET)])
-    cv2.imwrite(str(R / "POE642_CasaA_PH_Terreo_12K_diferencas.jpg"), viz, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    cv2.imwrite(str(R / f"POE642_CasaA_PH_{PAV}_12K_diferencas.jpg"), viz, [cv2.IMWRITE_JPEG_QUALITY, 85])
     for a, *b in manchas[:40]:
         print(f"    {a:6d} px  {b}")
     return manchas
@@ -360,7 +368,7 @@ def corrigir_ia(saida_ia, destino):
         pts = np.float32([[x0 - X0, y0 - Yia], [x1 - X0, y0 - Yia], [x1 - X0, y1 - Yia], [x0 - X0, y1 - Yia]])
         pq = cv2.transform(pts[None], Tm)[0]
         cv2.fillConvexPoly(m, np.int32(np.round(pq)), 1.0)
-    Q = FA.QuadroA("Terreo")
+    Q = quadro()
     k = 2 * q["folga_mascara_px"] + 1
     for nome, chave in CORRIGIR_MASCARAS.items():
         mq = cv2.dilate(_mascara(Q, chave).astype(np.uint8), np.ones((k, k), np.uint8))[Yia:Yia + Hc, X0:X0 + Wc]
@@ -448,7 +456,7 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
     L = largura or q["largura"]
     Wa0, Ha0 = q["a3"]
     Hh = int(round(L * Ha0 / Wa0))
-    Q = FA.QuadroA("Terreo")
+    Q = quadro()
     img = cv2.imread(str(FINAL))
     entrada = cv2.imread(str(ENTRADA_IA))
     d = json.loads(DADOS.read_text())
@@ -458,7 +466,7 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
     s = L / Wc
     ia = cv2.imread(str(saida_topaz))
     Hi, Wi = ia.shape[:2]
-    print(f"[Térreo] a saída ampliada: {Wi}x{Hi}; o JPG: {L}x{Hh} ({s:.3f}x a final)")
+    print(f"[{NOME_PAV}] a saída ampliada: {Wi}x{Hi}; o JPG: {L}x{Hh} ({s:.3f}x a final)")
     M = _alinhar(ia, entrada)
     print(f"    alinhamento (entrada -> saída): [[{M[0, 0]:.4f} {M[0, 1]:.4f} {M[0, 2]:.2f}] "
           f"[{M[1, 0]:.4f} {M[1, 1]:.4f} {M[1, 2]:.2f}]]")
@@ -552,14 +560,14 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
     dpi = int(round(L / (420 / 25.4)))
     Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(saida, quality=q["qualidade"], subsampling=0,
                                                                dpi=(dpi, dpi), optimize=True)
-    cv2.imwrite(str(R / f"POE642_CasaA_PH_Terreo_12K_opcao_{opcao}_previa.jpg"),
+    cv2.imwrite(str(R / f"POE642_CasaA_PH_{PAV}_12K_opcao_{opcao}_previa.jpg"),
                 cv2.resize(out, (2000, round(2000 * Hh / L)), interpolation=cv2.INTER_AREA), [cv2.IMWRITE_JPEG_QUALITY, 90])
     for nome, (x0, y0, x1, y1) in CONFERENCIA.items():
         u0, v0, u1, v1 = [int(round(t_)) for t_ in ((x0 - X0) * s, (y0 - Ya3) * s, (x1 - X0) * s, (y1 - Ya3) * s)]
         cr = out[v0:v1, u0:u1]
         ref = cv2.resize(img[y0:y1, x0:x1], (cr.shape[1], cr.shape[0]), interpolation=cv2.INTER_LANCZOS4)
         par = np.hstack([ref, np.full((cr.shape[0], 24, 3), 255, np.uint8), cr])
-        cv2.imwrite(str(R / f"POE642_CasaA_PH_Terreo_12K_opcao_{opcao}_conferencia_{nome}.jpg"),
+        cv2.imwrite(str(R / f"POE642_CasaA_PH_{PAV}_12K_opcao_{opcao}_conferencia_{nome}.jpg"),
                     cv2.resize(par, (par.shape[1] // 2, par.shape[0] // 2), interpolation=cv2.INTER_AREA),
                     [cv2.IMWRITE_JPEG_QUALITY, 90])
     print(f"    {saida} {L}x{Hh} ({dpi} dpi na A3), {saida.stat().st_size / 1e6:.1f} MB")

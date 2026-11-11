@@ -1237,13 +1237,15 @@ def _danae_fn(semente, mult=1.0):
 
 
 
-def cuba_esculpida(Q, out, c, textura, escurecer, raio_pt=3.0):
+def cuba_esculpida(Q, out, c, textura, escurecer, raio_pt=3.0, poros=0.0):
     """A cuba esculpida na pedra da bancada: a bacia (`c["bacia"]`, cantos de `raio_pt`) lisa e `escurecer` x o tom da
     pedra, com o fundo côncavo (mais escuro junto às bordas, sobretudo a de cima e a da esquerda), a borda fina, o lábio
-    claro embaixo e à direita e o ralo cromado no meio."""
+    claro embaixo e à direita e o ralo cromado no meio. `poros` (0 a 1): quanto da textura da pedra (os poros e os
+    estratos do travertino bruto) fica na bacia (0: lisa, como no Térreo)."""
     tl = FA.tela(out, Q, c["cuba"], folga=4)
     G = textura(tl)
     liso = cv2.GaussianBlur(G.astype(np.float32), (0, 0), 1.6)
+    liso = liso * (1 - poros) + G.astype(np.float32) * poros
     b = tl.ret(c["bacia"], raio_pt)
     d = cv2.resize(cv2.distanceTransform(b, cv2.DIST_L2, 5).astype(np.float32) / 8, (tl.w, tl.h),
                    interpolation=cv2.INTER_AREA)
