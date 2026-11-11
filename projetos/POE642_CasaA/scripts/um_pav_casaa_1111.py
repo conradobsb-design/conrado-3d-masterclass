@@ -1871,7 +1871,16 @@ def retoques_1111e(Q, img, q=None):
 PISOS_1111E = {
     "vinilico": {"chapada": (79, 120, 168), "regua_m": 0.20, "comprimento_m": (1.1, 1.8), "tom": 0.035,
                  "matiz": 0.012, "veio": 0.035, "veio_fino": 0.06, "junta": 0.74, "junta_px": 0.55, "bisel": 0.030,
-                 "topo": 0.86, "direcao": "h", "semente": 1112},
+                 "topo": 0.86, "direcao": "h", "semente": 1112,
+                 # usuário (11/11, com a foto de um vinílico de carvalho claro): "vamos trazer esse piso vinílico em sua
+                 # respectiva escala para os ambientes que possuem piso vinílico. vamos testar e se der certo adotaremos
+                 # para todas as outras plantas" -> as réguas da própria foto (`_reguas_amostra`), cada uma com 20 cm
+                 "amostra": {"arquivo": "_texturas/originais/amostra_vinilico_carvalho_1111.png", "fiada_px": 20.8,
+                             "fase_px": 7.0, "apara_px": 1.5, "junta_min": 3.0, "janela_px": 5, "peca_min_px": 18,
+                             "sem_repetir": 6,
+                             # os vãos das portas (na chapada, preto) com o vinílico do render (entre a folha de correr
+                             # e a cortina): a cor do vinílico antigo, até `vao_px` do ambiente, ligados a ele
+                             "vao_px": 30, "vao_croma": 0.035, "vao_r": (0.75, 1.25)}},
     "travertino": {"chapada": (202, 217, 220), "forca": 1.1, "veio": 0.012, "faixa": 0.022, "poros": 8,
                    "poro_esc": 0.07, "semente": 1113},
     "camadas_pdf": ("ARQ_LAYOUT HUMANIZAÇÃO", "ARQ_LOUÇAS E METAIS", "ARQ_BANCADAS", "ARQ_ELEMENTOS FIXOS",
@@ -1920,6 +1929,76 @@ def _reguas_1111e(h, w, px_m, q, rng):
     return cv2.resize(D, (w, h), interpolation=cv2.INTER_AREA)
 
 
+_PECAS_AMOSTRA = {}
+
+
+def _pecas_amostra(qa):
+    """As réguas inteiras da foto (de junta de topo a junta de topo, em cada fiada), em pé (o comprimento em y), BGR."""
+    from scipy.signal import find_peaks
+    if qa["arquivo"] in _PECAS_AMOSTRA:
+        return _PECAS_AMOSTRA[qa["arquivo"]]
+    a = cv2.imread(str(TA.RAIZ / qa["arquivo"])).astype(np.float32)
+    Ha, Wa = a.shape[:2]
+    w, ph, ap = qa["fiada_px"], qa["fase_px"], qa["apara_px"]
+    n = int(round(w))
+    pecas = []
+    k = 0
+    while ph + (k + 1) * w <= Wa:
+        c0 = ph + k * w
+        xs = np.linspace(c0 + ap, c0 + w - ap, n).astype(np.float32)
+        mx = np.repeat(xs[None], Ha, axis=0)
+        my = np.repeat(np.arange(Ha, dtype=np.float32)[:, None], n, axis=1)
+        fiada = cv2.remap(a, mx, my, cv2.INTER_LINEAR)
+        m = fiada.mean(axis=(1, 2))
+        j = qa["janela_px"]
+        d = np.zeros(Ha, np.float32)
+        for y in range(j, Ha - j + 1):
+            d[y] = abs(m[y - j:y].mean() - m[y:y + j].mean())
+        juntas, _ = find_peaks(d, height=qa["junta_min"], distance=10)
+        for y0, y1 in zip(juntas[:-1], juntas[1:]):
+            if y1 - y0 >= qa["peca_min_px"]:
+                pecas.append(fiada[y0 + 1:y1 - 1])
+        k += 1
+    _PECAS_AMOSTRA[qa["arquivo"]] = pecas
+    return pecas
+
+
+def _reguas_amostra(h, w, px_m, q, rng):
+    """O vinílico da foto (cor da foto, BGR), h x w px, em fiadas horizontais de `regua_m`: cada fiada com réguas
+    inteiras da foto, sorteadas (sem repetir as últimas `sem_repetir`, às vezes giradas 180°) e emendadas junta a junta;
+    a escala: a largura da régua da foto vira `regua_m`. Em 4x e reduzido."""
+    qa = q["amostra"]
+    pecas = _pecas_amostra(qa)
+    k = 4
+    Hk, Wk = h * k, w * k
+    larg = q["regua_m"] * px_m * k
+    D = np.zeros((Hk, Wk, 3), np.float32)
+    ult = []
+    y = -rng.uniform(0, larg)
+    while y < Hk:
+        b0, b1 = int(round(y)), int(round(y + larg))
+        hh = b1 - b0
+        x = -rng.uniform(0, 1.2 * px_m * k)
+        while x < Wk:
+            i = int(rng.integers(len(pecas)))
+            while i in ult:
+                i = int(rng.integers(len(pecas)))
+            ult = (ult + [i])[-qa["sem_repetir"]:]
+            P = pecas[i]
+            if rng.random() < 0.5:
+                P = P[::-1, ::-1]
+            comp = int(round(P.shape[0] * hh / P.shape[1]))
+            pedaco = cv2.resize(np.ascontiguousarray(P.transpose(1, 0, 2)), (comp, hh), interpolation=cv2.INTER_CUBIC)
+            a0 = int(round(x))
+            c0, c1 = max(a0, 0), min(a0 + comp, Wk)
+            r0, r1 = max(b0, 0), min(b1, Hk)
+            if c1 > c0 and r1 > r0:
+                D[r0:r1, c0:c1] = pedaco[r0 - b0:r1 - b0, c0 - a0:c1 - a0]
+            x = a0 + comp
+        y += larg
+    return cv2.resize(D, (w, h), interpolation=cv2.INTER_AREA)
+
+
 def _objetos_pdf(Q, camadas, folga):
     """As peças do PDF (as camadas dadas), cheias por dentro e com `folga` px."""
     from scipy import ndimage as nd
@@ -1960,6 +2039,16 @@ def pisos_1111e(Q, img, q=None):
         mat = (Q.chapada == qm["chapada"]).all(axis=2)
         mat = cv2.morphologyEx(mat.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8)) > 0
         mat &= ~par
+        if nome == "vinilico" and "amostra" in qm:
+            qa = qm["amostra"]
+            ref = np.median(I[mat & ~pdf], axis=0)
+            nI = I / np.maximum(I.sum(axis=2, keepdims=True), 1)
+            rv = I.mean(axis=2) / max(float(ref.mean()), 1.0)
+            cand = dilatar(mat, qa["vao_px"]) & ~mat & ~par & (Q.chapada == 0).all(axis=2)
+            cand &= (np.abs(nI - ref / ref.sum()).max(axis=2) < qa["vao_croma"]) & (rv > qa["vao_r"][0]) & \
+                (rv < qa["vao_r"][1])
+            ligado = ndimage.binary_propagation(mat, mask=mat | cand)
+            mat |= cand & ligado
         L = F.luz_robusta(base, mat & ~pdf, 0.5 * k, desvio=q["desvio"])
         n = I / np.maximum(I.sum(axis=2, keepdims=True), 1)
         nL = L / np.maximum(L.sum(axis=2, keepdims=True), 1)
@@ -1992,14 +2081,18 @@ def pisos_1111e(Q, img, q=None):
                     gx = cv2.Sobel(g, cv2.CV_32F, 1, 0, ksize=3)
                     gy = cv2.Sobel(g, cv2.CV_32F, 0, 1, ksize=3)
                     deitado = float((gy[m] ** 2).sum()) >= float((gx[m] ** 2).sum())
+                gerar = _reguas_amostra if "amostra" in qm else _reguas_1111e
                 if deitado:
-                    T = _reguas_1111e(h, w, k, qm, rng)
+                    T = gerar(h, w, k, qm, rng)
                 else:
-                    T = np.ascontiguousarray(_reguas_1111e(w, h, k, qm, rng).transpose(1, 0, 2))
+                    T = np.ascontiguousarray(gerar(w, h, k, qm, rng).transpose(1, 0, 2))
             else:
                 T = FA.travertino_bruto(Q, h, w, qm["semente"] + i, qm["veio"], qm["faixa"], qm["poros"],
                                         qm["poro_esc"], forca=qm["forca"])[..., None]
-            novo = Lr * T * S[y:y + h, x:x + w, None]
+            if nome == "vinilico" and "amostra" in qm:      # a cor é a da foto; do lugar, só a luz (relativa)
+                novo = T * (Lr.mean(axis=2, keepdims=True) / max(float(med.mean()), 1.0)) * S[y:y + h, x:x + w, None]
+            else:
+                novo = Lr * T * S[y:y + h, x:x + w, None]
             al = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.5) * m
             reg = out[y:y + h, x:x + w]
             reg[:] = reg * (1 - al[..., None]) + novo * al[..., None]
@@ -2015,8 +2108,9 @@ def pisos_1111e(Q, img, q=None):
             fora |= dilatar(a > 0.002, 2)
     out = AM.pintar(out, volta)
     out[fora] = img[fora]
-    print(f"    pisos: vinílico em {feitos['vinilico'][0]} ambientes ({feitos['vinilico'][1]} px), réguas de 20 cm com "
-          f"juntas finas, bisel e veio; travertino bruto em {feitos['travertino'][0]} ambientes "
+    vin = ("réguas da foto do carvalho claro, 20 cm cada, emendadas junta a junta" if "amostra" in q["vinilico"]
+           else "réguas de 20 cm com juntas finas, bisel e veio")
+    print(f"    pisos: vinílico em {feitos['vinilico'][0]} ambientes ({feitos['vinilico'][1]} px), {vin}; travertino bruto em {feitos['travertino'][0]} ambientes "
           f"({feitos['travertino'][1]} px), sem manchas e sem rejuntes; {len(volta)} rótulos redesenhados por cima")
     return out
 
@@ -2376,6 +2470,12 @@ ANTES_DEPOIS_1111F_1P = {"1Pavimento": {
     "portas_circulacao": (2040, 1290, 2240, 1600), "porta_banho_suite1": (2380, 1270, 2520, 1350),
     "porta_banho_master": (1650, 1440, 1770, 1510)}}
 
+# o teste do vinílico da foto (11/11, contra a final de 0e5d084), em renders/..._1111g_<trecho>_antes_depois.jpg
+ANTES_DEPOIS_1111G_1P = {"1Pavimento": {
+    "planta": (1150, 260, 2830, 1720), "suite3_closet3": (1480, 320, 2090, 660),
+    "suite2_closet2": (1700, 860, 2010, 1260), "suite_master": (1330, 1190, 1920, 1640),
+    "suite1_closet1": (2150, 1200, 2560, 1600), "detalhe_reguas": (1560, 1140, 1760, 1260)}}
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -2385,7 +2485,7 @@ def main():
     ap.add_argument("--saida")
     ap.add_argument("--passos")
     ap.add_argument("--antes_depois", action="store_true",
-                    help="grava os recortes de ANTES_DEPOIS_1111F_1P em renders/ (antes: a imagem de --antes, ou a de "
+                    help="grava os recortes de ANTES_DEPOIS_1111G_1P em renders/ (antes: a imagem de --antes, ou a de "
                          "--antes_ref)")
     ap.add_argument("--antes_ref", help="a imagem de antes dos recortes (a final instalada), no lugar de --antes")
     a = ap.parse_args()
@@ -2395,7 +2495,7 @@ def main():
     if a.antes_depois:
         import pedidos_terreo_casaa_2910 as P
         ref = cv2.imread(a.antes_ref) if a.antes_ref else antes
-        P.antes_depois_pedidos_ta("1Pavimento", ref, out, caixas=ANTES_DEPOIS_1111F_1P, sufixo="1111f")
+        P.antes_depois_pedidos_ta("1Pavimento", ref, out, caixas=ANTES_DEPOIS_1111G_1P, sufixo="1111g")
 
 
 if __name__ == "__main__":
