@@ -961,11 +961,16 @@ BEGE_TA = {"chapada": (232, 232, 232), "forca": 0.45, "mediana_px": 25, "croma_o
            "area_obj": 30, "aresta": 10.0, "aresta_px": 2}
 
 
-def bege_ta(Q, img, q=None):
+def bege_ta(Q, img, q=None, zona=None):
+    """`zona`: a máscara do Bege Bahia de outro pavimento (o 1º Pavimento: `um_pav_casaa_1111.bege_1p`); sem ela, a do
+    Térreo."""
     q = q or BEGE_TA
     im = img.astype(np.float32)
-    B = T.F.fechar(np.all(Q.chapada == np.uint8(q["chapada"]), axis=2), 5) | (FA.ret_aa(Q, T.GRANITO_T["bege"]) > 0.5)
-    B &= ~(FA.paredes_pdf(Q) > 0.3)
+    if zona is None:
+        B = T.F.fechar(np.all(Q.chapada == np.uint8(q["chapada"]), axis=2), 5) | (FA.ret_aa(Q, T.GRANITO_T["bege"]) > 0.5)
+        B &= ~(FA.paredes_pdf(Q) > 0.3)
+    else:
+        B = zona.copy()
     rots = rotulos_na_imagem(Q, img, dentro=B)
     texto = np.zeros(B.shape, np.float32)
     for _, al, _, _ in rots:

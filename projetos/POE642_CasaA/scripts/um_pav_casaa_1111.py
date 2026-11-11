@@ -103,10 +103,20 @@ def degraus_1p(Q):
     return a * (1 - (Q.troca.astype(np.float32) / 255))
 
 
+def pegada_1p(Q, k=None):
+    """A pegada do 1º Pavimento sem os dentes da pegada antiga (as pontas das vigas do pergolado coladas à casa, com o
+    trecho tracejado delas sob a laje): abertura de `CONTORNO_1P["abrir_px"]` (25 px: tira os 8 dentes, de 14 a 18 px de
+    largura, e as 2 lascas de 1 a 2 px na borda da varanda de 14,6 m², e nada da casa). Vale para o nublado, o pergolado
+    e o contorno."""
+    k = k or CONTORNO_1P["abrir_px"]
+    pg = (Q.pegada > 127).astype(np.uint8)
+    return cv2.morphologyEx(pg, cv2.MORPH_OPEN, np.ones((k, k), np.uint8)) > 0
+
+
 def mascara_terreo(Q, q=None):
     """Onde o Térreo nublado aparece: fora da pegada, nos vazios e no poço da escada (0 a 1)."""
     q = q or NUBLADO_1P
-    pg = Q.pegada > 127
+    pg = pegada_1p(Q)
     a = np.maximum(cv2.GaussianBlur(pg.astype(np.float32), (0, 0), 1.0), pg)
     m = 1 - a
     for r in q["vazios_pt"]:
@@ -256,13 +266,31 @@ def costura(img, out, retas, moveis, par, excl, q=None):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# 2b. O Bege Bahia menos manchado (regra de 10/11, "em todas as plantas de todas as casas"; usuário, vendo a final:
+# "Reduzir manchas do bege Bahia, da mesma forma que fizemos. Isso é regra para todas as demais plantas."): nas 4
+# varandas, no quarto de serviço, na saleta e no B. serviço (o cinza 232 da base chapada, dentro da pegada e fora do
+# nublado e das paredes), as manchas a 45% do contraste, pelo mesmo `terreo_casaa_1011.bege_ta` do Térreo; a luz, as
+# sombras, o tom, as peças e os rótulos ficam.
+BEGE_1P = dict(TA.BEGE_TA)
+
+
+def bege_1p(Q, img, q=None):
+    q = q or BEGE_1P
+    zona = TA.T.F.fechar(np.all(Q.chapada == np.uint8(q["chapada"]), axis=2), 5) & pegada_1p(Q)
+    zona &= ~(mascara_terreo(Q) > 0.02) & ~(FA.paredes_pdf(Q) > 0.3)
+    return TA.bege_ta(Q, img, q, zona=zona)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # 3. O pergolado (cliente: "Como essa planta é do 1º pavimento, nós não vemos o pergolado tracejado, vemos ele na cor
-# dele. Só que com o tom mais 'apagado' para mostrar que ele está embaixo do 1º pavimento."): as vigas do PDF
-# (ARQ_PERGOLADO: cada viga é o par de traços a 0,2 m), cheias, na madeira (o tom das réguas do deck do Térreo, com o
-# veio ao longo da viga), apagadas para o véu do nublado (`apagado`: a fração de branco, menos que a do Térreo), com a
-# sombra curta no Térreo de baixo; só onde o Térreo aparece (o 1º Pavimento fica por cima).
-PERGOLADO_1P = {"madeira": (78, 112, 152), "veio": 0.10, "apagado": 0.42, "saturacao": 0.85, "sombra": 0.10,
-                "sombra_px": (2.0, 2.0, 1.6), "semente": 1111}
+# dele. Só que com o tom mais 'apagado' para mostrar que ele está embaixo do 1º pavimento."; usuário, vendo a final:
+# "Pergolado esfumaçado, conforme orientação, por estar abaixo do 1° pavimento"): as vigas do PDF (ARQ_PERGOLADO: cada
+# viga é o par de traços a 0,2 m), cheias, na madeira (o tom das réguas do deck do Térreo, com um grão largo e leve),
+# esfumaçadas: o véu do nublado (`apagado`: a fração de branco) e as bordas desfocadas (`esfumado_px`, o sigma em px),
+# com a sombra difusa no Térreo de baixo; cada viga vai até a borda da casa (a ponta tracejada dela sob a laje fica sob
+# o nublado: `pegada_1p`); só onde o Térreo aparece (o 1º Pavimento fica por cima).
+PERGOLADO_1P = {"madeira": (78, 112, 152), "grao": 0.04, "grao_px": 3.0, "apagado": 0.62, "saturacao": 0.85,
+                "esfumado_px": 2.2, "sombra": 0.04, "sombra_px": (2.0, 2.0, 4.0), "ponta_px": 14, "semente": 1111}
 
 
 def pergolado_vigas(Q):
@@ -292,40 +320,60 @@ def pergolado_vigas(Q):
     return vigas
 
 
+def _ate_a_casa(pg, viga, alcance):
+    """A viga esticada até a borda da casa (a pegada aberta), quando a ponta dela para a até `alcance` px dela."""
+    x0, y0, x1, y1, vert = viga
+    H, W = pg.shape
+    if vert:
+        c = int(np.clip(round((x0 + x1) / 2), 0, W - 1))
+        for d in range(1, alcance + 1):
+            if pg[int(np.clip(y1 + d, 0, H - 1)), c]:
+                y1 += d + 2
+                break
+        for d in range(1, alcance + 1):
+            if pg[int(np.clip(y0 - d, 0, H - 1)), c]:
+                y0 -= d + 2
+                break
+    else:
+        c = int(np.clip(round((y0 + y1) / 2), 0, H - 1))
+        for d in range(1, alcance + 1):
+            if pg[c, int(np.clip(x1 + d, 0, W - 1))]:
+                x1 += d + 2
+                break
+        for d in range(1, alcance + 1):
+            if pg[c, int(np.clip(x0 - d, 0, W - 1))]:
+                x0 -= d + 2
+                break
+    return x0, y0, x1, y1, vert
+
+
 def pergolado_1p(Q, img, q=None):
     q = q or PERGOLADO_1P
-    vigas = pergolado_vigas(Q)
+    pg = pegada_1p(Q)
+    vigas = [_ate_a_casa(pg, v, q["ponta_px"]) for v in pergolado_vigas(Q)]
     H, W = img.shape[:2]
     a = np.zeros((H, W), np.float32)
-    veio = np.zeros((H, W), np.float32)
-    rng = np.random.default_rng(q["semente"])
     for x0, y0, x1, y1, vert in vigas:
-        r = ret_alfa(Q, (x0, y0, x1, y1))
-        a = np.maximum(a, r)
-        # o veio ao longo da viga (listras finas, a escala da madeira) e a luz de cima: a aresta de um lado mais clara
-        X0, Y0, X1, Y1 = int(x0) - 1, int(y0) - 1, int(np.ceil(x1)) + 1, int(np.ceil(y1)) + 1
-        h, w = Y1 - Y0, X1 - X0
-        n = rng.normal(0, 1, (h, w)).astype(np.float32)
-        sx, sy = (0.6, 6.0) if vert else (6.0, 0.6)
-        n = cv2.GaussianBlur(n, (0, 0), sigmaX=sx, sigmaY=sy)
-        n /= max(n.std(), 1e-6)
-        perfil = np.linspace(-1, 1, w if vert else h)
-        luz = 0.06 * (perfil[None, :] if vert else perfil[:, None])
-        veio[Y0:Y1, X0:X1] = np.where(r[Y0:Y1, X0:X1] > 0, n * q["veio"] - luz, veio[Y0:Y1, X0:X1])
-    madeira = np.float32(q["madeira"]) * (1 + veio[..., None])
+        a = np.maximum(a, ret_alfa(Q, (x0, y0, x1, y1)))
+    # o grão largo e leve da madeira (o veio fino some no esfumado)
+    rng = np.random.default_rng(q["semente"])
+    grao = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), q["grao_px"])
+    grao /= max(float(grao.std()), 1e-6)
+    madeira = np.float32(q["madeira"]) * (1 + q["grao"] * grao[..., None])
     cinza = madeira.mean(axis=2, keepdims=True)
     madeira = cinza + (madeira - cinza) * q["saturacao"]
     madeira = 255 - (255 - madeira) * (1 - q["apagado"])
     vis = mascara_terreo(Q)
+    asf = cv2.GaussianBlur(a, (0, 0), q["esfumado_px"])
     f = img.astype(np.float32)
-    # a sombra curta das vigas no Térreo (para baixo e à esquerda, como as outras)
+    # a sombra difusa das vigas no Térreo (para baixo e à esquerda, como as outras)
     dx, dy, sg = q["sombra_px"]
     sb = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, -dx], [0, 1, dy]]), (W, H)), (0, 0), sg)
-    f *= (1 - q["sombra"] * sb * (1 - a) * vis)[..., None]
-    al = (a * vis)[..., None]
+    f *= (1 - q["sombra"] * sb * (1 - asf) * vis)[..., None]
+    al = (asf * vis)[..., None]
     out = f * (1 - al) + madeira * al
-    print(f"    pergolado: {len(vigas)} vigas do PDF na madeira, apagadas ({int(q['apagado'] * 100)}% de branco), sob "
-          f"o 1º Pavimento")
+    print(f"    pergolado: {len(vigas)} vigas do PDF na madeira, esfumaçadas ({int(q['apagado'] * 100)}% de branco, bordas "
+          f"desfocadas a {q['esfumado_px']} px), até a borda da casa, sob o 1º Pavimento")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
@@ -334,16 +382,14 @@ def pergolado_1p(Q, img, q=None):
 # da varanda e no pergolado): a borda de fora da pegada do 1º Pavimento (sem os vazios) em linha cinza-escura firme e,
 # do lado de fora, sobre o Térreo nublado, a sombra suave do pavimento (para baixo e à esquerda), que o descola do
 # Térreo.
-CONTORNO_1P = {"cor": (58, 58, 58), "larg_px": 2.2, "simplifica_px": 1.2, "abrir_px": 15, "sombra": 0.22, "sombra_px": (5.0, 5.0, 5.0)}
+CONTORNO_1P = {"cor": (58, 58, 58), "larg_px": 2.2, "simplifica_px": 1.2, "abrir_px": 25, "sombra": 0.22, "sombra_px": (5.0, 5.0, 5.0)}
 
 
 def contorno_1p(Q, img, q=None):
     q = q or CONTORNO_1P
     H, W = img.shape[:2]
-    pg = (Q.pegada > 127).astype(np.uint8)
     # sem os dentes do pegada antiga (as pontas das vigas do pergolado coladas à casa): abertura de `abrir_px`
-    k = q["abrir_px"]
-    pg = cv2.morphologyEx(pg, cv2.MORPH_OPEN, np.ones((k, k), np.uint8))
+    pg = pegada_1p(Q, q["abrir_px"]).astype(np.uint8)
     cs, _ = cv2.findContours(pg, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     cs = [cv2.approxPolyDP(c, q["simplifica_px"], True) for c in cs if cv2.contourArea(c) > 5000]
     ss = 4
@@ -807,7 +853,7 @@ def floreira_1p(Q, img, q=None):
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
-PASSOS = [("nublado", nublado_1p), ("tracejados", tracejados_1p), ("pergolado", pergolado_1p),
+PASSOS = [("nublado", nublado_1p), ("tracejados", tracejados_1p), ("bege", bege_1p), ("pergolado", pergolado_1p),
           ("contorno", contorno_1p), ("vazios", vazios_1p), ("paineis", paineis_1p), ("bancada", bancada_1p),
           ("tapete", tapete_1p), ("closets", closets_1p), ("portas", portas_1p), ("escadas", escadas_1p),
           ("floreira", floreira_1p)]
@@ -840,7 +886,14 @@ ANTES_DEPOIS_1111_1P = {"1Pavimento": {
     "bancada_danae": (2150, 1430, 2280, 1600), "closet_3": (1860, 340, 2060, 520), "closet_2": (1780, 880, 2010, 1215),
     "closet_master": (1720, 1300, 1920, 1645), "closet_1": (2240, 1200, 2445, 1340),
     "portas_suite3_banho3": (1950, 460, 2130, 610), "portas_suite_master_closet": (1660, 1200, 1930, 1490),
-    "portas_servico_suite1": (2080, 1300, 2200, 1520)}}
+    "portas_servico_suite1": (2080, 1300, 2200, 1520), "bege_varanda_146": (1200, 1200, 1300, 1650),
+    "bege_varanda_39": (2540, 1200, 2800, 1660), "bege_servico_saleta": (1900, 1300, 2200, 1660)}}
+# a 2ª leva de 11/11 (contra a final de 216506b): o Bege Bahia menos manchado e o pergolado esfumaçado, em
+# renders/..._1111b_<trecho>_antes_depois.jpg
+ANTES_DEPOIS_1111B_1P = {"1Pavimento": {
+    "pergolado": (1170, 860, 1630, 1260), "bege_varanda_146": (1200, 1200, 1300, 1650),
+    "bege_varanda_39": (2540, 1200, 2800, 1660), "bege_varandas_636_715": (1495, 320, 1640, 1220),
+    "bege_servico_saleta": (1900, 1300, 2200, 1660)}}
 
 
 def main():
