@@ -40,10 +40,10 @@ VINILICO_FOTO = {
     "camadas_pdf": ("ARQ_LAYOUT HUMANIZAÇÃO", "ARQ_LOUÇAS E METAIS", "ARQ_BANCADAS", "ARQ_ELEMENTOS FIXOS",
                     "ARQ_ESCADAS E RAMPAS"),
     "pdf_folga_px": 1, "desvio": 30, "croma": 0.030, "sombra_min": 0.70, "perto_m": 0.40, "luz_m": 0.9,
-    "plano": 0.6, "fechar_px": 3, "fiapo_px": 60,
+    "plano": 0.6, "fechar_px": 3, "fiapo_px": 60, "fiapo_r": 0.8, "fiapo_croma": 0.06,
     "vao": {"px": 30, "croma": 0.035, "r": (0.75, 1.25)},
     # o texto e os riscos escuros: mais escuro que `escuro` x o piso, pouco colorido, em peças de até `lado_max` px
-    "texto": {"escuro": 0.62, "croma": 0.05, "lado_max": 40, "folga_px": 2, "alfa_min": 0.12},
+    "texto": {"escuro": 0.62, "croma": 0.05, "lado_max": 40, "largura_max": 260, "folga_px": 2, "alfa_min": 0.12},
     # uma peça do PDF é piso se `fracao` dela tem o tom do piso do lugar (a peça que a final não desenha)
     "peca_piso": {"desvio": 16, "croma": 0.02, "fracao": 0.85, "area_min": 60},
     "semente": 1112,
@@ -160,10 +160,17 @@ def trocar(Q, img, cores, q=None, camadas=None):
         L0 = F.luz_robusta(img, mat & ~pdf, 0.5 * k, desvio=q["desvio"])
     lum, lum0 = I.mean(axis=2), np.maximum(L0.mean(axis=2), 1)
     cinza = (I.max(axis=2) - I.min(axis=2)) / np.maximum(I.max(axis=2), 1) < qt["croma"] * 4
-    nucleo = mat & ~pdf & (lum < qt["escuro"] * lum0) & cinza
+    # (12/11) sem exigir o cinza: a borda das letras finas pega a cor da madeira (sobre o vinílico, só 35 px do rótulo
+    # ACADEMIA do Subsolo da Casa B passavam); o escuro basta (o veio do piso nunca chega a 0,62 do tom dele), e o
+    # que mais for escuro e pequeno fica por cima, como estava
+    nucleo = mat & ~pdf & (lum < qt["escuro"] * lum0)
     nc, lab, st, _ = cv2.connectedComponentsWithStats(nucleo.astype(np.uint8), 8)
     ok = np.zeros(nc, bool)
-    ok[1:] = np.maximum(st[1:, cv2.CC_STAT_WIDTH], st[1:, cv2.CC_STAT_HEIGHT]) <= qt["lado_max"]
+    # (12/11) as letras de uma palavra se tocam (ACADEMIA, SUÍTE MASTER): o lado menor até `lado_max` e o maior até
+    # `largura_max`; antes, a palavra inteira passava de 40 px e saía do texto, e as letras viravam piso
+    lmen = np.minimum(st[1:, cv2.CC_STAT_WIDTH], st[1:, cv2.CC_STAT_HEIGHT])
+    lmai = np.maximum(st[1:, cv2.CC_STAT_WIDTH], st[1:, cv2.CC_STAT_HEIGHT])
+    ok[1:] = (lmen <= qt["lado_max"]) & (lmai <= qt["largura_max"])
     nucleo = ok[lab]
     texto = U.dilatar(nucleo, qt["folga_px"]) & mat & ~pdf
     # o piso: o que tem o tom do piso do lugar (ou a sombra dele)
@@ -178,7 +185,9 @@ def trocar(Q, img, cores, q=None, camadas=None):
     folga_pdf = mat & pdf & igual & ~texto
     piso |= ndimage.binary_propagation(piso, mask=piso | folga_pdf) & folga_pdf
     # os fiapos do piso antigo que o filtro deixa (um veio claro de 1 px) entram: buracos pequenos, fora do texto
-    buraco = mat & ~pdf & ~piso & ~texto
+    # (12/11) só os px no tom do piso (claros e na cor dele): antes, as letras dos rótulos de traço fino e as peças
+    # escuras pequenas fora do contorno do PDF (o remo da academia do Subsolo da Casa E) viravam piso
+    buraco = mat & ~pdf & ~piso & ~texto & (r > q["fiapo_r"]) & (err < q["fiapo_croma"])
     nb, labb, stb, _ = cv2.connectedComponentsWithStats(buraco.astype(np.uint8), 8)
     peq = np.zeros(nb, bool)
     peq[1:] = stb[1:, cv2.CC_STAT_AREA] <= q["fiapo_px"]
