@@ -113,7 +113,54 @@ def _mascara_1p(Q, chave):
     return casa & ~piso
 
 
-Z._mascara = _mascara_1p
+# (11/11, a 6ª leva e o vinílico da foto sobre a mesma saída do Nano Banana Pro, job 09c2bb19) o que mudou na entrada
+# contra a que a IA viu (`MUDOU_12K["antes"]`: os degraus, a caracol, as folhas das portas, a saleta, a cadeira e o
+# vinílico) vem da entrada nova; e os arcos das portas (o setor de cada arco do PDF, que a IA desenhava no piso, R3)
+MUDOU_12K = {"antes": None, "limiar": 10, "folga_px": 3}
+ARCOS_12K = {"camada": "ARQ_PAREDE", "lado_pt": (15.0, 90.0), "folga_px": 4}
+
+
+def _mascara_mudou(Q):
+    rc = json.loads(Z.DADOS.read_text())["recortes"]
+    X0, Yia = rc["X0"], rc["Yia"]
+    a0, a1 = cv2.imread(str(MUDOU_12K["antes"])), cv2.imread(str(Z.ENTRADA_IA))
+    d = (np.abs(a0.astype(np.int16) - a1.astype(np.int16)).max(axis=2) > MUDOU_12K["limiar"]).astype(np.uint8)
+    k = 2 * MUDOU_12K["folga_px"] + 1
+    d = cv2.dilate(d, np.ones((k, k), np.uint8))
+    m = np.zeros((Q.H, Q.W), bool)
+    m[Yia:Yia + d.shape[0], X0:X0 + d.shape[1]] = d > 0
+    return m
+
+
+def _mascara_arcos(Q):
+    q = ARCOS_12K
+    m = np.zeros((Q.H, Q.W), np.uint8)
+    for d in Q.desenhos:
+        r = d["rect"]
+        if d.get("layer") == q["camada"] and d["type"] == "s" and d["items"] and all(it[0] == "c" for it in d["items"]) \
+                and abs(r.width - r.height) < 4 and q["lado_pt"][0] < max(r.width, r.height) < q["lado_pt"][1]:
+            for c in Q.caminhos(d):
+                c = np.float64(c)
+                x0, y0 = c.min(axis=0)
+                x1, y1 = c.max(axis=0)
+                meio = c[len(c) // 2]
+                cantos = np.array([[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
+                centro = cantos[np.argmax(np.hypot(*(cantos - meio).T))]      # o centro: o canto mais longe do meio
+                cv2.fillPoly(m, [np.int32(np.round(np.vstack([centro[None], c])))], 1)
+                cv2.polylines(m, [np.int32(np.round(c))], False, 1, 3)
+    k = 2 * q["folga_px"] + 1
+    return cv2.dilate(m, np.ones((k, k), np.uint8)) > 0
+
+
+def _mascara_1p_todas(Q, chave):
+    if chave == "mudou":
+        return _mascara_mudou(Q)
+    if chave == "arcos":
+        return _mascara_arcos(Q)
+    return _mascara_1p(Q, chave)
+
+
+Z._mascara = _mascara_1p_todas
 Z.CONFERENCIA = {"suites_3_2": (1490, 320, 2100, 1220), "sala_intima_escada": (1980, 880, 2580, 1280),
                  "master_banho": (1200, 1190, 1960, 1660), "suite_1_varanda": (2150, 1100, 2790, 1660)}
 
@@ -146,13 +193,18 @@ def preparar(passos):
     try:
         with contextlib.redirect_stdout(io.StringIO()):
             sem = U.floreira_1p(Q, U.escadas_1p(Q, sem))
+            # (11/11) os passos de depois (pisos, retoques, degraus) também mexem nas escadas (os degraus da escada em
+            # U, a caracol): eles rodam sobre a versão sem as anotações, e o trecho delas vem dali
+            sem_fim = U.correcoes(sem, "pisos_1111e")
     finally:
         TA.ANOTAR["sim"] = True
     com = cv2.imread(str(Path(passos) / "passo_floreira.png"))
     anot = cv2.dilate((np.abs(sem.astype(np.int16) - com.astype(np.int16)).max(axis=2) > 0).astype(np.uint8),
                       np.ones((5, 5), np.uint8)) > 0
     base = img.copy()
-    base[anot] = sem[anot]
+    base[anot] = sem_fim[anot]
+    fora = int((np.abs(sem_fim.astype(np.int16) - img.astype(np.int16)).max(axis=2)[~anot] > 6).sum())
+    print(f"    a versão sem anotações contra a final, fora delas: {fora} px com mais de 6 de diferença")
     dif = np.abs(base.astype(np.int16) - img.astype(np.int16)).max(axis=2)
     # sem tracejados a redesenhar: o alfa vazio
     cv2.imwrite(str(Z.TRACOS), np.zeros(img.shape, np.uint8))
@@ -192,6 +244,8 @@ if __name__ == "__main__":
     c_ = sub.add_parser("corrigir")
     c_.add_argument("saida_ia", type=Path)
     c_.add_argument("destino", type=Path)
+    c_.add_argument("--entrada_antes", type=Path, default=None,
+                    help="a entrada que a IA viu: o que mudou na entrada nova vem dela (`MUDOU_12K`), e os arcos")
     m_ = sub.add_parser("montar12k")
     m_.add_argument("saida_topaz", type=Path)
     m_.add_argument("--largura", type=int, default=None)
@@ -202,6 +256,9 @@ if __name__ == "__main__":
     elif a.etapa == "diferencas":
         Z.diferencas(a.saida_ia)
     elif a.etapa == "corrigir":
+        if a.entrada_antes:
+            MUDOU_12K["antes"] = a.entrada_antes
+            Z.CORRIGIR_MASCARAS = dict(Z.CORRIGIR_MASCARAS, mudou="mudou", arcos="arcos")
         Z.corrigir_ia(a.saida_ia, a.destino)
     else:
         for op in a.opcao:

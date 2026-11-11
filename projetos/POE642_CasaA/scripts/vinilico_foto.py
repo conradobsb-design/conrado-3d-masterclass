@@ -65,6 +65,20 @@ PLANTAS = {
     "E_Subsolo": ("E", "Subsolo", R / "POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_final.png", [(79, 120, 168)]),
     "A_Subsolo": ("A", "Subsolo", R / "POE642_CasaA/renders/POE642_CasaA_PH_Subsolo_final_rotulos.png", "madeira"),
 }
+# as plantas cujos rótulos têm especificação (o 12K e a letra manuscrita os tiram pela conta do alfa): o piso troca
+# com eles tirados e eles voltam desenhados pela especificação, px a px (sem isso, a conta do alfa do 12K deixava o
+# fantasma branco das letras sobre o piso novo)
+ROTULOS_SPEC = {"A_Subsolo"}
+
+
+def camadas_spec(planta, Q, forma):
+    if planta == "A_Subsolo":
+        import rotulos_subsolo_casaa as RS
+        import ampliacao_a3_casaa as A3
+        with contextlib.redirect_stdout(io.StringIO()):
+            aj = RS.ler_spec()
+        return RS.camadas(Q, aj, forma) + A3.escada_camadas(forma)
+    return None
 
 
 def quadro(casa, chave):
@@ -98,13 +112,18 @@ def mascara_vinilico(Q, cores):
     return Q.cor(cores, tol=6)
 
 
-def trocar(Q, img, cores, q=None):
+def trocar(Q, img, cores, q=None, camadas=None):
     """O vinílico da foto na final `img` (BGR uint8), no vinílico da base (`cores`); devolve a imagem nova e a máscara
-    do que mudou."""
+    do piso. Com `camadas` (os rótulos da especificação, [(alfa, cor)]), eles saem antes (`ampliacao_a3_casaa.tirar`) e
+    voltam desenhados por cima no fim (os que caem no piso novo; os outros ficam como estavam)."""
     import final3840_casaa as FA
     import final3840_casab as F
     import um_pav_casaa_1111 as U
+    import ampliacao_a3_casaa as AM
     q = q or VINILICO_FOTO
+    original = img
+    if camadas:
+        img = AM.tirar(img, camadas, 0.85)
     qv = dict(copy.deepcopy(U.PISOS_1111E["vinilico"]), regua_foto_m=q["regua_m"])
     H, W = img.shape[:2]
     k = Q.px_m
@@ -154,6 +173,10 @@ def trocar(Q, img, cores, q=None):
     r = cv2.GaussianBlur(lum, (0, 0), 0.8) / np.maximum(L.mean(axis=2), 1)
     dev = np.abs(I - L).max(axis=2)
     piso = mat & ~pdf & ~texto & (err < q["croma"]) & ((dev < q["desvio"]) | ((r > q["sombra_min"]) & (r < 1.0)))
+    # dentro do contorno das peças do PDF, o que ainda é o piso antigo (no tom dele, ligado ao piso de fora; a peça
+    # desenhada na final é menor que o contorno do PDF, como os aparelhos da academia do Subsolo da Casa A) entra
+    folga_pdf = mat & pdf & igual & ~texto
+    piso |= ndimage.binary_propagation(piso, mask=piso | folga_pdf) & folga_pdf
     # os fiapos do piso antigo que o filtro deixa (um veio claro de 1 px) entram: buracos pequenos, fora do texto
     buraco = mat & ~pdf & ~piso & ~texto
     nb, labb, stb, _ = cv2.connectedComponentsWithStats(buraco.astype(np.uint8), 8)
@@ -215,6 +238,15 @@ def trocar(Q, img, cores, q=None):
         reg[:] = reg * (1 - al[..., None]) + novo * al[..., None]
         feitos += 1
     out = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    if camadas:
+        volta = [(a, c) for a, c in camadas if (piso & (a > 0.02)).any()]
+        fora = np.zeros((H, W), bool)
+        for a, c in camadas:
+            if not (piso & (a > 0.02)).any():
+                fora |= U.dilatar(a > 0.002, 2)
+        out = AM.pintar(out, volta)
+        out[fora] = original[fora]
+        print(f"    {len(volta)} rótulos da especificação redesenhados sobre o piso novo")
     print(f"    vinílico da foto (régua de {q['regua_m'] * 100:.0f} cm): {feitos} ambientes, {int(piso.sum())} px de "
           f"piso, {int(texto.sum())} px de texto e riscos mantidos por cima")
     return out, piso
@@ -251,7 +283,8 @@ def main():
     casa, chave, final, cores = PLANTAS[a.planta]
     Q = quadro(casa, chave)
     img = cv2.imread(str(a.antes or final))
-    out, _ = trocar(Q, img, cores)
+    cam = camadas_spec(a.planta, Q, img.shape[:2]) if a.planta in ROTULOS_SPEC else None
+    out, _ = trocar(Q, img, cores, camadas=cam)
     cv2.imwrite(str(a.saida or final), out)
     print(f"    {a.saida or final}")
     if a.antes_depois:

@@ -385,6 +385,10 @@ CORRIGIR_PX = {"sauna": (1188, 1506, 1382, 1634), "bancada_bh_serv": (1100, 988,
                # ondulada, com um ponto escuro junto ao nicho; e as prateleiras do depósito, no tom novo (o dos armários)
                "prateleiras_deposito_cima": (1342, 876, 1832, 912), "prateleiras_deposito_lado": (1826, 876, 1874, 1049)}
 CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0}
+# depois (11/11, o vinílico da foto na academia: "vamos ter que alterar o vinílico do subsolo da casa A"): o que mudou na
+# final contra a de antes (`MUDOU["antes"]`, a final de quando a IA foi feita) também vem da entrada nova, px a px (o que
+# difere mais que `limiar`, crescido `folga_px`); os aparelhos da academia, que não mudaram, ficam os da IA
+MUDOU = {"antes": None, "limiar": 6, "folga_px": 2}
 
 
 def corrigir_ia(saida_ia, destino):
@@ -411,6 +415,13 @@ def corrigir_ia(saida_ia, destino):
         pts = np.float32([[x0 - X0, y0 - Yia], [x1 - X0, y0 - Yia], [x1 - X0, y1 - Yia], [x0 - X0, y1 - Yia]])
         pq = cv2.transform(pts[None], T)[0]
         cv2.fillConvexPoly(m, np.int32(np.round(pq)), 1.0)
+    if MUDOU["antes"]:
+        a0, a1 = cv2.imread(str(MUDOU["antes"])), cv2.imread(str(FINAL_SUB))
+        d = (np.abs(a0.astype(np.int16) - a1.astype(np.int16)).max(axis=2) > MUDOU["limiar"]).astype(np.uint8)
+        k = 2 * MUDOU["folga_px"] + 1
+        d = cv2.dilate(d, np.ones((k, k), np.uint8))[Yia:Yia + Hc, X0:X0 + Wc].astype(np.float32)
+        m = np.maximum(m, cv2.warpAffine(d, T, (Wi, Hi), flags=cv2.INTER_LINEAR))
+        print(f"    e o que mudou na final contra {Path(MUDOU['antes']).name}: {int(d.sum())} px da entrada")
     m = cv2.GaussianBlur(m, (0, 0), q["borda_px"] * Wi / Wc / 2.7)[..., None]
     out = np.clip(np.round(ia * (1 - m) + ref * m), 0, 255).astype(np.uint8)
     cv2.imwrite(str(destino), out)
@@ -591,6 +602,8 @@ if __name__ == "__main__":
     m3 = sub.add_parser("corrigir", help="a saída da IA (4K) com os trechos inventados vindos da entrada")
     m3.add_argument("saida_ia", type=Path)
     m3.add_argument("destino", type=Path)
+    m3.add_argument("--antes_final", type=Path, default=None,
+                    help="a final de quando a IA foi feita: o que mudou nela vem da entrada nova (`MUDOU`)")
     m2 = sub.add_parser("montar12k", help="a saída do Topaz (12K) -> os JPGs das opções A e B")
     m2.add_argument("saida_topaz", type=Path)
     m2.add_argument("--largura", type=int, default=None)
@@ -600,6 +613,7 @@ if __name__ == "__main__":
     elif a.etapa == "montar":
         montar(a.saida_ia)
     elif a.etapa == "corrigir":
+        MUDOU["antes"] = a.antes_final
         corrigir_ia(a.saida_ia, a.destino)
     else:
         montar_grande(a.saida_topaz, a.largura)
