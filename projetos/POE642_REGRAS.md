@@ -304,6 +304,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - **[29/10] Sob a cortina, o piso** (usuário, na suíte 3 da Casa B: "embaixo dessa cortina, existe algo que não deve ser representado. corrija-a com o piso vinilico"): nenhum desenho antigo sob o pano; ali o piso do ambiente (o vinílico, linha por linha), o trilho e o contorno do tapete retos, e o pano pousado de novo por cima.
 - **Academia: cada peça pelo que ela é.**
   - **[28/10] Barra de alongamento, não TV** (usuário, no Subsolo da Casa E: "NÃO É TV É UMA BARRA COM BARRAS AO MEIO PARA ALONGAMENTO"): a peça junto à parede do DCE (a moldura da ARQ_MARCENARIA, presa na parede, com as barras da ARQ_ MOB COMUM ao meio) é a barra de alongamento. A moldura vai em madeira, e as barras do meio cromadas, como tubos, com os traços finos do PDF e a sombra curta. Não vai como TV, nem só como a barra escura do meio. Na dúvida sobre o que um bloco do PDF representa, pergunte antes de desenhar.
+- **[11/11] Guarda-roupas em L ou U numa peça só** (cliente, no 1º Pavimento da Casa A: os cabides "se encontrando no L do guarda-roupa", sem a lateral entre os trechos): cada trecho com os cabides até o canto, os varões se encontrando no centro do canto, a moldura só nas bordas de fora. Feito nos 4 closets do 1º Pavimento da Casa A (`um_pav_casaa_1111.py`).
 
 ## 9. Estrutura, projeções e brises
 
@@ -347,6 +348,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - **[27/10] O beiral sobe em L** (usuário, na Casa D: "o beiral também sobe formando o L. segue o bege no lugar desse cinza claro com falhas. remova o cinza e substitua por bege. não altere paredes e nem o tracejado"; "é somente esse trecho até o brise marrom"): na ponta do beiral, a faixa entre a face da parede e o tracejado da laje sobe no mesmo Bege Bahia, de pé, até o brise, contínua com o beiral (sem a linha da face no canto); a parede e o tracejado ficam como estão. Depois ("corrija só um trecho fino do beiral que ficou com vestígios antigos em cinza. esse beiral passa em frente ao brise marrom, mas em uma faixa estreita"): diante do brise, ele segue na faixa estreita entre as lâminas e o tracejado, até o canto da laje.
   - **[27/10] O tracejado fecha nas pontas** (usuário, na Casa D: "faltou o fechamento da projeção em tracejado branco"): onde o PDF fecha a projeção (as linhas de pé e o trecho de volta na ponta), o tracejado branco também fecha; a linha não termina solta.
     - **[27/10] Mas não entra no piso** (usuário, depois: "dentro da área do bege bahia não tem tracejado. ele termina logo acima, no encontro com o piso bege bahia. dali para baixo já não tem mais, assim como o pdf"): o que o PDF cobre com o piso (as linhas de pé sob o deck) não aparece; o tracejado vai só até a borda do piso.
+- **[11/11] No 1º Pavimento, o pergolado de baixo na cor dele, apagado** (cliente, Casa A: "Como essa planta é do 1º pavimento, nós não vemos o pergolado tracejado, vemos ele na cor dele. Só que com o tom mais 'apagado'"): as vigas cheias na madeira, com o véu do nublado e a sombra curta; e sem tracejado do telhado, do afastamento e do lote dentro da pegada (ficam só os X e as molduras dos vazios, finos e claros). Painel amadeirado das varandas em ripado de nogueira. Feito no 1º Pavimento da Casa A.
 
 ## 10. Área externa
 
@@ -414,6 +416,7 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
   - O Térreo usado é o aprovado, sem passar pelo motor.
   - O 1º Pavimento entra por cima, integralmente.
 - **Térreo:** a planta inteira em cor cheia, com o entorno do lote.
+- **[11/11] O contorno de fora da casa em destaque nos 1º Pavimentos** (cliente, Casa A: "contorno da casa em maior destaque"): a borda da pegada em traço cinza-escuro de ~2 px, com sombra curta para fora, sobre o Térreo nublado. Feito no 1º Pavimento da Casa A.
 
 ## 12. Rótulos (nome e área do ambiente)
 
