@@ -112,10 +112,13 @@ def mascara_vinilico(Q, cores):
     return Q.cor(cores, tol=6)
 
 
-def trocar(Q, img, cores, q=None, camadas=None):
+def trocar(Q, img, cores, q=None, camadas=None, gerar=None, apagar=None, incluir=None):
     """O vinílico da foto na final `img` (BGR uint8), no vinílico da base (`cores`); devolve a imagem nova e a máscara
     do piso. Com `camadas` (os rótulos da especificação, [(alfa, cor)]), eles saem antes (`ampliacao_a3_casaa.tirar`) e
-    voltam desenhados por cima no fim (os que caem no piso novo; os outros ficam como estavam)."""
+    voltam desenhados por cima no fim (os que caem no piso novo; os outros ficam como estavam).
+    (12/11) Para outros pisos: `gerar(h, w, px_m, rng, deitado, med)` dá o desenho novo (BGR, no tom `med` do piso do
+    lugar) no lugar das réguas da foto; `apagar` (bool, H x W): o texto que cai nela não volta (os rótulos que serão
+    escritos de novo em outro lugar), vira piso."""
     import final3840_casaa as FA
     import final3840_casab as F
     import um_pav_casaa_1111 as U
@@ -134,6 +137,8 @@ def trocar(Q, img, cores, q=None, camadas=None):
     f = 2 * q["fechar_px"] + 1
     mat = cv2.morphologyEx(mat.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((f, f), np.uint8)) > 0
     mat &= ~par
+    if incluir is not None:                     # (12/11) um trecho do mesmo piso que a base não pinta com a cor dele
+        mat |= incluir & ~par
     nI = I / np.maximum(I.sum(axis=2, keepdims=True), 1)
     # os vãos das portas com o vinílico do render (na chapada, preto)
     qa = q["vao"]
@@ -215,6 +220,12 @@ def trocar(Q, img, cores, q=None, camadas=None):
         a = np.where(a < qt["alfa_min"], 0.0, a)
         a_txt[m_i] = a
         cor_txt[m_i] = cor
+    if apagar is not None:
+        nt2, labt2 = cv2.connectedComponents(texto.astype(np.uint8), connectivity=8)
+        tira = np.zeros(nt2, bool)
+        tira[np.unique(labt2[apagar & texto])] = True
+        tira[0] = False
+        a_txt[tira[labt2]] = 0.0
     out = I.copy()
     rng = np.random.default_rng(q["semente"])
     nc, lab, st, _ = cv2.connectedComponentsWithStats(mat.astype(np.uint8), 8)
@@ -235,7 +246,9 @@ def trocar(Q, img, cores, q=None, camadas=None):
             gy = cv2.Sobel(g, cv2.CV_32F, 0, 1, ksize=3)
             mm = m & ~texto[y:y + h, x:x + w]
             deitado = float((gy[mm] ** 2).sum()) >= float((gx[mm] ** 2).sum())
-        if deitado:
+        if gerar is not None:
+            T = gerar(h, w, k, rng, deitado, med)
+        elif deitado:
             T = U._reguas_amostra(h, w, k, qv, rng)
         else:
             T = np.ascontiguousarray(U._reguas_amostra(w, h, k, qv, rng).transpose(1, 0, 2))
