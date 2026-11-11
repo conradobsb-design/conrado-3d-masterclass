@@ -12,5 +12,10 @@ Usuário: "já vou deixar as alterações, além das que definimos como regra do
 8. `08_painel_amadeirado_varanda_7_15.png` — "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado." (a varanda de 7,15 m²; o item 2 é o da varanda de 6,36 m²)
 9. `09_cabides_no_L_do_guarda_roupa_2.png` — "Deixar os cabides se encontrando no 'L' do guarda-roupa. Tirar essa lateral como se fossem dois guarda-roupas separados." (o outro closet, ou o mesmo visto de outro ângulo: conferir no PDF)
 10. `10_tapete_camuflado_no_piso.png` — "Trocar a cor do tapete. Está camuflando com o piso." (regra de 11/11: tapete com tom próprio)
+11. `11_bancada_dekton_danae.png` — "Cor da bancada é no Dekton Danae." (a bancada da cuba, como as do Térreo)
+12. `12_X_do_vazio_junto_ao_elevador.png` — "Colocar o tracejado em 'X' que indica vazio." (o vão entre o elevador e o banho)
+13. `13_seta_descricao_guarda_corpo_escadas.png` — "Colocar a seta e a descrição em todas as escadas. Representar o guarda-corpo."
+14. `14_painel_amadeirado_2.png` — "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado." (outro trecho do painel)
+15. `15_porta_encostada_na_parede.png` — "Encostar essa porta mais na parede, ela tá solta." E o usuário: "revisar todas as portas, quina a quina para todas as portas com suas respectivas paredes." (a regra de 11/11 do Térreo: nenhuma porta flutuante)
 
 Além destes, as regras já definidas (POE642_REGRAS.md) que valem para o 1º Pavimento (o Térreo nublado novo, a água C, os tracejados finos, os rótulos centralizados etc.).
