@@ -61,21 +61,59 @@ PROMPT = ("High-fidelity 4K upscale of the reference image, which is a top-down 
           "leaves, thin glass balustrades, the U-shaped staircase and the spiral staircase, the elevator, the shafts "
           "with their dashed X, the beds with white duvets and burgundy throws, the upholstered bench at the foot of "
           "each bed, nightstands, armchairs, the cream L-shaped boucle sofa with terracotta cushions, the walnut coffee "
-          "table and the dark round side tables, the rugs, the wardrobes with hangers, the bathroom fixtures, the carved "
+          "table and the dark round side tables, the rugs, the desk with the open laptop and the wood-and-linen chair, "
+          "the wardrobes with hangers, the bathroom fixtures, the carved "
           "raw travertine washbasins, bathtub, toilets and showers, the faded wooden pergola and the faded ground floor "
           "around the house, and the pure white background. Keep every thin dashed line exactly where it is. Do not "
           "add, remove, move, rotate, resize or redesign anything. Do not add any text, labels, numbers, arrows, "
           "triangles, symbols or people. Only increase resolution and detail: crisp straight wall edges and lines, "
           "sharp furniture edges, and fine realistic material textures matching the existing colors and tones exactly: "
-          "warm wood vinyl planks in the bedrooms, closets and living area, light raw travertine in the bathrooms, "
+          "warm wood vinyl planks (20 cm wide, thin crisp joints, fine wood grain) in the bedrooms and closets, clean "
+          "light raw travertine with fine horizontal veining in the corridor, the family room and the bathrooms, "
           "smooth light beige marble (Bege Bahia) on the balconies with soft low-contrast veining, soft fabric on the "
           "beds and upholstery. Keep colors, brightness and contrast the same as the reference. Clean, photographic "
           "architectural presentation quality, no artifacts, no noise.")
 
-# os trechos que a IA trocar (px da final), conferidos no mapa das diferenças: voltam da entrada (preenchido depois de
-# ver a saída da IA)
+# o que a IA trocou (11/11, saída do job 09c2bb19, conferida no mapa das diferenças e nos recortes): as cortinas
+# franzidas viraram fileiras de contas, as folhas amadeiradas das portas mudaram de ripado, as camas (travesseiros, a
+# manta, a do quarto de serviço), as cubas (a da bancada Danae e a do banho de serviço), os ralos e o canteiro do banho
+# master, a cadeira e o laptop da escrivaninha da suíte 1, a janela de vidro da circulação e trechos de parede. Em vez
+# de caixas, todas as peças da casa voltam da entrada (`pecas`: dentro da pegada, tudo o que não é piso: os móveis, as
+# louças, as bancadas, as portas, os vidros, as paredes, as escadas); da IA ficam os pisos (vinílico, travertino bruto e
+# Bege Bahia, no que é piso, com a mesma conta do passo `pisos_1111e`) e o entorno (o Térreo nublado e o pergolado)
 Z.CORRIGIR_PX = {}
-Z.CORRIGIR_MASCARAS = {}
+Z.CORRIGIR_MASCARAS = {"pecas": "pecas"}
+PECAS_12K = {"pisos": ((79, 120, 168), (202, 217, 220), (232, 232, 232)), "desvio": 30, "croma": 0.035,
+             "r": (0.55, 1.2), "pdf_folga_px": 2, "borda_px": 2}
+_mascara_terreo = Z._mascara
+
+
+def _mascara_1p(Q, chave):
+    """As máscaras do 1º Pavimento para a correção da saída da IA (`pecas`); as outras como no Térreo."""
+    if chave != "pecas":
+        return _mascara_terreo(Q, chave)
+    import final3840_casab as F
+    q = PECAS_12K
+    img = cv2.imread(str(Z.FINAL))
+    piso = np.zeros(img.shape[:2], bool)
+    pdf = U._objetos_pdf(Q, U.PISOS_1111E["camadas_pdf"], q["pdf_folga_px"])
+    par = U.dilatar(FA.paredes_pdf(Q) > 0.3, 1)
+    I = img.astype(np.float32)
+    n = I / np.maximum(I.sum(axis=2, keepdims=True), 1)
+    for cor in q["pisos"]:
+        mat = (Q.chapada == cor).all(axis=2) & ~par
+        L = F.luz_robusta(img, mat & ~pdf, 0.5 * Q.px_m, desvio=q["desvio"])
+        nL = L / np.maximum(L.sum(axis=2, keepdims=True), 1)
+        r = I.mean(axis=2) / np.maximum(L.mean(axis=2), 1)
+        piso |= mat & ~pdf & (np.abs(n - nL).max(axis=2) < q["croma"]) & (r > q["r"][0]) & (r < q["r"][1])
+    # as juntas e os veios do piso (finos) contam como piso; o que sobra são as peças
+    piso = cv2.morphologyEx(piso.astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+    piso = cv2.erode(piso, np.ones((2 * q["borda_px"] + 1,) * 2, np.uint8)) > 0
+    casa = cv2.dilate((Q.pegada > 0).astype(np.uint8), np.ones((7, 7), np.uint8)) > 0
+    return casa & ~piso
+
+
+Z._mascara = _mascara_1p
 Z.CONFERENCIA = {"suites_3_2": (1490, 320, 2100, 1220), "sala_intima_escada": (1980, 880, 2580, 1280),
                  "master_banho": (1200, 1190, 1960, 1660), "suite_1_varanda": (2150, 1100, 2790, 1660)}
 
