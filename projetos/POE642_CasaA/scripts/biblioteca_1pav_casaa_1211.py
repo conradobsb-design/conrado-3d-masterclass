@@ -44,12 +44,16 @@ ANTES_COMMIT = "127eabc"
 REG_JSON = R / "POE642_CasaA_PH_1Pavimento_12K_biblioteca.json"
 REG_MASC = R / "POE642_CasaA_PH_1Pavimento_12K_biblioteca_zona.png"
 PX_M = 59.70590031258779
-SOMBRAS = BT.SOMBRAS
+# (12/11, "OS CHUVEIROS PRECISAM SER REFEITOS. ESTÃO MUITO APAGADOS") a sombra dos chuveiros desenhados em planta
+# (`chuveiros_planta_casaa_1211`): o chuveiro fica no alto, a sombra cai mais longe e mais forte que a de uma louça
+SOMBRAS = dict(BT.SOMBRAS, chuveiro=[{"dx": -0.03, "dy": 0.03, "sig": 0.018, "forca": 0.30},
+                                     {"dx": -0.008, "dy": 0.008, "sig": 0.008, "forca": 0.22}])
 girar_pt = BT.girar_pt
 
 # os tapetes que ficam (as camas e os criados das suítes 1, 2 e 3 em cima deles): a parte da pegada dentro deles volta
 # ao tapete, não ao piso
-TAPETES_FICAM = [(1637, 388, 1846, 525), (1662, 1045, 1871, 1164), (2284, 1398, 2493, 1529)]
+# (12/11, "CORRIGIR O TAPETE NA SUITE 2") o da suíte 2 não fica mais: é redesenhado inteiro (a peça `tapete`, abaixo)
+TAPETES_FICAM = [(1637, 388, 1846, 525), (2284, 1398, 2493, 1529)]
 
 # Cada peça: (png, cx, cy, larg, alt, giro, sombra, extra) em px da final (larg x alt antes do giro; alt None: a
 # proporção do PNG); extra: None, "lavabo" (os lados esticados), "anti_t" (o PNG espelhado na antidiagonal), ou
@@ -109,11 +113,16 @@ AMBIENTES = {
         "abajures": [(2289.0, 1557.0, 17.0), (2390.5, 1557.0, 17.0), (2492.0, 1557.0, 17.0)],
         "recolar": [((2466, 1338, 2488, 1360), "baixa", "cheio")]},
     "suite_2": {
+        # (12/11, "CORRIGIR O TAPETE NA SUITE 2") o tapete do render (a beira dobrada à esquerda, os degraus da borda de
+        # baixo junto à cama e, no 12K, a colcha de retalhos da trama da IA com o tecido refeito) sai inteiro, com a
+        # sombra: o vinílico volta do gerador e o tapete novo entra no retângulo do PDF (1662,0/1044,9 a 1871,0/1164,3)
         "zonas": [(1702, 1081, 1829, 1209), (1664, 1177, 1868, 1209), (1619, 1014, 1675, 1070),
-                  (1684, 1003, 1847, 1026), (1704, 1054, 1822, 1088)],
+                  (1684, 1003, 1847, 1026), (1704, 1054, 1822, 1088), (1658, 1041, 1875, 1168)],
         "manter": [(1664, 1012, 1685, 1034)],               # a mesinha redonda
         "pecas": [
             ("suite-2/bancada-suites", 1765.5, 1014.5, 155.2, 14.9, 0.0, "baixa", None),
+            # o tapete da biblioteca (o da sala íntima, de trama fina) no tom do tapete de antes (BGR 210, 218, 227)
+            ("sala-intima/tapete", 1766.5, 1104.6, 209.0, 119.4, 0.0, "tapete", ("tom", 210.0, 218.0, 227.0)),
             ("suite-2/cama-casal-a", 1765.5, 1145.0, 119.4, 119.4, 180.0, "movel", None),
             ("suite-master/banco-pe-de-cama", 1765.5, 1072.0, 95.5, 23.9, 0.0, "movel", None),
             ("suite-1/criado-retangular-vista-superior", 1684.5, 1193.0, 32.8, 23.9, 0.0, "movel", "tom_bancada"),
@@ -143,38 +152,44 @@ AMBIENTES = {
         "recolar": []},
     "banho_master": {
         "zonas": [(1406, 1469, 1514, 1529), (1394, 1490, 1422, 1510), (1689, 1590, 1718, 1629),
-                  (1413, 1588, 1434, 1609), (1484, 1588, 1505, 1609)],
+                  (1411, 1586, 1437, 1612), (1482, 1586, 1508, 1612),
+                  (1387, 1464, 1391, 1631)],     # o verde do render do lado de dentro da janela da floreira
         "manter": [],
         "pecas": [
             # (12/11, "VAMOS ALTERAR ESSA VEGETAÇÃO MAIS ALTA POR" + foto de espada-de-são-jorge e folhagem alta) a
-            # floreira gerada no Higgsfield (gpt_image_2, job 9f219839): a mesma caixa, com a caixa no lugar da antiga
-            # (166,4 x 35,0 px, centro 1369,2/1546,5); as folhas do lado do vidro param na borda da caixa
-            ("banho-master/floreira-espada-de-sao-jorge-e-folhagem", 1365.13, 1546.5, 166.35, 43.35, 90.0, "baixa",
+            # floreira gerada no Higgsfield (gpt_image_2, job 9f219839); depois ("CORRIJA [...] O CONTORNO DA FLOREIRA E
+            # NÃO DEIXE AS PLANTAS VERDES PASSAREM PELAS JANELAS") na caixa do PDF, entre a janela da fachada (x 1345,3)
+            # e a do banho (x 1376,7), de parede a parede (y 1463,9 a 1631,1), com as folhas dentro da caixa
+            # (`floreira_caixa_casaa_1211`: a caixa comprida pelo miolo, sem achatar as plantas); 0,6 px a mais de
+            # cada lado, para a beira macia do PNG não deixar o verde do render (as paredes e as janelas ficam)
+            ("banho-master/floreira-espada-de-sao-jorge-e-folhagem", 1361.0, 1547.5, 168.4, 32.6, 90.0, "baixa",
              None),
             ("banho-master/banheira-oval-a", 1460.0, 1499.0, 96.0, 48.0, 0.0, "movel", None),
             ("banho-master/misturador-piso-banheira-render", 1407.0, 1500.0, 14.0, 19.0, 90.0, "baixa", None),
             ("banho-master/bancada-dupla-esculpida-render-v2", 1599.0, 1613.0, 137.3, 35.8, 180.0, "baixa", None),
             ("banho-master/bacia-carrara", 1703.5, 1609.5, 21.1, 30.7, 180.0, "baixa", None),
-            ("banho-master/chuveiro-quadrado", 1423.5, 1598.0, 13.0, 13.0, 0.0, "baixa", None),
-            ("banho-master/chuveiro-quadrado", 1495.0, 1598.0, 13.0, 13.0, 0.0, "baixa", None)],
+            ("banho-master/chuveiro-quadrado-planta", 1423.5, 1598.0, 13.0, 13.0, 0.0, "chuveiro", None),
+            ("banho-master/chuveiro-quadrado-planta", 1495.0, 1598.0, 13.0, 13.0, 0.0, "chuveiro", None)],
         "recolar": []},
     "banhos": {
-        "zonas": [(2499, 1196, 2537, 1225), (2453, 1116, 2473, 1150), (1692, 887, 1721, 925),
-                  (1637, 889, 1657, 923), (2140, 367, 2169, 406), (2204, 421, 2224, 441)],
+        "zonas": [(2499, 1196, 2537, 1225), (2447, 1116, 2481, 1153), (1692, 887, 1721, 925),
+                  (1633, 889, 1661, 925), (2140, 367, 2169, 406), (2202, 419, 2227, 444)],
         "manter": [],
         "pecas": [
             # banho 1: a bancada na parede da direita, a cuba a 54 px do alto (o PDF)
             ("banho-1/cuba-esculpida-travertino", 2516.0, 1279.0, 89.6, 35.8, -90.0, "baixa", ("cuba", 54.0)),
             ("banho-1/bacia-carrara", 2518.5, 1210.5, 21.1, 30.7, -90.0, "baixa", None),
-            (("banho-1/chuveiro-quadrado-parede", (2463.0, 1140.5), (1118.0, "cima")), 0, 0, 0, 0, 0, "baixa", None),
+            (("banho-1/chuveiro-quadrado-parede-planta", (2463.0, 1140.5), (1118.0, "cima")), 0, 0, 0, 0, 0, "chuveiro",
+             None),
             # banho 2: a bancada na parede de cima
             ("banho-2/cuba-esculpida-travertino", 1766.0, 909.0, 71.7, 35.8, 0.0, "baixa", ("cuba", 35.85)),
             ("banho-2/bacia-carrara", 1706.5, 906.0, 21.1, 30.7, 0.0, "baixa", None),
-            (("banho-2/chuveiro-quadrado-parede", (1646.5, 913.5), (891.0, "cima")), 0, 0, 0, 0, 0, "baixa", None),
+            (("banho-2/chuveiro-quadrado-parede-planta", (1646.5, 913.5), (891.0, "cima")), 0, 0, 0, 0, 0, "chuveiro",
+             None),
             # banho 3
             ("banho-3/cuba-esculpida-travertino", 2094.5, 389.0, 71.7, 35.8, 0.0, "baixa", ("cuba", 35.85)),
             ("banho-3/bacia-carrara", 2154.5, 386.5, 21.1, 30.7, 0.0, "baixa", None),
-            ("banho-3/chuveiro-quadrado", 2214.0, 431.0, 12.0, 12.0, 0.0, "baixa", None)],
+            ("banho-3/chuveiro-quadrado-planta", 2214.0, 431.0, 12.0, 12.0, 0.0, "chuveiro", None)],
         "recolar": []},
     "banho_servico": {
         "zonas": [(2210, 1492, 2250, 1522), (2212, 1526, 2250, 1574), (2229, 1452, 2250, 1468)],
@@ -182,8 +197,8 @@ AMBIENTES = {
         "pecas": [
             ("banho-de-servico/cuba-servico-granito", 2234.5, 1550.5, 41.8, 23.9, -90.0, "baixa", "lavabo"),
             ("banho-de-servico/bacia-monte-carlo-sem-valvula", 2230.5, 1507.0, 22.5, 32.8, -90.0, "baixa", None),
-            (("banho-de-servico/chuveiro-redondo-parede", (2238.0, 1460.5), (2247.0, "dir")), 0, 0, 0, 0, 0,
-             "baixa", None)],
+            (("banho-de-servico/chuveiro-redondo-parede-planta", (2238.0, 1460.5), (2247.0, "dir")), 0, 0, 0, 0, 0,
+             "chuveiro", None)],
         "recolar": []},
 }
 
@@ -232,6 +247,11 @@ def preparar(nome, larg, alt, extra=None):
         P = BT.esticar_lados(P, larg / alt, miolo=MIOLO_CUBA)
     elif isinstance(extra, (tuple, list)) and extra[0] == "cuba":
         P = cuba_na_bancada(P, larg, alt, extra[1])
+    elif isinstance(extra, (tuple, list)) and extra[0] == "tom":         # a peça no tom pedido (a mediana BGR)
+        a = P[..., 3] > 200
+        med = np.median(P[..., :3][a], axis=0)
+        P = P.copy()
+        P[..., :3] = np.clip(P[..., :3] * (np.float32(extra[1:4]) / np.maximum(med, 1))[None, None], 0, 255)
     h, w = P.shape[:2]
     if alt is None:
         alt = larg * h / w
@@ -246,6 +266,11 @@ def chuveiro(nome, placa_c, parede, placa_px=12.0):
     larg_linha = a.sum(axis=1)
     lmax = larg_linha.max()
     y_placa = int(np.argmax(larg_linha > 0.6 * lmax))
+    if nome.endswith("-planta"):
+        # o desenho em planta: a placa começa logo abaixo do tubo (no redondo, a calota de cima não estica com o braço)
+        tubo = larg_linha[:y_placa][larg_linha[:y_placa] > 0].min()
+        while y_placa > 0 and tubo * 1.2 < larg_linha[y_placa - 1] <= larg_linha[y_placa]:
+            y_placa -= 1
     s = placa_px / lmax
     dist, eixo = parede
     alcance = abs(dist - (placa_c[0] if eixo == "dir" else placa_c[1])) - placa_px / 2
@@ -260,6 +285,67 @@ def chuveiro(nome, placa_c, parede, placa_px=12.0):
     if eixo == "dir":
         return P2, placa_c[0] + desloc, placa_c[1], wt, ht, -90.0
     return P2, placa_c[0], placa_c[1] - desloc, wt, ht, 0.0
+
+
+# (12/11, "CORRIJA AS FOLHAS DE VIDRO PARA SE ENCONTRAREM, CORRIJA O CONTORNO DA FLOREIRA E NÃO DEIXE AS PLANTAS VERDES
+# PASSAREM PELAS JANELAS") a janela entre a floreira e o banho master, redesenhada pelo PDF (ARQ_PAREDE): o vão de
+# parede a parede, da face de fora (x 1376,7) à de dentro (1387,5), no cinza das paredes, com o marco em cima e embaixo
+# e as três folhas de correr em trilhos escalonados, cada uma de montante a montante, de modo que os montantes de duas
+# folhas vizinhas ficam lado a lado (as folhas se encontram); o render deixava vãos verdes entre elas e a floreira
+# passava por baixo. Desenhada nítida na final e no 12K (`pecas_12k`), por cobertura exata de cada retângulo.
+JANELA_FLOREIRA = {
+    "vao": (1376.7, 1463.9, 1387.5, 1631.1),
+    "marcos": [(1378.5, 1463.9, 1387.5, 1466.3), (1378.5, 1628.7, 1387.5, 1631.1)],
+    "folhas": [(1384.5, 1466.3, 1387.5, 1523.6), (1381.5, 1518.8, 1384.5, 1576.2), (1378.5, 1571.4, 1381.5, 1628.7)],
+    "montante": 4.8, "linha_px": 0.35,
+    "parede": (80, 80, 80), "linha": (38, 38, 38), "marco": (150, 152, 154), "montante_cor": (168, 171, 174),
+    "vidro": (232, 236, 238), "vidro_borda": (198, 205, 210)}
+
+
+def _cobre(x0, y0, x1, y1, U0, V0, U1, V1):
+    """A fração de cada px de [U0, U1) x [V0, V1) coberta pelo retângulo (x0, y0, x1, y1) (px de saída)."""
+    u = np.arange(U0, U1, dtype=np.float32)
+    v = np.arange(V0, V1, dtype=np.float32)
+    cx = np.clip(np.minimum(x1, u + 1) - np.maximum(x0, u), 0, 1)
+    cy = np.clip(np.minimum(y1, v + 1) - np.maximum(y0, v), 0, 1)
+    return cy[:, None] * cx[None, :]
+
+
+def janela_floreira(out, s=1.0, X0=0.0, Y0=0.0, q=JANELA_FLOREIRA):
+    H, W = out.shape[:2]
+    T = lambda r: ((r[0] - X0) * s, (r[1] - Y0) * s, (r[2] - X0) * s, (r[3] - Y0) * s)     # noqa: E731
+    vx0, vy0, vx1, vy1 = T(q["vao"])
+    U0, V0 = max(int(np.floor(vx0)) - 1, 0), max(int(np.floor(vy0)) - 1, 0)
+    U1, V1 = min(int(np.ceil(vx1)) + 2, W), min(int(np.ceil(vy1)) + 2, H)
+    reg = out[V0:V1, U0:U1].astype(np.float32)
+    lw = max(q["linha_px"] * s, 0.35)
+
+    def pinta(r, cor, k=1.0):
+        nonlocal reg
+        c = _cobre(*r, U0, V0, U1, V1)[..., None] * k
+        reg = reg * (1 - c) + np.float32(cor) * c
+
+    def caixa(r, cor):                                  # o retângulo com o contorno fino
+        x0, y0, x1, y1 = r
+        pinta(r, q["linha"])
+        pinta((x0 + lw, y0 + lw, x1 - lw, y1 - lw), cor)
+
+    pinta((vx0, vy0, vx1, vy1), q["parede"])
+    for xl in (vx0, vx1):                               # as faces do vão
+        pinta((xl - lw / 2, vy0, xl + lw / 2, vy1), q["linha"], 0.8)
+    for r in q["marcos"]:
+        caixa(T(r), q["marco"])
+    m = q["montante"] * s
+    for r in q["folhas"]:
+        x0, y0, x1, y1 = T(r)
+        caixa((x0, y0, x1, y1), q["vidro_borda"])
+        pinta((x0 + 2 * lw, y0 + m, x1 - 2 * lw, y1 - m), q["vidro"])             # o vidro, mais claro no miolo
+        xm = (x0 + x1) / 2
+        pinta((xm - lw / 2, y0 + m, xm + lw / 2, y1 - m), q["vidro_borda"], 0.7)  # as duas faces do vidro
+        for ya, yb in ((y0, y0 + m), (y1 - m, y1)):                               # os montantes
+            caixa((x0, ya, x1, yb), q["montante_cor"])
+    out[V0:V1, U0:U1] = reg if out.dtype == np.float32 else np.clip(np.round(reg), 0, 255).astype(out.dtype)
+    return out
 
 
 def abajur(out, cx, cy, D, s=1.0, X0=0.0, Y0=0.0, q=None, ss=8):
@@ -435,6 +521,8 @@ def aplicar(antes):
             REGISTRO["pecas_m"] |= BT.mascara_formas([BT.ret(*caixa, 2)], forma)
             # no 12K, o recorte volta por cima das peças nítidas (senão o tapete novo cobria a mesa de centro)
             REGISTRO["pecas"].append(["recolar", list(caixa), cheio])
+    o = janela_floreira(o)
+    REGISTRO["pecas"].append(["janela_floreira"])
     out = np.clip(np.round(o), 0, 255).astype(np.uint8)
     REGISTRO["zona"] = (zona_total | REGISTRO["pecas_m"]) & ~REGISTRO["nao"]
     print(f"    biblioteca do 1º Pavimento: {int(zona_total.sum())} px de piso refeito; "
@@ -460,6 +548,76 @@ def _bege_piso(C):
     ok[np.unique(lab_[m & caixa])] = True
     ok[0] = False
     return ok[lab_]
+
+
+TOM_ENTORNO = {"anel": (3, 11), "borda": 5, "min_px": 24, "limite": (0.88, 1.12)}
+
+
+def tom_do_entorno(R, antes, gerado, piso_ok, q=TOM_ENTORNO):
+    """(12/11, ao refazer os chuveiros: "ESTÃO MUITO APAGADOS") o piso que sai do gerador vinha uns 10 tons mais claro
+    que o da final em volta (a final passou por outros acertos de tom depois do gerador) e a pegada da peça antiga
+    aparecia como um retângulo claro. Cada mancha refeita vai ao tom do piso de verdade em volta: a razão, por canal,
+    entre a mediana do anel de fora (na final de antes) e a da beira de dentro (no gerado)."""
+    R = R.astype(np.float32)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(gerado.astype(np.uint8))
+    a0, a1 = q["anel"]
+    for i in range(1, n):
+        x, y, w, h = st[i, :4]
+        m = a1 + 2
+        X0, Y0 = max(x - m, 0), max(y - m, 0)
+        X1, Y1 = min(x + w + m, R.shape[1]), min(y + h + m, R.shape[0])
+        c = (lab[Y0:Y1, X0:X1] == i).astype(np.uint8)
+        fora = (cv2.dilate(c, np.ones((2 * a1 + 1,) * 2, np.uint8)) > 0) & ~(cv2.dilate(c, np.ones((2 * a0 + 1,) * 2,
+                                                                                                    np.uint8)) > 0)
+        fora &= piso_ok[Y0:Y1, X0:X1]
+        beira = (c > 0) & ~(cv2.erode(c, np.ones((2 * q["borda"] + 1,) * 2, np.uint8)) > 0)
+        if fora.sum() < q["min_px"] or beira.sum() < q["min_px"]:
+            continue
+        ref = np.median(antes[Y0:Y1, X0:X1][fora].astype(np.float32), axis=0)
+        ger = np.median(R[Y0:Y1, X0:X1][beira], axis=0)
+        k = np.clip(ref / np.maximum(ger, 1), *q["limite"])
+        sub = R[Y0:Y1, X0:X1]
+        sub[c > 0] *= k
+    return np.clip(np.round(R), 0, 255).astype(np.uint8)
+
+
+LUZ_ENTORNO = {"anel": (2, 16), "sig": 4.0, "limite": (0.90, 1.10)}
+
+
+def luz_do_entorno(R, antes, gerado, piso_ok, q=LUZ_ENTORNO):
+    """(12/11, ao refazer os chuveiros) no travertino, a pegada refeita saía clara no miolo (a luz por baixo do gerador
+    é um inpaint, mais clara que a final em volta) e o quadrado aparecia em volta do chuveiro novo. A luz de fundo de
+    cada mancha refeita vai à do piso de verdade em volta: a final borrada no anel de fora, levada para dentro por
+    inpaint, sobre a do gerado borrada (o desenho da pedra fica; o travertino não tem réguas)."""
+    R = R.astype(np.float32)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(gerado.astype(np.uint8))
+    a0, a1 = q["anel"]
+    sg = q["sig"]
+    for i in range(1, n):
+        x, y, w, h = st[i, :4]
+        m = a1 + 8
+        X0, Y0 = max(x - m, 0), max(y - m, 0)
+        X1, Y1 = min(x + w + m, R.shape[1]), min(y + h + m, R.shape[0])
+        c = (lab[Y0:Y1, X0:X1] == i).astype(np.uint8)
+        fora = (cv2.dilate(c, np.ones((2 * a1 + 1,) * 2, np.uint8)) > 0) & ~(cv2.dilate(c, np.ones((2 * a0 + 1,) * 2,
+                                                                                                    np.uint8)) > 0)
+        fora &= piso_ok[Y0:Y1, X0:X1]
+        if fora.sum() < 24:
+            continue
+        A = antes[Y0:Y1, X0:X1].astype(np.float32)
+        f = fora.astype(np.float32)
+        den = cv2.GaussianBlur(f, (0, 0), sg)
+        alvo = cv2.GaussianBlur(A * f[..., None], (0, 0), sg) / np.maximum(den, 1e-4)[..., None]
+        sem = ((den < 0.15) | (c > 0)).astype(np.uint8)
+        alvo = np.dstack([cv2.inpaint(np.clip(alvo[..., k], 0, 255).astype(np.uint8), sem, 6, cv2.INPAINT_TELEA)
+                          for k in range(3)]).astype(np.float32)
+        cf = c.astype(np.float32)
+        Rs = R[Y0:Y1, X0:X1]
+        dc = cv2.GaussianBlur(cf, (0, 0), sg)
+        ger = cv2.GaussianBlur(Rs * cf[..., None], (0, 0), sg) / np.maximum(dc, 1e-4)[..., None]
+        k = np.clip(alvo / np.maximum(ger, 1), *q["limite"])
+        Rs[c > 0] = (Rs * k)[c > 0]
+    return np.clip(np.round(R), 0, 255).astype(np.uint8)
 
 
 def piso_de_volta(Q, antes, zona, tap, pdf, par, livre):
@@ -504,6 +662,8 @@ def piso_de_volta(Q, antes, zona, tap, pdf, par, livre):
                                            for x, y, w, h, _ in st[1:]]
         with contextlib.redirect_stdout(io.StringIO()):
             R = U.pisos_1111e(Q2, base2, dict(qp, forcar_px=forcar))
+        R = tom_do_entorno(R, antes, gerado & (qual == 0), piso_ok)
+        R = luz_do_entorno(R, antes, gerado & (qual == 1), piso_ok)
         al = cv2.GaussianBlur(gerado.astype(np.float32), (0, 0), 0.6)
         al = np.maximum(al, gerado.astype(np.float32))[..., None]
         out = np.clip(np.round(out.astype(np.float32) * (1 - al) + R.astype(np.float32) * al), 0, 255).astype(np.uint8)
@@ -586,6 +746,9 @@ def pecas_12k(final, entrada, out, s, X0, Yia, Ya3, px_m=PX_M):
     for item in reg["pecas"]:
         if item[0] == "abajur":
             out = abajur(out, item[1], item[2], item[3], s, X0, Ya3)
+            continue
+        if item[0] == "janela_floreira":
+            out = janela_floreira(out, s, X0, Ya3)
             continue
         if item[0] == "recolar":
             # o que ficou, recortado da final (sobre as peças novas), por cima das peças nítidas

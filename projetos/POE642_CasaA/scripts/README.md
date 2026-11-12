@@ -2198,9 +2198,57 @@ concreto claro com quatro touceiras de espada-de-são-jorge de borda amarela, du
 (tipo dracena) e forração miúda, vista de cima
 (`biblioteca-objetos/03-primeiro-pavimento/banho-master/floreira-espada-de-sao-jorge-e-folhagem.png`). A caixa cai no
 lugar exato da antiga (166,4 x 35,0 px, centro 1369,2/1546,5: a peça em 1365,13/1546,5, 166,35 x 43,35, 90°); as folhas
-passam da caixa para o lado da parede (como os cactos) e, do lado do vidro do banho, param na borda da caixa.
+passam da caixa para o lado da parede (como os cactos) e, do lado do vidro do banho, param na borda da caixa. (Depois,
+ainda em 12/11, a caixa vai ao retângulo do PDF, com as folhas dentro dela: ver "Floreira e janela do banho master".)
 
-**Como refazer:** `python3 biblioteca_1pav_casaa_1211.py` (parte da final de `ANTES_COMMIT` = 127eabc; sem `--saida`
+**Chuveiros (12/11, "OS CHUVEIROS PRECISAM SER REFEITOS. ESTÃO MUITO APAGADOS"):** os PNG da biblioteca são fotos de
+cromado claro; reduzidos a 12 px sobre o travertino claro, viravam um quadrado cinza-claro liso (os furos somem), e o
+redondo de parede é foto em perspectiva (saía oval). `chuveiros_planta_casaa_1211.py` desenha os chuveiros vistos de
+cima e grava na biblioteca, ao lado dos originais, `banho-master/` e `banho-3/chuveiro-quadrado-planta.png`, `banho-1/`
+e `banho-2/chuveiro-quadrado-parede-planta.png` e `banho-de-servico/chuveiro-redondo-parede-planta.png`: a placa em
+inox escovado médio (o cinza que se lê no travertino) com o degradê da luz do alto à direita, o chanfro da borda (claro
+em cima e à direita, escuro embaixo e à esquerda), o contorno escuro fino, o crivo mais escuro com a grade de furos (ou
+os anéis, no redondo) e, nos de parede, o braço em tubo com o brilho do lado da luz e a canopla. A mesma posição e o
+mesmo tamanho de antes; a sombra `chuveiro` (o chuveiro fica no alto: mais longe e mais forte que a de uma louça). Em
+`chuveiro`, a placa dos desenhos `-planta` começa logo abaixo do tubo (no redondo, a calota de cima não estica com o
+braço). As zonas dos chuveiros antigos vão um pouco além, com a sombra deles. Antes e depois em
+`renders/POE642_CasaA_PH_1Pavimento_1211_chuveiros_antes_depois.jpg`.
+
+**Piso refeito no tom do entorno (12/11, junto com os chuveiros):** o piso que sai do gerador vinha mais claro que o da
+final em volta (até uns 10 tons no travertino: a final passou por outros acertos de tom depois do gerador) e a pegada
+da peça antiga aparecia como um quadrado claro em volta do chuveiro novo. No vinílico (`tom_do_entorno`), cada mancha
+refeita vai ao tom do piso de verdade em volta (a razão, por canal, da mediana do anel de fora na final de antes pela
+da beira de dentro no gerado, entre 0,88 e 1,12); no travertino (`luz_do_entorno`), a luz de fundo inteira: a final
+borrada no anel de fora, levada para dentro por inpaint, sobre a do gerado borrada (o desenho da pedra fica).
+
+**Tapete da suíte 2 (12/11, "CORRIGIR O TAPETE NA SUITE 2"):** o tapete do render ficava (`TAPETES_FICAM`), com a pegada
+das peças antigas refeita no tecido dele: a beira da esquerda dobrada (do render), degraus na borda de baixo onde a
+zona da cama começava e, no 12K, uma colcha de retalhos (a faixa lisa e clara da IA em cima e à direita, o tecido
+refeito no miolo). Agora sai inteiro, com a sombra (zona 1658,1041 a 1875,1168; não está mais em `TAPETES_FICAM`): o
+vinílico volta do gerador e entra o tapete da biblioteca (`sala-intima/tapete`, de trama fina) no tom do de antes
+(BGR 210, 218, 227: `("tom", b, g, r)` em `preparar`), no retângulo do PDF (ARQ_LAYOUT HUMANIZAÇÃO, 1662,0/1044,9 a
+1871,0/1164,3: 3,50 x 2,00 m), por baixo da cama, do banco e da poltrona; no 12K, nítido do PNG. Antes e depois em
+`renders/POE642_CasaA_PH_1Pavimento_1211_tapete_suite_2_antes_depois.jpg`.
+
+**Floreira e janela do banho master (12/11, "CORRIJA AS FOLHAS DE VIDRO PARA SE ENCONTRAREM, CORRIJA O CONTORNO DA
+FLOREIRA E NÃO DEIXE AS PLANTAS VERDES PASSAREM PELAS JANELAS"):** pelo PDF (ARQ_PAREDE), a floreira fica entre a
+janela da fachada (face de dentro em x 1345,3) e a janela do banho (face de fora em x 1376,7), de parede a parede
+(y 1463,9 a 1631,1): 167,2 x 31,4 px. A caixa ia de 1351,7 a 1386,7, por cima da janela do banho, e as folhas passavam
+da caixa e apareciam entre as folhas de vidro. `floreira_caixa_casaa_1211.py <saída do Higgsfield>` refaz o PNG da
+floreira (o mesmo nome): só a caixa (as folhas param na borda de fora dela) e comprida até a proporção do PDF (5,3:1;
+a imagem é 4:1) pelo miolo, sem achatar as plantas (358 costuras verticais de menor energia, que passam pela terra e
+pela forração entre as touceiras, duplicadas: seam carving). A peça entra no retângulo do PDF (1361,0/1547,5, 0,6 px a
+mais de cada lado para a beira macia não deixar o verde do render; as paredes e as janelas ficam). A janela é
+redesenhada pelo PDF (`janela_floreira`, `JANELA_FLOREIRA`): o vão de 1376,7 a 1387,5 no cinza das paredes (80), o
+marco em cima e embaixo e as três folhas de correr em trilhos escalonados (x 1384,5, 1381,5 e 1378,5; 3 px cada), cada
+uma de montante a montante, de modo que os montantes de duas folhas vizinhas ficam lado a lado (as folhas se
+encontram); o vidro claro com as duas faces e o contorno fino. Desenhada depois das peças, nítida na final e no 12K
+(`pecas_12k`, pela cobertura exata de cada retângulo). O verde do render do lado de dentro da janela volta ao
+travertino (zona 1387,1464 a 1391,1631). Antes e depois em
+`renders/POE642_CasaA_PH_1Pavimento_1211_floreira_janela_antes_depois.jpg`.
+
+**Como refazer:** `python3 chuveiros_planta_casaa_1211.py` e `python3 floreira_caixa_casaa_1211.py <a saída 9f219839 do
+Higgsfield, fora do git>` (os PNG da biblioteca, já no git); `python3 biblioteca_1pav_casaa_1211.py` (parte da final de `ANTES_COMMIT` = 127eabc; sem `--saida`
 grava a final, o registro do 12K e os antes e depois `renders/POE642_CasaA_PH_1Pavimento_1211b_<ambiente>_antes_depois.jpg`);
 depois `ampliacao_12k_1pav_casaa.py montar12k <Topaz> --opcao AB`, `rodape_entrega.py --no-quadro --render
 1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png`, `pdf_entrega.py` e `book_entrega.py`.
