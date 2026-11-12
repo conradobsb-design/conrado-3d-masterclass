@@ -926,10 +926,295 @@ def pergolado_tb(Q, img, q=PERGOLADO_TB):
     return out
 
 
+# O mobiliário do estar da varanda e do living (usuário, com os recortes):
+# - "Tirar o contorno dos mobiliários" (os dois sofás, o pufe, as mesas): o desenho cinza do PDF sobre as peças (o
+#   contorno de fora, as divisões dos módulos e as almofadas em traço) sai; o estofado fica o tecido da própria peça,
+#   tecido de novo (`quilting` de um trecho limpo dela, `fonte_px`), com as divisões e as almofadas só como vincos
+#   suaves (`vinco`: o traço antigo desfocado, escurecendo pouco) e a borda levemente mais escura (`borda`); a sombra
+#   no piso, a de antes;
+# - "Tirar a representação desse amadeirado em cima do sofá. Deixar apenas a mesa que encaixa no sofá.": a barra de
+#   madeira sobre o sofá da varanda (`barra_px`) sai (o sofá continua sob ela, com as divisões dos módulos); a mesinha
+#   que encaixa nele (`mesinha_px`) fica;
+# - "Representar como mesa de centro e não como banco estofado": a peça branca acima da mesa de centro da varanda vira
+#   mesa, retangular, na madeira da mesa ao lado (tecida do miolo dela), com a borda um pouco mais escura e sem o
+#   contorno; a mesa ao lado, sem o contorno também;
+# - "Tirar a representação do pé da mesa" (a mesa em gota do living): a cruz do pé e o contorno saem, com a madeira
+#   da própria mesa.
+MOVEIS_TB = {
+    "estofados": {
+        "sofa_varanda": {"rets": [(1212, 942, 1441, 1059)], "fonte_px": (1397, 948, 1433, 1027),
+                         "barra_px": (1245, 1028, 1430, 1050), "divisoes_x": [1300, 1391],
+                         "mesinha_px": (1357, 1046, 1384, 1075)},
+        "sofa_living": {"rets": [(1756, 748, 2028, 820), (1955, 748, 2028, 870)], "fonte_px": (1963, 823, 2001, 865),
+                        "mesinha_px": (1726, 791, 1765, 821)},
+        # o pufe girado: o quadrilátero do PDF (ARQ_LAYOUT HUMANIZAÇÃO), com 1 px a mais para o contorno
+        "pufe": {"poli_px": [(1193, 862), (1231, 900), (1210, 921), (1172, 883)], "fonte_px": (1397, 948, 1433, 1027)}},
+    "madeiras": {
+        "mesa_varanda": {"ret": (1291, 876, 1378, 913), "fonte_px": (1298, 881, 1371, 908)},
+        "mesa_nova": {"ret": (1319, 835, 1407, 872), "fonte_px": (1298, 881, 1371, 908)},
+        "mesa_gota": {"auto_px": (1788, 852, 1914, 936), "fonte_px": (1812, 872, 1846, 892), "folga": 1}},
+    "linha_dif": 22, "vinco": (1.3, 0.09), "borda": (2, 0.07), "borda_madeira": (1, 0.14), "p_px": 12,
+    "semente": 1215}
+
+
+def _mascara_auto(img, caixa):
+    x0, y0, x1, y1 = caixa
+    r = img[y0:y1, x0:x1].astype(np.float32)
+    esc = (r.mean(axis=2) < 178) & ((r.max(axis=2) - r.min(axis=2)) < 30)
+    m = ndimage.binary_fill_holes(ndimage.binary_closing(esc, np.ones((3, 3))))
+    lab, n = ndimage.label(m)
+    t = ndimage.sum(np.ones(m.shape), lab, range(1, n + 1))
+    M = np.zeros(img.shape[:2], bool)
+    M[y0:y1, x0:x1] = lab == (int(np.argmax(t)) + 1)
+    return M
+
+
+def _tecido(img, fonte, h, w, q, semente):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    import texturas
+    a, b, c, d = fonte
+    f_ = img[b:d, a:c]
+    fontes = [f_, np.ascontiguousarray(f_[:, ::-1]), np.ascontiguousarray(f_[::-1])]
+    return texturas.quilting(fontes, h, w, p=q["p_px"], sobra=max(3, q["p_px"] // 3),
+                             rng=np.random.default_rng(semente))[:h, :w].astype(np.float32)
+
+
+def moveis_tb(Q, img, q=MOVEIS_TB):
+    out = img.astype(np.float32)
+    lum = img.astype(np.float32).mean(axis=2)
+    H, W = lum.shape
+    sem = q["semente"]
+    for nome, e in q["estofados"].items():
+        if "rets" in e:
+            M = np.zeros((H, W), bool)
+            for x0, y0, x1, y1 in e["rets"]:
+                M[y0:y1, x0:x1] = True
+        elif "poli_px" in e:
+            m8 = np.zeros((H, W), np.uint8)
+            cv2.fillPoly(m8, [np.int32(np.round(e["poli_px"]))], 1)
+            M = dilatar(m8.astype(bool), 1)
+        else:
+            M = _mascara_auto(img, e["auto_px"])
+        fica = np.zeros((H, W), bool)
+        if "mesinha_px" in e:
+            x0, y0, x1, y1 = e["mesinha_px"]
+            fica[y0:y1, x0:x1] = True
+        a, b, c, d = e["fonte_px"]
+        med = float(np.median(lum[b:d, a:c]))
+        linhas = M & (lum < med - q["linha_dif"]) & ~fica
+        if "barra_px" in e:
+            x0, y0, x1, y1 = e["barra_px"]
+            # sob a barra, só as divisões dos módulos continuam (`divisoes_x`)
+            linhas[y0:y1, x0:x1] = False
+            for xd in e["divisoes_x"]:
+                linhas[y0:y1, xd] = True
+        borda = M & ~ndimage.binary_erosion(M, iterations=q["borda"][0])
+        ys, xs = np.nonzero(M)
+        y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+        tec = _tecido(img, e["fonte_px"], y1 - y0, x1 - x0, q, sem)
+        sem += 1
+        reg = out[y0:y1, x0:x1]
+        m = (M & ~fica)[y0:y1, x0:x1]
+        reg[m] = tec[m]
+        # os vincos: o traço de dentro (sem a borda) desfocado; a borda, um pouco mais escura
+        sig, k = q["vinco"]
+        v = cv2.GaussianBlur((linhas & ~borda).astype(np.float32), (0, 0), sig)
+        bd = cv2.GaussianBlur(borda.astype(np.float32), (0, 0), 0.7)
+        f = 1 - k * np.clip(v * 1.6, 0, 1) - q["borda"][1] * bd
+        sel = M & ~fica
+        out[sel] *= f[sel][:, None]
+        print(f"    {nome}: sem o contorno ({int(linhas.sum())} px de traço), o tecido de novo"
+              + (", sem a barra de madeira (a mesinha fica)" if "barra_px" in e else ""))
+    for nome, e in q["madeiras"].items():
+        if "ret" in e:
+            M = np.zeros((H, W), bool)
+            x0, y0, x1, y1 = e["ret"]
+            M[y0:y1, x0:x1] = True
+        else:
+            M = _mascara_auto(img, e["auto_px"])
+            if e.get("folga"):
+                M = dilatar(M, e["folga"])
+        ys, xs = np.nonzero(M)
+        y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+        tec = _tecido(img, e["fonte_px"], y1 - y0, x1 - x0, q, sem)
+        sem += 1
+        reg = out[y0:y1, x0:x1]
+        m = M[y0:y1, x0:x1]
+        reg[m] = tec[m]
+        n_b, k_b = q["borda_madeira"]
+        borda = M & ~ndimage.binary_erosion(M, iterations=n_b)
+        out[borda] *= 1 - k_b
+        print(f"    {nome}: madeira sem o contorno" + (" e sem a cruz do pé" if nome == "mesa_gota" else ""))
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# Os guarda-roupas em U e em L (usuário: "corrigir a ligação dos armários, sem divisão", no closet master; "nesse
+# armário também, remover a divisão." e "remover a divisão do armário.", nas suítes): cada um redesenhado como uma peça
+# só, no desenho do 1º Pavimento da Casa A (`um_pav_casaa_1111._closet`: o fundo bege que escurece junto às portas, os
+# cabides de través até o canto, o cabideiro de metal se encontrando no meio do canto, a moldura ocre só por fora), nos
+# trechos do PDF de `ajustes_casab.GUARDA_ROUPAS_B` (pt), cada um sem o canto, e os cantos à parte. O da suíte 1 junto à
+# circulação, de um trecho só, fica.
+CLOSETS_TB = {
+    "closet master": {"trechos": [((1059.3, 773.8, 1096.2, 918.3), "direita"), ((1096.2, 918.3, 1317.3, 952.4), "cima"),
+                                  ((1317.3, 773.8, 1351.3, 918.3), "esquerda")],
+                      "cantos": [(1059.3, 918.3, 1096.2, 952.4), (1317.3, 918.3, 1351.3, 952.4)]},
+    "suíte 1": {"trechos": [((1617.8, 736.9, 1651.8, 807.8), "direita"), ((1651.8, 807.8, 1807.7, 844.6), "cima")],
+                "cantos": [(1617.8, 807.8, 1651.8, 844.6)]},
+    "suíte 2": {"trechos": [((2295.2, 572.5, 2332.1, 739.8), "esquerda"), ((2332.1, 538.5, 2391.6, 572.5), "baixo")],
+                "cantos": [(2295.2, 538.5, 2332.1, 572.5)]},
+    "suíte 3": {"trechos": [((2108.1, 924.0, 2142.2, 1079.9), "direita"), ((2142.2, 1079.9, 2278.2, 1111.1), "cima")],
+                "cantos": [(2108.1, 1079.9, 2142.2, 1111.1)]},
+    "semente": 1216}
+
+
+def closets_tb(Q, img, q=CLOSETS_TB):
+    import um_pav_casaa_1111 as U
+    out = np.ascontiguousarray(img.copy())
+    rng = np.random.default_rng(q["semente"])
+    qa = dict(U.CLOSETS_1P)
+    nomes = [k for k in q if k != "semente"]
+    for n in nomes:
+        out = U._closet(Q, out, q[n], qa, rng)
+    print(f"    guarda-roupas: {', '.join(nomes)} numa peça só, sem a divisão no canto, os cabides se encontrando")
+    return out
+
+
+# O banco do closet master (usuário: "Representar como banco estofado."): a peça de madeira do meio do closet vira o
+# banco estofado da varanda da Casa A (`pedidos_terreo_casaa_2910.banco_estofado_ta`: o quadro de madeira castanho com a
+# sombra no piso e o assento de linho com volume e duas costuras), no retângulo da peça (`px`, com a sombra antiga dentro).
+BANCO_CLOSET_TB = {"px": (1340, 624, 1451, 670), "quadro_pt": 1.0, "costuras": (1 / 3, 2 / 3), "semente": 1217,
+                   "banco": {"linho": (196, 209, 219), "almofada": (150, 172, 196), "madeira": "castanho",
+                             "volume_m": 0.06, "volume": 0.16, "vinco": 0.30, "vinco_px": 0.8, "trama": 0.02,
+                             "almofada_volume": 0.22, "almofadas_pt": []}}
+
+
+def banco_closet_tb(Q, img, q=BANCO_CLOSET_TB):
+    import pedidos_terreo_casaa_2910 as P
+    x0, y0, x1, y1 = q["px"]
+    (a, b), (c, d) = Q.q2p(x0, y0), Q.q2p(x1, y1)
+    k = q["quadro_pt"]
+    bq = dict(q["banco"], quadro_pt=(a + k, b + k, c - k, d - k),
+              costuras_x_pt=tuple(a + (c - a) * t for t in q["costuras"]))
+    out = P.banco_estofado_ta(Q, np.ascontiguousarray(img.copy()), (a, b, c, d), bq, q["semente"])
+    print("    closet master: a peça do meio como banco estofado (quadro de madeira e assento de linho com duas costuras)")
+    return out
+
+
+# As espreguiçadeiras da prainha (usuário: "Colocar uma textura nas espreguiçadeiras"): o tampo off-white das duas (as
+# de `revisao_casab_2910.espreguicadeiras_tb`, dentro da água) ganha a textura de um tecido náutico: a trama fina
+# (`trama`: ruído de 0,6 px), as manchas largas (`manchas`: ruído de 3 px) e o tom levemente quente (`tom`), só nos px do
+# tampo (claros e neutros, dentro de `caixas_px`); o vinco, o aro e a água ficam.
+ESPREG_TB = {"caixas_px": [(925, 1145, 1047, 1195), (925, 1222, 1047, 1272)], "lum_min": 214, "croma_max": 18,
+             "trama": (0.6, 0.032), "manchas": (3.0, 0.02), "tom": (0.985, 0.995, 1.01), "semente": 1218}
+
+
+def espreguicadeiras_tb(Q, img, q=ESPREG_TB):
+    out = img.astype(np.float32)
+    rng = np.random.default_rng(q["semente"])
+    n = 0
+    for x0, y0, x1, y1 in q["caixas_px"]:
+        reg = out[y0:y1, x0:x1]
+        tampo = (reg.mean(axis=2) >= q["lum_min"]) & ((reg.max(axis=2) - reg.min(axis=2)) <= q["croma_max"])
+        tampo = ndimage.binary_opening(tampo, np.ones((2, 2)))
+        h, w = tampo.shape
+        f = np.ones((h, w), np.float32)
+        for sig, forca in (q["trama"], q["manchas"]):
+            r_ = cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0), sig)
+            f += forca * r_ / max(float(r_.std()), 1e-6)
+        a = cv2.GaussianBlur(tampo.astype(np.float32), (0, 0), 0.5)
+        novo = reg * f[..., None] * np.float32(q["tom"])[None, None, :]
+        reg[:] = reg * (1 - a[..., None]) + novo * a[..., None]
+        n += int(tampo.sum())
+    print(f"    espreguiçadeiras: a textura de tecido no tampo das duas ({n} px)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# As folhas amadeiradas (usuário: "melhorar a representação do amadeirado, com suas respectivas folhas", na fachada da
+# esquerda da suíte master e na fachada de cima): os painéis de madeira de correr do lado de fora das portas de vidro,
+# folha por folha como no PDF (as peças brancas de 3 px da ARQ_PAREDE no trilho de fora; cada folha num trilho, em
+# degrau), no desenho das folhas do 1º Pavimento da Casa A (`um_pav_casaa_1111.FOLHAS_1P`: ripado de nogueira, as ripas
+# marcadas, o veio no comprido, a luz, o contorno de cada folha e a sombra curta para fora). Antes, a faixa entre a face
+# de fora e a folha de vidro do mesmo vão (a madeira contínua de antes e o tom salmão entre os trilhos) recebe o piso de
+# fora, de logo depois da faixa (`folga_fonte_px`). (`folhas`: a folha de madeira, a de vidro do mesmo vão e o lado de
+# fora: "x-" à esquerda, "y-" em cima, "x+" à direita; px do quadro.)
+FOLHAS_TB = {"folhas": [
+    ((956.2, 395.5, 959.2, 508.9), (965.2, 395.5, 968.1, 508.9), "x-"),
+    ((959.2, 513.7, 962.2, 627.2), (968.1, 513.7, 971.1, 627.2), "x-"),
+    ((962.2, 631.9, 965.2, 745.4), (971.1, 631.9, 974.1, 745.4), "x-"),
+    ((1569.4, 316.7, 1689.7, 319.7), (1569.4, 328.6, 1689.7, 331.6), "y-"),
+    ((1694.5, 319.7, 1814.8, 322.7), (1694.5, 331.6, 1814.8, 334.6), "y-"),
+    ((1948.6, 316.7, 2089.5, 319.7), (1948.6, 331.6, 2088.3, 334.6), "y-"),
+    ((2094.3, 319.7, 2235.2, 322.7), (2093.1, 328.6, 2232.8, 331.6), "y-"),
+    ((2244.7, 319.7, 2385.6, 322.7), (2256.1, 331.6, 2391.3, 334.6), "y-"),
+    ((2390.4, 316.7, 2531.3, 319.7), (2396.1, 328.6, 2531.3, 331.6), "y-"),
+    ((2651.9, 628.4, 2654.9, 724.8), (2640.0, 628.4, 2643.0, 724.8), "x+"),
+    ((2654.9, 729.6, 2657.9, 826.0), (2643.0, 729.6, 2646.0, 826.0), "x+")],
+    "folga_fonte_px": 4, "folga_px": 0.5, "semente": 1219}
+
+
+def folhas_tb(Q, img, q=FOLHAS_TB):
+    import um_pav_casaa_1111 as U
+    qa = U.FOLHAS_1P
+    out = img.copy()
+    rng = np.random.default_rng(q["semente"])
+    # 1. a faixa entre a face de fora e o vidro, com o piso de fora
+    for (wx0, wy0, wx1, wy1), (gx0, gy0, gx1, gy1), lado in q["folhas"]:
+        if lado == "x-":
+            a, b = int(np.floor(min(wx0, 9e9) - 0.5)), int(np.floor(gx0))
+            y0, y1 = int(np.floor(wy0)), int(np.ceil(wy1))
+            d = (b - a) + q["folga_fonte_px"]
+            out[y0:y1, a:b] = out[y0:y1, a - d:b - d]
+        elif lado == "x+":
+            a, b = int(np.ceil(gx1)), int(np.ceil(wx1 + 0.5))
+            y0, y1 = int(np.floor(wy0)), int(np.ceil(wy1))
+            d = (b - a) + q["folga_fonte_px"]
+            out[y0:y1, a:b] = out[y0:y1, a + d:b + d]
+        else:
+            a, b = int(np.floor(wy0 - 0.5)), int(np.floor(gy0))
+            x0, x1 = int(np.floor(wx0)), int(np.ceil(wx1))
+            d = (b - a) + q["folga_fonte_px"]
+            out[a:b, x0:x1] = out[a - d:b - d, x0:x1]
+    # 2. as folhas, cada uma com o ripado, o contorno e a sombra para fora
+    o = out.astype(np.float32)
+    f = q["folga_px"]
+    for (wx0, wy0, wx1, wy1), _, lado in q["folhas"]:
+        vert = lado in ("x-", "x+")
+        r = (wx0 - f, wy0, wx1 + f, wy1) if vert else (wx0, wy0 - f, wx1, wy1 + f)
+        X0, Y0 = int(np.floor(r[0])) - 4, int(np.floor(r[1])) - 4
+        X1, Y1 = int(np.ceil(r[2])) + 4, int(np.ceil(r[3])) + 4
+        w, h = X1 - X0, Y1 - Y0
+        reg = o[Y0:Y1, X0:X1]
+        A = U._cobertura(r, X0, Y0, w, h)
+        dx, dy = {"x-": (-1.0, 0.6), "x+": (1.0, 0.6), "y-": (-0.6, -1.0)}[lado]
+        sb = cv2.GaussianBlur(cv2.warpAffine(A, np.float32([[1, 0, dx], [0, 1, dy]]), (w, h)), (0, 0), 0.9)
+        reg *= (1 - qa["sombra"] * sb * (1 - A))[..., None]
+        ys = (np.arange(h, dtype=np.float32) + Y0 + 0.5)[:, None] * np.ones((1, w), np.float32)
+        xs = (np.arange(w, dtype=np.float32) + X0 + 0.5)[None, :] * np.ones((h, 1), np.float32)
+        veio = cv2.GaussianBlur(rng.normal(0, 1, (h, w)).astype(np.float32), (0, 0),
+                                sigmaX=0.6 if vert else 6.0, sigmaY=6.0 if vert else 0.6)
+        veio /= max(float(veio.std()), 1e-6)
+        rel = np.clip(((xs - r[0]) / max(r[2] - r[0], 1e-3)) if vert else ((ys - r[1]) / max(r[3] - r[1], 1e-3)), 0, 1)
+        luz = 1 + qa["luz"] * (rel - 0.5) * (-1 if lado in ("x-", "y-") else 1)
+        cor = np.float32(qa["madeira"])[None, None] * (luz * (1 + qa["veio"] * veio))[..., None]
+        fase = np.mod((ys - r[1]) if vert else (xs - r[0]), qa["ripa_px"])
+        jt = np.clip(1 - np.abs(fase - qa["junta_px"] / 2) / (qa["junta_px"] / 2 + 0.5), 0, 1) * qa["junta_forca"]
+        cor = cor * (1 - jt[..., None]) + np.float32(qa["junta"]) * jt[..., None]
+        cp = qa["contorno_px"]
+        dentro = U._cobertura((r[0] + cp, r[1] + cp, r[2] - cp, r[3] - cp), X0, Y0, w, h)
+        reg[:] = reg * (1 - A[..., None]) + cor * A[..., None]
+        borda = np.clip(A - dentro, 0, 1)[..., None]
+        reg[:] = reg * (1 - borda) + np.float32(qa["contorno"]) * borda
+    print(f"    folhas amadeiradas: {len(q['folhas'])} folhas de correr de madeira (suíte master, fachada de cima e "
+          f"suíte 3) folha por folha, em ripado de nogueira, com a faixa entre elas e o vidro no piso de fora")
+    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_tb), ("deck", deck_tb), ("portas", portas_tb),
           ("escadas", escadas_tb), ("entrada", entrada_tb),
-          ("tracejados", tracejados_tb), ("pergolado", pergolado_tb)]
+          ("tracejados", tracejados_tb), ("moveis", moveis_tb), ("closets", closets_tb), ("banco", banco_closet_tb),
+          ("espreguicadeiras", espreguicadeiras_tb), ("folhas", folhas_tb),
+          ("pergolado", pergolado_tb)]
 
 
 def correcoes(img, de=None, ate=None, salvar_passos=None):
