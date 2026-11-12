@@ -2177,6 +2177,112 @@ def cadeiras_tb(Q, img, q=CADEIRAS_TB):
     return out
 
 
+# O estar da varanda pela IA (usuário: "vamos trazer mais realismo para esses mobiliarios, preservando-os, mas trazendo
+# do 3D para a planta humanizada. use o higgsfield", com o recorte do estar da varanda): o recorte de 400 x 320 px
+# (`caixa_px`, 5:4) foi ao Nano Banana Pro (Higgsfield) 4x maior, com o pedido de manter enquadramento, escala, lugar,
+# tamanho e cor de cada peça e só trazer o realismo do 3D visto de cima (sofá com as almofadas e o encosto embaixo,
+# virado para as mesas de centro; poltronas e pufes em bouclé; mesas em carvalho; luz difusa, sombras curtas); a
+# variante escolhida, alinhada ao recorte por ECC afim (borda do tapete, texto e piso), está em `ia_png` (2x). Entra só
+# o tapete e as peças (os retângulos do PDF, ARQ_MOBILIÁRIO / ARQ_LAYOUT HUMANIZAÇÃO / o tapete, com `folga_px` para
+# a sombra curta), a borda esfumada em `funde_px`; o tom da IA casado ao piso de volta (ganho por canal no anel).
+VARANDA_IA_TB = {"ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_varanda_estar_nbp_alinhado.png",
+                 "caixa_px": (1112, 776, 1512, 1096),
+                 "pecas_px": [(1211.4, 942.3, 1439.3, 1056.6), (1321.8, 834.9, 1405.4, 867.7),
+                              (1293.5, 876.7, 1377.1, 909.5), (1358.0, 1038.1, 1381.9, 1073.9),
+                              (1457.0, 821.5, 1508.1, 873.0), (1451.9, 907.1, 1503.1, 958.6),
+                              (1117.2, 909.7, 1173.3, 965.0), (1172.3, 862.2, 1231.1, 921.0)],
+                 "pecas_pdf": [64428, 66870, 67242, 66895, 66910, 67076, 67267, 71961],
+                 "tapete_px": (1187.3, 801.7, 1485.9, 1010.6), "folga_px": 10, "cresce_px": 2, "peca_lab_min": 9.0,
+                 "ganho_lim": (0.95, 1.2), "ganho_de": {3: 1}, "sombra_min": 0.78, "piso_lab_max": 7.0, "sombra_px": 7.0,
+                 "grao_px": (1114, 985, 1196, 1094)}
+
+
+def varanda_ia_tb(Q, img, q=VARANDA_IA_TB):
+    """Peça a peça: na silhueta de cada peça (a do PDF, antisserrilhada, + `cresce_px`, somada ao que a IA desenhou como
+    peça dentro da caixa dela), a IA com o ganho daquela peça (a mediana dela no original sobre a da IA: o tom de antes
+    fica); no tapete, a IA com o ganho do tapete; no piso em volta (até `folga_px`), o piso original limpo dos restos das
+    peças velhas (o que foge do tom do travertino, refeito só do piso em volta) com a sombra da IA como razão."""
+    x0, y0, x1, y1 = q["caixa_px"]
+    w, h = x1 - x0, y1 - y0
+    ia = cv2.resize(cv2.imread(str(q["ia_png"])), (w, h), interpolation=cv2.INTER_AREA).astype(np.float32)
+    reg = img[y0:y1, x0:x1].astype(np.float32)
+
+    def ret(r, d=0, enc=0):
+        m = np.zeros((h, w), bool)
+        a, b, c, e = r
+        m[max(0, int(b - y0 - d) + enc):int(np.ceil(e - y0 + d)) - enc,
+          max(0, int(a - x0 - d) + enc):int(np.ceil(c - x0 + d)) - enc] = True
+        return m
+    zona = ret(q["tapete_px"], d=q["folga_px"])
+    for r in q["pecas_px"]:
+        zona |= ret(r, d=q["folga_px"])
+    tap_b = ret(q["tapete_px"], d=1)
+    tap = np.clip(cv2.GaussianBlur(tap_b.astype(np.float32), (0, 0), 0.6), 0, 1)
+    # o piso da IA e o que nela é peça
+    lab = cv2.cvtColor(np.clip(ia / 255, 0, 1), cv2.COLOR_BGR2LAB)
+    caixas = np.zeros((h, w), bool)
+    for r in q["pecas_px"]:
+        caixas |= ret(r, d=4)
+    piso_ia = zona & ~caixas & ~tap_b
+    pf = np.median(lab[piso_ia], axis=0)
+    obj_ia = np.sqrt(((lab - pf) ** 2).sum(axis=2)) > q["peca_lab_min"]
+    # as silhuetas
+    sil = []
+    for i, r in zip(q["pecas_pdf"], q["pecas_px"]):
+        dd = Q.desenhos[i]
+        cov = Q.preencher(lambda d, dd=dd: d is dd, ss=4)[y0:y1, x0:x1].astype(np.float32)
+        k = 2 * q["cresce_px"] + 1
+        cov = cv2.dilate(cov, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
+        oi = (obj_ia & ret(r, d=4) & ~tap_b).astype(np.uint8)
+        oi = cv2.morphologyEx(oi, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8)).astype(np.float32)
+        sil.append(np.clip(cv2.GaussianBlur(np.maximum(cov, oi), (0, 0), 0.6), 0, 1))
+    S = np.stack(sil)
+    peso = S.max(axis=0)
+    # os ganhos: cada peça na própria silhueta (sem a beira), o tapete no trecho livre
+    livre_tap = ret(q["tapete_px"], enc=4)
+    for sk in sil:
+        livre_tap &= ~(cv2.dilate((sk > 0.01).astype(np.uint8), np.ones((17, 17), np.uint8)) > 0)
+    g_tap = np.median(reg[livre_tap], axis=0) / np.median(ia[livre_tap], axis=0)
+    ganhos = []
+    for sk in sil:
+        dentro = cv2.erode((sk > 0.99).astype(np.uint8), np.ones((7, 7), np.uint8)) > 0
+        ganhos.append(np.clip(np.median(reg[dentro], axis=0) / np.maximum(np.median(ia[dentro], axis=0), 1),
+                              *q["ganho_lim"]))
+    for k, kk in q.get("ganho_de", {}).items():
+        ganhos[k] = ganhos[kk]
+    G = np.stack(ganhos)[S.argmax(axis=0)]
+    # o piso original limpo: buraco = peças, tapete e o que foge do travertino na zona; refeito só do piso em volta
+    lab0 = cv2.cvtColor(np.clip(reg / 255, 0, 1), cv2.COLOR_BGR2LAB)
+    p0 = np.median(lab0[~zona & (reg.mean(axis=2) > 150)], axis=0)
+    resto = zona & (np.sqrt(((lab0 - p0) ** 2).sum(axis=2)) > q["piso_lab_max"])
+    buraco = zona & (resto | (peso > 0.01) | tap_b)
+    buraco = cv2.dilate(buraco.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    limpo = cv2.inpaint(np.clip(reg, 0, 255).astype(np.uint8), buraco.astype(np.uint8), 5,
+                        cv2.INPAINT_TELEA).astype(np.float32)
+    # o grão do travertino no refeito: o detalhe fino de um trecho limpo do mesmo piso (`grao_px`), rebatido
+    gx0, gy0, gx1, gy1 = q["grao_px"]
+    gr = img[gy0:gy1, gx0:gx1].astype(np.float32)
+    gr = gr - cv2.GaussianBlur(gr, (0, 0), 2.0)
+    gh, gw = gr.shape[:2]
+    rep = np.tile(np.concatenate([np.concatenate([gr, gr[:, ::-1]], 1), np.concatenate([gr[::-1], gr[::-1, ::-1]], 1)], 0),
+                  (h // (2 * gh) + 1, w // (2 * gw) + 1, 1))[:h, :w]
+    limpo = np.where(buraco[..., None], limpo + np.clip(rep, -14, 6), limpo)
+    anel = zona & (peso < 0.99) & (tap < 0.99)
+    # a sombra da IA, que some com a distância à peça (zero na borda da zona)
+    sombra = np.clip(lab[..., 0] / pf[0], q["sombra_min"], 1.0)
+    dobj = cv2.distanceTransform(((peso < 0.5) & (tap < 0.5)).astype(np.uint8), cv2.DIST_L2, 3)
+    sombra = 1 - (1 - sombra) * np.clip(1 - dobj / q["sombra_px"], 0, 1) ** 1.5
+    base = np.where(anel[..., None], limpo * sombra[..., None], reg)
+    base = base * (1 - tap[..., None]) + ia * g_tap[None, None, :] * tap[..., None]
+    o = base * (1 - peso[..., None]) + ia * G * peso[..., None]
+    out = img.copy()
+    out[y0:y1, x0:x1] = np.clip(np.round(o), 0, 255).astype(np.uint8)
+    print(f"    estar da varanda: o tapete e {len(sil)} peças da IA (Nano Banana Pro, alinhada ao recorte) nas "
+          f"silhuetas, cada uma no tom dela (ganhos {[round(float(np.mean(v)), 3) for v in ganhos]}, tapete "
+          f"{round(float(np.mean(g_tap)), 3)}); a sombra da IA sobre o piso original limpo "
+          f"({int((resto & ~(peso > 0.01) & ~tap_b).sum())} px de resto das peças velhas)")
+    return out
+
 # As pedras do acesso (usuário: "corrija os contornos das pedras", com o recorte dos pisantes da entrada sobre a grama):
 # as 9 pedras tinham a beira serrilhada (degraus de 1 px, o dente no canto da primeira). Cada uma volta como o
 # retângulo do PDF (ARQ_CONTRAPISO, px), com a cobertura subpixel na beira (antisserrilhada), o miolo dela mesma
@@ -2498,7 +2604,8 @@ PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_
           ("portas_fechadas", portas_fechadas_tb), ("cozinha", cozinha_tb),
           ("quina", quina_tb), ("tapete", tapete_tb),
           ("poltronas", poltronas_tb), ("sofa_living", sofa_living_tb),
-          ("cadeiras", cadeiras_tb), ("pedras", pedras_tb), ("rotulos", rotulos_tb)]
+          ("cadeiras", cadeiras_tb), ("varanda_ia", varanda_ia_tb), ("pedras", pedras_tb),
+          ("rotulos", rotulos_tb)]
 
 
 def correcoes(img, de=None, ate=None, salvar_passos=None):
