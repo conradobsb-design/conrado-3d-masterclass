@@ -2089,6 +2089,17 @@ Vendo a planta com as peças da biblioteca, o usuário mandou, cada um com um re
   vão da direita (ARQ_PAREDE, 2593,2–2605,2 x 355,2–429,1) mostrava o gramado; entra a soleira da janela de cima,
   girada (a face de fora junto ao gramado), tirada da própria imagem (na final e no 12K, cada um com a sua de cima).
 
+- **Folha do box do B. MOTORISTA** ("DEIXE RETO A FOLHA DO BOX. ESTÁ MUITO TORTO"; `box`): a linha de vidro tinha um
+  degrau no meio e um puxador torto (na final) e saía inclinada e quebrada no 12K. A faixa volta ao piso do box (9 px à
+  esquerda, a emenda da direita esfumada) e a folha entra reta, de parede a parede (y 1216–1305,6), no eixo das duas
+  folhas de correr do PDF (ARQ_LOUÇAS E METAIS, x 2297,65), no desenho do vidro do box do banho varanda (a face cinza,
+  o vidro claro e a face cinza, 1 px da final cada, com um halo leve), na final e no 12K.
+
+- **S e D das escadas** ("ADICIONE AS ESCADAS O "S" OU "D" DE SUBIR OU DESCER, LOGO ABAIXO DA SETA"; `letras`): o D
+  (os degraus que descem para o deck e a escada para o Subsolo) e o S (a escada do jardim e a caracol) centrados sob o
+  triângulo de cada escada, 2,5 px abaixo da ponta de baixo, no corpo (11 px) e na cor (45) das descrições; nos dados
+  do 12K como anotações "txt" (refeitas a cada rodada: as de antes saem antes). A seta da entrada não é escada.
+
 **Como refazer:** `regras_1211_casaa.py Terreo`, `biblioteca_terreo_casaa_1211.py` (a final, do commit `ANTES_COMMIT`),
 `pedidos_terreo_casaa_1211c.py --antes_depois <a final de 2c1c21d>` (lê a final que o anterior gravou; os antes e depois
 em `renders/POE642_CasaA_PH_Terreo_1211c_<pedido>_antes_depois.jpg`); o 12K pelo `montar12k` (que chama

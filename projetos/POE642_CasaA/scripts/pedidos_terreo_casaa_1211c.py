@@ -35,6 +35,11 @@ Usuário, com um recorte cada:
     volta ao piso de 10 px abaixo e a lâmina de vidro do PDF entra no desenho das guardas do Térreo;
   - "FALTOU A SOLEIRA DE UM DOS LADOS DA JANELA" (`soleira`, a janela de canto do escritório): no vão da direita, que
     mostrava o gramado, a soleira da janela de cima, girada (na final e no 12K, cada um com a sua de cima).
+  - "DEIXE RETO A FOLHA DO BOX. ESTÁ MUITO TORTO" (`box`, o B. MOTORISTA): a faixa da folha volta ao piso do box e a folha
+    entra reta, de parede a parede, no eixo das folhas do PDF, no desenho do vidro do box do banho varanda.
+  - "ADICIONE AS ESCADAS O "S" OU "D" DE SUBIR OU DESCER, LOGO ABAIXO DA SETA" (`letras`): o D (deck, Subsolo) e o S
+    (jardim, caracol) centrados sob o triângulo, 2,5 px abaixo da ponta de baixo, no corpo e na cor das descrições;
+    vão aos dados do 12K como anotações.
 
   python3 pedidos_terreo_casaa_1211c.py [--antes <png>] [--saida <png>]
 Roda depois do `biblioteca_terreo_casaa_1211.py` (parte da final que ele grava). Sem --saida, grava a final e os antes e
@@ -99,6 +104,17 @@ PEDIDOS_1211C = {
     # "COLOCA ESSE RÓTULO ACIMA DA ESCADA" (o SOBE PARA O 1º PAVIMENTO da caracol da área de serviço, à esquerda dela):
     # centrado sobre a caracol (o centro dela, x 1977), no piso livre entre as máquinas e o topo da escada (y 1518)
     "caracol": {"linhas": ["SOBE PARA O", "1º PAVIMENTO"], "perto": (1916.0, 1604.0), "novo": (1977.0, 1501.0, "centro")},
+    # "DEIXE RETO A FOLHA DO BOX. ESTÁ MUITO TORTO" (o box do B. MOTORISTA): a linha de vidro tinha um degrau no meio (na
+    # final) e saía inclinada e quebrada no 12K. A faixa volta ao piso do box (o de `fonte_dx` px à esquerda) e a folha
+    # entra reta, de parede a parede, no eixo das duas folhas de correr do PDF (ARQ_LOUÇAS E METAIS, x 2296,9–2298,4), no
+    # desenho do vidro do box do banho varanda (as duas faces cinza e o vidro claro no meio, 1 px cada)
+    "box": {"x": 2297.65, "y": (1216.0, 1305.6), "limpar_x": (2293, 2301), "fonte_dx": 9,
+            "faces": (177, 183, 188), "vidro": (229, 225, 215), "halo": 0.05},
+    # "ADICIONE AS ESCADAS O "S" OU "D" DE SUBIR OU DESCER, LOGO ABAIXO DA SETA": a letra centrada sob o triângulo de cada
+    # escada (o centro de cada triângulo, para achá-lo nos dados do 12K), `folga_px` abaixo da ponta de baixo dele, no
+    # corpo e na cor das descrições (o mesmo desenho das anotações, também no 12K)
+    "letras": {"escadas": [((1052.0, 418.0), "D"), ((914.0, 1094.0), "D"), ((2266.0, 948.0), "S"),
+                           ((2005.5, 1567.3), "S")], "folga_px": 2.5, "cor": (45, 45, 45)},
     "claraboia": {"nome": "PROJ. CLARABOIA", "corpo": 0.9, "centro": (2286.0, 369.0), "livre_px": (2257, 356, 2316, 383)},
 }
 
@@ -533,6 +549,74 @@ def soleira(img, q=None, s=1.0, X0=0.0, Y0=0.0):
     return out
 
 
+def box(img, q=None, s=1.0, X0=0.0, Y0=0.0, ss=8):
+    """A folha do box reta: a faixa limpa com o piso de `fonte_dx` px à esquerda e o vidro (face, vidro, face) no eixo,
+    de parede a parede; px da final -> u = (x - X0) s."""
+    q = q or PEDIDOS_1211C["box"]
+    out = img.astype(np.float32)
+    y0, y1 = q["y"]
+    v0, v1 = int(np.floor((y0 - Y0) * s)), int(np.ceil((y1 - Y0) * s))
+    a0, a1 = int(np.floor((q["limpar_x"][0] - X0) * s)), int(np.ceil((q["limpar_x"][1] - X0) * s))
+    d = int(round(q["fonte_dx"] * s))
+    out[v0:v1, a0:a1] = img[v0:v1, a0 - d:a1 - d].astype(np.float32)
+    # as emendas dos dois lados esfumadas (1 px da final; no 12K, a da esquerda aparecia como um fio)
+    e = max(1, int(round(s)))
+    t = np.linspace(1, 0, e + 2)[1:-1][None, :, None]
+    out[v0:v1, a1 - e:a1] = out[v0:v1, a1 - e:a1] * t + img[v0:v1, a1 - e:a1].astype(np.float32) * (1 - t)
+    t = t[:, ::-1]
+    out[v0:v1, a0:a0 + e] = out[v0:v1, a0:a0 + e] * t + img[v0:v1, a0:a0 + e].astype(np.float32) * (1 - t)
+    # o vidro: três faixas de 1 px (da final), em 8x
+    xc = (q["x"] - X0) * s
+    U0, U1 = int(np.floor(xc - 3 * s)), int(np.ceil(xc + 3 * s))
+    w = U1 - U0
+    xs = (np.arange(w * ss) + 0.5) / ss + U0
+    k = (xs - xc) / s                                         # em px da final, a partir do eixo
+    face = ((np.abs(k) >= 0.5) & (np.abs(k) < 1.5)).astype(np.float32)
+    meio = (np.abs(k) < 0.5).astype(np.float32)
+    halo = ((np.abs(k) >= 1.5) & (np.abs(k) < 2.5)).astype(np.float32)
+
+    def red(x):
+        return x.reshape(w, ss).mean(axis=1)[None, :, None]
+    fa, me, ha = red(face), red(meio), red(halo)
+    reg = out[v0:v1, U0:U1]
+    reg *= 1 - q["halo"] * ha
+    reg[:] = reg * (1 - fa) + np.float32(q["faces"]) * fa
+    reg[:] = reg * (1 - me) + np.float32(q["vidro"]) * me
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def letras(Q, img, q=None, gravar=True):
+    """O S ou o D logo abaixo da seta de cada escada (uma anotação "txt" a mais nos dados do 12K)."""
+    import ampliacao_12k_terreo_casaa as Z
+    import terreo_casaa_1011 as TA
+    q = q or PEDIDOS_1211C["letras"]
+    forma = img.shape[:2]
+    d = json.loads(Z.DADOS.read_text())
+    # as letras de uma rodada anterior saem dos dados (a final de antes não as tem)
+    d["anotacoes"] = [a for a in d["anotacoes"] if not (a[0] == "txt" and a[1][0] in (["S"], ["D"]))]
+    tris = [np.float32(a[1]) for a in d["anotacoes"] if a[0] == "tri"]
+    out = img.astype(np.float32)
+    feitos = []
+    for (cx, cy), L in q["escadas"]:
+        t = min(tris, key=lambda p: float(np.hypot(*(p.mean(axis=0) - (cx, cy)))))
+        x = float(t[:, 0].min() + t[:, 0].max()) / 2
+        topo = float(t[:, 1].max()) + q["folga_px"]
+        dados = [[L], x, topo + 6.0, "centro"]
+        a = Z.alfa_anotacao("txt", dados, forma)
+        ys, xs = np.nonzero(a > 0.3)
+        dados[2] += topo - ys.min()                             # o alto da letra na folga sob a ponta do triângulo
+        dados[1] += x - (xs.min() + xs.max()) / 2
+        a = Z.alfa_anotacao("txt", dados, forma)
+        out = TA.compor(out, a, q["cor"])
+        ys, xs = np.nonzero(a > 0.3)
+        feitos.append(f"{L} em x {xs.min()}-{xs.max()}, y {ys.min()}-{ys.max()}")
+        d["anotacoes"].append(["txt", dados, list(q["cor"])])
+    print(f"    letras das escadas: {'; '.join(feitos)}")
+    if gravar:
+        Z.DADOS.write_text(json.dumps(d, ensure_ascii=False, indent=1) + "\n")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
 def jardim_12k(out, s, X0, Ya3, q=None):
     q = q or PEDIDOS_1211C["jardim"]
     x0, y0, x1, y1 = q["doze_px"]
@@ -556,7 +640,10 @@ ANTES_DEPOIS = {"bege_pergolado": (1080, 840, 1540, 1230), "brises": (1180, 1240
                 "jardim": (2250, 950, 2440, 1040), "sofa": (1860, 340, 2200, 640),
                 "claraboia": (2240, 335, 2360, 425), "lavabo_vaso_bancada": (2250, 340, 2365, 525),
                 "garagem": (2280, 1280, 2700, 1460), "caracol": (1780, 1440, 2060, 1630),
-                "guarda_corpo": (1060, 322, 1600, 362), "soleira": (2460, 320, 2625, 470)}
+                "guarda_corpo": (1060, 322, 1600, 362), "soleira": (2460, 320, 2625, 470),
+                "box_motorista": (2240, 1200, 2330, 1315), "letra_deck": (1020, 395, 1110, 455),
+                "letra_subsolo": (850, 1070, 960, 1135), "letra_jardim": (2240, 925, 2370, 985),
+                "letra_caracol": (1930, 1520, 2040, 1620)}
 
 
 def antes_depois(antes, depois):
@@ -592,6 +679,8 @@ def aplicar(antes):
     out = caracol(Q, out)
     out = guarda_corpo(out)
     out = soleira(out)
+    out = box(out)
+    out = letras(Q, out)
     return out
 
 
@@ -605,6 +694,7 @@ def doze(out, s, X0, Ya3):
     out = bancada_12k(out, s, X0, Ya3)
     out = guarda_corpo(out, s=s, X0=X0, Y0=Ya3)
     out = soleira(out, s=s, X0=X0, Y0=Ya3)
+    out = box(out, s=s, X0=X0, Y0=Ya3)
     return out
 
 
