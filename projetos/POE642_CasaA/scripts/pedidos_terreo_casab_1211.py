@@ -1454,13 +1454,92 @@ def vidros_agua_tb(Q, img, q=VIDROS_AGUA_TB):
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
+# O "?" do usuário na ponta das paredes do BH gourmet da esquerda (usuário, 12/11: "deve ser um defeito a ser
+# removido"): a caixa cinza no nicho entre as duas paredes, acima do BH (no PDF, o retângulo do "Ref." com o tracejado
+# de armário, que a base desenhava como um inox), sai; o nicho fica no travertino da varanda (`pedidos_terreo_casaa_2910.
+# piso_refeito`, das `fontes_px` de logo acima e ao lado), só fora das paredes.
+DEFEITO_TB = {"nicho_px": (1110, 1474, 1210, 1528), "fontes_px": [(1115, 1418, 1205, 1470), (1222, 1478, 1290, 1525)],
+              "semente": 1222}
+
+
+def defeito_tb(Q, img, q=DEFEITO_TB):
+    import pedidos_terreo_casaa_2910 as P
+    x0, y0, x1, y1 = q["nicho_px"]
+    par = cv2.dilate((Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "EST_PILAR") and d.get("fill")
+                                  and max(d["fill"]) < 0.6, ss=2) > 0.3).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    I = img.astype(np.int16)
+    escuro = (I.mean(axis=2) < 92) & ((I.max(axis=2) - I.min(axis=2)) < 14)          # as paredes desenhadas
+    zona = np.zeros(img.shape[:2], bool)
+    zona[y0:y1, x0:x1] = True
+    zona &= ~par & ~dilatar(escuro & par, 1)
+    out = P.piso_refeito(img, zona, q["semente"], dict(P.PISO_TA, fontes_px=q["fontes_px"]))
+    print(f"    BH gourmet da esquerda: a caixa cinza do nicho sai ({int(zona.sum())} px de travertino refeito)")
+    return out
+
+
+# As floreiras das janelas (usuário: "Deixar o tom da vegetação dos jardins nas janelas diferente do terreno"; e, com a
+# imagem de referência: "para floreira use como inspiração um trecho da imagem anexa"): as 4 floreiras da fachada de
+# cima (`floreiras_px`: o miolo verde de cada caixa) recebem a folhagem do trecho da referência (`ref`: a floreira em pé
+# da imagem do quintal, folhagem fina verde-escura com flores brancas miúdas), deitada, na escala da planta (`escala`:
+# a referência a ~97 px/m levada aos 59,7 px/m do quadro), tecida por image quilting; a borda de dentro da caixa com a
+# sombra de contato (`contato`).
+FLOREIRAS_TB = {"floreiras_px": [(1253, 315, 1316, 336), (1481, 315, 1544, 336), (1839, 315, 1926, 335),
+                                 (2666, 315, 2753, 334)],
+                "ref": "_texturas/originais/floreira_flores_brancas_ref.png", "ref_cols": (3, 48), "escala": 0.75, "p_px": 10,
+                # a folhagem mais viva que a da referência reduzida (que fica parda): o matiz para o verde, a saturação
+                # e o brilho acima; e as flores brancas miúdas salpicadas (`flores`: por px², raio px, alfa)
+                "matiz": 6, "sat": 1.45, "brilho": 1.18, "flores": (0.018, 0.55, 0.85), "cor_flor": (232, 240, 242),
+                "contato": (0.30, 1.6), "caixa_lum": 95, "semente": 1223}
+
+
+def floreiras_tb(Q, img, q=FLOREIRAS_TB):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    import texturas
+    ref = cv2.imread(str(RAIZ / q["ref"]))[:, q["ref_cols"][0]:q["ref_cols"][1]]        # sem a borda da floreira
+    ref = cv2.resize(ref, None, fx=q["escala"], fy=q["escala"], interpolation=cv2.INTER_AREA)
+    deitada = np.ascontiguousarray(np.rot90(ref))
+    fontes = [deitada, np.ascontiguousarray(deitada[::-1]), np.ascontiguousarray(deitada[:, ::-1])]
+    out = img.astype(np.float32)
+    I = img.astype(np.int16)
+    for i, (x0, y0, x1, y1) in enumerate(q["floreiras_px"]):
+        h, w = y1 - y0, x1 - x0
+        rng = np.random.default_rng(q["semente"] + i)
+        tec = texturas.quilting(fontes, h, w, p=q["p_px"], sobra=max(3, q["p_px"] // 3), rng=rng)[:h, :w]
+        hsv = cv2.cvtColor(np.clip(tec, 0, 255).astype(np.uint8), cv2.COLOR_BGR2HSV).astype(np.float32)
+        hsv[..., 0] = np.clip(hsv[..., 0] + q["matiz"], 0, 179)
+        hsv[..., 1] = np.clip(hsv[..., 1] * q["sat"], 0, 255)
+        hsv[..., 2] = np.clip(hsv[..., 2] * q["brilho"], 0, 255)
+        tec = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR).astype(np.float32)
+        dens, raio, alfa = q["flores"]
+        fl = np.zeros((h * 4, w * 4), np.float32)
+        for _ in range(int(dens * h * w)):
+            cx, cy = rng.uniform(1, w - 1), rng.uniform(1, h - 1)
+            cv2.circle(fl, (int(cx * 4), int(cy * 4)), max(1, int(round(raio * 4 * rng.uniform(0.8, 1.3)))), 1.0, -1,
+                       cv2.LINE_AA)
+        fl = cv2.resize(fl, (w, h), interpolation=cv2.INTER_AREA)[..., None] * alfa
+        tec = tec * (1 - fl) + np.float32(q["cor_flor"]) * fl
+        reg = I[y0:y1, x0:x1]
+        # o miolo: o que não é a caixa (cinza escuro e neutro)
+        miolo = ~((reg.mean(axis=2) < q["caixa_lum"]) & ((reg.max(axis=2) - reg.min(axis=2)) < 12))
+        miolo = ndimage.binary_fill_holes(ndimage.binary_closing(miolo, np.ones((3, 3))))
+        dist = cv2.distanceTransform(miolo.astype(np.uint8), cv2.DIST_L2, 3)
+        k, alc = q["contato"]
+        tec *= (1 - k * np.exp(-(dist - 1) / alc))[..., None]
+        a = cv2.GaussianBlur(miolo.astype(np.float32), (0, 0), 0.5)[..., None]
+        out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a) + tec * a
+    print(f"    floreiras das janelas: {len(q['floreiras_px'])} com a folhagem verde-escura e as flores brancas da "
+          f"referência")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_tb), ("deck", deck_tb), ("portas", portas_tb),
           ("escadas", escadas_tb), ("entrada", entrada_tb),
           ("tracejados", tracejados_tb), ("moveis", moveis_tb), ("closets", closets_tb), ("banco", banco_closet_tb),
           ("espreguicadeiras", espreguicadeiras_tb), ("folhas", folhas_tb),
           ("gramado", gramado_tb), ("jardins", jardins_tb), ("perimetro", perimetro_tb),
-          ("pergolado", pergolado_tb), ("vidros_agua", vidros_agua_tb)]
+          ("pergolado", pergolado_tb), ("vidros_agua", vidros_agua_tb),
+          ("defeito", defeito_tb), ("floreiras", floreiras_tb)]
 
 
 def correcoes(img, de=None, ate=None, salvar_passos=None):
