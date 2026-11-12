@@ -1963,6 +1963,13 @@ vasos, como no Subsolo). Sobre a final de cada pavimento (a de 1415b75):
   parede é refeito pelo entorno (inpaint); e a mancha clara pequena no miolo da louça (até `miolo_max_px` 40 px, sem
   encostar na caixa: o ponto cinza de 4x4 px junto à parede e um ponto solto no vaso do lavabo).
 
+- **Claraboia sem o X (`CLARABOIA`, `claraboia_sai`, `claraboia`; usuário: "Na claraboia não precisa do X, apenas os
+  traços na horizontal"):** na caixa da claraboia do lavabo do Térreo, a camada dos tracejados finos do 12K
+  (`renders/POE642_CasaA_PH_Terreo_12K_tracejados.png`) mantém só a linha horizontal (as linhas com traço em ao menos
+  25% da largura da caixa); o resto (as diagonais, o X do meio e os resíduos junto às faces das paredes) sai. Na final,
+  o piso por baixo do que saiu volta da entrada da IA do 12K (fora dos traços, idêntica à final), fora das faces das
+  paredes; no 12K, `montar12k` zera esses traços na camada. Passo final de `aplicar` no Térreo.
+
 **O 12K (A e B), sem IA nova:** `regras_1211_casaa.py <pav> --entrada12k <cópia da entrada de antes>` grava a final e
 passa à entrada da IA do 12K o que mudou na final (fora dos textos e tracejados que a entrada não tem). Térreo: a saída
 corrigida da IA (`renders/POE642_CasaA_PH_Terreo_12K_saida_nano_banana_pro.png`) remendada onde a entrada mudou

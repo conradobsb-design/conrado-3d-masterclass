@@ -501,6 +501,9 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
     tr = cv2.imread(str(TRACOS))
     alfa_tr = tr[..., 0].astype(np.float32) / 255
     alfa_tr[sem_tracos] = 0
+    sai_cl = RG.claraboia_sai(PAV)          # a claraboia sem o X, só o tracejado horizontal (12/11)
+    if sai_cl is not None:
+        alfa_tr[sai_cl] = 0
     cor_tr = np.where(tr[..., 1] > 127, np.float32(TA.FINOS_TA["claro"][0]), np.float32(TA.FINOS_TA["escuro"][0]))
     sf = 2.0 * L / Wa0
     for y in range(0, Hh, 1024):

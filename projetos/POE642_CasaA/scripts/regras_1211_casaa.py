@@ -371,6 +371,61 @@ def objetos_pdf(Q):
     return ndimage.binary_dilation(obj, iterations=q["folga_px"])
 
 
+# Térreo, a claraboia do lavabo (usuário, 12/11: "Na claraboia não precisa do X, apenas os traços na horizontal"; "Falei
+# para remover o x tracejado da claraboia mantendo apenas o tracejado horizontal"): saem as diagonais e o X do meio;
+# fica a linha tracejada horizontal. Na camada dos tracejados finos do 12K (`..._12K_tracejados.png`), na caixa da
+# claraboia, fica só a linha horizontal (as linhas com traço em ao menos `linha_min` da largura da caixa); o resto sai, com os resíduos junto às faces das paredes. Na final, o piso
+# por baixo do que sai vem da entrada da IA do 12K (a final antes dos tracejados finos: fora dos traços, idêntica à
+# final), só no piso (fora das faces das paredes, abaixo de `face_y`).
+CLARABOIA = {"Terreo": {"caixa_px": (2252, 349, 2348, 401), "piso_x": (2257, 2341), "face_y": 357,
+                        "linha_min": 0.25, "limiar": 20}}
+
+
+def claraboia_sai(pav, q=None):
+    """A máscara (px da final) do que sai da claraboia na camada dos tracejados finos, ou None se o pavimento não tem."""
+    q = q or CLARABOIA
+    if pav not in q:
+        return None
+    c = q[pav]
+    tr = cv2.imread(str(FINAIS[pav].parent / f"POE642_CasaA_PH_{pav}_12K_tracejados.png"))[..., 0].astype(np.int16)
+    x0, y0, x1, y1 = c["caixa_px"]
+    a = tr[y0:y1, x0:x1]
+    linha = (a > c["limiar"]).sum(axis=1) >= c["linha_min"] * (x1 - x0)
+    # (a linha horizontal é de 2 px sem franja: o que encosta nela por cima ou por baixo é a ponta das diagonais)
+    fica = np.zeros(a.shape, bool)
+    fica[linha] = a[linha] > 0
+    sai = np.zeros(tr.shape, bool)
+    sai[y0:y1, x0:x1] = (a > 0) & ~fica
+    return sai
+
+
+def claraboia(pav, img, q=None):
+    q = q or CLARABOIA
+    sai = claraboia_sai(pav, q)
+    if sai is None:
+        return img
+    c = q[pav]
+    import ampliacao_12k_terreo_casaa as Z
+    dados = __import__("json").loads(Z.DADOS.read_text())["recortes"]
+    ent = cv2.imread(str(Z.ENTRADA_IA))
+    X0, Yia = dados["X0"], dados["Yia"]
+    x0, y0, x1, y1 = c["caixa_px"]
+    piso = np.zeros(sai.shape, bool)
+    piso[y0:y1, x0:x1] = True
+    face = np.zeros(sai.shape, bool)
+    face[c["face_y"]:y1, x0:c["piso_x"][0]] = True
+    face[c["face_y"]:y1, c["piso_x"][1]:x1] = True
+    zona = ndimage.binary_dilation(sai, iterations=1) & piso & ~face
+    E = np.zeros_like(img)
+    E[Yia:Yia + ent.shape[0], X0:X0 + ent.shape[1]] = ent
+    zona &= (img != E).any(axis=2)
+    out = img.copy()
+    out[zona] = E[zona]
+    print(f"    claraboia: sem o X (diagonais e o X do meio), só o tracejado horizontal; {int(zona.sum())} px do piso "
+          f"de volta; {int(sai.sum())} px fora da camada dos tracejados do 12K")
+    return out
+
+
 def aplicar(pav, antes):
     Q = quadro(pav)
     out = np.ascontiguousarray(antes.copy())
@@ -385,6 +440,7 @@ def aplicar(pav, antes):
     protegido |= ndimage.binary_dilation(folhas, iterations=1) | objetos_pdf(Q)
     out = BS.paredes_retas(Q, out, protegido, FA, q)
     out = vasos(pav, Q, out)
+    out = claraboia(pav, out)
     return out
 
 
