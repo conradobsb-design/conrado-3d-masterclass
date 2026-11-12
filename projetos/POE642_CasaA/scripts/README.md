@@ -1878,14 +1878,29 @@ Pedido do usuário: "NA HORA DE GERAR O 4K, PRECISO QUE TRAGA REALISMO AOS MATER
 BANANA PRO DE FORMA QUE TRAGA O MÁXIMO DE FOTOREALISMO [...] MAS MANTENDO PROPORÇÃO, ESCALA, MATERIAIS E QUALIDADE." O
 prompt (em inglês, a língua em que o modelo segue melhor as restrições) tem quatro blocos: (1) a trava: a entrada é o
 mapa exato de posição, escala e material, alinhada px a px, nada acrescentado, tirado, girado ou redesenhado, sem texto;
-(2) a meta: render de path tracer (qualidade Corona/V-Ray) visto de cima, luz difusa do alto à direita (a das sombras da
-final), só a física acrescentada (microtextura na escala real, relevo, oclusão nos cantos, sombras de contato curtas,
+(2) a meta: render de path tracer (qualidade Corona/V-Ray) visto de cima, com iluminação neutra e uniforme, sem luz natural
+(usuário: "TEM UM DETALHE NO PROMPT QUE NÃO PODE TER: ILUMINAÇÃO NATURAL"; a 1ª versão pedia luz do dia nublada do alto
+à direita, e a IA pôs fachos de luz em diagonal nos banhos), só a física acrescentada (microtextura na escala real, relevo, oclusão nos cantos, sombras de contato curtas,
 reflexos leves), sem mudar cor, brilho e contraste; (3) cada material no lugar dele e na escala real (paredes grafite
 lisas; vinílico de carvalho claro em fiadas de 20 cm na horizontal, com a régua "a largura de uma esteira cobre umas 4
 fiadas"; os aparelhos; Bege Bahia sem juntas; travertino bruto; louças, metais, granito marrom das cubas; vidros com
 perfil preto fino; prateleiras; elevador; escada; grama na escala); (4) o que evitar (perspectiva, efeitos de lente,
-grão, ar de ilustração, mudança de tom, linhas tortas, peças a mais ou a menos, juntas onde não há). Aguarda o OK do
-usuário para a rodada do 4K/12K do Subsolo.
+grão, ar de ilustração, mudança de tom, linhas tortas, peças a mais ou a menos, juntas onde não há).
+
+**A rodada (12/11, "APROVADO. VAMOS VER COMO FICA"):** `preparar` (a entrada sem textos, com a academia nova); Nano Banana
+Pro 4K 4:3 com `PROMPT_FOTO`, duas variações por vez. Com o prompt da luz do dia (jobs 11e7ffdd-7173-40ba-ab44-4da65c3c895d
+e 06ca9535-d4f4-4de4-904d-bf46a028ebcb), materiais bem mais reais, mas fachos de luz, sombra em volta da casa e trechos
+redesenhados (um ambiente novo fora da casa, o depósito virando outro ambiente). Com o prompt sem luz natural (jobs
+29e35837-a5f3-441d-b643-5047121d1429 e 7320ac0b-7eda-45c0-a04b-d7573c0816b8): luz uniforme, nada fora da casa; a 2ª
+ainda dividiu o depósito em ambientes; a 1ª manteve a planta (só o elevador e os shafts escureceram e o supino e as
+bicicletas mudaram de desenho). Ficou a 29e35837 (a saída bruta fica fora do git; a corrigida é
+`renders/POE642_CasaA_PH_Subsolo_A3_saida_nano_banana_pro.png`), com
+`corrigir --estrutura` (`ESTRUTURA`, `mascara_estrutura`): onde a estrutura (passa-banda) foge mais que 7, crescido 3 px,
+mais os aparelhos inteiros, a escada e os buracos pequenos da máscara, vem da entrada (21,9% da casa: paredes, portas,
+vidros, louças, bancadas, peças); antes de juntar, os tons da IA casados com os da entrada (sem isso, a borda da máscara
+virava um contorno claro ondulado). Da IA ficam os pisos (vinílico, Bege Bahia, travertino) e a grama, nos tons da final.
+O fundo fora da planta volta ao branco no `montar`. Depois, Topaz High Fidelity V2 a 12288 x 9175 (job
+559ee4dc-750a-47e9-9b89-ebce22d49e71, fora do git) e `montar12k` (A e B).
 
 ### As correções do cliente no Térreo da Casa A: `terreo_casaa_1011.py` (10/11)
 

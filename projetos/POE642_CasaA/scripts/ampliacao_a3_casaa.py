@@ -58,7 +58,8 @@ A3 = {"px": (4961, 3508), "dpi": 300, "margem_px": 150, "branco": 245, "ia": (4,
 # MATERIAIS [...] MAS MANTENDO PROPORÇÃO, ESCALA, MATERIAIS E QUALIDADE"): a entrada é o mapa exato (posição, escala e
 # material de cada coisa); a IA só acrescenta a física (microtextura na escala real, relevo, oclusão nos cantos, sombras
 # de contato curtas, reflexos leves), sem mudar cor, brilho, desenho ou tamanho. Em blocos: o que travar; a meta (render
-# de path tracer visto de cima, luz difusa do alto à direita, como as sombras da final); cada material no lugar dele e na
+# de path tracer visto de cima, iluminação neutra e uniforme, sem luz natural: usuário, "TEM UM DETALHE NO PROMPT QUE NÃO
+# PODE TER: ILUMINAÇÃO NATURAL"); cada material no lugar dele e na
 # escala real (a régua do vinílico: a largura de uma esteira cobre ~4 fiadas de 20 cm); o que evitar.
 PROMPT_FOTO = (
     "Photorealistic 4K re-render of the reference image: a top-down orthographic architectural floor plan (humanized "
@@ -68,10 +69,11 @@ PROMPT_FOTO = (
     "restyle anything. Do not add text, letters, numbers, arrows, triangles, symbols, people, plants, rugs or "
     "decorations.\n\n"
     "Goal: the look of a high-end architectural visualization rendered in a physically based path tracer (Corona / "
-    "V-Ray quality), real materials photographed from straight above under soft, diffuse, overcast daylight coming "
-    "slightly from the upper right. Add only physical realism: true-to-scale material micro-texture, subtle surface "
-    "relief, soft ambient occlusion where floors meet walls and fixtures, short soft contact shadows under objects "
-    "matching the existing ones, and gentle natural reflections on glossy surfaces. Keep the overall colors, "
+    "V-Ray quality), real materials seen from straight above under neutral, perfectly even, uniform illumination: "
+    "no natural lighting, no sunlight, no daylight, no window light, no light beams, no light falloff or gradients "
+    "across the rooms, every room lit the same. Add only material realism: true-to-scale material micro-texture, "
+    "subtle surface relief, soft ambient occlusion where floors meet walls and fixtures, the same short soft contact "
+    "shadows under objects as in the reference, and gentle reflections on glossy surfaces. Keep the overall colors, "
     "brightness, white balance and contrast of the reference.\n\n"
     "Materials, exactly where they are in the reference and at real-world scale:\n"
     "- Walls: solid matte dark graphite poché, perfectly flat, razor-sharp straight edges and square corners, no "
@@ -100,8 +102,9 @@ PROMPT_FOTO = (
     "- Lawn on the left: dense natural grass seen from above, fine short blades, subtle tonal variation, the same dark "
     "olive green and the same small scale, no large blades, no flowers.\n"
     "- Background outside the building: pure white (#FFFFFF), untouched.\n\n"
-    "Strictly avoid: perspective or tilt, 3D extrusion of walls, lens effects, vignetting, depth of field, bloom, "
-    "glare, film grain, noise, painterly, illustrated, cartoon or plastic CGI look, color shifts, warmer or cooler "
+    "Strictly avoid: natural lighting, sun rays, daylight patches, light streaks or shafts, cast shadows from "
+    "windows, shadows outside the building, perspective or tilt, 3D extrusion of walls, lens effects, vignetting, "
+    "depth of field, bloom, glare, film grain, noise, painterly, illustrated, cartoon or plastic CGI look, color shifts, warmer or cooler "
     "tint, brighter or darker image, wavy or bent lines, smudges, melted details, duplicated or missing objects, a "
     "different plank size or direction, and grout lines or tiles where there are none.")
 
@@ -440,6 +443,54 @@ CORRECAO = {"nitidez": (0.6, 1.2), "borda_px": 2.0}
 # final contra a de antes (`MUDOU["antes"]`, a final de quando a IA foi feita) também vem da entrada nova, px a px (o que
 # difere mais que `limiar`, crescido `folga_px`); os aparelhos da academia, que não mudaram, ficam os da IA
 MUDOU = {"antes": None, "limiar": 6, "folga_px": 2}
+# depois (12/11, o prompt fotorrealista `PROMPT_FOTO`; com `--estrutura`): a IA, mais livre, trouxe os materiais mais reais
+# mas redesenhou trechos (um ambiente novo fora da casa, as paredes do BH. SERV., o portal do depósito, o supino e as
+# bicicletas). Da IA fica só o que manteve o desenho: onde a estrutura (passa-banda, px da entrada) foge mais que
+# `limiar`, crescido `folga_px`, vem da entrada; e também, inteiros, os aparelhos da academia (o retângulo de cada peça
+# de `biblioteca_subsolo_casaa_1211.ACADEMIA`, com a `escala`/`largura_m`, e `peca_folga_px`), a escada e os buracos
+# pequenos da máscara (até `buraco_max_px`). Na prática: paredes, portas, vidros, louças, bancadas e peças da final;
+# pisos e grama da IA (os tons casados com a final no `montar`)
+ESTRUTURA = {"ligada": False, "limiar": 7.0, "folga_px": 3, "peca_folga_px": 4, "buraco_max_px": 900,
+             "caixas_px": {"escada": (900, 1050, 1090, 1132)}}
+
+
+def mascara_estrutura(ia, entrada, T):
+    """A máscara (px da entrada) do que a IA redesenhou: a estrutura que foge, os aparelhos da academia, a escada."""
+    from scipy import ndimage
+    import biblioteca_subsolo_casaa_1211 as BS
+    q = ESTRUTURA
+    Hc, Wc = entrada.shape[:2]
+    rc = json.loads(AJUSTE_ROT.read_text())["recortes"]
+    X0, Yia = rc["X0"], rc["Yia"]
+    al = cv2.warpAffine(ia, T, (Wc, Hc), flags=cv2.INTER_AREA | cv2.WARP_INVERSE_MAP, borderValue=(255, 255, 255))
+    g0 = cv2.GaussianBlur(cv2.cvtColor(entrada, cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    g1 = cv2.GaussianBlur(cv2.cvtColor(al, cv2.COLOR_BGR2GRAY).astype(np.float32), (0, 0), 1.2)
+    b0, b1 = g0 - cv2.GaussianBlur(g0, (0, 0), 4), g1 - cv2.GaussianBlur(g1, (0, 0), 4)
+    ds = cv2.GaussianBlur(np.abs(b0 - b1), (0, 0), 2)
+    casa = cv2.cvtColor(entrada, cv2.COLOR_BGR2GRAY) < 245
+    k = 2 * q["folga_px"] + 1
+    m = cv2.dilate(((ds > q["limiar"]) & casa).astype(np.uint8), np.ones((k, k), np.uint8)) > 0
+    import final3840_casaa as FA_
+    import contextlib
+    import io
+    with contextlib.redirect_stdout(io.StringIO()):
+        Q = FA_.QuadroA("Subsolo")
+    f = q["peca_folga_px"]
+    for pc in BS.ACADEMIA["pecas"]:
+        x0, y0, x1, y1 = BS.caixa_px(Q, pc["pt"])
+        e = pc.get("escala", 1.0)
+        if "largura_m" in pc:
+            e = pc["largura_m"] * Q.px_m / (x1 - x0)
+        cx, cy, mw, mh = (x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) * e / 2 + f, (y1 - y0) * e / 2 + f
+        m[max(int(cy - mh) - Yia, 0):int(np.ceil(cy + mh)) - Yia, max(int(cx - mw) - X0, 0):int(np.ceil(cx + mw)) - X0] = True
+    for x0, y0, x1, y1 in q["caixas_px"].values():
+        m[y0 - Yia:y1 - Yia, x0 - X0:x1 - X0] = True
+    buracos = ndimage.binary_fill_holes(m) & ~m
+    n, lab, st, _ = cv2.connectedComponentsWithStats(buracos.astype(np.uint8), 4)
+    peq = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= q["buraco_max_px"]])
+    m |= peq
+    print(f"    estrutura: {m[casa].mean() * 100:.1f}% da casa vem da entrada (paredes, peças, aparelhos, escada)")
+    return m.astype(np.float32)
 
 
 def corrigir_ia(saida_ia, destino):
@@ -466,6 +517,13 @@ def corrigir_ia(saida_ia, destino):
         pts = np.float32([[x0 - X0, y0 - Yia], [x1 - X0, y0 - Yia], [x1 - X0, y1 - Yia], [x0 - X0, y1 - Yia]])
         pq = cv2.transform(pts[None], T)[0]
         cv2.fillConvexPoly(m, np.int32(np.round(pq)), 1.0)
+    if ESTRUTURA["ligada"]:
+        m = np.maximum(m, cv2.warpAffine(mascara_estrutura(ia, entrada, T), T, (Wi, Hi), flags=cv2.INTER_LINEAR))
+        # antes de juntar, os tons da IA (a baixa frequência) casados com os da entrada: a IA esfriou os pisos, e sem
+        # isso a borda da máscara ficava um contorno claro ondulado
+        sg = A3["tom_sigma_px"] * Wi / Wc
+        iaf = ia.astype(np.float32)
+        ia = np.clip(iaf + cv2.GaussianBlur(ref, (0, 0), sg) - cv2.GaussianBlur(iaf, (0, 0), sg), 0, 255)
     if MUDOU["antes"]:
         a0, a1 = cv2.imread(str(MUDOU["antes"])), cv2.imread(str(FINAL_SUB))
         d = (np.abs(a0.astype(np.int16) - a1.astype(np.int16)).max(axis=2) > MUDOU["limiar"]).astype(np.uint8)
@@ -653,6 +711,8 @@ if __name__ == "__main__":
     m3 = sub.add_parser("corrigir", help="a saída da IA (4K) com os trechos inventados vindos da entrada")
     m3.add_argument("saida_ia", type=Path)
     m3.add_argument("destino", type=Path)
+    m3.add_argument("--estrutura", action="store_true",
+                    help="o que a IA redesenhou (a estrutura que foge, os aparelhos, a escada) vem da entrada (`ESTRUTURA`)")
     m3.add_argument("--antes_final", type=Path, default=None,
                     help="a final de quando a IA foi feita: o que mudou nela vem da entrada nova (`MUDOU`)")
     m2 = sub.add_parser("montar12k", help="a saída do Topaz (12K) -> os JPGs das opções A e B")
@@ -665,6 +725,7 @@ if __name__ == "__main__":
         montar(a.saida_ia)
     elif a.etapa == "corrigir":
         MUDOU["antes"] = a.antes_final
+        ESTRUTURA["ligada"] = a.estrutura
         corrigir_ia(a.saida_ia, a.destino)
     else:
         montar_grande(a.saida_topaz, a.largura)
