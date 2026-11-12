@@ -2115,6 +2115,45 @@ em `renders/POE642_CasaA_PH_Terreo_1211c_<pedido>_antes_depois.jpg`); o 12K pelo
 `pedidos_terreo_casaa_1211c.doze` depois do `pecas_12k`); depois prancha, PDF e book. Atenção: o `preparar` do 12K acha
 os rótulos da final pelas buscas de corpo; o JARDIM no corpo 0,9 fica gravado direto nos dados.
 
+### As peças da biblioteca no 1º Pavimento: `biblioteca_1pav_casaa_1211.py` (12/11)
+
+**Pedido:** "Vamos revisar os mobiliários do 1° pavimento da casa A"; a proposta
+(`renders/POE642_CasaA_PH_1Pavimento_1211_proposta_biblioteca_{1,2,3}.jpg`) aprovada com "OK, pode aplicar as
+recomendadas". Nas perguntas abertas, o recomendado: as camas da biblioteca (A, creme) no lugar das de manta bordô; os
+vasos sanitários brancos (bacia Carrara); os closets como estão (os cabides).
+
+**Como foi feito:** a biblioteca `biblioteca-objetos/03-primeiro-pavimento` (no git, a pasta inteira, 43 PNG) entra
+peça a peça no retângulo da peça do PDF (o centro, o tamanho e o giro dele), com `pousar`, `preparar` e as sombras do
+Térreo (`biblioteca_terreo_casaa_1211`). `AMBIENTES`: por ambiente, as zonas (retângulos da pegada das antigas com a
+folga da sombra), o que fica (`manter`: as cadeiras de madeira e linho, o rack da TV da suíte 3, as mesinhas
+redondas da suíte master e da suíte 2) e o que volta recortado por cima (`recolar`: a mesa de centro de nogueira da
+sala íntima, o banco aos pés da cama king, o laptop da suíte 1, a TV da suíte 2). Os rótulos e as anotações (dados do
+12K) não são refeitos nem cobertos.
+- **O piso por baixo (`piso_de_volta`):** na planta-base os móveis e os tapetes são brancos; cada px da zona fora dos
+  tapetes que ficam (`TAPETES_FICAM`: os das suítes 1, 2 e 3) leva o material do piso mais perto (vinílico,
+  travertino ou Bege Bahia). Vinílico e travertino saem do próprio gerador (`um_pav_casaa_1111.pisos_1111e`, com a zona
+  marcada no material numa cópia da planta-base, `forcar_px` nas caixas da zona e a luz do entorno por baixo, inpaint):
+  a mesma semente e a mesma paginação, as réguas continuam. O Bege Bahia (banho e quarto de serviço) e os tapetes que
+  ficam, do tecido do próprio material (`PT.piso_refeito`, fontes no mesmo tom, `fontes_auto`).
+- **As peças:** sala íntima (sofá em L A, espelhado na antidiagonal para o L do PDF; poltrona A; 3 mesas laterais;
+  tapete; vaso de folhagem); suíte master (cama king A, 2 criados, poltrona, pufe no lugar do pufe antigo, tapete);
+  suíte 1 (2 camas de solteiro A, 3 criados, a bancada da escrivaninha); suíte 2 (cama de casal A, 2 criados
+  retangulares como no PDF, a bancada do rack, a poltrona A); suíte 3 (cama de casal A, 2 criados redondos, a bancada
+  da escrivaninha); quarto de serviço (cama de solteiro A); banho master (bancada dupla esculpida do render, banheira
+  oval A com o misturador de piso no lugar do PDF, bacia Carrara, 2 chuveiros quadrados, a floreira de cactos e
+  folhagem); banhos 1, 2 e 3 (cuba esculpida em travertino na bancada do PDF, `cuba_na_bancada`: a cuba no lugar do
+  PDF, só os lados lisos esticados, `MIOLO_CUBA`; bacia Carrara; chuveiro quadrado com o braço até a parede); banho
+  de serviço (cuba no granito na bancada do PDF, bacia Monte Carlo, chuveiro redondo). Os closets e as mesinhas
+  redondas ficam.
+- **O 12K (A e B):** `montar12k` chama `pecas_12k` no 1º Pavimento: a final ampliada na zona refeita sobre a saída da IA
+  e as peças nítidas dos PNG (registro em `renders/POE642_CasaA_PH_1Pavimento_12K_biblioteca.json` e
+  `..._12K_biblioteca_zona.png`). Sem IA nova (Topaz 24b977d2).
+
+**Como refazer:** `python3 biblioteca_1pav_casaa_1211.py` (parte da final de `ANTES_COMMIT` = 127eabc; sem `--saida`
+grava a final, o registro do 12K e os antes e depois `renders/POE642_CasaA_PH_1Pavimento_1211b_<ambiente>_antes_depois.jpg`);
+depois `ampliacao_12k_1pav_casaa.py montar12k <Topaz> --opcao AB`, `rodape_entrega.py --no-quadro --render
+1Pavimento=../renders/POE642_CasaA_PH_1Pavimento_v7_final_rotulos.png`, `pdf_entrega.py` e `book_entrega.py`.
+
 ### As correções do cliente no Térreo da Casa A: `terreo_casaa_1011.py` (10/11)
 
 Lista do cliente (Paulo Octávio) com os recortes da planta do Térreo, e as respostas do usuário. Um passo por pedido, sobre a final do Térreo do commit 58ea098 (a mesma de 0a17741), na ordem de `PASSOS`:
