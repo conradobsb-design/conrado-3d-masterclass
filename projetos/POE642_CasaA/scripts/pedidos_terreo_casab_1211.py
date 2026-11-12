@@ -2298,7 +2298,10 @@ def varanda_ia_tb(Q, img, q=VARANDA_IA_TB):
 #   3. as 2 poltronas e a mesa de centro: o recorte maior do estar (com o sofá A já posto) foi de novo à IA, com a opção
 #      B de referência, para as poltronas inteiras em terracota (concha e assento) e a mesa de centro sem o contorno
 #      cinza, com a sombra macia no tapete (a opção B corta a 1ª poltrona na borda e deixa a 2ª de fora); silhuetas do
-#      PDF 64047, 64139 e 64285, e em volta, até `sombra_px`, a sombra da IA esmaecendo para fora.
+#      PDF 64047, 64139 e 64285, e em volta, até `sombra_px`, a sombra da IA esmaecendo para fora;
+#   4. o banco trançado aos pés do estar (usuário: "melhore o aspecto com realismo desse banco trançado. me apresente duas
+#      opções para aprovar"; "OPÇÃO BANCO b"): a opção B, estrutura de nogueira e trama de cordão de papel off-white, na
+#      silhueta do PDF (67349), metade sobre o tapete e metade sobre o travertino, com a sombra curta da IA.
 # Em cada camada: cada peça + `cresce_px`, somada ao que a IA desenhou como peça encostado nela (o que foge do fundo
 # original limpo, sem contar a sombra); no tom da IA com o ganho do fundo (piso e tapete fora das peças, original sobre
 # IA); o que da peça antiga sobra fora da nova volta ao fundo limpo; o que uma camada anterior já pôs fica (a mesa
@@ -2311,7 +2314,10 @@ LIVING_IA_TB = {"camadas": [
      "caixa_px": (1700, 722, 2064, 927), "pecas": [78383, 63984]},
     {"nome": "poltronas e mesa de centro (no estilo da opção B)",
      "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_living_estar_nbp_alinhado.png",
-     "caixa_px": (1660, 805, 1980, 985), "pecas": [64047, 64139, 64285], "sombra_px": 7.0}],
+     "caixa_px": (1660, 805, 1980, 985), "pecas": [64047, 64139, 64285], "sombra_px": 7.0},
+    {"nome": "banco trançado (opção B: nogueira e cordão off-white)",
+     "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_opcao_bancoB_nbp_alinhado.png",
+     "caixa_px": (1740, 920, 1990, 1061), "pecas": [67349], "sombra_px": 4.0}],
     "cresce_px": 2, "perto_px": 4, "peca_ab_min": 7.0, "peca_l_min": 9.0, "ganho_lim": (0.92, 1.08), "linha_lum": 110,
     "fora_px": [(2034, 722, 2064, 927), (1810, 970, 1920, 1010)]}
 
@@ -2435,7 +2441,7 @@ def living_ia_tb(Q, img, q=LIVING_IA_TB):
     for cam in q["camadas"]:
         out, pg = _living_camada(Q, out, cam, q, feito)
         feito = np.maximum(feito, pg)
-    print(f"    estar do living: o sofá da opção A; a mesa lateral, a arandela, as 2 poltronas e a mesa de centro com "
+    print(f"    estar do living: o sofá da opção A; a mesa lateral, a arandela, as 2 poltronas, a mesa de centro e o banco com "
           f"a sombra no estilo da opção B (Nano Banana Pro, nas silhuetas do PDF)")
     return out
 
