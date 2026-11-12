@@ -81,23 +81,26 @@ AMBIENTES = {
         "pecas": [
             ("suite-master/tapete", 1505.5, 1341.0, 209.0, 143.3, 0.0, "tapete", None),
             ("suite-master/cama-king-a", 1506.0, 1388.5, 124.2, 130.8, 180.0, "movel", None),
+            # (12/11, "GERE UM BANCO NOVO NO HIGGSFIELD") o banco aos pés da cama, gerado para a biblioteca
+            ("suite-master/banco-pe-de-cama", 1506.0, 1308.0, 95.5, 23.9, 0.0, "movel", None),
             ("suite-master/criado-retangular-vista-superior", 1417.0, 1439.0, 41.8, 23.9, 0.0, "movel", "tom_bancada"),
             ("suite-master/criado-retangular-vista-superior", 1595.0, 1439.0, 41.8, 23.9, 0.0, "movel", "tom_bancada"),
             # (12/11, revisão das poltronas) a frente para o pufe, na normal da borda reta do assento do PDF
             # (1640,7;1381,8)-(1674,3;1362,4): -150° (antes, para baixo e à esquerda, com o encosto para o pufe)
             ("suite-master/poltrona", 1671.0, 1394.0, 54.0, 56.0, -150.0, "movel", None),
             ("suite-master/pufe", 1653.0, 1363.0, 42.0, 22.0, 35.0, "baixa", None)],
-        # o banco aos pés da cama (o da final) volta por cima do tapete novo
         "abajures": [(1417.0, 1439.0, 19.0), (1595.0, 1439.0, 19.0)],
-        "recolar": [((1456, 1294, 1556, 1320), "baixa")]},
+        "recolar": []},
     "suite_1": {
         "zonas": [(2304, 1447, 2372, 1574), (2409, 1447, 2477, 1574), (2269, 1541, 2512, 1573),
-                  (2359, 1329, 2517, 1372)],
+                  (2359, 1329, 2517, 1372), (2297, 1424, 2374, 1453), (2402, 1424, 2479, 1453)],
         "manter": [(2456, 1369, 2498, 1395)],               # a cadeira de madeira e linho (fora da mesa)
         "pecas": [
             ("suite-1/bancada-suites", 2438.0, 1350.5, 149.3, 35.8, 0.0, "mesa", None),
             ("suite-1/cama-solteiro-a", 2338.0, 1510.5, 59.7, 119.4, 180.0, "movel", None),
             ("suite-1/cama-solteiro-a", 2443.0, 1510.5, 59.7, 119.4, 180.0, "movel", None),
+            ("suite-1/banco-pe-de-cama-solteiro", 2338.0, 1439.0, 53.7, 17.9, 0.0, "movel", None),
+            ("suite-1/banco-pe-de-cama-solteiro", 2443.0, 1439.0, 53.7, 17.9, 0.0, "movel", None),
             ("suite-1/criado-retangular-vista-superior", 2289.0, 1557.0, 32.8, 23.9, 0.0, "movel", "tom_bancada"),
             ("suite-1/criado-retangular-vista-superior", 2390.5, 1557.0, 32.8, 23.9, 0.0, "movel", "tom_bancada"),
             ("suite-1/criado-retangular-vista-superior", 2492.0, 1557.0, 32.8, 23.9, 0.0, "movel", "tom_bancada")],
@@ -107,11 +110,12 @@ AMBIENTES = {
         "recolar": [((2466, 1338, 2488, 1360), "baixa", "cheio")]},
     "suite_2": {
         "zonas": [(1702, 1081, 1829, 1209), (1664, 1177, 1868, 1209), (1619, 1014, 1675, 1070),
-                  (1684, 1003, 1847, 1026)],
+                  (1684, 1003, 1847, 1026), (1704, 1054, 1822, 1088)],
         "manter": [(1664, 1012, 1685, 1034)],               # a mesinha redonda
         "pecas": [
             ("suite-2/bancada-suites", 1765.5, 1014.5, 155.2, 14.9, 0.0, "baixa", None),
             ("suite-2/cama-casal-a", 1765.5, 1145.0, 119.4, 119.4, 180.0, "movel", None),
+            ("suite-master/banco-pe-de-cama", 1765.5, 1072.0, 95.5, 23.9, 0.0, "movel", None),
             ("suite-1/criado-retangular-vista-superior", 1684.5, 1193.0, 32.8, 23.9, 0.0, "movel", "tom_bancada"),
             ("suite-1/criado-retangular-vista-superior", 1847.5, 1193.0, 32.8, 23.9, 0.0, "movel", "tom_bancada"),
             ("sala-intima/poltrona-a", 1647.0, 1042.0, 48.0, 48.0, girar_pt(0.75, 0.66), "movel", None)],
@@ -121,12 +125,13 @@ AMBIENTES = {
         "recolar": [((1724, 1010, 1807, 1016), None, "escuro")]},
     "suite_3": {
         # (o pé da cama antiga ia até y 485, por cima do banco do PDF: a zona vai até o banco, y 486)
-        "zonas": [(1676, 339, 1808, 486), (1637, 340, 1848, 384), (1620, 558, 1785, 602)],
+        "zonas": [(1676, 339, 1808, 486), (1637, 340, 1848, 384), (1620, 558, 1785, 602), (1666, 472, 1810, 522)],
         # a cadeira de madeira e linho (a parte de fora da mesa) e o rack da TV, que o PDF põe na frente da mesa
         "manter": [(1642, 535, 1687, 562), (1704, 579, 1873, 600)],
         "pecas": [
             ("suite-3/bancada-suites", 1702.5, 580.0, 157.0, 35.8, 0.0, "mesa", None),
             ("suite-3/cama-casal-a", 1742.0, 408.0, 124.2, 130.8, 0.0, "movel", None),
+            ("suite-master/banco-pe-de-cama", 1742.0, 488.0, 95.5, 23.9, 0.0, "movel", None),
             ("suite-3/criado-redondo", 1658.5, 362.0, 35.8, 35.8, 0.0, "movel", None),
             ("suite-3/criado-redondo", 1826.0, 362.0, 35.8, 35.8, 0.0, "movel", None)],
         "abajures": [(1658.5, 362.0, 19.0), (1826.0, 362.0, 19.0)],
@@ -141,7 +146,11 @@ AMBIENTES = {
                   (1413, 1588, 1434, 1609), (1484, 1588, 1505, 1609)],
         "manter": [],
         "pecas": [
-            ("banho-master/floreira-cactos-e-folhagem", 1366.0, 1546.5, 167.0, 42.0, 90.0, "baixa", None),
+            # (12/11, "VAMOS ALTERAR ESSA VEGETAÇÃO MAIS ALTA POR" + foto de espada-de-são-jorge e folhagem alta) a
+            # floreira gerada no Higgsfield (gpt_image_2, job 9f219839): a mesma caixa, com a caixa no lugar da antiga
+            # (166,4 x 35,0 px, centro 1369,2/1546,5); as folhas do lado do vidro param na borda da caixa
+            ("banho-master/floreira-espada-de-sao-jorge-e-folhagem", 1365.13, 1546.5, 166.35, 43.35, 90.0, "baixa",
+             None),
             ("banho-master/banheira-oval-a", 1460.0, 1499.0, 96.0, 48.0, 0.0, "movel", None),
             ("banho-master/misturador-piso-banheira-render", 1407.0, 1500.0, 14.0, 19.0, 90.0, "baixa", None),
             ("banho-master/bancada-dupla-esculpida-render-v2", 1599.0, 1613.0, 137.3, 35.8, 180.0, "baixa", None),

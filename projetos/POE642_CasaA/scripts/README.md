@@ -2180,6 +2180,26 @@ inpaint). No 12K, a pegada das peças antigas sobre os tapetes que ficam é o te
 (`tapetes_12k`, no tom dele; a final ampliada era lisa e clara ao lado da trama da IA). Na suíte 3, a zona vai até o
 banco (y 486): o pé da cama antiga passava do retângulo do PDF e ficava uma faixa branca.
 
+**Bancos de pé de cama (12/11, "NÃO TEMOS NA BIBLIOTECA OS BANCOS QUE FICAM NA FRENTE DAS CAMAS?" / "GERE UM BANCO NOVO
+NO HIGGSFIELD"):** a biblioteca não tinha o banco; gerado no Higgsfield (gpt_image_2, 2k, 4 variantes: jobs d25a4b71,
+17b88afb, 5b12574e e 90c387c0; escolhida a d25a4b71: duas almofadas de linho cru numa moldura fina de carvalho, visto de cima)
+e recortado do fundo branco: `biblioteca-objetos/03-primeiro-pavimento/suite-master/banco-pe-de-cama.png` e, para as
+camas de solteiro, `suite-1/banco-pe-de-cama-solteiro.png` (uma almofada só: a metade esquerda até a costura do
+meio, mais a ponta direita da moldura). No retângulo do PDF aos pés de cada cama: suíte master (1506, 1308; 95,5 x 23,9 px), suíte 2 (1765,5,
+1072) e suíte 3 (1742, 488), e um banco de solteiro (53,7 x 17,9 px) aos pés de cada cama da suíte 1 (2338 e 2443,
+1439), com a sombra de volume (`movel`). O banco antigo da master (antes recortado da final, `recolar`) sai; as zonas
+das suítes 1, 2 e 3 cobrem o banco antigo com a sombra dele (uns 10 px a mais do lado da sombra; na suíte 3, de x 1666 a
+1810 e até y 522, com a linha de sombra do pé da cama antiga), que dá lugar ao vinílico refeito.
+
+**Floreira do banho master (12/11, "VAMOS ALTERAR ESSA VEGETAÇÃO MAIS ALTA POR" + a foto de espadas-de-são-jorge e
+folhagem alta na janela):** a floreira de cactos troca pela gerada no Higgsfield com a caixa antiga de referência
+(gpt_image_2, 4 variantes: jobs 3247a15d, 1679d02c, 9f219839 e 0b1daa9c; escolhida a 9f219839): a mesma caixa de
+concreto claro com quatro touceiras de espada-de-são-jorge de borda amarela, duas folhagens altas de folha larga
+(tipo dracena) e forração miúda, vista de cima
+(`biblioteca-objetos/03-primeiro-pavimento/banho-master/floreira-espada-de-sao-jorge-e-folhagem.png`). A caixa cai no
+lugar exato da antiga (166,4 x 35,0 px, centro 1369,2/1546,5: a peça em 1365,13/1546,5, 166,35 x 43,35, 90°); as folhas
+passam da caixa para o lado da parede (como os cactos) e, do lado do vidro do banho, param na borda da caixa.
+
 **Como refazer:** `python3 biblioteca_1pav_casaa_1211.py` (parte da final de `ANTES_COMMIT` = 127eabc; sem `--saida`
 grava a final, o registro do 12K e os antes e depois `renders/POE642_CasaA_PH_1Pavimento_1211b_<ambiente>_antes_depois.jpg`);
 depois `ampliacao_12k_1pav_casaa.py montar12k <Topaz> --opcao AB`, `rodape_entrega.py --no-quadro --render
