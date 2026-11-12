@@ -1834,9 +1834,10 @@ DEMAIS RECOMENDAÇÕES; 3. BH SERV. MESMO BATENDO USE OS ITENS DA BIBLIOTECA E S
   diferença zero contra a final; no buraco, as réguas vezes a luz do piso em volta (média normalizada). As peças antigas
   são o que foge do piso esperado perto dos retângulos (até `busca_px`), sem os rótulos da especificação. Sombra curta
   de `final3840_casaa.APARELHOS`. Depois, a pedido do usuário ("VAMOS TER QUE AUMENTAR A DIMENSÃO DAS BICICLETAS POIS
-  FICARAM PEQUENAS"; "AUMENTE O SUPINO NA MESMA PROPORCIONALIDADE"), as bicicletas e o supino com o retângulo do PDF
-  ampliado 1,45 vez em volta do centro (`escala`): as bicicletas de 0,85 x 0,35 m para 1,23 x 0,51 m, o supino de
-  1,35 x 1,72 m para 1,96 x 2,50 m. As esteiras ficam no retângulo do PDF.
+  FICARAM PEQUENAS"; "AUMENTE O SUPINO NA MESMA PROPORCIONALIDADE"; "AUMENTA UM POUQUINHO AS ESTEIRAS / DIMUNUI UM POUCO O
+  SUPINO PARA 1,60"), os aparelhos com o retângulo do PDF ampliado em volta do centro (`escala`, ou até a largura
+  `largura_m`): as esteiras 1,10 vez (1,60 x 0,70 m para 1,76 x 0,77 m), as bicicletas 1,45 vez (0,85 x 0,35 m para
+  1,23 x 0,51 m) e o supino com o banco de 1,60 m (1,35 x 1,72 m para 1,60 x 2,04 m, a barra na mesma proporção).
 - **BH. FEM. e BH. MASC.:** a bacia Carrara branca no retângulo do vaso do PDF (o retângulo antes no tom do piso em volta,
   `sob_peca`, sem o marrom na borda), a descarga cromada de novo; a cuba esculpida da biblioteca no retângulo da cuba do
   PDF, fatiada (os cantos e o meio com a torneira na escala da altura, as faixas lisas esticadas), no granito marrom da
@@ -1863,7 +1864,7 @@ DEMAIS RECOMENDAÇÕES; 3. BH SERV. MESMO BATENDO USE OS ITENS DA BIBLIOTECA E S
 - **Antes e depois:** `renders/POE642_CasaA_PH_Subsolo_1211_{academia,banhos_sauna,bh_serv}_antes_depois.jpg` (contra a
   final de `ANTES_COMMIT`) e `renders/POE642_CasaA_PH_Subsolo_1211b_{academia_vinilico,esquadrias_norte,esquadrias_sul}_antes_depois.jpg`
   (só o vinílico e as esquadrias, contra a final de d35fd16) e `renders/POE642_CasaA_PH_Subsolo_1211c_aparelhos_antes_depois.jpg`
-  (as bicicletas e o supino maiores, contra a final de b9d8625).
+  (os aparelhos maiores, contra a final de b9d8625).
 - **Antes e depois (contra a final de 028a12f):** `renders/POE642_CasaA_PH_Subsolo_1211_{academia,banhos_sauna,bh_serv}_antes_depois.jpg`.
 - **Como refazer:** `python3 biblioteca_subsolo_casaa_1211.py` (sem `--antes`, parte da final de `ANTES_COMMIT`);
   `rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png`;

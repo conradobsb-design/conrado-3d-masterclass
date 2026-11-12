@@ -11,7 +11,8 @@ trocas aprovadas pelo usuário:
   "4. OPÇÃO A" (sauna: o banco reto de travertino);
   "5. DEPÓSITO: FICA COMO ESTÁ"; "6. NÃO MEXA NOS PISOS."
 Depois, na mesma rodada: "Use o vinílico da biblioteca / As esquadrias dos box, portas de vidro e janelas são pretas";
-"VAMOS TER QUE AUMENTAR A DIMENSÃO DAS BICICLETAS POIS FICARAM PEQUENAS"; "AUMENTE O SUPINO NA MESMA PROPORCIONALIDADE".
+"VAMOS TER QUE AUMENTAR A DIMENSÃO DAS BICICLETAS POIS FICARAM PEQUENAS"; "AUMENTE O SUPINO NA MESMA PROPORCIONALIDADE";
+"AUMENTA UM POUQUINHO AS ESTEIRAS / DIMUNUI UM POUCO O SUPINO PARA 1,60".
 
 Cada peça vai no retângulo do PDF da peça que ela substitui (a composição não muda), girada para o símbolo do PDF:
 - **Academia (`ACADEMIA`):** as 2 esteiras, as 2 bicicletas e o supino no retângulo do PDF, todas com o console para
@@ -21,8 +22,9 @@ Cada peça vai no retângulo do PDF da peça que ela substitui (a composição n
   delas), o vinílico volta exato: as réguas da final (`REGUAS`, refeitas pelo `vinilico_foto.trocar` sobre a final de
   antes do vinílico, com a mesma semente; diferença zero com a final) vezes a luz do lugar, a luz da final sobre as
   réguas, levada para dentro do buraco pela média normalizada do piso em volta. A sombra curta das peças novas é a de
-  `final3840_casaa.APARELHOS`. As bicicletas e o supino, a pedido do usuário, maiores que o símbolo do PDF: o retângulo
-  ampliado `escala` (1,45) vezes em volta do centro (bicicletas 1,23 x 0,51 m; supino 1,96 x 2,50 m).
+  `final3840_casaa.APARELHOS`. Os aparelhos, a pedido do usuário, maiores que o símbolo do PDF: o retângulo ampliado em
+  volta do centro, `escala` vezes ou até a largura `largura_m` (esteiras 1,10: 1,76 x 0,77 m; bicicletas 1,45:
+  1,23 x 0,51 m; supino com o banco de 1,60 m: 1,60 x 2,04 m).
 - **Banhos (`BANHOS_BIB`):** as bacias no retângulo do vaso do PDF (a parede para a parede; antes, o retângulo no tom
   do piso em volta, `sob_peca`, para a borda da bacia não mostrar o vaso marrom), com a descarga cromada de novo por
   cima; nos BH. FEM./MASC., a cuba esculpida da biblioteca no retângulo da cuba do PDF (fatiada: os cantos e o
@@ -77,16 +79,18 @@ REGUAS_Q = {"origem": (1345, 1060), "commit": "7723238"}
 
 ACADEMIA = {
     "pecas": [
-        {"nome": "esteira 1", "png": "academia/esteira-a.png", "pt": (1270.0, 1343.0, 1360.7, 1382.7)},
-        {"nome": "esteira 2", "png": "academia/esteira-a.png", "pt": (1270.0, 1399.7, 1360.7, 1439.4)},
+        # as esteiras um pouco maiores que o PDF (usuário: "AUMENTA UM POUQUINHO AS ESTEIRAS"): 1,60 x 0,70 m -> 1,76 x 0,77 m
+        {"nome": "esteira 1", "png": "academia/esteira-a.png", "pt": (1270.0, 1343.0, 1360.7, 1382.7), "escala": 1.10},
+        {"nome": "esteira 2", "png": "academia/esteira-a.png", "pt": (1270.0, 1399.7, 1360.7, 1439.4), "escala": 1.10},
         # as bicicletas maiores que o símbolo do PDF (0,85 x 0,35 m; usuário: "VAMOS TER QUE AUMENTAR A DIMENSÃO DAS
         # BICICLETAS POIS FICARAM PEQUENAS"): o retângulo do PDF ampliado `escala` vezes em volta do centro (1,23 x 0,51 m)
         {"nome": "bicicleta 1", "png": "academia/bicicleta-b.png", "pt": (1298.4, 1493.6, 1346.6, 1513.4), "escala": 1.45},
         {"nome": "bicicleta 2", "png": "academia/bicicleta-b.png", "pt": (1298.4, 1550.3, 1346.6, 1570.1), "escala": 1.45},
-        # o supino ampliado na mesma proporção das bicicletas (usuário: "AUMENTE O SUPINO NA MESMA PROPORCIONALIDADE"):
-        # 1,35 x 1,72 m do PDF para 1,96 x 2,50 m
+        # o supino ampliado (usuário: "AUMENTE O SUPINO NA MESMA PROPORCIONALIDADE", depois "DIMUNUI UM POUCO O SUPINO
+        # PARA 1,60"): o banco com 1,60 m de comprimento (`largura_m`, no x da planta), a barra na mesma proporção:
+        # 1,35 x 1,72 m do PDF para 1,60 x 2,04 m
         {"nome": "supino", "png": "academia/banco-supino.png", "pt": (1465.6, 1431.0, 1542.2, 1528.6),
-         "barra": (170, 340), "escala": 1.45},  # as colunas (no PNG de pé) que se repetem: a barra e o travessão do rack
+         "barra": (170, 340), "largura_m": 1.60},  # as colunas (no PNG de pé) que se repetem: a barra e o travessão do rack
     ],
     "giro": "ccw",                   # o PNG de pé (console em cima) com o console para a esquerda, como no PDF
     "sombra": (0.30, 1.4, 1.6),      # força, distância e sigma (px): a de `final3840_casaa.APARELHOS`
@@ -340,9 +344,10 @@ def academia(Q, out):
         ys, xs = np.nonzero(P[..., 3] > 0)
         P = girar(np.ascontiguousarray(P[ys.min():ys.max() + 1, xs.min():xs.max() + 1]), q["giro"])
         cc = dentro(P, c) if p.get("dentro") else c
-        if "escala" in p:                                        # ampliada em volta do centro
+        if "escala" in p or "largura_m" in p:                    # ampliada em volta do centro
             x0, y0, x1, y1 = cc
-            cx, cy, mw, mh = (x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) * p["escala"] / 2, (y1 - y0) * p["escala"] / 2
+            e = p["escala"] if "escala" in p else p["largura_m"] * Q.px_m / (x1 - x0)
+            cx, cy, mw, mh = (x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) * e / 2, (y1 - y0) * e / 2
             cc = (cx - mw, cy - mh, cx + mw, cy + mh)
         out = compor(out, P, cc, sombra=q["sombra"])
         print(f"    academia: {p['nome']} ({Path(p['png']).stem}) em {cc[2] - cc[0]:.1f} x {cc[3] - cc[1]:.1f} px "
