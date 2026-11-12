@@ -2164,7 +2164,21 @@ do PDF, caíam sobre ele; vão ao lado: à esquerda da chaise, no tapete (2044, 
 da mesa de centro (2100, 1140). A terceira, ao lado da poltrona, fica. No 12K, os recortes do que fica (`recolar`: a mesa de
 centro, o banco, o laptop, a TV) entram no registro e voltam por cima das peças nítidas (antes, o tapete novo desenhado
 no 12K cobria a mesa de centro e o banco), recortados da final de `ANTES_COMMIT` e ampliados em Lanczos; o laptop e a
-TV pelo retângulo exato da peça (`cheio`), sem a sombra e o tampo antigos em volta.
+TV pelo retângulo exato da peça (`cheio`, a TV pelo escuro, `escuro`), sem a sombra e o tampo antigos em volta.
+
+**Criados das suítes (12/11, "Melhore a representação dos criados das suítes"):** os criados retangulares da biblioteca
+saíam no tom do vinílico e sumiam no piso; vão ao tom da madeira das bancadas das suítes (`TOM_BANCADA`, a mediana do
+`bancada-suites`, com o veio do criado: `tom_bancada`), com a sombra de volume (`movel`); os redondos da suíte 3 num
+círculo de 0,60 m, como no PDF (o PNG não é quadrado e saía oval); e um abajur visto de cima em cada criado
+(`abajur`, `ABAJUR`, `"abajures"` por ambiente: a cúpula de linho com a borda fina, o miolo aceso em âmbar claro, a luz
+no meio e a sombra curta), desenhado em 8x e, no 12K, na escala dele (nítido). Antes e depois em
+`renders/POE642_CasaA_PH_1Pavimento_1211_criados_antes_depois.jpg`. Junto, o piso ao lado das camas: na planta-base, partes dos móveis e
+os tapetes usam o mesmo cinza 232 do Bege Bahia, e o px junto da cama ia para o tecido do Bege (saía uma faixa clara
+em degrau ao lado da cama); o Bege agora é só o dos ambientes de serviço (`BEGE_AMBIENTES`, `_bege_piso`), e a luz
+por baixo do vinílico refeito vem só do piso de verdade em volta (a cama antiga sobre o tapete também é apagada no
+inpaint). No 12K, a pegada das peças antigas sobre os tapetes que ficam é o tecido do próprio tapete da IA
+(`tapetes_12k`, no tom dele; a final ampliada era lisa e clara ao lado da trama da IA). Na suíte 3, a zona vai até o
+banco (y 486): o pé da cama antiga passava do retângulo do PDF e ficava uma faixa branca.
 
 **Como refazer:** `python3 biblioteca_1pav_casaa_1211.py` (parte da final de `ANTES_COMMIT` = 127eabc; sem `--saida`
 grava a final, o registro do 12K e os antes e depois `renders/POE642_CasaA_PH_1Pavimento_1211b_<ambiente>_antes_depois.jpg`);

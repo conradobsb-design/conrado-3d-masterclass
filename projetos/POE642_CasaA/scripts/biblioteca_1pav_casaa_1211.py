@@ -81,13 +81,14 @@ AMBIENTES = {
         "pecas": [
             ("suite-master/tapete", 1505.5, 1341.0, 209.0, 143.3, 0.0, "tapete", None),
             ("suite-master/cama-king-a", 1506.0, 1388.5, 124.2, 130.8, 180.0, "movel", None),
-            ("suite-master/criado-retangular-vista-superior", 1417.0, 1439.0, 41.8, 23.9, 0.0, "baixa", None),
-            ("suite-master/criado-retangular-vista-superior", 1595.0, 1439.0, 41.8, 23.9, 0.0, "baixa", None),
+            ("suite-master/criado-retangular-vista-superior", 1417.0, 1439.0, 41.8, 23.9, 0.0, "movel", "tom_bancada"),
+            ("suite-master/criado-retangular-vista-superior", 1595.0, 1439.0, 41.8, 23.9, 0.0, "movel", "tom_bancada"),
             # (12/11, revisão das poltronas) a frente para o pufe, na normal da borda reta do assento do PDF
             # (1640,7;1381,8)-(1674,3;1362,4): -150° (antes, para baixo e à esquerda, com o encosto para o pufe)
             ("suite-master/poltrona", 1671.0, 1394.0, 54.0, 56.0, -150.0, "movel", None),
             ("suite-master/pufe", 1653.0, 1363.0, 42.0, 22.0, 35.0, "baixa", None)],
         # o banco aos pés da cama (o da final) volta por cima do tapete novo
+        "abajures": [(1417.0, 1439.0, 19.0), (1595.0, 1439.0, 19.0)],
         "recolar": [((1456, 1294, 1556, 1320), "baixa")]},
     "suite_1": {
         "zonas": [(2304, 1447, 2372, 1574), (2409, 1447, 2477, 1574), (2269, 1541, 2512, 1573),
@@ -97,11 +98,12 @@ AMBIENTES = {
             ("suite-1/bancada-suites", 2438.0, 1350.5, 149.3, 35.8, 0.0, "mesa", None),
             ("suite-1/cama-solteiro-a", 2338.0, 1510.5, 59.7, 119.4, 180.0, "movel", None),
             ("suite-1/cama-solteiro-a", 2443.0, 1510.5, 59.7, 119.4, 180.0, "movel", None),
-            ("suite-1/criado-retangular-vista-superior", 2289.0, 1557.0, 32.8, 23.9, 0.0, "baixa", None),
-            ("suite-1/criado-retangular-vista-superior", 2390.5, 1557.0, 32.8, 23.9, 0.0, "baixa", None),
-            ("suite-1/criado-retangular-vista-superior", 2492.0, 1557.0, 32.8, 23.9, 0.0, "baixa", None)],
+            ("suite-1/criado-retangular-vista-superior", 2289.0, 1557.0, 32.8, 23.9, 0.0, "movel", "tom_bancada"),
+            ("suite-1/criado-retangular-vista-superior", 2390.5, 1557.0, 32.8, 23.9, 0.0, "movel", "tom_bancada"),
+            ("suite-1/criado-retangular-vista-superior", 2492.0, 1557.0, 32.8, 23.9, 0.0, "movel", "tom_bancada")],
         # o laptop (o da final) volta por cima da bancada nova
         # (o retângulo do laptop, cheio: o recorte pela diferença levava a sombra e o tampo antigos em volta)
+        "abajures": [(2289.0, 1557.0, 17.0), (2390.5, 1557.0, 17.0), (2492.0, 1557.0, 17.0)],
         "recolar": [((2466, 1338, 2488, 1360), "baixa", "cheio")]},
     "suite_2": {
         "zonas": [(1702, 1081, 1829, 1209), (1664, 1177, 1868, 1209), (1619, 1014, 1675, 1070),
@@ -110,21 +112,24 @@ AMBIENTES = {
         "pecas": [
             ("suite-2/bancada-suites", 1765.5, 1014.5, 155.2, 14.9, 0.0, "baixa", None),
             ("suite-2/cama-casal-a", 1765.5, 1145.0, 119.4, 119.4, 180.0, "movel", None),
-            ("suite-1/criado-retangular-vista-superior", 1684.5, 1193.0, 32.8, 23.9, 0.0, "baixa", None),
-            ("suite-1/criado-retangular-vista-superior", 1847.5, 1193.0, 32.8, 23.9, 0.0, "baixa", None),
+            ("suite-1/criado-retangular-vista-superior", 1684.5, 1193.0, 32.8, 23.9, 0.0, "movel", "tom_bancada"),
+            ("suite-1/criado-retangular-vista-superior", 1847.5, 1193.0, 32.8, 23.9, 0.0, "movel", "tom_bancada"),
             ("sala-intima/poltrona-a", 1647.0, 1042.0, 48.0, 48.0, girar_pt(0.75, 0.66), "movel", None)],
         # a TV (a linha escura do PDF sobre o rack) volta por cima da bancada nova
         # (o alfa pelo escuro: só a linha da TV, sem o rack claro em volta)
+        "abajures": [(1684.5, 1193.0, 17.0), (1847.5, 1193.0, 17.0)],
         "recolar": [((1724, 1010, 1807, 1016), None, "escuro")]},
     "suite_3": {
-        "zonas": [(1676, 339, 1808, 477), (1637, 340, 1848, 384), (1620, 558, 1785, 602)],
+        # (o pé da cama antiga ia até y 485, por cima do banco do PDF: a zona vai até o banco, y 486)
+        "zonas": [(1676, 339, 1808, 486), (1637, 340, 1848, 384), (1620, 558, 1785, 602)],
         # a cadeira de madeira e linho (a parte de fora da mesa) e o rack da TV, que o PDF põe na frente da mesa
         "manter": [(1642, 535, 1687, 562), (1704, 579, 1873, 600)],
         "pecas": [
             ("suite-3/bancada-suites", 1702.5, 580.0, 157.0, 35.8, 0.0, "mesa", None),
             ("suite-3/cama-casal-a", 1742.0, 408.0, 124.2, 130.8, 0.0, "movel", None),
-            ("suite-3/criado-redondo", 1658.5, 362.0, 35.8, None, 0.0, "baixa", None),
-            ("suite-3/criado-redondo", 1826.0, 362.0, 35.8, None, 0.0, "baixa", None)],
+            ("suite-3/criado-redondo", 1658.5, 362.0, 35.8, 35.8, 0.0, "movel", None),
+            ("suite-3/criado-redondo", 1826.0, 362.0, 35.8, 35.8, 0.0, "movel", None)],
+        "abajures": [(1658.5, 362.0, 19.0), (1826.0, 362.0, 19.0)],
         "recolar": []},
     "quarto_servico": {
         "zonas": [(1910, 1330, 1977, 1457)],
@@ -180,6 +185,13 @@ def ler_png(nome):
     return np.ascontiguousarray(P[ys.min():ys.max() + 1, xs.min():xs.max() + 1])
 
 
+# (12/11, usuário: "Melhore a representação dos criados das suítes") os criados retangulares da biblioteca saíam no tom
+# do vinílico e sumiam no piso: vão ao tom da madeira das bancadas das suítes (`bancada-suites`, a mediana BGR), com o
+# veio deles; a sombra de volume ("movel"); os redondos num círculo de 0,60 m, como no PDF (o PNG não é quadrado); e
+# um abajur visto de cima em cada um (`abajur`: a cúpula de linho com a borda, o miolo aceso e a sombra curta).
+TOM_BANCADA = (52.0, 107.0, 169.0)
+ABAJUR = {"cupula": (214, 226, 234), "borda": 0.80, "miolo_r": 0.46, "dentro": (150, 196, 226), "luz": (225, 245, 255),
+          "luz_r": 0.22, "sombra": 0.32, "sombra_px": (-1.6, 1.6, 1.4)}
 MIOLO_CUBA = (0.15, 0.85)      # a cuba nos PNG da biblioteca vai de 16% a 84% da largura: só os lados lisos esticam
 
 
@@ -200,7 +212,12 @@ def cuba_na_bancada(P, L, D, c):
 
 def preparar(nome, larg, alt, extra=None):
     P = ler_png(nome)
-    if extra == "anti_t":
+    if extra == "tom_bancada":                    # a madeira das bancadas, com o veio do criado
+        a = P[..., 3] > 200
+        med = np.median(P[..., :3][a], axis=0)
+        P = P.copy()
+        P[..., :3] = np.clip(P[..., :3] * (np.float32(TOM_BANCADA) / np.maximum(med, 1))[None, None], 0, 255)
+    elif extra == "anti_t":
         P = np.ascontiguousarray(np.transpose(P, (1, 0, 2))[::-1, ::-1])
     elif extra == "lavabo":
         P = BT.esticar_lados(P, larg / alt, miolo=MIOLO_CUBA)
@@ -234,6 +251,47 @@ def chuveiro(nome, placa_c, parede, placa_px=12.0):
     if eixo == "dir":
         return P2, placa_c[0] + desloc, placa_c[1], wt, ht, -90.0
     return P2, placa_c[0], placa_c[1] - desloc, wt, ht, 0.0
+
+
+def abajur(out, cx, cy, D, s=1.0, X0=0.0, Y0=0.0, q=None, ss=8):
+    """O abajur visto de cima no criado (centro e diâmetro em px da final; u = (x - X0) s): a sombra curta, a cúpula de
+    linho clara com a borda fina, o miolo (o dentro da cúpula, aceso) e a luz no meio, em 8x."""
+    q = q or ABAJUR
+    R = D / 2 * s
+    u, v = (cx - X0) * s, (cy - Y0) * s
+    m_ = int(np.ceil(R + 4 * s)) + 2
+    x0, y0 = int(np.floor(u)) - m_, int(np.floor(v)) - m_
+    w = h = 2 * m_ + 1
+    H, W = out.shape[:2]
+    if x0 < 0 or y0 < 0 or x0 + w > W or y0 + h > H:
+        return out
+    yy, xx = np.mgrid[0:h * ss, 0:w * ss]
+    dx, dy = (xx + 0.5) / ss + x0 - u, (yy + 0.5) / ss + y0 - v
+    r = np.hypot(dx, dy) / R
+
+    def red(a):
+        return cv2.resize(a.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+    disco = red(r <= 1.0)
+    sx, sy, sg = q["sombra_px"]
+    sb = cv2.GaussianBlur(cv2.warpAffine(disco, np.float32([[1, 0, sx * s], [0, 1, sy * s]]), (w, h)), (0, 0), sg * s)
+    reg = out[y0:y0 + h, x0:x0 + w].astype(np.float32)
+    reg *= (1 - q["sombra"] * sb * (1 - disco))[..., None]
+    # a cúpula: o linho claro, um pouco mais escuro para a borda (a curva), com a luz de cima à direita
+    luz = 1.0 - 0.10 * np.clip(r, 0, 1) ** 2 + 0.04 * (dx - dy) / (np.hypot(dx, dy) + 1e-3) * np.clip(r, 0, 1)
+    cup = np.float32(q["cupula"])[None, None] * red(luz)[..., None]
+    reg = reg * (1 - disco[..., None]) + cup * disco[..., None]
+    # o miolo: o dentro da cúpula, aceso (o âmbar claro), e a luz no meio
+    mi = red(r <= q["miolo_r"])[..., None]
+    t = np.clip(red(r) / q["miolo_r"], 0, 1)[..., None]
+    dentro = np.float32(q["luz"])[None, None] * (1 - t) + np.float32(q["dentro"])[None, None] * t
+    reg = reg * (1 - mi) + dentro * mi
+    # as bordas finas: a de fora e a do miolo
+    lt = 0.06
+    anel = red((np.abs(r - 1.0) < lt) | (np.abs(r - q["miolo_r"]) < lt * 0.8))[..., None]
+    reg = reg * (1 - anel * (1 - q["borda"]))
+    out[y0:y0 + h, x0:x0 + w] = np.clip(np.round(reg), 0, 255).astype(out.dtype) if out.dtype != np.float32 \
+        else reg
+    return out
 
 
 _Q = {}
@@ -358,6 +416,9 @@ def aplicar(antes):
             o = BT.pousar(o, P, cx, cy, wt, ht, ang, SOMBRAS[sombra], PX_M, nao=nao | manter_total)
             REGISTRO["pecas"].append(reg)
             REGISTRO["pecas_m"] |= BT.mascara_formas([BT.caixa_rot(cx, cy, wt, ht, ang, 2)], forma)
+        for cx_, cy_, d_ in amb.get("abajures", []):
+            o = abajur(o, cx_, cy_, d_)
+            REGISTRO["pecas"].append(["abajur", cx_, cy_, d_])
         for caixa, sombra, *cheio in amb.get("recolar", []):
             cheio = cheio[0] if cheio else None
             P, cx, cy, wt, ht = recolar(antes, caixa, cheio)
@@ -375,6 +436,21 @@ def aplicar(antes):
 REGISTRO = {}
 
 BEGE = (232, 232, 232)
+# onde o piso é Bege Bahia na zona: o quarto e o banho de serviço (na planta-base, os tapetes e partes dos móveis usam o
+# mesmo cinza 232; só as manchas que tocam estas caixas são piso)
+BEGE_AMBIENTES = [(1880, 1300, 2150, 1520), (2190, 1430, 2265, 1590)]
+
+
+def _bege_piso(C):
+    m = (C == BEGE).all(axis=2)
+    n_, lab_, st_, _ = cv2.connectedComponentsWithStats(m.astype(np.uint8), 8)
+    caixa = np.zeros(m.shape, bool)
+    for x0, y0, x1, y1 in BEGE_AMBIENTES:
+        caixa[y0:y1, x0:x1] = True
+    ok = np.zeros(n_, bool)
+    ok[np.unique(lab_[m & caixa])] = True
+    ok[0] = False
+    return ok[lab_]
 
 
 def piso_de_volta(Q, antes, zona, tap, pdf, par, livre):
@@ -391,7 +467,9 @@ def piso_de_volta(Q, antes, zona, tap, pdf, par, livre):
     cores = [tuple(qp["vinilico"]["chapada"]), tuple(qp["travertino"]["chapada"]), BEGE]
     dists = []
     for c in cores:
-        m = (C == c).all(axis=2)
+        # o Bege Bahia, só o dos ambientes de serviço (o px junto da cama ia para o cinza 232 de um móvel ou de um
+        # tapete e saía branco); o vinílico e o travertino têm cores só deles (e vêm picados entre os móveis)
+        m = _bege_piso(C) if c == BEGE else (C == c).all(axis=2)
         dists.append(cv2.distanceTransform((~m).astype(np.uint8), cv2.DIST_L2, 5))
     qual = np.argmin(np.stack(dists), axis=0)
     zr = zona & tap
@@ -403,8 +481,13 @@ def piso_de_volta(Q, antes, zona, tap, pdf, par, livre):
         chap2 = C.copy()
         for k in (0, 1):
             chap2[gerado & (qual == k)] = cores[k]
-        base2 = cv2.inpaint(antes, cv2.dilate(gerado.astype(np.uint8), np.ones((3, 3), np.uint8)) * 255, 5,
-                            cv2.INPAINT_TELEA)
+        # a luz por baixo: só o piso de verdade em volta (vinílico ou travertino, fora das peças e da zona) serve de
+        # fonte; o resto perto da zona (a cama antiga sobre o tapete, o tapete, os móveis) também é apagado, senão o
+        # branco da cama antiga puxava a luz e o vinílico refeito saía claro junto dela
+        piso_ok = ((C == cores[0]).all(axis=2) | (C == cores[1]).all(axis=2)) & ~zona & ~pdf & ~par
+        perto = cv2.dilate(zona.astype(np.uint8), np.ones((41, 41), np.uint8)).astype(bool)
+        tapa = (perto & ~piso_ok) | cv2.dilate(gerado.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        base2 = cv2.inpaint(antes, tapa.astype(np.uint8) * 255, 5, cv2.INPAINT_TELEA)
         Q2 = copy.copy(Q)
         Q2.chapada = chap2
         n, lab, st, _ = cv2.connectedComponentsWithStats(gerado.astype(np.uint8))
@@ -419,7 +502,7 @@ def piso_de_volta(Q, antes, zona, tap, pdf, par, livre):
     I = antes.astype(np.float32)
     zd = cv2.dilate(zona.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool)
     sem = 6100
-    partes = [(zp & (qual == 2), (C == BEGE).all(axis=2) & livre)]
+    partes = [(zp & (qual == 2), _bege_piso(C) & livre)]
     for x0, y0, x1, y1 in TAPETES_FICAM:
         r_ = np.zeros(zona.shape, bool)
         r_[y0 + 1:y1 - 1, x0 + 1:x1 - 1] = True
@@ -490,7 +573,11 @@ def pecas_12k(final, entrada, out, s, X0, Yia, Ya3, px_m=PX_M):
         al = np.clip(cv2.GaussianBlur(al, (0, 0), 0.7 * s), 0, 1)[..., None]
         r = out[V0:V1, U0:U1].astype(np.float32)
         out[V0:V1, U0:U1] = np.clip(np.round(r * (1 - al) + src * al), 0, 255).astype(np.uint8)
+    out = tapetes_12k(final, out, s, X0, Ya3, zona)
     for item in reg["pecas"]:
+        if item[0] == "abajur":
+            out = abajur(out, item[1], item[2], item[3], s, X0, Ya3)
+            continue
         if item[0] == "recolar":
             # o que ficou, recortado da final (sobre as peças novas), por cima das peças nítidas
             P, cx, cy, wt, ht = recolar(antes, item[1], item[2] if len(item) > 2 else None)
@@ -511,6 +598,51 @@ def pecas_12k(final, entrada, out, s, X0, Yia, Ya3, px_m=PX_M):
             return nao[fy[:, None], fx[None, :]]
         out = BT.pousar(out, P, (cx - X0) * s, (cy - Ya3) * s, wt * s, ht * s, ang, [], px_m * s, nao=nao_fn)
     print(f"    biblioteca no 12K do 1º Pavimento: {len(reg['pecas'])} peças nítidas sobre a zona refeita")
+    return out
+
+
+def tapetes_12k(final, out, s, X0, Ya3, zona):
+    """No 12K, a pegada das peças antigas sobre os tapetes que ficam: o tecido do próprio tapete da saída da IA (a final
+    ampliada é lisa e clara ao lado da trama da IA, e a emenda aparecia), no tom do tapete, com a beira suave."""
+    sys.path.insert(0, str(AQUI.parent.parent / "_texturas"))
+    import texturas
+    H, W = out.shape[:2]
+    F = final.astype(np.float32)
+    zd = cv2.dilate(zona.astype(np.uint8), np.ones((9, 9), np.uint8)).astype(bool)
+    for i, (x0, y0, x1, y1) in enumerate(TAPETES_FICAM):
+        r_ = np.zeros(zona.shape, bool)
+        r_[y0 + 2:y1 - 2, x0 + 2:x1 - 2] = True
+        zr = zona & r_
+        if zr.sum() < 20:
+            continue
+        dentro = r_ & ~zd
+        med = np.median(F[dentro], axis=0)
+        fonte = dentro & (np.abs(F - med).max(axis=2) < 18)
+        ff = fontes_auto(fonte, ~zd, zr, n=3, lado=26, alcance=220)
+        if not ff:
+            continue
+        ys, xs = np.nonzero(zr)
+        fx0, fy0, fx1, fy1 = xs.min() - 3, ys.min() - 3, xs.max() + 4, ys.max() + 4
+        U0, V0 = max(int(np.floor((fx0 - X0) * s)), 0), max(int(np.floor((fy0 - Ya3) * s)), 0)
+        U1, V1 = min(int(np.ceil((fx1 - X0) * s)), W), min(int(np.ceil((fy1 - Ya3) * s)), H)
+        fs = []
+        for a, b, c, d in ff:
+            u0, v0 = int(round((a - X0) * s)), int(round((b - Ya3) * s))
+            u1, v1 = int(round((c - X0) * s)), int(round((d - Ya3) * s))
+            f_ = out[v0:v1, u0:u1]
+            fs += [f_.copy(), np.ascontiguousarray(f_[:, ::-1])]
+        lado = min(min(f.shape[:2]) for f in fs)
+        p = int(max(16, min(48, lado // 2)))
+        tec = texturas.quilting(fs, V1 - V0, U1 - U0, p=p, sobra=max(4, p // 3),
+                                rng=np.random.default_rng(7300 + i))[:V1 - V0, :U1 - U0].astype(np.float32)
+        med_f = np.median(np.concatenate([f.reshape(-1, 3) for f in fs]).astype(np.float32), axis=0)
+        tec += med_f - np.median(tec.reshape(-1, 3), axis=0)
+        Mw = np.array([[1 / s, 0, U0 / s + X0 - fx0], [0, 1 / s, V0 / s + Ya3 - fy0]], np.float64)
+        al = cv2.warpAffine(zr[fy0:fy1, fx0:fx1].astype(np.float32), Mw, (U1 - U0, V1 - V0),
+                            flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP)
+        al = np.clip(cv2.GaussianBlur(al, (0, 0), 0.6 * s), 0, 1)[..., None]
+        reg = out[V0:V1, U0:U1].astype(np.float32)
+        out[V0:V1, U0:U1] = np.clip(np.round(reg * (1 - al) + tec * al), 0, 255).astype(np.uint8)
     return out
 
 
