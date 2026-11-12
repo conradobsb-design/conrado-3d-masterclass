@@ -1872,6 +1872,21 @@ DEMAIS RECOMENDAÇÕES; 3. BH SERV. MESMO BATENDO USE OS ITENS DA BIBLIOTECA E S
   peças antigas: a refazer com `ampliacao_a3_casaa.py corrigir --antes_final` (as peças novas vêm da entrada) e Topaz,
   depois do OK.
 
+### O prompt fotorrealista do Nano Banana Pro (`ampliacao_a3_casaa.PROMPT_FOTO`, 12/11)
+
+Pedido do usuário: "NA HORA DE GERAR O 4K, PRECISO QUE TRAGA REALISMO AOS MATERIAIS. DESCREVA O PROMPT PARA O NANO
+BANANA PRO DE FORMA QUE TRAGA O MÁXIMO DE FOTOREALISMO [...] MAS MANTENDO PROPORÇÃO, ESCALA, MATERIAIS E QUALIDADE." O
+prompt (em inglês, a língua em que o modelo segue melhor as restrições) tem quatro blocos: (1) a trava: a entrada é o
+mapa exato de posição, escala e material, alinhada px a px, nada acrescentado, tirado, girado ou redesenhado, sem texto;
+(2) a meta: render de path tracer (qualidade Corona/V-Ray) visto de cima, luz difusa do alto à direita (a das sombras da
+final), só a física acrescentada (microtextura na escala real, relevo, oclusão nos cantos, sombras de contato curtas,
+reflexos leves), sem mudar cor, brilho e contraste; (3) cada material no lugar dele e na escala real (paredes grafite
+lisas; vinílico de carvalho claro em fiadas de 20 cm na horizontal, com a régua "a largura de uma esteira cobre umas 4
+fiadas"; os aparelhos; Bege Bahia sem juntas; travertino bruto; louças, metais, granito marrom das cubas; vidros com
+perfil preto fino; prateleiras; elevador; escada; grama na escala); (4) o que evitar (perspectiva, efeitos de lente,
+grão, ar de ilustração, mudança de tom, linhas tortas, peças a mais ou a menos, juntas onde não há). Aguarda o OK do
+usuário para a rodada do 4K/12K do Subsolo.
+
 ### As correções do cliente no Térreo da Casa A: `terreo_casaa_1011.py` (10/11)
 
 Lista do cliente (Paulo Octávio) com os recortes da planta do Térreo, e as respostas do usuário. Um passo por pedido, sobre a final do Térreo do commit 58ea098 (a mesma de 0a17741), na ordem de `PASSOS`:

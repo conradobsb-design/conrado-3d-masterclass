@@ -54,6 +54,57 @@ A3 = {"px": (4961, 3508), "dpi": 300, "margem_px": 150, "branco": 245, "ia": (4,
       # da caixa do PDF) que volta da final ampliada
       "tom_sigma_px": 2.5, "shaft_dentro_px": 4}
 
+# O prompt fotorrealista do Nano Banana Pro (usuário, 12/11: "NA HORA DE GERAR O 4K, PRECISO QUE TRAGA REALISMO AOS
+# MATERIAIS [...] MAS MANTENDO PROPORÇÃO, ESCALA, MATERIAIS E QUALIDADE"): a entrada é o mapa exato (posição, escala e
+# material de cada coisa); a IA só acrescenta a física (microtextura na escala real, relevo, oclusão nos cantos, sombras
+# de contato curtas, reflexos leves), sem mudar cor, brilho, desenho ou tamanho. Em blocos: o que travar; a meta (render
+# de path tracer visto de cima, luz difusa do alto à direita, como as sombras da final); cada material no lugar dele e na
+# escala real (a régua do vinílico: a largura de uma esteira cobre ~4 fiadas de 20 cm); o que evitar.
+PROMPT_FOTO = (
+    "Photorealistic 4K re-render of the reference image: a top-down orthographic architectural floor plan (humanized "
+    "plan) of a luxury house basement, seen exactly from directly above. Treat the reference as the exact layout, scale "
+    "and material map: keep every wall, edge, opening, object and floor boundary at exactly the same position, size, "
+    "proportion and orientation, pixel-aligned to the reference. Do not add, remove, move, rotate, resize, redraw or "
+    "restyle anything. Do not add text, letters, numbers, arrows, triangles, symbols, people, plants, rugs or "
+    "decorations.\n\n"
+    "Goal: the look of a high-end architectural visualization rendered in a physically based path tracer (Corona / "
+    "V-Ray quality), real materials photographed from straight above under soft, diffuse, overcast daylight coming "
+    "slightly from the upper right. Add only physical realism: true-to-scale material micro-texture, subtle surface "
+    "relief, soft ambient occlusion where floors meet walls and fixtures, short soft contact shadows under objects "
+    "matching the existing ones, and gentle natural reflections on glossy surfaces. Keep the overall colors, "
+    "brightness, white balance and contrast of the reference.\n\n"
+    "Materials, exactly where they are in the reference and at real-world scale:\n"
+    "- Walls: solid matte dark graphite poché, perfectly flat, razor-sharp straight edges and square corners, no "
+    "texture, no gradient.\n"
+    "- Gym (large central room): warm light-oak wood-look vinyl planks in 20 cm wide rows running horizontally, random "
+    "staggered end joints, fine natural grain and subtle color variation between planks, hairline joints, satin "
+    "finish. Keep the plank direction, width and pattern of the reference (the width of one treadmill spans about four "
+    "plank rows).\n"
+    "- Gym equipment, same size, position and orientation: two treadmills (matte graphite frame, black textured rubber "
+    "belt, dark console), two exercise bikes (graphite frame, black saddle and handlebars, small chrome details), one "
+    "weight bench (black padded leatherette with fine stitching) in a steel rack with a chrome barbell and black "
+    "weight plates.\n"
+    "- Open patio, circulation, storage room and service bathroom floors: Bege Bahia limestone, warm light beige, "
+    "honed, soft cloudy low-contrast veining and fine fossil speckles, seamless, no grout lines.\n"
+    "- Hall, sauna, sauna anteroom and the female and male bathrooms: raw honed light travertine, ivory-cream, fine "
+    "horizontal linear veining and tiny natural pores at real stone scale; the sauna bench in the same travertine, "
+    "slightly darker.\n"
+    "- Bathroom fixtures: glossy white ceramic wall-hung toilets with soft highlights; chrome flush plates, faucets and "
+    "square shower heads with crisp small reflections; carved basins in polished dark brown speckled granite on raw "
+    "travertine countertops; in the service bathroom a brown granite countertop with a white ceramic basin.\n"
+    "- Glass shower enclosures, glass doors and windows: clear glass with very thin matte black aluminum frames and a "
+    "faint cool reflection, the floor visible through the glass.\n"
+    "- Storage room shelves along the walls: matte warm rosy-beige wood.\n"
+    "- Elevator: brushed stainless steel cabin floor; the shafts keep their thin X lines.\n"
+    "- Stair to the deck: light travertine treads with the same gradual fading shading.\n"
+    "- Lawn on the left: dense natural grass seen from above, fine short blades, subtle tonal variation, the same dark "
+    "olive green and the same small scale, no large blades, no flowers.\n"
+    "- Background outside the building: pure white (#FFFFFF), untouched.\n\n"
+    "Strictly avoid: perspective or tilt, 3D extrusion of walls, lens effects, vignetting, depth of field, bloom, "
+    "glare, film grain, noise, painterly, illustrated, cartoon or plastic CGI look, color shifts, warmer or cooler "
+    "tint, brighter or darker image, wavy or bent lines, smudges, melted details, duplicated or missing objects, a "
+    "different plank size or direction, and grout lines or tiles where there are none.")
+
 # As caixas dos shafts do Subsolo, em pt (`revisao_casaa_2910.ELEVADOR_TA`), com o X tracejado da revisão de 29/10
 SHAFTS_PT = [(2021.2, 1230.9, 2143.1, 1287.5), (2114.8, 1287.6, 2143.1, 1372.7)]
 
