@@ -1902,6 +1902,40 @@ virava um contorno claro ondulado). Da IA ficam os pisos (vinílico, Bege Bahia,
 O fundo fora da planta volta ao branco no `montar`. Depois, Topaz High Fidelity V2 a 12288 x 9175 (job
 559ee4dc-750a-47e9-9b89-ebce22d49e71, fora do git) e `montar12k` (A e B).
 
+### Os defeitos do Subsolo de 12/11 (no `biblioteca_subsolo_casaa_1211.py`, depois das peças)
+
+Recortes do usuário (do 12K B): a parede de baixo do hall com uma linha clara embaixo; "OS X PRECISAM SER EM CINZA COM
+TRAÇOS MAIS FINOS E DELICADOS. ALÉM DISSO, LIMPE RESÍDUOS DE SUJEIRA" (elevador e shafts); "DEIXAR O CONTORNO EM VOLTA
+DOS VASOS PERFEITOS." (BH. FEM., BH. MASC.); "DEIXAR AS PAREDES RETAS" (a parede entre a academia e os banhos). Ordem no
+`aplicar`: peças, esquadrias, `paredes_retas` (as peças desta rodada protegidas), `sujeira`, shafts.
+
+- **Paredes retas (`PAREDES_RETAS`, `paredes_retas`):** a parede é o cinza 80 da própria final, só perto das paredes do PDF
+  (os aparelhos e os rótulos têm o mesmo cinza); fechamento e abertura 3x3 (entalhes de até 2 px viram parede; pontas
+  saem); na faixa de 3 px em volta, o que é cor de parede ou linha neutra clara (por dentro, só a mais clara que o piso em
+  15; por fora, tudo o que não é branco) vira o que está a 5 px na normal (o piso; fora da casa, o branco) — some a linha
+  clara sob a parede do hall; por último a aresta: nos 2 px junto à parede, o pixel que foge mais que 28 da mediana de 7
+  vizinhos ao longo da parede vira a mediana (os pontinhos claros e as falhas da borda). Ficam o preto das esquadrias e o
+  elevador.
+- **Sujeira (`SUJEIRA_PX`, `sujeira`):** as manchas na caixa (1832, 1502)-(1857, 1520), junto à parede da academia,
+  refeitas pelo piso em volta (inpaint).
+- **Shafts (`SHAFTS_X`, `segs_shaft`, `miolos_shafts`, `desenhar_shafts`):** o miolo de cada shaft (o maior pedaço que não
+  é parede e não toca a borda da caixa do PDF) em branco e os traços do PDF (DOC_LINHAS E PROJEÇÕES, o tracejado dele) em
+  cinza 128, 0,8 px, antisserrilhados (8x). A ampliação (`ampliacao_a3_casaa.montar` e `montar_grande`) desenha o mesmo X
+  na escala dela (`desenhar_shafts(img, miolos, s, X0, Ya3)`), em vez de copiar o miolo da entrada ampliada.
+- **Vasos (`BANHOS_BIB["vasos"][...]["fonte"]`, `sob_peca`, `costura`):** o retângulo do vaso antigo, que ia num tom
+  chapado (o retângulo claro em volta da bacia), recebe o piso de verdade: BH. FEM. o piso logo à direita (`dir`), BH.
+  MASC. cada metade espelhada do seu lado (`espelho`), BH. SERV. o de cima (`cima`); o que não é piso no trecho copiado
+  (o vidro do box, um cromado: desvio > 24 da mediana ou azulado) sai por inpaint; `costura` casa o tom com as bordas
+  (a diferença para o piso de fora, esquerda/direita e cima/baixo, em rampa por dentro; a parede não conta). Na
+  ampliação, `VASOS_IA` e `rampa_vasos`: a IA foi feita com o retângulo chapado (e desenhou a bacia antiga maior); o
+  trecho que vem da entrada (`MUDOU`) entra com uma rampa de 6 px para fora do retângulo, sem a borda reta à vista no 12K.
+
+**A rodada:** `python3 biblioteca_subsolo_casaa_1211.py` (a final e os antes/depois de 1211); `preparar`; `corrigir
+<saída bruta 29e35837> ../renders/POE642_CasaA_PH_Subsolo_A3_saida_nano_banana_pro.png --estrutura --antes_final <a final
+de d19082d>`; `montar`; Topaz High Fidelity V2 12288 x 9175 (job 67888e24-f5a8-4f88-a21c-ae0d174feaff, fora do git);
+`montar12k`; `rodape_entrega.py --no-quadro --render Subsolo=...`, `rotulos_manuscritos_casaa.py`, `pdf_entrega.py`,
+`book_entrega.py`.
+
 ### As correções do cliente no Térreo da Casa A: `terreo_casaa_1011.py` (10/11)
 
 Lista do cliente (Paulo Octávio) com os recortes da planta do Térreo, e as respostas do usuário. Um passo por pedido, sobre a final do Térreo do commit 58ea098 (a mesma de 0a17741), na ordem de `PASSOS`:

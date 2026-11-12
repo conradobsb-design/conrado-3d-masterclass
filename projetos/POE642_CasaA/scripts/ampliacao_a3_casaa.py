@@ -50,9 +50,8 @@ A3 = {"px": (4961, 3508), "dpi": 300, "margem_px": 150, "branco": 245, "ia": (4,
       # abaixo desta correlação o texto da final não casa px a px com o desenho (está borrado): sai inteiro, pelo piso
       # vizinho (`tirar`, copiar)
       "casa_px": 0.95,
-      # os tons (a baixa frequência) da final, com este desfoque (px da final); o miolo dos shafts (px da A3 para dentro
-      # da caixa do PDF) que volta da final ampliada
-      "tom_sigma_px": 2.5, "shaft_dentro_px": 4}
+      # os tons (a baixa frequência) da final, com este desfoque (px da final)
+      "tom_sigma_px": 2.5}
 
 # O prompt fotorrealista do Nano Banana Pro (usuário, 12/11: "NA HORA DE GERAR O 4K, PRECISO QUE TRAGA REALISMO AOS
 # MATERIAIS [...] MAS MANTENDO PROPORÇÃO, ESCALA, MATERIAIS E QUALIDADE"): a entrada é o mapa exato (posição, escala e
@@ -108,8 +107,6 @@ PROMPT_FOTO = (
     "tint, brighter or darker image, wavy or bent lines, smudges, melted details, duplicated or missing objects, a "
     "different plank size or direction, and grout lines or tiles where there are none.")
 
-# As caixas dos shafts do Subsolo, em pt (`revisao_casaa_2910.ELEVADOR_TA`), com o X tracejado da revisão de 29/10
-SHAFTS_PT = [(2021.2, 1230.9, 2143.1, 1287.5), (2114.8, 1287.6, 2143.1, 1372.7)]
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -365,15 +362,11 @@ def montar(saida_ia):
     f = a3.astype(np.float32)
     f += cv2.GaussianBlur(ref.astype(np.float32), (0, 0), sg) - cv2.GaussianBlur(f, (0, 0), sg)
     a3 = np.clip(np.round(f), 0, 255).astype(np.uint8)
-    # os shafts: o X tracejado da final (a IA o fez em traço contínuo), da entrada ampliada, no miolo de cada caixa
+    # os shafts: o miolo em branco e o X em cinza fino (usuário, 12/11: "OS X PRECISAM SER EM CINZA COM TRAÇOS MAIS
+    # FINOS E DELICADOS"), desenhados de novo na escala da A3 com os traços do PDF (a IA os engrossa)
+    import biblioteca_subsolo_casaa_1211 as BS
     Q = FA.QuadroA("Subsolo")
-    for p0, q0, p1, q1 in SHAFTS_PT:
-        (u0, v0), (u1, v1) = Q.p2q(p0, q0), Q.p2q(p1, q1)
-        k = q["shaft_dentro_px"]
-        u0, u1 = sorted(((u0 - X0) * s, (u1 - X0) * s))
-        v0, v1 = sorted(((v0 - Ya3) * s, (v1 - Ya3) * s))
-        u0, v0, u1, v1 = int(np.ceil(u0)) + k, int(np.ceil(v0)) + k, int(u1) - k, int(v1) - k
-        a3[v0:v1, u0:u1] = ref[v0:v1, u0:u1]
+    a3 = BS.desenhar_shafts(a3, BS.miolos_shafts(Q, img), s, X0, Ya3)
     # o fundo: branco puro fora da planta (a máscara da final, levada à A3)
     g = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     fundo = (g >= 254).astype(np.uint8)
@@ -493,6 +486,31 @@ def mascara_estrutura(ia, entrada, T):
     return m.astype(np.float32)
 
 
+# depois (12/11, "DEIXAR O CONTORNO EM VOLTA DOS VASOS PERFEITOS"): na final, o retângulo do vaso antigo em volta das
+# bacias novas passou a ter o piso do lado (`biblioteca_subsolo_casaa_1211.sob_peca`, `fonte`); a IA foi feita com o
+# retângulo chapado, e o trecho trazido da entrada (pelo `MUDOU`) deixava a borda reta dele à vista no 12K (a entrada
+# ampliada é mais lisa que o piso da IA). Em volta de cada retângulo, a passagem da entrada para a IA vira uma rampa de
+# `rampa_px` (px da final) para fora, em vez do degrau; dentro, a entrada. (A IA em volta não serve de fonte: ela desenhou
+# a bacia antiga maior e o retângulo chapado, que a máscara da estrutura já cobre.)
+VASOS_IA = {"ligada": True, "rampa_px": 6}
+
+
+def rampa_vasos(X0, Yia, Wc, Hc):
+    """A rampa (float, 1 no retângulo de cada vaso, 0 a `rampa_px` dele) na janela da entrada, e a zona que ela ocupa."""
+    import biblioteca_subsolo_casaa_1211 as BS
+    q = VASOS_IA
+    Q = FA.QuadroA("Subsolo")
+    caixa = np.zeros((Hc, Wc), np.uint8)
+    for v in BS.BANHOS_BIB["vasos"]:
+        c = BS.caixa_px(Q, v["pt"])
+        x0, y0, x1, y1 = int(np.floor(c[0])) - 1, int(np.floor(c[1])) - 1, int(np.ceil(c[2])) + 1, int(np.ceil(c[3])) + 1
+        caixa[y0 - Yia:y1 - Yia, x0 - X0:x1 - X0] = 1
+    dist = cv2.distanceTransform(1 - caixa, cv2.DIST_L2, 5)
+    rampa = np.clip(1 - dist / q["rampa_px"], 0, 1).astype(np.float32)
+    zona = dist <= q["rampa_px"] + 3
+    return rampa, zona
+
+
 def corrigir_ia(saida_ia, destino):
     """A saída da IA com os trechos de `CORRIGIR_PX` vindos da entrada ampliada (no quadro da saída, pelo ECC)."""
     q = CORRECAO
@@ -529,6 +547,9 @@ def corrigir_ia(saida_ia, destino):
         d = (np.abs(a0.astype(np.int16) - a1.astype(np.int16)).max(axis=2) > MUDOU["limiar"]).astype(np.uint8)
         k = 2 * MUDOU["folga_px"] + 1
         d = cv2.dilate(d, np.ones((k, k), np.uint8))[Yia:Yia + Hc, X0:X0 + Wc].astype(np.float32)
+        if VASOS_IA["ligada"]:
+            rampa, zona = rampa_vasos(X0, Yia, Wc, Hc)
+            d[zona] = rampa[zona]
         m = np.maximum(m, cv2.warpAffine(d, T, (Wi, Hi), flags=cv2.INTER_LINEAR))
         print(f"    e o que mudou na final contra {Path(MUDOU['antes']).name}: {int(d.sum())} px da entrada")
     m = cv2.GaussianBlur(m, (0, 0), q["borda_px"] * Wi / Wc / 2.7)[..., None]
@@ -592,16 +613,10 @@ def montar_grande(saida_topaz, largura=None):
     for y in range(0, Hh, 1024):
         a3[y:y + 1024] = np.clip(np.round(a3[y:y + 1024].astype(np.float32) + corr[y:y + 1024]), 0, 255).astype(np.uint8)
     del corr
-    # os shafts com o X tracejado (da entrada ampliada)
+    # os shafts: o miolo em branco e o X em cinza fino, desenhados de novo na escala do JPG (12/11)
+    import biblioteca_subsolo_casaa_1211 as BS
     Q = FA.QuadroA("Subsolo")
-    for p0, q0, p1, q1 in SHAFTS_PT:
-        (u0, v0), (u1, v1) = Q.p2q(p0, q0), Q.p2q(p1, q1)
-        k = int(round(q["shaft_dentro_px"] * s / (Wa0 / Wc)))
-        u0, u1 = sorted(((u0 - X0) * s, (u1 - X0) * s))
-        v0, v1 = sorted(((v0 - Ya3) * s, (v1 - Ya3) * s))
-        u0, v0, u1, v1 = int(np.ceil(u0)) + k, int(np.ceil(v0)) + k, int(u1) - k, int(v1) - k
-        Mb = np.array([[s, 0, -s * 0 - u0], [0, s, -s * (Ya3 - Yia) - v0]], np.float64)
-        a3[v0:v1, u0:u1] = cv2.warpAffine(entrada, Mb, (u1 - u0, v1 - v0), flags=cv2.INTER_LANCZOS4)
+    a3 = BS.desenhar_shafts(a3, BS.miolos_shafts(Q, img), s, X0, Ya3)
     # o fundo: branco puro fora da planta
     gq = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     fundo = (gq >= 254).astype(np.uint8)

@@ -99,11 +99,13 @@ ACADEMIA = {
 BANHOS_BIB = {
     "vasos": [
         {"nome": "BH. FEM.", "png": "banho-feminino-academia/bacia-carrara.png", "pt": (1396.1, 1746.1, 1416.1, 1775.2),
-         "giro": "180", "descarga": (1402.4, 1773.9, 1409.8, 1775.2)},
+         "giro": "180", "descarga": (1402.4, 1773.9, 1409.8, 1775.2), "fonte": "dir"},
         {"nome": "BH. MASC.", "png": "banho-masculino-academia/bacia-carrara.png",
-         "pt": (1518.0, 1746.1, 1538.0, 1775.2), "giro": "180", "descarga": (1524.3, 1773.9, 1531.7, 1775.2)},
+         "pt": (1518.0, 1746.1, 1538.0, 1775.2), "giro": "180", "descarga": (1524.3, 1773.9, 1531.7, 1775.2),
+         "fonte": "espelho"},
         {"nome": "BH. SERV.", "png": "banho-de-servico/bacia-monte-carlo-sem-valvula.png",
-         "pt": (929.9, 1135.2, 961.0, 1156.5), "giro": "ccw", "descarga": (929.9, 1142.7, 932.3, 1149.0)},
+         "pt": (929.9, 1135.2, 961.0, 1156.5), "giro": "ccw", "descarga": (929.9, 1142.7, 932.3, 1149.0),
+         "fonte": "cima"},
     ],
     # a cuba esculpida, girada 180° (a torneira junto à parede, embaixo): o recorte em volta da bacia (px do PNG
     # girado), as fatias em x (fixa, estica, fixa com a torneira, estica, fixa) e os fatores do granito
@@ -396,10 +398,76 @@ def piso_ao_lado(out, m, d):
     return out
 
 
-def sob_peca(out, c, par, anel=(3, 9)):
+def costura(out, novo, x0, y0, x1, y1, par, sigma=4.0, teto=30.0):
+    """O trecho `novo` (que vai para o retângulo x0..x1, y0..y1 de `out`) no tom das bordas: a diferença para o piso
+    logo do lado de fora (esquerda/direita, depois cima/baixo; a parede não conta) é espalhada em rampa por dentro,
+    para o retângulo não mostrar emenda."""
+    n = novo.astype(np.float32)
+    o = out.astype(np.float32)
+    H, W = out.shape[:2]
+
+    def borda(fora_px, dentro, ok):
+        d = fora_px - dentro
+        d[~ok] = np.nan
+        return d
+
+    def preencher(a, b):
+        a, b = a.copy(), b.copy()
+        a[np.isnan(a)] = b[np.isnan(a)]
+        b[np.isnan(b)] = a[np.isnan(b)]
+        a[np.isnan(a)] = 0
+        b[np.isnan(b)] = 0
+        a = ndimage.gaussian_filter1d(np.clip(a, -teto, teto), sigma, axis=0, mode="nearest")
+        b = ndimage.gaussian_filter1d(np.clip(b, -teto, teto), sigma, axis=0, mode="nearest")
+        return a, b
+
+    h, w = n.shape[:2]
+    if x0 >= 1 and x1 < W:
+        L = borda(o[y0:y1, x0 - 1], n[:, 0], ~par[y0:y1, x0 - 1])
+        R = borda(o[y0:y1, x1], n[:, -1], ~par[y0:y1, x1])
+        L, R = preencher(L, R)
+        t = np.linspace(0, 1, w)[None, :, None]
+        n = n + L[:, None, :] * (1 - t) + R[:, None, :] * t
+    if y0 >= 1 and y1 < H:
+        T = borda(o[y0 - 1, x0:x1], n[0], ~par[y0 - 1, x0:x1])
+        B = borda(o[y1, x0:x1], n[-1], ~par[y1, x0:x1])
+        T, B = preencher(T, B)
+        t = np.linspace(0, 1, h)[:, None, None]
+        n = n + T[None, :, :] * (1 - t) + B[None, :, :] * t
+    return np.clip(np.round(n), 0, 255).astype(np.uint8)
+
+
+def sob_peca(out, c, par, anel=(3, 9), fonte=None):
     """O retângulo c (o vaso antigo, de outra cor) no tom mediano do piso em volta (o anel de `anel` px, fora das
-    paredes), para a borda suave da peça nova não mostrar a cor da antiga."""
+    paredes), para a borda suave da peça nova não mostrar a cor da antiga. Com `fonte` (usuário, 12/11: "DEIXAR O
+    CONTORNO EM VOLTA DOS VASOS PERFEITOS"; o tom chapado aparecia como um retângulo claro em volta da bacia), o
+    retângulo recebe o próprio piso, com o veio: "dir" (o piso logo à direita), "cima" (logo acima) ou "espelho" (cada
+    metade espelhada do piso do seu lado; o veio deitado do travertino segue sem emenda)."""
     x0, y0, x1, y1 = (int(np.floor(c[0])) - 1, int(np.floor(c[1])) - 1, int(np.ceil(c[2])) + 1, int(np.ceil(c[3])) + 1)
+    if fonte:
+        H, W = out.shape[:2]
+        w, h = x1 - x0, y1 - y0
+        reg = out.copy()
+        if fonte == "dir":
+            novo = reg[y0:y1, x1 + 2:x1 + 2 + w]
+        elif fonte == "cima":
+            novo = reg[y0 - h - 2:y0 - 2, x0:x1]
+        else:
+            m = w // 2
+            novo = np.concatenate([reg[y0:y1, x0 - m:x0][:, ::-1], reg[y0:y1, x1:x1 + (w - m)][:, ::-1]], axis=1)
+        # o que não é piso no trecho copiado (um registro, uma placa cromada) sai, refeito pelo piso em volta
+        novo = np.ascontiguousarray(novo)
+        med = np.median(novo.reshape(-1, 3).astype(np.int16), axis=0)
+        n16 = novo.astype(np.int16)
+        fora = (np.abs(n16 - med).max(axis=2) > 24) | (n16[..., 0] > n16[..., 2] + 2)   # o vidro/cromado é azulado
+        if fora.any():
+            fora = ndimage.binary_dilation(fora, iterations=1).astype(np.uint8)
+            novo = cv2.inpaint(novo, fora, 3, cv2.INPAINT_TELEA)
+        novo = costura(out, novo, x0, y0, x1, y1, par)
+        caixa = ~par[y0:y1, x0:x1]
+        bloco = out[y0:y1, x0:x1]
+        bloco[caixa] = novo[caixa]
+        return out
     a, b = anel
     H, W = out.shape[:2]
     m = np.zeros((H, W), bool)
@@ -588,7 +656,7 @@ def banhos(Q, out, FA):
     # as bacias, com a descarga de novo
     for v in q["vasos"]:
         P = girar(ler_png(v["png"]), v["giro"])
-        out = sob_peca(out, caixa_px(Q, v["pt"]), par)
+        out = sob_peca(out, caixa_px(Q, v["pt"]), par, fonte=v.get("fonte"))
         out = compor(out, P, caixa_px(Q, v["pt"]), nao=par)
         out = FA.placa_cromada(Q, out, v["descarga"])
         print(f"    {v['nome']}: {Path(v['png']).stem} branca no retângulo do vaso do PDF, com a descarga")
@@ -715,14 +783,186 @@ def esquadrias(Q, out, FA):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------
+# Os recortes do usuário no 12K (12/11): "OS X PRECISAM SER EM CINZA COM TRAÇOS MAIS FINOS E DELICADOS. ALÉM DISSO,
+# LIMPE RESÍDUOS DE SUJEIRA"; "DEIXAR AS PAREDES RETAS"; a linha clara sob a parede de baixo do hall.
+# - shafts (`SHAFTS_X`): o miolo de cada shaft (o que não é parede na caixa do PDF) volta ao branco puro, sem resíduos,
+#   e os traços do X (os da DOC_LINHAS E PROJEÇÕES, tracejados) entram em cinza `cinza`, com `larg_px`; a A3 e o 12K
+#   desenham o mesmo X na escala deles (`desenhar_shafts`), em vez de ampliar o da final;
+# - paredes (`PAREDES_RETAS`, `paredes_retas`): as paredes da própria final (o desenho aprovado, sem voltar ao PDF, que
+#   tem os marcos e batentes que a final tirou), com os entalhes de até 2 px preenchidos e as pontas soltas tiradas; na
+#   faixa de `perto_px` em volta, o que é cor de parede e as linhas finas neutras viram o que está a `fonte_px` da
+#   parede, na normal (o piso; fora da casa, o branco); o preto das esquadrias, o elevador e as peças novas desta rodada
+#   (louças, descargas, cubas, chuveiros, bancos, esquadrias) não são tocados;
+# - sujeira (`SUJEIRA_PX`): as manchas marrons no travertino junto à parede direita do BH. MASC. saem (o piso em volta).
+SHAFTS_X = {"cinza": (128, 128, 128), "larg_px": 0.8, "ss": 8, "parede_tol": 22}
+PAREDES_RETAS = {"cor": 80, "tol": 22, "croma": 12, "perto_px": 3, "fonte_px": 5, "preto_max": 60, "pdf_px": 4,
+                 "linha_croma": 12, "linha_lum": (100, 236), "linha_desvio": 22, "linha_clara": 15,
+                 "aresta_jan": 3, "aresta_desvio": 28, "aresta_min": 4}
+SUJEIRA_PX = {"caixas": [(1832, 1502, 1857, 1520)], "desvio": 18}
+
+
+def segs_shaft(Q, caixa):
+    import revisao_casaa_2910 as RA
+    a0, b0, a1, b1 = caixa
+    segs = []
+    for d in Q.desenhos:
+        r = d["rect"]
+        if d.get("layer") == RA.ELEVADOR_TA["camada"] and d["type"] == "s" and r.x0 >= a0 - 0.5 \
+                and r.x1 <= a1 + 0.5 and r.y0 >= b0 - 0.5 and r.y1 <= b1 + 0.5:
+            for it in d["items"]:
+                if it[0] == "l":
+                    (u0, v0), (u1, v1) = Q.p2q(it[1].x, it[1].y), Q.p2q(it[2].x, it[2].y)
+                    segs.append((u0, v0, u1, v1))
+    return segs
+
+
+def miolos_shafts(Q, img):
+    """[(retângulo do miolo em px da final (x0, y0, x1, y1), traços em px da final)] dos shafts do Subsolo."""
+    import revisao_casaa_2910 as RA
+    q = SHAFTS_X
+    res = []
+    for caixa in RA.ELEVADOR_TA["shafts_pt"]["Subsolo"]:
+        x0, y0, x1, y1 = caixa_px(Q, caixa)
+        X0, Y0, X1, Y1 = int(np.floor(x0)) - 3, int(np.floor(y0)) - 3, int(np.ceil(x1)) + 3, int(np.ceil(y1)) + 3
+        reg = img[Y0:Y1, X0:X1].astype(np.int16)
+        parede = (np.abs(reg - 80).max(axis=2) <= q["parede_tol"])
+        n, lab, st, _ = cv2.connectedComponentsWithStats((~parede).astype(np.uint8), 4)
+        # o miolo: o maior pedaço que não é parede e não toca a borda da caixa
+        cand = [i for i in range(1, n) if st[i, 0] > 0 and st[i, 1] > 0 and st[i, 0] + st[i, 2] < reg.shape[1]
+                and st[i, 1] + st[i, 3] < reg.shape[0]]
+        i = max(cand, key=lambda i: st[i, 4])
+        res.append(((X0 + st[i, 0], Y0 + st[i, 1], X0 + st[i, 0] + st[i, 2], Y0 + st[i, 1] + st[i, 3]),
+                    segs_shaft(Q, caixa)))
+    return res
+
+
+def desenhar_shafts(img, miolos, s=1.0, ox=0.0, oy=0.0):
+    """O miolo de cada shaft em branco e o X em cinza fino, na escala `s` (px da final -> px de img: (x-ox)*s)."""
+    q = SHAFTS_X
+    k = q["ss"]
+    for (x0, y0, x1, y1), segs in miolos:
+        X0, Y0 = int(np.ceil((x0 - ox) * s)), int(np.ceil((y0 - oy) * s))
+        X1, Y1 = int(np.floor((x1 - ox) * s)), int(np.floor((y1 - oy) * s))
+        h, w = Y1 - Y0, X1 - X0
+        t = np.zeros((h * k, w * k), np.uint8)
+        for u0, v0, u1, v1 in segs:
+            p0 = (int(round(((u0 - ox) * s - X0) * k)), int(round(((v0 - oy) * s - Y0) * k)))
+            p1 = (int(round(((u1 - ox) * s - X0) * k)), int(round(((v1 - oy) * s - Y0) * k)))
+            cv2.line(t, p0, p1, 255, max(1, int(round(q["larg_px"] * s * k))), cv2.LINE_AA)
+        a = cv2.resize(t.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)[..., None]
+        img[Y0:Y1, X0:X1] = np.clip(np.round(255 * (1 - a) + np.float32(q["cinza"]) * a), 0, 255).astype(np.uint8)
+    return img
+
+
+def paredes_retas(Q, out, protegido, FA):
+    """As paredes da própria final (o cinza 80), sem os dentes e as linhas soltas: os furos e entalhes de até 2 px
+    viram parede (fechamento 3x3) e as pontas de até 2 px saem (abertura 3x3); na faixa de `perto_px` em volta da
+    parede limpa, o que é cor de parede ou linha fina neutra (clara ou cinza) vira o que está a `fonte_px` da parede, na
+    normal (o piso; do lado de fora da casa, o branco). Ficam o preto das esquadrias, o elevador e as peças desta rodada."""
+    q = PAREDES_RETAS
+    im = out.astype(np.int16)
+    croma_ = im.max(axis=2) - im.min(axis=2)
+    W = (np.abs(im - q["cor"]).max(axis=2) <= q["tol"]) & (croma_ <= q["croma"])
+    # só as paredes de verdade: perto do contorno das paredes do PDF (os aparelhos da academia e os rótulos têm o
+    # mesmo cinza e ficam de fora)
+    pdf = quieto(FA.paredes_pdf, Q) > 0.3
+    W &= cv2.dilate(pdf.astype(np.uint8), np.ones((2 * q["pdf_px"] + 1,) * 2, np.uint8)).astype(bool)
+    preto = (im.max(axis=2) < q["preto_max"]) & (croma_ <= q["croma"])
+    x0, y0, x1, y1 = caixa_px(Q, FA.ELEVADOR["externo"])
+    elev = np.zeros(W.shape, bool)
+    elev[int(y0) - 4:int(y1) + 5, int(x0) - 6:int(x1) + 5] = True
+    livre = ~protegido & ~preto & ~elev
+    k3 = np.ones((3, 3), np.uint8)
+    Wl = cv2.morphologyEx(cv2.morphologyEx(W.astype(np.uint8), cv2.MORPH_CLOSE, k3), cv2.MORPH_OPEN, k3).astype(bool)
+    res = out.copy()
+    entalhe = Wl & ~W & livre
+    res[entalhe] = q["cor"]
+    dist = cv2.distanceTransform((~Wl).astype(np.uint8), cv2.DIST_L2, 5)
+    gx = cv2.Sobel(dist, cv2.CV_32F, 1, 0, ksize=3)
+    gy = cv2.Sobel(dist, cv2.CV_32F, 0, 1, ksize=3)
+    nn = np.sqrt(gx ** 2 + gy ** 2) + 1e-6
+    faixa = (dist > 0) & (dist <= q["perto_px"]) & livre
+    ys, xs = np.nonzero(faixa)
+    d = q["fonte_px"] + q["perto_px"] - dist[ys, xs]
+    sx = np.clip(np.round(xs + gx[ys, xs] / nn[ys, xs] * d).astype(int), 0, out.shape[1] - 1)
+    sy = np.clip(np.round(ys + gy[ys, xs] / nn[ys, xs] * d).astype(int), 0, out.shape[0] - 1)
+    v = im[ys, xs]
+    f = im[sy, sx]
+    lum = v.mean(axis=1)
+    croma = v.max(axis=1) - v.min(axis=1)
+    parede_cor = W[ys, xs]
+    linha = (croma <= q["linha_croma"]) & (lum >= q["linha_lum"][0]) & (lum <= q["linha_lum"][1])
+    # do lado de fora (a fonte é o branco do fundo) a faixa toda fica branca; do lado de dentro, só as linhas mais
+    # claras que o piso (o degradê de borda da parede, mais escuro que o piso, fica, senão a borda serrilha)
+    fora = f.min(axis=1) >= 245
+    linha &= fora | (lum > f.mean(axis=1) + q["linha_clara"])
+    desvio = np.abs(v - f).max(axis=1) > q["linha_desvio"]
+    fonte_ok = ~Wl[sy, sx] & ~protegido[sy, sx] & ~preto[sy, sx]
+    troca = (parede_cor | linha | (fora & (lum < 245))) & desvio & fonte_ok
+    res[ys[troca], xs[troca]] = f[troca].astype(np.uint8)
+    # a aresta: nos 2 px junto à parede, o pixel que destoa dos vizinhos ao longo da parede (em x nas paredes
+    # deitadas, em y nas de pé) vira a mediana deles, e a borda fica contínua, sem pontos claros nem falhas
+    r = res.astype(np.int16)
+    H, Wd = Wl.shape
+    deitada = np.abs(gy) > 2 * np.abs(gx)
+    de_pe = np.abs(gx) > 2 * np.abs(gy)
+    n_aresta = 0
+    for d0, d1 in ((0.5, 1.5), (1.5, 2.5)):
+        anel = (dist > d0) & (dist <= d1) & livre
+        for eixo, orient in ((1, deitada), (0, de_pe)):
+            m = anel & orient
+            ys2, xs2 = np.nonzero(m)
+            if not len(ys2):
+                continue
+            viz = np.full((len(ys2), 2 * q["aresta_jan"] + 1, 3), np.nan, np.float32)
+            for i, k in enumerate(range(-q["aresta_jan"], q["aresta_jan"] + 1)):
+                yy = np.clip(ys2 + (k if eixo == 0 else 0), 0, H - 1)
+                xx = np.clip(xs2 + (k if eixo == 1 else 0), 0, Wd - 1)
+                ok = m[yy, xx]
+                viz[ok, i] = r[yy[ok], xx[ok]]
+            nval = (~np.isnan(viz[:, :, 0])).sum(axis=1)
+            med = np.nanmedian(viz, axis=1)
+            v2 = r[ys2, xs2]
+            fora_med = (np.abs(v2 - med).max(axis=1) > q["aresta_desvio"]) & (nval >= q["aresta_min"])
+            res[ys2[fora_med], xs2[fora_med]] = np.round(med[fora_med]).astype(np.uint8)
+            n_aresta += int(fora_med.sum())
+    print(f"    paredes retas: {int(entalhe.sum())} px de entalhes preenchidos; {int(troca.sum())} px de dentes e linhas "
+          f"soltas junto às paredes refeitos com o que está ao lado; {n_aresta} px da aresta alinhados aos vizinhos")
+    return res
+
+
+def sujeira(out):
+    q = SUJEIRA_PX
+    for x0, y0, x1, y1 in q["caixas"]:
+        reg = out[y0:y1, x0:x1]
+        med = np.median(reg.reshape(-1, 3).astype(np.int16), axis=0)
+        m = np.abs(reg.astype(np.int16) - med).max(axis=2) > q["desvio"]
+        m = ndimage.binary_dilation(m, iterations=1).astype(np.uint8)
+        X0, Y0 = x0 - 6, y0 - 6
+        jan = np.ascontiguousarray(out[Y0:y1 + 6, X0:x1 + 6])
+        mm = np.zeros(jan.shape[:2], np.uint8)
+        mm[6:6 + m.shape[0], 6:6 + m.shape[1]] = m
+        out[Y0:y1 + 6, X0:x1 + 6] = cv2.inpaint(jan, mm, 3, cv2.INPAINT_TELEA)
+        print(f"    sujeira: {int(m.sum())} px de manchas em ({x0}, {y0}) refeitos pelo piso em volta")
+    return out
+
+
 def aplicar(antes):
     import final3840_casaa as FA
     Q = quieto(FA.QuadroA, "Subsolo")
     out = np.ascontiguousarray(antes.copy())
     out = academia(Q, out)
+    base = out.copy()
     out = banhos(Q, out, FA)
     out = sauna(Q, out, antes, FA)
     out = esquadrias(Q, out, FA)
+    # os recortes do usuário de 12/11 (as peças desta rodada ficam protegidas)
+    protegido = ndimage.binary_dilation((out != base).any(axis=2), iterations=1)
+    out = paredes_retas(Q, out, protegido, FA)
+    out = sujeira(out)
+    out = desenhar_shafts(out, miolos_shafts(Q, out))
+    print("    shafts: o miolo em branco e o X em cinza fino")
     return out
 
 
