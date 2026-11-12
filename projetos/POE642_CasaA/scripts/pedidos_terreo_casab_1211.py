@@ -693,8 +693,243 @@ def portas_tb(Q, img, q=PORTAS_TB):
     return out
 
 
+# As escadas (usuário: "Colocar a seta e descrição em todas as escadas"): o D de cada uma sai (os px escuros da letra
+# recebem os do mesmo degrau, de `copia` (a faixa de deslocamentos verticais) px acima ou abaixo) e entra o triângulo cheio da Casa A
+# (`terreo_casaa_1011.seta_tri`, 15 x 17 px) no degrau de cima, com a ponta para onde se desce, e a descrição em duas
+# linhas no corpo dos rótulos (11 px, `ESCADAS_TA["corpo_desc_px"]`), em cinza 45, ao lado, no piso livre: a de 6
+# degraus desce da pedra grande para o deck da ducha, no Subsolo; a de 9, da varanda para o deck em L; os blocos de pedra
+# descem do deck em L para o jardim (o triângulo de 22/10, `final3840_casab.BLOCOS_F`, com a ponta na borda do deck; o D
+# deles saiu com a madeira nova do deck, `deck_tb`).
+ESCADAS_TB = {
+    "seis": {"letra_px": (680, 643), "tri_px": (680.6, 643.6), "dir": (1, 0), "texto": ("DESCE PARA O", "SUBSOLO"),
+             "txt_px": (665.0, 643.6), "alinhar": "direita", "copia": (16, 40)},
+    "nove": {"letra_px": (1080, 833), "tri_px": (1080.3, 833.0), "dir": (-1, 0), "texto": ("DESCE PARA O", "DECK"),
+             "txt_px": (1096.0, 833.0), "alinhar": "esquerda", "copia": (-42, -18)},
+    "blocos": {"letra_px": None, "tri_px": (608.0, 917.6), "dir": (-1, 0), "texto": ("DESCE PARA O", "JARDIM"),
+               "txt_px": (623.0, 917.6), "alinhar": "esquerda"},
+    "caixa_letra": (11, 13), "escuro": 30, "cor": (45, 45, 45)}
+
+
+def escadas_tb(Q, img, q=ESCADAS_TB):
+    import terreo_casaa_1011 as TC
+    out = np.ascontiguousarray(img.copy())
+    lum = cv2.cvtColor(out, cv2.COLOR_BGR2GRAY).astype(np.float32)
+    bx, by = q["caixa_letra"]
+    for nome in ("seis", "nove", "blocos"):
+        e = q[nome]
+        if e["letra_px"] is None:
+            continue
+        cx, cy = e["letra_px"]
+        caixa = lum[cy - by:cy + by + 1, cx - bx:cx + bx + 1]
+        m = np.zeros(lum.shape, bool)
+        m[cy - by:cy + by + 1, cx - bx:cx + bx + 1] = caixa < np.median(caixa) - q["escuro"]
+        m = dilatar(m, 2)
+        ys, xs = np.nonzero(m)
+        # o degrau tem gradiente e manchas: entre os deslocamentos verticais de `copia` (no mesmo degrau), o de anel
+        # (os 3 px em volta) mais parecido com o daqui, acertado pela média do anel
+        anel = dilatar(m, 3) & ~m
+        ay, ax = np.nonzero(anel)
+        aqui = out[ay, ax].astype(np.float32)
+        dx, dy, delta = min(((0, d, aqui.mean(0) - out[ay + d, ax].astype(np.float32).mean(0))
+                             for d in range(e["copia"][0], e["copia"][1] + 1)),
+                            key=lambda t: float(((aqui - t[2] - out[ay + t[1], ax]) ** 2).mean()))
+        out[ys, xs] = np.clip(out[ys + dy, xs + dx].astype(np.float32) + delta, 0, 255).astype(np.uint8)
+        print(f"    escada {nome}: o D sai ({int(m.sum())} px)")
+    out = out.astype(np.float32)
+    for nome in ("seis", "nove", "blocos"):
+        e = q[nome]
+        out = TC.triangulo(out, TC.seta_tri(*e["tri_px"], e["dir"]))
+        out = TC._texto_escada(out, e["texto"], *e["txt_px"], e["alinhar"], q["cor"])
+    print("    escadas: o triângulo e a descrição nas 3 (DESCE PARA O SUBSOLO, DESCE PARA O DECK, DESCE PARA O JARDIM)")
+    return np.clip(out, 0, 255).astype(np.uint8)
+
+
+# A entrada (como a da Casa A, `terreo_casaa_1011.soleiras_ta` e `entrada_ta`): "Representar uma soleira na entrada
+# igual a casa C": no vão da porta pivotante do PDF (o ARQ_CONTRAPISO de x 2526,6 a 2538,5 px e de y 985,4 a 1155), de
+# batente a batente, a faixa da soleira da entrada da Casa C (`casa_c`: a face de 1 px do lado de dentro, a pedra lisa
+# clara, a face de 2 px do lado de fora), esticada no comprimento do vão; a folha da porta pivotante (`folha_y`, a barra
+# cinza aberta a 90°) fica por cima; os batentes do PDF (as peças brancas de 955,6 a 985,4 e de 1155 a 1182,5) na cor
+# das paredes, como os das Casas A e C. "Centralizar a seta com a abertura da porta, usando este modelo de seta": a
+# seta de 1,5 m do hall (`final3840_casab.SETA_B`) sai, com o travertino refeito (`pedidos_terreo_casaa_2910.piso_refeito`,
+# das `fontes_px` do mesmo hall); entra o triângulo cheio das escadas (18 x 21 px, como o da Casa A), com a ponta para
+# dentro da casa, no centro da abertura, a `recuo_px` da soleira.
+ENTRADA_TB = {"soleira_px": (2527, 986, 2539, 1155), "folha_y": (1011, 1016),
+              "casa_c": "_texturas/originais/soleira_entrada_casac.png",
+              "batentes_px": [(2526, 955, 2540, 986), (2526, 1155, 2540, 1183)], "parede": (80, 80, 80),
+              "seta_px": (2553, 1104, 2658, 1147), "seta_lum": 120,
+              "fontes_px": [(2560, 950, 2690, 1000), (2600, 1146, 2690, 1178)], "semente": 1214,
+              "abertura_px": (985.4, 1155.0), "recuo_px": 16.0, "comp": 18.0, "larg": 21.0}
+
+
+def entrada_tb(Q, img, q=ENTRADA_TB):
+    import pedidos_terreo_casaa_2910 as P
+    import terreo_casaa_1011 as TC
+    out = np.ascontiguousarray(img.copy())
+    # a soleira de batente a batente, sob a folha da porta
+    x0, y0, x1, y1 = q["soleira_px"]
+    c = cv2.imread(str(RAIZ / q["casa_c"]))
+    out[y0:y1, x0:x1] = cv2.resize(c, (x1 - x0, y1 - y0), interpolation=cv2.INTER_LINEAR)
+    f0, f1 = q["folha_y"]
+    out[f0:f1, x0:x1] = img[f0:f1, x0:x1]
+    for b0, c0, b1, c1 in q["batentes_px"]:
+        out[c0:c1, b0:b1] = np.uint8(q["parede"])
+    # a seta antiga sai
+    sx0, sy0, sx1, sy1 = q["seta_px"]
+    zona = np.zeros(out.shape[:2], bool)
+    zona[sy0:sy1, sx0:sx1] = out[sy0:sy1, sx0:sx1].astype(np.float32).mean(axis=2) < q["seta_lum"]
+    zona = dilatar(zona, 3)
+    out = P.piso_refeito(out, zona, q["semente"], dict(P.PISO_TA, fontes_px=q["fontes_px"]))
+    # o triângulo no centro da abertura, com a ponta para dentro
+    a0, a1 = q["abertura_px"]
+    cy = (a0 + a1) / 2
+    cx = x1 + q["recuo_px"] + q["comp"] / 2
+    out = TC.triangulo(out.astype(np.float32), TC.seta_tri(cx, cy, (-1, 0), q["comp"], q["larg"]))
+    print(f"    entrada: a soleira da Casa C de batente a batente (sob a folha da porta), os batentes na cor da parede; "
+          f"sem a seta antiga ({int(zona.sum())} px de travertino refeito); o triângulo no centro da abertura (y = {cy:.0f} px)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# Os tracejados:
+# - o lote (usuário: "remover o tracejado", no de cima; "remover o tracejado vertical", no da direita; "remover", na
+#   ponta do muro de baixo que passava do lote): o retângulo tracejado de fora do lote (acima do muro de cima, nas
+#   laterais e abaixo do muro de baixo) sai para o fundo branco; o tracejado da borda da direita (`dir_px`: as colunas
+#   da linha, de cima a baixo do lote) sai, com o lote fechando reto em `borda_x` (o conteúdo das colunas da linha vem
+#   das `dir_px[2]` colunas à esquerda); e o muro de baixo para em `borda_x`, como o de cima;
+# - os X (usuário: "Melhorar o X tracejado", nos dois shafts pequenos da varanda e do living; e "Tirar o nome shaft"):
+#   os três shafts (`shafts_px`, o vão claro entre as paredes) no fundo claro, sem o X torto e sem o nome, com o X
+#   tracejado de canto a canto dos shafts do 1º Pavimento da Casa A (`um_pav_casaa_1111.SHAFTS_1P`: fino, simétrico, um
+#   traço cruzando o centro, preto), como o do Subsolo da Casa B;
+# - o pergolado (usuário: "Deixar as linhas do pergolado tracejadas mais finas e mais claras. Deixar tudo na mesma cor,
+#   preto ou branco."): os traços antigos (pretos no piso e brancos na grama e no jardim, de 1,5 px) saem aqui, antes da
+#   grama e do jardim novos (`pergolado_tb` os desenha de novo no fim, finos e numa cor só).
+TRACEJADOS_TB = {"lote_px": (297, 93, 3512, 1890), "fundo": (254, 254, 254), "dir_px": (3509, 3512, 4),
+                 "borda_x": 3512, "muro_baixo_y": (1870, 1896),
+                 "shafts_px": [(1564, 742, 1592, 771), (1563, 1252, 1591, 1278), (1734, 533, 1821, 552)],
+                 "perg_larg_px": 4.0, "perg_dif": 14, "perg_raio": 3}
+
+
+def _segs_pergolado(Q):
+    cb = F.B.COBERTURA_B
+    z = cb["zona"]
+    segs = []
+    for d in Q.desenhos:
+        r, w = d["rect"], d.get("width") or 0
+        if d["type"] == "s" and d.get("layer") == cb["camada"] and round(w, 2) == cb["larg_pdf"] \
+                and min(r.width, r.height) <= 0.3 and max(r.width, r.height) <= cb["traco_max"] \
+                and z[0] <= r.x0 and r.x1 <= z[2] and z[1] <= r.y0 and r.y1 <= z[3]:
+            segs += [(it[1].x, it[1].y, it[2].x, it[2].y) for it in d["items"] if it[0] == "l"]
+    # fora: o que corre sobre parede (como em `final3840_casab.projecoes_r8`)
+    pe = cv2.dilate((Q.preencher(lambda d: d.get("layer") == "ARQ_PAREDE" and d.get("fill"), ss=2) > 0.3)
+                    .astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    fica = []
+    for t in segs:
+        (u0, v0), (u1, v1) = Q.p2q(t[0], t[1]), Q.p2q(t[2], t[3])
+        if not pe[int((v0 + v1) / 2), int((u0 + u1) / 2)]:
+            fica.append(t)
+    return fica
+
+
+def _x_shaft(out, rect):
+    """O X tracejado de canto a canto de `um_pav_casaa_1111.SHAFTS_1P`, no fundo claro (out em float32)."""
+    import um_pav_casaa_1111 as U
+    q = U.SHAFTS_1P
+    x0, y0, x1, y1 = rect
+    out[y0:y1, x0:x1] = np.float32(q["fundo"])
+    ss, r = 8, q["recuo_px"]
+    X0, Y0 = x0 - 2, y0 - 2
+    w, h = (x1 - x0) + 4, (y1 - y0) + 4
+    M = np.zeros((h * ss, w * ss), np.uint8)
+    passo = q["traco_px"] + q["vao_px"]
+    for (ax, ay), (bx, by) in (((x0 + r, y0 + r), (x1 - r, y1 - r)), ((x1 - r, y0 + r), (x0 + r, y1 - r))):
+        cx, cy = (ax + bx) / 2, (ay + by) / 2
+        L = np.hypot(bx - ax, by - ay) / 2
+        ux, uy = (bx - ax) / (2 * L), (by - ay) / (2 * L)
+        kmax = int(np.ceil(L / passo)) + 1
+        for kk in range(-kmax, kmax + 1):
+            t0 = max(kk * passo - q["traco_px"] / 2, -L)
+            t1 = min(kk * passo + q["traco_px"] / 2, L)
+            if t1 - t0 < 0.4:
+                continue
+            p0 = ((cx + ux * t0 - X0) * ss, (cy + uy * t0 - Y0) * ss)
+            p1 = ((cx + ux * t1 - X0) * ss, (cy + uy * t1 - Y0) * ss)
+            cv2.line(M, tuple(int(round(v)) for v in p0), tuple(int(round(v)) for v in p1), 255,
+                     max(1, int(round(q["x_px"] * ss))), cv2.LINE_AA)
+    al = cv2.resize(M.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    al *= U._cobertura((x0, y0, x1, y1), X0, Y0, w, h)
+    reg = out[Y0:Y0 + h, X0:X0 + w]
+    out[Y0:Y0 + h, X0:X0 + w] = reg * (1 - al[..., None]) + np.float32(q["x"]) * al[..., None]
+
+
+def tracejados_tb(Q, img, q=TRACEJADOS_TB):
+    out = np.ascontiguousarray(img.copy())
+    H, W = out.shape[:2]
+    lum = out.astype(np.float32).mean(axis=2)
+    # fora do lote: os traços (finos) para o fundo
+    lx0, ly0, lx1, ly1 = q["lote_px"]
+    fora = np.ones((H, W), bool)
+    fora[ly0:ly1, lx0:lx1 + 2] = False
+    fora[ly0:ly1, :lx0] = False                      # na lateral esquerda, só acima e abaixo do lote (a pedra encosta)
+    marca = fora & (lum < 250)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(marca.astype(np.uint8), connectivity=8)
+    tira = np.isin(lab, [i for i in range(1, n) if min(st[i, 2], st[i, 3]) <= 8])
+    out[tira] = np.uint8(q["fundo"])
+    # a borda da direita: sem o tracejado, o lote fechando reto
+    a, b, k = q["dir_px"]
+    bx = q["borda_x"]
+    yt, yb = ly0 + 13, q["muro_baixo_y"][0]
+    out[yt:yb, a:b] = out[yt:yb, a - k:b - k]
+    out[yt:yb, bx:bx + 4] = np.uint8(q["fundo"])
+    # o muro de baixo até a borda do lote
+    m0, m1 = q["muro_baixo_y"]
+    out[m0:m1, bx:] = np.uint8(q["fundo"])
+    # o pergolado antigo sai (os traços que fogem do fundo em volta, dentro da faixa dos traços do PDF)
+    segs = _segs_pergolado(Q)
+    S = 4
+    geo = np.zeros((H * 1, W * 1), np.uint8)
+    for t in segs:
+        (u0, v0), (u1, v1) = Q.p2q(t[0], t[1]), Q.p2q(t[2], t[3])
+        cv2.line(geo, (int(round(u0)), int(round(v0))), (int(round(u1)), int(round(v1))), 1,
+                 int(round(q["perg_larg_px"])))
+    geo = dilatar(geo.astype(bool), 1)
+    med = cv2.medianBlur(out, 9).astype(np.float32)
+    dif = np.abs(out.astype(np.float32) - med).max(axis=2)
+    # (as paredes cheias do PDF; `paredes_pdf` também tem os traços do pergolado, que são da ARQ_PAREDE)
+    par = cv2.dilate((Q.preencher(lambda d: d.get("layer") == "ARQ_PAREDE" and d.get("fill"), ss=2) > 0.3)
+                     .astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+    velho = geo & (dif > q["perg_dif"]) & ~par
+    velho = dilatar(velho, 2) & geo & ~par
+    out = cv2.inpaint(out, (velho * 255).astype(np.uint8), q["perg_raio"], cv2.INPAINT_TELEA)
+    # os X dos shafts
+    o = out.astype(np.float32)
+    for r in q["shafts_px"]:
+        _x_shaft(o, r)
+    out = np.clip(np.round(o), 0, 255).astype(np.uint8)
+    print(f"    tracejados: o retângulo tracejado de fora do lote ({int(tira.sum())} px) e o da borda da direita saem; o muro "
+          f"de baixo para na borda do lote; o pergolado antigo sai ({len(segs)} traços, {int(velho.sum())} px); os "
+          f"{len(q['shafts_px'])} shafts no fundo claro com o X de canto a canto (sem o nome SHAFT)")
+    return out
+
+
+# O pergolado de novo (no fim, sobre a grama e o jardim novos): os traços do PDF (`_segs_pergolado`), finos
+# (`larg_px`) e numa cor só (`cor`, o preto dos X dos shafts, mais claro que o de antes), sobre o piso, a grama e o jardim.
+PERGOLADO_TB = {"larg_px": 0.85, "cor": (60, 60, 60)}
+
+
+def pergolado_tb(Q, img, q=PERGOLADO_TB):
+    import final3840_casaa_terreo as FT
+    segs = _segs_pergolado(Q)
+    pq = dict(FT.PROJ, larg_px=q["larg_px"], preto=q["cor"], branco=q["cor"])
+    out, _ = FT.preto_branco(Q, img, segs, pq)
+    par = Q.preencher(lambda d: d.get("layer") == "ARQ_PAREDE" and d.get("fill") and max(d["fill"]) < 0.6, ss=2) > 0.5
+    out[par] = img[par]
+    print(f"    pergolado: {len(segs)} traços do PDF, de {q['larg_px']} px, todos em cinza {q['cor'][0]}")
+    return out
+
+
 # ----------------------------------------------------------------------------------------------------------------------
-PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_tb), ("deck", deck_tb), ("portas", portas_tb)]
+PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_tb), ("deck", deck_tb), ("portas", portas_tb),
+          ("escadas", escadas_tb), ("entrada", entrada_tb),
+          ("tracejados", tracejados_tb), ("pergolado", pergolado_tb)]
 
 
 def correcoes(img, de=None, ate=None, salvar_passos=None):
