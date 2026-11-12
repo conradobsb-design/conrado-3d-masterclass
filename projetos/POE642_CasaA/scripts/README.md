@@ -2075,6 +2075,20 @@ Vendo a planta com as peças da biblioteca, o usuário mandou, cada um com um re
   (`marrom`: o branco da peça levado à faixa 0,80–1,22 do tom, com as linhas da tampa e da caixa reforçadas). Na
   camada dos tracejados, os resíduos do X da claraboia não voltam (`regras_1211_casaa.claraboia_sai`).
 
+- **Rótulos da caracol e da GARAGEM** ("COLOCA ESSE RÓTULO ACIMA DA ESCADA"; "COLOCA ESSE RÓTULO MAIS PARA DIREITA OU
+  DIMINUA O TAMANHO DA FONTE"; `caracol`, `garagem`): o SOBE PARA O 1º PAVIMENTO da caracol da área de serviço, que ficava
+  à esquerda dela, centrado acima dela (no piso livre entre as máquinas e o topo da escada; a anotação nos dados do
+  12K); o GARAGEM, espremido entre a parede e o carro do meio, no mesmo corpo, à direita, sobre o vão entre o carro do
+  meio e o da direita (~20 px de cada carro, 13 px da ponta da parede; os carros não mudam); o fundo de antes é o mesmo
+  trecho 95 px à esquerda (a parede reta continua). No 12K, a IA já tinha o piso limpo sob os dois.
+- **Guarda-corpo do deck** ("CORRIJA ESSE GUARDA CORPO"; `guarda_corpo`): na borda de cima do deck, junto ao gramado, a
+  barra cinza com os pontinhos escuros sai (a faixa volta ao piso de 10 px abaixo) e entra a lâmina de vidro do PDF
+  (ARQ_ELEMENTOS FIXOS, 1082,6–1590,1 x 337,8–339,3) no desenho das guardas do Térreo (`vidro_ret`, o mesmo de
+  `terreo_casaa_1011.vidro_laminas`, com os números da escada do jardim), na final e no 12K.
+- **Soleira da janela do escritório** ("FALTOU A SOLEIRA DE UM DOS LADOS DA JANELA"; `soleira`): na janela de canto, o
+  vão da direita (ARQ_PAREDE, 2593,2–2605,2 x 355,2–429,1) mostrava o gramado; entra a soleira da janela de cima,
+  girada (a face de fora junto ao gramado), tirada da própria imagem (na final e no 12K, cada um com a sua de cima).
+
 **Como refazer:** `regras_1211_casaa.py Terreo`, `biblioteca_terreo_casaa_1211.py` (a final, do commit `ANTES_COMMIT`),
 `pedidos_terreo_casaa_1211c.py --antes_depois <a final de 2c1c21d>` (lê a final que o anterior gravou; os antes e depois
 em `renders/POE642_CasaA_PH_Terreo_1211c_<pedido>_antes_depois.jpg`); o 12K pelo `montar12k` (que chama

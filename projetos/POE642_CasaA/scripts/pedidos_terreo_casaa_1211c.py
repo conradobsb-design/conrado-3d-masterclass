@@ -27,6 +27,14 @@ Usuário, com um recorte cada:
     da borda da cuba sobre o da pedra, px a px (o desenho, a luz e o contorno da pedra ficam); no 12K, o mesmo com os
     tons do 12K. (O vaso do lavabo, "MELHORE A REPRESENTAÇÃO DESSE VASO", é peça da biblioteca:
     `biblioteca_terreo_casaa_1211`, a bacia Carrara no marrom dos vasos.)
+  - "COLOCA ESSE RÓTULO MAIS PARA DIREITA OU DIMINUA O TAMANHO DA FONTE" (`garagem`): o GARAGEM, espremido entre a parede
+    e o carro do meio, vai à direita, no mesmo corpo, sobre o vão entre o carro do meio e o da direita (os carros não
+    mudam); "COLOCA ESSE RÓTULO ACIMA DA ESCADA" (`caracol`): o SOBE PARA O 1º PAVIMENTO da caracol da área de serviço,
+    que ficava à esquerda dela, centrado acima dela; os dois desenhos vão aos dados do 12K.
+  - "CORRIJA ESSE GUARDA CORPO" (`guarda_corpo`, o da borda de cima do deck): a faixa da barra cinza com os pontinhos
+    volta ao piso de 10 px abaixo e a lâmina de vidro do PDF entra no desenho das guardas do Térreo;
+  - "FALTOU A SOLEIRA DE UM DOS LADOS DA JANELA" (`soleira`, a janela de canto do escritório): no vão da direita, que
+    mostrava o gramado, a soleira da janela de cima, girada (na final e no 12K, cada um com a sua de cima).
 
   python3 pedidos_terreo_casaa_1211c.py [--antes <png>] [--saida <png>]
 Roda depois do `biblioteca_terreo_casaa_1211.py` (parte da final que ele grava). Sem --saida, grava a final e os antes e
@@ -74,6 +82,23 @@ PEDIDOS_1211C = {
     # borda da cuba sobre o da pedra, px a px (o desenho, a luz e o contorno da pedra ficam)
     "bancada": {"pedra_px": (2328, 468, 2345, 514), "borda_cuba_px": [(2318, 412, 2344, 416), (2318, 461, 2344, 465),
                                                                       (2317, 417, 2320, 460)]},
+    # (12/11, depois) "COLOCA ESSE RÓTULO MAIS PARA DIREITA OU DIMINUA O TAMANHO DA FONTE" (a GARAGEM, espremida entre a
+    # parede e o carro do meio): no mesmo corpo, à direita, sobre o vão entre o carro do meio (até x 2468 nesta altura)
+    # e o da direita (de x 2564), 13 px abaixo da ponta da parede da direita (y 1314)
+    "garagem": {"nome": "GARAGEM", "centro": (2516.0, 1340.0), "fundo_dx": 95},
+    # "CORRIJA ESSE GUARDA CORPO" (o da borda de cima do deck, junto ao gramado): no PDF, a lâmina de vidro da
+    # ARQ_ELEMENTOS FIXOS (1082,6–1590,1 x 337,8–339,3); na final, uma barra cinza com pontinhos escuros embaixo. A faixa
+    # (da borda do gramado até 6 px abaixo do vidro) volta ao piso de `fonte_dy` px abaixo e o vidro entra no desenho das
+    # guardas do Térreo (`terreo_casaa_1011.vidro_laminas`, os números da escada do jardim)
+    "guarda_corpo": {"vidro_px": (1082.6, 337.8, 1590.1, 339.3), "faixa_y": (336, 346), "x": (1083, 1591),
+                     "fonte_dy": 10},
+    # "FALTOU A SOLEIRA DE UM DOS LADOS DA JANELA" (a janela de canto do escritório): o vão da direita do PDF (ARQ_PAREDE,
+    # 2593,2–2605,2 x 355,2–429,1) mostrava o gramado; entra a soleira da janela de cima (o vão dela, 341,4–349,7, da
+    # face de fora à de dentro), girada: a face de fora junto ao gramado, o comprido da de cima ao longo
+    "soleira": {"vao_px": (2593.2, 355.2, 2605.2, 429.1), "topo_y": (341.4, 349.7), "topo_x": (2500.0, 2588.0)},
+    # "COLOCA ESSE RÓTULO ACIMA DA ESCADA" (o SOBE PARA O 1º PAVIMENTO da caracol da área de serviço, à esquerda dela):
+    # centrado sobre a caracol (o centro dela, x 1977), no piso livre entre as máquinas e o topo da escada (y 1518)
+    "caracol": {"linhas": ["SOBE PARA O", "1º PAVIMENTO"], "perto": (1916.0, 1604.0), "novo": (1977.0, 1501.0, "centro")},
     "claraboia": {"nome": "PROJ. CLARABOIA", "corpo": 0.9, "centro": (2286.0, 369.0), "livre_px": (2257, 356, 2316, 383)},
 }
 
@@ -363,6 +388,151 @@ def bancada_12k(out, s, X0, Ya3, q=None):
     return np.clip(np.round(f), 0, 255).astype(np.uint8)
 
 
+def _tapar(Q, img, a0):
+    import terreo_casaa_1011 as TA
+    with contextlib.redirect_stdout(io.StringIO()):
+        import final3840_casaa as FA
+        par = FA.paredes_pdf(Q) > 0.05
+    lum = img.astype(np.float32).mean(axis=2)
+    texto = np.abs(lum - cv2.medianBlur(img, 7).astype(np.float32).mean(axis=2)) > TA.ROTULOS_1111["texto_dif"]
+    proibido = TA.dilatar((a0 > 0.02) | texto, 2) | TA.moveis_pdf(Q) | par
+    zona = TA.dilatar(a0 > 0.02, TA.ROTULOS_1111["folga_px"])
+    return TA._tapar_rotulo(img, zona, proibido, Q.chapada, TA.ROTULOS_1111)
+
+
+def garagem(Q, img, q=None, gravar=True):
+    """O rótulo da GARAGEM no mesmo desenho, com o centro em `centro`."""
+    import ampliacao_12k_terreo_casaa as Z
+    import terreo_casaa_1011 as TA
+    q = q or PEDIDOS_1211C["garagem"]
+    forma = img.shape[:2]
+    d = json.loads(Z.DADOS.read_text())
+    i = next(k for k, b in enumerate(d["rotulos"]) if b["nome"] == q["nome"])
+    b = d["rotulos"][i]
+    b0 = dict(b, opc=b["_antes"]["opc"], desvio=b["_antes"]["desvio"]) if "_antes" in b else dict(b)
+    a0 = Z.alfa_rotulo(Q, b0, forma)
+    # o fundo: o mesmo trecho `fundo_dx` px à esquerda (a parede de cima é reta; o carro da esquerda começa mais abaixo)
+    zona = TA.dilatar(a0 > 0.02, 2)
+    al = np.clip(cv2.GaussianBlur(zona.astype(np.float32), (0, 0), 0.8) * 1.6, 0, 1)
+    al[~TA.dilatar(zona, 2)] = 0
+    fonte = np.roll(img, q["fundo_dx"], axis=1).astype(np.float32)
+    out = np.clip(np.round(img.astype(np.float32) * (1 - al[..., None]) + fonte * al[..., None]), 0, 255
+                  ).astype(np.uint8)
+    desl = f"{q['fundo_dx']} px à esquerda"
+    nb = {k: v for k, v in b0.items() if not k.startswith("_")}
+    ys, xs = np.nonzero(a0 > 0.3)
+    tx, ty = q["centro"]
+    nb["desvio"] = [nb["desvio"][0] + tx - (xs.min() + xs.max()) / 2, nb["desvio"][1] + ty - (ys.min() + ys.max()) / 2]
+    a = Z.alfa_rotulo(Q, nb, forma)
+    out = np.clip(np.round(TA.compor(out.astype(np.float32), a, tuple(nb["cor"]))), 0, 255).astype(np.uint8)
+    ys, xs = np.nonzero(a > 0.3)
+    print(f"    GARAGEM: x {xs.min()}-{xs.max()}, y {ys.min()}-{ys.max()}; fundo de {desl}")
+    if gravar:
+        nb["_antes"] = {"opc": b0["opc"], "desvio": b0["desvio"]}
+        d["rotulos"][i] = nb
+        Z.DADOS.write_text(json.dumps(d, ensure_ascii=False, indent=1) + "\n")
+    return out
+
+
+def caracol(Q, img, q=None, gravar=True):
+    """O SOBE PARA O 1º PAVIMENTO da caracol (uma anotação: os dados do 12K) no lugar novo, no mesmo desenho."""
+    import ampliacao_12k_terreo_casaa as Z
+    import terreo_casaa_1011 as TA
+    q = q or PEDIDOS_1211C["caracol"]
+    forma = img.shape[:2]
+    d = json.loads(Z.DADOS.read_text())
+    i = next(k for k, (t, dd, c) in enumerate(d["anotacoes"])
+             if t == "txt" and dd[0] == q["linhas"] and (np.allclose(dd[1:3], q["perto"])
+                                                          or np.allclose(dd[1:3], q["novo"][:2])))
+    t, dd, cor = d["anotacoes"][i]
+    d0 = [dd[0], q["perto"][0], q["perto"][1], "direita"]          # o desenho de antes (o que está na final de antes)
+    a0 = Z.alfa_anotacao(t, d0, forma)
+    out, desl = _tapar(Q, img, a0)
+    d1 = [dd[0], *q["novo"]]
+    a = Z.alfa_anotacao(t, d1, forma)
+    out = np.clip(np.round(TA.compor(out.astype(np.float32), a, tuple(cor))), 0, 255).astype(np.uint8)
+    ys, xs = np.nonzero(a > 0.3)
+    print(f"    SOBE PARA O 1º PAVIMENTO (caracol): x {xs.min()}-{xs.max()}, y {ys.min()}-{ys.max()}; fundo de {desl}")
+    if gravar:
+        d["anotacoes"][i] = [t, d1, cor]
+        Z.DADOS.write_text(json.dumps(d, ensure_ascii=False, indent=1) + "\n")
+    return out
+
+
+def vidro_ret(out, ret, q, s=1.0, X0=0.0, Y0=0.0, ss=8):
+    """Uma lâmina de vidro deitada (px da final: x0, y0, x1, y1), no desenho de `terreo_casaa_1011.vidro_laminas`
+    (o vidro claro, as duas faces em linha fina, o brilho no meio e a sombra curta), na escala s (u = (x - X0) s)."""
+    x0, y0, x1, y1 = ret
+    if y1 - y0 < q["larg_min_px"]:
+        c_ = (y0 + y1) / 2
+        y0, y1 = c_ - q["larg_min_px"] / 2, c_ + q["larg_min_px"] / 2
+    x0, x1 = x0 - q["ponta_px"], x1 + q["ponta_px"]
+    u0, v0, u1, v1 = (x0 - X0) * s, (y0 - Y0) * s, (x1 - X0) * s, (y1 - Y0) * s
+    A0, B0, A1, B1 = int(u0) - 3 * int(np.ceil(s)), int(v0) - 3 * int(np.ceil(s)), int(np.ceil(u1)) + 4 * int(np.ceil(s)), \
+        int(np.ceil(v1)) + 4 * int(np.ceil(s))
+    w, h = A1 - A0, B1 - B0
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    a0, b0, a1, b1 = [int(round(v * ss)) for v in (u0 - A0, v0 - B0, u1 - A0, v1 - B0)]
+    cv2.rectangle(m, (a0, b0), (a1 - 1, b1 - 1), 255, -1)
+    lt = max(1, int(round(q["linha_px"] * s * ss)))
+    bordas, meio = np.zeros_like(m), np.zeros_like(m)
+    bordas[b0:b0 + lt, a0:a1] = 255
+    bordas[b1 - lt:b1, a0:a1] = 255
+    c_ = (b0 + b1) // 2
+    meio[c_ - lt // 2:c_ + lt // 2 + 1, a0 + lt:a1 - lt] = 255
+
+    def reduzir(x):
+        return cv2.resize(x.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    av, ab, am = reduzir(m), reduzir(bordas), reduzir(meio)
+    reg = out[B0:B1, A0:A1].astype(np.float32)
+    sb = cv2.GaussianBlur(cv2.warpAffine(av, np.float32([[1, 0, -0.7 * s], [0, 1, 0.7 * s]]), (w, h)), (0, 0), 0.5 * s)
+    reg *= (1 - q["sombra"] * sb * (1 - av))[..., None]
+    al = av[..., None] * q["alfa"]
+    reg = reg * (1 - al) + np.float32(q["vidro"]) * al
+    reg = reg * (1 - ab[..., None]) + np.float32(q["contorno"]) * ab[..., None]
+    am = am[..., None] * q["brilho"]
+    reg = reg * (1 - am) + 250 * am
+    out[B0:B1, A0:A1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    return out
+
+
+def guarda_corpo(img, q=None, s=1.0, X0=0.0, Y0=0.0):
+    import terreo_casaa_1011 as TA
+    q = q or PEDIDOS_1211C["guarda_corpo"]
+    out = img.copy()
+    y0, y1 = [int(round((v - Y0) * s)) for v in q["faixa_y"]]
+    x0, x1 = [int(round((v - X0) * s)) for v in q["x"]]
+    d = int(round(q["fonte_dy"] * s))
+    out[y0:y1, x0:x1] = img[y0 + d:y1 + d, x0:x1]
+    return vidro_ret(out, q["vidro_px"], TA.ESCADAS_TA["jardim"]["vidro"], s, X0, Y0)
+
+
+def soleira(img, q=None, s=1.0, X0=0.0, Y0=0.0):
+    """A soleira do vão da direita, tirada da de cima (a mesma imagem), girada; px da final -> u = (x - X0) s."""
+    q = q or PEDIDOS_1211C["soleira"]
+    vx0, vy0, vx1, vy1 = q["vao_px"]
+    ty0, ty1 = q["topo_y"]
+    tx0, tx1 = q["topo_x"]
+    u0, v0 = int(np.floor((vx0 - X0) * s)), int(np.floor((vy0 - Y0) * s))
+    u1, v1 = int(np.ceil((vx1 - X0) * s)), int(np.ceil((vy1 - Y0) * s))
+    uu, vv = np.meshgrid(np.arange(u0, u1) + 0.5, np.arange(v0, v1) + 0.5)
+    x, y = uu / s + X0, vv / s + Y0                       # px da final de cada px do destino
+    # a face de fora (x = vx1, junto ao gramado) <-> a de fora de cima (y = ty0); o comprido <-> x de cima
+    yt = ty0 + (vx1 - x) * (ty1 - ty0) / (vx1 - vx0)
+    xt = tx0 + (y - vy0) * (tx1 - tx0) / (vy1 - vy0)
+    mx = ((xt - X0) * s - 0.5).astype(np.float32)
+    my = ((yt - Y0) * s - 0.5).astype(np.float32)
+    amostra = cv2.remap(img, mx, my, cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE).astype(np.float32)
+    # a cobertura do vão em cada px (as bordas fracionárias)
+    cx = np.clip(np.minimum(uu + 0.5, (vx1 - X0) * s) - np.maximum(uu - 0.5, (vx0 - X0) * s), 0, 1)
+    cy = np.clip(np.minimum(vv + 0.5, (vy1 - Y0) * s) - np.maximum(vv - 0.5, (vy0 - Y0) * s), 0, 1)
+    al = (cx * cy)[..., None]
+    out = img.copy()
+    reg = out[v0:v1, u0:u1].astype(np.float32)
+    out[v0:v1, u0:u1] = np.clip(np.round(reg * (1 - al) + amostra * al), 0, 255).astype(np.uint8)
+    return out
+
+
 def jardim_12k(out, s, X0, Ya3, q=None):
     q = q or PEDIDOS_1211C["jardim"]
     x0, y0, x1, y1 = q["doze_px"]
@@ -384,7 +554,9 @@ def jardim_12k(out, s, X0, Ya3, q=None):
 ANTES_DEPOIS = {"bege_pergolado": (1080, 840, 1540, 1230), "brises": (1180, 1240, 1260, 1580),
                 "porta": (1590, 1480, 1710, 1620), "deck_escadas": (700, 1060, 1110, 1160),
                 "jardim": (2250, 950, 2440, 1040), "sofa": (1860, 340, 2200, 640),
-                "claraboia": (2240, 335, 2360, 425), "lavabo_vaso_bancada": (2250, 340, 2365, 525)}
+                "claraboia": (2240, 335, 2360, 425), "lavabo_vaso_bancada": (2250, 340, 2365, 525),
+                "garagem": (2280, 1280, 2700, 1460), "caracol": (1780, 1440, 2060, 1630),
+                "guarda_corpo": (1060, 322, 1600, 362), "soleira": (2460, 320, 2625, 470)}
 
 
 def antes_depois(antes, depois):
@@ -416,6 +588,10 @@ def aplicar(antes):
     out = jardim(Q, out)
     out = claraboia(Q, out)
     out = bancada(out)
+    out = garagem(Q, out)
+    out = caracol(Q, out)
+    out = guarda_corpo(out)
+    out = soleira(out)
     return out
 
 
@@ -427,6 +603,8 @@ def doze(out, s, X0, Ya3):
     out = deck_12k(out, s, X0, Ya3)
     out = jardim_12k(out, s, X0, Ya3)
     out = bancada_12k(out, s, X0, Ya3)
+    out = guarda_corpo(out, s=s, X0=X0, Y0=Ya3)
+    out = soleira(out, s=s, X0=X0, Y0=Ya3)
     return out
 
 
