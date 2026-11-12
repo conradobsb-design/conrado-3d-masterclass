@@ -2323,8 +2323,14 @@ def _living_pdf(Q, peca, x0, y0, w, h):
         for r in SOFA_LIVING_TB["pegada_px"]:
             cov = np.maximum(cov, U._cobertura(r, x0, y0, w, h))
         return cov
-    dd = Q.desenhos[peca]
-    return Q.preencher(lambda d, dd=dd: d is dd, ss=4)[y0:y0 + h, x0:x0 + w].astype(np.float32)
+    chave = (id(Q), peca)
+    if chave not in _SIL_CACHE:
+        dd = Q.desenhos[peca]
+        _SIL_CACHE[chave] = Q.preencher(lambda d, dd=dd: d is dd, ss=4)
+    return _SIL_CACHE[chave][y0:y0 + h, x0:x0 + w].astype(np.float32)
+
+
+_SIL_CACHE = {}
 
 
 def _living_camada(Q, img, cam, q, feito):
@@ -2334,6 +2340,10 @@ def _living_camada(Q, img, cam, q, feito):
     # o que a IA inventou fora do PDF, refeito da própria IA `dx` px ao lado (px do quadro)
     for a, b, c, e, dx in cam.get("remendos_ia", ()):
         ia[b - y0:e - y0, a - x0:c - x0] = ia[b - y0:e - y0, a - x0 + dx:c - x0 + dx].copy()
+    # uma faixa da IA esticada na largura do PDF (linhas b-e, colunas de a0-a1 para c0-c1, px do quadro)
+    for b, e, a0, a1, c0, c1 in cam.get("estica_ia", ()):
+        faixa = ia[b - y0:e - y0, a0 - x0:a1 - x0].copy()
+        ia[b - y0:e - y0, c0 - x0:c1 - x0] = cv2.resize(faixa, (c1 - c0, e - b), interpolation=cv2.INTER_LINEAR)
     reg = img[y0:y1, x0:x1].astype(np.float32)
     fixo = feito[y0:y1, x0:x1].copy()
     for peca in cam.get("protege", ()):
@@ -2370,7 +2380,9 @@ def _living_camada(Q, img, cam, q, feito):
                 est &= ~(cresce((cv_ > 0.01).astype(np.uint8), 12) > 0)
     for r in q["fora_px"]:
         est &= ~ret(r, d=4)
-    est &= (reg.mean(axis=2) > 150) & ((reg.max(axis=2) - reg.min(axis=2)) < 40)
+    claro = est & (reg.mean(axis=2) > 150) & ((reg.max(axis=2) - reg.min(axis=2)) < 40)
+    # sem tapete nem piso claro (os quartos de piso marrom): o piso todo fora das peças, sem as linhas escuras
+    est = claro if claro.sum() >= 200 else est & (reg.mean(axis=2) > q["linha_lum"])
     g = np.clip(np.median(reg[est], axis=0) / np.maximum(np.median(ia[est], axis=0), 1), *q["ganho_lim"])
     iag = ia * g[None, None, :]
     # o que a IA desenhou como peça perto de cada silhueta: foge do fundo limpo em cor, ou é mais claro que ele (a
@@ -2379,10 +2391,15 @@ def _living_camada(Q, img, cam, q, feito):
     lab_f = cv2.cvtColor(np.clip(limpo / 255, 0, 1), cv2.COLOR_BGR2LAB)
     dab = np.hypot(lab_i[..., 1] - lab_f[..., 1], lab_i[..., 2] - lab_f[..., 2])
     obj = (dab > q["peca_ab_min"]) | (lab_i[..., 0] - lab_f[..., 0] > q["peca_l_min"])
+    # onde a peça da IA é menor que a silhueta do PDF (os cantos da cama junto à cabeceira e aos criados-mudos), a
+    # silhueta pegaria o piso escuro ou a sombra da IA: nesses retângulos (`corta_px`, px do quadro) volta o fundo limpo
+    cortado = np.zeros((h, w), bool)
+    for r in cam.get("corta_px", ()):
+        cortado |= ret(r)
     sil = []
     for p, r in zip(pdf, caixas):
-        cov = cresce(p, q["cresce_px"])
-        oi = (obj & ret(r, d=q["perto_px"])).astype(np.uint8)
+        cov = cresce(p, q["cresce_px"]) * ~cortado
+        oi = (obj & ~cortado & ret(r, d=q["perto_px"])).astype(np.uint8)
         oi = cv2.morphologyEx(oi, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8)) > 0
         nucleo = cov > 0.5
         lab, n = ndimage.label(oi | nucleo)
@@ -2394,6 +2411,7 @@ def _living_camada(Q, img, cam, q, feito):
         dist = cv2.distanceTransform((peso < 0.5).astype(np.uint8), cv2.DIST_L2, 3)
         anel = np.clip(1 - dist / cam["sombra_px"], 0, 1) ** 1.5
         peso = np.maximum(peso, anel)
+    peso[cortado] = 0
     # as linhas escuras de fora das peças antigas (o caixilho do vidro, a parede) e o que as camadas anteriores puseram
     linha = ~velho & (reg.mean(axis=2) < q["linha_lum"]) & (peso < 0.99)
     peso[linha] = 0
@@ -2453,6 +2471,52 @@ def estar_varanda_tb(Q, img, q=ESTAR_VARANDA_TB):
         feito = np.maximum(feito, pg)
     print("    estar da varanda: o sofá de dois lados pelo desenho do PDF e as 2 poltronas terracota realistas "
           "(Nano Banana Pro, nas silhuetas do PDF)")
+    return out
+
+
+# As camas pela IA (usuário: "altere as camas para camas mais realistas, mantendo o tom do jogo de cama. me apresente 2
+# opções de camas, tanto para camas de casal quanto de solteiro para aprovar."; "gostei da cama com a cabeceira cinza e o
+# jogo de cama com metalessa"; "já atualize o sofá na frente da cama de casal com realismo e os bancos/sofá onde tem,
+# também, em frente as camas"; "na suíte 3, não há banco e nem sofá em frente a cama de casal"). A combinação aprovada (a
+# cabeceira e a base estofadas em linho cinza claro da opção A; a colcha matelassê branca, as almofadas e a peseira de
+# veludo bordô da opção B; sem estrutura de madeira) foi ao Nano Banana Pro quarto a quarto, com o recorte da planta e a
+# combinação de referência, cada cama no lado da cabeceira do PDF; com ela, o que há aos pés da cama, em linho cinza
+# claro/greige: o banco com 2 rolos da suíte master, o sofá de 2 lugares da suíte 1 (encosto à direita, assento para a
+# cama) e os 2 bancos estofados da suíte 2. Cada camada alinhada ao seu recorte (`caixa_px`, `renders/ia/
+# POE642_CasaB_Terreo_cama_<quarto>_nbp_alinhado.png`) e posta pelo `_living_camada` nas silhuetas do PDF, com a sombra
+# curta da IA em volta; os criados-mudos ficam os de antes (`protege`).
+CAMAS_TB = {"camadas": [
+    {"nome": "suíte master: cama e banco aos pés", "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_cama_master_nbp_alinhado.png",
+     "caixa_px": (995, 575, 1215, 795), "pecas": [77941, 63289], "protege": [78321, 78337], "sombra_px": 4.0,
+     # a cabeceira da IA (x 1049-1162) esticada na largura da cabeceira do PDF (1036-1175, atrás dos criados-mudos);
+     # acima dela, entre a cama e os criados-mudos, o piso de antes (a IA pôs ali a sombra escura)
+     "estica_ia": [(752, 765, 1049, 1162, 1036, 1175)],
+     "corta_px": [(1034, 738, 1050, 752), (1161, 738, 1178, 752)]},
+    {"nome": "suíte 1: cama e sofá aos pés", "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_cama_s1_nbp_alinhado.png",
+     "caixa_px": (1925, 362, 2140, 522), "pecas": [77600, 77674], "protege": [77620, 77647], "sombra_px": 4.0,
+     # entre a cabeceira e os criados-mudos redondos a IA pôs o piso de madeira dela (o tapete do PDF começa antes)
+     "corta_px": [(1944, 379, 1983, 384), (1944, 499, 1983, 506)]},
+    {"nome": "suíte 2: 2 camas de solteiro e os bancos aos pés",
+     "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_cama_s2_nbp_alinhado.png",
+     "caixa_px": (2368, 333, 2552, 563), "pecas": [77500, 77520, 71845, 71850], "protege": [71840], "sombra_px": 4.0},
+    {"nome": "suíte 3: cama (sem banco nem sofá)", "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_cama_s3_nbp_alinhado.png",
+     "caixa_px": (2440, 692, 2600, 852), "pecas": [77560], "sombra_px": 4.0},
+    {"nome": "quarto de serviço: cama", "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_cama_serv_nbp_alinhado.png",
+     "caixa_px": (1900, 1590, 2050, 1674), "pecas": [77881], "sombra_px": 4.0},
+    {"nome": "quarto do motorista: cama", "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_cama_mot_nbp_alinhado.png",
+     "caixa_px": (2832, 1372, 2986, 1458), "pecas": [77921], "protege": [63266], "sombra_px": 4.0}],
+    "cresce_px": 2, "perto_px": 3, "peca_ab_min": 7.0, "peca_l_min": 9.0, "ganho_lim": (0.92, 1.08), "linha_lum": 110,
+    "fora_px": []}
+
+
+def camas_ia_tb(Q, img, q=CAMAS_TB):
+    out = img.copy()
+    feito = np.zeros(img.shape[:2], np.float32)
+    for cam in q["camadas"]:
+        out, pg = _living_camada(Q, out, cam, q, feito)
+        feito = np.maximum(feito, pg)
+    print("    camas: cabeceira estofada cinza e colcha matelassê com o bordô em todas as camas, e o banco e o sofá aos "
+          "pés das camas realistas (Nano Banana Pro, nas silhuetas do PDF)")
     return out
 
 
@@ -2995,7 +3059,7 @@ PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_
           ("quina", quina_tb), ("tapete", tapete_tb),
           ("poltronas", poltronas_tb), ("sofa_living", sofa_living_tb),
           ("cadeiras", cadeiras_tb), ("varanda_ia", varanda_ia_tb), ("poltronas_varanda", poltronas_varanda_tb),
-          ("estar_varanda", estar_varanda_tb), ("living_ia", living_ia_tb),
+          ("estar_varanda", estar_varanda_tb), ("living_ia", living_ia_tb), ("camas_ia", camas_ia_tb),
           ("pedras", pedras_tb), ("brises", brises_tb), ("despensa", despensa_tb), ("pontos", pontos_tb),
           ("rotulos", rotulos_tb), ("bancada_cozinha", bancada_cozinha_tb)]
 
