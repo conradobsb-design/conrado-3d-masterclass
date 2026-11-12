@@ -2192,7 +2192,7 @@ VARANDA_IA_TB = {"ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_varanda_estar_n
                               (1457.0, 821.5, 1508.1, 873.0), (1451.9, 907.1, 1503.1, 958.6),
                               (1117.2, 909.7, 1173.3, 965.0), (1172.3, 862.2, 1231.1, 921.0)],
                  "pecas_pdf": [64428, 66870, 67242, 66895, 66910, 67076, 67267, 71961],
-                 "tapete_px": (1187.3, 801.7, 1485.9, 1010.6), "folga_px": 10, "cresce_px": 2, "peca_lab_min": 9.0,
+                 "tapete_px": (1187.3, 801.7, 1485.9, 1010.6), "folga_px": 10, "cresce_px": 2, "peca_ab_min": 6.0, "peca_l_min": 8.0,
                  "ganho_lim": (0.95, 1.2), "ganho_de": {3: 1}, "sombra_min": 0.78, "piso_lab_max": 7.0, "sombra_px": 7.0,
                  "grao_px": (1114, 985, 1196, 1094)}
 
@@ -2225,7 +2225,10 @@ def varanda_ia_tb(Q, img, q=VARANDA_IA_TB):
         caixas |= ret(r, d=4)
     piso_ia = zona & ~caixas & ~tap_b
     pf = np.median(lab[piso_ia], axis=0)
-    obj_ia = np.sqrt(((lab - pf) ** 2).sum(axis=2)) > q["peca_lab_min"]
+    # peça: cor diferente do piso, ou mais clara que ele; a sombra (mais escura, no mesmo tom) não é peça (usuário:
+    # "corrija a sombra dessa poltrona": a sombra da IA contada como peça deixava a beira em degrau)
+    dab = np.hypot(lab[..., 1] - pf[1], lab[..., 2] - pf[2])
+    obj_ia = (dab > q["peca_ab_min"]) | (lab[..., 0] - pf[0] > q["peca_l_min"])
     # as silhuetas
     sil = []
     for i, r in zip(q["pecas_pdf"], q["pecas_px"]):
@@ -2282,6 +2285,150 @@ def varanda_ia_tb(Q, img, q=VARANDA_IA_TB):
           f"{round(float(np.mean(g_tap)), 3)}); a sombra da IA sobre o piso original limpo "
           f"({int((resto & ~(peso > 0.01) & ~tap_b).sum())} px de resto das peças velhas)")
     return out
+
+# As poltronas da varanda (usuário: "ainda está diferente do que eu esperava. segue o que eu espero dessas poltronas",
+# com as poltronas de concha terracota e assento branco, de frente e a 45°): as duas poltronas da direita do estar da
+# varanda, que a IA fez inteiras em creme, saem no modelo das poltronas do living (a concha do encosto e dos braços em
+# terracota, o assento branco): a poltrona do living (`modelo_pdf`, a silhueta do PDF) é recortada da própria planta,
+# girada e escalada até cobrir a silhueta do PDF de cada poltrona da varanda (o giro de maior sobreposição) e posta no
+# lugar dela, 1 px maior na beira (sem sobrar o creme da IA); a sombra curta da IA em volta fica.
+POLTRONAS_VAR_TB = {"modelo_pdf": 64047, "alvos_pdf": [66910, 67076], "passo_grau": 3}
+
+
+def _silhueta_pdf(Q, i, ss=4):
+    dd = Q.desenhos[i]
+    return Q.preencher(lambda d, dd=dd: d is dd, ss=ss).astype(np.float32)
+
+
+def poltronas_varanda_tb(Q, img, q=POLTRONAS_VAR_TB):
+    H, W = img.shape[:2]
+    am = _silhueta_pdf(Q, q["modelo_pdf"])
+    ys, xs = np.nonzero(am > 0.01)
+    x0, y0, x1, y1 = xs.min() - 2, ys.min() - 2, xs.max() + 3, ys.max() + 3
+    a_s = am[y0:y1, x0:x1]
+    c_s = img[y0:y1, x0:x1].astype(np.float32)
+    # a cor da beira: a do px de dentro mais perto (sem o fundo misturado)
+    dentro = a_s > 0.9
+    _, (iy, ix) = ndimage.distance_transform_edt(~dentro, return_indices=True)
+    c_s = c_s[iy, ix]
+    hs, ws = a_s.shape
+    cys, cxs = ndimage.center_of_mass(a_s)
+    out = img.astype(np.float32)
+    feitos = []
+    for i in q["alvos_pdf"]:
+        at = _silhueta_pdf(Q, i)
+        cyt, cxt = ndimage.center_of_mass(at)
+        esc = float(np.sqrt(at.sum() / a_s.sum()))
+
+        def pos(ang):
+            M = cv2.getRotationMatrix2D((cxs, cys), ang, esc)
+            M[0, 2] += cxt - cxs
+            M[1, 2] += cyt - cys
+            return M
+
+        def iou(ang):
+            r = cv2.warpAffine(a_s, pos(ang), (W, H), flags=cv2.INTER_LINEAR)
+            return float(np.minimum(r, at).sum() / max(np.maximum(r, at).sum(), 1e-6))
+        angs = np.arange(0, 360, q["passo_grau"])
+        melhor = max(angs, key=iou)
+        finos = np.arange(melhor - q["passo_grau"], melhor + q["passo_grau"] + 0.01, 0.5)
+        melhor = max(finos, key=iou)
+        M = pos(melhor)
+        a_r = cv2.warpAffine(a_s, M, (W, H), flags=cv2.INTER_LINEAR)
+        c_r = cv2.warpAffine(c_s, M, (W, H), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+        a_r = np.clip(cv2.dilate(a_r, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))), 0, 1)[..., None]
+        out = out * (1 - a_r) + c_r * a_r
+        feitos.append((i, round(float(melhor), 1), round(iou(melhor), 3)))
+    out = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    print(f"    poltronas da varanda: as 2 no modelo das poltronas do living (concha terracota, assento branco), "
+          f"giradas pela silhueta do PDF {[(g, f'IoU {v}') for _, g, v in feitos]}")
+    return out
+
+
+# Os brises junto ao jardim de 4,62 m² (usuário: "corrija os brises"): as 11 lâminas giradas da ARQ_ELEMENTOS FIXOS
+# tinham virado divisas escuras borradas, com o tracejado do pergolado por cima. A faixa entre o jardim e o piso da
+# garagem é refeita (as lâminas velhas e os restos escuros saem, `caixa_px`), o tracejado do pergolado volta só nela, e
+# as lâminas entram desenhadas como em `final3840_casab.brises` (alumínio grafite, a aresta da luz, o contorno fino e a
+# sombra curta).
+BRISES_TB = {"caixa_px": (2342, 1279, 2574, 1297), "escuro_lum": 135, "cresce_px": 2}
+
+
+def brises_tb(Q, img, q=BRISES_TB):
+    import final3840_casaa_terreo as FT
+    x0, y0, x1, y1 = q["caixa_px"]
+    H, W = img.shape[:2]
+    ds = F.brises_pdf(Q)
+    lam = np.zeros((H, W), np.uint8)
+    for d in ds:
+        for c in Q.caminhos(d):
+            if len(c) >= 3:
+                cv2.fillPoly(lam, [np.int32(np.round(c))], 1)
+    k = 2 * q["cresce_px"] + 1
+    lam = cv2.dilate(lam, np.ones((k, k), np.uint8)) > 0
+    caixa = np.zeros((H, W), bool)
+    caixa[y0:y1, x0:x1] = True
+    escuro = img.astype(np.float32).mean(axis=2) < q["escuro_lum"]
+    buraco = caixa & (lam | escuro)
+    buraco = cv2.dilate(buraco.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+    buraco &= caixa
+    out = cv2.inpaint(img, buraco.astype(np.uint8), 4, cv2.INPAINT_TELEA)
+    # o tracejado do pergolado, de novo, só na faixa
+    segs = _segs_pergolado(Q)
+    pq = dict(FT.PROJ, larg_px=PERGOLADO_TB["larg_px"], preto=PERGOLADO_TB["cor"], branco=PERGOLADO_TB["cor"])
+    com, _ = FT.preto_branco(Q, out, segs, pq)
+    out[buraco] = com[buraco]
+    out = np.clip(np.round(F.brises(Q, out, ds)), 0, 255).astype(np.uint8)
+    print(f"    brises: {len(ds)} lâminas do PDF redesenhadas (grafite, aresta de luz, contorno fino, sombra curta); "
+          f"{int(buraco.sum())} px da faixa refeitos, com o tracejado do pergolado de volta")
+    return out
+
+
+# A prateleira da despensa (usuário: "corrija o erro na prateleira da despensa"): o dente claro da prateleira da direita
+# sobre o piso (e a linha da beira da prateleira interrompida ali) sai: o trecho (`dente_px`) vem das mesmas colunas
+# `dy` px acima, onde o piso e a beira estão inteiros.
+DESPENSA_TB = {"dente_px": (2006, 1417, 2022, 1432), "dy": -14}
+
+
+def despensa_tb(Q, img, q=DESPENSA_TB):
+    x0, y0, x1, y1 = q["dente_px"]
+    dy = q["dy"]
+    out = img.copy()
+    src = img[y0 + dy:y1 + dy, x0:x1].astype(np.float32)
+    h, w = y1 - y0, x1 - x0
+    a = np.ones((h, w), np.float32)
+    for k in range(2):                                   # 2 px de transição em cima e embaixo
+        a[k, :] = a[h - 1 - k, :] = (k + 1) / 3
+    reg = img[y0:y1, x0:x1].astype(np.float32)
+    out[y0:y1, x0:x1] = np.clip(np.round(reg * (1 - a[..., None]) + src * a[..., None]), 0, 255).astype(np.uint8)
+    print(f"    despensa: o dente da prateleira da direita refeito ({w} x {h} px)")
+    return out
+
+
+# Os pontos estranhos (usuário: "remova o ponto preto. o ponto de interrogação significa algo estranho a ser
+# deletado", com o recorte do chuveiro do banho master): o puxador escuro da porta de vidro do box, que saía 5 px para
+# o piso como um ponto preto e cortava a dobradiça branca; o trecho vem das mesmas colunas `dy` px acima.
+# E (usuário: "remova o vestígio da cuba referente ao tracejado branco, bem na lateral. esse erro precisa sair"): na
+# cuba da pia gourmet, a aba branca saindo da borda da direita (o resto do tracejado branco do armário) e o risco branco
+# que cruzava a borda: a borda vertical vem da linha limpa `linha` (a mesma nas colunas da borda) e o granito ao lado,
+# de `dy` px abaixo.
+PONTOS_TB = {"remendos": [{"nome": "puxador do box do banho master", "px": (1542, 395, 1558, 400), "dy": -6},
+                          {"nome": "aba branca da cuba da pia gourmet (borda)", "px": (1399, 1497, 1404, 1512),
+                           "linha": 1513},
+                          {"nome": "aba branca da cuba da pia gourmet (granito)", "px": (1404, 1497, 1409, 1512),
+                           "dy": 14}]}
+
+
+def pontos_tb(Q, img, q=PONTOS_TB):
+    out = img.copy()
+    for r in q["remendos"]:
+        x0, y0, x1, y1 = r["px"]
+        if "linha" in r:
+            out[y0:y1, x0:x1] = img[r["linha"], x0:x1][None, :, :]
+        else:
+            out[y0:y1, x0:x1] = img[y0 + r["dy"]:y1 + r["dy"], x0:x1]
+    print(f"    pontos: {', '.join(r['nome'] for r in q['remendos'])} fora")
+    return out
+
 
 # As pedras do acesso (usuário: "corrija os contornos das pedras", com o recorte dos pisantes da entrada sobre a grama):
 # as 9 pedras tinham a beira serrilhada (degraus de 1 px, o dente no canto da primeira). Cada uma volta como o
@@ -2362,15 +2509,23 @@ def pedras_tb(Q, img, q=PEDRAS_TB):
 ROTULOS_TB = {"manter": ("SPA", "PISCINA", "PRAINHA", "JARDIM DE INVERNO", "JARDIM", "ELEVADOR"),
               "busca_px": 260, "margem_px": 4, "raio_px": 70, "corpos": (1.0, 0.85, 0.72, 0.62), "resto_area": 8,
               "alinhar": [("BANHO MASTER", "BANHO 1", "BANHO 2"), ("SUÍTE MASTER", "SUÍTE 1", "SUÍTE 2"),
-                          ("CLOSET MASTER", "SALA ÍNTIMA"), ("LIVING/JANTAR", "HALL INTERNO", "HALL", "VARANDA/GOURMET"),
+                          ("SALA ÍNTIMA", "CIRCULAÇÃO"), ("LIVING/JANTAR", "HALL INTERNO", "HALL", "VARANDA/GOURMET"),
                           ("LOUCEIRO", "DESPENSA", "ÁREA DE SERVIÇO"), ("BH SERVIÇO", "QUARTO SERVIÇO"),
                           ("BANHO GOURMET", "LAVATÓRIO GOURMET")],
               # as colunas (o meio do texto na mesma vertical)
               "alinhar_x": [("DEPÓSITO", "QUARTO MOTORISTA", "BH MOTORISTA")],
               "centros": {},
+              # a faixa fica na altura (ou no eixo) deste rótulo, que não sai do lugar (usuário: "alinhe sala intima com
+              # circulação": a CIRCULAÇÃO no meio do corredor, a SALA ÍNTIMA desce até ela)
+              "ancoras": ("CIRCULAÇÃO",),
               # onde o ambiente é apertado demais para o corpo da faixa: fica no lugar e no corpo achados (só a cor
               # refeita pelo piso novo)
               "no_lugar": ("BH SERVIÇO",),
+              # o meio pedido (px) e, se preciso, o corpo e a cor; a altura é a da faixa (usuário: "coloque o rótulo da
+              # varanda/gourmet mais a direita sem ficar na sombra do sofá, mas alinhado com o rótulo do living": entre a
+              # sombra do sofá, em x 1446, e a linha da varanda, em x 1553, cabe a 0,92; "corrija o rótulo do louceiro
+              # para cor branca e centralizado": no meio do piso marrom, entre a prateleira e a parede)
+              "fixos": {"VARANDA/GOURMET": {"cx": 1498.5, "corpo": 0.92}, "LOUCEIRO": {"cx": 1897.5, "cor": (255, 255, 255)}},
               # os ambientes abertos para o terreno (o recinto do PDF vaza): o piso livre nesta caixa (px)
               "recorte_px": {"DECK": (667, 1380, 1094, 1702), "HALL": (2545, 945, 2705, 1180),
                              "GARAGEM": (2390, 1296, 2850, 1366)}}
@@ -2537,6 +2692,9 @@ def rotulos_tb(Q, img, q=ROTULOS_TB):
         else:
             vals = [p_["alvo"][0] for p_ in ps]
         med = float(np.median(vals))
+        anc = [p_ for p_ in ps if p_["nome"] in q.get("ancoras", ())]
+        if anc:
+            med = anc[0]["fundo"] if eixo == "x" else anc[0]["alvo"][0]
         melhor = None
         for v in np.arange(min(vals) - 10, max(vals) + 11, 1.0):
             n_ok = sum(1 for p_ in ps if cabe(p_, 1.0, p_["alvo"][0] if eixo == "x" else v,
@@ -2550,6 +2708,21 @@ def rotulos_tb(Q, img, q=ROTULOS_TB):
     # 5. o desenho: no corpo da regra, na faixa (ou no meio do piso livre, ou no livre mais perto dele)
     for p_ in planos:
         r1 = achados[p_["i"]]["r1"]
+        if p_["nome"] in q.get("fixos", {}):
+            fx_ = q["fixos"][p_["nome"]]
+            fc = fx_.get("corpo", 1.0)
+            opc, bx0, by0, bx1, by1 = caixa(p_["i"], fc)
+            fundo = p_["alinhado"][1] if p_.get("eixo") == "x" else p_["fundo"]
+            x0_, y0_ = int(round(fx_["cx"] - (bx1 - bx0) / 2)), int(round(fundo - (by1 - by0)))
+            dx, dy = x0_ - bx0, y0_ - by0
+            cor = fx_.get("cor") or F.cor_do_fundo(out, x0_, y0_, x0_ + bx1 - bx0, y0_ + by1 - by0)
+            esc = Q.W / 2000
+            cx, cy = Q.p2q(*r1[2])
+            out = R1.rotulos_ambientes(out, [r1], Q.p2q, escala_desvio=esc, granito=None,
+                                       ajustes=[(r1[0], (cx / esc, cy / esc), (dx / esc, dy / esc), dict(opc, cor=cor))],
+                                       halo=None)
+            print(f"      {r1[0]}: fixo, caixa ({x0_}, {y0_})-({x0_ + bx1 - bx0}, {y0_ + by1 - by0}), corpo {fc}")
+            continue
         if p_["nome"] in q.get("no_lugar", ()):
             a_ = achados[p_["i"]]
             ys, xs = np.nonzero(a_["alfa"] > 0.05)
@@ -2604,7 +2777,8 @@ PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_
           ("portas_fechadas", portas_fechadas_tb), ("cozinha", cozinha_tb),
           ("quina", quina_tb), ("tapete", tapete_tb),
           ("poltronas", poltronas_tb), ("sofa_living", sofa_living_tb),
-          ("cadeiras", cadeiras_tb), ("varanda_ia", varanda_ia_tb), ("pedras", pedras_tb),
+          ("cadeiras", cadeiras_tb), ("varanda_ia", varanda_ia_tb), ("poltronas_varanda", poltronas_varanda_tb),
+          ("pedras", pedras_tb), ("brises", brises_tb), ("despensa", despensa_tb), ("pontos", pontos_tb),
           ("rotulos", rotulos_tb)]
 
 
