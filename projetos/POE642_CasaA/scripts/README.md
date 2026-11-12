@@ -2149,6 +2149,23 @@ sala íntima, o banco aos pés da cama king, o laptop da suíte 1, a TV da suít
   e as peças nítidas dos PNG (registro em `renders/POE642_CasaA_PH_1Pavimento_12K_biblioteca.json` e
   `..._12K_biblioteca_zona.png`). Sem IA nova (Topaz 24b977d2).
 
+**Revisão das poltronas (12/11, "Revisão de poltronas e rotação necessária"):** todos os PNG da biblioteca têm a
+frente para baixo (`girar_pt`); a frente de cada poltrona é a do símbolo do PDF (o encosto é o lado das linhas grossas;
+a frente, a borda reta do assento ou a linha entre os pés da frente). No 1º Pavimento, a da sala íntima e a da suíte
+master estavam ~120° fora: as duas a -150° (a normal da borda reta do assento: para a mesa de centro e para o pufe);
+a da suíte 2 estava certa. No Térreo, a creme da sala de estar a -56° (a linha entre os pés da frente; era -72,5°, a
+pose de 29/10); as oliva, as 4 caramelo (para a mesinha do meio), a dos brises e a de leitura estavam certas; as da
+varanda não têm símbolo no PDF (as poses de 29/10). Antes e depois em
+`renders/POE642_CasaA_PH_{Terreo,1Pavimento}_1211_poltronas_antes_depois.jpg`.
+
+**Mesas laterais da sala íntima (12/11, "Tem mesa redonda sobre o sofá, em vez de estar ao redor"):** o sofá em L da
+biblioteca é mais fundo que o do PDF (a chaise até y 1022, o braço desde x 2111), e as duas mesas laterais, no lugar
+do PDF, caíam sobre ele; vão ao lado: à esquerda da chaise, no tapete (2044, 992), e por fora do braço, junto à ponta
+da mesa de centro (2100, 1140). A terceira, ao lado da poltrona, fica. No 12K, os recortes do que fica (`recolar`: a mesa de
+centro, o banco, o laptop, a TV) entram no registro e voltam por cima das peças nítidas (antes, o tapete novo desenhado
+no 12K cobria a mesa de centro e o banco), recortados da final de `ANTES_COMMIT` e ampliados em Lanczos; o laptop e a
+TV pelo retângulo exato da peça (`cheio`), sem a sombra e o tampo antigos em volta.
+
 **Como refazer:** `python3 biblioteca_1pav_casaa_1211.py` (parte da final de `ANTES_COMMIT` = 127eabc; sem `--saida`
 grava a final, o registro do 12K e os antes e depois `renders/POE642_CasaA_PH_1Pavimento_1211b_<ambiente>_antes_depois.jpg`);
 depois `ampliacao_12k_1pav_casaa.py montar12k <Topaz> --opcao AB`, `rodape_entrega.py --no-quadro --render

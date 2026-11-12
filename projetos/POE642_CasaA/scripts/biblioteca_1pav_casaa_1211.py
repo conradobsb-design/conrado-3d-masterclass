@@ -62,10 +62,15 @@ AMBIENTES = {
         "pecas": [
             ("sala-intima/tapete", 2096.0, 1099.0, 262.0, 120.0, 90.0, "tapete", None),
             ("sala-intima/sofa-l-a", 2115.5, 1054.5, 119.0, 209.0, 0.0, "movel", "anti_t"),
-            ("sala-intima/mesa-lateral", 2077.0, 1004.0, 18.0, None, 0.0, "baixa", None),
-            ("sala-intima/mesa-lateral", 2121.5, 1138.5, 18.0, None, 0.0, "baixa", None),
+            # (12/11, usuário: "Tem mesa redonda sobre o sofá, em vez de estar ao redor") o sofá da biblioteca é mais
+            # fundo que o do PDF (a chaise até y 1022, o braço desde x 2111): as mesas laterais do PDF caíam sobre ele;
+            # vão ao lado: à esquerda da chaise, no tapete, e por fora do braço, junto à ponta da mesa de centro
+            ("sala-intima/mesa-lateral", 2044.0, 992.0, 18.0, None, 0.0, "baixa", None),
+            ("sala-intima/mesa-lateral", 2100.0, 1140.0, 18.0, None, 0.0, "baixa", None),
             ("sala-intima/mesa-lateral", 2140.5, 1188.5, 27.0, None, 0.0, "baixa", None),
-            ("sala-intima/poltrona-a", 2089.0, 1192.5, 54.0, 56.0, girar_pt(0.45, -0.9), "movel", None),
+            # (12/11, "Revisão de poltronas e rotação necessária") a frente na normal da borda reta do assento do
+            # PDF (2064,5;1183,6)-(2097,6;1164,5), para a mesa de centro: -150° (antes, para cima e à direita)
+            ("sala-intima/poltrona-a", 2089.0, 1192.5, 54.0, 56.0, -150.0, "movel", None),
             ("sala-intima/vaso-folhagem-a", 2021.5, 920.5, 54.0, None, 0.0, "movel", None)],
         # a mesa de centro de nogueira (a da final) volta por cima do tapete novo
         "recolar": [((2054, 1042, 2095, 1121), "movel")]},
@@ -78,7 +83,9 @@ AMBIENTES = {
             ("suite-master/cama-king-a", 1506.0, 1388.5, 124.2, 130.8, 180.0, "movel", None),
             ("suite-master/criado-retangular-vista-superior", 1417.0, 1439.0, 41.8, 23.9, 0.0, "baixa", None),
             ("suite-master/criado-retangular-vista-superior", 1595.0, 1439.0, 41.8, 23.9, 0.0, "baixa", None),
-            ("suite-master/poltrona", 1671.0, 1394.0, 54.0, 56.0, girar_pt(-0.6, 0.8), "movel", None),
+            # (12/11, revisão das poltronas) a frente para o pufe, na normal da borda reta do assento do PDF
+            # (1640,7;1381,8)-(1674,3;1362,4): -150° (antes, para baixo e à esquerda, com o encosto para o pufe)
+            ("suite-master/poltrona", 1671.0, 1394.0, 54.0, 56.0, -150.0, "movel", None),
             ("suite-master/pufe", 1653.0, 1363.0, 42.0, 22.0, 35.0, "baixa", None)],
         # o banco aos pés da cama (o da final) volta por cima do tapete novo
         "recolar": [((1456, 1294, 1556, 1320), "baixa")]},
@@ -94,7 +101,8 @@ AMBIENTES = {
             ("suite-1/criado-retangular-vista-superior", 2390.5, 1557.0, 32.8, 23.9, 0.0, "baixa", None),
             ("suite-1/criado-retangular-vista-superior", 2492.0, 1557.0, 32.8, 23.9, 0.0, "baixa", None)],
         # o laptop (o da final) volta por cima da bancada nova
-        "recolar": [((2464, 1338, 2491, 1361), "baixa")]},
+        # (o retângulo do laptop, cheio: o recorte pela diferença levava a sombra e o tampo antigos em volta)
+        "recolar": [((2466, 1338, 2488, 1360), "baixa", "cheio")]},
     "suite_2": {
         "zonas": [(1702, 1081, 1829, 1209), (1664, 1177, 1868, 1209), (1619, 1014, 1675, 1070),
                   (1684, 1003, 1847, 1026)],
@@ -106,7 +114,8 @@ AMBIENTES = {
             ("suite-1/criado-retangular-vista-superior", 1847.5, 1193.0, 32.8, 23.9, 0.0, "baixa", None),
             ("sala-intima/poltrona-a", 1647.0, 1042.0, 48.0, 48.0, girar_pt(0.75, 0.66), "movel", None)],
         # a TV (a linha escura do PDF sobre o rack) volta por cima da bancada nova
-        "recolar": [((1722, 1004, 1809, 1013), None)]},
+        # (o alfa pelo escuro: só a linha da TV, sem o rack claro em volta)
+        "recolar": [((1724, 1010, 1807, 1016), None, "escuro")]},
     "suite_3": {
         "zonas": [(1676, 339, 1808, 477), (1637, 340, 1848, 384), (1620, 558, 1785, 602)],
         # a cadeira de madeira e linho (a parte de fora da mesa) e o rack da TV, que o PDF põe na frente da mesa
@@ -276,11 +285,20 @@ def fontes_auto(material, livre, zona, n=2, lado=28, alcance=160):
     return caixas
 
 
-def recolar(antes, caixa, limiar=26):
+def recolar(antes, caixa, cheio=None, limiar=26):
     """O recorte da peça que fica (`caixa`, px) da final de antes, com o alfa pelo que foge do fundo (a mediana da borda
-    da caixa): (P BGRA, cx, cy, larg, alt)."""
+    da caixa), ou a caixa inteira (`cheio`, o retângulo exato da peça): (P BGRA, cx, cy, larg, alt)."""
     x0, y0, x1, y1 = caixa
     reg = antes[y0:y1, x0:x1].astype(np.float32)
+    if cheio == "escuro":                         # uma peça escura (a TV): o alfa pelo escuro, contra o claro em volta
+        L = reg.mean(axis=2)
+        ref = float(np.percentile(L, 90))
+        a = np.clip((ref - L) / max(ref - float(L.min()), 1.0) * 1.3 - 0.15, 0, 1)
+        P = np.concatenate([reg, (a * 255)[..., None]], axis=2).astype(np.float32)
+        return P, (x0 + x1) / 2, (y0 + y1) / 2, float(x1 - x0), float(y1 - y0)
+    if cheio:
+        P = np.concatenate([reg, np.full(reg.shape[:2] + (1,), 255, np.float32)], axis=2)
+        return P, (x0 + x1) / 2, (y0 + y1) / 2, float(x1 - x0), float(y1 - y0)
     borda = np.concatenate([reg[0], reg[-1], reg[:, 0], reg[:, -1]])
     fundo = np.median(borda, axis=0)
     dif = np.abs(reg - fundo).max(axis=2)
@@ -340,10 +358,13 @@ def aplicar(antes):
             o = BT.pousar(o, P, cx, cy, wt, ht, ang, SOMBRAS[sombra], PX_M, nao=nao | manter_total)
             REGISTRO["pecas"].append(reg)
             REGISTRO["pecas_m"] |= BT.mascara_formas([BT.caixa_rot(cx, cy, wt, ht, ang, 2)], forma)
-        for caixa, sombra in amb.get("recolar", []):
-            P, cx, cy, wt, ht = recolar(antes, caixa)
+        for caixa, sombra, *cheio in amb.get("recolar", []):
+            cheio = cheio[0] if cheio else None
+            P, cx, cy, wt, ht = recolar(antes, caixa, cheio)
             o = BT.pousar(o, P, cx, cy, wt, ht, 0.0, SOMBRAS[sombra], PX_M, nao=nao)     # (None: sem sombra)
             REGISTRO["pecas_m"] |= BT.mascara_formas([BT.ret(*caixa, 2)], forma)
+            # no 12K, o recorte volta por cima das peças nítidas (senão o tapete novo cobria a mesa de centro)
+            REGISTRO["pecas"].append(["recolar", list(caixa), cheio])
     out = np.clip(np.round(o), 0, 255).astype(np.uint8)
     REGISTRO["zona"] = (zona_total | REGISTRO["pecas_m"]) & ~REGISTRO["nao"]
     print(f"    biblioteca do 1º Pavimento: {int(zona_total.sum())} px de piso refeito; "
@@ -439,6 +460,14 @@ def pecas_12k(final, entrada, out, s, X0, Yia, Ya3, px_m=PX_M):
     if not REG_JSON.exists():
         return out
     reg = json.loads(REG_JSON.read_text())
+    antes = None
+    if any(it[0] == "recolar" for it in reg["pecas"]):
+        # os recortes do que fica vêm da final de antes (como na final; na nova, o fundo já é o tapete e a bancada
+        # novos e o recorte levava o contorno ou o fundo antigo)
+        rel = FINAL.relative_to(RAIZ_GIT)
+        dado = subprocess.run(["git", "-C", str(RAIZ_GIT), "show", f"{ANTES_COMMIT}:{rel}"], capture_output=True,
+                              check=True).stdout
+        antes = cv2.imdecode(np.frombuffer(dado, np.uint8), cv2.IMREAD_COLOR)
     mk = cv2.imread(str(REG_MASC))
     zona, nao = mk[..., 0] > 127, mk[..., 1] > 127
     H, W = out.shape[:2]
@@ -462,8 +491,16 @@ def pecas_12k(final, entrada, out, s, X0, Yia, Ya3, px_m=PX_M):
         r = out[V0:V1, U0:U1].astype(np.float32)
         out[V0:V1, U0:U1] = np.clip(np.round(r * (1 - al) + src * al), 0, 255).astype(np.uint8)
     for item in reg["pecas"]:
-        png, cx, cy, wt, ht, ang, extra = item
-        if isinstance(png, list):
+        if item[0] == "recolar":
+            # o que ficou, recortado da final (sobre as peças novas), por cima das peças nítidas
+            P, cx, cy, wt, ht = recolar(antes, item[1], item[2] if len(item) > 2 else None)
+            P = np.clip(cv2.resize(P, None, fx=s, fy=s, interpolation=cv2.INTER_LANCZOS4), 0, 255)  # sem serrilhar
+            ang, extra, png = 0.0, None, None
+        else:
+            png, cx, cy, wt, ht, ang, extra = item
+        if png is None:
+            pass
+        elif isinstance(png, list):
             P = chuveiro(png[0], tuple(png[1]), tuple(png[2]))[0]
         else:
             P = preparar(png, wt, ht, tuple(extra) if isinstance(extra, list) else extra)[0]

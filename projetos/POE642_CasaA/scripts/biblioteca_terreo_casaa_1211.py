@@ -115,7 +115,9 @@ AMBIENTES = {
                   # antes, 206 px no giro de 50,8°, 65%): 15° no sentido horário e 10% menor
                   ("sala-de-estar/sofa-curvo-render-casa-a", 1982.0, 443.0, 186, None, girar_pt(0.775, 0.632) - 15.0,
                    "movel", None),
-                  ("sala-de-estar/poltrona-creme-madeira-render", 2122.95, 465.15, 50, None, girar_pt(-0.95, 0.3),
+                  # (12/11, "Revisão de poltronas e rotação necessária") a frente na normal da linha entre os pés da
+                  # frente do símbolo do PDF ((2098;448) e (2128;492)): -56° (antes -72,5°, a pose de 29/10)
+                  ("sala-de-estar/poltrona-creme-madeira-render", 2122.95, 465.15, 50, None, girar_pt(-0.83, 0.56),
                    "movel", None),
                   ("sala-de-estar/poltrona-oliva-render-v2", 1993.35, 581.0, 44, None, 180.0, "movel", None),
                   ("sala-de-estar/poltrona-oliva-render-v2", 2064.95, 581.0, 44, None, 180.0, "movel", None),
