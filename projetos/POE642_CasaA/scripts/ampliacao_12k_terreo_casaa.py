@@ -490,6 +490,10 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
     # os vasos que a IA borrou (12/11): refeitos com a entrada ampliada, antes dos tracejados e dos textos
     import regras_1211_casaa as RG
     out, sem_tracos = RG.vasos_12k(PAV, img, entrada, out, s, X0, Yia, Ya3)
+    if PAV == "Terreo":
+        # as peças da biblioteca (12/11): a zona refeita da final e as peças nítidas, na escala do 12K
+        import biblioteca_terreo_casaa_1211 as BT
+        out = BT.pecas_12k(img, entrada, out, s, X0, Yia, Ya3)
     Fq = np.array([[s, 0, -s * X0], [0, s, -s * Ya3]], np.float64)
     # o fundo: branco puro fora da planta
     gq = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

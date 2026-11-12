@@ -1987,6 +1987,49 @@ a do piso; antes dos tracejados e dos textos. Na mesma faixa os tracejados finos
 Terreo=...` e `--render 1Pavimento=...`, `pdf_entrega.py` e `book_entrega.py`. Antes e depois em
 `renders/POE642_CasaA_PH_{Terreo,1Pavimento}_1211_*_antes_depois.jpg`.
 
+### As peças da biblioteca no Térreo: `biblioteca_terreo_casaa_1211.py` (12/11)
+
+**Pedido:** "eu também quero que você me faça a proposta para substituição dos elementos, né, baseado na biblioteca de
+objetos. Vamos concentrar os esforços agora na planta do térreo"; a proposta (`renders/POE642_CasaA_PH_Terreo_1211_proposta_biblioteca_{1,2,3}.jpg`)
+aprovada com "OK"; depois "NÃO ALTERE OS CARROS. DEXE COMO ESTAR." (a garagem fica como estava), "PRECISA DIMINUIR O
+TAMANHO DA CHURRASQUEIRA PARA CABER NA BANCADA SEM FICAR POR CIMA DA PAREDE." e "AS BANQUETAS FICAM PARCIALMENTE POR
+DEBAIXO DA BANCADA, NÃO SOBRE ELAS.". Os vasos sanitários ficam marrons (o usuário não escolheu o branco da biblioteca).
+
+**Como foi feito:** a biblioteca (`biblioteca-objetos/02-terreo`, PNG vistos de cima com transparência; no git só as 41
+peças usadas; o pacote inteiro vem do Drive, fora do git) entra peça a peça no lugar da antiga, sem mudar a composição:
+centro, tamanho e giro do PDF (caixas das camadas ARQ_MOBILIÁRIO, ARQ_LAYOUT HUMANIZAÇÃO e ARQ_LOUÇAS E METAIS, e as
+poses das poltronas das rodadas anteriores) ou da peça da final onde ela diverge do PDF. `AMBIENTES` lista, por
+ambiente, as zonas a refazer (`ret`, `disco`, `rot`, `pol`, `pdf` = o preenchimento do PDF numa caixa mais a folga,
+`polt` = a pegada das poltronas), as fontes do piso, o que fica (`manter`) e as peças `(png, cx, cy, wt, ht, ang,
+sombra, corte)`. Em `aplicar`: (1) a pegada das peças antigas, com a sombra, volta ao piso de cada lugar
+(`pedidos_terreo_casaa_2910.piso_refeito`; o tapete da varanda pelo `tecido`, no tom do anel do tapete, com a sombra da
+borda); (2) as peças novas, renderizadas a 4x e reduzidas, com a sombra curta (`SOMBRAS`: móvel, mesa, baixa, tapete);
+cadeiras e banquetas cortadas pela borda da mesa ou da bancada (`corte`); (3) as plantas em vaso de volta por cima, com
+a sombra (`plantas_de_volta`); (4) a beira clara da churrasqueira antiga junto à parede no tom da bancada
+(`beira_da_churrasqueira`); (5) os tracejados finos da camada do 12K de volta nas zonas. Ambientes: estar da varanda
+(sofá curvo externo, tapete, poltronas, mesinhas), sala de estar (sofá curvo, tapete redondo, poltronas, mesas de apoio),
+estar sob a projeção (poltronas), as duas mesas redondas e o jantar (cadeiras da biblioteca), escritório (mesa, cadeira,
+poltrona), gourmet e cozinha (banquetas, cooktops de 4 bocas, grelha, cubas inox Franke, tanques), lounge dos brises
+(poltronas, bancos), piscina (espreguiçadeiras no polígono do PDF), banhos (chuveiros com braço, bacia Monte Carlo, cuba
+compacta só a louça, cama de solteiro do motorista) e lavabo (cuba esculpida). A garagem e os carros não mudam.
+
+**Desvios da proposta (a confirmar com o usuário):** a pia da cozinha com duas cubas inox simples (`cuba-franke-inox-link`)
+no lugar da cuba dupla, para manter as duas bacias do desenho; a cuba compacta do banho só com a louça (`so_louca`), no
+granito que já estava; os cooktops de 60 cm, 4 bocas, no lugar dos antigos.
+
+**O 12K (A e B):** `montar12k` chama `pecas_12k` depois de `vasos_12k`: nas zonas refeitas (`renders/POE642_CasaA_PH_Terreo_12K_biblioteca_zona.png`:
+azul a zona, verde o que fica; o registro das peças em `..._12K_biblioteca.json`), a final ampliada sobre a saída da
+IA (o tapete inteiro da varanda e as plantas inteiras vêm da final), e as peças desenhadas nítidas na escala do 12K,
+direto dos PNG. Nas bancadas onde saíram a grelha e os cooktops antigos, o próprio granito da saída da IA, tecido e no tom
+do entorno (`bancadas_12k`), e a beira da grelha antiga limpa também no 12K (`beira_da_churrasqueira_12k`). A entrada da
+IA não muda (a correção de tom usa a entrada que a IA viu). Sem IA nova (Topaz 3272a7a5).
+
+**Como refazer:** depois de `regras_1211_casaa.py Terreo`, `python3 biblioteca_terreo_casaa_1211.py` (parte da final de
+`ANTES_COMMIT` = baf4362; sem `--saida` grava a final, o registro do 12K e os antes e depois
+`renders/POE642_CasaA_PH_Terreo_1211b_<ambiente>_antes_depois.jpg`); depois `ampliacao_12k_terreo_casaa.py montar12k
+<saída do Topaz> --opcao AB`, `rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png`,
+`pdf_entrega.py` e `book_entrega.py`.
+
 ### As correções do cliente no Térreo da Casa A: `terreo_casaa_1011.py` (10/11)
 
 Lista do cliente (Paulo Octávio) com os recortes da planta do Térreo, e as respostas do usuário. Um passo por pedido, sobre a final do Térreo do commit 58ea098 (a mesma de 0a17741), na ordem de `PASSOS`:
