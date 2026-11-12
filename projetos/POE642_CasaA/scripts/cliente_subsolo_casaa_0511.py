@@ -561,7 +561,11 @@ def degraus_cs(Q, img):
 # bloco na altura do triângulo. O S sai com o pátio das mesmas colunas, `desloc_s` px abaixo (a sombra do espelho do 1º
 # degrau corre na vertical, então ela continua igual).
 ESCADA_CS = {"triangulo": [(1062.0, 1094.0), (1076.0, 1086.0), (1076.0, 1102.0)], "cor_seta": (30, 30, 30), "ss": 8,
-             "texto": ("SOBE PARA O", "DECK"), "origem_px": (1088.0, 1090.0), "entrelinha_px": 20, "desloc_s": 18}
+             "texto": ("SOBE PARA O", "DECK"), "origem_px": (1088.0, 1090.0), "entrelinha_px": 20, "desloc_s": 18,
+             # (12/11, usuário: "APLIQUE O S E D NO SUBSOLO E 1º PAVIMENTO", depois do Térreo) o S logo abaixo da seta,
+             # centrado nela, `letra_folga_px` abaixo da ponta de baixo, na fonte, no corpo e na cor da descrição
+             # (`ampliacao_a3_casaa.escada_camadas`, a última camada; na Kalam, `letra_kalam`)
+             "letra": "S", "letra_folga_px": 2.5}
 
 
 def _alfa_texto(texto, fonte, corpo, ox, oy, caixa):

@@ -207,7 +207,40 @@ def escada_camadas(forma, s=1.0, x0=0.0, y0=0.0):
         a = np.zeros((H, W), np.float32)
         a[Y0:Y0 + Ht, X0:X0 + Wt] = _alfa_texto(linha, fonte, ox, oy, (X0, Y0, Wt, Ht))
         camadas.append((a, e["cor_texto"]))
+    if q.get("letra"):
+        # o S sob a seta: centrado no triângulo, o alto da letra `letra_folga_px` abaixo da ponta de baixo
+        cx, topo = letra_lugar()
+        l_, t_, r_, b_ = fonte.getbbox(q["letra"], anchor="ls")
+        ox, oy = (cx - x0) * s - (l_ + r_) / 8, (topo - y0) * s - t_ / 4
+        Wt, Ht = int((r_ - l_) / 4) + int(12 * s), int(corpo * 3)
+        X0, Y0 = int(ox) - int(4 * s), int(oy) - int(corpo * 2)
+        a = np.zeros((H, W), np.float32)
+        a[Y0:Y0 + Ht, X0:X0 + Wt] = _alfa_texto(q["letra"], fonte, ox, oy, (X0, Y0, Wt, Ht))
+        camadas.append((a, e["cor_texto"]))
     return camadas
+
+
+def letra_lugar():
+    """O centro (x) e o alto (y) da letra da escada do Subsolo, px da final."""
+    import cliente_subsolo_casaa_0511 as CS
+    q = CS.ESCADA_CS
+    pts = np.float32(q["triangulo"])
+    return float(pts[:, 0].min() + pts[:, 0].max()) / 2, float(pts[:, 1].max()) + q["letra_folga_px"]
+
+
+def letra_kalam(corpo, x0=0.0, y0=0.0, s=1.0):
+    """O item da letra na Kalam (`rotulos_manuscritos_casaa.desenhar`): o meio da letra no centro do triângulo, a
+    altura das maiúsculas abaixo da ponta (o mesmo alto da Inter)."""
+    import cliente_subsolo_casaa_0511 as CS
+    import rotulos_manuscritos_casaa as RM
+    from PIL import ImageFont
+    q = CS.ESCADA_CS
+    if not q.get("letra"):
+        return []
+    cx, topo = letra_lugar()
+    ft = ImageFont.truetype(str(RM.FONTE), max(4, int(round(corpo * 4))))
+    l_, t_, r_, b_ = ft.getbbox(q["letra"], anchor="ls")
+    return [(q["letra"], corpo, (cx - x0) * s - (l_ + r_) / 8, (topo - y0) * s - t_ / 4, "ls")]
 
 
 def rotulos_camadas(Q, ajustes, forma, pdf2img=None, s=1.0):
@@ -690,6 +723,7 @@ def montar_grande(saida_topaz, largura=None):
                 RM.MANUSCRITA["altura"]
             itens = [(linha, e["corpo_px"] * s * k_esc, ex - ebx_, ey + i * CS.ESCADA_CS["entrelinha_px"] * s - eby_, "ls")
                      for i, linha in enumerate(CS.ESCADA_CS["texto"])]
+            itens += letra_kalam(e["corpo_px"] * s * k_esc, X0 + ebx_ / s, Ya3 + eby_ / s, s)
             sub = out[eby_:eby1, ebx_:ebx1]
             out[eby_:eby1, ebx_:ebx1] = RM.desenhar(sub, itens, e["cor_texto"], reforco_px=RM.MANUSCRITA["reforco_px"] * s)
         arq = Path(str(g["saida"]).format(opcao=opcao))

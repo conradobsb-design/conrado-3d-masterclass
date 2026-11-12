@@ -148,6 +148,7 @@ def manuscrita(chave, img):
         k_esc = _altura_maiuscula(FONTES / e["fonte"]) / _altura_maiuscula(FONTE) * q["altura"]
         tx, ty = qe["origem_px"]
         itens = [(linha, e["corpo_px"] * k_esc, tx, ty + i * qe["entrelinha_px"], "ls") for i, linha in enumerate(qe["texto"])]
+        itens += AM.letra_kalam(e["corpo_px"] * k_esc)
         out = desenhar(out, itens, e["cor_texto"], reforco_px=q["reforco_px"])
     print(f"    {len(aj)} rótulos{' e o texto da escada' if escada else ''} na Kalam (maiúsculas {q['altura']:.2f} x "
           "a altura da Inter)")

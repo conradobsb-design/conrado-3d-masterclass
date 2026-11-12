@@ -2099,6 +2099,15 @@ Vendo a planta com as peças da biblioteca, o usuário mandou, cada um com um re
   (os degraus que descem para o deck e a escada para o Subsolo) e o S (a escada do jardim e a caracol) centrados sob o
   triângulo de cada escada, 2,5 px abaixo da ponta de baixo, no corpo (11 px) e na cor (45) das descrições; nos dados
   do 12K como anotações "txt" (refeitas a cada rodada: as de antes saem antes). A seta da entrada não é escada.
+- **S e D no Subsolo e no 1º Pavimento** ("APLIQUE O S E D NO SUBSOLO E 1º PAVIMENTO"; `letras_escadas_casaa_1211.py
+  <Subsolo|1Pavimento>`, da final de `ANTES_COMMIT` = f37669e): no Subsolo, o S sob a seta do SOBE PARA O DECK, na
+  fonte, no corpo (17 px) e na cor da descrição: a última camada de `ampliacao_a3_casaa.escada_camadas`
+  (`cliente_subsolo_casaa_0511.ESCADA_CS["letra"]`), que a final, a A3 4K, o 12K A e a retirada dos textos usam; na
+  Kalam (`letra_kalam`), na manuscrita e no 12K B. No 1º Pavimento, o D sob a seta da escada em U (DESCE PARA O HALL
+  INTERNO) e da caracol (DESCE PARA A ÁREA DE SERVIÇO), como as do Térreo (anotações "txt" nos dados do 12K do
+  1º Pavimento). Depois: `rotulos_manuscritos_casaa.py Subsolo`, as pranchas, `ampliacao_a3_casaa.py montar
+  ../renders/POE642_CasaA_PH_Subsolo_A3_saida_nano_banana_pro.png` e `montar12k <Topaz 67888e24>`,
+  `ampliacao_12k_1pav_casaa.py montar12k <Topaz 24b977d2> --opcao AB`, PDF e book.
 
 **Como refazer:** `regras_1211_casaa.py Terreo`, `biblioteca_terreo_casaa_1211.py` (a final, do commit `ANTES_COMMIT`),
 `pedidos_terreo_casaa_1211c.py --antes_depois <a final de 2c1c21d>` (lê a final que o anterior gravou; os antes e depois
