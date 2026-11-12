@@ -10,6 +10,7 @@ trocas aprovadas pelo usuário:
   "3. BH SERV. MESMO BATENDO USE OS ITENS DA BIBLIOTECA E SUA RECOMENDAÇÃO PARA O CHUVEIRO QUADRADO";
   "4. OPÇÃO A" (sauna: o banco reto de travertino);
   "5. DEPÓSITO: FICA COMO ESTÁ"; "6. NÃO MEXA NOS PISOS."
+Depois, na mesma rodada: "Use o vinílico da biblioteca / As esquadrias dos box, portas de vidro e janelas são pretas".
 
 Cada peça vai no retângulo do PDF da peça que ela substitui (a composição não muda), girada para o símbolo do PDF:
 - **Academia (`ACADEMIA`):** as 2 esteiras, as 2 bicicletas e o supino no retângulo do PDF, todas com o console para
@@ -33,7 +34,16 @@ Cada peça vai no retângulo do PDF da peça que ela substitui (a composição n
 - **Sauna (`SAUNA_BIB`):** o banco reto de travertino da biblioteca no retângulo do banco do PDF (as pontas na escala
   da altura, o meio esticado no veio), no tom do banco de antes (0,90 do piso, regra de 10/11: em cima, mais escuro);
   a sombra de contato fica.
-- Os pisos, as paredes, os rótulos e o depósito ficam como estavam.
+- **Vinílico da academia (`VINILICO_BIB`, `vinilico_biblioteca`):** no piso da academia (as réguas da final e o buraco
+  das peças antigas), a amostra `04-materiais/pisos-internos/madeira-academia-render.png` da biblioteca (7,2 x 4,8 m,
+  24 fiadas), fiada a fiada: cada fiada deslocada ao acaso (semente fixa) e repetida no comprimento, a emenda escurecida
+  como junta; vezes a mesma luz de antes (a da final sobre as réguas), de modo que as sombras e o rodapé ficam.
+- **Esquadrias pretas (`ESQUADRIAS`, `esquadrias`, `folha_preta`):** os perfis dos boxes (BH. SERV., antessala da
+  sauna, BH. FEM.), das portas de vidro (`final3840_casaa.PORTAS_VIDRO`: pátio, hall, vidro fixo e porta da sauna; as
+  folhas e os batentes), das janelas (`ajustes_casaa.JANELAS`: os caixilhos) e da porta de correr da circulação para o
+  pátio (a faixa do render volta ao piso, copiada em espelho, e as 2 folhas e os 4 batentes do PDF entram) em preto
+  (`perfil`), o vidro claro por dentro. As portas de giro (de madeira) e o depósito ficam.
+- Os outros pisos, as paredes, os rótulos e o depósito ficam como estavam.
 
   python3 biblioteca_subsolo_casaa_1211.py [--antes <png>] [--saida <png>]
 Sem --antes, parte da final do commit `ANTES_COMMIT` (a de antes desta rodada); sem --saida, grava a final do Subsolo
@@ -100,6 +110,22 @@ BANHOS_BIB = {
                  "limpa_px": 2, "sombra": (0.30, 1.0, 0.9)},
 }
 SAUNA_BIB = {"png": "sauna/banco-reto-travertino.png", "pontas": 60, "erosao_px": 3}
+# o vinílico da biblioteca na academia (usuário: "Use o vinílico da biblioteca"): a amostra do render (7,20 x 4,80 m,
+# 24 fiadas de réguas de 20 cm; o LEIA-ME manda essa na academia), fiada a fiada, cada uma deslocada ao acaso e
+# repetida no comprimento (a emenda da repetição vira uma junta, `junta`), na escala da planta
+VINILICO_BIB = {"png": CASA / "biblioteca-objetos" / "04-materiais" / "pisos-internos" / "madeira-academia-render.png",
+                "amostra_m": (7.2, 4.8), "fiadas": 24, "junta": 0.72, "semente": 1211}
+# as esquadrias pretas (usuário: "As esquadrias dos box, portas de vidro e janelas são pretas"): os perfis em preto e
+# o vidro claro; as folhas e os batentes nos retângulos do PDF de antes (`final3840_casaa.PORTAS_VIDRO`,
+# `ajustes_casaa.JANELAS`, os boxes de `ajustes_casaa.folhas_box`) e a porta de correr da circulação para o pátio
+ESQUADRIAS = {
+    "perfil": (34, 34, 36), "vidro": (228, 226, 220), "perfil_px": 1.9,
+    "box": {"face": (30, 30, 32), "face_px": 1.6},
+    "circulacao": {"folhas": [(1080.4, 1215.05, 1144.18, 1217.88), (1018.89, 1217.88, 1082.67, 1220.72)],
+                   "batentes": [(1079.27, 1215.05, 1080.4, 1217.88), (1144.18, 1215.05, 1145.32, 1217.88),
+                                (1017.76, 1217.88, 1018.89, 1220.72), (1082.67, 1217.88, 1083.81, 1220.72)],
+                   "faixa_pt": (1017.76, 1212.6, 1145.32, 1223.2)},
+}
 ANTES_DEPOIS = {"academia": (1330, 1040, 1900, 1530), "banhos_sauna": (1180, 1545, 1900, 1660),
                 "bh_serv": (1085, 870, 1230, 1060)}
 
@@ -247,10 +273,16 @@ def nconv(v, m, sig):
 
 
 def academia(Q, out):
+    import ampliacao_a3_casaa as AM
+    import vinilico_foto as V
     q = ACADEMIA
     T, piso = reguas_academia()
     ox, oy = REGUAS_Q["origem"]
     h, w = T.shape[:2]
+    # os rótulos da academia saem (a conta do alfa) e voltam no fim, sobre o vinílico novo
+    cam = quieto(V.camadas_spec, "A_Subsolo", Q, out.shape[:2])
+    cam = [(a, c) for a, c in cam if (a[oy:oy + h, ox:ox + w] > 0.02).any()]
+    out = np.ascontiguousarray(AM.tirar(out, cam, 0.85))
     reg = out[oy:oy + h, ox:ox + w].astype(np.float32)
     Lr = reg / np.maximum(T, 1)
     caixas = [caixa_px(Q, p["pt"]) for p in q["pecas"]]
@@ -282,9 +314,13 @@ def academia(Q, out):
         falta &= ~ok
         if not falta.any():
             break
-    reg[buraco] = (T * L)[buraco]
+    L[piso & ~buraco] = Lr[piso & ~buraco]
+    novo = vinilico_biblioteca(h, w, Q.px_m)
+    troca = piso | buraco
+    reg[troca] = (novo * L)[troca]
     out[oy:oy + h, ox:ox + w] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
-    print(f"    academia: {int(buraco.sum())} px de vinílico refeito pelas réguas da final (peças antigas e sombras)")
+    print(f"    academia: o vinílico da biblioteca em {int(troca.sum())} px (a luz e as sombras da final; por baixo das "
+          f"peças antigas, {int(buraco.sum())} px, a luz do piso em volta)")
     for p, c in zip(q["pecas"], caixas):
         P = ler_png(p["png"], cortar=False)
         if "barra" in p:
@@ -301,7 +337,37 @@ def academia(Q, out):
         cc = dentro(P, c) if p.get("dentro") else c
         out = compor(out, P, cc, sombra=q["sombra"])
         print(f"    academia: {p['nome']} ({Path(p['png']).stem}) em {cc[2] - cc[0]:.1f} x {cc[3] - cc[1]:.1f} px")
+    out = AM.pintar(out, cam)
     return out
+
+
+def vinilico_biblioteca(h, w, px_m):
+    """O vinílico da amostra da biblioteca (BGR float32, h x w px na escala `px_m`), fiada a fiada: cada fiada da
+    amostra deslocada ao acaso e repetida no comprimento; a emenda da repetição escurecida como junta."""
+    q = VINILICO_BIB
+    A = cv2.imread(str(q["png"])).astype(np.float32)
+    k = A.shape[1] / q["amostra_m"][0]                      # px da amostra por m
+    hf = A.shape[0] / q["fiadas"]
+    s = px_m / k
+    H, W = int(np.ceil(h / s)) + 2, int(np.ceil(w / s)) + 2
+    rng = np.random.default_rng(q["semente"])
+    tela = np.zeros((H, W, 3), np.float32)
+    j0 = int(rng.integers(q["fiadas"]))
+    y, j = 0.0, 0
+    while y < H:
+        i = (j0 + j) % q["fiadas"]
+        a0, a1 = int(round(i * hf)), int(round((i + 1) * hf))
+        b0, b1 = int(round(y)), min(int(round(y + hf)), H)
+        fiada = A[a0:a0 + (b1 - b0)]
+        desl = int(rng.integers(A.shape[1]))
+        rep = np.concatenate([fiada] * (W // A.shape[1] + 2), axis=1)
+        rep = np.roll(rep, -desl, axis=1)[:, :W].copy()
+        for x in range(A.shape[1] - desl, W, A.shape[1]):   # a emenda da repetição: uma junta
+            rep[:, max(x - 1, 0):x + 1] *= q["junta"]
+        tela[b0:b1] = rep[:b1 - b0]
+        y += hf
+        j += 1
+    return cv2.resize(tela, (int(round(W * s)), int(round(H * s))), interpolation=cv2.INTER_AREA)[:h, :w]
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -550,6 +616,90 @@ def sauna(Q, out, antes, FA):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# As esquadrias pretas
+def folha_preta(tl, r, q, montante=0.0, eixo="y"):
+    """Uma folha de vidro: o vidro claro, o perfil preto em volta e, com `montante` (pt), o perfil das pontas."""
+    m = tl.ret(r)
+    tl.pintar(m, q["vidro"])
+    x0, y0, x1, y1 = r
+    if montante:
+        for c in ((y0 + montante, y1 - montante) if eixo == "y" else (x0 + montante, x1 - montante)):
+            tl.pintar(tl.ret((x0, c - 0.3, x1, c + 0.3) if eixo == "y" else (c - 0.3, y0, c + 0.3, y1)), q["perfil"])
+    tl.contorno(m, q["perfil_px"], q["perfil"])
+
+
+def esquadrias(Q, out, FA):
+    import ajustes_casaa as AJ
+    q = ESQUADRIAS
+    # os boxes: o vidro com a face preta (o motor de sempre, com a cor nova)
+    guarda = dict(FA.BANHOS["box"])
+    try:
+        FA.BANHOS["box"].update(q["box"])
+        out = quieto(FA.boxes, Q, np.ascontiguousarray(out))
+    finally:
+        FA.BANHOS["box"].clear()
+        FA.BANHOS["box"].update(guarda)
+    print("    esquadrias: os boxes com o perfil preto e o vidro claro")
+    # as portas de vidro de antes (pátio, hall, vidro fixo e porta da sauna): as folhas e os batentes por cima
+    for p in FA.PORTAS_VIDRO["portas"]:
+        folhas, postes = p["folhas"], p.get("postes", [])
+        if "linhas" in p:                                   # o caixilho com a largura de antes (largura_min_px)
+            lm = p["linhas"]["largura_min_px"] / FA.PT_PX / 2
+
+            def largo(r, e):
+                x0, y0, x1, y1 = r
+                if e in ("y", "xy"):
+                    c = (x0 + x1) / 2
+                    x0, x1 = min(x0, c - lm), max(x1, c + lm)
+                if e in ("x", "xy"):
+                    c = (y0 + y1) / 2
+                    y0, y1 = min(y0, c - lm), max(y1, c + lm)
+                return (x0, y0, x1, y1)
+            folhas = [(largo(r, e), e) for r, e in folhas]
+            postes = [largo(b, "xy") for b in postes]
+        caixa = tuple(f(v) for f, v in zip((min, min, max, max), zip(*([r for r, _ in folhas] + p["batentes"] + postes))))
+        tl = FA.tela(out, Q, caixa, folga=5)
+        for b in p["batentes"] + postes:
+            tl.pintar(tl.ret(b), q["perfil"])
+        for r, e in folhas:
+            folha_preta(tl, r, q, p.get("montante_pt", 0.0), e)
+        out = tl.gravar()
+        print(f"    esquadrias: porta {p['nome']} com o perfil preto ({len(folhas)} folhas)")
+    # as janelas (banho de serviço e circulação/depósito): os caixilhos pretos e o vidro claro com o perfil preto
+    for j in AJ.JANELAS:
+        caixa = [f(v) for f, v in zip((min, min, max, max), zip(*(j["caixilhos"] + [j["vidro"]])))]
+        tl = FA.tela(out, Q, caixa, folga=4)
+        for r in j["caixilhos"]:
+            tl.pintar(tl.ret(r), q["perfil"])
+        folha_preta(tl, j["vidro"], q)
+        out = tl.gravar()
+        print(f"    esquadrias: janela {j['nome']} com os caixilhos pretos")
+    # a porta de correr de vidro da circulação para o pátio (no render, duas barras cinza arredondadas): a faixa do vão
+    # volta ao piso (cada metade copiada em espelho do piso logo acima e logo abaixo) e as duas folhas e os batentes
+    # do PDF entram com o perfil preto
+    c = q["circulacao"]
+    x0, y0, x1, y1 = caixa_px(Q, c["faixa_pt"])
+    X0, X1 = int(np.floor(x0)), int(np.ceil(x1))
+    Y0, Y1 = int(np.floor(y0)), int(np.ceil(y1))
+    meio = (Y0 + Y1) // 2
+    reg = out.copy()
+    for yy in range(Y0, meio):
+        out[yy, X0:X1] = reg[Y0 - 1 - (yy - Y0), X0:X1]
+    for yy in range(meio, Y1):
+        out[yy, X0:X1] = reg[Y1 + (Y1 - 1 - yy), X0:X1]
+    caixa = [f(v) for f, v in zip((min, min, max, max), zip(*(c["folhas"] + c["batentes"])))]
+    tl = FA.tela(out, Q, caixa, folga=5)
+    for b in c["batentes"]:
+        tl.pintar(tl.ret(b), q["perfil"])
+    for r in c["folhas"]:
+        FA.sombra_q(tl, tl.ret(r), forca=0.18, dist=0.9, sigma=0.8)
+        folha_preta(tl, r, q)
+    out = tl.gravar()
+    print("    esquadrias: porta de correr da circulação para o pátio (2 folhas) com o perfil preto")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 def aplicar(antes):
     import final3840_casaa as FA
     Q = quieto(FA.QuadroA, "Subsolo")
@@ -557,6 +707,7 @@ def aplicar(antes):
     out = academia(Q, out)
     out = banhos(Q, out, FA)
     out = sauna(Q, out, antes, FA)
+    out = esquadrias(Q, out, FA)
     return out
 
 

@@ -1819,7 +1819,8 @@ Pedidos do usuário, com os recortes do JPG em 12K: "1- CORRIGIR ESSA FALHA NA P
 
 O usuário montou uma biblioteca de objetos da Casa A (PNG com transparência, vista de cima, gerados no Higgsfield; o
 pacote veio pelo Google Drive) e pediu: "VEJA NA PASTA O QUE PODEMOS SUBSTITUIR NA PLANTA E GANHAR MAIS REALISMO".
-No repositório ficam só a pasta `POE642_CasaA/biblioteca-objetos/01-subsolo`, o `LEIA-ME.md` e o `catalogo.json` (o
+No repositório ficam só a pasta `POE642_CasaA/biblioteca-objetos/01-subsolo`, as duas amostras de
+`04-materiais/pisos-internos` (o vinílico da academia), o `LEIA-ME.md` e o `catalogo.json` (o
 pacote inteiro, com o Térreo, o 1º Pavimento e os materiais, tem 270 MB e fica fora do git). A proposta (a planta de
 hoje ao lado das peças) foi aprovada assim: "1. SIGO COM A SUA RECOMENDAÇÃO. SEM ALTERAR A COMPOSIÇÃO; 2. VASO BRANCO E
 DEMAIS RECOMENDAÇÕES; 3. BH SERV. MESMO BATENDO USE OS ITENS DA BIBLIOTECA E SUA RECOMENDAÇÃO PARA O CHUVEIRO QUADRADO;
@@ -1845,7 +1846,20 @@ DEMAIS RECOMENDAÇÕES; 3. BH SERV. MESMO BATENDO USE OS ITENS DA BIBLIOTECA E S
   `chuveiro-quadrado-parede`, o braço do comprimento do PDF até a parede; o braço antigo, mais largo, vira o piso do lado.
 - **Sauna:** o banco reto de travertino da biblioteca (as pontas na escala, o meio esticado no veio), no tom do banco de
   antes (0,90 do piso; regra de 10/11); a sombra de contato fica.
-- **Ficam:** os pisos, as paredes, os rótulos, o depósito e as prateleiras.
+- **Vinílico da biblioteca (pedido seguinte: "Use o vinílico da biblioteca"):** no piso da academia, a amostra
+  `biblioteca-objetos/04-materiais/pisos-internos/madeira-academia-render.png` (7,2 x 4,8 m, 24 fiadas), fiada a fiada,
+  cada fiada deslocada ao acaso (semente 1211) e repetida no comprimento, a emenda escurecida como junta
+  (`VINILICO_BIB`, `vinilico_biblioteca`), vezes a luz de antes (as sombras e o rodapé ficam). A outra amostra da pasta,
+  `madeira-academia.png`, é mais escura.
+- **Esquadrias pretas ("As esquadrias dos box, portas de vidro e janelas são pretas"; `ESQUADRIAS`, `esquadrias`):** os
+  perfis dos 3 boxes (pelo `FA.boxes` com a face preta), das portas de vidro de `FA.PORTAS_VIDRO` (folhas e batentes),
+  dos caixilhos das janelas de `ajustes_casaa.JANELAS` e da porta de correr da circulação para o pátio (a faixa do
+  render, duas barras cinza, volta ao piso em espelho; as 2 folhas e os 4 batentes do PDF entram) em preto, com o vidro
+  claro por dentro. As portas de giro e o nicho do depósito ficam.
+- **Ficam:** os outros pisos, as paredes, os rótulos, o depósito e as prateleiras.
+- **Antes e depois:** `renders/POE642_CasaA_PH_Subsolo_1211_{academia,banhos_sauna,bh_serv}_antes_depois.jpg` (contra a
+  final de `ANTES_COMMIT`) e `renders/POE642_CasaA_PH_Subsolo_1211b_{academia_vinilico,esquadrias_norte,esquadrias_sul}_antes_depois.jpg`
+  (só o vinílico e as esquadrias, contra a final de d35fd16).
 - **Antes e depois (contra a final de 028a12f):** `renders/POE642_CasaA_PH_Subsolo_1211_{academia,banhos_sauna,bh_serv}_antes_depois.jpg`.
 - **Como refazer:** `python3 biblioteca_subsolo_casaa_1211.py` (sem `--antes`, parte da final de `ANTES_COMMIT`);
   `rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png`;
