@@ -855,12 +855,12 @@ def desenhar_shafts(img, miolos, s=1.0, ox=0.0, oy=0.0):
     return img
 
 
-def paredes_retas(Q, out, protegido, FA):
+def paredes_retas(Q, out, protegido, FA, q=None):
     """As paredes da própria final (o cinza 80), sem os dentes e as linhas soltas: os furos e entalhes de até 2 px
     viram parede (fechamento 3x3) e as pontas de até 2 px saem (abertura 3x3); na faixa de `perto_px` em volta da
     parede limpa, o que é cor de parede ou linha fina neutra (clara ou cinza) vira o que está a `fonte_px` da parede, na
     normal (o piso; do lado de fora da casa, o branco). Ficam o preto das esquadrias, o elevador e as peças desta rodada."""
-    q = PAREDES_RETAS
+    q = q or PAREDES_RETAS
     im = out.astype(np.int16)
     croma_ = im.max(axis=2) - im.min(axis=2)
     W = (np.abs(im - q["cor"]).max(axis=2) <= q["tol"]) & (croma_ <= q["croma"])
@@ -896,6 +896,14 @@ def paredes_retas(Q, out, protegido, FA):
     # do lado de fora (a fonte é o branco do fundo) a faixa toda fica branca; do lado de dentro, só as linhas mais
     # claras que o piso (o degradê de borda da parede, mais escuro que o piso, fica, senão a borda serrilha)
     fora = f.min(axis=1) >= 245
+    if q.get("fora_fundo"):
+        # só o branco do fundo (ligado à borda da imagem) é o lado de fora; o branco de dentro (vazios, vidros, shafts)
+        # não
+        g = (im.min(axis=2) >= 245).astype(np.uint8)
+        _, lab = cv2.connectedComponents(g)
+        bordas = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))
+        fundo = np.isin(lab, bordas[bordas > 0])
+        fora &= fundo[sy, sx]
     linha &= fora | (lum > f.mean(axis=1) + q["linha_clara"])
     desvio = np.abs(v - f).max(axis=1) > q["linha_desvio"]
     fonte_ok = ~Wl[sy, sx] & ~protegido[sy, sx] & ~preto[sy, sx]

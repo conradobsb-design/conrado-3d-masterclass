@@ -487,6 +487,9 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
         out[y:y + 1024] = np.clip(np.round(out[y:y + 1024].astype(np.float32) + corr[y:y + 1024]), 0, 255
                                   ).astype(np.uint8)
     del corr
+    # os vasos que a IA borrou (12/11): refeitos com a entrada ampliada, antes dos tracejados e dos textos
+    import regras_1211_casaa as RG
+    out, sem_tracos = RG.vasos_12k(PAV, img, entrada, out, s, X0, Yia, Ya3)
     Fq = np.array([[s, 0, -s * X0], [0, s, -s * Ya3]], np.float64)
     # o fundo: branco puro fora da planta
     gq = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -497,6 +500,7 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
     fundo = cv2.erode(fundo, np.ones((kk, kk), np.uint8)).astype(np.float32)
     tr = cv2.imread(str(TRACOS))
     alfa_tr = tr[..., 0].astype(np.float32) / 255
+    alfa_tr[sem_tracos] = 0
     cor_tr = np.where(tr[..., 1] > 127, np.float32(TA.FINOS_TA["claro"][0]), np.float32(TA.FINOS_TA["escuro"][0]))
     sf = 2.0 * L / Wa0
     for y in range(0, Hh, 1024):
@@ -515,6 +519,9 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
         ct = cv2.warpAffine(cor_tr, Ft, (L, y1 - y), flags=cv2.INTER_NEAREST, borderValue=0.0)[..., None]
         reg = reg * (1 - at) + ct * at
         out[y:y1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+
+    # os shafts (12/11): o vão claro e o X cinza fino, desenhados na escala do 12K (`regras_1211_casaa.shafts_12k`)
+    out = RG.shafts_12k(PAV, img, out, s, X0, Ya3)
 
     # os textos e os símbolos, numa janela em volta de cada um
     def janela(cx, cy, meia):

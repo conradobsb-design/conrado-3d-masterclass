@@ -1936,6 +1936,50 @@ de d19082d>`; `montar`; Topaz High Fidelity V2 12288 x 9175 (job 67888e24-f5a8-4
 `montar12k`; `rodape_entrega.py --no-quadro --render Subsolo=...`, `rotulos_manuscritos_casaa.py`, `pdf_entrega.py`,
 `book_entrega.py`.
 
+### As mesmas regras no Térreo e no 1º Pavimento: `regras_1211_casaa.py` (12/11)
+
+Usuário: "PODE APLICAR NO TÉRREO E 1º PAVIMENTO DA CASA A" (o X cinza fino dos shafts, as paredes retas e o contorno dos
+vasos, como no Subsolo). Sobre a final de cada pavimento (a de 1415b75):
+
+- **Shafts (`SHAFTS`, `vaos_shafts`, `desenhar_x`):** no 1º Pavimento, os 4 vãos de `um_pav_casaa_1111.SHAFTS_1P` (o de
+  cima, o junto ao elevador e os dois da suíte master; o X ia em cinza 60); no Térreo, o vão do shaft junto ao elevador,
+  achado na final dentro da caixa do PDF (`revisao_casaa_2910.ELEVADOR_TA["shafts_pt"]["Terreo"]`, paredes no cinza 53;
+  o fundo era rosado e o X escuro). O vão no claro (246) e o X de canto a canto em cinza 128, 0,8 px, tracejado 3,4/2,2
+  px, simétrico (um traço cruza o centro). A claraboia do lavabo e os vazios seguem com o X fino da regra de 10/11.
+  A borda de parede em volta de cada vão (`limpar_aro`, 1,5 px): em cada lado e a cada distância da beira, o px cinza
+  que foge mais de 12 da mediana da faixa volta a ela (no 1º Pavimento havia um risco claro na beira de cima do shaft
+  de cima e dois pontinhos claros nos cantos de baixo, que no 12K viravam pontos brancos); o mesmo no 12K.
+- **Paredes retas (`PAREDES`; `biblioteca_subsolo_casaa_1211.paredes_retas` com os parâmetros do pavimento):** no Térreo,
+  o cinza 53 (tolerância 14) e o preto das esquadrias abaixo de 35; no 1º Pavimento, o 80 do Subsolo. Duas proteções
+  novas, achadas no primeiro teste: o que o PDF desenha e não é parede (`OBJETOS`, `objetos_pdf`: louças, mobiliário,
+  elementos fixos, bancadas, marcenaria, layout, escadas, pilares; e as folhas e esquadrias da ARQ_PAREDE fora do cinza das
+  paredes) fica de fora (a 1ª versão apagava a grelha da churrasqueira, a borda das geladeiras junto ao pilar e trechos
+  das folhas das portas); e `fora_fundo`: só o branco ligado à borda da imagem é o lado de fora (no 1º Pavimento, o
+  vidro branco do vazio da escada em U tinha a borda comida como se fosse o fundo). No Térreo, os muros do lote perdem a
+  franja clara do antisserrilhado e os pontos brancos junto às paredes saem; no 1º Pavimento, pouca coisa (as paredes já
+  estavam limpas).
+- **Vasos (`VASOS`, `vasos`):** os vasos dos dois pavimentos não tinham o retângulo chapado do Subsolo; o que havia era o
+  ponto claro na beira do vaso do lavabo do Térreo, junto à parede: nos vasos escuros, o px claro na beira junto à
+  parede é refeito pelo entorno (inpaint); e a mancha clara pequena no miolo da louça (até `miolo_max_px` 40 px, sem
+  encostar na caixa: o ponto cinza de 4x4 px junto à parede e um ponto solto no vaso do lavabo).
+
+**O 12K (A e B), sem IA nova:** `regras_1211_casaa.py <pav> --entrada12k <cópia da entrada de antes>` grava a final e
+passa à entrada da IA do 12K o que mudou na final (fora dos textos e tracejados que a entrada não tem). Térreo: a saída
+corrigida da IA (`renders/POE642_CasaA_PH_Terreo_12K_saida_nano_banana_pro.png`) remendada onde a entrada mudou
+(`--remendar <corrigida de antes> <destino> <entrada de antes>`); 1º Pavimento: a saída da IA (job 09c2bb19) corrigida de
+novo (`ampliacao_12k_1pav_casaa.py corrigir <saída> <corrigida> --entrada_antes <a entrada que a IA viu, de 036e633>`).
+Topaz High Fidelity V2 a 12288 x 6858 (Térreo: job 3272a7a5-ae57-4ef0-aa97-a4ea957d79d3; 1º Pavimento: job
+24b977d2-82f2-4189-ad27-07fbfc776183; fora do git); `montar12k --opcao AB`, que agora desenha os shafts direto no 12K
+(`regras_1211_casaa.shafts_12k`: o mesmo X e a mesma borda limpa, na escala do 12K) e refaz o vaso do lavabo do
+Térreo (`vasos_12k`, `DOZE["vasos_entrada"]`: a IA tinha borrado a borda esquerda da bacia em pinceladas e deixado
+pontinhos claros na face da parede): o vaso, o trecho até a parede e uma faixa de 5 px junto à face da parede, do alto
+do lavabo até 15 px abaixo do vaso, com a final sem textos ampliada; o contorno liso pela cobertura do vaso sobre o
+piso (a projeção de cada px no eixo piso -> vaso, ampliada em cúbico, suavizada e recortada) entre a camada da louça e
+a do piso; antes dos tracejados e dos textos. Na mesma faixa os tracejados finos não entram (a camada
+`..._12K_tracejados.png` tinha resíduos na sombra da face da parede, que viravam quadradinhos claros). Depois `rodape_entrega.py --no-quadro --render
+Terreo=...` e `--render 1Pavimento=...`, `pdf_entrega.py` e `book_entrega.py`. Antes e depois em
+`renders/POE642_CasaA_PH_{Terreo,1Pavimento}_1211_*_antes_depois.jpg`.
+
 ### As correções do cliente no Térreo da Casa A: `terreo_casaa_1011.py` (10/11)
 
 Lista do cliente (Paulo Octávio) com os recortes da planta do Térreo, e as respostas do usuário. Um passo por pedido, sobre a final do Térreo do commit 58ea098 (a mesma de 0a17741), na ordem de `PASSOS`:
