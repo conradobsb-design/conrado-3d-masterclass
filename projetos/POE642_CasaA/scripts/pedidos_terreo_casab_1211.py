@@ -2286,29 +2286,53 @@ def varanda_ia_tb(Q, img, q=VARANDA_IA_TB):
           f"({int((resto & ~(peso > 0.01) & ~tap_b).sum())} px de resto das peças velhas)")
     return out
 
-# O sofá do living, a mesa lateral e a arandela pela IA (usuário: "vamos substituir por um sofá mais realista que seja
-# semelhante ao proposto, bem como a mesa lateral e a luminária de parede? traga-me duas opções para aprovar."): o
-# recorte do estar do living (`caixa_px`, 16:9) foi ao Nano Banana Pro (Higgsfield) 4x maior, com o pedido de manter o
-# enquadramento e a pegada, o lugar e o tamanho de cada peça e trocar só as três por versões realistas vistas de cima.
-# A IA voltou no mesmo enquadramento (paredes, tapete e contorno do sofá batem); o ajuste fino (translação e escala
-# pela correlação dos gradientes, fora das peças) está na `ia_png` (2x). Entram só as três peças: o sofá na pegada do
-# PDF (`SOFA_LIVING_TB`), a mesa lateral e a arandela nas silhuetas do PDF (`pecas_pdf`), cada uma + `cresce_px`,
-# somadas ao que a IA desenhou como peça perto delas (o que foge do fundo original limpo, sem contar a sombra); no tom
-# da IA, com o ganho do fundo (o piso e o tapete de fora das peças, original sobre IA) para casar a luz da planta. O
-# que da peça antiga sobra fora da nova é refeito do fundo em volta; a sombra macia do sofá no tapete fica a de antes.
-LIVING_IA_TB = {"ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_living_sofa_nbp_alinhado.png",
-                "caixa_px": (1700, 722, 2064, 927),
-                "pecas_pdf": [78383, 63984], "cresce_px": 2, "perto_px": 4,
-                "peca_ab_min": 7.0, "peca_l_min": 9.0, "ganho_lim": (0.92, 1.08), "linha_lum": 110,
-                "fora_px": [(1786, 850, 1916, 940), (1700, 835, 1742, 927), (2034, 722, 2064, 927)]}
+# O estar do living pela IA (usuário: "vamos substituir por um sofá mais realista que seja semelhante ao proposto, bem
+# como a mesa lateral e a luminária de parede? traga-me duas opções para aprovar."; "opção A, pode instalar"; e, sobre a
+# opção B: "gostei da poltrona assim, gostei da sombra da mesa de centro assim, gostei da mesa lateral assim e da
+# luminária de parede. pode aplicar?"). Três camadas do Nano Banana Pro (Higgsfield), cada uma alinhada ao seu recorte
+# (`caixa_px`, a IA volta no mesmo enquadramento; o ajuste fino, translação e escala pela correlação dos gradientes
+# fora das peças, já está na `ia_png`, em 2x):
+#   1. o sofá em L da opção A (bouclé off-white), na pegada do PDF (`SOFA_LIVING_TB`);
+#   2. a mesa lateral de travertino e a arandela preta da opção B (linho greige; o sofá dela não entra), nas silhuetas do
+#      PDF (78383, 63984);
+#   3. as 2 poltronas e a mesa de centro: o recorte maior do estar (com o sofá A já posto) foi de novo à IA, com a opção
+#      B de referência, para as poltronas inteiras em terracota (concha e assento) e a mesa de centro sem o contorno
+#      cinza, com a sombra macia no tapete (a opção B corta a 1ª poltrona na borda e deixa a 2ª de fora); silhuetas do
+#      PDF 64047, 64139 e 64285, e em volta, até `sombra_px`, a sombra da IA esmaecendo para fora.
+# Em cada camada: cada peça + `cresce_px`, somada ao que a IA desenhou como peça encostado nela (o que foge do fundo
+# original limpo, sem contar a sombra); no tom da IA com o ganho do fundo (piso e tapete fora das peças, original sobre
+# IA); o que da peça antiga sobra fora da nova volta ao fundo limpo; o que uma camada anterior já pôs fica (a mesa
+# lateral do PDF entra sob o braço do sofá); as linhas escuras de fora das peças antigas (o caixilho do vidro) ficam.
+LIVING_IA_TB = {"camadas": [
+    {"nome": "sofá (opção A)", "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_living_sofa_nbp_opA_alinhado.png",
+     "caixa_px": (1700, 722, 2064, 927), "pecas": ["sofa"]},
+    {"nome": "mesa lateral e arandela (opção B)",
+     "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_living_sofa_nbp_opB_alinhado.png",
+     "caixa_px": (1700, 722, 2064, 927), "pecas": [78383, 63984]},
+    {"nome": "poltronas e mesa de centro (no estilo da opção B)",
+     "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_living_estar_nbp_alinhado.png",
+     "caixa_px": (1660, 805, 1980, 985), "pecas": [64047, 64139, 64285], "sombra_px": 7.0}],
+    "cresce_px": 2, "perto_px": 4, "peca_ab_min": 7.0, "peca_l_min": 9.0, "ganho_lim": (0.92, 1.08), "linha_lum": 110,
+    "fora_px": [(2034, 722, 2064, 927), (1810, 970, 1920, 1010)]}
 
 
-def living_ia_tb(Q, img, q=LIVING_IA_TB):
+def _living_pdf(Q, peca, x0, y0, w, h):
     import um_pav_casaa_1111 as U
-    x0, y0, x1, y1 = q["caixa_px"]
+    if peca == "sofa":
+        cov = np.zeros((h, w), np.float32)
+        for r in SOFA_LIVING_TB["pegada_px"]:
+            cov = np.maximum(cov, U._cobertura(r, x0, y0, w, h))
+        return cov
+    dd = Q.desenhos[peca]
+    return Q.preencher(lambda d, dd=dd: d is dd, ss=4)[y0:y0 + h, x0:x0 + w].astype(np.float32)
+
+
+def _living_camada(Q, img, cam, q, feito):
+    x0, y0, x1, y1 = cam["caixa_px"]
     w, h = x1 - x0, y1 - y0
-    ia = cv2.resize(cv2.imread(str(q["ia_png"])), (w, h), interpolation=cv2.INTER_AREA).astype(np.float32)
+    ia = cv2.resize(cv2.imread(str(cam["ia_png"])), (w, h), interpolation=cv2.INTER_AREA).astype(np.float32)
     reg = img[y0:y1, x0:x1].astype(np.float32)
+    fixo = feito[y0:y1, x0:x1]
 
     def ret(r, d=0):
         m = np.zeros((h, w), bool)
@@ -2317,36 +2341,35 @@ def living_ia_tb(Q, img, q=LIVING_IA_TB):
         return m
 
     def cresce(cov, d):
-        k = 2 * d + 1
+        k = 2 * int(d) + 1
         return cv2.dilate(cov, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
-    # as silhuetas do PDF: o sofá (a pegada) e as peças
-    sofa = np.zeros((h, w), np.float32)
-    for r in SOFA_LIVING_TB["pegada_px"]:
-        sofa = np.maximum(sofa, U._cobertura(r, x0, y0, w, h))
-    pdf = [sofa]
-    caixas = [r for r in SOFA_LIVING_TB["pegada_px"]]
-    for i in q["pecas_pdf"]:
-        dd = Q.desenhos[i]
-        pdf.append(Q.preencher(lambda d, dd=dd: d is dd, ss=4)[y0:y1, x0:x1].astype(np.float32))
-        ys, xs = np.nonzero(pdf[-1] > 0.01)
+    pdf, caixas = [], []
+    for peca in cam["pecas"]:
+        cov = _living_pdf(Q, peca, x0, y0, w, h) * (1 - fixo)
+        ys, xs = np.nonzero(cov > 0.01)
+        pdf.append(cov)
         caixas.append((xs.min() + x0, ys.min() + y0, xs.max() + 1 + x0, ys.max() + 1 + y0))
     velho = np.zeros((h, w), bool)
     for p in pdf:
         velho |= cresce((p > 0.01).astype(np.uint8), 2) > 0
+    velho &= fixo < 0.01
     # o fundo original limpo (sem as peças antigas)
     limpo = cv2.inpaint(np.clip(reg, 0, 255).astype(np.uint8), (cresce(velho.astype(np.uint8), 1) * 255).astype(np.uint8),
                         5, cv2.INPAINT_TELEA).astype(np.float32)
-    # o ganho do fundo: piso e tapete fora das peças (e fora da mesa de centro, das poltronas e do jardim)
+    # o ganho do fundo: piso e tapete fora de todas as peças do estar (e fora do jardim e da grelha de baixo)
     est = np.ones((h, w), bool)
-    for r in caixas:
-        est &= ~ret(r, d=12)
+    for c in q["camadas"]:
+        for peca in c["pecas"]:
+            cv_ = _living_pdf(Q, peca, x0, y0, w, h)
+            if cv_.max() > 0:
+                est &= ~(cresce((cv_ > 0.01).astype(np.uint8), 12) > 0)
     for r in q["fora_px"]:
         est &= ~ret(r, d=4)
     est &= (reg.mean(axis=2) > 150) & ((reg.max(axis=2) - reg.min(axis=2)) < 40)
     g = np.clip(np.median(reg[est], axis=0) / np.maximum(np.median(ia[est], axis=0), 1), *q["ganho_lim"])
     iag = ia * g[None, None, :]
     # o que a IA desenhou como peça perto de cada silhueta: foge do fundo limpo em cor, ou é mais claro que ele (a
-    # sombra, mais escura no mesmo tom, não é peça)
+    # sombra, mais escura no mesmo tom, não é peça); só o que encosta na silhueta do PDF
     lab_i = cv2.cvtColor(np.clip(iag / 255, 0, 1), cv2.COLOR_BGR2LAB)
     lab_f = cv2.cvtColor(np.clip(limpo / 255, 0, 1), cv2.COLOR_BGR2LAB)
     dab = np.hypot(lab_i[..., 1] - lab_f[..., 1], lab_i[..., 2] - lab_f[..., 2])
@@ -2356,24 +2379,41 @@ def living_ia_tb(Q, img, q=LIVING_IA_TB):
         cov = cresce(p, q["cresce_px"])
         oi = (obj & ret(r, d=q["perto_px"])).astype(np.uint8)
         oi = cv2.morphologyEx(oi, cv2.MORPH_OPEN, np.ones((2, 2), np.uint8)) > 0
-        # só o que encosta na silhueta do PDF (sem os pontos soltos da IA em volta)
         nucleo = cov > 0.5
         lab, n = ndimage.label(oi | nucleo)
         oi &= np.isin(lab, np.unique(lab[nucleo]))
         sil.append(np.clip(cv2.GaussianBlur(np.maximum(cov, oi.astype(np.float32)), (0, 0), 0.6), 0, 1))
     peso = np.stack(sil).max(axis=0)
-    # as linhas escuras de fora das peças antigas (o caixilho do vidro junto da chaise, a parede) ficam
-    linha = ~velho & (reg.mean(axis=2) < q["linha_lum"])
+    # a sombra da IA em volta (só na camada que pede), esmaecendo até `sombra_px`
+    if cam.get("sombra_px"):
+        dist = cv2.distanceTransform((peso < 0.5).astype(np.uint8), cv2.DIST_L2, 3)
+        anel = np.clip(1 - dist / cam["sombra_px"], 0, 1) ** 1.5
+        peso = np.maximum(peso, anel)
+    # as linhas escuras de fora das peças antigas (o caixilho do vidro, a parede) e o que as camadas anteriores puseram
+    linha = ~velho & (reg.mean(axis=2) < q["linha_lum"]) & (peso < 0.99)
     peso[linha] = 0
+    peso *= 1 - fixo
     # o que da peça antiga sobra fora da nova: o fundo limpo
     resto = velho & (peso < 0.5)
     base = np.where(resto[..., None], limpo, reg)
     o = base * (1 - peso[..., None]) + iag * peso[..., None]
     out = img.copy()
     out[y0:y1, x0:x1] = np.clip(np.round(o), 0, 255).astype(np.uint8)
-    print(f"    sofá, mesa lateral e arandela do living: as peças da IA (Nano Banana Pro, alinhada ao recorte) nas "
-          f"silhuetas do PDF, ganho do fundo {[round(float(v), 3) for v in g]}; {int(resto.sum())} px da peça antiga "
-          f"refeitos do fundo")
+    pg = np.zeros(feito.shape, np.float32)
+    pg[y0:y1, x0:x1] = np.where(peso > 0.5, 1.0, 0.0)
+    print(f"      {cam['nome']}: {len(pdf)} peça(s), ganho do fundo {[round(float(v), 3) for v in g]}, "
+          f"{int(resto.sum())} px da peça antiga refeitos do fundo")
+    return out, pg
+
+
+def living_ia_tb(Q, img, q=LIVING_IA_TB):
+    out = img.copy()
+    feito = np.zeros(img.shape[:2], np.float32)
+    for cam in q["camadas"]:
+        out, pg = _living_camada(Q, out, cam, q, feito)
+        feito = np.maximum(feito, pg)
+    print(f"    estar do living: o sofá da opção A; a mesa lateral, a arandela, as 2 poltronas e a mesa de centro com "
+          f"a sombra no estilo da opção B (Nano Banana Pro, nas silhuetas do PDF)")
     return out
 
 
@@ -2869,6 +2909,7 @@ PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_
           ("quina", quina_tb), ("tapete", tapete_tb),
           ("poltronas", poltronas_tb), ("sofa_living", sofa_living_tb),
           ("cadeiras", cadeiras_tb), ("varanda_ia", varanda_ia_tb), ("poltronas_varanda", poltronas_varanda_tb),
+          ("living_ia", living_ia_tb),
           ("pedras", pedras_tb), ("brises", brises_tb), ("despensa", despensa_tb), ("pontos", pontos_tb),
           ("rotulos", rotulos_tb)]
 
