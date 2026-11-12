@@ -102,12 +102,18 @@ AMBIENTES = {
                   ("lounge-dos-brises/mesa-lateral-externa", 1619.3, 469.5, 18, None, 0.0, "baixa", None),
                   ("lounge-dos-brises/mesa-lateral-externa", 1708.0, 392.5, 18, None, 0.0, "baixa", None)]},
     "sala_estar": {
+        # (12/11) com o sofá menor, a pegada do de antes (206 px, 50,8°) também volta ao piso: o sofá antigo do render,
+        # maior que o do PDF, ficava escondido por ele
         "zonas": [([disco(2035.9, 502.35, 126.0), ("pdf", ((1876, 372, 2080, 531), 6)),
+                    ("peca", ("sala-de-estar/sofa-curvo-render-casa-a", 1966.0, 447.0, 206, girar_pt(0.775, 0.632), 4)),
                     ("polt", (("sala de estar, à direita do tapete", "sala de estar, embaixo, à esquerda",
                                "sala de estar, embaixo, à direita"), 3))], None)],
         "manter": [(1878, 368, 1924, 432)],
         "pecas": [("sala-de-estar/tapete-redondo-render-v2", 2035.9, 502.35, 239, None, 0.0, "tapete", None),
-                  ("sala-de-estar/sofa-curvo-render-casa-a", 1966.0, 447.0, 206, None, girar_pt(0.775, 0.632),
+                  # (12/11, usuário: "DIMUNUIR O TAMANHO DO SOFÁ"; "TALVEZ ROTACIONANDO O SOFÁ, RESOLVA") o sofá no
+                  # contorno do sofá do PDF: o giro, o tamanho e o centro de maior sobreposição com ele (86% -> 87%;
+                  # antes, 206 px no giro de 50,8°, 65%): 15° no sentido horário e 10% menor
+                  ("sala-de-estar/sofa-curvo-render-casa-a", 1982.0, 443.0, 186, None, girar_pt(0.775, 0.632) - 15.0,
                    "movel", None),
                   ("sala-de-estar/poltrona-creme-madeira-render", 2122.95, 465.15, 50, None, girar_pt(-0.95, 0.3),
                    "movel", None),
@@ -176,8 +182,12 @@ AMBIENTES = {
                   ([ret(2308.8, 1216.2, 2331.3, 1248.9, 2)], [(2255, 1236, 2268, 1258), (2286, 1236, 2300, 1258)]),
                   ([ret(2421.3 - 30, 1175.5 - 60, 2421.3 + 30, 1175.5 + 60, 0)], [(2452, 1236, 2492, 1300)])],
         "pecas": "banhos"},
-    "lavabo": {"zonas": [], "pecas": [("lavabo/cuba-esculpida-poros-render", 2330.55, 438.65, 57.3, 29.9, -90.0,
-                                       "baixa", "lavabo")]},
+    # (12/11, usuário: "MELHORE A REPRESENTAÇÃO DESSE VASO") a bacia do lavabo: o bloco marrom chapado sai (o piso do
+    # lavabo de logo abaixo) e entra a bacia Carrara da biblioteca no retângulo do PDF (a caixa acoplada junto à parede
+    # da direita, a frente para a esquerda), no marrom-escuro dos vasos do Térreo (`marrom`)
+    "lavabo": {"zonas": [([ret(2312, 366, 2346, 394)], [(2259, 408, 2313, 427)])],
+               "pecas": [("lavabo/cuba-esculpida-poros-render", 2330.55, 438.65, 57.3, 29.9, -90.0, "baixa", "lavabo"),
+                         ("lavabo/bacia-carrara", 2330.1, 380.15, 21.1, 30.6, -90.0, "baixa", "marrom")]},
 }
 
 
@@ -228,8 +238,27 @@ def so_louca(P, croma=24):
     return np.ascontiguousarray(Q)
 
 
+MARROM_VASO = (57, 75, 101)                     # BGR: o marrom-escuro dos vasos do Térreo (o da final de 26/10)
+
+
+def marrom(P, cor=MARROM_VASO, faixa=(0.80, 1.22), traco=2.2):
+    """A louça branca da biblioteca no marrom-escuro dos vasos: o tom `cor` na luz da louça, com o branco da peça
+    levado à `faixa` (do p5 ao p95 da luz) e as linhas do desenho (a borda da tampa, a caixa, o assento) reforçadas
+    (`traco`: o px menos a média de perto); no marrom, o pouco contraste do branco sumia."""
+    Q = P.copy()
+    L = P[..., :3].mean(axis=2)
+    a = P[..., 3] > 128
+    p5, p95 = np.percentile(L[a], [5, 95])
+    f = faixa[0] + (faixa[1] - faixa[0]) * (L - p5) / max(p95 - p5, 1.0)
+    f += traco * (L - cv2.GaussianBlur(L, (0, 0), 3.0)) / 255
+    Q[..., :3] = np.clip(np.float32(cor)[None, None] * np.clip(f, 0.55, 1.3)[..., None], 0, 255)
+    return Q
+
+
 def preparar(nome, larg, alt, extra=None):
     P = ler_png(nome)
+    if extra == "marrom":
+        P = marrom(P)
     if extra == "lavabo":
         P = esticar_lados(P, larg / alt)
     elif extra == "louca":
@@ -302,6 +331,15 @@ def mascara_formas(formas, forma):
                 return min(a, c) >= x0 and max(a, c) <= x1 and min(b, e) >= y0 and max(b, e) <= y1
             k = (Q.preencher(dentro, ss=2) > 0.02).astype(np.uint8)
             m |= cv2.dilate(k, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * mg + 1,) * 2))
+            continue
+        if tipo == "peca":
+            # (12/11) a pegada de uma peça da biblioteca numa pose (o sofá de antes, maior que o do PDF), com a folga
+            nome, cx, cy, wt, ang, mg = v
+            P, wt_, ht_ = preparar(nome, wt, None)
+            Pa = P.astype(np.float32).copy()
+            Pa[..., :3] = 255
+            k = pousar(np.zeros((H, W, 3), np.float32), Pa, cx, cy, wt_, ht_, ang, [], 59.7, ss=2)[..., 0] > 127
+            m |= cv2.dilate(k.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * mg + 1,) * 2))
             continue
         if tipo == "polt":
             import pedidos_terreo_casaa_2910 as PT
@@ -441,7 +479,11 @@ def chuveiro_braco(placa_c, parede, placa_px):
 def tracos():
     tr = cv2.imread(str(TRACOS))
     import terreo_casaa_1011 as TA
+    import regras_1211_casaa as RG
     alfa = tr[..., 0].astype(np.float32) / 255
+    sai = RG.claraboia_sai("Terreo")            # o X da claraboia, que saiu (12/11): os resíduos da camada não voltam
+    if sai is not None:
+        alfa[sai] = 0
     cor = np.where(tr[..., 1] > 127, np.float32(TA.FINOS_TA["claro"][0]), np.float32(TA.FINOS_TA["escuro"][0]))
     return alfa, cor
 
@@ -559,7 +601,7 @@ def aplicar(antes):
     o = out.astype(np.float32)
     for nome, pecas, manter in desenho:
         for png, cx, cy, wt, ht, ang, sombra, corte in pecas:
-            extra = corte if corte in ("lavabo",) else None
+            extra = corte if corte in ("lavabo", "marrom") else None
             P, wt, ht = preparar(png, wt, ht, extra)
             nao = manter | rot | par
             if isinstance(corte, tuple):

@@ -494,6 +494,10 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
         # as peças da biblioteca (12/11): a zona refeita da final e as peças nítidas, na escala do 12K
         import biblioteca_terreo_casaa_1211 as BT
         out = BT.pecas_12k(img, entrada, out, s, X0, Yia, Ya3)
+        # os pedidos de 12/11 à noite: o Bege do pergolado, os riscos dos brises, a porta do banho varanda, a borda do
+        # deck e da escada (o rótulo do JARDIM vai pelos dados)
+        import pedidos_terreo_casaa_1211c as P3
+        out = P3.doze(out, s, X0, Ya3)
     Fq = np.array([[s, 0, -s * X0], [0, s, -s * Ya3]], np.float64)
     # o fundo: branco puro fora da planta
     gq = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

@@ -2030,6 +2030,57 @@ IA não muda (a correção de tom usa a entrada que a IA viu). Sem IA nova (Topa
 <saída do Topaz> --opcao AB`, `rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png`,
 `pdf_entrega.py` e `book_entrega.py`.
 
+### Térreo: os pedidos de 12/11 à noite (`pedidos_terreo_casaa_1211c.py`, `bege_pergolado_casaa_1211.py`)
+
+Vendo a planta com as peças da biblioteca, o usuário mandou, cada um com um recorte (aplicados direto):
+- **Sofá da sala** ("DIMUNUIR O TAMANHO DO SOFÁ"; "TALVEZ ROTACIONANDO O SOFÁ, RESOLVA"; no `biblioteca_terreo_casaa_1211.py`):
+  o sofá curvo da biblioteca era maior que o do PDF (65% de sobreposição com o contorno dele). O giro, o tamanho e o
+  centro de maior sobreposição (87%): 15° no sentido horário, 186 px (era 206, 10% menor), centro (1982, 443). A pegada
+  do sofá de antes também volta ao piso (a forma `peca` de `mascara_formas`), senão o sofá antigo do render aparecia.
+- **Bege Bahia do pergolado** ("PRECISAMOS MELHORAR O ASPECTO DO MARMORE BEGE BAHIA NESSA REGIÃO"; `bege_pergolado_casaa_1211.py`):
+  sob o pergolado, junto à prainha, o Bege tinha saído acinzentado e rosado, com manchas brancas (o refazimento de 10/11
+  emendava o tecido ao piso de fora pela membrana, e as bordas no travertino da varanda e do lounge puxavam o tom). O
+  Bege (o cinza 232 da chapada) de dentro do pergolado e a faixa entre a prainha e a linha do guarda-corpo, tecido do
+  deck bom (`fontes_px`), emendado só ao Bege bom de fora (a água, a linha e o travertino com a borda livre); os
+  tracejados de volta por cima. No 12K (`pergolado_12k`): o tecido do deck da própria saída da IA, com a correção de tom
+  calculada na escala da final e ampliada.
+- **Riscos entre os brises** ("REMOVA ESSES RISCOS PRETOS ENTE OS BRISES"; `brises`): as seis marquinhas na linha do
+  guarda-corpo, entre os brises do lounge (na final, cinza-claras; no 12K, traços pretos), saem: cada coluna da caixa
+  entre a linha de cima e a de baixo (a linha vertical continua); no 12K, com o grão do piso de volta.
+- **Porta do banho varanda** ("CORRIJA ESSA PORTA."; `porta`): a folha borrada (uma barra rosada larga) sai, o piso de
+  baixo é tecido do de logo abaixo, e a folha entra nítida no retângulo do PDF (ARQ_PAREDE, 1617,0–1670,7 x
+  1545,1–1547,5, aberta junto à parede da esquerda), no desenho das portas do Térreo (o cinza claro 222, a face 92 e a
+  sombra curta); no 12K, a folha em 8x na escala dele.
+- **Contorno do deck e da escada** ("CORRIJA ESSE CONTORNO DO DECK E ESCADAS"; `deck`): no PDF, o deck de madeira e a
+  escada para o Subsolo terminam na mesma reta (y 1130); a última régua tinha uma faixa clara com tracinhos e a borda
+  ondulava. O deck vai até a reta com a régua de cima (12 px acima; no 12K, o passo medido pela autocorrelação, 43 px),
+  a escada com os degraus de logo acima e a beira um tom abaixo, e o gramado começa logo abaixo (o próprio gramado,
+  refletido na borda dele).
+- **Rótulo do JARDIM** ("DIMINUA A FONTE PARA CABER NO VÃO, SEM ENCOSTAR NAS BORDAS."; `jardim`): o JARDIM A: 17,46 m²,
+  entre as linhas da floreira (25 px), no corpo 0,9 (antes 1,3): 39 x 17 px, no meio da faixa, no mesmo centro na
+  horizontal; o fundo é a floreira de 70 px à esquerda (as linhas continuam), e o "17,46" com a vírgula dos outros. O
+  desenho vai aos dados do 12K (`..._12K_dados.json`, com o de antes em `_antes`); no 12K, a mancha que a IA fez sob o
+  rótulo antigo sai com a floreira de 72 px à esquerda (`jardim_12k`).
+- **Rótulo da claraboia** ("ESCREVA O RÓTULO DA CLARABOIA DENTRO DO ESPAÇO DESTINADO PARA CLARABOIA, COM UMA FONTE MAIS
+  REDUZIDA. ELA FICA DENTRO DO TRACEJADO E PAREDE DA JANELA"; `claraboia`): o CLARABOIA, que ficava abaixo do tracejado,
+  sai (o piso do lavabo ao lado, `terreo_casaa_1011._tapar_rotulo`) e volta no corpo 0,9, no meio do trecho livre da
+  claraboia (entre a face da janela, y 356, e o tracejado, y 383, à esquerda da bacia); o desenho vai aos dados do 12K
+  e ao `..._rotulos_lavabo.json`.
+- **Bancada do lavabo** ("A BANCADA É NO MESMO TOM DA CUBA ESCULPIDA. CORRIJA"; `bancada`): a pedra abaixo da cuba
+  (ARQ_BANCADAS) no tom da cuba esculpida: o fator do tom mediano da borda da cuba sobre o da pedra, px a px (o desenho,
+  a luz e o contorno da pedra ficam); no 12K, o mesmo com os tons do 12K.
+- **Vaso do lavabo** ("MELHORE A REPRESENTAÇÃO DESSE VASO"; no `biblioteca_terreo_casaa_1211.py`): o bloco marrom
+  chapado sai (o piso do lavabo de logo abaixo) e entra a bacia Carrara da biblioteca (`02-terreo/lavabo/bacia-carrara.png`)
+  no retângulo do PDF (a caixa acoplada junto à parede, a frente para a esquerda), no marrom-escuro dos vasos do Térreo
+  (`marrom`: o branco da peça levado à faixa 0,80–1,22 do tom, com as linhas da tampa e da caixa reforçadas). Na
+  camada dos tracejados, os resíduos do X da claraboia não voltam (`regras_1211_casaa.claraboia_sai`).
+
+**Como refazer:** `regras_1211_casaa.py Terreo`, `biblioteca_terreo_casaa_1211.py` (a final, do commit `ANTES_COMMIT`),
+`pedidos_terreo_casaa_1211c.py --antes_depois <a final de 2c1c21d>` (lê a final que o anterior gravou; os antes e depois
+em `renders/POE642_CasaA_PH_Terreo_1211c_<pedido>_antes_depois.jpg`); o 12K pelo `montar12k` (que chama
+`pedidos_terreo_casaa_1211c.doze` depois do `pecas_12k`); depois prancha, PDF e book. Atenção: o `preparar` do 12K acha
+os rótulos da final pelas buscas de corpo; o JARDIM no corpo 0,9 fica gravado direto nos dados.
+
 ### As correções do cliente no Térreo da Casa A: `terreo_casaa_1011.py` (10/11)
 
 Lista do cliente (Paulo Octávio) com os recortes da planta do Térreo, e as respostas do usuário. Um passo por pedido, sobre a final do Térreo do commit 58ea098 (a mesma de 0a17741), na ordem de `PASSOS`:
