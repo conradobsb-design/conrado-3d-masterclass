@@ -1,0 +1,5562 @@
+{
+  "casa": "POE 642 · Casa A",
+  "formato": "PNG RGBA",
+  "vista": "superior, para composição de planta humanizada",
+  "escala": "Ajustar pela silhueta e pelas cotas da planta-base, preservando o aspecto do PNG.",
+  "objetos_unicos": 138,
+  "arquivos_png": 211,
+  "ambientes": 39,
+  "fontes": {
+    "drive": "https://drive.google.com/drive/folders/1NNi_gHWYJs-KvOJSBBP_GZTEpqeGvXrG",
+    "caderno": "https://docs.google.com/presentation/d/14knJRM2E1tcxLbac14A_y57k8H1NQ0nB/edit",
+    "especificacoes": "https://docs.google.com/spreadsheets/d/1KOSFkCtwH6LD3dk94ZZPlYAAzswyGVhE/edit",
+    "banheiros": "https://docs.google.com/presentation/d/19JUp3SgnHIoHXLqZICrzcOXUi8quip_S/edit",
+    "planta_subsolo": "642- SUBSOLO CASA A.pdf",
+    "planta_terreo": "642- TÉRREO CASA A.pdf",
+    "planta_1pav": "642- 1° PAVIMENTO CASA A.pdf",
+    "render_sala": "POE 642 - CASA A - SALA E GOURMET.jpg",
+    "render_banho_master": "POE 642 - CASA A - BH MASTER.png",
+    "planilha_materiais_drive": "https://docs.google.com/spreadsheets/d/1WUU5r7Cqh2w_8iktz17JnYEXFQpDVfhp/edit",
+    "barlavento_portobello": "https://www.portobello.com.br/produtos/barlavento/field-tile/barlavento-gris/14-5x14-5-externo/25927E/revestimentos?channel=portobello-shop",
+    "city_petra_durafloor": "https://www.downloads.durafloor.com.br/publico?grupo=8",
+    "textura_fina_ibratin": "https://fichas.ibratin.com.br/wp-content/uploads/2022/03/FT-TEXTURA-RUSTICA-PREMIUM-REV.001-12.07.2025.pdf",
+    "diretriz_piscina": "POE642_PH_revestimento_piscinas_v1.md",
+    "terreo_render": "POE642_CasaA_PH_Terreo_v33.md",
+    "primeiro_pav_render": "POE642_CasaA_PH_1Pavimento_v7.md",
+    "subsolo_render": "POE642_CasaA_PH_Subsolo_v6.md",
+    "render_subsolo_pisos": "Render do subsolo da Casa A no Higgsfield, Nano Banana Pro, original 5504 × 3072 correspondente à imagem anexada",
+    "render_terreo_pisos": "Render do térreo da Casa A no Higgsfield, Nano Banana Pro, original 5504 × 3072",
+    "render_terreo_anterior": "POE642_CasaA_PH_Terreo_final_bege.png. Referência de cor do Marrom Tabaco, pedra portuguesa caramelo e reflexos na água.",
+    "render_1pav_pisos": "renders/POE642_CasaA_PH_1Pavimento_v7_final2.png, Casa A. Recortes do render usados no Higgsfield GPT Image 2 como referência de aparência."
+  },
+  "objetos": [
+    {
+      "lote": "copas-verdes",
+      "objeto": "arvore-copa-densa",
+      "descricao_visual": "one medium dense Brazilian evergreen garden tree canopy, broad round but organically asymmetric, deep spring green leaf clusters with natural depth and small irregular gaps, foliage only, no trunk from above",
+      "largura_px": 557,
+      "altura_px": 547,
+      "silhueta_px": [
+        533,
+        523
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "nome": "Árvore de copa densa",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arvore-copa-densa.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "copas-verdes",
+      "objeto": "arvore-copa-arejada",
+      "descricao_visual": "one medium tree with an airy irregular lobed canopy of small light-green leaves, physically realistic translucent edges and gaps, thin branches glimpsed only through crown, no ground",
+      "largura_px": 577,
+      "altura_px": 568,
+      "silhueta_px": [
+        553,
+        544
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "nome": "Árvore de copa arejada",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arvore-copa-arejada.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "copas-verdes",
+      "objeto": "arvore-copa-oliva",
+      "descricao_visual": "one medium ornamental evergreen shade tree, irregular layered lobed canopy and fine deep olive-green foliage, medium natural variance in color",
+      "largura_px": 581,
+      "altura_px": 605,
+      "silhueta_px": [
+        557,
+        581
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "nome": "Árvore de copa verde-oliva",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arvore-copa-oliva.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "copas-verdes",
+      "objeto": "palmeira-leque",
+      "descricao_visual": "one green fan palm crown, radial but naturally irregular serrated wide fan-shaped leaves, no visible soil or trunk",
+      "largura_px": 525,
+      "altura_px": 539,
+      "silhueta_px": [
+        501,
+        515
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "nome": "Palmeira-leque",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/palmeira-leque.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "copas-verdes",
+      "objeto": "palmeira-plumosa",
+      "descricao_visual": "one green ornamental feather palm crown, finely feathered asymmetric fronds curling outward, rich natural greens, clean no ground",
+      "largura_px": 555,
+      "altura_px": 579,
+      "silhueta_px": [
+        531,
+        555
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "nome": "Palmeira plumosa",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/palmeira-plumosa.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "copas-verdes",
+      "objeto": "arvore-copa-compacta",
+      "descricao_visual": "one small compact ornamental tree with irregular elliptic deep and light green crown, tiny realistic leaf texture and branching distribution, vivid leaf tips and dark interior",
+      "largura_px": 427,
+      "altura_px": 443,
+      "silhueta_px": [
+        403,
+        419
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "nome": "Árvore de copa compacta",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arvore-copa-compacta.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "arbustos-tropicais",
+      "objeto": "arbusto-verde-denso",
+      "descricao_visual": "a single dense rounded low green landscape shrub with tight small glossy leaves, organically irregular silhouette",
+      "largura_px": 520,
+      "altura_px": 495,
+      "silhueta_px": [
+        496,
+        471
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "nome": "Arbusto verde denso",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arbusto-verde-denso.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "arbustos-tropicais",
+      "objeto": "arbusto-verde-arejado",
+      "descricao_visual": "a single low informal glossy green shrub with gently lobed airy outline and individually identifiable tiny leaves",
+      "largura_px": 557,
+      "altura_px": 525,
+      "silhueta_px": [
+        533,
+        501
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "nome": "Arbusto verde arejado",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arbusto-verde-arejado.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "arbustos-tropicais",
+      "objeto": "touceira-costela-de-adao",
+      "descricao_visual": "a natural grouping of about 8 varying large dark-green split Monstera leaves with holes and jagged fenestrations, no pot",
+      "largura_px": 598,
+      "altura_px": 493,
+      "silhueta_px": [
+        574,
+        469
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "nome": "Touceira de costela-de-adão",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/touceira-costela-de-adao.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "arbustos-tropicais",
+      "objeto": "touceira-estrelitzia",
+      "descricao_visual": "a low group of elongated green strelitzia leaves at varied natural angles with visible midribs, foliage only, no flowers",
+      "largura_px": 539,
+      "altura_px": 500,
+      "silhueta_px": [
+        515,
+        476
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "nome": "Touceira de estrelícia",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/touceira-estrelitzia.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "arbustos-tropicais",
+      "objeto": "touceira-samambaia",
+      "descricao_visual": "one natural spreading cluster of green sword ferns, many finely divided pinnate fronds in several green values",
+      "largura_px": 589,
+      "altura_px": 515,
+      "silhueta_px": [
+        565,
+        491
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "nome": "Touceira de samambaia",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/touceira-samambaia.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "arbustos-tropicais",
+      "objeto": "faixa-mista-tropical",
+      "descricao_visual": "one long narrow low planting mass of mixed philodendron foliage and ferns, runs horizontally, irregular edges, green foliage only, no bed, mulch or pot",
+      "largura_px": 699,
+      "altura_px": 324,
+      "silhueta_px": [
+        675,
+        300
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "nome": "Faixa mista tropical",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/faixa-mista-tropical.png"
+        }
+      ],
+      "referencias": [
+        "terreo_render",
+        "planta_terreo"
+      ],
+      "prioridade": "Paisagismo do lote"
+    },
+    {
+      "lote": "estar-render-v2",
+      "objeto": "sofa-curvo-assimetrico-render",
+      "descricao_visual": "replicate the right foreground ivory upholstered asymmetrical organic curved sofa from reference. From overhead: crescent opening downward, sweeping round continuous back and a deeper wide bulbous chaise lobe on image-right, four muted taupe irregular pillows including two small round cushions, fine cream upholstery grain",
+      "largura_px": 792,
+      "altura_px": 437,
+      "silhueta_px": [
+        768,
+        413
+      ],
+      "higgsfield_job": "55f0cb7c-358e-4b7f-a511-7298de2696b0",
+      "modelo": "gpt_image_2",
+      "nome": "Sofá curvo assimétrico",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/sofa-curvo-assimetrico-render.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "estar-render-v2",
+      "objeto": "poltrona-creme-madeira-render",
+      "descricao_visual": "replicate the foreground barrel chair with thick ivory woven upholstery and external continuous natural curved oak wraparound frame, from overhead with opening downward",
+      "largura_px": 409,
+      "altura_px": 441,
+      "silhueta_px": [
+        385,
+        417
+      ],
+      "higgsfield_job": "55f0cb7c-358e-4b7f-a511-7298de2696b0",
+      "modelo": "gpt_image_2",
+      "nome": "Poltrona creme com aro de madeira",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/poltrona-creme-madeira-render.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "estar-render-v2",
+      "objeto": "poltrona-oliva-render-v2",
+      "descricao_visual": "one compact upholstered moss-olive accent armchair as in image center, tailored slightly angular scalloped back, padded short slim arms, visible small dark warm wood details, opening down",
+      "largura_px": 356,
+      "altura_px": 453,
+      "silhueta_px": [
+        332,
+        429
+      ],
+      "higgsfield_job": "55f0cb7c-358e-4b7f-a511-7298de2696b0",
+      "modelo": "gpt_image_2",
+      "nome": "Poltrona verde-oliva",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/poltrona-oliva-render-v2.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "estar-render-v2",
+      "objeto": "poltrona-caramelo-render-v2",
+      "descricao_visual": "one of the middle group of tub chairs from render, smooth curved cognac leather exterior shell and cream upholstered lining and two soft offwhite cushions, opening down",
+      "largura_px": 477,
+      "altura_px": 480,
+      "silhueta_px": [
+        453,
+        456
+      ],
+      "higgsfield_job": "55f0cb7c-358e-4b7f-a511-7298de2696b0",
+      "modelo": "gpt_image_2",
+      "nome": "Poltrona de couro caramelo",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/poltrona-caramelo-render-v2.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "estar-render-v2",
+      "objeto": "mesa-centro-seixo-render-v2",
+      "descricao_visual": "one organic coffee table with rounded triangular pebble silhouette and precisely photographed warm medium brown wood grain, based on the low wooden table in the center foreground",
+      "largura_px": 471,
+      "altura_px": 406,
+      "silhueta_px": [
+        447,
+        382
+      ],
+      "higgsfield_job": "55f0cb7c-358e-4b7f-a511-7298de2696b0",
+      "modelo": "gpt_image_2",
+      "nome": "Mesa de centro em madeira",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/mesa-centro-seixo-render-v2.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "estar-render-v2",
+      "objeto": "tapete-redondo-render-v2",
+      "descricao_visual": "one circular flat rug with the same irregular large abstract taupe mottling on oatmeal as in the foreground reference, weave visible, no fringes, empty",
+      "largura_px": 611,
+      "altura_px": 614,
+      "silhueta_px": [
+        587,
+        590
+      ],
+      "higgsfield_job": "55f0cb7c-358e-4b7f-a511-7298de2696b0",
+      "modelo": "gpt_image_2",
+      "nome": "Tapete redondo estampado",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/tapete-redondo-render-v2.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "gourmet-render-v2",
+      "objeto": "cadeira-jantar-oliva-render",
+      "descricao_visual": "one of the left rear dining chairs: slender dark olive and dark brown chair frame, muted olive fabric back and warm ochre olive upholstered seat, squared slender silhouette, faces down",
+      "largura_px": 325,
+      "altura_px": 411,
+      "silhueta_px": [
+        301,
+        387
+      ],
+      "higgsfield_job": "48d03610-6dd6-48e4-9127-c74c01fa558b",
+      "modelo": "gpt_image_2",
+      "nome": "Cadeira de jantar em oliva",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar",
+          "arquivo": "02-terreo/sala-de-jantar/cadeira-jantar-oliva-render.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "gourmet-render-v2",
+      "objeto": "mesa-jantar-madeira-render",
+      "descricao_visual": "one long racetrack oblong dining table wood top, medium warm walnut tone with true fine natural woodgrain, elongated horizontally, no legs visible or chairs",
+      "largura_px": 779,
+      "altura_px": 358,
+      "silhueta_px": [
+        755,
+        334
+      ],
+      "higgsfield_job": "48d03610-6dd6-48e4-9127-c74c01fa558b",
+      "modelo": "gpt_image_2",
+      "nome": "Mesa de jantar em madeira",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar",
+          "arquivo": "02-terreo/sala-de-jantar/mesa-jantar-madeira-render.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "gourmet-render-v2",
+      "objeto": "pufe-externo-creme-render",
+      "descricao_visual": "one low round ivory outdoor bean bag pouf chair from the midground terrace, organic softly gathered linen with a loose cushion at rear and open seat facing down",
+      "largura_px": 441,
+      "altura_px": 440,
+      "silhueta_px": [
+        417,
+        416
+      ],
+      "higgsfield_job": "48d03610-6dd6-48e4-9127-c74c01fa558b",
+      "modelo": "gpt_image_2",
+      "nome": "Pufe externo creme",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda",
+          "arquivo": "02-terreo/varanda/pufe-externo-creme-render.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "gourmet-render-v2",
+      "objeto": "cadeira-gourmet-tramada-render",
+      "descricao_visual": "one slim honey wood dining chair from the covered gourmet terrace, curved gently angular back with warm pale woven cord, simple natural beige seat, facing down",
+      "largura_px": 389,
+      "altura_px": 439,
+      "silhueta_px": [
+        365,
+        415
+      ],
+      "higgsfield_job": "48d03610-6dd6-48e4-9127-c74c01fa558b",
+      "modelo": "gpt_image_2",
+      "nome": "Cadeira de madeira e trama",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda",
+          "arquivo": "02-terreo/varanda/cadeira-gourmet-tramada-render.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "gourmet-render-v2",
+      "objeto": "espreguicadeira-madeira-render",
+      "descricao_visual": "one poolside modern sun lounger, thin teak wood frame and thick beige fabric cushion segmented at head, vertical axis, head at top",
+      "largura_px": 263,
+      "altura_px": 579,
+      "silhueta_px": [
+        239,
+        555
+      ],
+      "higgsfield_job": "48d03610-6dd6-48e4-9127-c74c01fa558b",
+      "modelo": "gpt_image_2",
+      "nome": "Espreguiçadeira de madeira",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina",
+          "arquivo": "02-terreo/deck-piscina/espreguicadeira-madeira-render.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "gourmet-render-v2",
+      "objeto": "vaso-cactos-render",
+      "descricao_visual": "one cluster of tall deep green upright columnar cacti with smooth oval arms, accurate texture and separation, projected from directly above, in a circular sand-colored ceramic planter",
+      "largura_px": 473,
+      "altura_px": 559,
+      "silhueta_px": [
+        449,
+        535
+      ],
+      "higgsfield_job": "48d03610-6dd6-48e4-9127-c74c01fa558b",
+      "modelo": "gpt_image_2",
+      "nome": "Vaso com cactos colunares",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/vaso-cactos-render.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/vaso-cactos-render.png"
+        }
+      ],
+      "referencias": [
+        "render_sala"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "banho-master-render-v2",
+      "objeto": "banheira-oval-render-v2",
+      "descricao_visual": "replicate the glossy white compact freestanding soaking bathtub in the render. A compact slightly asymmetrical oval, smoothly tapered sculpted walls with a slim lip and rounded ends, empty white interior with fine natural material shading. Horizontal long axis. One chrome floor mounted tub filler behind center, seen directly down so it appears as small chromed circles with a short angled spout and small parallel hand shower, no side elevation",
+      "largura_px": 662,
+      "altura_px": 430,
+      "silhueta_px": [
+        638,
+        406
+      ],
+      "higgsfield_job": "495243e1-a028-4169-aa8d-6134eb331c4a",
+      "modelo": "gpt_image_2",
+      "nome": "Banheira oval com misturador",
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/banheira-oval-render-v2.png"
+        }
+      ],
+      "referencias": [
+        "render_banho_master"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "banho-master-render-v2",
+      "objeto": "bancada-dupla-esculpida-render-v2",
+      "descricao_visual": "master vanity from the reference, exact orthographic plan: one elongated horizontal natural warm beige Roman travertine countertop with visible parallel veins and natural filled pores, two rectangular integrally carved stone basins flush within the slab, each with one small chrome mixer just behind. A very narrow freijo wood front edge allowed only if visible in plan, no lower cabinetry in elevation",
+      "largura_px": 806,
+      "altura_px": 356,
+      "silhueta_px": [
+        782,
+        332
+      ],
+      "higgsfield_job": "495243e1-a028-4169-aa8d-6134eb331c4a",
+      "modelo": "gpt_image_2",
+      "nome": "Bancada dupla esculpida em travertino",
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/bancada-dupla-esculpida-render-v2.png"
+        }
+      ],
+      "referencias": [
+        "render_banho_master"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "banho-master-render-v2",
+      "objeto": "misturador-piso-banheira-render",
+      "descricao_visual": "one compact floor-mounted brushed chrome bathtub filler and slim hand shower as seen vertically from overhead; realistic silvery circular base, short horizontal spout and slim handset, no vertical pipe front face, no bath or floor",
+      "largura_px": 244,
+      "altura_px": 333,
+      "silhueta_px": [
+        220,
+        309
+      ],
+      "higgsfield_job": "495243e1-a028-4169-aa8d-6134eb331c4a",
+      "modelo": "gpt_image_2",
+      "nome": "Misturador de piso para banheira",
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/misturador-piso-banheira-render.png"
+        }
+      ],
+      "referencias": [
+        "render_banho_master"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "banho-master-render-v2",
+      "objeto": "banco-reto-travertino",
+      "descricao_visual": "one isolated straight solid rectangular slab bench seen only from above, vein-cut pale Roman travertine with realistic fine honey veins and subtle pores, long axis horizontal, no wood slats or furniture around it",
+      "largura_px": 632,
+      "altura_px": 247,
+      "silhueta_px": [
+        608,
+        223
+      ],
+      "higgsfield_job": "495243e1-a028-4169-aa8d-6134eb331c4a",
+      "modelo": "gpt_image_2",
+      "nome": "Banco reto em Travertino Romano",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna",
+          "arquivo": "01-subsolo/sauna/banco-reto-travertino.png"
+        }
+      ],
+      "referencias": [
+        "subsolo_render",
+        "render_banho_master"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "banho-master-render-v2",
+      "objeto": "cuba-esculpida-poros-render",
+      "descricao_visual": "one small orthographic beige Roman travertine washstand sample with one carved rectangular integrated stone basin and minimal chrome faucet, natural pores and directional warm fine veins",
+      "largura_px": 370,
+      "altura_px": 306,
+      "silhueta_px": [
+        346,
+        282
+      ],
+      "higgsfield_job": "495243e1-a028-4169-aa8d-6134eb331c4a",
+      "modelo": "gpt_image_2",
+      "nome": "Cuba esculpida em travertino",
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/cuba-esculpida-poros-render.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo do escritório",
+          "arquivo": "02-terreo/lavabo/cuba-esculpida-poros-render.png"
+        }
+      ],
+      "referencias": [
+        "render_banho_master"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "banho-master-render-v2",
+      "objeto": "floreira-cactos-e-folhagem",
+      "descricao_visual": "small long horizontal plain stone planter with an irregular green cluster of columnar cactus tips and low succulent green foliage, as through bathroom window, camera strictly from top",
+      "largura_px": 538,
+      "altura_px": 186,
+      "silhueta_px": [
+        514,
+        162
+      ],
+      "higgsfield_job": "495243e1-a028-4169-aa8d-6134eb331c4a",
+      "modelo": "gpt_image_2",
+      "nome": "Floreira com cactos e folhagem",
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/floreira-cactos-e-folhagem.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/floreira-cactos-e-folhagem.png"
+        }
+      ],
+      "referencias": [
+        "render_banho_master"
+      ],
+      "prioridade": "Preferir no ambiente indicado quando a silhueta encaixar na planta"
+    },
+    {
+      "lote": "academia",
+      "objeto": "esteira-a",
+      "descricao_visual": "Esteira grafite",
+      "largura_px": 287,
+      "altura_px": 630,
+      "silhueta_px": [
+        263,
+        606
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/esteira-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "academia",
+      "objeto": "esteira-b",
+      "descricao_visual": "Esteira grafite com acabamento em alumínio",
+      "largura_px": 257,
+      "altura_px": 623,
+      "silhueta_px": [
+        233,
+        599
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/esteira-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "academia",
+      "objeto": "bicicleta-a",
+      "descricao_visual": "Bicicleta ergométrica grafite",
+      "largura_px": 203,
+      "altura_px": 546,
+      "silhueta_px": [
+        179,
+        522
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/bicicleta-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "academia",
+      "objeto": "bicicleta-b",
+      "descricao_visual": "Bicicleta ergométrica grafite com guidão alternativo",
+      "largura_px": 205,
+      "altura_px": 575,
+      "silhueta_px": [
+        181,
+        551
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/bicicleta-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "academia",
+      "objeto": "banco-supino",
+      "descricao_visual": "Banco de supino com suporte e barra",
+      "largura_px": 505,
+      "altura_px": 617,
+      "silhueta_px": [
+        481,
+        593
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/banco-supino.png"
+        }
+      ]
+    },
+    {
+      "lote": "academia",
+      "objeto": "suporte-halteres",
+      "descricao_visual": "Suporte de halteres, opção para a faixa de equipamentos indicada na academia",
+      "largura_px": 428,
+      "altura_px": 322,
+      "silhueta_px": [
+        404,
+        298
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/suporte-halteres.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar",
+      "objeto": "sofa-curvo-a",
+      "descricao_visual": "wide crescent curved three-seat sofa, oatmeal woven upholstery, isolated, opening downward",
+      "largura_px": 650,
+      "altura_px": 317,
+      "silhueta_px": [
+        626,
+        293
+      ],
+      "higgsfield_job": "02e662c9-6482-4029-8669-26bdbe8fa90f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/sofa-curvo-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar",
+      "objeto": "sofa-curvo-b",
+      "descricao_visual": "wide asymmetrical kidney-shaped curved three-seat sofa, pale warm ivory boucle, opening downward",
+      "largura_px": 671,
+      "altura_px": 325,
+      "silhueta_px": [
+        647,
+        301
+      ],
+      "higgsfield_job": "02e662c9-6482-4029-8669-26bdbe8fa90f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/sofa-curvo-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar",
+      "objeto": "poltrona-a",
+      "descricao_visual": "compact low round armchair in sand boucle with rounded back, facing down",
+      "largura_px": 340,
+      "altura_px": 353,
+      "silhueta_px": [
+        316,
+        329
+      ],
+      "higgsfield_job": "02e662c9-6482-4029-8669-26bdbe8fa90f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/poltrona-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar",
+      "objeto": "poltrona-b",
+      "descricao_visual": "rounded barrel armchair in warm taupe woven fabric, facing down",
+      "largura_px": 370,
+      "altura_px": 404,
+      "silhueta_px": [
+        346,
+        380
+      ],
+      "higgsfield_job": "02e662c9-6482-4029-8669-26bdbe8fa90f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/poltrona-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar",
+      "objeto": "mesa-centro-organica",
+      "descricao_visual": "low organic pebble-shaped coffee table, warm medium walnut wood top",
+      "largura_px": 585,
+      "altura_px": 361,
+      "silhueta_px": [
+        561,
+        337
+      ],
+      "higgsfield_job": "02e662c9-6482-4029-8669-26bdbe8fa90f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/mesa-centro-organica.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar",
+      "objeto": "tapete-redondo",
+      "descricao_visual": "perfect circle rug, sandy natural tightly woven wool, plain, no fringes",
+      "largura_px": 505,
+      "altura_px": 486,
+      "silhueta_px": [
+        481,
+        462
+      ],
+      "higgsfield_job": "02e662c9-6482-4029-8669-26bdbe8fa90f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/tapete-redondo.png"
+        }
+      ]
+    },
+    {
+      "lote": "varanda",
+      "objeto": "sofa-curvo-externo",
+      "descricao_visual": "a wide outdoor curved lounge sofa, warm sand cushions and honey teak frame, opening down",
+      "largura_px": 766,
+      "altura_px": 424,
+      "silhueta_px": [
+        742,
+        400
+      ],
+      "higgsfield_job": "71c8c5ed-959c-41e2-9182-0cf2d112669f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda",
+          "arquivo": "02-terreo/varanda/sofa-curvo-externo.png"
+        }
+      ]
+    },
+    {
+      "lote": "varanda",
+      "objeto": "poltrona-externa-a",
+      "descricao_visual": "rounded outdoor lounge chair, warm teak frame, light linen seat and curved taupe rope back, facing down",
+      "largura_px": 410,
+      "altura_px": 453,
+      "silhueta_px": [
+        386,
+        429
+      ],
+      "higgsfield_job": "71c8c5ed-959c-41e2-9182-0cf2d112669f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda",
+          "arquivo": "02-terreo/varanda/poltrona-externa-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "varanda",
+      "objeto": "poltrona-externa-b",
+      "descricao_visual": "outdoor barrel armchair in greige woven rope and off-white seat cushion, facing down",
+      "largura_px": 420,
+      "altura_px": 457,
+      "silhueta_px": [
+        396,
+        433
+      ],
+      "higgsfield_job": "71c8c5ed-959c-41e2-9182-0cf2d112669f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda",
+          "arquivo": "02-terreo/varanda/poltrona-externa-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "varanda",
+      "objeto": "mesa-centro-seixo",
+      "descricao_visual": "short organic triangular pebble shaped outdoor coffee table, honed beige travertine",
+      "largura_px": 493,
+      "altura_px": 437,
+      "silhueta_px": [
+        469,
+        413
+      ],
+      "higgsfield_job": "71c8c5ed-959c-41e2-9182-0cf2d112669f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda",
+          "arquivo": "02-terreo/varanda/mesa-centro-seixo.png"
+        }
+      ]
+    },
+    {
+      "lote": "varanda",
+      "objeto": "mesa-redonda",
+      "descricao_visual": "round outdoor dining table, top only, weatherproof medium honey wood with a clean radial grain, NO chairs",
+      "largura_px": 549,
+      "altura_px": 553,
+      "silhueta_px": [
+        525,
+        529
+      ],
+      "higgsfield_job": "71c8c5ed-959c-41e2-9182-0cf2d112669f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda",
+          "arquivo": "02-terreo/varanda/mesa-redonda.png"
+        }
+      ]
+    },
+    {
+      "lote": "varanda",
+      "objeto": "cadeira-mesa-redonda",
+      "descricao_visual": "compact outdoor dining chair, woven taupe cord back and ivory seat, facing down",
+      "largura_px": 395,
+      "altura_px": 501,
+      "silhueta_px": [
+        371,
+        477
+      ],
+      "higgsfield_job": "71c8c5ed-959c-41e2-9182-0cf2d112669f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda",
+          "arquivo": "02-terreo/varanda/cadeira-mesa-redonda.png"
+        }
+      ]
+    },
+    {
+      "lote": "jantar",
+      "objeto": "mesa-oblonga-a",
+      "descricao_visual": "long oval racetrack dining table TOP ONLY, honey walnut veneer, long axis horizontal, NO chairs",
+      "largura_px": 606,
+      "altura_px": 283,
+      "silhueta_px": [
+        582,
+        259
+      ],
+      "higgsfield_job": "38f6d689-50c2-48df-8e4f-e63427294b19",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar",
+          "arquivo": "02-terreo/sala-de-jantar/mesa-oblonga-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "jantar",
+      "objeto": "mesa-oblonga-b",
+      "descricao_visual": "long oval racetrack dining table TOP ONLY in warm cream honed travertine, long axis horizontal, NO chairs",
+      "largura_px": 605,
+      "altura_px": 281,
+      "silhueta_px": [
+        581,
+        257
+      ],
+      "higgsfield_job": "38f6d689-50c2-48df-8e4f-e63427294b19",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar",
+          "arquivo": "02-terreo/sala-de-jantar/mesa-oblonga-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "jantar",
+      "objeto": "cadeira-a",
+      "descricao_visual": "warm honey wood dining chair with rounded back and light oatmeal padded seat, facing down",
+      "largura_px": 350,
+      "altura_px": 368,
+      "silhueta_px": [
+        326,
+        344
+      ],
+      "higgsfield_job": "38f6d689-50c2-48df-8e4f-e63427294b19",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar",
+          "arquivo": "02-terreo/sala-de-jantar/cadeira-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "jantar",
+      "objeto": "cadeira-b",
+      "descricao_visual": "warm taupe padded dining chair with gently curved back and ivory fabric seat, facing down",
+      "largura_px": 353,
+      "altura_px": 386,
+      "silhueta_px": [
+        329,
+        362
+      ],
+      "higgsfield_job": "38f6d689-50c2-48df-8e4f-e63427294b19",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar",
+          "arquivo": "02-terreo/sala-de-jantar/cadeira-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "jantar",
+      "objeto": "aparador",
+      "descricao_visual": "long narrow rectangular sand lacquer and freijo wood sideboard, empty flat top, long axis horizontal",
+      "largura_px": 662,
+      "altura_px": 218,
+      "silhueta_px": [
+        638,
+        194
+      ],
+      "higgsfield_job": "38f6d689-50c2-48df-8e4f-e63427294b19",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar",
+          "arquivo": "02-terreo/sala-de-jantar/aparador.png"
+        }
+      ]
+    },
+    {
+      "lote": "jantar",
+      "objeto": "tapete-retangular",
+      "descricao_visual": "long rectangular plain light warm greige textured wool rug, horizontal, square corners",
+      "largura_px": 555,
+      "altura_px": 363,
+      "silhueta_px": [
+        531,
+        339
+      ],
+      "higgsfield_job": "38f6d689-50c2-48df-8e4f-e63427294b19",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar",
+          "arquivo": "02-terreo/sala-de-jantar/tapete-retangular.png"
+        }
+      ]
+    },
+    {
+      "lote": "banhos",
+      "objeto": "bacia-carrara",
+      "descricao_visual": "Deca Carrara P.60.17-style glossy white floor-standing toilet without cistern, seat lid closed, wall side at top; slim slightly squared front oval silhouette",
+      "largura_px": 293,
+      "altura_px": 507,
+      "silhueta_px": [
+        269,
+        483
+      ],
+      "higgsfield_job": "824e0430-9f9b-4447-875f-fdd431ccb35a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho feminino da academia",
+          "arquivo": "01-subsolo/banho-feminino-academia/bacia-carrara.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho masculino da academia",
+          "arquivo": "01-subsolo/banho-masculino-academia/bacia-carrara.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho da varanda",
+          "arquivo": "02-terreo/banho-varanda/bacia-carrara.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo do escritório",
+          "arquivo": "02-terreo/lavabo/bacia-carrara.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "WC do gourmet",
+          "arquivo": "02-terreo/wc-gourmet/bacia-carrara.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 1",
+          "arquivo": "03-primeiro-pavimento/banho-1/bacia-carrara.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 2",
+          "arquivo": "03-primeiro-pavimento/banho-2/bacia-carrara.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 3",
+          "arquivo": "03-primeiro-pavimento/banho-3/bacia-carrara.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/bacia-carrara.png"
+        }
+      ]
+    },
+    {
+      "lote": "banhos",
+      "objeto": "cuba-esculpida-travertino",
+      "descricao_visual": "rectangular light warm beige honed travertine counter with a carved rectangular stone basin and small low chrome angular Deca Unic 1875.C90 style mixer at rear, top view",
+      "largura_px": 568,
+      "altura_px": 407,
+      "silhueta_px": [
+        544,
+        383
+      ],
+      "higgsfield_job": "824e0430-9f9b-4447-875f-fdd431ccb35a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho feminino da academia",
+          "arquivo": "01-subsolo/banho-feminino-academia/cuba-esculpida-travertino.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho masculino da academia",
+          "arquivo": "01-subsolo/banho-masculino-academia/cuba-esculpida-travertino.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho da varanda",
+          "arquivo": "02-terreo/banho-varanda/cuba-esculpida-travertino.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo do escritório",
+          "arquivo": "02-terreo/lavabo/cuba-esculpida-travertino.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavatório do gourmet",
+          "arquivo": "02-terreo/lavatorio/cuba-esculpida-travertino.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 1",
+          "arquivo": "03-primeiro-pavimento/banho-1/cuba-esculpida-travertino.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 2",
+          "arquivo": "03-primeiro-pavimento/banho-2/cuba-esculpida-travertino.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 3",
+          "arquivo": "03-primeiro-pavimento/banho-3/cuba-esculpida-travertino.png"
+        }
+      ]
+    },
+    {
+      "lote": "banhos",
+      "objeto": "cuba-quartzo",
+      "descricao_visual": "rectangular ivory quartz countertop with single white rectangular basin and subtle small chrome mixer at rear, horizontal",
+      "largura_px": 555,
+      "altura_px": 408,
+      "silhueta_px": [
+        531,
+        384
+      ],
+      "higgsfield_job": "824e0430-9f9b-4447-875f-fdd431ccb35a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "renders de planta humanizada do projeto"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho feminino da academia",
+          "arquivo": "01-subsolo/banho-feminino-academia/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho masculino da academia",
+          "arquivo": "01-subsolo/banho-masculino-academia/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho da varanda",
+          "arquivo": "02-terreo/banho-varanda/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo do escritório",
+          "arquivo": "02-terreo/lavabo/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavatório do gourmet",
+          "arquivo": "02-terreo/lavatorio/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 1",
+          "arquivo": "03-primeiro-pavimento/banho-1/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 2",
+          "arquivo": "03-primeiro-pavimento/banho-2/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 3",
+          "arquivo": "03-primeiro-pavimento/banho-3/cuba-quartzo.png"
+        }
+      ]
+    },
+    {
+      "lote": "banhos",
+      "objeto": "chuveiro-quadrado",
+      "descricao_visual": "single square thin chrome ceiling rain shower plate, Deca 1992.C.TET style, visible array of subtle dots, perfectly square and straight",
+      "largura_px": 376,
+      "altura_px": 384,
+      "silhueta_px": [
+        352,
+        360
+      ],
+      "higgsfield_job": "824e0430-9f9b-4447-875f-fdd431ccb35a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho feminino da academia",
+          "arquivo": "01-subsolo/banho-feminino-academia/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho masculino da academia",
+          "arquivo": "01-subsolo/banho-masculino-academia/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho da varanda",
+          "arquivo": "02-terreo/banho-varanda/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 1",
+          "arquivo": "03-primeiro-pavimento/banho-1/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 2",
+          "arquivo": "03-primeiro-pavimento/banho-2/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 3",
+          "arquivo": "03-primeiro-pavimento/banho-3/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/chuveiro-quadrado.png"
+        }
+      ]
+    },
+    {
+      "lote": "banhos",
+      "objeto": "chuveiro-acqua-plus",
+      "descricao_visual": "single round polished chrome Deca Acqua Plus style compact circular shower head with neat perforations, from directly above",
+      "largura_px": 362,
+      "altura_px": 365,
+      "silhueta_px": [
+        338,
+        341
+      ],
+      "higgsfield_job": "824e0430-9f9b-4447-875f-fdd431ccb35a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho de serviço",
+          "arquivo": "01-subsolo/banho-de-servico/chuveiro-acqua-plus.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho do motorista",
+          "arquivo": "02-terreo/banho-do-motorista/chuveiro-acqua-plus.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho de serviço",
+          "arquivo": "03-primeiro-pavimento/banho-de-servico/chuveiro-acqua-plus.png"
+        }
+      ]
+    },
+    {
+      "lote": "banho-master",
+      "objeto": "banheira-oval-a",
+      "descricao_visual": "one freestanding elongated oval pure white soaking bathtub, symmetric gently rolled lip and deep empty white interior with subtle gray shading, long axis horizontal",
+      "largura_px": 626,
+      "altura_px": 294,
+      "silhueta_px": [
+        602,
+        270
+      ],
+      "higgsfield_job": "7a1a9ce7-ad4b-4b41-aa9f-57579ebcb729",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros",
+        "render_banho_master"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/banheira-oval-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "banho-master",
+      "objeto": "banheira-oval-b",
+      "descricao_visual": "one freestanding elongated oval white soaking bath, thin contemporary lip and compact chrome freestanding tap just outside the top edge, horizontal",
+      "largura_px": 602,
+      "altura_px": 408,
+      "silhueta_px": [
+        578,
+        384
+      ],
+      "higgsfield_job": "7a1a9ce7-ad4b-4b41-aa9f-57579ebcb729",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros",
+        "render_banho_master"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/banheira-oval-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "banho-master",
+      "objeto": "bancada-dupla-travertino",
+      "descricao_visual": "long straight honed beige travertine bathroom worktop with exactly two rectangular sculpted inset stone basins side by side and small squared chrome taps behind them",
+      "largura_px": 659,
+      "altura_px": 296,
+      "silhueta_px": [
+        635,
+        272
+      ],
+      "higgsfield_job": "7a1a9ce7-ad4b-4b41-aa9f-57579ebcb729",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/bancada-dupla-travertino.png"
+        }
+      ]
+    },
+    {
+      "lote": "banho-master",
+      "objeto": "bancada-dupla-quartzo",
+      "descricao_visual": "long straight warm ivory quartz bathroom worktop with exactly two rectangular inset white porcelain basins side by side and small squared chrome taps behind them",
+      "largura_px": 659,
+      "altura_px": 300,
+      "silhueta_px": [
+        635,
+        276
+      ],
+      "higgsfield_job": "7a1a9ce7-ad4b-4b41-aa9f-57579ebcb729",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "renders de planta humanizada do projeto"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/bancada-dupla-quartzo.png"
+        }
+      ]
+    },
+    {
+      "lote": "banho-master",
+      "objeto": "cuba-entrada",
+      "descricao_visual": "compact small square cream stone vanity top with circular white basin and small chrome tap, no accessories",
+      "largura_px": 366,
+      "altura_px": 352,
+      "silhueta_px": [
+        342,
+        328
+      ],
+      "higgsfield_job": "7a1a9ce7-ad4b-4b41-aa9f-57579ebcb729",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/cuba-entrada.png"
+        }
+      ]
+    },
+    {
+      "lote": "banho-master",
+      "objeto": "cuba-servico-granito",
+      "descricao_visual": "compact rectangular brown granite vanity slab with white rectangular drop-in sink and small polished chrome Deca Link 1197-style low tap, facing down",
+      "largura_px": 452,
+      "altura_px": 328,
+      "silhueta_px": [
+        428,
+        304
+      ],
+      "higgsfield_job": "7a1a9ce7-ad4b-4b41-aa9f-57579ebcb729",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho de serviço",
+          "arquivo": "01-subsolo/banho-de-servico/cuba-servico-granito.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho do motorista",
+          "arquivo": "02-terreo/banho-do-motorista/cuba-servico-granito.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho de serviço",
+          "arquivo": "03-primeiro-pavimento/banho-de-servico/cuba-servico-granito.png"
+        }
+      ]
+    },
+    {
+      "lote": "sauna-jardim",
+      "objeto": "banco-reto-a",
+      "descricao_visual": "single long straight slatted sauna bench made of pale honey cedar, rectangular, horizontal, no backrest",
+      "largura_px": 554,
+      "altura_px": 156,
+      "silhueta_px": [
+        530,
+        132
+      ],
+      "higgsfield_job": "6b8b64da-15c2-45e1-a1fb-27ba116ed76a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna",
+          "arquivo": "01-subsolo/sauna/banco-reto-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "sauna-jardim",
+      "objeto": "banco-reto-b",
+      "descricao_visual": "single long straight slatted sauna bench made of warm freijo wood, rectangular, horizontal, no backrest",
+      "largura_px": 544,
+      "altura_px": 158,
+      "silhueta_px": [
+        520,
+        134
+      ],
+      "higgsfield_job": "6b8b64da-15c2-45e1-a1fb-27ba116ed76a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna",
+          "arquivo": "01-subsolo/sauna/banco-reto-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "sauna-jardim",
+      "objeto": "vaso-folhagem-a",
+      "descricao_visual": "one circular sand ceramic planter with understated green broad-leaved tropical foliage, leaves and pot only, no ground",
+      "largura_px": 367,
+      "altura_px": 378,
+      "silhueta_px": [
+        343,
+        354
+      ],
+      "higgsfield_job": "6b8b64da-15c2-45e1-a1fb-27ba116ed76a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/vaso-folhagem-a.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Sala íntima",
+          "arquivo": "03-primeiro-pavimento/sala-intima/vaso-folhagem-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "sauna-jardim",
+      "objeto": "vaso-folhagem-b",
+      "descricao_visual": "one round taupe ceramic planter containing a compact muted-green philodendron as seen directly above, pot and foliage only",
+      "largura_px": 360,
+      "altura_px": 361,
+      "silhueta_px": [
+        336,
+        337
+      ],
+      "higgsfield_job": "6b8b64da-15c2-45e1-a1fb-27ba116ed76a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/vaso-folhagem-b.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Sala íntima",
+          "arquivo": "03-primeiro-pavimento/sala-intima/vaso-folhagem-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "sauna-jardim",
+      "objeto": "floreira-baixa",
+      "descricao_visual": "one long narrow rectangular warm gray garden planter with dense low tropical foliage, strictly from top, long axis horizontal",
+      "largura_px": 660,
+      "altura_px": 203,
+      "silhueta_px": [
+        636,
+        179
+      ],
+      "higgsfield_job": "6b8b64da-15c2-45e1-a1fb-27ba116ed76a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/floreira-baixa.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master",
+          "arquivo": "03-primeiro-pavimento/banho-master/floreira-baixa.png"
+        }
+      ]
+    },
+    {
+      "lote": "sauna-jardim",
+      "objeto": "touceira",
+      "descricao_visual": "single small compact clump of architectural tropical green foliage without pot, one independent foliage element",
+      "largura_px": 315,
+      "altura_px": 308,
+      "silhueta_px": [
+        291,
+        284
+      ],
+      "higgsfield_job": "6b8b64da-15c2-45e1-a1fb-27ba116ed76a",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_subsolo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/touceira.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar-referencia",
+      "objeto": "sofa-curvo-render-casa-a",
+      "descricao_visual": "crescent sofa with wide low rounded cream upholstered silhouette, oatmeal linen and subtle taupe cushions, like the big cream curved sofa on right of the reference, opening downward",
+      "largura_px": 780,
+      "altura_px": 437,
+      "silhueta_px": [
+        756,
+        413
+      ],
+      "higgsfield_job": "3c4a174c-3b4c-4212-ad29-4793371aa77d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/sofa-curvo-render-casa-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar-referencia",
+      "objeto": "poltrona-verde-oliva",
+      "descricao_visual": "one of the compact moss olive upholstered chairs in the middle of the reference, thin warm wood edging, back at top",
+      "largura_px": 371,
+      "altura_px": 431,
+      "silhueta_px": [
+        347,
+        407
+      ],
+      "higgsfield_job": "3c4a174c-3b4c-4212-ad29-4793371aa77d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/poltrona-verde-oliva.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar-referencia",
+      "objeto": "poltrona-caramelo",
+      "descricao_visual": "one of the rounded warm cognac leather tub chairs in the midground of the reference, ivory inner seat and cognac exterior, back at top",
+      "largura_px": 432,
+      "altura_px": 442,
+      "silhueta_px": [
+        408,
+        418
+      ],
+      "higgsfield_job": "3c4a174c-3b4c-4212-ad29-4793371aa77d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/poltrona-caramelo.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar-referencia",
+      "objeto": "mesa-centro-madeira-render",
+      "descricao_visual": "one coffee table, elongated organic pebble shaped top with warm natural wood grain like central foreground table in reference",
+      "largura_px": 614,
+      "altura_px": 396,
+      "silhueta_px": [
+        590,
+        372
+      ],
+      "higgsfield_job": "3c4a174c-3b4c-4212-ad29-4793371aa77d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/mesa-centro-madeira-render.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar-referencia",
+      "objeto": "mesa-apoio-escura",
+      "descricao_visual": "one small almost black circular side table like the table at the lower right of the reference",
+      "largura_px": 265,
+      "altura_px": 271,
+      "silhueta_px": [
+        241,
+        247
+      ],
+      "higgsfield_job": "3c4a174c-3b4c-4212-ad29-4793371aa77d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/mesa-apoio-escura.png"
+        }
+      ]
+    },
+    {
+      "lote": "estar-referencia",
+      "objeto": "tapete-redondo-texturizado",
+      "descricao_visual": "one perfectly round oatmeal and taupe low contrast mottled woven rug like that in the reference, empty",
+      "largura_px": 603,
+      "altura_px": 614,
+      "silhueta_px": [
+        579,
+        590
+      ],
+      "higgsfield_job": "3c4a174c-3b4c-4212-ad29-4793371aa77d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo",
+        "render_sala"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar",
+          "arquivo": "02-terreo/sala-de-estar/tapete-redondo-texturizado.png"
+        }
+      ]
+    },
+    {
+      "lote": "metais-e-lavatorios",
+      "objeto": "bacia-monte-carlo-sem-valvula",
+      "descricao_visual": "single white vitreous china Brazilian conventional floor-mounted toilet bowl, oval white lid closed, narrower flat flange at rear touches implied wall at top; bowl and seat only, no cistern or plumbing, absolutely no flush valve, Deca Monte Carlo conventional silhouette",
+      "largura_px": 282,
+      "altura_px": 404,
+      "silhueta_px": [
+        258,
+        380
+      ],
+      "higgsfield_job": "5694abfb-dae5-4983-89df-18b594840dea",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho de serviço",
+          "arquivo": "01-subsolo/banho-de-servico/bacia-monte-carlo-sem-valvula.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho do motorista",
+          "arquivo": "02-terreo/banho-do-motorista/bacia-monte-carlo-sem-valvula.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho de serviço",
+          "arquivo": "03-primeiro-pavimento/banho-de-servico/bacia-monte-carlo-sem-valvula.png"
+        }
+      ]
+    },
+    {
+      "lote": "metais-e-lavatorios",
+      "objeto": "chuveiro-quadrado-parede",
+      "descricao_visual": "small polished chrome square shower head joined to one short centered straight chrome arm pointing straight upward to rear wall, Deca 1992.C.CT-inspired. Plate and arm only, strict overhead",
+      "largura_px": 305,
+      "altura_px": 396,
+      "silhueta_px": [
+        281,
+        372
+      ],
+      "higgsfield_job": "5694abfb-dae5-4983-89df-18b594840dea",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho feminino da academia",
+          "arquivo": "01-subsolo/banho-feminino-academia/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho masculino da academia",
+          "arquivo": "01-subsolo/banho-masculino-academia/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho da varanda",
+          "arquivo": "02-terreo/banho-varanda/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 1",
+          "arquivo": "03-primeiro-pavimento/banho-1/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 2",
+          "arquivo": "03-primeiro-pavimento/banho-2/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 3",
+          "arquivo": "03-primeiro-pavimento/banho-3/chuveiro-quadrado-parede.png"
+        }
+      ]
+    },
+    {
+      "lote": "metais-e-lavatorios",
+      "objeto": "chuveiro-redondo-parede",
+      "descricao_visual": "small round polished chrome round shower head joined to one short centered straight chrome arm pointing upward to rear wall, Acqua Plus-inspired, strict overhead",
+      "largura_px": 286,
+      "altura_px": 400,
+      "silhueta_px": [
+        262,
+        376
+      ],
+      "higgsfield_job": "5694abfb-dae5-4983-89df-18b594840dea",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho de serviço",
+          "arquivo": "01-subsolo/banho-de-servico/chuveiro-redondo-parede.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho do motorista",
+          "arquivo": "02-terreo/banho-do-motorista/chuveiro-redondo-parede.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho de serviço",
+          "arquivo": "03-primeiro-pavimento/banho-de-servico/chuveiro-redondo-parede.png"
+        }
+      ]
+    },
+    {
+      "lote": "metais-e-lavatorios",
+      "objeto": "bancada-lavabo-freijo",
+      "descricao_visual": "slim rectangular beige travertine washstand with a single off-center rectangular sculpted basin and one little chrome mixer, the smooth freijo veneer joinery only as a 2cm trim on the front edge, long axis horizontal",
+      "largura_px": 552,
+      "altura_px": 266,
+      "silhueta_px": [
+        528,
+        242
+      ],
+      "higgsfield_job": "5694abfb-dae5-4983-89df-18b594840dea",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo do escritório",
+          "arquivo": "02-terreo/lavabo/bancada-lavabo-freijo.png"
+        }
+      ]
+    },
+    {
+      "lote": "metais-e-lavatorios",
+      "objeto": "cuba-esculpida-lateral",
+      "descricao_visual": "long horizontal thin warm honed travertine vanity top with one square sculpted basin aligned on the right half and small square chrome tap behind it, no decor",
+      "largura_px": 622,
+      "altura_px": 301,
+      "silhueta_px": [
+        598,
+        277
+      ],
+      "higgsfield_job": "5694abfb-dae5-4983-89df-18b594840dea",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho feminino da academia",
+          "arquivo": "01-subsolo/banho-feminino-academia/cuba-esculpida-lateral.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho masculino da academia",
+          "arquivo": "01-subsolo/banho-masculino-academia/cuba-esculpida-lateral.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho da varanda",
+          "arquivo": "02-terreo/banho-varanda/cuba-esculpida-lateral.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 1",
+          "arquivo": "03-primeiro-pavimento/banho-1/cuba-esculpida-lateral.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 2",
+          "arquivo": "03-primeiro-pavimento/banho-2/cuba-esculpida-lateral.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 3",
+          "arquivo": "03-primeiro-pavimento/banho-3/cuba-esculpida-lateral.png"
+        }
+      ]
+    },
+    {
+      "lote": "metais-e-lavatorios",
+      "objeto": "cuba-compacta",
+      "descricao_visual": "one small square white inset basin with soft rounded corners in a compact sand-colored stone top with one discreet chrome mixer centered along rear edge",
+      "largura_px": 296,
+      "altura_px": 288,
+      "silhueta_px": [
+        272,
+        264
+      ],
+      "higgsfield_job": "5694abfb-dae5-4983-89df-18b594840dea",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "caderno",
+        "especificacoes",
+        "banheiros"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho de serviço",
+          "arquivo": "01-subsolo/banho-de-servico/cuba-compacta.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho do motorista",
+          "arquivo": "02-terreo/banho-do-motorista/cuba-compacta.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho de serviço",
+          "arquivo": "03-primeiro-pavimento/banho-de-servico/cuba-compacta.png"
+        }
+      ]
+    },
+    {
+      "lote": "modulos-ortogonais",
+      "objeto": "maquina-lavar-tampo",
+      "descricao_visual": "flat rectangular opaque warm white top of a laundry washing machine, rear control strip is flush on the top edge, nothing else. Orthographic plan projection; the front hatch, round front door, vertical surfaces and fascia are entirely invisible",
+      "largura_px": 419,
+      "altura_px": 396,
+      "silhueta_px": [
+        395,
+        372
+      ],
+      "higgsfield_job": "b87c0cdb-8f2e-4d40-9fe8-602cc1a12e1d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço",
+          "arquivo": "02-terreo/area-de-servico/maquina-lavar-tampo.png"
+        }
+      ]
+    },
+    {
+      "lote": "modulos-ortogonais",
+      "objeto": "armario-despensa-fechado",
+      "descricao_visual": "top surface ONLY of a closed narrow straight pantry cabinet, matte warm beige lacquer, plain long horizontal rectangle with a faint seam, no handles or open shelves",
+      "largura_px": 575,
+      "altura_px": 261,
+      "silhueta_px": [
+        551,
+        237
+      ],
+      "higgsfield_job": "b87c0cdb-8f2e-4d40-9fe8-602cc1a12e1d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Depósito",
+          "arquivo": "01-subsolo/deposito/armario-despensa-fechado.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Despensa",
+          "arquivo": "02-terreo/despensa/armario-despensa-fechado.png"
+        }
+      ]
+    },
+    {
+      "lote": "modulos-ortogonais",
+      "objeto": "modulo-armario-reto",
+      "descricao_visual": "top surface ONLY of a closed long warm freijo closet cabinet, strictly rectangular horizontal, fine wood grain, faint seam across half, no handles, no visible sides",
+      "largura_px": 614,
+      "altura_px": 276,
+      "silhueta_px": [
+        590,
+        252
+      ],
+      "higgsfield_job": "b87c0cdb-8f2e-4d40-9fe8-602cc1a12e1d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 1",
+          "arquivo": "03-primeiro-pavimento/closet-1/modulo-armario-reto.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 2",
+          "arquivo": "03-primeiro-pavimento/closet-2/modulo-armario-reto.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 3",
+          "arquivo": "03-primeiro-pavimento/closet-3/modulo-armario-reto.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet master",
+          "arquivo": "03-primeiro-pavimento/closet-master/modulo-armario-reto.png"
+        }
+      ]
+    },
+    {
+      "lote": "modulos-ortogonais",
+      "objeto": "modulo-armario-canto",
+      "descricao_visual": "top surface ONLY of a closed right-angle L-shaped freijo closet module, straight rectangular arms joined at 90 degrees, long horizontal leg at top and short vertical leg extending down on right, no walls or visible front",
+      "largura_px": 555,
+      "altura_px": 397,
+      "silhueta_px": [
+        531,
+        373
+      ],
+      "higgsfield_job": "b87c0cdb-8f2e-4d40-9fe8-602cc1a12e1d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 1",
+          "arquivo": "03-primeiro-pavimento/closet-1/modulo-armario-canto.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 2",
+          "arquivo": "03-primeiro-pavimento/closet-2/modulo-armario-canto.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 3",
+          "arquivo": "03-primeiro-pavimento/closet-3/modulo-armario-canto.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet master",
+          "arquivo": "03-primeiro-pavimento/closet-master/modulo-armario-canto.png"
+        }
+      ]
+    },
+    {
+      "lote": "modulos-ortogonais",
+      "objeto": "criado-retangular-vista-superior",
+      "descricao_visual": "top surface ONLY of one compact warm freijo bedside table. Exact square footprint with subtle rounded corners, clear empty wood top with no visible front drawer or any vertical surfaces",
+      "largura_px": 401,
+      "altura_px": 404,
+      "silhueta_px": [
+        377,
+        380
+      ],
+      "higgsfield_job": "b87c0cdb-8f2e-4d40-9fe8-602cc1a12e1d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 1",
+          "arquivo": "03-primeiro-pavimento/suite-1/criado-retangular-vista-superior.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte master",
+          "arquivo": "03-primeiro-pavimento/suite-master/criado-retangular-vista-superior.png"
+        }
+      ]
+    },
+    {
+      "lote": "modulos-ortogonais",
+      "objeto": "cuba-franke-dupla-vista-superior",
+      "descricao_visual": "stainless steel double-bowl inset sink, two rectangular bowls with drains side by side, a short chrome faucet seen in true overhead plan as a small circle at the rear center and a tiny short silver extension over the bowls, no tall arched shape or upright front elevation",
+      "largura_px": 559,
+      "altura_px": 398,
+      "silhueta_px": [
+        535,
+        374
+      ],
+      "higgsfield_job": "b87c0cdb-8f2e-4d40-9fe8-602cc1a12e1d",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/cuba-franke-dupla-vista-superior.png"
+        }
+      ]
+    },
+    {
+      "lote": "gourmet",
+      "objeto": "banqueta-a",
+      "descricao_visual": "small round ivory upholstered barstool with dark honey wood rim, facing down",
+      "largura_px": 350,
+      "altura_px": 353,
+      "silhueta_px": [
+        326,
+        329
+      ],
+      "higgsfield_job": "1e82e3f2-e913-42e7-873a-9889cbfc1525",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área gourmet",
+          "arquivo": "02-terreo/area-gourmet/banqueta-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "gourmet",
+      "objeto": "banqueta-b",
+      "descricao_visual": "barstool with round woven straw seat and a small curved teak back, facing down",
+      "largura_px": 390,
+      "altura_px": 417,
+      "silhueta_px": [
+        366,
+        393
+      ],
+      "higgsfield_job": "1e82e3f2-e913-42e7-873a-9889cbfc1525",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área gourmet",
+          "arquivo": "02-terreo/area-gourmet/banqueta-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "gourmet",
+      "objeto": "cuba-franke-misturador-unic",
+      "descricao_visual": "rectangular inset stainless steel Franke-style single kitchen sink with rolled edges, chrome Deca UNIC gourmet 2282.C-style minimalist square tap at top center, no countertop outside the rim",
+      "largura_px": 555,
+      "altura_px": 440,
+      "silhueta_px": [
+        531,
+        416
+      ],
+      "higgsfield_job": "1e82e3f2-e913-42e7-873a-9889cbfc1525",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área gourmet",
+          "arquivo": "02-terreo/area-gourmet/cuba-franke-misturador-unic.png"
+        }
+      ]
+    },
+    {
+      "lote": "gourmet",
+      "objeto": "grelha-churrasqueira",
+      "descricao_visual": "rectangular dark stainless barbecue grill insert with thin parallel steel bars, long axis horizontal, no surround",
+      "largura_px": 519,
+      "altura_px": 348,
+      "silhueta_px": [
+        495,
+        324
+      ],
+      "higgsfield_job": "1e82e3f2-e913-42e7-873a-9889cbfc1525",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área gourmet",
+          "arquivo": "02-terreo/area-gourmet/grelha-churrasqueira.png"
+        }
+      ]
+    },
+    {
+      "lote": "gourmet",
+      "objeto": "banco-brises",
+      "descricao_visual": "long narrow straight outdoor bench, warm freijo timber frame and three separate off-white rectangular cushions, axis horizontal, no other objects",
+      "largura_px": 635,
+      "altura_px": 238,
+      "silhueta_px": [
+        611,
+        214
+      ],
+      "higgsfield_job": "1e82e3f2-e913-42e7-873a-9889cbfc1525",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lounge dos brises",
+          "arquivo": "02-terreo/lounge-dos-brises/banco-brises.png"
+        }
+      ]
+    },
+    {
+      "lote": "gourmet",
+      "objeto": "poltrona-brises",
+      "descricao_visual": "small rounded outdoor armchair in sand woven rope and ivory upholstery, facing down",
+      "largura_px": 418,
+      "altura_px": 429,
+      "silhueta_px": [
+        394,
+        405
+      ],
+      "higgsfield_job": "1e82e3f2-e913-42e7-873a-9889cbfc1525",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lounge dos brises",
+          "arquivo": "02-terreo/lounge-dos-brises/poltrona-brises.png"
+        }
+      ]
+    },
+    {
+      "lote": "piscina",
+      "objeto": "espreguicadeira-a",
+      "descricao_visual": "slim elongated teak outdoor sunlounger, full-length warm off-white cushion, headrest at top, straight long axis vertical",
+      "largura_px": 234,
+      "altura_px": 595,
+      "silhueta_px": [
+        210,
+        571
+      ],
+      "higgsfield_job": "4d2b2e98-5ef5-41e1-8b2a-1959e047ffa9",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina",
+          "arquivo": "02-terreo/deck-piscina/espreguicadeira-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "piscina",
+      "objeto": "espreguicadeira-b",
+      "descricao_visual": "slim elongated graphite aluminum pool sunlounger, full-length warm taupe sling fabric, headrest top, long axis vertical",
+      "largura_px": 218,
+      "altura_px": 591,
+      "silhueta_px": [
+        194,
+        567
+      ],
+      "higgsfield_job": "4d2b2e98-5ef5-41e1-8b2a-1959e047ffa9",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina",
+          "arquivo": "02-terreo/deck-piscina/espreguicadeira-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "piscina",
+      "objeto": "mesa-lateral-externa",
+      "descricao_visual": "tiny circular side table, warm freijo wood surface",
+      "largura_px": 212,
+      "altura_px": 211,
+      "silhueta_px": [
+        188,
+        187
+      ],
+      "higgsfield_job": "4d2b2e98-5ef5-41e1-8b2a-1959e047ffa9",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina",
+          "arquivo": "02-terreo/deck-piscina/mesa-lateral-externa.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lounge dos brises",
+          "arquivo": "02-terreo/lounge-dos-brises/mesa-lateral-externa.png"
+        }
+      ]
+    },
+    {
+      "lote": "piscina",
+      "objeto": "vaso-redondo",
+      "descricao_visual": "round sand-colored outdoor ceramic planter with a low single compact clump of muted green broad-leaved tropical plant, entirely viewed from above",
+      "largura_px": 328,
+      "altura_px": 340,
+      "silhueta_px": [
+        304,
+        316
+      ],
+      "higgsfield_job": "4d2b2e98-5ef5-41e1-8b2a-1959e047ffa9",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina",
+          "arquivo": "02-terreo/deck-piscina/vaso-redondo.png"
+        }
+      ]
+    },
+    {
+      "lote": "piscina",
+      "objeto": "vaso-alongado",
+      "descricao_visual": "narrow long horizontal rectangular sand-colored planter with low dense green foliage, no surrounding paving",
+      "largura_px": 546,
+      "altura_px": 211,
+      "silhueta_px": [
+        522,
+        187
+      ],
+      "higgsfield_job": "4d2b2e98-5ef5-41e1-8b2a-1959e047ffa9",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina",
+          "arquivo": "02-terreo/deck-piscina/vaso-alongado.png"
+        }
+      ]
+    },
+    {
+      "lote": "piscina",
+      "objeto": "banco-externo",
+      "descricao_visual": "straight narrow horizontal freijo garden bench, parallel wooden slats, without backrest",
+      "largura_px": 559,
+      "altura_px": 173,
+      "silhueta_px": [
+        535,
+        149
+      ],
+      "higgsfield_job": "4d2b2e98-5ef5-41e1-8b2a-1959e047ffa9",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina",
+          "arquivo": "02-terreo/deck-piscina/banco-externo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lounge dos brises",
+          "arquivo": "02-terreo/lounge-dos-brises/banco-externo.png"
+        }
+      ]
+    },
+    {
+      "lote": "cozinha",
+      "objeto": "ilha-quatro-bocas",
+      "descricao_visual": "rectangular rectangular kitchen island worktop in light cream Silestone, four-burner black gas cooktop centered, no stools, long axis horizontal",
+      "largura_px": 634,
+      "altura_px": 341,
+      "silhueta_px": [
+        610,
+        317
+      ],
+      "higgsfield_job": "9ebe4375-788a-4de6-8b79-2d5edc8942a2",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/ilha-quatro-bocas.png"
+        }
+      ]
+    },
+    {
+      "lote": "cozinha",
+      "objeto": "cooktop-quatro-bocas",
+      "descricao_visual": "standalone black square four-burner gas hob insert with realistic grate, with two by two burner layout, no countertop",
+      "largura_px": 332,
+      "altura_px": 310,
+      "silhueta_px": [
+        308,
+        286
+      ],
+      "higgsfield_job": "9ebe4375-788a-4de6-8b79-2d5edc8942a2",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/cooktop-quatro-bocas.png"
+        }
+      ]
+    },
+    {
+      "lote": "cozinha",
+      "objeto": "banqueta-ilha",
+      "descricao_visual": "round bar stool with oatmeal upholstery and light honey wood rim",
+      "largura_px": 354,
+      "altura_px": 356,
+      "silhueta_px": [
+        330,
+        332
+      ],
+      "higgsfield_job": "9ebe4375-788a-4de6-8b79-2d5edc8942a2",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/banqueta-ilha.png"
+        }
+      ]
+    },
+    {
+      "lote": "cozinha",
+      "objeto": "tampo-silestone-a",
+      "descricao_visual": "long slim rectangular plain warm ivory Silestone countertop slab with subtle texture, no sink or hardware",
+      "largura_px": 664,
+      "altura_px": 247,
+      "silhueta_px": [
+        640,
+        223
+      ],
+      "higgsfield_job": "9ebe4375-788a-4de6-8b79-2d5edc8942a2",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/tampo-silestone-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "cozinha",
+      "objeto": "tampo-silestone-b",
+      "descricao_visual": "long slim rectangular plain warm pale greige Silestone countertop slab with subtle texture, no sink or hardware",
+      "largura_px": 643,
+      "altura_px": 247,
+      "silhueta_px": [
+        619,
+        223
+      ],
+      "higgsfield_job": "9ebe4375-788a-4de6-8b79-2d5edc8942a2",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/tampo-silestone-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "servico",
+      "objeto": "cuba-franke-inox-link",
+      "descricao_visual": "single stainless rectangular utility sink Franke style and small chrome Deca Link 1167 style faucet at the back, no countertop around edge",
+      "largura_px": 319,
+      "altura_px": 337,
+      "silhueta_px": [
+        295,
+        313
+      ],
+      "higgsfield_job": "8d12e554-7f09-4675-ae82-927c5ed4a5a7",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço",
+          "arquivo": "02-terreo/area-de-servico/cuba-franke-inox-link.png"
+        }
+      ]
+    },
+    {
+      "lote": "servico",
+      "objeto": "tanque-duplo-inox",
+      "descricao_visual": "two inset stainless rectangular utility basins joined side by side in one unit, with chrome taps, no countertop around edge",
+      "largura_px": 498,
+      "altura_px": 349,
+      "silhueta_px": [
+        474,
+        325
+      ],
+      "higgsfield_job": "8d12e554-7f09-4675-ae82-927c5ed4a5a7",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço",
+          "arquivo": "02-terreo/area-de-servico/tanque-duplo-inox.png"
+        }
+      ]
+    },
+    {
+      "lote": "servico",
+      "objeto": "bancada-granito-preto",
+      "descricao_visual": "long thin horizontal slab of polished near-black granite with fine speckling, clean straight edges",
+      "largura_px": 590,
+      "altura_px": 175,
+      "silhueta_px": [
+        566,
+        151
+      ],
+      "higgsfield_job": "8d12e554-7f09-4675-ae82-927c5ed4a5a7",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço",
+          "arquivo": "02-terreo/area-de-servico/bancada-granito-preto.png"
+        }
+      ]
+    },
+    {
+      "lote": "escritorio",
+      "objeto": "mesa-a",
+      "descricao_visual": "simple rectangular executive desk, broad warm honey freijo wood veneer top, long axis horizontal, clear empty surface",
+      "largura_px": 597,
+      "altura_px": 374,
+      "silhueta_px": [
+        573,
+        350
+      ],
+      "higgsfield_job": "724b90b6-76dd-45e9-a9a1-791c964522a5",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Escritório",
+          "arquivo": "02-terreo/escritorio/mesa-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "escritorio",
+      "objeto": "mesa-b",
+      "descricao_visual": "simple rectangular executive desk, broad smooth warm sand lacquer top, long axis horizontal, clear empty surface",
+      "largura_px": 606,
+      "altura_px": 374,
+      "silhueta_px": [
+        582,
+        350
+      ],
+      "higgsfield_job": "724b90b6-76dd-45e9-a9a1-791c964522a5",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Escritório",
+          "arquivo": "02-terreo/escritorio/mesa-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "escritorio",
+      "objeto": "cadeira-escritorio",
+      "descricao_visual": "one compact graphite and cognac leather swivel desk chair, backrest to top",
+      "largura_px": 335,
+      "altura_px": 501,
+      "silhueta_px": [
+        311,
+        477
+      ],
+      "higgsfield_job": "724b90b6-76dd-45e9-a9a1-791c964522a5",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Escritório",
+          "arquivo": "02-terreo/escritorio/cadeira-escritorio.png"
+        }
+      ]
+    },
+    {
+      "lote": "escritorio",
+      "objeto": "cadeira-visitante",
+      "descricao_visual": "one small visitor armchair with sand fabric seat and rounded warm wood back, backrest to top",
+      "largura_px": 372,
+      "altura_px": 411,
+      "silhueta_px": [
+        348,
+        387
+      ],
+      "higgsfield_job": "724b90b6-76dd-45e9-a9a1-791c964522a5",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Escritório",
+          "arquivo": "02-terreo/escritorio/cadeira-visitante.png"
+        }
+      ]
+    },
+    {
+      "lote": "escritorio",
+      "objeto": "poltrona-leitura",
+      "descricao_visual": "one chunky rounded contemporary lounge chair, ivory woven fabric, backrest to top",
+      "largura_px": 431,
+      "altura_px": 491,
+      "silhueta_px": [
+        407,
+        467
+      ],
+      "higgsfield_job": "724b90b6-76dd-45e9-a9a1-791c964522a5",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Escritório",
+          "arquivo": "02-terreo/escritorio/poltrona-leitura.png"
+        }
+      ]
+    },
+    {
+      "lote": "escritorio",
+      "objeto": "mesa-lateral",
+      "descricao_visual": "small round walnut pedestal side table seen directly from above, empty top",
+      "largura_px": 365,
+      "altura_px": 371,
+      "silhueta_px": [
+        341,
+        347
+      ],
+      "higgsfield_job": "724b90b6-76dd-45e9-a9a1-791c964522a5",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Escritório",
+          "arquivo": "02-terreo/escritorio/mesa-lateral.png"
+        }
+      ]
+    },
+    {
+      "lote": "garagem",
+      "objeto": "sedan-prata",
+      "descricao_visual": "modern premium silver sedan, straight top view, nose up, realistic glass and body panels, no visible logo",
+      "largura_px": 266,
+      "altura_px": 584,
+      "silhueta_px": [
+        242,
+        560
+      ],
+      "higgsfield_job": "ee10effc-0d6a-44f3-b689-6be3a03a5314",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem",
+          "arquivo": "02-terreo/garagem/sedan-prata.png"
+        }
+      ]
+    },
+    {
+      "lote": "garagem",
+      "objeto": "sedan-chumbo",
+      "descricao_visual": "modern premium charcoal grey sedan, straight top view, nose up, realistic glass and body panels, no visible logo",
+      "largura_px": 277,
+      "altura_px": 581,
+      "silhueta_px": [
+        253,
+        557
+      ],
+      "higgsfield_job": "ee10effc-0d6a-44f3-b689-6be3a03a5314",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem",
+          "arquivo": "02-terreo/garagem/sedan-chumbo.png"
+        }
+      ]
+    },
+    {
+      "lote": "garagem",
+      "objeto": "suv-branco",
+      "descricao_visual": "modern premium pearl white midsize SUV, straight top view, nose up, realistic dark glass and sunroof, no visible logo",
+      "largura_px": 298,
+      "altura_px": 596,
+      "silhueta_px": [
+        274,
+        572
+      ],
+      "higgsfield_job": "ee10effc-0d6a-44f3-b689-6be3a03a5314",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem",
+          "arquivo": "02-terreo/garagem/suv-branco.png"
+        }
+      ]
+    },
+    {
+      "lote": "garagem",
+      "objeto": "suv-areia",
+      "descricao_visual": "modern premium taupe midsize SUV, straight top view, nose up, realistic glass and sunroof, no visible logo",
+      "largura_px": 266,
+      "altura_px": 568,
+      "silhueta_px": [
+        242,
+        544
+      ],
+      "higgsfield_job": "ee10effc-0d6a-44f3-b689-6be3a03a5314",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem",
+          "arquivo": "02-terreo/garagem/suv-areia.png"
+        }
+      ]
+    },
+    {
+      "lote": "garagem",
+      "objeto": "suv-grafite",
+      "descricao_visual": "modern premium graphite full-size SUV, straight top view, nose up, realistic glass and body panels, no visible logo",
+      "largura_px": 292,
+      "altura_px": 596,
+      "silhueta_px": [
+        268,
+        572
+      ],
+      "higgsfield_job": "ee10effc-0d6a-44f3-b689-6be3a03a5314",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem",
+          "arquivo": "02-terreo/garagem/suv-grafite.png"
+        }
+      ]
+    },
+    {
+      "lote": "garagem",
+      "objeto": "sedan-branco",
+      "descricao_visual": "modern premium white sedan, straight top view, nose up, realistic glass and body panels, no visible logo",
+      "largura_px": 244,
+      "altura_px": 547,
+      "silhueta_px": [
+        220,
+        523
+      ],
+      "higgsfield_job": "ee10effc-0d6a-44f3-b689-6be3a03a5314",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_terreo"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem",
+          "arquivo": "02-terreo/garagem/sedan-branco.png"
+        }
+      ]
+    },
+    {
+      "lote": "master",
+      "objeto": "cama-king-a",
+      "descricao_visual": "king bed, warm cream linen duvet, two white sleeping pillows and two light beige cushions, headboard top, long axis vertical, no rug",
+      "largura_px": 452,
+      "altura_px": 591,
+      "silhueta_px": [
+        428,
+        567
+      ],
+      "higgsfield_job": "003bb0d2-8a26-49a5-84da-3c36a7068355",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte master",
+          "arquivo": "03-primeiro-pavimento/suite-master/cama-king-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "master",
+      "objeto": "cama-king-b",
+      "descricao_visual": "king bed, warm taupe linen duvet and ivory pillows, natural light oak upholstered headboard at top, long axis vertical, no rug",
+      "largura_px": 442,
+      "altura_px": 597,
+      "silhueta_px": [
+        418,
+        573
+      ],
+      "higgsfield_job": "003bb0d2-8a26-49a5-84da-3c36a7068355",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte master",
+          "arquivo": "03-primeiro-pavimento/suite-master/cama-king-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "master",
+      "objeto": "poltrona",
+      "descricao_visual": "rounded warm ivory lounge chair, headrest at top, woven linen upholstery",
+      "largura_px": 415,
+      "altura_px": 477,
+      "silhueta_px": [
+        391,
+        453
+      ],
+      "higgsfield_job": "003bb0d2-8a26-49a5-84da-3c36a7068355",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte master",
+          "arquivo": "03-primeiro-pavimento/suite-master/poltrona.png"
+        }
+      ]
+    },
+    {
+      "lote": "master",
+      "objeto": "pufe",
+      "descricao_visual": "compact elliptical oatmeal upholstered ottoman, empty, isolated",
+      "largura_px": 451,
+      "altura_px": 304,
+      "silhueta_px": [
+        427,
+        280
+      ],
+      "higgsfield_job": "003bb0d2-8a26-49a5-84da-3c36a7068355",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte master",
+          "arquivo": "03-primeiro-pavimento/suite-master/pufe.png"
+        }
+      ]
+    },
+    {
+      "lote": "master",
+      "objeto": "tapete",
+      "descricao_visual": "rectangular flat-woven warm oatmeal wool bedroom rug without fringe, horizontal",
+      "largura_px": 567,
+      "altura_px": 385,
+      "silhueta_px": [
+        543,
+        361
+      ],
+      "higgsfield_job": "003bb0d2-8a26-49a5-84da-3c36a7068355",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte master",
+          "arquivo": "03-primeiro-pavimento/suite-master/tapete.png"
+        }
+      ]
+    },
+    {
+      "lote": "suites",
+      "objeto": "cama-solteiro-a",
+      "descricao_visual": "single twin bed, headboard top, ivory linen duvet, one white sleeping pillow, pale honey wood headboard, no rug",
+      "largura_px": 290,
+      "altura_px": 588,
+      "silhueta_px": [
+        266,
+        564
+      ],
+      "higgsfield_job": "42623631-9d1a-4663-8482-b75de054923f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Quarto do motorista",
+          "arquivo": "02-terreo/quarto-do-motorista/cama-solteiro-a.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Quarto de serviço",
+          "arquivo": "03-primeiro-pavimento/quarto-de-servico/cama-solteiro-a.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 1",
+          "arquivo": "03-primeiro-pavimento/suite-1/cama-solteiro-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "suites",
+      "objeto": "cama-solteiro-b",
+      "descricao_visual": "single twin bed, headboard top, warm greige linen duvet, one off-white pillow, natural wood trim, no rug",
+      "largura_px": 289,
+      "altura_px": 587,
+      "silhueta_px": [
+        265,
+        563
+      ],
+      "higgsfield_job": "42623631-9d1a-4663-8482-b75de054923f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Quarto do motorista",
+          "arquivo": "02-terreo/quarto-do-motorista/cama-solteiro-b.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Quarto de serviço",
+          "arquivo": "03-primeiro-pavimento/quarto-de-servico/cama-solteiro-b.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 1",
+          "arquivo": "03-primeiro-pavimento/suite-1/cama-solteiro-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "suites",
+      "objeto": "cama-casal-a",
+      "descricao_visual": "queen double bed, headboard top, matte natural beige linen duvet, two pillows, low warm freijo headboard, no rug",
+      "largura_px": 513,
+      "altura_px": 607,
+      "silhueta_px": [
+        489,
+        583
+      ],
+      "higgsfield_job": "42623631-9d1a-4663-8482-b75de054923f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 2",
+          "arquivo": "03-primeiro-pavimento/suite-2/cama-casal-a.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 3",
+          "arquivo": "03-primeiro-pavimento/suite-3/cama-casal-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "suites",
+      "objeto": "cama-casal-b",
+      "descricao_visual": "queen double bed, headboard top, ivory linen coverlet, two pillows, sand padded headboard, no rug",
+      "largura_px": 483,
+      "altura_px": 592,
+      "silhueta_px": [
+        459,
+        568
+      ],
+      "higgsfield_job": "42623631-9d1a-4663-8482-b75de054923f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 2",
+          "arquivo": "03-primeiro-pavimento/suite-2/cama-casal-b.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 3",
+          "arquivo": "03-primeiro-pavimento/suite-3/cama-casal-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "suites",
+      "objeto": "criado-redondo",
+      "descricao_visual": "small round freijo bedside table with natural warm brown grain and empty top",
+      "largura_px": 294,
+      "altura_px": 315,
+      "silhueta_px": [
+        270,
+        291
+      ],
+      "higgsfield_job": "42623631-9d1a-4663-8482-b75de054923f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 2",
+          "arquivo": "03-primeiro-pavimento/suite-2/criado-redondo.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 3",
+          "arquivo": "03-primeiro-pavimento/suite-3/criado-redondo.png"
+        }
+      ]
+    },
+    {
+      "lote": "suites",
+      "objeto": "bancada-suites",
+      "descricao_visual": "slim rectangular freijo writing ledge desk with empty top, long axis horizontal",
+      "largura_px": 564,
+      "altura_px": 209,
+      "silhueta_px": [
+        540,
+        185
+      ],
+      "higgsfield_job": "42623631-9d1a-4663-8482-b75de054923f",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 1",
+          "arquivo": "03-primeiro-pavimento/suite-1/bancada-suites.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 2",
+          "arquivo": "03-primeiro-pavimento/suite-2/bancada-suites.png"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 3",
+          "arquivo": "03-primeiro-pavimento/suite-3/bancada-suites.png"
+        }
+      ]
+    },
+    {
+      "lote": "intima",
+      "objeto": "sofa-l-a",
+      "descricao_visual": "large rectangular L-shaped sectional sofa, light ivory linen, horizontal back across top and right-hand chaise extends downward, open lower-left, no ottoman",
+      "largura_px": 629,
+      "altura_px": 454,
+      "silhueta_px": [
+        605,
+        430
+      ],
+      "higgsfield_job": "683f70f8-30a7-4a45-afce-f01aa9345888",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Sala íntima",
+          "arquivo": "03-primeiro-pavimento/sala-intima/sofa-l-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "intima",
+      "objeto": "sofa-l-b",
+      "descricao_visual": "large rectilinear L-shaped sectional sofa, warm greige woven upholstery, horizontal back across top and right-hand chaise extends downward, open lower-left, no ottoman",
+      "largura_px": 652,
+      "altura_px": 455,
+      "silhueta_px": [
+        628,
+        431
+      ],
+      "higgsfield_job": "683f70f8-30a7-4a45-afce-f01aa9345888",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Sala íntima",
+          "arquivo": "03-primeiro-pavimento/sala-intima/sofa-l-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "intima",
+      "objeto": "poltrona-a",
+      "descricao_visual": "separate rounded off-white lounge chair with shallow curved back at top",
+      "largura_px": 324,
+      "altura_px": 363,
+      "silhueta_px": [
+        300,
+        339
+      ],
+      "higgsfield_job": "683f70f8-30a7-4a45-afce-f01aa9345888",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Sala íntima",
+          "arquivo": "03-primeiro-pavimento/sala-intima/poltrona-a.png"
+        }
+      ]
+    },
+    {
+      "lote": "intima",
+      "objeto": "poltrona-b",
+      "descricao_visual": "separate compact caramel leather lounge chair with curved back and thin oak trim",
+      "largura_px": 290,
+      "altura_px": 361,
+      "silhueta_px": [
+        266,
+        337
+      ],
+      "higgsfield_job": "683f70f8-30a7-4a45-afce-f01aa9345888",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Sala íntima",
+          "arquivo": "03-primeiro-pavimento/sala-intima/poltrona-b.png"
+        }
+      ]
+    },
+    {
+      "lote": "intima",
+      "objeto": "mesa-lateral",
+      "descricao_visual": "small round side table, oiled warm honey freijo wood, empty top",
+      "largura_px": 323,
+      "altura_px": 329,
+      "silhueta_px": [
+        299,
+        305
+      ],
+      "higgsfield_job": "683f70f8-30a7-4a45-afce-f01aa9345888",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Sala íntima",
+          "arquivo": "03-primeiro-pavimento/sala-intima/mesa-lateral.png"
+        }
+      ]
+    },
+    {
+      "lote": "intima",
+      "objeto": "tapete",
+      "descricao_visual": "large rectangular cream wool area rug, no fringes, horizontal, completely bare",
+      "largura_px": 729,
+      "altura_px": 482,
+      "silhueta_px": [
+        705,
+        458
+      ],
+      "higgsfield_job": "683f70f8-30a7-4a45-afce-f01aa9345888",
+      "modelo": "gpt_image_2",
+      "referencias": [
+        "planta_1pav"
+      ],
+      "locais": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Sala íntima",
+          "arquivo": "03-primeiro-pavimento/sala-intima/tapete.png"
+        }
+      ]
+    }
+  ],
+  "materiais": [
+    {
+      "id": "madeira-city-petra-1pav-render",
+      "nome": "Madeira no padrão City Petra",
+      "categoria": "Pisos internos",
+      "largura_px": 3657,
+      "altura_px": 2136,
+      "amostra_m": [
+        7.314,
+        4.272
+      ],
+      "modulo_cm": [
+        121.9,
+        17.8
+      ],
+      "modulos_xy": [
+        6,
+        24
+      ],
+      "repetivel": true,
+      "arquivo": "04-materiais/pisos-internos/madeira-city-petra-1pav-render.png",
+      "versao_de": "madeira-city-petra",
+      "aplicacao": "Piso das quatro suítes e dos closets. Réguas em marrom médio quente, veios naturais e emendas desencontradas. Gire no sentido da hachura da planta.",
+      "acabamento": "Vinílico de aspecto amadeirado fosco acetinado",
+      "modelo": "gpt_image_2",
+      "higgsfield_jobs": [
+        "8958f0fc-3a72-4e43-8897-fe71201c8ee7"
+      ],
+      "referencias": [
+        "render_1pav_pisos",
+        "primeiro_pav_render",
+        "city_petra_durafloor"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte master"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 1"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 2"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 3"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet master"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 1"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 2"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 3"
+        }
+      ]
+    },
+    {
+      "id": "travertino-romano-banhos-1pav-render",
+      "nome": "Travertino Romano levigado",
+      "categoria": "Pisos internos",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        3.6,
+        3.6
+      ],
+      "modulo_cm": [
+        120,
+        60
+      ],
+      "modulos_xy": [
+        3,
+        6
+      ],
+      "repetivel": true,
+      "arquivo": "04-materiais/pisos-internos/travertino-romano-banhos-1pav-render.png",
+      "versao_de": "travertino-romano-levigado",
+      "aplicacao": "Piso dos quatro banhos das suítes, circulação, sala íntima e escada em U. Pedra marfim com veios paralelos e poros discretos. Oriente o veio pela paginação.",
+      "acabamento": "Pedra levigada acetinada",
+      "modelo": "gpt_image_2",
+      "higgsfield_jobs": [
+        "7349b9b5-6ca6-42ea-8466-62d465d23c95"
+      ],
+      "referencias": [
+        "render_1pav_pisos",
+        "primeiro_pav_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 1"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 2"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 3"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Circulação"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Sala íntima"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Escada em U"
+        }
+      ],
+      "junta_mm": 2
+    },
+    {
+      "id": "bege-bahia-varandas-1pav-render",
+      "nome": "Mármore Bege Bahia fosco",
+      "categoria": "Pisos externos",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        3.6,
+        3.6
+      ],
+      "modulo_cm": [
+        60,
+        60
+      ],
+      "modulos_xy": [
+        6,
+        6
+      ],
+      "repetivel": true,
+      "arquivo": "04-materiais/pisos-externos/bege-bahia-varandas-1pav-render.png",
+      "versao_de": "bege-bahia-fosco",
+      "aplicacao": "Piso das quatro varandas, quarto de serviço, banho de serviço, saleta e trecho visível da escada caracol. Fundo bege-claro uniforme e pequena variação entre placas.",
+      "acabamento": "Pedra fosca com granulação discreta",
+      "modelo": "gpt_image_2",
+      "higgsfield_jobs": [
+        "9ca12b39-8392-4825-9233-071aa4bb87fe"
+      ],
+      "referencias": [
+        "render_1pav_pisos",
+        "primeiro_pav_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Varanda da suíte master"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Varanda da suíte 1"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Varanda da suíte 2"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Varanda da suíte 3"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Quarto de serviço"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho de serviço"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Saleta da caracol"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Escada caracol (trecho visível)"
+        }
+      ],
+      "junta_mm": 3
+    },
+    {
+      "id": "deck-madeira-terreo-render",
+      "nome": "Deck de madeira do térreo",
+      "categoria": "Pisos externos",
+      "largura_px": 4000,
+      "altura_px": 2400,
+      "amostra_m": [
+        7.0,
+        4.2
+      ],
+      "modulo_cm": [
+        null,
+        14
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "dc259ac8-d4d7-40c1-a58d-d50a79ac43fb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/pisos-externos/deck-madeira-terreo-render.png",
+      "aplicacao": "Plataforma de madeira junto ao spa. Réguas de 14 cm com veios horizontais e emendas alternadas. Oriente pelo desenho da hachura.",
+      "referencias": [
+        "render_terreo_pisos",
+        "terreo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina"
+        }
+      ],
+      "versao_de": "deck-madeira-natural",
+      "acabamento": "extraído do render; iluminação de cena normalizada"
+    },
+    {
+      "id": "bege-bahia-entorno-piscina-terreo-render",
+      "nome": "Bege Bahia do entorno da piscina",
+      "categoria": "Pisos externos",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        3.6,
+        3.6
+      ],
+      "modulo_cm": [
+        60,
+        60
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "dc259ac8-d4d7-40c1-a58d-d50a79ac43fb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/pisos-externos/bege-bahia-entorno-piscina-terreo-render.png",
+      "aplicacao": "Mármore fosco de placas quadradas para o piso em pedra junto à piscina e ao spa, suas bordas e os pisantes. Aparência extraída do entorno e dos pisantes do render.",
+      "referencias": [
+        "render_terreo_pisos",
+        "terreo_render",
+        "primeiro_pav_render",
+        "subsolo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Hall externo"
+        }
+      ],
+      "variante_render": "bege-bahia-fosco-render",
+      "versao_de": "bege-bahia-fosco",
+      "acabamento": "extraído do render; iluminação de cena normalizada",
+      "junta_mm": 3.0
+    },
+    {
+      "id": "barlavento-fundo-terreo-render",
+      "nome": "Barlavento · fundo da piscina",
+      "categoria": "Piscina e áreas molhadas",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        4.64,
+        4.64
+      ],
+      "modulo_cm": [
+        14.5,
+        14.5
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "dc259ac8-d4d7-40c1-a58d-d50a79ac43fb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/barlavento-fundo-terreo-render.png",
+      "aplicacao": "Base do fundo da piscina com cor estimada a partir das peças visíveis sob a água e da amostra seca. Use esta base para compor a água separadamente.",
+      "referencias": [
+        "render_terreo_pisos",
+        "diretriz_piscina",
+        "subsolo_render",
+        "barlavento_portobello"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina"
+        }
+      ],
+      "variante_render": "barlavento-seco-render",
+      "versao_de": "barlavento-seco",
+      "acabamento": "extraído do render; iluminação de cena normalizada",
+      "junta_mm": 1.8,
+      "grupo_paginacao": "barlavento-piscina-casa-a-terreo",
+      "origem_modulo_m": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "barlavento-agua-terreo-render",
+      "nome": "Barlavento · água da parte funda",
+      "categoria": "Piscina e áreas molhadas",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        4.64,
+        4.64
+      ],
+      "modulo_cm": [
+        14.5,
+        14.5
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "dc259ac8-d4d7-40c1-a58d-d50a79ac43fb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/barlavento-agua-terreo-render.png",
+      "aplicacao": "Versão pronta com água para a parte funda e o miolo do spa. Use a mesma origem e orientação da prainha para alinhar todas as juntas.",
+      "referencias": [
+        "render_terreo_pisos",
+        "render_terreo_anterior",
+        "diretriz_piscina",
+        "terreo_render",
+        "barlavento_portobello"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina"
+        }
+      ],
+      "versao_de": "barlavento-agua",
+      "acabamento": "extraído do render; iluminação de cena normalizada",
+      "junta_mm": 1.8,
+      "grupo_paginacao": "barlavento-piscina-casa-a-terreo",
+      "origem_modulo_m": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "barlavento-prainha-terreo-render",
+      "nome": "Barlavento · água da prainha",
+      "categoria": "Piscina e áreas molhadas",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        4.64,
+        4.64
+      ],
+      "modulo_cm": [
+        14.5,
+        14.5
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "dc259ac8-d4d7-40c1-a58d-d50a79ac43fb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/barlavento-prainha-terreo-render.png",
+      "aplicacao": "Versão pronta com água mais clara para a prainha. Use a mesma origem e orientação da parte funda.",
+      "referencias": [
+        "render_terreo_pisos",
+        "render_terreo_anterior",
+        "diretriz_piscina",
+        "terreo_render",
+        "barlavento_portobello"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina"
+        }
+      ],
+      "versao_de": "barlavento-prainha",
+      "acabamento": "extraído do render; iluminação de cena normalizada",
+      "junta_mm": 1.8,
+      "grupo_paginacao": "barlavento-piscina-casa-a-terreo",
+      "origem_modulo_m": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "travertino-romano-terreo-render",
+      "nome": "Travertino Romano da área social",
+      "categoria": "Pisos internos",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        3.6,
+        3.6
+      ],
+      "modulo_cm": [
+        120,
+        60
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "dc259ac8-d4d7-40c1-a58d-d50a79ac43fb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/pisos-internos/travertino-romano-terreo-render.png",
+      "aplicacao": "Veios finos e poros da pedra da área social. Placas de 60 × 120 cm com junta fina. Use a direção da paginação de cada ambiente.",
+      "referencias": [
+        "render_terreo_pisos",
+        "render_banho_master",
+        "render_sala",
+        "planilha_materiais_drive",
+        "terreo_render",
+        "primeiro_pav_render",
+        "subsolo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lounge dos brises"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área gourmet"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo do escritório"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho da varanda"
+        }
+      ],
+      "variante_render": "travertino-romano-levigado-render",
+      "versao_de": "travertino-romano-levigado",
+      "acabamento": "extraído do render; iluminação de cena normalizada",
+      "junta_mm": 2.0
+    },
+    {
+      "id": "granito-marrom-tabaco-terreo-render",
+      "nome": "Granito Marrom Tabaco do térreo",
+      "categoria": "Pisos internos",
+      "largura_px": 2048,
+      "altura_px": 2048,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        60,
+        60
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "dc259ac8-d4d7-40c1-a58d-d50a79ac43fb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/pisos-internos/granito-marrom-tabaco-terreo-render.png",
+      "aplicacao": "Piso com grão miúdo e tom marrom sóbrio conforme o render anterior. A variação de cor ajuda a separar o piso das bancadas em planta.",
+      "referencias": [
+        "render_terreo_pisos",
+        "render_terreo_anterior",
+        "terreo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área gourmet"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho do motorista"
+        }
+      ],
+      "versao_de": "granito-marrom-tabaco",
+      "acabamento": "cor calibrada pelo render anterior; grão de referência da biblioteca",
+      "junta_mm": 2.0
+    },
+    {
+      "id": "pedra-portuguesa-caramelo-terreo-render",
+      "nome": "Pedra portuguesa caramelo do acesso",
+      "categoria": "Pisos externos",
+      "largura_px": 2304,
+      "altura_px": 2304,
+      "amostra_m": [
+        4.0,
+        4.0
+      ],
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "dc259ac8-d4d7-40c1-a58d-d50a79ac43fb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/pisos-externos/pedra-portuguesa-caramelo-terreo-render.png",
+      "aplicacao": "Mosaico irregular do acesso veicular e do corredor de serviço. A amostra combina o desenho da pedra da biblioteca com a cor e a escala estimada do render anterior.",
+      "referencias": [
+        "render_terreo_pisos",
+        "render_terreo_anterior",
+        "terreo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Acesso veicular"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Corredor de serviço"
+        }
+      ],
+      "versao_de": "pedra-portuguesa-caramelo",
+      "acabamento": "cor calibrada pelo render anterior; grão de referência da biblioteca"
+    },
+    {
+      "id": "madeira-academia-render",
+      "nome": "Madeira da academia · acabamento do render",
+      "categoria": "Pisos internos",
+      "largura_px": 3840,
+      "altura_px": 2560,
+      "amostra_m": [
+        7.2,
+        4.8
+      ],
+      "modulo_cm": [
+        null,
+        20
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "93373bce-f18e-4dec-8d02-3f8175decafb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/pisos-internos/madeira-academia-render.png",
+      "aplicacao": "Réguas de 20 cm com veios, nós e emendas desencontradas. Gire para seguir a hachura da academia.",
+      "referencias": [
+        "render_subsolo_pisos",
+        "subsolo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia"
+        }
+      ],
+      "variante_render": "madeira-academia-render",
+      "versao_de": "madeira-academia",
+      "acabamento": "extraído do render; iluminação normalizada"
+    },
+    {
+      "id": "travertino-romano-levigado-render",
+      "nome": "Travertino Romano levigado · acabamento do render",
+      "categoria": "Pisos internos",
+      "largura_px": 2048,
+      "altura_px": 2048,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        120,
+        60
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "93373bce-f18e-4dec-8d02-3f8175decafb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/pisos-internos/travertino-romano-levigado-render.png",
+      "aplicacao": "Extraído do hall do elevador. Poros alongados, veios paralelos e junta de 2 mm. Para hall, sauna e banhos conforme a planta.",
+      "referencias": [
+        "render_subsolo_pisos",
+        "render_banho_master",
+        "render_sala",
+        "planilha_materiais_drive",
+        "terreo_render",
+        "primeiro_pav_render",
+        "subsolo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Hall"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho feminino da academia"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho masculino da academia"
+        }
+      ],
+      "variante_render": "travertino-romano-levigado-render",
+      "versao_de": "travertino-romano-levigado",
+      "acabamento": "extraído do render; iluminação normalizada"
+    },
+    {
+      "id": "travertino-romano-externo-render",
+      "nome": "Travertino Romano externo · acabamento do render",
+      "categoria": "Pisos externos",
+      "largura_px": 2048,
+      "altura_px": 2048,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        120,
+        60
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "93373bce-f18e-4dec-8d02-3f8175decafb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/pisos-externos/travertino-romano-externo-render.png",
+      "aplicacao": "Extraído do pátio da academia. Acabamento visual fosco, veios paralelos e junta de 2 mm. Gire conforme a paginação do pátio.",
+      "referencias": [
+        "render_subsolo_pisos",
+        "subsolo_render",
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Pátio da academia"
+        }
+      ],
+      "variante_render": "travertino-romano-externo-render",
+      "versao_de": "travertino-romano-externo",
+      "acabamento": "extraído do render; iluminação normalizada"
+    },
+    {
+      "id": "bege-bahia-fosco-render",
+      "nome": "Bege Bahia fosco · acabamento do render",
+      "categoria": "Pisos externos",
+      "largura_px": 2048,
+      "altura_px": 2048,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        60,
+        60
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "93373bce-f18e-4dec-8d02-3f8175decafb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/pisos-externos/bege-bahia-fosco-render.png",
+      "aplicacao": "Extraído do depósito. Variação discreta e fósseis leves, com junta de 3 mm. Usar na circulação, no depósito e no lance de acesso conforme o PDF.",
+      "referencias": [
+        "render_subsolo_pisos",
+        "terreo_render",
+        "primeiro_pav_render",
+        "subsolo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Circulação"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Depósito"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Escada de acesso"
+        }
+      ],
+      "variante_render": "bege-bahia-fosco-render",
+      "versao_de": "bege-bahia-fosco",
+      "acabamento": "extraído do render; iluminação normalizada"
+    },
+    {
+      "id": "barlavento-seco-render",
+      "nome": "Barlavento seco · acabamento do render",
+      "categoria": "Piscina e áreas molhadas",
+      "largura_px": 2048,
+      "altura_px": 2048,
+      "amostra_m": [
+        2.32,
+        2.32
+      ],
+      "modulo_cm": [
+        14.5,
+        14.5
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "93373bce-f18e-4dec-8d02-3f8175decafb"
+      ],
+      "modelo": "nano_banana_pro",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/barlavento-seco-render.png",
+      "aplicacao": "Extraído do banho de serviço do subsolo. Cinza-esverdeado com variação entre peças. Aplicar como piso seco.",
+      "referencias": [
+        "render_subsolo_pisos",
+        "diretriz_piscina",
+        "subsolo_render",
+        "barlavento_portobello"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho de serviço"
+        }
+      ],
+      "variante_render": "barlavento-seco-render",
+      "versao_de": "barlavento-seco",
+      "acabamento": "extraído do render; iluminação normalizada"
+    },
+    {
+      "id": "travertino-romano-levigado",
+      "nome": "Travertino Romano levigado",
+      "categoria": "Pisos internos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        120.0,
+        60.0
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "9809ede9-b904-4da6-90c3-93bdf1dc8fb5"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-internos/travertino-romano-levigado.png",
+      "aplicacao": "Estar, jantar, varanda, escada e banhos sociais. Veios na direção da paginação.",
+      "referencias": [
+        "render_banho_master",
+        "render_sala",
+        "planilha_materiais_drive",
+        "terreo_render",
+        "primeiro_pav_render",
+        "subsolo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho feminino da academia"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho masculino da academia"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lounge dos brises"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área gourmet"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo do escritório"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho da varanda"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Sala íntima"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 1"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 2"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 3"
+        }
+      ],
+      "variante_render": "travertino-romano-levigado-render",
+      "variante_terreo_render": "travertino-romano-terreo-render",
+      "variante_primeiro_pav_render": "travertino-romano-banhos-1pav-render"
+    },
+    {
+      "id": "travertino-romano-externo",
+      "nome": "Travertino Romano antiderrapante",
+      "categoria": "Pisos externos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        120.0,
+        60.0
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "807001bd-3f55-48de-b23d-028923e9001f"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-externos/travertino-romano-externo.png",
+      "aplicacao": "Pátio da academia. Opção para o deck segundo a planilha do Drive.",
+      "referencias": [
+        "subsolo_render",
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia"
+        }
+      ],
+      "variante_render": "travertino-romano-externo-render"
+    },
+    {
+      "id": "bege-bahia-fosco",
+      "nome": "Mármore Bege Bahia fosco",
+      "categoria": "Pisos externos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        60.0,
+        60.0
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "61a26f20-1f56-4086-8829-5454829740a4"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-externos/bege-bahia-fosco.png",
+      "aplicacao": "Deck e bordas da piscina e do spa, hall externo, pisantes, varandas superiores e bloco de serviço do 1º pavimento. Também circulação, depósito e escada do subsolo na versão humanizada.",
+      "referencias": [
+        "terreo_render",
+        "primeiro_pav_render",
+        "subsolo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Depósito"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Hall externo"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Quarto de serviço"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho de serviço"
+        }
+      ],
+      "variante_render": "bege-bahia-fosco-render",
+      "variante_terreo_render": "bege-bahia-entorno-piscina-terreo-render",
+      "variante_primeiro_pav_render": "bege-bahia-varandas-1pav-render"
+    },
+    {
+      "id": "bege-bahia-natural",
+      "nome": "Mármore Bege Bahia com variação natural",
+      "categoria": "Pisos externos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        60.0,
+        60.0
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "24d28da3-1571-4f44-b030-2d3e09b01114"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-externos/bege-bahia-natural.png",
+      "aplicacao": "Alternativa de Bege Bahia com fósseis discretos. Deck, bordas e pisantes. Para leitura mais uniforme, escolha Bege Bahia fosco.",
+      "referencias": [
+        "terreo_render"
+      ]
+    },
+    {
+      "id": "grama-terreno-verde",
+      "nome": "Grama baixa verde natural",
+      "categoria": "Paisagismo",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        3.0,
+        3.0
+      ],
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "dfe33542-da1b-4aa3-99e6-6edd26f445bf"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/gramados/grama-terreno-verde.png",
+      "aplicacao": "Gramado aberto do lote, juntas entre pisantes e jardim da escada principal. Recorte na máscara do terreno.",
+      "referencias": [
+        "terreo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras"
+        }
+      ]
+    },
+    {
+      "id": "grama-terreno-oliva",
+      "nome": "Grama baixa verde-oliva",
+      "categoria": "Paisagismo",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        3.0,
+        3.0
+      ],
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "9b404c98-ecae-422c-8023-e2eac57feaed"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/gramados/grama-terreno-oliva.png",
+      "aplicacao": "Variante ligeiramente mais escura de grama baixa para comparar com o gramado verde no entorno.",
+      "referencias": [
+        "terreo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras"
+        }
+      ]
+    },
+    {
+      "id": "freijo-natural",
+      "nome": "Freijó natural de marcenaria",
+      "categoria": "Materiais de objetos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "8de43a2c-d1fd-484e-8ffa-1d8701ad70af"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/materiais-de-objetos/freijo-natural.png",
+      "aplicacao": "Marcenaria do banho master e detalhes amadeirados. Gire o veio conforme a peça.",
+      "referencias": [
+        "render_banho_master",
+        "banheiros"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master"
+        }
+      ]
+    },
+    {
+      "id": "silestone-claro",
+      "nome": "Silestone claro de bancada",
+      "categoria": "Materiais de objetos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "32cf941d-8d80-4623-b9b3-840920ef4f22"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/materiais-de-objetos/silestone-claro.png",
+      "aplicacao": "Tampos da cozinha e do gourmet. Amostra de aparência clara conforme a linguagem do projeto.",
+      "referencias": [
+        "especificacoes",
+        "render_sala"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área gourmet"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha"
+        }
+      ]
+    },
+    {
+      "id": "linho-creme",
+      "nome": "Linho creme do estofado",
+      "categoria": "Materiais de objetos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "3134afe3-7a93-40ac-badf-3c3eb224dd03"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/materiais-de-objetos/linho-creme.png",
+      "aplicacao": "Sofá curvo e estofados claros do estar. Use em detalhe, com fibra na escala do objeto.",
+      "referencias": [
+        "render_sala"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar"
+        }
+      ]
+    },
+    {
+      "id": "tecido-oliva",
+      "nome": "Tecido verde-oliva das poltronas",
+      "categoria": "Materiais de objetos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "d8855e00-3449-4b53-a0b3-e5b4a255666d"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/materiais-de-objetos/tecido-oliva.png",
+      "aplicacao": "Estofado verde-oliva das poltronas do estar. Use em detalhe.",
+      "referencias": [
+        "render_sala"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar"
+        }
+      ]
+    },
+    {
+      "id": "pedra-hitam-preta",
+      "nome": "Pedra Hitam preta seca",
+      "categoria": "Piscina e áreas molhadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "0d9217a3-0260-4b21-b9ff-d4f7df37eb5b"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/pedra-hitam-preta.png",
+      "aplicacao": "Amostra seca de referência para o revestimento da piscina especificado na planilha do Drive.",
+      "referencias": [
+        "planilha_materiais_drive"
+      ]
+    },
+    {
+      "id": "pedra-hitam-agua",
+      "nome": "Pedra Hitam sob água",
+      "categoria": "Piscina e áreas molhadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "0d9217a3-0260-4b21-b9ff-d4f7df37eb5b",
+        "57768ab4-a9bf-4b4d-a351-015a899e2860"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/pedra-hitam-agua.png",
+      "aplicacao": "Alternativa submersa conforme a pedra Hitam indicada no Drive. Alinhe a mesma malha à variante seca.",
+      "referencias": [
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina"
+        }
+      ]
+    },
+    {
+      "id": "granito-preto-polido",
+      "nome": "Granito preto polido",
+      "categoria": "Pisos internos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        60.0,
+        60.0
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "56037c38-2054-4127-8e73-660c1dc31d91"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-internos/granito-preto-polido.png",
+      "aplicacao": "Alternativa conforme a planilha do Drive para cozinha, área e escada de serviço, bloco do motorista e garagem.",
+      "referencias": [
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Depósito"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho do motorista"
+        }
+      ]
+    },
+    {
+      "id": "granito-preto-flameado",
+      "nome": "Granito preto flameado",
+      "categoria": "Pisos externos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        60.0,
+        60.0
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "17677869-257e-4c03-b6e8-0954074b3180"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-externos/granito-preto-flameado.png",
+      "aplicacao": "Alternativa para hall e escada de entrada externos conforme a planilha do Drive.",
+      "referencias": [
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Hall externo"
+        }
+      ]
+    },
+    {
+      "id": "pedra-portuguesa-preta",
+      "nome": "Pedra portuguesa preta",
+      "categoria": "Pisos externos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "8bcc0689-272d-4f26-8c3d-1b24cc7f892e"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-externos/pedra-portuguesa-preta.png",
+      "aplicacao": "Alternativa para a rampa de veículos conforme a planilha do Drive.",
+      "referencias": [
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem"
+        }
+      ]
+    },
+    {
+      "id": "parede-pva-off-white",
+      "nome": "Pintura PVA off-white fosca",
+      "categoria": "Paredes e fachadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "58feb0f0-49a5-4338-a8c6-e927ca7503a1"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/paredes-e-fachadas/parede-pva-off-white.png",
+      "aplicacao": "Pintura fosca das paredes internas do estar, jantar, suítes e demais ambientes com pintura PVA. Tom inspirado no render da sala.",
+      "referencias": [
+        "render_sala",
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte master"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 1"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 2"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 3"
+        }
+      ]
+    },
+    {
+      "id": "parede-pva-areia",
+      "nome": "Pintura PVA areia clara",
+      "categoria": "Paredes e fachadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "127fd8d2-1209-4648-88c7-8178082bac2e"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/paredes-e-fachadas/parede-pva-areia.png",
+      "aplicacao": "Alternativa quente e suave para paredes internas com pintura PVA, compatível com a paleta de pedra e madeira dos renders.",
+      "referencias": [
+        "render_sala",
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de estar"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala de jantar"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte master"
+        }
+      ]
+    },
+    {
+      "id": "fachada-textura-mineral",
+      "nome": "Textura mineral areia para fachada",
+      "categoria": "Paredes e fachadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "25e529b9-3fcf-4af5-8116-850f3ff562df"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/paredes-e-fachadas/fachada-textura-mineral.png",
+      "aplicacao": "Textura fina para trechos de fachada e entrada previstos com acabamento texturizado. Cor indicativa inspirada nos renders.",
+      "referencias": [
+        "especificacoes",
+        "planilha_materiais_drive",
+        "textura_fina_ibratin"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Hall externo"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Fachadas"
+        }
+      ]
+    },
+    {
+      "id": "fachada-filetes-concreto",
+      "nome": "Filetes horizontais de concreto",
+      "categoria": "Paredes e fachadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "03595ca1-0331-43d9-9cf5-2c4ae6656412"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/paredes-e-fachadas/fachada-filetes-concreto.png",
+      "aplicacao": "Filetes de concreto para os trechos de fachada indicados no projeto. Mantenha juntas finas e fiadas horizontais em elevação.",
+      "referencias": [
+        "especificacoes"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Fachadas"
+        }
+      ]
+    },
+    {
+      "id": "parede-travertino-romano",
+      "nome": "Travertino Romano de parede",
+      "categoria": "Paredes e fachadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "abd46056-fecc-4635-93fc-aa8d5736ff9c"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/paredes-e-fachadas/parede-travertino-romano.png",
+      "aplicacao": "Paredes do banho master e do lavabo e áreas de travertino nos banhos 1, 2 e 3. Veios longitudinais visíveis como no render.",
+      "referencias": [
+        "render_banho_master",
+        "banheiros",
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo do escritório"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho master"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 1"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 2"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 3"
+        }
+      ]
+    },
+    {
+      "id": "parede-marmore-branco",
+      "nome": "Mármore branco para detalhes dos banhos",
+      "categoria": "Paredes e fachadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "fbe47a59-0e3a-4e52-9136-58d5cca0b7c4"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/paredes-e-fachadas/parede-marmore-branco.png",
+      "aplicacao": "Detalhes localizados de mármore branco nas paredes dos banhos 1, 2 e 3 previstos na planilha.",
+      "referencias": [
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 1"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 2"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho 3"
+        }
+      ]
+    },
+    {
+      "id": "parede-colorissima-portland",
+      "nome": "Porcelanato no padrão Coloríssima Portland",
+      "categoria": "Paredes e fachadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        1.2,
+        1.2
+      ],
+      "modulo_cm": [
+        60.0,
+        30.0
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "e4cdadc6-1f17-4b50-bd37-7d808eb99f34"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/paredes-e-fachadas/parede-colorissima-portland.png",
+      "aplicacao": "Paredes da área de serviço e dos banhos de serviço e do motorista conforme a planilha. Peças de 30 × 60 cm.",
+      "referencias": [
+        "planilha_materiais_drive"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho do motorista"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Banho de serviço"
+        }
+      ]
+    },
+    {
+      "id": "granito-marrom-tabaco",
+      "nome": "Granito Marrom Tabaco polido",
+      "categoria": "Pisos internos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        2.4,
+        2.4
+      ],
+      "modulo_cm": [
+        60.0,
+        60.0
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "419f6f75-548a-488e-a5b3-028f91f71912"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-internos/granito-marrom-tabaco.png",
+      "aplicacao": "Cozinha, bar do gourmet, serviço, despensa, bloco do motorista e garagem na versão humanizada.",
+      "referencias": [
+        "terreo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área gourmet"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho do motorista"
+        }
+      ],
+      "variante_terreo_render": "granito-marrom-tabaco-terreo-render"
+    },
+    {
+      "id": "madeira-city-petra",
+      "nome": "Madeira no padrão City Petra",
+      "categoria": "Pisos internos",
+      "largura_px": 1536,
+      "altura_px": 1382,
+      "amostra_m": [
+        2.374,
+        2.136
+      ],
+      "modulo_cm": [
+        121.9,
+        17.8
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "b1469498-85b9-4889-9090-c03ce455c704"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-internos/madeira-city-petra.png",
+      "aplicacao": "Piso vinílico amadeirado das suítes e closets, com réguas no sentido da hachura.",
+      "referencias": [
+        "planilha_materiais_drive",
+        "primeiro_pav_render",
+        "city_petra_durafloor"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte master"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 1"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 2"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Suíte 3"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet master"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 1"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 2"
+        },
+        {
+          "pavimento": "1º pavimento",
+          "ambiente": "Closet 3"
+        }
+      ],
+      "variante_primeiro_pav_render": "madeira-city-petra-1pav-render"
+    },
+    {
+      "id": "madeira-academia",
+      "nome": "Madeira natural da academia",
+      "categoria": "Pisos internos",
+      "largura_px": 1536,
+      "altura_px": 1410,
+      "amostra_m": [
+        3.486,
+        3.2
+      ],
+      "modulo_cm": [
+        null,
+        20.0
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "1d3b9c30-3287-48b8-b925-a2658265067a"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-internos/madeira-academia.png",
+      "aplicacao": "Piso da academia, réguas no sentido da hachura.",
+      "referencias": [
+        "subsolo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia"
+        }
+      ],
+      "variante_render": "madeira-academia-render"
+    },
+    {
+      "id": "deck-madeira-natural",
+      "nome": "Deck de madeira natural",
+      "categoria": "Pisos externos",
+      "largura_px": 1536,
+      "altura_px": 1385,
+      "amostra_m": [
+        2.484,
+        2.24
+      ],
+      "modulo_cm": [
+        null,
+        14.000000000000002
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "b09d3057-1351-410a-8e93-11228934b48c"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-externos/deck-madeira-natural.png",
+      "aplicacao": "Deck de madeira ao redor do spa. Gire as réguas para acompanhar a hachura.",
+      "referencias": [
+        "terreo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina"
+        }
+      ],
+      "variante_terreo_render": "deck-madeira-terreo-render"
+    },
+    {
+      "id": "pedra-portuguesa-caramelo",
+      "nome": "Pedra portuguesa caramelo",
+      "categoria": "Pisos externos",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": null,
+      "modulo_cm": null,
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "1f6d6540-74cf-400b-83f3-6e67ec788c18"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/pisos-externos/pedra-portuguesa-caramelo.png",
+      "aplicacao": "Rampa, acesso veicular e corredor de serviço descoberto na versão humanizada. Mosaico de pedra irregular.",
+      "referencias": [
+        "terreo_render"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem"
+        }
+      ],
+      "variante_terreo_render": "pedra-portuguesa-caramelo-terreo-render"
+    },
+    {
+      "id": "barlavento-seco",
+      "nome": "Barlavento seco",
+      "categoria": "Piscina e áreas molhadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        2.32,
+        2.32
+      ],
+      "modulo_cm": [
+        14.5,
+        14.5
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "5f3ed5d1-1e82-43c6-8c35-a6140ce70328"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/barlavento-seco.png",
+      "aplicacao": "Amostra seca cinza-esverdeada da versão humanizada. Usar também no piso do banho de serviço do subsolo.",
+      "referencias": [
+        "diretriz_piscina",
+        "subsolo_render",
+        "barlavento_portobello"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho de serviço"
+        }
+      ],
+      "variante_render": "barlavento-seco-render",
+      "variante_terreo_render": "barlavento-fundo-terreo-render"
+    },
+    {
+      "id": "barlavento-agua",
+      "nome": "Barlavento sob água da piscina",
+      "categoria": "Piscina e áreas molhadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        2.32,
+        2.32
+      ],
+      "modulo_cm": [
+        14.5,
+        14.5
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "5f3ed5d1-1e82-43c6-8c35-a6140ce70328",
+        "34259a43-43d0-4608-a393-0fa90b84efa7"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/barlavento-agua.png",
+      "aplicacao": "Fundo da piscina e spa na versão humanizada, visível sob a água turquesa. Use a mesma origem de paginação da prainha.",
+      "referencias": [
+        "diretriz_piscina",
+        "terreo_render",
+        "barlavento_portobello"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina"
+        }
+      ],
+      "variante_terreo_render": "barlavento-agua-terreo-render"
+    },
+    {
+      "id": "barlavento-prainha",
+      "nome": "Barlavento sob água rasa da prainha",
+      "categoria": "Piscina e áreas molhadas",
+      "largura_px": 1536,
+      "altura_px": 1536,
+      "amostra_m": [
+        2.32,
+        2.32
+      ],
+      "modulo_cm": [
+        14.5,
+        14.5
+      ],
+      "repetivel": true,
+      "higgsfield_jobs": [
+        "5f3ed5d1-1e82-43c6-8c35-a6140ce70328",
+        "79191efd-c0a3-4fd2-b7a7-aabb6dadd529"
+      ],
+      "modelo": "gpt_image_2",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/barlavento-prainha.png",
+      "aplicacao": "Prainha com água mais clara. Alinhe a mesma malha de juntas à parte funda.",
+      "referencias": [
+        "diretriz_piscina",
+        "terreo_render",
+        "barlavento_portobello"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina"
+        }
+      ],
+      "variante_terreo_render": "barlavento-prainha-terreo-render"
+    }
+  ],
+  "arquivos_png_materiais": 46,
+  "formato_materiais": "PNG RGB, amostras em vista superior",
+  "arquivos_png_total": 257,
+  "versao": 6,
+  "orientacao_materiais": "Aplicar sob os objetos e recortar pela máscara da base. Manter a proporção da amostra. Usar a mesma origem para as variantes de água do mesmo material.",
+  "pisos_do_render": [
+    "madeira-academia-render",
+    "travertino-romano-levigado-render",
+    "travertino-romano-externo-render",
+    "bege-bahia-fosco-render",
+    "barlavento-seco-render"
+  ],
+  "pisos_do_render_terreo": [
+    "deck-madeira-terreo-render",
+    "bege-bahia-entorno-piscina-terreo-render",
+    "barlavento-fundo-terreo-render",
+    "barlavento-agua-terreo-render",
+    "barlavento-prainha-terreo-render",
+    "travertino-romano-terreo-render",
+    "granito-marrom-tabaco-terreo-render",
+    "pedra-portuguesa-caramelo-terreo-render"
+  ],
+  "pisos_do_render_primeiro_pavimento": [
+    "madeira-city-petra-1pav-render",
+    "travertino-romano-banhos-1pav-render",
+    "bege-bahia-varandas-1pav-render"
+  ]
+}

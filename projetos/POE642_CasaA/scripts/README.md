@@ -1815,6 +1815,44 @@ Pedidos do usuário, com os recortes do JPG em 12K: "1- CORRIGIR ESSA FALHA NA P
 - **Depois: vértice com vértice (usuário: "QUERO QUE O VÉRTICE DA PORTA ENCONTRE COM O VÉRTICE DA PAREDE. [...] NÃO ENCOSTE O LADO, MAS SIM O VÉRTICE COM VÉRTICE."):** a ponte da parede vai só até a face de dentro da folha (não mais até a de fora): a quina da folha encontra a quina da ponta da parede e as duas se tocam só no vértice. As pontes: BH. SERV. 1190,1–1199,0 x 1037,0–1040,0; BH. FEM. 1494,6–1497,6 x 1499,7–1514,7; BH. MASC. 1861,8–1864,8 x 1499,7–1514,7; depósito 1333,4–1345,3 x 1024,9–1027,9; BH. da sauna 1378,2–1387,1 x 1565,4–1568,4. Topaz de novo (job 75de5331-92e7-4ef1-8fa6-01f40b3f9685).
 
 
+### Subsolo: as peças da biblioteca do usuário (`biblioteca_subsolo_casaa_1211.py`, 12/11)
+
+O usuário montou uma biblioteca de objetos da Casa A (PNG com transparência, vista de cima, gerados no Higgsfield; o
+pacote veio pelo Google Drive) e pediu: "VEJA NA PASTA O QUE PODEMOS SUBSTITUIR NA PLANTA E GANHAR MAIS REALISMO".
+No repositório ficam só a pasta `POE642_CasaA/biblioteca-objetos/01-subsolo`, o `LEIA-ME.md` e o `catalogo.json` (o
+pacote inteiro, com o Térreo, o 1º Pavimento e os materiais, tem 270 MB e fica fora do git). A proposta (a planta de
+hoje ao lado das peças) foi aprovada assim: "1. SIGO COM A SUA RECOMENDAÇÃO. SEM ALTERAR A COMPOSIÇÃO; 2. VASO BRANCO E
+DEMAIS RECOMENDAÇÕES; 3. BH SERV. MESMO BATENDO USE OS ITENS DA BIBLIOTECA E SUA RECOMENDAÇÃO PARA O CHUVEIRO QUADRADO;
+4. OPÇÃO A; 5. DEPÓSITO: FICA COMO ESTÁ; 6. NÃO MEXA NOS PISOS."
+
+- **Academia (`ACADEMIA`):** esteira-a (2), bicicleta-b (2) e banco-supino, cada um no retângulo do PDF da peça que
+  substitui, com o console para a esquerda como no PDF; no supino, a barra alongada até o comprimento do PDF (1,72 m)
+  pela repetição de uma coluna da barra e do travessão do rack de cada lado do banco. O vinílico volta exato por baixo
+  das peças antigas e da sombra delas: as réguas da final (`renders/POE642_CasaA_PH_Subsolo_vinilico_reguas_academia.png`,
+  o piso no alfa) foram refeitas pelo `vinilico_foto.trocar` sobre a final de 7723238 (a de antes do vinílico), com
+  diferença zero contra a final; no buraco, as réguas vezes a luz do piso em volta (média normalizada). As peças antigas
+  são o que foge do piso esperado perto dos retângulos (até `busca_px`), sem os rótulos da especificação. Sombra curta
+  de `final3840_casaa.APARELHOS`.
+- **BH. FEM. e BH. MASC.:** a bacia Carrara branca no retângulo do vaso do PDF (o retângulo antes no tom do piso em volta,
+  `sob_peca`, sem o marrom na borda), a descarga cromada de novo; a cuba esculpida da biblioteca no retângulo da cuba do
+  PDF, fatiada (os cantos e o meio com a torneira na escala da altura, as faixas lisas esticadas), no granito marrom da
+  especificação com o sombreado da peça (as bordas chanfradas, a sombra por dentro) e a torneira cromada dela; a bancada
+  de travertino bruto fica.
+- **BH. SERV.:** a bacia Monte Carlo branca; a bancada no polígono do PDF com o granito da peça `cuba-servico-granito`
+  (tecido das faixas só de granito dela), a borda de antes e sem sombra nova; a cuba branca e a torneira da peça no
+  retângulo da cuba do PDF (passa da bancada, como no PDF).
+- **Chuveiros (antessala, BH. FEM., BH. SERV.):** a placa quadrada da `chuveiro-quadrado` com o braço e a canopla da
+  `chuveiro-quadrado-parede`, o braço do comprimento do PDF até a parede; o braço antigo, mais largo, vira o piso do lado.
+- **Sauna:** o banco reto de travertino da biblioteca (as pontas na escala, o meio esticado no veio), no tom do banco de
+  antes (0,90 do piso; regra de 10/11); a sombra de contato fica.
+- **Ficam:** os pisos, as paredes, os rótulos, o depósito e as prateleiras.
+- **Antes e depois (contra a final de 028a12f):** `renders/POE642_CasaA_PH_Subsolo_1211_{academia,banhos_sauna,bh_serv}_antes_depois.jpg`.
+- **Como refazer:** `python3 biblioteca_subsolo_casaa_1211.py` (sem `--antes`, parte da final de `ANTES_COMMIT`);
+  `rodape_entrega.py --no-quadro --render Subsolo=../renders/POE642_CasaA_PH_Subsolo_final_rotulos.png`;
+  `rotulos_manuscritos_casaa.py`; `pdf_entrega.py`; `book_entrega.py`. O 12K do Subsolo (A e B) e a A3 4K ainda trazem as
+  peças antigas: a refazer com `ampliacao_a3_casaa.py corrigir --antes_final` (as peças novas vêm da entrada) e Topaz,
+  depois do OK.
+
 ### As correções do cliente no Térreo da Casa A: `terreo_casaa_1011.py` (10/11)
 
 Lista do cliente (Paulo Octávio) com os recortes da planta do Térreo, e as respostas do usuário. Um passo por pedido, sobre a final do Térreo do commit 58ea098 (a mesma de 0a17741), na ordem de `PASSOS`:
