@@ -1209,11 +1209,231 @@ def folhas_tb(Q, img, q=FOLHAS_TB):
     return np.clip(np.round(o), 0, 255).astype(np.uint8)
 
 
+# O gramado (usuário: "representar o gramado da casa A em todas as demais casas, nos seus respectivos terreos"; "OBS
+# GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro
+# projeto de paisagismo. Representar arbustos que são menores."): o gramado do Térreo da Casa A (`terreo_casaa_1011.
+# gramado_ta`): a grama do Subsolo (`texturas.textura("grama_padrao")`, na escala) no gramado do lote (o verde do PDF na
+# base chapada, `verde_pdf`, onde o render está verde, sem os jardins internos), e o paisagismo B de `paisagismo.py`
+# (a grama realista, os maciços de arbustos pequenos só nos cantos, ~14% do gramado), com 3 plantas como na Casa A: as
+# duas árvores pequenas nos cantos de cima e de baixo da esquerda e a palmeira no canto de cima da direita
+# (`plantas`: nome, centro px, copa m, raio do maciço m), sem as árvores e os arbustos do render.
+GRAMADO_TB = {"verde_pdf": (80, 145, 110), "lote_px": (300, 106, 3510, 1875), "fechar": 5, "area_min": 3000,
+              "verde": -4, "verde_azul": 10, "muro_px": 6,
+              # o canteiro de grama junto à escada de 6 degraus (branco na base, verde no render)
+              "extra_px": [(672, 690, 758, 776)],
+              "fora_px": [(2378, 1183, 2526, 1292)],                       # o jardim de 4,62 m² (no passo dos jardins)
+              "semente": 1220, "suave": 0.7, "paisagismo": "B",
+              "plantas": [("arvore_3", (430, 230), 3.0, 2.1), ("palmeira", (3390, 230), 3.8, 2.5),
+                          ("arvore_2", (430, 1760), 3.0, 2.1)]}
+
+
+def _gramado_mascara_tb(Q, img, q):
+    x0, y0, x1, y1 = q["lote_px"]
+    lote = np.zeros(img.shape[:2], bool)
+    lote[y0:y1, x0:x1] = True
+    for a, b, c, d in q["fora_px"]:
+        lote[b:d, a:c] = False
+    pdf = cv2.morphologyEx(np.all(Q.chapada == np.uint8(q["verde_pdf"]), axis=2).astype(np.uint8), cv2.MORPH_CLOSE,
+                           np.ones((q["fechar"], q["fechar"]), np.uint8)).astype(bool) & lote
+    n, lab, st, _ = cv2.connectedComponentsWithStats(pdf.astype(np.uint8), 8)
+    m = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["area_min"]])
+    # junto aos muros e às bordas, o verde do render que passa uns px da base entra
+    I = img.astype(np.int16)
+    vr = (I[..., 1] >= I[..., 2] + q["verde"]) & (I[..., 1] >= I[..., 0] + q["verde_azul"]) & lote
+    for _ in range(q["muro_px"]):
+        m |= dilatar(m, 1) & vr
+    for a, b, c, d in q.get("extra_px", []):
+        caixa = np.zeros(m.shape, bool)
+        caixa[b:d, a:c] = True
+        m |= caixa & vr
+    return m
+
+
+def gramado_tb(Q, img, q=GRAMADO_TB):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    import paisagismo as PG
+    m = _gramado_mascara_tb(Q, img, q)
+    ys, xs = np.nonzero(m)
+    y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+    G = _cache(f"grama_{y1 - y0}x{x1 - x0}_{q['semente']}",
+               lambda: textura("grama_padrao", Q.px_m, y1 - y0, x1 - x0, semente=q["semente"]).astype(np.float32))
+    novo = img.astype(np.float32).copy()
+    novo[y0:y1, x0:x1] = G
+    out = T.F.pousar(img.astype(np.float32), novo, m, suave=q["suave"])
+    out, _ = PG.paisagismo(out, m, Q.px_m, q["lote_px"], q["plantas"], q["paisagismo"])
+    print(f"    gramado: a grama da Casa A em {m.sum() / Q.px_m ** 2:.0f} m² do lote, sem as árvores do render; o "
+          f"paisagismo {q['paisagismo']} com {len(q['plantas'])} plantas nos cantos e arbustos pequenos")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# Os jardins e a vegetação de dentro (usuário, no jardim de inverno de 10,89 m² e no jardim de 4,62 m²: "Diminuir a
+# escala e quantidade de vegetação no jardim de inverno." e "Trocar essa representação do jardim de inverno. Usar a
+# mesma do interior da casa A.", com as setas para os dois jardins e para a planta em vaso do hall; na floreira do
+# lavatório gourmet: "tirar as plantas coloridas e colocar com o espaçamento igual entre elas"):
+# - os dois jardins como o jardim de 4,79 m² da Casa A (`terreo_casaa_1011.GRAMADO_TA["jardim_479"]`): a grama do
+#   gramado (`texturas.textura("grama_padrao")`), com a sombra de contato junto às paredes, e poucas plantas da
+#   biblioteca em tamanhos diferentes e menores (`plantas`: nome, centro px, copa m), só dentro do jardim (o verde do PDF
+#   na base chapada, `chapada`); os rótulos brancos ficam; no de inverno, o X tracejado dos painéis volta fino e claro
+#   (`terreo_casaa_1011.FINOS_TA`), como os dos vazios da Casa A;
+# - a planta em vaso do hall (a costela-de-adão): sai, com o travertino refeito, e entra uma palmeira pequena, como as
+#   dos jardins;
+# - a floreira do lavatório gourmet: a terra de novo e `n` arbustos verdes iguais (o arbusto da biblioteca de
+#   `paisagismo.py`, num verde só), com o mesmo espaço entre eles.
+JARDINS_TB = {
+    "jardins": {
+        "inverno": {"caixa_px": (2030, 735, 2250, 945), "x_doc": True, "rotulo_px": (2070, 803, 2215, 846),
+                    "plantas": [("palmeira_1", (2078, 772), 0.9), ("palmeira_3", (2203, 902), 0.7),
+                                ("arbusto_3", (2072, 905), 0.45)]},
+        "jardim_462": {"caixa_px": (2345, 1186, 2542, 1279), "rotulo_px": (2440, 1243, 2512, 1276),
+                       "plantas": [("palmeira_3", (2408, 1214), 0.7), ("arbusto_3", (2410, 1268), 0.42)]}},
+    "contato": (0.20, 3.0), "semente": 1221,
+    "vaso": {"caixa_px": (2455, 942, 2526, 1008), "lum": 175, "planta": ("palmeira_3", (2489, 975), 0.75),
+             "fontes_px": [(2560, 950, 2690, 1000), (2380, 1030, 2510, 1100)]},
+    "floreira": {"px": (1225, 1651, 1423, 1680), "n": 7, "d_m": 0.40, "terra": (34, 44, 56), "terra_ruido": 0.18,
+                 "verde": (60, 102, 88)}}
+
+
+def jardins_tb(Q, img, q=JARDINS_TB):
+    sys.path.insert(0, str(RAIZ / "_texturas"))
+    from texturas import textura
+    import json as _json
+    import paisagismo as PG
+    import pedidos_terreo_casaa_2910 as P
+    import terreo_casaa_1011 as TC
+    import final3840_casaa_terreo as FT
+    out = img.astype(np.float32)
+    rng = np.random.default_rng(q["semente"])
+    sombra = _json.loads((RAIZ / "_texturas" / "texturas.json").read_text())["vegetacao"]["sombra"]
+    for nome, e in q["jardins"].items():
+        x0, y0, x1, y1 = e["caixa_px"]
+        # o jardim: a caixa sem as paredes e as esquadrias do PDF
+        M = np.zeros(img.shape[:2], bool)
+        M[y0:y1, x0:x1] = True
+        # sem as paredes (as cheias escuras do PDF) e sem as esquadrias desenhadas (os fios claros e neutros, fora dos
+        # traços do X antigo, que saem)
+        M &= ~dilatar(Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "EST_PILAR") and d.get("fill")
+                                  and max(d["fill"]) < 0.6, ss=2) > 0.3, 1)
+        I = img.astype(np.int16)
+        geo = np.zeros(img.shape[:2], np.uint8)
+        if e.get("x_doc"):
+            for _, _, ss in FT.cadeias_tracejadas(Q, ["DOC_LINHAS E PROJEÇÕES"], min_n=2, min_ext=20):
+                for s_ in ss:
+                    (u0, v0), (u1, v1) = Q.p2q(s_[0], s_[1]), Q.p2q(s_[2], s_[3])
+                    cv2.line(geo, (int(round(u0)), int(round(v0))), (int(round(u1)), int(round(v1))), 1, 2)
+        claros = (I.mean(axis=2) > 150) & ((I.max(axis=2) - I.min(axis=2)) < 22) & M & ~dilatar(geo.astype(bool), 2)
+        n_, lab_, st_, _ = cv2.connectedComponentsWithStats(claros.astype(np.uint8), 8)
+        fios = np.isin(lab_, [i for i in range(1, n_) if max(st_[i, 2], st_[i, 3]) >= 25])   # os fios longos
+        M &= ~dilatar(fios, 1)
+        # as letras do rótulo (brancas, na caixa do rótulo), sem os traços do X antigo que passam por ela
+        a0, b0, a1, b1 = e["rotulo_px"]
+        txt = np.zeros(img.shape[:2], bool)
+        txt[b0:b1, a0:a1] = ((I.mean(axis=2) > 185) & ((I.max(axis=2) - I.min(axis=2)) < 35))[b0:b1, a0:a1]
+        if e.get("x_doc"):
+            branco = txt.copy()
+            txt &= ~geo.astype(bool)
+            # as letras cortadas pelo traço se fecham (o px do traço sob a letra também é branco)
+            txt = ndimage.binary_closing(txt, np.ones((3, 3))) & branco | txt
+        txt = dilatar(txt, 1) & (I.mean(axis=2) > 120)
+        h, w = y1 - y0, x1 - x0
+        G = textura("grama_padrao", Q.px_m, h, w, semente=q["semente"] + len(nome)).astype(np.float32)
+        # a sombra de contato junto às paredes
+        dist = cv2.distanceTransform(M[y0:y1, x0:x1].astype(np.uint8), cv2.DIST_L2, 5)
+        k, alc = q["contato"]
+        G *= (1 - k * np.exp(-dist / alc))[..., None]
+        reg = out[y0:y1, x0:x1]
+        mm = M[y0:y1, x0:x1]
+        reg[mm] = G[mm]
+        # as plantas, só dentro do jardim
+        tmp = out.copy()
+        for pl, (cx, cy), d in e["plantas"]:
+            TC._pousar(tmp, pl, cx, cy, d, Q.px_m)
+        a = cv2.GaussianBlur(cv2.erode(M.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(np.float32), (0, 0), 0.6)
+        out = tmp * a[..., None] + out * (1 - a[..., None])
+        # os rótulos de volta
+        out[txt] = img[txt]
+        if e.get("x_doc"):
+            segs = []
+            for _, _, ss in FT.cadeias_tracejadas(Q, ["DOC_LINHAS E PROJEÇÕES"], min_n=2, min_ext=20):
+                for s_ in ss:
+                    u, v = Q.p2q((s_[0] + s_[2]) / 2, (s_[1] + s_[3]) / 2)
+                    if x0 <= u <= x1 and y0 <= v <= y1:
+                        segs.append(s_)
+            fq = TC.FINOS_TA
+            pq = dict(FT.PROJ, larg_px=fq["larg_px"], preto=fq["escuro"], branco=fq["claro"], limiar=fq["limiar"])
+            o8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
+            novo, _ = FT.preto_branco(Q, o8, segs, pq)
+            tapa = dilatar(txt, TC.FINOS_TA["folga_rotulo"])          # o X não passa sobre o rótulo (como na Casa A)
+            novo[tapa] = o8[tapa]
+            out = novo.astype(np.float32)
+        print(f"    jardim {nome}: a grama da Casa A e {len(e['plantas'])} plantas menores"
+              + (f"; o X dos painéis fino e claro" if e.get("x_doc") else ""))
+    # a planta em vaso do hall: sai (o travertino refeito) e entra a palmeira pequena
+    v = q["vaso"]
+    x0, y0, x1, y1 = v["caixa_px"]
+    o8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
+    zona = np.zeros(img.shape[:2], bool)
+    reg = o8[y0:y1, x0:x1].astype(np.int16)
+    zona[y0:y1, x0:x1] = (reg.mean(axis=2) < v["lum"]) | ((reg[..., 1] - reg[..., 2]) > 4)
+    zona = dilatar(ndimage.binary_fill_holes(zona), 3)
+    zona[:y0 - 2], zona[y1 + 2:], zona[:, :x0 - 2], zona[:, x1 + 2:] = False, False, False, False
+    o8 = P.piso_refeito(o8, zona, q["semente"] + 7, dict(P.PISO_TA, fontes_px=v["fontes_px"]))
+    out = o8.astype(np.float32)
+    pl, (cx, cy), d = v["planta"]
+    TC._pousar(out, pl, cx, cy, d, Q.px_m)
+    # a floreira do lavatório gourmet
+    f = q["floreira"]
+    x0, y0, x1, y1 = f["px"]
+    h, w = y1 - y0, x1 - x0
+    terra = np.float32(f["terra"])[None, None] * (1 + f["terra_ruido"] * PG.ruido((h, w), 2.0, rng))[..., None]
+    out[y0:y1, x0:x1] = terra
+    cor0, al0, d0 = PG._sprite("arbusto")
+    var = PG._tingir(cor0, al0, f["verde"])
+    dpx = f["d_m"] * Q.px_m
+    passo = w / f["n"]
+    pecas = []
+    for i in range(f["n"]):
+        c, a = PG._colocar(var, al0, d0, dpx, rng.uniform(0, 360))
+        pecas.append((c, a, x0 + passo * (i + 0.5), (y0 + y1) / 2, dpx))
+    lim = np.zeros(img.shape[:2], np.float32)
+    lim[y0:y1, x0:x1] = 1
+    out = PG._camada(out, pecas, lim, sombra)
+    print(f"    hall: a planta em vaso trocada pela palmeira pequena; floreira do lavatório gourmet: {f['n']} arbustos "
+          f"verdes iguais, com o mesmo espaço entre eles")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+# O perímetro (usuário: "Demarcar melhor o perímetro da casa", como no Subsolo, `pedidos_subsolo_casab_1211.
+# perimetro_sb`): onde o piso da casa (o ARQ_CONTRAPISO do PDF: a calçada de travertino em volta, a varanda, os decks, a
+# piscina e a área de serviço descoberta) encosta no gramado e ali não há parede, um traço no cinza das paredes, de
+# `larg_px`, do lado de fora (na grama); os pisantes e os blocos de pedra, o acesso da garagem e os pisantes da entrada
+# (`fora_px`) não são a casa.
+PERIMETRO_TB = {"larg_px": 2, "cor": (80, 80, 80), "longe_parede_px": 4,
+                "fora_px": [(2700, 960, 3520, 1160), (2130, 1240, 3520, 1880), (290, 580, 700, 1000)]}
+
+
+def perimetro_tb(Q, img, q=PERIMETRO_TB):
+    m = _gramado_mascara_tb(Q, img, GRAMADO_TB)
+    cp = Q.preencher(lambda d: d.get("layer") == "ARQ_CONTRAPISO" and d.get("fill"), ss=2) > 0.5
+    par = Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "EST_PILAR") and d.get("fill")
+                      and max(d["fill"]) < 0.6, ss=2) > 0.3
+    k = q["larg_px"]
+    faixa = cv2.dilate(cp.astype(np.uint8), np.ones((2 * k + 1, 2 * k + 1), np.uint8)).astype(bool) & ~cp & m
+    faixa &= ~dilatar(par, q["longe_parede_px"])
+    for a, b, c, d in q["fora_px"]:
+        faixa[b:d, a:c] = False
+    out = img.copy()
+    out[faixa] = np.uint8(q["cor"])
+    print(f"    perímetro: {int(faixa.sum())} px de traço ({k} px, cinza das paredes) onde o piso da casa encosta na grama")
+    return out
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_tb), ("deck", deck_tb), ("portas", portas_tb),
           ("escadas", escadas_tb), ("entrada", entrada_tb),
           ("tracejados", tracejados_tb), ("moveis", moveis_tb), ("closets", closets_tb), ("banco", banco_closet_tb),
           ("espreguicadeiras", espreguicadeiras_tb), ("folhas", folhas_tb),
+          ("gramado", gramado_tb), ("jardins", jardins_tb), ("perimetro", perimetro_tb),
           ("pergolado", pergolado_tb)]
 
 
@@ -1235,7 +1455,11 @@ def correcoes(img, de=None, ate=None, salvar_passos=None):
 
 # Os antes e depois (contra a final de partida, a de 21fa118): a planta inteira e os trechos, em
 # `renders/POE642_CasaB_PH_Terreo_1211_<trecho>_antes_depois.jpg` da Casa B (px da final: x0, y0, x1, y1).
-ANTES_DEPOIS_TB = {"planta": (280, 60, 3560, 1900)}
+ANTES_DEPOIS_TB = {"planta": (280, 60, 3560, 1900), "escadas_decks": (290, 560, 1210, 1110),
+                   "varanda_living": (1150, 720, 2060, 1100), "suite_master_closet": (890, 290, 1660, 800),
+                   "suites_fachada": (1560, 290, 2720, 960), "jardins_entrada": (2010, 700, 2730, 1310),
+                   "gourmet": (1060, 1270, 1720, 1700), "cozinha_servico": (1600, 1270, 3000, 1720),
+                   "piscina": (680, 1100, 1220, 1500)}
 
 
 def antes_depois_tb(antes, depois, q=ANTES_DEPOIS_TB, max_lado=2400):
