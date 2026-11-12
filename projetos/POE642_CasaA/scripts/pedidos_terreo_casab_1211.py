@@ -2085,6 +2085,165 @@ def sofa_living_tb(Q, img, q=SOFA_LIVING_TB):
     return out
 
 
+# As cadeiras das escrivaninhas (usuário: "revise as cadeiras das escrivaninhas e traga mais realismo para elas. se for
+# o caso, substitua-as."): as três do render (suíte master, suíte 1, suíte 2) eram o recorte branco chapado com o aro
+# cinza; saem (o vinílico em volta, `terreo_casaa_1011._tapar_rotulo`: o trecho do mesmo piso, sem móvel nem parede,
+# que melhor casa o anel) e entra a cadeira de madeira e linho da biblioteca (`final3840_casad._cadeira_bloco`, a da
+# escrivaninha da suíte 3 do 1º Pav da Casa A), virada para a mesa, 1/3 sob o tampo, com a sombra curta do tampo
+# sobre ela. Mesa e cadeira do PDF (ARQ_LAYOUT HUMANIZAÇÃO / ARQ_MOBILIÁRIO, px); `meio`: o centro da cadeira no outro
+# eixo.
+CADEIRAS_TB = {"cadeiras": [{"nome": "suíte master", "mesa_px": (1204.0, 388.3, 1233.8, 510.6),
+                             "velha_px": (1178.8, 453.1, 1224.9, 497.2), "frente": (1, 0), "meio": 475.2},
+                            {"nome": "suíte 1", "mesa_px": (2031.0, 582.4, 2171.3, 612.2),
+                             "velha_px": (2056.8, 561.5, 2094.9, 602.0), "frente": (0, 1), "meio": 2075.9},
+                            {"nome": "suíte 2", "mesa_px": (2248.9, 362.2, 2281.1, 517.5),
+                             "velha_px": (2261.5, 379.9, 2302.0, 416.9), "frente": (-1, 0), "meio": 398.4}],
+               "folga_px": 4, "croma_max": 40, "aro_px": 2, "busca_px": 70}
+
+
+def cadeiras_tb(Q, img, q=CADEIRAS_TB):
+    import final3840_casad as D
+    import terreo_casaa_1011 as TC
+    import um_pav_casaa_1111 as U
+    H, W = img.shape[:2]
+    rf = F.ROTULOS_F
+    out = img.copy()
+    moveis = Q.preencher(lambda d: d.get("layer") in rf["obstaculos"] and d.get("layer") != "ARQ_PAREDE", ss=2) > 0.05
+    par = Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "EST_PILAR") and d.get("fill")
+                      and max(d["fill"]) < 0.6, ss=2) > 0.3
+    I = img.astype(np.int16)
+    croma = I.max(axis=2) - I.min(axis=2)
+    # 1. a cadeira velha sai (o que dela aparece fora do tampo, com o aro)
+    for c in q["cadeiras"]:
+        g = q["folga_px"]
+        x0, y0, x1, y1 = c["velha_px"]
+        caixa = np.zeros((H, W), bool)
+        caixa[int(y0) - g:int(np.ceil(y1)) + g, int(x0) - g:int(np.ceil(x1)) + g] = True
+        mx0, my0, mx1, my1 = c["mesa_px"]
+        mesa = np.zeros((H, W), bool)
+        mesa[int(np.floor(my0)):int(np.ceil(my1)), int(np.floor(mx0)):int(np.ceil(mx1))] = True
+        velha = caixa & ~mesa & ~par & (croma < q["croma_max"])
+        n, lab, st, _ = cv2.connectedComponentsWithStats(velha.astype(np.uint8), 8)
+        velha = np.isin(lab, [i for i in range(1, n) if st[i, 4] >= 30])
+        zona = dilatar(velha, q["aro_px"]) & caixa & ~mesa & ~par
+        # o piso do quarto: a cor do PDF do vinílico em volta (fora da cadeira e da mesa)
+        anel = dilatar(caixa, 6) & ~caixa & ~mesa & ~moveis & ~par
+        ch = Q.chapada.reshape(-1, 3)[anel.ravel()]
+        cores, nn = np.unique(ch, axis=0, return_counts=True)
+        piso = cores[np.argmax(nn)]
+        outro = np.any(Q.chapada != piso, axis=2) & ~zona
+        proibido = dilatar(moveis | par, 2) | outro
+        with contextlib.redirect_stdout(io.StringIO()):
+            out, _ = TC._tapar_rotulo(out, zona, proibido, np.zeros((H, W, 3), np.uint8),
+                                      dict(TC.ROTULOS_1111, busca_px=q["busca_px"]))
+        c["_tirada"] = int(zona.sum())
+    # 2. a cadeira da biblioteca, virada para a mesa, 1/3 sob o tampo, com a sombra curta do tampo
+    of = out.astype(np.float32)
+    k = Q.px_m
+    qc = D.MOVEIS_TD["cadeira"]
+    D_px = qc["m"] * k
+    s_ = D.F.PECAS["sombra"]
+    for c in q["cadeiras"]:
+        mx0, my0, mx1, my1 = c["mesa_px"]
+        X0, Y0 = int(np.floor(mx0)), int(np.floor(my0))
+        X1, Y1 = int(np.ceil(mx1)), int(np.ceil(my1))
+        mesa_a = np.zeros((H, W), np.float32)
+        mesa_a[Y0:Y1, X0:X1] = U._cobertura((mx0, my0, mx1, my1), X0, Y0, X1 - X0, Y1 - Y0)
+        fx, fy = c["frente"]
+        recuo = D_px * (0.5 - qc["sob"])
+        if fx:
+            ccx = (mx0 - recuo) if fx > 0 else (mx1 + recuo)
+            ccy = c["meio"]
+        else:
+            ccx = c["meio"]
+            ccy = (my0 - recuo) if fy > 0 else (my1 + recuo)
+        cor, a = D._cadeira_bloco(Q, (fx, fy), contorno=qc["contorno"])
+        D._pousar(of, cor, a, ccx, ccy, k, cobre=mesa_a)
+        d_ = s_["dist_m"] * k
+        sb = cv2.GaussianBlur(cv2.warpAffine(mesa_a, np.float32([[1, 0, -d_], [0, 1, d_]]), (W, H)), (0, 0),
+                              s_["sig_m"] * k) * s_["forca"]
+        cad_a = np.zeros((H, W), np.float32)
+        h_, w_ = a.shape
+        ty, tx = int(round(ccy - h_ / 2)), int(round(ccx - w_ / 2))
+        cad_a[ty:ty + h_, tx:tx + w_] = a
+        of *= (1 - sb * np.clip(cad_a, 0, 1) * (1 - mesa_a))[..., None]
+        c["_centro"] = (round(float(ccx), 1), round(float(ccy), 1))
+    out = np.clip(np.round(of), 0, 255).astype(np.uint8)
+    for c in q["cadeiras"]:
+        print(f"      {c['nome']}: a cadeira chapada sai ({c['_tirada']} px de vinílico refeito); a de madeira e linho "
+              f"em {c['_centro']}, virada para a mesa {c['frente']}")
+    print(f"    cadeiras das escrivaninhas: {len(q['cadeiras'])} trocadas pela de madeira e linho da biblioteca, 1/3 sob "
+          f"o tampo, com a sombra curta dele")
+    return out
+
+
+# As pedras do acesso (usuário: "corrija os contornos das pedras", com o recorte dos pisantes da entrada sobre a grama):
+# as 9 pedras tinham a beira serrilhada (degraus de 1 px, o dente no canto da primeira). Cada uma volta como o
+# retângulo do PDF (ARQ_CONTRAPISO, px), com a cobertura subpixel na beira (antisserrilhada), o miolo dela mesma
+# (`inset_px` para dentro, rebatido até a beira) e o aro fino da Casa A (`terreo_casaa_1011`, `R_PEDRAS`: 0,86 no 1º px
+# e 0,95 no 2º); em volta, os px claros que sobravam na grama (até `anel_px`) viram a grama mais perto, para fora.
+# Topo e base iguais nas 9 (a fiada alinhada).
+PEDRAS_TB = {"rets_px": [(2709.19, 2950.14), (2959.59, 3019.43), (3028.97, 3088.81), (3097.28, 3157.12),
+                         (3167.18, 3227.55), (3235.49, 3296.39), (3304.75, 3363.98), (3373.78, 3433.84),
+                         (3442.65, 3502.6)],
+             "y_px": (973.4, 1152.5), "inset_px": 4, "aro": (0.86, 0.95), "anel_px": 4, "busca_px": 12}
+
+
+def pedras_tb(Q, img, q=PEDRAS_TB):
+    import terreo_casaa_1011 as TC
+    import um_pav_casaa_1111 as U
+    H, W = img.shape[:2]
+    out = img.copy()
+    y0, y1 = q["y_px"]
+    ins = q["inset_px"]
+    # 1. a grama em volta sem os restos claros da beira velha (a grama mais perto, para fora)
+    pedra = np.zeros((H, W), bool)
+    for x0, x1 in q["rets_px"]:
+        pedra[int(np.ceil(y0)):int(np.floor(y1)), int(np.ceil(x0)):int(np.floor(x1))] = True
+    an, R = q["anel_px"], q["busca_px"]
+    grama = TC._grama_px(img)
+    zona = dilatar(pedra, an + 1) & ~pedra & ~grama
+    ys, xs = np.nonzero(zona)
+    trocados = 0
+    for y, x in zip(ys, xs):
+        # a direção para fora: da pedra mais perto
+        dx = dy = 0
+        for x0, x1 in q["rets_px"]:
+            if x0 - an - 2 <= x <= x1 + an + 2:
+                dx = -1 if x < x0 else (1 if x > x1 else 0)
+                dy = -1 if y < y0 else (1 if y > y1 else 0)
+                if dx or dy:
+                    break
+        if not (dx or dy):
+            continue
+        for k in range(1, R + 1):
+            yy, xx = y + dy * k, x + dx * k
+            if 0 <= yy < H and 0 <= xx < W and not pedra[yy, xx] and grama[yy, xx] and not zona[yy, xx]:
+                out[y, x] = img[yy, xx]
+                trocados += 1
+                break
+    # 2. cada pedra: o miolo dela rebatido até a beira, o aro fino e a cobertura subpixel do retângulo
+    of = out.astype(np.float32)
+    for x0, x1 in q["rets_px"]:
+        X0, Y0 = int(np.floor(x0)) - 1, int(np.floor(y0)) - 1
+        X1, Y1 = int(np.ceil(x1)) + 1, int(np.ceil(y1)) + 1
+        mx0, my0 = int(np.ceil(x0)) + ins, int(np.ceil(y0)) + ins
+        mx1, my1 = int(np.floor(x1)) - ins, int(np.floor(y1)) - ins
+        miolo = img[my0:my1, mx0:mx1].astype(np.float32)
+        tex = cv2.copyMakeBorder(miolo, my0 - Y0, Y1 - my1, mx0 - X0, X1 - mx1, cv2.BORDER_REFLECT)
+        yy, xx = np.mgrid[Y0:Y1, X0:X1].astype(np.float32) + 0.5
+        d = np.minimum.reduce([xx - x0, x1 - xx, yy - y0, y1 - yy])          # px até a beira (dentro > 0)
+        c0, c1 = q["aro"]
+        aro = np.where(d < 1, c0, np.where(d < 2, c0 + (c1 - c0) * (d - 1), np.where(d < 3, c1 + (1 - c1) * (d - 2), 1)))
+        tex *= aro[..., None]
+        a = U._cobertura((x0, y0, x1, y1), X0, Y0, X1 - X0, Y1 - Y0)[..., None]
+        of[Y0:Y1, X0:X1] = of[Y0:Y1, X0:X1] * (1 - a) + tex * a
+    out = np.clip(np.round(of), 0, 255).astype(np.uint8)
+    print(f"    pedras do acesso: {len(q['rets_px'])} retângulos do PDF com a beira antisserrilhada e o aro fino da "
+          f"Casa A (topo e base alinhados); {trocados} px claros da beira velha viram grama")
+    return out
+
+
 # Os rótulos (usuário: "centralize todos os rótulos e deixe-os alinhados"; "deixe os rótulos alinhados", com os
 # recortes): cada rótulo atual é achado na imagem (o desenho dele na fonte da prancha, `retoque_1pav_casae.
 # rotulos_ambientes`, em cada corpo e quebra, casado por correlação com o mapa do texto escuro ou claro, ±`busca_px` do
@@ -2339,7 +2498,7 @@ PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_
           ("portas_fechadas", portas_fechadas_tb), ("cozinha", cozinha_tb),
           ("quina", quina_tb), ("tapete", tapete_tb),
           ("poltronas", poltronas_tb), ("sofa_living", sofa_living_tb),
-          ("rotulos", rotulos_tb)]
+          ("cadeiras", cadeiras_tb), ("pedras", pedras_tb), ("rotulos", rotulos_tb)]
 
 
 def correcoes(img, de=None, ate=None, salvar_passos=None):
