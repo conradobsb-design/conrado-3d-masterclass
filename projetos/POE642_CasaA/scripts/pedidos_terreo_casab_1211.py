@@ -2834,6 +2834,15 @@ def _achar_rotulos(Q, img, rot, q):
     return achados
 
 
+ROTULOS_JSON = RENDERS / "POE642_CasaB_PH_Terreo_rotulos_1211.json"
+
+
+def _spec_rotulo(r1, opc, dx, dy, cor):
+    return {"nome": r1[0], "pdf": [float(v) for v in r1[2]],
+            "opc": {k: (list(v) if isinstance(v, tuple) else v) for k, v in opc.items() if k != "cor"},
+            "desvio": [float(dx), float(dy)], "cor": [int(c) for c in cor]}
+
+
 def rotulos_tb(Q, img, q=ROTULOS_TB):
     import retoque_1pav_casae as R1
     import terreo_casaa_1011 as TC
@@ -2861,6 +2870,10 @@ def rotulos_tb(Q, img, q=ROTULOS_TB):
     proibido = dilatar(texto, 2) | moveis | par
     with contextlib.redirect_stdout(io.StringIO()):
         out, _ = TC._tapar_rotulo(out, texto & ~par, proibido, Q.chapada, TC.ROTULOS_1111)
+    if not q.get("desenhar", True):                       # a entrada do 12K: os rótulos só saem
+        print(f"    rótulos: {len(achados)} tirados (sem desenhar, para o 12K)")
+        return out
+    specs = []
     # 2. o meio do piso livre de cada ambiente
     busca = []
     for a in achados:
@@ -2978,6 +2991,7 @@ def rotulos_tb(Q, img, q=ROTULOS_TB):
             out = R1.rotulos_ambientes(out, [r1], Q.p2q, escala_desvio=esc, granito=None,
                                        ajustes=[(r1[0], (cx / esc, cy / esc), (dx / esc, dy / esc), dict(opc, cor=cor))],
                                        halo=None)
+            specs.append(_spec_rotulo(r1, opc, dx, dy, cor))
             print(f"      {r1[0]}: fixo, caixa ({x0_}, {y0_})-({x0_ + bx1 - bx0}, {y0_ + by1 - by0}), corpo {fc}")
             continue
         if p_["nome"] in q.get("no_lugar", ()):
@@ -2990,6 +3004,7 @@ def rotulos_tb(Q, img, q=ROTULOS_TB):
             out = R1.rotulos_ambientes(out, [r1], Q.p2q, escala_desvio=esc, granito=None,
                                        ajustes=[(r1[0], (cx / esc, cy / esc), (dx / esc, dy / esc),
                                                  dict(a_["opc"], cor=cor))], halo=None)
+            specs.append(_spec_rotulo(r1, a_["opc"], dx, dy, cor))
             print(f"      {r1[0]}: no lugar achado ({xs.min()}, {ys.min()})-({xs.max() + 1}, {ys.max() + 1}), "
                   f"corpo {a_['opc']['corpo'] / base:.2f}")
             continue
@@ -3016,10 +3031,14 @@ def rotulos_tb(Q, img, q=ROTULOS_TB):
         out = R1.rotulos_ambientes(out, [r1], Q.p2q, escala_desvio=esc, granito=None,
                                    ajustes=[(r1[0], (cx / esc, cy / esc), (dx / esc, dy / esc), dict(opc, cor=cor))],
                                    halo=None)
+        specs.append(_spec_rotulo(r1, opc, dx, dy, cor))
         print(f"      {r1[0]}: achado (nota {achados[p_['i']]['nota']:.2f}); caixa ({x0_}, {y0_})-({x0_ + bx1 - bx0}, "
               f"{y0_ + by1 - by0}), corpo {fc}" + {"x": ", na faixa", "y": ", na coluna", "?": ", sem lugar livre",
                                                    None: ""}[eixo])
-    print(f"    rótulos: {len(achados)} no meio do piso livre, alinhados por faixa ({len(q['alinhar'])} faixas)")
+    # o desenho de cada rótulo (para o 12K: `ampliacao_12k_terreo_casab.py`)
+    ROTULOS_JSON.write_text(json.dumps(specs, ensure_ascii=False, indent=1) + "\n")
+    print(f"    rótulos: {len(achados)} no meio do piso livre, alinhados por faixa ({len(q['alinhar'])} faixas; "
+          f"{ROTULOS_JSON.name})")
     return out
 
 
