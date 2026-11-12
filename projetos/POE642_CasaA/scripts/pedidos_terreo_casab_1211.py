@@ -1428,13 +1428,39 @@ def perimetro_tb(Q, img, q=PERIMETRO_TB):
     return out
 
 
+# A água entre os vidros (usuário, no recorte da borda da piscina junto ao deck: "Corrigir o tom da água entre os
+# vidros"): o canal entre os dois vidros da borda esquerda da piscina (`canal_px`) ficou no turquesa saturado de antes
+# da água C; ele vai ao tom da água da piscina ao lado (`ref_px`, sem os brilhos acima de `brilho_lum`): a média e o
+# desvio de cada canal casados com os dela (o desvio a `contraste`), com o desenho da água do canal mantido; os fios
+# escuros dos vidros (abaixo de `vidro_lum`) ficam.
+VIDROS_AGUA_TB = {"canal_px": (747, 907, 764, 1093), "ref_px": (768, 915, 800, 1085), "brilho_lum": 190,
+                  "vidro_lum": 60, "contraste": 0.85}
+
+
+def vidros_agua_tb(Q, img, q=VIDROS_AGUA_TB):
+    out = img.astype(np.float32)
+    x0, y0, x1, y1 = q["canal_px"]
+    a0, b0, a1, b1 = q["ref_px"]
+    ref = out[b0:b1, a0:a1].reshape(-1, 3)
+    ref = ref[ref.mean(axis=1) < q["brilho_lum"]]
+    reg = out[y0:y1, x0:x1]
+    m = reg.mean(axis=2) >= q["vidro_lum"]
+    px = reg[m]
+    mu_s, sd_s = px.mean(axis=0), np.maximum(px.std(axis=0), 1e-3)
+    mu_r, sd_r = ref.mean(axis=0), ref.std(axis=0)
+    reg[m] = (px - mu_s) / sd_s * sd_r * q["contraste"] + mu_r
+    print(f"    água entre os vidros: o canal do turquesa (BGR {np.round(mu_s).astype(int).tolist()}) ao tom da piscina "
+          f"(BGR {np.round(mu_r).astype(int).tolist()}), {int(m.sum())} px")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_tb), ("deck", deck_tb), ("portas", portas_tb),
           ("escadas", escadas_tb), ("entrada", entrada_tb),
           ("tracejados", tracejados_tb), ("moveis", moveis_tb), ("closets", closets_tb), ("banco", banco_closet_tb),
           ("espreguicadeiras", espreguicadeiras_tb), ("folhas", folhas_tb),
           ("gramado", gramado_tb), ("jardins", jardins_tb), ("perimetro", perimetro_tb),
-          ("pergolado", pergolado_tb)]
+          ("pergolado", pergolado_tb), ("vidros_agua", vidros_agua_tb)]
 
 
 def correcoes(img, de=None, ate=None, salvar_passos=None):
