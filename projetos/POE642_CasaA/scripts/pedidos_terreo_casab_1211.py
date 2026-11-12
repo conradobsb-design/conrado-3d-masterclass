@@ -2331,8 +2331,13 @@ def _living_camada(Q, img, cam, q, feito):
     x0, y0, x1, y1 = cam["caixa_px"]
     w, h = x1 - x0, y1 - y0
     ia = cv2.resize(cv2.imread(str(cam["ia_png"])), (w, h), interpolation=cv2.INTER_AREA).astype(np.float32)
+    # o que a IA inventou fora do PDF, refeito da própria IA `dx` px ao lado (px do quadro)
+    for a, b, c, e, dx in cam.get("remendos_ia", ()):
+        ia[b - y0:e - y0, a - x0:c - x0] = ia[b - y0:e - y0, a - x0 + dx:c - x0 + dx].copy()
     reg = img[y0:y1, x0:x1].astype(np.float32)
-    fixo = feito[y0:y1, x0:x1]
+    fixo = feito[y0:y1, x0:x1].copy()
+    for peca in cam.get("protege", ()):
+        fixo = np.maximum(fixo, _living_pdf(Q, peca, x0, y0, w, h))
 
     def ret(r, d=0):
         m = np.zeros((h, w), bool)
@@ -2414,6 +2419,40 @@ def living_ia_tb(Q, img, q=LIVING_IA_TB):
         feito = np.maximum(feito, pg)
     print(f"    estar do living: o sofá da opção A; a mesa lateral, a arandela, as 2 poltronas e a mesa de centro com "
           f"a sombra no estilo da opção B (Nano Banana Pro, nas silhuetas do PDF)")
+    return out
+
+
+# O estar da varanda, 2ª passada pela IA (usuário, sobre o sofá: "mantenha o realismo, mas corrija a posição do encosto e
+# adicione o encosto para o outro lado também. Ao aplicar o realismo, não podemos alterar a composição e dimensões
+# existentes no PDF base. A opção do sofá permite as pessoas ficarem sentadas tanto viradas para TV quanto para as mesas
+# do gourmet"; e, sobre as duas poltronas terracota: "melhore o aspecto com mais realismo nessas poltronas"). Duas
+# camadas do Nano Banana Pro, como as do living (`_living_camada`):
+#   1. o sofá de dois lados (PDF 64428): o recorte foi à IA com o desenho do PDF do sofá ao lado, na mesma escala, de
+#      referência: o encosto fino no meio dos dois módulos, as almofadas de encosto e os assentos dos dois lados (virados
+#      para a TV e para as mesas do gourmet) e o módulo da direita, pufe inteiro, sem encosto; o contorno do PDF; a mesa
+#      lateral de carvalho (66895) fica a de antes (`protege`);
+#   2. as 2 poltronas giradas (66910, 67076): a concha terracota estofada e o assento off-white em bouclé, no giro e no
+#      tamanho delas, com as poltronas do living de referência de tecido; a sombra curta da IA em volta.
+ESTAR_VARANDA_TB = {"camadas": [
+    {"nome": "sofá de dois lados da varanda", "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_varanda_sofa2lados_nbp_alinhado.png",
+     "caixa_px": (1180, 935, 1470, 1098), "pecas": [64428], "protege": [66895],
+     # a tábua de madeira que a IA pôs no fim do assento de baixo do 2º módulo (não há no PDF): o assento e a fresta
+     # atrás da almofada vêm do 1º módulo, 89 px à esquerda (a largura do módulo)
+     "remendos_ia": [(1360, 1029, 1391, 1057, -89), (1385, 1000, 1391, 1029, -89)]},
+    {"nome": "poltronas terracota da varanda", "ia_png": RENDERS / "ia" / "POE642_CasaB_Terreo_varanda_poltronas_nbp_alinhado.png",
+     "caixa_px": (1380, 790, 1556, 1010), "pecas": [66910, 67076], "sombra_px": 5.0}],
+    "cresce_px": 2, "perto_px": 3, "peca_ab_min": 7.0, "peca_l_min": 9.0, "ganho_lim": (0.92, 1.08), "linha_lum": 110,
+    "fora_px": []}
+
+
+def estar_varanda_tb(Q, img, q=ESTAR_VARANDA_TB):
+    out = img.copy()
+    feito = np.zeros(img.shape[:2], np.float32)
+    for cam in q["camadas"]:
+        out, pg = _living_camada(Q, out, cam, q, feito)
+        feito = np.maximum(feito, pg)
+    print("    estar da varanda: o sofá de dois lados pelo desenho do PDF e as 2 poltronas terracota realistas "
+          "(Nano Banana Pro, nas silhuetas do PDF)")
     return out
 
 
@@ -2546,7 +2585,19 @@ PONTOS_TB = {"remendos": [{"nome": "puxador do box do banho master", "px": (1542
                           {"nome": "aba branca da cuba da pia gourmet (borda)", "px": (1399, 1497, 1404, 1512),
                            "linha": 1513},
                           {"nome": "aba branca da cuba da pia gourmet (granito)", "px": (1404, 1497, 1409, 1512),
-                           "dy": 14}]}
+                           "dy": 14},
+                          # (usuário: "desse banho gourmet, remova o ponto preto ... está dentro do box à direita"): o
+                          # botão escuro do registro do chuveiro do BH gourmet da esquerda; o piso de 9 px acima e a
+                          # beira do registro da linha limpa logo acima do botão
+                          {"nome": "botão escuro do registro do BH gourmet da esquerda (piso)", "px": (1203, 1633, 1208, 1641),
+                           "dy": -9},
+                          {"nome": "botão escuro do registro do BH gourmet da esquerda (beira)", "px": (1208, 1633, 1212, 1641),
+                           "linha": 1631},
+                          # (usuário: "volte o registro da ducha à direita. deve ficar igual ao registro do lado
+                          # esquerdo"): o registro da ducha da direita do banho master vira o espelho do da esquerda (a
+                          # barra creme junto à parede e o botão para dentro do box); x da direita = `espelho_x` - x
+                          {"nome": "registro da ducha da direita do banho master (espelho do da esquerda)",
+                           "px": (1546, 378, 1558, 417), "espelho_x": 2797}]}
 
 
 def pontos_tb(Q, img, q=PONTOS_TB):
@@ -2555,6 +2606,9 @@ def pontos_tb(Q, img, q=PONTOS_TB):
         x0, y0, x1, y1 = r["px"]
         if "linha" in r:
             out[y0:y1, x0:x1] = img[r["linha"], x0:x1][None, :, :]
+        elif "espelho_x" in r:
+            xs = r["espelho_x"] - np.arange(x0, x1)
+            out[y0:y1, x0:x1] = img[y0:y1][:, xs]
         else:
             out[y0:y1, x0:x1] = img[y0 + r["dy"]:y1 + r["dy"], x0:x1]
     print(f"    pontos: {', '.join(r['nome'] for r in q['remendos'])} fora")
@@ -2656,7 +2710,9 @@ ROTULOS_TB = {"manter": ("SPA", "PISCINA", "PRAINHA", "JARDIM DE INVERNO", "JARD
               # varanda/gourmet mais a direita sem ficar na sombra do sofá, mas alinhado com o rótulo do living": entre a
               # sombra do sofá, em x 1446, e a linha da varanda, em x 1553, cabe a 0,92; "corrija o rótulo do louceiro
               # para cor branca e centralizado": no meio do piso marrom, entre a prateleira e a parede)
-              "fixos": {"VARANDA/GOURMET": {"cx": 1498.5, "corpo": 0.92}, "LOUCEIRO": {"cx": 1897.5, "cor": (255, 255, 255)}},
+              # (usuário: "suba mais esse rótulo", o da COZINHA): no meio do piso livre acima da ilha, no eixo da cozinha
+              "fixos": {"VARANDA/GOURMET": {"cx": 1498.5, "corpo": 0.92}, "LOUCEIRO": {"cx": 1897.5, "cor": (255, 255, 255)},
+                        "COZINHA": {"cx": 1692.0, "fundo": 1354.0}},
               # os ambientes abertos para o terreno (o recinto do PDF vaza): o piso livre nesta caixa (px)
               "recorte_px": {"DECK": (667, 1380, 1094, 1702), "HALL": (2545, 945, 2705, 1180),
                              "GARAGEM": (2390, 1296, 2850, 1366)}}
@@ -2843,7 +2899,7 @@ def rotulos_tb(Q, img, q=ROTULOS_TB):
             fx_ = q["fixos"][p_["nome"]]
             fc = fx_.get("corpo", 1.0)
             opc, bx0, by0, bx1, by1 = caixa(p_["i"], fc)
-            fundo = p_["alinhado"][1] if p_.get("eixo") == "x" else p_["fundo"]
+            fundo = fx_.get("fundo") or (p_["alinhado"][1] if p_.get("eixo") == "x" else p_["fundo"])
             x0_, y0_ = int(round(fx_["cx"] - (bx1 - bx0) / 2)), int(round(fundo - (by1 - by0)))
             dx, dy = x0_ - bx0, y0_ - by0
             cor = fx_.get("cor") or F.cor_do_fundo(out, x0_, y0_, x0_ + bx1 - bx0, y0_ + by1 - by0)
@@ -2897,6 +2953,36 @@ def rotulos_tb(Q, img, q=ROTULOS_TB):
     return out
 
 
+# A cozinha, depois dos rótulos (usuário: "corrija esses erros na bancada da cozinha"; "suba mais esse rótulo e corrija o
+# erro na bancada da ilha da cozinha"): (1) a beira esquerda da perna vertical da bancada em L (PDF 24219, x 1786,2, de
+# y 1552,7 a 1630,3) tinha o tracejado do armário antigo: o piso marrom vem das colunas `piso_dx` px à esquerda, a
+# bancada das `bancada_dx` px à direita, e a coluna da beira é a mistura das duas na cobertura do PDF; (2) a mancha clara
+# à direita da ilha, junto ao rótulo antigo da COZINHA (o remendo do rótulo puxou a pedra da ilha para o piso): a faixa
+# vem de `dy` px abaixo, com a beira da ilha.
+BANCADA_COZINHA_TB = {"beira_x": 1786.2, "beira_y": (1553, 1630), "piso_cols": (1782, 1786), "bancada_cols": (1787, 1791),
+              "piso_dx": -7, "bancada_dx": 6,
+              "remendos": [{"nome": "mancha clara à direita da ilha", "px": (1715, 1391, 1723, 1413), "dy": 24}]}
+
+
+def bancada_cozinha_tb(Q, img, q=BANCADA_COZINHA_TB):
+    out = img.copy()
+    y0, y1 = q["beira_y"]
+    a0, a1 = q["piso_cols"]
+    b0, b1 = q["bancada_cols"]
+    out[y0:y1, a0:a1] = img[y0:y1, a0 + q["piso_dx"]:a1 + q["piso_dx"]]
+    out[y0:y1, b0:b1] = img[y0:y1, b0 + q["bancada_dx"]:b1 + q["bancada_dx"]]
+    xb = int(np.floor(q["beira_x"]))
+    c = 1 - (q["beira_x"] - xb)
+    mist = (1 - c) * img[y0:y1, xb + q["piso_dx"]].astype(np.float32) + c * img[y0:y1, xb + q["bancada_dx"]].astype(np.float32)
+    out[y0:y1, xb] = np.clip(np.round(mist), 0, 255).astype(np.uint8)
+    for r in q["remendos"]:
+        x0, ry0, x1, ry1 = r["px"]
+        out[ry0:ry1, x0:x1] = img[ry0 + r["dy"]:ry1 + r["dy"], x0:x1]
+    print(f"    cozinha: a beira da bancada em L sem o tracejado (x {q['beira_x']}, y {y0}-{y1}); "
+          f"{', '.join(r['nome'] for r in q['remendos'])} fora")
+    return out
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_tb), ("deck", deck_tb), ("portas", portas_tb),
           ("bege_escadas", bege_escadas_tb), ("escadas", escadas_tb), ("entrada", entrada_tb),
@@ -2909,9 +2995,9 @@ PASSOS = [("marrom", marrom_tb), ("bancadas", bancadas_tb), ("gourmet", gourmet_
           ("quina", quina_tb), ("tapete", tapete_tb),
           ("poltronas", poltronas_tb), ("sofa_living", sofa_living_tb),
           ("cadeiras", cadeiras_tb), ("varanda_ia", varanda_ia_tb), ("poltronas_varanda", poltronas_varanda_tb),
-          ("living_ia", living_ia_tb),
+          ("estar_varanda", estar_varanda_tb), ("living_ia", living_ia_tb),
           ("pedras", pedras_tb), ("brises", brises_tb), ("despensa", despensa_tb), ("pontos", pontos_tb),
-          ("rotulos", rotulos_tb)]
+          ("rotulos", rotulos_tb), ("bancada_cozinha", bancada_cozinha_tb)]
 
 
 def correcoes(img, de=None, ate=None, salvar_passos=None):
