@@ -81,9 +81,10 @@ SERVICO = {"cuba": (1182.3, 556.4, 1204.9, 579.0), "bancada": (1178.4, 538.5, 12
 # os chuveiros (pt): a placa do PDF, a face da parede onde o braço chega e o lado; o desenho em planta; o trecho de
 # antes (pt, a placa, o braço e a canopla) e de onde vem o piso que o cobre (o deslocamento em px)
 CHUVEIROS = [
+    # (13/11, "CORRIJA O PISO AO INCLUIR NOVO CHUVEIRO") na ducha do deck, o chuveiro de antes não é mais desenhado
+    # (`pedidos_subsolo_casab_1211.DECK_SB["chuveiro"]`): o deck por baixo é o do gerador, sem remendo (`antes_pt` None)
     {"nome": "ducha do deck", "png": "banho-1/chuveiro-quadrado-parede-planta",
-     "placa_pt": (747.5, 930.4, 758.7, 941.6), "parede": (958.2, "baixo"),
-     "antes_pt": (747.5, 930.4, 758.7, 958.2), "piso_dx": 1, "piso_dy": 0},
+     "placa_pt": (747.5, 930.4, 758.7, 941.6), "parede": (958.2, "baixo"), "antes_pt": None},
     {"nome": "chuveiro ao lado da sauna", "png": "banho-1/chuveiro-quadrado-parede-planta",
      "placa_pt": (990.5, 918.7, 1001.7, 929.9), "parede": (974.3, "esq"),
      "antes_pt": (974.9, 918.7, 1001.7, 929.9), "piso_dx": 0, "piso_dy": -1},
@@ -259,9 +260,10 @@ def aplicar(antes):
         print(f"    {v['nome']}: {Path(v['png']).stem} branca no retângulo do vaso do PDF")
     # 5. os chuveiros: os de antes viram piso, os desenhados entram
     for ch in CHUVEIROS:
-        a = px(Q, ch["antes_pt"])
-        a = (a[0] - LIMPA_PX, a[1] - LIMPA_PX, a[2] + LIMPA_PX, a[3] + LIMPA_PX)
-        out = piso_desloc(out, a, par, ch["piso_dx"], ch["piso_dy"], folga=0)
+        if ch["antes_pt"] is not None:
+            a = px(Q, ch["antes_pt"])
+            a = (a[0] - LIMPA_PX, a[1] - LIMPA_PX, a[2] + LIMPA_PX, a[3] + LIMPA_PX)
+            out = piso_desloc(out, a, par, ch["piso_dx"], ch["piso_dy"], folga=0)
         pl = px(Q, ch["placa_pt"])
         pc = ((pl[0] + pl[2]) / 2, (pl[1] + pl[3]) / 2)
         lado = ch["parede"][1]

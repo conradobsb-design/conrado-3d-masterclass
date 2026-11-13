@@ -2466,7 +2466,10 @@ aprovada com "OK, PODE APLICAR AS RECOMENDADAS"):** as escolhas do Subsolo da Ca
   retângulo do vaso do PDF (a caixa na parede da esquerda; por baixo, o inpaint do piso);
 - chuveiros (`CHUVEIROS`, `chuveiro_pos`: o desenho em planta com o braço até a parede em cima, embaixo, à esquerda ou
   à direita): o quadrado de parede na ducha do deck (`ajustes_casab.CHUVEIRO_DUCHA`) e no chuveiro ao lado da sauna,
-  o redondo de parede no chuveiro ao lado do BH serviço; os de antes viram o piso do lado; a sombra `chuveiro`;
+  o redondo de parede no chuveiro ao lado do BH serviço; os de antes viram o piso do lado; a sombra `chuveiro`; na
+  ducha do deck ("CORRIJA O PISO AO INCLUIR NOVO CHUVEIRO": o deck copiado do lado aparecia como um remendo, com as
+  juntas fora do lugar), o chuveiro de antes não é mais desenhado no passo do deck de `pedidos_subsolo_casab_1211`
+  (`DECK_SB["chuveiro"]` False) e o novo entra direto sobre o deck do gerador, com as réguas contínuas;
 - academia: sem troca (os aparelhos já são os da Casa A).
 No 12K, `montar12k` chama `pecas_12k` antes dos rótulos: a zona que mudou na final
 (`renders/POE642_CasaB_PH_Subsolo_12K_biblioteca_zona.png`) vem da final ampliada sobre a saída do Topaz e as peças de

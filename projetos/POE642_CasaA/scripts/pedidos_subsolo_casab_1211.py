@@ -134,7 +134,10 @@ def pisos_sb(Q, img, q=PISOS_SB):
 # de madeira nova, veio, bisel, juntas e topos discretos), nas cores do deck na base da Casa B. O rótulo DUCHA sai antes
 # (o escuro dele, pelo entorno) e volta no passo dos rótulos; o chuveiro da ducha (`B.CHUVEIRO_DUCHA`) é redesenhado por
 # cima, como no motor.
-DECK_SB = {"cores": [(99, 136, 174), (76, 106, 138)], "rotulo_px": (814, 657, 890, 696), "escuro": 110}
+DECK_SB = {"cores": [(99, 136, 174), (76, 106, 138)], "rotulo_px": (814, 657, 890, 696), "escuro": 110,
+           # (13/11, "CORRIJA O PISO AO INCLUIR NOVO CHUVEIRO") o chuveiro de antes não é mais desenhado aqui: o novo
+           # (o desenho em planta, `biblioteca_subsolo_casab_1311`) entra por cima do deck do gerador, sem remendo
+           "chuveiro": False}
 
 
 def deck_sb(Q, img, q=DECK_SB):
@@ -151,9 +154,11 @@ def deck_sb(Q, img, q=DECK_SB):
         out = TC.deck_madeira_ta(Q, base, q=dict(TC.DECK_TA, cores=q["cores"]))
     finally:
         TC.rotulos_na_imagem = guarda
-    c = B.CHUVEIRO_DUCHA
-    out = chuveiro(np.ascontiguousarray(out.copy()), Q.p2q, c["ducha"], c["braco"], c["canopla"])
-    print("    deck da ducha: o da Casa A (réguas de 20 cm, madeira nova), o chuveiro de novo por cima")
+    if q.get("chuveiro", True):
+        c = B.CHUVEIRO_DUCHA
+        out = chuveiro(np.ascontiguousarray(out.copy()), Q.p2q, c["ducha"], c["braco"], c["canopla"])
+    print("    deck da ducha: o da Casa A (réguas de 20 cm, madeira nova)"
+          + (", o chuveiro de novo por cima" if q.get("chuveiro", True) else "; o chuveiro vem da biblioteca"))
     return out
 
 
