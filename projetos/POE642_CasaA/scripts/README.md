@@ -2624,6 +2624,38 @@ d'água"). Depois ("Adicione os colchonetes ... e esse encosto de cabeça"): por
 encosto de cabeça em rolo da espreguiçadeira A (recortados dela, no tamanho da resina), a costura na dobra do encosto e
 a sombra curta: `espreguicadeira-resina-colchonete.png`.
 
+### Térreo da Casa B, a revisão do 12K (13/11): `revisao_terreo_casab_1311.py`
+
+Os apontamentos do usuário revisando o 12K, chamados no fim do `regras_terreo_casab_1311.aplicar`
+(`RV.aplicar(RT, Q, out, par, reg)`, o `RT` passado para não importar uma 2ª cópia do módulo quando ele roda como
+script). As peças desenhadas aqui entram no registro do 12K com o tipo `rv_...` (`rv_vetor`: retângulos, fios e
+polígonos; `rv_banco`; `rv_bancada`), desenhadas em 8x e redesenhadas nítidas na escala do 12K (`regras_terreo_casab_1311
+.peca_12k` -> `RV.peca_12k`); a cama da suíte 3 vem da saída do Topaz (`RV.copias_12k`, no `pecas_12k`).
+- **Deck:** o banco em réguas de madeira escura (8 réguas de 0,10 m no comprimento de cada braço, a esquadria a 45°
+  no canto, o fio da borda, a luz na quina de dentro) e o contorno cinza 80 de 2 px na borda de cima, na da direita e
+  por fora do banco.
+- **Piscina:** a faixa azul entre a linha do PDF (x 747,2) e o vidro da esquerda virou o deck (cada linha, as tábuas
+  4 px antes).
+- **Lavatório gourmet:** a bancada do PDF em travertino (`final3840_casaa.travertino_bruto` em 8x, no tom da cuba
+  esculpida), as 2 cubas por cima (e antes delas no registro do 12K).
+- **Refrigerador:** o do PDF (ARQ_LAYOUT, 1,40 x 0,75 m) no vão junto ao BH gourmet, a geladeira G2 girada 180°.
+- **Batentes:** nas 25 portas de giro (os arcos da ARQ_PAREDE), as peças brancas finas perto do arco, com a parede de um
+  lado, viram parede, até a face da folha que encosta (45).
+- **Porta de correr da cozinha:** só a folha (o vidro com o perfil preto) e o piso embaixo dela; a parede como no PDF
+  (o usuário recusou a parede aumentada até a folha).
+- **Banho da suíte 2:** as manchas entre a folha e a parede (o piso de 9 px acima) e a folha redesenhada.
+- **Paredes do louceiro, da despensa e da área de serviço:** a sombra suja logo abaixo da parede vira o piso de 9 px
+  abaixo.
+- **Suíte 3:** a cama da suíte 1 (a mesma, 2,00 x 2,00 m) girada 90° com a cabeceira embaixo, a sombra curta.
+- **Quarto de serviço:** a moldura marrom em volta da cama vira o piso (inpaint só do piso de fora, mais o grão de um
+  trecho limpo do quarto), a sombra curta; a janela de 2 folhas de correr redesenhada pelo PDF.
+No mesmo pacote, no `regras_terreo_casab_1311.py`: o piso da área dos recamiers da suíte master refeito com as réguas
+do vinílico (`piso_reguas`, a luz em sigmas até 128 e no tom do piso logo abaixo; o espelho por linha deixava
+fantasmas) e os trechos de cortina com um vão curto sem parede no meio unidos (`junta_px` 16; a cortina da suíte 2
+partia nos restos escuros da de antes).
+Antes e depois do 12K A contra a versão anterior: `python3 revisao_terreo_casab_1311.py --antes-depois <commit>`
+(`POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`).
+
 ### Subsolo da Casa C, a biblioteca (13/11): `biblioteca_subsolo_casac_1311.py`
 
 A proposta (`POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_proposta_biblioteca_1.jpg`) aprovada com "Ok"; os PDFs

@@ -82,6 +82,7 @@ import biblioteca_1pav_casaa_1211 as B1          # noqa: E402
 import biblioteca_terreo_casaa_1211 as BT        # noqa: E402
 import biblioteca_subsolo_casab_1311 as BB       # noqa: E402
 import regras_1211_casaa as RG                   # noqa: E402
+import revisao_terreo_casab_1311 as RV           # noqa: E402
 
 CASA_B = AQUI.parents[1] / "POE642_CasaB"
 R = CASA_B / "renders"
@@ -161,11 +162,15 @@ GELADEIRAS_TB = {"png": "02-terreo/cozinha/geladeira-inox.png", "pdf": [63242, 6
 # de um PNG mais comprido, fica para outros casos)
 RECAMIERS_TB = {"png": "03-primeiro-pavimento/suite-master/recamier-veludo-champanhe.png", "encurtar": None,
                 "pdf": [(63598, "esq"), (63651, "dir")], "mesas": [78368, 78353], "folga_px": 8, "busca_px": 14,
-                "velho_croma": 45, "velho_lum": 105}
+                "velho_croma": 45, "velho_lum": 105,
+                # (13/11, revisão do 12K: "CORRIJA O PISO NESSA ÁREA DA SUÍTE") o espelho por linha deixava fantasmas (as
+                # barras claras em cima, o risco entre os recamiers): o piso da área toda (fora as mesinhas e a poltrona
+                # de couro) é refeito com as réguas do vinílico (`piso_reguas`)
+                "zona_px": [(1024, 391, 1203, 452), (1024, 452, 1168, 500)], "tom_px": (1030, 505, 1200, 540)}
 BANCO_CLOSET_TB = {"png": "03-primeiro-pavimento/closet-master/banco-estofado-capitone.png",
                    "px": (1340.0, 624.0, 1451.0, 670.0)}
 CORTINAS_TB = {"png": "02-terreo/cortinas/cortina-linho-onda.png", "prof_px": 9.0, "vidro_px": 4.5,
-               "limpa": (4.0, 5.5), "dentro_px": 3, "parede": 95, "seguidos": 3, "busca_px": 360}
+               "limpa": (4.0, 5.5), "dentro_px": 3, "parede": 95, "seguidos": 3, "busca_px": 360, "junta_px": 16}
 # o jardim de inverno (usuário: "NÃO HÁ A NECESSIDADE DE TANTOS X, FAÇA APENAS UM DE UMA DIAGONAL A OUTRA" e "AS FOLHAS
 # DE BAIXO PRECISAM ESTAR EM CONTATO UMA COM A OUTRA"): os tracejados de antes saem (o branco pouco colorido sobre o
 # gramado, fora o rótulo; o gramado refeito por inpaint) e entra um X só, de canto a canto do miolo (`miolo_px`), no
@@ -739,9 +744,17 @@ def trilhos(img, q=CORTINAS_TB):
                     return yy - passo * (q["seguidos"] - 1) - passo * 0.5
             return y
         res.append([o, v, float(ex), ate((e0 + e1) / 2, -1), ate((e0 + e1) / 2, 1)])
+    def sem_parede(o, v, ex, a_, b_):
+        # (13/11) um vão curto entre dois trechos sem parede no meio (os restos escuros da cortina de antes paravam a
+        # busca e partiam a cortina da suíte 2): unidos
+        pq = par if o == "v" else par.T
+        dentro = int(round(ex)) + (q["dentro_px"] if v == "esquerda" else -q["dentro_px"])
+        return not pq[int(np.floor(a_)):int(np.ceil(b_)) + 1, dentro].any()
     unidos = []
     for o, v, ex, t0, t1 in sorted(res, key=lambda t: (t[0], t[1], round(t[2]), t[3])):
-        if unidos and unidos[-1][:2] == [o, v] and abs(unidos[-1][2] - ex) < 3 and t0 < unidos[-1][4] - 2 \
+        if unidos and unidos[-1][:2] == [o, v] and abs(unidos[-1][2] - ex) < 3 \
+                and (t0 < unidos[-1][4] - 2 or (t0 - unidos[-1][4] <= q["junta_px"]
+                                                and sem_parede(o, v, ex, unidos[-1][4], t0))) \
                 and t1 > unidos[-1][3] + 2:
             unidos[-1][3], unidos[-1][4] = min(unidos[-1][3], t0), max(unidos[-1][4], t1)
         else:
@@ -823,7 +836,20 @@ def pecas_higgsfield(Q, out, antes, par, reg):
     velho = np.isin(lab, toca[toca > 0]) | pdf
     k = 2 * q["folga_px"] + 1
     buraco = (cv2.dilate(velho.astype(np.uint8), np.ones((k, k), np.uint8)) > 0) & ~par & ~mesas
-    out = piso_espelho(out, buraco)
+    for x0, y0, x1, y1 in q["zona_px"]:
+        buraco[y0:y1, x0:x1] = True
+    buraco &= ~par & ~mesas
+    out = piso_reguas(Q, out, buraco, sigmas=(4, 8, 16, 32, 64, 128))
+    # a luz das réguas novas no tom do piso logo abaixo (o armário claro da direita clareava a estimativa)
+    x0_, y0_, x1_, y1_ = q["tom_px"]
+    alvo = np.median(out[y0_:y1_, x0_:x1_].reshape(-1, 3).astype(np.float32), axis=0)
+    o = out.astype(np.float32)
+    bf = buraco.astype(np.float32)
+    num = cv2.GaussianBlur(o * bf[..., None], (0, 0), 25)
+    den = cv2.GaussianBlur(bf, (0, 0), 25)[..., None]
+    loc = num / np.maximum(den, 1e-4)
+    o[buraco] = (o * alvo[None, None] / np.maximum(loc, 1))[buraco]
+    out = np.clip(np.round(o), 0, 255).astype(np.uint8)
     for i, lado in q["pdf"]:
         # o PNG: a cabeceira à esquerda e o encosto em cima; girado, a cabeceira em cima e o encosto à direita
         it = {"tipo": "png", "png": q["png"], "encurtar": list(q["encurtar"]) if q["encurtar"] else None, "rot": -1,
@@ -1381,12 +1407,15 @@ def aplicar(antes, gravar_dados=True):
     out = esquadrias(Q, out)
     out = pecas_higgsfield(Q, out, antes, par, reg)
     out = mobiliario(Q, out, par, reg)
+    out = RV.aplicar(sys.modules[__name__], Q, out, par, reg)       # a revisão do 12K (13/11)
     out = jardim_inverno(out)
     out = rotulos_grade(out, gravar=gravar_dados)
     return out, reg, par
 
 
 def peca_12k(it):
+    if it["tipo"].startswith("rv_"):                # a revisão do 12K (`revisao_terreo_casab_1311`)
+        return RV.peca_12k(it)
     if it["tipo"] == "chuveiro_tb":
         ch = next(c for c in CHUVEIROS_TB if c["nome"] == it["nome"])
         P, cx, cy, wt, ht, ang = chuveiro_desenho(ch)
@@ -1410,6 +1439,7 @@ def pecas_12k(final, out, s, X0, Ya3):
     base = out.copy()                                  # a saída do Topaz: as escrivaninhas nítidas, por cima das cadeiras
     out = BB.pecas_12k(final, out, s, X0, Ya3, reg_json=REG_JSON, reg_masc=REG_MASC, peca=peca_12k)
     out = topo_12k(out, base, s, X0, Ya3)
+    out = RV.copias_12k(out, base, s, X0, Ya3, REG_JSON)  # a cama da suíte 3: a da suíte 1 da saída do Topaz, girada
     if REG_MASC.exists():
         ok = cv2.imread(str(REG_MASC))[..., 2] > 127
         if ok.any():

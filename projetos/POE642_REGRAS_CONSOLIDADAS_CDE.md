@@ -37,6 +37,11 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   - [A três pavimentos; B Subsolo e Térreo]
 - [ ] **Portas quina a quina, sem batentes.** A folha encosta vértice com vértice na ponta da parede, e onde ficava o
   batente entra parede. Nenhuma porta "flutuante": conferir todas, inclusive as de correr. [A e B]
+  - Nas portas de giro, os batentes do PDF (as peças brancas finas na ponta da parede, junto ao arco) viram parede, até
+    a face da folha quando ela encosta ("AO APARECER UM VÃO ENTRE O BATENTE E A PORTA, COMPLETE COM PAREDE"). [B Térreo]
+  - **Porta de correr: só o aspecto da folha** (reta, o perfil preto, o vidro claro, o piso embaixo limpo). **A parede
+    não aumenta**: fica como no PDF, mesmo com a folha meio aberta ("NÃO AUMENTE A PAREDE"). [B Térreo]
+  - Sem sombra suja nem manchas escuras junto às faces das paredes e entre a folha e a parede. [B Térreo]
 - [ ] **Ponta de parede reta nos portais** sem folha desenhada, sem risco do marco. Depois de refazer um piso, as
   folhas voltam por cima. [A]
 - [ ] **Esquadrias pretas, só o contorno.**
@@ -85,6 +90,10 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 
 ## 4. Banhos e louças
 
+- [ ] **Bancada do lavatório em travertino igual ao da cuba esculpida** (o tom da cuba, os veios deitados), as cubas por
+  cima ("SUBSTITUA A BANCADA DO LAVATÓRIO POR TRAVERTINO, IGUAL DA CUBA ESCULPIDA"). [B Térreo]
+- [ ] **Refrigerador no vão do PDF** (a geladeira inox G2, a frente para o lado aberto): todo eletrodoméstico do PDF é
+  representado ("FALTOU REPRESENTAR O REFRIGERADOR NO VÃO"). [B Térreo]
 - [ ] **Chuveiros desenhados em planta**, nunca a foto do cromado.
   - Inox médio, chanfro, contorno fino, crivo marcado e sombra curta.
   - De parede: placa quadrada e braço até a face da parede.
@@ -140,6 +149,9 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 
 - [ ] **Camas:** no comprimento do PDF. Na Casa B, as aprovadas (cabeceira de linho cinza, colcha matelassê, veludo
   bordô) ficam como estão. [A; B]
+  - **Contorno da cama limpo:** sem moldura do render em volta (o anel vira o piso, a sombra curta da cama); a moldura
+    contínua dos dois lados. Uma cama remontada em faixas desencontradas é trocada pela mesma cama de outra suíte,
+    girada ("CORRIJA O CONTORNO DA CAMA"). [B Térreo]
 - [ ] **Tapete inteiro, nunca remendado.**
   - O tapete do PDF é refeito inteiro, no tom do de hoje.
   - Camas, bancos, sofá e criados voltam por cima pelo contorno do PDF, com a sombra curta.
@@ -210,6 +222,12 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 - [ ] **Gramado da Casa A em todos os Térreos:** 80% grama, poucas árvores nos cantos, arbustos baixos, até o muro.
   Jardins internos como o de 4,79 m² da Casa A. [A; B]
 - [ ] **Floreira dentro do retângulo do PDF:** as plantas não passam vidro nem janela. [A 1º Pav]
+- [ ] **Deck com contorno em todas as bordas** (o cinza das paredes, 2 px), inclusive a de cima e por fora do banco
+  ("CORRIJA O ACABAMENTO SUPERIOR DO PISO DE MADEIRA DO DECK"). **Banco do deck** em réguas de madeira escura no
+  comprimento de cada braço, a esquadria a 45° no canto, o fio da borda. [B Térreo]
+- [ ] **A água da piscina só até o vidro**: entre o deck e a divisória da esquerda, deck, nunca azul ("NÃO FAZ SENTIDO
+  DE ÁGUA DEPOIS DO VIDRO"). [B Térreo]
+- [ ] **Paisagismo:** proposta antes de aplicar ("QUERO VER ANTES DE VOCÊ APLICAR"). [B Térreo]
 
 ## 9. Pisos refeitos (por baixo das peças trocadas)
 
