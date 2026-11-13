@@ -54,6 +54,11 @@ Sobre a final de `ANTES_COMMIT` (a do 12K de 13/11: o estar E1 e o paisagismo da
   (`pedidos_terreo_casab_1211.cozinha_tb`, item 4): a bancada em marrom tabaco com o contorno e a sombra curta, a cuba
   de semiencaixe em louça branca da Casa A (`final3840_casaa.cuba_branca`) no retângulo do PDF (o piso de logo ao lado
   por baixo da parte que passa da bancada e da cuba antiga) e a torneira cromada saindo da parede.
+- **"CORRIJA ESSAS PORTAS PARA FICAREM BEM REPRESENTADAS"** (a área de serviço descoberta; `portas_descoberta`): as duas
+  portas de giro das paredes da esquerda e da direita tinham ficado com a folha do render (uma barra escura de
+  esquadria, solta), porque no PDF a folha é desenhada em 4 pedaços e a busca das portas (`pedidos_terreo_casac_1311.
+  portas_pdf`) não a achava; agora como as outras portas de giro da Casa C (`pedidos_subsolo_casab_1211.portas_sb`): a
+  folha de madeira clara no retângulo do PDF, quina com quina na ponta da parede, sem os marcos, a soleira no vão.
 - **"REMOVA ESSE TRACEJADO EM VOLTA DA PLANTA"** (`tracejado_lote`): o retângulo tracejado do lote (x 296 a 3583, y 5 a
   2050, que encostava na borda do gramado à esquerda) sai: fora do lote, branco puro.
 
@@ -146,10 +151,15 @@ QUARTO_S = {"vao": (2474.5, 501.0, 2615.5, 662.5), "cama_pdf": 84669, "cama": ("
 BH_SERV = {"bancada_px": (2676.4, 501.2, 2700.3, 554.9), "cuba_px": (2669.3, 514.7, 2693.1, 538.5),
            "antiga_px": (2666, 503, 2696, 543), "torneira_px": (2686.5, 525.1, 2699.5, 528.1), "base": "fim",
            "piso_amostra": (2622, 518, 2660, 560), "contorno": (30, 40, 54), "semente": 1315}
+# as duas portas de giro da área de serviço descoberta (px, pelo PDF: a parede, o vão com os marcos, a folha)
+PORTAS_DESC = [{"nome": "A. serviço descoberta, esquerda", "parede": (2463.2, 2473.4), "topo": 110.1, "base": 163.9,
+                "folha": (2473.4, 113.1, 2521.1, 115.5), "dobra": "topo", "lado": 1, "soleira": True},
+               {"nome": "A. serviço descoberta, direita", "parede": (2706.2, 2716.4), "topo": 110.1, "base": 163.9,
+                "folha": (2658.5, 113.1, 2706.2, 115.5), "dobra": "topo", "lado": -1, "soleira": True}]
 LOTE = {"abre_px": 5, "nb": 245, "corpo": 0.8}
 ANTES_DEPOIS = {"lavabos": (1080, 1480, 1640, 1700), "quartos": (300, 260, 2300, 760),
                 "claraboias": (700, 230, 1100, 990), "hall": (2280, 1170, 2790, 1460), "garagem": (2690, 300, 3290, 700),
-                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600),
+                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600), "area_descoberta": (2440, 40, 2740, 260),
                 "inteira": (0, 0, 3840, 2160)}
 
 
@@ -644,6 +654,19 @@ def bh_servico(Q, img, q=BH_SERV):
     return o8
 
 
+def portas_descoberta(Q, img, ps=PORTAS_DESC):
+    import pedidos_terreo_casac_1311 as PT
+    import pedidos_subsolo_casab_1211 as PB
+    x0, y0, x1, y1 = PT.PORTAS["soleira_px"]
+    sol = tuple(float(v) for v in np.median(img[y0:y1, x0:x1].reshape(-1, 3), axis=0))
+    base = dict(PB.PORTAS_SB, tique_px=(0, 0, 0, 0), soleira=sol)
+    with contextlib.redirect_stdout(io.StringIO()):
+        out = PB.portas_sb(Q, img.copy(), q=dict(base, portas=list(ps)))
+    print(f"    área de serviço descoberta: as {len(ps)} portas de giro com a folha de madeira clara, quina com quina na "
+          f"ponta da parede, e a soleira no vão")
+    return out
+
+
 def tracejado_lote(img, q=LOTE):
     from scipy import ndimage
     nb = (img.min(axis=2) < q["nb"]).astype(np.uint8)
@@ -681,6 +704,7 @@ def aplicar(antes):
     out = bancada_servico(out)
     out = quarto_servico(Q, out)
     out = bh_servico(Q, out)
+    out = portas_descoberta(Q, out)
     out = tracejado_lote(out)
     return out
 

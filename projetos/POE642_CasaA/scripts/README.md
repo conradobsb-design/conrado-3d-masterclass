@@ -2740,7 +2740,9 @@ de lavar da Casa B no vão acima dos tanques: "ADICIONAR DUAS MÁQUINAS DE LAVAR
 junto à parede de baixo, o guarda-roupa de 0,57 m na parede da esquerda no desenho dos da Casa C e o rótulo levado
 para cima, na área livre: "CRIE O AMBIENTE"); `bh_servico` (a bancada do BH serviço em marrom tabaco com o contorno,
 a cuba de louça branca da Casa A no retângulo do PDF, sem a tira branca da antiga, e a torneira cromada, como no BH
-serviço da Casa B: "CORRIJA O ERRO DA CUBA"); `tracejado_lote` (o
+serviço da Casa B: "CORRIJA O ERRO DA CUBA"); `portas_descoberta` (as 2 portas de giro da área de serviço descoberta,
+que a busca das portas não achava porque a folha do PDF vem em 4 pedaços, com a folha de madeira clara quina com quina
+e a soleira, como as outras: "CORRIJA ESSAS PORTAS PARA FICAREM BEM REPRESENTADAS"); `tracejado_lote` (o
 retângulo tracejado do lote em branco e o muro de baixo cortado na borda do lote: "REMOVA ESSE TRACEJADO EM VOLTA DA
 PLANTA"). Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`.
 Rodar sem `--antes` refaz a final a partir de 48a23e8.
