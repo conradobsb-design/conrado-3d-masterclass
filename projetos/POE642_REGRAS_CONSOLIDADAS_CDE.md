@@ -90,6 +90,8 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 
 ## 4. Banhos e louças
 
+- [ ] **Box com claraboia:** dentro da claraboia, o piso normal do box, só o contorno da claraboia ("DENTRO DA CLARABOIA NO
+  BOX, DEVE MANTER O PISO NORMAL COMO O DO RESTANTE DO BOX"). [C Térreo]
 - [ ] **Bancada do lavatório em travertino igual ao da cuba esculpida** (o tom da cuba, os veios deitados), as cubas por
   cima ("SUBSTITUA A BANCADA DO LAVATÓRIO POR TRAVERTINO, IGUAL DA CUBA ESCULPIDA"). [B Térreo]
 - [ ] **Refrigerador no vão do PDF** (a geladeira inox G2, a frente para o lado aberto): todo eletrodoméstico do PDF é
@@ -227,6 +229,8 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   brises), só com o fio da borda ("O BANCO TEM UM TOM ÚNICO, SEM VARIAÇÃO. TOM SÓLIDO BRONZE"). [B Térreo]
 - [ ] **Portas de correr pelo PDF:** os bolsos em cinza de parede, as folhas (a do bolso e a do vão) com o perfil, os
   nichos; nada de cinza passando da face da parede ("A REPRESENTAÇÃO DAS PORTAS DE CORRER FICARAM MUITO ERRADAS"). [B Térreo]
+- [ ] **Vidro da borda da piscina reto, de pedra a pedra**, sem restos pretos nas pontas. [C Térreo]
+- [ ] **Os materiais do Térreo da Casa B** (deck, granito, gramado, travertino, vinílico) também na Casa C. [C Térreo]
 - [ ] **A água da piscina só até o vidro**: entre o deck e a divisória da esquerda, deck, nunca azul ("NÃO FAZ SENTIDO
   DE ÁGUA DEPOIS DO VIDRO"). [B Térreo]
 - [ ] **Paisagismo:** proposta antes de aplicar ("QUERO VER ANTES DE VOCÊ APLICAR"). As peças vistas de cima em

@@ -66,6 +66,11 @@ CAMAS = [("suíte master", 80717, 0.0, "king", "off-white", "terracota clara", "
          ("quarto 1", 80296, -90.0, "casal", "areia", "sálvia", "manta", "esq", [88517]),
          ("quarto externo", 84669, -90.0, "solteiro", "branco", "cinza-claro", "peseira", None, [])]
 BANCO_MASTER = {"pdf": 88649, "png": "suite-master/banco-pe-de-cama"}
+# (13/11, "ESSES BANCOS NA FRENTE DA CAMA PRECISAM VIR EM ALTA RESOLUÇÃO E COM QUALIDADE 8K", "B1", "OS BANCOS SÃO PARA
+# CASA C") todos os bancos de pé de cama (o da suíte master e os dos quartos) com o B1: veludo bordô capitonê, moldura de
+# freijó, gerado em 2K no Higgsfield; o comprimento ajustado à proporção do PDF repetindo (ou tirando) módulos inteiros do
+# capitonê no meio (`periodo_px`, a autocorrelação da faixa do meio), sem esticar os losangos
+BANCOS_B1 = {"casal": ("bancos-pe-de-cama/b1-veludo-bordo-casal", 256), "solteiro": ("bancos-pe-de-cama/b1-veludo-bordo-solteiro", 244)}
 # os criados: (índice, forma, giro) e o abajur (diâmetro px)
 CRIADOS = [(88654, "ret", 0.0, 19.0), (88659, "ret", 0.0, 19.0), (88624, "ret", -90.0, 17.0), (88629, "ret", -90.0, 17.0),
            (88604, "ret", 90.0, 17.0), (88619, "ret", 90.0, 17.0), (88522, "redondo", 0.0, 19.0),
@@ -197,18 +202,36 @@ def camas(Q, out, antes, par):
             pass
         else:                                       # a sombra curta da cama (o colchão), como as outras peças
             pass
-        for b in bancos:                            # os bancos do render de volta por cima (a manta caída passa sob eles)
+        for b in bancos:                            # o banco B1 no retângulo do banco do PDF (a manta caída passa sob ele)
             bx0, by0, bx1, by1 = RT.caixa_pdf(Q, b)
             X0, Y0, X1, Y1 = int(np.floor(bx0)) - 1, int(np.floor(by0)) - 1, int(np.ceil(bx1)) + 1, int(np.ceil(by1)) + 1
             out[Y0:Y1, X0:X1] = antes[Y0:Y1, X0:X1]
+            out = banco_b1(out, (bx0, by0, bx1, by1), "solteiro" if tipo == "solteiro" else "casal", par)
         print(f"    {nome}: a cama {tipo} A, roupa {roupa}, {'a manta de tricô caída' if modo == 'manta' else 'a peseira'} "
               f"{enf}, o travesseiro extra")
-    # o banco de pé de cama da suíte master (a Casa A)
-    x0, y0, x1, y1 = RT.caixa_pdf(Q, BANCO_MASTER["pdf"])
-    P = ler(BANCO_MASTER["png"])
-    out = pousar(out, P, (x0 + x1) / 2, (y0 + y1) / 2, x1 - x0, y1 - y0, 0.0, "movel", par)
-    print("    suíte master: o banco de pé de cama da Casa A")
+    # o banco de pé de cama da suíte master: o B1
+    out = banco_b1(out, RT.caixa_pdf(Q, BANCO_MASTER["pdf"]), "casal", par)
+    print("    bancos de pé de cama: o B1 (veludo bordô capitonê, moldura de freijó, 2K) na suíte master e nos quartos")
     return out
+
+
+def banco_b1(out, c, tam, par, q=BANCOS_B1):
+    x0, y0, x1, y1 = c
+    w, h = x1 - x0, y1 - y0
+    L, D = max(w, h), min(w, h)
+    png, per = q[tam]
+    P = B1.ler_png(png)
+    Hp, Wp = P.shape[:2]
+    falta = L / D * Hp - Wp                                  # px do PNG para a proporção do PDF
+    n = int(round(falta / per))
+    c_ = Wp // 2
+    if n > 0:
+        P = np.concatenate([P[:, :c_], P[:, c_ - n * per:]], axis=1)
+    elif n < 0:
+        P = np.concatenate([P[:, :c_], P[:, c_ - n * per:]], axis=1)
+    P = np.ascontiguousarray(P)
+    giro = 0.0 if w >= h else 90.0
+    return pousar(out, P, (x0 + x1) / 2, (y0 + y1) / 2, L, D, giro, "movel", par)
 
 
 def criados(Q, out, par):
@@ -543,6 +566,57 @@ def piscina(out, q=PISCINA_C):
     return out
 
 
+# (13/11, "LIMPE OS RESÍDUOS PRETOS E MELHORE O CONTATO DO VIDRO COM AS BORDAS DA PISCINA, TANTO EM CIMA QUANTO
+# EMBAIXO") o vidro da borda esquerda redesenhado reto, de borda a borda (encostando na pedra de cima e na de baixo); o
+# gramado à esquerda dele refeito com o da mesma linha; as pontas das pedras sem os restos escuros; na água, os pontos
+# escuros junto à pedra de baixo saem
+VIDRO_PISC_C = {"vidro": (645.6, 1486.5, 647.4, 1636.5), "cor": (24, 30, 30), "grama_x": (637, 645), "grama_dx": -8,
+                "pedra_cima": (1485, 1487, 637, 652, 1484), "pedra_baixo": (1636, 1637, 637, 652, 1638),
+                "agua": (1628, 1637, 648, 700), "agua_lum": 100, "agua_cima": (1484, 1492, 648, 700), "agua_cima_lum": 80}
+
+
+def vidro_piscina(out, q=VIDRO_PISC_C):
+    x0, y0, x1, y1 = q["vidro"]
+    Y0, Y1 = int(np.floor(y0)) + 1, int(np.ceil(y1)) - 1
+    ga, gb = q["grama_x"]
+    d = q["grama_dx"]
+    out[Y0:Y1, ga:gb] = out[Y0:Y1, ga + d:gb + d]
+    for ya, yb, xa, xb, yf in (q["pedra_cima"], q["pedra_baixo"]):
+        out[ya:yb + 1, xa:xb] = out[yf, xa:xb][None]
+    ay0, ay1, ax0, ax1 = q["agua"]
+    sub = np.ascontiguousarray(out[ay0 - 6:ay1, ax0:ax1])
+    esc = (sub.astype(np.float32).mean(axis=2) < q["agua_lum"]).astype(np.uint8)
+    esc[:6] = 0
+    esc[-1:] = 0
+    esc = cv2.dilate(esc, np.ones((3, 3), np.uint8))
+    esc[-1:] = 0
+    if esc.any():
+        novo = cv2.inpaint(sub, esc * 255, 3, cv2.INPAINT_TELEA)
+        out[ay0 - 6:ay1, ax0:ax1][esc > 0] = novo[esc > 0]
+    # os pontos pretos na água junto à pedra de cima
+    ay0, ay1, ax0, ax1 = q["agua_cima"]
+    sub = np.ascontiguousarray(out[ay0:ay1 + 6, ax0:ax1])
+    esc2 = (sub.astype(np.float32).mean(axis=2) < q["agua_cima_lum"]).astype(np.uint8)
+    esc2[ay1 - ay0:] = 0
+    esc2 = cv2.dilate(esc2, np.ones((3, 3), np.uint8))
+    if esc2.any():
+        novo = cv2.inpaint(sub, esc2 * 255, 3, cv2.INPAINT_TELEA)
+        out[ay0:ay1 + 6, ax0:ax1][esc2 > 0] = novo[esc2 > 0]
+    # o vidro (o perfil escuro), com a cobertura de sub-px nas pontas
+    X0, X1 = int(np.floor(x0)), int(np.ceil(x1))
+    YA, YB = int(np.floor(y0)), int(np.ceil(y1))
+    xs = np.arange(X0, X1) + 0.5
+    ys = np.arange(YA, YB) + 0.5
+    cx = np.clip(np.minimum(xs + 0.5, x1) - np.maximum(xs - 0.5, x0), 0, 1)
+    cy = np.clip(np.minimum(ys + 0.5, y1) - np.maximum(ys - 0.5, y0), 0, 1)
+    a = np.outer(cy, cx)[..., None]
+    reg = out[YA:YB, X0:X1].astype(np.float32)
+    out[YA:YB, X0:X1] = np.clip(np.round(reg * (1 - a) + np.float32(q["cor"]) * a), 0, 255).astype(np.uint8)
+    print("    piscina: o vidro da borda esquerda reto, encostando nas pedras de cima e de baixo; o gramado e as pontas "
+          f"das pedras limpos; {int(esc.sum())} px escuros na água junto à pedra de baixo")
+    return out
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 def aplicar(antes):
     Q = quadro()
@@ -550,6 +624,7 @@ def aplicar(antes):
     par = BS.quieto(FA.paredes_pdf, Q) > 0.3
     out = cozinha(out, par)
     out = piscina(out)
+    out = vidro_piscina(out)
     out = camas(Q, out, antes, par)
     out = criados(Q, out, par)
     out = poltronas(Q, out, par)

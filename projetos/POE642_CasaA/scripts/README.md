@@ -2688,6 +2688,18 @@ o perfil de uma coluna limpa (as torneiras em dobro no 12K); a parede de baixo d
 nichos, as 4 folhas das portas de correr telescópicas; `PORTAS_BM`); o hall junto à suíte 3 (a face da parede reta, o
 toco e o caixilho de vidro pelo PDF, o piso do hall interno uniforme; `HALL`).
 
+### Térreo da Casa C, os materiais da Casa B (13/11): `materiais_terreo_casac_1311.py`
+
+Depois do mobiliário (`mobiliario_terreo_casac_1311.py --antes t2`), `materiais_terreo_casac_1311.py --antes <final>`:
+cada piso (granito, travertino, vinílico, deck, pelas regiões da legenda no PDF; o gramado pela cor e pelo pouco
+contraste) com a textura do mesmo material na final do Térreo da Casa B (`FONTES`), vezes a luz do piso da Casa C (as
+sombras e os cantos ficam); os rótulos, as peças e o que foge da cor do piso ficam, o contorno deles levado ao tom do piso
+novo; as texturas sem desenho repetidas sem emenda (`sem_emenda`), as de réguas em espelho. No mesmo dia, no
+`mobiliario_terreo_casac_1311.py`: o banco B1 (veludo bordô capitonê, 2K, em `03-primeiro-pavimento/bancos-pe-de-cama/`)
+aos pés de todas as camas, o comprimento acertado com módulos inteiros do capitonê; na piscina, a faixa azul depois do
+vidro virou gramado e o vidro foi redesenhado reto de pedra a pedra (`PISCINA_C`, `VIDRO_PISC_C`); no
+`pedidos_terreo_casac_1311.py`, o miolo da claraboia do box do BH master 2 com o piso do box (`piso_amostra`).
+
 ### Subsolo da Casa C, a biblioteca (13/11): `biblioteca_subsolo_casac_1311.py`
 
 A proposta (`POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_proposta_biblioteca_1.jpg`) aprovada com "Ok"; os PDFs

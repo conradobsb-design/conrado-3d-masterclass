@@ -55,7 +55,10 @@ CLARABOIAS = [{"nome": "varanda master", "ret": (736.0, 255.4, 950.8, 294.6), "a
               {"nome": "BH master 1", "ret": (750.8, 328.0, 894.1, 355.1), "antes": "preto"},
               {"nome": "closet master 1", "ret": (950.8, 410.2, 980.0, 488.2), "antes": "branco", "miolo": True},
               {"nome": "closet master 2", "ret": (967.4, 867.9, 1039.4, 898.1), "antes": "branco", "miolo": True},
-              {"nome": "box do BH master 2", "ret": (868.4, 907.2, 888.1, 966.9), "antes": "preto"}]
+              # (13/11, "DENTRO DA CLARABOIA NO BOX, DEVE MANTER O PISO NORMAL COMO O DO RESTANTE DO BOX") o miolo com o
+              # piso do box (a amostra `piso_amostra`, no tom do entorno), os restos escuros do tracejado de antes fora
+              {"nome": "box do BH master 2", "ret": (868.4, 907.2, 888.1, 966.9), "antes": "preto",
+               "piso_amostra": (815, 918, 842, 958)}]
 TRACO = {"cor": (128, 128, 128), "larg_px": 0.8, "traco_px": 6.0, "vao_px": 4.0, "ss": 8, "busca_px": 4,
          "miolo_tol": 5.0}
 # os guarda-corpos (px): (x0, x1) na borda de cima (y) e a lateral da varanda master (x, y0, y1)
@@ -214,6 +217,15 @@ def claraboias(Q, out, qs=CLARABOIAS, q=TRACO):
             escuro = cv2.dilate((out.astype(np.float32).mean(axis=2) < 110).astype(np.uint8), np.ones((5, 5), np.uint8))
             bur &= escuro == 0                              # os rótulos logo abaixo ficam
             out = BS.quieto(RT.piso_reguas, Q, out, bur)
+        if cl.get("piso_amostra"):
+            import paisagismo_terreo_casab_1311 as PJ
+            fx0, fy0, fx1, fy1 = cl["piso_amostra"]
+            I = out.astype(np.int16)
+            parede = np.abs(I - 80).max(axis=2) <= 14
+            bur = np.zeros((H, W), bool)
+            bur[int(y0) - 1:int(np.ceil(y1)) + 1, int(x0) - 1:int(np.ceil(x1)) + 1] = True
+            bur &= ~parede
+            out = PJ.preencher(out, bur, out[fy0:fy1, fx0:fx1].copy(), anel_px=5, nao=parede, sig=6.0)
         # b. só o retângulo de fora, tracejado, cinza e fino
         ss = q["ss"]
         M = np.zeros(((Y1 - Y0) * ss, (X1 - X0) * ss), np.uint8)
