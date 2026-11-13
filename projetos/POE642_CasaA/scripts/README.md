@@ -2736,7 +2736,9 @@ objetos, e o vaso de folhagem no lugar do disco serrilhado: "MELHORAR A REPRESEN
 do piso da garagem fora, o rótulo protegido: "REPRESENTAR UM FILETE ENTRE OS DOIS PISOS"); `maquinas` (as 2 máquinas
 de lavar da Casa B no vão acima dos tanques: "ADICIONAR DUAS MÁQUINAS DE LAVAR ROUPAS NESSE VÃO"); `bancada_servico`
 (a bancada dos tanques no granito marrom tabaco da Casa B, as cubas de inox por cima, com a sombra curta e o contorno:
-"TROCAR O MATERIAL DA BANCADA PARA GRANITO MARROM TABACO"); `tracejado_lote` (o
+"TROCAR O MATERIAL DA BANCADA PARA GRANITO MARROM TABACO"); `quarto_servico` (a cama de solteiro do quarto externo
+junto à parede de baixo, o guarda-roupa de 0,57 m na parede da esquerda no desenho dos da Casa C e o rótulo levado
+para cima, na área livre: "CRIE O AMBIENTE"); `tracejado_lote` (o
 retângulo tracejado do lote em branco e o muro de baixo cortado na borda do lote: "REMOVA ESSE TRACEJADO EM VOLTA DA
 PLANTA"). Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`.
 Rodar sem `--antes` refaz a final a partir de 48a23e8.

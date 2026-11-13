@@ -43,6 +43,12 @@ Sobre a final de `ANTES_COMMIT` (a do 12K de 13/11: o estar E1 e o paisagismo da
   `bancada_servico`): a bancada dos tanques da área de serviço (era o travertino claro) no marrom tabaco da Casa B (a
   pedra da ilha gourmet da Casa B, tecida: `pedidos_terreo_casab_1211._tabaco`), com o contorno fino um tom abaixo nos
   lados livres; as cubas de inox e as torneiras ficam.
+- **"CRIE O AMBIENTE"** (o post-it no quarto de serviço: "Colocar uma cama e um guarda-roupa aqui. E o nome do ambiente
+  mais pra cima."; `quarto_servico`): a cama de solteiro do quarto externo (`camas_casac_1311.cama`, 2,0 x 1,0 m, roupa
+  branca, peseira cinza-clara) deitada junto à parede de baixo, a cabeceira na parede da esquerda; o guarda-roupa de
+  0,57 m na parede da esquerda, da parede de cima até 11 cm da cama, no desenho dos guarda-roupas da Casa C (o creme
+  mais escuro do lado aberto, o varão no meio, os cabides, o fio de madeira e a sombra curta); o rótulo (a mesma letra,
+  levada pelo alfa contra o piso) no meio da área livre, entre o guarda-roupa e a parede, abaixo da porta.
 - **"REMOVA ESSE TRACEJADO EM VOLTA DA PLANTA"** (`tracejado_lote`): o retângulo tracejado do lote (x 296 a 3583, y 5 a
   2050, que encostava na borda do gramado à esquerda) sai: fora do lote, branco puro.
 
@@ -123,10 +129,17 @@ BANCADA_SERV = {"ret": (2655.4, 343.2, 2700.0, 495.6), "inox_croma": 16, "cuba_a
                 "final_b": AQUI.parents[1] / "POE642_CasaB" / "renders" / "POE642_CasaB_PH_Terreo_final_rotulos.png",
                 "fonte": (1418, 1325, 1546, 1381), "semente": 1313, "contorno": (30, 40, 54), "contorno_alfa": 0.5,
                 "ss": 8}
+# o quarto de serviço (px): o vão (x0, y0, x1, y1), a cama (o retângulo do PDF da do quarto externo, para o tamanho), o
+# guarda-roupa (fundo e folga até a cama), o rótulo de antes (caixa) e o centro novo, a amostra do piso
+QUARTO_S = {"vao": (2474.5, 501.0, 2615.5, 662.5), "cama_pdf": 84669, "cama": ("solteiro", "branco", "cinza-claro"),
+            "giro": 90.0, "arm_fundo_m": 0.57, "arm_folga_m": 0.11, "arm_cor": ((189, 209, 225), (158, 175, 188)),
+            "varao": (150, 156, 160), "cabide_px": 7.3, "cabide": 0.86, "fio": (75, 128, 170), "sombra": 0.18,
+            "rotulo": (2500, 612, 2602, 646), "rotulo_centro": (2562.0, 574.0), "piso": (2480, 512, 2550, 560),
+            "semente": 1314, "ss": 8}
 LOTE = {"abre_px": 5, "nb": 245, "corpo": 0.8}
 ANTES_DEPOIS = {"lavabos": (1080, 1480, 1640, 1700), "quartos": (300, 260, 2300, 760),
                 "claraboias": (700, 230, 1100, 990), "hall": (2280, 1170, 2790, 1460), "garagem": (2690, 300, 3290, 700),
-                "area_servico": (2540, 230, 2760, 520),
+                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690),
                 "inteira": (0, 0, 3840, 2160)}
 
 
@@ -486,6 +499,81 @@ def bancada_servico(img, q=BANCADA_SERV):
     return out
 
 
+def _guarda_roupa(out, r, q, rng):
+    """O guarda-roupa visto de cima (deitado em pé: o comprimento em y, a parede à esquerda), como os da Casa C."""
+    x0, y0, x1, y1 = r
+    ss = q["ss"]
+    X0, Y0 = int(np.floor(x0)) - 3, int(np.floor(y0)) - 1
+    W, H = int(np.ceil(x1)) + 5 - X0, int(np.ceil(y1)) + 5 - Y0
+    a = np.outer(_cob(y0, y1, H, Y0, ss), _cob(x0, x1, W, X0, ss))
+    t = np.clip((np.arange(W, dtype=np.float32) + X0 + 0.5 - x0) / (x1 - x0), 0, 1)
+    c0, c1 = np.float32(q["arm_cor"][0]), np.float32(q["arm_cor"][1])
+    cor = (c0[None, :] * (1 - t[:, None]) + c1[None, :] * t[:, None])[None].repeat(H, axis=0)
+    # os cabides (traços deitados, de comprimentos um pouco diferentes) e o varão no meio, em supersample
+    M = np.zeros((H * ss, W * ss), np.uint8)
+    xm = (x0 + x1) / 2
+    yy = y0 + q["cabide_px"] * 0.8
+    while yy < y1 - 2:
+        meia = (x1 - x0) * rng.uniform(0.30, 0.37)
+        cv2.line(M, (int((xm - meia - X0) * ss), int((yy - Y0) * ss)), (int((xm + meia - X0) * ss), int((yy - Y0) * ss)),
+                 255, max(1, int(0.8 * ss)), cv2.LINE_AA)
+        yy += q["cabide_px"]
+    cab = cv2.resize(M.astype(np.float32) / 255, (W, H), interpolation=cv2.INTER_AREA)
+    V = np.zeros((H * ss, W * ss), np.uint8)
+    cv2.line(V, (int((xm - X0) * ss), int((y0 + 2 - Y0) * ss)), (int((xm - X0) * ss), int((y1 - 2 - Y0) * ss)), 255,
+             max(1, int(1.3 * ss)), cv2.LINE_AA)
+    var = cv2.resize(V.astype(np.float32) / 255, (W, H), interpolation=cv2.INTER_AREA)
+    cor = cor * (1 - (1 - q["cabide"]) * cab[..., None])
+    cor = cor * (1 - var[..., None]) + np.float32(q["varao"]) * var[..., None]
+    # o fio de madeira no lado aberto e na ponta de baixo
+    miolo = np.outer(_cob(y0, y1 - 1.2, H, Y0, ss), _cob(x0, x1 - 1.2, W, X0, ss))
+    fio = np.clip(a - miolo, 0, 1)
+    cor = cor * (1 - fio[..., None]) + np.float32(q["fio"]) * fio[..., None]
+    reg = out[Y0:Y0 + H, X0:X0 + W]
+    sb = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, 1.2], [0, 1, 1.4]]), (W, H)), (0, 0), 1.2)
+    reg *= (1 - q["sombra"] * sb * (1 - a))[..., None]
+    reg[:] = reg * (1 - a[..., None]) + cor * a[..., None]
+    return out
+
+
+def quarto_servico(Q, img, q=QUARTO_S):
+    import paisagismo_terreo_casab_1311 as PJ
+    import camas_casac_1311 as CM
+    out = img.copy()
+    # o rótulo de antes: o alfa do branco contra o piso
+    rx0, ry0, rx1, ry1 = q["rotulo"]
+    sub = img[ry0:ry1, rx0:rx1].astype(np.float32)
+    lum = sub.mean(axis=2)
+    piso = float(np.median(lum[lum < 160]))
+    alfa = np.clip((lum - piso - 6) / (245 - piso - 6), 0, 1)
+    cor_txt = np.median(sub[alfa > 0.9], axis=0) if (alfa > 0.9).any() else np.float32((245, 245, 245))
+    m = np.zeros(img.shape[:2], bool)
+    m[ry0:ry1, rx0:rx1] = cv2.dilate((alfa > 0.04).astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+    fx0, fy0, fx1, fy1 = q["piso"]
+    out = PJ.preencher(out, m, img[fy0:fy1, fx0:fx1].copy(), anel_px=5, sig=6.0)
+    # a cama
+    vx0, vy0, vx1, vy1 = q["vao"]
+    c = MB.RT.caixa_pdf(Q, q["cama_pdf"])
+    comp, larg = max(c[2] - c[0], c[3] - c[1]), min(c[2] - c[0], c[3] - c[1])
+    with contextlib.redirect_stdout(io.StringIO()):
+        P = CM.cama(q["cama"][0], q["cama"][1], q["cama"][2], "peseira")
+    cx, cy = vx0 + comp / 2, vy1 - larg / 2
+    o = BT.pousar(out.astype(np.float32), P, cx, cy, larg, comp, q["giro"], BT.SOMBRAS["movel"], PX_M)
+    # o guarda-roupa
+    fundo = q["arm_fundo_m"] * Q.px_m
+    gy1 = vy1 - larg - q["arm_folga_m"] * Q.px_m
+    o = _guarda_roupa(o, (vx0, vy0, vx0 + fundo, gy1), q, np.random.default_rng(q["semente"]))
+    # o rótulo no lugar novo
+    h, w = alfa.shape
+    ncx, ncy = q["rotulo_centro"]
+    nx0, ny0 = int(round(ncx - w / 2)), int(round(ncy - h / 2))
+    reg = o[ny0:ny0 + h, nx0:nx0 + w]
+    reg[:] = reg * (1 - alfa[..., None]) + np.float32(cor_txt) * alfa[..., None]
+    print(f"    quarto de serviço: a cama de solteiro ({comp:.0f} x {larg:.0f} px) junto à parede de baixo, o guarda-roupa "
+          f"({fundo:.0f} x {gy1 - vy0:.0f} px) na parede da esquerda; o rótulo subiu para ({ncx:.0f}, {ncy:.0f})")
+    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+
+
 def tracejado_lote(img, q=LOTE):
     from scipy import ndimage
     nb = (img.min(axis=2) < q["nb"]).astype(np.uint8)
@@ -521,6 +609,7 @@ def aplicar(antes):
     out = filete_garagem(Q, out)
     out = maquinas(out)
     out = bancada_servico(out)
+    out = quarto_servico(Q, out)
     out = tracejado_lote(out)
     return out
 
