@@ -643,6 +643,9 @@ ACADEMIA_SB = {"limpar_px": [(1416, 459, 1482, 496), (1416, 525, 1482, 562), (15
                              (1529, 506, 1638, 561), (1426, 600, 1522, 714), (1531, 612, 1592, 640),
                              (1386, 731, 1532, 764)],
                "final_a": "renders/POE642_CasaA_PH_Subsolo_final_rotulos.png",
+               # (13/11) a final do Subsolo da Casa A de onde os aparelhos foram tirados em 744adec (a de 21fa118): a
+               # de hoje tem os aparelhos da biblioteca e maiores; refazendo daqui, os da Casa B ficam os mesmos
+               "final_a_commit": "744adec",
                # (caixa na final da Casa A, o meio na Casa B, espelhar)
                "pecas": [((1460, 1169, 1564, 1223), (1582.5, 475.0), False),     # esteira de cima
                          ((1460, 1232, 1564, 1285), (1583.5, 533.5), False),     # esteira de baixo
@@ -719,6 +722,16 @@ def _alfa_aparelho(reg):
     return a
 
 
+def _final_a(q):
+    """A final do Subsolo da Casa A de onde vêm os aparelhos (a do commit `final_a_commit`)."""
+    import subprocess
+    raiz = Path(__file__).resolve().parents[3]
+    rel = (Path(__file__).resolve().parents[1] / q["final_a"]).relative_to(raiz)
+    dado = subprocess.run(["git", "-C", str(raiz), "show", f"{q['final_a_commit']}:{rel}"], capture_output=True,
+                          check=True).stdout
+    return cv2.imdecode(np.frombuffer(dado, np.uint8), cv2.IMREAD_COLOR)
+
+
 def academia_sb(Q, img, q=ACADEMIA_SB):
     import vinilico_foto as V
     H, W = img.shape[:2]
@@ -745,7 +758,7 @@ def academia_sb(Q, img, q=ACADEMIA_SB):
     with contextlib.redirect_stdout(io.StringIO()):
         out, _ = V.trocar(Q, pre, [(124, 162, 200)], apagar=m, incluir=m)
     # b. os da Casa A, com a sombra curta
-    A = cv2.imread(str(Path(__file__).resolve().parents[1] / q["final_a"]))
+    A = _final_a(q)
     f, dist, sig = FA.APARELHOS["sombra"]
     o = out.astype(np.float32)
     for (ax0, ay0, ax1, ay1), (cx, cy), esp in q["pecas"]:
@@ -786,7 +799,15 @@ ROTULOS_SB2 = {"desenhar": ("BH SERVIÇO", "CIRCULAÇÃO", "DEPÓSITO", "ACADEMI
                # os ambientes abertos (a garagem e o deck da ducha para fora; a circulação da sauna para a garagem):
                # o recinto do PDF vaza, e o piso livre fica nesta caixa (px; por nome e x do ponto do PDF arredondado)
                "recorte_px": {("GARAGEM", 1129): (897, 275, 1358, 596), ("DUCHA", 848): (762, 597, 957, 771),
-                              ("CIRCULAÇÃO", 1191): (1154, 598, 1234, 696)}}
+                              ("CIRCULAÇÃO", 1191): (1154, 598, 1234, 696)},
+               # (13/11, "ALINHE OS RÓTULOS", com os recortes das duas fileiras) os rótulos de cada fileira com o
+               # meio na mesma linha: a linha (y) em que todos cabem no piso livre (sem tocar em peça, parede ou
+               # traço), o mais perto de onde estavam; cada um pode correr na horizontal até `alinhar_dx_px`
+               # (a CIRCULAÇÃO de cima, acima do vidro, só cabe com o meio entre y 348 e 357, e o BH SERVIÇO, entre a
+               # cuba e a porta, só entre 385 e 393: ela fica no espaço dela, e a fileira de cima é a dos outros três)
+               "alinhar": [("GARAGEM", "BH SERVIÇO", "DEPÓSITO"),
+                           ("DUCHA", "SAUNA", "CIRCULAÇÃO@baixo", "BH SAUNA", "ACADEMIA")],
+               "alinhar_dx_px": 40, "alinhar_dy_px": 80}
 
 
 def rotulos_sb(Q, img, q=ROTULOS_SB2):
@@ -805,7 +826,7 @@ def rotulos_sb(Q, img, q=ROTULOS_SB2):
     b = F.SAUNA_F[Q.chave]
     x0, y0, x1, y1 = F.ret_q(Q, b["pt"])
     obst[y0:y1 + 1, x0:x1 + 1] = True
-    A = cv2.imread(str(Path(__file__).resolve().parents[1] / ACADEMIA_SB["final_a"]))
+    A = _final_a(ACADEMIA_SB)
     for (ax0, ay0, ax1, ay1), (cx, cy), _ in ACADEMIA_SB["pecas"]:
         w, h = ax1 - ax0, ay1 - ay0
         X0, Y0 = int(round(cx - w / 2)), int(round(cy - h / 2))
@@ -816,6 +837,7 @@ def rotulos_sb(Q, img, q=ROTULOS_SB2):
     esc = Q.W / 2000
     out = img.copy()
     specs = []
+    caixas = []
 
     def soma(I, a, b_, c, d):
         return int(I[d, c] - I[b_, c] - I[d, a] + I[b_, a])
@@ -863,14 +885,67 @@ def rotulos_sb(Q, img, q=ROTULOS_SB2):
                 break
         opc = o_
         _, a0, b0, a1, b1 = melhor
-        dx, dy = a0 - (cx + bx0), b0 - (cy + by0)
+        caixas.append({"r1": r1, "nome": nome, "cx": cx, "cy": cy, "opc": opc, "bx0": bx0, "by0": by0,
+                       "a0": a0, "b0": b0, "a1": a1, "b1": b1, "I_reg": I_reg, "tx": tx, "ty": ty, "fc": fc,
+                       "livre": melhor[0] < 1000})
+    # as fileiras alinhadas: o meio de cada rótulo na mesma linha
+    for fileira in q.get("alinhar", []):
+        membros = []
+        for chave in fileira:
+            nm, _, lado = chave.partition("@")
+            cs = sorted([c_ for c_ in caixas if c_["nome"] == nm], key=lambda c_: c_["cy"])
+            if cs:
+                membros.append(cs[0] if lado == "cima" else cs[-1])
+        meios = [(c_["b0"] + c_["b1"]) / 2 for c_ in membros]
+        melhor_l = None
+        for t in np.arange(min(meios) - q["alinhar_dy_px"], max(meios) + q["alinhar_dy_px"] + 0.5, 1.0):
+            custo, pos = 0.0, []
+            for c_, m_ in zip(membros, meios):
+                w_, h_ = c_["a1"] - c_["a0"], c_["b1"] - c_["b0"]
+                b0n = int(round(t - h_ / 2))
+                ok = None
+                for ox in sorted(range(-q["alinhar_dx_px"], q["alinhar_dx_px"] + 1), key=abs):
+                    a0n = c_["a0"] + ox
+                    if soma(I_obst, a0n, b0n, a0n + w_, b0n + h_) == 0 and \
+                            soma(c_["I_reg"], a0n, b0n, a0n + w_, b0n + h_) == w_ * h_:
+                        ok = (a0n, b0n, abs(ox))
+                        break
+                if ok is None:
+                    custo = None
+                    break
+                custo += abs(t - m_) + 0.5 * ok[2]
+                pos.append(ok)
+            if custo is not None and (melhor_l is None or custo < melhor_l[0]):
+                melhor_l = (custo, t, pos)
+        if melhor_l is None:
+            print(f"      fileira {', '.join(fileira)}: sem linha em que todos caibam livres; ficam onde estavam")
+            for c_, m_ in zip(membros, meios):
+                w_, h_ = c_["a1"] - c_["a0"], c_["b1"] - c_["b0"]
+                ts = [t for t in range(int(min(meios)) - 80, int(max(meios)) + 81)
+                      if any(soma(I_obst, c_["a0"] + ox, int(round(t - h_ / 2)), c_["a0"] + ox + w_,
+                                  int(round(t - h_ / 2)) + h_) == 0 and
+                             soma(c_["I_reg"], c_["a0"] + ox, int(round(t - h_ / 2)), c_["a0"] + ox + w_,
+                                  int(round(t - h_ / 2)) + h_) == w_ * h_
+                             for ox in range(-q["alinhar_dx_px"], q["alinhar_dx_px"] + 1))]
+                print(f"        {c_['nome']}: meio em {m_:.0f}; cabe com o meio em y "
+                      f"{(min(ts), max(ts)) if ts else 'nenhum'} ({len(ts)} linhas)")
+            continue
+        _, t, pos = melhor_l
+        for c_, (a0n, b0n, _) in zip(membros, pos):
+            w_, h_ = c_["a1"] - c_["a0"], c_["b1"] - c_["b0"]
+            c_["a0"], c_["b0"], c_["a1"], c_["b1"] = a0n, b0n, a0n + w_, b0n + h_
+        print(f"      fileira {', '.join(fileira)}: o meio de todos em y {t:.0f} px")
+    for c_ in caixas:
+        r1, nome, cx, cy, opc = c_["r1"], c_["nome"], c_["cx"], c_["cy"], c_["opc"]
+        a0, b0, a1, b1 = c_["a0"], c_["b0"], c_["a1"], c_["b1"]
+        dx, dy = a0 - (cx + c_["bx0"]), b0 - (cy + c_["by0"])
         o2 = dict(opc, cor=F.cor_do_fundo(out, a0, b0, a1, b1))
         out = R1.rotulos_ambientes(out, [r1], Q.p2q, escala_desvio=esc, granito=None,
                                    ajustes=[(nome, (cx / esc, cy / esc), (dx / esc, dy / esc), o2)], halo=None)
         specs.append({"nome": nome, "pdf": [float(v) for v in r1[2]], "opc": {k: v for k, v in opc.items()},
                       "desvio": [float(dx), float(dy)], "cor": [int(c) for c in o2["cor"]]})
-        print(f"      {nome}: o meio do piso livre em ({tx:.0f}, {ty:.0f}) px; a caixa em ({a0}, {b0})-({a1}, {b1}) "
-              f"{'livre' if melhor[0] < 1000 else 'tocando'}, corpo {fc}")
+        print(f"      {nome}: o meio do piso livre em ({c_['tx']:.0f}, {c_['ty']:.0f}) px; a caixa em ({a0}, {b0})-"
+              f"({a1}, {b1}) {'livre' if c_['livre'] else 'tocando'}, corpo {c_['fc']}")
     # o desenho de cada rótulo (para o 12K: `ampliacao_12k_subsolo_casab.py`)
     ROTULOS_JSON.write_text(json.dumps(specs, ensure_ascii=False, indent=1) + "\n")
     print(f"    rótulos: {len(q['desenhar'])} nomes no meio do piso livre de cada ambiente ({ROTULOS_JSON.name})")

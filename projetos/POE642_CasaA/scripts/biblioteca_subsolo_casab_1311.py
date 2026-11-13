@@ -118,6 +118,12 @@ def piso_desloc(out, c, par, dx, dy, folga=1):
     w, h = x1 - x0, y1 - y0
     ox, oy = dx * (w + 2), dy * (h + 2)
     novo = np.ascontiguousarray(out[y0 + oy:y1 + oy, x0 + ox:x1 + ox])
+    # o que não é piso no trecho copiado (uma letra de rótulo, um metal) sai, refeito pelo piso em volta
+    med = np.median(novo.reshape(-1, 3).astype(np.int16), axis=0)
+    fora = np.abs(novo.astype(np.int16) - med).max(axis=2) > 24
+    if fora.any():
+        fora = cv2.dilate(fora.astype(np.uint8), np.ones((3, 3), np.uint8))
+        novo = cv2.inpaint(novo, fora, 3, cv2.INPAINT_TELEA)
     novo = BS.costura(out, novo, x0, y0, x1, y1, par)
     caixa = ~par[y0:y1, x0:x1]
     out[y0:y1, x0:x1][caixa] = novo[caixa]

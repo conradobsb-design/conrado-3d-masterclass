@@ -2437,6 +2437,19 @@ degrau de baixo, x 750–758, y 646–658). No 12K, a letra vai aos dados (`_esc
 `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1311_letra_escada_antes_depois.jpg`. (O PDF do cliente do Subsolo da Casa B,
 que o `montar12k` lê, vem do Drive para `_pdfs_cliente/642 - SUBSOLO - CASA B.pdf`, fora do git.)
 
+**Os rótulos alinhados (13/11, "ALINHE OS RÓTULOS", com os recortes das duas fileiras):** no passo `rotulos`, as
+caixas de todos os rótulos são achadas primeiro (o meio do piso livre de cada ambiente) e, por fileira
+(`ROTULOS_SB2["alinhar"]`), o meio de todos vai a uma mesma linha: a linha (y) em que todos cabem livres (sem tocar em
+peça, parede ou traço, dentro do ambiente), cada um podendo correr na horizontal até `alinhar_dx_px`, o mais perto de
+onde estavam. Fileira de cima: GARAGEM, BH SERVIÇO e DEPÓSITO em y 393 (a CIRCULAÇÃO de cima, acima do vidro, só cabe
+com o meio entre y 348 e 357, e o BH SERVIÇO, entre a cuba e a porta, só entre 385 e 393: ela fica no espaço dela);
+de baixo: DUCHA, SAUNA, CIRCULAÇÃO, BH SAUNA e ACADEMIA em y 675. Os aparelhos da academia vêm da final do Subsolo da
+Casa A do commit de 744adec (`ACADEMIA_SB["final_a_commit"]`, `_final_a`), para o passo refeito dar os mesmos de antes
+(a de hoje tem os aparelhos da biblioteca). Refeito desde a final de 21fa118 (só os rótulos mudaram), e a biblioteca de
+novo por cima (`biblioteca_subsolo_casab_1311.py --antes <a saída>`); no 12K, os rótulos novos nos dados
+(`POE642_CasaB_PH_Subsolo_12K_dados.json`). Antes e depois em
+`POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1311_rotulos_alinhados_antes_depois.jpg`.
+
 **A biblioteca no Subsolo da Casa B (13/11, `biblioteca_subsolo_casab_1311.py`; "VAMOS REVISAR OS MOBILIÁRIOS DO
 SUBSOLO DA CASA B", a proposta `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1311_proposta_biblioteca_{1,2}.jpg`
 aprovada com "OK, PODE APLICAR AS RECOMENDADAS"):** as escolhas do Subsolo da Casa A (as funções de
@@ -2459,7 +2472,8 @@ No 12K, `montar12k` chama `pecas_12k` antes dos rótulos: a zona que mudou na fi
 (`renders/POE642_CasaB_PH_Subsolo_12K_biblioteca_zona.png`) vem da final ampliada sobre a saída do Topaz e as peças de
 PNG (bancos, bacias e chuveiros, `renders/POE642_CasaB_PH_Subsolo_12K_biblioteca.json`) entram nítidas na escala do
 12K. Antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1311_<trecho>_antes_depois.jpg`. Como refazer:
-`python3 biblioteca_subsolo_casab_1311.py` (sem `--saida`, grava a final, o registro do 12K e os antes e depois), depois
+`python3 pedidos_subsolo_casab_1211.py --antes <a final de 21fa118> --saida <png>` e `python3 biblioteca_subsolo_casab_1311.py
+--antes <png>` (sem `--saida`, grava a final, o registro do 12K e os antes e depois), depois
 o 12K (`ampliacao_12k_subsolo_casab.py montar12k <Topaz ecd1a9e8> --opcao AB`), a prancha, o PDF da Casa B e o book.
 
 **Como refazer:** `python3 pedidos_subsolo_casab_1211.py --antes <a final do Subsolo da Casa B de 21fa118> --antes_depois` (sem `--saida`, grava a final em `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final_rotulos.png`; `--de`/`--ate <passo>` e `--passos <pasta>` para testar um trecho); os antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1211_<trecho>_antes_depois.jpg`. Depois `rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --no-quadro --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final_rotulos.png`, `pdf_entrega.py --config ../../POE642_CasaB/config_bases.json` e `book_entrega.py`. O 12K (opções A e B): `ampliacao_12k_subsolo_casab.py`, abaixo.
