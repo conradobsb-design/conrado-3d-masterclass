@@ -2429,6 +2429,14 @@ Os pedidos do usuário vendo o Subsolo da Casa B (com os recortes), sobre a fina
 - **academia:** os aparelhos da Casa B e o retângulo junto à parede de baixo saem (o vinílico refeito nas caixas, preenchidas antes no tom do piso); entram os da final do Subsolo da Casa A (2 esteiras, 2 bicicletas, o supino espelhado; a mesma escala) pelo alfa (`_alfa_aparelho`) com a sombra curta, e a bola de pilates presa na parede ("No lugar dessas linhas, representar uma bola presa na parede. Tirar linhas.": 0,68 m, suporte em U grafite).
 - **rotulos:** os rótulos apagados voltam no meio do piso livre de cada ambiente (o recinto do PDF sem os obstáculos, os bancos e os aparelhos novos; nos ambientes abertos, `recorte_px`); o corpo cai só onde não cabe (BH SERVIÇO a 0,72).
 
+**O S sob a seta (13/11, "COLOQUE O S ABAIXO DA SETA"):** a letra da escada, como no Subsolo da Casa A
+(`cliente_subsolo_casaa_0511.ESCADA_CS["letra"]`): `ESCADA_SB["letra"]` e `letra_sb`, no fim do passo `escada`: o S
+centrado no triângulo, `letra_folga_px` (2,5) abaixo da ponta de baixo, na fonte, no corpo e na cor da descrição (no
+degrau de baixo, x 750–758, y 646–658). No 12K, a letra vai aos dados (`_escada_dados`, `escada["letra"]`) e
+`_escada_12k` a desenha (A na Inter, B na Kalam, no corpo da descrição). Antes e depois em
+`POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1311_letra_escada_antes_depois.jpg`. (O PDF do cliente do Subsolo da Casa B,
+que o `montar12k` lê, vem do Drive para `_pdfs_cliente/642 - SUBSOLO - CASA B.pdf`, fora do git.)
+
 **Como refazer:** `python3 pedidos_subsolo_casab_1211.py --antes <a final do Subsolo da Casa B de 21fa118> --antes_depois` (sem `--saida`, grava a final em `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final_rotulos.png`; `--de`/`--ate <passo>` e `--passos <pasta>` para testar um trecho); os antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1211_<trecho>_antes_depois.jpg`. Depois `rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --no-quadro --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final_rotulos.png`, `pdf_entrega.py --config ../../POE642_CasaB/config_bases.json` e `book_entrega.py`. O 12K (opções A e B): `ampliacao_12k_subsolo_casab.py`, abaixo.
 
 **O 12K do Subsolo da Casa B (`ampliacao_12k_subsolo_casab.py`; usuário, 12/11: "gere os 12K do subsolo da casa B"):** o roteiro dos 12K da Casa A (`ampliacao_12k_terreo_casaa.py` para o recorte, o alinhamento e os rótulos em 12K; a correção pelos pisos, como a de `ampliacao_12k_1pav_casaa.py`), com os rótulos da Casa B no lugar dos da Casa A (`_usar_rotulos_b`).

@@ -509,7 +509,33 @@ def ralo_sb(Q, img, q=RALO_SB):
 ESCADA_SB = {"s_px": (746, 634, 761, 652), "desloc_s": -18,
              "triangulo": [(748.5, 637.5), (760.5, 631.0), (760.5, 644.0)], "cor_seta": (30, 30, 30), "ss": 8,
              "texto": ("SOBE PARA O", "JARDIM"), "centro_x": 717.0, "x_max": 752.0, "base_y": 701.0,
-             "entrelinha_px": 20}
+             "entrelinha_px": 20,
+             # (13/11, "COLOQUE O S ABAIXO DA SETA") o S sob a seta, como no Subsolo da Casa A
+             # (`cliente_subsolo_casaa_0511.ESCADA_CS["letra"]`): centrado no triângulo, `letra_folga_px` abaixo da
+             # ponta de baixo, na fonte, no corpo e na cor da descrição (no degrau, que vai até y 674)
+             "letra": "S", "letra_folga_px": 2.5}
+
+
+def letra_sb(img, q=ESCADA_SB):
+    """O S sob a seta da escada (px da final)."""
+    from PIL import ImageFont
+    from rodape_entrega import FONTES
+    from cliente_subsolo_casaa_0511 import _alfa_texto
+    e = FA.ESCADA_A
+    out = img.copy()
+    fonte = ImageFont.truetype(str(FONTES / e["fonte"]), e["corpo_px"] * 4)
+    pts = np.float32(q["triangulo"])
+    cx, topo = float(pts[:, 0].min() + pts[:, 0].max()) / 2, float(pts[:, 1].max()) + q["letra_folga_px"]
+    l_, t_, r_, b_ = fonte.getbbox(q["letra"], anchor="ls")
+    ox, oy = cx - (l_ + r_) / 8, topo - t_ / 4
+    W, H = int((r_ - l_) / 4) + 12, e["corpo_px"] * 3
+    X0, Y0 = int(ox) - 4, int(oy) - e["corpo_px"] * 2
+    a = _alfa_texto(q["letra"], fonte, e["corpo_px"], ox, oy, (X0, Y0, W, H))[..., None]
+    r_ = out[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
+    out[Y0:Y0 + H, X0:X0 + W] = np.clip(np.round(r_ * (1 - a) + np.float32(e["cor_texto"]) * a), 0, 255).astype(np.uint8)
+    ys, xs = np.nonzero(a[..., 0] > 0.3)
+    print(f"    escada: o {q['letra']} sob a seta em x {xs.min() + X0}-{xs.max() + X0}, y {ys.min() + Y0}-{ys.max() + Y0}")
+    return out
 
 
 def escada_sb(Q, img, q=ESCADA_SB):
@@ -544,6 +570,8 @@ def escada_sb(Q, img, q=ESCADA_SB):
         out[Y0:Y0 + H, X0:X0 + W] = np.clip(np.round(r_ * (1 - a) + np.float32(e["cor_texto"]) * a), 0,
                                             255).astype(np.uint8)
     print(f"    escada: o S saiu; a seta no degrau de baixo e \"{' / '.join(q['texto'])}\" logo abaixo da escada")
+    if q.get("letra"):
+        out = letra_sb(out, q)
     return out
 
 

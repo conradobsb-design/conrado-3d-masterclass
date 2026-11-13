@@ -122,8 +122,11 @@ def _escada_dados():
     larg = [fonte.getlength(t) / 4 for t in q["texto"]]
     cx = min(q["centro_x"], q["x_max"] - max(larg) / 2)
     linhas = [[t, cx - lw / 2, q["base_y"] + i * q["entrelinha_px"], cx] for i, (t, lw) in enumerate(zip(q["texto"], larg))]
+    pts = np.float32(q["triangulo"])
+    letra = ({"texto": q["letra"], "cx": float(pts[:, 0].min() + pts[:, 0].max()) / 2,
+              "topo": float(pts[:, 1].max()) + q["letra_folga_px"]} if q.get("letra") else None)
     return {"tri": [list(map(float, p)) for p in q["triangulo"]], "cor_seta": list(q["cor_seta"]), "linhas": linhas,
-            "corpo": e["corpo_px"], "cor": list(e["cor_texto"]), "fonte": e["fonte"]}
+            "corpo": e["corpo_px"], "cor": list(e["cor_texto"]), "fonte": e["fonte"], "letra": letra}
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -343,6 +346,16 @@ def _escada_12k(out, esc, s, X0, Ya3, opcao, reforco):
             reg = out[Y:Y + H, X:X + W].astype(np.float32)
             out[Y:Y + H, X:X + W] = np.clip(np.round(reg * (1 - al) + np.float32(esc["cor"]) * al), 0,
                                             255).astype(np.uint8)
+        lt = esc.get("letra")
+        if lt:                                          # (13/11, "COLOQUE O S ABAIXO DA SETA") o S sob a seta
+            l_, t_, r_, b_ = fonte.getbbox(lt["texto"], anchor="ls")
+            ox, oy = (lt["cx"] - X0) * s - (l_ + r_) / 8, (lt["topo"] - Ya3) * s - t_ / 4
+            W, H = int((r_ - l_) / 4) + int(12 * s), int(corpo * 3)
+            X, Y = int(ox) - int(4 * s), int(oy) - int(corpo * 2)
+            al = AM._alfa_texto(lt["texto"], fonte, ox, oy, (X, Y, W, H), ss=4)[..., None]
+            reg = out[Y:Y + H, X:X + W].astype(np.float32)
+            out[Y:Y + H, X:X + W] = np.clip(np.round(reg * (1 - al) + np.float32(esc["cor"]) * al), 0,
+                                            255).astype(np.uint8)
         return
     k = RM._altura_maiuscula(FONTES / esc["fonte"]) / RM._altura_maiuscula(RM.FONTE) * RM.MANUSCRITA["altura"]
     fi = ImageFont.truetype(str(FONTES / esc["fonte"]), 400)
@@ -350,6 +363,13 @@ def _escada_12k(out, esc, s, X0, Ya3, opcao, reforco):
     teto = min(fi.getlength(t) / max(fk.getlength(t) * k, 1e-6) for t, *_ in esc["linhas"])
     itens = [(t, corpo * k * min(1.0, teto), (cx - X0) * s, (ly - Ya3) * s, "ms") for t, _, ly, cx in esc["linhas"]]
     Z._desenhar_janela(out, itens, tuple(esc["cor"]), reforco)
+    lt = esc.get("letra")
+    if lt:                                              # o S sob a seta, na Kalam (como `ampliacao_a3_casaa.letra_kalam`)
+        ck = corpo * k * min(1.0, teto)
+        ft = ImageFont.truetype(str(RM.FONTE), max(4, int(round(ck * 4))))
+        l_, t_, r_, b_ = ft.getbbox(lt["texto"], anchor="ls")
+        Z._desenhar_janela(out, [(lt["texto"], ck, (lt["cx"] - X0) * s - (l_ + r_) / 8,
+                                  (lt["topo"] - Ya3) * s - t_ / 4, "ls")], tuple(esc["cor"]), reforco)
 
 
 def montar12k(saida_topaz, largura=None, opcao="A"):

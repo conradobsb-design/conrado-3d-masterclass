@@ -235,7 +235,12 @@
    45,
    45
   ],
-  "fonte": "Inter-SemiBold.otf"
+  "fonte": "Inter-SemiBold.otf",
+  "letra": {
+   "texto": "S",
+   "cx": 754.5,
+   "topo": 646.5
+  }
  },
  "shaft_px": [
   1734,
