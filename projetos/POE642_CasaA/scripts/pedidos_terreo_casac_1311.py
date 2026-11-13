@@ -76,7 +76,42 @@ PORTAS = {"esp_px": 9.0, "marco_px": 3.0, "soleira_px": (746, 846, 752, 888), "r
 # "Tirar o contorno dos mobiliários" (os armários dos closets e dos quartos: os retângulos com diagonal da DOC_LINHAS):
 # o traço laranja em volta de cada módulo vira o creme do próprio armário (a mediana dos px creme em volta)
 ARMARIOS = {"croma_min": 40, "lum": (95, 178), "creme_lum": 185, "creme_croma": 45, "faixa_px": 2.6, "viz_px": 4}
-ANTES_DEPOIS = {"claraboias_master": (620, 230, 1240, 1000), "armarios": (1040, 330, 2070, 560), "varandas": (1060, 215, 2200, 300),
+# ---- 2ª leva de post-its (13/11, "Mais da casa C térreo")
+# "Representar demarcação com piso.": no vão de grama entre o fim do caminho e a fileira de pisantes de baixo, um
+# pisante de Bege Bahia na largura do caminho, com as juntas de grama dos pisantes (`junta_px`); o desenho vem do pisante
+# de baixo (as metades de cima e de baixo, para ficarem as duas bordas)
+PISANTE = {"x": (475, 574), "vao_y": (1666, 1745), "junta_px": 11, "fonte_y": (1745, 1827)}
+# "Trocar essa representação do jardim de inverno" (as setas no jardim de inverno, no jardim 1 e na floreira junto à
+# adega): como o jardim de 4,79 m² da Casa A e os jardins do Térreo da Casa B (`pedidos_terreo_casab_1211.jardins_tb`):
+# a grama do gramado com a sombra de contato junto às paredes e poucas plantas menores, em tamanhos diferentes; os
+# rótulos brancos ficam; nos dois de inverno, o X dos painéis fino e claro; a floreira com a terra e arbustos verdes
+# iguais, com o mesmo espaço entre eles
+JARDINS = {
+    "jardins": {
+        "inverno": {"caixa_px": (1775, 934, 2024, 1190), "x_doc": True, "rotulo_px": (1840, 985, 1972, 1026),
+                    "plantas": [("palmeira_1", (1812, 972), 0.9), ("palmeira_3", (1988, 1152), 0.75),
+                                ("arbusto_3", (1808, 1158), 0.45), ("arbusto_3", (1992, 968), 0.40)]},
+        "inverno_2": {"caixa_px": (1892, 824, 2024, 918), "x_doc": True, "rotulo_px": (1922, 840, 2024, 890),
+                      "plantas": [("palmeira_3", (1912, 900), 0.6), ("arbusto_3", (2006, 904), 0.36)]},
+        "jardim_1": {"caixa_px": (1124, 839, 1230, 978), "rotulo_px": (1145, 900, 1212, 934),
+                     "plantas": [("palmeira_3", (1152, 866), 0.7), ("arbusto_3", (1205, 960), 0.40)]}},
+    "contato": (0.20, 3.0), "semente": 1311, "gramado_px": (620, 1700, 700, 1740), "branco": (250, 250, 250),
+    "floreira": {"px": (2367, 932, 2464, 966), "n": 4, "d_m": 0.38, "terra": (34, 44, 56), "terra_ruido": 0.18,
+                 "verde": (60, 102, 88)}}
+# a gourmet: "Geral: Não precisa representar os armários inferiores ou superiores." (as divisões dos módulos na bancada
+# de trás saem: as linhas cinza finas dentro do tampo; a borda do tampo fica); "Representar a churrasqueira" (a grelha da
+# Casa A no módulo do meio, na profundidade do tampo com folga); "Alinhar as geladeiras" (as duas na geladeira inox G2,
+# a frente para a gourmet, encostadas na parede, no mesmo alinhamento); "Acrescentar uma 5/6 banquetas" (6 banquetas B
+# na face de baixo da ilha, viradas para ela, ~40% por baixo do tampo)
+GOURMET = {"linhas_h": [(952, 1241, 1509), (970, 1283, 1369)], "linhas_v": [(1280, 1284), (1368, 1375), (1450, 1454)],
+           "tampo_y": (933, 972), "pia_px": (1290, 938, 1334, 969), "desloc_px": 6,
+           "grelha": {"png": "area-gourmet/grelha-churrasqueira", "cx": 1411.5, "cy": 952.0, "alt": 30.0},
+           "geladeiras": {"png": "02-terreo/cozinha/geladeira-inox.png", "xs": [(1520.0, 1567.7), (1573.2, 1620.9)],
+                          "y0": 933.0, "alt": 47.7, "limpa_px": (1516, 933, 1626, 990)},
+           "banquetas": {"png": "area-gourmet/banqueta-b", "larg": 25.0, "borda_y": 1155.9, "x": (1231.4, 1562.8),
+                         "n": 6}}
+ANTES_DEPOIS = {"claraboias_master": (620, 230, 1240, 1000), "armarios": (1040, 330, 2070, 560),
+                "pisante": (420, 1500, 720, 1860), "jardins": (1100, 800, 2480, 1200), "gourmet": (1210, 900, 1660, 1200), "varandas": (1060, 215, 2200, 300),
                 "escadas": (500, 880, 1060, 1080)}
 
 
@@ -367,6 +402,183 @@ def armarios(Q, out, q=ARMARIOS):
     return np.clip(np.round(f), 0, 255).astype(np.uint8)
 
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+# A 2ª leva de post-its
+def pisante(out, q=PISANTE):
+    x0, x1 = q["x"]
+    a, b = q["vao_y"]
+    j = q["junta_px"]
+    y0, y1 = a + j, b - j
+    h = y1 - y0
+    f0, f1 = q["fonte_y"]
+    meio = h // 2
+    pedra = np.concatenate([out[f0:f0 + meio, x0:x1], out[f1 - (h - meio):f1, x0:x1]], axis=0)
+    out[y0:y1, x0:x1] = pedra
+    print(f"    o pisante de Bege Bahia no vão do caminho (x {x0}-{x1}, y {y0}-{y1}), com as juntas de grama de {j} px")
+    return out
+
+
+def jardins(Q, img, q=JARDINS):
+    import json as _json
+    import paisagismo as PG
+    import terreo_casaa_1011 as TC
+    import final3840_casaa_terreo as FT
+    sys.path.insert(0, str(AQUI.parents[1] / "_texturas"))
+    from texturas import textura
+    from scipy import ndimage
+    out = img.astype(np.float32)
+    rng = np.random.default_rng(q["semente"])
+    sombra = _json.loads((AQUI.parents[1] / "_texturas" / "texturas.json").read_text())["vegetacao"]["sombra"]
+    par_pdf = BS.quieto(lambda: Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "EST_PILAR") and d.get("fill")
+                                              and max(d["fill"]) < 0.6, ss=2) > 0.3)
+    cadeias = BS.quieto(FT.cadeias_tracejadas, Q, ["DOC_LINHAS E PROJEÇÕES"], min_n=2, min_ext=20)
+    for nome, e in q["jardins"].items():
+        x0, y0, x1, y1 = e["caixa_px"]
+        M = np.zeros(img.shape[:2], bool)
+        M[y0:y1, x0:x1] = True
+        M &= ~PS._dil(par_pdf, 1)
+        I = np.clip(np.round(out), 0, 255).astype(np.int16)
+        geo = np.zeros(img.shape[:2], np.uint8)
+        if e.get("x_doc"):
+            for _, _, ss in cadeias:
+                for s_ in ss:
+                    (u0, v0), (u1, v1) = Q.p2q(s_[0], s_[1]), Q.p2q(s_[2], s_[3])
+                    cv2.line(geo, (int(round(u0)), int(round(v0))), (int(round(u1)), int(round(v1))), 1, 2)
+        claros = (I.mean(axis=2) > 150) & ((I.max(axis=2) - I.min(axis=2)) < 22) & M & ~PS._dil(geo > 0, 2)
+        n_, lab_, st_, _ = cv2.connectedComponentsWithStats(claros.astype(np.uint8), 8)
+        fios = np.isin(lab_, [i for i in range(1, n_) if max(st_[i, 2], st_[i, 3]) >= 25])
+        M &= ~PS._dil(fios, 1)
+        a0, b0, a1, b1 = e["rotulo_px"]
+        txt = np.zeros(img.shape[:2], bool)
+        txt[b0:b1, a0:a1] = ((I.mean(axis=2) > 185) & ((I.max(axis=2) - I.min(axis=2)) < 35))[b0:b1, a0:a1]
+        if e.get("x_doc"):
+            branco = txt.copy()
+            txt &= ~(geo > 0)
+            txt = (ndimage.binary_closing(txt, np.ones((3, 3))) & branco) | txt
+        txt = PS._dil(txt, 1) & (I.mean(axis=2) > 120)
+        h, w = y1 - y0, x1 - x0
+        G = textura("grama_padrao", Q.px_m, h, w, semente=q["semente"] + len(nome)).astype(np.float32)
+        # no tom do gramado do lote (a mediana dele, `gramado_px`): a textura sozinha saía oliva, mais escura
+        ga, gb, gc, gd = q["gramado_px"]
+        alvo = np.median(img[gb:gd, ga:gc].reshape(-1, 3).astype(np.float32), axis=0)
+        G *= (alvo / np.maximum(np.median(G.reshape(-1, 3), axis=0), 1))[None, None]
+        dist = cv2.distanceTransform(M[y0:y1, x0:x1].astype(np.uint8), cv2.DIST_L2, 5)
+        k, alc = q["contato"]
+        G *= (1 - k * np.exp(-dist / alc))[..., None]
+        reg = out[y0:y1, x0:x1]
+        mm = M[y0:y1, x0:x1]
+        reg[mm] = G[mm]
+        tmp = out.copy()
+        for pl, (cx, cy), d in e["plantas"]:
+            TC._pousar(tmp, pl, cx, cy, d, Q.px_m)
+        a = cv2.GaussianBlur(cv2.erode(M.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(np.float32), (0, 0), 0.6)
+        out = tmp * a[..., None] + out * (1 - a[..., None])
+        # os rótulos brancos de volta, pelo alfa (o branco sobre as plantas escuras de antes), na caixa do rótulo
+        lum0 = img[b0:b1, a0:a1].astype(np.float32).mean(axis=2)
+        cr0 = (img[b0:b1, a0:a1].max(axis=2).astype(np.int16) - img[b0:b1, a0:a1].min(axis=2))
+        al = np.clip((lum0 - 95.0) / (240.0 - 95.0), 0, 1) * (cr0 < 50)
+        al[al < 0.12] = 0
+        if e.get("x_doc"):
+            al *= ~(geo[b0:b1, a0:a1] > 0) | (lum0 > 200)
+        out[b0:b1, a0:a1] = out[b0:b1, a0:a1] * (1 - al[..., None]) + np.float32(q["branco"]) * al[..., None]
+        txt = np.zeros(img.shape[:2], bool)
+        txt[b0:b1, a0:a1] = al > 0.12
+        if e.get("x_doc"):
+            segs = []
+            for _, _, ss in cadeias:
+                for s_ in ss:
+                    u, v = Q.p2q((s_[0] + s_[2]) / 2, (s_[1] + s_[3]) / 2)
+                    if x0 <= u <= x1 and y0 <= v <= y1:
+                        segs.append(s_)
+            fq = TC.FINOS_TA
+            pq = dict(FT.PROJ, larg_px=fq["larg_px"], preto=fq["escuro"], branco=fq["claro"], limiar=fq["limiar"])
+            o8 = np.clip(np.round(out), 0, 255).astype(np.uint8)
+            novo, _ = BS.quieto(FT.preto_branco, Q, o8, segs, pq)
+            tapa = PS._dil(txt, TC.FINOS_TA["folga_rotulo"])
+            novo[tapa] = o8[tapa]
+            out = novo.astype(np.float32)
+        print(f"    jardim {nome}: a grama da Casa A e {len(e['plantas'])} plantas menores"
+              + ("; o X dos painéis fino e claro" if e.get("x_doc") else ""))
+    f = q["floreira"]
+    x0, y0, x1, y1 = f["px"]
+    h, w = y1 - y0, x1 - x0
+    terra = np.float32(f["terra"])[None, None] * (1 + f["terra_ruido"] * PG.ruido((h, w), 2.0, rng))[..., None]
+    out[y0:y1, x0:x1] = terra
+    cor0, al0, d0 = PG._sprite("arbusto")
+    var = PG._tingir(cor0, al0, f["verde"])
+    dpx = f["d_m"] * Q.px_m
+    passo = w / f["n"]
+    pecas = []
+    for i in range(f["n"]):
+        c, a_ = PG._colocar(var, al0, d0, dpx, rng.uniform(0, 360))
+        pecas.append((c, a_, x0 + passo * (i + 0.5), (y0 + y1) / 2, dpx))
+    lim = np.zeros(img.shape[:2], np.float32)
+    lim[y0:y1, x0:x1] = 1
+    out = PG._camada(out, pecas, lim, sombra)
+    print(f"    floreira junto à adega: a terra e {f['n']} arbustos verdes iguais, com o mesmo espaço entre eles")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def gourmet(Q, out, q=GOURMET):
+    par = BS.quieto(lambda: __import__("final3840_casaa").paredes_pdf(Q)) > 0.3
+    # a. as divisões dos módulos na bancada de trás: as linhas finas (cinza claro sobre o granito) saem, cada uma com o
+    # granito logo ao lado (`desloc_px`); a borda do tampo (junto à parede e na frente) e o fim dele junto às geladeiras
+    # ficam
+    d_ = q["desloc_px"]
+    px0, py0, px1, py1 = q["pia_px"]
+    n = 0
+    for y, xa, xb in q["linhas_h"]:
+        for x in range(xa, xb):
+            if px0 <= x < px1 and py0 <= y < py1:
+                continue
+            out[y - 1:y + 2, x] = out[y - 1 + d_ - 3:y + 2 + d_ - 3, x] if y + d_ < q["tampo_y"][1] else \
+                out[y - 1 - d_:y + 2 - d_, x]
+            n += 3
+    ta, tb = q["tampo_y"]
+    for xa, xb in q["linhas_v"]:
+        w_ = xb - xa
+        for y in range(ta, tb):
+            if px0 <= xa < px1 and py0 <= y < py1:
+                continue
+            out[y, xa:xb] = out[y, xb + 2:xb + 2 + w_]
+            n += w_
+    print(f"    gourmet: as divisões dos armários na bancada de trás saem ({len(q['linhas_h'])} deitadas, "
+          f"{len(q['linhas_v'])} em pé, {n} px); o tampo liso, as bordas ficam")
+    # b. a churrasqueira
+    g = q["grelha"]
+    P = RT.ler_peca("02-terreo/" + g["png"] + ".png")
+    wt = g["alt"] * P.shape[1] / P.shape[0]
+    it = RT.item_bib("BT", g["png"], g["cx"], g["cy"], wt, g["alt"], 0.0, None, None)
+    out = RT.pousar_bib(out, it, par)
+    print(f"    gourmet: a grelha da churrasqueira da Casa A ({wt:.0f} x {g['alt']:.0f} px) no módulo do meio do tampo")
+    # c. as geladeiras alinhadas
+    ge = q["geladeiras"]
+    a, b, c, d = ge["limpa_px"]
+    out = __import__("biblioteca_subsolo_casab_1311").piso_desloc(out, (a, b, c, d), par, 0, 1, folga=0)
+    for gx0, gx1 in ge["xs"]:
+        it = {"tipo": "png", "png": ge["png"], "c": [gx0, ge["y0"], gx1, ge["y0"] + ge["alt"]], "sombra": "movel"}
+        out = RT.pousar_peca(out, it, __import__("biblioteca_terreo_casaa_1211").SOMBRAS["movel"], par)
+    print(f"    gourmet: as 2 geladeiras inox alinhadas (topo em y {ge['y0']:.0f}, {ge['alt']:.1f} px), a frente para a "
+          "gourmet")
+    # d. as banquetas na face de baixo da ilha
+    bq = q["banquetas"]
+    xa, xb = bq["x"]
+    passo = (xb - xa) / bq["n"]
+    antes = out.copy()
+    yb = bq["borda_y"]
+    for i in range(bq["n"]):
+        cx = xa + passo * (i + 0.5)
+        it = RT.item_bib("BT", bq["png"], cx, yb + 2.7, bq["larg"], None, 180.0, "movel", None)
+        out = RT.pousar_bib(out, it, par)
+    Y = int(np.floor(yb))
+    fr = yb - Y                                          # o tampo por cima (a parte da banqueta sob ele não aparece)
+    X0, X1 = int(xa) - 2, int(np.ceil(xb)) + 3
+    out[Y - 30:Y, X0:X1] = antes[Y - 30:Y, X0:X1]
+    out[Y, X0:X1] = np.clip(np.round(antes[Y, X0:X1] * fr + out[Y, X0:X1] * (1 - fr)), 0, 255).astype(np.uint8)
+    print(f"    gourmet: {bq['n']} banquetas B na face de baixo da ilha, viradas para ela, ~40% por baixo do tampo")
+    return out
+
 # ----------------------------------------------------------------------------------------------------------------------
 def aplicar(antes):
     Q = quadro()
@@ -376,6 +588,9 @@ def aplicar(antes):
     out = portas(Q, out)
     out = guarda_corpo(out)
     out = escadas(out)
+    out = pisante(out)
+    out = jardins(Q, out)
+    out = gourmet(Q, out)
     return out
 
 

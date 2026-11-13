@@ -129,6 +129,10 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 - [ ] **Bancadas:** em Dekton Danae na ilha, na pia e nos tanques da Casa A; as de marrom tabaco seguem mais escuras
   que o piso. [A]
 - [ ] **Armários e prateleiras no tom padrão** RGB 208, 178, 156, em todas as casas. [A]
+- [ ] **Sem os armários inferiores e superiores** (cliente, Casa C: "Geral: Não precisa representar os armários
+  inferiores ou superiores."): o tampo das bancadas liso, sem as divisões dos módulos; ficam as bordas, as cubas, o
+  cooktop e a churrasqueira. [C Térreo]
+- [ ] **Geladeiras alinhadas** entre si e encostadas na parede, na mesma peça (G2). [C Térreo]
 
 ## 6. Quartos, suítes e closets
 
@@ -195,6 +199,10 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
     com o colchonete creme e o encosto de cabeça em rolo da A por cima (`espreguicadeira-resina-colchonete.png`).
   - No retângulo do PDF, com a cabeceira na parte menor do PDF.
   - [A; B Térreo]
+- [ ] **Jardins internos e de inverno como o de 4,79 m² da Casa A** ("Trocar essa representação do jardim de
+  inverno"): a grama no tom do gramado do lote, poucas plantas menores, os rótulos brancos, o X fino e claro; as
+  floreiras com a terra e arbustos iguais. Pisantes completos onde o cliente marca ("Representar demarcação com piso").
+  [B e C Térreo]
 - [ ] **Gramado da Casa A em todos os Térreos:** 80% grama, poucas árvores nos cantos, arbustos baixos, até o muro.
   Jardins internos como o de 4,79 m² da Casa A. [A; B]
 - [ ] **Floreira dentro do retângulo do PDF:** as plantas não passam vidro nem janela. [A 1º Pav]

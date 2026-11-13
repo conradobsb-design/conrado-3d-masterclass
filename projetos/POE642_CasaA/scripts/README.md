@@ -2670,6 +2670,12 @@ no creme deles (`armarios`, a faixa da borda dos retângulos com diagonal da DOC
 a busca das pontas da parede erra ali; 3 dão erro e 6 arcos não têm folha no PDF); o guarda-corpo de vidro nas bordas
 das varandas e na lateral da varanda master (`pedidos_terreo_casaa_1211c.vidro_ret`, 3 px, faces escuras); a seta com o
 D e "DESCE PARA O / SUBSOLO" nos degraus largos e na escada estreita.
+A 2ª leva ("Mais da casa C térreo"): `pisante` (um pisante de Bege Bahia no vão de grama entre o caminho e a fileira de
+baixo, com as juntas de 11 px); `jardins` (o jardim de inverno, o de inverno 2 e o jardim 1 como o de 4,79 m² da Casa A:
+a grama no tom do gramado do lote, poucas plantas menores, os rótulos brancos de volta pelo alfa, o X dos painéis fino e
+claro; a floreira junto à adega com a terra e 4 arbustos iguais); `gourmet` (as divisões dos armários da bancada de trás
+fora, "Geral: Não precisa representar os armários inferiores ou superiores."; a grelha da Casa A no módulo do meio; as 2
+geladeiras inox G2 alinhadas e encostadas na parede; 6 banquetas B na face de baixo da ilha, ~40% sob o tampo).
 
 ### Térreo da Casa C, a biblioteca, 1ª leva (13/11): `biblioteca_terreo_casac_1311.py`
 
