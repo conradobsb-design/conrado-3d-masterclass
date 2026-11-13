@@ -2437,6 +2437,31 @@ degrau de baixo, x 750–758, y 646–658). No 12K, a letra vai aos dados (`_esc
 `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1311_letra_escada_antes_depois.jpg`. (O PDF do cliente do Subsolo da Casa B,
 que o `montar12k` lê, vem do Drive para `_pdfs_cliente/642 - SUBSOLO - CASA B.pdf`, fora do git.)
 
+**A biblioteca no Subsolo da Casa B (13/11, `biblioteca_subsolo_casab_1311.py`; "VAMOS REVISAR OS MOBILIÁRIOS DO
+SUBSOLO DA CASA B", a proposta `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1311_proposta_biblioteca_{1,2}.jpg`
+aprovada com "OK, PODE APLICAR AS RECOMENDADAS"):** as escolhas do Subsolo da Casa A (as funções de
+`biblioteca_subsolo_casaa_1211.py`) e os chuveiros desenhados do 1º Pavimento da Casa A, sobre a final de df9a29e:
+- sauna: o banco reto de travertino nos dois bancos do PDF (`final3840_casab.SAUNA_F`, o da frente e o de trás; o
+  espelho entre eles fica), cada um no tom do de antes (`SAUNA`, `banco`);
+- BH sauna: a cuba esculpida esculpida no granito da bancada (`cuba_bhs`: a `cuba_esculpida` da Casa A feita na
+  janela girada, porque a parede está à direita, e girada de volta; no tom do granito da bancada em volta, fora a
+  torneira cromada), no retângulo da cuba do PDF com a faixa até a parede; a sobra da cuba branca de antes (1 a 3 px
+  fora do PDF) vai antes ao piso e ao granito da bancada; a bacia Carrara branca no retângulo do vaso do PDF (a caixa
+  na parede da direita), sobre o travertino logo à esquerda (`piso_desloc`, com a costura);
+- BH serviço: a bancada no polígono do PDF com o granito da cuba de serviço da biblioteca e a cuba branca com a
+  torneira dela (a `servico` da Casa A, com os retângulos da Casa B, `SERVICO`); a bacia Monte Carlo (sem válvula) no
+  retângulo do vaso do PDF (a caixa na parede da esquerda; por baixo, o inpaint do piso);
+- chuveiros (`CHUVEIROS`, `chuveiro_pos`: o desenho em planta com o braço até a parede em cima, embaixo, à esquerda ou
+  à direita): o quadrado de parede na ducha do deck (`ajustes_casab.CHUVEIRO_DUCHA`) e no chuveiro ao lado da sauna,
+  o redondo de parede no chuveiro ao lado do BH serviço; os de antes viram o piso do lado; a sombra `chuveiro`;
+- academia: sem troca (os aparelhos já são os da Casa A).
+No 12K, `montar12k` chama `pecas_12k` antes dos rótulos: a zona que mudou na final
+(`renders/POE642_CasaB_PH_Subsolo_12K_biblioteca_zona.png`) vem da final ampliada sobre a saída do Topaz e as peças de
+PNG (bancos, bacias e chuveiros, `renders/POE642_CasaB_PH_Subsolo_12K_biblioteca.json`) entram nítidas na escala do
+12K. Antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1311_<trecho>_antes_depois.jpg`. Como refazer:
+`python3 biblioteca_subsolo_casab_1311.py` (sem `--saida`, grava a final, o registro do 12K e os antes e depois), depois
+o 12K (`ampliacao_12k_subsolo_casab.py montar12k <Topaz ecd1a9e8> --opcao AB`), a prancha, o PDF da Casa B e o book.
+
 **Como refazer:** `python3 pedidos_subsolo_casab_1211.py --antes <a final do Subsolo da Casa B de 21fa118> --antes_depois` (sem `--saida`, grava a final em `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final_rotulos.png`; `--de`/`--ate <passo>` e `--passos <pasta>` para testar um trecho); os antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1211_<trecho>_antes_depois.jpg`. Depois `rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --no-quadro --render Subsolo=../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_final_rotulos.png`, `pdf_entrega.py --config ../../POE642_CasaB/config_bases.json` e `book_entrega.py`. O 12K (opções A e B): `ampliacao_12k_subsolo_casab.py`, abaixo.
 
 **O 12K do Subsolo da Casa B (`ampliacao_12k_subsolo_casab.py`; usuário, 12/11: "gere os 12K do subsolo da casa B"):** o roteiro dos 12K da Casa A (`ampliacao_12k_terreo_casaa.py` para o recorte, o alinhamento e os rótulos em 12K; a correção pelos pisos, como a de `ampliacao_12k_1pav_casaa.py`), com os rótulos da Casa B no lugar dos da Casa A (`_usar_rotulos_b`).

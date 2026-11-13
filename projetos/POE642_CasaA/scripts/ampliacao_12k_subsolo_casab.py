@@ -427,6 +427,10 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
         fa = cv2.warpAffine(fundo, Ft, (L, yb - ya), flags=cv2.INTER_LINEAR, borderValue=1.0)
         fa = cv2.GaussianBlur(fa, (0, 0), sf)[y - ya:y1 - ya, :, None]
         out[y:y1] = np.clip(np.round(out[y:y1].astype(np.float32) * (1 - fa) + 255 * fa), 0, 255).astype(np.uint8)
+    # (13/11, "OK, PODE APLICAR AS RECOMENDADAS") as peças da biblioteca (`biblioteca_subsolo_casab_1311`): o que
+    # mudou na final vem dela ampliada, e as peças de PNG por cima, nítidas
+    import biblioteca_subsolo_casab_1311 as BB
+    out = BB.pecas_12k(img, out, s, X0, Ya3)
     # o shaft, os rótulos, a seta e a descrição da escada
     _shaft_12k(out, d["shaft_px"], s, X0, Ya3)
     meia = q["janela_px"] * s
