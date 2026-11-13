@@ -2470,11 +2470,22 @@ aprovada com "OK, PODE APLICAR AS RECOMENDADAS"):** as escolhas do Subsolo da Ca
   ducha do deck ("CORRIJA O PISO AO INCLUIR NOVO CHUVEIRO": o deck copiado do lado aparecia como um remendo, com as
   juntas fora do lugar), o chuveiro de antes não é mais desenhado no passo do deck de `pedidos_subsolo_casab_1211`
   (`DECK_SB["chuveiro"]` False) e o novo entra direto sobre o deck do gerador, com as réguas contínuas;
-- academia: sem troca (os aparelhos já são os da Casa A).
+- academia: na proposta, sem troca (os aparelhos eram os da Casa A de 12/11, ainda os do render); depois ("E O
+  SUPINO? QUERO QUE TROQUE, MANTENDO A BOLA") as 2 esteiras (`esteira-a`), as 2 bicicletas (`bicicleta-b`) e o supino
+  (`banco-supino`) da biblioteca no tamanho da Casa A (`ACADEMIA`, `aparelho`: a escala, o banco de 1,60 m e a barra
+  alongada vêm de `biblioteca_subsolo_casaa_1211.ACADEMIA`; esteiras 1,76 x 0,77 m, bicicletas 1,23 x 0,51 m, supino
+  1,60 x 2,04 m), cada um com o meio no meio do símbolo do PDF da Casa B (a caixa dos traços da ARQ_LAYOUT
+  HUMANIZAÇÃO, do tamanho dos da Casa A), o console para a esquerda, o supino espelhado (a barra à direita do banco,
+  como no PDF), a sombra curta da Casa A. Os aparelhos de antes saem com a sombra (o alfa deles, como os pedidos
+  colaram, mais 6 px, dentro da sala: o vinílico da base com os buracos dos símbolos fechados, porque os pedais das
+  bicicletas são cheios no PDF): o vinílico volta com as mesmas réguas (`reguas_academia`: as do `vinilico_foto.trocar`
+  dos pedidos, pegas por um espião; a razão final / réguas no piso fica lisa, alta frequência 0,0011) vezes a luz do
+  piso em volta (média normalizada). A bola (um disco de 28 px em volta dela) e o armário ficam: a bola e o rótulo
+  ACADEMIA com 0 px de diferença; o supino a 16 px do rótulo.
 No 12K, `montar12k` chama `pecas_12k` antes dos rótulos: a zona que mudou na final
 (`renders/POE642_CasaB_PH_Subsolo_12K_biblioteca_zona.png`) vem da final ampliada sobre a saída do Topaz e as peças de
-PNG (bancos, bacias e chuveiros, `renders/POE642_CasaB_PH_Subsolo_12K_biblioteca.json`) entram nítidas na escala do
-12K. Antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1311_<trecho>_antes_depois.jpg`. Como refazer:
+PNG (bancos, bacias, chuveiros e aparelhos, `renders/POE642_CasaB_PH_Subsolo_12K_biblioteca.json`) entram nítidas na
+escala do 12K. Antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1311_<trecho>_antes_depois.jpg`. Como refazer:
 `python3 pedidos_subsolo_casab_1211.py --antes <a final de 21fa118> --saida <png>` e `python3 biblioteca_subsolo_casab_1311.py
 --antes <png>` (sem `--saida`, grava a final, o registro do 12K e os antes e depois), depois
 o 12K (`ampliacao_12k_subsolo_casab.py montar12k <Topaz ecd1a9e8> --opcao AB`), a prancha, o PDF da Casa B e o book.

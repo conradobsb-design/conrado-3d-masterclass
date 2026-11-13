@@ -20,9 +20,14 @@ onde vêm as funções) e os chuveiros desenhados em planta do 1º Pavimento da 
   CHUVEIRO_DUCHA`, o braço para a parede de baixo) e no chuveiro ao lado da sauna (o braço para a parede da esquerda);
   o redondo de parede no chuveiro ao lado do BH serviço (o braço para a parede da direita); a placa no quadrado do PDF,
   o braço até a parede; os de antes saem (o piso do lado, com a costura); a sombra `chuveiro`.
-- **Academia:** sem troca (os aparelhos já são os da Casa A, pedido de 12/11); a bola e o armário ficam.
+- **Academia:** na proposta, sem troca; depois (usuário: "E O SUPINO? QUERO QUE TROQUE, MANTENDO A BOLA") as 2
+  esteiras (`esteira-a`), as 2 bicicletas (`bicicleta-b`) e o supino (`banco-supino`) da biblioteca, no tamanho da Casa
+  A (esteiras 1,76 x 0,77 m, bicicletas 1,23 x 0,51 m, supino 1,60 x 2,04 m, com a barra alongada como lá), cada um com
+  o meio no meio do símbolo do PDF da Casa B, o console para a esquerda e o supino espelhado (a barra à direita do
+  banco, como no PDF); a sombra curta da Casa A. Os aparelhos de antes saem com a sombra: o vinílico volta com as
+  mesmas réguas (`reguas_academia`) vezes a luz do piso em volta. A bola e o armário ficam.
 No 12K (`ampliacao_12k_subsolo_casab.montar12k`, `pecas_12k`): o que mudou na final (`REG_MASC`) vem da final ampliada
-sobre a saída do Topaz e, por cima, as peças de PNG (bancos, bacias e chuveiros) nítidas na escala do 12K.
+sobre a saída do Topaz e, por cima, as peças de PNG (bancos, bacias, chuveiros e aparelhos) nítidas na escala do 12K.
 
   python3 biblioteca_subsolo_casab_1311.py [--antes <png>] [--saida <png>]
 Sem --antes, parte da final do commit `ANTES_COMMIT`; sem --saida, grava a final, o registro do 12K e os antes e
@@ -40,6 +45,7 @@ from pathlib import Path
 
 import cv2
 import numpy as np
+from scipy import ndimage
 
 AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
@@ -93,9 +99,31 @@ CHUVEIROS = [
      "antes_pt": (1287.0, 615.1, 1313.8, 626.3), "piso_dx": -1, "piso_dy": 0},
 ]
 LIMPA_PX = 2
+# a academia (13/11, "E O SUPINO? QUERO QUE TROQUE, MANTENDO A BOLA"): as 2 esteiras, as 2 bicicletas e o supino da
+# biblioteca no tamanho da Casa A (`biblioteca_subsolo_casaa_1211.ACADEMIA`, de onde vêm a escala, o banco de 1,60 m e
+# a barra do supino: esteiras 1,76 x 0,77 m, bicicletas 1,23 x 0,51 m, supino 1,60 x 2,04 m), cada um com o meio no
+# meio do símbolo do PDF da Casa B (`pdf_px`: a caixa dos traços da ARQ_LAYOUT HUMANIZAÇÃO, px do quadro; os símbolos
+# têm o tamanho dos da Casa A), o console para a esquerda (o giro da Casa A); o supino espelhado (a barra à direita do
+# banco, como no PDF da Casa B). Os aparelhos de antes (os da final da Casa A de 744adec, colados pelos pedidos:
+# `pedidos_subsolo_casab_1211.ACADEMIA_SB`) saem com a sombra (`folga_px` em volta): o vinílico volta com as mesmas
+# réguas (as do `vinilico_foto.trocar` da academia, a mesma semente) vezes a luz do piso em volta (a média normalizada,
+# cada vez mais larga: `luz_sigmas`). A bola (um disco de `bola_px` em volta dela fica intocado) e o armário ficam.
+ACADEMIA = {
+    "pecas": [
+        {"nome": "esteira de cima", "png": "academia/esteira-a.png", "pdf_px": (1534.7, 455.0, 1630.2, 496.8)},
+        {"nome": "esteira de baixo", "png": "academia/esteira-a.png", "pdf_px": (1535.3, 512.7, 1630.8, 554.5)},
+        {"nome": "bicicleta de cima", "png": "academia/bicicleta-b.png", "pdf_px": (1422.4, 464.8, 1473.2, 485.7)},
+        {"nome": "bicicleta de baixo", "png": "academia/bicicleta-b.png", "pdf_px": (1422.4, 532.4, 1473.2, 553.3)},
+        {"nome": "supino", "png": "academia/banco-supino.png", "pdf_px": (1434.5, 604.2, 1515.1, 706.9),
+         "espelho": True},
+    ],
+    "folga_px": 6, "bola_px": 28, "desvio": 18, "luz_sigmas": (4.0, 8.0, 16.0, 32.0), "fechar_px": 3,
+    # as réguas pegas têm de ser as do piso: a alta frequência da razão (final / réguas) no piso, no máximo
+    "razao_max": 0.005,
+}
 ANTES_DEPOIS = {"sauna": (950, 690, 1150, 775), "bh_sauna": (1295, 598, 1368, 752), "ducha_deck": (860, 690, 965, 775),
                 "chuveiro_sauna": (1140, 712, 1200, 758), "bh_servico": (1358, 322, 1410, 432),
-                "chuveiro_bh_servico": (1438, 398, 1522, 432)}
+                "chuveiro_bh_servico": (1438, 398, 1522, 432), "academia": (1395, 440, 1700, 780)}
 
 
 def quadro():
@@ -226,6 +254,132 @@ def peca_bacia(v):
     return BS.girar(BS.ler_png(v["png"]), v["giro"])
 
 
+def aparelho(p):
+    """O aparelho da biblioteca (BGRA) e a caixa dele (px), como na Casa A (`biblioteca_subsolo_casaa_1211.academia`:
+    a barra do supino alongada até a do PDF repetindo as colunas da barra e do travessão do rack, o giro com o console
+    para a esquerda, a caixa do PDF ampliada em volta do meio), no símbolo do PDF da Casa B; o supino espelhado."""
+    a = next(x for x in BS.ACADEMIA["pecas"] if x["png"] == p["png"])
+    c = p["pdf_px"]
+    P = BS.ler_png(p["png"], cortar=False)
+    if "barra" in a:
+        a0, a1 = a["barra"]
+        ys, xs = np.nonzero(P[..., 3] > 0)
+        larg, alt = xs.max() - xs.min() + 1, ys.max() - ys.min() + 1
+        d = max(0, int(round(((c[3] - c[1]) / (c[2] - c[0]) * alt - larg) / 2)))
+
+        def col(x):
+            return np.repeat(P[:, x:x + 1], d, axis=1)
+        P = np.concatenate([P[:, :a0], col(a0), P[:, a0:a1], col(a1), P[:, a1:]], axis=1)
+    ys, xs = np.nonzero(P[..., 3] > 0)
+    P = BS.girar(np.ascontiguousarray(P[ys.min():ys.max() + 1, xs.min():xs.max() + 1]), BS.ACADEMIA["giro"])
+    if p.get("espelho"):
+        P = np.ascontiguousarray(P[:, ::-1])
+    x0, y0, x1, y1 = c
+    e = a["escala"] if "escala" in a else a["largura_m"] * PX_M / (x1 - x0)
+    cx, cy, mw, mh = (x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) * e / 2, (y1 - y0) * e / 2
+    return P, (cx - mw, cy - mh, cx + mw, cy + mh)
+
+
+def reguas_academia(Q, antes):
+    """As réguas do vinílico da academia (BGR float32) e o canto (x, y) delas no quadro: as do `vinilico_foto.trocar`
+    dos pedidos (a mesma conta, só para pegar as réguas; a imagem que ele devolve não é usada)."""
+    import pedidos_subsolo_casab_1211 as PS
+    import um_pav_casaa_1111 as U
+    import vinilico_foto as V
+    H, W = antes.shape[:2]
+    m = np.zeros((H, W), bool)
+    for x0, y0, x1, y1 in PS.ACADEMIA_SB["limpar_px"]:
+        m[y0:y1, x0:x1] = True
+    pegas = []
+    orig = U._reguas_amostra
+
+    def espiao(h, w, px_m, qv, rng):
+        T = orig(h, w, px_m, qv, rng)
+        f = sys._getframe(1).f_locals
+        pegas.append((T if f["deitado"] else np.ascontiguousarray(T.transpose(1, 0, 2)), f["x"], f["y"]))
+        return T
+    U._reguas_amostra = espiao
+    try:
+        BS.quieto(V.trocar, Q, antes, [(124, 162, 200)], apagar=m, incluir=m)
+    finally:
+        U._reguas_amostra = orig
+    cx, cy = np.mean([[(p["pdf_px"][0] + p["pdf_px"][2]) / 2, (p["pdf_px"][1] + p["pdf_px"][3]) / 2]
+                      for p in ACADEMIA["pecas"]], axis=0)
+    for T, x, y in pegas:
+        if x <= cx < x + T.shape[1] and y <= cy < y + T.shape[0]:
+            return T, x, y
+    raise RuntimeError("as réguas da academia não foram achadas")
+
+
+def academia(Q, out, antes, par, q=ACADEMIA):
+    """Os aparelhos de antes saem (o vinílico de volta) e os da biblioteca entram, com a sombra curta da Casa A."""
+    import pedidos_subsolo_casab_1211 as PS
+    import vinilico_foto as V
+    H, W = out.shape[:2]
+    T, ox, oy = reguas_academia(Q, antes)
+    h, w = T.shape[:2]
+    reg = out[oy:oy + h, ox:ox + w].astype(np.float32)
+    Lr = reg / np.maximum(T, 1)
+    # a. o buraco: os aparelhos de antes (o alfa deles, como os pedidos colaram) e a sombra, dentro da academia
+    A = PS._final_a(PS.ACADEMIA_SB)
+    velho = np.zeros((H, W), bool)
+    for (ax0, ay0, ax1, ay1), (cx, cy), esp in PS.ACADEMIA_SB["pecas"]:
+        al = PS._alfa_aparelho(A[ay0:ay1, ax0:ax1])
+        if esp:
+            al = al[:, ::-1]
+        hh, ww = al.shape
+        X0, Y0 = int(round(cx - ww / 2)), int(round(cy - hh / 2))
+        velho[Y0:Y0 + hh, X0:X0 + ww] |= al > 0.02
+    k = 2 * q["folga_px"] + 1
+    buraco = cv2.dilate(velho.astype(np.uint8), np.ones((k, k), np.uint8)) > 0
+    # a sala: o vinílico da base com os buracos dos símbolos do PDF fechados (os pedais das bicicletas são cheios no PDF)
+    f = 2 * q["fechar_px"] + 1
+    sala = ndimage.binary_fill_holes(cv2.morphologyEx(V.mascara_vinilico(Q, [(124, 162, 200)]).astype(np.uint8),
+                                                      cv2.MORPH_CLOSE, np.ones((f, f), np.uint8)) > 0)
+    bx, by = PS.ACADEMIA_SB["bola"]["centro_px"]
+    yy, xx = np.ogrid[0:H, 0:W]
+    bola = np.hypot(xx - bx, yy - by) <= q["bola_px"]
+    buraco &= sala & ~par & ~bola
+    assert not buraco[:oy].any() and not buraco[oy + h:].any() and not buraco[:, :ox].any() and \
+        not buraco[:, ox + w:].any(), "o buraco passa das réguas"
+    b = buraco[oy:oy + h, ox:ox + w]
+    # b. o piso que vale para a luz: na sala, fora do buraco, no tom das réguas vezes a luz larga (sem rótulo, bola,
+    # armário e batentes)
+    s_ = (sala & ~par)[oy:oy + h, ox:ox + w]
+    num, den = BS.nconv(Lr, s_ & ~b, 12.0)
+    E = T * num / np.maximum(den, 1e-4)
+    valido = s_ & ~b & (np.abs(reg - E).max(axis=2) <= q["desvio"])
+    g = Lr.mean(axis=2)
+    alta = float(np.median(np.abs(g - cv2.GaussianBlur(g, (0, 0), 2.0))[valido]))
+    if alta > q["razao_max"]:
+        raise RuntimeError(f"as réguas pegas não são as do piso (alta frequência da razão {alta:.4f})")
+    # c. o vinílico de volta no buraco: as réguas vezes a luz do piso em volta (média normalizada, cada vez mais larga)
+    L = np.zeros_like(Lr)
+    falta = b.copy()
+    for sig in q["luz_sigmas"]:
+        num, den = BS.nconv(Lr, valido, sig)
+        ok = falta & (den[..., 0] > 0.05)
+        L[ok] = (num / np.maximum(den, 1e-6))[ok]
+        falta &= ~ok
+        if not falta.any():
+            break
+    reg[b] = (T * L)[b]
+    out[oy:oy + h, ox:ox + w] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    academia: os aparelhos de antes saem; o vinílico de volta em {int(b.sum())} px (as réguas da academia, "
+          f"alta frequência da razão no piso {alta:.4f}, vezes a luz do piso em volta)")
+    # d. os aparelhos da biblioteca
+    pecas = []
+    for p in q["pecas"]:
+        P, cc = aparelho(p)
+        out = BS.compor(out, P, cc, sombra=BS.ACADEMIA["sombra"], nao=par)
+        pecas.append({"tipo": "aparelho", "png": p["png"], "pdf_px": list(p["pdf_px"]),
+                      "espelho": bool(p.get("espelho")), "c": list(cc)})
+        print(f"    academia: {p['nome']} ({Path(p['png']).stem}{', espelhado' if p.get('espelho') else ''}) em "
+              f"{cc[2] - cc[0]:.1f} x {cc[3] - cc[1]:.1f} px ({(cc[2] - cc[0]) / PX_M:.2f} x "
+              f"{(cc[3] - cc[1]) / PX_M:.2f} m), o meio em ({(cc[0] + cc[2]) / 2:.1f}, {(cc[1] + cc[3]) / 2:.1f})")
+    return out, pecas
+
+
 def aplicar(antes):
     Q = quadro()
     out = antes.copy()
@@ -276,6 +430,9 @@ def aplicar(antes):
         reg["pecas"].append({"tipo": "chuveiro", "png": ch["png"], "placa_c": list(pc), "parede": [dist, lado],
                              "placa_px": placa})
         print(f"    {ch['nome']}: {Path(ch['png']).stem}, o braço até a parede ({lado})")
+    # 6. a academia: os aparelhos da biblioteca no tamanho da Casa A (a bola fica)
+    out, pecas = academia(Q, out, antes, par)
+    reg["pecas"] += pecas
     return out, reg, par
 
 
@@ -331,6 +488,8 @@ def pecas_12k(final, out, s, X0, Ya3):
             c = it["c"]
             if it["tipo"] == "banco":
                 P, _ = _banco_12k(c, it["tom"])
+            elif it["tipo"] == "aparelho":
+                P, _ = aparelho(it)
             else:
                 P = BS.girar(BS.ler_png(it["png"]), it["giro"])
             cx, cy, wt, ht, ang = (c[0] + c[2]) / 2, (c[1] + c[3]) / 2, c[2] - c[0], c[3] - c[1], 0.0
