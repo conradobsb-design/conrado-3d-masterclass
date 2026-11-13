@@ -502,6 +502,10 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
         # as peças da biblioteca do 1º Pavimento (12/11)
         import biblioteca_1pav_casaa_1211 as B1
         out = B1.pecas_12k(img, entrada, out, s, X0, Yia, Ya3)
+    elif PAV == "Terreo_CasaB":
+        # as regras da Casa A no Térreo da Casa B (13/11): o que mudou na final, ampliado, e os chuveiros nítidos
+        import regras_terreo_casab_1311 as RB
+        out = RB.pecas_12k(img, out, s, X0, Ya3)
     Fq = np.array([[s, 0, -s * X0], [0, s, -s * Ya3]], np.float64)
     # o fundo: branco puro fora da planta
     gq = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -536,7 +540,11 @@ def montar12k(saida_topaz, largura=None, opcao="A"):
         out[y:y1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
 
     # os shafts (12/11): o vão claro e o X cinza fino, desenhados na escala do 12K (`regras_1211_casaa.shafts_12k`)
-    out = RG.shafts_12k(PAV, img, out, s, X0, Ya3)
+    if PAV == "Terreo_CasaB":
+        import regras_terreo_casab_1311 as RB
+        out = RB.shafts_12k(img, out, s, X0, Ya3)
+    else:
+        out = RG.shafts_12k(PAV, img, out, s, X0, Ya3)
 
     # os textos e os símbolos, numa janela em volta de cada um
     def janela(cx, cy, meia):

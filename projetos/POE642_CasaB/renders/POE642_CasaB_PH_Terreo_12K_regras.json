@@ -1,0 +1,44 @@
+{
+ "pecas": [
+  {
+   "tipo": "chuveiro_tb",
+   "nome": "banho master (esquerda)"
+  },
+  {
+   "tipo": "chuveiro_tb",
+   "nome": "banho master (direita)"
+  },
+  {
+   "tipo": "chuveiro_tb",
+   "nome": "banho 1"
+  },
+  {
+   "tipo": "chuveiro_tb",
+   "nome": "banho 2"
+  },
+  {
+   "tipo": "chuveiro_tb",
+   "nome": "banho 3"
+  },
+  {
+   "tipo": "chuveiro_tb",
+   "nome": "BH gourmet (esquerda)"
+  },
+  {
+   "tipo": "chuveiro_tb",
+   "nome": "BH gourmet (direita)"
+  },
+  {
+   "tipo": "chuveiro_tb",
+   "nome": "ducha do deck"
+  },
+  {
+   "tipo": "chuveiro_tb",
+   "nome": "BH serviço"
+  },
+  {
+   "tipo": "chuveiro_tb",
+   "nome": "BH motorista"
+  }
+ ]
+}

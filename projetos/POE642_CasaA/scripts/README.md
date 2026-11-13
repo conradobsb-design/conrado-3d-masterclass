@@ -2507,6 +2507,39 @@ o 12K (`ampliacao_12k_subsolo_casab.py montar12k <Topaz ecd1a9e8> --opcao AB`), 
 - **Topaz (High Fidelity V2, 12288 x 6858):** job b44e8511-a768-449b-aba7-fd92ea2e5bdc; a saída fica fora do git.
 - **`montar12k <saída do Topaz> --opcao AB`:** `ampliacao_12k_terreo_casaa.montar12k` com os nomes da Casa B (sem os tracejados finos, que vêm da entrada): a A3 deitada (12288 x 8689), os tons da final, o fundo em branco puro, os 38 rótulos, os 4 triângulos e as 3 descrições em 12K (A na Inter; B na Kalam). `POE642_CasaB/entrega/POE642_CasaB_PH_Terreo_12K_opcao_{A,B}.jpg`, prévias `renders/POE642_CasaB_PH_Terreo_12K_opcao_{A,B}_previa.jpg` e conferências `..._conferencia_{varanda_piscina,suites,living_hall,cozinha_servico,garagem_motorista}.jpg`.
 
+### Térreo da Casa B, as regras da Casa A (13/11): `regras_terreo_casab_1311.py`
+
+Usuário: "VAMOS REVISAR OS MOBILIÁRIOS DO TÉRREO DA CASA B E REALIZAR AS ALTERAÇÕES FEITAS NA CASA A LISTADAS ACIMA".
+Sobre a final de 4574dc9 (a de 12/11), sem IA nova:
+- **letras:** o D sob a seta das 3 escadas (SUBSOLO, DECK, JARDIM), no corpo e na cor das descrições, como no Térreo
+  da Casa A; também nos dados do 12K (`POE642_CasaB_PH_Terreo_12K_dados.json`), que o `montar12k` desenha (A na Inter,
+  B na Kalam);
+- **shafts:** os 2 vãos (`SHAFTS_TB`) no claro com o X cinza fino tracejado e a borda de parede limpa
+  (`regras_1211_casaa.desenhar_x`, `limpar_aro`); no 12K, `shafts_12k`;
+- **chuveiros (`CHUVEIROS_TB`):** os 10 desenhados em planta: os 2 de teto do banho master, os quadrados de parede dos
+  banhos 1, 2 e 3, dos 2 BH gourmet e da ducha do deck, os redondos de parede do BH serviço e do BH motorista; a placa no
+  quadrado do PDF, o braço até a face da parede (medida na final); os de antes viram o piso do lado
+  (`biblioteca_subsolo_casab_1311.piso_desloc`); na ducha do deck, cada linha das tábuas vem das duas laterais, em
+  degradê (`piso_linhas`: copiado de um lado só, o trecho aparecia como uma faixa de outro tom);
+- **paredes retas:** `biblioteca_subsolo_casaa_1211.paredes_retas` no cinza 80, com as proteções do Térreo da Casa A
+  (objetos do PDF, folhas e esquadrias da ARQ_PAREDE fora do cinza, só o branco ligado à borda é fora) e o elevador
+  (`ELEVADOR_TB`): 45 px de entalhes, 6345 px de dentes e linhas soltas, 173 px de aresta;
+- **esquadrias pretas:** ainda não aplicadas (`esquadrias`, a troca do traço neutro pelo preto, ficou irregular: os
+  boxes não pegam, e as portas das suítes têm os brises de bronze de 29/10); vão por prévia.
+No 12K, `ampliacao_12k_terreo_casaa.montar12k` com `PAV` "Terreo_CasaB" chama `regras_terreo_casab_1311.pecas_12k`
+(a zona que mudou, `renders/POE642_CasaB_PH_Terreo_12K_regras_zona.png`, da final ampliada, e os chuveiros nítidos;
+`biblioteca_subsolo_casab_1311.pecas_12k` agora aceita o registro e a zona de outro pavimento e um `peca(it)` para os
+tipos novos) e `shafts_12k`. Topaz b44e8511 baixado de novo (fora do git). Antes e depois em
+`POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_{letras_escadas,shafts,chuveiros_banhos,chuveiros_servico}_antes_depois.jpg`.
+Como refazer: `python3 regras_terreo_casab_1311.py` (sem `--antes`, parte da final de `ANTES_COMMIT`), `python3
+ampliacao_12k_terreo_casab.py montar12k <Topaz b44e8511> --opcao AB`, a prancha, o PDF da Casa B e o book.
+
+**A proposta do mobiliário (13/11):** `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_proposta_biblioteca_{1,2,3}.jpg`
+(17 trechos; as escolhas da Casa A marcadas). O usuário: "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO
+O RETOQUE EM VOLTA DO CONTORNO E NOS TAPETES" (as camas de 12/11 ficam; os tapetes refeitos e o contorno limpo); peças
+novas geradas no Higgsfield (a biblioteca não tem): geladeira, recamier da suíte master, banco estofado do closet master e
+cortina, 4 variantes de cada em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_pecas_higgsfield.jpg`, para a escolha.
+
 ### Térreo da Casa B, pedidos de 12/11: `pedidos_terreo_casab_1211.py`
 
 Os pedidos do usuário vendo o Térreo da Casa B (com os recortes da prancha), sobre a final de 21fa118, em passos (`PASSOS`, cada um documentado no script com as falas do usuário):

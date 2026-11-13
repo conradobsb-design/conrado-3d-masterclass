@@ -447,13 +447,16 @@ def salvar_registro(antes, depois, reg, par):
     print(f"    {REG_JSON.name}: {len(reg['pecas'])} peças; zona {int(zona.sum())} px")
 
 
-def pecas_12k(final, out, s, X0, Ya3):
+def pecas_12k(final, out, s, X0, Ya3, reg_json=None, reg_masc=None, peca=None):
     """No 12K do Subsolo da Casa B (`ampliacao_12k_subsolo_casab.montar12k`, antes dos rótulos): o que mudou na final
-    vem da final ampliada; por cima, as peças de PNG nítidas na escala do 12K."""
-    if not REG_JSON.exists():
+    vem da final ampliada; por cima, as peças de PNG nítidas na escala do 12K. Também para o Térreo
+    (`regras_terreo_casab_1311`): o registro e a zona dele (`reg_json`, `reg_masc`) e `peca(it)`, que desenha os tipos
+    novos ((P, cx, cy, larg, alt, giro, sombras) ou None para os daqui)."""
+    reg_json, reg_masc = reg_json or REG_JSON, reg_masc or REG_MASC
+    if not reg_json.exists():
         return out
-    reg = json.loads(REG_JSON.read_text())
-    mk = cv2.imread(str(REG_MASC))
+    reg = json.loads(reg_json.read_text())
+    mk = cv2.imread(str(reg_masc))
     zona, nao = mk[..., 0] > 127, mk[..., 1] > 127
     H, W = out.shape[:2]
     n, lab, st, _ = cv2.connectedComponentsWithStats(zona.astype(np.uint8))
@@ -481,6 +484,11 @@ def pecas_12k(final, out, s, X0, Ya3):
         fx = np.clip(np.floor(np.arange(xa, xb) / s + X0).astype(int), 0, nao.shape[1] - 1)
         return nao[fy[:, None], fx[None, :]]
     for it in reg["pecas"]:
+        r = peca(it) if peca is not None else None
+        if r is not None:
+            P, cx, cy, wt, ht, ang, sb = r
+            out = BT.pousar(out, P, (cx - X0) * s, (cy - Ya3) * s, wt * s, ht * s, ang, sb, PX_M * s, nao=nao_fn)
+            continue
         if it["tipo"] == "chuveiro":
             P, cx, cy, wt, ht, ang = chuveiro_pos(it["png"], tuple(it["placa_c"]), tuple(it["parede"]),
                                                   it["placa_px"])
@@ -494,7 +502,7 @@ def pecas_12k(final, out, s, X0, Ya3):
                 P = BS.girar(BS.ler_png(it["png"]), it["giro"])
             cx, cy, wt, ht, ang = (c[0] + c[2]) / 2, (c[1] + c[3]) / 2, c[2] - c[0], c[3] - c[1], 0.0
         out = BT.pousar(out, P, (cx - X0) * s, (cy - Ya3) * s, wt * s, ht * s, ang, [], PX_M * s, nao=nao_fn)
-    print(f"    biblioteca no 12K do Subsolo da Casa B: {len(reg['pecas'])} peças nítidas sobre a zona refeita")
+    print(f"    {reg_json.name}: {len(reg['pecas'])} peças nítidas no 12K, sobre a zona refeita")
     return out
 
 
