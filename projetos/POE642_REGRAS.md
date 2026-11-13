@@ -2,6 +2,8 @@
 
 _Consolidado em 19/10/26, antes de começar as execuções. Este arquivo vale mais que o histórico (`POE642_HANDOFF_SESSAO_LOCAL.md`): quando uma regra daqui contradiz uma decisão antiga, vale a daqui. As regras novas de 19/10 estão marcadas com **[19/10]**, e as que elas substituem estão na seção 15._
 
+**[13/11] Lista consolidada para as Casas C, D e E:** `POE642_REGRAS_CONSOLIDADAS_CDE.md` junta, por tema e em forma de checklist, as regras usadas no Subsolo, no Térreo e no 1º Pavimento da Casa A e no Subsolo e no Térreo da Casa B (10 a 13/11), com as de 13/11 que ainda não estavam aqui (esquadrias só no contorno, louças e cubas por ambiente, cadeira de escritório sob a escrivaninha, pufe na frente da poltrona, mesa de centro em tom quente, nada de madeira dentro d'água, piso refeito no tom do entorno, script sempre a partir do commit de base).
+
 **[26/10] Especificações novas para todas as casas na seção 19.** Elas mudam o símbolo das escadas (S/D no lugar do triângulo da R14), a cor das paredes (cinza 80, resposta do usuário) e a dos pilares (preto). A aplicação vai planta por planta, com o OK do usuário em cada uma ("Caso apareça alguma inconformidade, me apresente antes de alterar. Eu dou OK e você altera."; "vou aprovar planta por planta"). A primeira foi o Subsolo da Casa A (seção 19, "Aplicação").
 
 Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de começar as execuções." Junto vieram 13 regras novas. Elas estão abaixo, cada uma no seu tema, com o número da lista do usuário (R1 a R13).
