@@ -4424,6 +4424,6 @@ entre os lavabos; as bancadas das cubas dos lavabos em travertino, sem as mancha
 em veludos diferentes (a suíte master fica); o contorno das claraboias de volta; o aparador do hall (gerado no
 Higgsfield) e o vaso de folhagem; a folha da porta do hall num material só; o triângulo no centro do vão no lugar da seta;
 o filete entre a garagem e a pedra portuguesa (e os pontinhos claros do piso da garagem fora); as 2 máquinas de lavar na
-área de serviço; a bancada dos tanques em granito marrom tabaco; o quarto de serviço mobiliado (cama de solteiro, guarda-roupa, o rótulo mais para cima); sem o tracejado do lote. Antes e depois em
+área de serviço; a bancada dos tanques em granito marrom tabaco; o quarto de serviço mobiliado (cama de solteiro, guarda-roupa, o rótulo mais para cima); a cuba e a bancada do BH serviço (marrom tabaco, louça branca, torneira cromada); sem o tracejado do lote. Antes e depois em
 `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`. Prancha, PDF da Casa C e book
 refeitos. O 12K do Térreo se refaz (Topaz) no fim da revisão.

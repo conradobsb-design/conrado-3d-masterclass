@@ -49,6 +49,11 @@ Sobre a final de `ANTES_COMMIT` (a do 12K de 13/11: o estar E1 e o paisagismo da
   0,57 m na parede da esquerda, da parede de cima até 11 cm da cama, no desenho dos guarda-roupas da Casa C (o creme
   mais escuro do lado aberto, o varão no meio, os cabides, o fio de madeira e a sombra curta); o rótulo (a mesma letra,
   levada pelo alfa contra o piso) no meio da área livre, entre o guarda-roupa e a parede, abaixo da porta.
+- **"CORRIJA O ERRO DA CUBA"** (o BH serviço; `bh_servico`): a bancada do PDF saía no piso, só com um contorno cinza
+  solto, e a cuba com uma tira branca subindo pelo canto; como no BH serviço da Casa B
+  (`pedidos_terreo_casab_1211.cozinha_tb`, item 4): a bancada em marrom tabaco com o contorno e a sombra curta, a cuba
+  de semiencaixe em louça branca da Casa A (`final3840_casaa.cuba_branca`) no retângulo do PDF (o piso de logo ao lado
+  por baixo da parte que passa da bancada e da cuba antiga) e a torneira cromada saindo da parede.
 - **"REMOVA ESSE TRACEJADO EM VOLTA DA PLANTA"** (`tracejado_lote`): o retângulo tracejado do lote (x 296 a 3583, y 5 a
   2050, que encostava na borda do gramado à esquerda) sai: fora do lote, branco puro.
 
@@ -136,10 +141,15 @@ QUARTO_S = {"vao": (2474.5, 501.0, 2615.5, 662.5), "cama_pdf": 84669, "cama": ("
             "varao": (150, 156, 160), "cabide_px": 7.3, "cabide": 0.86, "fio": (75, 128, 170), "sombra": 0.18,
             "rotulo": (2500, 612, 2602, 646), "rotulo_centro": (2562.0, 574.0), "piso": (2480, 512, 2550, 560),
             "semente": 1314, "ss": 8}
+# o BH serviço (px): a bancada e a cuba do PDF, a cuba antiga (a caixa, para o piso por baixo), a torneira (deitada,
+# a base na parede) e de onde vem o piso (dx)
+BH_SERV = {"bancada_px": (2676.4, 501.2, 2700.3, 554.9), "cuba_px": (2669.3, 514.7, 2693.1, 538.5),
+           "antiga_px": (2666, 503, 2696, 543), "torneira_px": (2686.5, 525.1, 2699.5, 528.1), "base": "fim",
+           "piso_amostra": (2622, 518, 2660, 560), "contorno": (30, 40, 54), "semente": 1315}
 LOTE = {"abre_px": 5, "nb": 245, "corpo": 0.8}
 ANTES_DEPOIS = {"lavabos": (1080, 1480, 1640, 1700), "quartos": (300, 260, 2300, 760),
                 "claraboias": (700, 230, 1100, 990), "hall": (2280, 1170, 2790, 1460), "garagem": (2690, 300, 3290, 700),
-                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690),
+                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600),
                 "inteira": (0, 0, 3840, 2160)}
 
 
@@ -574,6 +584,66 @@ def quarto_servico(Q, img, q=QUARTO_S):
     return np.clip(np.round(o), 0, 255).astype(np.uint8)
 
 
+def bh_servico(Q, img, q=BH_SERV):
+    import pedidos_terreo_casab_1211 as PB2
+    FAa = FA
+    H, W = img.shape[:2]
+    par = Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "EST_PILAR") and d.get("fill")
+                      and max(d["fill"]) < 0.6, ss=2) > 0.3
+    o8 = img.copy()
+    bx0, by0, bx1, by1 = q["bancada_px"]
+    # o piso por baixo da cuba antiga e da parte da cuba nova que passa da bancada
+    fora = np.zeros((H, W), bool)
+    a0, b0, a1, b1 = q["antiga_px"]
+    fora[b0:b1, a0:a1] = True
+    fora |= PB2._ret_px_bool(H, W, q["cuba_px"])
+    fora[int(np.floor(by0)):int(np.ceil(by1)), int(np.floor(bx0)) + 1:int(np.ceil(bx1))] = False
+    fora &= ~par
+    import paisagismo_terreo_casab_1311 as PJ
+    banc = np.zeros((H, W), bool)
+    banc[int(np.floor(by0)) - 1:int(np.ceil(by1)) + 2, int(np.floor(bx0)):int(np.ceil(bx1)) + 1] = True
+    fx0, fy0, fx1, fy1 = q["piso_amostra"]
+    # a folha clara da porta, a louça e o cinza das paredes (a beira delas) não dão o tom
+    Ii = img.astype(np.int16)
+    claro = (Ii.mean(axis=2) > 150) | ((Ii.max(axis=2) - Ii.min(axis=2)) < 25)
+    o8 = PJ.preencher(o8, cv2.dilate(fora.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0,
+                      img[fy0:fy1, fx0:fx1].copy(), anel_px=5, nao=par | banc | claro, sig=5.0)
+    # a bancada: o marrom tabaco (a pedra da ilha gourmet da Casa B), o contorno e a sombra
+    imgB = cv2.imread(str(BANCADA_SERV["final_b"]))
+    antes_par = o8[par].copy()
+    rb = PB2._pt(Q, q["bancada_px"])
+    tl = FAa.tela(o8, Q, rb, folga=4)
+    mb = tl.ret(rb, 0.2)
+    FAa.sombra_q(tl, mb, forca=0.24, dist=0.9, sigma=0.9)
+    with contextlib.redirect_stdout(io.StringIO()):
+        T_ = PB2._tabaco(imgB, PB2.BANCADAS_TB["fonte_tabaco_px"], tl.h, tl.w, q["semente"])
+    tl.pintar(mb, T_)
+    tl.contorno(mb, 0.5, q["contorno"])
+    o8 = tl.gravar()
+    o8[par] = antes_par
+    # a cuba de louça branca e a torneira cromada (a base na parede, a bica sobre a bacia)
+    o8 = FAa.cuba_branca(Q, o8, PB2._pt(Q, q["cuba_px"]))
+    t0, t1, t2, t3 = PB2._pt(Q, q["torneira_px"])
+    tl = FAa.tela(o8, Q, (t0, t1, t2, t3), folga=4)
+    ym = (t1 + t3) / 2
+    bica = (t0, ym - 0.55, t2, ym + 0.55)
+    base, ponta = ((t2, ym), (t0, ym)) if q["base"] == "fim" else ((t0, ym), (t2, ym))
+    mb_ = tl.ret(bica, 0.5)
+    FAa.sombra_q(tl, mb_, forca=0.30, dist=0.8, sigma=0.7)
+    tl.pintar(mb_, FAa.CROMO["meio"])
+    tl.contorno(mb_, 0.3, FAa.CROMO["contorno"])
+    for (cx, cy), rr, cor in ((base, 1.5, FAa.CROMO["meio"]), (ponta, 0.8, FAa.CROMO["escuro"])):
+        v = tl.vazia()
+        px_, py_ = tl.pt(cx, cy)
+        cv2.circle(v, (int(px_), int(py_)), int(rr * PB2.FA.PT_PX * 8), 255, -1, cv2.LINE_AA)
+        tl.pintar(v, cor)
+        tl.contorno(v, 0.3, FAa.CROMO["contorno"])
+    o8 = tl.gravar()
+    print("    BH serviço: a bancada em marrom tabaco com o contorno e a sombra, a cuba de louça branca no retângulo do PDF "
+          "(sem a tira branca da antiga) e a torneira cromada")
+    return o8
+
+
 def tracejado_lote(img, q=LOTE):
     from scipy import ndimage
     nb = (img.min(axis=2) < q["nb"]).astype(np.uint8)
@@ -610,6 +680,7 @@ def aplicar(antes):
     out = maquinas(out)
     out = bancada_servico(out)
     out = quarto_servico(Q, out)
+    out = bh_servico(Q, out)
     out = tracejado_lote(out)
     return out
 

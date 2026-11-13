@@ -2738,7 +2738,9 @@ de lavar da Casa B no vão acima dos tanques: "ADICIONAR DUAS MÁQUINAS DE LAVAR
 (a bancada dos tanques no granito marrom tabaco da Casa B, as cubas de inox por cima, com a sombra curta e o contorno:
 "TROCAR O MATERIAL DA BANCADA PARA GRANITO MARROM TABACO"); `quarto_servico` (a cama de solteiro do quarto externo
 junto à parede de baixo, o guarda-roupa de 0,57 m na parede da esquerda no desenho dos da Casa C e o rótulo levado
-para cima, na área livre: "CRIE O AMBIENTE"); `tracejado_lote` (o
+para cima, na área livre: "CRIE O AMBIENTE"); `bh_servico` (a bancada do BH serviço em marrom tabaco com o contorno,
+a cuba de louça branca da Casa A no retângulo do PDF, sem a tira branca da antiga, e a torneira cromada, como no BH
+serviço da Casa B: "CORRIJA O ERRO DA CUBA"); `tracejado_lote` (o
 retângulo tracejado do lote em branco e o muro de baixo cortado na borda do lote: "REMOVA ESSE TRACEJADO EM VOLTA DA
 PLANTA"). Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`.
 Rodar sem `--antes` refaz a final a partir de 48a23e8.
