@@ -2700,6 +2700,32 @@ aos pés de todas as camas, o comprimento acertado com módulos inteiros do capi
 vidro virou gramado e o vidro foi redesenhado reto de pedra a pedra (`PISCINA_C`, `VIDRO_PISC_C`); no
 `pedidos_terreo_casac_1311.py`, o miolo da claraboia do box do BH master 2 com o piso do box (`piso_amostra`).
 
+### Térreo da Casa C, o estar (13/11): `proposta_estar_casac_1311.py`
+
+"GERE OPÇÕES PARA O ESTAR DA CASA C" / "ANTES DO 12K, FAÇA AS OPÇÕES PARA O ESTAR": o conjunto da esquerda do estar (2
+poltronas, sofá de 3, sofá de 2,5, 2 mesas de centro) em três estilos gerados no Higgsfield (`gpt_image_2`, 2K, o fundo
+tirado; `biblioteca-objetos/02-terreo/sala-de-estar/propostas-estar-c/e{1,2,3}_{sofa3,sofa2,poltrona,mesa}.png`), cada
+peça no retângulo do PDF sem deformar (cada lado estica no máximo 1,25), o tapete inteiro no retângulo do PDF e o
+travertino em volta refeitos; a folha em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_proposta_estar.jpg`.
+Escolhido **E1** (linho off-white, poltronas de couro caramelo com madeira, mesas de freijó): `--aplicar E1`; antes e
+depois em `..._Terreo_1311_estar_E1_antes_depois.jpg`.
+
+### Térreo da Casa C, o paisagismo externo (13/11): `paisagismo_terreo_casac_1311.py`
+
+"TEMOS QUE MEXER NA GRAMA E NAS ARVORES DA AREA EXTERNA DA CASA C. DIMINUIR DRASTICAMENTE E ALTERAR": como na Casa B
+(as oliveiras), todo o verde externo (o gramado e as árvores e arbustos sobre ele: o verde ligado à faixa da borda do
+lote, com os buracos das copas e os pontinhos escuros dos troncos; os jardins internos ficam) refeito com o gramado da
+Casa B (a amostra repetida sem emenda vezes a luz larga do lugar) e só 3 oliveiras (`OLIVEIRAS`) com a sombra da copa.
+Roda sobre a final com o E1; antes e depois em `..._Terreo_1311_paisagismo_antes_depois.jpg`.
+
+### Casa C, o JPG em 12K (13/11): `ampliacao_12k_casac.py`
+
+Sem IA generativa (nada muda de lugar): `preparar <pav>` (o recorte A3 da planta, a margem 150/4961), o Topaz High
+Fidelity V2 do Higgsfield a 12288 x 8689, `montar <pav> <saída do Topaz>` (os tons da final, o fundo em branco puro, JPG
+95 a 743 dpi na A3, prévia e conferências). Subsolo e Térreo em
+`POE642_CasaC/entrega/POE642_CasaC_PH_{Subsolo,Terreo}_12K_opcao_A.jpg`, refeitos depois da revisão do Subsolo e do
+paisagismo do Térreo (as saídas do Topaz ficam fora do git). A opção B (letra Kalam) não foi feita.
+
 ### Subsolo da Casa C, a biblioteca (13/11): `biblioteca_subsolo_casac_1311.py`
 
 A proposta (`POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_proposta_biblioteca_1.jpg`) aprovada com "Ok"; os PDFs
@@ -2717,7 +2743,7 @@ Subsolo da Casa B (`biblioteca_subsolo_casab_1311`) e das regras do Térreo da C
 - rótulos em fileira: VARANDA SUBSOLO na linha de ACADEMIA (y 498) e DEPÓSITO na de SAUNA (y 826), o texto levado pela
   conta do alfa contra o piso do lado; o BH ACADEMIA não cabe na fileira (51 px entre a bancada e a parede) e fica.
 Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_{sauna,bh_academia,academia,rotulos}_antes_depois.jpg`.
-A Casa C ainda não tem 12K (precisa de IA nova).
+O 12K da Casa C: `ampliacao_12k_casac.py` (seção abaixo).
 
 ### Subsolo da Casa C, os post-its do cliente (13/11): `pedidos_subsolo_casac_1311.py`
 
@@ -2742,6 +2768,18 @@ fio da aresta e a sombrinha no travertino; antes, cinza escuro); o caixote da fl
 borda de 10 cm em concreto claro com os fios das arestas, a sombra na terra e no piso); as portas (`quinas`: a ponta da
 parede até a quina da folha, vértice com vértice, e os tiquinhos escuros dos marcos fora).
 Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_postits_<trecho>_antes_depois.jpg`.
+Depois, na revisão do 12K (usuário: "ESTOU REVISANDO O SUBSOLO DA CASA C"), quatro etapas novas no mesmo roteiro:
+`fundo_branco` ("REMOVA O HACHURADO DE FUNDO ... NÃO TERÁ MAIS HACHURADO, FUNDO BRANCO", como no Subsolo da Casa A em
+05/11: a hachura sai pela conta de `ajustes_casaa.subsolo_hachurado` na borda da pegada e fora dela tudo branco, sem o
+contorno do lote; só o pedaço da planta da pegada, a faixa do pé do lote também sai); `escada_sem_corte` ("REMOVA A
+LINHA PRETA E PRESERVE A DIFERENÇA DE TONS. SÓ REMOVA A LINHA EM DIAGONAL": a linha de corte da escada estreita, com o
+zigue-zague, sai; o trecho depois do corte continua nevoado, com a divisa reta entre as pontas da linha, refeito pela
+conta de `final3840_casac.escada_estreita_s`); `PILAR` ("CORRIJA A LOCALIZAÇÃO DO PILAR. ELE FICA NO TRAVERTINO": o
+pilar inteiro no travertino, em (656, 336), onde o post-it o marca; antes, no canto, metade fora); `travertino` de volta
+("NO PISO DO TRAVERTINO REMOVER MANCHAS CINZAS, CONFORME ORIENTAÇÃO": as faixas cinzas largas à mediana, força 0,85,
+só no piso: a parede do alto da varanda fica). O roteiro continua partindo da final de `ANTES_COMMIT`; antes e depois
+contra a final de antes da revisão em `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_revisao12k_{planta,pilar,
+escada,travertino}_antes_depois.jpg`.
 
 ### Térreo da Casa C, os post-its do cliente (13/11): `pedidos_terreo_casac_1311.py`
 

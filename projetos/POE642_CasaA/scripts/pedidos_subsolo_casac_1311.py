@@ -25,6 +25,18 @@ Subsolo da Casa B (`pedidos_subsolo_casab_1211`, de onde vêm as portas e o dese
   estão (os chuveiros desenhados, as louças sem caixa, os aparelhos da academia no tamanho da Casa A, BH nos rótulos) ou
   entram aqui (a seta com o S e a descrição, as portas quina com quina e as pontas de parede retas nos portais).
 
+Depois, na revisão do 12K (13/11, "ESTOU REVISANDO O SUBSOLO DA CASA C"):
+- **"REMOVA O HACHURADO DE FUNDO ... NÃO TERÁ MAIS HACHURADO, FUNDO BRANCO"** (`fundo_branco`, como no Subsolo da Casa
+  A em 05/11): fora da pegada (`final3840_casac.pegada_subsolo`) tudo branco, sem a hachura e sem o contorno do lote; na
+  borda da pegada a hachura sai pela conta dela (`ajustes_casaa.subsolo_hachurado`).
+- **"REMOVA A LINHA PRETA E PRESERVE A DIFERENÇA DE TONS. SÓ REMOVA A LINHA EM DIAGONAL"** (`escada_sem_corte`, a
+  escada estreita): a linha de corte do PDF (com o zigue-zague) sai; o trecho depois do corte continua nevoado, com a
+  divisa reta (a diagonal entre as pontas da linha), refeito pela mesma conta de `final3840_casac.escada_estreita_s`.
+- **"CORRIJA A LOCALIZAÇÃO DO PILAR. ELE FICA NO TRAVERTINO."** (`PILAR`): o pilar todo dentro do travertino, afastado
+  do filete e da borda de cima, onde o post-it do cliente o marca (antes, no canto, metade fora do piso).
+- **"NO PISO DO TRAVERTINO REMOVER MANCHAS CINZAS, CONFORME ORIENTAÇÃO"** (`travertino`, o post-it "Colocar um piso com
+  menos manchas cinzas"): as manchas largas cinzas saem (a baixa frequência à mediana do piso); o veio fino fica.
+
   python3 pedidos_subsolo_casac_1311.py [--antes <png>] [--saida <png>]
 """
 
@@ -59,14 +71,23 @@ ANTES_COMMIT = "6ea1bc3"
 BEGE = {"chapada": (232, 232, 232), "forca": 0.35, "mediana_px": 61, "croma_obj": 22, "lum_obj": 120, "area_obj": 30,
         "aresta": 10.0, "aresta_px": 2, "texto": 0.72, "linha": 0.92}
 # a varanda do Subsolo (px): o retângulo do travertino, a força e o sigma da baixa frequência que sai
-TRAVERTINO = {"px": (637, 321, 1064, 737), "sigma": (28.0, 2.5), "forca": 0.75, "texto": 0.80}
+# (revisão do 12K, "NO PISO DO TRAVERTINO REMOVER MANCHAS CINZAS") a força 0,85 e só no piso (`den_min`: a fração de
+# piso na média em volta a partir da qual a correção é inteira)
+TRAVERTINO = {"px": (637, 321, 1064, 737), "sigma": (28.0, 2.5), "forca": 0.85, "texto": 0.80, "den_min": 0.5}
 # o encontro do Bege Bahia com o travertino (px): x, de y0 a y1; a largura (m), a cor da pedra e a dos fios (BGR)
 # (13/11, "Esse filete, eu não sei se ele é num tom preto ... deve vir do mármore bege Bahia") o filete em Bege Bahia:
 # uma tira de `larg_m` da pedra do pátio logo ao lado, um pouco mais clara (um mini degrau polido), com o fio fino da
 # aresta do lado do travertino e a sombrinha curta nele
 FILETE = {"x": 636.4, "y0": 320.0, "y1": 737.0, "larg_m": 0.05, "clarear": 1.035, "fonte_dx": -14,
           "fio": (150, 165, 178), "fio_alfa": 0.55, "sombra": 0.10, "ss": 8}
-PILAR = {"centro_px": (636.4, 329.5), "diam_m": 0.30, "cor": (80, 80, 80), "ss": 8}
+# (13/11, revisão do 12K: "CORRIJA A LOCALIZAÇÃO DO PILAR. ELE FICA NO TRAVERTINO.") o pilar inteiro no travertino, onde
+# o post-it o marca: ~0,15 m à direita do filete e ~0,12 m abaixo da borda de cima (antes, (636.4, 329.5), no canto)
+PILAR = {"centro_px": (656.0, 336.0), "diam_m": 0.30, "cor": (80, 80, 80), "ss": 8}
+# (revisão do 12K) o fundo: fora da pegada, branco puro (a hachura e o contorno do lote saem)
+FUNDO = {"fora": 0.001}
+# (revisão do 12K) a escada estreita sem a linha de corte: a divisa do trecho nevoado reta, entre as pontas da linha
+# (pt); `folga_px`: o anel em volta da linha e da diferença das divisas que é refeito
+ESCADA_CORTE = {"divisa": [(657.1, 1155.3), (691.4, 1240.9)], "folga_px": 1, "fundo_px": 6, "ss": 8}
 # a floreira junto à sauna (`final3840_casac.FLOREIRA_S`): plantinhas de `d_m`, a cada `passo` (fração da altura)
 FLOREIRA = {"d_m": (0.16, 0.20), "passo": 0.056, "forracao_m": (0.09, 0.14), "forracao_passo_m": 0.07, "semente": 1311}
 # as escadas: o triângulo (px, a ponta para onde sobe), a letra (centro x, topo y) e a descrição (linhas, centro x, base
@@ -106,6 +127,9 @@ CAIXOTE = {"fora": (664.2, 737.1, 694.0, 978.9), "dentro": (670.2, 743.0, 688.1,
 QUINAS = [((822.4, 792.9, 864.2, 795.3), "base", +1, False),
           ((897.1, 753.5, 944.8, 755.9), "topo", +1, False),
           ((746.0, 1001.5, 793.8, 1003.9), "topo", +1, True)]
+# (revisão do 12K) o antes e depois contra a final de antes desta revisão (a do disco)
+REVISAO = {"planta": (330, 220, 1920, 1700), "pilar": (590, 290, 720, 400), "escada": (680, 960, 900, 1120),
+           "travertino": (637, 321, 1064, 737)}
 ANTES_DEPOIS = {"bege_bahia": (350, 300, 1260, 1700), "varanda_filete_pilar": (600, 300, 1080, 760),
                 "caixote": (640, 725, 720, 995), "floreira_escadas": (355, 690, 900, 1120),
                 "portas": (780, 725, 1080, 830)}
@@ -137,6 +161,92 @@ def _pintar(out, a, X0, Y0, cor):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+def fundo_branco(Q, img, q=FUNDO):
+    """Sem a hachura: a final do Subsolo é final * p + hachura * (1 - p) (`ajustes_casaa.subsolo_hachurado`, p a pegada);
+    a hachura sai pela conta dela (as mesmas diagonais) e no lugar entra o branco; fora da pegada, branco puro."""
+    import ajustes_casaa as AJ
+    p = C.pegada_subsolo(Q)
+    # só o pedaço da planta: a pegada também pega uma faixa fina no pé do lote (y ~1815 a 1838, a linha do lote e o
+    # tracejado da calçada da base), que fica branca
+    n, lab, st, _ = cv2.connectedComponentsWithStats((p > q["fora"]).astype(np.uint8), connectivity=8)
+    p = p * (lab == 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA])))
+    h = AJ.SUBSOLO_R2["hachura"]
+    H, W = img.shape[:2]
+    s = h["passo_m"] * Q.px_m
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    fr = np.mod((xx + yy) / np.sqrt(2), s)
+    a = np.clip(h["largura_px"] / 2 + 0.5 - np.minimum(fr, s - fr), 0, 1)[..., None]
+    fundo = 255 * (1 - a) + np.float32(h["cor"]) * a
+    out = img.astype(np.float32) + (255 - fundo) * (1 - p[..., None])
+    out[p <= q["fora"]] = 255
+    print(f"    fundo branco: {int((p <= q['fora']).sum())} px fora da pegada (sem a hachura e o contorno do lote)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def _escada_estreita(Q, img, corte, ss=8):
+    """A conta de `final3840_casac.escada_estreita_s` até antes da linha de corte, com a divisa do trecho nevoado em
+    `corte` (pt): o recorte (px), a cobertura da escada e o desenho."""
+    sys.path.insert(0, str(C.RAIZ / "_texturas"))
+    from texturas import textura
+    q, s = C.ESTREITA_S, F.ESCADA_SOMBRA
+    ex0, ey0, ex1, ey1 = q["pdf"]
+    x0, y0, x1, y1 = F.ret_q(Q, (ex0 - 8, ey0, ex1, ey1))
+    x0, y0, x1, y1 = x0, y0 - 1, x1 + 1, y1 + 1
+    X, Y = C.grade_pt(Q, x0, y0, x1, y1)
+    a = F.ret_aa_q(Q, q["pdf"])[y0:y1, x0:x1]
+    h, w = a.shape
+    bordas = [ex0] + list(q["bocels"]) + [ex1]
+    k = np.searchsorted(bordas, X).astype(np.int32)
+    f = C.sombras_degraus(k, len(bordas), s)
+    bege = F.fechar(Q.cor([(232, 232, 232)], tol=6), 5)
+    tom = np.median(img[bege].reshape(-1, 3), axis=0).astype(np.float32)
+    T = textura(F.DEGRAUS_F["pedra"], Q.px_m, h, w, semente=q["semente"]).astype(np.float32)
+    novo = T / T.reshape(-1, 3).mean(axis=0) * tom * f[..., None]
+    pts = [Q.p2q(x, y) for x, y in corte + [(ex1 + 3, ey1 + 3), (ex1 + 3, ey0 - 3), (corte[0][0], ey0 - 3)]]
+    m = np.zeros((h * ss, w * ss), np.uint8)
+    cv2.fillPoly(m, [np.int32(np.round((np.float32(pts) - (x0, y0)) * ss))], 255)
+    depois = cv2.resize(m.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    e, nv = q["esmaecer"], q["nevoa"]
+    antes_c = novo * (1 - e) + 255 * e
+    nevoa = cv2.GaussianBlur(novo, (0, 0), nv["sigma_px"]) * (1 - nv["branco"]) + 255 * nv["branco"]
+    desenho = antes_c * (1 - depois[..., None]) + nevoa * depois[..., None]
+    return (x0, y0, x1, y1), a, depois, desenho
+
+
+def escada_sem_corte(Q, img, q=ESCADA_CORTE):
+    """A escada estreita sem a linha de corte: onde estava a linha (e onde a divisa reta difere da do zigue-zague), o
+    desenho refeito pela conta da escada, com a divisa reta; nas pontas (fora da escada), o fundo de junto."""
+    qe = C.ESTREITA_S
+    (x0, y0, x1, y1), a, dep_v, des_v = _escada_estreita(Q, img, qe["corte"], q["ss"])
+    _, _, dep_n, des_n = _escada_estreita(Q, img, q["divisa"], q["ss"])
+    h, w = a.shape
+    ss = q["ss"]
+    cp = np.float32([Q.p2q(x, y) for x, y in qe["corte"]])
+    ml = np.zeros((h * ss, w * ss), np.uint8)
+    cv2.polylines(ml, [np.int32(np.round((cp - (x0, y0)) * ss))], False, 255,
+                  max(1, int(round(qe["linha"]["larg_px"] * ss))), cv2.LINE_AA)
+    al = cv2.resize(ml.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    reg = img[y0:y1, x0:x1].astype(np.float32)
+    # a conta bate com a final longe da linha? (o desenho de antes, onde a escada é cheia)
+    longe = (a > 0.999) & ~_dil(al > 0.002, 3)
+    dif = np.abs(reg - des_v)[longe].mean()
+    troca = _dil((al > 0.002) | (np.abs(dep_v - dep_n) > 0.002), q["folga_px"])
+    # o fundo de junto, nas pontas da linha fora da escada: o px da mesma coluna, `fundo_px` acima (no alto) ou abaixo
+    fundo = reg.copy()
+    meio = h // 2
+    fp = q["fundo_px"]
+    for yy in range(h):
+        y2 = max(yy - fp, 0) if yy < meio else min(yy + fp, h - 1)
+        fundo[yy] = reg[y2]
+    novo = des_n * a[..., None] + fundo * (1 - a[..., None])
+    reg[troca] = novo[troca]
+    out = img.copy()
+    out[y0:y1, x0:x1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    escada estreita: a linha de corte sai ({int(troca.sum())} px refeitos; a divisa do nevoado reta); a conta "
+          f"bate com a final longe da linha (diferença média {dif:.2f})")
+    return out
+
+
 def _dil(m, r):
     return cv2.dilate(m.astype(np.uint8), np.ones((2 * r + 1, 2 * r + 1), np.uint8)) > 0
 
@@ -197,7 +307,10 @@ def travertino(out, q=TRAVERTINO):
     den = cv2.GaussianBlur(m, (0, 0), sigmaX=sx, sigmaY=sy)[..., None]
     L = num / np.maximum(den, 1e-4)
     alvo = np.median(reg[piso], axis=0)
-    reg += q["forca"] * (alvo[None, None] - L)
+    # (revisão do 12K) só no piso: as paredes e as esquadrias dentro do retângulo ficam (longe do piso, a média
+    # normalizada não tem amostra e clareava a parede de cima)
+    no_piso = (lum > q["texto"] * med).astype(np.float32) * np.clip(den[..., 0] / q["den_min"], 0, 1)
+    reg += q["forca"] * (alvo[None, None] - L) * no_piso[..., None]
     out[y0:y1, x0:x1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
     print(f"    varanda: as manchas largas do travertino saem (BGR mediano {np.round(alvo).astype(int)}, força "
           f"{q['forca']})")
@@ -440,8 +553,14 @@ def quinas(out, qs=QUINAS, cor=(80, 80, 80), tol=8, gap_max=10, ss=8):
 def aplicar(antes):
     Q = quadro()
     out = antes.copy()
+    # (revisão do 12K) o fundo branco e a escada estreita sem a linha de corte, antes de tudo (as setas e os textos vêm
+    # depois, já no branco)
+    out = fundo_branco(Q, out)
+    out = escada_sem_corte(Q, out)
     out = bege(Q, out)
-    # (13/11, "Era pra mexer no Travertino ou era pra mexer no Bege Bahia?") o travertino da varanda fica como estava
+    # (13/11, "Era pra mexer no Travertino ou era pra mexer no Bege Bahia?") o travertino tinha voltado como estava;
+    # (revisão do 12K, "NO PISO DO TRAVERTINO REMOVER MANCHAS CINZAS, CONFORME ORIENTAÇÃO") as manchas cinzas saem
+    out = travertino(out)
     out = filete(Q, out)
     out = pilar(Q, out)
     out = floreira(Q, out)
@@ -452,8 +571,9 @@ def aplicar(antes):
     return out
 
 
-def antes_depois(antes, depois):
-    for nome, (x0, y0, x1, y1) in ANTES_DEPOIS.items():
+def antes_depois(antes, depois, quadros=None, prefixo="postits"):
+    quadros = quadros or ANTES_DEPOIS
+    for nome, (x0, y0, x1, y1) in quadros.items():
         a, b = antes[y0:y1, x0:x1], depois[y0:y1, x0:x1]
         k = min(4.0, 1000 / max(a.shape[:2]))
         a = cv2.resize(a, None, fx=k, fy=k, interpolation=cv2.INTER_LANCZOS4)
@@ -461,9 +581,9 @@ def antes_depois(antes, depois):
         junto = np.hstack([a, np.full((a.shape[0], 16, 3), 255, np.uint8), b])
         topo = np.full((44, junto.shape[1], 3), 255, np.uint8)
         cv2.putText(topo, "ANTES | DEPOIS", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (40, 40, 40), 2, cv2.LINE_AA)
-        arq = R / f"POE642_CasaC_PH_Subsolo_1311_postits_{nome}_antes_depois.jpg"
+        arq = R / f"POE642_CasaC_PH_Subsolo_1311_{prefixo}_{nome}_antes_depois.jpg"
         cv2.imwrite(str(arq), np.vstack([topo, junto]), [cv2.IMWRITE_JPEG_QUALITY, 90])
-    print(f"    antes e depois: {', '.join(ANTES_DEPOIS)}")
+    print(f"    antes e depois ({prefixo}): {', '.join(quadros)}")
 
 
 def final_de(commit):
@@ -483,9 +603,11 @@ def main():
         cv2.imwrite(a.saida, depois)
         print(f"    {a.saida}")
         return
+    atual = cv2.imread(str(FINAL))
     cv2.imwrite(str(FINAL), depois)
     print(f"    {FINAL.name}")
     antes_depois(antes, depois)
+    antes_depois(atual, depois, REVISAO, "revisao12k")
 
 
 if __name__ == "__main__":

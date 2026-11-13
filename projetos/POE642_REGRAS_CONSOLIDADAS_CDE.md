@@ -238,6 +238,10 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   agave, palmeira-ráfis). Na Casa B, escolhidas: **oliveiras** nos cantos do lote (no lugar das copas com anel de
   arbustos), palmeira-ráfis e filodendro no jardim de inverno, agave no hall, moreia e filodendro no jardim, moreias
   na floreira; o caminho de pedras da entrada como estava ("HOJE"). [B Térreo]
+  Na Casa C ("DIMINUIR DRASTICAMENTE E ALTERAR"): todo o verde externo refeito com o gramado da Casa B e só 3
+  oliveiras; os jardins internos ficam. [C Térreo]
+- [ ] **Estar da Casa C:** o conjunto E1 (linho off-white, poltronas de couro caramelo, mesas de freijó), cada peça no
+  retângulo do PDF sem deformar. [C Térreo]
 
 ## 9. Pisos refeitos (por baixo das peças trocadas)
 
@@ -252,8 +256,16 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   a 45% do contraste; a luz, as sombras, o tom, as arestas e as linhas dos degraus ficam ("Já removeu manchas do bege
   Bahia como fizemos nas outras plantas?"). [A três pavimentos, 10 e 11/11; C Subsolo, 13/11]
 - [ ] **O Bege Bahia na medida do Subsolo da Casa A:** o contraste das manchas no pátio igual ao da Casa A (a mediana de
-  61 px e as manchas a 35% no Subsolo da Casa C), também nos degraus de pedra. O post-it "menos manchas cinzas" era do
-  Bege Bahia, não do travertino (o travertino fica). [C Subsolo]
+  61 px e as manchas a 35% no Subsolo da Casa C), também nos degraus de pedra. [C Subsolo]
+- [ ] **Travertino da varanda sem as manchas cinzas** (o post-it do cliente "Colocar um piso com menos manchas
+  cinzas"; usuário, na revisão do 12K: "NO PISO DO TRAVERTINO REMOVER MANCHAS CINZAS, CONFORME ORIENTAÇÃO"): as faixas
+  largas à mediana do piso (força 0,85), só no piso; o veio fino e os poros ficam. [C Subsolo]
+- [ ] **Subsolo sem hachura, fundo branco:** fora da planta do Subsolo, branco puro, sem a hachura do terreno e sem o
+  contorno do lote ("NÃO TERÁ MAIS HACHURADO, FUNDO BRANCO"). [A Subsolo, 05/11; C Subsolo, 13/11]
+- [ ] **Escada sem a linha de corte preta:** o trecho depois do corte continua esmaecido, com a divisa reta; sai só a
+  linha diagonal com o zigue-zague ("SÓ REMOVA A LINHA EM DIAGONAL"). [C Subsolo]
+- [ ] **Pilar onde o cliente marca, inteiro no piso** (no Subsolo da Casa C, no travertino, afastado do filete e da
+  borda), nunca metade fora. [C Subsolo]
 - [ ] **Floreira com caixote:** a caixa do PDF com a borda (10 cm, concreto claro), as arestas em fio, a sombra da borda
   na terra e a da caixa no piso; as plantas dentro. [C Subsolo]
 - [ ] **Filete entre pisos em pedra** (Bege Bahia, um mini degrau com o fio da aresta), nunca um traço escuro. [C
