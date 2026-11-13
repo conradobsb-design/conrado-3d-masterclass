@@ -49,6 +49,8 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 - [ ] **Soleira em todo vão de janela**, inclusive em cada lado da janela de canto: nunca o cinza da parede nem o
   gramado no vão. [A Térreo e 1º Pav]
 - [ ] **Guarda-corpo de vidro limpo**, até o fim, encostando na parede, sem barra cinza nem pontinhos. [A]
+- [ ] **Guarda-corpo nas varandas** ("Representar guarda-corpo das varandas"): a lâmina de vidro legível (3 px, as faces
+  em cinza escuro, o brilho e a sombra curta), de parede a parede, em toda borda de varanda para o jardim. [C Térreo]
 - [ ] **Soleira de entrada como a da Casa C.** [A Térreo]
 
 ## 2. Escadas
@@ -71,7 +73,11 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   - [A três pavimentos; B Térreo]
 - [ ] **Jardim de inverno:** um X só, de uma diagonal à outra, interrompido em volta do rótulo; as folhas de vidro
   encostadas umas nas outras. [B Térreo]
-- [ ] **Claraboia sem X:** fica só o tracejado horizontal. [A Térreo]
+- [ ] **Claraboia só com as linhas de fora** (cliente, Casa C: "Representar as claraboias apenas com as linhas de fora,
+  sem o X no meio para ficar mais discreto. Usar um tom cinza e as linhas mais fininhas. Padronizar para as outras
+  plantas que tiverem claraboia."): o retângulo do PDF tracejado, em cinza médio (128), ~0,8 px; sem X, sem o
+  tracejado grosso preto ou branco, e o piso contínuo por dentro (sem o véu claro). [C Térreo; na Casa A, o lavabo
+  tinha ficado só com o tracejado horizontal, a pedido do usuário: a confirmar]
 - [ ] **Escadas e pisos externos (post-its do cliente no Subsolo):** o filete de pedra entre dois pisos que se
   encontram e o pilar onde o cliente marca (redondo, 0,30 m, no cinza das paredes). [B e C Subsolo]
 - [ ] **Tracejado só nos vazios.** Saem o telhado, os afastamentos e as projeções. O pergolado fica fino e numa cor só
@@ -146,6 +152,9 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 - [ ] **Recamier e chaises** na medida do PDF ("CUIDADO COM A PROPORÇÃO"); as mesinhas de encaixe de volta por cima.
   [B Térreo]
 - [ ] **Closet:** banco estofado representado como banco estofado (o capitonê). [B Térreo]
+- [ ] **Sem contorno nos mobiliários** ("Tirar o contorno dos mobiliários"): sem o traço do PDF sobre as peças (os
+  estofados e as mesas da Casa B; os módulos dos armários da Casa C, o traço laranja vira o creme do armário). [B e C
+  Térreo]
 - [ ] **Cortinas de linho em ondas** nos trilhos do PDF, de parede a parede; os trechos que se sobrepõem unidos; o
   trilho grafite do lado do vidro. [B Térreo]
 

@@ -2659,6 +2659,18 @@ Bege Bahia a 45%, pela conta de `terreo_casaa_1011.bege_ta`, na chapada 232), co
 caminhos e os pisantes).
 Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_postits_<trecho>_antes_depois.jpg`.
 
+### Térreo da Casa C, os post-its do cliente (13/11): `pedidos_terreo_casac_1311.py`
+
+Sobre a final com a 1ª leva: as 5 claraboias do PDF (varanda master, BH master 1, closets master 1 e 2, box do BH
+master 2) só com o retângulo de fora tracejado em cinza 128, ~0,8 px (o X e o tracejado grosso saem; nos closets, o
+miolo com as réguas do vinílico, `regras_terreo_casab_1311.piso_reguas`); o contorno laranja dos módulos dos armários
+no creme deles (`armarios`, a faixa da borda dos retângulos com diagonal da DOC_LINHAS); 14 portas de giro do PDF
+(arco + folha da ARQ_PAREDE; a dobradiça no canto mais longe do meio do arco) quina com quina, sem marcos, com a soleira
+(`pedidos_subsolo_casab_1211.portas_sb`, as de parede deitada na imagem transposta; o BH externo e o louceiro 1 ficam:
+a busca das pontas da parede erra ali; 3 dão erro e 6 arcos não têm folha no PDF); o guarda-corpo de vidro nas bordas
+das varandas e na lateral da varanda master (`pedidos_terreo_casaa_1211c.vidro_ret`, 3 px, faces escuras); a seta com o
+D e "DESCE PARA O / SUBSOLO" nos degraus largos e na escada estreita.
+
 ### Térreo da Casa C, a biblioteca, 1ª leva (13/11): `biblioteca_terreo_casac_1311.py`
 
 A proposta (`POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_proposta_biblioteca_{1,2,3}.jpg`) aprovada com "Ok". A 1ª
