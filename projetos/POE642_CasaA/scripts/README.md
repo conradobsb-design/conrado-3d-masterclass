@@ -2656,6 +2656,18 @@ partia nos restos escuros da de antes).
 Antes e depois do 12K A contra a versão anterior: `python3 revisao_terreo_casab_1311.py --antes-depois <commit>`
 (`POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`).
 
+### Térreo da Casa B, o paisagismo (13/11): `paisagismo_terreo_casab_1311.py`
+
+A proposta (`python3 paisagismo_terreo_casab_1311.py`, as 4 folhas `POE642_CasaB_PH_Terreo_1311_paisagismo_proposta_*`)
+e, com a escolha ("OLIVEIRA, HOJE E PODE APLICAR AS OUTRAS PLANTAS"), a aplicação, chamada no `regras_terreo_casab_1311
+.aplicar` (`PJ.aplicar(out, reg)`): as 3 árvores de hoje (a copa e o anel de arbustos, achados pela cor: o gramado tem
+G - R < 0 e R - B ~ 42; fora a linha do muro e o branco da prancha) viram gramado (o trecho `GRAMA_PX`, no tom do
+entorno) e entra a oliveira (4,5 m, afastada da divisa, a sombra da copa); as outras plantas (`PLANTAS`) no lugar das de
+hoje (o chão de cada uma refeito da textura do lugar). O caminho de pedras fica como estava. No registro do 12K, a
+chave "paisagismo" (as regiões do chão, com a máscara `POE642_CasaB_PH_Terreo_12K_paisagismo_mascara.png`, e as
+plantas); no 12K (`PJ.pecas_12k`, no `pecas_12k`), o chão de cada região refeito com a textura da própria saída do
+Topaz e as plantas nítidas na escala dele.
+
 ### Subsolo da Casa C, a biblioteca (13/11): `biblioteca_subsolo_casac_1311.py`
 
 A proposta (`POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_proposta_biblioteca_1.jpg`) aprovada com "Ok"; os PDFs

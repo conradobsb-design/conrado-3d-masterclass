@@ -2490,5 +2490,238 @@
    ],
    "margem": 1.0
   }
- ]
+ ],
+ "paisagismo": {
+  "regioes": [
+   {
+    "fonte": [
+     640,
+     120,
+     860,
+     250
+    ],
+    "branco": true
+   },
+   {
+    "fonte": [
+     640,
+     120,
+     860,
+     250
+    ],
+    "branco": true
+   },
+   {
+    "fonte": [
+     640,
+     120,
+     860,
+     250
+    ],
+    "branco": true
+   },
+   {
+    "fonte": [
+     2123,
+     814,
+     2163,
+     854
+    ],
+    "branco": false,
+    "anel_px": 6
+   },
+   {
+    "fonte": [
+     2452,
+     1012,
+     2536,
+     1082
+    ],
+    "branco": false,
+    "anel_px": 6
+   },
+   {
+    "fonte": [
+     2358,
+     1218,
+     2398,
+     1258
+    ],
+    "branco": false,
+    "anel_px": 6
+   },
+   {
+    "fonte": [
+     1226,
+     1650,
+     1424,
+     1656
+    ],
+    "branco": false,
+    "anel_px": 6
+   }
+  ],
+  "plantas": [
+   {
+    "png": "oliveira",
+    "cx": 451,
+    "cy": 256,
+    "d": 270,
+    "giro": 260.89824406404307,
+    "espelho": false,
+    "sombra": "arvore",
+    "margem": true
+   },
+   {
+    "png": "oliveira",
+    "cx": 3346,
+    "cy": 256,
+    "d": 270,
+    "giro": 218.77091466654605,
+    "espelho": false,
+    "sombra": "arvore",
+    "margem": true
+   },
+   {
+    "png": "oliveira",
+    "cx": 454,
+    "cy": 1732,
+    "d": 265,
+    "giro": 124.55310643842262,
+    "espelho": false,
+    "sombra": "arvore",
+    "margem": true
+   },
+   {
+    "png": "palmeira-rafis",
+    "cx": 2075.0,
+    "cy": 770.0,
+    "d": 62.0,
+    "giro": 272.1138953706054,
+    "espelho": false,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "filodendro-xanadu",
+    "cx": 2068.0,
+    "cy": 904.0,
+    "d": 52.0,
+    "giro": 66.95306375807516,
+    "espelho": false,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "palmeira-rafis",
+    "cx": 2204.0,
+    "cy": 900.0,
+    "d": 62.0,
+    "giro": 260.98880054698776,
+    "espelho": true,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "agave",
+    "cx": 2500.0,
+    "cy": 976.0,
+    "d": 50.0,
+    "giro": 245.90704107671806,
+    "espelho": false,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "moreia",
+    "cx": 2385.0,
+    "cy": 1214.0,
+    "d": 50.0,
+    "giro": 83.71269021125005,
+    "espelho": false,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "filodendro-xanadu",
+    "cx": 2378.0,
+    "cy": 1258.0,
+    "d": 40.0,
+    "giro": 350.29555149366314,
+    "espelho": true,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "moreia",
+    "cx": 1240.0,
+    "cy": 1668.0,
+    "d": 34.0,
+    "giro": 350.23654065236104,
+    "espelho": false,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "moreia",
+    "cx": 1269.0,
+    "cy": 1668.0,
+    "d": 34.0,
+    "giro": 42.488528155975644,
+    "espelho": false,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "moreia",
+    "cx": 1298.0,
+    "cy": 1668.0,
+    "d": 34.0,
+    "giro": 39.720727773190816,
+    "espelho": false,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "moreia",
+    "cx": 1327.0,
+    "cy": 1668.0,
+    "d": 34.0,
+    "giro": 130.63199991137824,
+    "espelho": true,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "moreia",
+    "cx": 1356.0,
+    "cy": 1668.0,
+    "d": 34.0,
+    "giro": 302.4397098725341,
+    "espelho": true,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "moreia",
+    "cx": 1385.0,
+    "cy": 1668.0,
+    "d": 34.0,
+    "giro": 317.9436019122069,
+    "espelho": true,
+    "sombra": "planta",
+    "margem": false
+   },
+   {
+    "png": "moreia",
+    "cx": 1414.0,
+    "cy": 1668.0,
+    "d": 34.0,
+    "giro": 73.56185305335957,
+    "espelho": false,
+    "sombra": "planta",
+    "margem": false
+   }
+  ]
+ }
 }

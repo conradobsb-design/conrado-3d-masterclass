@@ -227,7 +227,11 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   comprimento de cada braço, a esquadria a 45° no canto, o fio da borda. [B Térreo]
 - [ ] **A água da piscina só até o vidro**: entre o deck e a divisória da esquerda, deck, nunca azul ("NÃO FAZ SENTIDO
   DE ÁGUA DEPOIS DO VIDRO"). [B Térreo]
-- [ ] **Paisagismo:** proposta antes de aplicar ("QUERO VER ANTES DE VOCÊ APLICAR"). [B Térreo]
+- [ ] **Paisagismo:** proposta antes de aplicar ("QUERO VER ANTES DE VOCÊ APLICAR"). As peças vistas de cima em
+  `02-terreo/paisagismo/` (oliveira, ipê-amarelo, pau-ferro, quaresmeira, costela-de-adão, filodendro xanadu, moreia,
+  agave, palmeira-ráfis). Na Casa B, escolhidas: **oliveiras** nos cantos do lote (no lugar das copas com anel de
+  arbustos), palmeira-ráfis e filodendro no jardim de inverno, agave no hall, moreia e filodendro no jardim, moreias
+  na floreira; o caminho de pedras da entrada como estava ("HOJE"). [B Térreo]
 
 ## 9. Pisos refeitos (por baixo das peças trocadas)
 

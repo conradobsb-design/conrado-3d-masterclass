@@ -18,6 +18,7 @@ e faixa), filodendro xanadu, moreia, agave attenuata, palmeira-ráfis.
 grava `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_paisagismo_proposta_{1_planta,2_arvores,3_caminho,4_plantas}.jpg`.
 """
 
+import json
 import sys
 from pathlib import Path
 
@@ -86,7 +87,7 @@ def textura(fonte, h, w):
     return np.tile(T, (h // T.shape[0] + 1, w // T.shape[1] + 1, 1))[:h, :w]
 
 
-def preencher(out, m, fonte, anel_px=10, nao=None):
+def preencher(out, m, fonte, anel_px=10, nao=None, sig=14.0):
     """Os px de `m` com a textura `fonte`, no tom local do entorno (a média do anel em volta, estendida)."""
     ys, xs = np.nonzero(m)
     X0, Y0, X1, Y1 = xs.min() - anel_px * 3, ys.min() - anel_px * 3, xs.max() + anel_px * 3 + 1, ys.max() + anel_px * 3 + 1
@@ -97,15 +98,15 @@ def preencher(out, m, fonte, anel_px=10, nao=None):
     if nao is not None:                                       # o que não serve de tom (o branco da prancha)
         anel &= ~nao[Y0:Y1, X0:X1]
     T = textura(fonte.astype(np.float32), Y1 - Y0, X1 - X0)
-    num = cv2.GaussianBlur(sub * anel[..., None], (0, 0), 14)
-    den = cv2.GaussianBlur(anel.astype(np.float32), (0, 0), 14)[..., None]
+    num = cv2.GaussianBlur(sub * anel[..., None], (0, 0), sig)
+    den = cv2.GaussianBlur(anel.astype(np.float32), (0, 0), sig)[..., None]
     med = np.median(sub[anel].reshape(-1, 3), axis=0) if anel.any() else sub.reshape(-1, 3).mean(axis=0)
     # longe do anel (o miolo de um buraco grande), o tom mediano do anel
     w_ = np.clip(den / 0.05, 0, 1)
     alvo = (num / np.maximum(den, 1e-4)) * w_ + med[None, None] * (1 - w_)
-    Tm = cv2.GaussianBlur(T, (0, 0), 14)
+    Tm = cv2.GaussianBlur(T, (0, 0), sig)
     novo = T * alvo / np.maximum(Tm, 1)
-    a = cv2.GaussianBlur(mm.astype(np.float32), (0, 0), 1.2)[..., None]
+    a = cv2.GaussianBlur(mm.astype(np.float32), (0, 0), 1.2 * sig / 14.0)[..., None]
     sub = sub * (1 - a) + novo * a
     out[Y0:Y1, X0:X1] = np.clip(np.round(sub), 0, 255).astype(np.uint8)
     return out
@@ -266,6 +267,161 @@ def folhas(base):
         arq = R / f"POE642_CasaB_PH_Terreo_1311_paisagismo_proposta_{n}.jpg"
         cv2.imwrite(str(arq), f, [cv2.IMWRITE_JPEG_QUALITY, 88])
         print(f"    {arq.name} {f.shape[1]}x{f.shape[0]}")
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# A aplicação (13/11, "OLIVEIRA, HOJE E PODE APLICAR AS OUTRAS PLANTAS"): as oliveiras nos 3 cantos e as outras plantas;
+# o caminho de pedras fica como hoje. Chamado no `regras_terreo_casab_1311.aplicar`; no 12K (`pecas_12k`), o chão de
+# cada região refeito com a textura da própria saída do Topaz e as plantas nítidas na escala dele.
+REG_MASCARA = R / "POE642_CasaB_PH_Terreo_12K_paisagismo_mascara.png"
+SOMBRAS = {"arvore": SOMBRA_ARVORE, "planta": SOMBRA_PLANTA}
+
+
+def _pousar_it(out, it, s=1.0, X0=0.0, Y0=0.0):
+    P = ler(it["png"])
+    if it["espelho"]:
+        P = np.ascontiguousarray(P[:, ::-1])
+    h, w = P.shape[:2]
+    k = it["d"] / max(h, w)
+    o = BT.pousar(out.astype(np.float32), P, (it["cx"] - X0) * s, (it["cy"] - Y0) * s, w * k * s, h * k * s,
+                  it["giro"], SOMBRAS[it["sombra"]], PX_M * s)
+    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+
+
+def mancha_arvore(base, cx, cy, r, folga=50):
+    """A árvore de hoje inteira (a copa e o anel de arbustos, que não é redondo): o que não é gramado (o gramado tem
+    G - R < 0 e R - B ~ 42) ligado ao miolo, mais o círculo; fora a linha cinza do muro e o branco da prancha."""
+    H, W = base.shape[:2]
+    X0, Y0, X1, Y1 = max(cx - r - folga, 0), max(cy - r - folga, 0), min(cx + r + folga, W), min(cy + r + folga, H)
+    sub = base[Y0:Y1, X0:X1].astype(np.int16)
+    L = sub.mean(axis=2)
+    cinza = (sub.max(axis=2) - sub.min(axis=2)) < 10
+    fora = (L >= 150) | cinza
+    folha = (((sub[..., 1] - sub[..., 2]) > 3) | ((sub[..., 2] - sub[..., 0]) < 36)) & ~fora
+    folha = cv2.morphologyEx(folha.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    folha = cv2.morphologyEx(folha, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
+    yy, xx = np.mgrid[Y0:Y1, X0:X1]
+    circ = (xx - cx) ** 2 + (yy - cy) ** 2 <= r * r
+    nucleo = (xx - cx) ** 2 + (yy - cy) ** 2 <= (0.6 * r) ** 2
+    n, lab = cv2.connectedComponents(folha, connectivity=8)
+    ok = np.unique(lab[nucleo & (folha > 0)])
+    m = np.isin(lab, ok[ok > 0])
+    m = cv2.dilate(m.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+    m = (m | circ) & ~fora
+    out = np.zeros((H, W), bool)
+    out[Y0:Y1, X0:X1] = m
+    return out
+
+
+def aplicar(out, reg, especie=ARVORE_REC):
+    rng = np.random.default_rng(SEMENTE)              # a mesma sequência da proposta (os mesmos giros)
+    base = out.copy()
+    H, W = out.shape[:2]
+    rot = np.zeros((H, W), np.uint8)
+    regioes, itens = [], []
+    yy, xx = np.mgrid[0:H, 0:W]
+    lote = base.astype(np.float32).mean(axis=2) < 150
+    x0, y0, x1, y1 = GRAMA_PX
+    grama = out[y0:y1, x0:x1].copy()
+    for ((cx, cy), r, _), ((dx, dy), d) in zip(ARVORES, ARVORES_NOVAS):
+        m = mancha_arvore(base, cx, cy, r)
+        nao = ~lote | ((base.astype(np.int16).max(axis=2) - base.astype(np.int16).min(axis=2)) < 10)
+        out = preencher(out, m, grama, nao=nao)
+        regioes.append({"fonte": list(GRAMA_PX), "branco": True})
+        rot[m] = len(regioes)
+        it = {"png": especie, "cx": cx + dx, "cy": cy + dy, "d": d, "giro": float(rng.uniform(0, 360)),
+              "espelho": False, "sombra": "arvore", "margem": True}
+        out = _pousar_it(out, it)
+        itens.append(it)
+    out[~lote] = base[~lote]                                    # a copa e a sombra não passam para a margem
+    caminho(out.copy(), rng)                                    # (só para a sequência; o caminho fica como hoje)
+    for nome, (caixa, desloc, novas) in PLANTAS.items():
+        x0, y0, x1, y1 = caixa
+        sub = out[y0:y1, x0:x1].astype(np.int16)
+        b, g, r_ = sub[..., 0], sub[..., 1], sub[..., 2]
+        verde = (g - r_ > VERDE["g_r"]) & (g - b > VERDE["g_b"]) & ((sub.max(axis=2) - sub.min(axis=2)) > VERDE["sat"])
+        verde = cv2.morphologyEx(verde.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+        verde = cv2.dilate(verde, np.ones((7, 7), np.uint8)) > 0
+        m = np.zeros(out.shape[:2], bool)
+        m[y0:y1, x0:x1] = verde
+        if nome in ("jardim_inverno", "jardim_garagem"):
+            ys, xs = np.nonzero(~verde)
+            fy, fx = int(np.median(ys)), int(np.median(xs))
+            fr = [x0 + max(fx - 20, 0), y0 + max(fy - 20, 0), x0 + fx + 20, y0 + fy + 20]
+        elif nome == "floreira_lavatorio":
+            fr = [1226, 1650, 1424, 1656]
+            m &= ~(out.astype(np.int16).mean(axis=2) < 60)
+        else:
+            fr = [x0 + desloc[0], y0 + desloc[1], x1 + desloc[0], y1 + desloc[1]]
+        if m.any():
+            out = preencher(out, m, out[fr[1]:fr[3], fr[0]:fr[2]].copy(), anel_px=6)
+            regioes.append({"fonte": fr, "branco": False, "anel_px": 6})
+            rot[m] = len(regioes)
+        for cx, cy, planta, d in novas:
+            it = {"png": planta, "cx": float(cx), "cy": float(cy), "d": float(d), "giro": float(rng.uniform(0, 360)),
+                  "espelho": bool(rng.integers(0, 2)), "sombra": "planta", "margem": False}
+            out = _pousar_it(out, it)
+            itens.append(it)
+    cv2.imwrite(str(REG_MASCARA), rot)
+    reg["paisagismo"] = {"regioes": regioes, "plantas": itens}
+    print(f"    paisagismo: as {len(ARVORES)} árvores de hoje viraram {NOMES[especie].lower()}s; "
+          f"{len(itens) - len(ARVORES)} plantas novas (jardim de inverno, hall, jardim da garagem, floreira do "
+          "lavatório); o caminho de pedras como hoje")
+    return out
+
+
+def pecas_12k(out, base, s, X0, Y0, reg_json):
+    """No 12K: cada região do chão refeita com a textura da saída do Topaz (`base`), no tom do entorno, e as plantas
+    nítidas na escala dele."""
+    if not reg_json.exists() or not REG_MASCARA.exists():
+        return out
+    pj = json.loads(reg_json.read_text()).get("paisagismo")
+    if not pj:
+        return out
+    rot = cv2.imread(str(REG_MASCARA), cv2.IMREAD_GRAYSCALE)
+    Hh, Wh = out.shape[:2]
+    for i, rg in enumerate(pj["regioes"], 1):
+        ys, xs = np.nonzero(rot == i)
+        if not len(ys):
+            continue
+        fx0, fy0, fx1, fy1 = xs.min() - 8, ys.min() - 8, xs.max() + 9, ys.max() + 9
+        U0, V0 = max(int(np.floor((fx0 - X0) * s)), 0), max(int(np.floor((fy0 - Y0) * s)), 0)
+        U1, V1 = min(int(np.ceil((fx1 - X0) * s)), Wh), min(int(np.ceil((fy1 - Y0) * s)), Hh)
+        Mw = np.array([[1 / s, 0, U0 / s + X0 - fx0], [0, 1 / s, V0 / s + Y0 - fy0]], np.float64)
+        z = (rot[fy0:fy1, fx0:fx1] == i).astype(np.float32)
+        m = cv2.warpAffine(z, Mw, (U1 - U0, V1 - V0), flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP) > 0.3
+        m = cv2.dilate(m.astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+        a, b_, c, d = rg["fonte"]
+        fonte = base[int((b_ - Y0) * s):int((d - Y0) * s), int((a - X0) * s):int((c - X0) * s)].copy()
+        anel = int(round(rg.get("anel_px", 10) * s))
+        mg = 3 * anel + 4
+        A0, B0 = max(U0 - mg, 0), max(V0 - mg, 0)
+        A1, B1 = min(U1 + mg, Wh), min(V1 + mg, Hh)
+        sub = out[B0:B1, A0:A1]
+        mm = np.zeros(sub.shape[:2], bool)
+        mm[V0 - B0:V1 - B0, U0 - A0:U1 - A0] = m
+        if rg["branco"]:
+            bb = base[B0:B1, A0:A1].astype(np.int16)
+            nao = (bb.mean(axis=2) >= 150) | ((bb.max(axis=2) - bb.min(axis=2)) < 10)
+        else:
+            nao = None
+        if nao is not None:
+            mm &= ~nao
+        if mm.any():
+            preencher(sub, mm, fonte, anel_px=anel, nao=nao, sig=14.0 * s)
+    for it in pj["plantas"]:
+        if it["margem"]:
+            antes = out.copy()
+        out = _pousar_it(out, it, s, X0, Y0)
+        if it["margem"]:
+            r = int(it["d"] * s * 0.75) + int(0.6 * PX_M * s)
+            cx, cy = int((it["cx"] - X0) * s), int((it["cy"] - Y0) * s)
+            A0, B0, A1, B1 = max(cx - r, 0), max(cy - r, 0), min(cx + r, Wh), min(cy + r, Hh)
+            branco = base[B0:B1, A0:A1].astype(np.float32).mean(axis=2) >= 200
+            out[B0:B1, A0:A1][branco] = antes[B0:B1, A0:A1][branco]
+    print(f"    paisagismo no 12K: {len(pj['regioes'])} regiões do chão refeitas da saída do Topaz, "
+          f"{len(pj['plantas'])} plantas nítidas")
+    return out
 
 
 if __name__ == "__main__":

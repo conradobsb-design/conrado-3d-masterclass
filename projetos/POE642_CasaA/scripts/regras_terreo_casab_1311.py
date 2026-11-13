@@ -83,6 +83,7 @@ import biblioteca_terreo_casaa_1211 as BT        # noqa: E402
 import biblioteca_subsolo_casab_1311 as BB       # noqa: E402
 import regras_1211_casaa as RG                   # noqa: E402
 import revisao_terreo_casab_1311 as RV           # noqa: E402
+import paisagismo_terreo_casab_1311 as PJ        # noqa: E402
 
 CASA_B = AQUI.parents[1] / "POE642_CasaB"
 R = CASA_B / "renders"
@@ -1408,6 +1409,7 @@ def aplicar(antes, gravar_dados=True):
     out = pecas_higgsfield(Q, out, antes, par, reg)
     out = mobiliario(Q, out, par, reg)
     out = RV.aplicar(sys.modules[__name__], Q, out, par, reg)       # a revisão do 12K (13/11)
+    out = PJ.aplicar(out, reg)                                      # o paisagismo (13/11: oliveiras, outras plantas)
     out = jardim_inverno(out)
     out = rotulos_grade(out, gravar=gravar_dados)
     return out, reg, par
@@ -1440,6 +1442,7 @@ def pecas_12k(final, out, s, X0, Ya3):
     out = BB.pecas_12k(final, out, s, X0, Ya3, reg_json=REG_JSON, reg_masc=REG_MASC, peca=peca_12k)
     out = topo_12k(out, base, s, X0, Ya3)
     out = RV.copias_12k(out, base, s, X0, Ya3, REG_JSON)  # a cama da suíte 3: a da suíte 1 da saída do Topaz, girada
+    out = PJ.pecas_12k(out, base, s, X0, Ya3, REG_JSON)    # o paisagismo: o chão da saída do Topaz, as plantas nítidas
     if REG_MASC.exists():
         ok = cv2.imread(str(REG_MASC))[..., 2] > 127
         if ok.any():
