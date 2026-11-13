@@ -2524,8 +2524,17 @@ Sobre a final de 4574dc9 (a de 12/11), sem IA nova:
 - **paredes retas:** `biblioteca_subsolo_casaa_1211.paredes_retas` no cinza 80, com as proteções do Térreo da Casa A
   (objetos do PDF, folhas e esquadrias da ARQ_PAREDE fora do cinza, só o branco ligado à borda é fora) e o elevador
   (`ELEVADOR_TB`): 45 px de entalhes, 6345 px de dentes e linhas soltas, 173 px de aresta;
-- **esquadrias pretas:** ainda não aplicadas (`esquadrias`, a troca do traço neutro pelo preto, ficou irregular: os
-  boxes não pegam, e as portas das suítes têm os brises de bronze de 29/10); vão por prévia.
+- **tapetes das suítes (`TAPETES_TB`, `tapetes`; "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO O RETOQUE
+  EM VOLTA DO CONTORNO E NOS TAPETES"):** o tapete do PDF de cada suíte (master, 1, 2 e 3) refeito inteiro com o da
+  biblioteca no tom de hoje; as camas de 12/11, os bancos, o sofá e os criados por cima pelo contorno do PDF de cada
+  peça, com a sombra curta dos móveis (o halo da IA em volta das camas saiu); na master, a dobra do edredom do PDF passa
+  da cama da IA e ali entra o tapete (`fora_px`);
+- **esquadrias pretas (`ESQUADRIAS_TB`, `esquadrias`):** a 1ª tentativa (o traço neutro escurecido pela cor) ficou
+  irregular; a prévia (`POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_previa_esquadrias_pretas.jpg`) desenhava os
+  traços do PDF (ARQ_PAREDE e, nas louças, os vidros dos boxes, longos e finos) em preto onde a final mostra vidro ou
+  alumínio neutro; o usuário: "FAÇA APENAS O CONTORNO DA ESQUADRIA EM PRETO": o traço fino (0,5 px), só o contorno, o
+  vidro claro por dentro; a madeira das portas de giro, o bronze dos brises e os chuveiros não mudam; no 12K o contorno
+  é redesenhado na escala dele (`esquadrias_12k`, onde a final aceitou o perfil: o canal 2 de `REG_MASC`).
 No 12K, `ampliacao_12k_terreo_casaa.montar12k` com `PAV` "Terreo_CasaB" chama `regras_terreo_casab_1311.pecas_12k`
 (a zona que mudou, `renders/POE642_CasaB_PH_Terreo_12K_regras_zona.png`, da final ampliada, e os chuveiros nítidos;
 `biblioteca_subsolo_casab_1311.pecas_12k` agora aceita o registro e a zona de outro pavimento e um `peca(it)` para os

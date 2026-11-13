@@ -22,15 +22,16 @@ Térreo de 12/11), as regras aprovadas na Casa A (o mobiliário vai pela propost
   EM VOLTA DO CONTORNO E NOS TAPETES"):** o tapete do PDF de cada suíte refeito inteiro com o da biblioteca no tom do de
   hoje; as camas de 12/11 (e os bancos, o sofá e os criados) por cima pelo contorno do PDF, com a sombra curta dos
   móveis: o halo da IA em volta das camas sai.
-- **Esquadrias pretas (`ESQUADRIAS_TB`, `esquadrias`; só com o OK da prévia):** os perfis dos boxes, das portas de vidro
-  e os caixilhos das janelas em preto, o vidro claro (a regra de 12/11 da Casa A, "As esquadrias dos box, portas de
+- **Esquadrias pretas (`ESQUADRIAS_TB`, `esquadrias`; vendo a prévia: "FAÇA APENAS O CONTORNO DA ESQUADRIA EM
+  PRETO"):** o contorno dos boxes, das portas de vidro e dos caixilhos das janelas em preto, fino, o vidro claro (a regra de 12/11 da Casa A, "As esquadrias dos box, portas de
   vidro e janelas são pretas"): os traços do PDF (os da ARQ_PAREDE e, nas louças, os vidros dos boxes: longos e finos)
   desenhados em preto onde a final mostra o vidro ou o alumínio neutro; a parede, a madeira das portas de giro, o bronze
   dos brises e os chuveiros não mudam. A primeira tentativa (o traço neutro da ARQ_PAREDE escurecido pela cor) ficou
   irregular: os boxes não pegavam e as linhas escureciam pela metade.
 No 12K (`ampliacao_12k_terreo_casaa.montar12k` com `PAV` "Terreo_CasaB", chamado pelo `ampliacao_12k_terreo_casab`):
 `pecas_12k` traz o que mudou na final (`REG_MASC`) da final ampliada sobre a saída do Topaz e, por cima, os chuveiros
-nítidos na escala do 12K; os shafts e as letras vão pelo `montar12k`.
+nítidos na escala do 12K e o contorno das esquadrias redesenhado nela (`esquadrias_12k`, onde a final aceitou o perfil:
+o canal 2 de `REG_MASC`); os shafts e as letras vão pelo `montar12k`.
 
   python3 regras_terreo_casab_1311.py [--antes <png>] [--saida <png>]
 Sem --antes, parte da final do commit `ANTES_COMMIT`; sem --saida, grava a final, os dados do 12K, o registro e os
@@ -101,8 +102,12 @@ CHUVEIROS_TB = [
 LIMPA_PX = 3                 # em volta da placa e do braço de antes (a sombra deles)
 PAREDES_TB = dict(BS.PAREDES_RETAS, fora_fundo=True)
 ELEVADOR_TB = (1720, 515, 1825, 665)          # a caixa do elevador (px), fora das paredes retas
-ESQUADRIAS_TB = {"perfil": (34, 34, 36), "traco_px": 1.1, "ss": 4, "forca": 1.15, "croma_max": 16, "lum_min": 120,
+# (usuário, vendo a prévia: "FAÇA APENAS O CONTORNO DA ESQUADRIA EM PRETO") o traço fino (`traco_px`): só o contorno de
+# cada folha, caixilho e vidro de box em preto, o vidro claro por dentro (com 1,1 px, os dois lados das folhas finas
+# viravam uma barra preta)
+ESQUADRIAS_TB = {"perfil": (34, 34, 36), "traco_px": 0.5, "ss": 8, "forca": 1.6, "croma_max": 16, "lum_min": 120,
                  "box_larg_px": 1.5, "box_comp_px": 40, "chuveiro_folga_px": 3}
+_ESQ = {}                 # onde a final aceita o perfil (bool, px da final), para o 12K
 # os tapetes das suítes (usuário: "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO O RETOQUE EM VOLTA DO
 # CONTORNO E NOS TAPETES"): o tapete do PDF (o índice do desenho) refeito inteiro com o da biblioteca no tom do de hoje
 # (`png`), como nas suítes do 1º Pavimento da Casa A; as camas de 12/11, os bancos, o sofá e os criados por cima, pelo
@@ -117,6 +122,8 @@ TAPETES_TB = {"master": {"tapete": 35, "png": "suite-master/tapete", "extra": [6
 CAMADAS_TAP = ("ARQ_LAYOUT HUMANIZAÇÃO", "ARQ_LOUÇAS E METAIS", "ARQ_MOBILIÁRIO")
 ANTES_DEPOIS = {"letras_escadas": (590, 600, 1180, 960), "shafts": (1540, 720, 1615, 1300),
                 "tapetes_master": (995, 560, 1220, 790), "tapetes_suites": (1930, 330, 2650, 860),
+                "esquadrias_banho_master": (1230, 300, 1560, 420), "esquadrias_jardim_inverno": (1880, 770, 2240, 960),
+                "esquadrias_servico": (1540, 1440, 2260, 1700),
                 "chuveiros_banhos": (1250, 340, 2810, 900), "chuveiros_servico": (1095, 1520, 2880, 1680)}
 
 
@@ -297,13 +304,8 @@ def tapetes(Q, out, q=TAPETES_TB):
     return out
 
 
-def esquadrias(Q, out, q=ESQUADRIAS_TB):
-    """Os traços das esquadrias do PDF (os da ARQ_PAREDE e, nas louças, só os vidros dos boxes: longos e finos) em preto,
-    só onde a final mostra o vidro ou o alumínio neutro (fora a parede e a borda dela; a madeira das portas de giro e o
-    bronze dos brises, coloridos, ficam); fora os chuveiros desenhados."""
-    H, W = out.shape[:2]
-    ss = q["ss"]
-    M = np.zeros((H * ss, W * ss), np.uint8)
+def _tracos_esquadrias(Q, q=ESQUADRIAS_TB):
+    """Os traços das esquadrias do PDF: os da ARQ_PAREDE e, nas louças, só os vidros dos boxes (longos e finos)."""
     for d in Q.desenhos:
         if d.get("layer") not in ("ARQ_PAREDE", "ARQ_LOUÇAS E METAIS") or d.get("type") != "s":
             continue
@@ -314,10 +316,21 @@ def esquadrias(Q, out, q=ESQUADRIAS_TB):
         w, h = pts.max(0) - pts.min(0)
         if d.get("layer") == "ARQ_LOUÇAS E METAIS" and not (min(w, h) <= q["box_larg_px"] and max(w, h) >= q["box_comp_px"]):
             continue
+        yield cs
+
+
+def esquadrias(Q, out, q=ESQUADRIAS_TB):
+    """O contorno das esquadrias do PDF em preto, só onde a final mostra o vidro ou o alumínio neutro (fora a parede e a
+    borda dela; a madeira das portas de giro e o bronze dos brises, coloridos, ficam); fora os chuveiros desenhados."""
+    H, W = out.shape[:2]
+    ss = q["ss"]
+    M = np.zeros((H * ss, W * ss), np.uint8)
+    for cs in _tracos_esquadrias(Q, q):
         for c in cs:
             cv2.polylines(M, [np.int32(np.round(np.asarray(c) * ss))], False, 255,
                           max(1, int(round(q["traco_px"] * ss))), cv2.LINE_AA)
     al = cv2.resize(M.astype(np.float32) / 255, (W, H), interpolation=cv2.INTER_AREA)
+    del M
     im = out.astype(np.int16)
     croma = im.max(axis=2) - im.min(axis=2)
     parede = (np.abs(im - 80).max(axis=2) <= 22) & (croma <= 12)
@@ -331,10 +344,33 @@ def esquadrias(Q, out, q=ESQUADRIAS_TB):
             x0, x1 = (face, x1) if lado == "esq" else (x0, face) if lado == "dir" else (x0, x1)
             y0, y1 = (face, y1) if lado == "cima" else (y0, face) if lado == "baixo" else (y0, y1)
         ok[min(y0, y1) - e:max(y0, y1) + e, min(x0, x1) - e:max(x0, x1) + e] = False
+    _ESQ["ok"] = ok
     al = np.clip(al * q["forca"], 0, 1) * ok
     novo = out.astype(np.float32) * (1 - al[..., None]) + np.float32(q["perfil"]) * al[..., None]
-    print(f"    esquadrias: o perfil preto em {int((al > 0.3).sum())} px (os boxes, as portas de vidro e as janelas)")
+    print(f"    esquadrias: o contorno preto em {int((al > 0.3).sum())} px (os boxes, as portas de vidro e as janelas)")
     return np.clip(np.round(novo), 0, 255).astype(np.uint8)
+
+
+def esquadrias_12k(out, s, X0, Ya3, ok, q=ESQUADRIAS_TB):
+    """O mesmo contorno no 12K, desenhado na escala dele (nítido), onde a final aceitou o perfil (`ok`, ampliado)."""
+    H, W = out.shape[:2]
+    M = np.zeros((H, W), np.uint8)
+    esp = max(1, int(round(q["traco_px"] * s)))
+    for cs in _tracos_esquadrias(quadro(), q):
+        for c in cs:
+            pts = (np.asarray(c, np.float64) - [X0, Ya3]) * s * 4
+            cv2.polylines(M, [np.int32(np.round(pts))], False, 255, esp, cv2.LINE_AA, shift=2)
+    ok8 = ok.astype(np.uint8) * 255
+    for y in range(0, H, 1024):
+        y1 = min(H, y + 1024)
+        Fq = np.array([[s, 0, -s * X0], [0, s, -s * Ya3 - y]], np.float64)
+        okb = cv2.warpAffine(ok8, Fq, (W, y1 - y), flags=cv2.INTER_NEAREST, borderValue=0) > 127
+        a = np.clip(M[y:y1].astype(np.float32) / 255 * q["forca"], 0, 1) * okb
+        reg = out[y:y1].astype(np.float32)
+        out[y:y1] = np.clip(np.round(reg * (1 - a[..., None]) + np.float32(q["perfil"]) * a[..., None]), 0, 255
+                            ).astype(np.uint8)
+    print("    esquadrias no 12K: o contorno preto nítido")
+    return out
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -348,8 +384,7 @@ def aplicar(antes, gravar_dados=True):
     out = chuveiros(out, par, reg)
     out = paredes(Q, out, antes)
     out = tapetes(Q, out)
-    # as esquadrias pretas (`esquadrias`) só depois da prévia aprovada (a cor sozinha não basta: os boxes não pegam e
-    # as portas das suítes têm os brises de bronze de 29/10)
+    out = esquadrias(Q, out)
     return out, reg, par
 
 
@@ -363,7 +398,12 @@ def peca_12k(it):
 
 def pecas_12k(final, out, s, X0, Ya3):
     """No 12K do Térreo da Casa B (`ampliacao_12k_terreo_casaa.montar12k`, antes dos tracejados e dos textos)."""
-    return BB.pecas_12k(final, out, s, X0, Ya3, reg_json=REG_JSON, reg_masc=REG_MASC, peca=peca_12k)
+    out = BB.pecas_12k(final, out, s, X0, Ya3, reg_json=REG_JSON, reg_masc=REG_MASC, peca=peca_12k)
+    if REG_MASC.exists():
+        ok = cv2.imread(str(REG_MASC))[..., 2] > 127
+        if ok.any():
+            out = esquadrias_12k(out, s, X0, Ya3, ok)
+    return out
 
 
 def salvar_registro(antes, depois, reg, par):
@@ -372,6 +412,8 @@ def salvar_registro(antes, depois, reg, par):
     m = np.zeros(antes.shape, np.uint8)
     m[..., 0] = zona * 255
     m[..., 1] = par * 255
+    if "ok" in _ESQ:
+        m[..., 2] = _ESQ["ok"] * 255                 # onde o contorno das esquadrias entra (para o 12K)
     cv2.imwrite(str(REG_MASC), m)
     REG_JSON.write_text(json.dumps(reg, ensure_ascii=False, indent=1) + "\n")
     print(f"    {REG_JSON.name}: {len(reg['pecas'])} peças; zona {int(zona.sum())} px")
