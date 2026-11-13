@@ -18,11 +18,16 @@ Térreo de 12/11), as regras aprovadas na Casa A (o mobiliário vai pela propost
 - **Paredes retas (`PAREDES_TB`, `paredes`):** `biblioteca_subsolo_casaa_1211.paredes_retas` no cinza 80 das paredes da
   Casa B, com as proteções do Térreo da Casa A (`regras_1211_casaa`: os objetos do PDF, as folhas e esquadrias da
   ARQ_PAREDE fora do cinza das paredes, só o branco ligado à borda é o lado de fora) e o elevador.
-- **Esquadrias pretas (`ESQUADRIAS_TB`, `esquadrias`):** os perfis dos boxes, das portas de vidro e os caixilhos das
-  janelas em preto, o vidro claro (a regra de 12/11 da Casa A, "As esquadrias dos box, portas de vidro e janelas são
-  pretas"): nas esquadrias do PDF, o traço neutro (o alumínio e a face cinza dos boxes) vai ao preto do perfil na
-  proporção do escuro dele (o vidro claro fica); a madeira das portas de giro, o bronze dos brises e as soleiras
-  (coloridas) não mudam.
+- **Tapetes das suítes (`TAPETES_TB`, `tapetes`; "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO O RETOQUE
+  EM VOLTA DO CONTORNO E NOS TAPETES"):** o tapete do PDF de cada suíte refeito inteiro com o da biblioteca no tom do de
+  hoje; as camas de 12/11 (e os bancos, o sofá e os criados) por cima pelo contorno do PDF, com a sombra curta dos
+  móveis: o halo da IA em volta das camas sai.
+- **Esquadrias pretas (`ESQUADRIAS_TB`, `esquadrias`; só com o OK da prévia):** os perfis dos boxes, das portas de vidro
+  e os caixilhos das janelas em preto, o vidro claro (a regra de 12/11 da Casa A, "As esquadrias dos box, portas de
+  vidro e janelas são pretas"): os traços do PDF (os da ARQ_PAREDE e, nas louças, os vidros dos boxes: longos e finos)
+  desenhados em preto onde a final mostra o vidro ou o alumínio neutro; a parede, a madeira das portas de giro, o bronze
+  dos brises e os chuveiros não mudam. A primeira tentativa (o traço neutro da ARQ_PAREDE escurecido pela cor) ficou
+  irregular: os boxes não pegavam e as linhas escureciam pela metade.
 No 12K (`ampliacao_12k_terreo_casaa.montar12k` com `PAV` "Terreo_CasaB", chamado pelo `ampliacao_12k_terreo_casab`):
 `pecas_12k` traz o que mudou na final (`REG_MASC`) da final ampliada sobre a saída do Topaz e, por cima, os chuveiros
 nítidos na escala do 12K; os shafts e as letras vão pelo `montar12k`.
@@ -96,9 +101,22 @@ CHUVEIROS_TB = [
 LIMPA_PX = 3                 # em volta da placa e do braço de antes (a sombra deles)
 PAREDES_TB = dict(BS.PAREDES_RETAS, fora_fundo=True)
 ELEVADOR_TB = (1720, 515, 1825, 665)          # a caixa do elevador (px), fora das paredes retas
-ESQUADRIAS_TB = {"perfil": (34, 34, 36), "croma_max": 14, "escuro": 170.0, "vidro": 226.0, "cresce_px": 1,
-                 "fora_px": []}
+ESQUADRIAS_TB = {"perfil": (34, 34, 36), "traco_px": 1.1, "ss": 4, "forca": 1.15, "croma_max": 16, "lum_min": 120,
+                 "box_larg_px": 1.5, "box_comp_px": 40, "chuveiro_folga_px": 3}
+# os tapetes das suítes (usuário: "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO O RETOQUE EM VOLTA DO
+# CONTORNO E NOS TAPETES"): o tapete do PDF (o índice do desenho) refeito inteiro com o da biblioteca no tom do de hoje
+# (`png`), como nas suítes do 1º Pavimento da Casa A; as camas de 12/11, os bancos, o sofá e os criados por cima, pelo
+# contorno do PDF de cada peça (`CAMADAS_TAP` e `extra`), com a sombra curta dos móveis (`biblioteca_terreo_casaa.
+# SOMBRAS["movel"]`): o halo da IA em volta das camas sai. Na suíte master, a dobra do edredom do PDF passa da cama da
+# IA (`fora_px`): ali entra o tapete.
+TAPETES_TB = {"master": {"tapete": 35, "png": "suite-master/tapete", "extra": [63289],
+                         "fora_px": [(1036, 702, 1048, 727), (1163, 702, 1169, 727)]},
+              "suíte 1": {"tapete": 71886, "png": "sala-intima/tapete", "extra": []},
+              "suíte 2": {"tapete": 71788, "png": "sala-intima/tapete", "extra": []},
+              "suíte 3": {"tapete": 71904, "png": "sala-intima/tapete", "extra": []}}
+CAMADAS_TAP = ("ARQ_LAYOUT HUMANIZAÇÃO", "ARQ_LOUÇAS E METAIS", "ARQ_MOBILIÁRIO")
 ANTES_DEPOIS = {"letras_escadas": (590, 600, 1180, 960), "shafts": (1540, 720, 1615, 1300),
+                "tapetes_master": (995, 560, 1220, 790), "tapetes_suites": (1930, 330, 2650, 860),
                 "chuveiros_banhos": (1250, 340, 2810, 900), "chuveiros_servico": (1095, 1520, 2880, 1680)}
 
 
@@ -221,28 +239,101 @@ def paredes(Q, out, antes):
     return BS.paredes_retas(Q, out, protegido, FA, q)
 
 
-def esquadrias_mascara(Q, out, q=ESQUADRIAS_TB):
-    """As esquadrias do PDF na final: o que a ARQ_PAREDE preenche e não é o cinza das paredes, com `cresce_px`."""
-    im = out.astype(np.int16)
-    croma = im.max(axis=2) - im.min(axis=2)
-    parede = (np.abs(im - 80).max(axis=2) <= 22) & (croma <= 12)
-    pdf = BS.quieto(FA.paredes_pdf, Q) > 0.15
-    # fora a parede e a borda dela (o degradê de 1 px da parede para o piso fica como está)
-    m = ndimage.binary_dilation(pdf, iterations=q["cresce_px"]) & ~ndimage.binary_dilation(parede, iterations=1)
-    for x0, y0, x1, y1 in q["fora_px"]:
-        m[y0:y1, x0:x1] = False
-    return m
+def _caixa(Q, d):
+    pts = np.concatenate([np.asarray(c) for c in Q.caminhos(d)])
+    return pts.min(0), pts.max(0)
+
+
+def tapete(Q, out, q):
+    """O tapete do PDF refeito com o da biblioteca no tom do de hoje; as peças sobre ele de volta, pelo contorno do PDF,
+    com a sombra curta."""
+    dt = Q.desenhos[q["tapete"]]
+    (x0, y0), (x1, y1) = _caixa(Q, dt)
+    objs = set()
+    for i, d in enumerate(Q.desenhos):
+        if i == q["tapete"] or d.get("type") != "f" or (d.get("layer") not in CAMADAS_TAP and i not in q["extra"]):
+            continue
+        if not Q.caminhos(d):
+            continue
+        (a0, b0), (a1, b1) = _caixa(Q, d)
+        if a1 < x0 or a0 > x1 or b1 < y0 or b0 > y1 or (a1 - a0) < 3 or (b1 - b0) < 3:
+            continue
+        objs.add(id(d))
+    alfa = Q.preencher(lambda d: id(d) in objs, ss=4, fs=True).astype(np.float32)
+    rug = Q.preencher(lambda d: d is dt, ss=4, fs=True).astype(np.float32)
+    X0, Y0, X1, Y1 = int(np.floor(x0)) - 6, int(np.floor(y0)) - 6, int(np.ceil(x1)) + 6, int(np.ceil(y1)) + 6
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    al = np.clip(alfa[Y0:Y1, X0:X1], 0, 1)
+    for a0, b0, a1, b1 in q.get("fora_px", ()):
+        al[b0 - Y0:b1 - Y0, a0 - X0:a1 - X0] = 0
+    ru = np.clip(rug[Y0:Y1, X0:X1], 0, 1)
+    livre = (ru > 0.99) & ~ndimage.binary_dilation(al > 0.01, iterations=8)
+    tom = np.median(reg[livre], axis=0)
+    P = B1.ler_png(q["png"])
+    m = P[..., 3] > 250
+    P[..., :3] = np.clip(P[..., :3] * (np.float32(tom) / np.median(P[..., :3][m], axis=0)), 0, 255)
+    w, h = x1 - x0, y1 - y0
+    if (P.shape[1] > P.shape[0]) != (w > h):
+        P = np.ascontiguousarray(np.rot90(P))
+    novo = BT.pousar(reg.copy(), P, (x0 + x1) / 2 - X0, (y0 + y1) / 2 - Y0, w, h, 0.0, BT.SOMBRAS["tapete"], PX_M)
+    for sb in BT.SOMBRAS["movel"]:
+        sh = cv2.GaussianBlur(al, (0, 0), max(0.3, sb["sig"] * PX_M))
+        Ms = np.float32([[1, 0, sb["dx"] * PX_M], [0, 1, sb["dy"] * PX_M]])
+        sh = cv2.warpAffine(sh, Ms, (sh.shape[1], sh.shape[0]), flags=cv2.INTER_LINEAR, borderValue=0)
+        novo *= (1 - sb["forca"] * sh * (1 - al))[..., None]
+    res = novo * (1 - al[..., None]) + reg * al[..., None]
+    dentro = np.clip(cv2.dilate(ru, np.ones((3, 3), np.uint8)), 0, 1)[..., None]
+    res = reg * (1 - dentro) + res * dentro
+    out[Y0:Y1, X0:X1] = np.clip(np.round(res), 0, 255).astype(np.uint8)
+    return out, tom
+
+
+def tapetes(Q, out, q=TAPETES_TB):
+    feitos = []
+    for nome, t in q.items():
+        out, tom = tapete(Q, out, t)
+        feitos.append(f"{nome} (BGR {np.round(tom).astype(int)})")
+    print(f"    tapetes refeitos inteiros, as camas por cima pelo contorno do PDF: {'; '.join(feitos)}")
+    return out
 
 
 def esquadrias(Q, out, q=ESQUADRIAS_TB):
-    m = esquadrias_mascara(Q, out, q)
-    im = out.astype(np.float32)
+    """Os traços das esquadrias do PDF (os da ARQ_PAREDE e, nas louças, só os vidros dos boxes: longos e finos) em preto,
+    só onde a final mostra o vidro ou o alumínio neutro (fora a parede e a borda dela; a madeira das portas de giro e o
+    bronze dos brises, coloridos, ficam); fora os chuveiros desenhados."""
+    H, W = out.shape[:2]
+    ss = q["ss"]
+    M = np.zeros((H * ss, W * ss), np.uint8)
+    for d in Q.desenhos:
+        if d.get("layer") not in ("ARQ_PAREDE", "ARQ_LOUÇAS E METAIS") or d.get("type") != "s":
+            continue
+        cs = Q.caminhos(d)
+        if not cs:
+            continue
+        pts = np.concatenate([np.asarray(c) for c in cs])
+        w, h = pts.max(0) - pts.min(0)
+        if d.get("layer") == "ARQ_LOUÇAS E METAIS" and not (min(w, h) <= q["box_larg_px"] and max(w, h) >= q["box_comp_px"]):
+            continue
+        for c in cs:
+            cv2.polylines(M, [np.int32(np.round(np.asarray(c) * ss))], False, 255,
+                          max(1, int(round(q["traco_px"] * ss))), cv2.LINE_AA)
+    al = cv2.resize(M.astype(np.float32) / 255, (W, H), interpolation=cv2.INTER_AREA)
+    im = out.astype(np.int16)
     croma = im.max(axis=2) - im.min(axis=2)
-    lum = im.mean(axis=2)
-    neutro = m & (croma <= q["croma_max"]) & (lum < q["vidro"])
-    a = np.clip((q["vidro"] - lum) / (q["vidro"] - q["escuro"]), 0, 1) * neutro
-    novo = im * (1 - a[..., None]) + np.float32(q["perfil"]) * a[..., None]
-    print(f"    esquadrias: {int((a > 0.05).sum())} px do perfil neutro no preto (o vidro claro fica)")
+    parede = (np.abs(im - 80).max(axis=2) <= 22) & (croma <= 12)
+    neutro = (croma <= q["croma_max"]) & (im.mean(axis=2) >= q["lum_min"])
+    ok = ndimage.binary_dilation(neutro & ~ndimage.binary_dilation(parede, iterations=1), iterations=1) & ~parede
+    for ch in CHUVEIROS_TB:
+        x0, y0, x1, y1 = [int(round(v)) for v in ch["placa_px"]]
+        e = q["chuveiro_folga_px"]
+        if ch["parede"] is not None:
+            face, lado = ch["parede"]
+            x0, x1 = (face, x1) if lado == "esq" else (x0, face) if lado == "dir" else (x0, x1)
+            y0, y1 = (face, y1) if lado == "cima" else (y0, face) if lado == "baixo" else (y0, y1)
+        ok[min(y0, y1) - e:max(y0, y1) + e, min(x0, x1) - e:max(x0, x1) + e] = False
+    al = np.clip(al * q["forca"], 0, 1) * ok
+    novo = out.astype(np.float32) * (1 - al[..., None]) + np.float32(q["perfil"]) * al[..., None]
+    print(f"    esquadrias: o perfil preto em {int((al > 0.3).sum())} px (os boxes, as portas de vidro e as janelas)")
     return np.clip(np.round(novo), 0, 255).astype(np.uint8)
 
 
@@ -256,6 +347,7 @@ def aplicar(antes, gravar_dados=True):
     out = shafts(out)
     out = chuveiros(out, par, reg)
     out = paredes(Q, out, antes)
+    out = tapetes(Q, out)
     # as esquadrias pretas (`esquadrias`) só depois da prévia aprovada (a cor sozinha não basta: os boxes não pegam e
     # as portas das suítes têm os brises de bronze de 29/10)
     return out, reg, par
