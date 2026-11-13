@@ -268,6 +268,8 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   piso por cima. [C Térreo]
 - [ ] **Seta da entrada:** o triângulo cheio das escadas, centrado no vão da porta, do lado de fora, com a ponta para
   dentro (nunca a seta grande). [B Térreo; C Térreo]
+- [ ] **Bancada dos tanques da área de serviço em granito marrom tabaco** (como as da Casa B), as cubas de inox por
+  cima. [B Térreo; C Térreo]
 - [ ] **Bancos de pé de cama em tons variados** (veludos diferentes por quarto), o da suíte master como está. [C Térreo]
 - [ ] **Subsolo sem hachura, fundo branco:** fora da planta do Subsolo, branco puro, sem a hachura do terreno e sem o
   contorno do lote ("NÃO TERÁ MAIS HACHURADO, FUNDO BRANCO"). [A Subsolo, 05/11; C Subsolo, 13/11]

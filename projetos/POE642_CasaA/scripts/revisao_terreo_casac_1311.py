@@ -39,6 +39,10 @@ Sobre a final de `ANTES_COMMIT` (a do 12K de 13/11: o estar E1 e o paisagismo da
   `maquinas`): no vão da área de serviço entre a parede de cima e a bancada dos tanques, encostadas na parede da
   direita, as duas máquinas de 0,60 m da Casa B (`pedidos_terreo_casab_1211._maquina`: o tampo branco arredondado, o
   painel junto à parede, o botão e a sombra curta).
+- **"TROCAR O MATERIAL DA BANCADA PARA GRANITO MARROM TABACO"** (o post-it: "Cor da bancada é marrom tabaco";
+  `bancada_servico`): a bancada dos tanques da área de serviço (era o travertino claro) no marrom tabaco da Casa B (a
+  pedra da ilha gourmet da Casa B, tecida: `pedidos_terreo_casab_1211._tabaco`), com o contorno fino um tom abaixo nos
+  lados livres; as cubas de inox e as torneiras ficam.
 - **"REMOVA ESSE TRACEJADO EM VOLTA DA PLANTA"** (`tracejado_lote`): o retângulo tracejado do lote (x 296 a 3583, y 5 a
   2050, que encostava na borda do gramado à esquerda) sai: fora do lote, branco puro.
 
@@ -113,10 +117,16 @@ FILETE_G = {"y": 344.0, "x": (2714.0, 3268.0), "larg_m": 0.05, "fonte": (2760, 1
             "pontos": (2716, 348, 3266, 670), "claro": 35, "area_max": 30, "carro_px": 4, "texto_min": 225}
 # as máquinas de lavar (px): x0, y0, x1, y1 de cada (a parede da direita em x 2700; o vão de y 260 à bancada em 343)
 MAQUINAS = [(2663.5, 262.0, 2698.5, 299.0), (2663.5, 303.0, 2698.5, 340.0)]
+# a bancada dos tanques (px; a parede à direita em x 2700): o retângulo, as cubas (o inox, pouco croma, em peças
+# grandes) e a sombra delas, a amostra do marrom tabaco na final da Casa B e o contorno
+BANCADA_SERV = {"ret": (2655.4, 343.2, 2700.0, 495.6), "inox_croma": 16, "cuba_area": 100, "cuba_sombra": 0.35,
+                "final_b": AQUI.parents[1] / "POE642_CasaB" / "renders" / "POE642_CasaB_PH_Terreo_final_rotulos.png",
+                "fonte": (1418, 1325, 1546, 1381), "semente": 1313, "contorno": (30, 40, 54), "contorno_alfa": 0.5,
+                "ss": 8}
 LOTE = {"abre_px": 5, "nb": 245, "corpo": 0.8}
 ANTES_DEPOIS = {"lavabos": (1080, 1480, 1640, 1700), "quartos": (300, 260, 2300, 760),
                 "claraboias": (700, 230, 1100, 990), "hall": (2280, 1170, 2790, 1460), "garagem": (2690, 300, 3290, 700),
-                "area_servico": (2540, 230, 2760, 560),
+                "area_servico": (2540, 230, 2760, 520),
                 "inteira": (0, 0, 3840, 2160)}
 
 
@@ -438,6 +448,44 @@ def maquinas(img, qs=MAQUINAS):
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
+def bancada_servico(img, q=BANCADA_SERV):
+    from scipy import ndimage
+    import pedidos_terreo_casab_1211 as PB2
+    x0, y0, x1, y1 = q["ret"]
+    X0, Y0 = int(np.floor(x0)) - 1, int(np.floor(y0)) - 1
+    W, H = int(np.ceil(x1)) + 1 - X0, int(np.ceil(y1)) + 2 - Y0
+    reg = img[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
+    I = reg.astype(np.int16)
+    lum = I.mean(axis=2)
+    ss = q["ss"]
+    cob = np.outer(_cob(y0, y1, H, Y0, ss), _cob(x0, x1, W, X0, ss))
+    dentro = cob > 0.99
+    # as cubas: o inox (pouco croma), em peças grandes, com os furos; a sombra bege em volta delas é pedra (sai)
+    croma = I.max(axis=2) - I.min(axis=2)
+    inox = dentro & (croma < q["inox_croma"])
+    n, lab, st, _ = cv2.connectedComponentsWithStats(inox.astype(np.uint8), connectivity=8)
+    cuba = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["cuba_area"]])
+    cuba = ndimage.binary_fill_holes(cuba)
+    a = cob * (1 - cv2.GaussianBlur(cuba.astype(np.float32), (0, 0), 0.5))
+    imgB = cv2.imread(str(q["final_b"]))
+    with contextlib.redirect_stdout(io.StringIO()):
+        T = PB2._tabaco(imgB, q["fonte"], H, W, q["semente"]).astype(np.float32)
+    # a sombra curta das cubas no granito (a luz do alto à direita)
+    sb = cv2.GaussianBlur(cv2.warpAffine(cuba.astype(np.float32), np.float32([[1, 0, -1.0], [0, 1, 1.2]]), (W, H)),
+                          (0, 0), 1.0) * (1 - cuba)
+    T = T * (1 - q["cuba_sombra"] * sb)[..., None]
+    reg = reg * (1 - a[..., None]) + T * a[..., None]
+    # o contorno: a borda de 1 px nos lados livres (esquerda, cima, baixo), não na parede
+    miolo = np.outer(_cob(y0 + 1.0, y1 - 1.0, H, Y0, ss), _cob(x0 + 1.0, x1, W, X0, ss))
+    fio = np.clip(cob - miolo, 0, 1) * q["contorno_alfa"]
+    reg = reg * (1 - fio[..., None]) + np.float32(q["contorno"]) * fio[..., None]
+    out = img.copy()
+    out[Y0:Y0 + H, X0:X0 + W] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    área de serviço: a bancada dos tanques em granito marrom tabaco ({int((a > 0.5).sum())} px), as cubas de "
+          f"inox ficam")
+    return out
+
+
 def tracejado_lote(img, q=LOTE):
     from scipy import ndimage
     nb = (img.min(axis=2) < q["nb"]).astype(np.uint8)
@@ -472,6 +520,7 @@ def aplicar(antes):
     out = seta_entrada(Q, out)
     out = filete_garagem(Q, out)
     out = maquinas(out)
+    out = bancada_servico(out)
     out = tracejado_lote(out)
     return out
 

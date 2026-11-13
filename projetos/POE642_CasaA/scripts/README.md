@@ -2734,7 +2734,9 @@ objetos, e o vaso de folhagem no lugar do disco serrilhado: "MELHORAR A REPRESEN
 `seta_entrada` (a seta de 1,5 m sai; o triângulo das escadas no centro do vão, do lado de fora, como na Casa B);
 `filete_garagem` (o filete de Bege Bahia de 5 cm entre a pedra portuguesa e o piso da garagem, e os pontinhos claros
 do piso da garagem fora, o rótulo protegido: "REPRESENTAR UM FILETE ENTRE OS DOIS PISOS"); `maquinas` (as 2 máquinas
-de lavar da Casa B no vão acima dos tanques: "ADICIONAR DUAS MÁQUINAS DE LAVAR ROUPAS NESSE VÃO"); `tracejado_lote` (o
+de lavar da Casa B no vão acima dos tanques: "ADICIONAR DUAS MÁQUINAS DE LAVAR ROUPAS NESSE VÃO"); `bancada_servico`
+(a bancada dos tanques no granito marrom tabaco da Casa B, as cubas de inox por cima, com a sombra curta e o contorno:
+"TROCAR O MATERIAL DA BANCADA PARA GRANITO MARROM TABACO"); `tracejado_lote` (o
 retângulo tracejado do lote em branco e o muro de baixo cortado na borda do lote: "REMOVA ESSE TRACEJADO EM VOLTA DA
 PLANTA"). Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`.
 Rodar sem `--antes` refaz a final a partir de 48a23e8.
