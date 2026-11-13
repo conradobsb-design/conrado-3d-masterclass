@@ -514,12 +514,42 @@ def cozinha(out, par, q=COZINHA):
     return out
 
 
+# (13/11, "CORRIJA O AZUL À ESQUERDA APÓS O VIDRO. NÃO HÁ AZUL DE ÁGUA DEPOIS DO VIDRO") na borda esquerda da piscina,
+# entre o gramado e o vidro (a linha escura), o fio claro e a faixa azul viram o gramado (a mesma linha, logo antes)
+PISCINA_C = {"x": (636, 652), "y": (1380, 1720), "azul": 30, "vidro_lum": 70}
+
+
+def piscina(out, q=PISCINA_C):
+    x0, x1 = q["x"]
+    n = 0
+    for y in range(*q["y"]):
+        lin = out[y, x0:x1].astype(np.int16)
+        lum = lin.mean(axis=1)
+        az = np.nonzero((lin[:, 0] - lin[:, 2]) > q["azul"])[0]
+        vid = np.nonzero(lum < q["vidro_lum"])[0]
+        gr = (lin[:4, 1] > lin[:4, 2] + 5).all()                     # o gramado logo antes
+        if not len(az) or not len(vid) or not gr:
+            continue
+        v = int(vid[vid > az.min()].min()) if (vid > az.min()).any() else None
+        if v is None:
+            continue
+        a_ = 4                                                       # do fim do gramado até o vidro
+        while a_ < v and (lin[a_, 1] > lin[a_, 2] + 5) and (lin[a_, 0] - lin[a_, 2]) <= q["azul"] and lum[a_] < 120:
+            a_ += 1
+        d = v - a_
+        out[y, x0 + a_:x0 + v] = out[y, x0 + a_ - d:x0 + v - d]
+        n += 1
+    print(f"    piscina: a faixa azul entre o gramado e o vidro virou gramado ({n} linhas)")
+    return out
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 def aplicar(antes):
     Q = quadro()
     out = antes.copy()
     par = BS.quieto(FA.paredes_pdf, Q) > 0.3
     out = cozinha(out, par)
+    out = piscina(out)
     out = camas(Q, out, antes, par)
     out = criados(Q, out, par)
     out = poltronas(Q, out, par)
