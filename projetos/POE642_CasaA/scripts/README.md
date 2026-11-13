@@ -2239,8 +2239,15 @@ floreira (o mesmo nome): só a caixa (as folhas param na borda de fora dela) e c
 a imagem é 4:1) pelo miolo, sem achatar as plantas (358 costuras verticais de menor energia, que passam pela terra e
 pela forração entre as touceiras, duplicadas: seam carving). A peça entra no retângulo do PDF (1361,0/1547,5, 0,6 px a
 mais de cada lado para a beira macia não deixar o verde do render; as paredes e as janelas ficam). A janela é
-redesenhada pelo PDF (`janela_floreira`, `JANELA_FLOREIRA`): o vão de 1376,7 a 1387,5 no cinza das paredes (80), o
-marco em cima e embaixo e as três folhas de correr em trilhos escalonados (x 1384,5, 1381,5 e 1378,5; 3 px cada), cada
+redesenhada pelo PDF (`janela_floreira`, `JANELA_FLOREIRA`): o vão de 1376,7 a 1387,5 (depois, "PODE APLICAR UMA
+SOLEIRA PARA AS JANELAS A DIREITA DA FLOREIRA. O TOM DE PAREDE NÃO PODE SER": não no cinza das paredes, mas na soleira
+das portas do 1º Pavimento, a de `ajustes_casaa.desenhar_soleiras`: Bege Bahia na escala, no tom da referência, com as
+faces da parede, os lados compridos, em cinza fino; antes e depois em
+`renders/POE642_CasaA_PH_1Pavimento_1211_soleira_janela_floreira_antes_depois.jpg`; "SEM AVANÇAR SOBRE A PAREDE DE
+CIMA": a soleira só no vão, da face da parede de cima, y 1463,9, à de baixo, 1631,1; e a beira da caixa da floreira junto
+às paredes, onde a máscara das paredes não deixava a peça pintar e sobrava 1 a 2 px do verde do render, vai ao
+concreto da caixa, da face da parede para dentro, `floreira_beiras`, com o canto de baixo à esquerda, onde o marco da
+janela da fachada entra na floreira) e as três folhas de correr em trilhos escalonados (x 1384,5, 1381,5 e 1378,5; 3 px cada), cada
 uma de montante a montante, de modo que os montantes de duas folhas vizinhas ficam lado a lado (as folhas se
 encontram); o vidro claro com as duas faces e o contorno fino. Desenhada depois das peças, nítida na final e no 12K
 (`pecas_12k`, pela cobertura exata de cada retângulo). O verde do render do lado de dentro da janela volta ao

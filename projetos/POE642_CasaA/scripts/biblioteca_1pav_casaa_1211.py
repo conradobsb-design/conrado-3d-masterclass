@@ -292,14 +292,24 @@ def chuveiro(nome, placa_c, parede, placa_px=12.0):
 # parede a parede, da face de fora (x 1376,7) à de dentro (1387,5), no cinza das paredes, com o marco em cima e embaixo
 # e as três folhas de correr em trilhos escalonados, cada uma de montante a montante, de modo que os montantes de duas
 # folhas vizinhas ficam lado a lado (as folhas se encontram); o render deixava vãos verdes entre elas e a floreira
-# passava por baixo. Desenhada nítida na final e no 12K (`pecas_12k`), por cobertura exata de cada retângulo.
+# passava por baixo. Desenhada nítida na final e no 12K (`pecas_12k`), por cobertura exata de cada retângulo. Depois
+# ("PODE APLICAR UMA SOLEIRA PARA AS JANELAS A DIREITA DA FLOREIRA. O TOM DE PAREDE NÃO PODE SER"): o vão não fica no
+# cinza das paredes; é a soleira das portas do 1º Pavimento (`ajustes_casaa.desenhar_soleiras`: Bege Bahia na escala,
+# no tom da referência, com as faces da parede, os lados compridos, em cinza fino), e as folhas por cima.
 JANELA_FLOREIRA = {
     "vao": (1376.7, 1463.9, 1387.5, 1631.1),
-    "marcos": [(1378.5, 1463.9, 1387.5, 1466.3), (1378.5, 1628.7, 1387.5, 1631.1)],
     "folhas": [(1384.5, 1466.3, 1387.5, 1523.6), (1381.5, 1518.8, 1384.5, 1576.2), (1378.5, 1571.4, 1381.5, 1628.7)],
     "montante": 4.8, "linha_px": 0.35,
-    "parede": (80, 80, 80), "linha": (38, 38, 38), "marco": (150, 152, 154), "montante_cor": (168, 171, 174),
-    "vidro": (232, 236, 238), "vidro_borda": (198, 205, 210)}
+    "soleira_forca": 0.5, "soleira_semente": 7, "face": (150, 152, 154), "face_px": 0.4,
+    "linha": (112, 116, 120), "montante_cor": (176, 179, 182),
+    "vidro": (234, 238, 240), "vidro_borda": (204, 210, 214),
+    # ("SEM AVANÇAR SOBRE A PAREDE DE CIMA") a beira da caixa da floreira junto às paredes e à janela da fachada: ali a
+    # máscara das paredes não deixava a peça pintar e sobrava o verde do render (1 a 2 px); vai ao concreto da caixa,
+    # da face da parede para dentro (nunca por cima dela): em cima, embaixo e à esquerda
+    # (embaixo à esquerda, o marco de baixo da janela da fachada entra na floreira até x 1351,3, de 1628,7 a 1631,1)
+    "floreira_beiras": [(1345.3, 1463.9, 1376.7, 1466.0), (1345.3, 1629.6, 1376.7, 1631.1),
+                        (1345.3, 1463.9, 1346.7, 1631.1), (1345.3, 1627.4, 1352.0, 1631.1)],
+    "concreto": (182, 196, 207), "concreto_ruido": 4.0}
 
 
 def _cobre(x0, y0, x1, y1, U0, V0, U1, V1):
@@ -315,7 +325,8 @@ def janela_floreira(out, s=1.0, X0=0.0, Y0=0.0, q=JANELA_FLOREIRA):
     H, W = out.shape[:2]
     T = lambda r: ((r[0] - X0) * s, (r[1] - Y0) * s, (r[2] - X0) * s, (r[3] - Y0) * s)     # noqa: E731
     vx0, vy0, vx1, vy1 = T(q["vao"])
-    U0, V0 = max(int(np.floor(vx0)) - 1, 0), max(int(np.floor(vy0)) - 1, 0)
+    fx0 = min(T(r)[0] for r in q["floreira_beiras"])
+    U0, V0 = max(int(np.floor(fx0)) - 1, 0), max(int(np.floor(vy0)) - 1, 0)
     U1, V1 = min(int(np.ceil(vx1)) + 2, W), min(int(np.ceil(vy1)) + 2, H)
     reg = out[V0:V1, U0:U1].astype(np.float32)
     lw = max(q["linha_px"] * s, 0.35)
@@ -330,11 +341,22 @@ def janela_floreira(out, s=1.0, X0=0.0, Y0=0.0, q=JANELA_FLOREIRA):
         pinta(r, q["linha"])
         pinta((x0 + lw, y0 + lw, x1 - lw, y1 - lw), cor)
 
-    pinta((vx0, vy0, vx1, vy1), q["parede"])
-    for xl in (vx0, vx1):                               # as faces do vão
-        pinta((xl - lw / 2, vy0, xl + lw / 2, vy1), q["linha"], 0.8)
-    for r in q["marcos"]:
-        caixa(T(r), q["marco"])
+    rng = np.random.default_rng(11)
+    for r in q["floreira_beiras"]:                      # a beira da caixa da floreira, no concreto dela
+        c = _cobre(*T(r), U0, V0, U1, V1)[..., None]
+        conc = np.float32(q["concreto"]) + rng.normal(0, q["concreto_ruido"], reg.shape[:2])[..., None]
+        reg = reg * (1 - c) + conc * c
+    # a soleira: Bege Bahia na escala (a textura das soleiras do 1º Pavimento, no tom da referência)
+    sys.path.insert(0, str(AQUI.parent.parent / "_texturas"))
+    from texturas import textura
+    from retoque_terreo_casae import BEGE
+    Tx = textura("bege_bahia", PX_M * s, V1 - V0, U1 - U0, semente=q["soleira_semente"]).astype(np.float32)
+    Tx = (1 + q["soleira_forca"] * (Tx / Tx.reshape(-1, 3).mean(axis=0) - 1)) * np.float32(BEGE["tom"])
+    c = _cobre(vx0, vy0, vx1, vy1, U0, V0, U1, V1)[..., None]
+    reg = reg * (1 - c) + Tx * c
+    fw = max(q["face_px"] * s, 0.4)
+    for xl in (vx0, vx1 - fw):                          # as faces da parede (os lados compridos)
+        pinta((xl, vy0, xl + fw, vy1), q["face"])
     m = q["montante"] * s
     for r in q["folhas"]:
         x0, y0, x1, y1 = T(r)
