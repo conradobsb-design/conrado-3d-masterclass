@@ -2718,6 +2718,27 @@ lote, com os buracos das copas e os pontinhos escuros dos troncos; os jardins in
 Casa B (a amostra repetida sem emenda vezes a luz larga do lugar) e só 3 oliveiras (`OLIVEIRAS`) com a sombra da copa.
 Roda sobre a final com o E1; antes e depois em `..._Terreo_1311_paisagismo_antes_depois.jpg`.
 
+### Térreo da Casa C, a revisão do 12K (13/11): `revisao_terreo_casac_1311.py`
+
+"ESTOU REVISANDO O TÉRREO DA CASA C". Sobre a final do 12K (`ANTES_COMMIT` 48a23e8), na ordem: `box_ducha` (o vidro do box do
+chuveiro entre os lavabos, do PDF, contínuo de parede a parede: "FALTOU O BOX DO CHUVEIRO"); `bancadas_cubas` (as faixas
+da bancada das cubas esculpidas dos lavabos no travertino bruto no tom da cuba, sem o granito pontilhado e os fios
+brancos: "CORRIJA O CONTORNO DAS CUBAS. TEM MANCHAS BRANCAS"); `bancos` (os B1 dos quartos em veludo rosé antigo
+(quarto 3), azul petróleo (quarto 2) e verde musgo (quarto 1), a troca exata do veludo; a suíte master fica: "VAMOS
+VARIAR OS TONS DOS BANCOS EM FRENTE AS CAMAS"); `claraboias` (o tracejado cinza fino das 5 claraboias de volta, que a
+troca de materiais tinha coberto, e os restos do tracejado preto junto às paredes fora: "FICOU FALTANDO A DELIMITAÇÃO
+DAS CLARABOIAS"); `aparador_planta` (o aparador do hall em freijó com objetos, gerado no Higgsfield,
+`biblioteca-objetos/02-terreo/hall/aparador-freijo-objetos.png`, na proporção do PDF tirando madeira lisa entre os
+objetos, e o vaso de folhagem no lugar do disco serrilhado: "MELHORAR A REPRESENTAÇÃO DO APARADOR E DAS PLANTAS");
+`porta_hall` (a folha da porta pivotante num material só: "MANTENHA O MESMO MATERIAL PARA PORTA DE FORA A FORA");
+`seta_entrada` (a seta de 1,5 m sai; o triângulo das escadas no centro do vão, do lado de fora, como na Casa B);
+`filete_garagem` (o filete de Bege Bahia de 5 cm entre a pedra portuguesa e o piso da garagem, e os pontinhos claros
+do piso da garagem fora, o rótulo protegido: "REPRESENTAR UM FILETE ENTRE OS DOIS PISOS"); `maquinas` (as 2 máquinas
+de lavar da Casa B no vão acima dos tanques: "ADICIONAR DUAS MÁQUINAS DE LAVAR ROUPAS NESSE VÃO"); `tracejado_lote` (o
+retângulo tracejado do lote em branco e o muro de baixo cortado na borda do lote: "REMOVA ESSE TRACEJADO EM VOLTA DA
+PLANTA"). Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`.
+Rodar sem `--antes` refaz a final a partir de 48a23e8.
+
 ### Casa C, o JPG em 12K (13/11): `ampliacao_12k_casac.py`
 
 Sem IA generativa (nada muda de lugar): `preparar <pav>` (o recorte A3 da planta, a margem 150/4961), o Topaz High

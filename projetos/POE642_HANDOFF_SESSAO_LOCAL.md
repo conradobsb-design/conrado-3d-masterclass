@@ -4416,3 +4416,14 @@ Depois (12/11, "PODE APLICAR NO TÉRREO E 1º PAVIMENTO DA CASA A"): `POE642_Cas
   Térreo de antes do E1 e do paisagismo foi preservada fora do git, como pedido: "SE JÁ RODOU O 12K, PRESERVE"). A opção
   B (Kalam) da Casa C não foi feita.
 - Pranchas do Subsolo e do Térreo, PDF da Casa C e book refeitos.
+
+### Casa C, Térreo: a revisão do 12K (13/11)
+
+"ESTOU REVISANDO O TÉRREO DA CASA C" e os pedidos, todos em `revisao_terreo_casac_1311.py` (README): o box do chuveiro
+entre os lavabos; as bancadas das cubas dos lavabos em travertino, sem as manchas brancas; os bancos dos quartos 1, 2 e 3
+em veludos diferentes (a suíte master fica); o contorno das claraboias de volta; o aparador do hall (gerado no
+Higgsfield) e o vaso de folhagem; a folha da porta do hall num material só; o triângulo no centro do vão no lugar da seta;
+o filete entre a garagem e a pedra portuguesa (e os pontinhos claros do piso da garagem fora); as 2 máquinas de lavar na
+área de serviço; sem o tracejado do lote. Antes e depois em
+`POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`. Prancha, PDF da Casa C e book
+refeitos. O 12K do Térreo se refaz (Topaz) no fim da revisão.
