@@ -2597,6 +2597,8 @@ beira escura junto a uma parede, não serve):
   dela (0,62 x 0,43 m, de través: o pufe da poltrona), que o render tinha feito de mesa de madeira, é o pufe estofado da
   Casa A (`03-primeiro-pavimento/suite-master/pufe`, 45°); o piso refeito em volta no tom do entorno
   (`tom_do_entorno`: a fonte de longe, perto da janela, é mais clara; a beira junto às paredes fica fora da fonte);
+  e ("TROQUE O TOM DA MESA DE CENTRO PARA UM TOM QUENTE") a mesa de centro redonda no tom da madeira das bancadas (o
+  dos criados, `B1.TOM_BANCADA`), cada px vezes o tom novo sobre a mediana do tampo de antes (o veio e a borda ficam);
 - jantar: as 10 cadeiras oliva da Casa A (30 px) no centro de cada cadeira do PDF, viradas para a mesa (o travertino
   refeito coluna a coluna em cima e embaixo, linha a linha nas pontas); a mesa e o aparador ficam, a mesa de volta por
   cima com a sombra curta nas cadeiras (`mesa_por_cima`; no 12K, a da saída do Topaz);

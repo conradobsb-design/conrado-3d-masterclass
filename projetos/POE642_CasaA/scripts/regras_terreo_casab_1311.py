@@ -271,7 +271,8 @@ CADEIRAS_TB = {"png": "escritorio/cadeira-escritorio", "larg": 34.0, "sob": 1 / 
 #   (de volta por cima, pelo contorno do PDF). Depois ("PÕE UM BANCO ESTOFADO, COMO SE FOSSE UM PUFF NA FRENTE DA
 #   POLTRONA"): o retângulo girado do PDF na frente da poltrona (0,62 x 0,43 m, o lado comprido de través à frente
 #   dela: o pufe dela), que o render tinha feito de mesa de madeira, vira o pufe estofado da Casa A
-#   (`suite-master/pufe`, 45°); a mesa de madeira sai, com o piso refeito;
+#   (`suite-master/pufe`, 45°); a mesa de madeira sai, com o piso refeito. E ("TROQUE O TOM DA MESA DE CENTRO PARA UM
+#   TOM QUENTE"): a mesa de centro no tom da madeira das bancadas (o dos criados), com o veio dela;
 # - o jantar: só as 10 cadeiras oliva da Casa A (30 px) no lugar das bordô, no centro do retângulo de cada uma no PDF,
 #   viradas para a mesa; a mesa e o aparador ficam (a mesa de volta por cima, com a sombra curta nas cadeiras);
 # - a prainha: as 2 espreguiçadeiras A no retângulo do PDF, a cabeceira à direita (a parte menor do PDF);
@@ -280,6 +281,7 @@ CADEIRAS_TB = {"png": "escritorio/cadeira-escritorio", "larg": 34.0, "sob": 1 / 
 #   da borda não é desenhado (`corte_y`).
 SALA_INTIMA_TB = {"tapete": 70337, "sofa": (77730, 77731, 77732, 77733, 77734, 77735), "mesa_centro": 77823, "pufe": 71935,
                   "pufe_png": "suite-master/pufe", "pufe_px": (36.8, 25.5), "pufe_giro": 45.0,
+                  "mesa_centro_tom": B1.TOM_BANCADA,
                   "mesas_laterais": [77800, 77858], "poltrona": 62306, "poltrona_px": (50.0, 52.0), "poltrona_giro": 225.0,
                   "folga_px": 10, "folga_pufe_px": 10}
 JANTAR_TB = {"mesa": 63685, "larg": 30.0, "folga_px": 7,
@@ -1067,7 +1069,16 @@ def sala_intima(Q, out, par, reg, q=SALA_INTIMA_TB):
         it = item_bib(*p)
         out = pousar_bib(out, it, par)
         reg["pecas"].append(it)
-    out = recorte_de_volta(Q, out, antes, [q["mesa_centro"]], reg["pecas"])
+    # ("TROQUE O TOM DA MESA DE CENTRO PARA UM TOM QUENTE") a mesa de centro no tom quente da madeira das bancadas (o
+    # dos criados, `B1.TOM_BANCADA`): cada px vezes o tom novo sobre a mediana do tampo de antes (o veio e a borda
+    # escura ficam, no tom novo)
+    _, mc = mascara_pdf(Q, [q["mesa_centro"]])
+    tampo = cv2.erode(mc.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    med = np.median(antes[tampo].reshape(-1, 3).astype(np.float32), axis=0)
+    fonte_mc = antes.astype(np.float32)
+    fonte_mc[dilatar(mc, 1)] *= np.float32(q["mesa_centro_tom"]) / np.maximum(med, 1)
+    fonte_mc = np.clip(np.round(fonte_mc), 0, 255).astype(np.uint8)
+    out = recorte_de_volta(Q, out, fonte_mc, [q["mesa_centro"]], reg["pecas"])
     for i in q["mesas_laterais"]:
         x0, y0, x1, y1 = caixa_pdf(Q, i)
         D = ((x1 - x0) + (y1 - y0)) / 2
