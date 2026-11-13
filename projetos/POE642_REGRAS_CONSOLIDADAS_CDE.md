@@ -223,8 +223,13 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 - [ ] **Bege Bahia menos manchado** em todo piso, degrau, pisante, soleira e borda de Bege Bahia: as manchas da pedra
   a 45% do contraste; a luz, as sombras, o tom, as arestas e as linhas dos degraus ficam ("Já removeu manchas do bege
   Bahia como fizemos nas outras plantas?"). [A três pavimentos, 10 e 11/11; C Subsolo, 13/11]
-- [ ] **Travertino da varanda sem manchas cinzas** (as faixas largas levadas ao tom do piso, o veio fino fica). [C
-  Subsolo, post-it do cliente]
+- [ ] **O Bege Bahia na medida do Subsolo da Casa A:** o contraste das manchas no pátio igual ao da Casa A (a mediana de
+  61 px e as manchas a 35% no Subsolo da Casa C), também nos degraus de pedra. O post-it "menos manchas cinzas" era do
+  Bege Bahia, não do travertino (o travertino fica). [C Subsolo]
+- [ ] **Floreira com caixote:** a caixa do PDF com a borda (10 cm, concreto claro), as arestas em fio, a sombra da borda
+  na terra e a da caixa no piso; as plantas dentro. [C Subsolo]
+- [ ] **Filete entre pisos em pedra** (Bege Bahia, um mini degrau com o fio da aresta), nunca um traço escuro. [C
+  Subsolo]
 - [ ] **Nunca um quadrado de outro tom** em volta da peça nova. A folga da área refeita leva junto a sombra da peça
   antiga. [A; B]
 

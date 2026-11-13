@@ -2657,6 +2657,14 @@ Depois ("Já removeu manchas do bege Bahia como fizemos nas outras plantas?"): `
 Bege Bahia a 45%, pela conta de `terreo_casaa_1011.bege_ta`, na chapada 232), com as letras e as linhas dos degraus
 (corridas escuras compridas) inteiras; também no Térreo da Casa C (`biblioteca_terreo_casac_1311`, os banhos, os
 caminhos e os pisantes).
+Depois (usuário, vendo o Subsolo): "Era pra mexer no Travertino ou era pra mexer no Bege Bahia?" / "é para diminuir a
+quantidade de manchas do bege Bahia, como a gente fez no subsolo da Casa A" / "Serve também para os degraus em pedra":
+o travertino da varanda volta como estava; o `bege` com o tom do lugar na mediana de 61 px e as manchas a 35% (o
+contraste das manchas medido no pátio igual ao do Bege Bahia do Subsolo da Casa A: 2,0 contra 1,8), em todo o Bege
+Bahia, degraus inclusos; o filete em Bege Bahia (`filete`: a pedra do pátio, um pouco mais clara, um mini degrau com o
+fio da aresta e a sombrinha no travertino; antes, cinza escuro); o caixote da floreira (`caixote`: a caixa do PDF, a
+borda de 10 cm em concreto claro com os fios das arestas, a sombra na terra e no piso); as portas (`quinas`: a ponta da
+parede até a quina da folha, vértice com vértice, e os tiquinhos escuros dos marcos fora).
 Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_postits_<trecho>_antes_depois.jpg`.
 
 ### Térreo da Casa C, os post-its do cliente (13/11): `pedidos_terreo_casac_1311.py`

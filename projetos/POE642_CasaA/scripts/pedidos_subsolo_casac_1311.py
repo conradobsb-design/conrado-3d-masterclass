@@ -56,13 +56,16 @@ ANTES_COMMIT = "6ea1bc3"
 # 232: o pátio, os degraus largos, o caminho e o depósito), pela conta de `terreo_casaa_1011.bege_ta`: o tom do lugar
 # (a mediana larga, com as peças tapadas) fica, a luz, as sombras e as arestas dos degraus também; as letras (o escuro)
 # e as peças (pouco croma, escuras ou verdes) ficam como estão
-BEGE = {"chapada": (232, 232, 232), "forca": 0.45, "mediana_px": 25, "croma_obj": 22, "lum_obj": 120, "area_obj": 30,
+BEGE = {"chapada": (232, 232, 232), "forca": 0.35, "mediana_px": 61, "croma_obj": 22, "lum_obj": 120, "area_obj": 30,
         "aresta": 10.0, "aresta_px": 2, "texto": 0.72, "linha": 0.92}
 # a varanda do Subsolo (px): o retângulo do travertino, a força e o sigma da baixa frequência que sai
 TRAVERTINO = {"px": (637, 321, 1064, 737), "sigma": (28.0, 2.5), "forca": 0.75, "texto": 0.80}
 # o encontro do Bege Bahia com o travertino (px): x, de y0 a y1; a largura (m), a cor da pedra e a dos fios (BGR)
-FILETE = {"x": 636.4, "y0": 320.0, "y1": 737.0, "larg_m": 0.04, "cor": (118, 128, 138), "fio": (88, 96, 104),
-          "ss": 8}
+# (13/11, "Esse filete, eu não sei se ele é num tom preto ... deve vir do mármore bege Bahia") o filete em Bege Bahia:
+# uma tira de `larg_m` da pedra do pátio logo ao lado, um pouco mais clara (um mini degrau polido), com o fio fino da
+# aresta do lado do travertino e a sombrinha curta nele
+FILETE = {"x": 636.4, "y0": 320.0, "y1": 737.0, "larg_m": 0.05, "clarear": 1.035, "fonte_dx": -14,
+          "fio": (150, 165, 178), "fio_alfa": 0.55, "sombra": 0.10, "ss": 8}
 PILAR = {"centro_px": (636.4, 329.5), "diam_m": 0.30, "cor": (80, 80, 80), "ss": 8}
 # a floreira junto à sauna (`final3840_casac.FLOREIRA_S`): plantinhas de `d_m`, a cada `passo` (fração da altura)
 FLOREIRA = {"d_m": (0.16, 0.20), "passo": 0.056, "forracao_m": (0.09, 0.14), "forracao_passo_m": 0.07, "semente": 1311}
@@ -92,7 +95,19 @@ PORTAS = {
          "folha": (746.0, 1001.5, 793.8, 1003.9), "dobra": "topo", "lado": +1, "soleira": True},
     ],
 }
-ANTES_DEPOIS = {"bege_bahia": (350, 300, 1260, 1700), "varanda_filete_pilar": (600, 300, 1080, 760), "floreira_escadas": (355, 690, 900, 1120),
+# (13/11, "tem que ter o caixote dessa jardineira ... a borda, tudo direitinho") o caixote da floreira junto à sauna,
+# pelo PDF (ARQ_PAISAGISMO): a caixa de fora e a de dentro (px); a borda em concreto claro, com os fios das arestas, a
+# sombra da borda na terra (a luz do alto à direita) e a sombra curta da caixa no piso
+CAIXOTE = {"fora": (664.2, 737.1, 694.0, 978.9), "dentro": (670.2, 743.0, 688.1, 972.9), "cor": (204, 212, 218),
+           "ruido": 0.025, "fio": (150, 158, 166), "fio_alfa": 0.7, "sombra_terra": 0.35, "sombra_piso": 0.16,
+           "ss": 8, "semente": 1311}
+# (13/11, "As portas não podem estar flutuando ... remove o batente e cola a quina com quina da parede com a porta") a
+# ponta da parede vai até a quina da folha: (folha px, dobra, lado, transposta)
+QUINAS = [((822.4, 792.9, 864.2, 795.3), "base", +1, False),
+          ((897.1, 753.5, 944.8, 755.9), "topo", +1, False),
+          ((746.0, 1001.5, 793.8, 1003.9), "topo", +1, True)]
+ANTES_DEPOIS = {"bege_bahia": (350, 300, 1260, 1700), "varanda_filete_pilar": (600, 300, 1080, 760),
+                "caixote": (640, 725, 720, 995), "floreira_escadas": (355, 690, 900, 1120),
                 "portas": (780, 725, 1080, 830)}
 
 
@@ -192,14 +207,21 @@ def travertino(out, q=TRAVERTINO):
 def filete(Q, out, q=FILETE):
     w = q["larg_m"] * Q.px_m
     x, y0, y1 = q["x"], q["y0"], q["y1"]
-    X0, Y0 = int(np.floor(x - w)) - 2, int(np.floor(y0))
-    W, H = int(np.ceil(2 * w)) + 4, int(np.ceil(y1 - y0))
+    X0, Y0 = int(np.floor(x - w)) - 3, int(np.floor(y0))
+    W, H = int(np.ceil(2 * w)) + 6, int(np.ceil(y1 - y0))
+    # a pedra: o Bege Bahia do pátio `fonte_dx` px à esquerda, um pouco mais clara
+    pedra = out[Y0:Y0 + H, X0 + q["fonte_dx"]:X0 + q["fonte_dx"] + W].astype(np.float32) * q["clarear"]
     a = _alfa_poligono([(x - w / 2, y0), (x + w / 2, y0), (x + w / 2, y1), (x - w / 2, y1)], X0, Y0, W, H, q["ss"])
-    out = _pintar(out, a, X0, Y0, q["cor"])
-    for xf in (x - w / 2, x + w / 2):                     # os fios das bordas
-        a = _alfa_poligono([(xf - 0.3, y0), (xf + 0.3, y0), (xf + 0.3, y1), (xf - 0.3, y1)], X0, Y0, W, H, q["ss"])
-        out = _pintar(out, a * 0.8, X0, Y0, q["fio"])
-    print(f"    o filete de pedra entre o Bege Bahia e o travertino ({w:.1f} px), de y {y0:.0f} a {y1:.0f}")
+    reg = out[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
+    reg = reg * (1 - a[..., None]) + pedra * a[..., None]
+    # a sombrinha do mini degrau no travertino (à direita) e o fio da aresta
+    xe = x + w / 2
+    sb = _alfa_poligono([(xe, y0), (xe + 1.6, y0), (xe + 1.6, y1), (xe, y1)], X0, Y0, W, H, q["ss"])
+    reg *= (1 - q["sombra"] * sb)[..., None]
+    out[Y0:Y0 + H, X0:X0 + W] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    fio = _alfa_poligono([(xe - 0.3, y0), (xe + 0.3, y0), (xe + 0.3, y1), (xe - 0.3, y1)], X0, Y0, W, H, q["ss"])
+    out = _pintar(out, fio * q["fio_alfa"], X0, Y0, q["fio"])
+    print(f"    o filete de Bege Bahia entre o pátio e o travertino ({w:.1f} px, um mini degrau com o fio da aresta)")
     return out
 
 
@@ -319,16 +341,113 @@ def portas(Q, out, q=PORTAS):
     return out
 
 
+
+def caixote(Q, out, q=CAIXOTE):
+    ss = q["ss"]
+    ox0, oy0, ox1, oy1 = q["fora"]
+    ix0, iy0, ix1, iy1 = q["dentro"]
+    X0, Y0 = int(np.floor(ox0)) - 4, int(np.floor(oy0)) - 4
+    W, H = int(np.ceil(ox1)) + 5 - X0, int(np.ceil(oy1)) + 5 - Y0
+    fora = _alfa_poligono([(ox0, oy0), (ox1, oy0), (ox1, oy1), (ox0, oy1)], X0, Y0, W, H, ss)
+    dentro = _alfa_poligono([(ix0, iy0), (ix1, iy0), (ix1, iy1), (ix0, iy1)], X0, Y0, W, H, ss)
+    borda = np.clip(fora - dentro, 0, 1)
+    reg = out[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
+    # a sombra curta da caixa no piso (para baixo e à esquerda), fora dela
+    sp = cv2.GaussianBlur(cv2.warpAffine(fora, np.float32([[1, 0, -1.6], [0, 1, 1.6]]), (W, H)), (0, 0), 1.2)
+    reg *= (1 - q["sombra_piso"] * sp * (1 - fora))[..., None]
+    # a sombra da borda na terra (junto à borda de cima e à da direita)
+    st = cv2.GaussianBlur(cv2.warpAffine(1 - dentro, np.float32([[1, 0, -1.4], [0, 1, 1.4]]), (W, H),
+                                         borderValue=1), (0, 0), 1.0)
+    reg *= (1 - q["sombra_terra"] * st * dentro)[..., None]
+    # a borda: o concreto claro com um grão leve
+    rng = np.random.default_rng(q["semente"])
+    gr = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), 0.8)
+    cor = np.float32(q["cor"])[None, None] * (1 + q["ruido"] * gr / max(float(gr.std()), 1e-6))[..., None]
+    reg = reg * (1 - borda[..., None]) + cor * borda[..., None]
+    out[Y0:Y0 + H, X0:X0 + W] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    # os fios das arestas (a de fora e a de dentro)
+    for (a0, b0, a1, b1) in (q["fora"], q["dentro"]):
+        M = np.zeros((H * ss, W * ss), np.uint8)
+        cv2.rectangle(M, (int(round((a0 - X0) * ss)), int(round((b0 - Y0) * ss))),
+                      (int(round((a1 - X0) * ss)), int(round((b1 - Y0) * ss))), 255, max(1, int(0.5 * ss)), cv2.LINE_AA)
+        fio = cv2.resize(M.astype(np.float32) / 255, (W, H), interpolation=cv2.INTER_AREA)
+        out = _pintar(out, fio * q["fio_alfa"], X0, Y0, q["fio"])
+    print(f"    floreira: o caixote do PDF ({(ox1 - ox0) / Q.px_m:.2f} x {(oy1 - oy0) / Q.px_m:.2f} m, a borda de "
+          f"{(ix0 - ox0) / Q.px_m * 100:.0f} cm) em concreto claro, com as arestas, a sombra na terra e no piso")
+    return out
+
+
+def quinas(out, qs=QUINAS, cor=(80, 80, 80), tol=8, gap_max=10, ss=8):
+    """A ponta da parede até a quina da folha (vértice com vértice): onde sobrou soleira ou batente entre a parede e a
+    folha, entra a parede (a face do lado da folha até a linha da borda de fora da folha)."""
+    feitas = []
+    for (fx0, fy0, fx1, fy1), dobra, lado, transp in qs:
+        im = out.transpose(1, 0, 2) if transp else out
+        I = im.astype(np.int16)
+        par = np.abs(I - np.int16(cor)).max(axis=2) <= tol
+        yref = int(round(fy0)) - 3 if dobra == "topo" else int(round(fy1)) + 3
+        # as faces da parede na linha de referência (a corrida que termina junto à folha)
+        xe = fx0 if lado > 0 else fx1
+        xs = [x for x in range(int(xe) - 4, int(xe) + 5) if par[yref, x]]
+        if not xs:
+            continue
+        x = xs[len(xs) // 2]
+        a_, b_ = x, x
+        while par[yref, a_ - 1]:
+            a_ -= 1
+        while par[yref, b_ + 1]:
+            b_ += 1
+        wa, wb = a_, b_ + 1
+        if dobra == "topo":
+            y = int(np.floor(fy0))
+            while y > fy0 - gap_max and not par[y, wa:wb].all():
+                y -= 1
+            r0, r1 = y + 1, fy0
+        else:
+            y = int(np.ceil(fy1))
+            while y < fy1 + gap_max and not par[y, wa:wb].all():
+                y += 1
+            r0, r1 = fy1, y
+        if r1 - r0 <= 0.05:
+            continue
+        Y0, Y1 = int(np.floor(r0)), int(np.ceil(r1))
+        yy = np.arange(Y0, Y1) + 0.5
+        cob = np.clip(np.minimum(yy + 0.5, r1) - np.maximum(yy - 0.5, r0), 0, 1)[:, None, None]
+        reg = im[Y0:Y1, wa:wb].astype(np.float32)
+        im[Y0:Y1, wa:wb] = np.clip(np.round(reg * (1 - cob) + np.float32(cor) * cob), 0, 255).astype(np.uint8)
+        feitas.append(f"{r1 - r0:.1f} px")
+    # os tiquinhos escuros que sobraram dos marcos em volta das portas (pontos isolados quase pretos) saem
+    limpos = 0
+    for (fx0, fy0, fx1, fy1), dobra, lado, transp in qs:
+        im = out.transpose(1, 0, 2) if transp else out
+        X0, Y0 = int(min(fx0, fx1)) - 16, int(fy0) - 56
+        X1, Y1 = int(max(fx0, fx1)) + 4, int(fy1) + 56
+        sub = np.ascontiguousarray(im[Y0:Y1, X0:X1])
+        lum = sub.astype(np.float32).mean(axis=2)
+        esc = (lum < 55).astype(np.uint8)
+        n, lab, st, _ = cv2.connectedComponentsWithStats(esc, connectivity=8)
+        m = np.isin(lab, [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] <= 6]).astype(np.uint8)
+        if m.any():
+            m = cv2.dilate(m, np.ones((3, 3), np.uint8))
+            novo = cv2.inpaint(sub, m * 255, 2, cv2.INPAINT_TELEA)
+            im[Y0:Y1, X0:X1][m > 0] = novo[m > 0]
+            limpos += int(n - 1)
+    print(f"    portas: a ponta da parede até a quina da folha em {len(feitas)} portas ({', '.join(feitas)}); "
+          f"{limpos} tiquinhos dos marcos fora")
+    return out
+
 # ----------------------------------------------------------------------------------------------------------------------
 def aplicar(antes):
     Q = quadro()
     out = antes.copy()
     out = bege(Q, out)
-    out = travertino(out)
+    # (13/11, "Era pra mexer no Travertino ou era pra mexer no Bege Bahia?") o travertino da varanda fica como estava
     out = filete(Q, out)
     out = pilar(Q, out)
     out = floreira(Q, out)
+    out = caixote(Q, out)
     out = portas(Q, out)
+    out = quinas(out)
     out = escadas(out)
     return out
 
