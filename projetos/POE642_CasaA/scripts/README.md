@@ -2641,6 +2641,18 @@ Subsolo da Casa B (`biblioteca_subsolo_casab_1311`) e das regras do Térreo da C
 Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_{sauna,bh_academia,academia,rotulos}_antes_depois.jpg`.
 A Casa C ainda não tem 12K (precisa de IA nova).
 
+### Subsolo da Casa C, os post-its do cliente (13/11): `pedidos_subsolo_casac_1311.py`
+
+Sobre a final com a biblioteca, os pedidos do quadro "POE 642 - Revisão de Imagens" (os mesmos do Subsolo da Casa B,
+de onde vêm as portas, `pedidos_subsolo_casab_1211.portas_sb`): o travertino da varanda com menos manchas cinzas (as
+faixas deitadas de baixa frequência levadas à mediana, `travertino`); o filete de pedra de 4 cm entre o Bege Bahia e o
+travertino e o pilar redondo de 0,30 m no alto do encontro (o PDF não o desenha); a floreira junto à sauna com
+plantinhas de ~0,18 m e a forração miúda (o canteiro só dentro dela); as setas (o triângulo no 1º degrau, o S logo
+abaixo) e as descrições "SOBE PARA O / JARDIM" (degraus largos, no pátio) e "SOBE PARA O / DECK" (escada estreita,
+abaixo dela, a hachura limpa em volta); as 3 portas de giro (sauna, BH academia e depósito, esta na imagem transposta)
+com a folha de madeira clara quina com quina na ponta da parede, sem os marcos, a soleira no bege das soleiras da Casa C.
+Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_postits_<trecho>_antes_depois.jpg`.
+
 ### Térreo da Casa C, a biblioteca, 1ª leva (13/11): `biblioteca_terreo_casac_1311.py`
 
 A proposta (`POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_proposta_biblioteca_{1,2,3}.jpg`) aprovada com "Ok". A 1ª
