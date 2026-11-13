@@ -2633,6 +2633,26 @@ Subsolo da Casa B (`biblioteca_subsolo_casab_1311`) e das regras do Térreo da C
 Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_{sauna,bh_academia,academia,rotulos}_antes_depois.jpg`.
 A Casa C ainda não tem 12K (precisa de IA nova).
 
+### Térreo da Casa C, a biblioteca, 1ª leva (13/11): `biblioteca_terreo_casac_1311.py`
+
+A proposta (`POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_proposta_biblioteca_{1,2,3}.jpg`) aprovada com "Ok". A 1ª
+leva (banhos, lavabos, cozinha, gourmet e serviço), com as peças e as funções do Térreo da Casa B
+(`regras_terreo_casab_1311`: `item_bib`, `pousar_bib`, `balcao`, `chuveiro_desenho`, `pousar_peca`) nos retângulos
+do PDF da Casa C:
+- BH master 1: a bancada dupla esculpida no comprimento da do PDF (`dupla_png`: as pontas lisas e o meio entre as
+  cubas esticados, as cubas sem deformar, nas do PDF); BH master 2 e BH 1 a 3: a cuba esculpida de travertino na
+  bancada inteira; as bacias Carrara brancas;
+- lavabos masculino, feminino e o da adega: a cuba esculpida de poros, a bacia Carrara marrom e a pedra da bancada no
+  tom da cuba (`bancadas_lavabos`, a regra da Casa A, os pontos do granito suavizados);
+- BH serviço e BH externo: só a louça da cuba e a bacia Monte Carlo;
+- chuveiros desenhados em planta: de teto no quadrado do PDF (BH master 1 e 2, BH 1 a 3, a ducha entre os lavabos: o
+  PDF não tem o braço), redondos de parede no BH serviço e no BH externo;
+- cozinha: o cooktop de 4 bocas (o resto do de 5 vira bancada), as 2 cubas Franke, a geladeira inox G2 nos 2
+  retângulos do PDF (a frente para a ilha), as 4 banquetas da ilha da Casa A nos círculos do PDF com a ilha por cima;
+  gourmet: o cooktop de 4 bocas e a cuba Franke com misturador; área de serviço: os 2 tanques Franke;
+- esquadrias: o contorno preto fino, sem os batentes (`biblioteca_subsolo_casac_1311.esquadrias`).
+Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_<trecho>_antes_depois.jpg`.
+
 ### Térreo da Casa B, pedidos de 12/11: `pedidos_terreo_casab_1211.py`
 
 Os pedidos do usuário vendo o Térreo da Casa B (com os recortes da prancha), sobre a final de 21fa118, em passos (`PASSOS`, cada um documentado no script com as falas do usuário):
