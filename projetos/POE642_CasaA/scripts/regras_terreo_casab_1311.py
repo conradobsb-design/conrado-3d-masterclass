@@ -267,17 +267,21 @@ CADEIRAS_TB = {"png": "escritorio/cadeira-escritorio", "larg": 34.0, "sob": 1 / 
 # - a sala íntima com o conjunto da Casa A (`SALA_INTIMA_TB`): o tapete, o sofá em L A (o "anti_t" da Casa A: o corpo
 #   comprido à direita, contra a parede, e a ponta em cima; 89% de sobreposição com o L do PDF), as mesas laterais
 #   redondas nos 2 círculos do PDF e a poltrona A no símbolo do PDF (o encosto, a faixa fina do PDF, para o elevador; a
-#   frente para a sala: 225°; 50 x 52 px). O PDF tem uma poltrona só (a proposta dizia 2): o quadrado girado ao lado é
-#   uma mesa, que fica, como a mesa de centro redonda (as duas de volta por cima, pelo contorno do PDF);
+#   frente para a sala: 225°; 50 x 52 px). O PDF tem uma poltrona só (a proposta dizia 2); a mesa de centro redonda fica
+#   (de volta por cima, pelo contorno do PDF). Depois ("PÕE UM BANCO ESTOFADO, COMO SE FOSSE UM PUFF NA FRENTE DA
+#   POLTRONA"): o retângulo girado do PDF na frente da poltrona (0,62 x 0,43 m, o lado comprido de través à frente
+#   dela: o pufe dela), que o render tinha feito de mesa de madeira, vira o pufe estofado da Casa A
+#   (`suite-master/pufe`, 45°); a mesa de madeira sai, com o piso refeito;
 # - o jantar: só as 10 cadeiras oliva da Casa A (30 px) no lugar das bordô, no centro do retângulo de cada uma no PDF,
 #   viradas para a mesa; a mesa e o aparador ficam (a mesa de volta por cima, com a sombra curta nas cadeiras);
 # - a prainha: as 2 espreguiçadeiras A no retângulo do PDF, a cabeceira à direita (a parte menor do PDF);
 # - a bancada gourmet: as 5 banquetas B da Casa A (25 px) no lugar das 5 de hoje (o PDF desenha 4, desiguais; a planta
 #   tem 5 desde 12/11 e a proposta foi com 5), ~40% do assento por baixo da bancada (a borda em y 1319,3): o que passa
 #   da borda não é desenhado (`corte_y`).
-SALA_INTIMA_TB = {"tapete": 70337, "sofa": (77730, 77731, 77732, 77733, 77734, 77735), "mesa_centro": 77823, "mesa_quadrada": 71935,
+SALA_INTIMA_TB = {"tapete": 70337, "sofa": (77730, 77731, 77732, 77733, 77734, 77735), "mesa_centro": 77823, "pufe": 71935,
+                  "pufe_png": "suite-master/pufe", "pufe_px": (36.8, 25.5), "pufe_giro": 45.0,
                   "mesas_laterais": [77800, 77858], "poltrona": 62306, "poltrona_px": (50.0, 52.0), "poltrona_giro": 225.0,
-                  "folga_px": 10, "folga_pufe_px": 6}
+                  "folga_px": 10, "folga_pufe_px": 10}
 JANTAR_TB = {"mesa": 63685, "larg": 30.0, "folga_px": 7,
              "cadeiras": [(62447, 0.0), (62496, 0.0), (62545, 0.0), (62594, 0.0), (31098, 180.0), (31147, 180.0),
                           (31196, 180.0), (31245, 180.0), (62643, 90.0), (31294, -90.0)]}
@@ -1008,6 +1012,21 @@ def piso_saltando(out, buraco, fonte, larg=16, alcance=60, eixo="x", ancorar=Fal
     return res
 
 
+def tom_do_entorno(antes, feito, buraco, fonte, sigma=10.0, anel_px=12):
+    """O piso refeito (`feito`, no `buraco`) no tom do piso em volta: a média local do anel de fonte em volta do buraco
+    (em `antes`), estendida para dentro, menos a média local do que entrou; as tábuas e os veios ficam, só a luz muda
+    (a fonte de longe, perto da janela, é mais clara)."""
+    anel = dilatar(buraco, anel_px) & ~buraco & fonte
+    ref = antes.astype(np.float32)
+    o = feito.astype(np.float32)
+    num, den = BS.nconv(ref, anel.astype(np.float32), sigma)
+    T = num / np.maximum(den, 1e-6)
+    num2, den2 = BS.nconv(o, buraco.astype(np.float32), sigma)
+    C = num2 / np.maximum(den2, 1e-6)
+    o[buraco] += (T - C)[buraco]
+    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+
+
 def mesa_por_cima(out, fonte, a, ca, reg):
     """A mesa (alfa `a`) de `fonte` de volta por cima do que mudou em volta dela (as cadeiras e a sombra delas), com a
     sombra curta dela nas cadeiras (alfa `ca`); no 12K, a da saída do Topaz (`topo_12k`)."""
@@ -1026,16 +1045,17 @@ def sala_intima(Q, out, par, reg, q=SALA_INTIMA_TB):
     antes = out.copy()
     forma = par.shape
     _, pol = mascara_pdf(Q, [q["poltrona"]])
-    _, pufe = mascara_pdf(Q, [q["mesas_laterais"][1]])
-    _, quad = mascara_pdf(Q, [q["mesa_quadrada"]])
+    _, redondo = mascara_pdf(Q, [q["mesas_laterais"][1]])
+    _, quad = mascara_pdf(Q, [q["pufe"]])
     _, tap = mascara_pdf(Q, [q["tapete"]])
-    # o piso por baixo da poltrona e do pufe de antes (a mesa quadrada fica): as tábuas deitadas, linha a linha
-    # (a folga leva junto a sombra da poltrona e do pufe de antes, para baixo e para a esquerda)
-    buraco = (dilatar(pol, q["folga_px"]) | dilatar(pufe, q["folga_pufe_px"])) & ~dilatar(quad, 1) & ~par
+    # o piso por baixo da poltrona, do pufe redondo e da mesa quadrada de antes: as tábuas deitadas, linha a linha
+    # (a folga leva junto a sombra delas, para baixo e para a esquerda)
+    buraco = (dilatar(pol, q["folga_px"]) | dilatar(redondo, q["folga_pufe_px"]) | dilatar(quad, q["folga_pufe_px"])) \
+        & ~par
     im = out.astype(np.int16)
     madeira = (im.max(axis=2) - im.min(axis=2)) >= 40
-    fonte = madeira & ~dilatar(quad, 8) & ~dilatar(tap, 2) & ~par          # (8: fora a sombra da mesa quadrada)
-    out = piso_saltando(out, buraco, fonte, alcance=70, ancorar=True)
+    fonte = madeira & ~dilatar(tap, 2) & ~dilatar(par, 3)        # (3: a beira escura junto às paredes não serve)
+    out = tom_do_entorno(antes, piso_saltando(out, buraco, fonte, alcance=70, ancorar=True), buraco, fonte)
     pecas = []
     x0, y0, x1, y1 = caixa_pdf(Q, q["tapete"])
     pecas.append(("B1", "sala-intima/tapete", (x0 + x1) / 2, (y0 + y1) / 2, y1 - y0, x1 - x0, 90.0, "tapete", None))
@@ -1060,9 +1080,13 @@ def sala_intima(Q, out, par, reg, q=SALA_INTIMA_TB):
                   None)
     out = pousar_bib(out, it, par)
     reg["pecas"].append(it)
-    out = recorte_de_volta(Q, out, antes, [q["mesa_quadrada"]], reg["pecas"])
-    print("    sala íntima: o tapete, o sofá em L A, as 2 mesas laterais e a poltrona A da Casa A (a mesa de centro e a "
-          "quadrada ficam)")
+    ys, xs = np.nonzero(quad)
+    w, h = q["pufe_px"]
+    it = item_bib("B1", q["pufe_png"], float(xs.mean()), float(ys.mean()), w, h, q["pufe_giro"], "movel", None)
+    out = pousar_bib(out, it, par)
+    reg["pecas"].append(it)
+    print("    sala íntima: o tapete, o sofá em L A, as 2 mesas laterais, a poltrona A e o pufe estofado na frente dela "
+          "(a mesa de centro fica)")
     return out
 
 

@@ -2592,8 +2592,11 @@ beira escura junto a uma parede, não serve):
 - sala íntima: o tapete, o sofá em L A (o "anti_t" da Casa A: o corpo comprido contra a parede da direita e a ponta em
   cima; com os traços finos do encosto do PDF, 92% de sobreposição com o L), as 2 mesas laterais redondas nos círculos
   do PDF e a poltrona A no símbolo do PDF (o encosto para o elevador, a frente para a sala; 225°, 50 x 52 px); a mesa de
-  centro redonda e a mesa quadrada ficam (de volta por cima, pelo contorno do PDF). O PDF tem uma poltrona só (a
-  proposta dizia 2): o quadrado girado ao lado é uma mesa;
+  centro redonda fica (de volta por cima, pelo contorno do PDF). O PDF tem uma poltrona só (a proposta dizia 2).
+  Depois ("PÕE UM BANCO ESTOFADO, COMO SE FOSSE UM PUFF NA FRENTE DA POLTRONA"): o retângulo girado do PDF na frente
+  dela (0,62 x 0,43 m, de través: o pufe da poltrona), que o render tinha feito de mesa de madeira, é o pufe estofado da
+  Casa A (`03-primeiro-pavimento/suite-master/pufe`, 45°); o piso refeito em volta no tom do entorno
+  (`tom_do_entorno`: a fonte de longe, perto da janela, é mais clara; a beira junto às paredes fica fora da fonte);
 - jantar: as 10 cadeiras oliva da Casa A (30 px) no centro de cada cadeira do PDF, viradas para a mesa (o travertino
   refeito coluna a coluna em cima e embaixo, linha a linha nas pontas); a mesa e o aparador ficam, a mesa de volta por
   cima com a sombra curta nas cadeiras (`mesa_por_cima`; no 12K, a da saída do Topaz);

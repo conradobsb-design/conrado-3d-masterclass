@@ -693,13 +693,16 @@
    "extra": null
   },
   {
-   "tipo": "recorte",
-   "c": [
-    1636,
-    528,
-    1692,
-    584
-   ]
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "suite-master/pufe",
+   "cx": 1663.5,
+   "cy": 555.5,
+   "larg": 36.8,
+   "alt": 25.5,
+   "giro": 45.0,
+   "sombra": "movel",
+   "extra": null
   },
   {
    "tipo": "bib",
