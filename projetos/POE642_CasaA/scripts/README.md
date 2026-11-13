@@ -2742,7 +2742,10 @@ para cima, na área livre: "CRIE O AMBIENTE"); `bh_servico` (a bancada do BH ser
 a cuba de louça branca da Casa A no retângulo do PDF, sem a tira branca da antiga, e a torneira cromada, como no BH
 serviço da Casa B: "CORRIJA O ERRO DA CUBA"); `portas_descoberta` (as 2 portas de giro da área de serviço descoberta,
 que a busca das portas não achava porque a folha do PDF vem em 4 pedaços, com a folha de madeira clara quina com quina
-e a soleira, como as outras: "CORRIJA ESSAS PORTAS PARA FICAREM BEM REPRESENTADAS"); `tracejado_lote` (o
+e a soleira, como as outras: "CORRIJA ESSAS PORTAS PARA FICAREM BEM REPRESENTADAS"); `cozinha` (a bancada em L da pia,
+a ilha e a bancada da direita em Dekton Danae, com as cubas, as torneiras e o cooktop por cima; os 2 armários altos,
+que tinham sumido sob o granito do piso no mobiliário, e as prateleiras do louceiro 1 na cor dos armários de antes,
+RGB 189, 160, 129, lisa: "CORRIJA A COZINHA. BANCADAS EM DEKTON DANAE. ESTÁ FALTANDO ARMÁRIOS"); `tracejado_lote` (o
 retângulo tracejado do lote em branco e o muro de baixo cortado na borda do lote: "REMOVA ESSE TRACEJADO EM VOLTA DA
 PLANTA"). Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`.
 Rodar sem `--antes` refaz a final a partir de 48a23e8.

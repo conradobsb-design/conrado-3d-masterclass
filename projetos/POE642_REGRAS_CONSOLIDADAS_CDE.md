@@ -268,6 +268,9 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   piso por cima. [C Térreo]
 - [ ] **Seta da entrada:** o triângulo cheio das escadas, centrado no vão da porta, do lado de fora, com a ponta para
   dentro (nunca a seta grande). [B Térreo; C Térreo]
+- [ ] **Cozinha da Casa C:** bancadas (a em L da pia, a ilha e a da direita) em Dekton Danae; os armários altos e as
+  prateleiras do louceiro na cor dos armários (RGB 189, 160, 129), lisa, sem textura. Conferir que um piso refeito não
+  cobre armários e bancadas. [C Térreo]
 - [ ] **Bancada dos tanques da área de serviço em granito marrom tabaco** (como as da Casa B), as cubas de inox por
   cima. [B Térreo; C Térreo]
 - [ ] **Bancos de pé de cama em tons variados** (veludos diferentes por quarto), o da suíte master como está. [C Térreo]

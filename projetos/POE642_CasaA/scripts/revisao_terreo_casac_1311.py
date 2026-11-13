@@ -59,6 +59,16 @@ Sobre a final de `ANTES_COMMIT` (a do 12K de 13/11: o estar E1 e o paisagismo da
   esquadria, solta), porque no PDF a folha é desenhada em 4 pedaços e a busca das portas (`pedidos_terreo_casac_1311.
   portas_pdf`) não a achava; agora como as outras portas de giro da Casa C (`pedidos_subsolo_casab_1211.portas_sb`): a
   folha de madeira clara no retângulo do PDF, quina com quina na ponta da parede, sem os marcos, a soleira no vão.
+- **"CORRIJA A COZINHA. BANCADAS EM DEKTON DANAE. ESTÁ FALTANDO ARMÁRIOS. REPRESENTAR OS ARMÁRIOS NA COR DEFINIDA,
+  INCLUSIVE O ARMÁRIO DO LOUCEIRO"**, "BANCADA EM L DA COZINHA DEKTON DANAE", "COR DA ILHA DA COZINHA EM DEKTON
+  DANAE", "ESTÁ FALTANDO ESSE ARMÁRIO NA COZINHA" (os post-its: "Cor da bancada é no Dekton Danae", "Representar
+  armário e prateleiras na mesma cor", "Seguir essa cor"; `cozinha`): a bancada em L da pia (PDF 38671 e o trecho das
+  cubas, 38920), a ilha
+  (53847) e a bancada da direita, abaixo do armário (38868), no Dekton Danae (`terreo_casaa_1011.danae`, a face um tom
+  abaixo); as cubas, as torneiras e o cooktop ficam por cima. Os dois armários altos do PDF (o da parede da esquerda,
+  88831, e o da direita, 88836, os retângulos com a diagonal), que tinham sumido sob o granito do piso no mobiliário
+  (c4cd7ce), e as prateleiras em U do louceiro 1 (88919) na cor dos armários de antes (a madeira clara, RGB 189, 160,
+  129, "seguir essa cor"), lisa, sem textura, com a face um tom abaixo; a sombra curta das peças no piso.
 - **"REMOVA ESSE TRACEJADO EM VOLTA DA PLANTA"** (`tracejado_lote`): o retângulo tracejado do lote (x 296 a 3583, y 5 a
   2050, que encostava na borda do gramado à esquerda) sai: fora do lote, branco puro.
 
@@ -156,10 +166,14 @@ PORTAS_DESC = [{"nome": "A. serviço descoberta, esquerda", "parede": (2463.2, 2
                 "folha": (2473.4, 113.1, 2521.1, 115.5), "dobra": "topo", "lado": 1, "soleira": True},
                {"nome": "A. serviço descoberta, direita", "parede": (2706.2, 2716.4), "topo": 110.1, "base": 163.9,
                 "folha": (2658.5, 113.1, 2706.2, 115.5), "dobra": "topo", "lado": -1, "soleira": True}]
+# a cozinha: as peças do PDF (índices) em Danae e na cor dos armários (BGR); o que fica por cima (o inox, o cooktop:
+# pouco croma, compacto); a face e a sombra
+COZINHA = {"danae": [(38671, 38920), (53847,), (38868,)], "armarios": [(88831,), (88836,), (88919,)], "cor_armario": (129, 160, 189),
+           "face": 0.86, "fica_croma": 18, "fica_area": 8, "fica_max_px": 60, "sombra": 0.22, "semente": 1316}
 LOTE = {"abre_px": 5, "nb": 245, "corpo": 0.8}
 ANTES_DEPOIS = {"lavabos": (1080, 1480, 1640, 1700), "quartos": (300, 260, 2300, 760),
                 "claraboias": (700, 230, 1100, 990), "hall": (2280, 1170, 2790, 1460), "garagem": (2690, 300, 3290, 700),
-                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600), "area_descoberta": (2440, 40, 2740, 260),
+                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600), "area_descoberta": (2440, 40, 2740, 260), "cozinha": (2150, 240, 2480, 720),
                 "inteira": (0, 0, 3840, 2160)}
 
 
@@ -667,6 +681,60 @@ def portas_descoberta(Q, img, ps=PORTAS_DESC):
     return out
 
 
+def cozinha(Q, img, q=COZINHA):
+    import terreo_casaa_1011 as TC
+    H, W = img.shape[:2]
+    out = img.astype(np.float32)
+    I = img.astype(np.int16)
+    croma = I.max(axis=2) - I.min(axis=2)
+
+    def fica(m):
+        """O que está por cima da peça (as cubas, as torneiras, o cooktop): pouco croma, compacto (não as linhas
+        compridas das bordas)."""
+        c = (m & (croma < q["fica_croma"])).astype(np.uint8)
+        n, lab, st, _ = cv2.connectedComponentsWithStats(c, connectivity=8)
+        ok = [i for i in range(1, n) if st[i, cv2.CC_STAT_AREA] >= q["fica_area"]
+              and max(st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT]) <= q["fica_max_px"]]
+        return cv2.dilate(np.isin(lab, ok).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+
+    def sombra(m):
+        a = m.astype(np.float32)
+        sb = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, -1.0], [0, 1, 1.3]]), (W, H)), (0, 0), 1.1)
+        return sb * (1 - a)
+
+    def peca(ids, cor):
+        nonlocal out
+        a, m = MB.RT.mascara_pdf(Q, list(ids))
+        # as linhas cinzas da borda antiga, logo fora da peça (as compridas, de pouco croma): o piso de volta
+        anel = cv2.dilate(m.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) & ~m
+        c = (anel & (croma < q["fica_croma"])).astype(np.uint8)
+        n, lab, st, _ = cv2.connectedComponentsWithStats(c, connectivity=8)
+        lin = np.isin(lab, [i for i in range(1, n) if max(st[i, cv2.CC_STAT_WIDTH], st[i, cv2.CC_STAT_HEIGHT]) >
+                            q["fica_max_px"]])
+        if lin.any():
+            ys, xs = np.nonzero(lin)
+            y0, y1, x0, x1 = max(ys.min() - 6, 0), ys.max() + 7, max(xs.min() - 6, 0), xs.max() + 7
+            sub = np.clip(np.round(out[y0:y1, x0:x1]), 0, 255).astype(np.uint8)
+            mk = cv2.dilate(lin[y0:y1, x0:x1].astype(np.uint8), np.ones((3, 3), np.uint8)) & ~m[y0:y1, x0:x1]
+            novo = cv2.inpaint(sub, mk.astype(np.uint8) * 255, 3, cv2.INPAINT_TELEA).astype(np.float32)
+            out[y0:y1, x0:x1][mk > 0] = novo[mk > 0]
+        out *= (1 - q["sombra"] * sombra(m))[..., None]
+        f = fica(m)
+        borda = m & ~cv2.erode(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
+        cor = cor * np.where(borda, q["face"], 1.0)[..., None]
+        al = a[..., None] * (~f)[..., None]
+        out = out * (1 - al) + cor * al
+        return int(m.sum()), int(f.sum())
+    danae = TC.danae(H, W, q["semente"]).astype(np.float32)
+    n_d = [peca(i, danae) for i in q["danae"]]
+    cor_a = np.broadcast_to(np.float32(q["cor_armario"]), (H, W, 3))
+    n_a = [peca(i, cor_a) for i in q["armarios"]]
+    print(f"    cozinha: a bancada em L, a ilha e a bancada da direita em Dekton Danae ({sum(n for n, _ in n_d)} px; "
+          f"{sum(f for _, f in n_d)} px de cubas, torneiras e cooktop por cima); os 2 armários altos e as prateleiras do "
+          f"louceiro 1 na cor dos armários, lisa ({sum(n for n, _ in n_a)} px)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
 def tracejado_lote(img, q=LOTE):
     from scipy import ndimage
     nb = (img.min(axis=2) < q["nb"]).astype(np.uint8)
@@ -705,6 +773,7 @@ def aplicar(antes):
     out = quarto_servico(Q, out)
     out = bh_servico(Q, out)
     out = portas_descoberta(Q, out)
+    out = cozinha(Q, out)
     out = tracejado_lote(out)
     return out
 
