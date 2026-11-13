@@ -72,6 +72,8 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 - [ ] **Jardim de inverno:** um X só, de uma diagonal à outra, interrompido em volta do rótulo; as folhas de vidro
   encostadas umas nas outras. [B Térreo]
 - [ ] **Claraboia sem X:** fica só o tracejado horizontal. [A Térreo]
+- [ ] **Escadas e pisos externos (post-its do cliente no Subsolo):** o filete de pedra entre dois pisos que se
+  encontram e o pilar onde o cliente marca (redondo, 0,30 m, no cinza das paredes). [B e C Subsolo]
 - [ ] **Tracejado só nos vazios.** Saem o telhado, os afastamentos e as projeções. O pergolado fica fino e numa cor só
   (preto) no Térreo, e esfumaçado no 1º Pavimento. [A; B Térreo]
 
@@ -180,7 +182,8 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 - [ ] **Espreguiçadeiras.**
   - No deck: de madeira.
   - Na prainha, dentro d'água: **nunca madeira**, e sim resina/polietileno ou concreto: a de resina E4 da biblioteca
-    (`02-terreo/deck-piscina/espreguicadeira-resina.png`, escolhida na Casa B), no comprimento do PDF, sem deformar.
+    (`02-terreo/deck-piscina/espreguicadeira-resina.png`, escolhida na Casa B), no comprimento do PDF, sem deformar,
+    com o colchonete creme e o encosto de cabeça em rolo da A por cima (`espreguicadeira-resina-colchonete.png`).
   - No retângulo do PDF, com a cabeceira na parte menor do PDF.
   - [A; B Térreo]
 - [ ] **Gramado da Casa A em todos os Térreos:** 80% grama, poucas árvores nos cantos, arbustos baixos, até o muro.
@@ -196,6 +199,11 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   - Depois, no tom do piso em volta.
   - A beira escura junto à parede não serve de fonte.
   - [B Térreo]
+- [ ] **Bege Bahia menos manchado** em todo piso, degrau, pisante, soleira e borda de Bege Bahia: as manchas da pedra
+  a 45% do contraste; a luz, as sombras, o tom, as arestas e as linhas dos degraus ficam ("Já removeu manchas do bege
+  Bahia como fizemos nas outras plantas?"). [A três pavimentos, 10 e 11/11; C Subsolo, 13/11]
+- [ ] **Travertino da varanda sem manchas cinzas** (as faixas largas levadas ao tom do piso, o veio fino fica). [C
+  Subsolo, post-it do cliente]
 - [ ] **Nunca um quadrado de outro tom** em volta da peça nova. A folga da área refeita leva junto a sombra da peça
   antiga. [A; B]
 

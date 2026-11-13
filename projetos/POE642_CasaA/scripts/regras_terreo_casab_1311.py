@@ -291,7 +291,11 @@ JANTAR_TB = {"mesa": 63685, "larg": 30.0, "folga_px": 7,
 # areia/greige, o encosto em placa reta; recortada em `02-terreo/deck-piscina/espreguicadeira-resina.png`, o encosto em
 # cima como a A) no lugar da A de madeira: no comprimento do retângulo do PDF, a largura pela proporção do PNG (sem
 # deformar), no meio dele, o encosto à direita
-ESPREG_TB = {"png": "deck-piscina/espreguicadeira-resina", "pdf": [62435, 62441], "giro": -90.0, "sem_deformar": True,
+# (13/11, "Adicione os colchonetes ... e esse encosto de cabeça"; "os colchonetes não são de resina, é sobre a
+# espreguiçadeira de material de resina") sobre a resina, o colchonete creme e o encosto de cabeça em rolo da
+# espreguiçadeira A, com a costura na dobra do encosto e a sombra curta (`espreguicadeira-resina-colchonete.png`)
+ESPREG_TB = {"png": "deck-piscina/espreguicadeira-resina-colchonete", "pdf": [62435, 62441], "giro": -90.0,
+             "sem_deformar": True,
              "sombra": "baixa"}
 BANQUETAS_TB = {"png": "area-gourmet/banqueta-b", "larg": 25.0, "borda_y": 1319.3,
                 "xs": [1321.5, 1370.0, 1420.0, 1470.0, 1519.0], "velhas_px": (17, 1295)}

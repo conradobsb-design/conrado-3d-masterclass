@@ -2620,7 +2620,9 @@ A E4 do Higgsfield (polietileno areia/greige, o encosto em placa reta) recortada
 deck-piscina/espreguicadeira-resina.png` e posta nas 2 da prainha pelo `regras_terreo_casab_1311.ESPREG_TB`
 (`sem_deformar`: o comprimento do PDF, a largura pela proporção; a água por baixo das bordas que sobram, copiada no
 passo da grade dos azulejos, `_passo_grade`; a sombra baixa). No lugar da A de madeira ("nada de madeira dentro
-d'água").
+d'água"). Depois ("Adicione os colchonetes ... e esse encosto de cabeça"): por cima da resina, o colchonete creme e o
+encosto de cabeça em rolo da espreguiçadeira A (recortados dela, no tamanho da resina), a costura na dobra do encosto e
+a sombra curta: `espreguicadeira-resina-colchonete.png`.
 
 ### Subsolo da Casa C, a biblioteca (13/11): `biblioteca_subsolo_casac_1311.py`
 
@@ -2651,6 +2653,10 @@ plantinhas de ~0,18 m e a forração miúda (o canteiro só dentro dela); as set
 abaixo) e as descrições "SOBE PARA O / JARDIM" (degraus largos, no pátio) e "SOBE PARA O / DECK" (escada estreita,
 abaixo dela, a hachura limpa em volta); as 3 portas de giro (sauna, BH academia e depósito, esta na imagem transposta)
 com a folha de madeira clara quina com quina na ponta da parede, sem os marcos, a soleira no bege das soleiras da Casa C.
+Depois ("Já removeu manchas do bege Bahia como fizemos nas outras plantas?"): `bege`, a regra de 10/11 (as manchas do
+Bege Bahia a 45%, pela conta de `terreo_casaa_1011.bege_ta`, na chapada 232), com as letras e as linhas dos degraus
+(corridas escuras compridas) inteiras; também no Térreo da Casa C (`biblioteca_terreo_casac_1311`, os banhos, os
+caminhos e os pisantes).
 Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_postits_<trecho>_antes_depois.jpg`.
 
 ### Térreo da Casa C, a biblioteca, 1ª leva (13/11): `biblioteca_terreo_casac_1311.py`

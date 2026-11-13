@@ -18,6 +18,7 @@ Térreo da Casa B (`regras_terreo_casab_1311`, de onde vêm as funções), nos r
   do PDF, com a ilha de volta por cima (a parte do assento sob o tampo não aparece).
 - **Gourmet:** o cooktop de 4 bocas e a cuba Franke com misturador.
 - **Área de serviço:** os 2 tanques Franke (a torneira na parede da direita).
+- **Bege Bahia:** as manchas a 45% (a regra de 10/11), nos banhos, nos caminhos e nos pisantes.
 - **Esquadrias:** o contorno fino em preto (`regras_terreo_casab_1311.esquadrias`), sem os batentes.
 
   python3 biblioteca_terreo_casac_1311.py [--antes <png>] [--saida <png>]
@@ -124,7 +125,8 @@ BANQUETAS = {"png": "cozinha/banqueta-ilha", "d": 23.7, "x": 2252.45, "ys": (399
 ANTES_DEPOIS = {"bh_master_1": (735, 300, 900, 590), "bh_master_2": (630, 820, 900, 985),
                 "bh_1_2_3": (1060, 250, 1990, 440), "lavabos": (1180, 1480, 1560, 1660),
                 "lavabo_adega": (2250, 960, 2480, 1210), "cozinha_servico": (2160, 240, 2720, 690),
-                "gourmet": (1220, 910, 1580, 1170), "externo": (2790, 670, 2980, 830)}
+                "gourmet": (1220, 910, 1580, 1170), "externo": (2790, 670, 2980, 830),
+                "bege_bahia": (560, 1180, 3300, 1860)}
 
 
 def quadro():
@@ -256,6 +258,10 @@ def aplicar(antes):
     out = antes.copy()
     par = BS.quieto(FA.paredes_pdf, Q) > 0.3
     reg = []
+    # (13/11, "Já removeu manchas do bege Bahia como fizemos nas outras plantas?"; a regra de 10/11) o Bege Bahia (a
+    # chapada 232: os banhos, os caminhos e os pisantes) com as manchas a 45% (`pedidos_subsolo_casac_1311.bege`)
+    import pedidos_subsolo_casac_1311 as PS
+    out = PS.bege(Q, out)
     out = RT.balcao(out, par, BALCAO)
     out = chuveiros(out, par, reg)
     out = bancada_dupla(out, par, reg)

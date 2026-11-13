@@ -2,6 +2,8 @@
 
 Sobre a final com a biblioteca (`biblioteca_subsolo_casac_1311`, commit `ANTES_COMMIT`), como os mesmos pedidos no
 Subsolo da Casa B (`pedidos_subsolo_casab_1211`, de onde vêm as portas e o desenho das setas):
+- **"Já removeu manchas do bege Bahia como fizemos nas outras plantas?"** (`bege`, a regra de 10/11): as manchas do
+  Bege Bahia a 45%, como nos três pavimentos da Casa A.
 - **"Colocar um piso com menos manchas cinzas."** (`travertino`, a varanda do Subsolo): as manchas largas do travertino
   saem (a luz e a cor de baixa frequência levadas à mediana do piso, `forca`); o veio fino fica.
 - **"Representar um filete entre os dois pisos"** (`filete`, entre o Bege Bahia do pátio e o travertino da varanda): uma
@@ -49,6 +51,13 @@ FINAL = R / "POE642_CasaC_PH_Subsolo_final_rotulos.png"
 RAIZ_GIT = AQUI.parents[2]
 ANTES_COMMIT = "6ea1bc3"
 
+# (regra de 10/11, "Bege Bahia menos manchado, em todas as plantas de todas as casas"; usuário: "Já removeu manchas do
+# bege Bahia como fizemos nas outras plantas?") as manchas da pedra a 45% (`forca`) em todo o Bege Bahia (a chapada
+# 232: o pátio, os degraus largos, o caminho e o depósito), pela conta de `terreo_casaa_1011.bege_ta`: o tom do lugar
+# (a mediana larga, com as peças tapadas) fica, a luz, as sombras e as arestas dos degraus também; as letras (o escuro)
+# e as peças (pouco croma, escuras ou verdes) ficam como estão
+BEGE = {"chapada": (232, 232, 232), "forca": 0.45, "mediana_px": 25, "croma_obj": 22, "lum_obj": 120, "area_obj": 30,
+        "aresta": 10.0, "aresta_px": 2, "texto": 0.72, "linha": 0.92}
 # a varanda do Subsolo (px): o retângulo do travertino, a força e o sigma da baixa frequência que sai
 TRAVERTINO = {"px": (637, 321, 1064, 737), "sigma": (28.0, 2.5), "forca": 0.75, "texto": 0.80}
 # o encontro do Bege Bahia com o travertino (px): x, de y0 a y1; a largura (m), a cor da pedra e a dos fios (BGR)
@@ -83,7 +92,7 @@ PORTAS = {
          "folha": (746.0, 1001.5, 793.8, 1003.9), "dobra": "topo", "lado": +1, "soleira": True},
     ],
 }
-ANTES_DEPOIS = {"varanda_filete_pilar": (600, 300, 1080, 760), "floreira_escadas": (355, 690, 900, 1120),
+ANTES_DEPOIS = {"bege_bahia": (350, 300, 1260, 1700), "varanda_filete_pilar": (600, 300, 1080, 760), "floreira_escadas": (355, 690, 900, 1120),
                 "portas": (780, 725, 1080, 830)}
 
 
@@ -113,6 +122,50 @@ def _pintar(out, a, X0, Y0, cor):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+def _dil(m, r):
+    return cv2.dilate(m.astype(np.uint8), np.ones((2 * r + 1, 2 * r + 1), np.uint8)) > 0
+
+
+def bege(Q, img, q=BEGE):
+    im = img.astype(np.float32)
+    B = cv2.morphologyEx(np.all(Q.chapada == np.uint8(q["chapada"]), axis=2).astype(np.uint8), cv2.MORPH_CLOSE,
+                         np.ones((5, 5), np.uint8)) > 0
+    B &= ~(BS.quieto(FA.paredes_pdf, Q) > 0.3)
+    f = cv2.GaussianBlur(im, (0, 0), 0.7)
+    lum, croma = f.mean(axis=2), f.max(axis=2) - f.min(axis=2)
+    verde = f[..., 1] > f[..., 2] + 4
+    cand = B & ((croma < q["croma_obj"]) | (lum < q["lum_obj"]) | verde)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(cand.astype(np.uint8), connectivity=8)
+    ok = np.zeros(n, bool)
+    ok[1:] = (st[1:, cv2.CC_STAT_AREA] >= q["area_obj"])
+    obj = _dil(ok[lab], 1)
+    ys, xs = np.nonzero(B)
+    y0, y1 = max(ys.min() - 30, 0), min(ys.max() + 31, Q.H)
+    x0, x1 = max(xs.min() - 30, 0), min(xs.max() + 31, Q.W)
+    piso = (B & ~obj)[y0:y1, x0:x1]
+    sub = cv2.inpaint(img[y0:y1, x0:x1].copy(), ((~piso) * 255).astype(np.uint8), 5, cv2.INPAINT_TELEA)
+    tom = cv2.GaussianBlur(cv2.medianBlur(sub, q["mediana_px"]).astype(np.float32), (0, 0), 1.5)
+    tl = tom.mean(axis=2)
+    gx, gy = cv2.Sobel(tl, cv2.CV_32F, 1, 0, ksize=3), cv2.Sobel(tl, cv2.CV_32F, 0, 1, ksize=3)
+    aresta = _dil(np.hypot(gx, gy) / 8 > q["aresta"], q["aresta_px"])
+    lumv = im[y0:y1, x0:x1].mean(axis=2)
+    texto = _dil(piso & (lumv < q["texto"] * tl), 2)
+    # as linhas dos degraus (corridas escuras compridas, deitadas ou em pé) ficam inteiras, como estão
+    escuro = (piso & (lumv < q["linha"] * tl)).astype(np.uint8)
+    linhas = (cv2.morphologyEx(escuro, cv2.MORPH_OPEN, np.ones((1, 21), np.uint8)) |
+              cv2.morphologyEx(escuro, cv2.MORPH_OPEN, np.ones((21, 1), np.uint8))) > 0
+    texto |= _dil(linhas, 2)
+    D = im[y0:y1, x0:x1] / np.maximum(tom, 1)
+    novo = tom * (1 + q["forca"] * (D - 1))
+    m = (piso & ~aresta & ~texto).astype(np.float32)
+    m = cv2.GaussianBlur(m, (0, 0), 0.8) * (piso & ~texto)
+    out = im.copy()
+    out[y0:y1, x0:x1] = im[y0:y1, x0:x1] * (1 - m[..., None]) + novo * m[..., None]
+    print(f"    Bege Bahia: as manchas a {q['forca'] * 100:.0f}% em {int(piso.sum())} px (o pátio, os degraus, o caminho e "
+          "o depósito)")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
 def travertino(out, q=TRAVERTINO):
     """As manchas largas do travertino da varanda saem: a baixa frequência (média normalizada no piso, sem o texto) vai
     à mediana do piso, com `forca`; o veio fino e o texto ficam."""
@@ -270,6 +323,7 @@ def portas(Q, out, q=PORTAS):
 def aplicar(antes):
     Q = quadro()
     out = antes.copy()
+    out = bege(Q, out)
     out = travertino(out)
     out = filete(Q, out)
     out = pilar(Q, out)
