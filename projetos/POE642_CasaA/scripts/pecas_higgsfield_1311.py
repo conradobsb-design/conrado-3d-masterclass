@@ -6,8 +6,10 @@ HIGGSFIELD"; "PRECISO TROCAR OS RECAMIERS DA SUITE MASTER TAMBÉM", depois "GOST
 CLOSET MASTER TEM UM BANCO ESTOFADO QUE PRECISA SER REPRESENTADO COMO BANCO ESTOFADO") e escolheu, entre 4 variantes de
 cada (gpt_image_2, vista de cima, fundo branco), "G2, R7, B1, C4":
   - geladeira: job 9f2879f5 (inox escovado, os puxadores na frente, embaixo no PNG);
-  - recamier: job 66656fd6 (veludo champanhe em gomos, a cabeceira curva à esquerda, o encosto baixo em cima, o rolo e o
-    filete de latão);
+  - recamier: o R7 (job 66656fd6, mais comprido que o PDF: "CUIDADO COM A PROPORÇÃO DO RECAMIER E MESA LATERAL") trocado
+    a pedido ("PODEMOS USAR OUTRO MODELO DE RECAMIER QUE TENHA AS MESMAS DIMENSÕES DO ORIGINAL?") pelo R11, gerado na
+    medida do original, 0,70 x 1,50 m (job 1c8a44b5: veludo champanhe em gomos, o encosto curvo em L, o rolo e o filete
+    de latão);
   - banco estofado do closet: job 85a49f2f (linho greige, capitonê em grade);
   - cortina: job c42ba4d3 (linho off-white em ondas, o trilho grafite em cima).
 O fundo branco ligado à borda sai (o alfa pela distância ao branco, só na beira; a cor sem o branco misturado), e o PNG
@@ -24,7 +26,7 @@ import numpy as np
 
 BIB = Path(__file__).resolve().parent.parent / "biblioteca-objetos"
 PECAS = {"9f2879f5": "02-terreo/cozinha/geladeira-inox.png",
-         "66656fd6": "03-primeiro-pavimento/suite-master/recamier-veludo-champanhe.png",
+         "1c8a44b5": "03-primeiro-pavimento/suite-master/recamier-veludo-champanhe.png",
          "85a49f2f": "03-primeiro-pavimento/closet-master/banco-estofado-capitone.png",
          "c42ba4d3": "02-terreo/cortinas/cortina-linho-onda.png"}
 

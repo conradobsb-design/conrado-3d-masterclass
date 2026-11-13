@@ -2543,6 +2543,24 @@ tipos novos) e `shafts_12k`. Topaz b44e8511 baixado de novo (fora do git). Antes
 Como refazer: `python3 regras_terreo_casab_1311.py` (sem `--antes`, parte da final de `ANTES_COMMIT`), `python3
 ampliacao_12k_terreo_casab.py montar12k <Topaz b44e8511> --opcao AB`, a prancha, o PDF da Casa B e o book.
 
+**As peças do Higgsfield, o jardim de inverno e os rótulos em grade (13/11, no mesmo `regras_terreo_casab_1311.py`):**
+- a geladeira inox (G2) nos 3 retângulos da cozinha, a frente para a ilha; o banco estofado capitonê (B1) no closet
+  master ("NO CLOSET MASTER TEM UM BANCO ESTOFADO QUE PRECISA SER REPRESENTADO COMO BANCO ESTOFADO");
+- os recamiers da suíte master ("PRECISO TROCAR OS RECAMIERS DA SUITE MASTER TAMBÉM", "GOSTO DO RECAMIER COM MAIS
+  GLAMOUR", "CUIDADO COM A PROPORÇÃO DO RECAMIER E MESA LATERAL", "PODEMOS USAR OUTRO MODELO DE RECAMIER QUE TENHA AS MESMAS
+  DIMENSÕES DO ORIGINAL?", "R11"): o R11, gerado na medida do original (0,70 x 1,50 m), espelhados; o de antes achado na
+  imagem (o branco do bouclé ligado ao retângulo do PDF, mais 8 px de sombra) e o piso por baixo em espelho, linha a
+  linha, dentro da madeira contígua (até 16 px de cada lado: o reflexo não alcança a janela nem a cortina); as mesinhas
+  de encaixe de volta por cima, no tamanho do PDF;
+- a cortina de linho em ondas (C4) nos trilhos do PDF (`ajustes_casab.trechos_cortina_b`, os que se sobrepõem unidos,
+  de parede a parede), o trilho grafite do lado do vidro, sobre o piso em espelho;
+- o jardim de inverno com um X só, de canto a canto, interrompido em volta do rótulo; as 3 folhas de baixo encostadas;
+- os rótulos SUÍTE 1/2 e CIRCULAÇÃO/SUÍTE 3 em grade (y 560 e 695; x 2135 e 2416); no 12K, os desvios novos nos dados;
+- as esquadrias pretas só com os traços da ARQ_PAREDE e, das louças, só os vidros dos boxes (até 80 px de um chuveiro):
+  os traços longos das camas e dos recamiers, na mesma camada, ficavam pretos.
+No 12K, o texto dos rótulos movidos e o do JARDIM DE INVERNO ficam fora da zona trazida da final (o 12K os desenha
+nítidos) e o X do jardim é redesenhado na escala dele. As peças recortadas por `pecas_higgsfield_1311.py`.
+
 **A proposta do mobiliário (13/11):** `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_proposta_biblioteca_{1,2,3}.jpg`
 (17 trechos; as escolhas da Casa A marcadas). O usuário: "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO
 O RETOQUE EM VOLTA DO CONTORNO E NOS TAPETES" (as camas de 12/11 ficam; os tapetes refeitos e o contorno limpo); peças

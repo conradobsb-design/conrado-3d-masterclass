@@ -22,6 +22,17 @@ Térreo de 12/11), as regras aprovadas na Casa A (o mobiliário vai pela propost
   EM VOLTA DO CONTORNO E NOS TAPETES"):** o tapete do PDF de cada suíte refeito inteiro com o da biblioteca no tom do de
   hoje; as camas de 12/11 (e os bancos, o sofá e os criados) por cima pelo contorno do PDF, com a sombra curta dos
   móveis: o halo da IA em volta das camas sai.
+- **Peças do Higgsfield (`GELADEIRAS_TB`, `RECAMIERS_TB`, `BANCO_CLOSET_TB`, `CORTINAS_TB`, `pecas_higgsfield`; "G2, R7,
+  B1, C4", e o recamier depois trocado pelo R11, na medida do original):** a geladeira inox nos 3 retângulos da cozinha,
+  a frente para a ilha; o banco estofado capitonê no closet master; os 2 recamiers de veludo na suíte master (o de
+  antes achado na imagem, o piso por baixo em espelho dentro da madeira ao lado, as mesinhas de volta por cima); a
+  cortina de linho em ondas nos trilhos do PDF (os trechos que se sobrepõem unidos), o trilho grafite do lado do vidro.
+- **Jardim de inverno (`JARDIM_TB`, `jardim_inverno`):** "NÃO HÁ A NECESSIDADE DE TANTOS X, FAÇA APENAS UM DE UMA DIAGONAL
+  A OUTRA": os tracejados de antes saem e entra um X só, de canto a canto, interrompido em volta do rótulo; "AS FOLHAS DE
+  BAIXO PRECISAM ESTAR EM CONTATO UMA COM A OUTRA": as 3 folhas de baixo encostadas.
+- **Rótulos em grade (`ROTULOS_GRADE_TB`, `rotulos_grade`):** SUÍTE 1 e 2 numa linha, CIRCULAÇÃO e SUÍTE 3 noutra, SUÍTE 1
+  e CIRCULAÇÃO numa coluna, SUÍTE 2 e 3 noutra; o de antes sai pela conta do alfa, o novo entra pelo mesmo desenho, e os
+  dados do 12K levam os desvios novos.
 - **Esquadrias pretas (`ESQUADRIAS_TB`, `esquadrias`; vendo a prévia: "FAÇA APENAS O CONTORNO DA ESQUADRIA EM
   PRETO"):** o contorno dos boxes, das portas de vidro e dos caixilhos das janelas em preto, fino, o vidro claro (a regra de 12/11 da Casa A, "As esquadrias dos box, portas de
   vidro e janelas são pretas"): os traços do PDF (os da ARQ_PAREDE e, nas louças, os vidros dos boxes: longos e finos)
@@ -106,7 +117,7 @@ ELEVADOR_TB = (1720, 515, 1825, 665)          # a caixa do elevador (px), fora d
 # cada folha, caixilho e vidro de box em preto, o vidro claro por dentro (com 1,1 px, os dois lados das folhas finas
 # viravam uma barra preta)
 ESQUADRIAS_TB = {"perfil": (34, 34, 36), "traco_px": 0.5, "ss": 8, "forca": 1.6, "croma_max": 16, "lum_min": 120,
-                 "box_larg_px": 1.5, "box_comp_px": 40, "chuveiro_folga_px": 3}
+                 "box_larg_px": 1.5, "box_comp_px": 40, "box_raio_px": 80, "chuveiro_folga_px": 3}
 _ESQ = {}                 # onde a final aceita o perfil (bool, px da final), para o 12K
 # os tapetes das suítes (usuário: "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO O RETOQUE EM VOLTA DO
 # CONTORNO E NOS TAPETES"): o tapete do PDF (o índice do desenho) refeito inteiro com o da biblioteca no tom do de hoje
@@ -132,11 +143,11 @@ GELADEIRAS_TB = {"png": "02-terreo/cozinha/geladeira-inox.png", "pdf": [63242, 6
 # os recamiers de antes passam do retângulo do PDF (o encosto e o braço): o de antes é o branco pouco colorido do bouclé
 # (`velho_croma`, `velho_lum`) até `busca_px` do retângulo, ligado a ele, mais `folga_px` (a sombra); o piso por baixo,
 # em cada linha (as tábuas são deitadas), em espelho a partir das duas beiradas do buraco
-# (usuário: "CUIDADO COM A PROPORÇÃO DO RECAMIER E MESA LATERAL") o PNG é mais comprido (3,05:1) que o retângulo do PDF
-# (0,70 x 1,50 m, 2,14:1): em vez de alargá-lo 42% (os gomos e o rolo deformados), saem 5 gomos inteiros do meio do
-# assento (`encurtar`: as colunas entre duas costuras do PNG), e ele fica 2,21:1, ajustado ao PDF em 3%; a cabeceira, o
-# rolo e a ponta curva ficam como estão; as mesinhas, no tamanho do PDF
-RECAMIERS_TB = {"png": "03-primeiro-pavimento/suite-master/recamier-veludo-champanhe.png", "encurtar": (1018, 1681),
+# (usuário: "CUIDADO COM A PROPORÇÃO DO RECAMIER E MESA LATERAL"; "PODEMOS USAR OUTRO MODELO DE RECAMIER QUE TENHA AS
+# MESMAS DIMENSÕES DO ORIGINAL?"; "R11") o recamier gerado na medida do original (0,70 x 1,50 m, 2,16:1 contra os 2,14:1
+# do PDF): entra no retângulo do PDF sem deformar; as mesinhas, no tamanho do PDF (`encurtar`, que tirava gomos do meio
+# de um PNG mais comprido, fica para outros casos)
+RECAMIERS_TB = {"png": "03-primeiro-pavimento/suite-master/recamier-veludo-champanhe.png", "encurtar": None,
                 "pdf": [(63598, "esq"), (63651, "dir")], "mesas": [78368, 78353], "folga_px": 8, "busca_px": 14,
                 "velho_croma": 45, "velho_lum": 105}
 BANCO_CLOSET_TB = {"png": "03-primeiro-pavimento/closet-master/banco-estofado-capitone.png",
@@ -358,8 +369,15 @@ def _tracos_esquadrias(Q, q=ESQUADRIAS_TB):
             continue
         pts = np.concatenate([np.asarray(c) for c in cs])
         w, h = pts.max(0) - pts.min(0)
-        if d.get("layer") == "ARQ_LOUÇAS E METAIS" and not (min(w, h) <= q["box_larg_px"] and max(w, h) >= q["box_comp_px"]):
-            continue
+        if d.get("layer") == "ARQ_LOUÇAS E METAIS":
+            if not (min(w, h) <= q["box_larg_px"] and max(w, h) >= q["box_comp_px"]):
+                continue
+            # só os vidros dos boxes: perto de um chuveiro (os traços longos das camas e dos recamiers, na mesma camada,
+            # ficavam pretos)
+            cx, cy = (pts.min(0) + pts.max(0)) / 2
+            if not any(np.hypot(cx - (c["placa_px"][0] + c["placa_px"][2]) / 2, cy - (c["placa_px"][1] + c["placa_px"][3]) / 2)
+                       <= q["box_raio_px"] for c in CHUVEIROS_TB):
+                continue
         yield cs
 
 
@@ -668,7 +686,8 @@ def pecas_higgsfield(Q, out, antes, par, reg):
     out = piso_espelho(out, buraco)
     for i, lado in q["pdf"]:
         # o PNG: a cabeceira à esquerda e o encosto em cima; girado, a cabeceira em cima e o encosto à direita
-        it = {"tipo": "png", "png": q["png"], "encurtar": list(q["encurtar"]), "rot": -1, "espelho": lado == "esq",
+        it = {"tipo": "png", "png": q["png"], "encurtar": list(q["encurtar"]) if q["encurtar"] else None, "rot": -1,
+              "espelho": lado == "esq",
               "c": list(caixa_pdf(Q, i)), "sombra": "movel"}
         out = pousar_peca(out, it, BT.SOMBRAS["movel"], par)
         reg["pecas"].append(it)
@@ -735,6 +754,8 @@ def jardim_inverno(out, q=JARDIM_TB):
     sub = cv2.inpaint(np.ascontiguousarray(out[Y0:Y1, X0:X1]), M[Y0:Y1, X0:X1] * 255, 3, cv2.INPAINT_TELEA)
     out[Y0:Y1, X0:X1][M[Y0:Y1, X0:X1] > 0] = sub[M[Y0:Y1, X0:X1] > 0]
     out = x_jardim(out, q=q)
+    _ZONA_FORA["jardim"] = cv2.dilate((_alfa_rotulo_nome("JARDIM DE INVERNO", out.shape[:2]) > 0.03).astype(np.uint8),
+                                      np.ones((3, 3), np.uint8)) > 0
     # as folhas de baixo: o perfil de uma folha (a coluna do meio dela) nos vãos, e o fio preto da junta
     fy0, fy1 = q["folhas_y"]
     col = out[fy0:fy1, q["perfil_x"]].copy()
@@ -838,6 +859,7 @@ def pecas_12k(final, out, s, X0, Ya3):
         ok = cv2.imread(str(REG_MASC))[..., 2] > 127
         if ok.any():
             out = esquadrias_12k(out, s, X0, Ya3, ok)
+    out = x_jardim(out, s, X0, Ya3)                    # o X do jardim de inverno, nítido na escala do 12K
     return out
 
 

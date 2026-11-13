@@ -39,6 +39,138 @@
   {
    "tipo": "chuveiro_tb",
    "nome": "BH motorista"
+  },
+  {
+   "tipo": "png",
+   "png": "02-terreo/cozinha/geladeira-inox.png",
+   "rot": -1,
+   "c": [
+    1770.2152354285731,
+    1410.8026906738849,
+    1817.9824518857438,
+    1458.5699071310555
+   ],
+   "sombra": "movel"
+  },
+  {
+   "tipo": "png",
+   "png": "02-terreo/cozinha/geladeira-inox.png",
+   "rot": -1,
+   "c": [
+    1770.2152354285731,
+    1460.1075377924535,
+    1817.9824518857438,
+    1507.8747542496242
+   ],
+   "sombra": "movel"
+  },
+  {
+   "tipo": "png",
+   "png": "02-terreo/cozinha/geladeira-inox.png",
+   "rot": -1,
+   "c": [
+    1786.1605682388185,
+    1513.8605858519675,
+    1821.9859484405874,
+    1552.671489399805
+   ],
+   "sombra": "movel"
+  },
+  {
+   "tipo": "png",
+   "png": "03-primeiro-pavimento/closet-master/banco-estofado-capitone.png",
+   "c": [
+    1340.0,
+    624.0,
+    1451.0,
+    670.0
+   ],
+   "sombra": "movel"
+  },
+  {
+   "tipo": "png",
+   "png": "03-primeiro-pavimento/suite-master/recamier-veludo-champanhe.png",
+   "encurtar": null,
+   "rot": -1,
+   "espelho": true,
+   "c": [
+    1041.4274135407363,
+    409.4608988249278,
+    1083.223711870206,
+    499.02454217600496
+   ],
+   "sombra": "movel"
+  },
+  {
+   "tipo": "png",
+   "png": "03-primeiro-pavimento/suite-master/recamier-veludo-champanhe.png",
+   "encurtar": null,
+   "rot": -1,
+   "espelho": false,
+   "c": [
+    1107.889506130894,
+    409.4608988249278,
+    1149.685868742582,
+    499.02454217600496
+   ],
+   "sombra": "movel"
+  },
+  {
+   "tipo": "recorte",
+   "c": [
+    1017,
+    439,
+    1173,
+    479
+   ]
+  },
+  {
+   "tipo": "cortina",
+   "o": "h",
+   "v": "esquerda",
+   "ex": 342.9537122586427,
+   "t0": 1562.5,
+   "t1": 1821.5
+  },
+  {
+   "tipo": "cortina",
+   "o": "h",
+   "v": "esquerda",
+   "ex": 342.9464162268673,
+   "t0": 1941.5,
+   "t1": 2239.5
+  },
+  {
+   "tipo": "cortina",
+   "o": "h",
+   "v": "esquerda",
+   "ex": 342.9657008923531,
+   "t0": 2249.5,
+   "t1": 2448.5
+  },
+  {
+   "tipo": "cortina",
+   "o": "h",
+   "v": "esquerda",
+   "ex": 342.9595940816159,
+   "t0": 2460.5,
+   "t1": 2537.5
+  },
+  {
+   "tipo": "cortina",
+   "o": "v",
+   "v": "direita",
+   "ex": 2634.6260671492378,
+   "t0": 621.5,
+   "t1": 832.5
+  },
+  {
+   "tipo": "cortina",
+   "o": "v",
+   "v": "esquerda",
+   "ex": 977.2072275955165,
+   "t0": 388.5,
+   "t1": 763.5
   }
  ]
 }
