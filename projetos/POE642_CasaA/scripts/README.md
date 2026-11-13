@@ -2676,6 +2676,11 @@ a grama no tom do gramado do lote, poucas plantas menores, os rótulos brancos d
 claro; a floreira junto à adega com a terra e 4 arbustos iguais); `gourmet` (as divisões dos armários da bancada de trás
 fora, "Geral: Não precisa representar os armários inferiores ou superiores."; a grelha da Casa A no módulo do meio; as 2
 geladeiras inox G2 alinhadas e encostadas na parede; 6 banquetas B na face de baixo da ilha, ~40% sob o tampo).
+As cortinas ("Trocar as cortinas pelo modelo padrão que escolhemos e siga a orientação do post it"): `cortinas`, a C4
+da Casa B (`regras_terreo_casab_1311.cortina_desenho`) nos trechos do PDF (`final3840_casac.trechos_cortina_tc`), cada
+um até a ponta da parede (na linha do lado de dentro ou do lado do vidro, até 110 px), os painéis da mesma janela unidos
+quando não há parede entre eles; onde a parede segue na linha, 0,15 m além do vão, a cortina recuada para dentro o que
+precisa para não pisar na parede (a janela de baixo do estar, a do post-it); os panos de antes saem só no vão.
 
 ### Térreo da Casa C, a biblioteca, 1ª leva (13/11): `biblioteca_terreo_casac_1311.py`
 
