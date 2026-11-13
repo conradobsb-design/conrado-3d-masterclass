@@ -287,7 +287,12 @@ SALA_INTIMA_TB = {"tapete": 70337, "sofa": (77730, 77731, 77732, 77733, 77734, 7
 JANTAR_TB = {"mesa": 63685, "larg": 30.0, "folga_px": 7,
              "cadeiras": [(62447, 0.0), (62496, 0.0), (62545, 0.0), (62594, 0.0), (31098, 180.0), (31147, 180.0),
                           (31196, 180.0), (31245, 180.0), (62643, 90.0), (31294, -90.0)]}
-ESPREG_TB = {"png": "deck-piscina/espreguicadeira-a", "pdf": [62435, 62441], "giro": -90.0}
+# (13/11, "Gostei da E4") na prainha, dentro d'água, a espreguiçadeira de resina gerada no Higgsfield (E4: polietileno
+# areia/greige, o encosto em placa reta; recortada em `02-terreo/deck-piscina/espreguicadeira-resina.png`, o encosto em
+# cima como a A) no lugar da A de madeira: no comprimento do retângulo do PDF, a largura pela proporção do PNG (sem
+# deformar), no meio dele, o encosto à direita
+ESPREG_TB = {"png": "deck-piscina/espreguicadeira-resina", "pdf": [62435, 62441], "giro": -90.0, "sem_deformar": True,
+             "sombra": "baixa"}
 BANQUETAS_TB = {"png": "area-gourmet/banqueta-b", "larg": 25.0, "borda_y": 1319.3,
                 "xs": [1321.5, 1370.0, 1420.0, 1470.0, 1519.0], "velhas_px": (17, 1295)}
 ANTES_DEPOIS = {"letras_escadas":(590, 600, 1180, 960), "shafts": (1540, 720, 1615, 1300),
@@ -1136,13 +1141,49 @@ def jantar(Q, out, par, reg, q=JANTAR_TB):
     return out
 
 
+def _passo_grade(img, x0, y0, x1, y1, lmin=5, lmax=20):
+    """O passo (px, fracionário) da grade dos azulejos na vertical: o pico da autocorrelação da luz das linhas."""
+    g = img[y0:y1, x0:x1].astype(np.float32).mean(axis=2).mean(axis=1)
+    g = g - np.convolve(g, np.ones(7) / 7, mode="same")
+    g = g[3:-3]
+    ac = np.array([np.dot(g[:-k], g[k:]) / (len(g) - k) for k in range(lmin, min(lmax, len(g) - 4) + 1)])
+    i = int(np.argmax(ac))
+    if 0 < i < len(ac) - 1:                              # o pico com a parábola nos vizinhos
+        d = 0.5 * (ac[i - 1] - ac[i + 1]) / (ac[i - 1] - 2 * ac[i] + ac[i + 1])
+    else:
+        d = 0.0
+    return lmin + i + d
+
+
 def espreguicadeiras_prainha(Q, out, par, reg, q=ESPREG_TB):
     for i in q["pdf"]:
         x0, y0, x1, y1 = caixa_pdf(Q, i)
-        it = item_bib("BT", q["png"], (x0 + x1) / 2, (y0 + y1) / 2, y1 - y0, x1 - x0, q["giro"], None, None)
+        larg = y1 - y0
+        if q.get("sem_deformar"):                         # o comprimento do PDF; a largura pela proporção do PNG
+            P = BT.ler_png(q["png"])
+            larg = (x1 - x0) * P.shape[1] / P.shape[0]
+            # a peça é mais estreita que o retângulo do PDF: a água volta por baixo dele (o que sobra nas bordas),
+            # cada linha copiada da água logo acima (metade de cima) ou logo abaixo (de baixo) no passo da grade dos
+            # azulejos (`passo`, pela autocorrelação na vertical), as juntas contínuas
+            X0, Y0, X1, Y1 = int(np.floor(x0)) - 2, int(np.floor(y0)) - 2, int(np.ceil(x1)) + 2, int(np.ceil(y1)) + 2
+            p = _passo_grade(out, X0, Y0 - 34, X1, Y0 - 4)
+            novo = out.copy()
+            meio = (Y0 + Y1) / 2
+            for y in range(Y0, Y1):
+                if y < meio:
+                    src = y - int(np.ceil((y - Y0 + 1) / p)) * p
+                else:
+                    src = y + int(np.ceil((Y1 - y) / p)) * p
+                novo[y, X0:X1] = out[int(round(src)), X0:X1]
+            m = np.zeros(out.shape[:2], bool)
+            m[Y0:Y1, X0:X1] = True
+            m &= ~par
+            out[m] = novo[m]
+        it = item_bib("BT", q["png"], (x0 + x1) / 2, (y0 + y1) / 2, larg, x1 - x0, q["giro"],
+                      q.get("sombra"), None)
         out = pousar_bib(out, it, par)
         reg["pecas"].append(it)
-    print("    prainha: as 2 espreguiçadeiras A, a cabeceira à direita")
+    print(f"    prainha: as 2 espreguiçadeiras ({Path(q['png']).stem}), o encosto à direita")
     return out
 
 

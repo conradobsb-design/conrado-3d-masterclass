@@ -2614,6 +2614,14 @@ O RETOQUE EM VOLTA DO CONTORNO E NOS TAPETES" (as camas de 12/11 ficam; os tapet
 novas geradas no Higgsfield (a biblioteca não tem): geladeira, recamier da suíte master, banco estofado do closet master e
 cortina, 4 variantes de cada em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_pecas_higgsfield.jpg`, para a escolha.
 
+### Térreo da Casa B: a espreguiçadeira de resina na prainha (13/11, "Gostei da E4")
+
+A E4 do Higgsfield (polietileno areia/greige, o encosto em placa reta) recortada em `biblioteca-objetos/02-terreo/
+deck-piscina/espreguicadeira-resina.png` e posta nas 2 da prainha pelo `regras_terreo_casab_1311.ESPREG_TB`
+(`sem_deformar`: o comprimento do PDF, a largura pela proporção; a água por baixo das bordas que sobram, copiada no
+passo da grade dos azulejos, `_passo_grade`; a sombra baixa). No lugar da A de madeira ("nada de madeira dentro
+d'água").
+
 ### Subsolo da Casa C, a biblioteca (13/11): `biblioteca_subsolo_casac_1311.py`
 
 A proposta (`POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_proposta_biblioteca_1.jpg`) aprovada com "Ok"; os PDFs

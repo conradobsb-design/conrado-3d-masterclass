@@ -827,25 +827,25 @@
   {
    "tipo": "bib",
    "leitor": "BT",
-   "png": "deck-piscina/espreguicadeira-a",
+   "png": "deck-piscina/espreguicadeira-resina",
    "cx": 987.3757424361753,
    "cy": 1170.7723733367166,
-   "larg": 44.107115512410246,
+   "larg": 38.8859808613331,
    "alt": 115.79380967596967,
    "giro": -90.0,
-   "sombra": null,
+   "sombra": "baixa",
    "extra": null
   },
   {
    "tipo": "bib",
    "leitor": "BT",
-   "png": "deck-piscina/espreguicadeira-a",
+   "png": "deck-piscina/espreguicadeira-resina",
    "cx": 987.3757424361753,
    "cy": 1247.817890345459,
-   "larg": 44.10698694797361,
+   "larg": 38.8859808613331,
    "alt": 115.79380967596967,
    "giro": -90.0,
-   "sombra": null,
+   "sombra": "baixa",
    "extra": null
   },
   {

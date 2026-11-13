@@ -179,8 +179,8 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 - [ ] **Sauna:** bancos retos de travertino; BH da sauna com a cuba esculpida e a bacia Carrara. [B Subsolo]
 - [ ] **Espreguiçadeiras.**
   - No deck: de madeira.
-  - Na prainha, dentro d'água: **nunca madeira**, e sim resina/polietileno ou concreto (pendente na Casa B: gerar as
-    de resina no Higgsfield).
+  - Na prainha, dentro d'água: **nunca madeira**, e sim resina/polietileno ou concreto: a de resina E4 da biblioteca
+    (`02-terreo/deck-piscina/espreguicadeira-resina.png`, escolhida na Casa B), no comprimento do PDF, sem deformar.
   - No retângulo do PDF, com a cabeceira na parte menor do PDF.
   - [A; B Térreo]
 - [ ] **Gramado da Casa A em todos os Térreos:** 80% grama, poucas árvores nos cantos, arbustos baixos, até o muro.
