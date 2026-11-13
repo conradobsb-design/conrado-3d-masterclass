@@ -38,6 +38,8 @@ import final3840_casab as F                      # noqa: E402
 import final3840_casac as C                      # noqa: E402
 import biblioteca_subsolo_casaa_1211 as BS       # noqa: E402
 import regras_terreo_casab_1311 as RT            # noqa: E402
+import biblioteca_terreo_casaa_1211 as BT        # noqa: E402
+import biblioteca_1pav_casaa_1211 as B1          # noqa: E402
 import pedidos_subsolo_casac_1311 as PS          # noqa: E402
 
 CASA_C = AQUI.parents[1] / "POE642_CasaC"
@@ -45,6 +47,7 @@ R = CASA_C / "renders"
 FINAL = R / "POE642_CasaC_PH_Terreo_final_rotulos.png"
 RAIZ_GIT = AQUI.parents[2]
 ANTES_COMMIT = "c9d7643"
+PX_M = B1.PX_M
 
 # as claraboias (px: o retângulo de fora do PDF) e a cor do tracejado de antes (preto sobre a pedra, branco sobre a
 # madeira); o novo: cinza médio, fino, tracejado (traço e vão, px)
@@ -110,8 +113,18 @@ GOURMET = {"linhas_h": [(952, 1241, 1509), (970, 1283, 1369)], "linhas_v": [(128
                           "y0": 933.0, "alt": 47.7, "limpa_px": (1516, 933, 1626, 990)},
            "banquetas": {"png": "area-gourmet/banqueta-b", "larg": 25.0, "borda_y": 1155.9, "x": (1231.4, 1562.8),
                          "n": 6}}
+# "Trocar as cortinas pelo modelo padrão que escolhemos" (a C4 da Casa B: o linho em ondas com o trilho grafite do lado
+# do vidro, `regras_terreo_casab_1311.cortina_desenho`) "e siga a orientação do post it" ("Pode deixar a cortina
+# ultrapassar um pouco as laterais da janela."): os trechos do PDF (`final3840_casac.trechos_cortina_tc`: os da ARQ_LOUÇAS
+# E METAIS e os do estar, na ARQ_MOBILIÁRIO) até a ponta da parede de cada lado do vão (até `busca_px`; mais longe, o
+# trecho fica no tamanho do PDF), os da mesma janela unidos; onde a parede segue na mesma linha, a cortina passa
+# `alem_m` dela, do lado de dentro (a cortina toda chega para dentro do ambiente o que precisa para não pisar na parede);
+# onde a parede vira (um canto), ela para no vão
+CORTINAS = {"busca_px": 110, "junta_px": 120, "alem_m": 0.15, "dentro_px": 3, "limpa": (4.0, 5.5), "face_px": 18}
 ANTES_DEPOIS = {"claraboias_master": (620, 230, 1240, 1000), "armarios": (1040, 330, 2070, 560),
-                "pisante": (420, 1500, 720, 1860), "jardins": (1100, 800, 2480, 1200), "gourmet": (1210, 900, 1660, 1200), "varandas": (1060, 215, 2200, 300),
+                "pisante": (420, 1500, 720, 1860), "jardins": (1100, 800, 2480, 1200), "gourmet": (1210, 900, 1660, 1200),
+                "cortinas_estar": (1850, 1560, 2160, 1700), "cortinas_master": (740, 540, 860, 860),
+                "cortinas_quartos": (1150, 300, 2200, 380), "cortinas_hall": (2330, 1420, 2730, 1680), "varandas": (1060, 215, 2200, 300),
                 "escadas": (500, 880, 1060, 1080)}
 
 
@@ -403,6 +416,117 @@ def armarios(Q, out, q=ARMARIOS):
 
 
 
+
+def cortinas(Q, out, reg=None, q=CORTINAS):
+    import ajustes_casab as AB
+    qc = RT.CORTINAS_TB
+    with contextlib.redirect_stdout(io.StringIO()):
+        with F.em_quadro(Q):
+            trechos = C.trechos_cortina_tc(Q.chave, AB.trechos_cortina_b)
+    par = BS.quieto(lambda: Q.preencher(lambda d: d.get("layer") == "ARQ_PAREDE" and d.get("fill")
+                                          and max(d["fill"]) < 0.6, ss=2) > 0.3)
+    alem = q["alem_m"] * Q.px_m
+    # 1. cada trecho até a ponta da parede de cada lado (do lado de dentro, a `dentro_px` do eixo)
+    res = []
+    for o, vidro, ex, e0, e1 in trechos:
+        pq = par if o == "v" else par.T
+        v = vidro if o == "v" else {"cima": "esquerda", "baixo": "direita"}[vidro]
+        # a ponta da parede: na linha do lado de dentro (os batentes, um canto) ou na do lado do vidro (a parede que
+        # segue na mesma linha da janela), a que vier primeiro
+        X = int(round(ex))
+        sv = -1 if v == "esquerda" else 1                   # o lado do vidro
+        cols = [X - sv * q["dentro_px"]] + [X + sv * k for k in range(2, 8)]
+
+        def ate(y, passo):
+            for yy in range(int(round(y)), int(round(y)) + passo * q["busca_px"], passo):
+                if pq[yy, cols].any():
+                    return yy - passo * 0.5, True
+            return None, False
+        a0, ok0 = ate(e0, -1)
+        a1, ok1 = ate(e1, 1)
+        res.append([o, v, float(ex), a0 if ok0 else e0, a1 if ok1 else e1, ok0, ok1])
+    # os trechos da mesma janela (a mesma linha) que se sobrepõem depois de levados às paredes: unidos
+    unidos = []
+    for r in sorted(res, key=lambda t: (t[0], t[1], t[3])):
+        def sem_parede(u, r):                           # entre os dois painéis da mesma linha, nenhuma parede
+            pq = par if r[0] == "v" else par.T
+            X = int(round(r[2]))
+            a, b = int(np.floor(min(u[4], r[3]))), int(np.ceil(max(u[4], r[3])))
+            return b - a <= q["junta_px"] and not pq[a:b + 1, X - 4:X + 5].any()
+        u = next((u for u in unidos if u[:2] == r[:2] and abs(u[2] - r[2]) < 3 and r[4] > u[3] - 2
+                  and (r[3] < u[4] + 2 or sem_parede(u, r))), None)
+        if u:
+            if r[3] < u[3]:
+                u[3], u[5] = r[3], r[5]
+            if r[4] > u[4]:
+                u[4], u[6] = r[4], r[6]
+        else:
+            unidos.append(list(r))
+    # 2. a passagem além do vão e o recuo para dentro
+    feitos, alem_n = 0, 0
+    for o, v, ex, t0, t1, ok0, ok1 in unidos:
+        pq = par if o == "v" else par.T
+        im = out if o == "v" else out.transpose(1, 0, 2)
+        prof = qc["prof_px"]
+        c0 = ex - qc["vidro_px"] if v == "esquerda" else ex + qc["vidro_px"] - prof
+        X = int(round(ex))
+        desloc = 0.0
+        pontas = []
+        for t, ok, passo in ((t0, ok0, -1), (t1, ok1, 1)):
+            if not ok:
+                pontas.append(t)
+                continue
+            tt = int(round(t + passo * 3))
+            col = pq[tt, X - q["face_px"]:X + q["face_px"] + 1]
+            idx = np.nonzero(col)[0]
+            if not len(idx):
+                pontas.append(t)
+                continue
+            face = (X - q["face_px"] + idx.max() + 1) if v == "esquerda" else (X - q["face_px"] + idx.min())
+            d_ = max(0.0, face - c0) if v == "esquerda" else min(0.0, face - (c0 + prof))
+            desloc = max(desloc, d_, key=abs) if abs(d_) <= 6 else desloc
+            pontas.append((t, passo, face))
+        a0_, a1_ = c0 + desloc, c0 + desloc + prof
+        fim = []
+        for p in pontas:
+            if not isinstance(p, tuple):
+                fim.append(p)
+                continue
+            t, passo, face = p
+            # a faixa da cortina além do vão: livre da parede (a parede segue na linha) ou não (um canto)
+            ys = np.arange(int(round(t)), int(round(t + passo * alem)), passo)
+            xs = np.arange(int(np.floor(a0_)), int(np.ceil(a1_)))
+            livre = not pq[np.ix_(ys, xs)].any() if len(ys) else False
+            if livre:
+                fim.append(t + passo * alem)
+                alem_n += 1
+            else:
+                fim.append(t)
+        T0, T1 = fim
+        # o pano e o trilho de antes saem (só no vão): o piso logo do lado de dentro, em espelho
+        b0 = ex - q["limpa"][0] if v == "esquerda" else ex - q["limpa"][1]
+        b1 = ex + q["limpa"][1] if v == "esquerda" else ex + q["limpa"][0]
+        A0, A1 = int(np.floor(b0)), int(np.ceil(b1))
+        S0, S1 = int(np.floor(t0)), int(np.ceil(t1))
+        n = A1 - A0
+        livre_ = ~pq[S0:S1, A0:A1]
+        if v == "esquerda":
+            fonte = im[S0:S1, A1:A1 + n][:, ::-1].copy()
+        else:
+            fonte = im[S0:S1, A0 - n:A0][:, ::-1].copy()
+        alvo = im[S0:S1, A0:A1]
+        alvo[livre_] = fonte[livre_]
+        it = {"tipo": "cortina", "o": o, "v": v, "ex": ex + desloc, "t0": T0, "t1": T1}
+        P, cx, cy, wt, ht = RT.cortina_desenho(it, qc)
+        o_ = BT.pousar(out.astype(np.float32), P, cx, cy, wt, ht, 0.0, BT.SOMBRAS["movel"][1:], PX_M)
+        out = np.clip(np.round(o_), 0, 255).astype(np.uint8)
+        if reg is not None:
+            reg.append(it)
+        feitos += 1
+    print(f"    cortinas: {feitos} trilhos com a cortina de linho em ondas (a C4, o trilho grafite do lado do vidro); "
+          f"{alem_n} pontas passam {q['alem_m']:.2f} m além do vão, do lado de dentro")
+    return out
+
 # ----------------------------------------------------------------------------------------------------------------------
 # A 2ª leva de post-its
 def pisante(out, q=PISANTE):
@@ -586,6 +710,7 @@ def aplicar(antes):
     out = claraboias(Q, out)
     out = armarios(Q, out)
     out = portas(Q, out)
+    out = cortinas(Q, out)
     out = guarda_corpo(out)
     out = escadas(out)
     out = pisante(out)

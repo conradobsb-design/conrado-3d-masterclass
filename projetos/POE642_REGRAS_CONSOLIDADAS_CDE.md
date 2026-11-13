@@ -159,8 +159,10 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 - [ ] **Sem contorno nos mobiliários** ("Tirar o contorno dos mobiliários"): sem o traço do PDF sobre as peças (os
   estofados e as mesas da Casa B; os módulos dos armários da Casa C, o traço laranja vira o creme do armário). [B e C
   Térreo]
-- [ ] **Cortinas de linho em ondas** nos trilhos do PDF, de parede a parede; os trechos que se sobrepõem unidos; o
-  trilho grafite do lado do vidro. [B Térreo]
+- [ ] **Cortinas de linho em ondas** (a C4) nos trilhos do PDF, de parede a parede; os painéis da mesma janela unidos
+  num trilho só; o trilho grafite do lado do vidro. Onde a parede segue na mesma linha da janela, a cortina passa
+  0,15 m além do vão de cada lado, do lado de dentro ("Pode deixar a cortina ultrapassar um pouco as laterais da
+  janela."); num canto, para no vão. [B e C Térreo]
 
 ## 7. Salas e jantar
 
