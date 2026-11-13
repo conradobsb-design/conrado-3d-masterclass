@@ -133,6 +133,8 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   inferiores ou superiores."): o tampo das bancadas liso, sem as divisões dos módulos; ficam as bordas, as cubas, o
   cooktop e a churrasqueira. [C Térreo]
 - [ ] **Geladeiras alinhadas** entre si e encostadas na parede, na mesma peça (G2). [C Térreo]
+- [ ] **Painéis pivotantes** onde o cliente marca: painéis de madeira clara fechados na linha do vão, com o ponto do
+  pivô (o desenho das folhas das portas). [C Térreo, gourmet]
 
 ## 6. Quartos, suítes e closets
 

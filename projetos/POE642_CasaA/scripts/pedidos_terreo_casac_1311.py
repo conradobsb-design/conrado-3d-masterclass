@@ -121,10 +121,20 @@ GOURMET = {"linhas_h": [(952, 1241, 1509), (970, 1283, 1369)], "linhas_v": [(128
 # `alem_m` dela, do lado de dentro (a cortina toda chega para dentro do ambiente o que precisa para não pisar na parede);
 # onde a parede vira (um canto), ela para no vão
 CORTINAS = {"busca_px": 110, "junta_px": 120, "alem_m": 0.15, "dentro_px": 3, "limpa": (4.0, 5.5), "face_px": 18}
+# ---- 3ª leva (13/11, "Segue mais orientações do térreo da casa C")
+# "Aqui tem que representar dois painéis pivotantes" (o vão entre a ponta da parede do jardim 1 e o fim da bancada da
+# gourmet, do lado da varanda gourmet): dois painéis de madeira clara (o desenho das folhas das portas: o veio no
+# comprido, o contorno e a sombra curta), fechados, na linha logo fora da bancada, cada um com o ponto do pivô
+# "Geral: Não precisa representar os armários inferiores ou superiores com essa linha acima da bancada": também na
+# cozinha, a divisão do módulo das cubas (a linha em pé no tampo); a borda da bancada fica
+PIVOTANTES = {"x": (1224.5, 1230.0), "y": (979.0, 1156.0), "junta_px": 1.5, "pivo_frac": 0.18, "pivo_r": 1.3,
+              "pivo_cor": (52, 60, 70), "semente": 1313}
+LINHAS_COZINHA = [("v", 2408, 2412, 257, 291), ("h", 2203, 2409, 289, 291)]
 ANTES_DEPOIS = {"claraboias_master": (620, 230, 1240, 1000), "armarios": (1040, 330, 2070, 560),
                 "pisante": (420, 1500, 720, 1860), "jardins": (1100, 800, 2480, 1200), "gourmet": (1210, 900, 1660, 1200),
                 "cortinas_estar": (1850, 1560, 2160, 1700), "cortinas_master": (740, 540, 860, 860),
-                "cortinas_quartos": (1150, 300, 2200, 380), "cortinas_hall": (2330, 1420, 2730, 1680), "varandas": (1060, 215, 2200, 300),
+                "cortinas_quartos": (1150, 300, 2200, 380), "cortinas_hall": (2330, 1420, 2730, 1680),
+                "pivotantes": (1150, 940, 1330, 1190), "cozinha_bancada": (2160, 245, 2480, 300), "varandas": (1060, 215, 2200, 300),
                 "escadas": (500, 880, 1060, 1080)}
 
 
@@ -703,6 +713,57 @@ def gourmet(Q, out, q=GOURMET):
     print(f"    gourmet: {bq['n']} banquetas B na face de baixo da ilha, viradas para ela, ~40% por baixo do tampo")
     return out
 
+
+# ----------------------------------------------------------------------------------------------------------------------
+# A 3ª leva
+def pivotantes(out, q=PIVOTANTES):
+    import pedidos_terreo_casaa_2910 as PT
+    import um_pav_casaa_1111 as U
+    qf = U.RETOQUES_1111F["folha"]
+    ss = 8
+    rng = np.random.default_rng(q["semente"])
+    x0, x1 = q["x"]
+    ya, yb = q["y"]
+    meio = (ya + yb) / 2
+    for fy0, fy1 in ((ya, meio - q["junta_px"] / 2), (meio + q["junta_px"] / 2, yb)):
+        FX0, FY0 = int(np.floor(x0)) - 3, int(np.floor(fy0)) - 3
+        fw, fh = int(np.ceil(x1)) + 3 - FX0, int(np.ceil(fy1)) + 3 - FY0
+        mk = PT._ret_arred((x0, fy0, x1, fy1), qf["raio_px"], FX0, FY0, fh, fw, ss)
+        al = cv2.resize(mk, (fw, fh), interpolation=cv2.INTER_AREA)
+        sx, sy, sg = qf["sombra_px"]
+        sb = cv2.GaussianBlur(cv2.warpAffine(al, np.float32([[1, 0, sx], [0, 1, sy]]), (fw, fh)), (0, 0), sg)
+        r_ = out[FY0:FY0 + fh, FX0:FX0 + fw].astype(np.float32)
+        r_ *= (1 - qf["sombra"] * sb * (1 - al))[..., None]
+        out[FY0:FY0 + fh, FX0:FX0 + fw] = np.clip(np.round(r_), 0, 255).astype(np.uint8)
+        n_ = cv2.GaussianBlur(rng.normal(0, 1, mk.shape).astype(np.float32), (0, 0), sigmaX=0.6 * ss, sigmaY=6.0 * ss)
+        n_ = 1 + qf["veio"] * n_ / max(float(n_.std()), 1e-6)
+        out = PT._pintar(out, FX0, FY0, fw, fh, ss, mk, np.float32(qf["madeira"])[None, None] * n_[..., None])
+        borda = np.clip(mk - cv2.erode(mk, np.ones((5, 5), np.uint8)), 0, 1) * qf["contorno_alfa"]
+        out = PT._pintar(out, FX0, FY0, fw, fh, ss, borda,
+                         np.float32(qf["contorno"])[None, None] * np.ones_like(borda)[..., None])
+        # o pivô: um ponto escuro a `pivo_frac` do comprimento, a partir da ponta de cima do painel
+        cx, cy = (x0 + x1) / 2, fy0 + q["pivo_frac"] * (fy1 - fy0)
+        Mp = np.zeros((fh * ss, fw * ss), np.uint8)
+        cv2.circle(Mp, (int(round((cx - FX0) * ss)), int(round((cy - FY0) * ss))), int(round(q["pivo_r"] * ss)), 255, -1,
+                   cv2.LINE_AA)
+        Mp = Mp.astype(np.float32) / 255
+        out = PT._pintar(out, FX0, FY0, fw, fh, ss, Mp, np.float32(q["pivo_cor"])[None, None] * np.ones_like(Mp)[..., None])
+    print(f"    gourmet: os 2 painéis pivotantes de madeira clara no vão junto à bancada (y {ya:.0f}-{yb:.0f}), fechados, "
+          "com o ponto do pivô")
+    return out
+
+
+def linhas_cozinha(out, qs=LINHAS_COZINHA):
+    for o, a, b, y0, y1 in qs:
+        if o == "v":
+            w_ = b - a
+            out[y0:y1, a:b] = out[y0:y1, b + 3:b + 3 + w_]
+        else:                                           # a linha deitada: o granito logo acima
+            h_ = y1 - y0
+            out[y0:y1, a:b] = out[y0 - 3 - h_:y0 - 3, a:b]
+    print(f"    cozinha: a divisão do módulo das cubas no tampo sai ({len(qs)} linhas); a borda da bancada fica")
+    return out
+
 # ----------------------------------------------------------------------------------------------------------------------
 def aplicar(antes):
     Q = quadro()
@@ -716,6 +777,8 @@ def aplicar(antes):
     out = pisante(out)
     out = jardins(Q, out)
     out = gourmet(Q, out)
+    out = pivotantes(out)
+    out = linhas_cozinha(out)
     return out
 
 

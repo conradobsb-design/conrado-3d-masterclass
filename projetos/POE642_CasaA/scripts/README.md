@@ -2681,6 +2681,10 @@ da Casa B (`regras_terreo_casab_1311.cortina_desenho`) nos trechos do PDF (`fina
 um até a ponta da parede (na linha do lado de dentro ou do lado do vidro, até 110 px), os painéis da mesma janela unidos
 quando não há parede entre eles; onde a parede segue na linha, 0,15 m além do vão, a cortina recuada para dentro o que
 precisa para não pisar na parede (a janela de baixo do estar, a do post-it); os panos de antes saem só no vão.
+A 3ª leva ("Segue mais orientações do térreo da casa C"): `pivotantes` ("Aqui tem que representar dois painéis
+pivotantes": dois painéis de madeira clara, fechados, na linha logo fora da bancada da gourmet, da ponta da parede do
+jardim 1 ao fim da bancada, cada um com o ponto do pivô) e `linhas_cozinha` ("Geral: Não precisa representar os
+armários inferiores ou superiores com essa linha acima da bancada": a divisão do módulo das cubas da cozinha fora).
 
 ### Térreo da Casa C, a biblioteca, 1ª leva (13/11): `biblioteca_terreo_casac_1311.py`
 
