@@ -39,6 +39,14 @@ Térreo de 12/11), as regras aprovadas na Casa A (o mobiliário vai pela propost
   desenhados em preto onde a final mostra o vidro ou o alumínio neutro; a parede, a madeira das portas de giro, o bronze
   dos brises e os chuveiros não mudam. A primeira tentativa (o traço neutro da ARQ_PAREDE escurecido pela cor) ficou
   irregular: os boxes não pegavam e as linhas escureciam pela metade.
+- **Mobiliário (`MOBILIARIO_TB`, `ABAJURES_TB`, `BALCAO_TB`, `CADEIRAS_TB`, `mobiliario`; as 15 respostas, "A BANCADA
+  DO BH. MOTORISTA É MARROM TABACO", "FALTOU A CADEIRA DE ESCRITORIO NAS ESCRIVANINHAS"):** as peças da Casa A no
+  retângulo do PDF: criados com abajur, a bancada dupla esculpida e as bacias Carrara do banho master, a cuba esculpida
+  e a bacia dos banhos 1 a 3, o lavabo, as bacias marrons e as cubas esculpidas do BH gourmet, só a louça da cuba e a
+  bacia Monte Carlo nos BH serviço e motorista, cooktops de 4 bocas (o resto do de 5 vira bancada, `balcao`), as cubas
+  e os tanques Franke, a grelha; e a cadeira de escritório nas 3 escrivaninhas, 1/3 por baixo da mesa (`cadeiras`).
+- **Rótulos em dobro (corrigido):** o `rotulos_grade` parte dos desvios dos dados do `ANTES_COMMIT` (os do disco já vêm
+  movidos de uma rodada anterior).
 No 12K (`ampliacao_12k_terreo_casaa.montar12k` com `PAV` "Terreo_CasaB", chamado pelo `ampliacao_12k_terreo_casab`):
 `pecas_12k` traz o que mudou na final (`REG_MASC`) da final ampliada sobre a saída do Topaz e, por cima, os chuveiros
 nítidos na escala do 12K e o contorno das esquadrias redesenhado nela (`esquadrias_12k`, onde a final aceitou o perfil:
@@ -172,6 +180,85 @@ JARDIM_TB = {"miolo_px": (2041, 735, 2238, 935), "rotulo_px": (2078, 811, 2194, 
 ROTULOS_GRADE_TB = {"SUÍTE 1": (2135.0, 560.0), "SUÍTE 2": (2416.0, 560.0), "CIRCULAÇÃO": (2135.0, 695.0),
                     "SUÍTE 3": (2416.0, 695.0)}
 _ZONA_FORA = {}           # os px que o 12K não traz da final (o texto dos rótulos novos, que o 12K desenha nítido)
+# O mobiliário decidido (13/11, as 15 respostas, uma a uma; "A BANCADA DO BH. MOTORISTA É MARROM TABACO"; "FALTOU A
+# CADEIRA DE ESCRITORIO NAS ESCRIVANINHAS"): as peças da Casa A no retângulo do PDF de cada uma, com as convenções de
+# lá (`biblioteca_terreo_casaa_1211`, `biblioteca_1pav_casaa_1211`): o giro pela parede (0: a parede em cima, a
+# torneira ou a caixa acoplada para ela; 180: embaixo; 90: à esquerda; -90: à direita), as medidas da Casa A onde o
+# PNG não é o retângulo do PDF (a bacia Carrara 21,1 x 30,7; a Monte Carlo 22,5 x 32,7; as cubas Franke com a
+# torneira além do retângulo, do lado da parede). (leitor, png, cx, cy, larg, alt, giro, sombra, extra); leitor: BT
+# (02-terreo) ou B1 (03-primeiro-pavimento); alt None: na proporção do PNG.
+MOBILIARIO_TB = {
+    # os criados da Casa A no tom da madeira das bancadas, com o abajur visto de cima (o PDF manda: retangulares na
+    # master, na suíte 2 e na 3; redondos na suíte 1)
+    "criados": [("B1", "suite-master/criado-retangular-vista-superior", 1022.45, 743.8, 39.3, 25.8, 180.0, "movel",
+                 "tom_bancada"),
+                ("B1", "suite-master/criado-retangular-vista-superior", 1188.55, 743.8, 39.3, 25.8, 180.0, "movel",
+                 "tom_bancada"),
+                ("B1", "suite-3/criado-redondo", 1962.4, 519.2, 32.7, 32.7, 90.0, "movel", None),
+                ("B1", "suite-3/criado-redondo", 1963.2, 363.45, 32.7, 32.7, 90.0, "movel", None),
+                ("B1", "suite-1/criado-retangular-vista-superior", 2520.45, 440.9, 47.8, 29.9, -90.0, "movel",
+                 "tom_bancada"),
+                ("B1", "suite-1/criado-retangular-vista-superior", 2604.2, 815.85, 41.8, 29.9, 180.0, "movel",
+                 "tom_bancada")],
+    # banho master: a bancada dupla esculpida (as 2 cubas caem nas do PDF) e as bacias Carrara brancas
+    "banho_master": [("B1", "banho-master/bancada-dupla-esculpida-render-v2", 1398.05, 346.55, 131.3, 35.9, 0.0,
+                      "baixa", None),
+                     ("B1", "banho-master/bacia-carrara", 1261.15, 474.95, 21.1, 30.7, 90.0, "baixa", None),
+                     ("B1", "banho-master/bacia-carrara", 1534.95, 474.95, 21.1, 30.7, -90.0, "baixa", None)],
+    # banhos 1, 2 e 3: a cuba esculpida de travertino na bancada inteira (a cuba no lugar da do PDF: ("cuba", c); no
+    # `biblioteca_1pav_casaa_1211.cuba_na_bancada`, c conta da ponta direita do PNG: girado -90, a de baixo; 180, a da
+    # esquerda) e a bacia Carrara branca
+    "banhos": [("B1", "banho-1/cuba-esculpida-travertino", 1848.85, 495.85, 65.7, 35.9, 90.0, "baixa", ("cuba", 32.9)),
+               ("B1", "banho-1/bacia-carrara", 1846.25, 436.1, 21.1, 30.7, 90.0, "baixa", None),
+               ("B1", "banho-2/cuba-esculpida-travertino", 2741.5, 540.55, 143.3, 35.8, -90.0, "baixa",
+                ("cuba", 58.2)),
+               ("B1", "banho-2/bacia-carrara", 2744.1, 439.05, 21.1, 30.7, -90.0, "baixa", None),
+               ("B1", "banho-3/cuba-esculpida-travertino", 2607.15, 913.8, 143.3, 35.8, 180.0, "baixa",
+                ("cuba", 58.2)),
+               ("B1", "banho-3/bacia-carrara", 2708.65, 916.35, 21.1, 30.7, 180.0, "baixa", None)],
+    # lavabo: a cuba esculpida de poros na bancada e a bacia no marrom dos vasos (como o lavabo da Casa A)
+    "lavabo": [("BT", "lavabo/cuba-esculpida-poros-render", 2267.6, 824.7, 57.0, 31.4, 90.0, "baixa", "lavabo"),
+               ("BT", "lavabo/bacia-carrara", 2267.25, 767.45, 21.1, 30.7, 90.0, "baixa", "marrom")],
+    # BH gourmet: as bacias marrons e, no lavatório, a cuba esculpida de travertino em cada bloco do PDF (mais estreita
+    # que o PNG: os lados viram um aro fino e a cuba estreita um pouco, `cuba_estreita`)
+    "bh_gourmet": [("BT", "lavabo/bacia-carrara", 1138.35, 1553.05, 21.1, 30.7, 0.0, "baixa", "marrom"),
+                   ("BT", "lavabo/bacia-carrara", 1514.45, 1553.05, 21.1, 30.7, 0.0, "baixa", "marrom"),
+                   ("B1", "banho-1/cuba-esculpida-travertino", 1294.15, 1625.3, 30.1, 32.0, 180.0, "baixa",
+                    ("estreita", 0.164, 0.845, 0.06)),
+                   ("B1", "banho-1/cuba-esculpida-travertino", 1354.85, 1625.3, 30.1, 32.0, 180.0, "baixa",
+                    ("estreita", 0.164, 0.845, 0.06))],
+    # BH serviço e BH motorista: só a louça da cuba (a bancada marrom tabaco fica) e a bacia Monte Carlo
+    "bh_servico": [("B1", "banho-de-servico/cuba-servico-granito", 1850.05, 1531.8, 23.8, None, 90.0, None, "louca"),
+                   ("BT", "banho-do-motorista/bacia-monte-carlo-sem-valvula", 1847.35, 1588.5, 22.5, 32.7, 90.0,
+                    "baixa", None)],
+    "bh_motorista": [("BT", "banho-do-motorista/cuba-compacta", 2935.6, 1557.4, 24.0, None, 180.0, None, "louca"),
+                     ("BT", "banho-do-motorista/bacia-monte-carlo-sem-valvula", 2878.85, 1560.15, 22.5, 32.7, 180.0,
+                      "baixa", None)],
+    # cozinha: o cooktop de 4 bocas no meio do de 5 (o resto vira bancada, `BALCAO_TB`) e as cubas Franke da pia
+    "cozinha": [("BT", "cozinha/cooktop-quatro-bocas", 1693.65, 1499.05, 31.0, 29.0, 90.0, None, None),
+                ("BT", "area-de-servico/cuba-franke-inox-link", 1672.7, 1650.85, 38.2, 30.3, 180.0, None, None),
+                ("BT", "area-de-servico/cuba-franke-inox-link", 1720.5, 1650.85, 38.2, 30.3, 180.0, None, None)],
+    # gourmet: o cooktop de 4 bocas, a cuba Franke com misturador e a grelha da Casa A no meio da churrasqueira do PDF
+    "gourmet": [("BT", "cozinha/cooktop-quatro-bocas", 1383.6, 1363.3, 31.0, 29.0, 0.0, None, None),
+                ("BT", "area-gourmet/cuba-franke-misturador-unic", 1383.7, 1509.1, 43.0, 27.0, 180.0, None, None),
+                ("BT", "area-gourmet/grelha-churrasqueira", 1501.95, 1508.0, 62.0, 32.0, 0.0, None, None)],
+    # área de serviço: os tanques Franke (a torneira na parede da direita)
+    "tanques": [("BT", "area-de-servico/cuba-franke-inox-link", 2219.1, 1492.95, 37.9, 35.4, -90.0, None, None),
+                ("BT", "area-de-servico/cuba-franke-inox-link", 2219.1, 1532.45, 37.9, 35.4, -90.0, None, None)]}
+# os abajures (centro e diâmetro, px), um em cada criado: 19 nos de ~0,70 m, 17 nos menores (como na Casa A)
+ABAJURES_TB = [(1022.45, 743.8, 19.0), (1188.55, 743.8, 19.0), (1962.4, 519.2, 17.0), (1963.2, 363.45, 17.0),
+               (2520.45, 440.9, 17.0), (2604.2, 815.85, 19.0)]
+# os cooktops de 5 bocas que saem: o retângulo do PDF (com a `folga` do rebaixo claro em volta) vira bancada, cada
+# metade com o granito logo do lado (ao longo da bancada: `eixo`), a emenda do meio e a borda em rampa de `rampa` px:
+# (c, eixo, folga, rampa)
+BALCAO_TB = [((1678.7, 1472.8, 1708.6, 1525.3), "y", 2, 3), ((1357.3, 1348.4, 1409.9, 1378.2), "x", 5, 3)]
+# as cadeiras de escritório (a da Casa A, 34 px de largura) nas 3 escrivaninhas: ~1/3 da cadeira por baixo da mesa, o
+# encosto para fora; a de antes sai (o piso refeito em espelho, `piso_espelho`) e a mesa volta por cima, com a sombra
+# curta dela na cadeira. lado: onde a cadeira fica em relação à mesa
+CADEIRAS_TB = {"png": "escritorio/cadeira-escritorio", "larg": 34.0, "sob": 1 / 3, "folga_px": 3,
+               "itens": [{"nome": "suíte 1", "cadeira": 62273, "mesa": 71876, "lado": "cima"},
+                         {"nome": "suíte 2", "cadeira": 62240, "mesa": 71855, "lado": "dir"},
+                         {"nome": "suíte master", "cadeira": 63443, "mesa": 71925, "lado": "esq"}]}
 ANTES_DEPOIS = {"letras_escadas": (590, 600, 1180, 960), "shafts": (1540, 720, 1615, 1300),
                 "tapetes_master": (995, 560, 1220, 790), "tapetes_suites": (1930, 330, 2650, 860),
                 "esquadrias_banho_master": (1230, 300, 1560, 420), "esquadrias_jardim_inverno": (1880, 770, 2240, 960),
@@ -179,7 +266,15 @@ ANTES_DEPOIS = {"letras_escadas": (590, 600, 1180, 960), "shafts": (1540, 720, 1
                 "recamiers_suite_master": (995, 380, 1225, 525), "banco_closet": (1320, 600, 1470, 690),
                 "cortinas_fachada": (1550, 325, 2560, 375), "cortinas_master": (955, 380, 1000, 775),
                 "jardim_inverno": (2025, 725, 2250, 955), "rotulos_suites": (2060, 520, 2520, 790),
-                "chuveiros_banhos": (1250, 340, 2810, 900), "chuveiros_servico": (1095, 1520, 2880, 1680)}
+                "chuveiros_banhos": (1250, 340, 2810, 900), "chuveiros_servico": (1095, 1520, 2880, 1680),
+                "mob_banho_master": (1225, 315, 1565, 500), "mob_banho_1": (1815, 410, 1885, 540),
+                "mob_banho_2": (2710, 415, 2775, 620), "mob_banho_3": (2525, 885, 2730, 945),
+                "mob_lavabo": (2240, 745, 2295, 865), "mob_bh_gourmet": (1115, 1525, 1535, 1650),
+                "mob_bh_servico": (1820, 1505, 1880, 1610), "mob_bh_motorista": (2855, 1530, 2960, 1585),
+                "mob_cozinha": (1640, 1455, 1750, 1680), "mob_gourmet": (1340, 1335, 1545, 1535),
+                "mob_tanques": (2190, 1465, 2245, 1560), "mob_criados_master": (990, 715, 1220, 770),
+                "mob_criados_suites": (1935, 335, 2640, 845), "mob_escrivaninha_master": (1145, 375, 1245, 520),
+                "mob_escrivaninha_s1": (2020, 535, 2180, 620), "mob_escrivaninha_s2": (2240, 350, 2315, 525)}
 
 
 def quadro():
@@ -511,14 +606,17 @@ def piso_reguas(Q, out, buraco, sigmas=(4, 8, 16)):
     return out
 
 
-def piso_espelho(out, buraco, larg_max=16, croma_min=40):
+def piso_espelho(out, buraco, larg_max=16, croma_min=40, nao_fonte=None):
     """Cada trecho do `buraco` em cada linha com o piso de madeira da mesma linha, refletido em vaivém dentro da faixa de
     piso logo ao lado (até `larg_max` px de madeira contígua: a cor da madeira, `croma_min`): a metade da esquerda vem
     da esquerda, a da direita, da direita; as tábuas deitadas continuam, sem emenda na beirada, e o reflexo não alcança
-    a janela, a cortina ou os móveis em volta."""
+    a janela, a cortina ou os móveis em volta (`nao_fonte`: os px que não servem de fonte, como a escrivaninha, que
+    também é madeira)."""
     res = out.copy()
     im = out.astype(np.int16)
     madeira = ((im.max(axis=2) - im.min(axis=2)) >= croma_min) & ~buraco
+    if nao_fonte is not None:
+        madeira &= ~nao_fonte
     W = out.shape[1]
     for y in np.unique(np.nonzero(buraco)[0]):
         xs = np.nonzero(buraco[y])[0]
@@ -698,6 +796,158 @@ def pecas_higgsfield(Q, out, antes, par, reg):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# O mobiliário decidido
+def cuba_estreita(P, alvo, miolo, aro):
+    """A cuba esculpida mais estreita que o PNG (`alvo` = larg / alt, menor que a do PNG): os lados lisos viram um aro de
+    `aro` da largura nova e o miolo (a cuba e a torneira, `miolo`: as frações da largura do PNG) estreita o que falta."""
+    h, w = P.shape[:2]
+    W = alvo * h
+    a, b = int(round(w * miolo[0])), int(round(w * miolo[1]))
+    la = max(1, int(round(aro * W)))
+    lm = max(1, int(round(W - 2 * la)))
+    partes = [cv2.resize(P[:, :a], (la, h), interpolation=cv2.INTER_AREA),
+              cv2.resize(P[:, a:b], (lm, h), interpolation=cv2.INTER_AREA),
+              cv2.resize(P[:, b:], (la, h), interpolation=cv2.INTER_AREA)]
+    return np.ascontiguousarray(np.concatenate(partes, axis=1))
+
+
+def preparar_bib(it):
+    """(P, larg, alt) de uma peça da biblioteca do registro ({"leitor", "png", "larg", "alt", "extra"})."""
+    leitor = {"BT": BT, "B1": B1}[it["leitor"]]
+    extra = it.get("extra")
+    extra = tuple(extra) if isinstance(extra, list) else extra
+    wt, ht = it["larg"], it["alt"]
+    estreita = isinstance(extra, tuple) and extra[0] == "estreita"
+    if estreita or (extra == "louca" and leitor is B1):
+        P = leitor.ler_png(it["png"])
+        P = cuba_estreita(P, wt / ht, extra[1:3], extra[3]) if estreita else BT.so_louca(P)
+        if ht is None:
+            ht = wt * P.shape[0] / P.shape[1]
+        return P, float(wt), float(ht)
+    return leitor.preparar(it["png"], wt, ht, extra)
+
+
+def pousar_bib(out, it, par):
+    P, wt, ht = preparar_bib(it)
+    o = BT.pousar(out.astype(np.float32), P, it["cx"], it["cy"], wt, ht, it["giro"], BT.SOMBRAS[it["sombra"]], PX_M,
+                  nao=par)
+    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+
+
+def item_bib(leitor, png, cx, cy, wt, ht, ang, sombra, extra):
+    return {"tipo": "bib", "leitor": leitor, "png": png, "cx": cx, "cy": cy, "larg": wt, "alt": ht, "giro": ang,
+            "sombra": sombra, "extra": list(extra) if isinstance(extra, tuple) else extra}
+
+
+def balcao(out, par, q=BALCAO_TB):
+    """Cada metade do cooktop de 5 bocas que sai com o granito logo do lado, deslocado ao longo da bancada (as linhas
+    dela continuam), a emenda do meio e a borda em rampa; sem costura de tom (com os pontos do granito, ela manchava)."""
+    for c, eixo, folga, rampa in q:
+        X0, Y0 = int(np.floor(c[0])) - folga, int(np.floor(c[1])) - folga
+        X1, Y1 = int(np.ceil(c[2])) + folga, int(np.ceil(c[3])) + folga
+        if eixo == "x":
+            meio = (X0 + X1) / 2
+            d = int(np.ceil(meio + rampa - X0)) + 2
+            A, B = out[Y0:Y1, X0 - d:X1 - d], out[Y0:Y1, X0 + d:X1 + d]
+            t_ = np.clip((np.arange(X0, X1) + 0.5 - (meio - rampa)) / (2 * rampa), 0, 1)[None, :, None]
+        else:
+            meio = (Y0 + Y1) / 2
+            d = int(np.ceil(meio + rampa - Y0)) + 2
+            A, B = out[Y0 - d:Y1 - d, X0:X1], out[Y0 + d:Y1 + d, X0:X1]
+            t_ = np.clip((np.arange(Y0, Y1) + 0.5 - (meio - rampa)) / (2 * rampa), 0, 1)[:, None, None]
+        F = A.astype(np.float32) * (1 - t_) + B.astype(np.float32) * t_
+        h, w = Y1 - Y0, X1 - X0
+        dist = np.minimum.outer(np.minimum(np.arange(h) + 0.5, h - np.arange(h) - 0.5),
+                                np.minimum(np.arange(w) + 0.5, w - np.arange(w) - 0.5))
+        m = np.clip(dist / 2.0, 0, 1)[..., None] * ~par[Y0:Y1, X0:X1, None]
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - m) + F * m), 0, 255).astype(np.uint8)
+    return out
+
+
+def _alfa_peca(P, cx, cy, wt, ht, ang, forma):
+    Pb = P.copy()
+    Pb[..., :3] = 255
+    return BT.pousar(np.zeros(forma + (3,), np.float32), Pb, cx, cy, wt, ht, ang, [], PX_M)[..., 0] / 255
+
+
+def mesa_sobre(out, fonte, a, ca, s=1.0):
+    """A mesa (alfa `a`) de `fonte` por cima, com a sombra curta dela (`BT.SOMBRAS["mesa"]`) só na cadeira (alfa `ca`)."""
+    o = out.astype(np.float32)
+    for sb in BT.SOMBRAS["mesa"]:
+        sh = cv2.GaussianBlur(a, (0, 0), max(0.3, sb["sig"] * PX_M * s))
+        Ms = np.float32([[1, 0, sb["dx"] * PX_M * s], [0, 1, sb["dy"] * PX_M * s]])
+        sh = cv2.warpAffine(sh, Ms, (sh.shape[1], sh.shape[0]), flags=cv2.INTER_LINEAR, borderValue=0)
+        o *= (1 - sb["forca"] * sh * (1 - a) * ca)[..., None]
+    o = o * (1 - a[..., None]) + fonte.astype(np.float32) * a[..., None]
+    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+
+
+def cadeiras(Q, out, par, reg, q=CADEIRAS_TB):
+    feitas = []
+    for c in q["itens"]:
+        it = item_bib("BT", q["png"], 0.0, 0.0, q["larg"], None, 0.0, "movel", None)
+        P, wt, ht = preparar_bib(it)
+        x0, y0, x1, y1 = caixa_pdf(Q, c["cadeira"])
+        mx0, my0, mx1, my1 = caixa_pdf(Q, c["mesa"])
+        d, f = ht, q["sob"]
+        if c["lado"] == "cima":
+            cx, cy, ang = (x0 + x1) / 2, my0 + d * f - d / 2, 0.0
+        elif c["lado"] == "dir":
+            cx, cy, ang = mx1 - d * f + d / 2, (y0 + y1) / 2, -90.0
+        else:
+            cx, cy, ang = mx0 + d * f - d / 2, (y0 + y1) / 2, 90.0
+        it.update(cx=float(cx), cy=float(cy), alt=float(ht), giro=ang)
+        alvo = id(Q.desenhos[c["mesa"]])
+        a = np.clip(Q.preencher(lambda dd: id(dd) == alvo, ss=4, fs=True), 0, 1)
+        mesa = cv2.dilate((a > 0.02).astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+        # a cadeira de antes: o retângulo do PDF dela, com a folga da sombra, fora a mesa e as paredes
+        fo = q["folga_px"]
+        buraco = np.zeros(par.shape, bool)
+        buraco[int(np.floor(y0)) - fo:int(np.ceil(y1)) + fo, int(np.floor(x0)) - fo:int(np.ceil(x1)) + fo] = True
+        buraco &= ~mesa & ~par
+        out = piso_espelho(out, buraco, nao_fonte=mesa)
+        fonte = out.copy()
+        out = pousar_bib(out, it, par)
+        reg["pecas"].append(it)
+        ca = _alfa_peca(P, cx, cy, wt, ht, ang, par.shape)
+        # a mesa de volta por cima, no trecho em que a cadeira (e a sombra dela) a alcança
+        mud = np.abs(out.astype(np.int16) - fonte.astype(np.int16)).max(axis=2) > 0
+        ys, xs = np.nonzero(mud)
+        X0, Y0, X1, Y1 = xs.min() - 4, ys.min() - 4, xs.max() + 5, ys.max() + 5
+        out[Y0:Y1, X0:X1] = mesa_sobre(out[Y0:Y1, X0:X1], fonte[Y0:Y1, X0:X1], a[Y0:Y1, X0:X1], ca[Y0:Y1, X0:X1])
+        cv2.imwrite(str(R / f"POE642_CasaB_PH_Terreo_12K_regras_mesa_{X0}_{Y0}.png"),
+                    np.dstack([np.round(a[Y0:Y1, X0:X1] * 255), np.round(ca[Y0:Y1, X0:X1] * 255),
+                               np.zeros((Y1 - Y0, X1 - X0))]).astype(np.uint8))
+        reg["topo"].append({"tipo": "mesa_topo", "c": [int(X0), int(Y0), int(X1), int(Y1)]})
+        feitas.append(c["nome"])
+    print(f"    cadeiras de escritório: {', '.join(feitas)} (1/3 por baixo da escrivaninha, a de antes saiu)")
+    return out
+
+
+def mobiliario(Q, out, par, reg, q=MOBILIARIO_TB):
+    antes = out.copy()
+    out = balcao(out, par)
+    n = 0
+    for amb, pecas in q.items():
+        for p in pecas:
+            it = item_bib(*p)
+            out = pousar_bib(out, it, par)
+            reg["pecas"].append(it)
+            n += 1
+    for cx, cy, D in ABAJURES_TB:
+        out = B1.abajur(out, cx, cy, D)
+        reg["topo"].append({"tipo": "abajur", "cx": cx, "cy": cy, "d": D})
+    out = cadeiras(Q, out, par, reg)
+    if "ok" in _ESQ:                 # no 12K, o contorno das esquadrias não passa por cima das peças novas
+        mud = np.abs(out.astype(np.int16) - antes.astype(np.int16)).max(axis=2) > 2
+        _ESQ["ok"] &= ~mud
+    print(f"    mobiliário: {n} peças da Casa A ({', '.join(q)}), {len(ABAJURES_TB)} abajures; os cooktops de 5 bocas "
+          "viraram bancada")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # O jardim de inverno e os rótulos das suítes
 def x_jardim(img, s=1.0, ox=0.0, oy=0.0, q=JARDIM_TB):
     """O X tracejado de canto a canto do miolo do jardim, interrompido em volta do rótulo, na escala `s`."""
@@ -782,10 +1032,17 @@ def rotulos_grade(out, q=ROTULOS_GRADE_TB, gravar=True):
         ZB._usar_rotulos_b(Qr)
     forma = out.shape[:2]
     d = json.loads(DADOS.read_text())
+    # (13/11) o desvio de partida é o dos dados do `ANTES_COMMIT` (o da final de partida): os do disco já vêm movidos
+    # de uma rodada anterior, e o rótulo antigo, procurado no lugar novo, ficava na final (os 4 saíram em dobro)
+    rel = DADOS.relative_to(RAIZ_GIT)
+    base = json.loads(subprocess.run(["git", "-C", str(RAIZ_GIT), "show", f"{ANTES_COMMIT}:{rel}"],
+                                     capture_output=True, check=True).stdout)
+    base = {(b["nome"], tuple(np.round(b["pdf"], 3))): b["desvio"] for b in base["rotulos"] if b["nome"] in q}
     novos = []
     for b in d["rotulos"]:
         if b["nome"] not in q:
             continue
+        b["desvio"] = list(base[(b["nome"], tuple(np.round(b["pdf"], 3)))])
         a = Z.alfa_rotulo(Qr, b, forma)
         out = np.ascontiguousarray(AM.tirar(out, [(a, tuple(b["cor"]))], 0.85))
         ys, xs = np.nonzero(a > 0.3)
@@ -823,7 +1080,7 @@ def aplicar(antes, gravar_dados=True):
     Q = quadro()
     out = antes.copy()
     par = BS.quieto(FA.paredes_pdf, Q) > 0.3
-    reg = {"pecas": []}
+    reg = {"pecas": [], "topo": []}
     out = letras(out, gravar=gravar_dados)
     out = shafts(out)
     out = chuveiros(out, par, reg)
@@ -831,6 +1088,7 @@ def aplicar(antes, gravar_dados=True):
     out = tapetes(Q, out)
     out = esquadrias(Q, out)
     out = pecas_higgsfield(Q, out, antes, par, reg)
+    out = mobiliario(Q, out, par, reg)
     out = jardim_inverno(out)
     out = rotulos_grade(out, gravar=gravar_dados)
     return out, reg, par
@@ -844,6 +1102,9 @@ def peca_12k(it):
     if it["tipo"] in ("png", "cortina"):
         P, cx, cy, wt, ht = peca_desenho(it)
         return P, cx, cy, wt, ht, 0.0, []
+    if it["tipo"] == "bib":                          # o mobiliário da Casa A
+        P, wt, ht = preparar_bib(it)
+        return P, it["cx"], it["cy"], wt, ht, it["giro"], []
     if it["tipo"] == "recorte":                      # as mesinhas da suíte master, da final, por cima dos recamiers
         x0, y0, x1, y1 = it["c"]
         P = cv2.imread(str(R / f"POE642_CasaB_PH_Terreo_12K_regras_recorte_{x0}_{y0}.png"),
@@ -854,12 +1115,36 @@ def peca_12k(it):
 
 def pecas_12k(final, out, s, X0, Ya3):
     """No 12K do Térreo da Casa B (`ampliacao_12k_terreo_casaa.montar12k`, antes dos tracejados e dos textos)."""
+    base = out.copy()                                  # a saída do Topaz: as escrivaninhas nítidas, por cima das cadeiras
     out = BB.pecas_12k(final, out, s, X0, Ya3, reg_json=REG_JSON, reg_masc=REG_MASC, peca=peca_12k)
+    out = topo_12k(out, base, s, X0, Ya3)
     if REG_MASC.exists():
         ok = cv2.imread(str(REG_MASC))[..., 2] > 127
         if ok.any():
             out = esquadrias_12k(out, s, X0, Ya3, ok)
     out = x_jardim(out, s, X0, Ya3)                    # o X do jardim de inverno, nítido na escala do 12K
+    return out
+
+
+def topo_12k(out, base, s, X0, Ya3):
+    """Os abajures (desenhados na escala do 12K) e as escrivaninhas por cima das cadeiras novas: a da saída do Topaz,
+    pelo alfa do PDF ampliado, com a sombra curta na cadeira."""
+    if not REG_JSON.exists():
+        return out
+    H, W = out.shape[:2]
+    for it in json.loads(REG_JSON.read_text()).get("topo", []):
+        if it["tipo"] == "abajur":
+            out = B1.abajur(out, it["cx"], it["cy"], it["d"], s, X0, Ya3)
+            continue
+        x0, y0, x1, y1 = it["c"]
+        m = cv2.imread(str(R / f"POE642_CasaB_PH_Terreo_12K_regras_mesa_{x0}_{y0}.png")).astype(np.float32) / 255
+        U0, V0 = max(int(np.floor((x0 - X0) * s)), 0), max(int(np.floor((y0 - Ya3) * s)), 0)
+        U1, V1 = min(int(np.ceil((x1 - X0) * s)), W), min(int(np.ceil((y1 - Ya3) * s)), H)
+        Mw = np.array([[1 / s, 0, U0 / s + X0 - x0], [0, 1 / s, V0 / s + Ya3 - y0]], np.float64)
+        al = cv2.warpAffine(m, Mw, (U1 - U0, V1 - V0), flags=cv2.INTER_LINEAR | cv2.WARP_INVERSE_MAP,
+                            borderValue=0)
+        out[V0:V1, U0:U1] = mesa_sobre(out[V0:V1, U0:U1], base[V0:V1, U0:U1], np.clip(al[..., 0], 0, 1),
+                                       np.clip(al[..., 1], 0, 1), s)
     return out
 
 

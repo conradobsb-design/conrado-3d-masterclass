@@ -2561,6 +2561,33 @@ ampliacao_12k_terreo_casab.py montar12k <Topaz b44e8511> --opcao AB`, a prancha,
 No 12K, o texto dos rótulos movidos e o do JARDIM DE INVERNO ficam fora da zona trazida da final (o 12K os desenha
 nítidos) e o X do jardim é redesenhado na escala dele. As peças recortadas por `pecas_higgsfield_1311.py`.
 
+**O mobiliário decidido (13/11, no mesmo `regras_terreo_casab_1311.py`, 1ª etapa: as trocas no lugar):** as 15
+respostas, uma a uma, com as peças e as convenções da Casa A (`MOBILIARIO_TB`, `mobiliario`), no retângulo do PDF de cada
+peça; o giro pela parede (0: a parede em cima; 180: embaixo; 90: à esquerda; -90: à direita):
+- criados da Casa A no tom da madeira das bancadas, com o abajur visto de cima (`ABAJURES_TB`): retangulares na master, na
+  suíte 2 (em pé, entre as camas) e na 3; redondos na suíte 1, como o PDF;
+- banho master: a bancada dupla esculpida (as 2 cubas caem nas do PDF) e as 2 bacias Carrara brancas;
+- banhos 1, 2 e 3: a cuba esculpida de travertino na bancada inteira, a cuba no lugar da do PDF
+  (`biblioteca_1pav_casaa_1211.cuba_na_bancada`: o c conta da ponta direita do PNG), e a bacia Carrara branca;
+- lavabo: a cuba esculpida de poros e a bacia no marrom dos vasos; BH gourmet: as bacias marrons e, no lavatório, a cuba
+  esculpida de travertino em cada bloco do PDF (mais estreita que o PNG: `cuba_estreita`, os lados viram um aro fino);
+- BH serviço e BH motorista: só a louça da cuba (`BT.so_louca`; "A BANCADA DO BH. MOTORISTA É MARROM TABACO": a bancada
+  fica) e a bacia Monte Carlo;
+- cozinha e gourmet: o cooktop de 4 bocas no meio do de 5, o resto vira bancada (`balcao`: cada metade com o granito do
+  lado, deslocado ao longo da bancada, a emenda e a borda em rampa; a costura de tom do `piso_desloc` manchava os pontos
+  do granito); as cubas Franke da pia, a cuba com misturador e a grelha da Casa A (62 x 32 px) no meio da churrasqueira
+  do PDF; os tanques Franke na área de serviço;
+- "FALTOU A CADEIRA DE ESCRITORIO NAS ESCRIVANINHAS": a cadeira de escritório da Casa A (34 px) nas 3 escrivaninhas (suítes
+  master, 1 e 2), 1/3 por baixo da mesa, o encosto para fora (`CADEIRAS_TB`, `cadeiras`); a de antes sai (o piso em
+  espelho, sem tirar da madeira da mesa) e a mesa volta por cima, com a sombra curta dela só na cadeira (`mesa_sobre`).
+No 12K: as peças nítidas do PNG (`peca_12k`, tipo "bib"); os abajures e as mesas por cima das cadeiras vão em `topo` do
+registro (`topo_12k`): a mesa da saída do Topaz, pelo alfa do PDF ampliado. O contorno das esquadrias no 12K não passa por
+cima das peças novas. Corrigido junto: na final de ca1ed82 os 4 rótulos em grade saíram em dobro (a 2ª rodada lia dos
+dados os desvios já movidos e tirava o rótulo de antes no lugar novo); o desvio de partida agora vem dos dados do
+`ANTES_COMMIT`. Antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_mob_<trecho>_antes_depois.jpg`.
+Para a 2ª etapa (o piso a refazer): a sala íntima (sofá em L, 2 poltronas, mesa lateral e tapete da Casa A), as 10
+cadeiras oliva do jantar, as espreguiçadeiras A da piscina e as banquetas B da gourmet.
+
 **A proposta do mobiliário (13/11):** `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_proposta_biblioteca_{1,2,3}.jpg`
 (17 trechos; as escolhas da Casa A marcadas). O usuário: "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO
 O RETOQUE EM VOLTA DO CONTORNO E NOS TAPETES" (as camas de 12/11 ficam; os tapetes refeitos e o contorno limpo); peças

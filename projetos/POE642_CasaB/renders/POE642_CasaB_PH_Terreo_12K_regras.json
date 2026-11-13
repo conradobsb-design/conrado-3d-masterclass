@@ -171,6 +171,522 @@
    "ex": 977.2072275955165,
    "t0": 388.5,
    "t1": 763.5
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "suite-master/criado-retangular-vista-superior",
+   "cx": 1022.45,
+   "cy": 743.8,
+   "larg": 39.3,
+   "alt": 25.8,
+   "giro": 180.0,
+   "sombra": "movel",
+   "extra": "tom_bancada"
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "suite-master/criado-retangular-vista-superior",
+   "cx": 1188.55,
+   "cy": 743.8,
+   "larg": 39.3,
+   "alt": 25.8,
+   "giro": 180.0,
+   "sombra": "movel",
+   "extra": "tom_bancada"
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "suite-3/criado-redondo",
+   "cx": 1962.4,
+   "cy": 519.2,
+   "larg": 32.7,
+   "alt": 32.7,
+   "giro": 90.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "suite-3/criado-redondo",
+   "cx": 1963.2,
+   "cy": 363.45,
+   "larg": 32.7,
+   "alt": 32.7,
+   "giro": 90.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "suite-1/criado-retangular-vista-superior",
+   "cx": 2520.45,
+   "cy": 440.9,
+   "larg": 47.8,
+   "alt": 29.9,
+   "giro": -90.0,
+   "sombra": "movel",
+   "extra": "tom_bancada"
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "suite-1/criado-retangular-vista-superior",
+   "cx": 2604.2,
+   "cy": 815.85,
+   "larg": 41.8,
+   "alt": 29.9,
+   "giro": 180.0,
+   "sombra": "movel",
+   "extra": "tom_bancada"
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-master/bancada-dupla-esculpida-render-v2",
+   "cx": 1398.05,
+   "cy": 346.55,
+   "larg": 131.3,
+   "alt": 35.9,
+   "giro": 0.0,
+   "sombra": "baixa",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-master/bacia-carrara",
+   "cx": 1261.15,
+   "cy": 474.95,
+   "larg": 21.1,
+   "alt": 30.7,
+   "giro": 90.0,
+   "sombra": "baixa",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-master/bacia-carrara",
+   "cx": 1534.95,
+   "cy": 474.95,
+   "larg": 21.1,
+   "alt": 30.7,
+   "giro": -90.0,
+   "sombra": "baixa",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-1/cuba-esculpida-travertino",
+   "cx": 1848.85,
+   "cy": 495.85,
+   "larg": 65.7,
+   "alt": 35.9,
+   "giro": 90.0,
+   "sombra": "baixa",
+   "extra": [
+    "cuba",
+    32.9
+   ]
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-1/bacia-carrara",
+   "cx": 1846.25,
+   "cy": 436.1,
+   "larg": 21.1,
+   "alt": 30.7,
+   "giro": 90.0,
+   "sombra": "baixa",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-2/cuba-esculpida-travertino",
+   "cx": 2741.5,
+   "cy": 540.55,
+   "larg": 143.3,
+   "alt": 35.8,
+   "giro": -90.0,
+   "sombra": "baixa",
+   "extra": [
+    "cuba",
+    58.2
+   ]
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-2/bacia-carrara",
+   "cx": 2744.1,
+   "cy": 439.05,
+   "larg": 21.1,
+   "alt": 30.7,
+   "giro": -90.0,
+   "sombra": "baixa",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-3/cuba-esculpida-travertino",
+   "cx": 2607.15,
+   "cy": 913.8,
+   "larg": 143.3,
+   "alt": 35.8,
+   "giro": 180.0,
+   "sombra": "baixa",
+   "extra": [
+    "cuba",
+    58.2
+   ]
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-3/bacia-carrara",
+   "cx": 2708.65,
+   "cy": 916.35,
+   "larg": 21.1,
+   "alt": 30.7,
+   "giro": 180.0,
+   "sombra": "baixa",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "lavabo/cuba-esculpida-poros-render",
+   "cx": 2267.6,
+   "cy": 824.7,
+   "larg": 57.0,
+   "alt": 31.4,
+   "giro": 90.0,
+   "sombra": "baixa",
+   "extra": "lavabo"
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "lavabo/bacia-carrara",
+   "cx": 2267.25,
+   "cy": 767.45,
+   "larg": 21.1,
+   "alt": 30.7,
+   "giro": 90.0,
+   "sombra": "baixa",
+   "extra": "marrom"
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "lavabo/bacia-carrara",
+   "cx": 1138.35,
+   "cy": 1553.05,
+   "larg": 21.1,
+   "alt": 30.7,
+   "giro": 0.0,
+   "sombra": "baixa",
+   "extra": "marrom"
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "lavabo/bacia-carrara",
+   "cx": 1514.45,
+   "cy": 1553.05,
+   "larg": 21.1,
+   "alt": 30.7,
+   "giro": 0.0,
+   "sombra": "baixa",
+   "extra": "marrom"
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-1/cuba-esculpida-travertino",
+   "cx": 1294.15,
+   "cy": 1625.3,
+   "larg": 30.1,
+   "alt": 32.0,
+   "giro": 180.0,
+   "sombra": "baixa",
+   "extra": [
+    "estreita",
+    0.164,
+    0.845,
+    0.06
+   ]
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-1/cuba-esculpida-travertino",
+   "cx": 1354.85,
+   "cy": 1625.3,
+   "larg": 30.1,
+   "alt": 32.0,
+   "giro": 180.0,
+   "sombra": "baixa",
+   "extra": [
+    "estreita",
+    0.164,
+    0.845,
+    0.06
+   ]
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "banho-de-servico/cuba-servico-granito",
+   "cx": 1850.05,
+   "cy": 1531.8,
+   "larg": 23.8,
+   "alt": null,
+   "giro": 90.0,
+   "sombra": null,
+   "extra": "louca"
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "banho-do-motorista/bacia-monte-carlo-sem-valvula",
+   "cx": 1847.35,
+   "cy": 1588.5,
+   "larg": 22.5,
+   "alt": 32.7,
+   "giro": 90.0,
+   "sombra": "baixa",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "banho-do-motorista/cuba-compacta",
+   "cx": 2935.6,
+   "cy": 1557.4,
+   "larg": 24.0,
+   "alt": null,
+   "giro": 180.0,
+   "sombra": null,
+   "extra": "louca"
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "banho-do-motorista/bacia-monte-carlo-sem-valvula",
+   "cx": 2878.85,
+   "cy": 1560.15,
+   "larg": 22.5,
+   "alt": 32.7,
+   "giro": 180.0,
+   "sombra": "baixa",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "cozinha/cooktop-quatro-bocas",
+   "cx": 1693.65,
+   "cy": 1499.05,
+   "larg": 31.0,
+   "alt": 29.0,
+   "giro": 90.0,
+   "sombra": null,
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-de-servico/cuba-franke-inox-link",
+   "cx": 1672.7,
+   "cy": 1650.85,
+   "larg": 38.2,
+   "alt": 30.3,
+   "giro": 180.0,
+   "sombra": null,
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-de-servico/cuba-franke-inox-link",
+   "cx": 1720.5,
+   "cy": 1650.85,
+   "larg": 38.2,
+   "alt": 30.3,
+   "giro": 180.0,
+   "sombra": null,
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "cozinha/cooktop-quatro-bocas",
+   "cx": 1383.6,
+   "cy": 1363.3,
+   "larg": 31.0,
+   "alt": 29.0,
+   "giro": 0.0,
+   "sombra": null,
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-gourmet/cuba-franke-misturador-unic",
+   "cx": 1383.7,
+   "cy": 1509.1,
+   "larg": 43.0,
+   "alt": 27.0,
+   "giro": 180.0,
+   "sombra": null,
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-gourmet/grelha-churrasqueira",
+   "cx": 1501.95,
+   "cy": 1508.0,
+   "larg": 62.0,
+   "alt": 32.0,
+   "giro": 0.0,
+   "sombra": null,
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-de-servico/cuba-franke-inox-link",
+   "cx": 2219.1,
+   "cy": 1492.95,
+   "larg": 37.9,
+   "alt": 35.4,
+   "giro": -90.0,
+   "sombra": null,
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-de-servico/cuba-franke-inox-link",
+   "cx": 2219.1,
+   "cy": 1532.45,
+   "larg": 37.9,
+   "alt": 35.4,
+   "giro": -90.0,
+   "sombra": null,
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "escritorio/cadeira-escritorio",
+   "cx": 2075.868890971705,
+   "cy": 573.6990328408577,
+   "larg": 34.0,
+   "alt": 52.147909967845656,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "escritorio/cadeira-escritorio",
+   "cx": 2289.8398808426,
+   "cy": 398.9536166939025,
+   "larg": 34.0,
+   "alt": 52.147909967845656,
+   "giro": -90.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "escritorio/cadeira-escritorio",
+   "cx": 1195.2999755758517,
+   "cy": 475.13492356000984,
+   "larg": 34.0,
+   "alt": 52.147909967845656,
+   "giro": 90.0,
+   "sombra": "movel",
+   "extra": null
+  }
+ ],
+ "topo": [
+  {
+   "tipo": "abajur",
+   "cx": 1022.45,
+   "cy": 743.8,
+   "d": 19.0
+  },
+  {
+   "tipo": "abajur",
+   "cx": 1188.55,
+   "cy": 743.8,
+   "d": 19.0
+  },
+  {
+   "tipo": "abajur",
+   "cx": 1962.4,
+   "cy": 519.2,
+   "d": 17.0
+  },
+  {
+   "tipo": "abajur",
+   "cx": 1963.2,
+   "cy": 363.45,
+   "d": 17.0
+  },
+  {
+   "tipo": "abajur",
+   "cx": 2520.45,
+   "cy": 440.9,
+   "d": 17.0
+  },
+  {
+   "tipo": "abajur",
+   "cx": 2604.2,
+   "cy": 815.85,
+   "d": 19.0
+  },
+  {
+   "tipo": "mesa_topo",
+   "c": [
+    2044,
+    538,
+    2102,
+    613
+   ]
+  },
+  {
+   "tipo": "mesa_topo",
+   "c": [
+    2251,
+    372,
+    2326,
+    431
+   ]
+  },
+  {
+   "tipo": "mesa_topo",
+   "c": [
+    1154,
+    449,
+    1229,
+    508
+   ]
   }
  ]
 }
