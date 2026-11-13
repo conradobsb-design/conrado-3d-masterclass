@@ -52,8 +52,9 @@ girar_pt = BT.girar_pt
 
 # os tapetes que ficam (as camas e os criados das suítes 1, 2 e 3 em cima deles): a parte da pegada dentro deles volta
 # ao tapete, não ao piso
-# (12/11, "CORRIGIR O TAPETE NA SUITE 2") o da suíte 2 não fica mais: é redesenhado inteiro (a peça `tapete`, abaixo)
-TAPETES_FICAM = [(1637, 388, 1846, 525), (2284, 1398, 2493, 1529)]
+# (12/11, "CORRIGIR O TAPETE NA SUITE 2"; depois "PODE APLICAR NOS TAPETES DAS SUÍTES 1 E 3") nenhum fica mais: os
+# três são redesenhados inteiros (a peça `tapete` de cada suíte, abaixo)
+TAPETES_FICAM = []
 
 # Cada peça: (png, cx, cy, larg, alt, giro, sombra, extra) em px da final (larg x alt antes do giro; alt None: a
 # proporção do PNG); extra: None, "lavabo" (os lados esticados), "anti_t" (o PNG espelhado na antidiagonal), ou
@@ -96,11 +97,15 @@ AMBIENTES = {
         "abajures": [(1417.0, 1439.0, 19.0), (1595.0, 1439.0, 19.0)],
         "recolar": []},
     "suite_1": {
+        # ("PODE APLICAR NOS TAPETES DAS SUÍTES 1 E 3") o tapete do render sai inteiro, com a sombra, e entra o novo no
+        # retângulo do PDF (2283,6/1397,9 a 2492,6/1529,2), como o da suíte 2; o rótulo da suíte fica por cima
         "zonas": [(2304, 1447, 2372, 1574), (2409, 1447, 2477, 1574), (2269, 1541, 2512, 1573),
-                  (2359, 1329, 2517, 1372), (2297, 1424, 2374, 1453), (2402, 1424, 2479, 1453)],
+                  (2359, 1329, 2517, 1372), (2297, 1424, 2374, 1453), (2402, 1424, 2479, 1453),
+                  (2280, 1394, 2497, 1533)],
         "manter": [(2456, 1369, 2498, 1395)],               # a cadeira de madeira e linho (fora da mesa)
         "pecas": [
             ("suite-1/bancada-suites", 2438.0, 1350.5, 149.3, 35.8, 0.0, "mesa", None),
+            ("sala-intima/tapete", 2388.1, 1463.55, 209.0, 131.3, 0.0, "tapete", ("tom", 210.0, 217.0, 227.0)),
             ("suite-1/cama-solteiro-a", 2338.0, 1510.5, 59.7, 119.4, 180.0, "movel", None),
             ("suite-1/cama-solteiro-a", 2443.0, 1510.5, 59.7, 119.4, 180.0, "movel", None),
             ("suite-1/banco-pe-de-cama-solteiro", 2338.0, 1439.0, 53.7, 17.9, 0.0, "movel", None),
@@ -134,11 +139,15 @@ AMBIENTES = {
         "recolar": [((1724, 1010, 1807, 1016), None, "escuro")]},
     "suite_3": {
         # (o pé da cama antiga ia até y 485, por cima do banco do PDF: a zona vai até o banco, y 486)
-        "zonas": [(1676, 339, 1808, 486), (1637, 340, 1848, 384), (1620, 558, 1785, 602), (1666, 472, 1810, 522)],
+        # ("PODE APLICAR NOS TAPETES DAS SUÍTES 1 E 3") o tapete do render sai inteiro, com a sombra, e entra o novo no
+        # retângulo do PDF (1636,7/387,8 a 1845,7/525,2), como o da suíte 2
+        "zonas": [(1676, 339, 1808, 486), (1637, 340, 1848, 384), (1620, 558, 1785, 602), (1666, 472, 1810, 522),
+                  (1633, 384, 1850, 529)],
         # a cadeira de madeira e linho (a parte de fora da mesa) e o rack da TV, que o PDF põe na frente da mesa
         "manter": [(1642, 535, 1687, 562), (1704, 579, 1873, 600)],
         "pecas": [
             ("suite-3/bancada-suites", 1702.5, 580.0, 157.0, 35.8, 0.0, "mesa", None),
+            ("sala-intima/tapete", 1741.2, 456.5, 209.0, 137.4, 0.0, "tapete", ("tom", 206.0, 214.0, 225.0)),
             ("suite-3/cama-casal-a", 1742.0, 408.0, 124.2, 130.8, 0.0, "movel", None),
             ("suite-master/banco-pe-de-cama", 1742.0, 488.0, 95.5, 23.9, 0.0, "movel", None),
             ("suite-3/criado-redondo", 1658.5, 362.0, 35.8, 35.8, 0.0, "movel", None),

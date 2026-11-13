@@ -2228,7 +2228,12 @@ refeito no miolo). Agora sai inteiro, com a sombra (zona 1658,1041 a 1875,1168; 
 vinílico volta do gerador e entra o tapete da biblioteca (`sala-intima/tapete`, de trama fina) no tom do de antes
 (BGR 210, 218, 227: `("tom", b, g, r)` em `preparar`), no retângulo do PDF (ARQ_LAYOUT HUMANIZAÇÃO, 1662,0/1044,9 a
 1871,0/1164,3: 3,50 x 2,00 m), por baixo da cama, do banco e da poltrona; no 12K, nítido do PNG. Antes e depois em
-`renders/POE642_CasaA_PH_1Pavimento_1211_tapete_suite_2_antes_depois.jpg`.
+`renders/POE642_CasaA_PH_1Pavimento_1211_tapete_suite_2_antes_depois.jpg`. Depois ("PODE APLICAR NOS TAPETES DAS SUÍTES
+1 E 3"), o mesmo nas suítes 1 e 3 (`TAPETES_FICAM` fica vazio): os tapetes do render saem inteiros, com a sombra (zonas
+2280,1394 a 2497,1533 e 1633,384 a 1850,529), e entra o da biblioteca no tom de cada um (suíte 1, BGR 210, 217, 227;
+suíte 3, 206, 214, 225, a mediana das faixas livres do tapete antigo), nos retângulos do PDF (suíte 1, 2283,6/1397,9 a
+2492,6/1529,2; suíte 3, 1636,7/387,8 a 1845,7/525,2), por baixo das camas, dos bancos e dos criados; o rótulo da suíte 1
+fica por cima. Antes e depois em `renders/POE642_CasaA_PH_1Pavimento_1211_tapetes_suites_1_3_antes_depois.jpg`.
 
 **Floreira e janela do banho master (12/11, "CORRIJA AS FOLHAS DE VIDRO PARA SE ENCONTRAREM, CORRIJA O CONTORNO DA
 FLOREIRA E NÃO DEIXE AS PLANTAS VERDES PASSAREM PELAS JANELAS"):** pelo PDF (ARQ_PAREDE), a floreira fica entre a
