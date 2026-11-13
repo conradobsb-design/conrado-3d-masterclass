@@ -47,6 +47,7 @@ import biblioteca_terreo_casaa_1211 as BT        # noqa: E402
 import regras_terreo_casab_1311 as RT            # noqa: E402
 import camas_casac_1311 as CM                    # noqa: E402
 import manta_caida_casac_1311 as MC              # noqa: E402
+import paisagismo_terreo_casab_1311 as PJ        # noqa: E402  (o `preencher`: a textura de uma amostra no tom do entorno)
 
 CASA_C = AQUI.parents[1] / "POE642_CasaC"
 R = CASA_C / "renders"
@@ -79,8 +80,9 @@ CADEIRAS = [("suíte master", (80747, 80748), 1202.5, "dir", (1202, 575, 1231, 7
             ("quarto 1", (80326, 80327), 2133.5, "dir", (2133, 560, 2162, 700))]
 CADEIRA_ESC = {"png": "escritorio/cadeira-escritorio", "larg": 34.0, "sob": 1 / 3}
 SALA_TV = {"tapete": 85737, "sofa": (85747, 85748, 85749, 85750, 85751, 85752), "poltrona": 90249,
-           "mesas_laterais": (88789, 88810), "mesas_centro": (88750, 88717), "vaso_px": (1252, 846, 1310, 908)}
-ESTAR = {"tapete": 53916, "sofa": 85911, "mesa_centro": 91067, "oliva": (90391, 90320), "creme": 91075,
+           "mesas_laterais": (88789, 88810), "mesas_centro": (88750, 88717), "vaso_px": (1252, 846, 1310, 908),
+           "trav_amostra_px": (1244, 700, 1306, 790)}
+ESTAR = {"tapete": 53916, "tapete_amostra_px": (2140, 1420, 2185, 1465), "sofa": 85911, "mesa_centro": 91067, "oliva": (90391, 90320), "creme": 91075,
          "apoio": (91219, 91221, 91238), "vaso": 81802}
 JANTAR = {"mesa": 92210, "larg": 30.0, "folga_px": 7,
           "cadeiras": [(84689, 90.0), (79024, 90.0), (78854, 90.0), (78684, 90.0),
@@ -92,7 +94,8 @@ MESAS_REDONDAS = [(85081, (80170, 80191, 80212, 80233, 80254, 80275)),
 ESCRITORIO = {"mesa": 88841, "cadeira": (82215, 82216), "visitantes": [(82389, 82406, 82431, 82452),
                                                                        (82467, 82484, 82509, 82530)]}
 # os armários altos da cozinha (px): a faixa clara junto à parede da esquerda e o bloco junto à parede da direita
-COZINHA = {"armarios_px": [(2171, 457, 2203, 630), (2426, 495, 2466, 674)], "folga_px": 2}
+COZINHA = {"armarios_px": [(2171, 457, 2206, 630), (2426, 495, 2466, 674)], "folga_px": 2,
+           "granito_amostra_px": (2330, 560, 2410, 620)}
 ANTES_DEPOIS = {"suite_master": (780, 560, 1240, 840), "quartos": (1170, 330, 1700, 590), "quarto_1": (1960, 330, 2175, 690),
                 "quarto_externo": (2990, 690, 3200, 830), "sala_tv": (1240, 690, 1640, 930),
                 "estar": (1640, 1290, 2400, 1620), "jantar": (2070, 920, 2240, 1210),
@@ -152,7 +155,13 @@ def encaixar(Q, P, m, giros=range(0, 360, 5), escalas=(0.9, 0.95, 1.0, 1.05)):
 
 
 def piso_vinilico(Q, out, buraco):
-    return BS.quieto(RT.piso_reguas, Q, out, buraco)
+    """As réguas do vinílico no buraco (a luz em sigmas até 128: num buraco grande, a de 16 não chegava ao miolo e ele
+    ficava preto) e no tom do vinílico em volta (só a madeira, fora os móveis claros)."""
+    antes = out.copy()
+    out = BS.quieto(RT.piso_reguas, Q, out, buraco, sigmas=(4, 8, 16, 32, 64, 128))
+    im = antes.astype(np.int16)
+    fonte = ((im.max(axis=2) - im.min(axis=2)) >= 40) & ~buraco
+    return RT.tom_do_entorno(antes, out, buraco, fonte)
 
 
 def piso_travertino(out, buraco, par, alcance=140):
@@ -294,6 +303,11 @@ def sala_tv(Q, out, antes, par, q=SALA_TV):
     if iou2 > iou:
         melhor = (iou2, g2, wt2, ht2, True)
     iou, g, wt, ht, esp = melhor
+    # a medida: a caixa do L do PDF (o giro e o espelho do encaixe; o PNG tem outra proporção)
+    ys, xs = np.nonzero(sofa)
+    bw, bh = float(xs.max() + 1 - xs.min()), float(ys.max() + 1 - ys.min())
+    cx, cy = (xs.min() + xs.max() + 1) / 2, (ys.min() + ys.max() + 1) / 2
+    wt, ht = (bw, bh) if round(g) % 180 == 0 else (bh, bw)
     out = pousar(out, Pm if esp else Ps, cx, cy, wt, ht, g, "movel", par)
     print(f"    sala TV: o sofá em L A, {'espelhado, ' if esp else ''}giro {g:.0f}° ({iou * 100:.0f}% sobre o L do PDF)")
     out = recorte(Q, out, antes, list(q["mesas_centro"]))
@@ -308,10 +322,14 @@ def sala_tv(Q, out, antes, par, q=SALA_TV):
           "de volta por cima")
     # o vaso de folhagem A no vaso de hoje
     x0, y0, x1, y1 = q["vaso_px"]
+    sub = out[y0 - 8:y1 + 8, x0 - 8:x1 + 8].astype(np.int16)
+    folha = ((sub[..., 1] - sub[..., 2]) > 4) | (sub.mean(axis=2) < 150)
+    folha = cv2.dilate(folha.astype(np.uint8), np.ones((7, 7), np.uint8)) > 0
     bur = np.zeros(par.shape, bool)
-    bur[y0:y1, x0:x1] = True
-    bur &= ~par
-    out = piso_travertino(out, bur, par)
+    bur[y0 - 8:y1 + 8, x0 - 8:x1 + 8] = folha
+    bur &= ~RT.dilatar(par, 1)
+    fx0, fy0, fx1, fy1 = q["trav_amostra_px"]
+    out = PJ.preencher(out, bur, out[fy0:fy1, fx0:fx1].copy(), anel_px=6, nao=RT.dilatar(par, 1))
     D = min(x1 - x0, y1 - y0) - 4
     out = pousar(out, ler("sala-intima/vaso-folhagem-a"), (x0 + x1) / 2, (y0 + y1) / 2, D, D, 0.0, "movel", par)
     print("    sala TV: o vaso de folhagem A no lugar do de hoje")
@@ -348,14 +366,18 @@ def estar(Q, out, par, q=ESTAR):
     # o tapete no desenho do PDF, com a trama do tapete redondo (a amostra do miolo, ampliada para cobrir a caixa)
     ys, xs = np.nonzero(tap)
     X0, Y0, X1, Y1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
-    T = ler("sala-de-estar/tapete-redondo-render-v2")
-    h, w = T.shape[:2]
-    miolo = T[int(h * 0.3):int(h * 0.7), int(w * 0.3):int(w * 0.7), :3]
-    k = 0.012 * PX_M / max(miolo.shape[0] / (h * 0.4), 1e-6) * h / max(miolo.shape[0], 1)
-    rep = np.tile(miolo, (int(np.ceil((Y1 - Y0) / (miolo.shape[0] * 0.5))) + 1,
-                          int(np.ceil((X1 - X0) / (miolo.shape[1] * 0.5))) + 1, 1))
-    esc = (Y1 - Y0) / (2.0 * miolo.shape[0])                      # a trama na escala de ~2 amostras no tapete
-    rep = cv2.resize(rep, None, fx=esc, fy=esc, interpolation=cv2.INTER_AREA)[:Y1 - Y0, :X1 - X0]
+    # (a trama do tapete redondo da biblioteca, repetida, saía em "camuflagem"): a lã lisa do tapete de hoje, a amostra
+    # limpa do miolo dele espelhada em vaivém, no tom médio dela
+    ax0, ay0, ax1, ay1 = q["tapete_amostra_px"]
+    am = antes[ay0:ay1, ax0:ax1].astype(np.float32)
+    media = am.reshape(-1, 3).mean(axis=0)
+    dp = float((am.mean(axis=2) - cv2.GaussianBlur(am.mean(axis=2), (0, 0), 3)).std())
+    # (a amostra repetida em vaivém deixava losangos): a lã no tom médio dela, com o grão fino de ruído (o desvio do
+    # grão da amostra), sem repetição
+    rng = np.random.default_rng(1311)
+    gr = cv2.GaussianBlur(rng.standard_normal((Y1 - Y0, X1 - X0)).astype(np.float32), (0, 0), 0.7)
+    gr = gr / max(float(gr.std()), 1e-6) * dp
+    rep = media[None, None] * (1 + gr[..., None] / max(float(media.mean()), 1))
     a, _ = contorno(Q, [q["tapete"]])
     al = a[Y0:Y1, X0:X1, None]
     reg = out[Y0:Y1, X0:X1].astype(np.float32)
@@ -486,9 +508,8 @@ def cozinha(out, par, q=COZINHA):
     for x0, y0, x1, y1 in q["armarios_px"]:
         buraco[y0:y1, x0:x1] = True
     buraco &= ~RT.dilatar(par, 0)
-    fonte = granito & ~buraco & ~RT.dilatar(par, 2)
-    feito = RT.piso_saltando(out, buraco, fonte, alcance=80, eixo="y", ancorar=True)
-    out = RT.tom_do_entorno(out, feito, buraco, fonte)
+    fx0, fy0, fx1, fy1 = q["granito_amostra_px"]
+    out = PJ.preencher(out, buraco, out[fy0:fy1, fx0:fx1].copy(), anel_px=8, nao=~granito | RT.dilatar(par, 1))
     print(f"    cozinha: os {len(q['armarios_px'])} armários altos saem (o granito do piso por baixo)")
     return out
 

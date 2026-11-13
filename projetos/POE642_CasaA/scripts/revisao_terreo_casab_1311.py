@@ -4,9 +4,9 @@ Chamado no fim do `regras_terreo_casab_1311.aplicar` (`aplicar(RT, Q, out, par, 
 regras, passado para não importar uma 2ª cópia dele quando ele roda como script). As peças desenhadas aqui entram no
 registro do 12K com o tipo "rv_..." e são redesenhadas nítidas na escala dele (`peca_12k`); a cama da suíte 3, copiada
 da suíte 1, vem da saída do Topaz (`copias_12k`).
-- **Banco do deck (`BANCO`; "CORRIJA O ACABAMENTO DO BANCO E SEU CONTORNO"):** o L do PDF (0,80 m) refeito em réguas de
-  madeira escura no comprimento de cada braço (a esquadria a 45° no canto), as juntas finas, o fio escuro da borda e a
-  luz na quina de dentro; o contorno de fora no cinza 80 de 2 px, como o da borda de baixo do deck.
+- **Banco do deck (`BANCO`; "CORRIJA O ACABAMENTO DO BANCO E SEU CONTORNO"; "O BANCO TEM UM TOM ÚNICO, SEM VARIAÇÃO. TOM
+  SÓLIDO BRONZE"):** o L do PDF (0,80 m) no bronze dos brises, chapado, com o fio escuro da borda (as réguas de madeira
+  da 1ª rodada saíram); o contorno de fora no cinza 80 de 2 px, como o da borda de baixo do deck.
 - **Borda de cima do deck (`CONTORNO_DECK`; "CORRIJA O ACABAMENTO SUPERIOR DO PISO DE MADEIRA DO DECK"):** o mesmo
   contorno cinza 80 de 2 px na borda de cima (o deck encostava direto no travertino) e no trecho da direita até a
   parede.
@@ -64,14 +64,21 @@ BANCO = {"poli": [(615.9, 1378.6), (663.6, 1378.6), (663.6, 1660.1), (896.5, 166
                   (615.9, 1707.9)],
          "canto": ((615.9, 1707.9), (663.6, 1660.1)),        # a esquadria a 45°: acima dela, réguas em pé
          "regua_m": 0.10, "junta_m": 0.008, "tom": (56, 81, 110), "var": 0.05, "veio": 0.045,
-         "junta": 0.62, "fio": (30, 42, 55), "fio_px": 0.6, "luz": 1.18, "luz_px": 0.9, "semente": 1311}
+         "junta": 0.62, "fio": (30, 42, 55), "fio_px": 0.6, "luz": 1.18, "luz_px": 0.9, "semente": 1311,
+         # (usuário: "O BANCO TEM UM TOM ÚNICO, SEM VARIAÇÃO. TOM SÓLIDO BRONZE") o bronze dos brises da Casa B (a
+         # mediana das 2 linhas do brise da fachada), chapado, só com o fio escuro da borda
+         "solido": True, "bronze": (47, 71, 104), "fio_solido": (28, 40, 56)}
 CONTORNO_DECK = {"cor": PAREDE, "rets": [(613.9, 1376.6, 1095.5, 1378.6),     # a borda de cima (deck e banco)
                                          (1093.5, 1378.6, 1095.5, 1475.0),     # a da direita, até a parede
                                          (613.9, 1378.6, 615.9, 1709.9),       # a de fora do banco
                                          (613.9, 1707.9, 898.5, 1709.9),
                                          (896.5, 1701.0, 898.5, 1709.9)]}
 PISCINA = {"x": 747.2, "y": (890, 1093), "vidro_lum": 80, "busca_px": 9, "azul": 30}
+# (usuário: "TEMOS UMA DUPLICAÇÃO ERRADA AQUI ... NO LAVATORIO GOURMET") entre a bancada e a janela ficavam as bases das
+# torneiras e as bordas das cubas de antes (no 12K, torneiras em dobro): a faixa (`faixa_y`) sob as cubas (`faixa_x`)
+# com o perfil de uma coluna limpa (`faixa_ref_x`)
 BANCADA_LAV = {"c": (1218.9, 1618.3, 1427.9, 1641.3), "tom": (188, 207, 225), "fio": 0.80, "semente": 1311,
+               "faixa_y": (1641, 1646), "faixa_x": [(1222, 1267), (1273, 1374), (1380, 1425)], "faixa_ref_x": (1238, 1266),
                "veio": 0.010, "faixa": 0.016, "poros": 6, "poro_esc": 0.05, "forca": 0.8,
                "cubas": ["banho-1/cuba-esculpida-travertino"]}
 BATENTES_EXTRA = []            # (x0, y0, x1, y1) px a mais, se a busca não pegar
@@ -94,12 +101,35 @@ QUARTO_SERV = {"cama": (1916.8, 1611.0, 2036.2, 1664.2), "anel_px": 5, "grao_px"
 # (13/11, "FALTOU REPRESENTAR O REFRIGERADOR NO VÃO") o refrigerador do PDF (ARQ_LAYOUT, 1,40 x 0,75 m) no vão junto
 # ao BH gourmet: a geladeira inox G2 da cozinha (o tampo escovado, a frente com os 2 puxadores) para a varanda, em cima
 REFRIGERADOR = {"png": "02-terreo/cozinha/geladeira-inox.png", "c": (1117.4, 1481.0, 1201.0, 1525.8), "rot": 2}
+# (usuário: "A REPRESENTAÇÃO DAS PORTAS DE CORRER FICARAM MUITO ERRADAS. CORRIJA!", com o recorte do PDF) a parede de
+# baixo do banho master pelo PDF: os 2 bolsos em cinza (as portas de correr telescópicas, 2 folhas de cada lado: a do
+# bolso e a do vão), os nichos brancos das pontas, os 2 batentes do vão; o piso da suíte por baixo do cinza que passava
+# da face (`piso_px`)
+PORTAS_BM = {"parede": [(1236.2, 503.6, 1244.0, 508.9), (1289.4, 501.8, 1344.8, 503.6), (1235.6, 508.9, 1344.8, 510.7),
+                        (1244.0, 503.6, 1344.8, 508.9), (1452.3, 501.8, 1506.7, 503.6), (1452.3, 508.9, 1550.3, 510.7),
+                        (1452.3, 503.6, 1550.3, 508.9), (1550.3, 503.6, 1552.1, 508.9),
+                        (1344.8, 501.8, 1346.6, 507.2), (1450.5, 501.8, 1452.3, 507.2)],
+             "nichos": [(1245.8, 501.8, 1289.4, 507.6), (1506.7, 501.8, 1550.3, 507.3)],
+             "folhas": [(1296.8, 507.5, 1344.8, 510.4), (1452.3, 507.5, 1500.4, 510.4), (1341.8, 507.8, 1392.6, 510.1),
+                        (1404.5, 507.8, 1455.3, 510.1)],
+             "vao": (1346.6, 501.8, 1450.5, 507.8), "vao_fonte_dy": -9,
+             "piso_px": (1234, 511, 1556, 519), "nicho": (232, 234, 236), "folha": (236, 238, 240), "perfil_px": 0.5}
+# (usuário: "CORRIGIR O PISO E PAREDE", o hall junto à suíte 3) a face da parede de cima reta em y 943,6 (do PDF; o render
+# a encurtava depois de x 2452); o toco de parede e o caixilho de vidro emoldurado abaixo dele pelo PDF; o piso do hall
+# interno no retângulo mais claro do render (o PDF muda de piso só em x 2537), sem a linha clara sob o vaso
+HALL = {"parede": [(2410.0, 938.0, 2526.6, 943.6), (2526.6, 943.6, 2538.5, 955.6)],
+        "caixilho": (2525.1, 955.6, 2539.1, 985.4), "montante": (2529.5, 957.7, 2532.5, 983.3),
+        "peitoril": (2526.6, 985.4, 2538.5, 986.6),
+        "piso": (2448, 944, 2526, 1009), "piso_fonte": (2386, 946, 2446, 1006),
+        "piso_baixo": (2524, 987, 2541, 1011), "vidro": (226, 230, 232), "perfil_px": 0.5}
 ANTES_DEPOIS = {"deck_banco": (600, 1360, 1110, 1720), "piscina_faixa": (720, 880, 800, 1110),
                 "lavatorio": (1200, 1590, 1450, 1665), "suite_master_piso": (1015, 385, 1215, 505),
                 "cortina_suite2": (2240, 320, 2560, 360), "porta_banho2": (2630, 585, 2720, 625),
                 "porta_correr_cozinha": (1580, 1265, 1770, 1305), "paredes_louceiro_despensa": (1815, 1350, 2260, 1420),
                 "cama_suite3": (2440, 695, 2600, 845), "quarto_servico": (1900, 1598, 2050, 1685),
-                "refrigerador": (1085, 1460, 1235, 1545)}
+                "refrigerador": (1085, 1460, 1235, 1545),
+                "portas_banho_master": (1225, 470, 1570, 530),
+                "hall_piso_parede": (2400, 920, 2570, 1025)}
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -168,6 +198,16 @@ def banco_desenho(it, q=BANCO):
     x, y = (xx + 0.5) / K + X0, (yy + 0.5) / K + Y0
     (ax, ay), (bx, by) = q["canto"]
     em_pe = ((bx - ax) * (y - ay) - (by - ay) * (x - ax)) < 0         # acima da diagonal do canto: o braço de pé
+    if q.get("solido"):
+        a = _poli(pts, X0, Y0, w, h)
+        C = np.empty((H, W, 3), np.float32)
+        C[:] = np.float32(q["bronze"])
+        er = cv2.erode((a > 0.5).astype(np.uint8), np.ones((3, 3), np.uint8),
+                       iterations=max(1, int(round(q["fio_px"] * K / 1.5))))
+        fio = np.clip(a - cv2.GaussianBlur(er.astype(np.float32), (0, 0), 0.6), 0, 1)
+        C = C * (1 - fio[..., None]) + np.float32(q["fio_solido"])[None, None] * fio[..., None]
+        P = np.dstack([C, a * 255]).astype(np.float32)
+        return P, X0 + w / 2, Y0 + h / 2, float(w), float(h)
     rg, jt = q["regua_m"] * PX_M, q["junta_m"] * PX_M
     u = np.where(em_pe, x - pts[0, 0], y - pts[2, 1])                 # a coordenada através das réguas
     v = np.where(em_pe, y, x)                                         # a do comprimento
@@ -246,8 +286,8 @@ def deck(out, par, reg):
           "prims": prims}
     out = pousar(out, it, None)
     reg["pecas"].append(it)
-    print("    deck: o banco em réguas de madeira (a esquadria a 45° no canto, o fio da borda) e o contorno cinza 80 "
-          "de 2 px na borda de cima, na da direita e por fora do banco")
+    print("    deck: o banco no bronze dos brises, chapado, com o fio da borda, e o contorno cinza 80 de 2 px na borda de "
+          "cima, na da direita e por fora do banco")
     return out
 
 
@@ -279,6 +319,10 @@ def bancada_lavatorio(out, par, reg, q=BANCADA_LAV):
     for i in idx:
         out = _RT["m"].pousar_bib(out, reg["pecas"][i], par)
     reg["pecas"].insert(min(idx) if idx else len(reg["pecas"]), it)
+    y0, y1 = q["faixa_y"]
+    ref = np.median(out[y0:y1, q["faixa_ref_x"][0]:q["faixa_ref_x"][1]].astype(np.float32), axis=1)
+    for xa, xb in q["faixa_x"]:
+        out[y0:y1, xa:xb] = np.round(ref[:, None, :]).astype(np.uint8)
     print(f"    lavatório gourmet: a bancada em travertino no tom da cuba esculpida, as {len(idx)} cubas por cima")
     return out
 
@@ -533,6 +577,73 @@ def refrigerador(out, par, reg, q=REFRIGERADOR):
     return out
 
 
+def portas_banho_master(RT, Q, out, par, reg, q=PORTAS_BM):
+    # o vão: o piso do banho logo acima (os restos das folhas e o borrão entre elas saem)
+    x0, y0, x1, y1 = [int(round(v)) for v in q["vao"]]
+    d = q["vao_fonte_dy"]
+    out[y0:y1 + 2, x0:x1] = out[y0 + d:y1 + 2 + d, x0:x1]
+    # o piso da suíte por baixo do cinza que passava da face da parede
+    px0, py0, px1, py1 = q["piso_px"]
+    I = out[py0:py1, px0:px1].astype(np.int16)
+    cinza = (np.abs(I - np.int16(PAREDE)).max(axis=2) <= 22) | ((I.max(axis=2) - I.min(axis=2)) < 12)
+    bur = np.zeros(par.shape, bool)
+    bur[py0:py1, px0:px1] = cinza
+    if bur.any():
+        out = BS_quieto(RT.piso_reguas, Q, out, bur, sigmas=(4, 8, 16, 32, 64))
+    prims = [{"t": "ret", "c": list(r), "cor": PAREDE} for r in q["parede"]]
+    for r in q["nichos"]:
+        prims += [{"t": "ret", "c": list(r), "cor": q["nicho"]}, {"t": "fio", "c": list(r), "cor": (150, 150, 150),
+                                                                   "px": 0.4}]
+    for r in q["folhas"]:
+        prims += [{"t": "ret", "c": list(r), "cor": q["folha"]},
+                  {"t": "fio", "c": list(r), "cor": PERFIL, "px": q["perfil_px"]}]
+    rs = np.float32(q["parede"] + q["folhas"])
+    it = {"tipo": "rv_vetor", "nome": "portas_banho_master",
+          "c": [float(rs[:, 0].min()), float(rs[:, 1].min()), float(rs[:, 2].max()), float(rs[:, 3].max())],
+          "prims": prims}
+    out = pousar(out, it, None)
+    reg["pecas"].append(it)
+    print("    banho master: a parede de baixo pelo PDF (os 2 bolsos, os nichos, os batentes), as 4 folhas das portas de "
+          "correr telescópicas; o piso da suíte por baixo do cinza que passava da face")
+    return out
+
+
+def BS_quieto(f, *a, **k):
+    with contextlib.redirect_stdout(io.StringIO()):
+        return f(*a, **k)
+
+
+def hall(out, par, reg, q=HALL):
+    import paisagismo_terreo_casab_1311 as PJ
+    x0, y0, x1, y1 = q["piso"]
+    fx0, fy0, fx1, fy1 = q["piso_fonte"]
+    I = out.astype(np.int16)
+    trav = (I.mean(axis=2) > 165) & ((I.max(axis=2) - I.min(axis=2)) < 45)
+    m = np.zeros(par.shape, bool)
+    m[y0:y1, x0:x1] = True
+    nao = ~trav & ~m                      # o que não é travertino em volta (a parede, a linha preta) não dá o tom
+    m &= ~RT_dil(par, 1)
+    out = PJ.preencher(out, m, out[fy0:fy1, fx0:fx1].copy(), anel_px=8, nao=nao)
+    # embaixo do caixilho, até a folha da porta: o piso do lado
+    bx0, by0, bx1, by1 = q["piso_baixo"]
+    out[by0:by1, bx0:bx1] = out[by0:by1, bx0 - 20:bx1 - 20]
+    prims = [{"t": "ret", "c": list(r), "cor": PAREDE} for r in q["parede"]]
+    prims += [{"t": "ret", "c": list(q["caixilho"]), "cor": q["vidro"]},
+              {"t": "fio", "c": list(q["caixilho"]), "cor": PERFIL, "px": q["perfil_px"]},
+              {"t": "fio", "c": list(q["montante"]), "cor": PERFIL, "px": q["perfil_px"]},
+              {"t": "ret", "c": list(q["peitoril"]), "cor": (210, 221, 238)}]
+    it = {"tipo": "rv_vetor", "nome": "hall_parede", "c": [2410.0, 938.0, 2539.1, 986.6], "prims": prims}
+    out = pousar(out, it, None)
+    reg["pecas"].append(it)
+    print("    hall: a face da parede reta pelo PDF, o toco e o caixilho de vidro abaixo dele; o piso do hall interno no "
+          "retângulo claro, sem a linha sob o vaso")
+    return out
+
+
+def RT_dil(m, r):
+    return cv2.dilate(m.astype(np.uint8), np.ones((2 * r + 1, 2 * r + 1), np.uint8)) > 0
+
+
 def aplicar(RT, Q, out, par, reg):
     _RT["m"] = RT
     out = refrigerador(out, par, reg)
@@ -543,6 +654,8 @@ def aplicar(RT, Q, out, par, reg):
     out = correr_cozinha(out, reg)
     out = folha_banho2(out, reg)
     out = faixa_parede(out, par)
+    out = portas_banho_master(RT, Q, out, par, reg)
+    out = hall(out, par, reg)
     out = cama_suite3(out, reg)
     out = quarto_servico(out, par, reg)
     return out

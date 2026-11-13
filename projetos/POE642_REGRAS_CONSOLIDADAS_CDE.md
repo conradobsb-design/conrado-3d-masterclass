@@ -223,8 +223,10 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   Jardins internos como o de 4,79 m² da Casa A. [A; B]
 - [ ] **Floreira dentro do retângulo do PDF:** as plantas não passam vidro nem janela. [A 1º Pav]
 - [ ] **Deck com contorno em todas as bordas** (o cinza das paredes, 2 px), inclusive a de cima e por fora do banco
-  ("CORRIJA O ACABAMENTO SUPERIOR DO PISO DE MADEIRA DO DECK"). **Banco do deck** em réguas de madeira escura no
-  comprimento de cada braço, a esquadria a 45° no canto, o fio da borda. [B Térreo]
+  ("CORRIJA O ACABAMENTO SUPERIOR DO PISO DE MADEIRA DO DECK"). **Banco do deck num tom único, sólido, bronze** (o dos
+  brises), só com o fio da borda ("O BANCO TEM UM TOM ÚNICO, SEM VARIAÇÃO. TOM SÓLIDO BRONZE"). [B Térreo]
+- [ ] **Portas de correr pelo PDF:** os bolsos em cinza de parede, as folhas (a do bolso e a do vão) com o perfil, os
+  nichos; nada de cinza passando da face da parede ("A REPRESENTAÇÃO DAS PORTAS DE CORRER FICARAM MUITO ERRADAS"). [B Térreo]
 - [ ] **A água da piscina só até o vidro**: entre o deck e a divisória da esquerda, deck, nunca azul ("NÃO FAZ SENTIDO
   DE ÁGUA DEPOIS DO VIDRO"). [B Térreo]
 - [ ] **Paisagismo:** proposta antes de aplicar ("QUERO VER ANTES DE VOCÊ APLICAR"). As peças vistas de cima em

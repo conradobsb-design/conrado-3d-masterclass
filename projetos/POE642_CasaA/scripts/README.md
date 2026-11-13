@@ -2668,6 +2668,26 @@ chave "paisagismo" (as regiões do chão, com a máscara `POE642_CasaB_PH_Terreo
 plantas); no 12K (`PJ.pecas_12k`, no `pecas_12k`), o chão de cada região refeito com a textura da própria saída do
 Topaz e as plantas nítidas na escala dele.
 
+### Térreo da Casa C, o mobiliário (13/11): `mobiliario_terreo_casac_1311.py`
+
+A 2ª leva da biblioteca no Térreo da Casa C ("E O MOBILIÁRIO DO TERREO DA CASA C?", "PODE"), nos desenhos do PDF:
+camas A (a manta de tricô caída na king e nas de casal, a peseira nas de solteiro, o travesseiro extra), criados com
+abajur, poltronas e pufes (a frente para o pufe), cadeiras de escritório 1/3 sob a escrivaninha, a sala TV (tapete, sofá
+em L A na caixa do L do PDF, poltrona A, mesas laterais, vaso de folhagem), o estar (o tapete do PDF em lã lisa no tom
+do de hoje, o sofá curvo, a mesa seixo, as poltronas oliva e creme, as mesas de apoio escuras), as 10 cadeiras oliva do
+jantar, as mesas redondas da varanda gourmet e da sala de almoço, o escritório; os armários altos da cozinha saem
+("SAEM"). Os pisos por baixo: o vinílico pelas réguas (`piso_reguas`, a luz em sigmas até 128 e no tom do entorno), o
+travertino e o granito pela textura de uma amostra limpa (`paisagismo_terreo_casab_1311.preencher`). A cadeia do Térreo
+da Casa C: `biblioteca_terreo_casac_1311.py --saida t1`, `pedidos_terreo_casac_1311.py --antes t1 --saida t2`,
+`mobiliario_terreo_casac_1311.py --antes t2` (o Bege Bahia na medida nova vem da biblioteca).
+
+### Térreo da Casa B, mais revisões do 12K (13/11, no `revisao_terreo_casab_1311.py`)
+
+O banco do deck no bronze dos brises, chapado ("TOM SÓLIDO BRONZE"); a faixa entre a bancada do lavatório e a janela com
+o perfil de uma coluna limpa (as torneiras em dobro no 12K); a parede de baixo do banho master pelo PDF (os 2 bolsos, os
+nichos, as 4 folhas das portas de correr telescópicas; `PORTAS_BM`); o hall junto à suíte 3 (a face da parede reta, o
+toco e o caixilho de vidro pelo PDF, o piso do hall interno uniforme; `HALL`).
+
 ### Subsolo da Casa C, a biblioteca (13/11): `biblioteca_subsolo_casac_1311.py`
 
 A proposta (`POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_proposta_biblioteca_1.jpg`) aprovada com "Ok"; os PDFs
