@@ -2614,6 +2614,25 @@ O RETOQUE EM VOLTA DO CONTORNO E NOS TAPETES" (as camas de 12/11 ficam; os tapet
 novas geradas no Higgsfield (a biblioteca não tem): geladeira, recamier da suíte master, banco estofado do closet master e
 cortina, 4 variantes de cada em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_pecas_higgsfield.jpg`, para a escolha.
 
+### Subsolo da Casa C, a biblioteca (13/11): `biblioteca_subsolo_casac_1311.py`
+
+A proposta (`POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_proposta_biblioteca_1.jpg`) aprovada com "Ok"; os PDFs
+da Casa C anexados pelo usuário (em `_pdfs_cliente/`, fora do git). Parte da final do `ANTES_COMMIT` e usa as funções do
+Subsolo da Casa B (`biblioteca_subsolo_casab_1311`) e das regras do Térreo da Casa B (`regras_terreo_casab_1311`):
+- sauna: o banco reto de travertino da biblioteca no L do PDF (a perna junto à parede da direita, girada, e o degrau de
+  baixo) e no assento junto à parede de baixo, no tom de cada um de antes;
+- BH academia: a cuba esculpida no granito da bancada (no retângulo de baixo do PDF, onde a planta tinha a cuba; o de
+  cima fica só com o contorno), a bacia Carrara branca no lugar da marrom (o travertino do lado por baixo), os 2
+  chuveiros de teto desenhados em planta no quadrado do PDF;
+- academia: 2 esteiras A, 2 bicicletas B e 2 supinos da biblioteca no tamanho da Casa A, no meio e no sentido dos
+  símbolos do PDF (a barra do supino à esquerda, sem espelhar); o vinílico de volta por baixo dos aparelhos do render
+  com as mesmas réguas do `vinilico_foto.trocar` (a alta frequência da razão no piso 0,0011) vezes a luz em volta;
+- esquadrias: o contorno preto fino (`regras_terreo_casab_1311.esquadrias`), sem os batentes (traços com menos de 10 px);
+- rótulos em fileira: VARANDA SUBSOLO na linha de ACADEMIA (y 498) e DEPÓSITO na de SAUNA (y 826), o texto levado pela
+  conta do alfa contra o piso do lado; o BH ACADEMIA não cabe na fileira (51 px entre a bancada e a parede) e fica.
+Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_1311_{sauna,bh_academia,academia,rotulos}_antes_depois.jpg`.
+A Casa C ainda não tem 12K (precisa de IA nova).
+
 ### Térreo da Casa B, pedidos de 12/11: `pedidos_terreo_casab_1211.py`
 
 Os pedidos do usuário vendo o Térreo da Casa B (com os recortes da prancha), sobre a final de 21fa118, em passos (`PASSOS`, cada um documentado no script com as falas do usuário):
