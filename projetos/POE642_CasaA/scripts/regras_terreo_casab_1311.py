@@ -45,6 +45,10 @@ Térreo de 12/11), as regras aprovadas na Casa A (o mobiliário vai pela propost
   e a bacia dos banhos 1 a 3, o lavabo, as bacias marrons e as cubas esculpidas do BH gourmet, só a louça da cuba e a
   bacia Monte Carlo nos BH serviço e motorista, cooktops de 4 bocas (o resto do de 5 vira bancada, `balcao`), as cubas
   e os tanques Franke, a grelha; e a cadeira de escritório nas 3 escrivaninhas, 1/3 por baixo da mesa (`cadeiras`).
+- **Mobiliário, 2ª etapa (`SALA_INTIMA_TB`, `JANTAR_TB`, `ESPREG_TB`, `BANQUETAS_TB`; "PODE FAZER A 2ª ETAPA"):** a sala
+  íntima com o conjunto da Casa A (tapete, sofá em L A, mesas laterais, poltrona A; a mesa de centro e a quadrada
+  ficam), as 10 cadeiras oliva no jantar (a mesa por cima), as espreguiçadeiras A na prainha e as banquetas B na
+  bancada gourmet; o piso por baixo das peças de antes refeito por `piso_saltando`.
 - **Rótulos em dobro (corrigido):** o `rotulos_grade` parte dos desvios dos dados do `ANTES_COMMIT` (os do disco já vêm
   movidos de uma rodada anterior).
 No 12K (`ampliacao_12k_terreo_casaa.montar12k` com `PAV` "Terreo_CasaB", chamado pelo `ampliacao_12k_terreo_casab`):
@@ -259,7 +263,28 @@ CADEIRAS_TB = {"png": "escritorio/cadeira-escritorio", "larg": 34.0, "sob": 1 / 
                "itens": [{"nome": "suíte 1", "cadeira": 62273, "mesa": 71876, "lado": "cima"},
                          {"nome": "suíte 2", "cadeira": 62240, "mesa": 71855, "lado": "dir"},
                          {"nome": "suíte master", "cadeira": 63443, "mesa": 71925, "lado": "esq"}]}
-ANTES_DEPOIS = {"letras_escadas": (590, 600, 1180, 960), "shafts": (1540, 720, 1615, 1300),
+# A 2ª etapa do mobiliário ("PODE FAZER A 2ª ETAPA"), a que refaz o piso por baixo das peças de antes:
+# - a sala íntima com o conjunto da Casa A (`SALA_INTIMA_TB`): o tapete, o sofá em L A (o "anti_t" da Casa A: o corpo
+#   comprido à direita, contra a parede, e a ponta em cima; 89% de sobreposição com o L do PDF), as mesas laterais
+#   redondas nos 2 círculos do PDF e a poltrona A no símbolo do PDF (o encosto, a faixa fina do PDF, para o elevador; a
+#   frente para a sala: 225°; 50 x 52 px). O PDF tem uma poltrona só (a proposta dizia 2): o quadrado girado ao lado é
+#   uma mesa, que fica, como a mesa de centro redonda (as duas de volta por cima, pelo contorno do PDF);
+# - o jantar: só as 10 cadeiras oliva da Casa A (30 px) no lugar das bordô, no centro do retângulo de cada uma no PDF,
+#   viradas para a mesa; a mesa e o aparador ficam (a mesa de volta por cima, com a sombra curta nas cadeiras);
+# - a prainha: as 2 espreguiçadeiras A no retângulo do PDF, a cabeceira à direita (a parte menor do PDF);
+# - a bancada gourmet: as 5 banquetas B da Casa A (25 px) no lugar das 5 de hoje (o PDF desenha 4, desiguais; a planta
+#   tem 5 desde 12/11 e a proposta foi com 5), ~40% do assento por baixo da bancada (a borda em y 1319,3): o que passa
+#   da borda não é desenhado (`corte_y`).
+SALA_INTIMA_TB = {"tapete": 70337, "sofa": (77730, 77731, 77732, 77733, 77734, 77735), "mesa_centro": 77823, "mesa_quadrada": 71935,
+                  "mesas_laterais": [77800, 77858], "poltrona": 62306, "poltrona_px": (50.0, 52.0), "poltrona_giro": 225.0,
+                  "folga_px": 10, "folga_pufe_px": 6}
+JANTAR_TB = {"mesa": 63685, "larg": 30.0, "folga_px": 7,
+             "cadeiras": [(62447, 0.0), (62496, 0.0), (62545, 0.0), (62594, 0.0), (31098, 180.0), (31147, 180.0),
+                          (31196, 180.0), (31245, 180.0), (62643, 90.0), (31294, -90.0)]}
+ESPREG_TB = {"png": "deck-piscina/espreguicadeira-a", "pdf": [62435, 62441], "giro": -90.0}
+BANQUETAS_TB = {"png": "area-gourmet/banqueta-b", "larg": 25.0, "borda_y": 1319.3,
+                "xs": [1321.5, 1370.0, 1420.0, 1470.0, 1519.0], "velhas_px": (17, 1295)}
+ANTES_DEPOIS = {"letras_escadas":(590, 600, 1180, 960), "shafts": (1540, 720, 1615, 1300),
                 "tapetes_master": (995, 560, 1220, 790), "tapetes_suites": (1930, 330, 2650, 860),
                 "esquadrias_banho_master": (1230, 300, 1560, 420), "esquadrias_jardim_inverno": (1880, 770, 2240, 960),
                 "esquadrias_servico": (1540, 1440, 2260, 1700), "geladeiras": (1740, 1395, 1845, 1565),
@@ -274,7 +299,9 @@ ANTES_DEPOIS = {"letras_escadas": (590, 600, 1180, 960), "shafts": (1540, 720, 1
                 "mob_cozinha": (1640, 1455, 1750, 1680), "mob_gourmet": (1340, 1335, 1545, 1535),
                 "mob_tanques": (2190, 1465, 2245, 1560), "mob_criados_master": (990, 715, 1220, 770),
                 "mob_criados_suites": (1935, 335, 2640, 845), "mob_escrivaninha_master": (1145, 375, 1245, 520),
-                "mob_escrivaninha_s1": (2020, 535, 2180, 620), "mob_escrivaninha_s2": (2240, 350, 2315, 525)}
+                "mob_escrivaninha_s1": (2020, 535, 2180, 620), "mob_escrivaninha_s2": (2240, 350, 2315, 525),
+                "mob_sala_intima": (1630, 345, 1830, 630), "mob_jantar": (1715, 1075, 1985, 1215),
+                "mob_prainha": (915, 1135, 1060, 1285), "mob_banquetas": (1290, 1285, 1560, 1345)}
 
 
 def quadro():
@@ -824,7 +851,15 @@ def preparar_bib(it):
         if ht is None:
             ht = wt * P.shape[0] / P.shape[1]
         return P, float(wt), float(ht)
-    return leitor.preparar(it["png"], wt, ht, extra)
+    P, wt, ht = leitor.preparar(it["png"], wt, ht, extra)
+    if it.get("corte_y") is not None and it.get("giro", 0.0) == 0.0:
+        # a banqueta por baixo da bancada: as linhas do PNG além da borda (y >= corte_y) não aparecem (também no 12K)
+        P = P.copy()
+        H = P.shape[0]
+        f = (it["corte_y"] - (it["cy"] - ht / 2)) / ht * H
+        r = np.arange(H, dtype=np.float32) + 0.5
+        P[..., 3] *= np.clip(f - r + 0.5, 0, 1)[:, None]
+    return P, wt, ht
 
 
 def pousar_bib(out, it, par):
@@ -925,6 +960,178 @@ def cadeiras(Q, out, par, reg, q=CADEIRAS_TB):
     return out
 
 
+def mascara_pdf(Q, ids, limiar=0.05):
+    alvo = {id(Q.desenhos[i]) for i in ids}
+    a = np.clip(Q.preencher(lambda d: id(d) in alvo, ss=4, fs=True), 0, 1)
+    return a, a > limiar
+
+
+def dilatar(m, r):
+    return cv2.dilate(m.astype(np.uint8), np.ones((2 * r + 1, 2 * r + 1), np.uint8)) > 0
+
+
+def piso_saltando(out, buraco, fonte, larg=16, alcance=60, eixo="x", ancorar=False):
+    """Como o `piso_espelho`, linha a linha (ou coluna a coluna, `eixo` "y"), mas a fonte (`fonte`, bool) não precisa
+    estar colada: em cada lado, os `larg` px de fonte mais perto, pulando o que não é fonte (uma mesa, um pufe) até
+    `alcance` px; a metade de cada lado vem do seu lado, em vaivém. `ancorar`: o vaivém conta das bordas do buraco
+    inteiro, não das de cada trecho (num buraco de beira inclinada, as emendas das tábuas copiadas saíam em degrau,
+    acompanhando a beira; ancoradas, ficam em pé, como as das tábuas)."""
+    if eixo == "y":
+        res = piso_saltando(np.ascontiguousarray(out.transpose(1, 0, 2)), buraco.T, fonte.T, larg, alcance, "x",
+                            ancorar)
+        return np.ascontiguousarray(res.transpose(1, 0, 2))
+    res = out.copy()
+    fonte = fonte & ~buraco
+    W = out.shape[1]
+    cols = np.nonzero(buraco.any(axis=0))[0]
+    XA, XB = int(cols.min()), int(cols.max()) + 1
+    for y in np.unique(np.nonzero(buraco)[0]):
+        xs = np.nonzero(buraco[y])[0]
+        quebras = np.nonzero(np.diff(xs) > 1)[0]
+        for a, b in zip(np.r_[xs[0], xs[quebras + 1]], np.r_[xs[quebras], xs[-1]] + 1):
+            E = [x for x in range(a - 1, max(a - 1 - alcance, -1), -1) if fonte[y, x]][:larg]
+            D = [x for x in range(b, min(b + alcance, W)) if fonte[y, x]][:larg]
+            # um lado com 1 ou 2 px de fonte (a beira escura junto a uma parede) não serve: vem tudo do outro
+            E, D = (E if len(E) >= 4 else []), (D if len(D) >= 4 else [])
+            meio = (a + b) / 2 if E and D else (b if E else a)
+            ia, ib = (XA, XB) if ancorar else (a, b)
+            for x in range(a, b):
+                if x < meio and E:
+                    k = (x - ia) % (2 * len(E))
+                    fx = E[k if k < len(E) else 2 * len(E) - 1 - k]
+                elif D:
+                    k = (ib - 1 - x) % (2 * len(D))
+                    fx = D[k if k < len(D) else 2 * len(D) - 1 - k]
+                else:
+                    continue
+                res[y, x] = out[y, fx]
+    return res
+
+
+def mesa_por_cima(out, fonte, a, ca, reg):
+    """A mesa (alfa `a`) de `fonte` de volta por cima do que mudou em volta dela (as cadeiras e a sombra delas), com a
+    sombra curta dela nas cadeiras (alfa `ca`); no 12K, a da saída do Topaz (`topo_12k`)."""
+    mud = np.abs(out.astype(np.int16) - fonte.astype(np.int16)).max(axis=2) > 0
+    ys, xs = np.nonzero(mud)
+    X0, Y0, X1, Y1 = xs.min() - 4, ys.min() - 4, xs.max() + 5, ys.max() + 5
+    out[Y0:Y1, X0:X1] = mesa_sobre(out[Y0:Y1, X0:X1], fonte[Y0:Y1, X0:X1], a[Y0:Y1, X0:X1], ca[Y0:Y1, X0:X1])
+    cv2.imwrite(str(R / f"POE642_CasaB_PH_Terreo_12K_regras_mesa_{X0}_{Y0}.png"),
+                np.dstack([np.round(a[Y0:Y1, X0:X1] * 255), np.round(ca[Y0:Y1, X0:X1] * 255),
+                           np.zeros((Y1 - Y0, X1 - X0))]).astype(np.uint8))
+    reg["topo"].append({"tipo": "mesa_topo", "c": [int(X0), int(Y0), int(X1), int(Y1)]})
+    return out
+
+
+def sala_intima(Q, out, par, reg, q=SALA_INTIMA_TB):
+    antes = out.copy()
+    forma = par.shape
+    _, pol = mascara_pdf(Q, [q["poltrona"]])
+    _, pufe = mascara_pdf(Q, [q["mesas_laterais"][1]])
+    _, quad = mascara_pdf(Q, [q["mesa_quadrada"]])
+    _, tap = mascara_pdf(Q, [q["tapete"]])
+    # o piso por baixo da poltrona e do pufe de antes (a mesa quadrada fica): as tábuas deitadas, linha a linha
+    # (a folga leva junto a sombra da poltrona e do pufe de antes, para baixo e para a esquerda)
+    buraco = (dilatar(pol, q["folga_px"]) | dilatar(pufe, q["folga_pufe_px"])) & ~dilatar(quad, 1) & ~par
+    im = out.astype(np.int16)
+    madeira = (im.max(axis=2) - im.min(axis=2)) >= 40
+    fonte = madeira & ~dilatar(quad, 8) & ~dilatar(tap, 2) & ~par          # (8: fora a sombra da mesa quadrada)
+    out = piso_saltando(out, buraco, fonte, alcance=70, ancorar=True)
+    pecas = []
+    x0, y0, x1, y1 = caixa_pdf(Q, q["tapete"])
+    pecas.append(("B1", "sala-intima/tapete", (x0 + x1) / 2, (y0 + y1) / 2, y1 - y0, x1 - x0, 90.0, "tapete", None))
+    xs0, ys0, xs1, ys1 = [f(v) for f, v in zip((min, min, max, max),
+                                                zip(*[caixa_pdf(Q, i) for i in q["sofa"]]))]
+    pecas.append(("B1", "sala-intima/sofa-l-a", (xs0 + xs1) / 2, (ys0 + ys1) / 2, xs1 - xs0, ys1 - ys0, 0.0, "movel",
+                  "anti_t"))
+    for p in pecas:
+        it = item_bib(*p)
+        out = pousar_bib(out, it, par)
+        reg["pecas"].append(it)
+    out = recorte_de_volta(Q, out, antes, [q["mesa_centro"]], reg["pecas"])
+    for i in q["mesas_laterais"]:
+        x0, y0, x1, y1 = caixa_pdf(Q, i)
+        D = ((x1 - x0) + (y1 - y0)) / 2
+        it = item_bib("B1", "sala-intima/mesa-lateral", (x0 + x1) / 2, (y0 + y1) / 2, D, D, 0.0, "baixa", None)
+        out = pousar_bib(out, it, par)
+        reg["pecas"].append(it)
+    ys, xs = np.nonzero(pol)
+    w, h = q["poltrona_px"]
+    it = item_bib("B1", "sala-intima/poltrona-a", float(xs.mean()), float(ys.mean()), w, h, q["poltrona_giro"], "movel",
+                  None)
+    out = pousar_bib(out, it, par)
+    reg["pecas"].append(it)
+    out = recorte_de_volta(Q, out, antes, [q["mesa_quadrada"]], reg["pecas"])
+    print("    sala íntima: o tapete, o sofá em L A, as 2 mesas laterais e a poltrona A da Casa A (a mesa de centro e a "
+          "quadrada ficam)")
+    return out
+
+
+def jantar(Q, out, par, reg, q=JANTAR_TB):
+    a, mesa = mascara_pdf(Q, [q["mesa"]])
+    buraco = np.zeros(par.shape, bool)
+    for i, _ in q["cadeiras"]:
+        x0, y0, x1, y1 = caixa_pdf(Q, i)
+        f = q["folga_px"]
+        buraco[int(np.floor(y0)) - f:int(np.ceil(y1)) + f, int(np.floor(x0)) - f:int(np.ceil(x1)) + f] = True
+    buraco &= ~dilatar(mesa, 1) & ~par
+    im = out.astype(np.int16)
+    claro = (im.mean(axis=2) > 150) & ((im.max(axis=2) - im.min(axis=2)) < 45)
+    fonte = claro & ~dilatar(mesa, 2) & ~par
+    # o travertino tem os veios em pé: em cima e embaixo, coluna a coluna; nas pontas, linha a linha
+    lados = np.zeros(par.shape, bool)
+    for i, g in q["cadeiras"]:
+        if g in (90.0, -90.0):
+            x0, y0, x1, y1 = caixa_pdf(Q, i)
+            lados[int(y0) - 8:int(y1) + 9, int(x0) - 8:int(x1) + 9] = True
+    out = piso_saltando(out, buraco & ~lados, fonte, alcance=30, eixo="y")
+    out = piso_saltando(out, buraco & lados, fonte, alcance=30, eixo="x")
+    fonte_mesa = out.copy()
+    ca = np.zeros(par.shape, np.float32)
+    for i, g in q["cadeiras"]:
+        x0, y0, x1, y1 = caixa_pdf(Q, i)
+        it = item_bib("BT", "sala-de-jantar/cadeira-jantar-oliva-render", (x0 + x1) / 2, (y0 + y1) / 2, q["larg"], None,
+                      g, "movel", None)
+        P, wt, ht = preparar_bib(it)
+        it["alt"] = float(ht)
+        out = pousar_bib(out, it, par)
+        reg["pecas"].append(it)
+        ca = np.maximum(ca, _alfa_peca(P, it["cx"], it["cy"], wt, ht, g, par.shape))
+    out = mesa_por_cima(out, fonte_mesa, a, ca, reg)
+    print(f"    jantar: as {len(q['cadeiras'])} cadeiras oliva da Casa A no lugar das bordô (a mesa de volta por cima)")
+    return out
+
+
+def espreguicadeiras_prainha(Q, out, par, reg, q=ESPREG_TB):
+    for i in q["pdf"]:
+        x0, y0, x1, y1 = caixa_pdf(Q, i)
+        it = item_bib("BT", q["png"], (x0 + x1) / 2, (y0 + y1) / 2, y1 - y0, x1 - x0, q["giro"], None, None)
+        out = pousar_bib(out, it, par)
+        reg["pecas"].append(it)
+    print("    prainha: as 2 espreguiçadeiras A, a cabeceira à direita")
+    return out
+
+
+def banquetas(out, par, reg, q=BANQUETAS_TB):
+    meia, ytopo = q["velhas_px"]
+    yb = int(np.floor(q["borda_y"]))
+    buraco = np.zeros(par.shape, bool)
+    for x in q["xs"]:
+        buraco[ytopo:yb, int(x - meia):int(x + meia) + 1] = True
+    buraco &= ~par
+    im = out.astype(np.int16)
+    fonte = (im.mean(axis=2) > 150) & ~par
+    out = piso_saltando(out, buraco, fonte, alcance=30)
+    for x in q["xs"]:
+        it = item_bib("BT", q["png"], x, q["borda_y"] - 2.0, q["larg"], None, 0.0, "movel", None)
+        it["corte_y"] = q["borda_y"]
+        P, wt, ht = preparar_bib(it)
+        it["alt"] = float(ht)
+        out = pousar_bib(out, it, par)
+        reg["pecas"].append(it)
+    print(f"    gourmet: as {len(q['xs'])} banquetas B da Casa A, ~40% por baixo da bancada")
+    return out
+
+
 def mobiliario(Q, out, par, reg, q=MOBILIARIO_TB):
     antes = out.copy()
     out = balcao(out, par)
@@ -939,6 +1146,11 @@ def mobiliario(Q, out, par, reg, q=MOBILIARIO_TB):
         out = B1.abajur(out, cx, cy, D)
         reg["topo"].append({"tipo": "abajur", "cx": cx, "cy": cy, "d": D})
     out = cadeiras(Q, out, par, reg)
+    # a 2ª etapa
+    out = sala_intima(Q, out, par, reg)
+    out = jantar(Q, out, par, reg)
+    out = espreguicadeiras_prainha(Q, out, par, reg)
+    out = banquetas(out, par, reg)
     if "ok" in _ESQ:                 # no 12K, o contorno das esquadrias não passa por cima das peças novas
         mud = np.abs(out.astype(np.int16) - antes.astype(np.int16)).max(axis=2) > 2
         _ESQ["ok"] &= ~mud

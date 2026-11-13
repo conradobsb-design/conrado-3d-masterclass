@@ -2585,8 +2585,23 @@ registro (`topo_12k`): a mesa da saída do Topaz, pelo alfa do PDF ampliado. O c
 cima das peças novas. Corrigido junto: na final de ca1ed82 os 4 rótulos em grade saíram em dobro (a 2ª rodada lia dos
 dados os desvios já movidos e tirava o rótulo de antes no lugar novo); o desvio de partida agora vem dos dados do
 `ANTES_COMMIT`. Antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_mob_<trecho>_antes_depois.jpg`.
-Para a 2ª etapa (o piso a refazer): a sala íntima (sofá em L, 2 poltronas, mesa lateral e tapete da Casa A), as 10
-cadeiras oliva do jantar, as espreguiçadeiras A da piscina e as banquetas B da gourmet.
+**A 2ª etapa ("PODE FAZER A 2ª ETAPA"; `SALA_INTIMA_TB`, `JANTAR_TB`, `ESPREG_TB`, `BANQUETAS_TB`):** o que refaz o
+piso por baixo das peças de antes (`piso_saltando`: linha a linha ou coluna a coluna, pulando o que não é piso até
+achar a fonte; `ancorar` deixa as emendas das tábuas em pé numa beira inclinada; um lado com menos de 4 px de fonte, a
+beira escura junto a uma parede, não serve):
+- sala íntima: o tapete, o sofá em L A (o "anti_t" da Casa A: o corpo comprido contra a parede da direita e a ponta em
+  cima; com os traços finos do encosto do PDF, 92% de sobreposição com o L), as 2 mesas laterais redondas nos círculos
+  do PDF e a poltrona A no símbolo do PDF (o encosto para o elevador, a frente para a sala; 225°, 50 x 52 px); a mesa de
+  centro redonda e a mesa quadrada ficam (de volta por cima, pelo contorno do PDF). O PDF tem uma poltrona só (a
+  proposta dizia 2): o quadrado girado ao lado é uma mesa;
+- jantar: as 10 cadeiras oliva da Casa A (30 px) no centro de cada cadeira do PDF, viradas para a mesa (o travertino
+  refeito coluna a coluna em cima e embaixo, linha a linha nas pontas); a mesa e o aparador ficam, a mesa de volta por
+  cima com a sombra curta nas cadeiras (`mesa_por_cima`; no 12K, a da saída do Topaz);
+- prainha: as 2 espreguiçadeiras A (`02-terreo/deck-piscina/espreguicadeira-a.png`, trazida do pacote da biblioteca) no
+  retângulo do PDF, a cabeceira à direita (a parte menor do PDF);
+- gourmet: as 5 banquetas B (25 px) no lugar das 5 de hoje (o PDF desenha 4, desiguais), ~40% por baixo da bancada (a
+  borda em y 1319,3): as linhas do PNG além dela saem (`corte_y`, também no 12K).
+Antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_mob_{sala_intima,jantar,prainha,banquetas}_antes_depois.jpg`.
 
 **A proposta do mobiliário (13/11):** `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1311_proposta_biblioteca_{1,2,3}.jpg`
 (17 trechos; as escolhas da Casa A marcadas). O usuário: "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO

@@ -622,6 +622,293 @@
    "giro": 90.0,
    "sombra": "movel",
    "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "sala-intima/tapete",
+   "cx": 1730.6445803428146,
+   "cy": 438.58701122470785,
+   "larg": 161.21446803683318,
+   "alt": 149.69952999306793,
+   "giro": 90.0,
+   "sombra": "tapete",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "sala-intima/sofa-l-a",
+   "cx": 1762.1574593664395,
+   "cy": 439.0885410917742,
+   "larg": 119.6569781482956,
+   "alt": 161.21446803683318,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": "anti_t"
+  },
+  {
+   "tipo": "recorte",
+   "c": [
+    1664,
+    423,
+    1734,
+    493
+   ]
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "sala-intima/mesa-lateral",
+   "cx": 1706.3190961457324,
+   "cy": 368.19602159402723,
+   "larg": 20.792212068999703,
+   "alt": 20.792212068999703,
+   "giro": 0.0,
+   "sombra": "baixa",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "sala-intima/mesa-lateral",
+   "cx": 1656.9427029182116,
+   "cy": 596.6339408143958,
+   "larg": 20.79214778678147,
+   "alt": 20.79214778678147,
+   "giro": 0.0,
+   "sombra": "baixa",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "B1",
+   "png": "sala-intima/poltrona-a",
+   "cx": 1693.733136593592,
+   "cy": 585.7449409780776,
+   "larg": 50.0,
+   "alt": 52.0,
+   "giro": 225.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "recorte",
+   "c": [
+    1636,
+    528,
+    1692,
+    584
+   ]
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "sala-de-jantar/cadeira-jantar-oliva-render",
+   "cx": 1789.4639671543107,
+   "cy": 1104.0937139531536,
+   "larg": 30.0,
+   "alt": 38.57142857142857,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "sala-de-jantar/cadeira-jantar-oliva-render",
+   "cx": 1829.35860462023,
+   "cy": 1104.0937139531536,
+   "larg": 30.0,
+   "alt": 38.57142857142857,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "sala-de-jantar/cadeira-jantar-oliva-render",
+   "cx": 1872.2117669005374,
+   "cy": 1104.0937139531536,
+   "larg": 30.0,
+   "alt": 38.57142857142857,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "sala-de-jantar/cadeira-jantar-oliva-render",
+   "cx": 1911.9541197913375,
+   "cy": 1104.0937139531536,
+   "larg": 30.0,
+   "alt": 38.57142857142857,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "sala-de-jantar/cadeira-jantar-oliva-render",
+   "cx": 1789.4639671543107,
+   "cy": 1187.3789130442503,
+   "larg": 30.0,
+   "alt": 38.57142857142857,
+   "giro": 180.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "sala-de-jantar/cadeira-jantar-oliva-render",
+   "cx": 1829.35860462023,
+   "cy": 1187.3789130442503,
+   "larg": 30.0,
+   "alt": 38.57142857142857,
+   "giro": 180.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "sala-de-jantar/cadeira-jantar-oliva-render",
+   "cx": 1872.2117669005374,
+   "cy": 1187.3789130442503,
+   "larg": 30.0,
+   "alt": 38.57142857142857,
+   "giro": 180.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "sala-de-jantar/cadeira-jantar-oliva-render",
+   "cx": 1911.9541197913375,
+   "cy": 1187.3789130442503,
+   "larg": 30.0,
+   "alt": 38.57142857142857,
+   "giro": 180.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "sala-de-jantar/cadeira-jantar-oliva-render",
+   "cx": 1746.6003911546409,
+   "cy": 1146.208080698702,
+   "larg": 30.0,
+   "alt": 38.57142857142857,
+   "giro": 90.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "sala-de-jantar/cadeira-jantar-oliva-render",
+   "cx": 1954.6207350741797,
+   "cy": 1146.208080698702,
+   "larg": 30.0,
+   "alt": 38.57142857142857,
+   "giro": -90.0,
+   "sombra": "movel",
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "deck-piscina/espreguicadeira-a",
+   "cx": 987.3757424361753,
+   "cy": 1170.7723733367166,
+   "larg": 44.107115512410246,
+   "alt": 115.79380967596967,
+   "giro": -90.0,
+   "sombra": null,
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "deck-piscina/espreguicadeira-a",
+   "cx": 987.3757424361753,
+   "cy": 1247.817890345459,
+   "larg": 44.10698694797361,
+   "alt": 115.79380967596967,
+   "giro": -90.0,
+   "sombra": null,
+   "extra": null
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-gourmet/banqueta-b",
+   "cx": 1321.5,
+   "cy": 1317.3,
+   "larg": 25.0,
+   "alt": 26.84426229508197,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": null,
+   "corte_y": 1319.3
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-gourmet/banqueta-b",
+   "cx": 1370.0,
+   "cy": 1317.3,
+   "larg": 25.0,
+   "alt": 26.84426229508197,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": null,
+   "corte_y": 1319.3
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-gourmet/banqueta-b",
+   "cx": 1420.0,
+   "cy": 1317.3,
+   "larg": 25.0,
+   "alt": 26.84426229508197,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": null,
+   "corte_y": 1319.3
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-gourmet/banqueta-b",
+   "cx": 1470.0,
+   "cy": 1317.3,
+   "larg": 25.0,
+   "alt": 26.84426229508197,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": null,
+   "corte_y": 1319.3
+  },
+  {
+   "tipo": "bib",
+   "leitor": "BT",
+   "png": "area-gourmet/banqueta-b",
+   "cx": 1519.0,
+   "cy": 1317.3,
+   "larg": 25.0,
+   "alt": 26.84426229508197,
+   "giro": 0.0,
+   "sombra": "movel",
+   "extra": null,
+   "corte_y": 1319.3
   }
  ],
  "topo": [
@@ -686,6 +973,15 @@
     449,
     1229,
     508
+   ]
+  },
+  {
+   "tipo": "mesa_topo",
+   "c": [
+    1712,
+    1075,
+    1984,
+    1223
    ]
   }
  ]
