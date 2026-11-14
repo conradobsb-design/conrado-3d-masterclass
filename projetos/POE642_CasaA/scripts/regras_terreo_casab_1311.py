@@ -131,7 +131,7 @@ ELEVADOR_TB = (1720, 515, 1825, 665)          # a caixa do elevador (px), fora d
 # cada folha, caixilho e vidro de box em preto, o vidro claro por dentro (com 1,1 px, os dois lados das folhas finas
 # viravam uma barra preta)
 ESQUADRIAS_TB = {"perfil": (34, 34, 36), "traco_px": 0.5, "ss": 8, "forca": 1.6, "croma_max": 16, "lum_min": 120,
-                 "box_larg_px": 1.5, "box_comp_px": 40, "box_raio_px": 80, "chuveiro_folga_px": 3}
+                 "box_larg_px": 1.5, "box_comp_px": 40, "box_raio_px": 80, "chuveiro_folga_px": 3, "boxes_pretos": False}
 _ESQ = {}                 # onde a final aceita o perfil (bool, px da final), para o 12K
 # os tapetes das suítes (usuário: "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO O RETOQUE EM VOLTA DO
 # CONTORNO E NOS TAPETES"): o tapete do PDF (o índice do desenho) refeito inteiro com o da biblioteca no tom do de hoje
@@ -513,6 +513,10 @@ def _tracos_esquadrias(Q, q=ESQUADRIAS_TB):
         pts = np.concatenate([np.asarray(c) for c in cs])
         w, h = pts.max(0) - pts.min(0)
         if d.get("layer") == "ARQ_LOUÇAS E METAIS":
+            # (14/11, "ESSE É O ESTILO DE BOX DE CHUVEIRO ... PARA TODOS OS BANHEIROS. NADA DE ESQUADRIA PRETA") os
+            # vidros dos boxes ficam no vidro claro com o fio cinza, sem o contorno preto
+            if not q["boxes_pretos"]:
+                continue
             if not (min(w, h) <= q["box_larg_px"] and max(w, h) >= q["box_comp_px"]):
                 continue
             # só os vidros dos boxes: perto de um chuveiro (os traços longos das camas e dos recamiers, na mesma camada,

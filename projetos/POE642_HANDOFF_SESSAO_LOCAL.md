@@ -4427,3 +4427,12 @@ o filete entre a garagem e a pedra portuguesa (e os pontinhos claros do piso da 
 área de serviço; a bancada dos tanques em granito marrom tabaco; o quarto de serviço mobiliado (cama de solteiro, guarda-roupa, o rótulo mais para cima); a cuba e a bancada do BH serviço (marrom tabaco, louça branca, torneira cromada); as 2 portas de giro da área de serviço descoberta com a folha de madeira e a soleira; a cozinha (bancadas e ilha em Dekton Danae, os 2 armários altos de volta e as prateleiras do louceiro na cor dos armários); o vão das portas das varandas no vinílico do quarto; os guarda-roupas em L e em U sem divisão; o armário da entrada do quarto 1; os tapetes dos quartos 1 e 3 inteiros, a mesa lateral do quarto 1 e o contorno das camas; o "²" do rótulo do quarto 2; sem o tracejado do lote. Antes e depois em
 `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`. Prancha, PDF da Casa C e book
 refeitos. O 12K do Térreo se refaz (Topaz) no fim da revisão.
+
+### Padrões de 14/11: portas dos quartos e boxes de chuveiro (todas as casas)
+
+- "ESSE É O PADRÃO PARA UTILIZAR EM TODOS OS QUARTOS ... ADOTE PARA TODAS AS CASAS" (o recorte da suíte master da Casa
+  B) e "AS FOLHAS DAS PORTAS DE MADEIRA PRECISAM SE ENCONTRAR, BEM COMO AS FOLHAS DE VIDRO": `esquadrias_quartos.py`;
+  aplicado no Térreo da Casa C (quartos 1, 2, 3 e suíte master); Casa A 1º Pav e Casa B Térreo já estavam no padrão.
+- "ESSE É O ESTILO DE BOX DE CHUVEIRO ... NADA DE ESQUADRIA PRETA": Casa B Térreo sem o contorno preto nos boxes
+  (`regras_terreo_casab_1311`, cadeia completa com o 12K A e B); Casa C, as folhas do BH master 1; A e C já no padrão.
+- Casas D e E: os PDFs do cliente não estão nesta sessão (`_pdfs_cliente/` só tem A, B e C); falta aplicar lá.

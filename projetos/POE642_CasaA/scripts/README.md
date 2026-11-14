@@ -2753,7 +2753,10 @@ desenho das Casas A e B: "REVISE TODOS OS ARMÁRIOS E REMOVA DIVISÓRIAS. ELES F
 o degrau do piso refeito do mobiliário; o piso em volta da poltrona, do pufe e das cadeiras no vinílico do quarto; a
 mesa lateral do quarto 1 em madeira; o contorno claro de todas as camas fora: "CORRIJA NO QUARTO 1 E 2 OS TAPETES ...
 REVISE TODAS AS CAMAS"); `m2_quarto2` (o "²" do rótulo do quarto 2, que tinha sido cortado, de volta, copiado
-do rótulo do quarto 3: "CORRIJA O M² DO QUARTO 2"); `tracejado_lote` (o
+do rótulo do quarto 3: "CORRIJA O M² DO QUARTO 2"); `portas_quartos` (o padrão das portas dos quartos,
+`esquadrias_quartos.py`: os vãos de 4 trilhos achados no PDF, as folhas de madeira de fora em ripado, as de vidro em
+vidro claro, o vão no piso do quarto e as folhas de cada grupo se encontrando em degrau); `folhas_bh_master` (as 2
+folhas de vidro do BH master 1 em vidro claro, sem a barra escura); `tracejado_lote` (o
 retângulo tracejado do lote em branco e o muro de baixo cortado na borda do lote: "REMOVA ESSE TRACEJADO EM VOLTA DA
 PLANTA"). Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`.
 Rodar sem `--antes` refaz a final a partir de 48a23e8.
@@ -2917,3 +2920,16 @@ Os pedidos do usuário vendo o Térreo da Casa B (com os recortes da prancha), s
 - **rotulos:** (usuário: "centralize todos os rótulos e deixe-os alinhados") os 32 rótulos (menos os da água, dos jardins e o ELEVADOR) saem e voltam no meio do piso livre de cada ambiente, alinhados pela linha de baixo do texto em 7 faixas (banhos, suítes, closet e sala íntima, living e halls, louceiro/despensa/área de serviço, BH e quarto de serviço, banhos e lavatório gourmet) e numa coluna (depósito, quarto e BH do motorista); onde não cabe, cai a 0,85 e 0,72; o BH SERVIÇO fica no lugar achado (`no_lugar`); depois (usuário: "alinhe sala intima com circulação"; "coloque o rótulo da varanda/gourmet mais a direita sem ficar na sombra do sofá, mas alinhado com o rótulo do living"; "corrija o rótulo do louceiro para cor branca e centralizado"): SALA ÍNTIMA na faixa da CIRCULAÇÃO, que não sai do lugar (`ancoras`); VARANDA/GOURMET entre a sombra do sofá e a linha da varanda, a 0,92, na linha do LIVING (`fixos`); LOUCEIRO branco no meio do piso marrom (`fixos`).
 
 **Como refazer:** `CACHE_TB=<pasta> python3 pedidos_terreo_casab_1211.py --antes <a final do Térreo da Casa B de 21fa118> --antes_depois` (sem `--saida`, grava a final em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_final_rotulos.png`; `--de`/`--ate <passo>` e `--passos <pasta>` para testar um trecho; `CACHE_TB` guarda os tecidos demorados); os antes e depois em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1211_<trecho>_antes_depois.jpg`; a 2ª leva (do bege das escadas aos rótulos, contra a final de 90dca67) em `..._1211b_<trecho>_antes_depois.jpg`; a 3ª (poltronas da varanda, rótulos, brises, despensa, pontos, contra a final de 0239e34) em `..._1211c_<trecho>_antes_depois.jpg`. A 4ª (o estar do living, contra a final de db4cbf8) em `..._1211d_{living_estar,varanda_living}_antes_depois.jpg`. A 5ª (varanda, cozinha, registros, contra a final de f76d874) em `..._1211e_<trecho>_antes_depois.jpg`. A 6ª (as camas, contra a final de 87dab88) em `..._1211f_{camas_suite_master,camas_suites_1_2,camas_suite_3,cama_quarto_servico,cama_quarto_motorista}_antes_depois.jpg`. Depois `rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --no-quadro --render Terreo=../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_final_rotulos.png`, `pdf_entrega.py --config ../../POE642_CasaB/config_bases.json` e `book_entrega.py`.
+
+### Padrões de 14/11: portas dos quartos e boxes (`esquadrias_quartos.py`)
+
+"ESSE É O PADRÃO PARA UTILIZAR EM TODOS OS QUARTOS DE ESQUADRIA DE VIDRO E PORTA DE MADEIRA EXTERNA, DIVIDIDOS EM FOLHAS
+... ADOTE PARA TODAS AS CASAS" e "ESSE É O ESTILO DE BOX DE CHUVEIRO ... PARA TODOS OS BANHEIROS. NADA DE ESQUADRIA
+PRETA". `esquadrias_quartos.vaos_pdf(Q)` acha no PDF os vãos de 4 trilhos de folhas (as peças brancas finas da
+ARQ_PAREDE) junto ao piso laranja dos quartos; `aplicar(Q, img, vaos)` desenha as folhas de fora em ripado de nogueira
+(`um_pav_casaa_1111.FOLHAS_1P`), as de dentro em vidro claro (`final3840_casab.BOXES_VIDRO`), o vão no piso do quarto e
+as folhas de cada grupo se encontrando (`_encontrar`). Levantamento: Casa A 1º Pav e Casa B Térreo já estavam no padrão
+(a referência); Casa C Térreo aplicado (4 vãos); as Casas A, B e C não têm outros quartos com esse vão; os PDFs das Casas
+D e E não estão nesta sessão. Boxes: na Casa B Térreo o contorno preto de `regras_terreo_casab_1311.esquadrias` saiu dos
+vidros dos boxes (`ESQUADRIAS_TB["boxes_pretos"] = False`; a final, o 12K A e B, a prancha e o PDF refeitos pela
+cadeia); na Casa C, as 2 folhas do BH master 1; as Casas A e C (outros boxes) já estavam no vidro claro.

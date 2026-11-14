@@ -268,6 +268,13 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   piso por cima. [C Térreo]
 - [ ] **Seta da entrada:** o triângulo cheio das escadas, centrado no vão da porta, do lado de fora, com a ponta para
   dentro (nunca a seta grande). [B Térreo; C Térreo]
+- [ ] **Portas dos quartos (padrão, todas as casas):** nos vãos de 4 trilhos (porta de vidro de correr e, por fora, as
+  folhas de madeira de correr), folha por folha como no PDF: as de fora no ripado de nogueira (Casa A 1º Pav, Casa B
+  Térreo), as de dentro em vidro claro com as faces finas, o vão entre elas no piso do quarto; as duas folhas de cada
+  grupo se encontram, em degrau, com uma sobreposição curta ("ADOTE PARA TODAS AS CASAS"; "AS FOLHAS ... PRECISAM SE
+  ENCONTRAR"). `esquadrias_quartos.py`. [A 1º Pav; B Térreo; C Térreo; D e E: falta o PDF]
+- [ ] **Box de chuveiro (padrão, todos os banheiros):** vidro claro com o fio cinza fino, nunca esquadria preta
+  ("NADA DE ESQUADRIA PRETA"). [A; B; C; D e E: falta o PDF]
 - [ ] **Guarda-roupas em L e em U contínuos** (sem a divisão no canto, os cabides se encontrando), em todas as casas.
   [A 1º Pav; B Térreo; C Térreo]
 - [ ] **Piso refeito em volta de peças nunca entra no tapete** e fica no tom do piso de agora; camas sem o contorno claro

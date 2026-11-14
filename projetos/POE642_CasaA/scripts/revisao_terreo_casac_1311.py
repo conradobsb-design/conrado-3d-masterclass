@@ -93,6 +93,13 @@ Sobre a final de `ANTES_COMMIT` (a do 12K de 13/11: o estar E1 e o paisagismo da
 - **"CORRIJA O M² DO QUARTO 2"** (`m2_quarto2`): o "²" do rótulo do quarto 2 tinha sido cortado (sobrava um ponto); os
   restos saem (o piso de volta) e o "²" do rótulo do quarto 3 (a mesma letra e o mesmo corpo) entra logo depois do "m",
   na mesma posição relativa (10 px depois do começo do "m", 3 px acima do topo dele).
+- **"ESSE É O PADRÃO PARA UTILIZAR EM TODOS OS QUARTOS DE ESQUADRIA DE VIDRO E PORTA DE MADEIRA EXTERNA, DIVIDIDOS EM
+  FOLHAS ... ADOTE PARA TODAS AS CASAS"** (`portas_quartos`, `esquadrias_quartos.py`): nos vãos dos quartos 1, 2 e 3 e
+  da suíte master (os 4 trilhos de folhas do PDF), as folhas de fora no ripado de nogueira das Casas A e B, as de dentro
+  em vidro claro com as faces finas, e o vão entre elas no piso do quarto (as réguas de logo depois, espelhadas).
+- **"ESSE É O ESTILO DE BOX DE CHUVEIRO ... PARA TODOS OS BANHEIROS. NADA DE ESQUADRIA PRETA"** (`folhas_bh_master`): as
+  duas folhas de vidro do BH master 1 (junto à divisória), que tinham saído em barras cinza-escuras, no vidro claro com as
+  faces finas; os outros boxes da Casa C já estavam assim.
 - **"REMOVA ESSE TRACEJADO EM VOLTA DA PLANTA"** (`tracejado_lote`): o retângulo tracejado do lote (x 296 a 3583, y 5 a
   2050, que encostava na borda do gramado à esquerda) sai: fora do lote, branco puro.
 
@@ -228,10 +235,12 @@ QUARTOS = {"tapetes": [{"pdf": 53797, "amostra": (1983, 530, 2003, 562)},
 # o "²": a janela do "²" no rótulo do quarto 3 (px) e onde ele vai no quarto 2 (o canto de cima à esquerda); a caixa dos
 # restos no quarto 2 e o escuro dos restos (fração do piso)
 M2 = {"fonte": (1267, 444, 1273, 453), "destino": (1597, 447), "restos": (1597, 445, 1604, 457), "escuro": 0.9}
+# as folhas de vidro do BH master 1 (px, ARQ_BANCADAS): (x0, y0, x1, y1, deitada)
+FOLHAS_BHM = [(825.9, 370.4, 828.3, 411.6, False), (830.1, 370.4, 832.5, 411.6, False)]
 LOTE = {"abre_px": 5, "nb": 245, "corpo": 0.8}
 ANTES_DEPOIS = {"lavabos": (1080, 1480, 1640, 1700), "quartos": (300, 260, 2300, 760),
                 "claraboias": (700, 230, 1100, 990), "hall": (2280, 1170, 2790, 1460), "garagem": (2690, 300, 3290, 700),
-                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600), "area_descoberta": (2440, 40, 2740, 260), "cozinha": (2150, 240, 2480, 720), "varandas": (1240, 240, 2180, 380), "closets": (880, 320, 1960, 980), "quarto_1": (1960, 340, 2180, 680), "quarto_3": (1180, 340, 1460, 600), "rotulo_quarto_2": (1560, 425, 1640, 470),
+                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600), "area_descoberta": (2440, 40, 2740, 260), "cozinha": (2150, 240, 2480, 720), "varandas": (1240, 240, 2180, 380), "closets": (880, 320, 1960, 980), "quarto_1": (1960, 340, 2180, 680), "quarto_3": (1180, 340, 1460, 600), "rotulo_quarto_2": (1560, 425, 1640, 470), "portas_quartos": (1240, 300, 2180, 360), "suite_master_bh": (730, 300, 900, 830),
                 "inteira": (0, 0, 3840, 2160)}
 
 
@@ -1112,6 +1121,20 @@ def m2_quarto2(img, q=M2):
     return out
 
 
+def portas_quartos(Q, img):
+    import esquadrias_quartos as EQ
+    return EQ.aplicar(Q, img, EQ.vaos_pdf(Q))
+
+
+def folhas_bh_master(img, fs=FOLHAS_BHM):
+    import esquadrias_quartos as EQ
+    o = img.astype(np.float32)
+    for x0, y0, x1, y1, hor in fs:
+        EQ._vidro(o, (x0, y0, x1, y1), hor, +1)
+    print(f"    BH master 1: as {len(fs)} folhas de vidro claras, sem a barra escura")
+    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+
+
 def tracejado_lote(img, q=LOTE):
     from scipy import ndimage
     nb = (img.min(axis=2) < q["nb"]).astype(np.uint8)
@@ -1156,6 +1179,8 @@ def aplicar(antes):
     out = armario_entrada(out)
     out = quartos(Q, out)
     out = m2_quarto2(out)
+    out = portas_quartos(Q, out)
+    out = folhas_bh_master(out)
     out = tracejado_lote(out)
     return out
 
