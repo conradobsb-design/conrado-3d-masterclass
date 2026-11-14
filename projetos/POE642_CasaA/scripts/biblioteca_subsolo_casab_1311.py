@@ -433,7 +433,24 @@ def aplicar(antes):
     # 6. a academia: os aparelhos da biblioteca no tamanho da Casa A (a bola fica)
     out, pecas = academia(Q, out, antes, par)
     reg["pecas"] += pecas
+    # 7. (14/11, "COMPLETE O CONTORNO PRETO ATÉ A PAREDE DEBAIXO. FALTOU UM PEQUENO TRECHO DA ÚLTIMA RIPA DE MADEIRA") o
+    # contorno da borda esquerda do deck da ducha (o cinza das paredes, 3 px) desce até a parede de baixo
+    out = contorno_ducha(out)
     return out, reg, par
+
+
+# o contorno da borda esquerda do deck da ducha: as colunas (px) e de onde até onde (a parede de baixo inclusa)
+CONTORNO_DUCHA = {"x": (759, 762), "y": (765, 777), "canto_x": 762, "canto_y": (770, 777), "cor": (80, 80, 80)}
+
+
+def contorno_ducha(out, q=CONTORNO_DUCHA):
+    x0, x1 = q["x"]
+    y0, y1 = q["y"]
+    out[y0:y1, x0:x1] = np.uint8(q["cor"])
+    c0, c1 = q["canto_y"]
+    out[c0:c1, q["canto_x"]] = np.uint8(q["cor"])
+    print(f"    ducha: o contorno da borda esquerda do deck até a parede de baixo (y {y0} a {y1})")
+    return out
 
 
 def salvar_registro(antes, depois, reg, par):

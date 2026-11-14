@@ -2933,3 +2933,12 @@ as folhas de cada grupo se encontrando (`_encontrar`). Levantamento: Casa A 1º 
 D e E não estão nesta sessão. Boxes: na Casa B Térreo o contorno preto de `regras_terreo_casab_1311.esquadrias` saiu dos
 vidros dos boxes (`ESQUADRIAS_TB["boxes_pretos"] = False`; a final, o 12K A e B, a prancha e o PDF refeitos pela
 cadeia); na Casa C, as 2 folhas do BH master 1; as Casas A e C (outros boxes) já estavam no vidro claro.
+
+### Subsolo da Casa B, o contorno do deck da ducha (14/11)
+
+"COMPLETE O CONTORNO PRETO ATÉ A PAREDE DEBAIXO. FALTOU UM PEQUENO TRECHO DA ÚLTIMA RIPA DE MADEIRA": o contorno da borda
+esquerda do deck da ducha (o cinza das paredes, 3 px, x 759 a 761) parava em y 764, e a última ripa ficava sem ele até
+a parede de baixo; agora desce até ela (`biblioteca_subsolo_casab_1311.contorno_ducha`, o último passo do `aplicar`).
+Aplicado direto sobre a final (a final atual vem dos pedidos sobre 21fa118 com a biblioteca por cima), o trecho marcado
+na zona do 12K (`REG_MASC`); 12K A e B (`ampliacao_12k_subsolo_casab.py montar12k`, a mesma saída do Topaz), prancha,
+PDF da Casa B e book refeitos. Antes e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1411_contorno_ducha_antes_depois.jpg`.
