@@ -90,6 +90,9 @@ Sobre a final de `ANTES_COMMIT` (a do 12K de 13/11: o estar E1 e o paisagismo da
   redonda de madeira da biblioteca, com a sombra curta. Em todas as camas, o contorno claro da cama de antes (as faixas
   claras e cinzas entre a cama nova e o tapete ou o piso) sai: o tapete ou o piso de logo ao lado, copiado para dentro, e
   a sombra curta da cama.
+- **"CORRIJA O M² DO QUARTO 2"** (`m2_quarto2`): o "²" do rótulo do quarto 2 tinha sido cortado (sobrava um ponto); os
+  restos saem (o piso de volta) e o "²" do rótulo do quarto 3 (a mesma letra e o mesmo corpo) entra logo depois do "m",
+  na mesma posição relativa (10 px depois do começo do "m", 3 px acima do topo dele).
 - **"REMOVA ESSE TRACEJADO EM VOLTA DA PLANTA"** (`tracejado_lote`): o retângulo tracejado do lote (x 296 a 3583, y 5 a
   2050, que encostava na borda do gramado à esquerda) sai: fora do lote, branco puro.
 
@@ -222,10 +225,13 @@ QUARTOS = {"tapetes": [{"pdf": 53797, "amostra": (1983, 530, 2003, 562)},
            "poltronas": ["quarto 1"], "cadeiras": ["quarto 1", "quarto 3"],
            "mesa_lateral": {"pdf": 88573, "png": "suite-3/criado-redondo", "d": 18.0, "quarto": "q1"},
            "anel_px": 4, "salto_px": 3, "salto_max_px": 14, "viz_px": 6, "texto_lum": 90, "madeira_rb": 40, "madeira_lum": 178}
+# o "²": a janela do "²" no rótulo do quarto 3 (px) e onde ele vai no quarto 2 (o canto de cima à esquerda); a caixa dos
+# restos no quarto 2 e o escuro dos restos (fração do piso)
+M2 = {"fonte": (1267, 444, 1273, 453), "destino": (1597, 447), "restos": (1597, 445, 1604, 457), "escuro": 0.9}
 LOTE = {"abre_px": 5, "nb": 245, "corpo": 0.8}
 ANTES_DEPOIS = {"lavabos": (1080, 1480, 1640, 1700), "quartos": (300, 260, 2300, 760),
                 "claraboias": (700, 230, 1100, 990), "hall": (2280, 1170, 2790, 1460), "garagem": (2690, 300, 3290, 700),
-                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600), "area_descoberta": (2440, 40, 2740, 260), "cozinha": (2150, 240, 2480, 720), "varandas": (1240, 240, 2180, 380), "closets": (880, 320, 1960, 980), "quarto_1": (1960, 340, 2180, 680), "quarto_3": (1180, 340, 1460, 600),
+                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600), "area_descoberta": (2440, 40, 2740, 260), "cozinha": (2150, 240, 2480, 720), "varandas": (1240, 240, 2180, 380), "closets": (880, 320, 1960, 980), "quarto_1": (1960, 340, 2180, 680), "quarto_3": (1180, 340, 1460, 600), "rotulo_quarto_2": (1560, 425, 1640, 470),
                 "inteira": (0, 0, 3840, 2160)}
 
 
@@ -1076,6 +1082,36 @@ def quartos(Q, img, q=QUARTOS):
     return out
 
 
+def m2_quarto2(img, q=M2):
+    out = img.copy()
+    # os restos: o escuro na caixa, no piso de volta
+    x0, y0, x1, y1 = q["restos"]
+    sub = img[y0 - 4:y1 + 4, x0 - 4:x1 + 4]
+    L = sub.astype(np.float32).mean(axis=2)
+    piso = float(np.median(L))
+    m = np.zeros(L.shape, np.uint8)
+    m[4:-4, 4:-4] = (L[4:-4, 4:-4] < q["escuro"] * piso)
+    m = cv2.dilate(m, np.ones((3, 3), np.uint8))
+    m[:, :4] = 0                                             # o "m" fica (a caixa começa depois dele)
+    novo = cv2.inpaint(np.ascontiguousarray(sub), m * 255, 3, cv2.INPAINT_TELEA)
+    out[y0 - 4:y1 + 4, x0 - 4:x1 + 4][m > 0] = novo[m > 0]
+    # o "²" do quarto 3: o alfa (o escuro contra o piso de logo em volta) e a cor das letras
+    fx0, fy0, fx1, fy1 = q["fonte"]
+    g = img[fy0:fy1, fx0:fx1].astype(np.float32)
+    Lg = g.mean(axis=2)
+    fundo = float(np.percentile(Lg, 90))
+    tinta = float(Lg.min())
+    a = np.clip((fundo - Lg) / max(fundo - tinta, 1), 0, 1)
+    cor = g[Lg <= np.percentile(Lg, 10)].mean(axis=0)
+    dx, dy = q["destino"]
+    h, w = a.shape
+    reg = out[dy:dy + h, dx:dx + w].astype(np.float32)
+    reg = reg * (1 - a[..., None]) + cor * a[..., None]
+    out[dy:dy + h, dx:dx + w] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    quarto 2: o \"²\" do rótulo de volta ({int(m.sum())} px de restos fora)")
+    return out
+
+
 def tracejado_lote(img, q=LOTE):
     from scipy import ndimage
     nb = (img.min(axis=2) < q["nb"]).astype(np.uint8)
@@ -1119,6 +1155,7 @@ def aplicar(antes):
     out = closets(Q, out)
     out = armario_entrada(out)
     out = quartos(Q, out)
+    out = m2_quarto2(out)
     out = tracejado_lote(out)
     return out
 

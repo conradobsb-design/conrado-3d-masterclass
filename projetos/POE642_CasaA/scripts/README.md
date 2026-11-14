@@ -2752,7 +2752,8 @@ desenho das Casas A e B: "REVISE TODOS OS ARMÁRIOS E REMOVA DIVISÓRIAS. ELES F
 (o armário raso da entrada do quarto 1, de costas para o closet); `quartos` (os tapetes dos quartos 1 e 3 inteiros, sem
 o degrau do piso refeito do mobiliário; o piso em volta da poltrona, do pufe e das cadeiras no vinílico do quarto; a
 mesa lateral do quarto 1 em madeira; o contorno claro de todas as camas fora: "CORRIJA NO QUARTO 1 E 2 OS TAPETES ...
-REVISE TODAS AS CAMAS"); `tracejado_lote` (o
+REVISE TODAS AS CAMAS"); `m2_quarto2` (o "²" do rótulo do quarto 2, que tinha sido cortado, de volta, copiado
+do rótulo do quarto 3: "CORRIJA O M² DO QUARTO 2"); `tracejado_lote` (o
 retângulo tracejado do lote em branco e o muro de baixo cortado na borda do lote: "REMOVA ESSE TRACEJADO EM VOLTA DA
 PLANTA"). Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`.
 Rodar sem `--antes` refaz a final a partir de 48a23e8.
