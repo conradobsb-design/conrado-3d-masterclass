@@ -621,9 +621,11 @@ def portas_banho_master(RT, Q, out, par, reg, q=PORTAS_BM):
         prims += [{"t": "ret", "c": list(r), "cor": q["folha"]},
                   {"t": "fio", "c": list(r), "cor": PERFIL, "px": q["perfil_px"]}]
     rs = np.float32(q["parede"] + q["folhas"])
+    # no 12K também sobre as paredes do PDF (a ponta da folha de correr da direita passa por cima do bolso; com a
+    # máscara das paredes ela sumia ali e o 12K ficava com a mancha da emenda: "O SEU FINAL FALHOU")
     it = {"tipo": "rv_vetor", "nome": "portas_banho_master",
           "c": [float(rs[:, 0].min()), float(rs[:, 1].min()), float(rs[:, 2].max()), float(rs[:, 3].max())],
-          "prims": prims}
+          "prims": prims, "nao": False}
     out = pousar(out, it, None)
     reg["pecas"].append(it)
     print("    banho master: a parede de baixo pelo PDF (os 2 bolsos, os nichos, os batentes), as 4 folhas das portas de "

@@ -514,7 +514,10 @@ def pecas_12k(final, out, s, X0, Ya3, reg_json=None, reg_masc=None, peca=None):
         r = peca(it) if peca is not None else None
         if r is not None:
             P, cx, cy, wt, ht, ang, sb = r
-            out = BT.pousar(out, P, (cx - X0) * s, (cy - Ya3) * s, wt * s, ht * s, ang, sb, PX_M * s, nao=nao_fn)
+            # (14/11) `"nao": False` no item: desenhado também sobre as paredes do PDF, como na final (as folhas do banho
+            # master da Casa B passam por cima do bolso da parede)
+            out = BT.pousar(out, P, (cx - X0) * s, (cy - Ya3) * s, wt * s, ht * s, ang, sb, PX_M * s,
+                            nao=nao_fn if it.get("nao", True) else None)
             continue
         if it["tipo"] == "chuveiro":
             P, cx, cy, wt, ht, ang = chuveiro_pos(it["png"], tuple(it["placa_c"]), tuple(it["parede"]),
