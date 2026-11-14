@@ -115,7 +115,7 @@ PORTAS_BM = {"parede": [(1236.2, 503.6, 1244.0, 508.9), (1289.4, 501.8, 1344.8, 
              "folhas": [(1296.8, 507.5, 1344.8, 510.4), (1452.3, 507.5, 1500.4, 510.4), (1341.8, 507.8, 1392.6, 510.1),
                         (1404.5, 507.8, 1455.3, 510.1)],
              "vao": (1346.6, 501.8, 1450.5, 507.8), "vao_fonte_dy": -9,
-             "piso_px": (1234, 511, 1556, 519), "nicho": (232, 234, 236), "folha": (236, 238, 240), "perfil_px": 0.5,
+             "piso_px": (1234, 511, 1556, 519), "nicho": (232, 234, 236), "folha": (236, 238, 240), "perfil_px": 0.75,
              # (14/11, "PAREDE À ESQUERDA NAS PORTAS DO BANHO MASTER, UMA FALHA") a faixa do piso da suíte logo abaixo da
              # face da parede, inteira: os restos (rosa claro sob o nicho, a sombra escura sob o bolso) pareciam um dente
              "piso_faixa": [(1234, 511, 1346, 514), (1452, 511, 1556, 514)],

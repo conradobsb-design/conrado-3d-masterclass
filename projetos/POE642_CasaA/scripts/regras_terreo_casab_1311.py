@@ -143,8 +143,11 @@ ESQUADRIAS_TB = {"perfil": (34, 34, 36), "traco_px": 0.5, "ss": 8, "forca": 1.6,
                  # saía tracejado, mais forte no 12K)
                  # e a folha do BH gourmet ("REMOVER DOIS PONTOS PRETOS NA PORTA, DO BANHO GOURMET": as marcas do PDF
                  # na borda de baixo dela)
+                 # e as 4 folhas das portas do banho master (o contorno delas vem só do desenho delas,
+                 # `revisao_terreo_casab_1311.PORTAS_BM`: o preto das esquadrias engrossava o fio até x 1448 e não perto
+                 # da parede, e a ponta da direita parecia falhar)
                  "fora_px": [(2521, 942, 2544, 1011), (2521, 1145, 2544, 1186), (2655, 600, 2710, 610),
-                             (1436, 1542, 1490, 1550)]}
+                             (1436, 1542, 1490, 1550), (1294, 505, 1503, 512)]}
 _ESQ = {}                 # onde a final aceita o perfil (bool, px da final), para o 12K
 # (14/11) onde o 12K vem da final mesmo sem mudança: "REMOVA O TRACEJADO DA PORTA DO BANHO 2" (o tracejado preto que a
 # saída do Topaz pôs entre a folha e a parede; a final não tem) e a coluna da porta principal (a soleira e os vidros
