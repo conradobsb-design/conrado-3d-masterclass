@@ -3027,3 +3027,29 @@ parede de baixo, a borda esquerda só passa o tom, que some em 2 px (o canto no 
 aresta de baixo); em cima, costurado na saída (y 756 a 760). A versão anterior (a repintura nítida pela final, que
 deixava o degrau) saiu. 12K A e B, prancha, PDF da Casa B e book refeitos; antes e depois do 12K em
 `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1411_contorno_ducha_12k_antes_depois.jpg`.
+
+### Casa C, a revisão do 12K de 14/11: `revisao_subsolo_casac_1411.py` e `revisao_terreo_casac_1411.py`
+
+Os recortes do usuário sobre o 12K da Casa C, mostrados antes do 12K ("e as demais correções, pode me mostrar antes de
+rodar o 12k?") e aprovados ("ok"):
+- **Subsolo** (`revisao_subsolo_casac_1411.py`, parte da final de 48a23e8): a face da parede do BH academia reta; os
+  pontos pretos da soleira do vidro da sauna e a face da parede de baixo; o contorno do armário superior na bancada do BH
+  academia fora (a borda da cuba fica); o canto da parede junto à porta do depósito; as 4 folhas de vidro da academia e o
+  vidro da sauna (em pé e em cima) no vidro claro dos boxes (o preto vira a face fina, o miolo o vidro).
+- **Térreo** (`revisao_terreo_casac_1411.py`, chamado no fim de `revisao_terreo_casac_1311.aplicar`): "DESCE PARA O /
+  JARDIM" no deck, o banco do deck, os vestígios no jardim, o cano do chuveiro do pisante até o muro, os traços pretos da
+  piscina, os painéis da ilha gourmet fora (só o piso), o filete reto no fim do jardim 1 (de parede a parede), o box do
+  BH master 2 num piso só com o tracejado da claraboia, os traços na frente das cortinas dos quartos 3 e 2, o fio do
+  tapete do quarto 1, o cooktop sem a moldura marrom, o louceiro 1 (a parede fina no cinza, o rótulo reescrito; no 12K
+  ele é redesenhado nítido, `ampliacao_12k_casac.rotulos_12k`), a porta de correr da circulação, os batentes do
+  louceiro 2 em parede, o vão entre o criado e a cama do quarto 1 no vinílico; as 3 escrivaninhas no retângulo do PDF
+  (DOC_LINHAS 88664, 88644, 88551) em freijó (o das mesas do estar); no estar, o tapete manchado da biblioteca no
+  contorno orgânico do PDF, a poltrona curva de bouclé com a almofada franzida do sofá (no tamanho do símbolo do PDF), a
+  mesa de centro redonda de nogueira em três gomos com adorno, as mesinhas seixo em cinza metálico, as poltronas greige
+  com pés de nogueira e, no conjunto da esquerda, a P1 azul-marinho clareada no lugar do couro caramelo (peças geradas
+  no Higgsfield, na biblioteca em `02-terreo/sala-de-estar/`), os vasos de folhagem da biblioteca e o entorno do sofá
+  sem a sombra dupla; as cadeiras do jantar com encosto e assento azul-marinho. O aparador cinza foi feito e desfeito
+  ("deixe como estava em vez do cinza").
+Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_{Subsolo,Terreo}_1411_<trecho>_antes_depois.jpg`; a proposta
+das poltronas azuis em `..._Terreo_1411_proposta_poltronas_azuis.jpg`. Depois, `ampliacao_12k_casac.py preparar|montar`
+(Topaz High Fidelity V2), `rodape_entrega.py --no-quadro`, `pdf_entrega.py` e `book_entrega.py`.
