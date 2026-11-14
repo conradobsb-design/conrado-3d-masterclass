@@ -440,7 +440,10 @@ def aplicar(antes):
 
 
 # o contorno da borda esquerda do deck da ducha: as colunas (px) e de onde até onde (a parede de baixo inclusa)
-CONTORNO_DUCHA = {"x": (759, 762), "y": (765, 777), "canto_x": 762, "canto_y": (770, 777), "cor": (80, 80, 80)}
+CONTORNO_DUCHA = {"x": (759, 762), "y": (765, 777), "canto_x": 762, "canto_y": (770, 777), "cor": (80, 80, 80),
+                  # (14/11, "SEM ERRO OU DENTE") o canto com as bordas da parede de baixo: as linhas da aresta de
+                  # cima (770), da de baixo (776) e o filete claro debaixo (777) copiados da coluna da parede (763)
+                  "parede_x": 763, "aresta_cima": 770, "aresta_baixo": (776, 778), "canto_de": 759}
 
 
 def contorno_ducha(out, q=CONTORNO_DUCHA):
@@ -449,7 +452,14 @@ def contorno_ducha(out, q=CONTORNO_DUCHA):
     out[y0:y1, x0:x1] = np.uint8(q["cor"])
     c0, c1 = q["canto_y"]
     out[c0:c1, q["canto_x"]] = np.uint8(q["cor"])
-    print(f"    ducha: o contorno da borda esquerda do deck até a parede de baixo (y {y0} a {y1})")
+    # o canto sem dente: o pixel da aresta de cima na coluna do canto e as linhas da aresta de baixo (e o filete claro)
+    # da borda esquerda iguais aos da parede de baixo
+    px, a = q["parede_x"], q["aresta_cima"]
+    out[a, q["canto_x"]] = out[a, px]
+    b0, b1 = q["aresta_baixo"]
+    out[b0:b1, q["canto_de"]:px] = out[b0:b1, px:px + 1]
+    print(f"    ducha: o contorno da borda esquerda do deck até a parede de baixo (y {y0} a {y1}), o canto nas arestas da "
+          f"parede")
     return out
 
 
@@ -520,6 +530,74 @@ def pecas_12k(final, out, s, X0, Ya3, reg_json=None, reg_masc=None, peca=None):
             cx, cy, wt, ht, ang = (c[0] + c[2]) / 2, (c[1] + c[3]) / 2, c[2] - c[0], c[3] - c[1], 0.0
         out = BT.pousar(out, P, (cx - X0) * s, (cy - Ya3) * s, wt * s, ht * s, ang, [], PX_M * s, nao=nao_fn)
     print(f"    {reg_json.name}: {len(reg['pecas'])} peças nítidas no 12K, sobre a zona refeita")
+    if reg_json == REG_JSON:
+        out = contorno_ducha_12k(final, out, s, X0, Ya3)
+    return out
+
+
+# (14/11, "TEM QUE FICAR BEM FEITO, SEM ERRO OU DENTE") o canto de baixo à esquerda do deck da ducha no 12K, refeito no
+# mesmo desenho do resto do contorno: a saída do Topaz não tinha o trecho novo da borda esquerda, e a zona refeita (a
+# final ampliada) deixava o trecho mais largo e mais comprido que a parede de baixo (o dente). No bloco do canto:
+# - o deck e a parede de baixo vêm das colunas da própria saída `fonte_dx` px à direita (as ripas são horizontais, a
+#   parede de baixo é reta), costurados nas de lá a partir de `copia_ate`;
+# - a borda esquerda vem do perfil dela onde a saída a tem inteira (`perfil_y`): o cinza coluna a coluna, a borda do
+#   branco e a da madeira com a mesma suavidade;
+# - na parede de baixo, a borda esquerda só troca o tom (sai na mesma aresta de baixo da parede, sem passar dela);
+# - em cima, `emenda_y` costura na saída.
+CONTORNO_12K = {"bloco": (752, 756, 792, 784), "fonte_dx": 14, "copia_ate": 768, "costura": 4, "perfil_y": (700, 755),
+                "nucleo": 100, "madeira": (8, 20), "parede_y": (772, 775), "perfil_parede_x": (770, 790),
+                "emenda_y": (756, 760), "resto": 0.12, "tom_some_px": 2.0}
+
+
+def contorno_ducha_12k(final, out, s, X0, Ya3, q=CONTORNO_12K):
+    U = lambda x: int(round((x - X0) * s))
+    V = lambda y: int(round((y - Ya3) * s))
+    bx0, by0, bx1, by1 = q["bloco"]
+    U0, V0, U1, V1 = U(bx0), V(by0), U(bx1), V(by1)
+    own = out[V0:V1, U0:U1].astype(np.float32)
+    h, w = own.shape[:2]
+    # o deck e a parede de baixo: as colunas da saída `fonte_dx` px à direita, costuradas nas de lá
+    du = U(bx0 + q["fonte_dx"]) - U0
+    base = out[V0:V1, U0 + du:U1 + du].astype(np.float32)
+    uc0, uc1 = U(q["copia_ate"]) - U0, U(q["copia_ate"] + q["costura"]) - U0
+    wc = np.clip((np.arange(w) - uc0) / max(uc1 - uc0, 1), 0, 1)[None, :, None]
+    base = base * (1 - wc) + own * wc
+    # o perfil da borda esquerda onde a saída a tem inteira
+    Hp = out[V(q["perfil_y"][0]):V(q["perfil_y"][1]), U0:U1].astype(np.float32).mean(axis=0)
+    Hm = Hp.mean(axis=1)
+    nuc = np.nonzero(Hm < q["nucleo"])[0]
+    c0, c1 = nuc.min(), nuc[nuc < nuc.min() + int(6 * s)].max()
+    G = Hp[np.clip(np.arange(w), c0, c1)]
+    m0, m1 = q["madeira"]
+    Wm = Hm[c1 + m0:c1 + m1].mean()
+    u = np.arange(w)
+    Lx = np.where(u < c0, np.clip((255 - Hm) / (255 - Hm[c0]), 0, 1), 1.0)
+    Rx = np.where(u > c1, np.clip((Wm - Hm) / (Wm - Hm[c1]), 0, 1), 1.0)
+    Rx = np.clip((Rx - q["resto"]) / (1 - q["resto"]), 0, 1)      # sem o resíduo na madeira (sem risca)
+    Rx[u > c1 + m1] = 0
+    # a parede de baixo: o tom e a cobertura linha a linha (a aresta de baixo e o filete claro inclusos)
+    p0, p1 = U(q["perfil_parede_x"][0]) - U0, U(q["perfil_parede_x"][1]) - U0
+    Pv = base[:, p0:p1].mean(axis=1)
+    Pm = Pv.mean(axis=1)
+    n0, n1 = V(q["parede_y"][0]) - V0, V(q["parede_y"][1]) - V0
+    gb = Pv[n0:n1].mean(axis=0)
+    A = np.clip((255 - Pm) / (255 - gb.mean()), 0, 1)
+    # acima da parede de baixo: a borda esquerda cobre o deck; nela: só o tom (a mesma aresta de baixo)
+    R = Rx[None, :, None]
+    cima = (1 - R) * base + R * G[None]
+    # o tom da borda esquerda some no começo da parede de baixo (o canto no cinza da parede, sem emenda de tom)
+    fade = np.clip(1 - (np.arange(h) - n0) / max(q["tom_some_px"] * s, 1), 0, 1)
+    nela = base + R * (A * fade)[:, None, None] * (G[None] - gb[None, None])
+    lin = (np.arange(h) >= n0)[:, None, None]
+    inner = np.where(lin, nela, cima)
+    res = (1 - Lx[None, :, None]) * 255 + Lx[None, :, None] * inner
+    # em cima, costurado na saída
+    e0, e1 = V(q["emenda_y"][0]) - V0, V(q["emenda_y"][1]) - V0
+    we = np.clip((np.arange(h) - e0) / max(e1 - e0, 1), 0, 1)[:, None, None]
+    res = own * (1 - we) + res * we
+    out[V0:V1, U0:U1] = np.clip(np.round(res), 0, 255).astype(np.uint8)
+    print(f"    ducha: o canto de baixo do deck refeito no desenho do contorno (a borda esquerda {c1 - c0 + 1} px, "
+          f"na aresta da parede de baixo)")
     return out
 
 

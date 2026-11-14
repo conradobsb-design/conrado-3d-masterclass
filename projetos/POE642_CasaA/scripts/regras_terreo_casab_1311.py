@@ -131,7 +131,8 @@ ELEVADOR_TB = (1720, 515, 1825, 665)          # a caixa do elevador (px), fora d
 # cada folha, caixilho e vidro de box em preto, o vidro claro por dentro (com 1,1 px, os dois lados das folhas finas
 # viravam uma barra preta)
 ESQUADRIAS_TB = {"perfil": (34, 34, 36), "traco_px": 0.5, "ss": 8, "forca": 1.6, "croma_max": 16, "lum_min": 120,
-                 "box_larg_px": 1.5, "box_comp_px": 40, "box_raio_px": 80, "chuveiro_folga_px": 3, "boxes_pretos": False}
+                 "box_larg_px": 1.5, "box_comp_px": 40, "box_raio_px": 80, "chuveiro_folga_px": 3, "boxes_pretos": False,
+                 "vidros_varanda_pretos": False, "vidro_folga_px": 2.5}
 _ESQ = {}                 # onde a final aceita o perfil (bool, px da final), para o 12K
 # os tapetes das suítes (usuário: "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO O RETOQUE EM VOLTA DO
 # CONTORNO E NOS TAPETES"): o tapete do PDF (o índice do desenho) refeito inteiro com o da biblioteca no tom do de hoje
@@ -553,6 +554,16 @@ def esquadrias(Q, out, q=ESQUADRIAS_TB):
             x0, x1 = (face, x1) if lado == "esq" else (x0, face) if lado == "dir" else (x0, x1)
             y0, y1 = (face, y1) if lado == "cima" else (y0, face) if lado == "baixo" else (y0, y1)
         ok[min(y0, y1) - e:max(y0, y1) + e, min(x0, x1) - e:max(x0, x1) + e] = False
+    # (14/11, "NO TÉRREO DA CASA B, VOCÊ NÃO ALTEROU AS FOLHAS DE VIDRO DAS VARANDAS"; o padrão das portas dos quartos:
+    # o vidro claro com o fio cinza) as folhas de vidro das portas das suítes para as varandas
+    # (`pedidos_terreo_casab_1211.FOLHAS_TB`, as de dentro) ficam no vidro claro, sem o contorno preto
+    if not q["vidros_varanda_pretos"]:
+        import pedidos_terreo_casab_1211 as PB2
+        e = q["vidro_folga_px"]
+        for (wx0, wy0, wx1, wy1), (gx0, gy0, gx1, gy1), _ in PB2.FOLHAS_TB["folhas"]:
+            # a faixa inteira da porta (da folha de madeira à de vidro, com as peças de encontro entre elas)
+            x0, y0, x1, y1 = min(wx0, gx0), min(wy0, gy0), max(wx1, gx1), max(wy1, gy1)
+            ok[int(np.floor(y0 - e)):int(np.ceil(y1 + e)), int(np.floor(x0 - e)):int(np.ceil(x1 + e))] = False
     _ESQ["ok"] = ok
     al = np.clip(al * q["forca"], 0, 1) * ok
     novo = out.astype(np.float32) * (1 - al[..., None]) + np.float32(q["perfil"]) * al[..., None]

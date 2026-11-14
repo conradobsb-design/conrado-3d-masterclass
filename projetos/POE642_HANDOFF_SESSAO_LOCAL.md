@@ -4435,4 +4435,15 @@ refeitos. O 12K do Térreo se refaz (Topaz) no fim da revisão.
   aplicado no Térreo da Casa C (quartos 1, 2, 3 e suíte master); Casa A 1º Pav e Casa B Térreo já estavam no padrão.
 - "ESSE É O ESTILO DE BOX DE CHUVEIRO ... NADA DE ESQUADRIA PRETA": Casa B Térreo sem o contorno preto nos boxes
   (`regras_terreo_casab_1311`, cadeia completa com o 12K A e B); Casa C, as folhas do BH master 1; A e C já no padrão.
-- Casas D e E: os PDFs do cliente não estão nesta sessão (`_pdfs_cliente/` só tem A, B e C); falta aplicar lá.
+- Casas D e E: os PDFs chegaram depois (copiados para `_pdfs_cliente/`, fora do git); levantamento feito (não há vão de
+  4 trilhos; há grupos de 3 folhas no E 1º Pav, D Térreo e E Térreo, a conferir); falta aplicar lá.
+- "NO TÉRREO DA CASA B, VOCÊ NÃO ALTEROU AS FOLHAS DE VIDRO DAS VARANDAS": as folhas de vidro das portas das varandas
+  das suítes sem o contorno preto de `regras_terreo_casab_1311.esquadrias` (a faixa de cada porta fora da máscara,
+  `vidros_varanda_pretos`); cadeia completa (final, 12K A e B, prancha, PDF, book).
+
+### Casa B, Subsolo: o contorno do deck da ducha (14/11)
+
+- "COMPLETE O CONTORNO PRETO ATÉ A PAREDE DEBAIXO": a borda esquerda do deck desce até a parede de baixo
+  (`biblioteca_subsolo_casab_1311.contorno_ducha`).
+- "TEM QUE FICAR BEM FEITO, SEM ERRO OU DENTE": na final, o canto nas arestas da parede de baixo (9 px); no 12K, o bloco
+  do canto refeito no desenho do resto do contorno (`contorno_ducha_12k`, ver README). 12K A e B, prancha, PDF, book.

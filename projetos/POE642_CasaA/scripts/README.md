@@ -2934,6 +2934,13 @@ D e E não estão nesta sessão. Boxes: na Casa B Térreo o contorno preto de `r
 vidros dos boxes (`ESQUADRIAS_TB["boxes_pretos"] = False`; a final, o 12K A e B, a prancha e o PDF refeitos pela
 cadeia); na Casa C, as 2 folhas do BH master 1; as Casas A e C (outros boxes) já estavam no vidro claro.
 
+Depois (usuário: "NO TÉRREO DA CASA B, VOCÊ NÃO ALTEROU AS FOLHAS DE VIDRO DAS VARANDAS"): o contorno preto de
+`esquadrias` também cobria as folhas de vidro das portas das varandas das suítes (as de `pedidos_terreo_casab_1211
+.FOLHAS_TB`, já no vidro claro por baixo). Agora a faixa inteira de cada porta (a folha de madeira e a de vidro, mais
+`vidro_folga_px` = 2,5 px) fica fora da máscara do contorno (`ESQUADRIAS_TB["vidros_varanda_pretos"] = False`); só a
+faixa do vidro deixava pontinhos pretos nas pontas, entre as folhas. Final, 12K A e B, prancha e PDF pela cadeia
+(`cb_mob/cadeia5.sh`).
+
 ### Subsolo da Casa B, o contorno do deck da ducha (14/11)
 
 "COMPLETE O CONTORNO PRETO ATÉ A PAREDE DEBAIXO. FALTOU UM PEQUENO TRECHO DA ÚLTIMA RIPA DE MADEIRA": o contorno da borda
@@ -2942,3 +2949,17 @@ a parede de baixo; agora desce até ela (`biblioteca_subsolo_casab_1311.contorno
 Aplicado direto sobre a final (a final atual vem dos pedidos sobre 21fa118 com a biblioteca por cima), o trecho marcado
 na zona do 12K (`REG_MASC`); 12K A e B (`ampliacao_12k_subsolo_casab.py montar12k`, a mesma saída do Topaz), prancha,
 PDF da Casa B e book refeitos. Antes e depois: `POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1411_contorno_ducha_antes_depois.jpg`.
+
+Depois (usuário: "TEM QUE FICAR BEM FEITO, SEM ERRO OU DENTE"): o canto de baixo fazia dente no 12K. Na final, o trecho
+novo era 1 px mais alto na aresta de cima (o pixel do canto, x 762, y 770) e descia até y 776 inteiro, enquanto a parede
+de baixo tem as arestas suaves (y 770 e 776) e o filete claro em y 777; agora o canto copia essas três linhas da coluna
+da parede (x 763; `CONTORNO_DUCHA["parede_x"]`, 9 px mudados). No 12K, a saída do Topaz não tinha o trecho, e a zona
+refeita (a final ampliada) o deixava mais largo, com pontos escuros e um entalhe branco embaixo; `contorno_ducha_12k`
+(no fim de `pecas_12k`) refaz o bloco do canto (`CONTORNO_12K["bloco"]`, x 752 a 792, y 756 a 784 da final) no mesmo
+desenho do resto do contorno: o deck e a parede de baixo das colunas da própria saída 14 px à direita (ripas
+horizontais, parede reta), costurados nas de lá a partir de x 768; a borda esquerda pelo perfil dela onde a saída a tem
+inteira (y 700 a 755: o cinza coluna a coluna e as duas bordas com a mesma suavidade, sem o resíduo na madeira); na
+parede de baixo, a borda esquerda só passa o tom, que some em 2 px (o canto no cinza da parede, terminando na mesma
+aresta de baixo); em cima, costurado na saída (y 756 a 760). A versão anterior (a repintura nítida pela final, que
+deixava o degrau) saiu. 12K A e B, prancha, PDF da Casa B e book refeitos; antes e depois do 12K em
+`POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_1411_contorno_ducha_12k_antes_depois.jpg`.
