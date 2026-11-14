@@ -108,12 +108,17 @@ REFRIGERADOR = {"png": "02-terreo/cozinha/geladeira-inox.png", "c": (1117.4, 148
 PORTAS_BM = {"parede": [(1236.2, 503.6, 1244.0, 508.9), (1289.4, 501.8, 1344.8, 503.6), (1235.6, 508.9, 1344.8, 510.7),
                         (1244.0, 503.6, 1344.8, 508.9), (1452.3, 501.8, 1506.7, 503.6), (1452.3, 508.9, 1550.3, 510.7),
                         (1452.3, 503.6, 1550.3, 508.9), (1550.3, 503.6, 1552.1, 508.9),
-                        (1344.8, 501.8, 1346.6, 507.2), (1450.5, 501.8, 1452.3, 507.2)],
+                        # os batentes do vão até a face de baixo da parede (14/11, "A PORTA DE CORRER À DIREITA - O SEU
+                        # FINAL FALHOU": entre o batente e a parede ficava um vão de 2 px sem nada, embaixo das folhas)
+                        (1344.8, 501.8, 1346.6, 510.7), (1450.5, 501.8, 1452.3, 510.7)],
              "nichos": [(1245.8, 501.8, 1289.4, 507.6), (1506.7, 501.8, 1550.3, 507.3)],
              "folhas": [(1296.8, 507.5, 1344.8, 510.4), (1452.3, 507.5, 1500.4, 510.4), (1341.8, 507.8, 1392.6, 510.1),
                         (1404.5, 507.8, 1455.3, 510.1)],
              "vao": (1346.6, 501.8, 1450.5, 507.8), "vao_fonte_dy": -9,
-             "piso_px": (1234, 511, 1556, 519), "nicho": (232, 234, 236), "folha": (236, 238, 240), "perfil_px": 0.5}
+             "piso_px": (1234, 511, 1556, 519), "nicho": (232, 234, 236), "folha": (236, 238, 240), "perfil_px": 0.5,
+             # (14/11, "PAREDE À ESQUERDA NAS PORTAS DO BANHO MASTER, UMA FALHA") a faixa do piso da suíte logo abaixo da
+             # face da parede, inteira: os restos (rosa claro sob o nicho, a sombra escura sob o bolso) pareciam um dente
+             "piso_faixa": [(1234, 511, 1346, 514), (1452, 511, 1556, 514)]}
 # (usuário: "CORRIGIR O PISO E PAREDE", o hall junto à suíte 3) a face da parede de cima reta em y 943,6 (do PDF; o render
 # a encurtava depois de x 2452); o toco de parede e o caixilho de vidro emoldurado abaixo dele pelo PDF; o piso do hall
 # interno no retângulo mais claro do render (o PDF muda de piso só em x 2537), sem a linha clara sob o vaso
@@ -604,6 +609,8 @@ def portas_banho_master(RT, Q, out, par, reg, q=PORTAS_BM):
     cinza = (np.abs(I - np.int16(PAREDE)).max(axis=2) <= 22) | ((I.max(axis=2) - I.min(axis=2)) < 12)
     bur = np.zeros(par.shape, bool)
     bur[py0:py1, px0:px1] = cinza
+    for fx0, fy0, fx1, fy1 in q.get("piso_faixa", []):
+        bur[fy0:fy1, fx0:fx1] = True
     if bur.any():
         out = BS_quieto(RT.piso_reguas, Q, out, bur, sigmas=(4, 8, 16, 32, 64))
     prims = [{"t": "ret", "c": list(r), "cor": PAREDE} for r in q["parede"]]
@@ -621,6 +628,25 @@ def portas_banho_master(RT, Q, out, par, reg, q=PORTAS_BM):
     reg["pecas"].append(it)
     print("    banho master: a parede de baixo pelo PDF (os 2 bolsos, os nichos, os batentes), as 4 folhas das portas de "
           "correr telescópicas; o piso da suíte por baixo do cinza que passava da face")
+    return out
+
+
+# (14/11, "CORRIGIR FALHAS NA PAREDE DE CIMA. DO LAVATORIO GOURMET E BH. GOURMET") a face de baixo da parede de cima
+# (y 1537,74 no PDF) num desenho só: a linha escura de 1 px em y 1538 dos dois lados (o lado do lavatório tinha 2 linhas e
+# ficava 1 px mais baixo, o degrau na emenda), o canto do toco sem o claro, e o piso logo abaixo sem os blocos escuros
+PAREDE_GOURMET = {"faixas": [(1289, 1428), (1437, 1538)], "face_y": 1537, "linha_y": 1538, "piso_y": 1539,
+                  "linha_ref": (1440, 1530)}
+
+
+def parede_gourmet(out, q=PAREDE_GOURMET):
+    yl, yf, yp = q["linha_y"], q["face_y"], q["piso_y"]
+    r0, r1 = q["linha_ref"]
+    lin = np.median(out[yl, r0:r1].reshape(-1, 3).astype(np.float32), axis=0)
+    for x0, x1 in q["faixas"]:
+        out[yf, x0:x1] = np.uint8(PAREDE)
+        out[yl, x0:x1] = np.uint8(np.round(lin))
+        out[yp, x0:x1] = out[yp + 1, x0:x1]
+    print(f"    lavatório e BH gourmet: a face de baixo da parede de cima num desenho só (a linha {np.round(lin)})")
     return out
 
 
@@ -676,6 +702,7 @@ def aplicar(RT, Q, out, par, reg):
     out = faixa_parede(out, par)
     out = portas_banho_master(RT, Q, out, par, reg)
     out = hall(out, par, reg)
+    out = parede_gourmet(out)
     out = cama_suite3(out, reg)
     out = quarto_servico(out, par, reg)
     return out

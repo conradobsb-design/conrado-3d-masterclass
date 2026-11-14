@@ -4448,6 +4448,12 @@ refeitos. O 12K do Térreo se refaz (Topaz) no fim da revisão.
   cima reto; a folha da pivotante num estilo só, de ponta a ponta. No 12K, sem o tracejado da porta do banho 2.
   `revisao_terreo_casab_1311.HALL` e `regras_terreo_casab_1311` (`extras`, `fora_px`, `ZONA_12K_EXTRA`, `pivo_12k`).
 
+### Casa B, Térreo: os 5 erros de 14/11
+
+- Banho master (a faixa de piso sob a parede e os batentes até a face), o fio da borda das escrivaninhas da suíte master e
+  da suíte 2 por cima da cadeira, os 2 pontos pretos na folha do BH gourmet, a parede de cima do lavatório e do BH
+  gourmet num desenho só. Ver README.
+
 ### Casa B, Subsolo: o contorno do deck da ducha (14/11)
 
 - "COMPLETE O CONTORNO PRETO ATÉ A PAREDE DEBAIXO": a borda esquerda do deck desce até a parede de baixo

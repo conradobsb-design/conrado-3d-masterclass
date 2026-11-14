@@ -2970,6 +2970,27 @@ Cadeia: `regras_terreo_casab_1311.py`, `ampliacao_12k_terreo_casab.py montar12k 
 `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1411_porta_principal_pdf.jpg`; antes e depois em
 `..._Terreo_1411_porta_principal_antes_depois.jpg`.
 
+### Térreo da Casa B: os 5 erros de 14/11 (banho master, escrivaninhas, gourmet)
+
+"NO TERREO DA CASA B, TEMOS ALGUNS ERROS PARA CORRIGIR AINDA":
+1. **"PAREDE À ESQUERDA NAS PORTAS DO BANHO MASTER, UMA FALHA. E A PORTA DE CORRER À DIREITA - O SEU FINAL FALHOU":** a
+   faixa do piso da suíte logo abaixo da face da parede (y 511 a 513) tinha restos (rosa claro sob o nicho, sombra escura
+   sob o bolso) que pareciam um dente na parede: refeita inteira em réguas (`revisao_terreo_casab_1311.PORTAS_BM
+   ["piso_faixa"]`); entre o batente do vão e a parede de baixo ficava um vão de 2 px sem desenho embaixo das folhas, que
+   apagava o fim da folha de correr: os batentes (x 1344,8 e 1450,5) descem até a face da parede (y 510,7).
+2. e 3. **"O CONTORNO DA ESCRIVANINHA EM FRENTE A CADEIRA DE ESCRITÓRIO, NA SUITE MASTER / NA SUITE 2, FALHOU":** o fio
+   escuro da borda da escrivaninha do lado da cadeira some onde a cadeira entra por baixo; `regras_terreo_casab_1311
+   .contorno_mesa` mede as colunas e o tom do fio onde a cadeira não chega e o redesenha inteiro, por cima dela (um vetor
+   no "topo": na final e, nítido, no 12K pelo `topo_12k`). Master: x 1203 e 1204; suíte 2: x 2281.
+4. **"REMOVER DOIS PONTOS PRETOS NA PORTA, DO BANHO GOURMET":** as marcas do PDF na borda de baixo da folha do BH gourmet
+   saíam pretas pelo contorno das esquadrias; a folha fica fora dele (`ESQUADRIAS_TB["fora_px"]`).
+5. **"CORRIGIR FALHAS NA PAREDE DE CIMA. DO LAVATORIO GOURMET E BH. GOURMET":** a face de baixo da parede de cima num
+   desenho só (`revisao_terreo_casab_1311.parede_gourmet`): a linha escura de 1 px em y 1538 dos dois lados (o lado do
+   lavatório tinha 2 linhas e ficava 1 px mais baixo: o degrau na emenda), o canto do toco sem o claro e o piso logo
+   abaixo sem os blocos escuros.
+No 12K, essas áreas vêm da final (`ZONA_12K_EXTRA`). Antes e depois em
+`POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1411_erros_<trecho>_antes_depois.jpg`.
+
 ### Subsolo da Casa B, o contorno do deck da ducha (14/11)
 
 "COMPLETE O CONTORNO PRETO ATÉ A PAREDE DEBAIXO. FALTOU UM PEQUENO TRECHO DA ÚLTIMA RIPA DE MADEIRA": o contorno da borda

@@ -141,12 +141,17 @@ ESQUADRIAS_TB = {"perfil": (34, 34, 36), "traco_px": 0.5, "ss": 8, "forca": 1.6,
                  # da soleira e os caixilhos viravam pontos pretos); a borda de baixo da folha de madeira do banho 2
                  # ("REMOVA O TRACEJADO DA PORTA DO BANHO 2": o traço do PDF só pegava onde o piso ao lado é neutro e
                  # saía tracejado, mais forte no 12K)
-                 "fora_px": [(2521, 942, 2544, 1011), (2521, 1145, 2544, 1186), (2655, 600, 2710, 610)]}
+                 # e a folha do BH gourmet ("REMOVER DOIS PONTOS PRETOS NA PORTA, DO BANHO GOURMET": as marcas do PDF
+                 # na borda de baixo dela)
+                 "fora_px": [(2521, 942, 2544, 1011), (2521, 1145, 2544, 1186), (2655, 600, 2710, 610),
+                             (1436, 1542, 1490, 1550)]}
 _ESQ = {}                 # onde a final aceita o perfil (bool, px da final), para o 12K
 # (14/11) onde o 12K vem da final mesmo sem mudança: "REMOVA O TRACEJADO DA PORTA DO BANHO 2" (o tracejado preto que a
 # saída do Topaz pôs entre a folha e a parede; a final não tem) e a coluna da porta principal (a soleira e os vidros
 # fixos, que a saída do Topaz tem como parede e caixilho)
-ZONA_12K_EXTRA = [(2655, 603, 2710, 611), (2519, 940, 2546, 1179), (2512, 1179, 2540, 1190)]
+ZONA_12K_EXTRA = [(2655, 603, 2710, 611), (2519, 940, 2546, 1179), (2512, 1179, 2540, 1190),
+                  # (14/11) as portas do banho master, a parede de cima do lavatório e do BH gourmet e a folha do BH
+                  (1232, 500, 1556, 516), (1285, 1531, 1541, 1543), (1436, 1542, 1490, 1550)]
 # a folha da pivotante no 12K: o perfil dela onde a saída do Topaz a tem inteira (x 2420 a 2500) estendido até a ponta, e
 # a ponta da direita no espelho da da esquerda ("NO MESMO ESTILO DO COMEÇO AO FIM")
 PIVO_12K = {"linhas": (1009.5, 1017.5), "perfil_x": (2420, 2500), "de": 2505.0, "ate": 2554.91,
@@ -285,8 +290,12 @@ BALCAO_TB = [((1678.7, 1472.8, 1708.6, 1525.3), "y", 2, 3), ((1357.3, 1348.4, 14
 # curta dela na cadeira. lado: onde a cadeira fica em relação à mesa
 CADEIRAS_TB = {"png": "escritorio/cadeira-escritorio", "larg": 34.0, "sob": 1 / 3, "folga_px": 3,
                "itens": [{"nome": "suíte 1", "cadeira": 62273, "mesa": 71876, "lado": "cima"},
-                         {"nome": "suíte 2", "cadeira": 62240, "mesa": 71855, "lado": "dir"},
-                         {"nome": "suíte master", "cadeira": 63443, "mesa": 71925, "lado": "esq"}]}
+                         {"nome": "suíte 2", "cadeira": 62240, "mesa": 71855, "lado": "dir", "contorno": True},
+                         {"nome": "suíte master", "cadeira": 63443, "mesa": 71925, "lado": "esq", "contorno": True}],
+               # (14/11, "O CONTORNO DA ESCRIVANINHA EM FRENTE A CADEIRA DE ESCRITÓRIO ... FALHOU") o fio escuro da borda
+               # da escrivaninha do lado da cadeira, redesenhado inteiro por cima dela (as colunas e o tom medidos onde a
+               # cadeira não chega: `contorno_folga_px` fora dela, mais escuras que a mediana em `contorno_dif`)
+               "contorno_folga_px": 8, "contorno_dif": 25}
 # A 2ª etapa do mobiliário ("PODE FAZER A 2ª ETAPA"), a que refaz o piso por baixo das peças de antes:
 # - a sala íntima com o conjunto da Casa A (`SALA_INTIMA_TB`): o tapete, o sofá em L A (o "anti_t" da Casa A: o corpo
 #   comprido à direita, contra a parede, e a ponta em cima; 89% de sobreposição com o L do PDF), as mesas laterais
@@ -1033,9 +1042,38 @@ def cadeiras(Q, out, par, reg, q=CADEIRAS_TB):
                     np.dstack([np.round(a[Y0:Y1, X0:X1] * 255), np.round(ca[Y0:Y1, X0:X1] * 255),
                                np.zeros((Y1 - Y0, X1 - X0))]).astype(np.uint8))
         reg["topo"].append({"tipo": "mesa_topo", "c": [int(X0), int(Y0), int(X1), int(Y1)]})
+        if c.get("contorno"):
+            it2 = contorno_mesa(out, (mx0, my0, mx1, my1), (x0, y0, x1, y1), c["lado"], c["nome"], q)
+            if it2 is not None:
+                out = RV.pousar(out, it2, None)
+                reg["topo"].append(it2)
         feitas.append(c["nome"])
     print(f"    cadeiras de escritório: {', '.join(feitas)} (1/3 por baixo da escrivaninha, a de antes saiu)")
     return out
+
+
+def contorno_mesa(out, mesa, cad, lado, nome, q=CADEIRAS_TB):
+    """O fio escuro da borda da escrivaninha do lado da cadeira, por inteiro (um vetor: na final e, nítido, no 12K)."""
+    mx0, my0, mx1, my1 = mesa
+    x0, y0, x1, y1 = cad
+    e = q["contorno_folga_px"]
+    if lado not in ("esq", "dir"):
+        return None
+    xe = mx0 if lado == "esq" else mx1
+    cols = np.arange(int(np.floor(xe)) - 3, int(np.floor(xe)) + 4)
+    lin = np.r_[int(np.ceil(my0)) + 4:int(np.floor(y0)) - e, int(np.ceil(y1)) + e:int(np.floor(my1)) - 4]
+    P = out[lin][:, cols].astype(np.float32)
+    lum = P.mean(axis=(0, 2))
+    esc = [i for i in range(len(cols)) if lum[i] < np.median(lum) - q["contorno_dif"]]
+    if not esc:
+        print(f"    escrivaninha da {nome}: o fio da borda não foi achado")
+        return None
+    prims = [{"t": "ret", "c": [float(cols[i]), float(my0), float(cols[i] + 1), float(my1)],
+              "cor": [float(v) for v in P[:, i].mean(axis=0)]} for i in esc]
+    print(f"    escrivaninha da {nome}: o fio da borda (x {', '.join(str(int(cols[i])) for i in esc)}) inteiro, por cima "
+          f"da cadeira")
+    return {"tipo": "rv_vetor", "nome": f"contorno_mesa_{nome}",
+            "c": [float(cols[min(esc)]), float(my0), float(cols[max(esc)] + 1), float(my1)], "prims": prims}
 
 
 def mascara_pdf(Q, ids, limiar=0.05):
@@ -1524,6 +1562,10 @@ def topo_12k(out, base, s, X0, Ya3):
     for it in json.loads(REG_JSON.read_text()).get("topo", []):
         if it["tipo"] == "abajur":
             out = B1.abajur(out, it["cx"], it["cy"], it["d"], s, X0, Ya3)
+            continue
+        if it["tipo"] == "rv_vetor":                     # o fio da borda das escrivaninhas, depois delas
+            P, cx, cy, wt, ht, ang, sb = RV.peca_12k(it)
+            out = BT.pousar(out, P, (cx - X0) * s, (cy - Ya3) * s, wt * s, ht * s, ang, sb, PX_M * s)
             continue
         x0, y0, x1, y1 = it["c"]
         m = cv2.imread(str(R / f"POE642_CasaB_PH_Terreo_12K_regras_mesa_{x0}_{y0}.png")).astype(np.float32) / 255
