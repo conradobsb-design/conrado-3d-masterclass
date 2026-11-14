@@ -327,7 +327,12 @@ def preparar(pav):
     camadas = [(b["_alfa"], tuple(b["cor"])) for b in rots]
     linhas = [{"nome": b["nome"], "cor": b["cor"], "linhas": b["linhas"]} for b in rots]
     for nome, a, cor, ll in extras(pav, img.shape[:2]):
-        camadas.append((a, tuple(cor)))
+        if nome == "LOUCEIRO 1":
+            # o louceiro é estreito (o armário logo abaixo): sai como na opção A, pelo piso de cima
+            import revisao_terreo_casac_1411 as R14
+            img = R14.louceiro1_apaga(img)
+        else:
+            camadas.append((a, tuple(cor)))
         linhas.append({"nome": nome, "cor": cor, "linhas": ll})
     # cada linha sai inteira, pelo piso deslocado mais parecido com o da volta (`apagar`; a conta do alfa deixava o
     # fantasma das letras: o desenho achado cai a px inteiros, o da final em fração de px)

@@ -3053,3 +3053,15 @@ rodar o 12k?") e aprovados ("ok"):
 Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_{Subsolo,Terreo}_1411_<trecho>_antes_depois.jpg`; a proposta
 das poltronas azuis em `..._Terreo_1411_proposta_poltronas_azuis.jpg`. Depois, `ampliacao_12k_casac.py preparar|montar`
 (Topaz High Fidelity V2), `rodape_entrega.py --no-quadro`, `pdf_entrega.py` e `book_entrega.py`.
+
+### Casa C, a opção B do 12K (rótulos na Kalam, 14/11): `rotulos_kalam_casac.py`
+
+("QUERO OS RÓTULOS NO SUBSOLO - VERSÃO B TAMBÉM", "TAMBÉM QUERO O RÓTULO VERSÃO B PARA O TERREO".) Como as opções B das
+Casas A e B, sem IA generativa: cada rótulo do PDF achado na final pela forma (o desenho da Inter do motor em vários
+corpos, numa linha ou com o nome quebrado, SemiBold ou Regular, os melhores picos de cada um e a atribuição sem
+repetição: o QUARTO 3 e o QUARTO 2 têm a mesma área); a final sem os textos (`apagar`: cada linha pelo piso deslocado
+mais parecido com o da volta, o que destoa por inpaint; o LOUCEIRO 1 pelo piso de cima, como na opção A) como a entrada
+do Topaz; no 12K, cada linha na Kalam no mesmo meio e na mesma linha de base, um corpo só (o fator 0,72 da altura das
+maiúsculas x 1,12), a mesma cor; as descrições das escadas também na Kalam, as setas e os D/S ficam.
+`python3 ampliacao_12k_casac.py preparar <pav> --opcao B` e `montar <pav> <saída do Topaz> --opcao B`
+-> `POE642_CasaC/entrega/POE642_CasaC_PH_{Subsolo,Terreo}_12K_opcao_B.jpg`.
