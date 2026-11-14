@@ -47,8 +47,19 @@ def dados(pav):
     return R / f"POE642_CasaC_PH_{pav}_12K_dados.json"
 
 
+def rotulos_12k(pav):
+    """Os rótulos que o 12K redesenha nítidos (a entrada do Topaz vai sem eles): no Térreo, o do louceiro 1 (14/11, "O
+    RÓTULO PRECISA SER REESCRITO PARA FICAR LEGÍVEL": pequeno, o Topaz o embaralhava)."""
+    if pav != "Terreo":
+        return []
+    import revisao_terreo_casac_1411 as R14
+    return R14.rotulos_12k()
+
+
 def preparar(pav):
     img = cv2.imread(str(final(pav)))
+    for r in rotulos_12k(pav):
+        img = r["apaga"](img)
     Hf, Wf = img.shape[:2]
     nb = (img.astype(np.int16).min(axis=2) < 245)
     ys, xs = np.nonzero(nb)
@@ -102,6 +113,11 @@ def montar(pav, saida_topaz):
         reg = reg * (1 - f_) + 255 * f_
         out[y:y + 1024] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
     del corr, fa
+    if rotulos_12k(pav):
+        import revisao_terreo_casac_1411 as R14
+        for r in rotulos_12k(pav):
+            R14.desenhar_linhas(out, r["linhas"], r["cor"], s=L / d["Wc"], X0=d["X0"], Y0=d["Y0"])
+        print(f"    {len(rotulos_12k(pav))} rótulo(s) redesenhado(s) nítido(s) no 12K")
     saida = E / f"POE642_CasaC_PH_{pav}_12K_opcao_A.jpg"
     dpi = int(round(L / (420 / 25.4)))
     Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(saida, quality=95, subsampling=0, dpi=(dpi, dpi),

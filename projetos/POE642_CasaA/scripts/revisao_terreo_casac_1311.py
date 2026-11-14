@@ -166,7 +166,17 @@ MANTAS = {"suíte master": ("areia sóbria", (212, 190, 156)), "quarto 3": ("beg
 # (`mobiliario_terreo_casac_1311.CADEIRAS`), por cima da cadeira (1/3 por baixo dela)
 # ("A ESCRIVANINHA TEM TOM FREIJÓ") no freijó do projeto (`final3840_casaa`: o bege-dourado, RGB ~201, 158, 112), com o
 # veio e a borda da mesa de antes (a luz dela / a mediana, ** `gama`)
-ESCRIVANINHAS = {"commit": "2263fe0", "freijo": (112, 158, 201), "gama": 0.8}
+# (14/11, "CORRIJA O TOM DA ESCRIVANINHA PARA FREIJÓ NA SUITE MASTER E NÃO AVANCE A ESCRIVANINHA SOBRE A PAREDE",
+# "... DA QUARTO 3", "NO QUARTO 1 ... AVANÇANDO SOBRE A PAREDE DE BAIXO E FALHANDO PARA CIMA ... ELA É NO TOM FREIJÓ")
+# o retângulo de cada mesa (`rets`, px, medido na final de 2263fe0: a borda clara e a escura de cada lado inclusas; a
+# caixa da cadeira em `CADEIRAS` pegava a parede e o piso em volta) e o freijó das mesas de centro do estar E1 (a amostra
+# `fonte`, px: o dourado com o veio, aprovado), o veio no comprido da mesa, com a borda da mesa de antes (a luz dela / a
+# mediana, ** `gama`); antes, um bege-dourado chapado (RGB ~201, 158, 112)
+ESCRIVANINHAS = {"fonte": (1801, 1405, 1912, 1433), "borda": 0.84, "ss": 8,
+                 # (14/11, "TEM QUE MOVIMENTAR A ESCRIVANINHA MAIS PARA CIMA, OCUPANDO O MÓVEL NAS DIMENSÕES DO PDF")
+                 # o retângulo de cada uma na DOC_LINHAS E PROJEÇÕES (px): 88664, 88644 e 88551
+                 "rets": {"suíte master": (1201.6, 578.8, 1231.4, 728.1), "quarto 3": (1315.0, 540.0, 1434.4, 569.9),
+                          "quarto 1": (2133.0, 531.1, 2162.9, 662.4)}, "parede": (80, 12)}
 VELUDO = {"matiz": (150, 8), "sat_min": 60, "gama": 0.5}
 # as claraboias: a faixa em volta do retângulo (px) onde ficam os restos do tracejado antigo; o escuro (fração da
 # mediana do piso) e o cinza da parede (tolerância)
@@ -368,14 +378,35 @@ def bancos(Q, img):
 
 
 def escrivaninhas(img, q=ESCRIVANINHAS):
+    """Cada escrivaninha no retângulo do PDF: o freijó das mesas do estar (sem emenda, o veio no comprido), a borda um
+    tom abaixo e a sombra curta das mesas no piso; a parede em volta não muda (os px no cinza dela ficam)."""
+    import materiais_terreo_casac_1311 as MT
+    import biblioteca_terreo_casaa_1211 as BT
     out = img.copy()
-    velha = final_de(q["commit"])
-    for nome, ids, borda, lado, (x0, y0, x1, y1) in MB.CADEIRAS:
-        v = velha[y0:y1, x0:x1].astype(np.float32)
-        Y = v @ np.float32([0.114, 0.587, 0.299])
-        r = (Y / max(float(np.median(Y)), 1.0)) ** q["gama"]
-        out[y0:y1, x0:x1] = np.clip(np.round(np.float32(q["freijo"])[None, None] * r[..., None]), 0, 255).astype(np.uint8)
-        print(f"    {nome}: a escrivaninha de volta, em freijó")
+    fx0, fy0, fx1, fy1 = q["fonte"]
+    amostra = img[fy0:fy1, fx0:fx1].astype(np.float32)
+    v, tol = q["parede"]
+    ss = q["ss"]
+    for nome, (x0, y0, x1, y1) in q["rets"].items():
+        X0, Y0 = int(np.floor(x0)) - 6, int(np.floor(y0)) - 6
+        W, H = int(np.ceil(x1)) + 7 - X0, int(np.ceil(y1)) + 7 - Y0
+        a = np.outer(_cob(y0, y1, H, Y0, ss), _cob(x0, x1, W, X0, ss)).astype(np.float32)
+        pe = (y1 - y0) > (x1 - x0)
+        A = np.ascontiguousarray(np.rot90(amostra)) if pe else amostra
+        T = MT.sem_emenda(A, H, W)
+        dentro = np.outer(_cob(y0 + 1, y1 - 1, H, Y0, ss), _cob(x0 + 1, x1 - 1, W, X0, ss))
+        T = T * (q["borda"] + (1 - q["borda"]) * dentro)[..., None]
+        reg = out[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
+        parede = (np.abs(reg - v).max(axis=2) <= tol)
+        for sb in BT.SOMBRAS["mesa"]:
+            sh = cv2.GaussianBlur(a, (0, 0), max(0.3, sb["sig"] * PX_M))
+            Ms = np.float32([[1, 0, sb["dx"] * PX_M], [0, 1, sb["dy"] * PX_M]])
+            sh = cv2.warpAffine(sh, Ms, (W, H), flags=cv2.INTER_LINEAR, borderValue=0)
+            reg *= (1 - sb["forca"] * sh * (1 - a) * ~parede)[..., None]
+        al = (a * ~parede)[..., None]
+        reg = reg * (1 - al) + T * al
+        out[Y0:Y0 + H, X0:X0 + W] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+        print(f"    {nome}: a escrivaninha em freijó no retângulo do PDF ({x1 - x0:.0f} x {y1 - y0:.0f} px)")
     return out
 
 
@@ -1248,6 +1279,9 @@ def aplicar(antes):
     out = tracejado_lote(out)
     out = escrivaninhas(out)
     out = mantas(Q, out)
+    # 14/11: os recortes do 12K (`revisao_terreo_casac_1411`)
+    import revisao_terreo_casac_1411 as R14
+    out = R14.aplicar(Q, out)
     return out
 
 
@@ -1283,6 +1317,9 @@ def main():
     print(f"    {a.saida or FINAL.name}")
     if not a.saida:
         antes_depois(antes, depois)
+        import revisao_terreo_casac_1411 as R14
+        # os de 14/11 contra a final do commit de antes desta rodada (`R14.ANTES_DEPOIS_COMMIT`)
+        R14.antes_depois(final_de(R14.ANTES_DEPOIS_COMMIT), depois, R)
 
 
 if __name__ == "__main__":
