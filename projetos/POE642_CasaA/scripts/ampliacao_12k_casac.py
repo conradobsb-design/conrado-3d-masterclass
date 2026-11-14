@@ -8,8 +8,11 @@ Mais simples que o roteiro das Casas A e B (sem a IA generativa nos pisos: nada 
   3. `montar <pav> <saída do Topaz>`: a saída no tamanho certo, os tons da final (a baixa frequência da entrada,
      ampliada), o fundo fora da planta em branco puro; o JPG (qualidade 95, 743 dpi na A3) e as conferências.
 
-  python3 ampliacao_12k_casac.py preparar Subsolo|Terreo
-  python3 ampliacao_12k_casac.py montar Subsolo|Terreo <saída do Topaz>
+  python3 ampliacao_12k_casac.py preparar Subsolo|Terreo [--opcao B]
+  python3 ampliacao_12k_casac.py montar Subsolo|Terreo <saída do Topaz> [--opcao B]
+
+A opção B (14/11): a entrada do Topaz sem os rótulos nem as descrições das escadas e, no 12K, os textos na Kalam
+(`rotulos_kalam_casac`); o recorte e os tons são os da opção A (`preparar` da A antes).
 """
 
 import argparse
@@ -39,8 +42,8 @@ def final(pav):
     return R / f"POE642_CasaC_PH_{pav}_final_rotulos.png"
 
 
-def entrada(pav):
-    return R / f"POE642_CasaC_PH_{pav}_12K_entrada_topaz.png"
+def entrada(pav, opcao="A"):
+    return R / f"POE642_CasaC_PH_{pav}_12K_entrada_topaz{'' if opcao == 'A' else '_opcao_B'}.png"
 
 
 def dados(pav):
@@ -56,10 +59,16 @@ def rotulos_12k(pav):
     return R14.rotulos_12k()
 
 
-def preparar(pav):
-    img = cv2.imread(str(final(pav)))
-    for r in rotulos_12k(pav):
-        img = r["apaga"](img)
+def preparar(pav, opcao="A"):
+    if opcao == "B":
+        # (14/11, a opção B: os rótulos na Kalam) a final sem os rótulos nem as descrições das escadas
+        # (`rotulos_kalam_casac.preparar`), que voltam na Kalam no 12K
+        import rotulos_kalam_casac as K
+        img = K.preparar(pav)
+    else:
+        img = cv2.imread(str(final(pav)))
+        for r in rotulos_12k(pav):
+            img = r["apaga"](img)
     Hf, Wf = img.shape[:2]
     nb = (img.astype(np.int16).min(axis=2) < 245)
     ys, xs = np.nonzero(nb)
@@ -77,18 +86,21 @@ def preparar(pav):
     M = np.float64([[1, 0, -X0], [0, 1, -Y0]])
     ent = cv2.warpAffine(img, M, (Wi, Hi), flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT,
                          borderValue=(255, 255, 255))
-    cv2.imwrite(str(entrada(pav)), ent)
+    cv2.imwrite(str(entrada(pav, opcao)), ent)
+    if opcao == "B":
+        print(f"[{pav}] a entrada da opção B (sem textos) -> {entrada(pav, opcao).name}")
+        return
     dados(pav).write_text(json.dumps({"planta": [x0, y0, x1, y1], "X0": X0, "Y0": Y0, "Wc": Wc, "Hc": Hc,
                                       "entrada": [Wi, Hi]}, indent=1) + "\n")
     print(f"[{pav}] a planta {x0},{y0} a {x1},{y1}; o recorte A3 {Wi}x{Hi} a partir de ({X0:.1f}, {Y0:.1f}) "
           f"({L / Wc:.3f}x no 12K) -> {entrada(pav).name}")
 
 
-def montar(pav, saida_topaz):
+def montar(pav, saida_topaz, opcao="A"):
     from PIL import Image
     d = json.loads(dados(pav).read_text())
     img = cv2.imread(str(final(pav)))
-    ent = cv2.imread(str(entrada(pav)))
+    ent = cv2.imread(str(entrada(pav, opcao)))
     Wi, Hi = ent.shape[1], ent.shape[0]
     ia = cv2.imread(str(saida_topaz))
     print(f"[{pav}] a saída do Topaz: {ia.shape[1]}x{ia.shape[0]}; o JPG: {L}x{H} ({L / d['Wc']:.3f}x a final)")
@@ -113,16 +125,19 @@ def montar(pav, saida_topaz):
         reg = reg * (1 - f_) + 255 * f_
         out[y:y + 1024] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
     del corr, fa
-    if rotulos_12k(pav):
+    if opcao == "B":
+        import rotulos_kalam_casac as K
+        K.desenhar(out, pav, L / d["Wc"], d["X0"], d["Y0"])
+    elif rotulos_12k(pav):
         import revisao_terreo_casac_1411 as R14
         for r in rotulos_12k(pav):
             R14.desenhar_linhas(out, r["linhas"], r["cor"], s=L / d["Wc"], X0=d["X0"], Y0=d["Y0"])
         print(f"    {len(rotulos_12k(pav))} rótulo(s) redesenhado(s) nítido(s) no 12K")
-    saida = E / f"POE642_CasaC_PH_{pav}_12K_opcao_A.jpg"
+    saida = E / f"POE642_CasaC_PH_{pav}_12K_opcao_{opcao}.jpg"
     dpi = int(round(L / (420 / 25.4)))
     Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(saida, quality=95, subsampling=0, dpi=(dpi, dpi),
                                                                optimize=True)
-    cv2.imwrite(str(R / f"POE642_CasaC_PH_{pav}_12K_opcao_A_previa.jpg"),
+    cv2.imwrite(str(R / f"POE642_CasaC_PH_{pav}_12K_opcao_{opcao}_previa.jpg"),
                 cv2.resize(out, (2000, round(2000 * H / L)), interpolation=cv2.INTER_AREA), [cv2.IMWRITE_JPEG_QUALITY, 90])
     s = L / d["Wc"]
     for nome, (x0, y0, x1, y1) in CONFERENCIA[pav].items():
@@ -131,7 +146,7 @@ def montar(pav, saida_topaz):
         cr = out[max(v0, 0):v1, max(u0, 0):u1]
         ref = cv2.resize(img[y0:y1, x0:x1], (cr.shape[1], cr.shape[0]), interpolation=cv2.INTER_LANCZOS4)
         par = np.hstack([ref, np.full((cr.shape[0], 24, 3), 255, np.uint8), cr])
-        cv2.imwrite(str(R / f"POE642_CasaC_PH_{pav}_12K_opcao_A_conferencia_{nome}.jpg"),
+        cv2.imwrite(str(R / f"POE642_CasaC_PH_{pav}_12K_opcao_{opcao}_conferencia_{nome}.jpg"),
                     cv2.resize(par, (par.shape[1] // 3, par.shape[0] // 3), interpolation=cv2.INTER_AREA),
                     [cv2.IMWRITE_JPEG_QUALITY, 90])
     print(f"    {saida} {L}x{H} ({dpi} dpi na A3), {saida.stat().st_size / 1e6:.1f} MB")
@@ -142,11 +157,12 @@ def main():
     ap.add_argument("acao", choices=["preparar", "montar"])
     ap.add_argument("pav", choices=["Subsolo", "Terreo"])
     ap.add_argument("saida_topaz", nargs="?")
+    ap.add_argument("--opcao", choices=("A", "B"), default="A")
     a = ap.parse_args()
     if a.acao == "preparar":
-        preparar(a.pav)
+        preparar(a.pav, a.opcao)
     else:
-        montar(a.pav, a.saida_topaz)
+        montar(a.pav, a.saida_topaz, a.opcao)
 
 
 if __name__ == "__main__":
