@@ -12,7 +12,8 @@ Sobre a final de `ANTES_COMMIT` (a de 48a23e8: a biblioteca, os post-its e a rev
    dentro.
 4. **"CORRIJA FALHA NA PAREDE AO LADO DA PORTA"** (`deposito`): o canto de dentro entre a parede da esquerda e a de cima,
    junto à porta do depósito, tinha um ponto preto e a meia-tinta escura: no cinza da parede e na meia-tinta da face.
-5. **"ESQUADRIA EM TOM DE VIDRO, NÃO PRETO"** (`vidros_academia`): as 4 folhas de vidro de correr entre a varanda e a
+5. **"ESQUADRIA EM TOM DE VIDRO, NÃO PRETO"** (`vidros_academia`; e depois "vidro da sauna, vidro claro, como as folhas
+   da academia. sim!": o vidro da sauna, em pé e em cima, igual): as 4 folhas de vidro de correr entre a varanda e a
    academia (o contorno preto das esquadrias de 13/11 e o miolo cinza) no vidro claro dos boxes da Casa C
    (`final3840_casab.BOXES_VIDRO`: o vidro azul-acinzentado claro e as faces finas num cinza claro), pela luminância de
    cada px (o fio escuro vira a face, o miolo vira o vidro); os encontros brancos das folhas ficam.
@@ -38,15 +39,18 @@ ANTES_COMMIT = "48a23e8"
 PAREDE = 80
 
 PAREDE_BH = {"x_face": 897, "y": (804, 895)}
-SAUNA = {"soleira_x": 706, "soleira_y": (750, 832), "escuro": 150, "parede": (695, 706), "y0": 835, "face_x": 706,
-         "face_cor": 84, "piso_min": 195}
+SAUNA = {"soleira_x": 706, "soleira_y": (746, 832), "escuro": 150, "parede": (695, 706), "y0": 835, "face_x": 706,
+         "face_cor": 84, "piso_min": 195, "tique": ((707, 709), 746, 709)}
 BANCADA_BH = {"ret": (948, 755, 980, 795), "fios": {"cima": (757, 761), "baixo": (790, 790), "esq": (949, 955),
                                                      "dir": (972, 979), "ate_y": 792}, "dentro": 4, "dif": -1}
 DEPOSITO = {"canto": [(992, 746)], "face_x": 993, "face_y": (746, 748), "amostra_y": (752, 790)}
-VIDROS_ACADEMIA = {"caixa": (1060, 334, 1082, 738), "croma_max": 18, "claro_max": 200,
+# (e "vidro da sauna, vidro claro, como as folhas da academia. sim!": o vidro em pé da sauna, x 698 a 702, e o de cima,
+# y 741 a 745, até o batente branco em x 760)
+VIDROS_ACADEMIA = {"caixas": {"academia": (1060, 334, 1082, 738), "sauna em pé": (697, 739, 704, 834),
+                              "sauna em cima": (703, 740, 760, 746)}, "croma_max": 18, "claro_max": 200,
                    "face": (162, 164, 166), "vidro": (218, 214, 204), "l0": 34, "l1": 150}
 ANTES_DEPOIS = {"bh_academia": (860, 730, 1000, 910), "sauna": (680, 725, 760, 910), "deposito": (975, 725, 1090, 800),
-                "vidros_academia": (1030, 320, 1110, 750)}
+                "vidros_academia": (1030, 320, 1110, 750), "vidro_sauna": (685, 730, 770, 845)}
 
 
 def parede_bh(img, q=PAREDE_BH):
@@ -69,6 +73,9 @@ def sauna(img, q=SAUNA):
     esc = col.mean(axis=1) < q["escuro"]
     cor = np.median(col[~esc], axis=0)
     out[y0:y1, x][esc] = np.round(cor).astype(np.uint8)
+    # o tiquinho escuro no encontro do vidro de cima com a soleira: a cor da face de baixo do vidro, logo ao lado
+    (t0, t1), ty, tx = q["tique"]
+    out[ty, t0:t1] = img[ty, tx]
     # a parede de baixo: a face reta e o piso ao lado sem restos
     p0, p1 = q["parede"]
     y = q["y0"]
@@ -130,17 +137,17 @@ def deposito(img, q=DEPOSITO):
 
 def vidros_academia(img, q=VIDROS_ACADEMIA):
     out = img.copy()
-    X0, Y0, X1, Y1 = q["caixa"]
-    reg = img[Y0:Y1, X0:X1].astype(np.float32)
-    I = reg.astype(np.int16)
-    croma = I.max(axis=2) - I.min(axis=2)
-    lum = reg.mean(axis=2)
-    folha = (croma <= q["croma_max"]) & (lum <= q["claro_max"])
-    t = np.clip((lum - q["l0"]) / (q["l1"] - q["l0"]), 0, 1)[..., None]
-    novo = np.float32(q["face"]) * (1 - t) + np.float32(q["vidro"]) * t
-    reg[folha] = novo[folha]
-    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
-    print(f"    academia: as 4 folhas de vidro de correr no vidro claro ({int(folha.sum())} px), sem o preto")
+    for nome, (X0, Y0, X1, Y1) in q["caixas"].items():
+        reg = img[Y0:Y1, X0:X1].astype(np.float32)
+        I = reg.astype(np.int16)
+        croma = I.max(axis=2) - I.min(axis=2)
+        lum = reg.mean(axis=2)
+        folha = (croma <= q["croma_max"]) & (lum <= q["claro_max"])
+        t = np.clip((lum - q["l0"]) / (q["l1"] - q["l0"]), 0, 1)[..., None]
+        novo = np.float32(q["face"]) * (1 - t) + np.float32(q["vidro"]) * t
+        reg[folha] = novo[folha]
+        out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+        print(f"    {nome}: o vidro no vidro claro ({int(folha.sum())} px), sem o preto")
     return out
 
 

@@ -44,6 +44,8 @@ da final de 3840:
   recortado da final antiga (o desenho velho da planta e o halo cinza) vira travertino, com a sombra curta das folhas; em
   volta do sofá curvo, a sombra dupla vira a sombra curta do contorno dele (o sofá refeito pela mesma conta do
   `mobiliario_terreo_casac_1311.estar`).
+- O aparador do hall chegou a ir para o cinza da foto ("ESSE APARADOR TEM O TOM CINZA CONFORME FOTO") e voltou ao freijó
+  ("deixe como estava em vez do cinza").
 """
 
 import contextlib
@@ -602,7 +604,7 @@ POLTRONA_CURVA = {"png": "sala-de-estar/poltrona-curva-boucle-almofada", "folga_
                   "amostra": (2215, 1606, 2295, 1640)}
 
 
-def _trocar_peca(Q, img, chave, png, cx, cy, wt, ht, g, sombra, folga_px, amostra):
+def _trocar_peca(Q, img, chave, png, cx, cy, wt, ht, g, sombra, folga_px, amostra, mais=()):
     """A peça `chave` do estar sai (a zona dela com `folga_px`, fora das outras peças): por baixo, o tapete manchado onde
     há tapete e o travertino fora dele; a peça nova (`png`) pousa no centro, no tamanho e no giro dados."""
     import mobiliario_terreo_casac_1311 as MB
@@ -629,7 +631,10 @@ def _trocar_peca(Q, img, chave, png, cx, cy, wt, ht, g, sombra, folga_px, amostr
     fundo = fundo_tap * at + trav * (1 - at)
     out = img.copy()
     _misturar(out, X0, Y0, fundo, _pena(zona[Y0:Y1, X0:X1], 0.6))
-    return MB.pousar(out, MB.ler(png), cx, cy, wt, ht, g, sombra, par)
+    P = MB.ler(png)
+    for pcx, pcy, pwt, pht, pg in ((cx, cy, wt, ht, g),) + tuple(mais):
+        out = MB.pousar(out, P, pcx, pcy, pwt, pht, pg, sombra, par)
+    return out
 
 
 def poltrona_creme(Q, img, q=POLTRONA_CURVA):
@@ -686,28 +691,24 @@ def mesinhas_cinza(img, q=MESINHAS):
     return out
 
 
-# (14/11, "O TOM DESSAS DUAS POLTRONAS DEVE SER O DA IMAGEM", a foto de uma poltrona de linho greige) o tecido das 2
-# poltronas oliva do estar no greige da foto (BGR, a mediana), com a luz de cada uma; os pés de madeira ficam
-OLIVA_GREIGE = {"cor": (138, 152, 168), "gama": 0.75, "matiz": (20, 50), "sat_min": 25, "val_min": 25}
+# (14/11, "O TOM DESSAS DUAS POLTRONAS DEVE SER O DA IMAGEM", a foto de uma poltrona de linho greige; depois, "essas
+# poltronas precisam ficar perfeitas") as 2 poltronas oliva do estar trocam pela poltrona de linho greige com pés de
+# nogueira (gerada em 2K no Higgsfield, `gpt_image_2_6`, o fundo tirado), nas mesmas poses (o centro e a altura do
+# retângulo do PDF, viradas para a mesa); antes, a oliva recolorida (os fios escuros do desenho dela apareciam)
+OLIVA_GREIGE = {"png": "sala-de-estar/poltrona-greige-linho-pes-nogueira", "folga_px": 6, "escala": 1.0,
+                "amostra": (2215, 1606, 2295, 1640)}
 
 
 def poltronas_oliva(Q, img, q=OLIVA_GREIGE):
-    al, _ = _estar_pecas(Q)
-    m = al["oliva"] > 0.5
-    ys, xs = np.nonzero(m)
-    X0, Y0, X1, Y1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
-    reg = img[Y0:Y1, X0:X1]
-    hsv = cv2.cvtColor(reg, cv2.COLOR_BGR2HSV).astype(np.int16)
-    tec = m[Y0:Y1, X0:X1] & (hsv[..., 0] >= q["matiz"][0]) & (hsv[..., 0] <= q["matiz"][1]) & \
-        (hsv[..., 1] >= q["sat_min"]) & (hsv[..., 2] >= q["val_min"])
-    Y = reg.astype(np.float32) @ np.float32([0.114, 0.587, 0.299])
-    r = (Y / max(float(np.median(Y[tec])), 1.0)) ** q["gama"]
-    o = reg.astype(np.float32)
-    novo = np.float32(q["cor"])[None, None] * r[..., None]
-    o[tec] = novo[tec]
-    out = img.copy()
-    out[Y0:Y1, X0:X1] = np.clip(np.round(o), 0, 255).astype(np.uint8)
-    print(f"    estar: as 2 poltronas oliva no linho greige da foto ({int(tec.sum())} px de tecido)")
+    import mobiliario_terreo_casac_1311 as MB
+    P = MB.ler(q["png"])
+    poses = []
+    for i in MB.ESTAR["oliva"]:
+        a0, b0, a1, b1 = MB.RT.caixa_pdf(Q, i)
+        hh = (b1 - b0) * q["escala"]
+        poses.append(((a0 + a1) / 2, (b0 + b1) / 2, hh * P.shape[1] / P.shape[0], hh, 0.0))
+    out = _trocar_peca(Q, img, "oliva", q["png"], *poses[0], "movel", q["folga_px"], q["amostra"], mais=poses[1:])
+    print("    estar: as 2 poltronas oliva trocadas pela de linho greige com pés de nogueira")
     return out
 
 
@@ -756,7 +757,8 @@ def cadeiras_jantar(Q, img, q=JANTAR_AZUL):
     return out
 
 
-# (14/11, "ESSE APARADOR TEM O TOM CINZA CONFORME FOTO", a foto de um aparador laqueado cinza-fendi) a madeira do
+# (14/11, "ESSE APARADOR TEM O TOM CINZA CONFORME FOTO", a foto de um aparador laqueado cinza-fendi; depois, vendo o
+# resultado com pontos do freijó soltos: "deixe como estava em vez do cinza", fora do `aplicar`) a madeira do
 # aparador do hall (`revisao_terreo_casac_1311.APARADOR`, o freijó do PNG) no cinza da foto (BGR, a mediana), com a luz
 # dela; os objetos (o vaso, os livros, a tigela) ficam
 APARADOR_CINZA = {"cor": (112, 120, 130), "gama": 0.8, "matiz": (5, 28), "sat_min": 85, "val_max": 225, "folga_px": 2}
@@ -791,7 +793,8 @@ ANTES_DEPOIS = {"deck": (600, 985, 1125, 1300), "chuveiro_pisante": (1140, 1780,
                 "box_bh_master2": (795, 895, 900, 980), "cortinas_quartos": (1160, 320, 1720, 380),
                 "tapete_quarto1": (1990, 545, 2130, 640), "cozinha_louceiros": (2150, 380, 2480, 900),
                 "circulacao": (2255, 690, 2320, 850), "estar": (1660, 1330, 2420, 1645), "jantar": (2060, 920, 2260, 1200),
-                "hall_aparador": (2290, 1185, 2490, 1250), "escrivaninhas": (1170, 500, 2180, 760)}
+                "hall_aparador": (2290, 1185, 2490, 1250), "escrivaninhas": (1170, 500, 2180, 760),
+                "quarto1_criado": (2085, 340, 2180, 440)}
 
 
 def antes_depois(antes, depois, R):
@@ -809,6 +812,85 @@ def antes_depois(antes, depois, R):
         cv2.imwrite(str(R / f"POE642_CasaC_PH_Terreo_1411_{nome}_antes_depois.jpg"), np.vstack([t, j]),
                     [cv2.IMWRITE_JPEG_QUALITY, 90])
     print(f"    antes e depois (14/11): {', '.join(ANTES_DEPOIS)}")
+
+
+# (14/11, "preencheu o vão entre o criado mudo e a cama, com criado mudo?", a cabeceira do quarto 1) entre o criado
+# redondo e o lado da cama havia uma faixa escura de 3 px (a sombra da cama, dura, até a parede) que com o lençol branco
+# lia como uma peça a mais: as linhas `linhas` viram o vinílico do quarto (as de `fonte_y`, logo acima do criado, na
+# mesma coluna), com a sombra curta da cama no piso (`sombra`, da linha de cima para a da cama)
+CRIADO_Q1 = {"x": (2119, 2163), "linhas": (399, 404), "fonte_y": 351, "sombra": (0.0, 0.04, 0.10, 0.18, 0.26)}
+
+
+def criado_q1(img, q=CRIADO_Q1):
+    out = img.copy()
+    x0, x1 = q["x"]
+    y0, y1 = q["linhas"]
+    fy = q["fonte_y"]
+    reg = img[fy:fy + (y1 - y0), x0:x1].astype(np.float32)
+    reg *= (1 - np.float32(q["sombra"]))[:, None, None]
+    # o criado redondo e a sombra dele ficam (o escuro dele acima da faixa não muda: só as linhas da faixa)
+    out[y0:y1, x0:x1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print("    quarto 1: o vão entre o criado e a cama no vinílico, com a sombra curta da cama (sem a faixa escura)")
+    return out
+
+
+# (14/11, "ESSAS DUAS POLTRONAS DEVEM TER O ESTILO E TOM DE COR DA IMAGEM 2", proposta P1 escolhida e "clareie um pouco o
+# azul marinho das poltronas, para que possamos ver os contornos dela e a base nogueira") as 2 poltronas de couro
+# caramelo do conjunto da esquerda (`proposta_estar_casac_1311.PECAS`) trocam pela P1 (azul-marinho, braço rolado, base de
+# nogueira; gerada em 2K no Higgsfield) com o tecido azul clareado (`clarear`: o brilho, HSV, e um pouco menos de
+# saturação), a madeira igual; por baixo, o tapete liso do conjunto onde ele está (x >= `tapete_x0`) e o travertino fora
+POLTRONAS_AZUIS = {"png": "sala-de-estar/poltrona-azul-p1-clara", "fonte": "propostas-estar-c/poltrona-azul-p1.png",
+                   "clarear": 1.45, "sat": 0.85, "matiz": (95, 135), "folga_px": 8,
+                   "tapete_x0": 1713.3, "tapete_y": (1342.2, 1551.2),
+                   "amostra_tapete": (1758, 1490, 1798, 1526), "amostra_trav": (1780, 1604, 1940, 1632)}
+
+
+def poltrona_azul_png(q=POLTRONAS_AZUIS):
+    """O PNG da P1 com o azul clareado (gravado na biblioteca; refeito se a fonte mudar)."""
+    bib = AQUI.parents[0] / "biblioteca-objetos" / "02-terreo" / "sala-de-estar"
+    P = cv2.imread(str(bib / q["fonte"]), cv2.IMREAD_UNCHANGED)
+    hsv = cv2.cvtColor(P[..., :3], cv2.COLOR_BGR2HSV).astype(np.float32)
+    azul = (hsv[..., 0] >= q["matiz"][0]) & (hsv[..., 0] <= q["matiz"][1]) & (hsv[..., 1] > 50)
+    hsv[..., 2] = np.where(azul, np.clip(hsv[..., 2] * q["clarear"], 0, 255), hsv[..., 2])
+    hsv[..., 1] = np.where(azul, hsv[..., 1] * q["sat"], hsv[..., 1])
+    P[..., :3] = cv2.cvtColor(np.round(hsv).astype(np.uint8), cv2.COLOR_HSV2BGR)
+    cv2.imwrite(str(bib / (q["png"].split("/")[-1] + ".png")), P)
+
+
+def poltronas_azuis(Q, img, q=POLTRONAS_AZUIS):
+    import mobiliario_terreo_casac_1311 as MB
+    import proposta_estar_casac_1311 as PE
+    poltrona_azul_png(q)
+    with contextlib.redirect_stdout(io.StringIO()):
+        par = MB.BS.quieto(MB.FA.paredes_pdf, Q) > 0.3
+    out = img.copy()
+    P = MB.ler(q["png"])
+    for peca, (x0, y0, x1, y1), g, _ in PE.PECAS:
+        if peca != "poltrona":
+            continue
+        f = q["folga_px"]
+        X0, Y0, X1, Y1 = int(x0) - f, int(y0) - f, int(np.ceil(x1)) + f, int(np.ceil(y1)) + f
+        H, W = Y1 - Y0, X1 - X0
+        ss = 8
+        at = np.outer(RT_cob(q["tapete_y"][0], q["tapete_y"][1], H, Y0, ss), RT_cob(q["tapete_x0"], 1e9, W, X0, ss))
+        # o tom de cada um: o tapete logo à direita da zona, o travertino logo à esquerda
+        ref_t = np.median(img[Y0:Y1, X1 + 2:X1 + 8].reshape(-1, 3).astype(np.float32), axis=0)
+        ref_v = np.median(img[Y0:Y1, X0 - 8:X0 - 2].reshape(-1, 3).astype(np.float32), axis=0)
+        Tt = _textura(img, q["amostra_tapete"], H, W, ref_t)
+        Tv = _textura(img, q["amostra_trav"], H, W, ref_v)
+        fundo = Tt * at[..., None] + Tv * (1 - at[..., None])
+        m = np.ones((H, W), np.float32)
+        m[[0, -1], :] = 0.5
+        m[:, [0, -1]] = 0.5
+        _misturar(out, X0, Y0, fundo, m)
+        out = MB.pousar(out, P, (x0 + x1) / 2, (y0 + y1) / 2, y1 - y0, x1 - x0, g, "movel", par)
+    print("    estar: as 2 poltronas de couro caramelo trocadas pela P1 azul-marinho (clareada), com a base de nogueira")
+    return out
+
+
+def RT_cob(a0, a1, n, o, ss):
+    import revisao_terreo_casac_1311 as RT
+    return RT._cob(a0, a1, n, o, ss)
 
 
 def aplicar(Q, out):
@@ -833,5 +915,7 @@ def aplicar(Q, out):
     out = mesinhas_cinza(out)
     out = poltronas_oliva(Q, out)
     out = cadeiras_jantar(Q, out)
-    out = aparador_cinza(out)
+    out = criado_q1(out)
+    out = poltronas_azuis(Q, out)
+    # (o aparador cinza saiu: "deixe como estava em vez do cinza"; `aparador_cinza` fica, sem uso)
     return out
