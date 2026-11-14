@@ -595,7 +595,10 @@ def tapete_estar(Q, img, q=TAPETE_ESTAR):
 # redonda marrom) a poltrona creme de madeira do estar troca pela curva de bouclé greige com a almofada redonda de veludo
 # marrom (gerada em 2K no Higgsfield, `gpt_image_2_6`, vista de cima, o fundo tirado), na mesma pose (o centro, o lado e
 # o giro de `mobiliario_terreo_casac_1311.estar`); por baixo, o tapete manchado e o travertino refeitos
-POLTRONA_CURVA = {"png": "sala-de-estar/poltrona-curva-boucle-almofada", "folga_px": 7, "escala": 1.0,
+# (14/11, "AUMENTE O TAMANHO PROPORCIONALMENTE DA ALMOFADA E POLTRONA, CONFORME DEMAIS ALMOFADAS") `escala` 1,25: a
+# poltrona no tamanho do símbolo do PDF (53 px; o lado da creme era 0,80 dele) e a almofada franzida no diâmetro das
+# almofadas redondas do sofá curvo (19,6 px)
+POLTRONA_CURVA = {"png": "sala-de-estar/poltrona-curva-boucle-almofada", "folga_px": 7, "escala": 1.25,
                   "amostra": (2215, 1606, 2295, 1640)}
 
 
