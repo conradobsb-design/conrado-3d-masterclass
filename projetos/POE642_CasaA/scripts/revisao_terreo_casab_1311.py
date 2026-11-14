@@ -118,7 +118,11 @@ PORTAS_BM = {"parede": [(1236.2, 503.6, 1244.0, 508.9), (1289.4, 501.8, 1344.8, 
              "piso_px": (1234, 511, 1556, 519), "nicho": (232, 234, 236), "folha": (236, 238, 240), "perfil_px": 0.5,
              # (14/11, "PAREDE À ESQUERDA NAS PORTAS DO BANHO MASTER, UMA FALHA") a faixa do piso da suíte logo abaixo da
              # face da parede, inteira: os restos (rosa claro sob o nicho, a sombra escura sob o bolso) pareciam um dente
-             "piso_faixa": [(1234, 511, 1346, 514), (1452, 511, 1556, 514)]}
+             "piso_faixa": [(1234, 511, 1346, 514), (1452, 511, 1556, 514)],
+             # (14/11, "A PORTA DE CORRER DO LADO DIREITO ... NO FINAL DELA, AINDA HÁ UMA FALHA. PRECISO DO CONTORNO
+             # COMPLETO DE PONTA A PONTA") o fio das pontas das folhas do vão que encostam nas dos bolsos, cheio no pixel
+             # (o da direita, em x 1455,3, caía dividido entre 2 px e quase sumia; o da esquerda fica igual)
+             "pontas": [(1341.8, 507.8, 1342.8, 510.1), (1455.0, 507.8, 1456.0, 510.1)]}
 # (usuário: "CORRIGIR O PISO E PAREDE", o hall junto à suíte 3) a face da parede de cima reta em y 943,6 (do PDF; o render
 # a encurtava depois de x 2452); o toco de parede e o caixilho de vidro emoldurado abaixo dele pelo PDF; o piso do hall
 # interno no retângulo mais claro do render (o PDF muda de piso só em x 2537), sem a linha clara sob o vaso
@@ -620,7 +624,8 @@ def portas_banho_master(RT, Q, out, par, reg, q=PORTAS_BM):
     for r in q["folhas"]:
         prims += [{"t": "ret", "c": list(r), "cor": q["folha"]},
                   {"t": "fio", "c": list(r), "cor": PERFIL, "px": q["perfil_px"]}]
-    rs = np.float32(q["parede"] + q["folhas"])
+    prims += [{"t": "ret", "c": list(r), "cor": PERFIL} for r in q.get("pontas", [])]
+    rs = np.float32(q["parede"] + q["folhas"] + q.get("pontas", []))
     # no 12K também sobre as paredes do PDF (a ponta da folha de correr da direita passa por cima do bolso; com a
     # máscara das paredes ela sumia ali e o 12K ficava com a mancha da emenda: "O SEU FINAL FALHOU")
     it = {"tipo": "rv_vetor", "nome": "portas_banho_master",
