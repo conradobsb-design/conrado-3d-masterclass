@@ -280,6 +280,9 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   a soleira de parede a parede; os vidros fixos ao lado da pivotante (a peça do PDF com a lâmina de 3 px e as bordas
   tracejadas da soleira) no vidro claro, por cima da soleira, nunca caixilho branco nem parede. [B Térreo; conferir nas
   outras casas]
+- [ ] **Mantas e pufes em tons sóbrios** (bege, areia, ocre; o pufe da suíte master pode ser marrom claro); as
+  escrivaninhas em freijó. Ao trocar um material de piso, conferir que os móveis do PDF (as escrivaninhas) continuam.
+  [C Térreo]
 - [ ] **Móvel por cima de outro (escrivaninha sobre a cadeira):** o fio da borda do de cima continua inteiro por cima
   do de baixo. [B Térreo]
 - [ ] **Face de parede reta:** a mesma linha de borda dos dois lados de uma emenda, sem degrau, sem blocos escuros nem

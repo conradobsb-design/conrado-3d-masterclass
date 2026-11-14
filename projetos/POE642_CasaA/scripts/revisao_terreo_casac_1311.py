@@ -146,10 +146,27 @@ TRAV = {"veio": 0.010, "faixa": 0.016, "poros": 6, "poro_esc": 0.05, "forca": 0.
 # os bancos dos quartos (índice do retângulo do PDF, tamanho) e o veludo novo (BGR, a mediana vista de cima); o
 # veludo do PNG: o matiz do bordô (OpenCV, >= 150 ou < 8) e saturado; `gama`: o contraste da luz do veludo
 # (a 1ª tentativa, mais clara e com gama 0,75, saiu rosa-chiclete; estes são os da variante B, fechados, de veludo)
-TONS = [("quarto 3", 88634, "casal", "rosé antigo", (76, 70, 112)),
-        ("quarto 2, de cima", 88609, "solteiro", "azul petróleo", (72, 62, 28)),
-        ("quarto 2, de baixo", 88614, "solteiro", "azul petróleo", (72, 62, 28)),
-        ("quarto 1", 88517, "casal", "verde musgo", (42, 76, 70))]
+# (14/11, "AS MANTAS E PUFFS EM TONS SOBRIOS: BEGE, AREIA, OCRE") os bancos de pé de cama (os pufes) nos tons sóbrios,
+# variando de quarto a quarto, e o da suíte master entra (era o bordô do B1); antes: rosé antigo, azul petróleo e verde
+# musgo (BGR)
+SOBRIOS = {"bege": (172, 198, 214), "areia": (140, 178, 200), "ocre": (62, 116, 160)}
+# ("O BANCO NA SUITE MASTER PODE TER TOM MARROM CLARO")
+TONS = [("suíte master", 88649, "casal", "marrom claro", (84, 118, 154)),
+        ("quarto 3", 88634, "casal", "bege", SOBRIOS["bege"]),
+        ("quarto 2, de cima", 88609, "solteiro", "areia", SOBRIOS["areia"]),
+        ("quarto 2, de baixo", 88614, "solteiro", "areia", SOBRIOS["areia"]),
+        ("quarto 1", 88517, "casal", "ocre", SOBRIOS["ocre"])]
+# as mantas de tricô caídas nas camas (`mobiliario_terreo_casac_1311.CAMAS`, `manta_caida_casac_1311`) nos tons sóbrios
+# (RGB, na escala dos tons de `camas_casac_1311.TONS`); só a manta muda (a diferença entre a manta de antes e a nova,
+# como nos bancos), os pufes por cima ficam
+MANTAS = {"suíte master": ("areia sóbria", (212, 190, 156)), "quarto 3": ("bege sóbrio", (222, 208, 186)),
+          "quarto 1": ("areia sóbria", (212, 190, 156))}
+# (14/11) as escrivaninhas da suíte master e dos quartos 3 e 1, que o piso novo de 3f92bb8 ("os materiais da Casa B")
+# cobriu (as cadeiras ficaram viradas para o nada): de volta da final de antes (2263fe0), no retângulo de cada mesa
+# (`mobiliario_terreo_casac_1311.CADEIRAS`), por cima da cadeira (1/3 por baixo dela)
+# ("A ESCRIVANINHA TEM TOM FREIJÓ") no freijó do projeto (`final3840_casaa`: o bege-dourado, RGB ~201, 158, 112), com o
+# veio e a borda da mesa de antes (a luz dela / a mediana, ** `gama`)
+ESCRIVANINHAS = {"commit": "2263fe0", "freijo": (112, 158, 201), "gama": 0.8}
 VELUDO = {"matiz": (150, 8), "sat_min": 60, "gama": 0.5}
 # as claraboias: a faixa em volta do retângulo (px) onde ficam os restos do tracejado antigo; o escuro (fração da
 # mediana do piso) e o cinza da parede (tolerância)
@@ -347,6 +364,53 @@ def bancos(Q, img):
         novo = _camada(P2, cx, cy, L, D, giro, H, W)[y0:y1, x0:x1]
         out[y0:y1, x0:x1] += novo - velho
         print(f"    {nome}: o banco B1 em veludo {cor}")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def escrivaninhas(img, q=ESCRIVANINHAS):
+    out = img.copy()
+    velha = final_de(q["commit"])
+    for nome, ids, borda, lado, (x0, y0, x1, y1) in MB.CADEIRAS:
+        v = velha[y0:y1, x0:x1].astype(np.float32)
+        Y = v @ np.float32([0.114, 0.587, 0.299])
+        r = (Y / max(float(np.median(Y)), 1.0)) ** q["gama"]
+        out[y0:y1, x0:x1] = np.clip(np.round(np.float32(q["freijo"])[None, None] * r[..., None]), 0, 255).astype(np.uint8)
+        print(f"    {nome}: a escrivaninha de volta, em freijó")
+    return out
+
+
+def mantas(Q, img, q=MANTAS):
+    import camas_casac_1311 as CM
+    import manta_caida_casac_1311 as MC
+    out = img.astype(np.float32)
+    H, W = img.shape[:2]
+    bancos = {n: idx for n, idx, *_ in TONS}
+    for nome, i, giro, tipo, roupa, enf, modo, lado, _ in MB.CAMAS:
+        if nome not in q or modo != "manta":
+            continue
+        novo_nome, rgb = q[nome]
+        CM.TONS[novo_nome] = (rgb[2], rgb[1], rgb[0])
+        x0, y0, x1, y1 = MB.RT.caixa_pdf(Q, i)
+        cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+        comp, larg = (y1 - y0, x1 - x0) if giro in (0.0, 180.0) else (x1 - x0, y1 - y0)
+        with contextlib.redirect_stdout(io.StringIO()):
+            P0 = CM.cama(tipo, roupa, enf, "nada")
+            Pa, p = MC.manta_caida(P0, enf, lado)
+            Pb, _ = MC.manta_caida(P0, novo_nome, lado)
+        H0, W0 = P0.shape[:2]
+        wt, ht = larg * (W0 + 2 * p) / W0, comp * (H0 + 2 * p) / H0
+        m = int(max(wt, ht)) // 2 + 8
+        X0, Y0, X1, Y1 = int(cx) - m, int(cy) - m, int(cx) + m, int(cy) + m
+        velho = _camada(Pa, cx, cy, wt, ht, giro, H, W)[Y0:Y1, X0:X1]
+        novo = _camada(Pb, cx, cy, wt, ht, giro, H, W)[Y0:Y1, X0:X1]
+        dif = novo - velho
+        # o pufe por cima da manta fica como está
+        for n_, idx in bancos.items():
+            if n_ == nome:
+                b0, b1_, b2, b3 = MB.RT.caixa_pdf(Q, idx)
+                dif[max(0, int(b1_) - 2 - Y0):int(np.ceil(b3)) + 2 - Y0, max(0, int(b0) - 2 - X0):int(np.ceil(b2)) + 2 - X0] = 0
+        out[Y0:Y1, X0:X1] += dif
+        print(f"    {nome}: a manta de tricô em {novo_nome} (era {enf})")
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
@@ -1182,6 +1246,8 @@ def aplicar(antes):
     out = portas_quartos(Q, out)
     out = folhas_bh_master(out)
     out = tracejado_lote(out)
+    out = escrivaninhas(out)
+    out = mantas(Q, out)
     return out
 
 

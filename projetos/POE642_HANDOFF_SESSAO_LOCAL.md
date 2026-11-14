@@ -4448,6 +4448,11 @@ refeitos. O 12K do Térreo se refaz (Topaz) no fim da revisão.
   cima reto; a folha da pivotante num estilo só, de ponta a ponta. No 12K, sem o tracejado da porta do banho 2.
   `revisao_terreo_casab_1311.HALL` e `regras_terreo_casab_1311` (`extras`, `fora_px`, `ZONA_12K_EXTRA`, `pivo_12k`).
 
+### Casa C, Térreo: escrivaninhas, mantas e pufes (14/11)
+
+- As escrivaninhas da suíte master e dos quartos 3 e 1 de volta, em freijó (tinham sumido em 3f92bb8); as mantas em
+  areia e bege e os pufes em bege, areia, ocre e marrom claro (suíte master); 12K do Térreo refeito. Ver README.
+
 ### Casa B, Térreo: os 5 erros de 14/11
 
 - Banho master (a faixa de piso sob a parede e os batentes até a face), o fio da borda das escrivaninhas da suíte master e

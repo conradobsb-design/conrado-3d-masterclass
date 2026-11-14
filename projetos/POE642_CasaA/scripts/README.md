@@ -2970,6 +2970,20 @@ Cadeia: `regras_terreo_casab_1311.py`, `ampliacao_12k_terreo_casab.py montar12k 
 `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1411_porta_principal_pdf.jpg`; antes e depois em
 `..._Terreo_1411_porta_principal_antes_depois.jpg`.
 
+### Térreo da Casa C: as escrivaninhas de volta, as mantas e os pufes em tons sóbrios (14/11)
+
+- **As escrivaninhas** da suíte master e dos quartos 3 e 1 tinham sumido em 3f92bb8 ("os materiais da Casa B": o piso
+  novo cobriu o retângulo das mesas, e as cadeiras de escritório ficaram viradas para o nada). Achado na autorrevisão da
+  Casa C pelos erros da Casa B. `revisao_terreo_casac_1311.escrivaninhas`: o retângulo de cada mesa
+  (`mobiliario_terreo_casac_1311.CADEIRAS`) da final de antes (2263fe0), por cima da cadeira (1/3 por baixo), no
+  freijó do projeto ("A ESCRIVANINHA TEM TOM FREIJÓ": RGB ~201, 158, 112, o veio e a borda pela luz da mesa de antes).
+- **"AS MANTAS E PUFFS EM TONS SOBRIOS: BEGE, AREIA, OCRE":** os bancos de pé de cama (B1) pelo `bancos` (`TONS`):
+  suíte master em marrom claro ("O BANCO NA SUITE MASTER PODE TER TOM MARROM CLARO"), quarto 3 bege, quarto 2 areia,
+  quarto 1 ocre (`SOBRIOS`); as mantas de tricô caídas (`mantas`, `MANTAS`): suíte master e quarto 1 em areia, quarto
+  3 em bege; só a manta muda (a diferença entre a manta de antes e a nova pelo `manta_caida_casac_1311`, como nos
+  bancos), o pufe por cima fica. As almofadas ficam como estavam.
+- 12K do Térreo refeito (Topaz HF V2 sobre a final nova); prancha, PDF da Casa C e book.
+
 ### Térreo da Casa B: os 5 erros de 14/11 (banho master, escrivaninhas, gourmet)
 
 "NO TERREO DA CASA B, TEMOS ALGUNS ERROS PARA CORRIGIR AINDA":
