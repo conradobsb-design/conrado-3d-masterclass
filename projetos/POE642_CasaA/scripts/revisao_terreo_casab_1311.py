@@ -117,11 +117,27 @@ PORTAS_BM = {"parede": [(1236.2, 503.6, 1244.0, 508.9), (1289.4, 501.8, 1344.8, 
 # (usuário: "CORRIGIR O PISO E PAREDE", o hall junto à suíte 3) a face da parede de cima reta em y 943,6 (do PDF; o render
 # a encurtava depois de x 2452); o toco de parede e o caixilho de vidro emoldurado abaixo dele pelo PDF; o piso do hall
 # interno no retângulo mais claro do render (o PDF muda de piso só em x 2537), sem a linha clara sob o vaso
-HALL = {"parede": [(2410.0, 938.0, 2526.6, 943.6), (2526.6, 943.6, 2538.5, 955.6)],
-        "caixilho": (2525.1, 955.6, 2539.1, 985.4), "montante": (2529.5, 957.7, 2532.5, 983.3),
-        "peitoril": (2526.6, 985.4, 2538.5, 986.6),
-        "piso": (2448, 944, 2526, 1009), "piso_fonte": (2386, 946, 2446, 1006),
-        "piso_baixo": (2524, 987, 2541, 1011), "vidro": (226, 230, 232), "perfil_px": 0.5}
+# (14/11, "CORRIJA A SOLEIRA DA PORTA PRINCIPAL, ELA VAI DE FORA A FORA. CORRIJA TAMBÉM A PAREDE DE CIMA, ONDE A PORTA E
+# A SOLEIRA ENCOSTA"; "ISSO ESTÁ ME PARECENDO UM VIDRO TAMBÉM SOBRE A SOLEIRA"; "E DO OUTRO LADO DA PORTA TAMBÉM") nos
+# dois lados da porta pivotante o PDF tem a mesma peça: o vidro fixo (a lâmina de 3 px, a das folhas de vidro das
+# varandas) no caixilho, em pé sobre a soleira (os tracejados são as bordas da soleira por baixo). A soleira vai da
+# parede de cima (o toco, y 955,6) à de baixo (y 1182,5); os vidros por cima dela no vidro claro (`final3840_casab
+# .BOXES_VIDRO`); o toco reto, com as bordas limpas. Antes (13/11) o de cima era um caixilho branco e, embaixo, a final
+# tinha parede no lugar do vidro.
+HALL = {"parede": [(2410.0, 938.0, 2526.6, 943.6), (2526.55, 943.63, 2538.49, 955.57)],
+        "toco_limpo": [((2523, 944, 2527, 956), -6), ((2539, 945, 2544, 956), 6)],
+        # (linhas, colunas, de onde: "v" a linha de cima da fonte / "h" o deslocamento em x): a soleira vem da parte
+        # livre (de cima para baixo); o piso dos lados, da coluna do lado (o tom continua); o tracejado de fora, que
+        # começa em x 2541, y 1182, vai até a parede
+        # ("r": a coluna do piso do lado repetida, onde a planta está perto)
+        "soleira": [((955, 986), (2527, 2539), "v", 1020), ((955, 986), (2539, 2545), "h", 6),
+                    ((955, 986), (2525, 2527), "r", 2524),
+                    ((1152, 1183), (2527, 2539), "v", 1100), ((1152, 1181), (2520, 2527), "h", -8),
+                    ((1181, 1183), (2518, 2527), "v", 1178), ((1152, 1180), (2539, 2545), "h", 6),
+                    ((1180, 1183), (2539, 2541), "h", 3)],
+        "parede_baixo": (2517.6, 1182.47, 2538.49, 1185.0),
+        "vidros": [(2529.54, 955.57, 2532.52, 985.43), (2529.54, 1152.61, 2532.52, 1182.47)],
+        "piso": (2448, 944, 2526, 1009), "piso_fonte": (2386, 946, 2446, 1006)}
 ANTES_DEPOIS = {"deck_banco": (600, 1360, 1110, 1720), "piscina_faixa": (720, 880, 800, 1110),
                 "lavatorio": (1200, 1590, 1450, 1665), "suite_master_piso": (1015, 385, 1215, 505),
                 "cortina_suite2": (2240, 320, 2560, 360), "porta_banho2": (2630, 585, 2720, 625),
@@ -624,19 +640,23 @@ def hall(out, par, reg, q=HALL):
     nao = ~trav & ~m                      # o que não é travertino em volta (a parede, a linha preta) não dá o tom
     m &= ~RT_dil(par, 1)
     out = PJ.preencher(out, m, out[fy0:fy1, fx0:fx1].copy(), anel_px=8, nao=nao)
-    # embaixo do caixilho, até a folha da porta: o piso do lado
-    bx0, by0, bx1, by1 = q["piso_baixo"]
-    out[by0:by1, bx0:bx1] = out[by0:by1, bx0 - 20:bx1 - 20]
-    prims = [{"t": "ret", "c": list(r), "cor": PAREDE} for r in q["parede"]]
-    prims += [{"t": "ret", "c": list(q["caixilho"]), "cor": q["vidro"]},
-              {"t": "fio", "c": list(q["caixilho"]), "cor": PERFIL, "px": q["perfil_px"]},
-              {"t": "fio", "c": list(q["montante"]), "cor": PERFIL, "px": q["perfil_px"]},
-              {"t": "ret", "c": list(q["peitoril"]), "cor": (210, 221, 238)}]
-    it = {"tipo": "rv_vetor", "nome": "hall_parede", "c": [2410.0, 938.0, 2539.1, 986.6], "prims": prims}
+    # as bordas do toco: o piso dos lados (o escuro e o degrau de 1 px que o render deixava)
+    for (x0, y0, x1, y1), dx in q["toco_limpo"]:
+        out[y0:y1, x0:x1] = out[y0:y1, x0 + dx:x1 + dx]
+    # a soleira de parede a parede: nos dois vãos dos vidros fixos, a soleira (e o piso dos lados) da parte livre
+    for (y0, y1), (x0, x1), modo, d in q["soleira"]:
+        out[y0:y1, x0:x1] = (out[d:d + (y1 - y0), x0:x1] if modo == "v" else out[y0:y1, d:d + 1] if modo == "r"
+                             else out[y0:y1, x0 + d:x1 + d])
+    from final3840_casab import BOXES_VIDRO as BV
+    prims = [{"t": "ret", "c": list(r), "cor": PAREDE} for r in q["parede"] + [q["parede_baixo"]]]
+    for v in q["vidros"]:
+        prims += [{"t": "ret", "c": list(v), "cor": BV["vidro"]},
+                  {"t": "fio", "c": list(v), "cor": BV["face"], "px": BV["face_px"]}]
+    it = {"tipo": "rv_vetor", "nome": "hall_parede", "c": [2410.0, 938.0, 2539.1, 1185.0], "prims": prims}
     out = pousar(out, it, None)
     reg["pecas"].append(it)
-    print("    hall: a face da parede reta pelo PDF, o toco e o caixilho de vidro abaixo dele; o piso do hall interno no "
-          "retângulo claro, sem a linha sob o vaso")
+    print("    hall: a face da parede reta pelo PDF e o toco reto; a soleira da porta principal de parede a parede, com os "
+          "2 vidros fixos por cima (vidro claro); o piso do hall interno no retângulo claro, sem a linha sob o vaso")
     return out
 
 

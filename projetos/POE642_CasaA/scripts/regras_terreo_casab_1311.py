@@ -132,8 +132,25 @@ ELEVADOR_TB = (1720, 515, 1825, 665)          # a caixa do elevador (px), fora d
 # viravam uma barra preta)
 ESQUADRIAS_TB = {"perfil": (34, 34, 36), "traco_px": 0.5, "ss": 8, "forca": 1.6, "croma_max": 16, "lum_min": 120,
                  "box_larg_px": 1.5, "box_comp_px": 40, "box_raio_px": 80, "chuveiro_folga_px": 3, "boxes_pretos": False,
-                 "vidros_varanda_pretos": False, "vidro_folga_px": 2.5}
+                 "vidros_varanda_pretos": False, "vidro_folga_px": 2.5,
+                 # (14/11, "CORRIJA A PORTA DE ENTRADA, ELA DEVE ESTAR NO MESMO ESTILO DO COMEÇO AO FIM") a folha da
+                 # pivotante: o traço do meio até a ponta e a ponta da direita como a da esquerda (o PDF parava o traço
+                 # em x 2528 e a ponta ficava branca)
+                 "extras": [[(2528.05, 1013.49), (2554.91, 1013.49)], [(2553.72, 1012.0), (2553.72, 1014.98)]],
+                 # sem o preto: a soleira e os vidros fixos dos dois lados da pivotante (os arcos, as bordas tracejadas
+                 # da soleira e os caixilhos viravam pontos pretos); a borda de baixo da folha de madeira do banho 2
+                 # ("REMOVA O TRACEJADO DA PORTA DO BANHO 2": o traço do PDF só pegava onde o piso ao lado é neutro e
+                 # saía tracejado, mais forte no 12K)
+                 "fora_px": [(2521, 942, 2544, 1011), (2521, 1145, 2544, 1186), (2655, 600, 2710, 610)]}
 _ESQ = {}                 # onde a final aceita o perfil (bool, px da final), para o 12K
+# (14/11) onde o 12K vem da final mesmo sem mudança: "REMOVA O TRACEJADO DA PORTA DO BANHO 2" (o tracejado preto que a
+# saída do Topaz pôs entre a folha e a parede; a final não tem) e a coluna da porta principal (a soleira e os vidros
+# fixos, que a saída do Topaz tem como parede e caixilho)
+ZONA_12K_EXTRA = [(2655, 603, 2710, 611), (2519, 940, 2546, 1179), (2512, 1179, 2540, 1190)]
+# a folha da pivotante no 12K: o perfil dela onde a saída do Topaz a tem inteira (x 2420 a 2500) estendido até a ponta, e
+# a ponta da direita no espelho da da esquerda ("NO MESMO ESTILO DO COMEÇO AO FIM")
+PIVO_12K = {"linhas": (1009.5, 1017.5), "perfil_x": (2420, 2500), "de": 2505.0, "ate": 2554.91,
+            "ponta_esq": (2385.5, 2390.5), "eixo": (2387.73 + 2554.91) / 2, "piso": 196.0, "escuro": 60.0}
 # os tapetes das suítes (usuário: "NÃO VOU QUERER TROCAR AS CAMAS QUE EU JÁ COLOQUEI, MAS QUERO O RETOQUE EM VOLTA DO
 # CONTORNO E NOS TAPETES"): o tapete do PDF (o índice do desenho) refeito inteiro com o da biblioteca no tom do de hoje
 # (`png`), como nas suítes do 1º Pavimento da Casa A; as camas de 12/11, os bancos, o sofá e os criados por cima, pelo
@@ -527,6 +544,8 @@ def _tracos_esquadrias(Q, q=ESQUADRIAS_TB):
                        <= q["box_raio_px"] for c in CHUVEIROS_TB):
                 continue
         yield cs
+    for tr in q.get("extras", []):
+        yield [np.float64(tr)]
 
 
 def esquadrias(Q, out, q=ESQUADRIAS_TB):
@@ -564,6 +583,8 @@ def esquadrias(Q, out, q=ESQUADRIAS_TB):
             # a faixa inteira da porta (da folha de madeira à de vidro, com as peças de encontro entre elas)
             x0, y0, x1, y1 = min(wx0, gx0), min(wy0, gy0), max(wx1, gx1), max(wy1, gy1)
             ok[int(np.floor(y0 - e)):int(np.ceil(y1 + e)), int(np.floor(x0 - e)):int(np.ceil(x1 + e))] = False
+    for x0, y0, x1, y1 in q.get("fora_px", []):
+        ok[y0:y1, x0:x1] = False
     _ESQ["ok"] = ok
     al = np.clip(al * q["forca"], 0, 1) * ok
     novo = out.astype(np.float32) * (1 - al[..., None]) + np.float32(q["perfil"]) * al[..., None]
@@ -1463,6 +1484,34 @@ def pecas_12k(final, out, s, X0, Ya3):
         if ok.any():
             out = esquadrias_12k(out, s, X0, Ya3, ok)
     out = x_jardim(out, s, X0, Ya3)                    # o X do jardim de inverno, nítido na escala do 12K
+    out = pivo_12k(out, s, X0, Ya3)
+    return out
+
+
+def pivo_12k(out, s, X0, Ya3, q=PIVO_12K):
+    """A folha da porta pivotante no 12K num estilo só: o perfil (coluna média) da parte em que a saída do Topaz a tem
+    inteira, da `de` à ponta, e a ponta da direita no espelho da da esquerda; pela cobertura (o escuro da folha sobre o
+    piso), sem levar o piso de lá."""
+    U = lambda x: int(round((x - X0) * s))
+    V = lambda y: int(round((y - Ya3) * s))
+    v0, v1 = V(q["linhas"][0]), V(q["linhas"][1])
+    P = out[v0:v1, U(q["perfil_x"][0]):U(q["perfil_x"][1])].astype(np.float32).mean(axis=1)      # (linhas, 3)
+    a = np.clip((q["piso"] - P.mean(axis=1)) / (q["piso"] - q["escuro"]), 0, 1)[:, None, None]
+    u0, u1 = U(q["de"]), U(q["ate"])
+    reg = out[v0:v1, u0:u1].astype(np.float32)
+    rampa = np.clip((np.arange(u1 - u0) + 1) / max(int(2 * s), 1), 0, 1)[None, :, None]   # costura na de antes
+    ar = a * rampa
+    out[v0:v1, u0:u1] = np.clip(np.round(reg * (1 - ar) + P[:, None, :] * ar), 0, 255).astype(np.uint8)
+    # a ponta da direita: o espelho da da esquerda em torno do meio da folha
+    e0, e1 = q["ponta_esq"]
+    us = np.arange(U(e0), U(e1))
+    ud = np.round(2 * (q["eixo"] - X0) * s - us - 1).astype(int)
+    for us_, ud_ in zip(us, ud):
+        col = out[v0:v1, us_].astype(np.float32)
+        ac = np.clip((q["piso"] - col.mean(axis=1)) / (q["piso"] - q["escuro"]), 0, 1)[:, None]
+        dst = out[v0:v1, ud_].astype(np.float32)
+        out[v0:v1, ud_] = np.clip(np.round(dst * (1 - ac) + col * ac), 0, 255).astype(np.uint8)
+    print("    porta principal no 12K: a folha da pivotante num estilo só, da ponta à ponta")
     return out
 
 
@@ -1493,6 +1542,8 @@ def salvar_registro(antes, depois, reg, par):
                       np.ones((5, 5), np.uint8)).astype(bool)
     for m_ in _ZONA_FORA.values():                       # o texto dos rótulos novos: o 12K o desenha nítido
         zona &= ~m_
+    for x0, y0, x1, y1 in ZONA_12K_EXTRA:                 # o 12K traz a final aqui (o Topaz tinha restos)
+        zona[y0:y1, x0:x1] = True
     m = np.zeros(antes.shape, np.uint8)
     m[..., 0] = zona * 255
     m[..., 1] = par * 255

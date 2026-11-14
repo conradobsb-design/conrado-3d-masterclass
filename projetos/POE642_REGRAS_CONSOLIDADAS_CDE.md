@@ -276,6 +276,10 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
 - [ ] **Box de chuveiro (padrão, todos os banheiros):** vidro claro com o fio cinza fino, nunca esquadria preta
   ("NADA DE ESQUADRIA PRETA"). Vale também para as folhas de vidro das portas das varandas: nenhum contorno preto por
   cima delas, nem pontos nas pontas entre as folhas. [A; B; C; D e E: a aplicar]
+- [ ] **Porta principal pivotante:** a folha num estilo só, de ponta a ponta (o traço do meio e as duas pontas iguais);
+  a soleira de parede a parede; os vidros fixos ao lado da pivotante (a peça do PDF com a lâmina de 3 px e as bordas
+  tracejadas da soleira) no vidro claro, por cima da soleira, nunca caixilho branco nem parede. [B Térreo; conferir nas
+  outras casas]
 - [ ] **Contornos sem dente:** um trecho de contorno que se acrescenta termina nas mesmas arestas da parede em que
   encosta (a mesma aresta de cima e de baixo, o mesmo filete claro), na final e no 12K; no 12K, o canto refeito no
   desenho do resto do contorno (o mesmo perfil de borda e de tom), nunca a final ampliada nem repintada à parte.

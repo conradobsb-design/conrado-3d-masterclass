@@ -2941,6 +2941,35 @@ Depois (usuário: "NO TÉRREO DA CASA B, VOCÊ NÃO ALTEROU AS FOLHAS DE VIDRO D
 faixa do vidro deixava pontinhos pretos nas pontas, entre as folhas. Final, 12K A e B, prancha e PDF pela cadeia
 (`cb_mob/cadeia5.sh`).
 
+### Térreo da Casa B: a porta principal e a porta do banho 2 (14/11)
+
+"CORRIJA A PORTA DE ENTRADA, ELA DEVE ESTAR NO MESMO ESTILO DO COMEÇO AO FIM. CORRIJA A SOLEIRA DA PORTA PRINCIPAL, ELA
+VAI DE FORA A FORA. CORRIJA TAMBÉM A PAREDE DE CIMA, ONDE A PORTA E A SOLEIRA ENCOSTA"; "ISSO ESTÁ ME PARECENDO UM VIDRO
+TAMBÉM SOBRE A SOLEIRA, SERIA ISSO?"; "E DO OUTRO LADO DA PORTA TAMBÉM"; "REMOVA O TRACEJADO DA PORTA DO BANHO 2. LIMPE E
+ENTREGUE":
+- **A peça dos dois lados da pivotante** (PDF: o retângulo branco 2525,1–2539,1 com a lâmina de 3 px no meio, a das folhas
+  de vidro das varandas, e as bordas tracejadas da soleira por baixo) é um vidro fixo sobre a soleira, acima (y 955,6 a
+  985,4) e abaixo (1152,6 a 1182,5). Em 13/11 o de cima tinha virado um caixilho branco (`revisao_terreo_casab_1311.HALL`)
+  e o trecho da soleira até a folha, piso; embaixo, a final (de 7ecb326) tinha parede. Agora (`HALL`): o toco da parede
+  de cima reto pelo PDF, com as bordas limpas (`toco_limpo`); a soleira de parede a parede (`soleira`: a soleira da
+  parte livre nos vãos dos vidros, o piso dos lados pela coluna do lado, o tracejado de fora até a parede); a face da
+  parede de baixo em y 1182,47 (`parede_baixo`); os 2 vidros no vidro claro (`final3840_casab.BOXES_VIDRO`) por cima.
+- **A folha da pivotante num estilo só:** o traço do meio do PDF parava em x 2528 e a ponta ficava branca;
+  `regras_terreo_casab_1311.ESQUADRIAS_TB["extras"]` leva o traço até a ponta e faz a ponta da direita como a da
+  esquerda (a final e, nítido, o 12K pelo `esquadrias_12k`); no 12K, `pivo_12k` (`PIVO_12K`) ainda estende o perfil da
+  folha da saída do Topaz até a ponta, pela cobertura, e espelha a ponta da esquerda.
+- **Sem preto:** `ESQUADRIAS_TB["fora_px"]` tira do contorno preto a soleira e os vidros fixos (os arcos, os tracejados e
+  os caixilhos do PDF viravam pontos pretos nos cantos).
+- **O tracejado da porta do banho 2:** era o contorno preto das esquadrias na borda de baixo da folha de madeira (o traço
+  do PDF em y 604,84 só entrava onde o piso ao lado é neutro, por isso tracejado; fraco na final, preto no 12K); a folha
+  fica fora do contorno (`ESQUADRIAS_TB["fora_px"]`).
+- **No 12K, da final mesmo sem mudança (`ZONA_12K_EXTRA`, somada à zona do `salvar_registro`):** a coluna da porta
+  principal (a saída do Topaz tinha ali parede e caixilho) e a faixa da folha do banho 2.
+Cadeia: `regras_terreo_casab_1311.py`, `ampliacao_12k_terreo_casab.py montar12k <saída do Topaz> --opcao AB`,
+`rodape_entrega.py`, `pdf_entrega.py`, `book_entrega.py`. O PDF do cliente anotado em
+`POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1411_porta_principal_pdf.jpg`; antes e depois em
+`..._Terreo_1411_porta_principal_antes_depois.jpg`.
+
 ### Subsolo da Casa B, o contorno do deck da ducha (14/11)
 
 "COMPLETE O CONTORNO PRETO ATÉ A PAREDE DEBAIXO. FALTOU UM PEQUENO TRECHO DA ÚLTIMA RIPA DE MADEIRA": o contorno da borda

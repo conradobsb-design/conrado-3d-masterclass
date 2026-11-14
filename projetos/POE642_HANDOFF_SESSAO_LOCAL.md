@@ -4441,6 +4441,13 @@ refeitos. O 12K do Térreo se refaz (Topaz) no fim da revisão.
   das suítes sem o contorno preto de `regras_terreo_casab_1311.esquadrias` (a faixa de cada porta fora da máscara,
   `vidros_varanda_pretos`); cadeia completa (final, 12K A e B, prancha, PDF, book).
 
+### Casa B, Térreo: a porta principal e a porta do banho 2 (14/11)
+
+- A porta de entrada: os dois lados da pivotante são vidros fixos sobre a soleira (o PDF; o usuário: "ISSO ESTÁ ME
+  PARECENDO UM VIDRO TAMBÉM SOBRE A SOLEIRA", "E DO OUTRO LADO DA PORTA TAMBÉM"); a soleira de parede a parede; o toco de
+  cima reto; a folha da pivotante num estilo só, de ponta a ponta. No 12K, sem o tracejado da porta do banho 2.
+  `revisao_terreo_casab_1311.HALL` e `regras_terreo_casab_1311` (`extras`, `fora_px`, `ZONA_12K_EXTRA`, `pivo_12k`).
+
 ### Casa B, Subsolo: o contorno do deck da ducha (14/11)
 
 - "COMPLETE O CONTORNO PRETO ATÉ A PAREDE DEBAIXO": a borda esquerda do deck desce até a parede de baixo
