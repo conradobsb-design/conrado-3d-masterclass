@@ -69,6 +69,27 @@ Sobre a final de `ANTES_COMMIT` (a do 12K de 13/11: o estar E1 e o paisagismo da
   88831, e o da direita, 88836, os retângulos com a diagonal), que tinham sumido sob o granito do piso no mobiliário
   (c4cd7ce), e as prateleiras em U do louceiro 1 (88919) na cor dos armários de antes (a madeira clara, RGB 189, 160,
   129, "seguir essa cor"), lisa, sem textura, com a face um tom abaixo; a sombra curta das peças no piso.
+- **"O PISO ACIMA DA CORTINA ... É VINÍLICO"** (`faixa_vinilico`): nas portas de correr da Varanda 1 (quarto 1) e da
+  Varanda (quartos 2 e 3), o vão entre os perfis, acima da cortina, saía num marrom escuro e acinzentado; agora é o
+  vinílico do quarto (as réguas de logo abaixo da cortina, espelhadas para cima, coluna a coluna: o mesmo tom e as
+  mesmas réguas); os perfis da porta (cinza e escuros) ficam.
+- **"REVISE TODOS OS ARMÁRIOS E REMOVA DIVISÓRIAS. ELES FORMAM O L CONTÍNUO ... JÁ FIZEMOS ISSO NAS CASAS A E B"**
+  (`closets`): os guarda-roupas em L e em U do PDF (os polígonos da DOC_LINHAS: o closet do quarto 1, o do vizinho, o
+  do quarto 3 e os closets master 1, em U, e 2) como uma peça só, no desenho do 1º Pavimento da Casa A e do Térreo da
+  Casa B (`um_pav_casaa_1111._closet`: o fundo bege que escurece junto às portas, os cabides de través até o canto, o
+  cabideiro se encontrando no meio do canto, a moldura ocre só por fora, nada entre os trechos).
+- **"NO QUARTO 1, TEMOS UM ARMÁRIO NA ENTRADA DO QUARTO COM FUNDO DO ARMÁRIO DO CLOSET ... PRECISA SER REPRESENTADO"**
+  (`armario_entrada`): o armário raso do PDF (88482, 0,30 m) de costas para o closet, com as portas para a entrada: o
+  miolo bege no tom dos guarda-roupas, a moldura ocre e a faixa das portas, sem cabides.
+- **"CORRIJA NO QUARTO 1 E 2 OS TAPETES. CORRIJA NO QUARTO 1, O DEFEITO DA MESA LATERAL E O CONTORNO DA CAMA. REVISE
+  TODAS AS CAMAS DE TODOS OS QUARTOS"** (`quartos`): no mobiliário (`mobiliario_terreo_casac_1311.poltronas` e
+  `cadeiras_escritorio`) o piso refeito em volta da poltrona, do pufe e das cadeiras entrou no tapete (o degrau na borda
+  de baixo dos tapetes do quarto 1 e do quarto 3) e ficou num tom mais claro que o vinílico novo; agora o tapete volta
+  inteiro no retângulo do PDF (a lã dele, no tom dele) e o piso em volta das peças é o vinílico do quarto no tom do
+  entorno, com a sombra curta das peças de novo. A mesa lateral de vidro do quarto 1 (um anel quebrado) vira a mesinha
+  redonda de madeira da biblioteca, com a sombra curta. Em todas as camas, o contorno claro da cama de antes (as faixas
+  claras e cinzas entre a cama nova e o tapete ou o piso) sai: o tapete ou o piso de logo ao lado, copiado para dentro, e
+  a sombra curta da cama.
 - **"REMOVA ESSE TRACEJADO EM VOLTA DA PLANTA"** (`tracejado_lote`): o retângulo tracejado do lote (x 296 a 3583, y 5 a
   2050, que encostava na borda do gramado à esquerda) sai: fora do lote, branco puro.
 
@@ -96,6 +117,7 @@ import biblioteca_terreo_casaa_1211 as BT        # noqa: E402
 import mobiliario_terreo_casac_1311 as MB        # noqa: E402
 
 PX_M = B1.PX_M
+Q_PX_PT = 59.70590031258779 / 56.69                 # px do quadro por pt do PDF
 R = AQUI.parents[1] / "POE642_CasaC" / "renders"
 FINAL = R / "POE642_CasaC_PH_Terreo_final_rotulos.png"
 RAIZ_GIT = AQUI.parents[2]
@@ -170,10 +192,40 @@ PORTAS_DESC = [{"nome": "A. serviço descoberta, esquerda", "parede": (2463.2, 2
 # pouco croma, compacto); a face e a sombra
 COZINHA = {"danae": [(38671, 38920), (53847,), (38868,)], "armarios": [(88831,), (88836,), (88919,)], "cor_armario": (129, 160, 189),
            "face": 0.86, "fica_croma": 18, "fica_area": 8, "fica_max_px": 60, "sombra": 0.22, "semente": 1316}
+# o vão das portas de correr das varandas (px): a faixa, e onde medir o tom do vinílico do quarto (logo abaixo da
+# cortina); o marrom da faixa (R - B, lum máx.) e o vinílico do quarto
+FAIXAS_VIN = [{"faixa": (1255, 316, 1440, 341), "tom": (1262, 346, 1400, 366)},
+              {"faixa": (1440, 316, 1623, 341), "tom": (1450, 349, 1615, 369)},
+              {"faixa": (2000, 318, 2166, 341), "tom": (2000, 346, 2170, 354)}]
+VIN = {"marrom_rb": 25, "marrom_lum": 168, "croma": 28, "tom_rb": 50, "tom_lum": (100, 178)}
+# os guarda-roupas (pt, dos polígonos do PDF): cada trecho sem o canto, com o lado das portas, e os cantos à parte
+CLOSETS_TC = {
+    "quarto 1": {"trechos": [((1601.3, 640.0, 1635.3, 733.5), "direita"), ((1635.3, 733.5, 1706.2, 767.6), "cima")],
+                 "cantos": [(1601.3, 733.5, 1635.3, 767.6)]},
+    "vizinho do quarto 1": {"trechos": [((1558.8, 640.0, 1592.8, 733.5), "esquerda"),
+                                        ((1487.9, 733.5, 1558.8, 767.6), "cima")],
+                            "cantos": [(1558.8, 733.5, 1592.8, 767.6)]},
+    "quarto 3": {"trechos": [((898.3, 640.0, 932.3, 733.5), "direita"), ((932.3, 733.5, 1003.2, 767.6), "cima")],
+                 "cantos": [(898.3, 733.5, 932.3, 767.6)]},
+    "closet master 1": {"trechos": [((736.7, 538.0, 855.8, 572.0), "baixo"), ((855.8, 572.0, 889.8, 733.5), "esquerda"),
+                                    ((736.7, 733.5, 855.8, 767.6), "cima")],
+                        "cantos": [(855.8, 538.0, 889.8, 572.0), (855.8, 733.5, 889.8, 767.6)]},
+    "closet master 2": {"trechos": [((901.1, 1019.8, 935.1, 1110.6), "esquerda"), ((731.0, 1110.6, 901.1, 1144.6), "cima")],
+                        "cantos": [(901.1, 1110.6, 935.1, 1144.6)]},
+    "semente": 1317}
+# o armário da entrada do quarto 1 (px, PDF 88482): o retângulo e o lado das portas
+ARMARIO_ENT = {"px": (1813.6, 569.9, 1924.1, 587.8), "lado": "baixo", "ss": 8}
+# os quartos: os tapetes (PDF) com a amostra limpa da lã (px), as peças em volta deles e a amostra do vinílico do quarto
+QUARTOS = {"tapetes": [{"pdf": 53797, "amostra": (1983, 530, 2003, 562)},
+                       {"pdf": 53802, "amostra": (1277, 486, 1297, 512)}],
+           "piso": {"q1": (1835, 600, 1905, 650), "q3": (1225, 515, 1275, 540)},
+           "poltronas": ["quarto 1"], "cadeiras": ["quarto 1", "quarto 3"],
+           "mesa_lateral": {"pdf": 88573, "png": "suite-3/criado-redondo", "d": 18.0, "quarto": "q1"},
+           "anel_px": 4, "salto_px": 3, "salto_max_px": 14, "viz_px": 6, "texto_lum": 90, "madeira_rb": 40, "madeira_lum": 178}
 LOTE = {"abre_px": 5, "nb": 245, "corpo": 0.8}
 ANTES_DEPOIS = {"lavabos": (1080, 1480, 1640, 1700), "quartos": (300, 260, 2300, 760),
                 "claraboias": (700, 230, 1100, 990), "hall": (2280, 1170, 2790, 1460), "garagem": (2690, 300, 3290, 700),
-                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600), "area_descoberta": (2440, 40, 2740, 260), "cozinha": (2150, 240, 2480, 720),
+                "area_servico": (2540, 230, 2760, 520), "quarto_servico": (2440, 480, 2720, 690), "bh_servico": (2610, 488, 2712, 600), "area_descoberta": (2440, 40, 2740, 260), "cozinha": (2150, 240, 2480, 720), "varandas": (1240, 240, 2180, 380), "closets": (880, 320, 1960, 980), "quarto_1": (1960, 340, 2180, 680), "quarto_3": (1180, 340, 1460, 600),
                 "inteira": (0, 0, 3840, 2160)}
 
 
@@ -735,6 +787,295 @@ def cozinha(Q, img, q=COZINHA):
     return np.clip(np.round(out), 0, 255).astype(np.uint8)
 
 
+def faixa_vinilico(img, fs=FAIXAS_VIN, q=VIN):
+    """O vão de cada porta no piso do quarto: as linhas do vinílico de logo abaixo da cortina, espelhadas para cima
+    (as mesmas réguas e o mesmo tom, coluna a coluna); onde a coluna não tem vinílico, a mais perto que tem."""
+    out = img.copy()
+    I = img.astype(np.int16)
+    L = I.mean(axis=2)
+    croma = I.max(axis=2) - I.min(axis=2)
+    n = 0
+    for f in fs:
+        x0, y0, x1, y1 = f["faixa"]
+        tx0, ty0, tx1, ty1 = f["tom"]
+        T_ = I[ty0:ty1, x0:x1]
+        Lt = T_.mean(axis=2)
+        vin = ((T_[..., 2] - T_[..., 0]) > q["tom_rb"]) & (Lt > q["tom_lum"][0]) & (Lt < q["tom_lum"][1])
+        cols = np.arange(x0, x1)
+        dentro = (cols >= tx0) & (cols < tx1)
+        boas = np.nonzero((vin.mean(axis=0) > 0.9) & dentro)[0]
+        src_x = boas[np.abs(np.arange(x1 - x0)[:, None] - boas[None, :]).argmin(axis=1)] + x0
+        h_s = ty1 - ty0
+        Ib = I[y0:y1, x0:x1]
+        m = ((Ib[..., 2] - Ib[..., 0]) > q["marrom_rb"]) & (L[y0:y1, x0:x1] < q["marrom_lum"]) & \
+            (croma[y0:y1, x0:x1] > q["croma"])
+        for k, y in enumerate(range(y1 - 1, y0 - 1, -1)):
+            j = k % (2 * h_s)
+            sy = ty0 + (j if j < h_s else 2 * h_s - 1 - j)
+            row = img[sy, src_x]
+            mm = m[y - y0]
+            out[y, x0:x1][mm] = row[mm]
+        n += int(m.sum())
+    print(f"    varandas: o vão das portas de correr acima da cortina no vinílico do quarto, as réguas de logo abaixo da "
+          f"cortina espelhadas ({n} px)")
+    return out
+
+
+def closets(Q, img, q=CLOSETS_TC):
+    import um_pav_casaa_1111 as U
+    out = np.ascontiguousarray(img.copy())
+    rng = np.random.default_rng(q["semente"])
+    qa = dict(U.CLOSETS_1P)
+    nomes = [k for k in q if k != "semente"]
+    for n in nomes:
+        out = U._closet(Q, out, q[n], qa, rng)
+    print(f"    guarda-roupas: {', '.join(nomes)} numa peça só, sem a divisão no canto, os cabides se encontrando")
+    return out
+
+
+def armario_entrada(img, q=ARMARIO_ENT):
+    """O armário raso: o miolo bege (o dos guarda-roupas, `um_pav_casaa_1111.CLOSETS_1P`) que escurece junto às portas,
+    a moldura ocre (as laterais, o fundo e a faixa das portas) e o contorno escuro."""
+    import um_pav_casaa_1111 as U
+    qa = U.CLOSETS_1P
+    x0, y0, x1, y1 = q["px"]
+    ss = q["ss"]
+    cmp = U.CM * Q_PX_PT
+    X0, Y0 = int(np.floor(x0)) - 2, int(np.floor(y0)) - 2
+    W, H = int(np.ceil(x1)) + 3 - X0, int(np.ceil(y1)) + 3 - Y0
+    a = np.outer(_cob(y0, y1, H, Y0, ss), _cob(x0, x1, W, X0, ss))
+    yy = (np.arange(H, dtype=np.float32) + Y0 + 0.5 - y0) / (y1 - y0)
+    fr = np.clip(yy if q["lado"] == "baixo" else 1 - yy, 0, 1)
+    t = (216 - 40 * fr ** 1.4)[:, None, None] * np.ones((1, W, 3), np.float32) / 216 * np.float32(qa["miolo"])
+    mold = np.float32(qa["moldura"])
+
+    def faixa(a0, a1, b0, b1):
+        return np.outer(_cob(b0, b1, H, Y0, ss), _cob(a0, a1, W, X0, ss))
+    lat, fun, por, con = (qa[k] * cmp for k in ("lateral_cm", "fundo_cm", "porta_cm", "contorno_cm"))
+    porta_y = (y1 - por, y1) if q["lado"] == "baixo" else (y0, y0 + por)
+    fundo_y = (y0, y0 + fun) if q["lado"] == "baixo" else (y1 - fun, y1)
+    m = np.clip(faixa(x0, x0 + lat, y0, y1) + faixa(x1 - lat, x1, y0, y1) + faixa(x0, x1, *porta_y) +
+                faixa(x0, x1, *fundo_y), 0, 1)
+    t = t * (1 - m[..., None]) + mold * m[..., None]
+    c = np.clip(a - np.outer(_cob(y0 + con, y1 - con, H, Y0, ss), _cob(x0 + con, x1 - con, W, X0, ss)), 0, 1)
+    t = t * (1 - c[..., None]) + mold * 0.68 * c[..., None]
+    out = img.astype(np.float32)
+    reg = out[Y0:Y0 + H, X0:X0 + W]
+    reg[:] = reg * (1 - a[..., None]) + t * a[..., None]
+    print(f"    quarto 1: o armário raso da entrada ({x1 - x0:.0f} x {y1 - y0:.0f} px), as portas para a entrada")
+    return np.clip(np.round(out), 0, 255).astype(np.uint8)
+
+
+def _alfa(P, cx, cy, wt, ht, g, forma):
+    return MB.RT._alfa_peca(P, cx, cy, wt, ht, g, forma)
+
+
+def _cama_pose(Q, item):
+    """A cama como em `mobiliario_terreo_casac_1311.camas`: (P, cx, cy, wt, ht, giro)."""
+    import camas_casac_1311 as CM
+    import manta_caida_casac_1311 as MC
+    nome, i, giro, tipo, roupa, enf, modo, lado, bancos_ = item
+    x0, y0, x1, y1 = MB.RT.caixa_pdf(Q, i)
+    comp, larg = (y1 - y0, x1 - x0) if giro in (0.0, 180.0) else (x1 - x0, y1 - y0)
+    with contextlib.redirect_stdout(io.StringIO()):
+        if modo == "manta":
+            P0 = CM.cama(tipo, roupa, enf, "nada")
+            P, p = MC.manta_caida(P0, enf, lado)
+        else:
+            P0 = CM.cama(tipo, roupa, enf, "peseira")
+            P, p = P0, 0
+    H0, W0 = P0.shape[:2]
+    return P, (x0 + x1) / 2, (y0 + y1) / 2, larg * (W0 + 2 * p) / W0, comp * (H0 + 2 * p) / H0, giro, (x0, y0, x1, y1)
+
+
+def _poltrona_pose(Q, nome):
+    for n, png, ip, png_pufe, ipufe in MB.POLTRONAS:
+        if n != nome:
+            continue
+        _, mp = MB.contorno(Q, [ip])
+        _, mf = MB.contorno(Q, [ipufe])
+        ys, xs = np.nonzero(mp)
+        pc = np.array([xs.mean(), ys.mean()])
+        ys2, xs2 = np.nonzero(mf)
+        fc = np.array([xs2.mean(), ys2.mean()])
+        g = MB.frente(fc - pc)
+        (_, _), (w, h), _ = cv2.minAreaRect(np.column_stack([xs, ys]).astype(np.float32))
+        lado = 0.92 * min(w, h)
+        P = MB.ler(png)
+        (_, _), (w2, h2), _ = cv2.minAreaRect(np.column_stack([xs2, ys2]).astype(np.float32))
+        Pf = MB.ler(png_pufe)
+        buraco = MB.RT.dilatar(mp, 8) | MB.RT.dilatar(mf, 8)
+        return [(P, pc[0], pc[1], lado * P.shape[1] / P.shape[0], lado, g),
+                (Pf, fc[0], fc[1], max(w2, h2), min(w2, h2), g)], buraco
+
+
+def _cadeira_pose(Q, nome):
+    q = MB.CADEIRA_ESC
+    for n, ids, borda, lado, mesa_px in MB.CADEIRAS:
+        if n != nome:
+            continue
+        _, m = MB.contorno(Q, list(ids))
+        ys, xs = np.nonzero(m)
+        X0, Y0, X1, Y1 = xs.min() - 3, ys.min() - 3, xs.max() + 4, ys.max() + 4
+        buraco = np.zeros(m.shape, bool)
+        buraco[Y0:Y1, X0:X1] = True
+        mx0, my0, mx1, my1 = mesa_px
+        buraco[my0:my1, mx0:mx1] = False
+        P = MB.ler(q["png"])
+        wt = q["larg"]
+        ht = wt * P.shape[0] / P.shape[1]
+        f = q["sob"]
+        if lado == "dir":
+            cx, cy, g = borda - ht / 2 + f * ht, (ys.min() + ys.max()) / 2, 90.0
+        elif lado == "esq":
+            cx, cy, g = borda + ht / 2 - f * ht, (ys.min() + ys.max()) / 2, -90.0
+        else:
+            cx, cy, g = (xs.min() + xs.max()) / 2, borda - ht / 2 + f * ht, 0.0
+        mesa = np.zeros(m.shape, bool)
+        mesa[my0:my1, mx0:mx1] = True
+        return (P, cx, cy, wt, ht, g), buraco, mesa
+
+
+def _sombra_em(out, alfa, onde):
+    """A sombra curta das peças (`BT.SOMBRAS["movel"]`, alfa somado) só nos px `onde`."""
+    o = out.astype(np.float32)
+    f = np.ones(alfa.shape, np.float32)
+    for sb in BT.SOMBRAS["movel"]:
+        sh = cv2.GaussianBlur(alfa, (0, 0), max(0.3, sb["sig"] * PX_M))
+        Ms = np.float32([[1, 0, sb["dx"] * PX_M], [0, 1, sb["dy"] * PX_M]])
+        sh = cv2.warpAffine(sh, Ms, (alfa.shape[1], alfa.shape[0]), flags=cv2.INTER_LINEAR, borderValue=0)
+        f *= 1 - sb["forca"] * sh * (1 - alfa)
+    o[onde] *= f[onde][..., None]
+    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+
+
+def quartos(Q, img, q=QUARTOS):
+    import paisagismo_terreo_casab_1311 as PJ
+    import materiais_terreo_casac_1311 as MT
+    H, W = img.shape[:2]
+    forma = (H, W)
+    out = img.copy()
+    par = Q.preencher(lambda d: d.get("layer") in ("ARQ_PAREDE", "EST_PILAR") and d.get("fill")
+                      and max(d["fill"]) < 0.6, ss=2) > 0.3
+    # as peças que ficam (alfa) e os buracos de piso do mobiliário
+    pecas, buracos, mesas = [], np.zeros(forma, bool), np.zeros(forma, bool)
+    for n in q["poltronas"]:
+        ps, bur = _poltrona_pose(Q, n)
+        pecas += ps
+        buracos |= bur
+    for n in q["cadeiras"]:
+        pz, bur, mesa = _cadeira_pose(Q, n)
+        pecas.append(pz)
+        buracos |= bur
+        mesas |= mesa
+    obj = np.zeros(forma, np.float32)
+    for P, cx, cy, wt, ht, g in pecas:
+        obj = np.maximum(obj, _alfa(P, cx, cy, wt, ht, g, forma))
+    camas = [_cama_pose(Q, it) for it in MB.CAMAS]
+    a_cama = np.zeros(forma, np.float32)
+    for P, cx, cy, wt, ht, g, _ in camas:
+        a_cama = np.maximum(a_cama, _alfa(P, cx, cy, wt, ht, g, forma))
+    a_banco = np.zeros(forma, np.float32)
+    bancos_ = [(MB.RT.caixa_pdf(Q, b), "solteiro" if it[3] == "solteiro" else "casal") for it in MB.CAMAS for b in it[8]]
+    bancos_.append((MB.RT.caixa_pdf(Q, MB.BANCO_MASTER["pdf"]), "casal"))
+    for c, tam in bancos_:
+        P, cx, cy, L, D, g = _banco_png(c, tam)
+        a_banco = np.maximum(a_banco, _alfa(P, cx, cy, L, D, g, forma))
+    criados = np.zeros(forma, bool)
+    for i, *_ in MB.CRIADOS:
+        x0, y0, x1, y1 = MB.RT.caixa_pdf(Q, i)
+        criados[int(y0) - 3:int(np.ceil(y1)) + 4, int(x0) - 3:int(np.ceil(x1)) + 4] = True
+    mx = q["mesa_lateral"]
+    lx0, ly0, lx1, ly1 = MB.RT.caixa_pdf(Q, mx["pdf"])
+    lcx, lcy = (lx0 + lx1) / 2, (ly0 + ly1) / 2
+    yy, xx = np.mgrid[0:H, 0:W]
+    lateral = (xx - lcx) ** 2 + (yy - lcy) ** 2 <= (mx["d"] / 2 + 4) ** 2
+    buracos |= lateral
+    fixo = (obj > 0.02) | (a_cama > 0.02) | (a_banco > 0.02) | par | criados | mesas
+    I = img.astype(np.int16)
+    madeira = ((I[..., 2] - I[..., 0]) > q["madeira_rb"]) & (I.mean(axis=2) < q["madeira_lum"])
+    # 1. os tapetes: a lã de volta onde o piso entrou (o retângulo do PDF, menos as peças)
+    rug_all = np.zeros(forma, bool)
+    n_t = 0
+    for t in q["tapetes"]:
+        x0, y0, x1, y1 = MB.RT.caixa_pdf(Q, t["pdf"])
+        X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
+        cov = np.zeros(forma, np.float32)
+        cov[Y0:Y1, X0:X1] = np.outer(_cob(y0, y1, Y1 - Y0, Y0, 8), _cob(x0, x1, X1 - X0, X0, 8))
+        rug_all |= cov > 0.5
+        m = (cov > 0.01) & (buracos | madeira) & ~fixo
+        ax0, ay0, ax1, ay1 = t["amostra"]
+        T = MT.sem_emenda(img[ay0:ay1, ax0:ax1].astype(np.float32), Y1 - Y0, X1 - X0)
+        big = np.zeros((H, W, 3), np.float32)
+        big[Y0:Y1, X0:X1] = T
+        o = out.astype(np.float32)
+        o[m] = o[m] * (1 - cov[m][..., None]) + big[m] * cov[m][..., None]
+        out = np.clip(np.round(o), 0, 255).astype(np.uint8)
+        n_t += int(m.sum())
+    # 2. o piso em volta das peças (o buraco do mobiliário fora do tapete): o vinílico do quarto no tom do entorno
+    piso_m = buracos & ~rug_all & ~fixo
+    for k, (fx0, fy0, fx1, fy1) in q["piso"].items():
+        reg = np.zeros(forma, bool)
+        reg[fy0 - 260:fy1 + 260, fx0 - 260:fx1 + 260] = True
+        m = piso_m & reg
+        if m.any():
+            out = PJ.preencher(out, m, img[fy0:fy1, fx0:fx1].copy(), anel_px=6, nao=fixo | rug_all | buracos, sig=8.0)
+            piso_m &= ~m
+    out = _sombra_em(out, obj, buracos & ~fixo)
+    # 3. a mesa lateral
+    Pm = MB.ler(mx["png"])
+    o = BT.pousar(out.astype(np.float32), Pm, lcx, lcy, mx["d"], mx["d"], 0.0, BT.SOMBRAS["movel"], PX_M)
+    out = np.clip(np.round(o), 0, 255).astype(np.uint8)
+    # 4. o contorno das camas: o anel (o retângulo do PDF mais `anel_px`) fora da cama nova, do lado de fora para dentro
+    e, sl = q["anel_px"], q["salto_px"]
+    # os rótulos (as letras escuras e sem cor) não são fonte nem são refeitos
+    Io = out.astype(np.int16)
+    texto = (Io.mean(axis=2) < q["texto_lum"]) & ((Io.max(axis=2) - Io.min(axis=2)) < 30)
+    base_ok = ~(fixo | (a_cama > 0.01))
+    n_a = 0
+    for P, cx, cy, wt, ht, g, (x0, y0, x1, y1) in camas:
+        X0, Y0, X1, Y1 = int(np.floor(x0)) - e, int(np.floor(y0)) - e, int(np.ceil(x1)) + e, int(np.ceil(y1)) + e
+        anel = np.zeros(forma, bool)
+        anel[Y0:Y1, X0:X1] = True
+        anel &= (a_cama < 0.02) & ~fixo
+        # as letras dos rótulos perto da cama (o escuro fora do retângulo + 3 px; o contorno escuro antigo fica dentro)
+        perto = np.zeros(forma, bool)
+        perto[Y0 + e - 3:Y1 - e + 3, X0 + e - 3:X1 - e + 3] = True
+        letras = cv2.dilate((texto & ~perto).astype(np.uint8), np.ones((5, 5), np.uint8)) > 0
+        fonte_ok = base_ok & ~letras
+        anel &= ~letras
+        ys, xs = np.nonzero(anel)
+        resto = []
+        for y, x in zip(ys, xs):
+            d = {(0, -1): y - Y0, (0, 1): Y1 - 1 - y, (-1, 0): x - X0, (1, 0): X1 - 1 - x}
+            for (dx, dy), dist in sorted(d.items(), key=lambda kv: kv[1]):
+                k = dist + sl
+                if k > q["salto_max_px"]:
+                    resto.append((y, x))
+                    break
+                sy, sx = y + dy * k, x + dx * k
+                if 0 <= sy < H and 0 <= sx < W and fonte_ok[sy, sx]:
+                    out[y, x] = out[sy, sx]
+                    break
+            else:
+                resto.append((y, x))
+        # os px sem fonte perto (junto aos criados e à parede): a mediana do piso livre em volta (o anel fora)
+        r_ = q["viz_px"]
+        livre = fonte_ok & ~anel
+        for y, x in resto:
+            a0, a1, b0, b1 = max(y - r_, 0), y + r_ + 1, max(x - r_, 0), x + r_ + 1
+            v = livre[a0:a1, b0:b1]
+            if v.any():
+                out[y, x] = np.median(out[a0:a1, b0:b1][v], axis=0)
+        n_a += len(ys)
+        a1 = _alfa(P, cx, cy, wt, ht, g, forma)
+        out = _sombra_em(out, a1, anel)
+    print(f"    quartos: os tapetes do quarto 1 e do quarto 3 inteiros ({n_t} px de lã de volta), o piso em volta da "
+          f"poltrona, do pufe e das cadeiras no vinílico do quarto, a mesa lateral de madeira no quarto 1; o contorno "
+          f"claro de {len(camas)} camas fora ({n_a} px), com a sombra curta")
+    return out
+
+
 def tracejado_lote(img, q=LOTE):
     from scipy import ndimage
     nb = (img.min(axis=2) < q["nb"]).astype(np.uint8)
@@ -774,6 +1115,10 @@ def aplicar(antes):
     out = bh_servico(Q, out)
     out = portas_descoberta(Q, out)
     out = cozinha(Q, out)
+    out = faixa_vinilico(out)
+    out = closets(Q, out)
+    out = armario_entrada(out)
+    out = quartos(Q, out)
     out = tracejado_lote(out)
     return out
 

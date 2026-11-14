@@ -2745,7 +2745,14 @@ que a busca das portas não achava porque a folha do PDF vem em 4 pedaços, com 
 e a soleira, como as outras: "CORRIJA ESSAS PORTAS PARA FICAREM BEM REPRESENTADAS"); `cozinha` (a bancada em L da pia,
 a ilha e a bancada da direita em Dekton Danae, com as cubas, as torneiras e o cooktop por cima; os 2 armários altos,
 que tinham sumido sob o granito do piso no mobiliário, e as prateleiras do louceiro 1 na cor dos armários de antes,
-RGB 189, 160, 129, lisa: "CORRIJA A COZINHA. BANCADAS EM DEKTON DANAE. ESTÁ FALTANDO ARMÁRIOS"); `tracejado_lote` (o
+RGB 189, 160, 129, lisa: "CORRIJA A COZINHA. BANCADAS EM DEKTON DANAE. ESTÁ FALTANDO ARMÁRIOS"); `faixa_vinilico` (o
+vão das portas de correr das varandas, acima da cortina, no vinílico do quarto, as réguas de logo abaixo espelhadas:
+"O PISO ACIMA DA CORTINA ... É VINÍLICO"); `closets` (os guarda-roupas em L e em U numa peça só, sem a divisão, no
+desenho das Casas A e B: "REVISE TODOS OS ARMÁRIOS E REMOVA DIVISÓRIAS. ELES FORMAM O L CONTÍNUO"); `armario_entrada`
+(o armário raso da entrada do quarto 1, de costas para o closet); `quartos` (os tapetes dos quartos 1 e 3 inteiros, sem
+o degrau do piso refeito do mobiliário; o piso em volta da poltrona, do pufe e das cadeiras no vinílico do quarto; a
+mesa lateral do quarto 1 em madeira; o contorno claro de todas as camas fora: "CORRIJA NO QUARTO 1 E 2 OS TAPETES ...
+REVISE TODAS AS CAMAS"); `tracejado_lote` (o
 retângulo tracejado do lote em branco e o muro de baixo cortado na borda do lote: "REMOVA ESSE TRACEJADO EM VOLTA DA
 PLANTA"). Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1311_revisao12k_<trecho>_antes_depois.jpg`.
 Rodar sem `--antes` refaz a final a partir de 48a23e8.

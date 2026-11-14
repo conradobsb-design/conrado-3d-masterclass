@@ -268,6 +268,10 @@ falas do usuário de cada uma estão no `POE642_REGRAS.md` (seções 4 a 13) e n
   piso por cima. [C Térreo]
 - [ ] **Seta da entrada:** o triângulo cheio das escadas, centrado no vão da porta, do lado de fora, com a ponta para
   dentro (nunca a seta grande). [B Térreo; C Térreo]
+- [ ] **Guarda-roupas em L e em U contínuos** (sem a divisão no canto, os cabides se encontrando), em todas as casas.
+  [A 1º Pav; B Térreo; C Térreo]
+- [ ] **Piso refeito em volta de peças nunca entra no tapete** e fica no tom do piso de agora; camas sem o contorno claro
+  da cama de antes. [C Térreo]
 - [ ] **Cozinha da Casa C:** bancadas (a em L da pia, a ilha e a da direita) em Dekton Danae; os armários altos e as
   prateleiras do louceiro na cor dos armários (RGB 189, 160, 129), lisa, sem textura. Conferir que um piso refeito não
   cobre armários e bancadas. [C Térreo]
