@@ -3065,3 +3065,31 @@ do Topaz; no 12K, cada linha na Kalam no mesmo meio e na mesma linha de base, um
 maiúsculas x 1,12), a mesma cor; as descrições das escadas também na Kalam, as setas e os D/S ficam.
 `python3 ampliacao_12k_casac.py preparar <pav> --opcao B` e `montar <pav> <saída do Topaz> --opcao B`
 -> `POE642_CasaC/entrega/POE642_CasaC_PH_{Subsolo,Terreo}_12K_opcao_B.jpg`.
+
+### Térreo da Casa C, a revisão de 15/11: `revisao_terreo_casac_1511.py`
+
+Os recortes do usuário de 15/11, mostrados antes do 12K e aprovados ("Ok"), chamados no fim de
+`revisao_terreo_casac_1411.aplicar` (a cadeia segue `python3 revisao_terreo_casac_1311.py`):
+- **Armários no tom definido** (a cor dos armários da cozinha, lisa, a face um tom abaixo só no contorno de fora): o L
+  do escritório (DOC_LINHAS 88846 e 88851), o comprido da circulação, o dos arcos junto ao jantar e o L inteiro do
+  louceiro 2; cada retângulo para no fio do contorno (o fio, a sombra e os arcos ficam).
+- **Lavabo:** a bancada e a cuba em granito marrom tabaco (a torneira fica) e a folha da porta escura de ponta a ponta.
+- **Louceiro 2:** a parede de dentro até o canto de cima.
+- **Estar:** as cortinas C4 só nos dois trechos de cada janela do PDF (o trilho, a cortina velha e os pontinhos dela
+  fora); os dois vasos no modelo de cima (`revisao_terreo_casac_1411.ESTAR_ENTORNO`, o segundo girado).
+- **Jardins de inverno:** a grama no tom do gramado do lote (L, a e b casados); o X e os rótulos ficam.
+- **Cozinha:** as soleiras das janelas no Dekton Danae da bancada.
+- **Suíte master:** a mesinha redonda do PDF (88686) em nogueira; a mesinha de antes, maior, sai pelo vinílico.
+- **Escritório:** a soleira da janela lisa no bege das soleiras, os batentes em parede, a folha em vidro claro.
+- **BH externo:** o vidro do box até a parede de baixo.
+- **Restos de piso antigo:** acima da janela do quarto de serviço e no vão entre a cozinha e a área de serviço (a faixa
+  escura vira o piso do lado, `faixa_cozinha_servico`).
+- **Circulação entre o BH master 2 e o closet master 2:** o vinílico da suíte, sem a parede, as soleiras nas duas
+  portas; a parede fina e curta junto à bacia do BH master 2.
+- **Quarto 1:** o aparador do PDF (88594) em freijó embaixo da TV.
+- **Opção B, o fundo do rótulo CLOSET MASTER 2:** em `rotulos_kalam_casac.apagar`, o piso de referência de cada linha é
+  o de entre as letras (a volta pegava o guarda-roupa logo abaixo, e a cópia o trazia para o "A: 7,92 m²").
+Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1511_<trecho>_antes_depois.jpg` (contra 77cbb38) e
+`..._1511_rotulo_closet_master2_opcao_B_antes_depois.jpg`. Depois, `ampliacao_12k_casac.py preparar|montar Terreo
+[--opcao B]` (Topaz High Fidelity V2, jobs 62480c04 e d5cc48cd; as saídas fora do git), `rodape_entrega.py --no-quadro`,
+`pdf_entrega.py` e `book_entrega.py`.
