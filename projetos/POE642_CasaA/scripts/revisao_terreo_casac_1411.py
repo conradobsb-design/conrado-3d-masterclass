@@ -81,8 +81,10 @@ LOUCEIRO1 = {"apaga": (2201, 660, 2252, 687), "apaga_dy": -26, "centro_x": 2226.
 PORTA_CIRC = {"faixa": (2285, 715, 2292, 834), "dx": 10, "parede": (2282, 705, 2292, 714), "piso": (2282, 714, 2292, 716)}
 BATENTES_L2 = [{"ret": (2394, 811, 2401, 822), "coluna": 2390}, {"ret": (2453, 811, 2458, 821), "coluna": 2460}]
 ESTAR_ENTORNO = {"amostra": (2215, 1606, 2295, 1640), "vaso_folga": 14, "sofa_folga": 10, "cortina_x": 2384, "plantas_antes": (2290, 1528, 2384, 1636),
-                 "vasos": [("sala-intima/vaso-folhagem-a", (2357.0, 1563.0), 52.0),
-                           ("sala-intima/vaso-folhagem-b", (2330.0, 1601.0), 50.0)]}
+                 # (15/11, "USE O MESMO MODELO DE PLANTAS. GOSTEI MAIS DO DE CIMA. UTILIZE O DE CIMA DUPLICADO") os dois
+                 # vasos no modelo a, o de baixo girado (o giro, graus) para não repetir as folhas no mesmo desenho
+                 "vasos": [("sala-intima/vaso-folhagem-a", (2357.0, 1563.0), 52.0, 0.0),
+                           ("sala-intima/vaso-folhagem-a", (2330.0, 1601.0), 52.0, 115.0)]}
 TAPETE_ESTAR = {"png": "02-terreo/sala-de-estar/tapete-redondo-render-v2.png", "miolo": 0.68, "luz_sigma": 2.0,
                 "luz_min": 0.55}
 
@@ -539,8 +541,8 @@ def entorno_estar(Q, img, q=ESTAR_ENTORNO):
     reg = _sombra(reg, a_sofa[Y0:Y1, X0:X1].astype(np.float32), MB.BT.SOMBRAS["movel"], Q.px_m, m)
     out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
     # os vasos da biblioteca (a folhagem da sala íntima da Casa A, aprovada no hall), nos centros das plantas de antes
-    for nome, (cx, cy), D in q["vasos"]:
-        out = MB.pousar(out, MB.ler(nome), cx, cy, D, D, 0.0, "baixa", par)
+    for nome, (cx, cy), D, giro in q["vasos"]:
+        out = MB.pousar(out, MB.ler(nome), cx, cy, D, D, giro, "baixa", par)
     print(f"    estar: {int(zona.sum())} px em volta do sofá curvo e dos vasos no travertino (o desenho velho, o halo e a "
           f"sombra dupla fora), a sombra do sofá; {len(q['vasos'])} vasos de folhagem da biblioteca")
     return out
@@ -917,5 +919,8 @@ def aplicar(Q, out):
     out = cadeiras_jantar(Q, out)
     out = criado_q1(out)
     out = poltronas_azuis(Q, out)
+    # 15/11: os recortes do Térreo (`revisao_terreo_casac_1511`)
+    import revisao_terreo_casac_1511 as R15
+    out = R15.aplicar(Q, out)
     # (o aparador cinza saiu: "deixe como estava em vez do cinza"; `aparador_cinza` fica, sem uso)
     return out

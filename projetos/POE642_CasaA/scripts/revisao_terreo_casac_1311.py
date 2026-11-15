@@ -1317,9 +1317,10 @@ def main():
     print(f"    {a.saida or FINAL.name}")
     if not a.saida:
         antes_depois(antes, depois)
-        import revisao_terreo_casac_1411 as R14
-        # os de 14/11 contra a final do commit de antes desta rodada (`R14.ANTES_DEPOIS_COMMIT`)
-        R14.antes_depois(final_de(R14.ANTES_DEPOIS_COMMIT), depois, R)
+        import revisao_terreo_casac_1511 as R15
+        # os da última rodada (15/11) contra a final do commit de antes dela (`R15.ANTES_DEPOIS_COMMIT`); os de 14/11
+        # (`revisao_terreo_casac_1411.antes_depois`) ficam como foram entregues
+        R15.antes_depois(final_de(R15.ANTES_DEPOIS_COMMIT), depois, R)
 
 
 if __name__ == "__main__":

@@ -284,8 +284,14 @@ def apagar(img, camadas):
             ys, xs = np.nonzero(m)
             y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
             h, w = y1 - y0, x1 - x0
-            anel = (cv2.dilate(m, np.ones((15, 15), np.uint8)) > 0) & (texto_d == 0)
-            ref = np.median(out[anel].astype(np.float32), axis=0)
+            # a referência é o piso de dentro da própria linha (entre as letras): a volta pegava o guarda-roupa logo
+            # abaixo do CLOSET MASTER 2, e a cópia trazia o guarda-roupa para o lugar do "A: 7,92 m²"
+            entre = (m > 0) & (cv2.dilate((al > 0.02).astype(np.uint8), np.ones((3, 3), np.uint8)) == 0)
+            if entre.sum() >= 30:
+                ref = np.median(out[entre].astype(np.float32), axis=0)
+            else:
+                anel = (cv2.dilate(m, np.ones((15, 15), np.uint8)) > 0) & (texto_d == 0)
+                ref = np.median(out[anel].astype(np.float32), axis=0)
             mm = m[y0:y1, x0:x1] > 0
             melhor = None
             for dx, dy in ([(0, -(h + k)) for k in (2, 6, 10)] + [(0, h + k) for k in (2, 6, 10)]
