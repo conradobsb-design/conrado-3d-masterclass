@@ -3227,3 +3227,11 @@ A 2ª leva de pedidos de 16/11 no Térreo da Casa D (`pedidos_terreo_casad_1611b
   logo depois do painel, sem os traços claros;
 - a borda da piscina, da prainha e do spa lisa, sem juntas, em Bege Bahia um tom abaixo do deck (o alto-relevo);
 - sem o tracejado do limite em volta da planta; o muro de baixo termina com a grama, como o de cima.
+
+## Casa E · análise das notas e dos padrões (16/11)
+
+Só a análise, sem alterar as plantas: `POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md` (as notas que citam
+outras casas, os padrões de todas as casas com a situação da E por pavimento e as perguntas).
+`comparacao_casae_1611.py linhas.json saida.jpg [altura]` monta a folha "Casa E × exemplo": cada linha com os recortes
+das finais (chaves `E_T`, `E_S`, `E_1`, `A_T`, `C_T`, `C_S`, `D_T`, `D_S`), lado a lado na mesma altura. As linhas usadas
+estão em `POE642_CasaE/POE642_CasaE_1611_comparacao_{1,2}.json`, e as folhas em `POE642_CasaE/renders/`.
