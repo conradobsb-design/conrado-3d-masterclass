@@ -3093,3 +3093,28 @@ Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1511_<trecho>_ant
 `..._1511_rotulo_closet_master2_opcao_B_antes_depois.jpg`. Depois, `ampliacao_12k_casac.py preparar|montar Terreo
 [--opcao B]` (Topaz High Fidelity V2, jobs 62480c04 e d5cc48cd; as saídas fora do git), `rodape_entrega.py --no-quadro`,
 `pdf_entrega.py` e `book_entrega.py`.
+
+### Subsolo da Casa D, a revisão de 15/11 e 16/11 e o 12K: `biblioteca_subsolo_casad_1511.py`, `ampliacao_12k_casad.py`
+
+A proposta de 15/11 pela biblioteca e as notas do cliente, com as rodadas de 16/11 (aprovado: "Aprovado o Subsolo da
+casa D. Rode as versões 12k"). `python3 biblioteca_subsolo_casad_1511.py` parte da final do commit `ANTES_COMMIT` e grava
+a final e os antes e depois (`renders/POE642_CasaD_PH_Subsolo_1511_<trecho>_antes_depois.jpg`); com `--saida`, só a
+imagem e os antes e depois na pasta dela. Etapas, na ordem de `aplicar`: fundo branco sem hachura; Bege Bahia com as
+manchas reduzidas (como A/B/C, também nos bancos e no piso da sauna, do vestiário e da circulação); a escada (a divisão
+diagonal sem linha, os degraus de cima em transparência); o granito marrom; a academia (2 esteiras A, 2 bicicletas B, 2
+supinos nos tamanhos da Casa A); a sauna e o vestiário (a cuba de travertino na bancada de granito marrom tabaco, a
+parede entre as portas); o WC DCE (a bancada em tabaco, a soleira e os batentes, o contorno do chuveiro); a cama do DCE
+1 com a cabeceira para baixo e o criado; as soleiras da sauna e do vestiário (o vão da academia só no vinílico); as
+**portas de correr do pátio** com as folhas do pátio do Subsolo A (`PORTA_ACADEMIA`: 4 folhas em 2 trilhos, as das
+pontas no de fora, sobrepostas no montante, o vidro claro com o perfil escuro, os batentes; o trecho desfocado de leve
+para a nitidez da final da Casa A); o elevador das Casas A a C; os rótulos centrados (`ROTULOS`, com o ponto que sobrava
+do "A" do VESTIÁRIO tirado pelo piso da esquerda, `"-dx"`).
+
+Opção B: `rotulos_kalam_casad.py <Terreo|Subsolo>` (a final sem os rótulos e os textos na Kalam, pela
+`rotulos_kalam_casac`; os escritos pelos scripts de 15/11 vêm das próprias linhas).
+
+12K: `ampliacao_12k_casad.py preparar|montar <pav> [--opcao B]`, o roteiro da Casa C (recorte A3, Topaz High Fidelity
+V2 a 12288 x 8689, os tons da final, o fundo branco; na B, os dados das linhas da Kalam em
+`renders/POE642_CasaD_PH_<pav>_rotulos_kalam.json`). Subsolo: jobs 56d5115c (A) e e01c1dea (B), as saídas fora do git.
+Depois, `rodape_entrega.py --config ../../POE642_CasaD/config_bases.json --no-quadro --render Subsolo=...`,
+`pdf_entrega.py --config ../../POE642_CasaD/config_bases.json` e `book_entrega.py`.

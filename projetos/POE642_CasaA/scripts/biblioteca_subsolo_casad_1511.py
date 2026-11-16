@@ -170,15 +170,17 @@ DCE = {"caixa": (1018.1, 1029.5, 1077.9, 1148.9), "giro": 180.0, "roupa": "branc
 # px): a ACADEMIA no eixo da sala, acima das esteiras; a SAUNA acima dos bancos; o VESTIÁRIO entre a bancada e os
 # boxes; o ELEVADOR na cabine; o DCE 1 entre a parede e a cama; o WC DCE entre a bancada e a porta; o DEPÓSITO no meio.
 # O corpo: o da 1ª linha de antes (a largura da tinta, px) ou `corpo`; DCE 1 e WC DCE no mesmo corpo (o WC DCE
-# só cabe nele). `apaga`: a caixa do rótulo de antes (px) e como sai: "dx" (o piso do lado), "claro" (o texto branco
-# sobre o granito, inpaint) ou None (o piso novo já o tirou: o Bege Bahia, a cabine do elevador)
+# só cabe nele). `apaga`: a caixa do rótulo de antes (px) e como sai: "dx"/"-dx" (o piso da direita/da esquerda),
+# "claro" (o texto branco sobre o granito, inpaint) ou None (o piso novo já o tirou: o Bege Bahia, a cabine do
+# elevador)
 ROTULOS = {"entrelinha": 1.42, "altura": 0.73, "escuro": (20, 20, 20), "claro": (236, 236, 236), "itens": [
     {"linhas": ("ACADEMIA", "A: 72,23 m²"), "centro": (1198.5, 1406.0), "largura": 56.0, "cor": "escuro",
      "apaga": ((1016, 1439, 1081, 1469), "dx")},
     {"linhas": ("SAUNA", "A: 6,55 m²"), "centro": (865.0, 1636.0), "largura": 37.0, "cor": "escuro", "apaga": None},
     # (16/11, usuário: "alinhe esses dois rótulos") o VESTIÁRIO na fileira da SAUNA (o mesmo y)
+    # (16/11, conferência do 12K) o ponto que sobrava da ponta do "A" de antes, à esquerda do "A" novo: o piso da esquerda
     {"linhas": ("VESTIÁRIO", "A: 6,41 m²"), "centro": (1164.5, 1636.0), "largura": 56.0, "cor": "escuro",
-     "apaga": None},
+     "apaga": ((1136, 1633, 1142, 1641), "-dx")},
     {"linhas": ("ELEVADOR",), "centro": (1397.75, 1282.1), "largura": 56.0, "cor": "escuro", "apaga": None},
     {"linhas": ("DCE 1", "A: 6 m²"), "centro": (976.5, 1092.0), "corpo": 8.4, "cor": "claro",
      "apaga": ((956, 1070, 1006, 1104), "claro")},
@@ -609,8 +611,8 @@ def rotulos(out, par, q=ROTULOS):
     for it in q["itens"]:
         if it["apaga"]:
             (x0, y0, x1, y1), modo = it["apaga"]
-            if modo == "dx":
-                out = BB.piso_desloc(out, (x0, y0, x1, y1), par, 1, 0)
+            if modo in ("dx", "-dx"):
+                out = BB.piso_desloc(out, (x0, y0, x1, y1), par, 1 if modo == "dx" else -1, 0)
             else:
                 reg = np.ascontiguousarray(out[y0:y1, x0:x1])
                 I = reg.astype(np.int16)
