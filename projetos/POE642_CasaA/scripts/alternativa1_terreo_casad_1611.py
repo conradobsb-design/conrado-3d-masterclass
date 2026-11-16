@@ -327,8 +327,13 @@ def sala_intima(Q, out, antes, par):
         D_ = ((a1 - a0) + (b1 - b0)) / 2
         out = MB.pousar(out, Pm, (a0 + a1) / 2, (b0 + b1) / 2, D_, D_, 0.0, "mesa", par)
     Pp = ler("sala-intima/poltrona-verde-intima-d")
-    cx, cy, (iou2, g2, wt2, ht2) = MB.encaixar(Q, Pp, pol)
-    out = MB.pousar(out, Pp, cx, cy, wt2, ht2, g2, "movel", par)
+    cx, cy, (iou2, _, wt2, ht2) = MB.encaixar(Q, Pp, pol)
+    # (16/11, usuário: "rotação das poltronas [...] para a direção do 3D") como no 3D da sala íntima: de costas para a
+    # entrada, de frente para a mesa de centro e a janela (a frente do PNG para baixo); o encaixe na silhueta redonda do
+    # PDF não diz a frente
+    g2 = 0.0
+    lado = min(wt2, ht2)
+    out = MB.pousar(out, Pp, cx, cy, lado * Pp.shape[1] / Pp.shape[0], lado, g2, "movel", par)
     print(f"    sala íntima: o tapete de trama, o sofá em L da Casa D ({'espelhado, ' if esp else ''}giro {g:.0f}°, "
           f"{iou * 100:.0f}% sobre o L do PDF), a poltrona oliva (giro {g2:.0f}°) e as mesas redondas")
     return out
@@ -615,4 +620,121 @@ def gourmet(Q, out, par):
     with com_d({"area-gourmet/banqueta-b": "D:gourmet/banqueta-gourmet-d"}), contextlib.redirect_stdout(io.StringIO()):
         out = TD.gourmet(Q, out, par)
     print("    gourmet: como em 15/11, com as 4 banquetas altas de madeira da Casa D")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
+# 16/11, a revisão do usuário sobre a Alternativa 1:
+# - "Para as escrivaninhas dos quartos, use o tom de madeira nogueira": os tampos das escrivaninhas com cadeira (suíte
+#   master, suíte 1, suíte 3/escritório; os retângulos da DOC_LINHAS E PROJEÇÕES e da mesa do escritório, px) na
+#   nogueira da biblioteca da Casa A (o painel liso da mesa de centro redonda de nogueira, o veio no comprido do tampo),
+#   a aresta um tom abaixo e a sombra curta; a bancada da suíte 2 (sem cadeira) fica armário.
+# - "Verifica a rotação das poltronas [...] para a direção do 3D": no 3D da sala íntima ("POE 642 - CASA D - SALA
+#   ÍNTIMA"), a poltrona verde fica de costas para a entrada, de frente para a mesa de centro e a janela; aqui ela vai
+#   a 0° (a frente para baixo), no lugar do giro do encaixe na silhueta redonda do PDF (235°). As outras conferem com o
+#   3D da sala e do quarto (as do estar do living para o meio, as do estar do jantar para a mesa redonda, as dos
+#   quartos para o pufe).
+# - "Esse último WC-DCE do térreo tá bem desconfigurado [...] Piso" (`wc_dce`): o banho refeito pelo PDF. O piso inteiro
+#   (o miolo das paredes, fora a bancada) no travertino claro dos banhos da biblioteca da Casa D (60 x 120, na escala da
+#   final), no tom e no contraste do piso do banho 2 (Lab casado com a amostra); por cima, a bacia Carrara dos outros
+#   banhos, o chuveiro em planta na parede da direita, a folha de madeira da porta aberta e o vidro do box no desenho do
+#   banho 2. A bancada de granito marrom tabaco e a cuba ficam.
+ESCRIVANINHAS = {"png": "02-terreo/sala-de-estar/mesa-centro-redonda-nogueira-adorno.png",
+                 "painel": (0.165, 0.55, 0.30, 0.80), "aresta": 0.78,
+                 "mesas": [("suíte master", (1046.0, 1434.4, 1081.8, 1552.6)),
+                           ("suíte 1", (1290.8, 1422.4, 1440.1, 1452.3)),
+                           ("suíte 3/escritório", (2362.5, 1553.8, 2410.3, 1673.2))]}
+WC_DCE_D = {"miolo": (2386.5, 526.8, 2476.0, 676.0), "bancada": (2386.5, 526.8, 2410.8, 621.4),
+            "piso_png": "04-materiais/pisos-internos/travertino-romano-banhos.png", "piso_m": 3.6,
+            "amostra_banho2": (2048, 1688, 2118, 1722), "contraste": 0.8,
+            "bacia": ("B1", "banho-1/bacia-carrara", 2449.4, 542.1, 21.0, 30.6, 0.0, "baixa", None),
+            "chuveiro": (2447.2, 642.7, 2459.0, 654.5, 2476.0),
+            "folha": ((2434.3, 612.5, 2476.0, 614.8), (124, 154, 188)),
+            "vidro": {"x": (2386.5, 2476.0), "linhas": [(622, (189, 187, 182)), (623, (201, 199, 195)),
+                                                       (624, (189, 193, 198))]}}
+
+
+def _painel_nogueira(L, D, q=ESCRIVANINHAS, ss=4):
+    """O tampo L x D px (o comprimento na horizontal), em ss: o painel liso da nogueira, o veio no comprido, repetido em
+    espelho ao longo dele; a aresta um tom abaixo."""
+    P = cv2.imread(str(AQUI.parent / "biblioteca-objetos" / q["png"]), cv2.IMREAD_UNCHANGED)
+    h, w = P.shape[:2]
+    a0, b0, a1, b1 = q["painel"]
+    pn = np.ascontiguousarray(np.rot90(P[int(b0 * h):int(b1 * h), int(a0 * w):int(a1 * w), :3]))   # o veio deitado
+    W, H = int(round(L * ss)), int(round(D * ss))
+    k = H / pn.shape[0]
+    pn = cv2.resize(pn, (max(1, int(round(pn.shape[1] * k))), H), interpolation=cv2.INTER_AREA)
+    tiras = []
+    while sum(t.shape[1] for t in tiras) < W:
+        tiras.append(pn if len(tiras) % 2 == 0 else pn[:, ::-1])
+    T = np.concatenate(tiras, axis=1)[:, :W].astype(np.float32)
+    e = max(1, int(round(0.7 * ss)))
+    T[:e] *= q["aresta"]
+    T[-e:] *= q["aresta"]
+    T[:, :e] *= q["aresta"]
+    T[:, -e:] *= q["aresta"]
+    return np.dstack([T, np.full(T.shape[:2], 255, np.float32)])
+
+
+def escrivaninhas(out, par, q=ESCRIVANINHAS):
+    for nome, (x0, y0, x1, y1) in q["mesas"]:
+        w, h = x1 - x0, y1 - y0
+        L, D, g = (w, h, 0.0) if w >= h else (h, w, 90.0)
+        P = _painel_nogueira(L, D, q)
+        out = MB.pousar(out, P, (x0 + x1) / 2, (y0 + y1) / 2, L, D, g, "mesa", par)
+    print(f"    escrivaninhas: os tampos em nogueira ({', '.join(n for n, _ in q['mesas'])})")
+    return out
+
+
+def _lab_casado(T, ref, contraste):
+    """T (BGR float) com a média de L, a, b de `ref` e o desvio de L dela vezes `contraste`."""
+    Tl = cv2.cvtColor(np.clip(T, 0, 255).astype(np.uint8), cv2.COLOR_BGR2LAB).astype(np.float32)
+    Rl = cv2.cvtColor(ref, cv2.COLOR_BGR2LAB).reshape(-1, 3).astype(np.float32)
+    for c in range(3):
+        sd_t, sd_r = float(Tl[..., c].std()) or 1.0, float(Rl[:, c].std())
+        f = sd_r / sd_t * (contraste if c == 0 else 1.0)
+        Tl[..., c] = (Tl[..., c] - Tl[..., c].mean()) * f + Rl[:, c].mean()
+    return cv2.cvtColor(np.clip(Tl, 0, 255).astype(np.uint8), cv2.COLOR_LAB2BGR).astype(np.float32)
+
+
+def wc_dce(out, par, q=WC_DCE_D):
+    import biblioteca_terreo_casac_1311 as BC
+    import biblioteca_terreo_casad_1511 as TD
+    X0, Y0, X1, Y1 = q["miolo"]
+    A0, B0, A1, B1 = int(np.floor(X0)) - 1, int(np.floor(Y0)) - 1, int(np.ceil(X1)) + 1, int(np.ceil(Y1)) + 1
+    h, w = B1 - B0, A1 - A0
+    # o piso: o travertino claro dos banhos, na escala da final, casado com o piso do banho 2
+    T = cv2.imread(str(BIB_D.parent / q["piso_png"]))
+    lado = int(round(q["piso_m"] * PX_M))
+    T = cv2.resize(T, (lado, lado), interpolation=cv2.INTER_AREA).astype(np.float32)
+    T = np.tile(T, (h // lado + 1, w // lado + 1, 1))[:h, :w]
+    ax0, ay0, ax1, ay1 = q["amostra_banho2"]
+    T = _lab_casado(T, out[ay0:ay1, ax0:ax1], q["contraste"])
+    # a cobertura: o miolo menos a bancada, menos as paredes do PDF (exata, em ss)
+    ss = 8
+    M = np.zeros((h * ss, w * ss), np.uint8)
+    cv2.rectangle(M, (int(round((X0 - A0) * ss)), int(round((Y0 - B0) * ss))),
+                  (int(round((X1 - A0) * ss)) - 1, int(round((Y1 - B0) * ss)) - 1), 255, -1)
+    bx0, by0, bx1, by1 = q["bancada"]
+    cv2.rectangle(M, (int(round((bx0 - A0) * ss)), int(round((by0 - B0) * ss))),
+                  (int(round((bx1 - A0) * ss)) - 1, int(round((by1 - B0) * ss)) - 1), 0, -1)
+    a = cv2.resize(M.astype(np.float32) / 255, (w, h), interpolation=cv2.INTER_AREA)
+    a *= ~par[B0:B1, A0:A1]
+    reg = out[B0:B1, A0:A1].astype(np.float32)
+    out = out.copy()
+    out[B0:B1, A0:A1] = np.clip(np.round(reg * (1 - a[..., None]) + T * a[..., None]), 0, 255).astype(np.uint8)
+    # a bacia Carrara (a parede em cima), o chuveiro em planta na parede da direita
+    out = RT.pousar_bib(out, RT.item_bib(*q["bacia"]), par)
+    cx0, cy0, cx1, cy1, parede = q["chuveiro"]
+    with contextlib.redirect_stdout(io.StringIO()):
+        out = BC.chuveiros(out, par, [], [{"nome": "WC DCE", "placa_px": (cx0, cy0, cx1, cy1), "png": TD.CH_Q,
+                                           "parede": (parede, "dir"), "piso": (0, -1)}])
+    # a folha da porta aberta (madeira) e o vidro do box (o desenho do banho 2)
+    (fx0, fy0, fx1, fy1), cor = q["folha"]
+    out = TD._poligono(out, [(fx0, fy0), (fx1, fy0), (fx1, fy1), (fx0, fy1)], cor)
+    vx0, vx1 = q["vidro"]["x"]
+    for y, c in q["vidro"]["linhas"]:
+        out[y, int(np.ceil(vx0)):int(np.floor(vx1))] = c
+    print("    WC DCE: refeito pelo PDF (o piso inteiro no travertino claro dos banhos, no tom do banho 2; a bacia "
+          "Carrara, o chuveiro, a folha da porta e o vidro do box); a bancada de granito e a cuba ficam")
     return out

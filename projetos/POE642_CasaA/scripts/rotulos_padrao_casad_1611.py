@@ -59,13 +59,10 @@ ROTULOS_T = [
     ("LOUCEIRO", ("LOUCEIRO", "A: 2,73 m²"), (2134.5, 437.0), "pequeno", CLARO),
     ("DESPENSA", ("DESPENSA", "A: 2,59 m²"), (2134.5, 611.0), "pequeno", CLARO),
     ("DCE TÉRREO", ("DCE TÉRREO", "A: 6 m²"), (2525.0, 588.0), "normal", ESCURO),
-    # o WC DCE no espaço livre de cima (entre a bacia e o box), e não dentro do box
-    ("WC DCE TÉRREO", ("WC DCE", "TÉRREO", "A: 3,75 m²"), (2446.0, 577.0), "pequeno", ESCURO),
+    # o WC DCE no espaço livre de cima, centrado entre a bancada e a parede e entre a bacia e a folha da porta (não no box)
+    ("WC DCE TÉRREO", ("WC DCE", "TÉRREO", "A: 3,75 m²"), (2443.5, 575.5), "pequeno", ESCURO),
     ("ÁREA DESCOBERTA", ("ÁREA DESCOBERTA",), (2281.0, 634.0), "normal", CLARO),
 ]
-# as manchas do piso antigo (os quadradinhos bege) no piso de quartzito do WC DCE: px (a caixa do banho), o que é
-# bege e pequeno sai pelo inpaint (a barra de toalha, comprida, fica)
-WC_DCE_MANCHAS = {"caixa": (2386, 528, 2476, 668), "rb": 22, "lum": (140, 235), "area_max": 60, "lado_max": 12}
 # os restos do rótulo do motor que a busca não pega (os pontinhos claros à esquerda do "A:" do JARDIM da sala íntima,
 # px): o que é claro sai pelo inpaint (a grama em volta)
 RESIDUOS_T = [((1595, 1712, 1609, 1731), 150)]
@@ -118,24 +115,6 @@ def _camadas_antes(img):
     return camadas
 
 
-def manchas_wc_dce(img, q=WC_DCE_MANCHAS):
-    x0, y0, x1, y1 = q["caixa"]
-    reg = img[y0:y1, x0:x1]
-    I = reg.astype(np.int16)
-    lum = I.mean(axis=2)
-    bege = ((I[..., 2] - I[..., 0]) > q["rb"]) & (lum > q["lum"][0]) & (lum < q["lum"][1])
-    n, lab, st, _ = cv2.connectedComponentsWithStats(bege.astype(np.uint8), connectivity=8)
-    m = np.zeros(bege.shape, np.uint8)
-    for i in range(1, n):
-        x, y, w, h, a = st[i]
-        if a <= q["area_max"] and max(w, h) <= q["lado_max"]:
-            m[lab == i] = 255
-    m = cv2.dilate(m, np.ones((3, 3), np.uint8))
-    out = img.copy()
-    out[y0:y1, x0:x1] = cv2.inpaint(np.ascontiguousarray(reg), m, 3, cv2.INPAINT_TELEA)
-    return out, int((m > 0).sum())
-
-
 def residuos(img, q=RESIDUOS_T):
     out = img.copy()
     for (x0, y0, x1, y1), lum in q:
@@ -145,15 +124,17 @@ def residuos(img, q=RESIDUOS_T):
     return out
 
 
-def aplicar(img):
+def aplicar(img, depois_de_apagar=None):
+    """`depois_de_apagar(out)`: o que refaz um ambiente inteiro entre o apagar e o escrever (o WC DCE)."""
     import revisao_terreo_casac_1411 as R14
     import rotulos_kalam_casac as KC
     camadas = _camadas_antes(img)
     out = KC.apagar(img, camadas)
-    out, n = manchas_wc_dce(out)
+    if depois_de_apagar is not None:
+        out = depois_de_apagar(out)
     out = residuos(out)
     for _, ll, cor in linhas():
         out = R14.desenhar_linhas(out, ll, tuple(cor))
     print(f"    rótulos: os {len(camadas)} de antes saem; os {len(ROTULOS_T)} do padrão (Inter, 8 px de maiúscula, 7 nos "
-          f"ambientes pequenos; as fileiras alinhadas); o piso do WC DCE sem as manchas bege ({n} px)")
+          "ambientes pequenos; as fileiras alinhadas)")
     return out
