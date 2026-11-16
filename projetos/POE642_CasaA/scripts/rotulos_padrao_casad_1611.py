@@ -24,7 +24,9 @@ CORPOS = {"normal": (10.95, 15.0), "pequeno": (9.6, 13.1)}            # (corpo p
 # (nome, linhas, (meio x, base da 1ª linha) px, corpo, cor)
 ROTULOS_T = [
     ("SUÍTE MASTER", ("SUÍTE MASTER", "A: 46,51 m²"), (1022.0, 1387.0), "normal", ESCURO),
-    ("SALA ÍNTIMA", ("SALA ÍNTIMA", "A: 43,25 m²"), (1664.0, 1387.0), "normal", ESCURO),
+    # (16/11, usuário: "põe o rótulo mais pra cima, centralizado no ambiente") no meio da sala (entre a parede da esquerda
+    # e a da bancada), na faixa livre acima da poltrona
+    ("SALA ÍNTIMA", ("SALA ÍNTIMA", "A: 43,25 m²"), (1623.0, 1365.0), "normal", ESCURO),
     ("CIRCULAÇÃO (master)", ("CIRCULAÇÃO", "A: 6,23 m²"), (1300.0, 1364.0), "normal", ESCURO),
     ("CIRCULAÇÃO (suítes)", ("CIRCULAÇÃO", "A: 8,06 m²"), (1992.0, 1364.0), "normal", ESCURO),
     ("CLOSET (suíte 1)", ("CLOSET", "A: 3,60 m²"), (1162.5, 1500.0), "normal", ESCURO),
@@ -33,7 +35,9 @@ ROTULOS_T = [
     ("CLOSET (suíte 2)", ("CLOSET", "A: 3,60 m²"), (2082.0, 1500.0), "normal", ESCURO),
     ("SUÍTE 3/ESCRITÓRIO", ("SUÍTE 3/ESCRITÓRIO", "A: 33,03 m²"), (2388.0, 1500.0), "normal", ESCURO),
     ("CLOSET (master)", ("CLOSET", "A: 12,31 m²"), (655.0, 1644.0), "normal", ESCURO),
-    ("CLOSET (master 2)", ("CLOSET", "A: 6,32 m²"), (1019.5, 1644.0), "normal", ESCURO),
+    # (16/11, usuário: "centraliza o rótulo") no meio do livre do closet: entre a parede da esquerda (x 958) e o armário
+    # da direita (x 1046,5), acima do armário de baixo (y 1563 a 1664)
+    ("CLOSET (master 2)", ("CLOSET", "A: 6,32 m²"), (1002.0, 1614.0), "normal", ESCURO),
     ("BANHO MASTER", ("BANHO MASTER", "A: 5,3 m²"), (868.0, 1636.0), "normal", ESCURO),
     ("BANHO 1", ("BANHO 1", "A: 5,73 m²"), (1161.5, 1636.0), "normal", ESCURO),
     ("BANHO 2", ("BANHO 2", "A: 5,73 m²"), (2085.5, 1636.0), "normal", ESCURO),

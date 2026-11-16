@@ -362,8 +362,8 @@ def floreiras(out, par, q=FLOREIRAS):
 # folha de vidro e o painel (x 2515 a 2524, até a linha do contrapiso do PDF) no vinílico da suíte (a amostra limpa da
 # suíte, sem emenda, as réguas em pé como as dela); o painel (x 2524 a 2532,2) no ripado de nogueira das folhas de madeira
 # do 1º Pavimento da Casa A (`um_pav_casaa_1111.FOLHAS_1P`), com o contorno e a sombra curta para fora (na grama)
-SUITE3 = {"mesa": 104187, "piso": (2515, 1339, 2524, 1496), "vinilico_px": (2425, 1560, 2470, 1640),
-          "painel": (2524.0, 1339.5, 2532.2, 1494.5), "semente": 1615}
+SUITE3 = {"mesa": 104187, "piso": (2515, 1339, 2524, 1496), "vinilico_px": (2425, 1560, 2470, 1640), "veio": 0.035,
+          "painel": (2524.0, 1339.5, 2532.2, 1494.5), "grama_x": (2532, 2536), "semente": 1615}
 
 
 def _folha_madeira(o, r, lado, qa, rng):
@@ -399,16 +399,29 @@ def suite3(Q, out, par, q=SUITE3):
     import materiais_terreo_casac_1311 as MT
     import um_pav_casaa_1111 as U
     out = mesinha(Q, out, par, q["mesa"], dict(MESINHA_D, folga_px=1.5))
+    out = madeira_tom(Q, out, MESA_CENTRO_S3)
+    # (depois: "corrija aqueles tons mais escuros entre o painel de madeira e a folha de vidro. mantenha o tom do piso
+    # entre eles") a faixa no tom do vinílico da suíte (a mediana da amostra), uniforme, só com o veio fino no comprido
     x0, y0, x1, y1 = q["piso"]
     a0, b0, a1, b1 = q["vinilico_px"]
-    T = MT.sem_emenda(out[b0:b1, a0:a1].astype(np.float32), y1 - y0, x1 - x0)
+    cor = np.median(out[b0:b1, a0:a1].reshape(-1, 3).astype(np.float32), axis=0)
+    rng = np.random.default_rng(q["semente"])
+    veio = cv2.GaussianBlur(rng.normal(0, 1, (y1 - y0, x1 - x0)).astype(np.float32), (0, 0), sigmaX=0.6, sigmaY=8.0)
+    veio /= max(float(veio.std()), 1e-6)
+    T = cor[None, None] * (1 + q["veio"] * veio)[..., None]
     out = out.copy()
     livre = ~par[y0:y1, x0:x1]
     reg = out[y0:y1, x0:x1]
     reg[livre] = np.clip(np.round(T[livre]), 0, 255).astype(np.uint8)
+    # ("corrija as falhas depois do painel de madeira. tem uns traços falhos brancos") os px da faixa clara de antes, logo
+    # depois do painel, recebem a grama de logo além, em espelho
+    g0, g1 = q["grama_x"]
+    Y0, Y1 = int(np.floor(q["painel"][1])), int(np.ceil(q["painel"][3]))
+    out[Y0:Y1, g0:g1] = out[Y0:Y1, g1:2 * g1 - g0][:, ::-1]
     o = out.astype(np.float32)
     _folha_madeira(o, q["painel"], "x+", U.FOLHAS_1P, np.random.default_rng(q["semente"]))
-    print("    suíte 3: a mesa redonda em nogueira; o piso entre o vidro e o painel no vinílico da suíte; o painel em "
+    print("    suíte 3: a mesa redonda e a de centro em nogueira; o piso entre o vidro e o painel no vinílico da suíte; o "
+          "painel em "
           "ripado de nogueira, com o contorno e a sombra curta na grama")
     return np.clip(np.round(o), 0, 255).astype(np.uint8)
 
@@ -421,6 +434,16 @@ APARADOR = {"pdf": 97337, "cor": (40, 60, 92), "gama": 0.9, "sat_min": 14}
 
 
 def aparador(Q, out, q=APARADOR):
+    out = madeira_tom(Q, out, q)
+    print("    aparador do living: em nogueira escuro")
+    return out
+
+
+# a mesa de centro da suíte 3 (usuário, com o recorte dela: "aplique o tom nogueira"; DOC_LINHAS E PROJEÇÕES 104236)
+MESA_CENTRO_S3 = {"pdf": 104236, "cor": (50, 76, 112), "gama": 0.9, "sat_min": 14}
+
+
+def madeira_tom(Q, out, q):
     x0, y0, x1, y1 = RT.caixa_pdf(Q, q["pdf"])
     X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
     reg = out[Y0:Y1, X0:X1].astype(np.float32)
@@ -433,7 +456,6 @@ def aparador(Q, out, q=APARADOR):
     reg[madeira] = novo[madeira]
     out = out.copy()
     out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
-    print(f"    aparador do living: em nogueira escuro ({int(madeira.sum())} px)")
     return out
 
 
@@ -546,11 +568,45 @@ def porta_hall(out, q=PORTA_HALL):
     return np.clip(np.round(o), 0, 255).astype(np.uint8)
 
 
-# as portas de vidro de correr entre a varanda gourmet e o living (usuário: "melhore o tom das portas de vidro para que
-# elas não sumam com o tom do piso"; as 4 folhas da ARQ_PAREDE, px): cada folha no tom do vidro (um
-# cinza azulado, abaixo dos dois pisos) com as arestas escuras finas, destacada do Bege Bahia e do travertino
-VIDROS = {"folhas": [(1807.3, 690.4, 1809.7, 812.3), (1804.9, 818.3, 1807.3, 940.3), (1804.9, 946.2, 1807.3, 1068.2),
-                     (1807.3, 1074.2, 1809.7, 1196.1)],
+# as portas de vidro (usuário: "melhore o tom das portas de vidro para que elas não sumam com o tom do piso", entre a
+# varanda gourmet e o living; depois: "aplique o mesmo tom nas outras portas de vidro"): as folhas de vidro de correr da
+# ARQ_PAREDE (as duas faixas finas de 1,2 px lado a lado, com a mesma extensão; px), fora as duas do painel de madeira
+# entre a sala íntima e a circulação; cada folha no tom do vidro (um cinza azulado, abaixo dos pisos) com as arestas
+# escuras finas, sem pintar o cinza das paredes onde a folha encosta nelas
+VIDROS = {"folhas": [
+                     (628.1, 1472.2, 630.4, 1539.3),
+                     (630.4, 1404.3, 632.8, 1471.4),
+                     (632.8, 1336.4, 635.2, 1403.4),
+                     (634.6, 1332.3, 697.9, 1334.6),
+                     (696.7, 1329.9, 759.9, 1332.3),
+                     (1224.1, 1743.6, 1288.6, 1746.0),
+                     (1292.2, 1746.0, 1356.6, 1748.4),
+                     (1360.2, 1748.4, 1424.7, 1750.8),
+                     (1453.2, 1223.0, 1551.6, 1225.4),
+                     (1489.1, 1683.9, 1575.5, 1686.3),
+                     (1555.1, 1220.6, 1653.5, 1223.0),
+                     (1579.1, 1686.3, 1665.4, 1688.7),
+                     (1657.0, 1218.2, 1755.4, 1220.6),
+                     (1669.0, 1688.7, 1755.4, 1691.1),
+                     (1804.9, 818.3, 1807.3, 940.3),
+                     (1804.9, 946.2, 1807.3, 1068.2),
+                     (1807.3, 690.4, 1809.7, 812.3),
+                     (1807.3, 1074.2, 1809.7, 1196.1),
+                     (1819.2, 1746.6, 1883.7, 1749.0),
+                     (1887.3, 1744.2, 1951.8, 1746.6),
+                     (1955.4, 1741.9, 2019.8, 1744.2),
+                     (2202.3, 568.6, 2204.7, 608.7),
+                     (2292.1, 568.6, 2294.5, 608.7),
+                     (2314.5, 1097.3, 2432.8, 1100.3),
+                     (2357.8, 804.4, 2360.2, 850.4),
+                     (2358.9, 1746.0, 2422.7, 1748.4),
+                     (2360.2, 854.0, 2362.6, 900.0),
+                     (2426.3, 1748.4, 2490.2, 1750.8),
+                     (2510.1, 1424.5, 2512.5, 1491.4),
+                     (2512.5, 1354.0, 2514.9, 1420.9),
+                     (2516.4, 802.6, 2518.8, 900.8),
+                     (2607.4, 1213.4, 2609.8, 1268.4),
+                     (2609.8, 1271.9, 2612.2, 1326.9)],
           "vidro": (180, 168, 150), "aresta": (96, 92, 86), "aresta_px": 0.6}
 
 
@@ -563,9 +619,11 @@ def vidros(out, q=VIDROS):
         e = q["aresta_px"]
         dentro = _cob((r[0] + e, r[1] + e, r[2] - e, r[3] - e), X0, Y0, w, h)
         reg = o[Y0:Y1, X0:X1]
+        livre = (np.abs(out[Y0:Y1, X0:X1].astype(np.int16) - 80).max(axis=2) > 4).astype(np.float32)
+        A, dentro = A * livre, dentro * livre
         reg[:] = reg * (1 - A[..., None]) + np.float32(q["aresta"]) * A[..., None]
         reg[:] = reg * (1 - dentro[..., None]) + np.float32(q["vidro"]) * dentro[..., None]
-    print(f"    vidros: as {len(q['folhas'])} folhas entre a varanda e o living no tom do vidro, com as arestas")
+    print(f"    vidros: as {len(q['folhas'])} folhas de vidro de correr no tom do vidro, com as arestas")
     return np.clip(np.round(o), 0, 255).astype(np.uint8)
 
 
@@ -590,4 +648,26 @@ def geladeira_gourmet(out, par, q=GELADEIRA_GOURMET):
     px0, py0, px1, py1 = q["peca"]
     out = MB.pousar(out, P, (px0 + px1) / 2, (py0 + py1) / 2, px1 - px0 - 1, py1 - py0 - 1, 0.0, "movel", par)
     print("    gourmet: o refrigerador inox da biblioteca no nicho, a frente para a gourmet")
+    return out
+
+
+# o living (usuário: "aplique o tom freijó às mesas redondas", as duas ao lado do sofá; "troque esse banco por um da
+# biblioteca", o ripado à direita do tapete): as mesinhas no freijó do aparador da biblioteca da Casa D (o painel liso
+# dele, sem emenda no disco), no círculo do PDF; o banco estofado de linho da biblioteca da Casa D (banco-peseira-d)
+# em pé no retângulo do PDF
+MESINHA_FREIJO = {"png": "../../POE642_CasaD/biblioteca-objetos/02-terreo/hall-de-entrada/aparador-freijo.png",
+                  "patch": (0.10, 0.15, 0.40, 0.85), "borda": 0.80, "folga_px": 1.5}
+# (depois, com o recorte da mesinha entre as duas poltronas de cima: "mesinha redonda em freijó") as 3 mesinhas redondas
+LIVING_PECAS = {"mesinhas": (101026, 125827, 101028), "banco": 98058, "banco_png": "suite-1/banco-peseira-d"}
+
+
+def living_pecas(Q, out, par, q=LIVING_PECAS):
+    for i in q["mesinhas"]:
+        out = mesinha(Q, out, par, i, MESINHA_FREIJO)
+    x0, y0, x1, y1 = RT.caixa_pdf(Q, q["banco"])
+    P = _rgba(BIB_D / f"{q['banco_png']}.png")
+    L, D = max(x1 - x0, y1 - y0), min(x1 - x0, y1 - y0)
+    g = 90.0 if (y1 - y0) > (x1 - x0) else 0.0
+    out = MB.pousar(out, P, (x0 + x1) / 2, (y0 + y1) / 2, L, D, g, "movel", par)
+    print("    living: as 3 mesinhas redondas em freijó; o banco estofado de linho da biblioteca no lugar do ripado")
     return out

@@ -39,7 +39,10 @@ BIB_D = AQUI.parents[1] / "POE642_CasaD" / "biblioteca-objetos" / "02-terreo"
 PX_M = B1.PX_M
 
 # as camas: o PNG, as linhas (fração da altura) da manta e das almofadas, a fração de cima que não estica
-CAMAS_D = {"king": {"png": "suite-master/cama-master-d", "manta": (0.60, 0.93), "almofadas": (0.20, 0.40), "fixo": 0.42},
+# (16/11, usuário, na cama da suíte master: "mantenha o tom, mas deixe apenas a pezeira, igual ao estilo das outras
+# camas de casal") na king, a manta só na pezeira (`pezeira`, fração da altura do PNG), o resto dela no branco do edredom
+CAMAS_D = {"king": {"png": "suite-master/cama-master-d", "manta": (0.60, 0.93), "almofadas": (0.20, 0.40), "fixo": 0.42,
+                    "pezeira": (0.68, 0.86)},
            "casal": {"png": "suite-1/cama-casal-d", "manta": (0.56, 0.82), "almofadas": None, "fixo": 0.40},
            "solteiro": {"png": "quarto-dce/cama-solteiro-d", "manta": (0.58, 0.92), "almofadas": None, "fixo": 0.40,
                         "vermelho": True}}
@@ -153,6 +156,16 @@ def cama_png(tipo, cor_bgr, comp, larg):
     dentro = (col > 0.05 * w) & (col < 0.95 * w) & (P[..., 3] > 200)
     a, b = q["manta"]
     m = (s >= 45) & (lin >= a * h) & (lin <= b * h) & dentro
+    if q.get("pezeira"):
+        # fora da pezeira, a manta no branco do edredom (a mediana do branco entre as almofadas e a manta), com a luz dela
+        p0, p1 = q["pezeira"]
+        faixa = (lin >= p0 * h) & (lin <= p1 * h)
+        resto = cv2.morphologyEx((m & ~faixa).astype(np.uint8), cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8)) > 0
+        resto = cv2.dilate(resto.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & ~faixa & (P[..., 3] > 200)
+        branco = (s < 25) & (lin >= 0.44 * h) & (lin <= 0.58 * h) & dentro
+        cor_b = tuple(float(v) for v in np.median(P[..., :3][branco], axis=0))
+        P = tingir(P, resto, cor_b, gama=0.5)
+        m &= faixa
     if q["almofadas"]:
         c, d = q["almofadas"]
         m |= (s >= 32) & (lin >= c * h) & (lin <= d * h) & dentro
@@ -657,7 +670,9 @@ def estar(Q, out, par, q=ESTAR_D, qj=ESTAR_JANTAR_D):
                  [tap_l, trav], ficam=e["ficam"])
     if e.get("tapete_png"):
         cx_ = PD2.caixa_uniao(tap_l[0], RT.caixa_pdf(Q, PISOS_D["tapetes"]["living"][0]))
-        out = PD2.tapete_novo(Q, out, par, ler(e["tapete_png"]), cx_, ficam=e["ficam"])
+        trocadas = (*PD2.LIVING_PECAS["mesinhas"], PD2.LIVING_PECAS["banco"])
+        out = PD2.tapete_novo(Q, out, par, ler(e["tapete_png"]), cx_, ficam=[i for i in e["ficam"] if i not in trocadas])
+        out = PD2.living_pecas(Q, out, par)
     cxs, cys, ws, hs = _centro(Q, e["sofa"])
     out = MB.pousar(out, ler("living/sofa-living-d"), cxs, cys, ws, hs, 180.0, "movel", par)
     pts = np.array([_centro(Q, i)[:2] for i, _ in e["mesas"]])

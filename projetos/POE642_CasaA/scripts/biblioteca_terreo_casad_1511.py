@@ -296,7 +296,8 @@ ESCADAS = [
     {"nome": "escada larga do deck", "triangulo": [(713.5, 928.5), (724.5, 923.0), (724.5, 934.0)], "s_px": None,
      "texto": ("DESCE PARA O", "JARDIM"), "centro_x": 815.0, "base_y": 968.0, "fundo": None},
     {"nome": "escada estreita", "triangulo": [(1128.5, 1267.0), (1139.5, 1261.5), (1139.5, 1272.5)], "s_px": None,
-     "texto": ("DESCE PARA O", "SUBSOLO"), "centro_x": 992.0, "base_y": 1214.0, "fundo": None}]
+     # (16/11, usuário: "coloque a descrição ao lado direito da seta triangular") à direita da seta, no meio da altura dela
+     "texto": ("DESCE PARA O", "SUBSOLO"), "centro_x": 1218.0, "base_y": 1263.0, "fundo": None}]
 # (Miro: "Demarcar melhor o perímetro da casa", a borda do deck) o fio da borda do Bege Bahia junto ao gramado (o px do
 # Bege Bahia que toca a grama, um tom abaixo, e o px da grama junto a ele, menos)
 PERIMETRO = {"bege": 0.62, "grama": 0.80, "area_min": 5000}

@@ -3213,7 +3213,13 @@ A 2ª leva de pedidos de 16/11 no Térreo da Casa D (`pedidos_terreo_casad_1611b
   folha aberta e a parede fica) e sem os dentes escuros sob a parede de cima;
 - o jantar: as 10 cadeiras alinhadas aos lados da mesa (as dos lados em pé, as das cabeceiras deitadas), não
   giradas para o centro;
-- a porta do hall para a garagem em madeira lisa (destacada do travertino); as 4 folhas de vidro de correr entre a
-  varanda e o living no tom do vidro com as arestas; o refrigerador inox da biblioteca no nicho da gourmet;
+- a porta do hall para a garagem em madeira lisa (destacada do travertino); as 33 folhas de vidro de correr da planta
+  no tom do vidro com as arestas (fora o painel de madeira entre a sala íntima e a circulação); o refrigerador inox
+  da biblioteca no nicho da gourmet;
+- o living: as 3 mesinhas redondas em freijó (o aparador de freijó da biblioteca) e o banco estofado de linho da
+  biblioteca (`banco-peseira-d`) no lugar do ripado; a mesa de centro da suíte 3 em nogueira; a cama king com a
+  manta só na pezeira; os rótulos do closet master 2 e da sala íntima no centro do livre; a descrição da escada
+  do Subsolo à direita da seta; a faixa entre o vidro e o painel da suíte 3 no tom do vinílico, uniforme, e a grama
+  logo depois do painel, sem os traços claros;
 - a borda da piscina, da prainha e do spa lisa, sem juntas, em Bege Bahia um tom abaixo do deck (o alto-relevo);
 - sem o tracejado do limite em volta da planta; o muro de baixo termina com a grama, como o de cima.
