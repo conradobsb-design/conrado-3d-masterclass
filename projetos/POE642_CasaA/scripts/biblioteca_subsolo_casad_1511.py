@@ -93,13 +93,18 @@ SOLEIRA = {"vao": (955, 1594, 1092, 1606), "cor": (181, 208, 228), "fio": 0.86, 
            # (16/11, usuário: "faltaram as soleiras: para a sauna e para o vestiário") os vãos das portas nas paredes da
            # sauna e do vestiário (os retângulos brancos da ARQ_PAREDE, na espessura da parede da imagem, px)
            "portas": [(945.0, 1605.0, 955.5, 1655.0), (1092.0, 1606.5, 1101.5, 1655.5)]}
-# (16/11, usuário: "corrija as portas conforme 3d") as portas de correr entre o pátio e a academia (o vão da ARQ_PAREDE,
-# px): o vinílico da academia até a face de fora do vão (sem a faixa clara de antes) e os dois trilhos das folhas
-# brancos e contínuos, com o contorno fino escuro e o traço de cada ponta de folha do PDF, como no 3D
-PORTA_ACADEMIA = {"vao": (759.1, 1341.7, 768.0, 1592.5), "trilhos": [(759.1, 761.5), (761.5, 763.9)],
-                  "y": (1342.9, 1591.3),
-                  "pontas": {0: (1348.9, 1399.0, 1535.1, 1585.3), 1: (1411.0, 1461.1, 1473.0, 1523.2)},
-                  "branco": (236, 237, 235), "contorno": (45, 45, 45), "fio": 0.6, "ss": 8}
+# (16/11, usuário: "corrija as portas conforme 3d"; "As folhas de vidro precisam seguir o estilo das que usamos no
+# subsolo da casa A") as portas de correr entre o pátio e a academia (o vão da ARQ_PAREDE, px): o vinílico da academia
+# até a face de fora do vão e as folhas como as do pátio da Casa A (`final3840_casaa.PORTAS_VIDRO["portas"][0]` com o
+# perfil de `biblioteca_subsolo_casaa_1211.ESQUADRIAS`, na mesma escala: 59,7 px/m nas duas): 4 folhas em 2 trilhos, as
+# das pontas no de fora (o do pátio) e as do meio no de dentro, as de cada lado sobrepostas no montante; cada folha com
+# o vidro claro, o perfil escuro em volta e o traço dos montantes perto das pontas; os batentes nas duas pontas do vão
+PORTA_ACADEMIA = {"vao": (759.1, 1341.7, 768.0, 1592.5), "x": 759.1, "folha_px": 3.0, "batente_px": 2.4,
+                  "montante_px": 4.74, "montante_fio_px": 0.63, "perfil_px": 0.9,
+                  "perfil": (34, 34, 36), "vidro": (228, 226, 220), "sombra": 0.18, "ss": 8,
+                  # a nitidez das folhas da final da Casa A (o perfil em ~100-120 e o vidro em ~150-180 lá, não o preto
+                  # e o branco puros do desenho): o trecho das folhas desfocado de leve
+                  "suave": 0.5}
 # a peça com a barra na parede de cima do WC do vestiário ("Isso aqui não existe"): a parede continua (px); embaixo, o
 # piso de `dy` abaixo
 NAO_EXISTE = {"parede": (1201, 1598, 1281, 1606), "piso": (1201, 1606, 1281, 1612), "dy": 7}
@@ -332,17 +337,41 @@ def portas(Q, out, q=PORTAS):
 
 def porta_academia(out, par, q=PORTA_ACADEMIA):
     out = BB.piso_desloc(out, q["vao"], par, 1, 0)
-    y0, y1 = q["y"]
-    f = q["fio"]
-    for k, (a0, a1) in enumerate(q["trilhos"]):
-        out = TD._poligono(out, [(a0, y0), (a1, y0), (a1, y1), (a0, y1)], q["contorno"], q["ss"])
-        out = TD._poligono(out, [(a0 + f, y0 + f), (a1 - f, y0 + f), (a1 - f, y1 - f), (a0 + f, y1 - f)], q["branco"],
-                           q["ss"])
-        for y in q["pontas"][k]:
-            out = TD._poligono(out, [(a0, y - f / 2), (a1, y - f / 2), (a1, y + f / 2), (a0, y + f / 2)], q["contorno"],
-                               q["ss"])
-    print("    academia: as portas de correr do pátio como no 3D (o vinílico até a face do vão, os trilhos brancos com "
-          "o contorno fino e as pontas das folhas)")
+    vx0, vy0, vx1, vy1 = q["vao"]
+    bt, w, mo = q["batente_px"], q["folha_px"], q["montante_px"]
+    y0, y1 = vy0 + bt, vy1 - bt
+    L = (y1 - y0 + 2 * mo) / 4                       # a folha: o vão em 4, com a sobreposição dos montantes
+    x0 = q["x"]
+    fora, dentro = (x0, x0 + w), (x0 + w, x0 + 2 * w)
+    folhas = [(fora, y0, y0 + L), (dentro, y0 + L - mo, y0 + 2 * L - mo), (dentro, y1 - 2 * L + mo, y1 - L + mo),
+              (fora, y1 - L, y1)]
+
+    def ret(a0, b0, a1, b1, cor, forca=1.0):
+        nonlocal out
+        if forca >= 1.0:
+            out = TD._poligono(out, [(a0, b0), (a1, b0), (a1, b1), (a0, b1)], cor, q["ss"])
+        else:                                        # a sombra: o piso escurecido
+            reg = out.copy()
+            out = TD._poligono(out, [(a0, b0), (a1, b0), (a1, b1), (a0, b1)], (0, 0, 0), q["ss"])
+            out = np.clip(reg.astype(np.float32) * (1 - forca) + out.astype(np.float32) * forca, 0,
+                          255).astype(np.uint8)
+    # a sombra curta das folhas (a luz do alto à direita), como a da Casa A
+    ret(x0 - 0.9, y0 + 0.9, x0 + 2 * w - 0.9, y1 + 0.9, None, q["sombra"])
+    for b0, b1 in ((vy0, y0), (y1, vy1)):                          # os batentes, no perfil
+        ret(vx0, b0, vx1, b1, q["perfil"])
+    p, f = q["perfil_px"], q["montante_fio_px"]
+    for (a0, a1), b0, b1 in folhas:
+        ret(a0, b0, a1, b1, q["perfil"])
+        ret(a0 + p, b0 + p, a1 - p, b1 - p, q["vidro"])
+        for yy in (b0 + mo, b1 - mo):                              # os montantes
+            ret(a0, yy - f / 2, a1, yy + f / 2, q["perfil"])
+    X0, X1 = int(np.floor(x0)) - 2, int(np.ceil(x0 + 2 * w)) + 2
+    Y0, Y1 = int(np.floor(y0)) - 1, int(np.ceil(y1)) + 1
+    trecho = out[Y0 - 3:Y1 + 3, X0 - 3:X1 + 3].astype(np.float32)
+    out[Y0:Y1, X0:X1] = np.clip(np.round(cv2.GaussianBlur(trecho, (0, 0), q["suave"])[3:-3, 3:-3]), 0,
+                                255).astype(np.uint8)
+    print(f"    academia: as portas de correr do pátio como as do pátio do Subsolo A (4 folhas de {L / PX_M:.2f} m em 2 "
+          "trilhos, o vidro claro com o perfil escuro e os montantes; os batentes nas pontas)")
     return out
 
 
