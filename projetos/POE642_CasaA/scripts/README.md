@@ -3280,3 +3280,29 @@ entram no deck. As bancadas com cuba (BH gourmet, lavabos, WC DCE) usam `esticad
 repetida em espelho até o comprimento do PDF. Para refazer só o mobiliário e os rótulos:
 `python3 pedidos_terreo_casae_1611.py --de mobiliario --cache <pasta>`. O antes e depois fica em
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_mobiliario_instalado_{1..4}_antes_depois.jpg`.
+
+
+#### Todas as casas: o Dekton Danae da foto oficial (16/11)
+
+Usuário: "Esse Delton Danae que estamos adotando está vindo em alta resolução, 4k?"; vendo a chapa oficial e a simulação:
+"APLIQUE EM TODAS AS CASAS". O Danae era desenhado por código (`terreo_casaa_1011.danae`, o tom BGR 172, 189, 200 com
+grão e manchas; a foto não tinha baixado em 10/11). Agora é a chapa oficial da Cosentino (código KAC: 5550 x 2690 px de uma
+chapa de 327 x 147 cm, matte), guardada a 800 px por metro em `_texturas/originais/dekton_danae_cosentino_KAC.jpg`.
+
+`danae_foto.py`: acha o Danae desenhado pela assinatura dele (`sementes`: o tom e o grão do procedural, maior no R que no B)
+e cresce cada bancada pelo mesmo croma, só onde há o grão do desenho (`regiao`: a beira escura e o molhado entram; as
+cubas, as torneiras, o cooktop e as banquetas lisas encostadas não); no lugar, a foto na escala da planta, uma chapa por
+bancada (os dois lados de uma cuba sem emenda), os veios no comprido, a luz de antes só onde ela escurecia (`refazer`).
+`EXCLUIR` e `INCLUIR` acertam os casos da Casa E (o degrau junto ao S da escada; a bancada do tanque). Plantas com Danae:
+Térreos das Casas A a E e 1º Pavimento da Casa A (`PLANTAS`; os Subsolos e o 1º Pavimento da E não têm). Nos 12K já
+entregues (`DOZE_K`, opções A e B), a foto vai direto no 12K, na escala dele: o afim final -> 12K por SIFT e as regiões da
+final de antes levadas ao 12K (sem nova ida ao Topaz). A Casa E recebe o passo `danae` no roteiro do Térreo
+(`pedidos_terreo_casae_1611`).
+
+  python3 danae_foto.py final <planta>                          # A_Terreo, A_1Pavimento, B_Terreo, C_Terreo, D_Terreo, D_Terreo_B, E_Terreo
+  python3 danae_foto.py doze <planta> --final_antes <final de antes da troca>
+
+Depois, `rodape_entrega.py` das pranchas (A: Térreo e 1º Pavimento; B, C e D: Térreo), `pdf_entrega.py` de cada casa e
+`book_entrega.py`. Se um roteiro de casa refizer a final pelo desenho, rodar `danae_foto.py final` de novo. Os antes e
+depois em `renders/POE642_Todas_Danae_foto_1611_antes_depois_{1,2,3}.jpg` e `..._12K_antes_depois.jpg`. A prancha e o
+PDF da Casa E ficam para o OK do Térreo dela.

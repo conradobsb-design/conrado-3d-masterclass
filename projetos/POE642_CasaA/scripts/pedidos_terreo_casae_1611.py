@@ -957,6 +957,14 @@ def mobiliario(Q, img):
     return ME.aplicar(Q, img)
 
 
+# 18. O Dekton Danae da foto oficial (16/11, "APLIQUE EM TODAS AS CASAS"): `danae_foto.trocar` sobre o Danae desenhado.
+def danae(Q, img):
+    import danae_foto as DF
+    out, reg = DF.trocar(img, planta="E_Terreo")
+    print(f"    danae: a foto oficial em {cv2.connectedComponents(reg.astype(np.uint8))[0] - 1} bancadas")
+    return out
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("base", base), ("margem", margem), ("tracejados", tracejados), ("gramado", gramado), ("bege", bege),
           ("marrom", marrom),
@@ -964,7 +972,7 @@ PASSOS = [("base", base), ("margem", margem), ("tracejados", tracejados), ("gram
           ("bancadas", bancadas), ("armarios", armarios), ("wc_dce", wc_dce),
           ("gourmet", gourmet), ("piscina", piscina),
           ("escadas", escadas), ("soltas", soltas), ("cortinas", cortinas),
-          ("tracejados_finos", tracejados_finos), ("mobiliario", mobiliario), ("rotulos", rotulos)]
+          ("tracejados_finos", tracejados_finos), ("mobiliario", mobiliario), ("danae", danae), ("rotulos", rotulos)]
 
 
 def rodar(img, de=None, ate=None, cache=None):

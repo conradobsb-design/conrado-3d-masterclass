@@ -370,7 +370,8 @@ def gourmet(Q, out, par, q=GOURMET_E):
     out = banquetas(out, par, q["ilha"], q["banquetas_x"], "bege_gourmet", antes)
     # o cooktop de 4 bocas (a pedra da ilha em volta)
     x0, y0, x1, y1 = q["cooktop"]
-    out = piso(out, ret(q["cooktop"], 2)(out.shape[:2]), "danae_gourmet", par)
+    fora = ~ret(q["ilha"])(out.shape[:2])                 # o piso em volta da ilha não dá a luz da pedra
+    out = piso(out, ret(q["cooktop"], 2)(out.shape[:2]) & ~fora, "danae_gourmet", par, nao_luz=fora)
     lado = y1 - y0
     out = pousar(out, ler("area-gourmet/cooktop-quatro-bocas"), (x0 + x1) / 2, (y0 + y1) / 2, lado * 1.15, lado, 0.0,
                  "baixa", par)
@@ -395,7 +396,8 @@ def cozinha(Q, out, par, q=COZINHA_E):
     antes = out.copy()
     out = banquetas(out, par, q["ilha"], q["banquetas_x"], "marrom", antes)
     x0, y0, x1, y1 = q["cooktop"]
-    out = piso(out, ret(q["cooktop"], 2)(out.shape[:2]), "danae_ilha", par)
+    fora = ~ret(q["ilha"])(out.shape[:2])
+    out = piso(out, ret(q["cooktop"], 2)(out.shape[:2]) & ~fora, "danae_ilha", par, nao_luz=fora)
     lado = y1 - y0
     out = pousar(out, ler("cozinha/cooktop-quatro-bocas"), (x0 + x1) / 2, (y0 + y1) / 2, lado * 1.15, lado, 0.0,
                  "baixa", par)
