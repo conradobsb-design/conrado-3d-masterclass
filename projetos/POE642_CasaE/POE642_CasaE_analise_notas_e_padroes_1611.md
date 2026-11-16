@@ -14,6 +14,8 @@ instalação depois; o que diverge entre a nota, o PDF e a planta vai antes como
 - **Folhas de comparação:** cada nota que cita outra casa, com a Casa E de hoje ao lado do exemplo.
   - `renders/POE642_CasaE_1611_comparacao_1.jpg`: árvores e grama, lote, degraus, travertino, marrom tabaco.
   - `renders/POE642_CasaE_1611_comparacao_2.jpg`: WC DCE, seta, piscina, hachura do Subsolo, claraboias.
+- **Lista completa dos padrões** tirados do `POE642_REGRAS.md` e da lista CDE, com a data, a fala, a casa de origem e as
+  regras que nasceram na própria Casa E: `POE642_CasaE_padroes_todas_as_casas_1611.md`.
 
 ## 1. As notas que citam outras casas
 
@@ -26,7 +28,7 @@ instalação depois; o que diverge entre a nota, o PDF e a planta vai antes como
 | Subsolo 8: "Essa textura de travertino está diferente das outras casas" | A, C e D | O vestiário e a sauna das outras casas usam o travertino da biblioteca, liso, sem as pintas. | Sauna, vestiário e o espaço entre os dois no travertino dos Subsolos da C e da D. O rótulo "AMBIENTE" está riscado no Miro (pergunta 5). |
 | Térreo 20 e Subsolo 4: "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo." | A Térreo 6 (mesma frase) | Na A, primeiro o cinza-esverdeado da foto (10/11); depois o usuário trocou para o #7CC8D4 e, em 11/11, para a água da opção C, "para todas as piscinas de todas as casas". | **A Casa E já tem a água C** (a mediana da água é igual na A, C, D e E). Pergunta 2. |
 | Térreo 27: "Centralizar a seta com a abertura da porta, usando este modelo de seta" | Modelo das outras casas | Nas Casas C e D, a entrada é marcada pelo triângulo cheio, preto, no piso, no eixo da porta. | O triângulo no eixo do vão da pivotante do hall, no lugar da seta de linha com ponta (folha 2, item 7). |
-| 1º Pav. 2: "Padronizar para as outras plantas que tiverem claraboia" | Todas as casas | A Casa A (lavabo do Térreo, 12/11) ficou sem o X, só com a linha; a Casa C (29/10) ainda tem a moldura e o X em preto ou branco. | Na Casa E, só a moldura, cinza e fina. A nota atinge também as claraboias das outras casas (pergunta 4). |
+| 1º Pav. 2: "Padronizar para as outras plantas que tiverem claraboia" | Todas as casas | É a mesma nota que o cliente deu na Casa C, e já virou padrão (lista CDE): o retângulo do PDF tracejado, cinza 128, ~0,8 px, sem X, com o piso contínuo por dentro. A C segue. A exceção é o lavabo da A, só com a linha horizontal (12/11), ainda a confirmar. | Aplicar o padrão às claraboias da E (pergunta 4, sobre o lugar). |
 | Térreo G3: "No terreno não precisa representar muitas árvores [...] Representar arbustos que são menores" | Igual à nota G1 do Térreo da A | Na A, na C e na D, 3 árvores pequenas afastadas (na C, oliveiras: "vegetação drasticamente menor"). | Tirar o maciço de árvores grandes; ficam 3 árvores pequenas e alguns arbustos baixos (folha 1, item 1). |
 | (nota da D, Subsolo 2) "usar para o piso marrom tabaco a referência [...] para dar destaque para as bancadas e o marrom do piso ficar mais sóbrio" | A amostra do cliente | Na A (10/11) e na D: o marrom médio e uniforme da amostra (RGB ~135, 108, 87), sem as pintas do granito; as bancadas em marrom tabaco mais escuras que o piso. | Cozinha, gourmet, serviço, despensa, circulações, DCE, garagem e casa de máquinas da E: hoje é o granito escuro e pintado (folha 1, item 5). |
 
@@ -74,6 +76,14 @@ Em negrito na coluna Origem, as regras com data posterior às finais da E (11/11
 | **Banquetas sob a bancada, sem tracejado** | **16/11, D** | conferir (a ilha gourmet e a da cozinha) | n/a | n/a |
 | **Cadeiras alinhadas à mesa retangular** | **16/11, D** | ok (jantar) | n/a | n/a |
 | **Painéis pivotantes em brises** | **16/11, D (como na A)** | conferir (os da varanda já são lâminas a 45°) | n/a | n/a |
+| **Gramado esfumaçado no 1º Pavimento** | **12/11, pedido para a Casa E** | n/a | n/a | falta |
+| **Jardins internos como o de 4,79 m² da A** | **12/11, A (modelo); B e C** | falta (nota 24) | n/a | n/a |
+| **X do shaft em cinza 128, ~0,8 px** | **12/11, A e B ("nas outras casas, com o OK")** | n/a | n/a | falta (hoje é preto, 28/10) |
+| **Box padrão: vidro claro com fio cinza, nunca esquadria preta** | **A, B e C ("D e E: a aplicar")** | conferir | conferir | falta |
+| **Esquadrias pretas só no contorno (~0,5 px)** | **13/11, A e B** | conferir | conferir | conferir |
+| **Soleira em todo vão de janela; guarda-corpo legível em toda borda de varanda** | **12/11, A; C** | falta (o deck, nota 1) | conferir | conferir (varandas) |
+| **Filete de Bege Bahia de 5 cm entre pisos diferentes** | **C** | conferir (a garagem e a pedra portuguesa) | conferir (o pátio e o travertino) | n/a |
+| **Portas dos quartos de 4 trilhos: nogueira ripada por fora, vidro por dentro** | **A, B e C ("D e E: falta o PDF")** | n/a | n/a | pergunta 10 |
 | Mobiliário pela biblioteca, partindo das escolhas da A | 13/11, todas | proposta à parte, depois do OK desta análise | idem | idem |
 | Entrega: final, prancha, PDF, book, 12K A (Inter) e B (Kalam) | todas | refazer no fim | refazer | refazer |
 
@@ -89,7 +99,7 @@ Em negrito na coluna Origem, as regras com data posterior às finais da E (11/11
   - 21: mostrar melhor a diferença de profundidade (a prainha e o spa mais claros e rasos, a piscina mais funda).
   - 22: no spa, tirar a linha em volta.
   - 23: a mesa do jantar em outro amadeirado (a nogueira das mesas da D, pela proposta da biblioteca).
-  - 24: o jardim de inverno menor e com menos plantas, como os jardins "mais sóbrios" da C (15/11).
+  - 24: o jardim de inverno menor e com menos plantas. O modelo é o jardim de 4,79 m² da A, que é padrão desde 12/11 e foi a resposta à mesma frase do cliente ("Trocar essa representação do jardim de inverno"): a grama no tom do gramado, poucas plantas menores, o X fino e claro.
   - 26: o X do vazio do hall mais fino e mais claro (pergunta 1).
 - **Subsolo:**
   - 1: demarcar melhor o perímetro do pátio (o contorno da laje e das paredes em linha contínua, na borda do Bege Bahia).
@@ -107,7 +117,8 @@ Em negrito na coluna Origem, as regras com data posterior às finais da E (11/11
    - O cliente pede o X dos vazios mais fino e cinza: Térreo 26 e 1º Pav. 4, como na nota 7 do Térreo da A ("mais finas e mais claras").
    - Na própria Casa E, em 28/10, o usuário definiu: "os tracejados são ou brancos ou pretos, a depender do fundo".
    - Na A, em 10/11, os vazios já foram para o traço fino (~0,9 px): cinza médio nos pisos claros, cinza claro nos escuros.
-   - **Recomendação:** seguir a A na Casa E, o que substitui o preto/branco de 28/10 nesta casa.
+   - Em 12/11, o X dos shafts foi para cinza 128, ~0,8 px, na A e na B ("nas outras casas, com o OK"). As claraboias do padrão também são cinza 128.
+   - **Recomendação:** na Casa E, os X dos vazios, do shaft e das claraboias em cinza fino, como na A e na C. Isso substitui o preto/branco de 28/10 nesta casa.
 2. **A piscina "mais sóbria".**
    - A água da E já é a opção C, que o usuário escolheu para todas as piscinas em 11/11.
    - A nota repete a do Térreo da A, que foi resolvida assim. É provável que o cliente tenha anotado uma imagem anterior a 11/11.
@@ -116,21 +127,30 @@ Em negrito na coluna Origem, as regras com data posterior às finais da E (11/11
 3. **O "mesmo cinza usado na casa D", no WC DCE.**
    - A leitura proposta: o cinza-claro dos banhos da D, o mesmo que o WC DCE da D recebeu em 16/11.
    - Confirmar que não é outro cinza da D.
-4. **Claraboias.**
+4. **Claraboias: o padrão já existe; a dúvida é o lugar.**
+   - É o padrão da lista CDE (a mesma frase do cliente na C): o retângulo tracejado, cinza 128, ~0,8 px, sem X.
    - A nota fala dos boxes dos banhos 1 e 2. Lá, o PDF não desenha claraboia, só o vidro do box (tracejado duplo), e a final não tem X.
    - Os X de claraboia que existem no 1º Pavimento estão no **banho master**, sobre o vaso e o box (folha 2, item 10).
-   - **Proposta:** aplicar a moldura cinza, fina e sem X no banho master, e confirmar no Miro se a nota é mesmo dos banhos 1 e 2.
-   - "Padronizar para as outras plantas que tiverem claraboia" também mexe nas casas entregues: na C, a moldura e o X em preto ou branco; na A, a linha horizontal. Aplicar nelas agora (final e 12K) ou só na E?
+   - **Proposta:** aplicar o padrão no banho master e confirmar no Miro se a nota é mesmo dos banhos 1 e 2.
+   - Fora da E, sobra o lavabo da A, só com a linha horizontal (12/11), pendente de confirmação desde a C. Igualar ao padrão?
 5. **"AMBIENTE" no Subsolo.**
    - O PDF não dá nome ao espaço entre a sauna e o vestiário (com a ducha); o rótulo foi posto pelo render, e o cliente o riscou.
    - **Proposta:** tirar o rótulo e deixar o espaço sem nome, como no PDF.
 6. **A borda esquerda da piscina do Térreo.**
-   - Hoje leva o vidro (mantido em 28/10: "os vidros da Casa E").
+   - Hoje leva as duas lâminas de vidro, por decisão sua em 28/10: "faça o mesmo na piscina da casa E, com duas bordas em vidro".
    - O cliente diz: "Aqui é parede".
-   - **Proposta:** a parede do PDF no cinza das paredes, encostada na água. Confirmar no PDF se é parede ou vidro (o cliente está corrigindo o render).
+   - **Proposta:** a parede do PDF no cinza das paredes, encostada na água. Como contraria a decisão de 28/10, só com o seu OK.
 7. **Árvores.** Quantas ficam?
    - **Recomendação:** 3 pequenas, afastadas, como na A, na C e na D, e arbustos baixos só junto aos muros (a nota pede "arbustos que são menores").
-8. **O Térreo esmaecido do 1º Pavimento.** Depois do Térreo novo, ele é refeito a partir dele (como em 28/10): grama, árvores, piso marrom, piscina e lote.
+8. **O Térreo esmaecido do 1º Pavimento.** Depois do Térreo novo, ele é refeito a partir dele (como em 28/10): grama, árvores, piso marrom, piscina e lote, com o gramado esfumaçado pedido para a E em 12/11.
+9. **A borda da piscina do Subsolo junto à academia.**
+   - Em 28/10, você definiu: "AS BORDAS EXISTENTES DA PISCINA SÃO EM MARMORE BEGE BAHIA".
+   - O cliente agora diz (Subsolo 3): "Essa borda é no mesmo revestimento da piscina".
+   - **Proposta:** só essa borda no Barlavento da piscina, e as outras seguem em Bege Bahia, lisas (16/11).
+10. **As portas das suítes do 1º Pavimento.**
+    - A E tem cortina, porta de vidro de correr e brise de bronze por fora. Foi o modelo das suítes da C em 29/10.
+    - O padrão novo das portas de 4 trilhos é nogueira ripada por fora e vidro por dentro (A, B e C; "D e E: falta o PDF").
+    - **Recomendação:** manter o bronze da E, que é o desenho dela e não recebeu nota do cliente.
 
 ## 5. Ordem proposta (depois do OK)
 
