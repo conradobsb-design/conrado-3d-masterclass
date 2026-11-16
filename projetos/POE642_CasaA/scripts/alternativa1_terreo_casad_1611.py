@@ -207,13 +207,39 @@ def criados(Q, out, par):
     return out
 
 
+# (16/11, usuário, com o recorte da suíte master: "Corrija essa mesinha redonda lateral ao lado da poltrona para um tom
+# nogueira e aí corrige já o formato dela") a mesinha de apoio redonda do PDF ao lado da poltrona: a de antes sai junto
+# com a poltrona e o pufe (o vinílico refeito de uma vez, sem a borda escura e a cunha clara que sobravam) e entra o
+# disco de nogueira da Casa C (`revisao_terreo_casac_1511._png_mesinha`, no painel liso da nogueira), no círculo do PDF,
+# com a aresta e a sombra curta
+MESINHAS = {"suíte master": 97704}
+
+
+def _mesinha_nogueira(Q, out, par, i):
+    import revisao_terreo_casac_1511 as R15
+    x0, y0, x1, y1 = RT.caixa_pdf(Q, i)
+    D = ((x1 - x0) + (y1 - y0)) / 2
+    P = R15._png_mesinha(dict(R15.MESINHA, patch=ESCRIVANINHAS["painel"]))
+    return MB.pousar(out, P, (x0 + x1) / 2, (y0 + y1) / 2, D, D, 0.0, "baixa", par), D
+
+
 def poltronas(Q, out, par):
-    """Como `mobiliario_terreo_casac_1311.poltronas`, com a poltrona concha de linho (o pufe da Casa A fica)."""
+    """Como `mobiliario_terreo_casac_1311.poltronas`, com a poltrona concha de linho (o pufe da Casa A fica) e a mesinha
+    de apoio em nogueira (`MESINHAS`)."""
     import biblioteca_terreo_casad_1511 as TD
     for nome, _, ip, png_pufe, ipufe in TD.POLTRONAS:
         _, mp = MB.contorno(Q, [ip])
         _, mf = MB.contorno(Q, [ipufe])
-        out = MB.piso_vinilico(Q, out, (RT.dilatar(mp, 8) | RT.dilatar(mf, 8)) & ~par)
+        # na suíte master, 12 px em volta (a sombra larga da poltrona de antes, maior, também sai, sem a cunha mais
+        # escura junto à mesinha); na suíte 2, 8 (mais largo, o vinílico refeito vira remendo)
+        d = 12 if nome in MESINHAS else 8
+        buraco = RT.dilatar(mp, d) | RT.dilatar(mf, d)
+        if nome in MESINHAS:
+            buraco |= RT.dilatar(MB.contorno(Q, [MESINHAS[nome]])[1], d)
+        out = MB.piso_vinilico(Q, out, buraco & ~par)
+        if nome in MESINHAS:
+            out, D = _mesinha_nogueira(Q, out, par, MESINHAS[nome])
+            print(f"    {nome}: a mesinha de apoio redonda em nogueira ({D:.1f} px, o círculo do PDF)")
         ys, xs = np.nonzero(mp)
         pc = np.array([xs.mean(), ys.mean()])
         ys2, xs2 = np.nonzero(mf)
