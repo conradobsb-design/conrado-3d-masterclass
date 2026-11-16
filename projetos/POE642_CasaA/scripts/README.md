@@ -3369,3 +3369,18 @@ subamostragem, 743 dpi). Como refazer: `python3 danae_cozinha_casaa_1611.py fina
 `rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png`, `pdf_entrega.py` e
 `book_entrega.py`. Antes e depois em `renders/POE642_CasaA_PH_Terreo_1611_danae_cozinha{,_12K}_antes_depois.jpg`.
 
+#### Casa A, Térreo: a janela da pia da cozinha nítida (16/11)
+
+Usuário: "CORRIJA A JANELA EM FRENTE A BANCADA DA COZINHA". A janela (de correr, 2 folhas desencontradas, na parede à
+direita da bancada da pia) estava no padrão de `pedidos_terreo_casaa_2910.janelas_ta`, mas no 12K saiu borrada da
+ampliação (as folhas em faixas moles, um bloco manchado no encontro delas, as faces sumindo, um pontinho laranja na
+quina de baixo) e, por fora, junto à face, ficava a sombra velha da folha de baixo. `janela_pia_casaa_1611.py` a desenha
+de novo pela geometria do PDF (`JANELA`, px da final: o vão de 2151,4 a 2163,3 e de 1314,6 a 1520,6; as folhas de
+1317,0 a 1420,0, do lado da pia, e de 1415,2 a 1518,2, do lado de fora), com as cores de `JANELAS_TA` (o peitoril cinza,
+as faces num fio escuro, o vidro claro com o contorno fino e a sombra curta só no peitoril), por cobertura exata de cada
+px, na escala de cada imagem: na final e direto nos 12K A e B (o afim por SIFT de `danae_foto.afim_12k`); o piso de fora
+junto à face (`fora`) vem do piso 6 px à direita. Como refazer: `python3 janela_pia_casaa_1611.py final` e
+`python3 janela_pia_casaa_1611.py doze`; depois `rodape_entrega.py --no-quadro --render
+Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png`, `pdf_entrega.py` e `book_entrega.py`. Antes e depois em
+`renders/POE642_CasaA_PH_Terreo_1611_janela_pia_antes_depois.jpg`.
+
