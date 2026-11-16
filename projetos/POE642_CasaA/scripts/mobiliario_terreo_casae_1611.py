@@ -191,7 +191,7 @@ def living(Q, out, par, q=LIVING):
     H, W = out.shape[:2]
     pilar = ret(q["pilar"])((H, W))
     # a cortina C4 e o caixilho junto ao vidro de baixo ficam (o tapete passa por baixo deles)
-    cortina = ret((1592, 1528, 1872, 1560))((H, W))
+    cortina = ret((1592, 1528, 2096, 1560))((H, W))           # a cortina C4 da fachada inteira (16/11)
     par2 = par | pilar | cortina
     # o tapete redondo, o sofá, as poltronas, as mesas, o banco e o vaso de antes saem; o travertino volta
     (x0, y0), (x1, y1) = RT._caixa(Q, Q.desenhos[q["tapete"]])

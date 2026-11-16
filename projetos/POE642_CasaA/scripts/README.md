@@ -3322,3 +3322,11 @@ do WC DCE sem as manchas e os 2 vidros do box no fio cinza. Ficam: a linha escur
 grafite da cortina C4), as folhas no cinza do render, o lavabo gourmet sem soleira (nota 7). Para refazer:
 `python3 pedidos_terreo_casae_1611.py --de portas --cache <pasta>`. Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_portas_esquadrias_antes_depois.jpg`.
+
+Cortinas (16/11, "Revise todas as cortinas e adote o padrão que escolhemos"): o padrão é a C4 bem visível
+(`cortinas_padrao_casad_1611`: linho em ondas, trilho grafite do lado do vidro, pano de 0,22 m, linho 0,82, sombra inteira;
+os painéis da mesma janela num trilho só, de parede a parede). No Térreo da Casa E, os dois trechos do PDF na fachada de
+baixo do living (x 1595 a 1770 e 1921 a 2096, a mesma linha de vidro, sem parede entre eles) viram um trilho só
+(`CORTINAS["unir"]` em `pedidos_terreo_casae_1611`); a cortina do vidro entre a varanda e o living e as do escritório já
+estavam no padrão. O DCE e o hall não têm cortina no PDF. Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_cortinas_antes_depois.jpg`.

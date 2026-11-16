@@ -744,16 +744,36 @@ def soltas(Q, img, q=SOLTAS):
 # `cortinas_padrao_casad_1611.aplicar`, o da Casa D): o linho em ondas com o trilho grafite nos trechos do PDF (o vidro de
 # baixo do living e o do escritório) e, fora deles, no vidro da esquerda do living (`extra`: o vidro, x da face, o
 # trecho), onde a cortina de linha fina de antes (`velha_px`) sai antes, com o piso de logo ao lado.
-CORTINAS = {"velha_px": (1590, 912, 1599, 1537), "desloc": 10, "extra": [("v", "esquerda", 1581.0, 912.0, 1536.0)]}
+# (16/11, "Revise todas as cortinas e adote o padrão que escolhemos": a C4, "os painéis da mesma janela num trilho só,
+# de parede a parede") os dois trechos do PDF na fachada de baixo do living (x 1595 a 1770 e 1921 a 2096, na mesma linha
+# do vidro, sem parede entre eles) viram um trilho só, de parede a parede
+CORTINAS = {"velha_px": (1590, 912, 1599, 1537), "desloc": 10, "extra": [("v", "esquerda", 1581.0, 912.0, 1536.0)],
+            "unir": [("h", "baixo", 1542.1)]}
 
 
 def cortinas(Q, img, q=CORTINAS):
     import cortinas_padrao_casad_1611 as CP
+    import pedidos_terreo_casac_1311 as PT
     out = img.copy()
     x0, y0, x1, y1 = q["velha_px"]
     d = q["desloc"]
     out[y0:y1, x0:x1] = out[y0:y1, x0 + d:x1 + d]
-    return CP.aplicar(Q, out, q=dict(CP.CORTINAS_D, extra=q["extra"]))
+    orig = PT.C.trechos_cortina_tc
+
+    def unidos(*a, **k):
+        tr = orig(*a, **k)
+        novo = []
+        for o, v, ex in q["unir"]:
+            mesmos = [t for t in tr if t[0] == o and t[1] == v and abs(t[2] - ex) < 2]
+            if len(mesmos) > 1:
+                tr = [t for t in tr if t not in mesmos]
+                novo.append((o, v, ex, min(t[3] for t in mesmos), max(t[4] for t in mesmos)))
+        return list(tr) + novo
+    PT.C.trechos_cortina_tc = unidos
+    try:
+        return CP.aplicar(Q, out, q=dict(CP.CORTINAS_D, extra=q["extra"]))
+    finally:
+        PT.C.trechos_cortina_tc = orig
 
 
 # ----------------------------------------------------------------------------------------------------------------------
