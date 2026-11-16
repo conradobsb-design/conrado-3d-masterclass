@@ -661,8 +661,8 @@ def gourmet(Q, out, par):
 #   3D da sala e do quarto (as do estar do living para o meio, as do estar do jantar para a mesa redonda, as dos
 #   quartos para o pufe).
 # - "Esse último WC-DCE do térreo tá bem desconfigurado [...] Piso" (`wc_dce`): o banho refeito pelo PDF. O piso inteiro
-#   (o miolo das paredes, fora a bancada) no travertino claro dos banhos da biblioteca da Casa D (60 x 120, na escala da
-#   final), no tom e no contraste do piso do banho 2 (Lab casado com a amostra); por cima, a bacia Carrara dos outros
+#   (o miolo das paredes, fora a bancada) no Mármore Bege Bahia fosco da biblioteca da Casa D (60 x 60, na escala da
+#   final), no tom e no contraste do Bege Bahia do vestiário do Subsolo (Lab casado com a amostra); por cima, a bacia Carrara dos outros
 #   banhos, o chuveiro em planta na parede da direita, a folha de madeira da porta aberta e o vidro do box no desenho do
 #   banho 2. A bancada de granito marrom tabaco e a cuba ficam.
 ESCRIVANINHAS = {"png": "02-terreo/sala-de-estar/mesa-centro-redonda-nogueira-adorno.png",
@@ -671,8 +671,11 @@ ESCRIVANINHAS = {"png": "02-terreo/sala-de-estar/mesa-centro-redonda-nogueira-ad
                            ("suíte 1", (1290.8, 1422.4, 1440.1, 1452.3)),
                            ("suíte 3/escritório", (2362.5, 1553.8, 2410.3, 1673.2))]}
 WC_DCE_D = {"miolo": (2386.5, 526.8, 2476.0, 676.0), "bancada": (2386.5, 526.8, 2410.8, 621.4),
-            "piso_png": "04-materiais/pisos-internos/travertino-romano-banhos.png", "piso_m": 3.6,
-            "amostra_banho2": (2048, 1688, 2118, 1722), "contraste": 0.8,
+            # (16/11, usuário: "mantém o mármore bege Bahia no banheiro") o Mármore Bege Bahia fosco da biblioteca da
+            # Casa D (60 x 60, a indicação dela para o banho DCE do térreo), no tom e no contraste do Bege Bahia do
+            # vestiário do Subsolo aprovado (as manchas reduzidas, como nas Casas A, B e C)
+            "piso_png": "04-materiais/pisos-internos/bege-bahia-fosco.png", "piso_m": 3.6,
+            "amostra": ("POE642_CasaD_PH_Subsolo_final_rotulos.png", (1140, 1688, 1192, 1734)), "contraste": 1.0,
             "bacia": ("B1", "banho-1/bacia-carrara", 2449.4, 542.1, 21.0, 30.6, 0.0, "baixa", None),
             "chuveiro": (2447.2, 642.7, 2459.0, 654.5, 2476.0),
             "folha": ((2434.3, 612.5, 2476.0, 614.8), (124, 154, 188)),
@@ -729,13 +732,14 @@ def wc_dce(out, par, q=WC_DCE_D):
     X0, Y0, X1, Y1 = q["miolo"]
     A0, B0, A1, B1 = int(np.floor(X0)) - 1, int(np.floor(Y0)) - 1, int(np.ceil(X1)) + 1, int(np.ceil(Y1)) + 1
     h, w = B1 - B0, A1 - A0
-    # o piso: o travertino claro dos banhos, na escala da final, casado com o piso do banho 2
+    # o piso: o Bege Bahia fosco da biblioteca, na escala da final, casado com o do vestiário do Subsolo
     T = cv2.imread(str(BIB_D.parent / q["piso_png"]))
     lado = int(round(q["piso_m"] * PX_M))
     T = cv2.resize(T, (lado, lado), interpolation=cv2.INTER_AREA).astype(np.float32)
     T = np.tile(T, (h // lado + 1, w // lado + 1, 1))[:h, :w]
-    ax0, ay0, ax1, ay1 = q["amostra_banho2"]
-    T = _lab_casado(T, out[ay0:ay1, ax0:ax1], q["contraste"])
+    arq, (ax0, ay0, ax1, ay1) = q["amostra"]
+    ref = cv2.imread(str(AQUI.parents[1] / "POE642_CasaD" / "renders" / arq))
+    T = _lab_casado(T, ref[ay0:ay1, ax0:ax1], q["contraste"])
     # a cobertura: o miolo menos a bancada, menos as paredes do PDF (exata, em ss)
     ss = 8
     M = np.zeros((h * ss, w * ss), np.uint8)
@@ -762,7 +766,7 @@ def wc_dce(out, par, q=WC_DCE_D):
     for y, c in q["vidro"]["linhas"]:
         out[y, int(np.ceil(vx0)):int(np.floor(vx1))] = c
     out = cuba_dce(out, par)
-    print("    WC DCE: refeito pelo PDF (o piso inteiro no travertino claro dos banhos, no tom do banho 2; a bacia "
+    print("    WC DCE: refeito pelo PDF (o piso inteiro no Bege Bahia fosco, no tom do vestiário do Subsolo; a bacia "
           "Carrara, o chuveiro, a folha da porta e o vidro do box; a bancada e a cuba em `cuba_dce`)")
     return out
 
