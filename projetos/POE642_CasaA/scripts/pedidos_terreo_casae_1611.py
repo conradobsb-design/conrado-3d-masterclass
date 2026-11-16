@@ -965,6 +965,12 @@ def danae(Q, img):
     return out
 
 
+# 19. As portas (quina a quina), as soleiras e as esquadrias (16/11, a revisão: "Prossiga"): `portas_terreo_casae_1611`.
+def portas(Q, img):
+    import portas_terreo_casae_1611 as PT
+    return PT.aplicar(Q, img)
+
+
 # ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("base", base), ("margem", margem), ("tracejados", tracejados), ("gramado", gramado), ("bege", bege),
           ("marrom", marrom),
@@ -972,7 +978,7 @@ PASSOS = [("base", base), ("margem", margem), ("tracejados", tracejados), ("gram
           ("bancadas", bancadas), ("armarios", armarios), ("wc_dce", wc_dce),
           ("gourmet", gourmet), ("piscina", piscina),
           ("escadas", escadas), ("soltas", soltas), ("cortinas", cortinas),
-          ("tracejados_finos", tracejados_finos), ("mobiliario", mobiliario), ("danae", danae), ("rotulos", rotulos)]
+          ("tracejados_finos", tracejados_finos), ("mobiliario", mobiliario), ("danae", danae), ("portas", portas), ("rotulos", rotulos)]
 
 
 def rodar(img, de=None, ate=None, cache=None):

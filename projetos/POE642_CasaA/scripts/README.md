@@ -3306,3 +3306,19 @@ Depois, `rodape_entrega.py` das pranchas (A: Térreo e 1º Pavimento; B, C e D: 
 `book_entrega.py`. Se um roteiro de casa refizer a final pelo desenho, rodar `danae_foto.py final` de novo. Os antes e
 depois em `renders/POE642_Todas_Danae_foto_1611_antes_depois_{1,2,3}.jpg` e `..._12K_antes_depois.jpg`. A prancha e o
 PDF da Casa E ficam para o OK do Térreo dela.
+
+#### Casa E, Térreo: portas (quina a quina), soleiras e esquadrias (16/11)
+
+Usuário: "Vamos revisar as portas para saber se elas estão fazendo quina aqui naquela parede, soleiras e as esquadrias
+também." O levantamento porta a porta contra o PDF (15 portas de giro;
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_portas_esquadrias_revisao.jpg`) e o OK ("Prossiga"):
+`portas_terreo_casae_1611.py`, o passo `portas` de `pedidos_terreo_casae_1611` (depois do `danae`, antes dos rótulos).
+P1 a folha inteira da despensa (no perfil dela); P2 a P7 os batentes do PDF junto à dobradiça em parede, e a parede do
+PDF até a dobradiça (`parede_pdf_perto`); P8 o gás com a folha até a quina, os batentes em parede e a soleira no vão;
+P9 a pivotante da entrada num tom só, de 2362,7 a 2519,7, a soleira de face a face e o toco no cinza das paredes;
+E1 os pontos entre as folhas de correr do living e os resíduos do canto; E3 a soleira e as 2 folhas de correr do PDF nas
+janelas do escritório; E4 as roldanas das janelas da cozinha e do serviço (a mediana na horizontal, `bolhas`); E5 o piso
+do WC DCE sem as manchas e os 2 vidros do box no fio cinza. Ficam: a linha escura entre a varanda e o living (o trilho
+grafite da cortina C4), as folhas no cinza do render, o lavabo gourmet sem soleira (nota 7). Para refazer:
+`python3 pedidos_terreo_casae_1611.py --de portas --cache <pasta>`. Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_portas_esquadrias_antes_depois.jpg`.
