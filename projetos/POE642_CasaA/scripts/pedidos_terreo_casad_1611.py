@@ -47,7 +47,10 @@ LOUCA = {"borda": (243, 244, 245), "bojo": (236, 237, 239), "fio": (150, 152, 15
 BORDA_PISCINA = {"agua": [(918.0, 509.0, 1096.0, 969.0), (1096.0, 509.0, 1264.0, 800.0), (1114.0, 818.0, 1264.0, 969.0)],
                  "larg_px": 18, "junta_px": 36, "amostra": (1120, 1110, 1320, 1310),
                  "final_a": AQUI.parents[1] / "POE642_CasaA" / "renders" / "POE642_CasaA_PH_Subsolo_final_rotulos.png",
-                 "levigado": 0.5, "claro": 1.035, "junta": 0.88, "fio_deck": 0.84, "quina": 1.06, "beira_agua": 0.80}
+                 # (16/11, usuário: "essa borda tem que ser sem traços, de forma lisa"; "as bordas da piscina devem ser no
+                 # marmore bege bahia com um levemente escurecida para dar ideia de autorelevo") lisa, sem as juntas e sem
+                 # o fio com o deck, um tom abaixo do deck (o alto-relevo), a quina junto à água um pouco mais clara
+                 "levigado": 0.5, "claro": 0.95, "junta": 1.0, "fio_deck": 0.97, "quina": 1.03, "beira_agua": 0.80}
 
 ARANDELAS = {"png": BIB_D / "suite-master" / "arandela-articulada-preta-d.png", "criados": (97046, 97058),
              "cupula_m": 0.26}

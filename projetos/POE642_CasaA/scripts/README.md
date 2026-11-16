@@ -3190,3 +3190,25 @@ O mobiliário pelo 3D da sala e os pedidos seguintes de 16/11, em
   prainha e do spa em placas de Bege Bahia levigado de 0,30 m, com as juntas a cada 0,60 m; as arandelas articuladas
   pretas da suíte master (do 3D, geradas no Higgsfield em 2K, `suite-master/arandela-articulada-preta-d.png`), presas na
   parede da cabeceira com a cúpula sobre o criado, no lugar do abajur.
+
+A 2ª leva de pedidos de 16/11 no Térreo da Casa D (`pedidos_terreo_casad_1611b.py`, e ajustes em
+`biblioteca_terreo_casad_1511` e `alternativa1_terreo_casad_1611`), em
+`POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1611b_pedidos_antes_depois_{1,2}.jpg`:
+- tapetes: o redondo do estar do jantar novo (`living/tapete-redondo-trama-greige-d`, gerado no Higgsfield em 2K) no
+  círculo do de antes; o do living na trama clara da biblioteca da Casa D (um tom acima do travertino, as peças que ficam
+  por cima, o miolo inteiro); o da varanda no próprio tecido (amostra limpa sem emenda) com a beira nítida, sem as
+  franjas tracejadas; o da suíte master na trama da biblioteca, por baixo da cama;
+- as mesinhas laterais do estar do jantar e a mesa redonda da suíte 3 no tom da mesa de centro de nogueira;
+- suíte master: armário liso no lugar do recamier, o fio do contorno da cama; DCE: o armário de baixo com cabides, o
+  criado-mudo liso, o contorno da cama sem falhas; banho gourmet: o armário junto à bacia liso;
+- closets em U (master) e em L (suítes 1 e 2) numa peça só, sem divisão no canto (`um_pav_casaa_1111._closet`, como na
+  Casa B);
+- WC DCE no mármore claro dos outros banhos (amostra do banho 1); o piso do GÁS liso (as letras pela luz do entorno);
+- os painéis pivotantes da gourmet em brises como na Casa A; as banquetas sob a bancada (o tampo inteiro por cima), sem
+  o tracejado (o deck de uma amostra limpa); as geladeiras com o granito refeito em volta;
+- as pedras (os 15 pisantes) em Bege Bahia levigado com aresta e sombra curta; as floreiras com a borda e o miolo de
+  folhagens da floreira baixa da biblioteca;
+- suíte 3: o piso entre o vidro e o painel no vinílico da suíte e o painel em ripado de nogueira, destacado;
+- o aparador do living em nogueira escuro; as paredes atrás das portas dos banhos 2 e 3 retas até a folha;
+- a borda da piscina, da prainha e do spa lisa, sem juntas, em Bege Bahia um tom abaixo do deck (o alto-relevo);
+- sem o tracejado do limite em volta da planta; o muro de baixo termina com a grama, como o de cima.

@@ -62,7 +62,9 @@ CAMAS = [("suíte master", (800.6, 1405.1, 918.2, 1550.8), 180.0, "king", "off-w
          ("suíte 1", (1320.7, 1541.8, 1440.1, 1649.3), -90.0, "casal", "off-white", "bege", "esq"),
          ("suíte 2", (1805.5, 1541.8, 1924.9, 1649.3), 90.0, "casal", "branco", "areia", "dir")]
 # os bancos de pé de cama (B1) nos retângulos do PDF, no veludo do tom do quarto
-BANCOS = [(97352, "terracota"), (104083, "bege"), (104160, "areia")]
+# (16/11, usuário, na suíte master: "aqui não é recamier, mas armário com cor sólida") o 97352 sai dos bancos e vai para
+# os armários lisos (`ARMARIOS`)
+BANCOS = [(104083, "bege"), (104160, "areia")]
 # os criados: (índice, forma, giro, diâmetro do abajur)
 CRIADOS = [(97046, "redondo", 0.0, 19.0), (97058, "redondo", 0.0, 19.0), (104078, "ret", -90.0, 17.0),
            (104073, "ret", -90.0, 17.0), (104155, "ret", 90.0, 17.0), (104150, "ret", 90.0, 17.0)]
@@ -110,23 +112,40 @@ ARMARIOS = {"closet master": 104098, "closet master 2 (banho)": 104114, "closet 
             "louceiro": 104282, "despensa": 104290, "cozinha (pia)": 104246, "cozinha (geladeira)": 104241,
             "área de serviço (tanques)": 104277, "área de serviço": 104272, "DCE": 104231,
             # (16/11, usuário: "corrija esse armario do escritorio para o tom sólido") o da parede da direita do escritório
-            "escritório (suíte 3)": 104221}
+            "escritório (suíte 3)": 104221,
+            # (16/11, usuário: "esse armario ao lado vaso na cor sólida de armário definido já. sem textura!") o do banho
+            # gourmet, junto à bacia (DOC_LINHAS E PROJEÇÕES)
+            "banho gourmet (junto à bacia)": 104298,
+            # (16/11, usuário, ao pé da cama da master: "aqui não é recamier, mas armário com cor sólida")
+            "suíte master (ao pé da cama)": 97352,
+            # (16/11, usuário, no DCE: "o armario de baixo com cabide e o criado mudo na cor sólida") o criado-mudo junto
+            # à cabeceira; o armário de baixo (DCE) vai aberto, com os cabides (`CABIDES`)
+            "DCE (criado-mudo)": 104226}
 # (16/11, usuário: "os armários do closet são representados com os cabides, igual as das casas A, B e C. isso vale
 # para a casa E também. Os outros armários é que são representado com cor sólida definida na casa A.") os armários dos
 # closets saem da cor lisa e vão abertos, com os cabides e o cabideiro (R11, `final3840_casae.armario_cabides`, o
 # guarda-roupa da biblioteca de elementos); os em L e em U em trechos (pt do PDF), cada um com as portas para o miolo
 # do closet; os outros armários seguem na cor lisa
 ARMARIOS_CLOSET = ("closet master", "closet master 2 (banho)", "closet master 2 (banho 1)", "closet da suíte 1",
-                   "closet da suíte 2")
-CABIDES = [("closet master (esquerda)", (367.9, 1710.3, 401.9, 1880.3), "direita"),
-           ("closet master (de cima)", (401.9, 1710.3, 521.0, 1744.3), "baixo"),
-           ("closet master (de baixo)", (401.9, 1846.3, 600.3, 1880.3), "cima"),
-           ("closet master 2 (esquerda)", (787.4, 1806.6, 821.5, 1880.3), "direita"),
+                   "closet da suíte 2", "DCE")
+CABIDES = [("closet master 2 (esquerda)", (787.4, 1806.6, 821.5, 1880.3), "direita"),
            ("closet master 2 (direita)", (872.5, 1710.3, 906.5, 1880.3), "esquerda"),
-           ("closet da suíte 1 (esquerda)", (915.0, 1577.0, 949.0, 1690.4), "direita"),
-           ("closet da suíte 1 (de cima)", (949.0, 1577.0, 1017.0, 1611.1), "baixo"),
-           ("closet da suíte 2 (direita)", (1890.1, 1577.0, 1924.1, 1690.4), "esquerda"),
-           ("closet da suíte 2 (de cima)", (1822.1, 1577.0, 1890.1, 1611.1), "baixo")]
+           ("DCE (armário de baixo)", (2238.8, 834.3, 2295.5, 868.3), "cima")]
+# (16/11, usuário: "faça o U no armário de forma contínua, sem barreiras"; "faz o L do armário sem barreiras, de forma
+# contínua"; "igual ao que fizemos nas outras casas. revise para ver se tem algum assim e corrija") os armários em U e em L
+# dos closets numa peça só, como na Casa B (`pedidos_terreo_casab_1211.closets_tb`, o desenho do 1º Pavimento da Casa A,
+# `um_pav_casaa_1111._closet`): cada trecho sem o canto, os cantos à parte, os cabides até o canto, o cabideiro se
+# encontrando no meio do canto, a moldura só por fora (pt). Os dois trechos do closet master 2 não se tocam: ficam
+CLOSETS_CONTINUOS = {
+    "closet master": {"trechos": [((367.9, 1744.3, 401.9, 1846.3), "direita"), ((401.9, 1710.3, 521.0, 1744.3), "baixo"),
+                                  ((401.9, 1846.3, 600.3, 1880.3), "cima")],
+                      "cantos": [(367.9, 1710.3, 401.9, 1744.3), (367.9, 1846.3, 401.9, 1880.3)]},
+    "closet da suíte 1": {"trechos": [((915.0, 1611.1, 949.0, 1690.4), "direita"), ((949.0, 1577.0, 1017.0, 1611.1), "baixo")],
+                          "cantos": [(915.0, 1577.0, 949.0, 1611.1)]},
+    "closet da suíte 2": {"trechos": [((1890.1, 1611.1, 1924.1, 1690.4), "esquerda"),
+                                      ((1822.1, 1577.0, 1890.1, 1611.1), "baixo")],
+                          "cantos": [(1890.1, 1577.0, 1924.1, 1611.1)]},
+    "semente": 1616}
 # (Miro: "Nome e área do ambiente e metragem", nos closets) o nome e a área (m², das faces das paredes e dos armários
 # do PDF) no corpo dos rótulos dos banhos (a Inter Regular dos rótulos, `retoque_1pav_casae.ROTULOS`, com o corpo medido
 # no BANHO 1 da final: 46 px de largura; 15,5 px entre as bases), no miolo livre de cada closet
@@ -202,7 +221,7 @@ GOURMET = {"pia": 68320, "granito_px": (1405, 530, 1470, 600), "face": 0.86, "se
            "cuba": (1558.95, 502.95, 38.2, 26.3),
            "cooktop_velho": (1530.4, 618.0, 1582.9, 647.8), "cooktop": (1556.65, 632.9, 31.0, 29.0),
            "ilha": (1454.5, 612.8, 1658.0, 685.0), "banquetas": (1493.4, 1535.15, 1576.95, 1618.75), "banqueta_d": 25.0,
-           "banquetas_velhas": (1476, 685, 1636, 707),
+           "banquetas_velhas": (1476, 685, 1636, 707), "deck_px": (1500, 735, 1600, 768),
            "paineis": {"x": (1390.5, 1396.5), "y": (558.0, 702.0), "folga": 1.5, "madeira": (150, 186, 214),
                        "fio": (70, 92, 118)}}
 COZINHA = {"ilha": 68310, "pia": 52828, "tanques": 52187, "semente": 1512,
@@ -217,7 +236,7 @@ WC_DCE = {"bancada": (2386.5, 526.8, 2410.0, 621.6), "cuba": (2392.0, 561.0, 241
           "quartzito_px": (2062, 1588, 2110, 1626), "obj": 30, "semente": 1513}
 # (Miro: "Piso do gás também é no marrom tabaco") o piso do abrigo do gás (o miolo entre as paredes, a partir de
 # `semente`), fora o rótulo, no granito marrom tabaco
-GAS = {"caixa": (2552, 352, 2634, 428), "semente": (2575, 410)}
+GAS = {"caixa": (2552, 352, 2634, 428), "semente": (2575, 410), "miolo_img": ((366, 413), (2563, 2629))}
 # (Miro: "Fazer uma linha contínua aqui pra linha tracejada não ficar voando", a divisa da área descoberta) o lado da
 # direita do retângulo do X, contínuo, no tom do tracejado (px)
 AREA_DESCOBERTA = {"linha": ((2347.0, 566.0), (2347.0, 676.5)), "cor": (226, 228, 230), "larg": 1.1, "ss": 8,
@@ -456,7 +475,7 @@ def claraboias(Q, out, q=CLARABOIAS):
     return PT.claraboias(Q, out, q)
 
 
-def armarios(Q, out, par, q=ARMARIOS, closets=ARMARIOS_CLOSET, cabides=CABIDES):
+def armarios(Q, out, par, q=ARMARIOS, closets=ARMARIOS_CLOSET, cabides=CABIDES, continuos=CLOSETS_CONTINUOS):
     import revisao_terreo_casac_1311 as RC
     import final3840_casae as FE
     q = {k: v for k, v in q.items() if k not in closets}
@@ -478,8 +497,14 @@ def armarios(Q, out, par, q=ARMARIOS, closets=ARMARIOS_CLOSET, cabides=CABIDES):
     with contextlib.redirect_stdout(io.StringIO()):
         for k, (nome, r, lado) in enumerate(cabides):
             out = FE.armario_cabides(Q, out, r, lado, semente=57 + k, nome=nome)
+    import um_pav_casaa_1111 as U
+    rng = np.random.default_rng(continuos["semente"])
+    nomes = [k for k in continuos if k != "semente"]
+    for nome in nomes:
+        out = U._closet(Q, out, continuos[nome], dict(U.CLOSETS_1P), rng)
     print(f"    armários: {len(q)} na cor dos armários, lisos ({n} px): {', '.join(q)}; os {len(closets)} dos closets "
-          f"abertos, com os cabides ({len(cabides)} trechos)")
+          f"abertos, com os cabides ({', '.join(nomes)} numa peça só, em U e em L, sem a divisão no canto; o master 2 em "
+          f"{len(cabides)} trechos)")
     return out
 
 
@@ -775,7 +800,10 @@ def gourmet(Q, out, par, q=GOURMET):
     cx, cy, wt, ht = q["cooktop"]
     out = _bib(out, par, "cozinha/cooktop-quatro-bocas", cx, cy, wt, ht, 0.0)
     # as banquetas B: as de antes saem (o deck logo abaixo), as novas 40% sob o tampo, o tampo por cima
-    out = BB.piso_desloc(out, q["banquetas_velhas"], par, 0, 1)
+    # (16/11, usuário: "remova esse tracejado, tanto em cima das banquetas, quanto embaixo delas") o deck de uma amostra
+    # limpa logo abaixo, no lugar do piso copiado de 25 px abaixo (que trazia o tracejado e um tom mais escuro)
+    import pedidos_terreo_casad_1611b as PD2
+    out = PD2.piso_amostra(out, q["banquetas_velhas"], par, q["deck_px"])
     fonte = out.copy()
     P = MB.ler("area-gourmet/banqueta-b")
     d_ = q["banqueta_d"]
@@ -784,21 +812,18 @@ def gourmet(Q, out, par, q=GOURMET):
     cy = iy1 + 0.1 * ht
     for cx in q["banquetas"]:
         out = MB.pousar(out, P, cx, cy, d_, ht, 180.0, "movel", par)
-    Y0, Y1 = int(np.floor(iy1)) - 3, int(np.ceil(iy1))
+    # (16/11, usuário: "a parte das banquetas que sobrepõe a bancada deve sair. a ideia é que as banquetas estejam abaixo
+    # da bancada") o tampo da ilha inteiro volta por cima (antes, só os 3 px da beira)
+    Y0, Y1 = int(np.floor(iy0)), int(np.ceil(iy1))
     X0, X1 = int(ix0), int(np.ceil(ix1))
     t = np.clip(iy1 - (np.arange(Y0, Y1) + 0.0), 0, 1)[:, None, None]
     out[Y0:Y1, X0:X1] = np.clip(np.round(fonte[Y0:Y1, X0:X1] * t + out[Y0:Y1, X0:X1] * (1 - t)), 0, 255).astype(np.uint8)
-    # os dois painéis pivotantes fechados
-    pq = q["paineis"]
-    a0, a1 = pq["x"]
-    b0, b1 = pq["y"]
-    meio = (b0 + b1) / 2
-    for c0, c1 in ((b0, meio - pq["folga"] / 2), (meio + pq["folga"] / 2, b1)):
-        out = _poligono(out, [(a0, c0), (a1, c0), (a1, c1), (a0, c1)], pq["fio"])
-        out = _poligono(out, [(a0 + 0.8, c0 + 0.8), (a1 - 0.8, c0 + 0.8), (a1 - 0.8, c1 - 0.8), (a0 + 0.8, c1 - 0.8)],
-                        pq["madeira"])
+    # (16/11, usuário: "não é assim os paines pivotantes. representar igual ao da casa A, em forma de brises") os dois
+    # painéis pivotantes como os brises da Casa A (`pedidos_terreo_casad_1611b.brises`)
+    import pedidos_terreo_casad_1611b as PD2
+    out = PD2.brises(out, par)
     print("    gourmet: a bancada da pia sem os armários, a churrasqueira no módulo da esquerda, a cuba Franke, o cooktop "
-          "de 4 bocas, 4 banquetas B 40% sob o tampo e os 2 painéis pivotantes fechados no lado do deck")
+          "de 4 bocas, 4 banquetas B 40% sob o tampo e os 2 painéis pivotantes no lado do deck, em brises")
     return out
 
 
@@ -863,8 +888,19 @@ def gas(out, par, q=GAS, g=GOURMET):
     reg = out[Y0:Y1, X0:X1].astype(np.float32)
     L = reg.mean(axis=2)
     fundo = float(np.median(L[m0]))
-    # o rótulo: a tinta de antes (escuro sobre o claro) vira o branco dos rótulos sobre o granito
-    a = np.clip((fundo - L) / max(fundo - 40.0, 1.0), 0, 1)[..., None] * m0[..., None]
+    # (16/11, usuário: "corrija o piso dentro desse espaço") o piso até a face das paredes da imagem (as do render estão
+    # 3 a 4 px para a direita e para baixo das do PDF: o filete claro embaixo e à direita era piso de antes)
+    ym, xm = q["miolo_img"]
+    ext = np.zeros_like(m0)
+    ext[ym[0] - Y0:ym[1] - Y0, xm[0] - X0:xm[1] - X0] = True
+    ext &= np.abs(reg - 80).max(axis=2) > 3
+    m0 = m0 | ext
+    # o rótulo: a tinta de antes (escuro sobre o claro) vira o branco dos rótulos sobre o granito; escuro em relação à
+    # luz do entorno (a mediana de 15 px) e longe da beira (a sombra escura da direita e de baixo do render virava um
+    # véu branco com a mediana da caixa inteira)
+    Lbg = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 15).astype(np.float32)
+    nucleo = cv2.erode(m0.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+    a = np.clip((Lbg - L - 12) / max(fundo - 40.0, 1.0), 0, 1)[..., None] * nucleo[..., None]
     T_ = _tecido(out, g["granito_px"], Y1 - Y0, X1 - X0, 1514)
     novo = T_ * (1 - a) + np.float32((236, 236, 236)) * a
     reg[m0] = novo[m0]
@@ -1083,7 +1119,10 @@ def aplicar(antes):
     out = chuveiros(out, par)
     out = A1.bancada_dupla(out, par)
     out = A1.pecas(out, par)
+    import pedidos_terreo_casad_1611b as PD2
+    out = PD2.tapete_master(Q, out, par)
     out = A1.camas(out, par)
+    out = PD2.contorno_cama(out, par)
     out = A1.bancos(Q, out, par)
     out = A1.criados(Q, out, par)
     out = A1.poltronas(Q, out, par)
@@ -1096,7 +1135,8 @@ def aplicar(antes):
     out = A1.cadeiras_s3(Q, out, par)
     # (16/11, usuário: "Para as escrivaninhas dos quartos, use o tom de madeira nogueira")
     out = A1.escrivaninhas(out, par)
-    out = painel_s3(out)
+    # (16/11, usuário: a mesa, o piso entre o vidro e o painel e o painel de madeira da suíte 3) no lugar de `painel_s3`
+    out = PD2.suite3(Q, out, par)
     out = portas(Q, out)
     out = sem_soleira(Q, out, par)
     out = A1.jantar(Q, out, par)
@@ -1109,9 +1149,12 @@ def aplicar(antes):
     out = cozinha(Q, out, par)
     out = wc_dce(out, par)
     out = marrom(Q, out)
+    out = PD2.geladeiras(Q, out, par)
     out = gas(out, par)
     out = area_descoberta(out)
     out = A1.cama_dce(out, par)
+    # (16/11, usuário, no DCE: "corrigir o contorno da cama, sem falhas!")
+    out = PD2.contorno_cama(out, par, dict(PD2.CONTORNO_CAMA, camas=("DCE",)))
     out = lavabo(out, antes)
     out = banco_varanda(out, par)
     out = contornos(out)
@@ -1127,6 +1170,9 @@ def aplicar(antes):
     # padronizados) as cortinas C4 em todos os trechos (a da suíte 3 inclusive) e os rótulos no padrão das casas
     import cortinas_padrao_casad_1611 as CP
     import rotulos_padrao_casad_1611 as RP
+    out = PD2.pedras(Q, out, par)
+    out = PD2.floreiras(out, par)
+    out = PD2.aparador(Q, out)
     out = PD.borda_piscina(out)
     out = PD.arandelas(Q, out, par)
     out = CP.aplicar(Q, out, par)
@@ -1137,6 +1183,9 @@ def aplicar(antes):
     # soleiras das portas de correr (`portas_revisao_casad_1611`)
     import portas_revisao_casad_1611 as PR
     out = PR.aplicar(out)
+    out = PD2.paredes_banhos(out)
+    out = PD2.tracejado_ilha(out)
+    out = PD2.margem(out)
     return out
 
 

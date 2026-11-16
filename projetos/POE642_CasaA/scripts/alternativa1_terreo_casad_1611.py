@@ -66,10 +66,19 @@ ESTAR_D = {"jantar": {"poltronas": (93392, 93435, 93478, 93521), "mesa": 125158,
                       # verde rajada, espelho"; "não precisa trazer o reflexo do ripado na mesa redonda"; "Colocar
                       # adorno") a grande no espelho liso, a menor na pedra verde rajada, as duas com adorno (geradas
                       # no Higgsfield pelo 3D da sala, recortadas no círculo)
-                      "mesas_png": ("living/mesa-centro-espelho-adorno-d", "living/mesa-centro-pedra-verde-adorno-d")}}
+                      "mesas_png": ("living/mesa-centro-espelho-adorno-d", "living/mesa-centro-pedra-verde-adorno-d"),
+                      # (16/11, usuário: "o tapete não está aparecendo aqui. corrija") o de trama clara da biblioteca da
+                      # Casa D (um tom acima do travertino), no retângulo do de antes; as peças que ficam voltam por cima
+                      "tapete_png": "living/tapete-estar-trama-clara"}}
 # (16/11, usuário: "as quatro poltronas do estar, com mesa redonda ao centro") o estar do jantar: as 4 poltronas creme
 # com o aro de madeira (as do 3D) e a mesa redonda de tampo de nogueira com adorno
-ESTAR_JANTAR_D = {"poltrona_png": "living/poltrona-creme-madeira-render", "mesa_png": "living/mesa-centro-nogueira-adorno-d"}
+ESTAR_JANTAR_D = {"poltrona_png": "living/poltrona-creme-madeira-render", "mesa_png": "living/mesa-centro-nogueira-adorno-d",
+                  # (16/11, usuário: "melhore a representação desse tapete. e traga o tom de mesa nogueira para as
+                  # mesinhas redondas laterais") o tapete redondo de lã greige com a beira debruada (gerado no Higgsfield
+                  # em 2K) no círculo do de antes, 1,5 px maior (a beira de antes por baixo); as 2 mesinhas de apoio no
+                  # tom da mesa de centro (`pedidos_terreo_casad_1611b.mesinha`)
+                  "tapete_png": "living/tapete-redondo-trama-greige-d", "tapete_folga_px": 1.5,
+                  "mesinhas": (100540, 100542)}
 # a varanda gourmet: as 2 mesas e as 6 cadeiras de cada; o estar (o sofá curvo, as poltronas, as mesas de centro de
 # antes e as 2 orgânicas novas: centro, tamanho e giro, px)
 VARANDA_D = {"mesas": ((97771, (93266, 93287, 93308, 93329, 93350, 93371)),
@@ -527,7 +536,7 @@ def _circulo(img, ref, amostras, buraco):
     return X0 + a, Y0 + b, float(np.sqrt(k + a * a + b * b))
 
 
-def _limpa_redondo(Q, out, par, ids, nome, piso, d=7, ficam=()):
+def _limpa_redondo(Q, out, par, ids, nome, piso, d=7, ficam=(), circulo=False):
     """Como `_limpa`, num tapete redondo: o círculo do tapete da imagem (`_circulo`), o tapete e o piso refeitos no
     buraco inteiro e no anel da beira, juntados pela distância ao círculo, com a beira macia de 2 px (sem os degraus da
     máscara nem os da beira do render)."""
@@ -554,7 +563,7 @@ def _limpa_redondo(Q, out, par, ids, nome, piso, d=7, ficam=()):
     out = out.copy()
     out[buraco] = np.clip(np.round(novo[buraco]), 0, 255).astype(np.uint8)
     print(f"      o tapete redondo: o círculo da imagem (centro {cx:.1f}, {cy:.1f}; raio {R:.1f} px)")
-    return out
+    return (out, (cx, cy, R)) if circulo else out
 
 
 def _tapete(Q, nome, img=None):
@@ -615,8 +624,14 @@ def estar(Q, out, par, q=ESTAR_D, qj=ESTAR_JANTAR_D):
     # o estar do jantar: as 4 poltronas viradas para a mesa redonda de madeira escura
     e = q["jantar"]
     trav = (None, PISOS_D["travertino"])
-    out = _limpa_redondo(Q, out, par, list(e["poltronas"]) + [e["mesa"]], "jantar", PISOS_D["travertino"],
-                         ficam=e["ficam"])
+    import pedidos_terreo_casad_1611b as PD2
+    mesinhas = tuple(qj.get("mesinhas", ()))
+    out, (tcx, tcy, tR) = _limpa_redondo(Q, out, par, list(e["poltronas"]) + [e["mesa"], *mesinhas], "jantar",
+                                         PISOS_D["travertino"], ficam=[i for i in e["ficam"] if i not in mesinhas],
+                                         circulo=True)
+    if qj.get("tapete_png"):
+        Rn = tR + qj["tapete_folga_px"]
+        out = MB.pousar(out, ler(qj["tapete_png"]), tcx, tcy, 2 * Rn, 2 * Rn, 0.0, "tapete", par)
     mx, my, mw, mh = _centro(Q, e["mesa"])
     for i in e["poltronas"]:
         cx, cy, w, h = _centro(Q, i)
@@ -625,10 +640,16 @@ def estar(Q, out, par, q=ESTAR_D, qj=ESTAR_JANTAR_D):
         out = MB.pousar(out, Pj, cx, cy, lado * Pj.shape[1] / Pj.shape[0], lado, g, "movel", par)
     D_ = (mw + mh) / 2
     out = MB.pousar(out, ler(qj["mesa_png"]), mx, my, D_, D_, 0.0, "mesa", par)
+    for i in mesinhas:
+        out = PD2.mesinha(Q, out, par, i)
     # o estar do living: o sofá de linho (de costas para baixo), as poltronas para o meio, as mesas orgânicas
     e = q["living"]
+    tap_l = _tapete(Q, "living", out)
     out = _limpa(Q, out, par, [e["sofa"], *e["poltronas"], *[i for i, _ in e["mesas"]]],
-                 [_tapete(Q, "living", out), trav], ficam=e["ficam"])
+                 [tap_l, trav], ficam=e["ficam"])
+    if e.get("tapete_png"):
+        cx_ = PD2.caixa_uniao(tap_l[0], RT.caixa_pdf(Q, PISOS_D["tapetes"]["living"][0]))
+        out = PD2.tapete_novo(Q, out, par, ler(e["tapete_png"]), cx_, ficam=e["ficam"])
     cxs, cys, ws, hs = _centro(Q, e["sofa"])
     out = MB.pousar(out, ler("living/sofa-living-d"), cxs, cys, ws, hs, 180.0, "movel", par)
     pts = np.array([_centro(Q, i)[:2] for i, _ in e["mesas"]])
@@ -666,7 +687,16 @@ def varanda(Q, out, par, q=VARANDA_D):
         D_ = (mw + mh) / 2
         out = MB.pousar(out, Pm, mx, my, D_, D_, 0.0, "mesa", par)
     # o estar: o sofá curvo no desenho do PDF, as poltronas para o meio, as mesas orgânicas
-    out = _limpa(Q, out, par, [q["sofa"], *q["poltronas"], *q["mesas_velhas"]], [_tapete(Q, "varanda", out), bege])
+    # (16/11, usuário: "corrija essas falhas nas bordas laterais do tapete") o tapete no próprio tecido (a amostra limpa,
+    # sem emenda) com a beira nítida, cobrindo o de antes e as franjas tracejadas das laterais
+    import pedidos_terreo_casad_1611b as PD2
+    tap_v = _tapete(Q, "varanda", out)
+    _, amostra_v = tap_v
+    cx_ = PD2.caixa_uniao(tap_v[0], RT.caixa_pdf(Q, PISOS_D["tapetes"]["varanda"][0]), folga=1.0)
+    Pv = PD2.tapete_amostra(out, amostra_v, cx_[2] - cx_[0], cx_[3] - cx_[1])
+    out = _limpa(Q, out, par, [q["sofa"], *q["poltronas"], *q["mesas_velhas"]], [tap_v, bege])
+    out = PD2.tapete_novo(Q, out, par, Pv, cx_)
+    out = PD2.franjas(out, par, cx_)
     _, ms = MB.contorno(Q, [q["sofa"]])
     Ps = ler(q["sofa_png"])
     cx, cy, (iou, g, wt, ht) = MB.encaixar(Q, Ps, ms, giros=(0, 180), escalas=(0.95, 1.0, 1.05))
@@ -721,6 +751,10 @@ WC_DCE_D = {"miolo": (2386.5, 526.8, 2476.0, 676.0), "bancada": (2386.5, 526.8, 
             # Casa D (60 x 60, a indicação dela para o banho DCE do térreo), no tom e no contraste do Bege Bahia do
             # vestiário do Subsolo aprovado (as manchas reduzidas, como nas Casas A, B e C)
             "piso_png": "04-materiais/pisos-internos/bege-bahia-fosco.png", "piso_m": 3.6,
+            # (16/11, usuário: "de acordo com a recomendação no Miro, esse banho segue o mesmo piso dos outros banhos")
+            # o mármore claro dos banhos 1 a 3 (a amostra limpa do banho 1 na final do Térreo, sem emenda), no lugar do
+            # Bege Bahia
+            "piso_amostra": ("POE642_CasaD_PH_Terreo_final_rotulos.png", (1128, 1553, 1190, 1620)),
             "amostra": ("POE642_CasaD_PH_Subsolo_final_rotulos.png", (1140, 1688, 1192, 1734)), "contraste": 1.0,
             "bacia": ("B1", "banho-1/bacia-carrara", 2449.4, 542.1, 21.0, 30.6, 0.0, "baixa", None),
             "chuveiro": (2447.2, 642.7, 2459.0, 654.5, 2476.0),
@@ -779,13 +813,19 @@ def wc_dce(out, par, q=WC_DCE_D):
     A0, B0, A1, B1 = int(np.floor(X0)) - 1, int(np.floor(Y0)) - 1, int(np.ceil(X1)) + 1, int(np.ceil(Y1)) + 1
     h, w = B1 - B0, A1 - A0
     # o piso: o Bege Bahia fosco da biblioteca, na escala da final, casado com o do vestiário do Subsolo
-    T = cv2.imread(str(BIB_D.parent / q["piso_png"]))
-    lado = int(round(q["piso_m"] * PX_M))
-    T = cv2.resize(T, (lado, lado), interpolation=cv2.INTER_AREA).astype(np.float32)
-    T = np.tile(T, (h // lado + 1, w // lado + 1, 1))[:h, :w]
-    arq, (ax0, ay0, ax1, ay1) = q["amostra"]
-    ref = cv2.imread(str(AQUI.parents[1] / "POE642_CasaD" / "renders" / arq))
-    T = _lab_casado(T, ref[ay0:ay1, ax0:ax1], q["contraste"])
+    if q.get("piso_amostra"):
+        import materiais_terreo_casac_1311 as MT
+        arq, (ax0, ay0, ax1, ay1) = q["piso_amostra"]
+        ref = cv2.imread(str(AQUI.parents[1] / "POE642_CasaD" / "renders" / arq))
+        T = MT.sem_emenda(ref[ay0:ay1, ax0:ax1].astype(np.float32), h, w)
+    else:
+        T = cv2.imread(str(BIB_D.parent / q["piso_png"]))
+        lado = int(round(q["piso_m"] * PX_M))
+        T = cv2.resize(T, (lado, lado), interpolation=cv2.INTER_AREA).astype(np.float32)
+        T = np.tile(T, (h // lado + 1, w // lado + 1, 1))[:h, :w]
+        arq, (ax0, ay0, ax1, ay1) = q["amostra"]
+        ref = cv2.imread(str(AQUI.parents[1] / "POE642_CasaD" / "renders" / arq))
+        T = _lab_casado(T, ref[ay0:ay1, ax0:ax1], q["contraste"])
     # a cobertura: o miolo menos a bancada, menos as paredes do PDF (exata, em ss)
     ss = 8
     M = np.zeros((h * ss, w * ss), np.uint8)
@@ -812,7 +852,7 @@ def wc_dce(out, par, q=WC_DCE_D):
     for y, c in q["vidro"]["linhas"]:
         out[y, int(np.ceil(vx0)):int(np.floor(vx1))] = c
     out = cuba_dce(out, par)
-    print("    WC DCE: refeito pelo PDF (o piso inteiro no Bege Bahia fosco, no tom do vestiário do Subsolo; a bacia "
+    print("    WC DCE: refeito pelo PDF (o piso inteiro no mármore claro dos outros banhos; a bacia "
           "Carrara, o chuveiro, a folha da porta e o vidro do box; a bancada e a cuba em `cuba_dce`)")
     return out
 
