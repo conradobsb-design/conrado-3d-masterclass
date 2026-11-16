@@ -763,37 +763,43 @@ def cortinas(Q, img, q=CORTINAS):
 # granito, no gramado e na água funda): a mediana da luz do fundo na caixa do texto. (nome, linhas, (meio x, base da 1ª
 # linha) px, corpo)
 ROTULOS = [
+    # usuário, 16/11: "RÓTULOS CENTRALIZADOS E PADRONIZADOS." Todos no corpo `normal`; cada um no meio do piso livre do
+    # ambiente (fora dos objetos e do box), e as fileiras e colunas vizinhas alinhadas: JARDIM, CIRCULAÇÃO (social) e
+    # LOUCEIRO no eixo 2047; ÁREA DE SERVIÇO DESCOBERTA e ÁREA DE SERVIÇO no 2085; JARDIM e ESCRITÓRIO na base 1083;
+    # CIRCULAÇÃO e GARAGEM na 858; DCE e WC DCE 1 na 596; DESPENSA e CPD na 752 (ELEVADOR na base da 2ª linha deles);
+    # PISCINA e PRAINHA na 1014. Os abertos (circulações de cima, varanda, deck) ficam no ponto do PDF. Só o WC DCE 1
+    # (0,79 m livre fora do box) não cabe a linha no `normal`: vai no `wc`, com ~4 px de folga.
     ("CIRCULAÇÃO GOURMET", ("CIRCULAÇÃO GOURMET", "A: 57,04 m²"), (1515.0, 352.0), "normal"),
     ("CIRCULAÇÃO (serviço)", ("CIRCULAÇÃO", "A: 67,87 m²"), (2105.0, 352.0), "normal"),
-    ("LAVABO GOURMET", ("LAVABO", "GOURMET", "A: 6,71 m²"), (1046.0, 545.0), "pequeno"),
-    ("BH GOURMET", ("BH GOURMET", "A: 5,92 m²"), (1336.0, 515.0), "normal"),
-    ("ÁREA GOURMET", ("ÁREA GOURMET", "A: 39,78 m²"), (1243.0, 676.0), "normal"),
-    ("GÁS", ("GÁS",), (1982.0, 449.0), "pequeno"),
+    ("LAVABO GOURMET", ("LAVABO GOURMET", "A: 6,71 m²"), (1108.0, 550.0), "normal"),
+    ("BH GOURMET", ("BH GOURMET", "A: 5,92 m²"), (1370.0, 523.0), "normal"),
+    ("ÁREA GOURMET", ("ÁREA GOURMET", "A: 39,78 m²"), (1297.0, 674.0), "normal"),
+    ("GÁS", ("GÁS",), (1984.0, 449.0), "normal"),
     ("ÁREA DE SERVIÇO DESCOBERTA", ("ÁREA DE SERVIÇO DESCOBERTA", "A: 8,17 m²"), (2085.0, 501.0), "normal"),
-    ("DCE", ("DCE", "A: 6,08 m²"), (2305.0, 586.0), "normal"),
-    ("WC DCE 1", ("WC DCE 1", "A: 3,04 m²"), (2424.0, 556.0), "pequeno"),
-    ("COZINHA", ("COZINHA", "A: 31,27 m²"), (1759.0, 728.0), "normal"),
-    ("ÁREA DE SERVIÇO", ("ÁREA DE SERVIÇO", "A: 16,34 m²"), (2101.0, 645.0), "normal"),
-    ("ELEVADOR", ("ELEVADOR",), (2006.0, 769.0), "pequeno"),
-    ("ADEGA", ("ADEGA", "A: 2,59 m²"), (2150.0, 782.0), "pequeno"),
-    ("DESPENSA", ("DESPENSA", "A: 3,92 m²"), (2287.0, 752.0), "pequeno"),
-    ("CPD", ("CPD", "A: 2,56 m²"), (2429.0, 766.0), "pequeno"),
-    ("GARAGEM", ("GARAGEM", "A: 64,54 m²"), (2765.0, 853.0), "normal"),
-    ("CIRCULAÇÃO (social)", ("CIRCULAÇÃO", "A: 21,23 m²"), (1859.0, 862.0), "normal"),
-    ("LOUCEIRO", ("LOUCEIRO", "A: 3,71 m²"), (2047.0, 928.0), "pequeno"),
-    ("JARDIM", ("JARDIM", "A: 7,08 m²"), (2047.0, 1084.0), "normal"),
-    ("LIVING E SALA DE JANTAR", ("LIVING E SALA DE JANTAR", "A: 89,87 m²"), (2040.0, 1235.0), "normal"),
-    ("ESCRITÓRIO", ("ESCRITÓRIO", "A: 13,59 m²"), (2378.0, 1083.0), "normal"),
-    ("CIRCULAÇÃO (escritório)", ("CIRCULAÇÃO", "A: 7,11 m²"), (2251.0, 1160.0), "pequeno"),
-    ("LAVABO", ("LAVABO", "A: 6,21 m²"), (2368.0, 1246.0), "normal"),
+    ("DCE", ("DCE", "A: 6,08 m²"), (2326.0, 596.0), "normal"),
+    ("WC DCE 1", ("WC DCE 1", "A: 3,04 m²"), (2422.5, 596.0), "wc"),
+    ("COZINHA", ("COZINHA", "A: 31,27 m²"), (1770.0, 728.0), "normal"),
+    ("ÁREA DE SERVIÇO", ("ÁREA DE SERVIÇO", "A: 16,34 m²"), (2085.0, 651.0), "normal"),
+    ("ELEVADOR", ("ELEVADOR",), (2002.0, 767.0), "normal"),
+    ("ADEGA", ("ADEGA", "A: 2,59 m²"), (2150.0, 792.0), "normal"),
+    ("DESPENSA", ("DESPENSA", "A: 3,92 m²"), (2286.0, 752.0), "normal"),
+    ("CPD", ("CPD", "A: 2,56 m²"), (2430.0, 752.0), "normal"),
+    ("GARAGEM", ("GARAGEM", "A: 64,54 m²"), (2765.0, 858.0), "normal"),
+    ("CIRCULAÇÃO (social)", ("CIRCULAÇÃO", "A: 21,23 m²"), (2047.0, 858.0), "normal"),
+    ("LOUCEIRO", ("LOUCEIRO", "A: 3,71 m²"), (2047.0, 930.0), "normal"),
+    ("JARDIM", ("JARDIM", "A: 7,08 m²"), (2047.0, 1083.0), "normal"),
+    ("LIVING E SALA DE JANTAR", ("LIVING E SALA DE JANTAR", "A: 89,87 m²"), (1910.0, 1229.0), "normal"),
+    ("ESCRITÓRIO", ("ESCRITÓRIO", "A: 13,59 m²"), (2380.0, 1083.0), "normal"),
+    ("CIRCULAÇÃO (escritório)", ("CIRCULAÇÃO", "A: 7,11 m²"), (2244.0, 1160.0), "normal"),
+    ("LAVABO", ("LAVABO", "A: 6,21 m²"), (2382.0, 1246.0), "normal"),
     ("HALL DE ENTRADA", ("HALL DE ENTRADA", "A: 16,63 m²"), (2351.0, 1452.0), "normal"),
     ("VARANDA", ("VARANDA", "A: 78,14 m²"), (1300.0, 1192.0), "normal"),
     ("DECK", ("DECK", "A: 44,67 m²"), (975.0, 1442.0), "normal"),
-    ("PISCINA", ("PISCINA", "A: 14,14 m²"), (837.0, 1021.0), "normal"),
-    ("PRAINHA", ("PRAINHA", "A: 7,61 m²"), (1054.0, 1021.0), "normal"),
-    ("SPA", ("SPA", "A: 6,5 m²"), (1059.0, 1205.0), "normal"),
+    ("PISCINA", ("PISCINA", "A: 14,14 m²"), (837.0, 1014.0), "normal"),
+    ("PRAINHA", ("PRAINHA", "A: 7,61 m²"), (1055.0, 1014.0), "normal"),
+    ("SPA", ("SPA", "A: 6,5 m²"), (1055.0, 1197.0), "normal"),
 ]
-CORPOS = {"normal": (10.95, 15.0), "pequeno": (9.6, 13.1)}
+CORPOS = {"normal": (10.95, 15.0), "pequeno": (9.6, 13.1), "wc": (9.0, 12.3)}
 ESCURO, CLARO = (20, 20, 20), (236, 236, 236)
 
 
@@ -834,7 +840,7 @@ def rotulos(Q, img):
         if cor == CLARO:
             escuros.append(r[0])
         out = R14.desenhar_linhas(out, linhas_rotulo(r), cor)
-    print(f"    rótulos: {len(ROTULOS)} no padrão (Inter, 2 linhas, um corpo; 9,6 px nos pequenos), em claro sobre o fundo "
+    print(f"    rótulos: {len(ROTULOS)} no padrão (Inter, 2 linhas, um corpo; 9 px só no WC DCE 1), em claro sobre o fundo "
           f"escuro ({', '.join(escuros)}) e em escuro nos outros")
     return u8(out)
 
