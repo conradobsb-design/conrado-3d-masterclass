@@ -28,6 +28,8 @@ R = CASA / "renders"
 FINAL = R / "POE642_CasaE_PH_Terreo_v1_final.png"
 RAIZ_GIT = AQUI.parents[2]
 ANTES_COMMIT = "b6b56f0"
+# a final sem as descrições das escadas e sem os rótulos (`--sem_textos`): a entrada da opção B do 12K
+SEM_TEXTOS = False
 
 
 def antes_img():
@@ -627,6 +629,10 @@ ESCADAS = {"cortadas": [(1151, 412, 1457, 483), (1875, 961, 2218, 1048)], "branc
            "tri": (13.0, 15.0), "tri_cor": (30, 30, 30)}
 
 
+def alfa_escada(txt, x, y, al, forma):
+    return TA.alfa_texto(txt, x, y, al, corpo=TA.ESCADAS_TA["corpo_desc_px"], forma=forma)
+
+
 def escadas(Q, img, q=ESCADAS):
     out = img.astype(np.float32)
     for x0, y0, x1, y1 in q["cortadas"]:
@@ -645,10 +651,10 @@ def escadas(Q, img, q=ESCADAS):
         out[y0:y1, x0:x1] = reg * (1 - a[..., None]) + novo * a[..., None]
     for (tx, ty), d, txt, (x, y), al, cor in q["setas"]:
         out = TA.triangulo(out, TA.seta_tri(tx, ty, d, *q["tri"]), q["tri_cor"])
-        a = TA.alfa_texto(txt, x, y, al, corpo=TA.ESCADAS_TA["corpo_desc_px"], forma=out.shape[:2])
-        out = TA.compor(out, a, cor)
+    # as descrições vão no fim, com os rótulos (`descricoes_escadas`): escritas aqui, o piso que o mobiliário refaz em
+    # volta (o jantar, junto ao SOBE PARA O 1º PAVIMENTO) tirava a luz das letras e deixava uma mancha cinza reta
     print(f"    escadas: os degraus cortados de {len(q['cortadas'])} escadas no tom delas, sob um véu claro; o triângulo "
-          f"e a descrição nas {len(q['setas'])} escadas ({'; '.join(' '.join(s[2]) for s in q['setas'])})")
+          f"nas {len(q['setas'])} escadas (as descrições vão com os rótulos: {'; '.join(' '.join(s[2]) for s in q['setas'])})")
     return u8(out)
 
 
@@ -848,16 +854,31 @@ def caixas_rotulos(forma, nomes=None, folga=0):
     return cx
 
 
+def cor_rotulo(r, img, lum=None):
+    """Escuro no piso claro, claro no escuro (a mediana da luz na caixa do rótulo, antes dele)."""
+    lum = cv2.GaussianBlur(img.astype(np.float32).mean(axis=2), (0, 0), 3) if lum is None else lum
+    a = alfa_rotulo(r, img.shape[:2])
+    ys, xs = np.nonzero(a > 0.02)
+    fundo = float(np.median(lum[ys.min() - 3:ys.max() + 4, xs.min() - 3:xs.max() + 4]))
+    return ESCURO if fundo > 125 else CLARO
+
+
+def descricoes_escadas(out, q=ESCADAS):
+    for _, _, txt, (x, y), al, cor in q["setas"]:
+        out = TA.compor(out, alfa_escada(txt, x, y, al, out.shape[:2]), cor)
+    return out
+
+
 def rotulos(Q, img):
     import revisao_terreo_casac_1411 as R14
-    out = img.astype(np.float32)
+    if SEM_TEXTOS:                               # a opção B do 12K: os textos voltam na Kalam (`ampliacao_12k_casae`)
+        print("    rótulos e descrições das escadas: fora (a final sem textos, entrada da opção B do 12K)")
+        return img
+    out = descricoes_escadas(img.astype(np.float32))
     lum = cv2.GaussianBlur(img.astype(np.float32).mean(axis=2), (0, 0), 3)
     escuros = []
     for r in ROTULOS:
-        a = alfa_rotulo(r, img.shape[:2])
-        ys, xs = np.nonzero(a > 0.02)
-        fundo = float(np.median(lum[ys.min() - 3:ys.max() + 4, xs.min() - 3:xs.max() + 4]))
-        cor = ESCURO if fundo > 125 else CLARO
+        cor = cor_rotulo(r, img, lum)
         if cor == CLARO:
             escuros.append(r[0])
         out = R14.desenhar_linhas(out, linhas_rotulo(r), cor)
@@ -1029,7 +1050,11 @@ def main():
     ap.add_argument("--cache")
     ap.add_argument("--saida")
     ap.add_argument("--antes_depois", help="só grava o antes e depois desta final (png) contra a de ANTES_COMMIT")
+    ap.add_argument("--sem_textos", action="store_true",
+                    help="sem as descrições das escadas e os rótulos (a entrada da opção B do 12K; use com --saida)")
     a = ap.parse_args()
+    global SEM_TEXTOS
+    SEM_TEXTOS = a.sem_textos
     if a.antes_depois:
         antes_depois(antes_img(), cv2.imread(a.antes_depois))
         return

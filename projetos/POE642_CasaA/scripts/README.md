@@ -3251,7 +3251,7 @@ cortados no tom delas, o triângulo, o S/D e a descrição); o guarda-corpo do d
 inverno e a mesa do jantar em nogueira; as cortinas C4; os X dos vazios finos e cinza e as linhas da garagem contínuas;
 os rótulos no padrão de 16/11. Uso: `python3 pedidos_terreo_casae_1611.py [--cache <pasta>] [--de/--ate <passo>]`
 (grava a final do Térreo); `--antes_depois <png>` grava `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_*_antes_depois.jpg`.
-Falta, depois do OK: 12K A e B, prancha, PDF e book; o Térreo esmaecido do 1º Pavimento.
+Falta: o Térreo esmaecido do 1º Pavimento (o 12K A e B, a prancha, o PDF e o book: "O 12K do Térreo da Casa E", abaixo).
 Rótulos (usuário, 16/11: "RÓTULOS CENTRALIZADOS E PADRONIZADOS."): a tabela `ROTULOS` foi refeita, com todos no corpo
 `normal` (o WC DCE 1 no `wc`, 9 px, porque a linha não cabe no piso livre fora do box), cada um no meio do piso livre
 do ambiente e as fileiras e colunas vizinhas alinhadas. Para refazer só os rótulos:
@@ -3330,3 +3330,25 @@ baixo do living (x 1595 a 1770 e 1921 a 2096, a mesma linha de vidro, sem parede
 (`CORTINAS["unir"]` em `pedidos_terreo_casae_1611`); a cortina do vidro entre a varanda e o living e as do escritório já
 estavam no padrão. O DCE e o hall não têm cortina no PDF. Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_cortinas_antes_depois.jpg`.
+
+#### Casa E, Térreo: o 12K A e B, a prancha, o PDF e o book (16/11, usuário: "Gere")
+
+`ampliacao_12k_casae.py`, o roteiro das Casas C e D (`ampliacao_12k_casad`): `preparar Terreo` (o recorte A3 deitado
+da final, 3390 x 2397 px a partir de (168,5; -291,1), 3,625x no 12K), o Topaz High Fidelity V2 do Higgsfield a
+12288 x 8689 (jobs 0cc02b82 na A e 5898a619 na B; as saídas, 112 MB cada, fora do git) e `montar Terreo <saída do
+Topaz> [--opcao B]` (os tons da final, o fundo branco puro, JPG 95 a 743 dpi na A3).
+- **Opção B (Kalam):** a entrada do Topaz é a final sem textos, gerada pelo próprio roteiro
+  (`pedidos_terreo_casae_1611.py --sem_textos --saida <png>`: sem as descrições das escadas nem os rótulos, nada a
+  apagar); `preparar Terreo --opcao B --sem_textos <png>` grava a entrada no recorte da A e as linhas dos 29 rótulos e
+  das 3 descrições (medidas no desenho da Inter: meio, base, altura das maiúsculas, largura; a cor do rótulo pelo piso)
+  em `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_rotulos_kalam.json`; no 12K, `rotulos_kalam_casac.desenhar` (62 linhas,
+  um corpo só, fator 0,72).
+- **A descrição das escadas no fim:** antes, `escadas` escrevia as descrições e o mobiliário refazia o piso do jantar
+  depois; a luz das letras do SOBE PARA O 1º PAVIMENTO entrava na conta do piso e deixava uma mancha cinza de borda reta
+  junto ao "1º". Agora o passo `escadas` só põe o triângulo e as descrições vão no passo `rotulos`
+  (`descricoes_escadas`). Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_descricao_escada_antes_depois.jpg`.
+- **Saídas:** `POE642_CasaE/entrega/POE642_CasaE_PH_Terreo_12K_opcao_{A,B}.jpg`; prévias, dados e conferências em
+  `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_12K_*` (`..._conferencia_{gourmet,cozinha_servico,living_jantar,
+  piscina_deck,hall_escritorio}.jpg`). Depois: `rodape_entrega.py --config ../../POE642_CasaE/config_bases.json
+  --no-quadro --render Terreo=../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_final.png`,
+  `pdf_entrega.py --config ../../POE642_CasaE/config_bases.json` e `book_entrega.py`.
