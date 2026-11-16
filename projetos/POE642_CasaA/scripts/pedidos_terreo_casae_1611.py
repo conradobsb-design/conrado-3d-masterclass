@@ -765,7 +765,8 @@ def cortinas(Q, img, q=CORTINAS):
 ROTULOS = [
     # usuário, 16/11: "RÓTULOS CENTRALIZADOS E PADRONIZADOS." Todos no corpo `normal`; cada um no meio do piso livre do
     # ambiente (fora dos objetos e do box), e as fileiras e colunas vizinhas alinhadas: JARDIM, CIRCULAÇÃO (social) e
-    # LOUCEIRO no eixo 2047; ÁREA DE SERVIÇO DESCOBERTA e ÁREA DE SERVIÇO no 2085; JARDIM e ESCRITÓRIO na base 1083;
+    # LOUCEIRO no eixo 2047; ÁREA DE SERVIÇO DESCOBERTA e ÁREA DE SERVIÇO no 2085; JARDIM e ESCRITÓRIO na base 1090 (entre
+    # as cadeiras novas e a poltrona do escritório);
     # CIRCULAÇÃO e GARAGEM na 858; DCE e WC DCE 1 na 596; DESPENSA e CPD na 752 (ELEVADOR na base da 2ª linha deles);
     # PISCINA e PRAINHA na 1014. Os abertos (circulações de cima, varanda, deck) ficam no ponto do PDF. Só o WC DCE 1
     # (0,79 m livre fora do box) não cabe a linha no `normal`: vai no `wc`, com ~4 px de folga.
@@ -787,9 +788,9 @@ ROTULOS = [
     ("GARAGEM", ("GARAGEM", "A: 64,54 m²"), (2765.0, 858.0), "normal"),
     ("CIRCULAÇÃO (social)", ("CIRCULAÇÃO", "A: 21,23 m²"), (2047.0, 858.0), "normal"),
     ("LOUCEIRO", ("LOUCEIRO", "A: 3,71 m²"), (2047.0, 930.0), "normal"),
-    ("JARDIM", ("JARDIM", "A: 7,08 m²"), (2047.0, 1083.0), "normal"),
+    ("JARDIM", ("JARDIM", "A: 7,08 m²"), (2047.0, 1090.0), "normal"),
     ("LIVING E SALA DE JANTAR", ("LIVING E SALA DE JANTAR", "A: 89,87 m²"), (1910.0, 1229.0), "normal"),
-    ("ESCRITÓRIO", ("ESCRITÓRIO", "A: 13,59 m²"), (2380.0, 1083.0), "normal"),
+    ("ESCRITÓRIO", ("ESCRITÓRIO", "A: 13,59 m²"), (2380.0, 1090.0), "normal"),
     ("CIRCULAÇÃO (escritório)", ("CIRCULAÇÃO", "A: 7,11 m²"), (2244.0, 1160.0), "normal"),
     ("LAVABO", ("LAVABO", "A: 6,21 m²"), (2382.0, 1246.0), "normal"),
     ("HALL DE ENTRADA", ("HALL DE ENTRADA", "A: 16,63 m²"), (2351.0, 1452.0), "normal"),
@@ -949,13 +950,21 @@ def antes_depois(antes, depois, q=ANTES_DEPOIS):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# 17. O mobiliário pela biblioteca da Casa E (16/11, a proposta aprovada: "1. SIM 2. SIM 3. COMO HOJE 4. ENTRAM AS 2"):
+# `mobiliario_terreo_casae_1611`.
+def mobiliario(Q, img):
+    import mobiliario_terreo_casae_1611 as ME
+    return ME.aplicar(Q, img)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("base", base), ("margem", margem), ("tracejados", tracejados), ("gramado", gramado), ("bege", bege),
           ("marrom", marrom),
           ("travertino", travertino),
           ("bancadas", bancadas), ("armarios", armarios), ("wc_dce", wc_dce),
           ("gourmet", gourmet), ("piscina", piscina),
           ("escadas", escadas), ("soltas", soltas), ("cortinas", cortinas),
-          ("tracejados_finos", tracejados_finos), ("rotulos", rotulos)]
+          ("tracejados_finos", tracejados_finos), ("mobiliario", mobiliario), ("rotulos", rotulos)]
 
 
 def rodar(img, de=None, ate=None, cache=None):

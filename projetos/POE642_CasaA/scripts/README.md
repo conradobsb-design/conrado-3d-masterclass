@@ -3267,3 +3267,16 @@ grupos de ambientes, o recorte da final de hoje, as peças da biblioteca (em ver
 falta), o que muda e, na última folha, as perguntas; na primeira, as vistas 3D da Casa E como referência (do Drive,
 fora do git: `--ref3d <pasta>` com `sala_gourmet.png` e `cozinha.png`). Saída:
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_mobiliario_{1,2,3}.jpg`. Nada é instalado antes do OK (regra 0).
+
+Instalação (usuário, sobre a proposta: "1. SIM 2. SIM 3. COMO HOJE 4. ENTRAM AS 2"): `mobiliario_terreo_casae_1611.py`
+entra como o passo `mobiliario` de `pedidos_terreo_casae_1611` (antes dos rótulos). As peças da biblioteca da Casa E vão
+nos desenhos do PDF (camadas ARQ_LAYOUT HUMANIZAÇÃO, ARQ_MOBILIÁRIO, ARQ_LOUÇAS E METAIS e ARQ_BANCADAS): a peça de antes
+sai (a silhueta do PDF e a da imagem, com folga), o piso volta pela amostra limpa (`alternativa1_terreo_casad_1611.refazer`,
+com as paredes, a ilha e as peças que ficam fora da luz) e a peça entra com a sombra do padrão. O tapete redondo
+azul-marinho do 3D foi gerado no Higgsfield (4 variantes; instalada a 2, no azul legível na planta) e guardado em
+`POE642_CasaE/biblioteca-objetos/02-terreo/living/tapete-redondo-azul-marinho-e.png`; as cadeiras do jantar levam o
+assento azul-marinho; a cozinha fica como hoje (Dekton Danae e a cor padrão de armário); as 2 espreguiçadeiras de madeira
+entram no deck. As bancadas com cuba (BH gourmet, lavabos, WC DCE) usam `esticada`: a cuba sem esticar e a pedra lisa
+repetida em espelho até o comprimento do PDF. Para refazer só o mobiliário e os rótulos:
+`python3 pedidos_terreo_casae_1611.py --de mobiliario --cache <pasta>`. O antes e depois fica em
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_mobiliario_instalado_{1..4}_antes_depois.jpg`.
