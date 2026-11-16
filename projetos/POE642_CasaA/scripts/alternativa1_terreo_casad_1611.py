@@ -761,6 +761,111 @@ def wc_dce(out, par, q=WC_DCE_D):
     vx0, vx1 = q["vidro"]["x"]
     for y, c in q["vidro"]["linhas"]:
         out[y, int(np.ceil(vx0)):int(np.floor(vx1))] = c
+    out = cuba_dce(out, par)
     print("    WC DCE: refeito pelo PDF (o piso inteiro no travertino claro dos banhos, no tom do banho 2; a bacia "
-          "Carrara, o chuveiro, a folha da porta e o vidro do box); a bancada de granito e a cuba ficam")
+          "Carrara, o chuveiro, a folha da porta e o vidro do box; a bancada e a cuba em `cuba_dce`)")
+    return out
+
+
+# (16/11, usuário, sobre o WC DCE do Térreo: "Corrija essa cuba e o contorno dela na bancada [...] Tá muito feio. Preciso
+# de um toque aí mais refinado") a bancada inteira no granito marrom tabaco do Subsolo (`biblioteca_subsolo_casad_1511
+# .tabaco`, sem a moldura bege e as pintas grandes de antes) com a aresta da frente um tom abaixo; a cuba desenhada em
+# 8x no retângulo do PDF (a borda da ARQ_REVESTIMENTOS e o bojo da ARQ_BANCADAS, px): a louça branca de sobrepor com os
+# cantos arredondados, o fio cinza fino em volta, o bojo com a sombra suave nas paredes do lado da luz (que vem do alto
+# à direita), o ralo, e a sombra curta da borda no granito; o misturador do PDF (o corpo junto à parede e a bica sobre o
+# bojo) em cromado, com o brilho no meio e a sombra curta
+CUBA_DCE = {"bancada": (2386.5, 526.8, 2410.8, 621.4), "face": 0.80, "semente": 1611,
+            "borda": (2392.4, 561.2, 2409.6, 587.0), "raio_borda": 2.6,
+            "bojo": (2393.7, 562.5, 2408.3, 585.7), "raio_bojo": 2.1,
+            "loucas": {"borda": (243, 244, 245), "bojo": (236, 237, 239), "fio": (150, 152, 156), "aresta": (206, 208, 211),
+                       "ralo": (150, 154, 158)},
+            "ralo": (2401.0, 574.1, 1.1),
+            "corpo": (2389.1, 572.8, 2394.4, 575.2), "bica": (2394.4, 573.35, 2399.2, 574.65),
+            "cromo": ((132, 134, 138), (232, 234, 237)), "sombra": (-0.6, 0.6, 0.6, 0.30), "ss": 8,
+            "janela": (2384, 553, 2413, 595)}
+
+
+def _sd_ret(X, Y, r, raio):
+    """A distância com sinal (px) ao retângulo de cantos arredondados `r` (x0, y0, x1, y1)."""
+    x0, y0, x1, y1 = r
+    cx, cy, hx, hy = (x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) / 2 - raio, (y1 - y0) / 2 - raio
+    qx, qy = np.abs(X - cx) - hx, np.abs(Y - cy) - hy
+    return np.hypot(np.maximum(qx, 0), np.maximum(qy, 0)) + np.minimum(np.maximum(qx, qy), 0) - raio
+
+
+def cuba_dce(out, par, q=CUBA_DCE):
+    import biblioteca_subsolo_casad_1511 as SD
+    import biblioteca_terreo_casad_1511 as TD
+    # a bancada no granito marrom tabaco, a aresta da frente um tom abaixo
+    x0, y0, x1, y1 = q["bancada"]
+    X0, Y0, X1, Y1 = int(round(x0)), int(round(y0)), int(round(x1)), int(round(y1))
+    m = np.zeros(par.shape, bool)
+    m[Y0:Y1, X0:X1] = True
+    m &= ~par
+    out = TD._pinta_textura(out, m, SD.tabaco(Y1 - Y0, X1 - X0, q["semente"]), None)
+    out = TD._poligono(out, [(x1 - 0.8, y0), (x1, y0), (x1, y1), (x1 - 0.8, y1)],
+                       tuple(float(v) for v in np.median(out[Y0:Y1, X0:X1].reshape(-1, 3), axis=0) * q["face"]))
+    out = TD._poligono(out, [(x0, y1 - 0.8), (x1, y1 - 0.8), (x1, y1), (x0, y1)],
+                       tuple(float(v) for v in np.median(out[Y0:Y1, X0:X1].reshape(-1, 3), axis=0) * q["face"]))
+    # a cuba e o misturador em 8x
+    s = q["ss"]
+    A0, B0, A1, B1 = q["janela"]
+    w, h = (A1 - A0) * s, (B1 - B0) * s
+    X, Y = np.meshgrid(A0 + (np.arange(w) + 0.5) / s, B0 + (np.arange(h) + 0.5) / s)
+    base = cv2.resize(out[B0:B1, A0:A1].astype(np.float32), (w, h), interpolation=cv2.INTER_LINEAR)
+    lc = {k: np.float32(v) for k, v in q["loucas"].items()}
+
+    def mistura(img, a, cor):
+        a = np.clip(a, 0, 1)[..., None]
+        return img * (1 - a) + (cor if np.ndim(cor) == 3 else np.float32(cor)) * a
+
+    def sombra(img, d_fn, forca):
+        dx, dy, sig, _ = q["sombra"]
+        m_ = (d_fn(X - dx, Y - dy) < 0).astype(np.float32)
+        sh = cv2.GaussianBlur(m_, (0, 0), sig * s)
+        return img * (1 - forca * sh)[..., None]
+
+    def d_borda(Xs, Ys):
+        return _sd_ret(Xs, Ys, q["borda"], q["raio_borda"])
+    db = d_borda(X, Y)
+    base = sombra(base, d_borda, q["sombra"][3]) * 1.0
+    base = mistura(base, (db < 0).astype(np.float32), lc["borda"])
+    base = mistura(base, (np.abs(db) < 0.28).astype(np.float32) * 0.85, lc["fio"])
+    # o bojo: a sombra suave nas paredes de cima e da direita (as que dão as costas para a luz do alto à direita)
+    dj = _sd_ret(X, Y, q["bojo"], q["raio_bojo"])
+    bx0, by0, bx1, by1 = q["bojo"]
+    perto_cima = np.clip(1 - (Y - by0) / 4.0, 0, 1)
+    perto_dir = np.clip(1 - (bx1 - X) / 4.0, 0, 1)
+    perto = np.clip(1 - (-dj) / 2.5, 0, 1)
+    tom = 1 - 0.09 * perto - 0.12 * np.maximum(perto_cima, perto_dir) ** 1.5
+    bojo = lc["bojo"][None, None] * tom[..., None]
+    base = mistura(base, (dj < 0).astype(np.float32), bojo)
+    base = mistura(base, (np.abs(dj) < 0.22).astype(np.float32) * 0.7, lc["aresta"])
+    rx, ry, rr = q["ralo"]
+    dr = np.hypot(X - rx, Y - ry)
+    base = mistura(base, (dr < rr).astype(np.float32), lc["ralo"])
+    base = mistura(base, (np.abs(dr - rr) < 0.2).astype(np.float32) * 0.8, lc["ralo"] * 0.75)
+    # o misturador: o corpo e a bica, o cromado com o brilho no meio, a sombra curta
+    c0, c1 = np.float32(q["cromo"][0]), np.float32(q["cromo"][1])
+    for r_, raio in ((q["corpo"], 0.9), (q["bica"], 0.6)):
+        def d_m(Xs, Ys, r_=r_, raio=raio):
+            return _sd_ret(Xs, Ys, r_, raio)
+        base = sombra(base, d_m, 0.35)
+    for r_, raio in ((q["corpo"], 0.9), (q["bica"], 0.6)):
+        d = _sd_ret(X, Y, r_, raio)
+        meio = (r_[1] + r_[3]) / 2
+        t = np.clip(1 - np.abs(Y - meio) / ((r_[3] - r_[1]) / 2), 0, 1) ** 0.8
+        cromo = c0[None, None] + (c1 - c0)[None, None] * t[..., None]
+        base = mistura(base, (d < 0).astype(np.float32), cromo)
+    # a ponta da bica, um tom abaixo
+    bx = q["bica"][2]
+    base = mistura(base, ((np.abs(X - (bx - 0.35)) < 0.35) & (np.abs(Y - (q["bica"][1] + q["bica"][3]) / 2) < 0.6))
+                   .astype(np.float32) * 0.8, c0 * 0.9)
+    novo = cv2.resize(base, (A1 - A0, B1 - B0), interpolation=cv2.INTER_AREA)
+    out = out.copy()
+    reg = out[B0:B1, A0:A1].astype(np.float32)
+    fora = par[B0:B1, A0:A1][..., None]
+    out[B0:B1, A0:A1] = np.clip(np.round(np.where(fora, reg, novo)), 0, 255).astype(np.uint8)
+    print("    WC DCE: a bancada no granito marrom tabaco com a aresta; a cuba branca de sobrepor redesenhada no PDF "
+          "(a borda arredondada com o fio, o bojo com a sombra suave, o ralo) e o misturador cromado")
     return out
