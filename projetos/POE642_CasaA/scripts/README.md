@@ -3118,3 +3118,21 @@ V2 a 12288 x 8689, os tons da final, o fundo branco; na B, os dados das linhas d
 `renders/POE642_CasaD_PH_<pav>_rotulos_kalam.json`). Subsolo: jobs 56d5115c (A) e e01c1dea (B), as saídas fora do git.
 Depois, `rodape_entrega.py --config ../../POE642_CasaD/config_bases.json --no-quadro --render Subsolo=...`,
 `pdf_entrega.py --config ../../POE642_CasaD/config_bases.json` e `book_entrega.py`.
+
+### Térreo da Casa D, 16/11: a Alternativa 1 do mobiliário, as cortinas e os rótulos no padrão das casas
+
+`biblioteca_terreo_casad_1511.aplicar` chama, no lugar das peças das Casas A a C:
+- `alternativa1_terreo_casad_1611.py` (usuário: "Alternativa 1", sobre `proposta_mobiliario_terreo_casad_1611.py`): as
+  peças da biblioteca da Casa D (`POE642_CasaD/biblioteca-objetos`, do Drive) nas mesmas caixas do PDF: camas com a manta
+  no tom de cada quarto, criados laterais, bancos de peseira, poltronas concha, cadeira de bancada, quartzito Aura nos
+  banhos, sala íntima, escritório, jantar (o linho das cadeiras em terracota), os dois estares do living, a varanda, as
+  banquetas e a cama do DCE. O piso e os tapetes onde a peça antiga era maior: o desenho de uma amostra limpa do próprio
+  piso na luz do entorno (`refazer`); o tapete redondo pelo círculo da imagem (`_limpa_redondo`), os retangulares pelo
+  retângulo da imagem (`_tapete`), a franja da borda recopiada (`_borda`).
+- `cortinas_padrao_casad_1611.py` (usuário: "adotar o padrão das cortinas que eu tenho feito nas casas A, B e C [...]
+  bem visível"): a C4 da Casa C (`pedidos_terreo_casac_1311.cortinas`) no quadro da Casa D, com o pano de 0,22 m, o linho
+  0,82 e a sombra inteira; mais a da suíte 3.
+- `rotulos_padrao_casad_1611.py` (usuário: "rótulos [...] centralizados, alinhados no que for possível, padronizados
+  [...] padrão para todas as casas"): todos os rótulos de antes saem e entram os da tabela `ROTULOS_T` (Inter Regular,
+  maiúscula de 8 px, 7 nos pequenos; as fileiras alinhadas); o piso do WC DCE sem as manchas bege. A opção B
+  (`rotulos_kalam_casad.escritos("Terreo")`) lê a mesma tabela.

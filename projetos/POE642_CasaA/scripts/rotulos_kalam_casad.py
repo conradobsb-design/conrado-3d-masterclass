@@ -1,9 +1,9 @@
 """A opção B da Casa D: os rótulos na letra Kalam (16/11, usuário: "precisamos ter a versão B com rótulos na outra fonte"),
 como a opção B da Casa C (`rotulos_kalam_casac`, de onde vêm a busca, o apagar e o desenho).
 
-- No **Térreo**, os rótulos do motor (os do PDF) são achados na final pela forma (`rotulos_kalam_casac.achar`); os que a
-  revisão de 15/11 escreveu (`biblioteca_terreo_casad_1511`: os 4 CLOSET, GARAGEM, DCE TÉRREO, o ² do SPA e as descrições
-  das escadas) vêm das próprias linhas (texto, fonte, corpo, meio, base), sem busca.
+- No **Térreo**, desde 16/11 todos os rótulos são escritos no padrão das casas (`rotulos_padrao_casad_1611`) e vêm das
+  próprias linhas (texto, fonte, corpo, meio, base), com as descrições das escadas; antes, os do motor eram achados na
+  final pela forma (`rotulos_kalam_casac.achar`) e só os da revisão de 15/11 vinham das linhas (`escritos_1511`).
 - No **Subsolo**, todos os rótulos foram reescritos (`biblioteca_subsolo_casad_1511.ROTULOS`) e vêm das linhas, com a
   descrição da escada.
 
@@ -65,7 +65,17 @@ def _escadas(escadas):
 
 
 def escritos(pav):
-    """Os rótulos que os scripts de 15/11 escreveram: [(nome, linhas (texto, fonte, corpo, meio, base), cor)]."""
+    """Os rótulos escritos pelos scripts: [(nome, linhas (texto, fonte, corpo, meio, base), cor)]. No Térreo, desde 16/11,
+    todos (`rotulos_padrao_casad_1611`, o padrão das casas) e as descrições das escadas."""
+    if pav == "Terreo":
+        import biblioteca_terreo_casad_1511 as TD
+        import rotulos_padrao_casad_1611 as RP
+        return RP.linhas() + _escadas(TD.ESCADAS)
+    return escritos_1511(pav)
+
+
+def escritos_1511(pav):
+    """Os rótulos que os scripts de 15/11 escreveram (no Térreo, os outros vinham do motor)."""
     from PIL import ImageFont
     from rodape_entrega import FONTES
     reg = str(FONTES / "Inter-Regular.otf")
@@ -120,7 +130,7 @@ def preparar(pav, img):
         linhas.append({"nome": nome, "cor": cor, "linhas": KC._geometria(a, [x[0] for x in ll])})
         ys, xs = np.nonzero(a > 0.02)
         caixas.append((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1))
-    if pav == "Terreo":
+    if pav == "Terreo_motor":                      # (até 16/11; desde então o Térreo tem todos os rótulos escritos)
         import biblioteca_terreo_casad_1511 as TD
         # o ² do SPA (desenhado à parte): sai com o rótulo; a linha da Kalam leva o ²
         q = TD.SPA_M2

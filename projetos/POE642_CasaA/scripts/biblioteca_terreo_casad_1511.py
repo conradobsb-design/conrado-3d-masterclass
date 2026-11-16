@@ -1055,7 +1055,6 @@ def aplicar(antes):
     out = A1.sala_intima(Q, out, antes, par)
     out = A1.escritorio(out, par)
     out = A1.cadeiras_s3(Q, out, par)
-    out = cortina_s3(out)
     out = painel_s3(out)
     out = portas(Q, out)
     out = sem_soleira(Q, out, par)
@@ -1083,6 +1082,12 @@ def aplicar(antes):
     out = rotulos_closets(out)
     out = spa_m2(out)
     out = rotulos_novos(Q, out, par)
+    # (16/11, usuário: o padrão das cortinas das Casas A, B e C, bem visíveis; os rótulos centralizados, alinhados e
+    # padronizados) as cortinas C4 em todos os trechos (a da suíte 3 inclusive) e os rótulos no padrão das casas
+    import cortinas_padrao_casad_1611 as CP
+    import rotulos_padrao_casad_1611 as RP
+    out = CP.aplicar(Q, out, par)
+    out = RP.aplicar(out)
     return out
 
 
