@@ -3213,5 +3213,7 @@ A 2ª leva de pedidos de 16/11 no Térreo da Casa D (`pedidos_terreo_casad_1611b
   folha aberta e a parede fica) e sem os dentes escuros sob a parede de cima;
 - o jantar: as 10 cadeiras alinhadas aos lados da mesa (as dos lados em pé, as das cabeceiras deitadas), não
   giradas para o centro;
+- a porta do hall para a garagem em madeira lisa (destacada do travertino); as 4 folhas de vidro de correr entre a
+  varanda e o living no tom do vidro com as arestas; o refrigerador inox da biblioteca no nicho da gourmet;
 - a borda da piscina, da prainha e do spa lisa, sem juntas, em Bege Bahia um tom abaixo do deck (o alto-relevo);
 - sem o tracejado do limite em volta da planta; o muro de baixo termina com a grama, como o de cima.

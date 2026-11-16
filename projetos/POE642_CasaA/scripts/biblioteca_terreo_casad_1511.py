@@ -1150,6 +1150,7 @@ def aplicar(antes):
     out = wc_dce(out, par)
     out = marrom(Q, out)
     out = PD2.geladeiras(Q, out, par)
+    out = PD2.geladeira_gourmet(out, par)
     out = gas(out, par)
     out = area_descoberta(out)
     out = A1.cama_dce(out, par)
@@ -1184,6 +1185,8 @@ def aplicar(antes):
     import portas_revisao_casad_1611 as PR
     out = PR.aplicar(out)
     out = PD2.paredes_banhos(out)
+    out = PD2.porta_hall(out)
+    out = PD2.vidros(out)
     out = PD2.tracejado_ilha(out)
     out = PD2.margem(out)
     return out

@@ -529,3 +529,65 @@ def franjas(out, par, caixa, larg=5, folga_y=3):
         livre = ~par[Y0:Y1, c0:c1]
         out[Y0:Y1, c0:c1][livre] = fonte[livre]
     return out
+
+
+# a porta do hall de entrada para a garagem (usuário: "melhore o tom da porta para que ela não suma com o tom do piso";
+# o vão da ARQ_PAREDE 62465, px): a folha fechada em madeira lisa um tom médio (sem as ripas), o veio no comprido, o
+# contorno escuro e a sombra curta no piso, destacada do travertino do hall
+PORTA_HALL = {"ret": (2516.0, 792.5, 2617.5, 801.4), "madeira": (92, 124, 164), "semente": 1617}
+
+
+def porta_hall(out, q=PORTA_HALL):
+    import um_pav_casaa_1111 as U
+    qa = dict(U.FOLHAS_1P, madeira=q["madeira"], junta_forca=0.0, luz=0.10)
+    o = out.astype(np.float32)
+    _folha_madeira(o, q["ret"], "y+", qa, np.random.default_rng(q["semente"]))
+    print("    hall: a porta da garagem em madeira, destacada do travertino")
+    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+
+
+# as portas de vidro de correr entre a varanda gourmet e o living (usuário: "melhore o tom das portas de vidro para que
+# elas não sumam com o tom do piso"; as 4 folhas da ARQ_PAREDE, px): cada folha no tom do vidro (um
+# cinza azulado, abaixo dos dois pisos) com as arestas escuras finas, destacada do Bege Bahia e do travertino
+VIDROS = {"folhas": [(1807.3, 690.4, 1809.7, 812.3), (1804.9, 818.3, 1807.3, 940.3), (1804.9, 946.2, 1807.3, 1068.2),
+                     (1807.3, 1074.2, 1809.7, 1196.1)],
+          "vidro": (180, 168, 150), "aresta": (96, 92, 86), "aresta_px": 0.6}
+
+
+def vidros(out, q=VIDROS):
+    o = out.astype(np.float32)
+    for r in q["folhas"]:
+        X0, Y0, X1, Y1 = int(np.floor(r[0])) - 1, int(np.floor(r[1])) - 1, int(np.ceil(r[2])) + 1, int(np.ceil(r[3])) + 1
+        w, h = X1 - X0, Y1 - Y0
+        A = _cob(r, X0, Y0, w, h)
+        e = q["aresta_px"]
+        dentro = _cob((r[0] + e, r[1] + e, r[2] - e, r[3] - e), X0, Y0, w, h)
+        reg = o[Y0:Y1, X0:X1]
+        reg[:] = reg * (1 - A[..., None]) + np.float32(q["aresta"]) * A[..., None]
+        reg[:] = reg * (1 - dentro[..., None]) + np.float32(q["vidro"]) * dentro[..., None]
+    print(f"    vidros: as {len(q['folhas'])} folhas entre a varanda e o living no tom do vidro, com as arestas")
+    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+
+
+# a geladeira da gourmet (usuário: "substitua pelo refrigerador da nossa biblioteca"; o nicho da ARQ_BANCADAS 68338 e a
+# peça da ARQ_LAYOUT 96580, px): o nicho no granito do piso da gourmet (a amostra limpa logo abaixo da bancada, tecida) e o
+# refrigerador inox da biblioteca (o G2 da cozinha) na peça do PDF, a frente para a gourmet, com a sombra curta
+GELADEIRA_GOURMET = {"nicho": (1634.2, 476.0, 1693.3, 523.5), "peca": (1637.4, 477.9, 1691.2, 522.7),
+                     "granito_px": (1580, 532, 1632, 598), "semente": 1618}
+
+
+def geladeira_gourmet(out, par, q=GELADEIRA_GOURMET):
+    import biblioteca_terreo_casad_1511 as TD
+    x0, y0, x1, y1 = q["nicho"]
+    X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
+    h, w = Y1 - Y0, X1 - X0
+    T = TD._tecido(out, q["granito_px"], h, w, q["semente"])[:h, :w]
+    a = _cob((x0, y0, x1, y1), X0, Y0, w, h) * ~par[Y0:Y1, X0:X1]
+    out = out.copy()
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a[..., None]) + T * a[..., None]), 0, 255).astype(np.uint8)
+    P = MB.ler("cozinha/geladeira-inox")
+    px0, py0, px1, py1 = q["peca"]
+    out = MB.pousar(out, P, (px0 + px1) / 2, (py0 + py1) / 2, px1 - px0 - 1, py1 - py0 - 1, 0.0, "movel", par)
+    print("    gourmet: o refrigerador inox da biblioteca no nicho, a frente para a gourmet")
+    return out
