@@ -72,7 +72,9 @@ HALL = {"aparador": (2271, 1327, 2421, 1359), "vaso": ((2333, 1518, 2386, 1571),
 ADEGA = {"topo": (2082, 752, 2217, 775), "lados": ((2082, 775, 2106, 817), (2193, 775, 2217, 817))}
 ELEVADOR = {"cabine": (1957, 718, 2048, 808)}
 GARAGEM = {"carros": ((2549, 538, 2667, 803), (2705, 538, 2822, 803), (2856, 538, 2974, 803))}
-DECK = {"espreguicadeiras": ((866.0, 1366.0), (921.0, 1366.0)), "larg": 42.0, "comp": 116.0}
+# o deck: as 2 espreguiçadeiras entraram (16/11, "ENTRAM AS 2") e saíram (16/11, revisão do Térreo: "TIRE AS
+# ESPREGUIÇADEIRAS DO DECK"); o deck fica vazio, como no PDF
+DECK = {"espreguicadeiras": (), "larg": 42.0, "comp": 116.0}
 JARDIM_E = {"plantas": (("jardim-interno/touceira-costela-de-adao", (1935.0, 1086.0), 32.0),
                         ("jardim-interno/palmeira-leque", (2160.0, 1088.0), 30.0)),
             "velhas": ((1935, 1086, 20), (2160, 1088, 20))}
@@ -549,7 +551,7 @@ def hall_e_outros(Q, out, par):
     for rel, (cx, cy), ld in JARDIM_E["plantas"]:
         out = pousar(out, ler(rel), cx, cy, ld, ld, 0.0, "baixa", par)
     print("    hall: o aparador em freijó e o vaso; adega: as garrafas da E no U; elevador: a cabine da E; garagem: os 3 "
-          "sedãs prata da E; deck: as 2 espreguiçadeiras de madeira; jardim interno: a costela-de-adão e a "
+          "sedãs prata da E; deck vazio (sem as espreguiçadeiras); jardim interno: a costela-de-adão e a "
           "palmeira-leque")
     return out
 
