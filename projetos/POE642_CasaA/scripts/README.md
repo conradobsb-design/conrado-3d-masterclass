@@ -3252,3 +3252,18 @@ inverno e a mesa do jantar em nogueira; as cortinas C4; os X dos vazios finos e 
 os rótulos no padrão de 16/11. Uso: `python3 pedidos_terreo_casae_1611.py [--cache <pasta>] [--de/--ate <passo>]`
 (grava a final do Térreo); `--antes_depois <png>` grava `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_*_antes_depois.jpg`.
 Falta, depois do OK: 12K A e B, prancha, PDF e book; o Térreo esmaecido do 1º Pavimento.
+Rótulos (usuário, 16/11: "RÓTULOS CENTRALIZADOS E PADRONIZADOS."): a tabela `ROTULOS` foi refeita, com todos no corpo
+`normal` (o WC DCE 1 no `wc`, 9 px, porque a linha não cabe no piso livre fora do box), cada um no meio do piso livre
+do ambiente e as fileiras e colunas vizinhas alinhadas. Para refazer só os rótulos:
+`python3 pedidos_terreo_casae_1611.py --de rotulos --cache <pasta>`. O antes e depois fica em
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_rotulos_{1,2}_antes_depois.jpg`.
+
+#### Casa E, Térreo: a proposta do mobiliário pela biblioteca da Casa E (16/11)
+
+Usuário: "VAMOS ALTERAR TODO O MOBILIARIO E REVER AMBIENTE POR AMBIENTE". A biblioteca da Casa E (do Drive:
+`POE642-Casa-E-Objetos-e-Pisos-Claude-Code.zip`) está em `POE642_CasaE/biblioteca-objetos` (Subsolo, Térreo, 1º Pav.,
+materiais, `catalogo.json` e `catalogo.html`). `proposta_mobiliario_terreo_casae_1611.py` monta, para cada um dos 9
+grupos de ambientes, o recorte da final de hoje, as peças da biblioteca (em verde, as recomendadas; "a gerar" a que
+falta), o que muda e, na última folha, as perguntas; na primeira, as vistas 3D da Casa E como referência (do Drive,
+fora do git: `--ref3d <pasta>` com `sala_gourmet.png` e `cozinha.png`). Saída:
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_mobiliario_{1,2,3}.jpg`. Nada é instalado antes do OK (regra 0).
