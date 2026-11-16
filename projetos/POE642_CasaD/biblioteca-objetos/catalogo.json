@@ -1,0 +1,3833 @@
+{
+  "casa": "POE 642 · Casa D",
+  "versao": 2,
+  "vista": "Superior ortográfica",
+  "formato_materiais": "PNG RGB",
+  "arquivos_png_materiais": 10,
+  "arquivos_png_total": 194,
+  "escala": "amostra_m indica largura e altura em metros. Use a escala da planta-base para converter em pixels.",
+  "revisao": "O deck da piscina e a varanda gourmet aparecem em pedra clara na prancha humanizada. O Bege Bahia é a leitura visual para essa versão. A faixa ligada à garagem aparece marrom. A pedra portuguesa caramelo fica disponível como opção de acesso conforme a revisão geral.",
+  "fontes": {
+    "pranchas_do_usuario": {
+      "Subsolo": "642-CASA D-SUBSOLO.pdf",
+      "Térreo": "642-CASA D-TÉRREO.pdf"
+    },
+    "pranchas_humanizadas": "https://drive.google.com/file/d/1MZS-47m1PLjcINVe-ihkKN2yV-vOXZsg/view",
+    "planilha_especificacoes": "https://docs.google.com/spreadsheets/d/144uR9Vak4dVn4oSkYcwyWnNtlMGFIxl2/edit",
+    "renders_3d": [
+      "POE 642 - CASA D - QUARTO.png",
+      "POE 642 - CASA D - SALA ÍNTIMA.png",
+      "POE 642 - CASA D - SALA.png"
+    ],
+    "legenda_miro": "https://miro.com/app/board/uXjVJkj7NUw=/?moveToWidget=3458764685392694080",
+    "miro_acessos": "https://miro.com/app/board/uXjVJkj7NUw=/?moveToWidget=3458764653050853853",
+    "miro_pedra_portuguesa": "https://miro.com/app/board/uXjVJkj7NUw=/?moveToWidget=3458764687763776163",
+    "city_petra_durafloor": "https://www.downloads.durafloor.com.br/publico?grupo=8",
+    "barlavento_portobello": "https://www.portobello.com.br/produtos/barlavento/field-tile/barlavento-gris/14-5x14-5-externo/25927E/revestimentos?channel=portobello-shop",
+    "pasta_especificacoes": "https://drive.google.com/drive/folders/1l_sSaeiunqTpJFYhr5F7HEYk15Q7ydfd",
+    "caderno_especificacoes": "https://docs.google.com/presentation/d/1oxayteX8YODby6ikpiWHQFgHemvY4Pka/edit",
+    "especificacoes_gerais": "https://docs.google.com/spreadsheets/d/1P9WM11zrT6_xLmFOtCjiWKMZo6Dff224/edit",
+    "apresentacao_banheiros": "https://drive.google.com/file/d/1nQLI3tgrwvhbuAL87UYkcHwaeeFDMWhF/view",
+    "biblioteca_casa_a": "projetos/POE642_CasaA/biblioteca-objetos/catalogo.json",
+    "biblioteca_casa_b": "projetos/POE642_CasaB/biblioteca-objetos/catalogo.json"
+  },
+  "pavimentos": {
+    "Térreo": [
+      "vinilico-city-petra",
+      "travertino-romano-levigado",
+      "travertino-romano-banhos",
+      "bege-bahia-fosco",
+      "bege-bahia-area-externa",
+      "granito-marrom",
+      "pedra-portuguesa-caramelo",
+      "barlavento-fundo",
+      "barlavento-agua-funda",
+      "barlavento-prainha"
+    ],
+    "Subsolo": [
+      "vinilico-city-petra",
+      "bege-bahia-fosco",
+      "bege-bahia-area-externa",
+      "granito-marrom"
+    ]
+  },
+  "materiais": [
+    {
+      "id": "vinilico-city-petra",
+      "nome": "Vinílico Durafloor City Petra",
+      "categoria": "pisos-internos",
+      "arquivo": "04-materiais/pisos-internos/vinilico-city-petra.png",
+      "largura_px": 3657,
+      "altura_px": 2136,
+      "amostra_m": [
+        7.314,
+        4.272
+      ],
+      "modulo_cm": [
+        121.9,
+        17.8
+      ],
+      "modulos_xy": [
+        6,
+        24
+      ],
+      "junta_mm": null,
+      "base_dimensional": "Formato comercial Durafloor.",
+      "repetivel": true,
+      "aplicacao": "Réguas com veios longitudinais e emendas desencontradas. Gire para seguir a hachura.",
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "planilha_especificacoes",
+        "city_petra_durafloor",
+        "renders_3d"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte master"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Closet master"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 1"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 2"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 3 e escritório"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala íntima"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Circulações íntimas"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Quarto DCE do térreo"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia"
+        }
+      ],
+      "origem_textura": "Gerada a partir de recortes do render desta casa e montada em escala.",
+      "modelo": "gpt_image_2",
+      "higgsfield_jobs": [
+        "3c6a52ec-f164-418d-bcee-9db037e8a4db"
+      ]
+    },
+    {
+      "id": "travertino-romano-levigado",
+      "nome": "Travertino Romano levigado",
+      "categoria": "pisos-internos",
+      "arquivo": "04-materiais/pisos-internos/travertino-romano-levigado.png",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        3.6,
+        3.6
+      ],
+      "modulo_cm": [
+        120,
+        60
+      ],
+      "modulos_xy": [
+        3,
+        6
+      ],
+      "junta_mm": 2,
+      "base_dimensional": "Paginação de representação para planta humanizada. A dimensão comercial das placas e da junta depende da confirmação executiva.",
+      "repetivel": true,
+      "aplicacao": "Veios paralelos, poros finos e acabamento acetinado. Siga o sentido dos veios na prancha.",
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "planilha_especificacoes",
+        "legenda_miro",
+        "renders_3d"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Living e jantar"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Hall interno"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Adega"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo"
+        }
+      ],
+      "origem_textura": "Base fotorealista da biblioteca anterior, calibrada pela cor e aplicação desta casa. O PNG está salvo nesta biblioteca.",
+      "modelo": "gpt_image_2",
+      "higgsfield_jobs": [
+        "87cabc91-8f16-4928-9400-dd238f7ed083"
+      ]
+    },
+    {
+      "id": "travertino-romano-banhos",
+      "nome": "Travertino Romano claro dos banhos",
+      "categoria": "pisos-internos",
+      "arquivo": "04-materiais/pisos-internos/travertino-romano-banhos.png",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        3.6,
+        3.6
+      ],
+      "modulo_cm": [
+        120,
+        60
+      ],
+      "modulos_xy": [
+        3,
+        6
+      ],
+      "junta_mm": 2,
+      "base_dimensional": "Paginação de representação para planta humanizada. A dimensão comercial das placas e da junta depende da confirmação executiva.",
+      "repetivel": true,
+      "aplicacao": "Amostra mais clara e neutra, ajustada à leitura dos banhos na prancha humanizada.",
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "planilha_especificacoes",
+        "legenda_miro"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho master"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 1"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 2"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 3"
+        }
+      ],
+      "origem_textura": "Base fotorealista da biblioteca anterior, calibrada pela cor e aplicação desta casa. O PNG está salvo nesta biblioteca.",
+      "modelo": "gpt_image_2",
+      "higgsfield_jobs": [
+        "87cabc91-8f16-4928-9400-dd238f7ed083"
+      ],
+      "status_aplicacao": "Leitura da prancha e da legenda. Conferência individual da revisão pendente."
+    },
+    {
+      "id": "bege-bahia-fosco",
+      "nome": "Mármore Bege Bahia fosco",
+      "categoria": "pisos-internos",
+      "arquivo": "04-materiais/pisos-internos/bege-bahia-fosco.png",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        3.6,
+        3.6
+      ],
+      "modulo_cm": [
+        60,
+        60
+      ],
+      "modulos_xy": [
+        6,
+        6
+      ],
+      "junta_mm": 3,
+      "base_dimensional": "Paginação de representação para planta humanizada. A dimensão comercial das placas e da junta depende da confirmação executiva.",
+      "repetivel": true,
+      "aplicacao": "Grão mineral fino e base creme quente, com baixa variação entre placas.",
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "planilha_especificacoes",
+        "legenda_miro"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho DCE do térreo"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Circulação externa"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Vestiário"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Ducha da sauna"
+        }
+      ],
+      "origem_textura": "Base fotorealista da biblioteca anterior, calibrada pela cor e aplicação desta casa. O PNG está salvo nesta biblioteca.",
+      "modelo": "gpt_image_2",
+      "higgsfield_jobs": [
+        "de586216-6a5a-425f-b111-2d28dac2f5e0"
+      ]
+    },
+    {
+      "id": "bege-bahia-area-externa",
+      "nome": "Bege Bahia para pisos externos",
+      "categoria": "pisos-externos",
+      "arquivo": "04-materiais/pisos-externos/bege-bahia-area-externa.png",
+      "largura_px": 2700,
+      "altura_px": 2700,
+      "amostra_m": [
+        3,
+        3
+      ],
+      "modulo_cm": null,
+      "modulos_xy": null,
+      "junta_mm": null,
+      "base_dimensional": "Amostra em metros para recorte. Mantenha a posição das juntas, pisantes e degraus do PDF.",
+      "repetivel": true,
+      "aplicacao": "Pedra clara de grão fino. Recorte a textura pelo contorno de cada peça, degrau ou patamar.",
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "planilha_especificacoes",
+        "legenda_miro",
+        "renders_3d"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck de pedra da piscina"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Bordas da piscina, do spa e da prainha"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Escada externa"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Pisantes e hall externo"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Patamar e escada de acesso"
+        }
+      ],
+      "origem_textura": "Base fotorealista da biblioteca anterior, calibrada pela cor e aplicação desta casa. O PNG está salvo nesta biblioteca.",
+      "modelo": "gpt_image_2",
+      "higgsfield_jobs": [
+        "de586216-6a5a-425f-b111-2d28dac2f5e0"
+      ],
+      "status_aplicacao": "Leitura da prancha e da legenda. Conferência individual da revisão pendente."
+    },
+    {
+      "id": "granito-marrom",
+      "nome": "Granito marrom",
+      "categoria": "pisos-internos",
+      "arquivo": "04-materiais/pisos-internos/granito-marrom.png",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        3.6,
+        3.6
+      ],
+      "modulo_cm": [
+        60,
+        60
+      ],
+      "modulos_xy": [
+        6,
+        6
+      ],
+      "junta_mm": 2,
+      "base_dimensional": "Paginação de representação para planta humanizada. A dimensão comercial das placas e da junta depende da confirmação executiva.",
+      "repetivel": true,
+      "aplicacao": "Acabamento marrom de grão miúdo, conforme o render da planta. Tom e acabamento da revisão visual.",
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "planilha_especificacoes",
+        "legenda_miro",
+        "renders_3d"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Gourmet coberto"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho gourmet"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Louceiro"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Despensa"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço descoberta"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Faixa pavimentada junto à garagem"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Quarto DCE 1"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho DCE"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Depósito e casa de máquinas"
+        }
+      ],
+      "origem_textura": "Base fotorealista da biblioteca anterior, calibrada pela cor e aplicação desta casa. O PNG está salvo nesta biblioteca.",
+      "modelo": "gpt_image_2",
+      "higgsfield_jobs": [
+        "1b0bdaf6-85e1-447d-b803-c2c43c65c25f"
+      ]
+    },
+    {
+      "id": "pedra-portuguesa-caramelo",
+      "nome": "Pedra portuguesa caramelo",
+      "categoria": "pisos-externos",
+      "arquivo": "04-materiais/pisos-externos/pedra-portuguesa-caramelo.png",
+      "largura_px": 2700,
+      "altura_px": 2700,
+      "amostra_m": [
+        3,
+        3
+      ],
+      "modulo_cm": null,
+      "modulos_xy": null,
+      "junta_mm": null,
+      "base_dimensional": "Amostra de 3 m com peças irregulares de escala aproximada.",
+      "repetivel": true,
+      "aplicacao": "Pedras pequenas em paginação orgânica, conforme a referência de acesso no Miro.",
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "miro_acessos",
+        "miro_pedra_portuguesa"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Rampa veicular · opção indicada na revisão geral"
+        }
+      ],
+      "origem_textura": "Base fotorealista da biblioteca anterior, calibrada pela cor e aplicação desta casa. O PNG está salvo nesta biblioteca.",
+      "modelo": "gpt_image_2",
+      "higgsfield_jobs": [
+        "3926f226-53a1-4a8e-8805-292f54b829eb"
+      ],
+      "status_aplicacao": "Opção indicada na revisão geral dos acessos. A prancha mostra a faixa da garagem com aparência marrom."
+    },
+    {
+      "id": "barlavento-fundo",
+      "nome": "Barlavento · fundo seco",
+      "categoria": "piscina-e-areas-molhadas",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/barlavento-fundo.png",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        4.64,
+        4.64
+      ],
+      "modulo_cm": [
+        14.5,
+        14.5
+      ],
+      "modulos_xy": [
+        32,
+        32
+      ],
+      "junta_mm": 1.8,
+      "base_dimensional": "Formato de referência Portobello. Junta de representação.",
+      "repetivel": true,
+      "aplicacao": "Base cinza-esverdeada para compor a água separadamente.",
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "legenda_miro",
+        "barlavento_portobello"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Piscina"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Spa"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Prainha"
+        }
+      ],
+      "grupo_paginacao": "barlavento-piscinas-casa-d",
+      "origem_modulo_m": [
+        0,
+        0
+      ],
+      "origem_textura": "Malha Barlavento calibrada anteriormente. Cor e reflexos da água foram ajustados para esta casa."
+    },
+    {
+      "id": "barlavento-agua-funda",
+      "nome": "Barlavento · água da parte funda",
+      "categoria": "piscina-e-areas-molhadas",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/barlavento-agua-funda.png",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        4.64,
+        4.64
+      ],
+      "modulo_cm": [
+        14.5,
+        14.5
+      ],
+      "modulos_xy": [
+        32,
+        32
+      ],
+      "junta_mm": 1.8,
+      "base_dimensional": "Formato de referência Portobello. Junta de representação.",
+      "repetivel": true,
+      "aplicacao": "Água azul-petróleo com reflexos suaves calibrados pelo render.",
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "legenda_miro",
+        "barlavento_portobello"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Piscina"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Spa"
+        }
+      ],
+      "grupo_paginacao": "barlavento-piscinas-casa-d",
+      "origem_modulo_m": [
+        0,
+        0
+      ],
+      "origem_textura": "Malha Barlavento calibrada anteriormente. Cor e reflexos da água foram ajustados para esta casa."
+    },
+    {
+      "id": "barlavento-prainha",
+      "nome": "Barlavento · água da prainha",
+      "categoria": "piscina-e-areas-molhadas",
+      "arquivo": "04-materiais/piscina-e-areas-molhadas/barlavento-prainha.png",
+      "largura_px": 3072,
+      "altura_px": 3072,
+      "amostra_m": [
+        4.64,
+        4.64
+      ],
+      "modulo_cm": [
+        14.5,
+        14.5
+      ],
+      "modulos_xy": [
+        32,
+        32
+      ],
+      "junta_mm": 1.8,
+      "base_dimensional": "Formato de referência Portobello. Junta de representação.",
+      "repetivel": true,
+      "aplicacao": "Água rasa mais clara com a mesma malha da parte funda.",
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "legenda_miro",
+        "barlavento_portobello"
+      ],
+      "ambientes": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Prainha"
+        }
+      ],
+      "grupo_paginacao": "barlavento-piscinas-casa-d",
+      "origem_modulo_m": [
+        0,
+        0
+      ],
+      "origem_textura": "Malha Barlavento calibrada anteriormente. Cor e reflexos da água foram ajustados para esta casa."
+    }
+  ],
+  "formato": "PNG RGBA para objetos, PNG RGB para materiais",
+  "objetos": [
+    {
+      "lote": "de-acabamentos-banhos",
+      "objeto": "bancada-dupla-quartzito-aura",
+      "nome": "Bancada dupla de quartzito Aura",
+      "descricao_visual": "Long satin ivory-grey quartzite slab with two integrated sculpted rectangular basins, delicate diagonal warm-gray mineral seams on counter and inside the sinks, and two tiny chrome taps",
+      "largura_px": 699,
+      "altura_px": 324,
+      "silhueta_px": [
+        675,
+        300
+      ],
+      "higgsfield_job": "e1bb5d3b-8083-4d08-ba96-86b3ee85b60e",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho master",
+          "arquivo": "02-terreo/banho-master/bancada-dupla-quartzito-aura.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield com referências de acabamento das Casas D e E",
+      "referencia_acabamento": "Quartzito Aura indicado na apresentação de banheiros. Veios aproximados a partir da amostra.",
+      "preferencia": "Usar para o acabamento indicado na apresentação de banheiros."
+    },
+    {
+      "lote": "de-acabamentos-banhos",
+      "objeto": "bancada-simples-quartzito-aura",
+      "nome": "Bancada de uma cuba em quartzito Aura",
+      "descricao_visual": "A medium satin ivory-grey quartzite worktop with one carved rectangular integrated basin in the center, soft diagonal taupe-grey mineral seams and one chrome tap",
+      "largura_px": 540,
+      "altura_px": 328,
+      "silhueta_px": [
+        516,
+        304
+      ],
+      "higgsfield_job": "e1bb5d3b-8083-4d08-ba96-86b3ee85b60e",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 1",
+          "arquivo": "02-terreo/banho-1/bancada-simples-quartzito-aura.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 2",
+          "arquivo": "02-terreo/banho-2/bancada-simples-quartzito-aura.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 3",
+          "arquivo": "02-terreo/banho-3/bancada-simples-quartzito-aura.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield com referências de acabamento das Casas D e E",
+      "referencia_acabamento": "Quartzito Aura indicado na apresentação de banheiros. Veios aproximados a partir da amostra.",
+      "preferencia": "Usar para o acabamento indicado na apresentação de banheiros."
+    },
+    {
+      "lote": "de-acabamentos-banhos",
+      "objeto": "cuba-travertino-gourmet",
+      "nome": "Cuba esculpida em travertino do banho gourmet",
+      "descricao_visual": "One cream beige honed travertine vanity with a carved rectangular basin, pores and slender sediment lines, and a small chrome tap",
+      "largura_px": 584,
+      "altura_px": 299,
+      "silhueta_px": [
+        560,
+        275
+      ],
+      "higgsfield_job": "e1bb5d3b-8083-4d08-ba96-86b3ee85b60e",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho gourmet",
+          "arquivo": "02-terreo/banho-gourmet/cuba-travertino-gourmet.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield com referências de acabamento das Casas D e E"
+    },
+    {
+      "lote": "de-acabamentos-banhos",
+      "objeto": "tampo-tabaco-vestiario",
+      "nome": "Tampo em granito Marrom Tabaco escovado",
+      "descricao_visual": "One separate empty rectangular worktop slab with square corners in brushed warm dark brown Marrom Tabaco granite with subtle natural light and dark mineral speckling",
+      "largura_px": 625,
+      "altura_px": 341,
+      "silhueta_px": [
+        601,
+        317
+      ],
+      "higgsfield_job": "e1bb5d3b-8083-4d08-ba96-86b3ee85b60e",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Vestiário",
+          "arquivo": "01-subsolo/vestiario/tampo-tabaco-vestiario.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield com referências de acabamento das Casas D e E"
+    },
+    {
+      "lote": "de-acabamentos-banhos",
+      "objeto": "cuba-travertino-vestiario",
+      "nome": "Cuba compacta em travertino do vestiário",
+      "descricao_visual": "A compact squared pale satin travertine worktop with one small rectangular recessed sink and a short polished chrome tap",
+      "largura_px": 313,
+      "altura_px": 339,
+      "silhueta_px": [
+        289,
+        315
+      ],
+      "higgsfield_job": "e1bb5d3b-8083-4d08-ba96-86b3ee85b60e",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Vestiário",
+          "arquivo": "01-subsolo/vestiario/cuba-travertino-vestiario.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield com referências de acabamento das Casas D e E"
+    },
+    {
+      "lote": "de-acabamentos-banhos",
+      "objeto": "banco-travertino-tabaco-sauna",
+      "nome": "Banco de sauna com travertino e Marrom Tabaco",
+      "descricao_visual": "One elongated rectilinear two-level sauna seat finished in pale cream naturally porous travertine with a narrow brushed brown Marrom Tabaco granite accent along one edge. No walls or room",
+      "largura_px": 630,
+      "altura_px": 297,
+      "silhueta_px": [
+        606,
+        273
+      ],
+      "higgsfield_job": "e1bb5d3b-8083-4d08-ba96-86b3ee85b60e",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna",
+          "arquivo": "01-subsolo/sauna/banco-travertino-tabaco-sauna.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield com referências de acabamento das Casas D e E"
+    },
+    {
+      "lote": "d-estar-hall",
+      "objeto": "sofa-living-d",
+      "nome": "Sofá de linho do living",
+      "descricao_visual": "One wide low three-seat cream linen lounge sofa with subtly rounded front corners, flat loose scatter cushions and broad block arms as in the Casa D render",
+      "largura_px": 783,
+      "altura_px": 320,
+      "silhueta_px": [
+        759,
+        296
+      ],
+      "higgsfield_job": "9aa5b97d-61f8-4f07-b2d0-f77a22688896",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Living",
+          "arquivo": "02-terreo/living/sofa-living-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-estar-hall",
+      "objeto": "poltrona-concha-d",
+      "nome": "Poltrona concha de linho",
+      "descricao_visual": "One modern ivory lounge chair with cocoon-shaped rounded back, slightly broad taupe seat, soft seams, all legs hidden",
+      "largura_px": 385,
+      "altura_px": 424,
+      "silhueta_px": [
+        361,
+        400
+      ],
+      "higgsfield_job": "9aa5b97d-61f8-4f07-b2d0-f77a22688896",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Living",
+          "arquivo": "02-terreo/living/poltrona-concha-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet",
+          "arquivo": "02-terreo/varanda-gourmet/poltrona-concha-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-estar-hall",
+      "objeto": "mesa-centro-circular-d",
+      "nome": "Mesa de centro redonda de madeira",
+      "descricao_visual": "One circular walnut coffee table top with a fine dark raised rim and rounded natural grain, no tabletop accessories",
+      "largura_px": 409,
+      "altura_px": 410,
+      "silhueta_px": [
+        385,
+        386
+      ],
+      "higgsfield_job": "9aa5b97d-61f8-4f07-b2d0-f77a22688896",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Living",
+          "arquivo": "02-terreo/living/mesa-centro-circular-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-estar-hall",
+      "objeto": "mesa-centro-seixo-d",
+      "nome": "Mesa de centro orgânica complementar",
+      "descricao_visual": "One low cream honed stone rounded organic coffee table, small soft asymmetrical round shape and restrained mineral grain",
+      "largura_px": 411,
+      "altura_px": 378,
+      "silhueta_px": [
+        387,
+        354
+      ],
+      "higgsfield_job": "9aa5b97d-61f8-4f07-b2d0-f77a22688896",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Living",
+          "arquivo": "02-terreo/living/mesa-centro-seixo-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet",
+          "arquivo": "02-terreo/varanda-gourmet/mesa-centro-seixo-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-estar-hall",
+      "objeto": "mesa-jantar-longa-d",
+      "nome": "Mesa longa de jantar em madeira",
+      "descricao_visual": "One long honey-toned rectangular dining table top, subtle softened corners and fine timber grain, empty, no chairs",
+      "largura_px": 776,
+      "altura_px": 354,
+      "silhueta_px": [
+        752,
+        330
+      ],
+      "higgsfield_job": "9aa5b97d-61f8-4f07-b2d0-f77a22688896",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jantar",
+          "arquivo": "02-terreo/jantar/mesa-jantar-longa-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-estar-hall",
+      "objeto": "cadeira-jantar-linho-d",
+      "nome": "Cadeira de jantar em madeira e linho",
+      "descricao_visual": "One natural light walnut chair with rounded low timber back and light linen upholstered seat, hide legs underneath in exact overhead view",
+      "largura_px": 372,
+      "altura_px": 435,
+      "silhueta_px": [
+        348,
+        411
+      ],
+      "higgsfield_job": "9aa5b97d-61f8-4f07-b2d0-f77a22688896",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jantar",
+          "arquivo": "02-terreo/jantar/cadeira-jantar-linho-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-gourmet-servico",
+      "objeto": "sofa-curvo-gourmet-d",
+      "nome": "Sofá curvo claro da varanda gourmet",
+      "descricao_visual": "One wide shallow crescent sofa with creamy outdoor woven upholstery and rounded symmetrical front, large plump cushions",
+      "largura_px": 689,
+      "altura_px": 331,
+      "silhueta_px": [
+        665,
+        307
+      ],
+      "higgsfield_job": "1ac91ec9-6820-4531-bc7c-90b23cf4b9d8",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet",
+          "arquivo": "02-terreo/varanda-gourmet/sofa-curvo-gourmet-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-gourmet-servico",
+      "objeto": "mesa-redonda-gourmet-d",
+      "nome": "Mesa redonda da varanda gourmet",
+      "descricao_visual": "One compact circular warm walnut teak dining top, natural fine grain, empty, no chairs or decorations",
+      "largura_px": 445,
+      "altura_px": 453,
+      "silhueta_px": [
+        421,
+        429
+      ],
+      "higgsfield_job": "1ac91ec9-6820-4531-bc7c-90b23cf4b9d8",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet",
+          "arquivo": "02-terreo/varanda-gourmet/mesa-redonda-gourmet-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-gourmet-servico",
+      "objeto": "cadeira-gourmet-fibra-d",
+      "nome": "Cadeira externa de fibra",
+      "descricao_visual": "One compact taupe woven outdoor chair with curved rattan backrest and neutral seat cushion, hide all legs under seat",
+      "largura_px": 366,
+      "altura_px": 372,
+      "silhueta_px": [
+        342,
+        348
+      ],
+      "higgsfield_job": "1ac91ec9-6820-4531-bc7c-90b23cf4b9d8",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet",
+          "arquivo": "02-terreo/varanda-gourmet/cadeira-gourmet-fibra-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-gourmet-servico",
+      "objeto": "tampo-gourmet-tabaco-d",
+      "nome": "Tampo de granito Marrom Tabaco",
+      "descricao_visual": "One long horizontal rectangular polished warm deep tobacco granite worktop slab with subtle mineral grain. Plain empty top with square edges",
+      "largura_px": 708,
+      "altura_px": 357,
+      "silhueta_px": [
+        684,
+        333
+      ],
+      "higgsfield_job": "1ac91ec9-6820-4531-bc7c-90b23cf4b9d8",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Gourmet",
+          "arquivo": "02-terreo/gourmet/tampo-gourmet-tabaco-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-gourmet-servico",
+      "objeto": "ilha-cozinha-clara-d",
+      "nome": "Ilha clara da cozinha",
+      "descricao_visual": "One large simple horizontal rectangular warm white engineered stone counter, matte ivory finely grained top, empty",
+      "largura_px": 670,
+      "altura_px": 399,
+      "silhueta_px": [
+        646,
+        375
+      ],
+      "higgsfield_job": "1ac91ec9-6820-4531-bc7c-90b23cf4b9d8",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/ilha-cozinha-clara-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-gourmet-servico",
+      "objeto": "banqueta-gourmet-d",
+      "nome": "Banqueta alta em madeira",
+      "descricao_visual": "One small high stool with round honey wood seat and a shallow gray-taupe crescent back, very small footprint, feet entirely under seat",
+      "largura_px": 336,
+      "altura_px": 362,
+      "silhueta_px": [
+        312,
+        338
+      ],
+      "higgsfield_job": "1ac91ec9-6820-4531-bc7c-90b23cf4b9d8",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Gourmet",
+          "arquivo": "02-terreo/gourmet/banqueta-gourmet-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/banqueta-gourmet-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-sala-intima-escritorio",
+      "objeto": "sofa-intimo-l-d",
+      "nome": "Sofá em L da sala íntima",
+      "descricao_visual": "One very compact cream upholstered modular L sofa with thick soft cushions and a short right chaise from the floor plan",
+      "largura_px": 623,
+      "altura_px": 399,
+      "silhueta_px": [
+        599,
+        375
+      ],
+      "higgsfield_job": "5b491c47-6aca-4cff-a405-e582e4a45517",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala íntima",
+          "arquivo": "02-terreo/sala-intima/sofa-intimo-l-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-sala-intima-escritorio",
+      "objeto": "poltrona-verde-intima-d",
+      "nome": "Poltrona oliva da sala íntima",
+      "descricao_visual": "One small rounded velvet chair in dark muted olive green, subdued saturation, padded curved back and realistic circular seat, top view only",
+      "largura_px": 317,
+      "altura_px": 351,
+      "silhueta_px": [
+        293,
+        327
+      ],
+      "higgsfield_job": "5b491c47-6aca-4cff-a405-e582e4a45517",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala íntima",
+          "arquivo": "02-terreo/sala-intima/poltrona-verde-intima-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-sala-intima-escritorio",
+      "objeto": "mesa-intima-redonda-d",
+      "nome": "Mesa de centro da sala íntima",
+      "descricao_visual": "One small honey timber circular coffee table with subtly concentric grain, flat unobstructed top",
+      "largura_px": 364,
+      "altura_px": 371,
+      "silhueta_px": [
+        340,
+        347
+      ],
+      "higgsfield_job": "5b491c47-6aca-4cff-a405-e582e4a45517",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala íntima",
+          "arquivo": "02-terreo/sala-intima/mesa-intima-redonda-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-sala-intima-escritorio",
+      "objeto": "tapete-intimo-d",
+      "nome": "Tapete de trama clara da sala íntima",
+      "descricao_visual": "One rectilinear pale greige woven low-pile rug with a simple natural texture, no accessories",
+      "largura_px": 545,
+      "altura_px": 378,
+      "silhueta_px": [
+        521,
+        354
+      ],
+      "higgsfield_job": "5b491c47-6aca-4cff-a405-e582e4a45517",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala íntima",
+          "arquivo": "02-terreo/sala-intima/tapete-intimo-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-sala-intima-escritorio",
+      "objeto": "mesa-escritorio-d",
+      "nome": "Mesa da suíte escritório",
+      "descricao_visual": "One rectangular elegant warm walnut wood executive desktop, softly rounded edges, plain empty top",
+      "largura_px": 537,
+      "altura_px": 309,
+      "silhueta_px": [
+        513,
+        285
+      ],
+      "higgsfield_job": "5b491c47-6aca-4cff-a405-e582e4a45517",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 3 e escritório",
+          "arquivo": "02-terreo/suite-3-e-escritorio/mesa-escritorio-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-sala-intima-escritorio",
+      "objeto": "sofa-escritorio-d",
+      "nome": "Sofá reto da suíte escritório",
+      "descricao_visual": "One compact two-seat sofa upholstered in warm ivory woven linen, two cream cushions and subtle short squared arms, strictly overhead",
+      "largura_px": 525,
+      "altura_px": 331,
+      "silhueta_px": [
+        501,
+        307
+      ],
+      "higgsfield_job": "5b491c47-6aca-4cff-a405-e582e4a45517",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 3 e escritório",
+          "arquivo": "02-terreo/suite-3-e-escritorio/sofa-escritorio-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-dormitorios",
+      "objeto": "cama-master-d",
+      "nome": "Cama king da suíte master",
+      "descricao_visual": "One king bed with light ivory sheets, taupe runner and two plus two ivory pillows, softly padded sand headboard, restrained fabrics seen from exactly above",
+      "largura_px": 532,
+      "altura_px": 574,
+      "silhueta_px": [
+        508,
+        550
+      ],
+      "higgsfield_job": "635bd617-bf34-4fb0-8d91-e34663e279d7",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte master",
+          "arquivo": "02-terreo/suite-master/cama-master-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-dormitorios",
+      "objeto": "cama-casal-d",
+      "nome": "Cama de casal em linho claro",
+      "descricao_visual": "One queen bed in cream cotton and pale walnut low headboard, folded subtle sand fabric and two pillows, neutral and realistic",
+      "largura_px": 396,
+      "altura_px": 537,
+      "silhueta_px": [
+        372,
+        513
+      ],
+      "higgsfield_job": "635bd617-bf34-4fb0-8d91-e34663e279d7",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 1",
+          "arquivo": "02-terreo/suite-1/cama-casal-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 2",
+          "arquivo": "02-terreo/suite-2/cama-casal-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-dormitorios",
+      "objeto": "criado-lateral-d",
+      "nome": "Criado lateral de madeira",
+      "descricao_visual": "One compact rectangular walnut bedside tabletop, softly eased edges and visible natural grain, no accessories",
+      "largura_px": 349,
+      "altura_px": 319,
+      "silhueta_px": [
+        325,
+        295
+      ],
+      "higgsfield_job": "635bd617-bf34-4fb0-8d91-e34663e279d7",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte master",
+          "arquivo": "02-terreo/suite-master/criado-lateral-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 1",
+          "arquivo": "02-terreo/suite-1/criado-lateral-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 2",
+          "arquivo": "02-terreo/suite-2/criado-lateral-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-dormitorios",
+      "objeto": "armario-cabides-d",
+      "nome": "Módulo de closet com cabides",
+      "descricao_visual": "One slim long straight beige closet bay with natural wooden hangers, a few folded light neutral fabrics, a visible rail in architectural plan cut",
+      "largura_px": 587,
+      "altura_px": 166,
+      "silhueta_px": [
+        563,
+        142
+      ],
+      "higgsfield_job": "635bd617-bf34-4fb0-8d91-e34663e279d7",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Closet master",
+          "arquivo": "02-terreo/closet-master/armario-cabides-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 1",
+          "arquivo": "02-terreo/suite-1/armario-cabides-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 2",
+          "arquivo": "02-terreo/suite-2/armario-cabides-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 3 e escritório",
+          "arquivo": "02-terreo/suite-3-e-escritorio/armario-cabides-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-dormitorios",
+      "objeto": "cama-solteiro-d",
+      "nome": "Cama de solteiro da área de serviço",
+      "descricao_visual": "One compact single bed with cream linens, a dark muted burgundy runner only on the lower portion and a thin taupe headboard",
+      "largura_px": 235,
+      "altura_px": 456,
+      "silhueta_px": [
+        211,
+        432
+      ],
+      "higgsfield_job": "635bd617-bf34-4fb0-8d91-e34663e279d7",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Quarto DCE",
+          "arquivo": "02-terreo/quarto-dce/cama-solteiro-d.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Quarto DCE 1",
+          "arquivo": "01-subsolo/quarto-dce-1/cama-solteiro-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-dormitorios",
+      "objeto": "banco-peseira-d",
+      "nome": "Banco de peseira em linho",
+      "descricao_visual": "One narrow long rectilinear bench with neutral cream woven cushioned top and no exposed legs",
+      "largura_px": 412,
+      "altura_px": 158,
+      "silhueta_px": [
+        388,
+        134
+      ],
+      "higgsfield_job": "635bd617-bf34-4fb0-8d91-e34663e279d7",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte master",
+          "arquivo": "02-terreo/suite-master/banco-peseira-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 1",
+          "arquivo": "02-terreo/suite-1/banco-peseira-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 2",
+          "arquivo": "02-terreo/suite-2/banco-peseira-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "renders_3d"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-banhos",
+      "objeto": "cuba-master-dupla-d",
+      "nome": "Bancada dupla do banho master · variante em pedra bege",
+      "descricao_visual": "One slim elongated matte ivory travertine vanity top with exactly two white carved rectangular troughs and two separate brushed chrome taps, no other objects",
+      "largura_px": 794,
+      "altura_px": 263,
+      "silhueta_px": [
+        770,
+        239
+      ],
+      "higgsfield_job": "707b8610-a0c5-430d-bd78-75833c0b82ab",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho master",
+          "arquivo": "02-terreo/banho-master/cuba-master-dupla-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D",
+      "referencia_acabamento": "Variante visual em pedra bege. Para os banhos de suítes, consulte as bancadas de quartzito Aura."
+    },
+    {
+      "lote": "d-banhos",
+      "objeto": "cuba-social-d",
+      "nome": "Cuba esculpida dos banhos · variante em pedra bege",
+      "descricao_visual": "One rectangular pale neutral cream stone vanity slab with one small rectangular sculpted washbasin and one chrome mixer; overhead only",
+      "largura_px": 559,
+      "altura_px": 288,
+      "silhueta_px": [
+        535,
+        264
+      ],
+      "higgsfield_job": "707b8610-a0c5-430d-bd78-75833c0b82ab",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 1",
+          "arquivo": "02-terreo/banho-1/cuba-social-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 2",
+          "arquivo": "02-terreo/banho-2/cuba-social-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 3",
+          "arquivo": "02-terreo/banho-3/cuba-social-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo",
+          "arquivo": "02-terreo/lavabo/cuba-social-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho gourmet",
+          "arquivo": "02-terreo/banho-gourmet/cuba-social-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D",
+      "referencia_acabamento": "Variante visual em pedra bege. Para os banhos de suítes, consulte as bancadas de quartzito Aura."
+    },
+    {
+      "lote": "d-banhos",
+      "objeto": "cuba-dce-gabriel-d",
+      "nome": "Cuba DCE com tampo São Gabriel",
+      "descricao_visual": "One small compact bright white porcelain square basin inset in a black near-matte fine-grained black granite rectangle with polished chrome faucet",
+      "largura_px": 307,
+      "altura_px": 284,
+      "silhueta_px": [
+        283,
+        260
+      ],
+      "higgsfield_job": "707b8610-a0c5-430d-bd78-75833c0b82ab",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho DCE",
+          "arquivo": "02-terreo/banho-dce/cuba-dce-gabriel-d.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho DCE",
+          "arquivo": "01-subsolo/banho-dce/cuba-dce-gabriel-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-banhos",
+      "objeto": "cuba-vestiario-d",
+      "nome": "Cuba do vestiário",
+      "descricao_visual": "One compact pale warm cream stone countertop with a small carved basin and short chrome mixer tap, from strictly overhead",
+      "largura_px": 410,
+      "altura_px": 273,
+      "silhueta_px": [
+        386,
+        249
+      ],
+      "higgsfield_job": "707b8610-a0c5-430d-bd78-75833c0b82ab",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Vestiário",
+          "arquivo": "01-subsolo/vestiario/cuba-vestiario-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-banhos",
+      "objeto": "banco-sauna-d",
+      "nome": "Banco de sauna em travertino",
+      "descricao_visual": "One long rectilinear low sauna bench in cream limestone, two parallel levels with a single horizontal divider, realistic matte stone grain",
+      "largura_px": 695,
+      "altura_px": 275,
+      "silhueta_px": [
+        671,
+        251
+      ],
+      "higgsfield_job": "707b8610-a0c5-430d-bd78-75833c0b82ab",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna",
+          "arquivo": "01-subsolo/sauna/banco-sauna-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-banhos",
+      "objeto": "cabine-elevador-d",
+      "nome": "Cabine de elevador em aço",
+      "descricao_visual": "One compact square brushed stainless elevator interior as seen exactly from overhead, open ceiling gray inset floor and slim steel sill",
+      "largura_px": 409,
+      "altura_px": 424,
+      "silhueta_px": [
+        385,
+        400
+      ],
+      "higgsfield_job": "707b8610-a0c5-430d-bd78-75833c0b82ab",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Elevador",
+          "arquivo": "01-subsolo/elevador/cabine-elevador-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Elevador",
+          "arquivo": "02-terreo/elevador/cabine-elevador-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-lazer-apoio",
+      "objeto": "espreguicadeira-deck-d",
+      "nome": "Espreguiçadeira de linho externo",
+      "descricao_visual": "One slender natural teak outdoor deck lounger with lightly woven oatmeal full-length cushion and separate padded head section, isolated no water",
+      "largura_px": 218,
+      "altura_px": 520,
+      "silhueta_px": [
+        194,
+        496
+      ],
+      "higgsfield_job": "eca6e1c4-22b1-4300-9e36-476431cff2fc",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina",
+          "arquivo": "02-terreo/deck-da-piscina/espreguicadeira-deck-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-lazer-apoio",
+      "objeto": "vaso-baixo-deck-d",
+      "nome": "Vaso de cerâmica do deck",
+      "descricao_visual": "One circular empty warm taupe natural glazed ceramic planter in direct top view with a thin rim and soft earthy mineral texture",
+      "largura_px": 326,
+      "altura_px": 336,
+      "silhueta_px": [
+        302,
+        312
+      ],
+      "higgsfield_job": "eca6e1c4-22b1-4300-9e36-476431cff2fc",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina",
+          "arquivo": "02-terreo/deck-da-piscina/vaso-baixo-deck-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-lazer-apoio",
+      "objeto": "apoio-louceiro-d",
+      "nome": "Módulo aberto de louceiro",
+      "descricao_visual": "One narrow rectangular low-saturation warm neutral open storage shelf top cut in plan, with evenly spaced shelves and no clutter",
+      "largura_px": 183,
+      "altura_px": 524,
+      "silhueta_px": [
+        159,
+        500
+      ],
+      "higgsfield_job": "eca6e1c4-22b1-4300-9e36-476431cff2fc",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Louceiro",
+          "arquivo": "02-terreo/louceiro/apoio-louceiro-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Despensa",
+          "arquivo": "02-terreo/despensa/apoio-louceiro-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-lazer-apoio",
+      "objeto": "tampo-servico-d",
+      "nome": "Bancada de granito da área de serviço",
+      "descricao_visual": "One slim long near-black granite worktop slab with tiny dense grains, quiet satin not mirror bright, empty no accessories",
+      "largura_px": 612,
+      "altura_px": 181,
+      "silhueta_px": [
+        588,
+        157
+      ],
+      "higgsfield_job": "eca6e1c4-22b1-4300-9e36-476431cff2fc",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço",
+          "arquivo": "02-terreo/area-de-servico/tampo-servico-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-lazer-apoio",
+      "objeto": "ralo-escovado-d",
+      "nome": "Ralo de aço escovado",
+      "descricao_visual": "One small square chromium steel shower drain grate, flat directly overhead and without any surrounding floor",
+      "largura_px": 214,
+      "altura_px": 207,
+      "silhueta_px": [
+        190,
+        183
+      ],
+      "higgsfield_job": "eca6e1c4-22b1-4300-9e36-476431cff2fc",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Vestiário",
+          "arquivo": "01-subsolo/vestiario/ralo-escovado-d.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna",
+          "arquivo": "01-subsolo/sauna/ralo-escovado-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho master",
+          "arquivo": "02-terreo/banho-master/ralo-escovado-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 1",
+          "arquivo": "02-terreo/banho-1/ralo-escovado-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 2",
+          "arquivo": "02-terreo/banho-2/ralo-escovado-d.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 3",
+          "arquivo": "02-terreo/banho-3/ralo-escovado-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas",
+        "apresentacao_banheiros",
+        "caderno_especificacoes"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "lote": "d-lazer-apoio",
+      "objeto": "banco-apoio-academia-d",
+      "nome": "Banco de apoio da academia",
+      "descricao_visual": "One slim long straight low rectangular exercise rest bench with tight taupe dark gray padded top and soft realistic stitching, no gym equipment attached",
+      "largura_px": 591,
+      "altura_px": 152,
+      "silhueta_px": [
+        567,
+        128
+      ],
+      "higgsfield_job": "eca6e1c4-22b1-4300-9e36-476431cff2fc",
+      "modelo": "gpt_image_2",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/banco-apoio-academia-d.png"
+        }
+      ],
+      "referencias": [
+        "pranchas_do_usuario",
+        "pranchas_humanizadas"
+      ],
+      "origem": "Gerado no Higgsfield para a Casa D"
+    },
+    {
+      "descricao_visual": "Esteira grafite",
+      "largura_px": 287,
+      "altura_px": 630,
+      "silhueta_px": [
+        263,
+        606
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "objeto": "esteira-a",
+      "nome": "Esteira grafite",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/esteira-a.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "01-subsolo/academia/esteira-a.png"
+    },
+    {
+      "descricao_visual": "Esteira grafite com acabamento em alumínio",
+      "largura_px": 257,
+      "altura_px": 623,
+      "silhueta_px": [
+        233,
+        599
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "objeto": "esteira-b",
+      "nome": "Esteira grafite com detalhe em alumínio",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/esteira-b.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "01-subsolo/academia/esteira-b.png"
+    },
+    {
+      "descricao_visual": "Bicicleta ergométrica grafite",
+      "largura_px": 203,
+      "altura_px": 546,
+      "silhueta_px": [
+        179,
+        522
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "objeto": "bicicleta-a",
+      "nome": "Bicicleta ergométrica grafite",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/bicicleta-a.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "01-subsolo/academia/bicicleta-a.png"
+    },
+    {
+      "descricao_visual": "Bicicleta ergométrica grafite com guidão alternativo",
+      "largura_px": 205,
+      "altura_px": 575,
+      "silhueta_px": [
+        181,
+        551
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "objeto": "bicicleta-b",
+      "nome": "Bicicleta ergométrica alternativa",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/bicicleta-b.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "01-subsolo/academia/bicicleta-b.png"
+    },
+    {
+      "descricao_visual": "Banco de supino com suporte e barra",
+      "largura_px": 505,
+      "altura_px": 617,
+      "silhueta_px": [
+        481,
+        593
+      ],
+      "higgsfield_job": "943f2a35-2970-438d-ab11-6e8667cb58ad",
+      "modelo": "gpt_image_2",
+      "objeto": "banco-supino",
+      "nome": "Banco de supino com barra",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Academia",
+          "arquivo": "01-subsolo/academia/banco-supino.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "01-subsolo/academia/banco-supino.png"
+    },
+    {
+      "descricao_visual": "Deca Carrara P.60.17-style glossy white floor-standing toilet without cistern, seat lid closed, wall side at top; slim slightly squared front oval silhouette",
+      "largura_px": 293,
+      "altura_px": 507,
+      "silhueta_px": [
+        269,
+        483
+      ],
+      "higgsfield_job": "824e0430-9f9b-4447-875f-fdd431ccb35a",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Deca",
+        "codigo": "P.60.17",
+        "observacao": "Bacia Carrara branca. A válvula de descarga é um item distinto no caderno."
+      },
+      "objeto": "bacia-carrara",
+      "nome": "Bacia branca modelo Carrara",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho master",
+          "arquivo": "02-terreo/banho-master/bacia-carrara.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 1",
+          "arquivo": "02-terreo/banho-1/bacia-carrara.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 2",
+          "arquivo": "02-terreo/banho-2/bacia-carrara.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 3",
+          "arquivo": "02-terreo/banho-3/bacia-carrara.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo",
+          "arquivo": "02-terreo/lavabo/bacia-carrara.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho gourmet",
+          "arquivo": "02-terreo/banho-gourmet/bacia-carrara.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Vestiário",
+          "arquivo": "01-subsolo/vestiario/bacia-carrara.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/banho-master/bacia-carrara.png"
+    },
+    {
+      "descricao_visual": "rectangular ivory quartz countertop with single white rectangular basin and subtle small chrome mixer at rear, horizontal",
+      "largura_px": 555,
+      "altura_px": 408,
+      "silhueta_px": [
+        531,
+        384
+      ],
+      "higgsfield_job": "824e0430-9f9b-4447-875f-fdd431ccb35a",
+      "modelo": "gpt_image_2",
+      "objeto": "cuba-quartzo",
+      "nome": "Cuba com tampo de quartzo claro",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho master",
+          "arquivo": "02-terreo/banho-master/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 1",
+          "arquivo": "02-terreo/banho-1/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 2",
+          "arquivo": "02-terreo/banho-2/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 3",
+          "arquivo": "02-terreo/banho-3/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo",
+          "arquivo": "02-terreo/lavabo/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho gourmet",
+          "arquivo": "02-terreo/banho-gourmet/cuba-quartzo.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Vestiário",
+          "arquivo": "01-subsolo/vestiario/cuba-quartzo.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/banho-master/cuba-quartzo.png"
+    },
+    {
+      "descricao_visual": "single square thin chrome ceiling rain shower plate, Deca 1992.C.TET style, visible array of subtle dots, perfectly square and straight",
+      "largura_px": 376,
+      "altura_px": 384,
+      "silhueta_px": [
+        352,
+        360
+      ],
+      "higgsfield_job": "824e0430-9f9b-4447-875f-fdd431ccb35a",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Deca",
+        "codigo": "1992.C.TET",
+        "observacao": "Chuveiro quadrado com tubo de teto. Siga o símbolo e a posição do projeto."
+      },
+      "objeto": "chuveiro-quadrado",
+      "nome": "Chuveiro quadrado compacto",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho master",
+          "arquivo": "02-terreo/banho-master/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 1",
+          "arquivo": "02-terreo/banho-1/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 2",
+          "arquivo": "02-terreo/banho-2/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 3",
+          "arquivo": "02-terreo/banho-3/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho gourmet",
+          "arquivo": "02-terreo/banho-gourmet/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Vestiário",
+          "arquivo": "01-subsolo/vestiario/chuveiro-quadrado.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna",
+          "arquivo": "01-subsolo/sauna/chuveiro-quadrado.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/banho-master/chuveiro-quadrado.png"
+    },
+    {
+      "descricao_visual": "small polished chrome square shower head joined to one short centered straight chrome arm pointing straight upward to rear wall, Deca 1992.C.CT-inspired. Plate and arm only, strict overhead",
+      "largura_px": 305,
+      "altura_px": 396,
+      "silhueta_px": [
+        281,
+        372
+      ],
+      "higgsfield_job": "5694abfb-dae5-4983-89df-18b594840dea",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Deca",
+        "codigo": "1992.C.CT",
+        "observacao": "Chuveiro quadrado com tubo de parede. Siga o símbolo e a posição do projeto."
+      },
+      "objeto": "chuveiro-quadrado-parede",
+      "nome": "Chuveiro quadrado de parede",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho master",
+          "arquivo": "02-terreo/banho-master/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 1",
+          "arquivo": "02-terreo/banho-1/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 2",
+          "arquivo": "02-terreo/banho-2/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 3",
+          "arquivo": "02-terreo/banho-3/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho gourmet",
+          "arquivo": "02-terreo/banho-gourmet/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Vestiário",
+          "arquivo": "01-subsolo/vestiario/chuveiro-quadrado-parede.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna",
+          "arquivo": "01-subsolo/sauna/chuveiro-quadrado-parede.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/banho-master/chuveiro-quadrado-parede.png"
+    },
+    {
+      "descricao_visual": "top right: one small square satin brushed stainless drain grid with a fine square inner perforated grate, one single object.",
+      "largura_px": 229,
+      "altura_px": 234,
+      "silhueta_px": [
+        205,
+        210
+      ],
+      "higgsfield_job": "826f52c7-6169-4e00-b8b1-6e658841a0b8",
+      "modelo": "gpt_image_2",
+      "objeto": "ralo-quadrado-inox",
+      "nome": "Ralo quadrado em inox",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho master",
+          "arquivo": "02-terreo/banho-master/ralo-quadrado-inox.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 1",
+          "arquivo": "02-terreo/banho-1/ralo-quadrado-inox.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 2",
+          "arquivo": "02-terreo/banho-2/ralo-quadrado-inox.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho 3",
+          "arquivo": "02-terreo/banho-3/ralo-quadrado-inox.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho gourmet",
+          "arquivo": "02-terreo/banho-gourmet/ralo-quadrado-inox.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Vestiário",
+          "arquivo": "01-subsolo/vestiario/ralo-quadrado-inox.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Sauna",
+          "arquivo": "01-subsolo/sauna/ralo-quadrado-inox.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/banho-master/ralo-quadrado-inox.png"
+    },
+    {
+      "descricao_visual": "single white vitreous china Brazilian conventional floor-mounted toilet bowl, oval white lid closed, narrower flat flange at rear touches implied wall at top; bowl and seat only, no cistern or plumbing, absolutely no flush valve, Deca Monte Carlo conventional silhouette",
+      "largura_px": 282,
+      "altura_px": 404,
+      "silhueta_px": [
+        258,
+        380
+      ],
+      "higgsfield_job": "5694abfb-dae5-4983-89df-18b594840dea",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Deca",
+        "codigo": "P.8.17",
+        "observacao": "Bacia convencional Monte Carlo branca."
+      },
+      "objeto": "bacia-monte-carlo-sem-valvula",
+      "nome": "Bacia branca modelo Monte Carlo",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho DCE",
+          "arquivo": "02-terreo/banho-dce/bacia-monte-carlo-sem-valvula.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho DCE",
+          "arquivo": "01-subsolo/banho-dce/bacia-monte-carlo-sem-valvula.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/banho-de-servico/bacia-monte-carlo-sem-valvula.png"
+    },
+    {
+      "descricao_visual": "single round polished chrome Deca Acqua Plus style compact circular shower head with neat perforations, from directly above",
+      "largura_px": 362,
+      "altura_px": 365,
+      "silhueta_px": [
+        338,
+        341
+      ],
+      "higgsfield_job": "824e0430-9f9b-4447-875f-fdd431ccb35a",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Deca",
+        "codigo": "1990.C.CT.ARE",
+        "observacao": "Acqua Plus para o banho de serviço."
+      },
+      "objeto": "chuveiro-acqua-plus",
+      "nome": "Chuveiro Deca Acqua Plus · referência",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho DCE",
+          "arquivo": "02-terreo/banho-dce/chuveiro-acqua-plus.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho DCE",
+          "arquivo": "01-subsolo/banho-dce/chuveiro-acqua-plus.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/banho-de-servico/chuveiro-acqua-plus.png"
+    },
+    {
+      "descricao_visual": "bottom left: one realistic squared white compact inset china sink in a short narrow rectangular black São Gabriel granite vanity top with dark matte micro-grain, delicate chrome tap. See the service washroom architectural drawing.",
+      "largura_px": 499,
+      "altura_px": 404,
+      "silhueta_px": [
+        475,
+        380
+      ],
+      "higgsfield_job": "83faf092-2a82-4acc-9db8-c6e016f05135",
+      "modelo": "gpt_image_2",
+      "referencia_acabamento": "Opção visual compartilhada. Use a apresentação e a prancha do ambiente para escolher o acabamento.",
+      "objeto": "cuba-servico-sao-gabriel",
+      "nome": "Cuba de serviço com tampo São Gabriel",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho DCE",
+          "arquivo": "02-terreo/banho-dce/cuba-servico-sao-gabriel.png"
+        },
+        {
+          "pavimento": "Subsolo",
+          "ambiente": "Banho DCE",
+          "arquivo": "01-subsolo/banho-dce/cuba-servico-sao-gabriel.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "apresentacao_banheiros"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/banho-de-servico/cuba-servico-sao-gabriel.png"
+    },
+    {
+      "descricao_visual": "bottom right: one warm dark bronze brown low-profile toilet bowl with closed oval seat from overhead, streamlined and simple. The dark bronze surface and silhouette are inspired by the sauna washroom render. No cistern, fixtures or room.",
+      "largura_px": 350,
+      "altura_px": 487,
+      "silhueta_px": [
+        326,
+        463
+      ],
+      "higgsfield_job": "83faf092-2a82-4acc-9db8-c6e016f05135",
+      "modelo": "gpt_image_2",
+      "referencia_acabamento": "Opção visual compartilhada. Use a apresentação e a prancha do ambiente para escolher o acabamento.",
+      "objeto": "bacia-escura-render",
+      "nome": "Bacia escura do render",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Lavabo",
+          "arquivo": "02-terreo/lavabo/bacia-escura-render.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Banho gourmet",
+          "arquivo": "02-terreo/banho-gourmet/bacia-escura-render.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "apresentacao_banheiros"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/lavabo/bacia-escura-render.png"
+    },
+    {
+      "descricao_visual": "stainless steel double-bowl inset sink, two rectangular bowls with drains side by side, a short chrome faucet seen in true overhead plan as a small circle at the rear center and a tiny short silver extension over the bowls, no tall arched shape or upright front elevation",
+      "largura_px": 559,
+      "altura_px": 398,
+      "silhueta_px": [
+        535,
+        374
+      ],
+      "higgsfield_job": "b87c0cdb-8f2e-4d40-9fe8-602cc1a12e1d",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Franke",
+        "codigo": null,
+        "observacao": "Cuba de inox. O formato foi escolhido pela planta."
+      },
+      "objeto": "cuba-franke-dupla-vista-superior",
+      "nome": "Cuba dupla de inox",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/cuba-franke-dupla-vista-superior.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/cozinha/cuba-franke-dupla-vista-superior.png"
+    },
+    {
+      "descricao_visual": "top left: one polished chrome Deca 2280.C Gourmet monocommand kitchen mixer. Match the first photo only for the design silhouette. From exact straight overhead only the narrow curved chrome outlet and the circular base/control and delicate bright highlights are visible. No sink.",
+      "largura_px": 197,
+      "altura_px": 423,
+      "silhueta_px": [
+        173,
+        399
+      ],
+      "higgsfield_job": "83faf092-2a82-4acc-9db8-c6e016f05135",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Deca",
+        "codigo": "2280.C",
+        "observacao": "Misturador monocomando de mesa para a cozinha."
+      },
+      "objeto": "misturador-deca-2280",
+      "nome": "Misturador de cozinha Deca 2280.C",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/misturador-deca-2280.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/cozinha/misturador-deca-2280.png"
+    },
+    {
+      "descricao_visual": "standalone black square four-burner gas hob insert with realistic grate, with two by two burner layout, no countertop",
+      "largura_px": 332,
+      "altura_px": 310,
+      "silhueta_px": [
+        308,
+        286
+      ],
+      "higgsfield_job": "9ebe4375-788a-4de6-8b79-2d5edc8942a2",
+      "modelo": "gpt_image_2",
+      "objeto": "cooktop-quatro-bocas",
+      "nome": "Cooktop a gás de quatro bocas",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Cozinha",
+          "arquivo": "02-terreo/cozinha/cooktop-quatro-bocas.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Gourmet",
+          "arquivo": "02-terreo/gourmet/cooktop-quatro-bocas.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/cozinha/cooktop-quatro-bocas.png"
+    },
+    {
+      "descricao_visual": "rectangular dark stainless barbecue grill insert with thin parallel steel bars, long axis horizontal, no surround",
+      "largura_px": 519,
+      "altura_px": 348,
+      "silhueta_px": [
+        495,
+        324
+      ],
+      "higgsfield_job": "1e82e3f2-e913-42e7-873a-9889cbfc1525",
+      "modelo": "gpt_image_2",
+      "objeto": "grelha-churrasqueira",
+      "nome": "Grelha de churrasqueira",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Gourmet",
+          "arquivo": "02-terreo/gourmet/grelha-churrasqueira.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/varanda-gourmet/grelha-churrasqueira.png"
+    },
+    {
+      "descricao_visual": "rectangular inset stainless steel Franke-style single kitchen sink with rolled edges, chrome Deca UNIC gourmet 2282.C-style minimalist square tap at top center, no countertop outside the rim",
+      "largura_px": 555,
+      "altura_px": 440,
+      "silhueta_px": [
+        531,
+        416
+      ],
+      "higgsfield_job": "1e82e3f2-e913-42e7-873a-9889cbfc1525",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Franke",
+        "codigo": null,
+        "observacao": "Cuba de inox. O misturador do gourmet é especificado à parte como Deca 2282.C."
+      },
+      "objeto": "cuba-franke-misturador-unic",
+      "nome": "Cuba de inox com misturador",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Gourmet",
+          "arquivo": "02-terreo/gourmet/cuba-franke-misturador-unic.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/cozinha/cuba-franke-misturador-unic.png"
+    },
+    {
+      "descricao_visual": "top center: one separate polished chrome compact upright culinary single-lever mixer Deca Unic 2282.C as referenced by the second photo. Overhead view only, small footprint. No sink.",
+      "largura_px": 96,
+      "altura_px": 376,
+      "silhueta_px": [
+        72,
+        352
+      ],
+      "higgsfield_job": "83faf092-2a82-4acc-9db8-c6e016f05135",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Deca",
+        "codigo": "2282.C",
+        "observacao": "Misturador monocomando Unic para o espaço gourmet."
+      },
+      "objeto": "misturador-deca-unic-2282",
+      "nome": "Misturador do gourmet Deca Unic 2282.C",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Gourmet",
+          "arquivo": "02-terreo/gourmet/misturador-deca-unic-2282.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/varanda-gourmet/misturador-deca-unic-2282.png"
+    },
+    {
+      "descricao_visual": "bottom center: one compact white satin top-loading washer, closed slightly gray transparent lid and slim dark control strip at rear, true overhead, no frontal facade or brand.",
+      "largura_px": 288,
+      "altura_px": 434,
+      "silhueta_px": [
+        264,
+        410
+      ],
+      "higgsfield_job": "192c8fe1-057c-41d8-93b7-c4f9c22da1c8",
+      "modelo": "gpt_image_2",
+      "objeto": "lavadora-tampa-superior",
+      "nome": "Lavadora vista superior",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço",
+          "arquivo": "02-terreo/area-de-servico/lavadora-tampa-superior.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/area-de-servico/lavadora-tampa-superior.png"
+    },
+    {
+      "descricao_visual": "two inset stainless rectangular utility basins joined side by side in one unit, with chrome taps, no countertop around edge",
+      "largura_px": 498,
+      "altura_px": 349,
+      "silhueta_px": [
+        474,
+        325
+      ],
+      "higgsfield_job": "8d12e554-7f09-4675-ae82-927c5ed4a5a7",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Franke",
+        "codigo": null,
+        "observacao": "Cuba de inox para serviço. Use o desenho para escolher quantidade e posição."
+      },
+      "objeto": "tanque-duplo-inox",
+      "nome": "Tanque duplo de inox",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço",
+          "arquivo": "02-terreo/area-de-servico/tanque-duplo-inox.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/area-de-servico/tanque-duplo-inox.png"
+    },
+    {
+      "descricao_visual": "single stainless rectangular utility sink Franke style and small chrome Deca Link 1167 style faucet at the back, no countertop around edge",
+      "largura_px": 319,
+      "altura_px": 337,
+      "silhueta_px": [
+        295,
+        313
+      ],
+      "higgsfield_job": "8d12e554-7f09-4675-ae82-927c5ed4a5a7",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Franke",
+        "codigo": null,
+        "observacao": "Cuba de inox. A torneira Link 1167.C.LNK tem representação própria."
+      },
+      "objeto": "cuba-franke-inox-link",
+      "nome": "Tanque de inox com torneira",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço",
+          "arquivo": "02-terreo/area-de-servico/cuba-franke-inox-link.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/area-de-servico/cuba-franke-inox-link.png"
+    },
+    {
+      "descricao_visual": "top right: one separate slim chrome angular Link 1167.C.LNK utility faucet. Follow the short L-shaped neck and small circular base from the third photo. True overhead no side elevation, no basin.",
+      "largura_px": 137,
+      "altura_px": 438,
+      "silhueta_px": [
+        113,
+        414
+      ],
+      "higgsfield_job": "83faf092-2a82-4acc-9db8-c6e016f05135",
+      "modelo": "gpt_image_2",
+      "referencia_comercial": {
+        "marca": "Deca",
+        "codigo": "1167.C.LNK",
+        "observacao": "Torneira Link para a área de serviço."
+      },
+      "objeto": "torneira-deca-link-1167",
+      "nome": "Torneira de serviço Deca Link 1167.C.LNK",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Área de serviço",
+          "arquivo": "02-terreo/area-de-servico/torneira-deca-link-1167.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario",
+        "caderno_especificacoes",
+        "especificacoes_gerais"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/area-de-servico/torneira-deca-link-1167.png"
+    },
+    {
+      "descricao_visual": "top surface ONLY of a closed narrow straight pantry cabinet, matte warm beige lacquer, plain long horizontal rectangle with a faint seam, no handles or open shelves",
+      "largura_px": 575,
+      "altura_px": 261,
+      "silhueta_px": [
+        551,
+        237
+      ],
+      "higgsfield_job": "b87c0cdb-8f2e-4d40-9fe8-602cc1a12e1d",
+      "modelo": "gpt_image_2",
+      "objeto": "armario-despensa-fechado",
+      "nome": "Módulo fechado de despensa",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Louceiro",
+          "arquivo": "02-terreo/louceiro/armario-despensa-fechado.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Despensa",
+          "arquivo": "02-terreo/despensa/armario-despensa-fechado.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/despensa/armario-despensa-fechado.png"
+    },
+    {
+      "descricao_visual": "bottom left: one narrow long rectangular pantry cabinet section, warm light gray-beige neutral laminate, one row of three open compartments from above, clean empty storage bays, no walls or floor.",
+      "largura_px": 611,
+      "altura_px": 373,
+      "silhueta_px": [
+        587,
+        349
+      ],
+      "higgsfield_job": "826f52c7-6169-4e00-b8b1-6e658841a0b8",
+      "modelo": "gpt_image_2",
+      "objeto": "modulo-estante-aberta",
+      "nome": "Módulo de prateleiras abertas",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Louceiro",
+          "arquivo": "02-terreo/louceiro/modulo-estante-aberta.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Despensa",
+          "arquivo": "02-terreo/despensa/modulo-estante-aberta.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/louceiro/modulo-estante-aberta.png"
+    },
+    {
+      "descricao_visual": "modern premium silver sedan, straight top view, nose up, realistic glass and body panels, no visible logo",
+      "largura_px": 266,
+      "altura_px": 584,
+      "silhueta_px": [
+        242,
+        560
+      ],
+      "higgsfield_job": "ee10effc-0d6a-44f3-b689-6be3a03a5314",
+      "modelo": "gpt_image_2",
+      "objeto": "sedan-prata",
+      "nome": "Sedã prata",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem",
+          "arquivo": "02-terreo/garagem/sedan-prata.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/garagem/sedan-prata.png"
+    },
+    {
+      "descricao_visual": "modern premium white sedan, straight top view, nose up, realistic glass and body panels, no visible logo",
+      "largura_px": 244,
+      "altura_px": 547,
+      "silhueta_px": [
+        220,
+        523
+      ],
+      "higgsfield_job": "ee10effc-0d6a-44f3-b689-6be3a03a5314",
+      "modelo": "gpt_image_2",
+      "objeto": "sedan-branco",
+      "nome": "Sedã branco",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem",
+          "arquivo": "02-terreo/garagem/sedan-branco.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/garagem/sedan-branco.png"
+    },
+    {
+      "descricao_visual": "modern premium charcoal grey sedan, straight top view, nose up, realistic glass and body panels, no visible logo",
+      "largura_px": 277,
+      "altura_px": 581,
+      "silhueta_px": [
+        253,
+        557
+      ],
+      "higgsfield_job": "ee10effc-0d6a-44f3-b689-6be3a03a5314",
+      "modelo": "gpt_image_2",
+      "objeto": "sedan-chumbo",
+      "nome": "Sedã chumbo",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem",
+          "arquivo": "02-terreo/garagem/sedan-chumbo.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/garagem/sedan-chumbo.png"
+    },
+    {
+      "descricao_visual": "modern premium pearl white midsize SUV, straight top view, nose up, realistic dark glass and sunroof, no visible logo",
+      "largura_px": 298,
+      "altura_px": 596,
+      "silhueta_px": [
+        274,
+        572
+      ],
+      "higgsfield_job": "ee10effc-0d6a-44f3-b689-6be3a03a5314",
+      "modelo": "gpt_image_2",
+      "objeto": "suv-branco",
+      "nome": "SUV branco",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Garagem",
+          "arquivo": "02-terreo/garagem/suv-branco.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/garagem/suv-branco.png"
+    },
+    {
+      "descricao_visual": "bottom center: one isolated large rectangular warm light greige woven carpet, finely visible subtle alternating fibers, low pile and edges; NO furniture; plane strictly parallel to camera.",
+      "largura_px": 632,
+      "altura_px": 518,
+      "silhueta_px": [
+        608,
+        494
+      ],
+      "higgsfield_job": "059721d3-ce84-4122-a77b-eb5819a7d5f9",
+      "modelo": "gpt_image_2",
+      "objeto": "tapete-estar-trama-clara",
+      "nome": "Tapete retangular de trama clara",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Living",
+          "arquivo": "02-terreo/living/tapete-estar-trama-clara.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala íntima",
+          "arquivo": "02-terreo/sala-intima/tapete-estar-trama-clara.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/sala-de-estar/tapete-estar-trama-clara.png"
+    },
+    {
+      "descricao_visual": "replicate the foreground barrel chair with thick ivory woven upholstery and external continuous natural curved oak wraparound frame, from overhead with opening downward",
+      "largura_px": 409,
+      "altura_px": 441,
+      "silhueta_px": [
+        385,
+        417
+      ],
+      "higgsfield_job": "55f0cb7c-358e-4b7f-a511-7298de2696b0",
+      "modelo": "gpt_image_2",
+      "objeto": "poltrona-creme-madeira-render",
+      "nome": "Poltrona creme com aro de madeira",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Living",
+          "arquivo": "02-terreo/living/poltrona-creme-madeira-render.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala íntima",
+          "arquivo": "02-terreo/sala-intima/poltrona-creme-madeira-render.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/sala-de-estar/poltrona-creme-madeira-render.png"
+    },
+    {
+      "descricao_visual": "bottom right: one compact square walnut top end table with fine dark metal edges and soft natural wood grain, no accessories.",
+      "largura_px": 363,
+      "altura_px": 341,
+      "silhueta_px": [
+        339,
+        317
+      ],
+      "higgsfield_job": "059721d3-ce84-4122-a77b-eb5819a7d5f9",
+      "modelo": "gpt_image_2",
+      "objeto": "mesa-lateral-metal-madeira",
+      "nome": "Mesa lateral de metal e madeira",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Living",
+          "arquivo": "02-terreo/living/mesa-lateral-metal-madeira.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Sala íntima",
+          "arquivo": "02-terreo/sala-intima/mesa-lateral-metal-madeira.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/sala-de-estar/mesa-lateral-metal-madeira.png"
+    },
+    {
+      "descricao_visual": "warm honey wood dining chair with rounded back and light oatmeal padded seat, facing down",
+      "largura_px": 350,
+      "altura_px": 368,
+      "silhueta_px": [
+        326,
+        344
+      ],
+      "higgsfield_job": "38f6d689-50c2-48df-8e4f-e63427294b19",
+      "modelo": "gpt_image_2",
+      "objeto": "cadeira-a",
+      "nome": "Cadeira de jantar em madeira e tecido",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jantar",
+          "arquivo": "02-terreo/jantar/cadeira-a.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/sala-de-jantar/cadeira-a.png"
+    },
+    {
+      "descricao_visual": "bottom left: one walnut dining chair with creamy upholstered seat and cream backrest as seen around the round gourmet table, tiny visible natural timber arms, one chair only.",
+      "largura_px": 301,
+      "altura_px": 389,
+      "silhueta_px": [
+        277,
+        365
+      ],
+      "higgsfield_job": "3f064f03-2c23-4482-866e-14f3ed780d2b",
+      "modelo": "gpt_image_2",
+      "objeto": "cadeira-gourmet-creme-madeira",
+      "nome": "Cadeira do gourmet com assento creme",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet",
+          "arquivo": "02-terreo/varanda-gourmet/cadeira-gourmet-creme-madeira.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/varanda-gourmet/cadeira-gourmet-creme-madeira.png"
+    },
+    {
+      "descricao_visual": "outdoor barrel armchair in greige woven rope and off-white seat cushion, facing down",
+      "largura_px": 420,
+      "altura_px": 457,
+      "silhueta_px": [
+        396,
+        433
+      ],
+      "higgsfield_job": "71c8c5ed-959c-41e2-9182-0cf2d112669f",
+      "modelo": "gpt_image_2",
+      "objeto": "poltrona-externa-b",
+      "nome": "Poltrona externa de corda",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet",
+          "arquivo": "02-terreo/varanda-gourmet/poltrona-externa-b.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/varanda-gourmet/poltrona-externa-b.png"
+    },
+    {
+      "descricao_visual": "tiny circular side table, warm freijo wood surface",
+      "largura_px": 212,
+      "altura_px": 211,
+      "silhueta_px": [
+        188,
+        187
+      ],
+      "higgsfield_job": "4d2b2e98-5ef5-41e1-8b2a-1959e047ffa9",
+      "modelo": "gpt_image_2",
+      "objeto": "mesa-lateral-externa",
+      "nome": "Mesa lateral externa",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet",
+          "arquivo": "02-terreo/varanda-gourmet/mesa-lateral-externa.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/deck-da-piscina/mesa-lateral-externa.png"
+    },
+    {
+      "descricao_visual": "one poolside modern sun lounger, thin teak wood frame and thick beige fabric cushion segmented at head, vertical axis, head at top",
+      "largura_px": 263,
+      "altura_px": 579,
+      "silhueta_px": [
+        239,
+        555
+      ],
+      "higgsfield_job": "48d03610-6dd6-48e4-9127-c74c01fa558b",
+      "modelo": "gpt_image_2",
+      "objeto": "espreguicadeira-madeira-render",
+      "nome": "Espreguiçadeira de madeira",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Prainha",
+          "arquivo": "02-terreo/prainha/espreguicadeira-madeira-render.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Deck da piscina",
+          "arquivo": "02-terreo/deck-da-piscina/espreguicadeira-madeira-render.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/deck-da-piscina/espreguicadeira-madeira-render.png"
+    },
+    {
+      "descricao_visual": "bottom left: one long straight slim rectangular warm freijo sideboard seen from above, natural wood finish, no accessories.",
+      "largura_px": 656,
+      "altura_px": 193,
+      "silhueta_px": [
+        632,
+        169
+      ],
+      "higgsfield_job": "059721d3-ce84-4122-a77b-eb5819a7d5f9",
+      "modelo": "gpt_image_2",
+      "objeto": "aparador-freijo",
+      "nome": "Aparador em freijó",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Hall de entrada",
+          "arquivo": "02-terreo/hall-de-entrada/aparador-freijo.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/sala-de-jantar/aparador-freijo.png"
+    },
+    {
+      "descricao_visual": "one circular sand ceramic planter with understated green broad-leaved tropical foliage, leaves and pot only, no ground",
+      "largura_px": 367,
+      "altura_px": 378,
+      "silhueta_px": [
+        343,
+        354
+      ],
+      "higgsfield_job": "6b8b64da-15c2-45e1-a1fb-27ba116ed76a",
+      "modelo": "gpt_image_2",
+      "objeto": "vaso-folhagem-a",
+      "nome": "Vaso com folhagem tropical",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Hall de entrada",
+          "arquivo": "02-terreo/hall-de-entrada/vaso-folhagem-a.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet",
+          "arquivo": "02-terreo/varanda-gourmet/vaso-folhagem-a.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/hall-interno/vaso-folhagem-a.png"
+    },
+    {
+      "descricao_visual": "one compact graphite and cognac leather swivel desk chair, backrest to top",
+      "largura_px": 335,
+      "altura_px": 501,
+      "silhueta_px": [
+        311,
+        477
+      ],
+      "higgsfield_job": "724b90b6-76dd-45e9-a9a1-791c964522a5",
+      "modelo": "gpt_image_2",
+      "objeto": "cadeira-escritorio",
+      "nome": "Cadeira de escritório",
+      "lote": "biblioteca-casa-a",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 3 e escritório",
+          "arquivo": "02-terreo/suite-3-e-escritorio/cadeira-escritorio.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_a",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa A",
+      "arquivo_origem": "02-terreo/escritorio/cadeira-escritorio.png"
+    },
+    {
+      "descricao_visual": "bottom center: one compact ivory upholstered wood desk chair, crescent back and softly squared upholstered seat, no visible base outside chair.",
+      "largura_px": 478,
+      "altura_px": 531,
+      "silhueta_px": [
+        454,
+        507
+      ],
+      "higgsfield_job": "826f52c7-6169-4e00-b8b1-6e658841a0b8",
+      "modelo": "gpt_image_2",
+      "objeto": "cadeira-bancada-suite",
+      "nome": "Cadeira estofada de bancada",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte master",
+          "arquivo": "02-terreo/suite-master/cadeira-bancada-suite.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 1",
+          "arquivo": "02-terreo/suite-1/cadeira-bancada-suite.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 2",
+          "arquivo": "02-terreo/suite-2/cadeira-bancada-suite.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/suite-master/cadeira-bancada-suite.png"
+    },
+    {
+      "descricao_visual": "small round freijo bedside table with natural warm brown grain and empty top",
+      "largura_px": 294,
+      "altura_px": 315,
+      "silhueta_px": [
+        270,
+        291
+      ],
+      "higgsfield_job": "42623631-9d1a-4663-8482-b75de054923f",
+      "modelo": "gpt_image_2",
+      "objeto": "criado-redondo",
+      "nome": "Criado redondo em madeira",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte master",
+          "arquivo": "02-terreo/suite-master/criado-redondo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 1",
+          "arquivo": "02-terreo/suite-1/criado-redondo.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 2",
+          "arquivo": "02-terreo/suite-2/criado-redondo.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/suite-1/criado-redondo.png"
+    },
+    {
+      "descricao_visual": "rectangular flat-woven warm oatmeal wool bedroom rug without fringe, horizontal",
+      "largura_px": 567,
+      "altura_px": 385,
+      "silhueta_px": [
+        543,
+        361
+      ],
+      "higgsfield_job": "003bb0d2-8a26-49a5-84da-3c36a7068355",
+      "modelo": "gpt_image_2",
+      "objeto": "tapete",
+      "nome": "Tapete de quarto de lã",
+      "lote": "biblioteca-casa-a",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte master",
+          "arquivo": "02-terreo/suite-master/tapete.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 1",
+          "arquivo": "02-terreo/suite-1/tapete.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Suíte 2",
+          "arquivo": "02-terreo/suite-2/tapete.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_a",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa A",
+      "arquivo_origem": "03-primeiro-pavimento/suite-master/tapete.png"
+    },
+    {
+      "descricao_visual": "one medium dense Brazilian evergreen garden tree canopy, broad round but organically asymmetric, deep spring green leaf clusters with natural depth and small irregular gaps, foliage only, no trunk from above",
+      "largura_px": 557,
+      "altura_px": 547,
+      "silhueta_px": [
+        533,
+        523
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "objeto": "arvore-copa-densa",
+      "nome": "Árvore de copa densa",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arvore-copa-densa.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardins-e-floreiras/arvore-copa-densa.png"
+    },
+    {
+      "descricao_visual": "one medium tree with an airy irregular lobed canopy of small light-green leaves, physically realistic translucent edges and gaps, thin branches glimpsed only through crown, no ground",
+      "largura_px": 577,
+      "altura_px": 568,
+      "silhueta_px": [
+        553,
+        544
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "objeto": "arvore-copa-arejada",
+      "nome": "Árvore de copa arejada",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arvore-copa-arejada.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardins-e-floreiras/arvore-copa-arejada.png"
+    },
+    {
+      "descricao_visual": "one small compact ornamental tree with irregular elliptic deep and light green crown, tiny realistic leaf texture and branching distribution, vivid leaf tips and dark interior",
+      "largura_px": 427,
+      "altura_px": 443,
+      "silhueta_px": [
+        403,
+        419
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "objeto": "arvore-copa-compacta",
+      "nome": "Árvore de copa compacta",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arvore-copa-compacta.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardins-e-floreiras/arvore-copa-compacta.png"
+    },
+    {
+      "descricao_visual": "a single dense rounded low green landscape shrub with tight small glossy leaves, organically irregular silhouette",
+      "largura_px": 520,
+      "altura_px": 495,
+      "silhueta_px": [
+        496,
+        471
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "objeto": "arbusto-verde-denso",
+      "nome": "Arbusto verde denso",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arbusto-verde-denso.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardins-e-floreiras/arbusto-verde-denso.png"
+    },
+    {
+      "descricao_visual": "a single low informal glossy green shrub with gently lobed airy outline and individually identifiable tiny leaves",
+      "largura_px": 557,
+      "altura_px": 525,
+      "silhueta_px": [
+        533,
+        501
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "objeto": "arbusto-verde-arejado",
+      "nome": "Arbusto verde arejado",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/arbusto-verde-arejado.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardins-e-floreiras/arbusto-verde-arejado.png"
+    },
+    {
+      "descricao_visual": "one green ornamental feather palm crown, finely feathered asymmetric fronds curling outward, rich natural greens, clean no ground",
+      "largura_px": 555,
+      "altura_px": 579,
+      "silhueta_px": [
+        531,
+        555
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "objeto": "palmeira-plumosa",
+      "nome": "Palmeira plumosa",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardins e floreiras",
+          "arquivo": "02-terreo/jardins-e-floreiras/palmeira-plumosa.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardins-e-floreiras/palmeira-plumosa.png"
+    },
+    {
+      "descricao_visual": "one green fan palm crown, radial but naturally irregular serrated wide fan-shaped leaves, no visible soil or trunk",
+      "largura_px": 525,
+      "altura_px": 539,
+      "silhueta_px": [
+        501,
+        515
+      ],
+      "higgsfield_job": "cf12efaf-53aa-4a81-a438-930c614c719d",
+      "modelo": "gpt_image_2",
+      "objeto": "palmeira-leque",
+      "nome": "Palmeira-leque",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim do lavabo",
+          "arquivo": "02-terreo/jardim-do-lavabo/palmeira-leque.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim da sala íntima",
+          "arquivo": "02-terreo/jardim-da-sala-intima/palmeira-leque.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim junto à adega",
+          "arquivo": "02-terreo/jardim-junto-a-adega/palmeira-leque.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardins-e-floreiras/palmeira-leque.png"
+    },
+    {
+      "descricao_visual": "a natural grouping of about 8 varying large dark-green split Monstera leaves with holes and jagged fenestrations, no pot",
+      "largura_px": 598,
+      "altura_px": 493,
+      "silhueta_px": [
+        574,
+        469
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "objeto": "touceira-costela-de-adao",
+      "nome": "Costela-de-adão",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim do lavabo",
+          "arquivo": "02-terreo/jardim-do-lavabo/touceira-costela-de-adao.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim da sala íntima",
+          "arquivo": "02-terreo/jardim-da-sala-intima/touceira-costela-de-adao.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim junto à adega",
+          "arquivo": "02-terreo/jardim-junto-a-adega/touceira-costela-de-adao.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardim-de-inverno/touceira-costela-de-adao.png"
+    },
+    {
+      "descricao_visual": "one natural spreading cluster of green sword ferns, many finely divided pinnate fronds in several green values",
+      "largura_px": 589,
+      "altura_px": 515,
+      "silhueta_px": [
+        565,
+        491
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "objeto": "touceira-samambaia",
+      "nome": "Touceira de samambaia",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim do lavabo",
+          "arquivo": "02-terreo/jardim-do-lavabo/touceira-samambaia.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim da sala íntima",
+          "arquivo": "02-terreo/jardim-da-sala-intima/touceira-samambaia.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim junto à adega",
+          "arquivo": "02-terreo/jardim-junto-a-adega/touceira-samambaia.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardim-de-inverno/touceira-samambaia.png"
+    },
+    {
+      "descricao_visual": "one long narrow rectangular warm gray garden planter with dense low tropical foliage, strictly from top, long axis horizontal",
+      "largura_px": 660,
+      "altura_px": 203,
+      "silhueta_px": [
+        636,
+        179
+      ],
+      "higgsfield_job": "6b8b64da-15c2-45e1-a1fb-27ba116ed76a",
+      "modelo": "gpt_image_2",
+      "objeto": "floreira-baixa",
+      "nome": "Floreira baixa",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim do lavabo",
+          "arquivo": "02-terreo/jardim-do-lavabo/floreira-baixa.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim da sala íntima",
+          "arquivo": "02-terreo/jardim-da-sala-intima/floreira-baixa.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim junto à adega",
+          "arquivo": "02-terreo/jardim-junto-a-adega/floreira-baixa.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardins-e-floreiras/floreira-baixa.png"
+    },
+    {
+      "descricao_visual": "one long narrow low planting mass of mixed philodendron foliage and ferns, runs horizontally, irregular edges, green foliage only, no bed, mulch or pot",
+      "largura_px": 699,
+      "altura_px": 324,
+      "silhueta_px": [
+        675,
+        300
+      ],
+      "higgsfield_job": "72796e26-5e3f-41ef-90e7-1ae3d79a7b87",
+      "modelo": "gpt_image_2",
+      "objeto": "faixa-mista-tropical",
+      "nome": "Faixa mista tropical",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim do lavabo",
+          "arquivo": "02-terreo/jardim-do-lavabo/faixa-mista-tropical.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim da sala íntima",
+          "arquivo": "02-terreo/jardim-da-sala-intima/faixa-mista-tropical.png"
+        },
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Jardim junto à adega",
+          "arquivo": "02-terreo/jardim-junto-a-adega/faixa-mista-tropical.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/jardim-de-inverno/faixa-mista-tropical.png"
+    },
+    {
+      "descricao_visual": "one round taupe ceramic planter containing a compact muted-green philodendron as seen directly above, pot and foliage only",
+      "largura_px": 360,
+      "altura_px": 361,
+      "silhueta_px": [
+        336,
+        337
+      ],
+      "higgsfield_job": "6b8b64da-15c2-45e1-a1fb-27ba116ed76a",
+      "modelo": "gpt_image_2",
+      "objeto": "vaso-folhagem-b",
+      "nome": "Vaso arredondado com folhagem",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Varanda gourmet",
+          "arquivo": "02-terreo/varanda-gourmet/vaso-folhagem-b.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/hall-interno/vaso-folhagem-b.png"
+    },
+    {
+      "descricao_visual": "top right: one long straight horizontal low walnut wine rack cut in plan, evenly spaced natural glass wine bottles stored horizontally in individual rows, viewed directly from above, just one single rectangular module.",
+      "largura_px": 639,
+      "altura_px": 146,
+      "silhueta_px": [
+        615,
+        122
+      ],
+      "higgsfield_job": "059721d3-ce84-4122-a77b-eb5819a7d5f9",
+      "modelo": "gpt_image_2",
+      "objeto": "adega-modulo-garrafas",
+      "nome": "Módulo de adega com garrafas",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Adega",
+          "arquivo": "02-terreo/adega/adega-modulo-garrafas.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/adega/adega-modulo-garrafas.png"
+    },
+    {
+      "descricao_visual": "bottom right: one outdoor low thin straight rectangular off-white upholstered pool lounger with subtly delineated two rectangular cushion sections, faint warm sand woven texture, no feet seen outside body, no water.",
+      "largura_px": 717,
+      "altura_px": 264,
+      "silhueta_px": [
+        693,
+        240
+      ],
+      "higgsfield_job": "3edda47a-3252-44a5-8fcb-522094ed4a69",
+      "modelo": "gpt_image_2",
+      "objeto": "espreguicadeira-prainha",
+      "nome": "Espreguiçadeira da prainha",
+      "lote": "biblioteca-casa-b",
+      "locais": [
+        {
+          "pavimento": "Térreo",
+          "ambiente": "Prainha",
+          "arquivo": "02-terreo/prainha/espreguicadeira-prainha.png"
+        }
+      ],
+      "referencias": [
+        "biblioteca_casa_b",
+        "pranchas_do_usuario"
+      ],
+      "origem": "Variante compartilhada da Casa B",
+      "arquivo_origem": "02-terreo/prainha/espreguicadeira-prainha.png"
+    }
+  ],
+  "escala_objetos": "Use a silhueta e a escala do PDF para posicionar os objetos. As dimensões dos PNGs estão em pixels.",
+  "ambientes": 38,
+  "objetos_unicos": 100,
+  "arquivos_png": 184
+}
