@@ -596,10 +596,17 @@ def _centro(Q, i):
     return (x0 + x1) / 2, (y0 + y1) / 2, x1 - x0, y1 - y0
 
 
-def _cadeiras_mesa(Q, out, par, mesa_c, ids, P, larg):
+def _cadeiras_mesa(Q, out, par, mesa_c, ids, P, larg, mesa_r=None):
+    """As cadeiras de frente para a mesa: na redonda, para o centro; na retangular (`mesa_r`, px), (16/11, usuário: "deixe
+    as cadeiras alinhadas, sem ficarem tortas ou bagunçadas") de frente para o lado da mesa em que estão, alinhadas a ele
+    (as dos lados em pé, as das cabeceiras deitadas), no centro do PDF."""
     for i in ids:
         cx, cy, _, _ = _centro(Q, i)
-        g = MB.frente(np.array(mesa_c) - np.array([cx, cy]))
+        d = np.array(mesa_c) - np.array([cx, cy])
+        if mesa_r is not None:
+            x0, y0, x1, y1 = mesa_r
+            d = np.array([np.sign(d[0]), 0.0]) if (cx < x0 or cx > x1) else np.array([0.0, np.sign(d[1])])
+        g = MB.frente(d)
         out = MB.pousar(out, P, cx, cy, larg, larg * P.shape[0] / P.shape[1], g, "movel", par)
     return out
 
@@ -610,7 +617,8 @@ def jantar(Q, out, par, q=JANTAR_D):
     zona[y0:y1, x0:x1] = True
     out = MB.piso_travertino(out, zona & ~par, par, alcance=200)
     mx, my, mw, mh = _centro(Q, q["mesa"])
-    out = _cadeiras_mesa(Q, out, par, (mx, my), q["cadeiras"], cadeira_terracota(q["terracota"]), q["larg"])
+    out = _cadeiras_mesa(Q, out, par, (mx, my), q["cadeiras"], cadeira_terracota(q["terracota"]), q["larg"],
+                         mesa_r=RT.caixa_pdf(Q, q["mesa"]))
     P = ler("jantar/mesa-jantar-longa-d")
     out = MB.pousar(out, P, mx, my, mh, mw, 90.0, "mesa", par)
     print(f"    jantar: a mesa longa de madeira da Casa D e as {len(q['cadeiras'])} cadeiras de madeira e linho, o linho "

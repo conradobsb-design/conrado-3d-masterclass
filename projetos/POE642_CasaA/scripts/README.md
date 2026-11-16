@@ -3209,6 +3209,9 @@ A 2ª leva de pedidos de 16/11 no Térreo da Casa D (`pedidos_terreo_casad_1611b
 - as pedras (os 15 pisantes) em Bege Bahia levigado com aresta e sombra curta; as floreiras com a borda e o miolo de
   folhagens da floreira baixa da biblioteca;
 - suíte 3: o piso entre o vidro e o painel no vinílico da suíte e o painel em ripado de nogueira, destacado;
-- o aparador do living em nogueira escuro; as paredes atrás das portas dos banhos 2 e 3 retas até a folha;
+- o aparador do living em nogueira escuro; nos banhos 2 e 3, as paredes na espessura do PDF (o vão do batente entre a
+  folha aberta e a parede fica) e sem os dentes escuros sob a parede de cima;
+- o jantar: as 10 cadeiras alinhadas aos lados da mesa (as dos lados em pé, as das cabeceiras deitadas), não
+  giradas para o centro;
 - a borda da piscina, da prainha e do spa lisa, sem juntas, em Bege Bahia um tom abaixo do deck (o alto-relevo);
 - sem o tracejado do limite em volta da planta; o muro de baixo termina com a grama, como o de cima.

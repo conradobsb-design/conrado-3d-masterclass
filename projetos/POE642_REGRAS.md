@@ -231,6 +231,8 @@ Pedido do usuário (19/10/26): "vamos consolidar todas as regras, antes de come�
 - **[16/11] Borda de piscina lisa, em alto-relevo** (usuário: "essa borda tem que ser sem traços, de forma lisa"; "as bordas da piscina devem ser no marmore bege bahia com um levemente escurecida para dar ideia de autorelevo"): em Bege Bahia, sem juntas nem fios, um tom abaixo do deck.
 - **[16/11] Painéis pivotantes como brises** (usuário: "representar igual ao da casa A, em forma de brises"): as lâminas escuras a 45° com a sombra esfumada, como no lounge dos brises da Casa A.
 - **[16/11] Sem o tracejado do limite do terreno** (usuário: "remova esse tracejado em volta da planta e corrija essa falha no final do muro"): a margem branca, o muro termina junto com a grama.
+- **[16/11] O vão do batente atrás da porta aberta** (usuário: "as paredes seguem a sua espessura fora a fora. tem um vão entre a porta e a parede, e a parede permanece com sua espessura original, sem dente"; "a distância entre a porta e a parede é a espessura do batente"): a folha aberta fica afastada da parede pela espessura do batente, com o piso entre elas; a parede não avança atrás da folha.
+- **[16/11] Cadeiras alinhadas à mesa retangular** (usuário: "deixe as cadeiras alinhadas, sem ficarem tortas ou bagunçadas"): de frente para o lado da mesa em que estão, no eixo dele, não giradas para o centro (só nas mesas redondas elas apontam para o centro).
 - **[16/11] Banquetas sob a bancada** (usuário: "a ideia é que as banquetas estejam abaixo da bancada"): o tampo por cima da parte do assento que fica embaixo dele; sem tracejado de projeção junto às banquetas.
 - **[19/10] R11. Guarda-roupa com cabides** (referência de 19/10):
   - visto de cima, aberto;

@@ -438,11 +438,12 @@ def aparador(Q, out, q=APARADOR):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-# as paredes atrás das portas dos banhos 2 e 3 (usuário: "corrija as paredes atras das portas"; px): a faixa de piso
-# entre a face da parede e a folha aberta vira parede (a face reta até a folha), e os dentes escuros de 2 px sob a parede
-# de cima, junto às portas, voltam ao piso de logo abaixo
-PAREDES_BANHOS = {"paredes": [((2046, 1551, 2050, 1599), "banho 2: atrás da folha, junto à parede da esquerda"),
-                              ((2222, 1551, 2270, 1555), "banho 3: atrás da folha, junto à parede de cima")],
+# as paredes atrás das portas dos banhos 2 e 3 (usuário: "corrija as paredes atras das portas"; depois: "não gostei do
+# que você fez atrás das portas, avançando as paredes. as paredes seguem a sua espessura fora a fora. tem um vão entre a
+# porta e a parede, e a parede permanece com sua espessura original, sem dente"; "a distância entre a porta e a parede é
+# a espessura do batente"; px): as paredes ficam na espessura do PDF, com o vão do batente entre a folha e a parede; só os
+# dentes escuros de 2 px sob a parede de cima, junto às portas, voltam ao piso de logo abaixo
+PAREDES_BANHOS = {"paredes": [],
                   "dentes": [((2103, 1551, 2117, 1553), 2), ((2199, 1551, 2217, 1553), 2)]}
 
 
@@ -452,7 +453,8 @@ def paredes_banhos(out, q=PAREDES_BANHOS):
         out[y0:y1, x0:x1] = PAREDE
     for (x0, y0, x1, y1), dy in q["dentes"]:
         out[y0:y1, x0:x1] = out[y0 + dy:y1 + dy, x0:x1]
-    print("    banhos 2 e 3: a parede atrás das folhas abertas, reta até a folha; os dentes escuros sob a parede, no piso")
+    print("    banhos 2 e 3: os dentes escuros sob a parede de cima, no piso (as paredes na espessura do PDF, o vão do batente "
+          "entre a folha e a parede)")
     return out
 
 
