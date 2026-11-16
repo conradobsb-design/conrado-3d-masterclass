@@ -55,13 +55,32 @@ JANTAR_D = {"mesa": 97706, "cadeiras": (65896, 65927, 65959, 65990, 66021, 66052
 ESTAR_D = {"jantar": {"poltronas": (93392, 93435, 93478, 93521), "mesa": 125158, "ficam": (100540, 100542, 97760)},
            "living": {"sofa": 125853, "poltronas": (125012, 125083, 100594, 100810), "mesas": ((125154, 18.0),
                                                                                               (126185, -24.0)),
-                      "ficam": (101028, 126168, 101026, 125827, 98058)}}
+                      "ficam": (101028, 126168, 101026, 125827, 98058),
+                      # (16/11, usuário: "vamos começar por essas duas poltronas do living, no tom terracota") as 2
+                      # junto ao vidro da varanda (as de couro do 3D da sala), no terracota das cadeiras do jantar
+                      "terracota": (125012, 125083),
+                      # (16/11, usuário: "duas poltronas do living, mesmo tom encosto e assento") as 4 num tom só
+                      # (encosto e assento): as 2 da janela em terracota, as outras 2 no bege médio da peça
+                      "gama_tom_unico": 0.35,
+                      # (16/11, usuário, com o 3D: "trocar os tampos das mesas para nogueira ou freijós, pedra em
+                      # verde rajada, espelho"; "não precisa trazer o reflexo do ripado na mesa redonda"; "Colocar
+                      # adorno") a grande no espelho liso, a menor na pedra verde rajada, as duas com adorno (geradas
+                      # no Higgsfield pelo 3D da sala, recortadas no círculo)
+                      "mesas_png": ("living/mesa-centro-espelho-adorno-d", "living/mesa-centro-pedra-verde-adorno-d")}}
+# (16/11, usuário: "as quatro poltronas do estar, com mesa redonda ao centro") o estar do jantar: as 4 poltronas creme
+# com o aro de madeira (as do 3D) e a mesa redonda de tampo de nogueira com adorno
+ESTAR_JANTAR_D = {"poltrona_png": "living/poltrona-creme-madeira-render", "mesa_png": "living/mesa-centro-nogueira-adorno-d"}
 # a varanda gourmet: as 2 mesas e as 6 cadeiras de cada; o estar (o sofá curvo, as poltronas, as mesas de centro de
 # antes e as 2 orgânicas novas: centro, tamanho e giro, px)
 VARANDA_D = {"mesas": ((97771, (93266, 93287, 93308, 93329, 93350, 93371)),
                        (101156, (101030, 101051, 101072, 101093, 101114, 101135))),
              "sofa": 125596, "poltronas": (125338, 125467, 125639), "mesas_velhas": (97966, 97991, 98008, 98033),
-             "organicas": (((1566.0, 1057.0), (52.0, 40.0), 8.0), ((1601.0, 1075.0), (32.0, 27.0), -18.0))}
+             "organicas": (((1566.0, 1057.0), (52.0, 40.0), 8.0), ((1601.0, 1075.0), (32.0, 27.0), -18.0)),
+             # (16/11, usuário: "proposta de poltrona da varanda", a de fibra trançada do 3D; "use esse sofá com
+             # almofadas em tom terracota na varanda, no lugar daquele") as poltronas de fibra com a almofada creme
+             # e o sofá curvo da sala de estar da Casa A com as 4 almofadas em terracota
+             "poltrona_png": "varanda-gourmet/poltrona-externa-b",
+             "sofa_png": "varanda-gourmet/sofa-curvo-almofadas-terracota-d"}
 # o piso refeito onde as peças de antes saem: em cada região (o tapete do PDF ou o resto), o desenho de uma amostra limpa
 # dela (px, ladrilhada em espelho) na luz do entorno (o inpaint só da própria região, desfocado em `sigma`): o tapete
 # redondo do estar do jantar (CONTRAPISO 53503), o do living (66510), o do estar da varanda (66205); o travertino do
@@ -171,9 +190,22 @@ def cama_dce(out, par):
     return out
 
 
+# (16/11, usuário: "temos os recamiers em frente as camas de casal a serem representados com a biblioteca de móveis,
+# mais realismo aqui também") o recamier de linho creme com os braços enrolados e a moldura de madeira da biblioteca
+# da Casa A (`banco-k3`), os braços inteiros nas pontas e o miolo esticado até o retângulo do PDF
+RECAMIER_D = AQUI.parents[1] / "POE642_CasaA" / "biblioteca-objetos" / "03-primeiro-pavimento" / \
+    "bancos-pe-de-cama-propostas" / "banco-k3.png"
+
+
+def ler_abs(caminho):
+    P = cv2.imread(str(caminho), cv2.IMREAD_UNCHANGED).astype(np.float32)
+    ys, xs = np.nonzero(P[..., 3] > 8)
+    return np.ascontiguousarray(P[ys.min():ys.max() + 1, xs.min():xs.max() + 1])
+
+
 def bancos(Q, out, par):
     import biblioteca_terreo_casad_1511 as TD
-    P0 = ler("suite-master/banco-peseira-d")
+    P0 = ler_abs(RECAMIER_D)
     hh, ww = P0.shape[:2]
     e = int(0.14 * ww)
     for i, _ in TD.BANCOS:
@@ -184,8 +216,14 @@ def bancos(Q, out, par):
         cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
         out = MB.pousar(out, P, cx, cy, L, Dp, g, "movel", par)
         out = TD._resto_fora(out, (x0, y0, x1, y1), RT._alfa_peca(P, cx, cy, L, Dp, g, par.shape), par)
-    print(f"    bancos de pé de cama: o banco de peseira em linho da Casa D nos {len(TD.BANCOS)} retângulos do PDF")
+    print(f"    recamiers ao pé das camas de casal: o de linho creme com braços e moldura de madeira da biblioteca "
+          f"(banco-k3) nos {len(TD.BANCOS)} retângulos do PDF")
     return out
+
+
+# (16/11, usuário: "na suite master da casa D, temos luminárias de parede") os criados da master sem o abajur: as
+# arandelas da parede (`pedidos_terreo_casad_1611.arandelas`) iluminam
+SEM_ABAJUR = (97046, 97058)
 
 
 def criados(Q, out, par):
@@ -202,7 +240,8 @@ def criados(Q, out, par):
             g = giro
         out = MB.pousar(out, P, cx, cy, w, h, g, "movel", par)
         out = TD._resto_fora(out, (x0, y0, x1, y1), RT._alfa_peca(P, cx, cy, w, h, g, par.shape), par)
-        out = B1.abajur(out, cx, cy, D)
+        if i not in SEM_ABAJUR:
+            out = B1.abajur(out, cx, cy, D)
     print(f"    criados: os {len(TD.CRIADOS)} criados laterais de madeira da Casa D, com o abajur")
     return out
 
@@ -570,8 +609,9 @@ def jantar(Q, out, par, q=JANTAR_D):
     return out
 
 
-def estar(Q, out, par, q=ESTAR_D):
+def estar(Q, out, par, q=ESTAR_D, qj=ESTAR_JANTAR_D):
     Pp = ler("living/poltrona-concha-d")
+    Pj = ler(qj["poltrona_png"])
     # o estar do jantar: as 4 poltronas viradas para a mesa redonda de madeira escura
     e = q["jantar"]
     trav = (None, PISOS_D["travertino"])
@@ -582,9 +622,9 @@ def estar(Q, out, par, q=ESTAR_D):
         cx, cy, w, h = _centro(Q, i)
         lado = 0.95 * min(w, h)
         g = MB.frente(np.array([mx - cx, my - cy]))
-        out = MB.pousar(out, Pp, cx, cy, lado * Pp.shape[1] / Pp.shape[0], lado, g, "movel", par)
+        out = MB.pousar(out, Pj, cx, cy, lado * Pj.shape[1] / Pj.shape[0], lado, g, "movel", par)
     D_ = (mw + mh) / 2
-    out = MB.pousar(out, ler("living/mesa-centro-circular-d"), mx, my, D_, D_, 0.0, "mesa", par)
+    out = MB.pousar(out, ler(qj["mesa_png"]), mx, my, D_, D_, 0.0, "mesa", par)
     # o estar do living: o sofá de linho (de costas para baixo), as poltronas para o meio, as mesas orgânicas
     e = q["living"]
     out = _limpa(Q, out, par, [e["sofa"], *e["poltronas"], *[i for i, _ in e["mesas"]]],
@@ -593,19 +633,24 @@ def estar(Q, out, par, q=ESTAR_D):
     out = MB.pousar(out, ler("living/sofa-living-d"), cxs, cys, ws, hs, 180.0, "movel", par)
     pts = np.array([_centro(Q, i)[:2] for i, _ in e["mesas"]])
     meio = pts.mean(axis=0)
+    a_ = Pp[..., 3] > 200
+    Pt = tingir(Pp, a_, JANTAR_D["terracota"], gama=e["gama_tom_unico"])
+    Pb = tingir(Pp, a_, tuple(float(v) for v in np.median(Pp[..., :3][a_], axis=0)), gama=e["gama_tom_unico"])
     for i in e["poltronas"]:
         cx, cy, w, h = _centro(Q, i)
         lado = 0.95 * min(w, h)
         g = MB.frente(meio - np.array([cx, cy]))
         g = round(g / 90.0) * 90.0                     # de frente para o estar, alinhadas às paredes
-        out = MB.pousar(out, Pp, cx, cy, lado * Pp.shape[1] / Pp.shape[0], lado, g, "movel", par)
-    Pm = ler("living/mesa-centro-seixo-d")
-    for i, g in e["mesas"]:
+        P_ = Pt if i in e.get("terracota", ()) else Pb
+        out = MB.pousar(out, P_, cx, cy, lado * P_.shape[1] / P_.shape[0], lado, g, "movel", par)
+    for (i, g), png in zip(e["mesas"], e["mesas_png"]):
+        Pm = ler(png)
         cx, cy, w, h = _centro(Q, i)
         D_ = 0.96 * (w + h) / 2
         out = MB.pousar(out, Pm, cx, cy, D_, D_ * Pm.shape[0] / Pm.shape[1], g, "mesa", par)
-    print("    living: o estar do jantar com as 4 poltronas concha e a mesa redonda de madeira escura; o do living com o "
-          "sofá de linho, 4 poltronas concha e as 2 mesas orgânicas")
+    print("    living: o estar do jantar com as 4 poltronas creme com aro de madeira e a mesa redonda de nogueira com "
+          "adorno; o do living com o sofá de linho, 4 poltronas concha num tom só (as 2 junto ao vidro da varanda em "
+          "terracota) e as mesas de espelho e de pedra verde rajada com adorno")
     return out
 
 
@@ -623,11 +668,11 @@ def varanda(Q, out, par, q=VARANDA_D):
     # o estar: o sofá curvo no desenho do PDF, as poltronas para o meio, as mesas orgânicas
     out = _limpa(Q, out, par, [q["sofa"], *q["poltronas"], *q["mesas_velhas"]], [_tapete(Q, "varanda", out), bege])
     _, ms = MB.contorno(Q, [q["sofa"]])
-    Ps = ler("varanda-gourmet/sofa-curvo-gourmet-d")
+    Ps = ler(q["sofa_png"])
     cx, cy, (iou, g, wt, ht) = MB.encaixar(Q, Ps, ms, giros=(0, 180), escalas=(0.95, 1.0, 1.05))
     out = MB.pousar(out, Ps, cx, cy, wt, ht, g, "movel", par)
     meio = np.mean([c for c, _, _ in q["organicas"]], axis=0)
-    Pp = ler("varanda-gourmet/poltrona-concha-d")
+    Pp = ler(q["poltrona_png"])
     for i in q["poltronas"]:
         pcx, pcy, w, h = _centro(Q, i)
         lado = 0.92 * min(w, h)
@@ -637,7 +682,8 @@ def varanda(Q, out, par, q=VARANDA_D):
     for (ox, oy), (w, h), go in q["organicas"]:
         out = MB.pousar(out, Po, ox, oy, w, h, go, "mesa", par)
     print(f"    varanda gourmet: as 2 mesas redondas com as 12 cadeiras de fibra; o sofá curvo (giro {g:.0f}°, "
-          f"{iou * 100:.0f}% sobre o do PDF), as 3 poltronas concha e 2 mesas orgânicas")
+          f"{iou * 100:.0f}% sobre o do PDF; o curvo da Casa A, as almofadas em terracota), as 3 poltronas de fibra e 2 "
+          "mesas orgânicas")
     return out
 
 

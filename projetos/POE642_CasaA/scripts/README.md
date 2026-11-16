@@ -3171,3 +3171,22 @@ brancos da ARQ_PAREDE (as soleiras do PDF). O que saiu dela:
 - Subsolo, `bege`: os arcos das portas no Bege Bahia (sauna, vestiário, os dois boxes do WC do vestiário) entram no piso
   novo (o traço do arco no PDF não é a chapada 232 e o do render ficava); o tracejado do render junto ao vão da porta dupla
   do depósito também.
+
+O mobiliário pelo 3D da sala e os pedidos seguintes de 16/11, em
+`POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1611_mobiliario_3d_antes_depois.jpg`:
+- `alternativa1_terreo_casad_1611.estar`: as 4 poltronas do living num tom só (encosto e assento; usuário: "duas
+  poltronas do living, mesmo tom encosto e assento"), as 2 junto ao vidro da varanda em terracota (as de couro do 3D) e
+  as outras no bege médio da peça; as mesas de centro: a grande de espelho (sem o reflexo do ripado do forro) e a menor
+  de pedra verde rajada, as duas com adorno; o estar do jantar com as 4 poltronas creme com aro de madeira e a mesa
+  redonda de nogueira com adorno. As 3 mesas geradas no Higgsfield a partir de recortes do 3D da sala e recortadas no
+  círculo (`POE642_CasaD/biblioteca-objetos/02-terreo/living/mesa-centro-*-adorno-d.png`).
+- `varanda`: as poltronas de fibra com a almofada creme (`poltrona-externa-b`) e o sofá curvo da sala de estar da Casa A
+  com as 4 almofadas em terracota (`varanda-gourmet/sofa-curvo-almofadas-terracota-d.png`).
+- `bancos`: os recamiers ao pé das camas de casal no `banco-k3` da Casa A (linho creme, braços, moldura de madeira).
+- `biblioteca_terreo_casad_1511.armarios`: os armários dos closets abertos, com os cabides (`final3840_casae
+  .armario_cabides`, em trechos nos L e no U); os outros na cor lisa, o do escritório inclusive.
+- `pedidos_terreo_casad_1611.py`: a bancada da sala íntima (o travertino da biblioteca, a cuba redonda de sobrepor do
+  PDF com o misturador de parede, o refrigerador de inox na ponta, sem as linhas técnicas); a borda da piscina, da
+  prainha e do spa em placas de Bege Bahia levigado de 0,30 m, com as juntas a cada 0,60 m; as arandelas articuladas
+  pretas da suíte master (do 3D, geradas no Higgsfield em 2K, `suite-master/arandela-articulada-preta-d.png`), presas na
+  parede da cabeceira com a cúpula sobre o criado, no lugar do abajur.

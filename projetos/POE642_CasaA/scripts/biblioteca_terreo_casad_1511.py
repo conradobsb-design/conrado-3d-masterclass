@@ -108,7 +108,25 @@ ARMARIOS = {"closet master": 104098, "closet master 2 (banho)": 104114, "closet 
             "closet da suíte 1": 104124, "closet da suíte 2": 104132, "suíte 3": 104140, "sala íntima": 134,
             "suíte 2 (bancada)": 104093, "sala íntima, junto ao elevador": 104145, "suíte 2 (banho 2)": 104182,
             "louceiro": 104282, "despensa": 104290, "cozinha (pia)": 104246, "cozinha (geladeira)": 104241,
-            "área de serviço (tanques)": 104277, "área de serviço": 104272, "DCE": 104231}
+            "área de serviço (tanques)": 104277, "área de serviço": 104272, "DCE": 104231,
+            # (16/11, usuário: "corrija esse armario do escritorio para o tom sólido") o da parede da direita do escritório
+            "escritório (suíte 3)": 104221}
+# (16/11, usuário: "os armários do closet são representados com os cabides, igual as das casas A, B e C. isso vale
+# para a casa E também. Os outros armários é que são representado com cor sólida definida na casa A.") os armários dos
+# closets saem da cor lisa e vão abertos, com os cabides e o cabideiro (R11, `final3840_casae.armario_cabides`, o
+# guarda-roupa da biblioteca de elementos); os em L e em U em trechos (pt do PDF), cada um com as portas para o miolo
+# do closet; os outros armários seguem na cor lisa
+ARMARIOS_CLOSET = ("closet master", "closet master 2 (banho)", "closet master 2 (banho 1)", "closet da suíte 1",
+                   "closet da suíte 2")
+CABIDES = [("closet master (esquerda)", (367.9, 1710.3, 401.9, 1880.3), "direita"),
+           ("closet master (de cima)", (401.9, 1710.3, 521.0, 1744.3), "baixo"),
+           ("closet master (de baixo)", (401.9, 1846.3, 600.3, 1880.3), "cima"),
+           ("closet master 2 (esquerda)", (787.4, 1806.6, 821.5, 1880.3), "direita"),
+           ("closet master 2 (direita)", (872.5, 1710.3, 906.5, 1880.3), "esquerda"),
+           ("closet da suíte 1 (esquerda)", (915.0, 1577.0, 949.0, 1690.4), "direita"),
+           ("closet da suíte 1 (de cima)", (949.0, 1577.0, 1017.0, 1611.1), "baixo"),
+           ("closet da suíte 2 (direita)", (1890.1, 1577.0, 1924.1, 1690.4), "esquerda"),
+           ("closet da suíte 2 (de cima)", (1822.1, 1577.0, 1890.1, 1611.1), "baixo")]
 # (Miro: "Nome e área do ambiente e metragem", nos closets) o nome e a área (m², das faces das paredes e dos armários
 # do PDF) no corpo dos rótulos dos banhos (a Inter Regular dos rótulos, `retoque_1pav_casae.ROTULOS`, com o corpo medido
 # no BANHO 1 da final: 46 px de largura; 15,5 px entre as bases), no miolo livre de cada closet
@@ -438,8 +456,10 @@ def claraboias(Q, out, q=CLARABOIAS):
     return PT.claraboias(Q, out, q)
 
 
-def armarios(Q, out, par, q=ARMARIOS):
+def armarios(Q, out, par, q=ARMARIOS, closets=ARMARIOS_CLOSET, cabides=CABIDES):
     import revisao_terreo_casac_1311 as RC
+    import final3840_casae as FE
+    q = {k: v for k, v in q.items() if k not in closets}
     import revisao_terreo_casac_1511 as R15
     c = RC.COZINHA
     o = out.astype(np.float32)
@@ -454,8 +474,13 @@ def armarios(Q, out, par, q=ARMARIOS):
         cor = np.float32(c["cor_armario"])[None, None] * np.where(borda, c["face"], 1.0)[..., None]
         o = o * (1 - a[..., None]) + cor * a[..., None]
         n += int(m.sum())
-    print(f"    armários: {len(q)} na cor dos armários, lisos ({n} px): {', '.join(q)}")
-    return np.clip(np.round(o), 0, 255).astype(np.uint8)
+    out = np.clip(np.round(o), 0, 255).astype(np.uint8)
+    with contextlib.redirect_stdout(io.StringIO()):
+        for k, (nome, r, lado) in enumerate(cabides):
+            out = FE.armario_cabides(Q, out, r, lado, semente=57 + k, nome=nome)
+    print(f"    armários: {len(q)} na cor dos armários, lisos ({n} px): {', '.join(q)}; os {len(closets)} dos closets "
+          f"abertos, com os cabides ({len(cabides)} trechos)")
+    return out
 
 
 def spa_m2(out, q=SPA_M2):
@@ -1065,6 +1090,8 @@ def aplicar(antes):
     out = A1.cadeiras(Q, out, par)
     out = armarios(Q, out, par)
     out = A1.sala_intima(Q, out, antes, par)
+    import pedidos_terreo_casad_1611 as PD
+    out = PD.bancada_intima(out, par)
     out = A1.escritorio(out, par)
     out = A1.cadeiras_s3(Q, out, par)
     # (16/11, usuário: "Para as escrivaninhas dos quartos, use o tom de madeira nogueira")
@@ -1100,6 +1127,8 @@ def aplicar(antes):
     # padronizados) as cortinas C4 em todos os trechos (a da suíte 3 inclusive) e os rótulos no padrão das casas
     import cortinas_padrao_casad_1611 as CP
     import rotulos_padrao_casad_1611 as RP
+    out = PD.borda_piscina(out)
+    out = PD.arandelas(Q, out, par)
     out = CP.aplicar(Q, out, par)
     # (16/11, usuário: "Esse último WC-DCE do térreo tá bem desconfigurado") o banho refeito entre o apagar e o escrever
     out = RP.aplicar(out, lambda o: A1.wc_dce(o, par))
