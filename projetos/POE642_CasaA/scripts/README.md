@@ -3352,3 +3352,20 @@ Topaz> [--opcao B]` (os tons da final, o fundo branco puro, JPG 95 a 743 dpi na 
   piscina_deck,hall_escritorio}.jpg`). Depois: `rodape_entrega.py --config ../../POE642_CasaE/config_bases.json
   --no-quadro --render Terreo=../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_final.png`,
   `pdf_entrega.py --config ../../POE642_CasaE/config_bases.json` e `book_entrega.py`.
+
+#### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
+
+Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
+949e551) tinha deixado: na ilha, a pedra no assento das 3 banquetas; na pia, a luz de antes (o anel molhado do desenho)
+como um retângulo escuro de borda irregular em volta e abaixo das cubas (no 12K, o granulado do desenho em volta delas);
+no L do serviço, a faixa das cubas ainda no Danae desenhado (só a perna da esquerda virou foto); e pontinhos claros
+soltos. `danae_cozinha_casaa_1611.py` refaz as três pela geometria (`BANCADAS`: os retângulos de pedra medidos nos perfis
+da final de antes da troca, a janela de cada uma volta de antes, com as banquetas inteiras): a foto da chapa numa luz só,
+os veios no comprido, sem os pontinhos (`sem_pontinhos`: o que passa 9 da mediana local), as cubas, as torneiras e o
+cooktop achados pela cor (o inox neutro, R - B < 12; o cooktop escuro; a pedra do desenho tem o R ~28 acima do B).
+Na final e direto nos 12K A e B (a partir dos 12K de antes da troca, pelo afim de `danae_foto.afim_12k`; JPG 95 sem
+subamostragem, 743 dpi). Como refazer: `python3 danae_cozinha_casaa_1611.py final --antes <final de 949e551^>` e
+`python3 danae_cozinha_casaa_1611.py doze --antes <final de 949e551^> --doze_antes <12K de 949e551^, {}=A|B>`; depois
+`rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png`, `pdf_entrega.py` e
+`book_entrega.py`. Antes e depois em `renders/POE642_CasaA_PH_Terreo_1611_danae_cozinha{,_12K}_antes_depois.jpg`.
+
