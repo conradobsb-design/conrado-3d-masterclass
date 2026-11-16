@@ -3151,3 +3151,23 @@ deveria?"), em `POE642_CasaD/renders/POE642_CasaD_PH_1611_bege_bahia_comparacao.
 Bahia do Subsolo da Casa A (`BEGE_A`), o do Térreo D a conta da Casa C (`pedidos_subsolo_casac_1311.bege`). Nas amostras
 limpas, o desvio da luz desfocada (sigma 5 px, as manchas): A 1,49, B 1,25, C 1,92, D Subsolo 1,81, D Térreo 1,61; o tom
 L* 218 a 223 nas quatro.
+
+A revisão das portas (usuário: "Confira o contorno das portas [...] a parede atrás da porta [...] algum dente, algum
+recorte inapropriado. Não pode ter nenhuma mancha de arco da porta [...] onde tiver soleira tem que colocar"), em
+`POE642_CasaD/renders/POE642_CasaD_PH_1611_portas_revisao_antes_depois.jpg`. A conferência: as folhas de cada porta (os 22
+arcos da ARQ_PAREDE do Térreo e os 10 do Subsolo, de qualquer tamanho) lado a lado com o PDF e realçadas; o contraste ao
+longo do caminho de cada arco (o resto do arco aparece como uma curva mais clara ou escura que o piso dos dois lados); a
+parede que existia na imagem de entrada perto de cada porta e sumiu na final (os recortes atrás das folhas); e os vãos
+brancos da ARQ_PAREDE (as soleiras do PDF). O que saiu dela:
+- Térreo, `portas_revisao_casad_1611.aplicar` (no fim de `aplicar`, depois dos rótulos): a face da parede atrás da folha
+  na circulação da suíte 2 e no banho 1 (1 px comido ao longo da folha pela limpeza da folha nova), o pé da parede do
+  banho gourmet, os dentes claros da parede de cima do lavabo, a ponta do tracejado do telhado na face da adega; o tracinho
+  branco no DCE e os pontinhos da despensa; as soleiras das duas portas de correr do living para as circulações e das
+  duas do banho master, nítidas no vão do PDF (eram borradas, com brilho e a ponta da parede esfumada).
+- Térreo, `pergolados`: o trecho do hall da cópia dos 5 px de cima (o tracejado escuro do telhado) começa depois da parede
+  da adega e não copia o cinza das paredes (descia a parede de baixo da adega: um degrau de 5 px).
+- Térreo, `sem_soleira`: a passagem da suíte 2 para o closet (Miro: "Não tem soleira") só no vinílico; o vão branco da
+  ARQ_PAREDE contava como parede no `par` e o `piso_desloc` não o trocava.
+- Subsolo, `bege`: os arcos das portas no Bege Bahia (sauna, vestiário, os dois boxes do WC do vestiário) entram no piso
+  novo (o traço do arco no PDF não é a chapada 232 e o do render ficava); o tracejado do render junto ao vão da porta dupla
+  do depósito também.

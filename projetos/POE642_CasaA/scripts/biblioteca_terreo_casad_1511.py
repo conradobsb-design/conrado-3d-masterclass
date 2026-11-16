@@ -221,7 +221,9 @@ AREA_DESCOBERTA = {"linha": ((2347.0, 566.0), (2347.0, 676.5)), "cor": (226, 228
 # de granito até y 472 (sobrava só o pé dela, solto no vão); `soleiras`: as caixas que a busca não toca (px)
 PERGOLADOS = {"limpa": (2637, 330, 3212, 470), "esquerda": (2540, 338, 2648, 472), "gas": (2558, 354, 2627, 427), "soleiras": [(2551, 420, 2566, 488)], "rotulo": (2846, 417, 2942, 454), "lum": 128, "croma": 45,
               "granito_px": (2792, 520, 2834, 700),
-              "hall": (2447, 896, 2618, 916), "hall_lum": 110, "hall_dy": 5,
+              # (16/11) o trecho do hall começa depois da face da parede da adega (de x 2447, a cópia dos 5 px de
+              # cima descia a parede de baixo da adega e as garrafas: um degrau de 5 px na parede)
+              "hall": (2516, 896, 2618, 916), "hall_lum": 110, "hall_dy": 5,
               "x0": 2676.0, "passo": 53.7, "larg": 41.8, "n": 9, "ys": [(362.6, 458.1), (810.4, 900.0)],
               "traco": {"cor": (165, 165, 165), "larg_px": 1.0, "traco_px": 6.0, "vao_px": 4.0, "ss": 8}}
 # a cama do DCE do Térreo (a caixa do PDF, a cabeceira em cima): a solteiro A com a peseira, na roupa branca e a peseira
@@ -602,7 +604,11 @@ def sala_intima(Q, out, antes, par, q=SALA_INTIMA):
 
 def sem_soleira(Q, out, par, q=SEM_SOLEIRA):
     for c in q:
-        out = BB.piso_desloc(out, c, par, -1, 0)
+        # (16/11) o vão branco da ARQ_PAREDE conta como parede no `par`, e o `piso_desloc` só troca o que não é
+        # parede: a soleira ficava. O miolo do vão sai do `par` (as pontas das paredes, fora dele, ficam)
+        p_ = par.copy()
+        p_[c[1] + 1:c[3] - 1, c[0]:c[2]] = False
+        out = BB.piso_desloc(out, c, p_, -1, 0)
     print("    suíte 2: a soleira da passagem do closet sai")
     return out
 
@@ -907,7 +913,8 @@ def pergolados(out, par, q=PERGOLADOS):
     out[gy0:gy1, gx0:gx1] = np.clip(np.round(o), 0, 255).astype(np.uint8)
     # os tracejados escuros do telhado no hall (no PDF, na ARQ_PAREDE: a máscara das paredes não serve aqui)
     hx0, hy0, hx1, hy1 = q["hall"]
-    esc = out[hy0:hy1, hx0:hx1].astype(np.float32).mean(axis=2) < q["hall_lum"]
+    reg_h = out[hy0:hy1, hx0:hx1].astype(np.int16)
+    esc = (reg_h.mean(axis=2) < q["hall_lum"]) & ~(np.abs(reg_h - 80).max(axis=2) <= 6)   # a parede cinza fica
     esc = cv2.dilate(esc.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
     fonte = out.copy()
     for y, x in zip(*np.nonzero(esc)):
@@ -1096,6 +1103,11 @@ def aplicar(antes):
     out = CP.aplicar(Q, out, par)
     # (16/11, usuário: "Esse último WC-DCE do térreo tá bem desconfigurado") o banho refeito entre o apagar e o escrever
     out = RP.aplicar(out, lambda o: A1.wc_dce(o, par))
+    # (16/11, usuário: "Confira o contorno das portas [...] a parede atrás da porta [...] nenhuma mancha de arco [...]
+    # onde tiver soleira tem que colocar") as faces das paredes atrás das folhas, as manchas junto às portas e as
+    # soleiras das portas de correr (`portas_revisao_casad_1611`)
+    import portas_revisao_casad_1611 as PR
+    out = PR.aplicar(out)
     return out
 
 

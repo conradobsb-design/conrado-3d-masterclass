@@ -72,7 +72,15 @@ BEGE_FORA = [(836, 1236, 1152, 1336)]
 BEGE_A = {"final": AQUI.parents[1] / "POE642_CasaA" / "renders" / "POE642_CasaA_PH_Subsolo_final_rotulos.png",
           "amostra": (1120, 1110, 1320, 1310), "luz_sigma": 18.0, "tol": 40,
           # os rótulos de antes sobre o Bege Bahia (SAUNA, VESTIÁRIO; px): saem com o piso novo (reescritos centrados)
-          "rotulos": [(805, 1624, 868, 1655), (1133, 1630, 1199, 1663)]}
+          "rotulos": [(805, 1624, 868, 1655), (1133, 1630, 1199, 1663),
+                      # (16/11, "evitar que tenha alguma mancha ao redor da porta") o tracejado do render junto ao
+                      # vão da porta dupla do depósito (não está no PDF)
+                      (1070, 1160, 1079, 1243)],
+          # (16/11, usuário: "Não pode ter nenhuma mancha de arco da porta [...] Essa planta humanizada não recebe o
+          # arco") os arcos das portas (ARQ_PAREDE) no Bege Bahia: o traço do arco no PDF não é a chapada 232, e o
+          # arco do render ficava (a sauna, o vestiário e os dois boxes do WC do vestiário); o caminho do arco, com
+          # `arco_px` de cada lado, entra no piso novo
+          "arco_px": 2}
 # a escada: a caixa dos degraus (entre as paredes, px); o branco do corte (`branco`: a luz mínima e o croma máximo); o
 # trecho dos degraus inteiros (x) de onde vem o período dos espelhos; (16/11, usuário: "manter divisória da escada em
 # diagonal, sem linha, e dali para cima os degraus em transparência") o véu dos degraus depois da diagonal, que entra
@@ -272,6 +280,21 @@ def bege(Q, out, fora=BEGE_FORA, q=BEGE_A):
     for x0, y0, x1, y1 in q["rotulos"]:
         perto[y0:y1, x0:x1] = True
     B &= perto
+    # os arcos das portas (o caminho do PDF, engrossado) onde o Bege Bahia está em volta
+    arcos = np.zeros(B.shape, np.uint8)
+    for d in Q.desenhos:
+        if d.get("layer") != "ARQ_PAREDE" or not any(it[0] == "c" for it in d.get("items", [])):
+            continue
+        (a0, b0), (a1, b1) = Q.p2q(d["rect"].x0, d["rect"].y0), Q.p2q(d["rect"].x1, d["rect"].y1)
+        w_, h_ = abs(a1 - a0), abs(b1 - b0)
+        if not (14 <= w_ <= 220 and abs(w_ - h_) < 2):
+            continue
+        for c in Q.caminhos(d):
+            cv2.polylines(arcos, [np.int32(np.round(np.asarray(c) * 8))], False, 1, 1 + 2 * q["arco_px"],
+                          cv2.LINE_8, shift=3)
+    perto_bege = cv2.dilate(B.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+    # (só o que é perto do piso: as peças sobre ele, o chuveiro, a bacia, ficam)
+    B |= (arcos > 0) & perto_bege & perto & ~(BS.quieto(FA.paredes_pdf, Q) > 0.3)
     ys, xs = np.nonzero(B)
     y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
     A = cv2.imread(str(q["final"]))
