@@ -3116,6 +3116,10 @@ Opção B: `rotulos_kalam_casad.py <Terreo|Subsolo>` (a final sem os rótulos e 
 12K: `ampliacao_12k_casad.py preparar|montar <pav> [--opcao B]`, o roteiro da Casa C (recorte A3, Topaz High Fidelity
 V2 a 12288 x 8689, os tons da final, o fundo branco; na B, os dados das linhas da Kalam em
 `renders/POE642_CasaD_PH_<pav>_rotulos_kalam.json`). Subsolo: jobs 56d5115c (A) e e01c1dea (B), as saídas fora do git.
+Em 16/11 à noite (usuário: "pode rodar os 12K A e B do térreo e subsolo"), com as finais regravadas (o Térreo com
+todos os pedidos de 16/11; o Subsolo sem os arcos e com a folha do vestiário): Térreo 4188fcc7 (A) e fee83ee3 (B),
+Subsolo 45efbea2 (A) e c715338d (B), Topaz High Fidelity V2 a 12288 x 8689 no Higgsfield (`topaz_image`); a
+prancha, o PDF da casa e o book refeitos.
 Depois, `rodape_entrega.py --config ../../POE642_CasaD/config_bases.json --no-quadro --render Subsolo=...`,
 `pdf_entrega.py --config ../../POE642_CasaD/config_bases.json` e `book_entrega.py`.
 
