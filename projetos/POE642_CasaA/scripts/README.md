@@ -3136,3 +3136,18 @@ Depois, `rodape_entrega.py --config ../../POE642_CasaD/config_bases.json --no-qu
   [...] padrão para todas as casas"): todos os rótulos de antes saem e entram os da tabela `ROTULOS_T` (Inter Regular,
   maiúscula de 8 px, 7 nos pequenos; as fileiras alinhadas); o piso do WC DCE sem as manchas bege. A opção B
   (`rotulos_kalam_casad.escritos("Terreo")`) lê a mesma tabela.
+
+A conferência das portas (usuário: "Você verificou todas as portas para saber se está quina a quina com a parede, não tem
+nenhuma porta flutuando não, né?"), em `POE642_CasaD/renders/POE642_CasaD_PH_1611_portas_antes_depois.jpg`:
+- Térreo: as 18 portas de giro do PDF quina a quina (17 pela rotina de portas; a 18ª, a do hall, é a pivotante da entrada,
+  aberta a 90°, a folha de x 2313 a 2462 como no PDF); as de correr dos banhos dentro da parede; a dupla da área
+  descoberta nas pontas da parede de cima. A soleira da porta da área de serviço para o gás sumia em `pergolados` (a
+  busca dos traços claros do telhado a tomava por tracejado): `PERGOLADOS["soleiras"]` a deixa de fora.
+- Subsolo: a folha de vidro da porta do vestiário (a do desenho de antes) estava 2 px abaixo da parede e 3 px fora da
+  soleira: `biblioteca_subsolo_casad_1511.folha_vestiario` a encosta nas duas, como a da sauna.
+
+O Bege Bahia (usuário: "O bege Bahia aprovado no subsolo está igual às outras casas [...]? Ou você reduziu mais do que
+deveria?"), em `POE642_CasaD/renders/POE642_CasaD_PH_1611_bege_bahia_comparacao.jpg`: o do Subsolo D é o próprio Bege
+Bahia do Subsolo da Casa A (`BEGE_A`), o do Térreo D a conta da Casa C (`pedidos_subsolo_casac_1311.bege`). Nas amostras
+limpas, o desvio da luz desfocada (sigma 5 px, as manchas): A 1,49, B 1,25, C 1,92, D Subsolo 1,81, D Térreo 1,61; o tom
+L* 218 a 223 nas quatro.

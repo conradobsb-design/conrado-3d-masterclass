@@ -216,7 +216,10 @@ AREA_DESCOBERTA = {"linha": ((2347.0, 566.0), (2347.0, 676.5)), "cor": (226, 228
 # garagem de cima saem (o granito tecido de um trecho limpo entre os carros; o rótulo fica) e os dois escuros do telhado
 # no hall (o travertino logo abaixo); o de baixo, sobre a grama, sai com o gramado novo. Os dois pergolados ficam só com
 # os módulos da EST_LAJE do PDF (9 de 41,8 px a cada 53,7 px), retângulos tracejados em cinza fino
-PERGOLADOS = {"limpa": (2637, 330, 3212, 470), "esquerda": (2540, 338, 2648, 472), "gas": (2558, 354, 2627, 427), "rotulo": (2846, 417, 2942, 454), "lum": 128, "croma": 45,
+# (16/11, usuário: "Você verificou todas as portas ... não tem nenhuma porta flutuando?") a soleira da porta da área
+# de serviço para o gás (`portas`) fica: a busca dos traços claros do telhado à esquerda a tomava por tracejado e a cobria
+# de granito até y 472 (sobrava só o pé dela, solto no vão); `soleiras`: as caixas que a busca não toca (px)
+PERGOLADOS = {"limpa": (2637, 330, 3212, 470), "esquerda": (2540, 338, 2648, 472), "gas": (2558, 354, 2627, 427), "soleiras": [(2551, 420, 2566, 488)], "rotulo": (2846, 417, 2942, 454), "lum": 128, "croma": 45,
               "granito_px": (2792, 520, 2834, 700),
               "hall": (2447, 896, 2618, 916), "hall_lum": 110, "hall_dy": 5,
               "x0": 2676.0, "passo": 53.7, "larg": 41.8, "n": 9, "ys": [(362.6, 458.1), (810.4, 900.0)],
@@ -892,6 +895,8 @@ def pergolados(out, par, q=PERGOLADOS):
     tr = (I.mean(axis=2) > q["lum"]) & ((I.max(axis=2) - I.min(axis=2)) < q["croma"])
     a0, b0, a1, b1 = q["gas"]
     tr[b0 - gy0:b1 - gy0, a0 - gx0:a1 - gx0] = False
+    for s0, t0, s1, t1 in q.get("soleiras", ()):                  # as soleiras das portas ficam
+        tr[max(t0 - gy0, 0):max(t1 - gy0, 0), max(s0 - gx0, 0):max(s1 - gx0, 0)] = False
     tr = cv2.dilate(tr.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
     tr &= ~(np.abs(I - 80).max(axis=2) <= 6)                       # a parede cinza fica
     T2 = _tecido(out, q["granito_px"], gy1 - gy0, gx1 - gx0, 1516)

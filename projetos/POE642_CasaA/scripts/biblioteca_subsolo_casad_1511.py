@@ -108,6 +108,13 @@ PORTA_ACADEMIA = {"vao": (759.1, 1341.7, 768.0, 1592.5), "x": 759.1, "folha_px":
 # a peça com a barra na parede de cima do WC do vestiário ("Isso aqui não existe"): a parede continua (px); embaixo, o
 # piso de `dy` abaixo
 NAO_EXISTE = {"parede": (1201, 1598, 1281, 1606), "piso": (1201, 1606, 1281, 1612), "dy": 7}
+# (16/11, usuário: "Você verificou todas as portas para saber se está quina a quina com a parede, não tem nenhuma porta
+# flutuando não, né?") a folha de vidro da porta do vestiário (a do desenho de antes) ficava solta: 2 px abaixo da
+# parede e 3 px à direita da soleira (a da sauna encosta nas duas). O trecho da folha (com as marcas logo abaixo, px)
+# sobe `dy` e vai `dx` à esquerda, encostando na parede e na ponta da soleira; onde ela estava, o Bege Bahia de
+# `piso_dy` px abaixo
+FOLHA_VESTIARIO = {"folha": (1106, 1608, 1147, 1614), "dx": -3, "dy": -2, "limpa": (1103, 1606, 1148, 1614),
+                   "piso_dy": 9}
 # a academia: os aparelhos de antes (caixas px, com folga) e os novos, nos tamanhos da Casa A
 # (`biblioteca_subsolo_casaa_1211.ACADEMIA`): as esteiras 1,76 x 0,77 m, de pé (o console em cima, como no PDF); as
 # bicicletas 1,45 vezes o símbolo do PDF, o console para a esquerda; os supinos com o banco de 1,60 m no x e a barra de
@@ -374,6 +381,19 @@ def porta_academia(out, par, q=PORTA_ACADEMIA):
                                 255).astype(np.uint8)
     print(f"    academia: as portas de correr do pátio como as do pátio do Subsolo A (4 folhas de {L / PX_M:.2f} m em 2 "
           "trilhos, o vidro claro com o perfil escuro e os montantes; os batentes nas pontas)")
+    return out
+
+
+def folha_vestiario(out, q=FOLHA_VESTIARIO):
+    src = out.copy()
+    x0, y0, x1, y1 = q["limpa"]
+    d = q["piso_dy"]
+    out[y0:y1, x0:x1] = src[y0 + d:y1 + d, x0:x1]
+    x0, y0, x1, y1 = q["folha"]
+    dx, dy = q["dx"], q["dy"]
+    out[y0 + dy:y1 + dy, x0 + dx:x1 + dx] = src[y0:y1, x0:x1]
+    print(f"    vestiário: a folha de vidro encostada na parede e na ponta da soleira ({-dy} px acima, {-dx} px à "
+          "esquerda; a da sauna já encostava)")
     return out
 
 
@@ -659,6 +679,7 @@ def aplicar(antes):
     out = portas(Q, out)
     out = wc_porta(out)
     out = soleira(out, par)
+    out = folha_vestiario(out)
     out = porta_academia(out, par)
     out = elevador(Q, out)
     out = perimetro(Q, out)
