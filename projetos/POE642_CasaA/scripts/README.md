@@ -3235,3 +3235,20 @@ outras casas, os padrões de todas as casas com a situação da E por pavimento 
 `comparacao_casae_1611.py linhas.json saida.jpg [altura]` monta a folha "Casa E × exemplo": cada linha com os recortes
 das finais (chaves `E_T`, `E_S`, `E_1`, `A_T`, `C_T`, `C_S`, `D_T`, `D_S`), lado a lado na mesma altura. As linhas usadas
 estão em `POE642_CasaE/POE642_CasaE_1611_comparacao_{1,2}.json`, e as folhas em `POE642_CasaE/renders/`.
+
+## Casa E · Térreo, as notas do cliente e os padrões de todas as casas (16/11)
+
+Usuário: "siga as recomendações em todas as perguntas e aplique no térreo"; "TRACEJADOS CONFORME O CLIENTE PEDE";
+"PISCINA MAIS SOBRIA"; "3. SIM 4. SIM 5. SIM 6. CONFORME RECOMENDAÇÃO 7. CONFORME RECOMENDAÇÃO 8. CONFORME RECOMENDAÇÃO".
+`pedidos_terreo_casae_1611.py` parte da final de `ANTES_COMMIT` (b6b56f0), sem os rótulos, e faz um passo por item
+(`PASSOS`): a margem e o lote sem tracejado; os tracejados de projeção fora; o gramado da Casa B com 3 oliveiras; o Bege
+Bahia a 45%; o piso marrom na amostra do cliente; o travertino Romano levigado da biblioteca da Casa D, no tom do living
+dela; as bancadas (Dekton Danae nas ilhas, na pia da cozinha e nos tanques; marrom tabaco na gourmet, no serviço, no WC
+DCE e no criado do DCE; travertino no BH gourmet); os armários lisos; o WC DCE no piso dos banhos da Casa D, com a cuba
+compacta; a gourmet (churrasqueira, refrigerador, armário; a torneira lateral e sem a soleira no lavabo gourmet); a
+piscina mais sóbria, a profundidade, a borda lisa e as duas faixas da borda esquerda em parede; as escadas (os degraus
+cortados no tom delas, o triângulo, o S/D e a descrição); o guarda-corpo do deck, o triângulo da entrada, o jardim de
+inverno e a mesa do jantar em nogueira; as cortinas C4; os X dos vazios finos e cinza e as linhas da garagem contínuas;
+os rótulos no padrão de 16/11. Uso: `python3 pedidos_terreo_casae_1611.py [--cache <pasta>] [--de/--ate <passo>]`
+(grava a final do Térreo); `--antes_depois <png>` grava `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1611_*_antes_depois.jpg`.
+Falta, depois do OK: 12K A e B, prancha, PDF e book; o Térreo esmaecido do 1º Pavimento.
