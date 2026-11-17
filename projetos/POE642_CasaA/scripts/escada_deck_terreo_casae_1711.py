@@ -15,9 +15,13 @@ o 11 (o deck) em cima: cada degrau por cima dos mais baixos.
 - os bancos de bronze (ARQ_ELEMENTOS FIXOS) por cima de tudo, no retângulo do PDF: o de cima avança sobre o degrau 10
   (que estava por cima dele) e sobre a grama até a face do PDF; o de baixo, até a face do PDF (o render parava na borda
   do deck).
+- `faixa` (usuário: "já corrija essa faixa branca indevida entre o degrau"): a faixa cinza e branca entre o degrau 10
+  e o deck (11), ao lado do "◀ D", sai: o piso do deck até a face dele (o deck de logo ao lado, sem as letras) e a
+  sombra curta do deck no degrau 10, como a dos outros degraus.
 
   python3 escada_deck_terreo_casae_1711.py doze [--opcao AB]     (antes da final: a final de antes é a referência)
   python3 escada_deck_terreo_casae_1711.py final
+  (--passos escada,faixa; na rodada da faixa, só `--passos faixa` sobre a final já com a escada)
 """
 import argparse
 import sys
@@ -62,6 +66,11 @@ ESCADA = {
     # os bancos: (o retângulo a cobrir, até a face do PDF; o deslocamento da fonte, o próprio banco à direita)
     "bancos": [((769.8, 1125.5, 784.5, 1318.3), (15, 0)), ((778.6, 1484.0, 790.0, 1657.7), (12, 0))],
 }
+# a faixa entre o 10 e o deck, entre os dois bancos: (retângulo px da final, deslocamento da fonte: o deck sem as letras)
+FAIXA = {"caixa": (740, 1290, 880, 1510),
+         "trechos": [((783.7, 1318.3, 791.5, 1342.0), (45, 0)), ((783.7, 1342.0, 791.5, 1395.0), (45, 60)),
+                     ((783.7, 1395.0, 791.5, 1484.0), (45, 0))],
+         "sombra": (783.7, 1318.3, 1484.0)}
 
 
 def _grade(m, caixa):
@@ -129,17 +138,51 @@ def escada(out, mp, q=ESCADA):
     print("    escada do deck: os degraus na ordem dos níveis (1 embaixo, 11 em cima) e os bancos por cima")
 
 
+def faixa(out, mp, q=FAIXA, e=ESCADA):
+    m = mp.local(out, q["caixa"]) if mp.ref is not None else mp
+    s = m.s
+    for r, (dx, dy) in q["trechos"]:
+        rm = m.ret(r)
+        x0, y0 = int(np.floor(rm[0])) - 1, int(np.floor(rm[1])) - 1
+        x1, y1 = int(np.ceil(rm[2])) + 1, int(np.ceil(rm[3])) + 1
+        a = alfa_ret((rm[0] - x0, rm[1] - y0, rm[2] - x0, rm[3] - y0), (y1 - y0, x1 - x0))[..., None]
+        ddx, ddy = int(round(dx * s)), int(round(dy * s))
+        alvo = out[y0:y1, x0:x1].astype(np.float32)
+        f = out[y0 + ddy:y1 + ddy, x0 + ddx:x1 + ddx].astype(np.float32)
+        out[y0:y1, x0:x1] = np.clip(np.round(alvo * (1 - a) + f * a), 0, 255).astype(np.uint8)
+    xf, ya, yb = q["sombra"]
+    (X0, Y0, X1, Y1), U, V = _grade(m, (xf - 10, ya - 2, xf + 1, yb + 2))
+    d = xf - U[None, :]
+    k = np.interp(d, e["sombra_d"], e["sombra_k"], left=0.0, right=0.0) * (d > -0.5 / s)
+    fator = 1 - k * _ponta(V, ya, yb, s)[:, None]
+    reg = out[Y0:Y1, X0:X1].astype(np.float32) * fator[..., None]
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print("    escada do deck: a faixa branca entre o degrau 10 e o deck saiu (o deck até a face, a sombra no 10)")
+
+
+PASSOS = ("escada", "faixa")
+
+
+def aplicar(out, mp, passos=PASSOS):
+    if "escada" in passos:
+        escada(out, mp)
+    if "faixa" in passos:
+        faixa(out, mp)
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("acao", choices=("final", "doze"))
     ap.add_argument("--opcao", default="AB")
     ap.add_argument("--entrada")
     ap.add_argument("--saida")
+    ap.add_argument("--passos", default=",".join(PASSOS))
     a = ap.parse_args()
+    passos = a.passos.split(",")
     fin = cv2.imread(a.entrada or str(FINAL))
     if a.acao == "final":
         out = fin.copy()
-        escada(out, Mapa())
+        aplicar(out, Mapa(), passos)
         cv2.imwrite(a.saida or str(FINAL), out)
         return
     from PIL import Image
@@ -150,7 +193,7 @@ def main():
         mp = Mapa(float(np.hypot(M[0, 0], M[1, 0])), (float(M[0, 2]), float(M[1, 2])))
         mp.ref = fin
         out = img.copy()
-        escada(out, mp)
+        aplicar(out, mp, passos)
         dpi = int(round(out.shape[1] / (420 / 25.4)))
         dest = a.saida.format(op) if a.saida else str(f)
         Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(dest, quality=95, subsampling=0, dpi=(dpi, dpi))
