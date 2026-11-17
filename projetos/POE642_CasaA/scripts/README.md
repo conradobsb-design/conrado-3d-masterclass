@@ -3457,6 +3457,38 @@ Não há 12K do 1º Pavimento da E. Depois, a prancha (`rodape_entrega.py --conf
 --no-quadro --render 1Pavimento=../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final.png`), o PDF da E e o
 book. Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1711_revisao_antes_depois.jpg`.
 
+#### Casa E, Térreo: varanda na alternativa 3, tracejados cinza finos e o levantamento (17/11, `revisao_terreo_casae_1711.py`)
+
+Escolhas do usuário: o banco k4 do 1º Pavimento fica; na varanda, "3. Linho e nogueira"; "Térreo no cinza fino";
+no levantamento de 17/11, os quatro itens (faixas escuras, criado-mudo do DCE, pontilhado do living, pontinhos do
+travertino). Na final e direto nos 12K A (Inter) e B (Kalam), no afim afinado em cada caixa (`doze` antes de `final`;
+a final de antes é a referência):
+
+1. `levantamento`: o piso do lado (`instalacao_terreo_casad_1711._remenda`) na faixa do piso escuro antigo dos dois
+   lados da folha de correr da cozinha, na faixa escura entre a parede e a folha da despensa (o fio da parede fica), na
+   linha escura contínua da garagem, na mancha junto ao criado-mudo do DCE, no pontilhado por dentro das cortinas do
+   living (x 1599) e nos 6 pontinhos soltos no travertino (`LEVANTAMENTO`, px). O criado-mudo do DCE (granito pintado)
+   na cor sólida dos armários da E (a do louceiro, 129/160/189 BGR), no retângulo do PDF até a face da parede, com o
+   fio e a sombra curta (`CRIADO`).
+2. `varanda`: na final, `proposta_varanda_casae_1711.limpar` e `montar` com a alternativa 3 (sofá reto de linho, 2
+   poltronas creme com aro de madeira, mesa de centro gota de nogueira, mesa lateral de metal e madeira, banco B1, mesas
+   redondas de nogueira com as cadeiras creme e madeira). No 12K, o piso limpo é a final limpa (a baixa frequência,
+   ampliada pelo afim) mais o grão do Bege Bahia limpo do próprio 12K (a amostra da proposta, em espelho), sem tocar o
+   texto do rótulo; as peças vão direto na escala do 12K (`M.pousar` trocado por `biblioteca_terreo_casaa_1211.pousar`
+   com o centro pelo afim, o tamanho e o `PX_M` vezes a escala, as paredes levadas pelo afim).
+3. `tracejados`: o X do hall (escuro) e o X da área de serviço descoberta (branco) no traço do 1º Pavimento (cinza 128
+   no fundo claro, cinza 200 no escuro, 0,8 px na final). Cada cadeia do PDF (`final3840_casae._tracos_te`) vira a
+   reta inteira; o traço antigo sai pelo px deslocado na perpendicular (4,5 px), só onde ele destoa; os trechos novos
+   vão onde o antigo estava, lido na final de antes (fora da caixa do texto dos rótulos, cujas letras escuras na reta
+   não são traço), o que mantém o ritmo e os vãos dos rótulos. No 12K B, os traços antigos passavam por baixo da Kalam:
+   saem também ali, e as letras voltam por cima do piso limpo (o alfa da Kalam como `rotulos_kalam_casac.desenhar` o
+   escreve). A linha escura contínua da garagem era a projeção da laje (`TRACEJADOS_TE`, a 1ª linha da laje da
+   garagem): volta tracejada, no cinza do fundo escuro.
+
+Depois, a prancha (`rodape_entrega.py --config ../../POE642_CasaE/config_bases.json --no-quadro --render
+Terreo=../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_final.png`), o PDF da E e o book. Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_revisao_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
