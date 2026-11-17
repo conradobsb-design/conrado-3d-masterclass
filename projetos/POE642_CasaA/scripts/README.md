@@ -3578,8 +3578,9 @@ caixa, `Mapa.local`, com a final de antes como referência):
 - `folha_vidro_master` ("a folha de vidro tem que ir até embaixo, encostando na parede"): a folha de pé, que parava no
   arremate branco 14 px acima da parede de baixo, continuada até a face da parede com o perfil dela de logo acima
   (`--passos folha_vidro_master`).
-- `parede_vao_master` ("corrija a parede para que ela vá de encontro com a folha de vidro", com a imagem do 3D como
-  fonte): no pé do vão, o toco da parede de baixo (≈ 8 px, no cinza da parede), da borda direita da folha de vidro até
-  o batente escuro da cortina; a folha desce ao lado dele até a parede (`--passos parede_vao_master`). Antes e depois
-  destes 3 em
+- `parede_vao_master` ("corrija a parede para que ela vá de encontro com a folha de vidro"; "A folha é menor, ela volta
+  para aquele tamanho que estava anteriormente e aí a parede ela vai avançar", com a imagem do 3D como fonte): a folha
+  de pé volta ao tamanho de antes (o arremate branco em y 1539-1540,6) e a parede de baixo avança no vão inteiro, do
+  ripado ao batente escuro da cortina, até a ponta da folha (`--passos parede_vao_master`). `folha_vidro_master` saiu
+  dos passos (desfeito por este). Antes e depois destes em
   `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1711d_vao_master_12K_antes_depois.jpg`.
