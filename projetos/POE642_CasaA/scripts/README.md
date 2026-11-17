@@ -3489,6 +3489,38 @@ Depois, a prancha (`rodape_entrega.py --config ../../POE642_CasaE/config_bases.j
 Terreo=../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_final.png`), o PDF da E e o book. Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_revisao_antes_depois.jpg`.
 
+#### Casa E, Térreo: Bege Bahia com menos manchas, garagem sem tracejado, banco B1 (17/11, `bege_garagem_terreo_casae_1711.py`)
+
+Usuário: sobre o Bege Bahia do Térreo, "Sim, pode reduzir."; sobre a projeção tracejada da laje da garagem, "tire.
+não haverá tracejado para projeções" (`revisao_terreo_casae_1711.TRACEJADOS["garagem"]` agora é `None`: a projeção não
+volta). Na final e direto nos 12K A e B (`doze` antes de `final`):
+
+1. `garagem`: os traços saem; o piso de logo acima no que destoa da faixa (`_remenda`).
+2. `bege`: as manchas a 35% (`pedidos_subsolo_casac_1311.bege`, pela legenda 232: a varanda, o deck, as faixas em
+   volta da casa, o caminho e os pisantes da entrada); fora o WC DCE (a mesma legenda, outro piso) e o mobiliário da
+   varanda (as caixas de `mobiliario_terreo_casae_1611.VARANDA` e `proposta_varanda_casae_1711.LUGARES`, com folga).
+   No 12K, os campos da final (o piso, o tom das manchas, as arestas) pelo afim global com o desvio local mediano de
+   caixas com desenho (`CAIXAS_AFIM`), o piso 1 px (da final) para dentro, e a fórmula na escala do 12K, em blocos; as
+   letras e as linhas escuras medidas no próprio 12K (a Kalam no B).
+3. `banco_fio`: o fio claro embaixo do banco B1 da varanda (o fundo branco da foto da peça) vai à 1ª linha da sombra.
+
+#### Casa E, Térreo: a descrição do deck à direita da seta e os vidros finos da piscina (17/11, `deck_piscina_terreo_casae_1711.py`)
+
+Usuário: "a descrição 'desce para o jardim' fica ao lado direito da seta, próxima a ela"; "coloque bordas de vidros
+finos. são dois, uma mais extremo e outro mais recuado à esquerda. esses que estão são muito grossos." Na final e nos
+12K A e B:
+
+1. `descricao_desce`: o "DESCE PARA O / JARDIM" sai do deck (a baixa frequência pelo inpaint do entorno e o grão do
+   piso de logo acima, a máscara com o antisserrilhado) e vai para a direita do triângulo e do D, no meio da altura
+   deles, no corpo das descrições (`escada_painel_casae_1711.descricao_sobe`); no 12K B na Kalam, e o JSON da Kalam
+   atualizado.
+2. `vidros_piscina`: as duas barras cinza de 9 px da borda esquerda da piscina (as paredes de vidro do PDF) viram água
+   (a de logo ao lado) e entra o vidro fino da piscina da Casa C (`VIDRO_PISC_C`: o perfil escuro de 1,8 px): o de fora
+   na face externa (o extremo), o de dentro no meio da parede dele.
+
+Depois, a prancha, o PDF da E e o book. Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_bege_deck_piscina_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,

@@ -60,7 +60,8 @@ CRIADO = {"ret": (2361.5, 554.0, 2386.9, 574.9), "cor": (129, 160, 189), "fio": 
 # 3. os grupos do PDF (`final3840_casae._tracos_te`) e a projeção da garagem (o nome e o trecho em x, px)
 TRACEJADOS = {"grupos": {"hall": ("DOC 45.0°", "DOC 90.0°", "DOC 138.5°"),
                          "área de serviço descoberta": ("DOC 0.0°", "DOC 15.0°", "DOC 158.5°")},
-              "garagem": ("laje da garagem (1)", 2489.5, 3036.5),
+              # (17/11, usuário: "tire. não haverá tracejado para projeções") a projeção da laje da garagem não volta
+              "garagem": None,
               "caixas": {"hall": (2215, 1315, 2495, 1595), "área de serviço descoberta": (1940, 420, 2230, 550),
                          "garagem": (2480, 466, 3046, 506)},
               "rotulos": ("HALL DE ENTRADA", "ÁREA DE SERVIÇO DESCOBERTA"),
@@ -270,6 +271,8 @@ def _linhas(Q, ref, q=TRACEJADOS):
                 i = j + 1
         cor = q["cinza"] if fundo(segs) >= q["limiar"] else q["cinza_escuro"]
         out[grupo] = (sinal, cor, segs, partes)
+    if not q.get("garagem"):
+        return out
     nome, xa, xb = q["garagem"]
     segs = []
     for t in tr[nome]:
