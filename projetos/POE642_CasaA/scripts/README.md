@@ -3378,6 +3378,24 @@ contorno fino e sombra curta; no pé, a faixa clara antiga e os 2 risquinhos cla
 marrom. Na final e direto nos 12K A e B (`doze`, antes da `final`). Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_geladeira_gourmet_12K_antes_depois.jpg`.
 
+#### Casa E, Térreo: a descrição da escada e o painel ripado do escritório (17/11, `escada_painel_casae_1711.py`)
+
+- `descricao_sobe` ("A descrição de sobe para o primeiro pavimento tem que ficar ali próximo ao S e o triângulo, de
+  preferência do lado direito ... na área de circulação. Você pode até reduzir um pouco a fonte ... Que não fique em cima
+  de parede"): o SOBE PARA O / 1º PAVIMENTO sai de junto da mesa de jantar (as letras pelo piso de logo acima) e vai para
+  a circulação à direita do triângulo e do S, centrado na faixa livre entre o fim da escada (x 2218) e o batente do
+  escritório (x 2283) e na altura do triângulo e do S, em duas linhas, no corpo das descrições x 0,7 (a faixa tem 62 px;
+  a descrição inteira, 78). No 12K A na Inter, no 12K B na Kalam (o fator único do corpo dos dados de antes); a linha
+  nova também em `POE642_CasaE_PH_Terreo_rotulos_kalam.json`. Fica para depois levar a posição a
+  `pedidos_terreo_casae_1611.ESCADAS` (o passo roda por cima da final que ele gera).
+- `painel_escritorio` ("Aqui é um painel de madeira com as ripas, então é tudo na madeira ... bem da forma como a gente
+  fez o painel de madeira na casa D ... Não tem nada de cor clara"): o vão creme da janela do escritório para o jardim
+  vira o painel de nogueira ripado da Casa D (`correcoes_terreo_casad_1711._ripado`, `FOLHAS_1P`), com as 2 folhas de
+  vidro de correr redesenhadas por cima (vidro claro, fio cinza); as 7 ripas que saem para o gramado em nogueira maciça
+  (o veio ao longo, a luz, o contorno, a sombra curta).
+- `python3 escada_painel_casae_1711.py doze` (antes da final) e `final` (que também grava a linha da Kalam). Antes e
+  depois em `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_escada_painel_12K_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
