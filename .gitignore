@@ -26,3 +26,7 @@ dist-ssr
 # PDFs do cliente (POE 642), ficam só na máquina local
 projetos/_pdfs_cliente/
 __pycache__/
+
+# saídas brutas do Meshy (PNG de 2K, normal, rugosidade, GLB): fora do git; a cor base vai em JPG
+projetos/_texturas/meshy/*/*.png
+projetos/_texturas/meshy/*/*.glb
