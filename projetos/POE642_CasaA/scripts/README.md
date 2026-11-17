@@ -3396,6 +3396,19 @@ marrom. Na final e direto nos 12K A e B (`doze`, antes da `final`). Antes e depo
 - `python3 escada_painel_casae_1711.py doze` (antes da final) e `final` (que também grava a linha da Kalam). Antes e
   depois em `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_escada_painel_12K_antes_depois.jpg`.
 
+#### Casa E, 1º Pavimento: as cortinas no padrão C4 (17/11, `cortinas_1pav_casae_1711.py`)
+
+Usuário: "Você está usando a cortina padrão que a gente vem utilizando? Se não, tem que trocar todos onde tem cortina pela
+cortina que a gente utiliza". Conferido nos três pavimentos da E: o Térreo já está na C4 (f5eb397: a fachada do living
+num trilho só e o escritório); o Subsolo não tem cortina no PDF; o 1º Pavimento ainda tinha a linha fina de 11/11 (e,
+na suíte master, só os pedacinhos franzidos). Nele, `cortinas_padrao_casad_1611.aplicar` (a C4 da D, a mesma do Térreo
+da E) nos 10 trechos do PDF (`final3840_casac.trechos_cortina_tc`), unidos em 5 trilhos de parede a parede (suítes
+master, 1, 2, 3 e 4): o linho em ondas, o trilho grafite do lado do vidro, o pano de 0,22 m, o linho 0,82 e a sombra
+inteira; o pano e o trilho de antes saem. Não há 12K do 1º Pavimento da E. Depois, a prancha (`rodape_entrega.py
+--config ../../POE642_CasaE/config_bases.json --no-quadro --render
+1Pavimento=../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final.png`), o PDF da E e o book. Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1711_cortinas_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
