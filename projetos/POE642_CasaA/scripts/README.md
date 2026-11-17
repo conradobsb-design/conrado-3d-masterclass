@@ -3430,6 +3430,33 @@ cadeiras de corda); 3. linho e nogueira, como o living da E (sofá reto de linho
 gota de nogueira, mesas de nogueira e cadeiras creme e madeira); nas três, o banco B1 (o do living da D). A folha:
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_varanda_proposta.jpg`. A final não muda.
 
+#### Casa E, 1º Pavimento: Bege Bahia, closets em L, bancos de pé de cama e tracejados (17/11, `revisao_1pav_casae_1711.py`)
+
+Usuário: "Reduzir as manchas do mármore bege Bahia igual ao das outras casas / Vamos alterar os bancos em frente as camas
+para um outro modelo da biblioteca. / Corrigir os armários com cabides em L, revendo dividirias entre eles, como fizemos
+nas outras casas. / Tracejados em cinza, não pretos. Traços mais finos também." Quatro passos sobre a final
+(`--passos bege,closets,bancos,tracejados`):
+
+1. `bege`: as manchas a 35% nas três varandas (`pedidos_subsolo_casac_1311.bege`, a rotina das C e D, pela legenda 232
+   do quadro). A bancada da copinha fica de fora (`BEGE_FORA`): a legenda só cobre a parte à esquerda da cuba.
+2. `closets`: os closets 1, 2, 3 e 4 em L numa peça só (`um_pav_casaa_1111._closet`, como os da A e os contínuos da D):
+   cada trecho sem o canto e o canto à parte (`CLOSETS`, pt, a partir de `retoque_1pav_casae.GUARDA_ROUPAS`), os
+   cabides até o canto, o cabideiro se encontrando no meio dele, a moldura só por fora; sai a lateral entre os trechos.
+   Os dois trechos retos do closet master ficam como estão.
+3. `bancos`: os 5 bancos (o estofado bege de 11/11) pelo `banco-k4` da biblioteca da A (couro caramelo em três gomos,
+   moldura escura), no retângulo de fora do banco de antes, contorno incluído (`BANCOS`, px), por `_pousar` (a sombra
+   curta de antes fica); na suíte 3, a cama embaixo, girado 180°. Os pingos de cor do banco antigo no tapete da master
+   vêm dos vizinhos (`_pingos`).
+4. `tracejados`: os do PDF (vazios da escada e do hall, shaft, rouparia, vaso e box do banho master) em cinza 128 e
+   0,8 px, o traço do pergolado da B (`correcoes_terreo_casab_1611.PERGOLADO_BRISES`), por
+   `final3840_casae.tracejados_1p_sobre_final` com `TRACEJADOS_1P` nesse traço; nos vazios, a faixa do traço preto
+   antigo vem do nublado de fora dela (`_faixa_vazios`, convolução normalizada; a limpeza por deslocamento deixava
+   listras).
+
+Não há 12K do 1º Pavimento da E. Depois, a prancha (`rodape_entrega.py --config ../../POE642_CasaE/config_bases.json
+--no-quadro --render 1Pavimento=../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final.png`), o PDF da E e o
+book. Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1711_revisao_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
