@@ -52,6 +52,22 @@ B_Terreo`), na final e direto nos 12K A e B, cada peça desenhada na escala de c
    MESMO"): o armário do quarto de serviço (o retângulo da ARQ_LAYOUT HUMANIZAÇÃO, 0,90 x 0,50 m, junto à parede da
    esquerda), que era um bloco cinza, liso na cor sólida dos armários, como os outros (`armarios`).
 
+14. `margem_lote` ("REMOVA ESSES TRAÇOS FORA DA PLANTA"; "PRECISA REMOVER ESSA SOBRA AQUI DE MURO"): fora do lote (das
+   pontas do muro de cima, medidas na própria imagem), tudo no fundo branco: as 2 marcas de canto em L à esquerda, os
+   fantasmas claros do tracejado antigo e as 2 linhas que o muro de baixo puxava além da ponta; a ponta do muro de baixo
+   com a mesma passagem para o branco da do de cima; nas bordas do gramado, a coluna clara da esquerda e a coluna verde
+   clara (e o entalhe branco junto ao muro) da direita viram grama.
+15. `grama_muro` ("CORRIJA ESSE TRAÇO VERDE, RESÍDUO DA ANTIGA GRAMA, RENTE AO MURO DO TERRENO"): a faixa verde clara
+   de 4 px (na final) logo acima do muro de baixo, de ponta a ponta, vira a grama de logo acima dela.
+16. `portoes_descoberta` ("TEMOS UMA LINHA TÉCNICA AQUI. O QUE ELA É?", "TEMOS PORTÕES AQUI", "PRECISAMOS
+   REPRESENTÁ-LOS"): os 2 portões de correr da área de serviço descoberta (ARQ_ELEMENTOS FIXOS: em cada lado, 2 folhas
+   desencontradas, da parede da casa ao muro, e os batentes nas pontas), que estavam em linha técnica (a folha de cima
+   em traço claro, a de baixo fundida à faixa cinza da borda do piso), no padrão da Casa B para os portões de correr da
+   área descoberta (em alumínio, com o contorno fino, a linha do meio de cada folha e a sombra curta). Antes, a faixa
+   cinza de 2 a 3 px em volta do piso (o contorno fino do contrapiso no PDF, engrossado no render) sai: o piso vai até a
+   face de fora de cada portão e até a borda de baixo do PDF e encontra a grama direto, como a pedra da garagem. No 12K
+   o desenho vai no afim afinado ali (`Mapa.local`: a final ampliada casada com o 12K, 1 a 2 px além do afim geral).
+
   python3 correcoes_terreo_casab_1611.py final [--saida <png>]
   python3 correcoes_terreo_casab_1611.py doze [--opcao AB] [--saida <jpg com {}>]
 """
@@ -128,6 +144,26 @@ PIA_SALA_INTIMA = {"interior": (1563.5, 586.5, 1594.5, 727.5), "fonte": (1563.5,
                    "sat_max": 18, "lum_min": 110, "sombra": 0.25}
 BANCO_DECK = {"traco": (615.0, 1709.6, 897.0, 1711.0), "dy": 3.0}
 ARMARIO_QS = {"ret": (1911.5, 1552.5, 1941.6, 1606.2)}
+# a margem: as referências (px da final) para achar, na própria imagem, as pontas dos muros e as bordas do gramado
+LOTE = {"muro_cima": (80, 110), "muro_baixo": (1878, 1900), "meio_x": (400, 3400), "linha_muro_cima": 100,
+        "linha_muro_baixo": 1883,
+        "grama": (108, 1876), "amostra_grama": (300, 900), "amostra_esq": (1100, 1700), "borda_esq_px": 4, "borda_dir_px": 5}
+GRAMA_MURO = {"x": (298, 3513), "busca": (1870, 1884), "faixa_px": 4.5}
+# os portões (ARQ_ELEMENTOS FIXOS, px da final); "piso": o contrapiso da área descoberta (ARQ_CONTRAPISO)
+PORTOES_AD = {
+    "piso": (1822.0, 1678.05, 2138.4, 1848.2),
+    "borda_baixo": ((1816.0, 1843.0, 2138.4, 1853.5), (0.0, -7.0), (0.0, 7.0)),
+    "lados": {
+        "esquerdo": {"faixa": (1816.0, 1679.84, 1830.0, 1876.29), "d_piso": (10.0, 0.0), "d_fora": (-8.0, 0.0),
+                     "batentes": [(1821.99, 1678.05, 1826.76, 1679.84), (1821.99, 1876.29, 1826.76, 1878.08)],
+                     "folhas": [(1824.37, 1679.84, 1826.76, 1746.72), (1821.99, 1746.72, 1824.37, 1876.29)]},
+        "direito": {"faixa": (2126.0, 1679.2, 2138.4, 1876.29), "d_piso": (-10.0, 0.0), "d_fora": (-10.0, 0.0),
+                    "batentes": [(2132.34, 1679.2, 2137.12, 1680.99), (2132.34, 1876.29, 2137.12, 1878.08)],
+                    "folhas": [(2134.73, 1680.99, 2137.12, 1746.72), (2132.34, 1746.72, 2134.73, 1876.29)]}},
+    "caixa_local": (1790, 1655, 2170, 1860),
+    # `ajustes_casab.PORTOES_B` (a regra da Casa B: "portões de correr da área descoberta em alumínio")
+    "aluminio": (196, 198, 200), "contorno": (104, 106, 110), "contorno_px": 0.45,
+    "meio": (150, 152, 156), "meio_px": 0.3, "sombra": 0.30}
 
 
 class Mapa:
@@ -147,6 +183,31 @@ class Mapa:
 
     def reti(self, r):
         return tuple(int(round(v)) for v in self.ret(r))
+
+    ref = None                                    # a final (só no 12K), para o afinamento local
+
+    def local(self, img, caixa, raio=12):
+        """O afim afinado na caixa (px da final): a final ampliada (s) casada com a imagem, com o subpixel; sem `ref`
+        (a própria final), o mesmo."""
+        if self.ref is None:
+            return self
+        x0, y0, x1, y1 = caixa
+        tpl = cv2.resize(self.ref[y0:y1, x0:x1], None, fx=self.s, fy=self.s,
+                         interpolation=cv2.INTER_CUBIC).astype(np.float32)
+        ex, ey = self.x(x0), self.y(y0)
+        X0, Y0 = int(np.floor(ex)) - raio, int(np.floor(ey)) - raio
+        reg = img[Y0:Y0 + tpl.shape[0] + 2 * raio + 1, X0:X0 + tpl.shape[1] + 2 * raio + 1].astype(np.float32)
+        r = cv2.matchTemplate(reg, tpl, cv2.TM_CCOEFF_NORMED)
+        _, _, _, (bx, by) = cv2.minMaxLoc(r)
+
+        def sub(c, a, b):
+            d = a + b - 2 * c
+            return 0.0 if d == 0 else 0.5 * (a - b) / d
+        sx = sub(r[by, bx], r[by, bx - 1], r[by, bx + 1]) if 0 < bx < r.shape[1] - 1 else 0.0
+        sy = sub(r[by, bx], r[by - 1, bx], r[by + 1, bx]) if 0 < by < r.shape[0] - 1 else 0.0
+        dx, dy = X0 + bx + sx - ex, Y0 + by + sy - ey
+        print(f"      afim local em {caixa}: {dx:+.2f}, {dy:+.2f} px")
+        return Mapa(self.s, (self.t[0] + dx, self.t[1] + dy))
 
 
 def copia(out, fonte, mp, r, d):
@@ -554,9 +615,159 @@ def armario_quarto_servico(out, mp, q=ARMARIO_QS):
     armarios(out, mp, {"quarto de serviço": q["ret"]}, couro=False)
 
 
+def _grama(px):
+    p = px.astype(np.int16)
+    return (p.mean(-1) < 125) & (p[..., 1] - p[..., 0] > 25)
+
+
+def _dentro(px):
+    """O que é do lote (grama, pedra, piso): não o fundo nem o muro escuro."""
+    p = px.astype(np.int16)
+    return (p.mean(-1) < 200) & (np.abs(p[..., 1] - p[..., 0]) + np.abs(p[..., 1] - p[..., 2]) > 14)
+
+
+def _cinza(out, y, xs):
+    p = out[y, xs].astype(np.int16)
+    return ((np.abs(p[:, 1] - p[:, 0]) < 12) & (np.abs(p[:, 1] - p[:, 2]) < 12)).mean()
+
+
+def margem_lote(out, mp, q=LOTE):
+    g = out.astype(np.int16).mean(axis=2)
+    xs = slice(int(mp.x(q["meio_x"][0])), int(mp.x(q["meio_x"][1])))
+    # o muro de cima: do miolo para cima até o fundo e para baixo até a grama
+    ya, yb = int(mp.y(q["muro_cima"][0])), int(mp.y(q["muro_cima"][1]))
+    meio_c = ya + int(np.argmin(g[ya:yb, xs].mean(1)))
+    yt = meio_c
+    while g[yt - 1, xs].mean() < 252:
+        yt -= 1
+    gy0 = meio_c
+    while _cinza(out, gy0, xs) > 0.5:
+        gy0 += 1
+    # o de baixo: do miolo para baixo até o fundo (com a sombra mole dele) e para cima até a grama
+    ya, yb = int(mp.y(q["muro_baixo"][0])), int(mp.y(q["muro_baixo"][1]))
+    meio_b = ya + int(np.argmin(g[ya:yb, xs].mean(1)))
+    yf = meio_b
+    while g[yf + 1, xs].mean() < 250:
+        yf += 1
+    gy1 = meio_b
+    while _cinza(out, gy1 - 1, xs) > 0.5:
+        gy1 -= 1
+    # as pontas: as do muro de cima; a do de baixo, a dele mesmo (as 2 linhas que passam dela saem)
+    linha = g[int(mp.y(q["linha_muro_cima"]))]
+    xl = int(np.argmax(linha < 200))
+    xr = len(linha) - 1 - int(np.argmax(linha[::-1] < 230))
+    lb = g[int(mp.y(q["linha_muro_baixo"])), :xr + 1]
+    xb = len(lb) - 1 - int(np.argmax(lb[::-1] < 200))
+    fora = np.ones(g.shape, bool)
+    fora[yt:yf + 1, xl:xr + 1] = False
+    fora[gy1:yf + 1, xb + 1:] = True
+    fundo = np.median(out[fora].reshape(-1, 3), axis=0).round().astype(np.uint8)
+    out[fora] = fundo
+    # as bordas do gramado (entre os muros): a 1ª e a última coluna no tom da grama de dentro
+    def tom(cols):
+        return out[ae, cols].astype(np.int16).mean(0)
+    ae = slice(int(mp.y(q["amostra_esq"][0])), int(mp.y(q["amostra_esq"][1])))
+    k = int(np.ceil(q["borda_esq_px"] * mp.s)) + 2
+    ref = tom(slice(xl + 3 * k, xl + 6 * k)).mean(0)
+    cols = tom(slice(xl, xl + k))
+    lc = xl + int(np.argmax(np.abs(cols - ref).max(1) < 8))
+    for i, x in enumerate(range(lc - 1, xl - 1, -1)):          # em espelho (sem emenda) a partir de lc
+        ok = _dentro(out[gy0:gy1, lc + i])
+        out[gy0:gy1, x][ok] = out[gy0:gy1, lc + i][ok]
+    ae = slice(int(mp.y(q["amostra_grama"][0])), int(mp.y(q["amostra_grama"][1])))
+    k = int(np.ceil(q["borda_dir_px"] * mp.s))
+    w0 = xr - 6 * k - 10
+    cols = tom(slice(w0, xr + 1))
+    ultima = len(cols) - 1 - int(np.argmax(cols[::-1].mean(1) < 125))
+    ref = cols[ultima - 5 * k:ultima - 2 * k].mean(0)
+    xg = ultima
+    while xg - 1 > ultima - k and np.abs(cols[xg - 1] - ref).max() > 6:
+        xg -= 1
+    xg_, ult_ = w0 + xg, w0 + ultima
+    for i, x in enumerate(range(xg_, ult_ + 1)):              # em espelho a partir de xg_
+        ok = _dentro(out[gy0:gy1, xg_ - 1 - i])
+        out[gy0:gy1, x][ok] = out[gy0:gy1, xg_ - 1 - i][ok]
+    out[gy0:gy1, ult_ + 1:xr + 1] = fundo
+    print(f"    margem: fora do lote (x {xl} a {xr}, y {yt} a {yf}; o muro de baixo até x {xb}) no fundo "
+          f"{tuple(int(v) for v in fundo)}; as bordas do gramado (y {gy0} a {gy1 - 1}): à esquerda x {xl} a {lc - 1}, "
+          f"à direita x {xg_} a {ult_}, em grama")
+
+
+def grama_muro(out, mp, q=GRAMA_MURO):
+    x0, x1 = int(np.floor(mp.x(q["x"][0]))), int(np.ceil(mp.x(q["x"][1])))
+    ya, yb = int(mp.y(q["busca"][0])), int(np.ceil(mp.y(q["busca"][1])))
+    reg = out[ya:yb, x0:x1].astype(np.int16)
+    cinza = (np.abs(reg[..., 1] - reg[..., 0]) < 10) & (np.abs(reg[..., 1] - reg[..., 2]) < 10) & (reg.mean(-1) < 110)
+    topo = np.argmax(cinza, axis=0)
+    ok = cinza.any(axis=0)
+    # o muro é reto: o topo por blocos de colunas (a mediana), interpolado
+    bl = max(64, int(64 * mp.s))
+    cx, ty = [], []
+    for i in range(0, x1 - x0, bl):
+        m = ok[i:i + bl]
+        if m.sum() > bl // 4:
+            cx.append(i + bl / 2)
+            ty.append(np.median(topo[i:i + bl][m]))
+    mt = ya + np.round(np.interp(np.arange(x1 - x0), cx, ty)).astype(int)
+    h = int(np.ceil(q["faixa_px"] * mp.s))
+    n = 0
+    for j, x in enumerate(range(x0, x1)):
+        y1 = mt[j]
+        if not _grama(out[y1 - h - 1, x]):
+            continue
+        # em espelho (sem emenda) a grama de logo acima
+        out[y1 - h:y1, x] = out[y1 - h - 1:y1 - 2 * h - 1:-1, x]
+        n += 1
+    print(f"    muro de baixo: a faixa verde clara de {h} px acima dele (o topo em y {int(np.median(mt))}, {n} colunas) "
+          f"vira a grama de logo acima, em espelho")
+
+
+def _refaz(out, mp, faixa, piso, d_piso, d_fora):
+    """A faixa (px da final) refeita: o que é do piso (cobertura exata) vem da imagem deslocada d_piso, o resto (a grama)
+    de d_fora (px da final)."""
+    fonte = out.copy()
+    r = mp.ret(faixa)
+    X0, Y0 = int(np.floor(r[0])) - 1, int(np.floor(r[1])) - 1
+    X1, Y1 = int(np.ceil(r[2])) + 1, int(np.ceil(r[3])) + 1
+    forma = (Y1 - Y0, X1 - X0)
+
+    def desl(d):
+        dx, dy = int(round(d[0] * mp.s)), int(round(d[1] * mp.s))
+        return fonte[Y0 + dy:Y1 + dy, X0 + dx:X1 + dx].astype(np.float32)
+
+    def loc(q):
+        return (q[0] - X0, q[1] - Y0, q[2] - X0, q[3] - Y0)
+    ap = alfa_ret(loc(mp.ret(piso)), forma)[..., None]
+    novo = desl(d_piso) * ap + desl(d_fora) * (1 - ap)
+    a = alfa_ret(loc(r), forma)[..., None]
+    reg = out[Y0:Y1, X0:X1].astype(np.float32) * (1 - a) + novo * a
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+
+
+def portoes_descoberta(out, mp, q=PORTOES_AD):
+    m = mp.local(out, q["caixa_local"])
+    faixa, d_piso, d_fora = q["borda_baixo"]
+    _refaz(out, m, faixa, q["piso"], d_piso, d_fora)
+    for nome, lado in q["lados"].items():
+        _refaz(out, m, lado["faixa"], q["piso"], lado["d_piso"], lado["d_fora"])
+        pecas = lado["batentes"] + lado["folhas"]
+        for r in pecas:
+            sombra(out, m, r, q["sombra"], dx=-0.6, dy=0.8, sigma=0.6)
+        desenho = [(r, "ret", q["aluminio"], 0) for r in pecas]
+        for r in lado["folhas"]:
+            xm = (r[0] + r[2]) / 2
+            desenho.append(((xm - q["meio_px"] / 2, r[1], xm + q["meio_px"] / 2, r[3]), "ret", q["meio"], 0))
+        desenho += [(r, "contorno", q["contorno"], q["contorno_px"]) for r in pecas]
+        pintar(out, m, desenho)
+    print("    área descoberta: a faixa cinza em volta do piso sai (o piso até a face de fora dos portões e a borda de "
+          "baixo do PDF); os 2 portões de correr (2 folhas e 2 batentes cada) em alumínio, com o contorno, a linha do "
+          "meio e a sombra curta")
+
+
 PASSOS = (porta_cozinha, cubas_lavatorio, armarios, portas_servico, maquinas, cuba_bh_servico,
           louceiro_despensa, porta_adega, gourmet_altura, lavabo_bancada, pia_sala_intima, banco_deck,
-          armario_quarto_servico)
+          armario_quarto_servico, margem_lote, grama_muro, portoes_descoberta)
+NOVOS_1711D = (margem_lote, grama_muro, portoes_descoberta)
 NOVOS_1711C = (pia_sala_intima, banco_deck, armario_quarto_servico)
 NOVOS_1711 = (louceiro_despensa, porta_adega, gourmet_altura, lavabo_bancada)
 
@@ -584,6 +795,7 @@ def main():
         doze = cv2.imread(str(f))
         M = DF.afim_12k(final, doze)
         mp = Mapa(float(np.hypot(M[0, 0], M[1, 0])), (float(M[0, 2]), float(M[1, 2])))
+        mp.ref = final
         out = aplicar(doze, mp)
         dpi = int(round(out.shape[1] / (420 / 25.4)))
         dest = a.saida.format(op) if a.saida else str(f)

@@ -3427,6 +3427,19 @@ MÁQUINAS PARA CABER ACIMA DA BANCADA"; "NÃO ENCUBRA AS MAQUINAS"; "SUBSTITUA P
   DEFINIDA" (`armario_quarto_servico`: o bloco cinza do quarto de serviço, o retângulo da ARQ_LAYOUT HUMANIZAÇÃO, liso
   na cor sólida dos armários). Antes e depois em
   `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1711c_correcoes_12K_antes_depois.jpg`.
+- **4ª rodada (17/11):** "TEMOS UMA LINHA TÉCNICA AQUI. O QUE ELA É?", "TEMOS PORTÕES AQUI", "PRECISAMOS
+  REPRESENTÁ-LOS" (`portoes_descoberta`: os 2 portões de correr da área de serviço descoberta da ARQ_ELEMENTOS FIXOS, 2
+  folhas desencontradas e 2 batentes de cada lado, da parede da casa ao muro, em alumínio com o contorno fino, a linha
+  do meio e a sombra curta, a regra da Casa B para os portões de correr da área descoberta; antes, a faixa cinza de 2 a
+  3 px em volta do piso, que era o contorno fino do contrapiso engrossado no render, sai e o piso vai até a face de fora
+  dos portões e a borda de baixo do PDF, encontrando a grama direto, como a pedra da garagem; no 12K, no afim afinado
+  ali por casamento com a final ampliada, `Mapa.local`); "REMOVA ESSES TRAÇOS FORA DA PLANTA" e "PRECISA REMOVER ESSA
+  SOBRA AQUI DE MURO" (`margem_lote`: fora do lote, medido pelas pontas do muro de cima na própria imagem, tudo no fundo
+  branco, as marcas de canto em L, os fantasmas claros do tracejado e as 2 linhas além da ponta do muro de baixo; as
+  colunas clara da esquerda e verde clara da direita do gramado em grama, em espelho); "CORRIJA ESSE TRAÇO VERDE,
+  RESÍDUO DA ANTIGA GRAMA, RENTE AO MURO DO TERRENO" (`grama_muro`: a faixa verde clara de 4 px acima do muro de baixo,
+  de ponta a ponta, vira a grama de logo acima, em espelho). Antes e depois em
+  `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1711d_correcoes_12K_antes_depois.jpg`.
 - **Como refazer:** `python3 danae_bancadas_1611.py final B_Terreo --antes <final de 949e551^>` e
   `python3 correcoes_terreo_casab_1611.py final`; `python3 danae_bancadas_1611.py doze B_Terreo --antes <final de
   949e551^> --doze_antes <12K de 949e551^, {}=A|B>` e `python3 correcoes_terreo_casab_1611.py doze`; depois
