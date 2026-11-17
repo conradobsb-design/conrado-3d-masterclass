@@ -3516,7 +3516,11 @@ finos. são dois, uma mais extremo e outro mais recuado à esquerda. esses que e
    atualizado.
 2. `vidros_piscina`: as duas barras cinza de 9 px da borda esquerda da piscina (as paredes de vidro do PDF) viram água
    (a de logo ao lado) e entra o vidro fino da piscina da Casa C (`VIDRO_PISC_C`: o perfil escuro de 1,8 px): o de fora
-   na face externa (o extremo), o de dentro no meio da parede dele.
+   na face externa (o extremo), o de dentro no meio da parede dele. Depois (usuário, com a imagem: "mantenha o vidro
+   na extremidade e represente a parede com o tom de parede onde está indicado"), `parede_piscina` (`--passos
+   parede`): a de dentro é parede, o retângulo do PDF (688,0 a 696,9 px) no cinza das paredes (80), e as pontas do
+   vidro fino de antes nas pedras de cima e de baixo voltam à pedra; o vidro fica só no extremo. Antes e depois em
+   `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_piscina_parede_antes_depois.jpg`.
 
 Depois, a prancha, o PDF da E e o book. Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_bege_deck_piscina_antes_depois.jpg`.

@@ -9,10 +9,13 @@
    paredes de vidro do PDF, ARQ_PAREDE, de 9 px cada) saem; a água de logo ao lado no lugar (`_remenda`, a borda de
    fora com a água de dentro do canal, a de dentro com a do canal e a da piscina, metade a metade) e o vidro fino da
    piscina da Casa C (`mobiliario_terreo_casac_1311.VIDRO_PISC_C`: o perfil escuro de 1,8 px): o de fora na face
-   externa (o extremo), o de dentro no meio da parede dele.
+   externa (o extremo). Depois (usuário, com a imagem: "mantenha o vidro na extremidade e represente a parede com o
+   tom de parede onde está indicado"): `parede_piscina`, a de dentro é parede, o retângulo do PDF no cinza das
+   paredes (80).
 
   python3 deck_piscina_terreo_casae_1711.py doze [--opcao AB]     (antes da final: a final de antes é a referência)
   python3 deck_piscina_terreo_casae_1711.py final
+  (--passos descricao,vidros,parede; na rodada da parede, só `--passos parede` sobre a final já com os outros dois)
 """
 import argparse
 import json
@@ -43,10 +46,11 @@ DESCE = {"texto": ("DESCE PARA O", "JARDIM"), "corpo": 11, "k": 1.0, "centro": (
 # 2. px da final: as duas paredes de vidro (o PDF), o trecho em y entre as bordas de pedra, a água de cada metade e o
 # vidro fino
 VIDROS = {"y": (928.5, 1106.9),
-          "paredes": [{"x": (655.2, 664.2), "agua": [((656.0, 664.4), (9, 0))], "vidro": (655.2, 657.0)},
-                      {"x": (688.0, 696.9), "agua": [((687.8, 692.45), (-9, 0)), ((692.45, 697.1), (9, 0))],
-                       "vidro": (691.55, 693.35)}],
-          "cor": (24, 30, 30), "caixa": (630, 900, 730, 1135)}
+          "paredes": [{"x": (655.2, 664.2), "agua": [((656.0, 664.4), (9, 0))], "vidro": (655.2, 657.0)}],
+          "cor": (24, 30, 30), "caixa": (630, 900, 730, 1135),
+          # (17/11, usuário, com a imagem: "mantenha o vidro na extremidade e represente a parede com o tom de parede
+          # onde está indicado") a de dentro é parede: o retângulo do PDF no cinza das paredes da planta
+          "parede": (688.0, 696.9), "cor_parede": (80, 80, 80)}
 
 
 def _local(out, mp, caixa):
@@ -92,14 +96,32 @@ def vidros_piscina(out, mp, q=VIDROS):
     for p in q["paredes"]:
         va, vb = p["vidro"]
         CB.pintar(out, m, [((va, y0 - 0.6, vb, y1 + 0.6), "ret", q["cor"], 0)])
-    print("    piscina: as 2 barras grossas da borda esquerda viraram água, com o vidro fino (o da Casa C) no extremo e "
-          "no meio da parede de dentro")
+    print("    piscina: a barra grossa do extremo virou água, com o vidro fino (o da Casa C) na face de fora")
 
 
-def aplicar(img, mp, kalam=None):
+def parede_piscina(out, mp, q=VIDROS):
+    m = _local(out, mp, q["caixa"])
+    xa, xb = q["parede"]
+    y0, y1 = q["y"]
+    CB.pintar(out, m, [((xa, y0, xb, y1), "ret", q["cor_parede"], 0)])
+    # as pontas do vidro fino de antes, que passavam 0,6 px para dentro das pedras de cima e de baixo: a pedra ao lado
+    import instalacao_terreo_casad_1711 as ID
+    ID._remenda(out, m, (xa, y0 - 1.2, xb, y0), [(0, -3)], None, 0)
+    ID._remenda(out, m, (xa, y1, xb, y1 + 1.2), [(0, 3)], None, 0)
+    print("    piscina: a de dentro é parede, no cinza das paredes")
+
+
+PASSOS = ("descricao", "vidros", "parede")
+
+
+def aplicar(img, mp, kalam=None, passos=PASSOS):
     out = img.copy()
-    descricao_desce(out, mp, kalam)
-    vidros_piscina(out, mp)
+    if "descricao" in passos:
+        descricao_desce(out, mp, kalam)
+    if "vidros" in passos:
+        vidros_piscina(out, mp)
+    if "parede" in passos:
+        parede_piscina(out, mp)
     return out
 
 
@@ -109,11 +131,13 @@ def main():
     ap.add_argument("--opcao", default="AB")
     ap.add_argument("--entrada")
     ap.add_argument("--saida")
+    ap.add_argument("--passos", default=",".join(PASSOS))
     a = ap.parse_args()
+    passos = a.passos.split(",")
     fin = cv2.imread(a.entrada or str(FINAL))
     if a.acao == "final":
-        cv2.imwrite(a.saida or str(FINAL), aplicar(fin, Mapa()))
-        if not a.saida:
+        cv2.imwrite(a.saida or str(FINAL), aplicar(fin, Mapa(), passos=passos))
+        if not a.saida and "descricao" in passos:
             rots = json.loads(KALAM.read_text())
             for b in rots:
                 if b["nome"] == DESCE["nome_kalam"]:
@@ -127,7 +151,7 @@ def main():
         M = DF.afim_12k(fin, img)
         mp = Mapa(float(np.hypot(M[0, 0], M[1, 0])), (float(M[0, 2]), float(M[1, 2])))
         mp.ref = fin
-        out = aplicar(img, mp, EP._kalam_global() if op == "B" else None)
+        out = aplicar(img, mp, EP._kalam_global() if op == "B" else None, passos)
         dpi = int(round(out.shape[1] / (420 / 25.4)))
         dest = a.saida.format(op) if a.saida else str(f)
         Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(dest, quality=95, subsampling=0, dpi=(dpi, dpi))
