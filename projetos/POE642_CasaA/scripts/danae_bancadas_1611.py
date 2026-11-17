@@ -24,7 +24,7 @@ torneira presa nela). Na final e direto nos
   python3 danae_bancadas_1611.py final <planta> --antes <final de antes da troca> [--saida <png>]
   python3 danae_bancadas_1611.py doze  <planta> --antes <final de antes da troca> --doze_antes <12K de antes, {}=A|B>
 
-  planta: A_Terreo, B_Terreo (as chaves de `BANCADAS`; as finais e os 12K em `danae_foto.PLANTAS` e `DOZE_K`)
+  planta: A_Terreo, B_Terreo, D_Terreo (as chaves de `BANCADAS`; as finais e os 12K em `danae_foto.PLANTAS` e `DOZE_K`)
 """
 import argparse
 import sys
@@ -57,6 +57,14 @@ BANCADAS = {
                                          "semente": 23, "pecas": False},
         "bancada dos tanques": {"rets": [(2200, 1463, 2239, 1562)], "janela": (2191, 1449, 2246, 1570),
                                 "semente": 24}},
+    # (17/11, usuário: "SIM, CONFIRA AS BANCADAS DA CASA D") as torneiras esmaecidas, a faixa do granulado antigo sob as
+    # cubas da pia e os pontinhos claros da ilha
+    "D_Terreo": {
+        "bancada da pia da cozinha": {"rets": [(1814, 373, 2039, 411)], "janela": (1808, 372, 2045, 416),
+                                      "semente": 31},
+        "ilha da cozinha": {"rets": [(1879, 481, 2026, 548)], "janela": (1872, 474, 2033, 554), "semente": 32},
+        "bancada da área de serviço": {"rets": [(2287, 373, 2458, 411)], "janela": (2285, 372, 2462, 416),
+                                       "semente": 33}},
 }
 NEUTRO = 12.0           # R - B abaixo disso não é pedra (o inox, o branco da borda das cubas)
 PECA_MIN = 120          # px da final: o que não é pedra e é maior que isso é peça (cuba, torneira, cooktop)

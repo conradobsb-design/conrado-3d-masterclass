@@ -3494,3 +3494,37 @@ afim afinado ali (`correcoes_terreo_casab_1611.Mapa.local`):
   (sobre a final e os 12K de 98712bd); depois `rodape_entrega.py --config ../../POE642_CasaC/config_bases.json
   --no-quadro --render Terreo=../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png`, `pdf_entrega.py
   --config ../../POE642_CasaC/config_bases.json` e `book_entrega.py`.
+
+### Térreo da Casa D, as correções de 17/11: `danae_bancadas_1611.py D_Terreo` e `correcoes_terreo_casad_1711.py`
+
+Vendo o Térreo da Casa D ("VAMOS VER COMO ESTÁ O TERREO DA CASA D"), na final e direto nos 12K A e B (no afim afinado
+ali, `correcoes_terreo_casab_1611.Mapa.local`):
+- **Bancadas de Danae** ("SIM, CONFIRA AS BANCADAS DA CASA D"; `danae_bancadas_1611.BANCADAS["D_Terreo"]`): a pia da
+  cozinha, a ilha e a bancada da área de serviço refeitas como nas Casas A e B (a janela de antes da troca de 949e551 e
+  a foto da chapa sem os pontinhos): sem as torneiras esmaecidas, sem a faixa do granulado antigo sob as cubas, sem os
+  pontinhos claros da ilha.
+- **`correcoes_terreo_casad_1711.py`**, um passo por pedido (o docstring tem as frases do usuário):
+  - `banho_gourmet`: as faixas do piso antigo no piso e o preto antigo nas faces das paredes no cinza delas;
+  - `folhas_correr`: as 4 folhas de vidro entre a varanda gourmet e o living ligadas (o trespasse entre os planos);
+  - `grama_suite3`: os pontinhos do tracejado e a grama clara junto à faixa de Bege Bahia da suíte 3 em grama;
+  - `ripado_master`: o L de madeira por fora das folhas da suíte master no ripado de nogueira do painel da suíte 3;
+  - `cooktop_gourmet`: o retângulo técnico em volta do cooktop da ilha gourmet no granito;
+  - `mesas_varanda`: as 2 mesas de centro da varanda gourmet, a oval em pedra terracota rajada e a redonda em nogueira;
+  - `louceiro_despensa`: as soleiras do piso antigo no piso da cozinha, os batentes no cinza, as folhas de giro de novo;
+  - `movel_jantar`: o móvel junto à parede do jantar na cor sólida dos armários;
+  - `porta_hall`: a folha de correr deitada do hall no tom escuro de ponta a ponta;
+  - `soleiras_residuos`: as faixas do piso antigo nos vãos da área descoberta e da área de serviço;
+  - `carros`: os 3 carros pousados de novo sobre o piso da garagem refeito em volta (quilting das faixas limpas entre
+    eles), sem o halo antigo, a borda macia e a sombra curta;
+  - `madeira_hall`: as 4 faixas de madeira das paredes do hall no ripado de nogueira das janelas.
+- Antes e depois em `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1711_correcoes_12K_antes_depois.jpg`.
+- **Propostas, para a escolha** ("VAMOS SUBSTITUIR ESSE BANCO. O QUE ME SUGERE?", o banco do living; "NÃO GOSTEI DESSAS
+  LUMINARIAS DE PAREDE. O QUE ME SUGERE NO LUGAR?", as arandelas pretas da suíte master): 4 bancos e 4 luminárias
+  gerados no Higgsfield (`gpt_image_2_6`, vista de cima), em
+  `POE642_CasaD/biblioteca-objetos/02-terreo/propostas-1711/` e na folha
+  `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1711_opcoes_banco_luminarias.jpg`. Nada instalado ainda.
+- **Como refazer:** `python3 danae_bancadas_1611.py final D_Terreo --antes <final de 949e551^>` e `doze D_Terreo
+  --antes <final de 949e551^> --doze_antes <12K de 949e551^, {}=A|B>`; depois `python3 correcoes_terreo_casad_1711.py
+  final` e `doze`; `rodape_entrega.py --config ../../POE642_CasaD/config_bases.json --no-quadro --render
+  Terreo=../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_final_rotulos.png`, `pdf_entrega.py --config
+  ../../POE642_CasaD/config_bases.json` e `book_entrega.py`.
