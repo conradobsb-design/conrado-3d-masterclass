@@ -3418,6 +3418,15 @@ MÁQUINAS PARA CABER ACIMA DA BANCADA"; "NÃO ENCUBRA AS MAQUINAS"; "SUBSTITUA P
   cuba, com o grão dela); "ENTRE A PAREDE E A BANCADA TEM UM ERRO" (`danae_bancadas_1611`, a bancada da parede do
   serviço até a face da parede: a tira cinza do PDF, x 2051,9 a 2054,3, lia como um vão; `"pecas": False`). Antes e
   depois em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1711b_correcoes{,_12K}_antes_depois.jpg`.
+- **3ª rodada (17/11):** "PRECISAMOS MELHORAR A REPRESENTAÇÃO DESSA BANCADA E PIA, SEM LINHA TÉCNICA. AQUI É PLANTA
+  HUMANIZADAS" (`pia_sala_intima`: a bancada estreita do bar da sala íntima sem o retângulo de linha técnica, a pedra
+  limpa do alto dela em espelho, e a cuba redonda chapada pela cuba redonda da biblioteca, `03-primeiro-pavimento/
+  banho-master/cuba-entrada.png`, só a louça e a torneira, no círculo do PDF, a torneira para a parede); "REMOVA ESSE
+  TRAÇO BRANCO NA PARTE DE BAIXO DO BANCO" (`banco_deck`: a linha clara sob o banco do pé do deck vira a grama); "ESSE
+  ARMARIO DO QUARTO DE SERVIÇO NÃO É COM CABIDES?", "NÃO É DE CABIDES MESMO", "PONHA NO TOM DE ARMÁRIO COM COR SÓLIDA
+  DEFINIDA" (`armario_quarto_servico`: o bloco cinza do quarto de serviço, o retângulo da ARQ_LAYOUT HUMANIZAÇÃO, liso
+  na cor sólida dos armários). Antes e depois em
+  `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1711c_correcoes_12K_antes_depois.jpg`.
 - **Como refazer:** `python3 danae_bancadas_1611.py final B_Terreo --antes <final de 949e551^>` e
   `python3 correcoes_terreo_casab_1611.py final`; `python3 danae_bancadas_1611.py doze B_Terreo --antes <final de
   949e551^> --doze_antes <12K de 949e551^, {}=A|B>` e `python3 correcoes_terreo_casab_1611.py doze`; depois

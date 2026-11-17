@@ -40,6 +40,18 @@ B_Terreo`), na final e direto nos 12K A e B, cada peça desenhada na escala de c
    clara, com pontinhos e riscos) no tom da cuba: a luz suave dela, sem os pontinhos e riscos, no tom mediano da
    pedra da cuba (a regra da Casa A), com o grão fino dessa pedra.
 
+11. `pia_sala_intima` ("PRECISAMOS MELHORAR A REPRESENTAÇÃO DESSA BANCADA E PIA, SEM LINHA TÉCNICA. AQUI É PLANTA
+   HUMANIZADAS"): a bancada estreita do bar da sala íntima sem o retângulo de linha técnica (a pedra limpa do alto
+   dela, em espelho, de ponta a ponta) e a cuba redonda chapada pela cuba redonda da biblioteca
+   (`03-primeiro-pavimento/banho-master/cuba-entrada.png`, só a louça e a torneira), no círculo do PDF, a torneira para
+   a parede.
+12. `banco_deck` ("REMOVA ESSE TRAÇO BRANCO NA PARTE DE BAIXO DO BANCO"): a linha clara sob o banco do pé do deck (a
+   linha 1710, x 615 a 897) vira a grama de logo abaixo.
+
+13. `armario_quarto_servico` ("ESSE ARMARIO DO QUARTO DE SERVIÇO NÃO É COM CABIDES?", e depois "NÃO É DE CABIDES
+   MESMO"): o armário do quarto de serviço (o retângulo da ARQ_LAYOUT HUMANIZAÇÃO, 0,90 x 0,50 m, junto à parede da
+   esquerda), que era um bloco cinza, liso na cor sólida dos armários, como os outros (`armarios`).
+
   python3 correcoes_terreo_casab_1611.py final [--saida <png>]
   python3 correcoes_terreo_casab_1611.py doze [--opcao AB] [--saida <jpg com {}>]
 """
@@ -109,6 +121,13 @@ PORTA_ADEGA = dict(PORTAS_SERVICO, folhas={"área de serviço (junto à adega)":
 GOURMET_ALTURA = {"frente": (1296.5, 1486.0, 1538.4), "sombra_px": 4.5, "sombra": 0.30, "fio_px": 0.6, "fio": 0.62,
                   "brilho_px": 1.2, "brilho": 1.07}
 LAVABO_BANCADA = {"peca": (2251.9, 853.7, 2270.4, 898.8), "ref": (2253.8, 799.0, 2258.6, 818.0), "borda_px": 1.0}
+
+PIA_SALA_INTIMA = {"interior": (1563.5, 586.5, 1594.5, 727.5), "fonte": (1563.5, 588.0, 1594.5, 652.0),
+                   "cuba": (1567.8, 662.5, 1588.1, 682.8),
+                   "png": RAIZ / "POE642_CasaA/biblioteca-objetos/03-primeiro-pavimento/banho-master/cuba-entrada.png",
+                   "sat_max": 18, "lum_min": 110, "sombra": 0.25}
+BANCO_DECK = {"traco": (615.0, 1709.6, 897.0, 1711.0), "dy": 3.0}
+ARMARIO_QS = {"ret": (1911.5, 1552.5, 1941.6, 1606.2)}
 
 
 class Mapa:
@@ -194,7 +213,7 @@ def cubas_lavatorio(out, mp, q=CUBAS_LAV):
     print(f"    lavatório gourmet: o lado direito das {len(q['cubas'])} cubas com o fio do lado esquerdo, em espelho")
 
 
-def armarios(out, mp, q=ARMARIOS):
+def armarios(out, mp, q=ARMARIOS, couro=True):
     import revisao_terreo_casac_1311 as RC
     c = RC.COZINHA
     for nome, r in q.items():
@@ -209,10 +228,11 @@ def armarios(out, mp, q=ARMARIOS):
         miolo = alfa_ret((loc[0] + e, loc[1] + e, loc[2] - e, loc[3] - e), forma)
         # o couro das cadeiras por cima fica
         im = reg
-        couro = ((im[..., 2] - im[..., 0]) > 85) & (im[..., 2] > 110)
-        couro = cv2.dilate(couro.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
-        a = a * ~couro
-        miolo = miolo * ~couro
+        if couro:
+            pele = ((im[..., 2] - im[..., 0]) > 85) & (im[..., 2] > 110)
+            pele = cv2.dilate(pele.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+            a = a * ~pele
+            miolo = miolo * ~pele
         M = np.float32([[1, 0, -1.0 * mp.s], [0, 1, 1.3 * mp.s]])
         sb = cv2.GaussianBlur(cv2.warpAffine(a, M, (forma[1], forma[0])), (0, 0), 1.1 * mp.s) * (1 - a)
         reg = reg * (1 - c["sombra"] * sb)[..., None]
@@ -458,8 +478,86 @@ def lavabo_bancada(out, mp, q=LAVABO_BANCADA):
     print("    lavabo: a bancada abaixo da cuba no tom da cuba, sem os pontinhos e riscos")
 
 
+def _cuba_redonda(q=PIA_SALA_INTIMA):
+    """A louça e a torneira da cuba redonda da biblioteca (sem a pedra da foto), giradas com a torneira para a esquerda:
+    (rgb, alfa, a caixa da louça)."""
+    if "R" not in _CUBA:
+        P = cv2.imread(str(q["png"]), cv2.IMREAD_UNCHANGED).astype(np.float32)
+        rgb, al = P[..., :3], P[..., 3] / 255
+        lum = rgb.mean(axis=2)
+        sat = rgb.max(axis=2) - rgb.min(axis=2)
+        m = (lum > q["lum_min"]) & (sat < q["sat_max"]) & (al > 0.5)
+        m = cv2.morphologyEx(m.astype(np.uint8), cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+        m = ndimage.binary_fill_holes(m)
+        lab, n = ndimage.label(m)
+        tam = ndimage.sum(m, lab, range(1, n + 1))
+        i_l = int(np.argmax(tam)) + 1
+        louca = lab == i_l
+        ys, xs = np.nonzero(louca)
+        lx0, ly0, lx1, ly1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
+        mm = louca.copy()
+        alto = 0.45 * (ly1 - ly0)
+        for i, sl in enumerate(ndimage.find_objects(lab)):
+            if i + 1 == i_l:
+                continue
+            if sl[1].start >= lx0 and sl[1].stop <= lx1 and sl[0].stop >= ly0 - alto and sl[0].start < ly0 + 0.2 * (ly1 - ly0):
+                mm[sl] |= lab[sl] == i + 1
+        mm = mm.astype(np.float32)
+        ys, xs = np.nonzero(mm)
+        X0, Y0, X1, Y1 = xs.min(), ys.min(), xs.max() + 1, ys.max() + 1
+        rgb, mm = rgb[Y0:Y1, X0:X1], mm[Y0:Y1, X0:X1]
+        caixa = (lx0 - X0, ly0 - Y0, lx1 - X0, ly1 - Y0)
+        rgb, mm = np.rot90(rgb).copy(), np.rot90(mm).copy()
+        W0 = X1 - X0
+        caixa = (caixa[1], W0 - caixa[2], caixa[3], W0 - caixa[0])
+        _CUBA["R"] = (rgb, mm, caixa)
+    return _CUBA["R"]
+
+
+def pia_sala_intima(out, mp, q=PIA_SALA_INTIMA):
+    fonte = out.copy()
+    # a bancada limpa: a pedra do alto dela (sem a linha técnica), em espelho, de ponta a ponta
+    X0, Y0, X1, Y1 = mp.reti(q["interior"])
+    fx0, fy0, fx1, fy1 = mp.reti(q["fonte"])
+    F = fonte[fy0:fy1, fx0:fx1].astype(np.float32)
+    lin = F
+    while lin.shape[0] < Y1 - Y0:
+        lin = np.concatenate([lin, lin[::-1]], axis=0)
+    T = cv2.resize(lin[:Y1 - Y0], (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA) if lin.shape[1] != X1 - X0 \
+        else lin[:Y1 - Y0]
+    out[Y0:Y1, X0:X1] = np.clip(np.round(T), 0, 255).astype(np.uint8)
+    # a cuba redonda da biblioteca no círculo do PDF, a torneira para a parede (à esquerda)
+    rgb, mm, (lx0, ly0, lx1, ly1) = _cuba_redonda(q)
+    cx0, cy0, cx1, cy1 = mp.ret(q["cuba"])
+    k = ((cx1 - cx0) + (cy1 - cy0)) / ((lx1 - lx0) + (ly1 - ly0))
+    W, H = int(round(rgb.shape[1] * k)), int(round(rgb.shape[0] * k))
+    BX = int(round((cx0 + cx1) / 2 - (lx0 + lx1) / 2 * k))
+    BY = int(round((cy0 + cy1) / 2 - (ly0 + ly1) / 2 * k))
+    S = cv2.resize(rgb, (W, H), interpolation=cv2.INTER_AREA)
+    a = cv2.resize(mm, (W, H), interpolation=cv2.INTER_AREA)
+    sb = cv2.GaussianBlur(cv2.warpAffine(a, np.float32([[1, 0, 0.8 * mp.s], [0, 1, 1.0 * mp.s]]), (W, H)), (0, 0),
+                          0.9 * mp.s) * (1 - a)
+    dst = out[BY:BY + H, BX:BX + W].astype(np.float32)
+    dst = dst * (1 - q["sombra"] * sb)[..., None]
+    dst = dst * (1 - a[..., None]) + S * a[..., None]
+    out[BY:BY + H, BX:BX + W] = np.clip(np.round(dst), 0, 255).astype(np.uint8)
+    print("    sala íntima: a bancada do bar sem a linha técnica e a cuba redonda da biblioteca (louça e torneira)")
+
+
+def banco_deck(out, mp, q=BANCO_DECK):
+    fonte = out.copy()
+    copia(out, fonte, mp, q["traco"], (0.0, q["dy"]))
+    print("    deck: o traço claro sob o banco vira grama")
+
+
+def armario_quarto_servico(out, mp, q=ARMARIO_QS):
+    armarios(out, mp, {"quarto de serviço": q["ret"]}, couro=False)
+
+
 PASSOS = (porta_cozinha, cubas_lavatorio, armarios, portas_servico, maquinas, cuba_bh_servico,
-          louceiro_despensa, porta_adega, gourmet_altura, lavabo_bancada)
+          louceiro_despensa, porta_adega, gourmet_altura, lavabo_bancada, pia_sala_intima, banco_deck,
+          armario_quarto_servico)
+NOVOS_1711C = (pia_sala_intima, banco_deck, armario_quarto_servico)
 NOVOS_1711 = (louceiro_despensa, porta_adega, gourmet_altura, lavabo_bancada)
 
 
