@@ -3574,5 +3574,8 @@ caixa, `Mapa.local`, com a final de antes como referência):
   mas na parte vertical do L está escurecido"): a parte de pé do vão em L das folhas de vidro da suíte master (entre o
   ripado de nogueira e a linha escura das cortinas, da linha clara de cima até a parede de baixo) no creme da soleira da
   parte de cima (amostra de cada imagem); só os px cinza neutros trocam, as linhas azuladas das folhas e o arremate
-  branco ficam. `--passos vao_folhas_master`; antes e depois em
+  branco ficam. `--passos vao_folhas_master`.
+- `folha_vidro_master` ("a folha de vidro tem que ir até embaixo, encostando na parede"): a folha de pé, que parava no
+  arremate branco 14 px acima da parede de baixo, continuada até a face da parede com o perfil dela de logo acima
+  (`--passos folha_vidro_master`). Antes e depois destes 2 em
   `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1711d_vao_master_12K_antes_depois.jpg`.

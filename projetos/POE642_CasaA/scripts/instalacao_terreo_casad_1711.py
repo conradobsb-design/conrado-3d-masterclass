@@ -44,6 +44,10 @@ afim afinado ali (`correcoes_terreo_casab_1611.Mapa.local`):
    ripado e as cortinas) no creme da soleira da parte de cima; as linhas das folhas de vidro (azuladas) e o arremate
    branco ficam.
 
+15. `folha_vidro_master` ("a folha de vidro tem que ir até embaixo, encostando na parede"): a folha de vidro de pé, que
+   parava no arremate branco 14 px acima da parede de baixo, continuada até a face da parede (o perfil dela de logo
+   acima, sem o arremate).
+
   (`--passos a,b`: só esses passos, sobre a final e os 12K que já têm os anteriores)
 
   python3 instalacao_terreo_casad_1711.py final [--saida <png>]
@@ -88,6 +92,8 @@ PORTA_GOURMET = {"antes": (1503.0, 375.0, 1558.0, 378.6), "ret": (1505.5, 370.6,
 # parede de baixo) e a amostra do creme da soleira na parte de cima do L
 VAO_MASTER = {"ret": (627.46, 1331.9, 636.6, 1553.77), "amostra": (660.0, 1333.6, 760.0, 1338.0), "caixa": (612, 1318, 700, 1420),
               "neutro": 14, "lum": (90.0, 130.0)}
+# a folha de pé (x 627,46 a 631: do ripado à borda dela) do arremate (y 1537,5) até a parede (y 1553,77), da faixa de cima
+FOLHA_MASTER = {"ret": (627.46, 1537.5, 631.0, 1553.77), "d": (0.0, -20.0)}
 BOX_GOURMET = {"ret": (1445.8, 373.9, 1449.2, 466.6), "vidro": (222, 216, 206), "contorno": (128, 122, 114),
                "contorno_px": 0.35, "sombra": 0.10}
 PIVOTANTES = {"x": (1390.5, 1396.5), "y": (558.0, 702.0), "n": 2, "comp": 0.93, "esp_px": 4.5, "cobre_px": 0.9}
@@ -454,9 +460,15 @@ def vao_folhas_master(out, mp, q=VAO_MASTER):
     print("    suíte master: a parte de pé do vão das folhas de vidro no creme da soleira, como a de cima")
 
 
+def folha_vidro_master(out, mp, q=FOLHA_MASTER):
+    m = _local(out, mp, VAO_MASTER["caixa"])
+    _remenda(out, m, q["ret"], [q["d"]], None)
+    print("    suíte master: a folha de vidro de pé até a parede de baixo")
+
+
 PASSOS = (banco_b1, arandelas_l2, soleira_garagem, vao_hall_garagem, painel_garagem, paineis_pivotantes,
           piso_banho_gourmet, portas_servico, poltrona_varanda, mesa_escritorio, box_chuveiro_gourmet,
-          painel_garagem_baixo, porta_banho_gourmet, vao_folhas_master)
+          painel_garagem_baixo, porta_banho_gourmet, vao_folhas_master, folha_vidro_master)
 
 
 def aplicar(img, mp, passos=PASSOS):
