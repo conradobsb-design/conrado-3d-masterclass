@@ -3458,3 +3458,31 @@ MÁQUINAS PARA CABER ACIMA DA BANCADA"; "NÃO ENCUBRA AS MAQUINAS"; "SUBSTITUA P
   ../../POE642_CasaB/config_bases.json` e `book_entrega.py`. Antes e depois em
   `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1711_correcoes{,_12K}_antes_depois.jpg`.
 
+
+### Térreo da Casa C, as correções de 17/11: `correcoes_terreo_casac_1711.py`
+
+Vendo o Térreo da Casa C ("VAMOS VER COMO ESTÁ O TERREO DA CASA C"), na final e direto nos 12K A e B, cada peça no
+afim afinado ali (`correcoes_terreo_casab_1611.Mapa.local`):
+- **Cubas da cozinha** ("CORRIJA AS MANCHAS E O CONTORNO", `cubas_cozinha`): a pedra granulada antiga que a troca pelo
+  Dekton Danae (949e551) deixou entre as 2 cubas e acima delas, e os cinzas soltos junto à janela, viram o Danae do
+  trecho limpo da mesma bancada à direita (as mesmas linhas, dobrado em espelho, a emenda da esquerda macia); as cubas
+  no retângulo do PDF, com um fio cinza fino no lugar do contorno marrom grosso; as torneiras ficam.
+- **Armários** ("REMOVA AS LINHAS TÉCNICAS", o aparador da circulação junto ao jantar com os arcos tracejados das
+  portas; "APLICAR COR SÓLIDA NOS ARMARIOS", "APLICAR COR SÓLIDA, NÃO NOGUEIRA", "TOM DO ARMARIO NA COR SÓLIDA QUE
+  DEFINIMOS NA CASA A", os armários dos quartos 3 e 2, em madeira clara com veio, e o do quarto 1, em nogueira;
+  `armarios_c`): no retângulo do PDF, na cor sólida dos armários (`revisao_terreo_casac_1311.COZINHA`), pelo
+  `correcoes_terreo_casab_1611.armarios`. Os closets com cabides ficam.
+- **O L do escritório** ("O L DO ARMÁRIO NÃO TEM DIVISÓRIA ENTRE OS DOIS ARMÁRIOS.", `armario_l_escritorio`): as 2
+  pernas (os retângulos da DOC_LINHAS E PROJEÇÕES) numa peça só, no polígono do L, na mesma cor sólida, a face só no
+  contorno de fora.
+- **Mesinhas seixo do estar** ("MESINHAS LATERAIS EM TOM E SOBRETOM, FREIJÓ E NOGUEIRA", `mesinhas_seixo`): os 2 pares
+  nas pontas do sofá, nos contornos do PDF (`POE642_CasaC/renders/POE642_CasaC_PH_Terreo_seixos.json`, porque o PDF
+  do cliente não vai ao git): a de trás em freijó (o tampo do `aparador-freijo` da biblioteca da Casa D) e a da
+  frente, por cima, em nogueira (um trecho liso da `mesa-centro-nogueira-adorno-d`), como na Casa A (a de cima em
+  nogueira, a de baixo no tom claro); o veio no comprido, a borda mais escura, o contorno fino e a sombra curta; o
+  cinza antigo, o halo claro dele no 12K e os pontinhos em volta saem antes (inpaint).
+- Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1711_correcoes_12K_antes_depois.jpg`.
+- **Como refazer:** `python3 correcoes_terreo_casac_1711.py final` e `python3 correcoes_terreo_casac_1711.py doze`
+  (sobre a final e os 12K de 98712bd); depois `rodape_entrega.py --config ../../POE642_CasaC/config_bases.json
+  --no-quadro --render Terreo=../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png`, `pdf_entrega.py
+  --config ../../POE642_CasaC/config_bases.json` e `book_entrega.py`.
