@@ -3388,11 +3388,20 @@ marrom. Na final e direto nos 12K A e B (`doze`, antes da `final`). Antes e depo
   a descrição inteira, 78). No 12K A na Inter, no 12K B na Kalam (o fator único do corpo dos dados de antes); a linha
   nova também em `POE642_CasaE_PH_Terreo_rotulos_kalam.json`. Fica para depois levar a posição a
   `pedidos_terreo_casae_1611.ESCADAS` (o passo roda por cima da final que ele gera).
-- `painel_escritorio` ("Aqui é um painel de madeira com as ripas, então é tudo na madeira ... bem da forma como a gente
-  fez o painel de madeira na casa D ... Não tem nada de cor clara"): o vão creme da janela do escritório para o jardim
-  vira o painel de nogueira ripado da Casa D (`correcoes_terreo_casad_1711._ripado`, `FOLHAS_1P`), com as 2 folhas de
-  vidro de correr redesenhadas por cima (vidro claro, fio cinza); as 7 ripas que saem para o gramado em nogueira maciça
-  (o veio ao longo, a luz, o contorno, a sombra curta).
+- `painel_escritorio` ("Aqui é um painel de madeira com as ripas ... bem da forma como a gente fez o painel de madeira
+  na casa D"; depois, "Não preenche com material de madeira, não. Tem a soleira da janela ... Na verdade, deixa só o
+  ripado no tom amadeirado e preserva o que estava antes, com a soleira e a janela"): só as 7 ripas que saem para o
+  gramado em nogueira maciça (`correcoes_terreo_casad_1711._ripado`, `FOLHAS_1P`: o veio ao longo, a luz, o contorno, a
+  sombra curta); a soleira e as folhas de vidro da janela como estavam. Os arquivos do Térreo voltaram a `7525ade^` e
+  o passo rodou de novo (a descrição da escada igual).
+- Antes e depois da versão final destes 2 e da churrasqueira em
+  `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_churrasqueira_ripas_12K_antes_depois.jpg`.
+
+#### Casa E, Térreo: a churrasqueira menor (17/11, `churrasqueira_gourmet_casae_1711.py`)
+
+Usuário: "Diminua um pouco o tamanho da churrasqueira". A grelha da bancada de trás da gourmet a 82%, no mesmo centro, com
+um reforço leve de nitidez (as barras finas perdem contraste na redução); a bancada de granito em volta, a de logo à
+direita da grelha deslocada. Na final e direto nos 12K A e B (`doze` antes da `final`).
 - `python3 escada_painel_casae_1711.py doze` (antes da final) e `final` (que também grava a linha da Kalam). Antes e
   depois em `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_escada_painel_12K_antes_depois.jpg`.
 

@@ -6,11 +6,11 @@
    logo acima no lugar das letras) e vai para a circulação à direita do triângulo e do S (entre o fim da escada, x 2218,
    e o batente do escritório, x 2283), centrado na faixa e na altura do triângulo e do S, em duas linhas, no corpo das
    descrições x `k` (0,7: a faixa tem 62 px e a descrição inteira, 78). No 12K B, na Kalam, como as outras.
-2. `painel_escritorio` ("Aqui é um painel de madeira com as ripas, então é tudo na madeira ... bem da forma como a gente
-   fez o painel de madeira na casa D ... Não tem nada de cor clara"): por fora do escritório, a faixa clara do vão da
-   janela vira o painel de nogueira ripado da Casa D (`correcoes_terreo_casad_1711._ripado`, `FOLHAS_1P`), com as 2
-   folhas de vidro de correr redesenhadas por cima (o vidro claro e o fio cinza); as 7 ripas que saem para o gramado, de creme para
-   nogueira maciça (o veio ao longo, a luz, o contorno e a sombra curta no gramado).
+2. `painel_escritorio` ("Aqui é um painel de madeira com as ripas ... bem da forma como a gente fez o painel de madeira
+   na casa D"; depois: "Não preenche com material de madeira, não. Tem a soleira da janela ... Na verdade, deixa só o
+   ripado no tom amadeirado e preserva o que estava antes, com a soleira e a janela"): só as 7 ripas que saem para o
+   gramado, de creme para a nogueira da Casa D (`correcoes_terreo_casad_1711._ripado`, `FOLHAS_1P`, maciça: o veio ao
+   longo, a luz, o contorno e a sombra curta no gramado); a soleira e as folhas de vidro da janela ficam como estavam.
 
   python3 escada_painel_casae_1711.py doze [--opcao AB]     (antes da final: a final de antes é a referência)
   python3 escada_painel_casae_1711.py final
@@ -27,7 +27,6 @@ AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
 import danae_foto as DF                                     # noqa: E402
 import correcoes_terreo_casad_1711 as CD                     # noqa: E402
-import correcoes_terreo_casab_1611 as CB                     # noqa: E402
 from correcoes_terreo_casab_1611 import Mapa                # noqa: E402
 
 RAIZ = AQUI.parents[1]
@@ -40,11 +39,7 @@ SOBE = {"texto": ("SOBE PARA O", "1º PAVIMENTO"), "corpo": 11, "k": 0.70, "cent
         "cor": (20, 20, 20), "velho": (1784, 990, 1874, 1026), "desloc_y": -30, "escuro": 40, "escuro_12k": 14,
         "caixa": (1760, 940, 2300, 1060), "nome_kalam": "escada: SOBE PARA O 1º PAVIMENTO",
         "kalam_linhas": ((9.0, 73.0), (9.0, 77.0))}
-PAINEL = {"faixa": (2475.0, 984.0, 2488.6, 1121.8),
-          # as folhas de vidro de correr (o vidro e o fio das bordas, como na final)
-          "folhas": [(2482.0, 984.0, 2486.0, 1056.4), (2485.0, 1049.8, 2489.0, 1121.8)],
-          "vidro": (199, 199, 200), "fio": (150, 151, 153), "fio_px": 0.8,
-          "ripas": [(2488.6, y0, 2501.8, y1) for y0, y1 in ((987.6, 995.4), (1008.8, 1015.4), (1029.6, 1036.3),
+PAINEL = {"ripas": [(2488.6, y0, 2501.8, y1) for y0, y1 in ((987.6, 995.4), (1008.8, 1015.4), (1029.6, 1036.3),
                                                            (1051.6, 1057.6), (1070.8, 1078.3), (1091.8, 1099.3),
                                                            (1112.7, 1120.4))],
           "caixa": (2440, 960, 2540, 1150)}
@@ -160,14 +155,10 @@ def descricao_sobe(out, mp, kalam=None, q=SOBE):
 def painel_escritorio(out, mp, q=PAINEL):
     import um_pav_casaa_1111 as U
     m = mp.local(out, q["caixa"]) if mp.ref is not None else mp
-    CD._ripado(out, m, q["faixa"], "x+", U.FOLHAS_1P, np.random.default_rng(1751))
-    # as folhas de vidro redesenhadas por cima, limpas (o vidro claro e o fio cinza das bordas)
-    for r in q["folhas"]:
-        CB.pintar(out, m, [(r, "ret", q["vidro"], 0), (r, "contorno", q["fio"], q["fio_px"])])
     macica = dict(U.FOLHAS_1P, junta_forca=0.0)
     for i, r in enumerate(q["ripas"]):
         CD._ripado(out, m, r, "y+", macica, np.random.default_rng(1760 + i))
-    print("    escritório: o painel e as 7 ripas de fora em nogueira (o ripado da Casa D), as folhas de vidro por cima")
+    print("    escritório: as 7 ripas de fora em nogueira (a da Casa D); a soleira e a janela como estavam")
 
 
 def aplicar(img, mp, kalam=None):
