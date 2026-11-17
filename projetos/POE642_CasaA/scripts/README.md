@@ -3528,3 +3528,34 @@ ali, `correcoes_terreo_casab_1611.Mapa.local`):
   final` e `doze`; `rodape_entrega.py --config ../../POE642_CasaD/config_bases.json --no-quadro --render
   Terreo=../../POE642_CasaD/renders/POE642_CasaD_PH_Terreo_final_rotulos.png`, `pdf_entrega.py --config
   ../../POE642_CasaD/config_bases.json` e `book_entrega.py`.
+
+### Casa D Térreo, 2ª leva de 17/11 (`instalacao_terreo_casad_1711.py`)
+
+"B1 E L2, PODE INSTALAR", mais os pedidos que vieram junto, na final e direto nos 12K A e B (o afim afinado em cada
+caixa, `Mapa.local`, com a final de antes como referência):
+- `banco_b1`: o banco de linho do living sai (o tapete de logo à esquerda) e entra o B1 de
+  `propostas-1711/banco-B1.png` (nogueira e couro conhaque) em pé no retângulo do PDF; o PNG pousado pré-multiplicado
+  pelo alfa (sem franja do fundo branco) e com a sombra curta.
+- `arandelas_l2`: as 2 arandelas pretas da suíte master saem (inpaint dos px escuros neutros do criado) e entram as L2
+  (`luminaria-L2.png`): cúpula de linho de 0,26 m sobre cada criado, braço e placa de latão até a parede da cabeceira.
+- `soleira_garagem` ("AQUI É UMA SOLEIRA. NÃO É AMADEIRADA"): a faixa de madeira entre a garagem e o piso claro de baixo
+  na soleira de Bege Bahia da porta da cozinha (ladrilhada em espelho).
+- `vao_hall_garagem` ("AQUI NÃO TEM SOLEIRA"; "ONDE REMOVEREMOS A SOLEIRA, FICARÁ PISO DA GARAGEM"): a faixa clara no vão
+  da porta do hall sai e o piso da garagem entra (em espelho) até a face do hall; a quina escura que caía no meio sai.
+- `painel_garagem` e `paineis_pivotantes` ("REFAÇA O PAINEL AMADEIRADO..."; "SÃO PAINEIS AMADEIRADOS ... AS DIMENSÕES
+  ESTÃO OK"): o painel em pé da garagem e as 2 lâminas a 45° da gourmet (as medidas de
+  `pedidos_terreo_casad_1611b.BRISES`) no ripado de nogueira das janelas (`um_pav_casaa_1111.FOLHAS_1P`).
+- `piso_banho_gourmet` ("VAMOS CORRIGIR ESSAS FALHAS NO PISO?"): a faixa do piso escuro antigo sob as janelas, acima e
+  abaixo da prateleira (a tábua clara fica), a marca preta e o toco marrom na parede do box pelo piso claro de perto; a
+  linha pontilhada de pé à esquerda e a emenda de pé à direita pelos dois lados em espelho (`_apaga_traco`).
+- `portas_servico` ("REVISE AS PORTAS E PAREDES..."): a borda escura da parede de dentro do louceiro e da despensa de
+  volta atrás das folhas; o piso escuro antigo junto das folhas (louceiro, despensa, a de correr da área de serviço, as
+  2 da área descoberta, a do WC DCE) e as manchinhas pelo piso de perto (`_remenda`: só os px do piso escuro, cada um
+  do primeiro deslocamento que cai em piso limpo); a folha de correr redesenhada reta.
+- `poltrona_varanda` ("CORRIJA ESSE BORRÃO VERTICAL EM VOLTA DA POLTRONA"): a faixa borrada acima e abaixo da poltrona
+  da direita do estar da varanda no Bege Bahia limpo, com a sombra da poltrona interpolada das colunas de fora.
+- `mesa_escritorio` ("MELHORE O CONTORNO DO NOGUEIRA NA MESA DO ESCRITÓRIO"): a borda cinza e o resto da mesa antiga em
+  volta do tampo pelo piso de madeira de perto; contorno fino e sombra curta no retângulo do PDF.
+- Antes e depois em `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1711b_instalacao_12K_antes_depois.jpg`.
+- **Como refazer:** `python3 instalacao_terreo_casad_1711.py doze` (antes da final: a final de antes é a referência do
+  afim) e `final`; depois `rodape_entrega.py`, `pdf_entrega.py` e `book_entrega.py` como acima.
