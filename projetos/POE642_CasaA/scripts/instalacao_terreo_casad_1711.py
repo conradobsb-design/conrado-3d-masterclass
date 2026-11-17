@@ -30,6 +30,12 @@ afim afinado ali (`correcoes_terreo_casab_1611.Mapa.local`):
 10. `mesa_escritorio` ("MELHORE O CONTORNO DO NOGUEIRA NA MESA DO ESCRITÓRIO"): a borda cinza à direita do tampo e o
    resto claro da mesa antiga embaixo (e à esquerda) pelo piso de madeira de perto; o contorno fino e a sombra curta do
    tampo de nogueira no retângulo do PDF.
+11. `box_chuveiro_gourmet` ("FALTOU O BOX DO CHUVEIRO"): o vidro do box do banho gourmet de volta (a faixa clara de pé
+   em x 1446, da parede de cima à de baixo, que saiu como resíduo na 1ª leva), em vidro claro com o contorno fino.
+12. `painel_garagem_baixo` ("Aqui também é painel de madeira"): a faixa clara na base da garagem, entre o muro baixo e a
+   parede da direita, no ripado de nogueira das janelas.
+
+  (`--passos a,b`: só esses passos, sobre a final e os 12K que já têm os anteriores)
 
   python3 instalacao_terreo_casad_1711.py final [--saida <png>]
   python3 instalacao_terreo_casad_1711.py doze [--opcao AB] [--saida <jpg com {}>]
@@ -65,6 +71,9 @@ VAO_HALL = {"faixa": (2430.6, 706.6, 2441.0, 770.0), "espelho_x": 2441.0,
             # a quina escura da parede de cima, que caía no meio do piso da garagem
             "quina": ((2439.0, 706.6, 2444.5, 712.5), [(6, 0), (8, 0)])}
 PAINEL_GARAGEM = ((3180.4, 467.5, 3184.8, 631.0), "x+")
+PAINEL_GARAGEM_BAIXO = ((3064.0, 797.4, 3165.6, 801.2), "y+")
+BOX_GOURMET = {"ret": (1445.8, 373.9, 1449.2, 466.6), "vidro": (222, 216, 206), "contorno": (128, 122, 114),
+               "contorno_px": 0.35, "sombra": 0.10}
 PIVOTANTES = {"x": (1390.5, 1396.5), "y": (558.0, 702.0), "n": 2, "comp": 0.93, "esp_px": 4.5, "cobre_px": 0.9}
 # os remendos: (retângulo px da final, os deslocamentos da fonte px da final, em ordem, o filtro dos px trocados)
 BANHO_G = {"caixa": (1380, 360, 1720, 470),
@@ -389,8 +398,25 @@ def mesa_escritorio(out, mp, q=ESCRITORIO):
     print("    escritório: o tampo de nogueira sem a borda cinza e o resto da mesa antiga, com o contorno fino")
 
 
+def box_chuveiro_gourmet(out, mp, q=BOX_GOURMET):
+    r = q["ret"]
+    m = _local(out, mp, (1380, 360, 1520, 475))
+    CB.sombra(out, m, r, q["sombra"])
+    CB.pintar(out, m, [(r, "ret", q["vidro"], 0), (r, "contorno", q["contorno"], q["contorno_px"])])
+    print("    banho gourmet: o vidro do box do chuveiro de volta, da parede de cima à de baixo")
+
+
+def painel_garagem_baixo(out, mp, q=PAINEL_GARAGEM_BAIXO):
+    import um_pav_casaa_1111 as U
+    r, lado = q
+    m = _local(out, mp, (int(r[0]) - 20, int(r[1]) - 30, int(r[2]) + 20, int(r[3]) + 25))
+    CD._ripado(out, m, r, lado, U.FOLHAS_1P, np.random.default_rng(1732))
+    print("    garagem: a faixa da base, entre o muro baixo e a parede, no ripado de nogueira")
+
+
 PASSOS = (banco_b1, arandelas_l2, soleira_garagem, vao_hall_garagem, painel_garagem, paineis_pivotantes,
-          piso_banho_gourmet, portas_servico, poltrona_varanda, mesa_escritorio)
+          piso_banho_gourmet, portas_servico, poltrona_varanda, mesa_escritorio, box_chuveiro_gourmet,
+          painel_garagem_baixo)
 
 
 def aplicar(img, mp, passos=PASSOS):
@@ -405,10 +431,12 @@ def main():
     ap.add_argument("acao", choices=("final", "doze"))
     ap.add_argument("--opcao", default="AB")
     ap.add_argument("--saida")
+    ap.add_argument("--passos", help="só estes passos (nomes separados por vírgula)")
     a = ap.parse_args()
+    passos = PASSOS if not a.passos else tuple(globals()[n] for n in a.passos.split(","))
     final = cv2.imread(str(FINAL))
     if a.acao == "final":
-        cv2.imwrite(a.saida or str(FINAL), aplicar(final, Mapa()))
+        cv2.imwrite(a.saida or str(FINAL), aplicar(final, Mapa(), passos))
         return
     from PIL import Image
     for op in a.opcao:
@@ -417,7 +445,7 @@ def main():
         M = DF.afim_12k(final, doze)
         mp = Mapa(float(np.hypot(M[0, 0], M[1, 0])), (float(M[0, 2]), float(M[1, 2])))
         mp.ref = final
-        out = aplicar(doze, mp)
+        out = aplicar(doze, mp, passos)
         dpi = int(round(out.shape[1] / (420 / 25.4)))
         dest = a.saida.format(op) if a.saida else str(f)
         Image.fromarray(cv2.cvtColor(out, cv2.COLOR_BGR2RGB)).save(dest, quality=95, subsampling=0, dpi=(dpi, dpi))

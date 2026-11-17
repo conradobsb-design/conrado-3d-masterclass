@@ -3557,5 +3557,11 @@ caixa, `Mapa.local`, com a final de antes como referência):
 - `mesa_escritorio` ("MELHORE O CONTORNO DO NOGUEIRA NA MESA DO ESCRITÓRIO"): a borda cinza e o resto da mesa antiga em
   volta do tampo pelo piso de madeira de perto; contorno fino e sombra curta no retângulo do PDF.
 - Antes e depois em `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1711b_instalacao_12K_antes_depois.jpg`.
+- `box_chuveiro_gourmet` ("FALTOU O BOX DO CHUVEIRO"): o vidro do box do banho gourmet de volta, de pé em x 1446 da
+  parede de cima à de baixo (a faixa clara que a 1ª leva tirou como resíduo), em vidro claro com contorno fino.
+- `painel_garagem_baixo` ("Aqui também é painel de madeira"): a faixa clara na base da garagem, entre o muro baixo e a
+  parede da direita, no ripado de nogueira. Antes e depois destes 2 em
+  `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1711c_box_painel_12K_antes_depois.jpg`.
 - **Como refazer:** `python3 instalacao_terreo_casad_1711.py doze` (antes da final: a final de antes é a referência do
   afim) e `final`; depois `rodape_entrega.py`, `pdf_entrega.py` e `book_entrega.py` como acima.
+  Só alguns passos sobre o que já tem os anteriores: `--passos box_chuveiro_gourmet,painel_garagem_baixo`.
