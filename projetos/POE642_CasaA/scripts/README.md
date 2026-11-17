@@ -3608,6 +3608,16 @@ degraus de antes por cima, transparente (a diferença de cada px para o tom dos 
 leve, sem o branco. A borda do jardim embaixo desse lance fica contínua como a do lance de baixo. Na final e nos 12K A
 e B.
 
+#### Casa E, Térreo: o canto do escritório (17/11, `escritorio_canto_casae_1711.py`)
+
+"Aqui a gente vai trocar o vaso com as plantas. E eu quero que corrija já o entorno do piso. E também quero que troque
+essa mesa redonda pelo Tom Nogueira." O canto de baixo do escritório volta ao travertino limpo (o de logo abaixo do
+jardim do living), com a sombra curta rente às paredes: saem os remendos claros, a mancha cinza e a barra branca junto
+à cortina. A cortina por trás do vaso de antes é refeita pela de 4 ondas acima. A poltrona arredondada volta no lugar e
+no giro de antes; a mesinha redonda no círculo do PDF em nogueira (o tampo da mesa lateral de metal e madeira do
+living em círculo, com o aro de metal escuro); o vaso com folhagem do hall de entrada no círculo do PDF, no lugar do
+vaso de antes. Na final e nos 12K A e B.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
