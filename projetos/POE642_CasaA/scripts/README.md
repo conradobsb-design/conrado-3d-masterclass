@@ -3368,6 +3368,16 @@ prancha, o PDF da Casa E e o book (os comandos acima). Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_armario_dce_12K_antes_depois.jpg`. Fica para o OK o criado-mudo do DCE
 (item 3 do levantamento de 17/11, `POE642_CasaE_PH_Terreo_1711_levantamento.jpg`).
 
+#### Casa E, Térreo: a geladeira inox da área gourmet (17/11, `geladeira_gourmet_casae_1711.py`)
+
+Usuário: "Troque o freezer da área gourmet para a linha inox da biblioteca". No módulo que avança da bancada de trás da
+gourmet (`pedidos_terreo_casae_1611.GOURMET["geladeira_pt"]`; em px da final, (1345,5, 601,0, 1393,5, 649,6)), a caixa de
+inox lisa e lavada sai e entra a geladeira inox G2 da biblioteca (`POE642_CasaA/biblioteca-objetos/02-terreo/cozinha/
+geladeira-inox.png`, a mesma das cozinhas da B e da D): o painel escovado, o friso e os 2 puxadores para a gourmet, com
+contorno fino e sombra curta; no pé, a faixa clara antiga e os 2 risquinhos claros sob o armário ao lado vão ao piso
+marrom. Na final e direto nos 12K A e B (`doze`, antes da `final`). Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_geladeira_gourmet_12K_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
