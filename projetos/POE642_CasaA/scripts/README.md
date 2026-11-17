@@ -3573,6 +3573,21 @@ clara da Casa D com o fio escuro e a sombra curta, quina a quina com a ponta da 
 ponta do render; no 1º Pavimento a ponta avança até a face da folha, cobrindo o resto do batente). A pivotante da
 entrada fica. Térreo na final e nos 12K A e B; 1º Pavimento na final.
 
+#### Casa E, Térreo: o WC DCE (17/11, `wcdce_terreo_casae_1711.py`)
+
+Post-it do cliente. O piso no cinza do WC DCE da Casa D (o tom de lá com o grão de agora; a bacia, o box, a bancada,
+a folha da porta e os rótulos ficam); a bancada no marrom tabaco (as faces da frente um tom abaixo); a cuba e a
+torneira da Casa D (a do WC DCE de lá, espelhada para a parede da direita), no grid fino.
+
+#### Casa E, Térreo: o lavabo pelos itens da biblioteca (17/11, `lavabo_terreo_casae_1711.py`)
+
+"melhorar a representação desse lavabo inteiro. substitua pelos itens da biblioteca e mantenha os tons." O contorno
+duplo em volta da bancada volta a ser piso; a bancada lisa no retângulo do PDF, no creme dela, com as faces um tom
+abaixo e a sombra curta; a cuba esculpida da biblioteca (`cuba-social-e`, a pedra creme com a cuba entalhada, o tom
+da de antes), só a cuba levada ao creme da bancada, e a torneira dela girada para sair da parede da esquerda, no lugar
+e no comprimento da do PDF; a bacia escura da biblioteca (`bacia-escura-render`) no retângulo do PDF, a caixa contra a
+parede. Na final e nos 12K A e B.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
