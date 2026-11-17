@@ -3560,8 +3560,13 @@ caixa, `Mapa.local`, com a final de antes como referência):
 - `box_chuveiro_gourmet` ("FALTOU O BOX DO CHUVEIRO"): o vidro do box do banho gourmet de volta, de pé em x 1446 da
   parede de cima à de baixo (a faixa clara que a 1ª leva tirou como resíduo), em vidro claro com contorno fino.
 - `painel_garagem_baixo` ("Aqui também é painel de madeira"): a faixa clara na base da garagem, entre o muro baixo e a
-  parede da direita, no ripado de nogueira. Antes e depois destes 2 em
+  parede da direita, no ripado de nogueira.
+- `porta_banho_gourmet` ("a porta tem que fazer quina a quina com a parede. ela não pode estar flutuando"): a folha de
+  madeira sob a janela alta da parede de cima do banho gourmet, que ficava solta 4 px abaixo da parede, encostada na
+  face da parede (y 370,6) e terminando na quina da parede da direita; o piso no lugar de antes. Antes e depois destes 3
+  em
   `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1711c_box_painel_12K_antes_depois.jpg`.
 - **Como refazer:** `python3 instalacao_terreo_casad_1711.py doze` (antes da final: a final de antes é a referência do
   afim) e `final`; depois `rodape_entrega.py`, `pdf_entrega.py` e `book_entrega.py` como acima.
-  Só alguns passos sobre o que já tem os anteriores: `--passos box_chuveiro_gourmet,painel_garagem_baixo`.
+  Só alguns passos sobre o que já tem os anteriores: `--passos box_chuveiro_gourmet,painel_garagem_baixo` e depois
+  `--passos porta_banho_gourmet` (a caixa do afim local sem o rótulo, que no 12K B é na Kalam e desviava o casamento).

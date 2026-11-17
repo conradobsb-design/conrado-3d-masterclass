@@ -35,6 +35,10 @@ afim afinado ali (`correcoes_terreo_casab_1611.Mapa.local`):
 12. `painel_garagem_baixo` ("Aqui também é painel de madeira"): a faixa clara na base da garagem, entre o muro baixo e a
    parede da direita, no ripado de nogueira das janelas.
 
+13. `porta_banho_gourmet` ("a porta tem que fazer quina a quina com a parede. ela não pode estar flutuando"): a folha
+   de madeira sob a janela alta da parede de cima do banho gourmet, que ficava solta no piso, encostada na face da
+   parede e terminando na quina da parede da direita; o piso no lugar de antes.
+
   (`--passos a,b`: só esses passos, sobre a final e os 12K que já têm os anteriores)
 
   python3 instalacao_terreo_casad_1711.py final [--saida <png>]
@@ -72,6 +76,9 @@ VAO_HALL = {"faixa": (2430.6, 706.6, 2441.0, 770.0), "espelho_x": 2441.0,
             "quina": ((2439.0, 706.6, 2444.5, 712.5), [(6, 0), (8, 0)])}
 PAINEL_GARAGEM = ((3180.4, 467.5, 3184.8, 631.0), "x+")
 PAINEL_GARAGEM_BAIXO = ((3064.0, 797.4, 3165.6, 801.2), "y+")
+# a folha (px da final): onde estava (sai) e onde fica, encostada na face da parede (y 370,6) até a quina da direita
+PORTA_GOURMET = {"antes": (1503.0, 375.0, 1558.0, 378.6), "ret": (1505.5, 370.6, 1555.9, 373.0),
+                 "amostra": (1510.0, 376.0, 1550.0, 378.0), "contorno": (88, 108, 134), "contorno_px": 0.35}
 BOX_GOURMET = {"ret": (1445.8, 373.9, 1449.2, 466.6), "vidro": (222, 216, 206), "contorno": (128, 122, 114),
                "contorno_px": 0.35, "sombra": 0.10}
 PIVOTANTES = {"x": (1390.5, 1396.5), "y": (558.0, 702.0), "n": 2, "comp": 0.93, "esp_px": 4.5, "cobre_px": 0.9}
@@ -414,9 +421,18 @@ def painel_garagem_baixo(out, mp, q=PAINEL_GARAGEM_BAIXO):
     print("    garagem: a faixa da base, entre o muro baixo e a parede, no ripado de nogueira")
 
 
+def porta_banho_gourmet(out, mp, q=PORTA_GOURMET):
+    m = _local(out, mp, (1430, 355, 1572, 390))
+    x0, y0, x1, y1 = m.reti(q["amostra"])
+    cor = tuple(float(v) for v in np.median(out[y0:y1, x0:x1].reshape(-1, 3), axis=0))
+    _remenda(out, m, q["antes"], [(0, 5.5)], None)
+    CB.pintar(out, m, [(q["ret"], "ret", cor, 0), (q["ret"], "contorno", q["contorno"], q["contorno_px"])])
+    print("    banho gourmet: a folha da porta encostada na parede, quina a quina")
+
+
 PASSOS = (banco_b1, arandelas_l2, soleira_garagem, vao_hall_garagem, painel_garagem, paineis_pivotantes,
           piso_banho_gourmet, portas_servico, poltrona_varanda, mesa_escritorio, box_chuveiro_gourmet,
-          painel_garagem_baixo)
+          painel_garagem_baixo, porta_banho_gourmet)
 
 
 def aplicar(img, mp, passos=PASSOS):
