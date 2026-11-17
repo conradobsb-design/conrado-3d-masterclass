@@ -3618,6 +3618,13 @@ no giro de antes; a mesinha redonda no círculo do PDF em nogueira (o tampo da m
 living em círculo, com o aro de metal escuro); o vaso com folhagem do hall de entrada no círculo do PDF, no lugar do
 vaso de antes. Na final e nos 12K A e B.
 
+#### Casa E, Térreo: as cadeiras da mesa do escritório nos lados certos (17/11, `escritorio_mesa_casae_1711.py`)
+
+"Onde tem uma é a do escritório, onde tem duas é a poltrona que você colocou do lado errado." O retângulo da mesa e
+das cadeiras volta ao travertino limpo; no lado de cima (onde vai uma) a cadeira de escritório de couro, virada para a
+mesa e 1/3 sob o tampo; no lado de baixo (onde vão duas) as duas poltroninhas de madeira e linho claro, viradas para a
+mesa e 1/3 sob o tampo; a mesa da E por cima, no mesmo lugar. Na final e nos 12K A e B.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
