@@ -68,6 +68,13 @@ B_Terreo`), na final e direto nos 12K A e B, cada peça desenhada na escala de c
    cinza de 2 a 3 px em volta do piso (o contorno fino do contrapiso no PDF, engrossado no render) sai: o piso vai até a
    face de fora de cada portão e até a borda de baixo do PDF e encontra a grama direto, como a pedra da garagem. No 12K
    o desenho vai no afim afinado ali (`Mapa.local`: a final ampliada casada com o 12K, 1 a 2 px além do afim geral).
+17. `pergolado_brises` ("CORRIJA O TRACEJADO PARA CINZA E MELHORE A REPRESENTAÇÃO DOS BRISES EM PRETO"): junto ao
+   jardim de 4,62 m² e ao hall, o tracejado do pergolado (os 248 traços do PDF, em
+   `renders/POE642_CasaB_PH_Terreo_pergolado_brises.json`), que era preto (22), sai (cada traço recebe o que está dos
+   dois lados dele, em espelho) e volta em cinza 128, fino, traço a traço por cobertura exata, fora das paredes; os
+   brises (as 11 lâminas giradas do PDF, que eram grafite borradas com a sombra larga) saem com a faixa de travertino e
+   a pedra da garagem sob eles refeitas (o travertino da mesma faixa à direita, em espelho; a pedra de logo abaixo) e
+   voltam por cima do tracejado em preto, nítidas, no polígono do PDF, com uma aresta de luz fina e a sombra curta.
 
   python3 correcoes_terreo_casab_1611.py final [--saida <png>]
   python3 correcoes_terreo_casab_1611.py doze [--opcao AB] [--saida <jpg com {}>]
@@ -167,6 +174,18 @@ PORTOES_AD = {
     "meio": (150, 152, 156), "meio_px": 0.3, "sombra": 0.30}
 
 
+PERGOLADO_BRISES = {
+    "json": RAIZ / "POE642_CasaB/renders/POE642_CasaB_PH_Terreo_pergolado_brises.json",
+    "caixa_local": (2330, 1170, 2860, 1270),
+    "apaga_px": 1.8,                                      # meia largura do traço antigo (px da final)
+    # a faixa de travertino sob os brises (entre as 2 linhas do tracejado) e a fonte dela, à direita, nas mesmas linhas
+    "faixa": (2348.0, 1278.0, 2577.0, 1289.9), "fonte_x": (2582.0, 2690.0),
+    "pedra": (2348.0, 1289.9, 2577.0, 1299.0), "pedra_dy": 9.0,
+    "cinza": (128, 128, 128), "larg_px": 0.8,
+    "preto": (22, 22, 24), "luz": (112, 112, 114), "luz_px": 0.7, "luz_forca": 0.45,
+    "sombra": {"d_px": 2.4, "sigma_px": 1.4, "forca": 0.45}}
+
+
 class Mapa:
     """A final levada à imagem: u' = s (u - 1/2) + t + 1/2 (px de borda; s = 1, t = 0: a própria final)."""
 
@@ -178,6 +197,10 @@ class Mapa:
 
     def y(self, v):
         return self.s * (v - 0.5) + self.t[1] + 0.5
+
+    def ux(self, X):
+        """O inverso de `x` (o centro do px X da imagem, na final)."""
+        return (X - self.t[0]) / self.s + 0.5
 
     def ret(self, r):
         return (self.x(r[0]), self.y(r[1]), self.x(r[2]), self.y(r[3]))
@@ -765,9 +788,137 @@ def portoes_descoberta(out, mp, q=PORTOES_AD):
           "meio e a sombra curta")
 
 
+class _Paredes:
+    """As paredes (o cinza neutro em massa: a abertura tira os traços finos, pretos ou não; depois 1 px a mais para as
+    bordas escuras delas), medidas na imagem antes de mexer, numa caixa."""
+
+    def __init__(self, img, caixa, s):
+        X0, Y0, X1, Y1 = caixa
+        p = img[Y0:Y1, X0:X1].astype(np.int16)
+        n = ((np.abs(p[..., 1] - p[..., 0]) < 10) & (np.abs(p[..., 1] - p[..., 2]) < 10)
+             & (p.mean(-1) < 110)).astype(np.uint8)
+        k = int(round(2.6 * s)) | 1
+        n = cv2.morphologyEx(n, cv2.MORPH_OPEN, np.ones((k, k), np.uint8))
+        self.m = cv2.dilate(n, np.ones((3, 3), np.uint8)) > 0
+        self.X0, self.Y0 = X0, Y0
+
+    def __call__(self, ys, xs):
+        return self.m[ys - self.Y0, xs - self.X0]
+
+
+def _apaga_traco(out, m, sg, e, par):
+    """O traço (px da final, de pé ou deitado) sai: a faixa de meia largura e recebe os dois lados dela em espelho,
+    misturados pela distância a cada lado (sem degrau de tom e sem o halo claro do 12K), fora das paredes."""
+    x0, y0, x1, y1 = sg
+    de_pe = abs(x1 - x0) < abs(y1 - y0)
+    if de_pe:
+        c = m.x((x0 + x1) / 2)
+        A, B = int(np.floor(m.y(min(y0, y1)) - e * m.s)), int(np.ceil(m.y(max(y0, y1)) + e * m.s))
+    else:
+        c = m.y((y0 + y1) / 2)
+        A, B = int(np.floor(m.x(min(x0, x1)) - e * m.s)), int(np.ceil(m.x(max(x0, x1)) + e * m.s))
+    L, R = int(np.floor(c - e * m.s)), int(np.ceil(c + e * m.s))
+    ao_longo = np.arange(A, B)
+    fonte = out.copy()
+
+    def px(i, j):                                   # i: através do traço, j: ao longo
+        return (j, i) if de_pe else (i, j)
+    for i in range(L, R):
+        sl, sr = 2 * L - 1 - i, 2 * R - 1 - i
+        wl = (R - 0.5 - i) / (R - L)
+        ys, xs = px(np.full_like(ao_longo, i), ao_longo)
+        ok = ~par(ys, xs)
+        yl, xl = px(np.full_like(ao_longo, sl), ao_longo)
+        yr, xr = px(np.full_like(ao_longo, sr), ao_longo)
+        bl, br = ~par(yl, xl), ~par(yr, xr)
+        vl, vr = fonte[yl, xl].astype(np.float32), fonte[yr, xr].astype(np.float32)
+        w = np.where(bl & br, wl, np.where(bl, 1.0, 0.0))[:, None]
+        v = vl * w + vr * (1 - w)
+        ok &= bl | br
+        out[ys[ok], xs[ok]] = np.clip(np.round(v[ok]), 0, 255).astype(np.uint8)
+
+
+def pergolado_brises(out, mp, q=PERGOLADO_BRISES):
+    import json
+    dados = json.loads(q["json"].read_text())
+    segs, brises = dados["segs"], dados["brises"]
+    m = mp.local(out, q["caixa_local"])
+    xs = [v for g in segs for v in (g[0], g[2])]
+    ys = [v for g in segs for v in (g[1], g[3])]
+    cx0, cy0, cx1, cy1 = m.ret((min(xs) - 12, min(ys) - 12, max(xs) + 12, max(ys) + 12))
+    par = _Paredes(out, (int(cx0), int(cy0), int(np.ceil(cx1)), int(np.ceil(cy1))), m.s)
+    # 1. o tracejado preto sai (os deitados antes, para os de pé, que passam um pouco das pontas, limparem os cruzamentos)
+    deitados = [g for g in segs if abs(g[2] - g[0]) >= abs(g[3] - g[1])]
+    de_pe = [g for g in segs if abs(g[2] - g[0]) < abs(g[3] - g[1])]
+    for g in deitados + de_pe:
+        _apaga_traco(out, m, g, q["apaga_px"], par)
+    # 2. sob os brises: a faixa de travertino (a da direita, nas mesmas linhas, dobrada em espelho) e a pedra (de baixo)
+    fx0, fy0, fx1, fy1 = m.ret(q["faixa"])
+    X0, X1, Y0, Y1 = int(np.floor(fx0)), int(np.ceil(fx1)), int(np.floor(fy0)), int(np.ceil(fy1))
+    a0, a1 = q["fonte_x"]
+    larg = a1 - a0
+    fonte = out.copy()
+    novo = np.empty((Y1 - Y0, X1 - X0, 3), np.float32)
+    for j, X in enumerate(range(X0, X1)):
+        t = (q["faixa"][2] - m.ux(X)) % (2 * larg)
+        u = a0 + (t if t < larg else 2 * larg - t)
+        novo[:, j] = fonte[Y0:Y1, int(np.floor(m.x(u)))]
+    a = alfa_ret((fx0 - X0, fy0 - Y0, fx1 - X0, fy1 - Y0), (Y1 - Y0, X1 - X0))[..., None]
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a) + novo * a), 0, 255).astype(np.uint8)
+    fonte = out.copy()
+    px0, py0, px1, py1 = m.ret(q["pedra"])
+    X0, X1, Y0, Y1 = int(np.floor(px0)), int(np.ceil(px1)), int(np.floor(py0)), int(np.ceil(py1))
+    dy = int(round(q["pedra_dy"] * m.s))
+    a = alfa_ret((px0 - X0, py0 - Y0, px1 - X0, py1 - Y0), (Y1 - Y0, X1 - X0))[..., None]
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a) + fonte[Y0 + dy:Y1 + dy, X0:X1] * a), 0, 255).astype(np.uint8)
+    # 3. o tracejado em cinza, traço a traço (cobertura exata), fora das paredes
+    cx0, cy0, cx1, cy1 = m.ret((min(xs) - 3, min(ys) - 3, max(xs) + 3, max(ys) + 3))
+    X0, Y0, X1, Y1 = int(cx0), int(cy0), int(np.ceil(cx1)), int(np.ceil(cy1))
+    forma = (Y1 - Y0, X1 - X0)
+    al = np.zeros(forma, np.float32)
+    w = q["larg_px"] / 2
+    for x0, y0, x1, y1 in segs:
+        if abs(x1 - x0) < abs(y1 - y0):
+            r = (x0 - w, min(y0, y1), x0 + w, max(y0, y1))
+        else:
+            r = (min(x0, x1), y0 - w, max(x0, x1), y0 + w)
+        rm = m.ret(r)
+        al = np.maximum(al, alfa_ret((rm[0] - X0, rm[1] - Y0, rm[2] - X0, rm[3] - Y0), forma))
+    reg = out[Y0:Y1, X0:X1]
+    yy, xx = np.mgrid[Y0:Y1, X0:X1]
+    al *= ~par(yy, xx)
+    out[Y0:Y1, X0:X1] = np.clip(np.round(compor(reg.astype(np.float32), al, q["cinza"])), 0, 255).astype(np.uint8)
+    # 4. os brises em preto, por cima: a sombra curta, a lâmina e a aresta de luz (do lado de cima, à direita)
+    pts = [np.float64([[m.x(p[0]), m.y(p[1])] for p in b]) for b in brises]
+    allp = np.vstack(pts)
+    f = int(np.ceil(6 * m.s))
+    X0, Y0 = int(allp[:, 0].min()) - f, int(allp[:, 1].min()) - f
+    X1, Y1 = int(np.ceil(allp[:, 0].max())) + f, int(np.ceil(allp[:, 1].max())) + f
+    forma = (Y1 - Y0, X1 - X0)
+    lam = np.zeros(forma, np.float32)
+    for p in pts:
+        a, _ = _alfa_poli(p - (X0, Y0), forma)
+        lam = np.maximum(lam, a)
+    sh = q["sombra"]
+    d = sh["d_px"] * m.s
+    sb = cv2.GaussianBlur(cv2.warpAffine(lam, np.float32([[1, 0, -d], [0, 1, d]]), (forma[1], forma[0])), (0, 0),
+                          sh["sigma_px"] * m.s) * sh["forca"] * (1 - lam)
+    reg = out[Y0:Y1, X0:X1].astype(np.float32) * (1 - sb)[..., None]
+    reg = compor(reg, lam, q["preto"])
+    k = q["luz_px"] * m.s
+    luz = np.clip(lam - cv2.warpAffine(lam, np.float32([[1, 0, -k], [0, 1, k]]), (forma[1], forma[0])), 0, 1)
+    reg = compor(reg, luz * lam * q["luz_forca"], q["luz"])
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print(f"    pergolado: {len(segs)} traços do tracejado, do preto ao cinza {q['cinza'][0]}; brises: {len(brises)} "
+          f"lâminas do PDF em preto (a faixa de travertino e a pedra sob elas refeitas)")
+
+
 PASSOS = (porta_cozinha, cubas_lavatorio, armarios, portas_servico, maquinas, cuba_bh_servico,
           louceiro_despensa, porta_adega, gourmet_altura, lavabo_bancada, pia_sala_intima, banco_deck,
-          armario_quarto_servico, margem_lote, grama_muro, portoes_descoberta)
+          armario_quarto_servico, margem_lote, grama_muro, portoes_descoberta, pergolado_brises)
+NOVOS_1711E = (pergolado_brises,)
 NOVOS_1711D = (margem_lote, grama_muro, portoes_descoberta)
 NOVOS_1711C = (pia_sala_intima, banco_deck, armario_quarto_servico)
 NOVOS_1711 = (louceiro_despensa, porta_adega, gourmet_altura, lavabo_bancada)

@@ -3441,6 +3441,15 @@ MÁQUINAS PARA CABER ACIMA DA BANCADA"; "NÃO ENCUBRA AS MAQUINAS"; "SUBSTITUA P
   RESÍDUO DA ANTIGA GRAMA, RENTE AO MURO DO TERRENO" (`grama_muro`: a faixa verde clara de 4 px acima do muro de baixo,
   de ponta a ponta, vira a grama de logo acima, em espelho). Antes e depois em
   `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1711d_correcoes_12K_antes_depois.jpg`.
+- **5ª rodada (17/11):** "CORRIJA O TRACEJADO PARA CINZA E MELHORE A REPRESENTAÇÃO DOS BRISES EM PRETO"
+  (`pergolado_brises`): junto ao jardim de 4,62 m² e ao hall, o tracejado do pergolado (os 248 traços do PDF, gravados
+  em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_pergolado_brises.json`, porque o PDF do cliente não vai ao git) sai
+  do preto 22 (cada traço recebe os dois lados em espelho, misturados pela distância, o que tira também o halo claro
+  do 12K; as paredes, o cinza neutro em massa, ficam de fora) e volta em cinza 128 de 0,8 px, traço a traço por
+  cobertura exata; os 11 brises (as lâminas giradas do PDF, antes grafite borradas com a sombra larga) saem com a
+  faixa de travertino e a pedra da garagem sob eles refeitas e voltam por cima em preto (22, 22, 24), nítidos, no
+  polígono do PDF, com uma aresta de luz fina e a sombra curta. Antes e depois em
+  `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1711e_correcoes_12K_antes_depois.jpg`.
 - **Como refazer:** `python3 danae_bancadas_1611.py final B_Terreo --antes <final de 949e551^>` e
   `python3 correcoes_terreo_casab_1611.py final`; `python3 danae_bancadas_1611.py doze B_Terreo --antes <final de
   949e551^> --doze_antes <12K de 949e551^, {}=A|B>` e `python3 correcoes_terreo_casab_1611.py doze`; depois
