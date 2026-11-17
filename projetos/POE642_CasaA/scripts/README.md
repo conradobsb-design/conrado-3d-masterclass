@@ -3525,6 +3525,16 @@ finos. são dois, uma mais extremo e outro mais recuado à esquerda. esses que e
 Depois, a prancha, o PDF da E e o book. Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_bege_deck_piscina_antes_depois.jpg`.
 
+#### Casa E, Térreo: "DESCE PARA O SUBSOLO" à esquerda do triângulo (17/11, `descricao_subsolo_terreo_casae_1711.py`)
+
+Usuário, com a imagem da escada do Subsolo: "a descrição fica ao lado esquerdo do triângulo/seta". O "DESCE PARA O /
+SUBSOLO" sai da circulação gourmet (o piso marrom de volta: a baixa frequência pelo inpaint do entorno e o grão do piso
+de logo acima; a máscara, o que destoa da mediana da caixa, as letras claras e o antisserrilhado) e vai para a esquerda
+do triângulo e do D (x 1153 a 1164, y 423 a 452), a ~7 px, no meio da altura dos dois, no corpo das descrições
+(`escada_painel_casae_1711.descricao_sobe`). Ali o fundo é o Bege Bahia: as letras no escuro (20), como o "DESCE PARA O
+JARDIM". Na final e nos 12K A e B (na Kalam), e o JSON da Kalam com as linhas e a cor novas. Depois, a prancha, o PDF
+da E e o book. Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_descricao_subsolo_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
