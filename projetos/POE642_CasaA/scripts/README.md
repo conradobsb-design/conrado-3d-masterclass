@@ -3535,6 +3535,44 @@ do triângulo e do D (x 1153 a 1164, y 423 a 452), a ~7 px, no meio da altura do
 JARDIM". Na final e nos 12K A e B (na Kalam), e o JSON da Kalam com as linhas e a cor novas. Depois, a prancha, o PDF
 da E e o book. Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_descricao_subsolo_antes_depois.jpg`.
 
+#### Casa E, Térreo: a escada do deck na ordem dos níveis (17/11, `escada_deck_terreo_casae_1711.py`)
+
+Usuário: "esse último degrau está abaixo do penúltimo"; com a imagem do PDF: "os números estão localizados nos cantos de
+cada degrau, sendo o 1 mais baixo e o 11 o mais alto"; "o degrau 11 está sobre o banco bronze, mas deveria estar sob
+ele"; "já corrija essa faixa branca indevida entre o degrau". O PDF desenha os 10 retângulos do mais alto para o mais
+baixo (cada um cobria os de cima). Agora cada degrau fica por cima dos mais baixos: o 4 sobre o 1, os degraus 2, 3, 5 e
+6 aparecem (no tom dos degraus do render, com a sombra curta à esquerda de cada mais alto e o fio leve de borda), os
+bancos de bronze inteiros por cima, até a face do PDF, e a faixa branca entre o 10 e o deck sai (o deck até a face,
+com a sombra no 10). Na final e direto nos 12K A e B (`doze` antes de `final`).
+
+#### Casa E, Térreo: cozinha e área de serviço (17/11, `cozinha_servico_terreo_casae_1711.py`)
+
+Usuário (com a imagem do 3D): bancadas sem imperfeições e o Dekton melhor, a ilha reta (sem a curva acima do cooktop),
+a soleira e as folhas das janelas. As três bancadas no retângulo reto, na chapa do Dekton Danae da foto oficial (sem
+os pontinhos), com as cubas, as torneiras e o cooktop por cima; as duas janelas de correr pela ARQ_PAREDE no padrão
+das janelas da Casa A (o vão no cinza do peitoril, as folhas em vidro claro desencontradas: três na cozinha, duas no
+serviço).
+
+#### Casa E, Térreo: o bloco gourmet (17/11, `gourmet_terreo_casae_1711.py`)
+
+O BH gourmet sem a soleira (o granito contínuo, sem emenda: a luz baixa do piso em volta e o grão do de ao lado); o
+chuveiro de fora pelo redondo da biblioteca (`chuveiro-acqua-plus`) no círculo do PDF, com o braço cromado até a
+parede; a cuba do lavabo gourmet pela da biblioteca (`cuba-quartzo`, só a louça), em pé no comprido da bancada, com a
+torneira na lateral (do lado da parede); os 4 brises do lado da gourmet no desenho dos da varanda (a lâmina da
+varanda como modelo, na escala e no ângulo do PDF).
+
+#### Casa E: as portas de giro no padrão da Casa D (17/11, `portas_casae_1711.py`)
+
+Levantamento aprovado ("pode aplicar"; e "garanta que a porta esteja quina a quina com a parede. e que em volta dela
+não haja piso escuro"). Cada porta do PDF (o arco com a folha; as 3 de veneziana do Térreo à parte), no lugar do
+render (o desvio medido no próprio vão: as faces da parede logo além da ponta e a ponta dela): em volta da folha, o
+que não é piso volta ao piso (a folha cinza de antes, os restos brancos do batente, o piso escuro; a parede e o fio
+dela ficam; o tom e a variação do piso medidos na fonte; o piso sem cor dos banhos; no 1º Pavimento a fonte ao longo
+das réguas); no vão junto à dobradiça, a ponta da folha de antes sai (a soleira fica inteira); a folha na madeira
+clara da Casa D com o fio escuro e a sombra curta, quina a quina com a ponta da parede (no Térreo a folha encosta na
+ponta do render; no 1º Pavimento a ponta avança até a face da folha, cobrindo o resto do batente). A pivotante da
+entrada fica. Térreo na final e nos 12K A e B; 1º Pavimento na final.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
