@@ -3625,6 +3625,13 @@ das cadeiras volta ao travertino limpo; no lado de cima (onde vai uma) a cadeira
 mesa e 1/3 sob o tampo; no lado de baixo (onde vão duas) as duas poltroninhas de madeira e linho claro, viradas para a
 mesa e 1/3 sob o tampo; a mesa da E por cima, no mesmo lugar. Na final e nos 12K A e B.
 
+#### Casa E, Térreo: a linha da laje da garagem num filete contínuo (17/11, `garagem_filete_casae_1711.py`)
+
+"CORRIGE AQUI. TEM UM FILETE COMO DIZ NA RECOMENDAÇÃO DA IMAGEM ANEXA" (a recomendação do cliente: "Representar essas
+linhas na cor cinza ou preta sem ser tracejada"). A projeção tracejada tinha saído; a linha volta como filete
+contínuo na reta do PDF (a cadeia "laje da garagem (1)", y 485,9), da face da parede da esquerda até a linha da borda
+da garagem à direita, no mesmo cinza escuro e na mesma espessura dela. Na final e nos 12K A e B.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
