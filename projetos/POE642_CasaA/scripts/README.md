@@ -3570,3 +3570,9 @@ caixa, `Mapa.local`, com a final de antes como referência):
   afim) e `final`; depois `rodape_entrega.py`, `pdf_entrega.py` e `book_entrega.py` como acima.
   Só alguns passos sobre o que já tem os anteriores: `--passos box_chuveiro_gourmet,painel_garagem_baixo` e depois
   `--passos porta_banho_gourmet` (a caixa do afim local sem o rótulo, que no 12K B é na Kalam e desviava o casamento).
+- `vao_folhas_master` ("corrija o vão que corre as folhas de vidro ... na parte de cima do L, temos o claro da soleira,
+  mas na parte vertical do L está escurecido"): a parte de pé do vão em L das folhas de vidro da suíte master (entre o
+  ripado de nogueira e a linha escura das cortinas, da linha clara de cima até a parede de baixo) no creme da soleira da
+  parte de cima (amostra de cada imagem); só os px cinza neutros trocam, as linhas azuladas das folhas e o arremate
+  branco ficam. `--passos vao_folhas_master`; antes e depois em
+  `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1711d_vao_master_12K_antes_depois.jpg`.

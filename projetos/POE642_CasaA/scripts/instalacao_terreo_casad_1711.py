@@ -39,6 +39,11 @@ afim afinado ali (`correcoes_terreo_casab_1611.Mapa.local`):
    de madeira sob a janela alta da parede de cima do banho gourmet, que ficava solta no piso, encostada na face da
    parede e terminando na quina da parede da direita; o piso no lugar de antes.
 
+14. `vao_folhas_master` ("corrija o vão que corre as folhas de vidro ... na parte de cima do L, temos o claro da soleira,
+   mas na parte vertical do L está escurecido"): o cinza escuro da parte de pé do vão das folhas da suíte master (entre o
+   ripado e as cortinas) no creme da soleira da parte de cima; as linhas das folhas de vidro (azuladas) e o arremate
+   branco ficam.
+
   (`--passos a,b`: só esses passos, sobre a final e os 12K que já têm os anteriores)
 
   python3 instalacao_terreo_casad_1711.py final [--saida <png>]
@@ -79,6 +84,10 @@ PAINEL_GARAGEM_BAIXO = ((3064.0, 797.4, 3165.6, 801.2), "y+")
 # a folha (px da final): onde estava (sai) e onde fica, encostada na face da parede (y 370,6) até a quina da direita
 PORTA_GOURMET = {"antes": (1503.0, 375.0, 1558.0, 378.6), "ret": (1505.5, 370.6, 1555.9, 373.0),
                  "amostra": (1510.0, 376.0, 1550.0, 378.0), "contorno": (88, 108, 134), "contorno_px": 0.35}
+# a parte de pé do vão (px da final: do ripado até antes da linha escura das cortinas, da linha clara de cima até a
+# parede de baixo) e a amostra do creme da soleira na parte de cima do L
+VAO_MASTER = {"ret": (627.46, 1331.9, 636.6, 1553.77), "amostra": (660.0, 1333.6, 760.0, 1338.0), "caixa": (612, 1318, 700, 1420),
+              "neutro": 14, "lum": (90.0, 130.0)}
 BOX_GOURMET = {"ret": (1445.8, 373.9, 1449.2, 466.6), "vidro": (222, 216, 206), "contorno": (128, 122, 114),
                "contorno_px": 0.35, "sombra": 0.10}
 PIVOTANTES = {"x": (1390.5, 1396.5), "y": (558.0, 702.0), "n": 2, "comp": 0.93, "esp_px": 4.5, "cobre_px": 0.9}
@@ -430,9 +439,24 @@ def porta_banho_gourmet(out, mp, q=PORTA_GOURMET):
     print("    banho gourmet: a folha da porta encostada na parede, quina a quina")
 
 
+def vao_folhas_master(out, mp, q=VAO_MASTER):
+    m = _local(out, mp, q["caixa"])
+    x0, y0, x1, y1 = m.reti(q["amostra"])
+    cor = np.median(out[y0:y1, x0:x1].reshape(-1, 3), axis=0).astype(np.float32)
+    rm = m.ret(q["ret"])
+    X0, Y0, X1, Y1 = int(np.floor(rm[0])), int(np.floor(rm[1])), int(np.ceil(rm[2])), int(np.ceil(rm[3]))
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    A = alfa_ret((rm[0] - X0, rm[1] - Y0, rm[2] - X0, rm[3] - Y0), (Y1 - Y0, X1 - X0))
+    neutro = np.abs(reg[..., 2] - reg[..., 0]) < q["neutro"]
+    lo, hi = q["lum"]
+    a = A * neutro * np.clip((hi - reg.mean(-1)) / (hi - lo), 0, 1)
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a[..., None]) + cor * a[..., None]), 0, 255).astype(np.uint8)
+    print("    suíte master: a parte de pé do vão das folhas de vidro no creme da soleira, como a de cima")
+
+
 PASSOS = (banco_b1, arandelas_l2, soleira_garagem, vao_hall_garagem, painel_garagem, paineis_pivotantes,
           piso_banho_gourmet, portas_servico, poltrona_varanda, mesa_escritorio, box_chuveiro_gourmet,
-          painel_garagem_baixo, porta_banho_gourmet)
+          painel_garagem_baixo, porta_banho_gourmet, vao_folhas_master)
 
 
 def aplicar(img, mp, passos=PASSOS):
