@@ -3409,6 +3409,15 @@ MÁQUINAS PARA CABER ACIMA DA BANCADA"; "NÃO ENCUBRA AS MAQUINAS"; "SUBSTITUA P
   piso vizinho; a cuba do BH serviço pela cuba de serviço da biblioteca (`01-subsolo/banho-de-servico/
   cuba-servico-granito.png`, só a louça e a torneira, a torneira para a parede como no PDF), a antiga saindo pelo
   granito da bancada e pelo piso ao lado. O louceiro e a despensa já eram lisos (num tom rosado) e ficaram.
+- **2ª rodada (17/11):** "SIM, PASSE O LOUCEIRO E A DESPENSA PARA O TOM PADRÃO" (`louceiro_despensa`: os armários em L
+  da ARQ_LAYOUT HUMANIZAÇÃO, do rosado na cor sólida dos armários); "CORRIJA ESSE RESIDUO DE PISO ANTIGO ABAIXO DA
+  PORTA" (`porta_adega`: a folha da área de serviço junto à adega, como as do serviço); "SE NÃO TEM FALHA, SÓ DÊ A
+  IDEIA DE QUE A BANCADA ESTÁ MAIS ALTA DO QUE O PISO" (`gourmet_altura`, a bancada de trás da gourmet: o fio escuro
+  da quina, o brilho de 1 px do tampo, a sombra curta no piso à frente); "CORRIJA A BANCADA NO TOM DA CUBA"
+  (`lavabo_bancada`: a peça abaixo da cuba esculpida do lavabo, sem os pontinhos e riscos, no tom mediano da pedra da
+  cuba, com o grão dela); "ENTRE A PAREDE E A BANCADA TEM UM ERRO" (`danae_bancadas_1611`, a bancada da parede do
+  serviço até a face da parede: a tira cinza do PDF, x 2051,9 a 2054,3, lia como um vão; `"pecas": False`). Antes e
+  depois em `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1711b_correcoes{,_12K}_antes_depois.jpg`.
 - **Como refazer:** `python3 danae_bancadas_1611.py final B_Terreo --antes <final de 949e551^>` e
   `python3 correcoes_terreo_casab_1611.py final`; `python3 danae_bancadas_1611.py doze B_Terreo --antes <final de
   949e551^> --doze_antes <12K de 949e551^, {}=A|B>` e `python3 correcoes_terreo_casab_1611.py doze`; depois

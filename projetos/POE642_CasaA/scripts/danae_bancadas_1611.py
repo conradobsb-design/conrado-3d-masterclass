@@ -51,8 +51,10 @@ BANCADAS = {
         "bancada das cubas da cozinha (L)": {"rets": [(1552, 1632, 1821, 1671), (1787, 1544, 1821, 1671)],
                                              "janela": [(1544, 1624, 1828, 1676), (1779, 1538, 1828, 1676)],
                                              "semente": 22},
-        "bancada da parede do serviço": {"rets": [(2055, 1372, 2081, 1487)], "janela": (2045, 1363, 2090, 1496),
-                                         "semente": 23},
+        # (17/11, usuário: "ENTRE A PAREDE E A BANCADA TEM UM ERRO") a pedra até a face da parede (a tira cinza do PDF,
+        # x 2051,9 a 2054,3, lia como um vão), sem achar peças nela
+        "bancada da parede do serviço": {"rets": [(2052, 1372, 2081, 1487)], "janela": (2045, 1363, 2090, 1496),
+                                         "semente": 23, "pecas": False},
         "bancada dos tanques": {"rets": [(2200, 1463, 2239, 1562)], "janela": (2191, 1449, 2246, 1570),
                                 "semente": 24}},
 }
@@ -122,7 +124,8 @@ def refazer(img, antes, bancadas, px_m, esc=1.0, mapa=None):
         pedra = np.zeros((Y1 - Y0, X1 - X0), bool)
         for x0, y0, x1, y1 in rets:
             pedra[y0 - Y0:y1 - Y0, x0 - X0:x1 - X0] = True
-        pedra &= ~pecas(antes, (X0, Y0, X1, Y1), esc)
+        if q.get("pecas", True):
+            pedra &= ~pecas(antes, (X0, Y0, X1, Y1), esc)
         hh, ww = Y1 - Y0, X1 - X0
         T = sem_pontinhos(DF.textura(hh, ww, px_m, deitada=ww >= hh, semente=q["semente"]), esc)
         a_ = cv2.GaussianBlur(pedra.astype(np.float32), (0, 0), 0.45 * esc)

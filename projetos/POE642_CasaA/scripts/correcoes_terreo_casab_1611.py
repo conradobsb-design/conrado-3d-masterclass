@@ -28,6 +28,18 @@ B_Terreo`), na final e direto nos 12K A e B, cada peça desenhada na escala de c
    tiradas do granito da foto), com a torneira para a parede, como no PDF; a cuba antiga sai (o granito da bancada e o
    piso de logo ao lado).
 
+7. `louceiro_despensa` ("SIM, PASSE O LOUCEIRO E A DESPENSA PARA O TOM PADRÃO"): os armários em L do louceiro e da
+   despensa (os polígonos da ARQ_LAYOUT HUMANIZAÇÃO), do rosado na cor sólida dos armários, como os outros (o que
+   foge do rosado por cima fica).
+8. `porta_adega` ("CORRIJA ESSE RESIDUO DE PISO ANTIGO ABAIXO DA PORTA"): a folha de giro da área de serviço, aberta
+   junto à parede de baixo da adega, como as do serviço (o traço velho tracejado embaixo sai, a folha de novo).
+9. `gourmet_altura` ("SE NÃO TEM FALHA, SÓ DÊ A IDEIA DE QUE A BANCADA ESTÁ MAIS ALTA DO QUE O PISO"): na frente da
+   bancada de trás da gourmet (a da cuba e da grelha), o fio escuro da quina, um brilho de 1 px na beira do tampo e a
+   sombra curta no piso à frente.
+10. `lavabo_bancada` ("CORRIJA A BANCADA NO TOM DA CUBA"): no lavabo, a peça de bancada abaixo da cuba esculpida (mais
+   clara, com pontinhos e riscos) no tom da cuba: a luz suave dela, sem os pontinhos e riscos, no tom mediano da
+   pedra da cuba (a regra da Casa A), com o grão fino dessa pedra.
+
   python3 correcoes_terreo_casab_1611.py final [--saida <png>]
   python3 correcoes_terreo_casab_1611.py doze [--opcao AB] [--saida <jpg com {}>]
 """
@@ -85,6 +97,18 @@ MAQUINAS = {"area": (2199.0, 1370.0, 2241.7, 1461.6), "fonte": (2104.0, 1372.0, 
 CUBA_BHS = {"png": RAIZ / "POE642_CasaA/biblioteca-objetos/01-subsolo/banho-de-servico/cuba-servico-granito.png",
             "cuba": (1838.2, 1519.9, 1861.9, 1543.7), "apaga": (1835.0, 1516.0, 1866.0, 1548.0),
             "bancada_x1": 1856.0, "dy_granito": 16.0, "dx_piso": 12.0, "sombra": 0.25}
+
+
+LOUCEIRO_DESPENSA = {"louceiro": [(1830.9, 1490.0), (1830.9, 1370.5), (1860.8, 1370.5), (1860.8, 1466.1),
+                                  (1933.9, 1466.1), (1933.9, 1490.0)],
+                     "despensa": [(1939.9, 1490.0), (1939.9, 1466.1), (2019.0, 1466.1), (2019.0, 1370.5),
+                                  (2042.9, 1370.5), (2042.9, 1490.0)],
+                     "outro": 40.0}
+PORTA_ADEGA = dict(PORTAS_SERVICO, folhas={"área de serviço (junto à adega)": (2126.5, 1297.4, 2180.2, 1299.8)},
+                   limpa=[((2124.5, 1290.6, 2180.1, 1306.5), (0.0, 16.0))])
+GOURMET_ALTURA = {"frente": (1296.5, 1486.0, 1538.4), "sombra_px": 4.5, "sombra": 0.30, "fio_px": 0.6, "fio": 0.62,
+                  "brilho_px": 1.2, "brilho": 1.07}
+LAVABO_BANCADA = {"peca": (2251.9, 853.7, 2270.4, 898.8), "ref": (2253.8, 799.0, 2258.6, 818.0), "borda_px": 1.0}
 
 
 class Mapa:
@@ -337,12 +361,111 @@ def cuba_bh_servico(out, mp, q=CUBA_BHS):
     print("    BH serviço: a cuba de serviço da biblioteca (a louça e a torneira), a torneira para a parede")
 
 
-PASSOS = (porta_cozinha, cubas_lavatorio, armarios, portas_servico, maquinas, cuba_bh_servico)
+def _alfa_poli(pts, forma, encolhe=0.0, ss=8):
+    """A cobertura do polígono (px da imagem) e a do miolo (o polígono encolhido `encolhe` px)."""
+    hi = np.zeros((forma[0] * ss, forma[1] * ss), np.uint8)
+    cv2.fillPoly(hi, [np.int32(np.round(np.float64(pts) * ss))], 255)
+    a = cv2.resize(hi.astype(np.float32) / 255, (forma[1], forma[0]), interpolation=cv2.INTER_AREA)
+    k = int(round(encolhe * ss))
+    if k > 0:
+        hi = cv2.erode(hi, np.ones((2 * k + 1, 2 * k + 1), np.uint8))
+    m = cv2.resize(hi.astype(np.float32) / 255, (forma[1], forma[0]), interpolation=cv2.INTER_AREA)
+    return a, m
 
 
-def aplicar(img, mp):
+def louceiro_despensa(out, mp, q=LOUCEIRO_DESPENSA):
+    import revisao_terreo_casac_1311 as RC
+    c = RC.COZINHA
+    for nome in ("louceiro", "despensa"):
+        pts = [(mp.x(x), mp.y(y)) for x, y in q[nome]]
+        f = int(np.ceil(6 * mp.s))
+        X0, Y0 = int(min(p[0] for p in pts)) - f, int(min(p[1] for p in pts)) - f
+        X1, Y1 = int(max(p[0] for p in pts)) + f, int(max(p[1] for p in pts)) + f
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        forma = reg.shape[:2]
+        a, miolo = _alfa_poli([(x - X0, y - Y0) for x, y in pts], forma, encolhe=mp.s)
+        # o que foge do rosado por cima (as folhas, os textos) fica
+        rosa = np.median(reg[miolo > 0.99], axis=0)
+        outro = np.linalg.norm(reg - rosa, axis=2) > q["outro"]
+        outro = cv2.dilate(outro.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0
+        a, miolo = a * ~outro, miolo * ~outro
+        M = np.float32([[1, 0, -1.0 * mp.s], [0, 1, 1.3 * mp.s]])
+        sb = cv2.GaussianBlur(cv2.warpAffine(a, M, (forma[1], forma[0])), (0, 0), 1.1 * mp.s) * (1 - a)
+        reg = reg * (1 - c["sombra"] * sb)[..., None]
+        cor = np.float32(c["cor_armario"])
+        reg = compor(reg, a - miolo, cor * c["face"])
+        reg = compor(reg, miolo, cor)
+        out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print("    louceiro e despensa: os armários em L do rosado na cor sólida dos armários")
+
+
+def porta_adega(out, mp, q=PORTA_ADEGA):
+    portas_servico(out, mp, q)
+
+
+def gourmet_altura(out, mp, q=GOURMET_ALTURA):
+    x0, yf, x1 = q["frente"]
+    L = q["sombra_px"]
+    X0, X1 = int(np.floor(mp.x(x0))), int(np.ceil(mp.x(x1)))
+    Y0, Y1 = int(np.floor(mp.y(yf - L))) - 1, int(np.ceil(mp.y(yf + q["brilho_px"]))) + 2
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    forma = reg.shape[:2]
+    cx = alfa_ret((mp.x(x0) - X0, 0, mp.x(x1) - X0, forma[0]), forma)
+    # a sombra no piso à frente: mais forte junto à quina
+    v = np.arange(forma[0], dtype=np.float32) + 0.5 + Y0
+    d = np.clip((mp.y(yf) - v) / (L * mp.s), 0, 1)
+    w = np.where(v < mp.y(yf), (1 - d) ** 2, 0.0)[:, None] * cx
+    reg = reg * (1 - q["sombra"] * w)[..., None]
+    # o brilho na beira do tampo e o fio escuro da quina
+    br = alfa_ret((mp.x(x0) - X0, mp.y(yf) - Y0, mp.x(x1) - X0, mp.y(yf + q["brilho_px"]) - Y0), forma)
+    reg = reg * (1 + (q["brilho"] - 1) * br)[..., None]
+    e = q["fio_px"] / 2
+    fi = alfa_ret((mp.x(x0) - X0, mp.y(yf - e) - Y0, mp.x(x1) - X0, mp.y(yf + e) - Y0), forma)
+    reg = reg * (1 - (1 - q["fio"]) * fi)[..., None]
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print("    gourmet: a bancada de trás mais alta que o piso (o fio da quina, o brilho do tampo, a sombra no piso)")
+
+
+def lavabo_bancada(out, mp, q=LAVABO_BANCADA):
+    """A peça no tom da cuba: a luz suave dela (a mediana e o desfoque só por dentro, sem os pontinhos e riscos) levada ao
+    tom mediano da pedra da cuba (`ref`, a faixa ao lado da cuba, sem a torneira), com o grão fino dessa faixa; o
+    contorno da peça fica."""
+    b = q["borda_px"]
+    x0, y0, x1, y1 = q["peca"]
+    rm = mp.ret((x0 + b, y0 + b, x1 - b, y1 - b))
+    X0, Y0, X1, Y1 = int(np.floor(rm[0])) - 2, int(np.floor(rm[1])) - 2, int(np.ceil(rm[2])) + 2, int(np.ceil(rm[3])) + 2
+    sub = out[Y0:Y1, X0:X1].copy()
+    reg = sub.astype(np.float32)
+    forma = reg.shape[:2]
+    a = alfa_ret((rm[0] - X0, rm[1] - Y0, rm[2] - X0, rm[3] - Y0), forma)
+    dentro = (a > 0.5).astype(np.float32)
+    k = max(5, int(round(5 * mp.s)) | 1)
+    med = cv2.medianBlur(sub, k).astype(np.float32)
+    sg = 3.0 * mp.s
+    luz = cv2.GaussianBlur(med * dentro[..., None], (0, 0), sg) / np.maximum(cv2.GaussianBlur(dentro, (0, 0), sg), 1e-3)[..., None]
+    rx0, ry0, rx1, ry1 = mp.reti(q["ref"])
+    F = out[ry0:ry1, rx0:rx1].astype(np.float32)
+    ref = np.median(F.reshape(-1, 3), axis=0)
+    luz *= ref / np.maximum(np.median(luz[dentro > 0], axis=0), 1)
+    grao = F - cv2.GaussianBlur(F, (0, 0), 1.5 * mp.s)
+    while grao.shape[0] < forma[0]:
+        grao = np.concatenate([grao, grao[::-1]], axis=0)
+    while grao.shape[1] < forma[1]:
+        grao = np.concatenate([grao, grao[:, ::-1]], axis=1)
+    T = luz + 0.8 * grao[:forma[0], :forma[1]]
+    reg = reg * (1 - a[..., None]) + T * a[..., None]
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    print("    lavabo: a bancada abaixo da cuba no tom da cuba, sem os pontinhos e riscos")
+
+
+PASSOS = (porta_cozinha, cubas_lavatorio, armarios, portas_servico, maquinas, cuba_bh_servico,
+          louceiro_despensa, porta_adega, gourmet_altura, lavabo_bancada)
+NOVOS_1711 = (louceiro_despensa, porta_adega, gourmet_altura, lavabo_bancada)
+
+
+def aplicar(img, mp, passos=PASSOS):
     out = img.copy()
-    for f in PASSOS:
+    for f in passos:
         f(out, mp)
     return out
 
