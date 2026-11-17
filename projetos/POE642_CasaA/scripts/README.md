@@ -3599,6 +3599,15 @@ coluna, ao contrário dos veios deitados); os pontinhos cinzas soltos saem. As p
 as poltronas do tapete, as 4 da mesa redonda, a do escritório) recebem só a correção larga e suave do tom. Na final e
 nos 12K A e B.
 
+#### Casa E, Térreo: a escada principal com o lance de cima transparente (17/11, `escada_principal_casae_1711.py`)
+
+"A parte que não for do nível desse pavimento, você tem que deixar transparente. O degrau não pode ficar branco." No
+PDF, à esquerda da diagonal de corte os degraus são tracejados (já passaram do plano de corte); no render estavam em
+degraus brancos. Agora ali aparece o travertino do Térreo por baixo (o de logo abaixo do jardim) com o desenho dos
+degraus de antes por cima, transparente (a diferença de cada px para o tom dos degraus, a 55%): as quinas aparecem de
+leve, sem o branco. A borda do jardim embaixo desse lance fica contínua como a do lance de baixo. Na final e nos 12K A
+e B.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
