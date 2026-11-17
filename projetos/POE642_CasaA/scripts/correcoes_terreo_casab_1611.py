@@ -63,7 +63,8 @@ B_Terreo`), na final e direto nos 12K A e B, cada peça desenhada na escala de c
    REPRESENTÁ-LOS"): os 2 portões de correr da área de serviço descoberta (ARQ_ELEMENTOS FIXOS: em cada lado, 2 folhas
    desencontradas, da parede da casa ao muro, e os batentes nas pontas), que estavam em linha técnica (a folha de cima
    em traço claro, a de baixo fundida à faixa cinza da borda do piso), no padrão da Casa B para os portões de correr da
-   área descoberta (em alumínio, com o contorno fino, a linha do meio de cada folha e a sombra curta). Antes, a faixa
+   área descoberta (em alumínio, com o contorno fino, a linha do meio de cada folha e a sombra curta; "MANTENHA EM
+   ALUMÍNIO"). Antes, a faixa
    cinza de 2 a 3 px em volta do piso (o contorno fino do contrapiso no PDF, engrossado no render) sai: o piso vai até a
    face de fora de cada portão e até a borda de baixo do PDF e encontra a grama direto, como a pedra da garagem. No 12K
    o desenho vai no afim afinado ali (`Mapa.local`: a final ampliada casada com o 12K, 1 a 2 px além do afim geral).

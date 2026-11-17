@@ -3430,7 +3430,8 @@ MÁQUINAS PARA CABER ACIMA DA BANCADA"; "NÃO ENCUBRA AS MAQUINAS"; "SUBSTITUA P
 - **4ª rodada (17/11):** "TEMOS UMA LINHA TÉCNICA AQUI. O QUE ELA É?", "TEMOS PORTÕES AQUI", "PRECISAMOS
   REPRESENTÁ-LOS" (`portoes_descoberta`: os 2 portões de correr da área de serviço descoberta da ARQ_ELEMENTOS FIXOS, 2
   folhas desencontradas e 2 batentes de cada lado, da parede da casa ao muro, em alumínio com o contorno fino, a linha
-  do meio e a sombra curta, a regra da Casa B para os portões de correr da área descoberta; antes, a faixa cinza de 2 a
+  do meio e a sombra curta, a regra da Casa B para os portões de correr da área descoberta, confirmada pelo usuário:
+  "MANTENHA EM ALUMÍNIO"; antes, a faixa cinza de 2 a
   3 px em volta do piso, que era o contorno fino do contrapiso engrossado no render, sai e o piso vai até a face de fora
   dos portões e a borda de baixo do PDF, encontrando a grama direto, como a pedra da garagem; no 12K, no afim afinado
   ali por casamento com a final ampliada, `Mapa.local`); "REMOVA ESSES TRAÇOS FORA DA PLANTA" e "PRECISA REMOVER ESSA
