@@ -3353,6 +3353,21 @@ Topaz> [--opcao B]` (os tons da final, o fundo branco puro, JPG 95 a 743 dpi na 
   --no-quadro --render Terreo=../../POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_final.png`,
   `pdf_entrega.py --config ../../POE642_CasaE/config_bases.json` e `book_entrega.py`.
 
+#### Casa E, Térreo: o armário do DCE (17/11, `armario_dce_casae_1711.py`)
+
+Usuário: "Revise o armário do DCE". Em 16/11, o passo dos armários lisos (`pedidos_terreo_casae_1611.armarios`, "DCE":
+(2236, 556, 2264, 612)) pintou um retângulo cor de armário fora do lugar, por cima do guarda-roupa aberto com cabides (no
+retângulo do PDF, `final3840_casae.ARMARIO_DCE_TER_E`) e da folha da porta. O retângulo sai, com o contorno e a sombra:
+- na final, o guarda-roupa e a folha de antes de 16/11 (a final de `bfbf5c3^`, só dentro dos retângulos deles) e o piso
+  marrom de hoje copiado de perto no resto;
+- nos 12K A e B (não há 12K de antes de 16/11), o guarda-roupa e a folha continuados de baixo para cima a partir da parte
+  que ficou inteira (abaixo de y 615,6), no passo dos cabides (7,14 px da final), e o friso de cima no tom do que ficou.
+
+`python3 armario_dce_casae_1711.py doze` (antes da final: a final de antes é a referência do afim) e `final`; depois a
+prancha, o PDF da Casa E e o book (os comandos acima). Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_armario_dce_12K_antes_depois.jpg`. Fica para o OK o criado-mudo do DCE
+(item 3 do levantamento de 17/11, `POE642_CasaE_PH_Terreo_1711_levantamento.jpg`).
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
