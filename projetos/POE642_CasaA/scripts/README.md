@@ -3409,6 +3409,18 @@ inteira; o pano e o trilho de antes saem. Não há 12K do 1º Pavimento da E. De
 1Pavimento=../../POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final.png`), o PDF da E e o book. Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1711_cortinas_antes_depois.jpg`.
 
+#### Casa E, Térreo: a proposta de troca do mobiliário da varanda (17/11, `proposta_varanda_casae_1711.py`)
+
+Usuário: "Vamos trocar esses mobiliários" (a varanda, com a imagem). Só a proposta (proposta antes, instalação depois):
+a varanda limpa (as 2 mesas redondas com as 12 cadeiras, o sofá, as 2 poltronas, a mesa de centro, o banco e a mesa
+lateral saem; o Bege Bahia de uma amostra limpa, porque a de `mobiliario_terreo_casae_1611.PISOS["bege"]` pega o rótulo
+da varanda; o rótulo, as plantas, os pivotantes e os pilares ficam) e 3 alternativas nas posições do PDF, com as peças das
+bibliotecas já aprovadas: 1. como a varanda da D (sofá curvo com as almofadas terracota, poltronas concha, seixo, mesas de
+nogueira e cadeiras de fibra); 2. como a varanda da A (sofá curvo de teca, poltronas de corda, seixo, mesas de teca e
+cadeiras de corda); 3. linho e nogueira, como o living da E (sofá reto de linho, poltronas creme com aro de madeira, mesa
+gota de nogueira, mesas de nogueira e cadeiras creme e madeira); nas três, o banco B1 (o do living da D). A folha:
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_varanda_proposta.jpg`. A final não muda.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
