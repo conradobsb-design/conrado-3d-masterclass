@@ -3482,6 +3482,14 @@ afim afinado ali (`correcoes_terreo_casab_1611.Mapa.local`):
   nogueira, a de baixo no tom claro); o veio no comprido, a borda mais escura, o contorno fino e a sombra curta; o
   cinza antigo, o halo claro dele no 12K e os pontinhos em volta saem antes (inpaint).
 - Antes e depois em `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1711_correcoes_12K_antes_depois.jpg`.
+- **2ª leva (17/11):** "ESSE ARMARIO DA TV PRECISA ESTAR NA COR SÓLIDA" (`armario_tv_master`: o rack da TV da suíte
+  master na cor sólida dos armários, a TV do PDF em grafite por cima); "AS TRES MESINHAS PEQUENAS REDONDAS TAMBÉM NO
+  NOGUEIRA" (`mesinhas_redondas`: as 3 do estar da direita, nos círculos do PDF, na nogueira da mesa de centro ao lado,
+  um trecho liso da `mesa-centro-redonda-nogueira-adorno` da biblioteca da Casa A, com a borda, o contorno e a sombra;
+  o disco cinza e a sombra antigos saem antes); "CORRIJA A MANCHA NA PEDRA. ESTÁ NO CANTINHO INFERIOR A DIREITA"
+  (`pisante_mancha`: o pisante quadrado do jardim de baixo, junto à fileira que vai ao hall; o canto de baixo à direita,
+  esverdeado no 12K, recebe a pedra do mesmo pisante logo acima, com a emenda macia). Antes e depois em
+  `POE642_CasaC/renders/POE642_CasaC_PH_Terreo_1711b_correcoes_12K_antes_depois.jpg`.
 - **Como refazer:** `python3 correcoes_terreo_casac_1711.py final` e `python3 correcoes_terreo_casac_1711.py doze`
   (sobre a final e os 12K de 98712bd); depois `rodape_entrega.py --config ../../POE642_CasaC/config_bases.json
   --no-quadro --render Terreo=../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_final_rotulos.png`, `pdf_entrega.py

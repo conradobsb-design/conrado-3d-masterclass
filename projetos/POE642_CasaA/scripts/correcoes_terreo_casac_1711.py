@@ -23,6 +23,17 @@ final ampliada casada com o 12K):
    comprido, a borda um pouco mais escura, o contorno fino e a sombra curta (a da frente também sobre a de trás); antes,
    o cinza antigo, o halo claro dele no 12K e os pontinhos em volta saem (inpaint).
 
+5. `armario_tv_master` ("ESSE ARMARIO DA TV PRECISA ESTAR NA COR SÓLIDA"): o rack da TV da suíte master (o retângulo
+   da ARQ_LAYOUT HUMANIZAÇÃO, em madeira com veio) na cor sólida dos armários; a TV por cima, no retângulo do PDF, em
+   grafite.
+6. `mesinhas_redondas` ("AS TRES MESINHAS PEQUENAS REDONDAS TAMBÉM NO NOGUEIRA"): as 3 mesinhas redondas do estar da
+   direita (cinza-escuras), nos círculos do PDF, na nogueira da mesa de centro ao lado (um trecho liso da
+   `mesa-centro-redonda-nogueira-adorno` da biblioteca da Casa A), como as mesinhas seixo (a borda, o contorno, a
+   sombra; o disco e a sombra antigos saem antes).
+7. `pisante_mancha` ("CORRIJA A MANCHA NA PEDRA. ESTÁ NO CANTINHO INFERIOR A DIREITA"): o pisante quadrado do jardim
+   de baixo, junto à fileira que vai ao hall: o canto de baixo à direita (uma mancha esverdeada, forte no 12K) recebe a
+   pedra do mesmo pisante logo acima, com a emenda macia.
+
   python3 correcoes_terreo_casac_1711.py final [--saida <png>]
   python3 correcoes_terreo_casac_1711.py doze [--opcao AB] [--saida <jpg com {}>]
 """
@@ -64,6 +75,16 @@ SEIXOS = {"json": RAIZ / "POE642_CasaC/renders/POE642_CasaC_PH_Terreo_seixos.jso
           "nogueira": (BIB / "living/mesa-centro-nogueira-adorno-d.png", (150, 560, 390, 830)),
           "borda": 0.82, "borda_px": 1.2, "contorno": 0.62, "contorno_px": 0.5,
           "sombra": 0.30, "folga_px": 7.0, "anel_px": 2.2}
+
+
+TV_MASTER = {"rack": (906.0, 808.7, 1109.0, 826.6), "tv": (967.1, 823.6, 1047.6, 826.6), "grafite": (54, 54, 58),
+             "contorno": (36, 36, 40), "contorno_px": 0.4}
+REDONDAS = {"circulos": [(2297.46, 1353.98, 10.45), (2323.39, 1460.53, 10.45), (2185.34, 1507.01, 12.51)],
+            "madeira": "nogueira_a", "anel_px": 3.0}
+SEIXOS_NOG_A = (RAIZ / "POE642_CasaA/biblioteca-objetos/02-terreo/sala-de-estar/mesa-centro-redonda-nogueira-adorno.png",
+                (100, 470, 280, 680))
+PISANTE = {"canto": (2849.0, 1789.0, 2896.0, 1824.5), "dy": -40.0, "suave_px": 5.0,
+           "caixa_local": (2725, 1650, 2915, 1845)}
 
 
 def _local(out, mp, caixa):
@@ -145,7 +166,7 @@ _MADEIRA = {}
 
 def _madeira(nome, q=SEIXOS):
     if nome not in _MADEIRA:
-        p, (x0, y0, x1, y1) = q[nome]
+        p, (x0, y0, x1, y1) = q[nome] if nome in q else SEIXOS_NOG_A
         im = cv2.imread(str(p), cv2.IMREAD_UNCHANGED)[y0:y1, x0:x1]
         if im.shape[2] == 4:
             im = im[..., :3]
@@ -215,7 +236,56 @@ def mesinhas_seixo(out, mp, q=SEIXOS):
           "do PDF")
 
 
-PASSOS = (cubas_cozinha, armarios_c, armario_l_escritorio, mesinhas_seixo)
+def armario_tv_master(out, mp, q=TV_MASTER):
+    r = q["rack"]
+    m = _local(out, mp, (int(r[0]) - 25, int(r[1]) - 25, int(r[2]) + 25, int(r[3]) + 25))
+    CB.armarios(out, m, {"TV da suíte master": r}, couro=False)
+    CB.pintar(out, m, [(q["tv"], "ret", q["grafite"], 0), (q["tv"], "contorno", q["contorno"], q["contorno_px"])])
+    print("    suíte master: o rack da TV na cor sólida dos armários, a TV em grafite por cima")
+
+
+def mesinhas_redondas(out, mp, q=REDONDAS, qs=SEIXOS):
+    qs = dict(qs, nogueira_a=SEIXOS_NOG_A)
+    for cx, cy, r in q["circulos"]:
+        m = _local(out, mp, (int(cx - r) - 30, int(cy - r) - 30, int(cx + r) + 30, int(cy + r) + 30))
+        qq = dict(qs, _s=m.s)
+        f = int(np.ceil((r + q["anel_px"] + 8) * m.s))
+        X0, Y0 = int(m.x(cx)) - f, int(m.y(cy)) - f
+        X1, Y1 = int(m.x(cx)) + f, int(m.y(cy)) + f
+        reg = out[Y0:Y1, X0:X1]
+        forma = reg.shape[:2]
+        t = np.linspace(0, 2 * np.pi, 96, endpoint=False)
+        pts = [(m.x(cx + r * np.cos(a)), m.y(cy + r * np.sin(a))) for a in t]
+        anel = [(m.x(cx + (r + q["anel_px"]) * np.cos(a)), m.y(cy + (r + q["anel_px"]) * np.sin(a))) for a in t]
+        buraco = (_alfa_poli(np.float64(anel) - (X0, Y0), forma)[0] > 0.01).astype(np.uint8)
+        limpo = cv2.inpaint(np.ascontiguousarray(reg), buraco, max(3, int(3 * m.s)), cv2.INPAINT_TELEA)
+        R = limpo.astype(np.float32)
+        _tampo(R, X0, Y0, pts, q["madeira"], qq)
+        out[Y0:Y1, X0:X1] = np.clip(np.round(R), 0, 255).astype(np.uint8)
+    print("    estar: as 3 mesinhas redondas na nogueira da mesa de centro, nos círculos do PDF")
+
+
+def pisante_mancha(out, mp, q=PISANTE):
+    m = _local(out, mp, q["caixa_local"])
+    fonte = out.copy()
+    rm = m.ret(q["canto"])
+    X0, Y0, X1, Y1 = int(np.floor(rm[0])), int(np.floor(rm[1])), int(np.ceil(rm[2])), int(np.ceil(rm[3]))
+    forma = (Y1 - Y0, X1 - X0)
+    loc = (rm[0] - X0, rm[1] - Y0, rm[2] - X0, rm[3] - Y0)
+    a = alfa_ret(loc, forma)
+    e = q["suave_px"] * m.s
+    xs, ys = np.arange(forma[1]) + 0.5, np.arange(forma[0]) + 0.5
+    a *= np.clip((xs - loc[0]) / e, 0, 1)[None, :] * np.clip((ys - loc[1]) / e, 0, 1)[:, None]
+    dy = int(round(q["dy"] * m.s))
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    src = fonte[Y0 + dy:Y1 + dy, X0:X1].astype(np.float32)
+    out[Y0:Y1, X0:X1] = np.clip(np.round(reg * (1 - a[..., None]) + src * a[..., None]), 0, 255).astype(np.uint8)
+    print("    jardim: o canto de baixo à direita do pisante quadrado sem a mancha (a pedra de logo acima)")
+
+
+PASSOS = (cubas_cozinha, armarios_c, armario_l_escritorio, mesinhas_seixo, armario_tv_master, mesinhas_redondas,
+          pisante_mancha)
+NOVOS_1711B = (armario_tv_master, mesinhas_redondas, pisante_mancha)
 
 
 def aplicar(img, mp, passos=PASSOS):
