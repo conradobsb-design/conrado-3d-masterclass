@@ -3588,6 +3588,17 @@ da de antes), só a cuba levada ao creme da bancada, e a torneira dela girada pa
 e no comprimento da do PDF; a bacia escura da biblioteca (`bacia-escura-render`) no retângulo do PDF, a caixa contra a
 parede. Na final e nos 12K A e B.
 
+#### Casa E, Térreo: o travertino sem as manchas cinzas e sem as juntas (17/11, `travertino_terreo_casae_1711.py`)
+
+"as manchas cinzas, remova as juntas também". O travertino (living e jantar, circulações, escritório, lavabo, hall,
+adega; a escada principal fica com os degraus) era um grid de placas, cada uma num tom (as mais escuras eram as manchas
+cinzas), com o fio da junta entre elas. O piso, reconhecido pela cor nas áreas dele (o Bege Bahia de fora, mais
+amarelo, fica), vai para um tom só (a mediana longe das peças) com os veios de cada px mantidos; junto às peças fica a
+sombra (o quanto o fundo ali é mais escuro que a placa); os fios das juntas verticais saem (o que se repete ao longo da
+coluna, ao contrário dos veios deitados); os pontinhos cinzas soltos saem. As peças creme sobre o piso (o sofá curvo,
+as poltronas do tapete, as 4 da mesa redonda, a do escritório) recebem só a correção larga e suave do tom. Na final e
+nos 12K A e B.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
