@@ -3359,13 +3359,13 @@ Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A tr
 949e551) tinha deixado: na ilha, a pedra no assento das 3 banquetas; na pia, a luz de antes (o anel molhado do desenho)
 como um retângulo escuro de borda irregular em volta e abaixo das cubas (no 12K, o granulado do desenho em volta delas);
 no L do serviço, a faixa das cubas ainda no Danae desenhado (só a perna da esquerda virou foto); e pontinhos claros
-soltos. `danae_cozinha_casaa_1611.py` refaz as três pela geometria (`BANCADAS`: os retângulos de pedra medidos nos perfis
+soltos. `danae_bancadas_1611.py` (planta `A_Terreo`; antes `danae_cozinha_casaa_1611.py`) refaz as três pela geometria (`BANCADAS`: os retângulos de pedra medidos nos perfis
 da final de antes da troca, a janela de cada uma volta de antes, com as banquetas inteiras): a foto da chapa numa luz só,
 os veios no comprido, sem os pontinhos (`sem_pontinhos`: o que passa 9 da mediana local), as cubas, as torneiras e o
 cooktop achados pela cor (o inox neutro, R - B < 12; o cooktop escuro; a pedra do desenho tem o R ~28 acima do B).
 Na final e direto nos 12K A e B (a partir dos 12K de antes da troca, pelo afim de `danae_foto.afim_12k`; JPG 95 sem
-subamostragem, 743 dpi). Como refazer: `python3 danae_cozinha_casaa_1611.py final --antes <final de 949e551^>` e
-`python3 danae_cozinha_casaa_1611.py doze --antes <final de 949e551^> --doze_antes <12K de 949e551^, {}=A|B>`; depois
+subamostragem, 743 dpi). Como refazer: `python3 danae_bancadas_1611.py final A_Terreo --antes <final de 949e551^>` e
+`python3 danae_bancadas_1611.py doze A_Terreo --antes <final de 949e551^> --doze_antes <12K de 949e551^, {}=A|B>`; depois
 `rodape_entrega.py --no-quadro --render Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png`, `pdf_entrega.py` e
 `book_entrega.py`. Antes e depois em `renders/POE642_CasaA_PH_Terreo_1611_danae_cozinha{,_12K}_antes_depois.jpg`.
 
@@ -3383,4 +3383,37 @@ junto à face (`fora`) vem do piso 6 px à direita. Como refazer: `python3 janel
 `python3 janela_pia_casaa_1611.py doze`; depois `rodape_entrega.py --no-quadro --render
 Terreo=../renders/POE642_CasaA_PH_Terreo_final_rotulos.png`, `pdf_entrega.py` e `book_entrega.py`. Antes e depois em
 `renders/POE642_CasaA_PH_Terreo_1611_janela_pia_antes_depois.jpg`.
+
+#### Casa B, Térreo: as correções de 16/11 e 17/11 vendo o 12K (bancadas de Danae, porta da cozinha, lavatório, armários, portas e máquinas do serviço, cuba do BH serviço)
+
+Pedidos do usuário, com os recortes do 12K: "VAMOS CORRIGIR AS FALHAS NAS BANCADAS DE DEKTON DO TERREO DA CASA B";
+"APROVEITA E CORRIJA ESSA FALHA NA PORTA DE CORRER DA COZINHA"; "CORRIJA A LATERAL DA CUBA DO LAVATÓRIO"; "CORRIJA O TOM
+DOS ARMARIOS DO TERREO DA CASA B, PARA O TOM QUE DEFINIMOS DESDE A CASA A. REMOVENDO VEIOS E DEIXANDO A COR SÓLIDA";
+"CORRIJA ESSAS FALHAS AO REDOR DAS PORTAS"; "CORRIJA PISO NO CONTORNO DAS MÁQUINAS DE LAVAR. CORRIJA A ESCALA DAS
+MÁQUINAS PARA CABER ACIMA DA BANCADA"; "NÃO ENCUBRA AS MAQUINAS"; "SUBSTITUA PELA CUBA DA BIBLIOTECA".
+- **Bancadas de Danae:** `danae_bancadas_1611.py B_Terreo` (o da Casa A, agora por planta): a ilha (um resto do desenho
+  junto ao cooktop), o L das cubas da cozinha (só a metade esquerda da faixa tinha virado foto; a janela em dois
+  retângulos, para não devolver o pé da ilha ao desenho antigo), a bancada da parede do serviço e a dos tanques (só o
+  trecho acima das cubas tinha trocado), sem os pontinhos claros.
+- **O resto:** `correcoes_terreo_casab_1611.py` (passos `porta_cozinha`, `cubas_lavatorio`, `armarios`,
+  `portas_servico`, `maquinas`, `cuba_bh_servico`, na final e direto nos 12K A e B, cada peça na escala de cada
+  imagem): a folha de correr da cozinha e os 2 batentes de novo pelo PDF (o branco com o contorno preto fino da Casa B,
+  o piso em volta limpo; o batente de cima na ponta do toco de parede, na largura dele, e o toco reto até ele, 17/11:
+  "ESSE BATENTE FICOU FORA DA PAREDE. ELE É NA PAREDE, NÃO AO LADO" — no PDF ele fica à esquerda do toco); o lado direito das 2 cubas do lavatório gourmet com o fio do lado esquerdo, em espelho (era
+  uma coluna clara, uma fresta no 12K); os 7 armários de madeira com veio (aparador do living, suíte 3, suíte master,
+  sala íntima, os 2 entre as suítes 1 e 2, o de baixo da suíte 1) nos retângulos do PDF, na cor sólida dos armários
+  (`revisao_terreo_casac_1311.COZINHA`), sem o couro das cadeiras por cima; as folhas de giro do BH serviço e do quarto
+  de serviço sem o traço velho tracejado embaixo e sem os pontinhos do piso junto ao vão; as máquinas de lavar no
+  tamanho do PDF (0,60 m), centradas na largura da bancada dos tanques e acima dela, visíveis (o retângulo branco do PDF
+  sobre elas não é desenhado), com o piso de trás tirado de um trecho limpo da área de serviço na luz linha a linha do
+  piso vizinho; a cuba do BH serviço pela cuba de serviço da biblioteca (`01-subsolo/banho-de-servico/
+  cuba-servico-granito.png`, só a louça e a torneira, a torneira para a parede como no PDF), a antiga saindo pelo
+  granito da bancada e pelo piso ao lado. O louceiro e a despensa já eram lisos (num tom rosado) e ficaram.
+- **Como refazer:** `python3 danae_bancadas_1611.py final B_Terreo --antes <final de 949e551^>` e
+  `python3 correcoes_terreo_casab_1611.py final`; `python3 danae_bancadas_1611.py doze B_Terreo --antes <final de
+  949e551^> --doze_antes <12K de 949e551^, {}=A|B>` e `python3 correcoes_terreo_casab_1611.py doze`; depois
+  `rodape_entrega.py --config ../../POE642_CasaB/config_bases.json --no-quadro --render
+  Terreo=../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_final_rotulos.png`, `pdf_entrega.py --config
+  ../../POE642_CasaB/config_bases.json` e `book_entrega.py`. Antes e depois em
+  `POE642_CasaB/renders/POE642_CasaB_PH_Terreo_1711_correcoes{,_12K}_antes_depois.jpg`.
 

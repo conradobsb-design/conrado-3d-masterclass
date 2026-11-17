@@ -1,5 +1,6 @@
-"""As bancadas de Dekton Danae da cozinha e do serviço do Térreo da Casa A sem as falhas da troca automática (16/11,
-usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A").
+"""As bancadas de Dekton Danae sem as falhas da troca automática, planta a planta (16/11; Térreo da Casa A, usuário:
+"CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A"; Térreo da Casa B: "VAMOS CORRIGIR AS FALHAS NAS
+BANCADAS DE DEKTON DO TERREO DA CASA B").
 
 A troca pela foto oficial (`danae_foto.trocar`, commit 949e551) achou a pedra pelo desenho de antes e deixou três
 falhas no Térreo da Casa A:
@@ -8,6 +9,9 @@ falhas no Térreo da Casa A:
     borda irregular, em volta e abaixo das cubas; no 12K, o granulado do desenho ficou em volta das cubas;
   - a bancada em L do serviço: só a perna da esquerda virou foto; a faixa das cubas ficou com o Danae desenhado;
   e, nas três, pontinhos claros soltos (os grãos claros da chapa, na escala da planta, liam como sujeira).
+No Térreo da Casa B, as mesmas falhas: o L da cozinha só com a metade esquerda da faixa das cubas na foto (entre as
+cubas, à direita delas e a perna do L no desenho antigo, com a emenda reta), a bancada dos tanques só acima das cubas,
+um resto do desenho junto ao cooktop da ilha e os pontinhos claros (também na bancada da parede do serviço).
 
 Aqui as bancadas são refeitas pela geometria delas (`BANCADAS`, px da final de 3840, medidas nos perfis da pedra), sem
 depender da detecção: em cada janela (`JANELA`) volta a imagem de antes da troca (as banquetas e o resto voltam
@@ -17,8 +21,10 @@ de antes pela cor (o inox neutro, o cooktop escuro; a pedra é quente), em compo
 torneira presa nela). Na final e direto nos
 12K entregues (opções A e B, a partir dos 12K de antes da troca; o afim por SIFT de `danae_foto.afim_12k`).
 
-  python3 danae_cozinha_casaa_1611.py final  --antes <final de antes da troca> [--saida <png>]
-  python3 danae_cozinha_casaa_1611.py doze   --antes <final de antes da troca> --doze_antes <12K de antes, {}=A|B>
+  python3 danae_bancadas_1611.py final <planta> --antes <final de antes da troca> [--saida <png>]
+  python3 danae_bancadas_1611.py doze  <planta> --antes <final de antes da troca> --doze_antes <12K de antes, {}=A|B>
+
+  planta: A_Terreo, B_Terreo (as chaves de `BANCADAS`; as finais e os 12K em `danae_foto.PLANTAS` e `DOZE_K`)
 """
 import argparse
 import sys
@@ -32,14 +38,23 @@ AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
 import danae_foto as DF                          # noqa: E402
 
-FINAL = DF.PLANTAS["A_Terreo"]
-DOZE = DF.DOZE_K["A_Terreo"]
 # os retângulos de pedra de cada bancada (x0, y0, x1, y1, px da final, fim exclusivo) e a janela que volta de antes
 BANCADAS = {
-    "ilha da cozinha": {"rets": [(1940, 1247, 2047, 1317)], "janela": (1922, 1222, 2066, 1334), "semente": 11},
-    "bancada da pia": {"rets": [(2117, 1232, 2150, 1520)], "janela": (2104, 1218, 2163, 1532), "semente": 12},
-    "bancada do serviço (L)": {"rets": [(1708, 1453, 1739, 1541), (1708, 1453, 1826, 1491)],
-                                "janela": (1698, 1444, 1834, 1550), "semente": 13},
+    "A_Terreo": {
+        "ilha da cozinha": {"rets": [(1940, 1247, 2047, 1317)], "janela": (1922, 1222, 2066, 1334), "semente": 11},
+        "bancada da pia": {"rets": [(2117, 1232, 2150, 1520)], "janela": (2104, 1218, 2163, 1532), "semente": 12},
+        "bancada do serviço (L)": {"rets": [(1708, 1453, 1739, 1541), (1708, 1453, 1826, 1491)],
+                                    "janela": (1698, 1444, 1834, 1550), "semente": 13}},
+    "B_Terreo": {
+        "ilha da cozinha": {"rets": [(1645, 1394, 1714, 1564)], "janela": (1636, 1385, 1723, 1573), "semente": 21},
+        # a janela do L em dois retângulos (um só pegava o pé da ilha e o devolvia ao desenho antigo)
+        "bancada das cubas da cozinha (L)": {"rets": [(1552, 1632, 1821, 1671), (1787, 1544, 1821, 1671)],
+                                             "janela": [(1544, 1624, 1828, 1676), (1779, 1538, 1828, 1676)],
+                                             "semente": 22},
+        "bancada da parede do serviço": {"rets": [(2055, 1372, 2081, 1487)], "janela": (2045, 1363, 2090, 1496),
+                                         "semente": 23},
+        "bancada dos tanques": {"rets": [(2200, 1463, 2239, 1562)], "janela": (2191, 1449, 2246, 1570),
+                                "semente": 24}},
 }
 NEUTRO = 12.0           # R - B abaixo disso não é pedra (o inox, o branco da borda das cubas)
 PECA_MIN = 120          # px da final: o que não é pedra e é maior que isso é peça (cuba, torneira, cooktop)
@@ -90,10 +105,13 @@ def refazer(img, antes, bancadas, px_m, esc=1.0, mapa=None):
     mp = mapa or (lambda x, y: (x, y))
     H, W = img.shape[:2]
     for nome, q in bancadas.items():
-        jx0, jy0 = mp(*q["janela"][:2])
-        jx1, jy1 = mp(*q["janela"][2:])
-        jx0, jy0, jx1, jy1 = max(int(round(jx0)), 0), max(int(round(jy0)), 0), min(int(round(jx1)), W), min(int(round(jy1)), H)
-        out[jy0:jy1, jx0:jx1] = antes[jy0:jy1, jx0:jx1]
+        janelas = q["janela"] if isinstance(q["janela"], list) else [q["janela"]]
+        for j in janelas:
+            jx0, jy0 = mp(*j[:2])
+            jx1, jy1 = mp(*j[2:])
+            jx0, jy0 = max(int(round(jx0)), 0), max(int(round(jy0)), 0)
+            jx1, jy1 = min(int(round(jx1)), W), min(int(round(jy1)), H)
+            out[jy0:jy1, jx0:jx1] = antes[jy0:jy1, jx0:jx1]
         rets = []
         for r in q["rets"]:
             a0, b0 = mp(*r[:2])
@@ -118,15 +136,17 @@ def refazer(img, antes, bancadas, px_m, esc=1.0, mapa=None):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("acao", choices=("final", "doze"))
+    ap.add_argument("planta", choices=tuple(BANCADAS))
     ap.add_argument("--antes", required=True, help="a final do Térreo de antes da troca do Danae (949e551^)")
     ap.add_argument("--doze_antes", help="o 12K de antes da troca ({} = A ou B)")
     ap.add_argument("--opcao", default="AB")
     ap.add_argument("--saida")
     a = ap.parse_args()
     antes = cv2.imread(a.antes)
+    FINAL, DOZE, ban = DF.PLANTAS[a.planta], DF.DOZE_K[a.planta], BANCADAS[a.planta]
     if a.acao == "final":
         img = cv2.imread(str(FINAL))
-        out = refazer(img, antes, BANCADAS, DF.PX_M)
+        out = refazer(img, antes, ban, DF.PX_M)
         cv2.imwrite(a.saida or str(FINAL), out)
         return
     for op in a.opcao:
@@ -140,7 +160,7 @@ def main():
         def mapa(x, y, M=M):
             p = M @ np.float32([x, y, 1])
             return float(p[0]), float(p[1])
-        out = refazer(doze, doze_antes, BANCADAS, DF.PX_M * s, esc=s, mapa=mapa)
+        out = refazer(doze, doze_antes, ban, DF.PX_M * s, esc=s, mapa=mapa)
         # como a montagem do 12K: JPG 95 sem subamostragem de cor, 743 dpi na A3
         from PIL import Image
         dpi = int(round(out.shape[1] / (420 / 25.4)))
