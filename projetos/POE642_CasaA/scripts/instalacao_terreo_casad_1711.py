@@ -50,10 +50,9 @@ afim afinado ali (`correcoes_terreo_casab_1611.Mapa.local`):
 
 16. `parede_vao_master` ("corrija a parede para que ela vá de encontro com a folha de vidro"; "A folha é menor, ela volta
    para aquele tamanho que estava anteriormente e aí a parede ela vai avançar", pelo 3D): a folha de pé volta ao
-   tamanho de antes (o arremate branco em y 1539-1540,6) e a parede de baixo avança só na linha da folha ("Não é no vão
-   até o batente ... É até a folha. A folha é encurtada, mas aí tem um dente na parede"): um dente da largura da folha
-   (do ripado à borda dela) até a ponta da folha; o resto do vão, até o batente, fica no creme da soleira.
-   `folha_vidro_master` (15) fica fora dos passos: desfeito por este.
+   tamanho de antes (o arremate branco em y 1539-1540,6) e a parede de baixo avança no vão inteiro (do ripado ao batente
+   da cortina) até a ponta da folha ("Esse é o certo", com a imagem desta versão). `folha_vidro_master` (15) fica fora
+   dos passos: desfeito por este.
 
   (`--passos a,b`: só esses passos, sobre a final e os 12K que já têm os anteriores)
 
@@ -102,9 +101,7 @@ VAO_MASTER = {"ret": (627.46, 1331.9, 636.6, 1553.77), "amostra": (660.0, 1333.6
 # a folha de pé (x 627,46 a 631: do ripado à borda dela) do arremate (y 1537,5) até a parede (y 1553,77), da faixa de cima
 FOLHA_MASTER = {"ret": (627.46, 1537.5, 631.0, 1553.77), "d": (0.0, -20.0)}
 # o toco da parede no pé do vão (px da final: da borda direita da folha ao batente da cortina) e a amostra da parede
-PAREDE_MASTER = {"ret": (627.46, 1540.6, 631.0, 1553.9), "amostra": (612.0, 1555.5, 660.0, 1560.5),
-                 # o resto do vão no pé (creme e a linha escura do batente) como logo acima
-                 "vao": ((631.0, 1539.0, 640.6, 1553.9), (0.0, -20.0)),
+PAREDE_MASTER = {"ret": (627.46, 1540.6, 640.6, 1553.9), "amostra": (612.0, 1555.5, 660.0, 1560.5),
                  "caixa": (600, 1490, 700, 1570),
                  # a folha de pé até o arremate (o perfil de logo acima) e o arremate branco na ponta, como antes
                  "folha": ((627.46, 1537.5, 631.0, 1540.6), (0.0, -20.0)), "arremate": (627.9, 1539.0, 630.0, 1540.6),
@@ -486,9 +483,8 @@ def parede_vao_master(out, mp, q=PAREDE_MASTER):
     x0, y0, x1, y1 = m.reti(q["amostra"])
     cor = tuple(float(v) for v in np.median(out[y0:y1, x0:x1].reshape(-1, 3), axis=0))
     _remenda(out, m, q["folha"][0], [q["folha"][1]], None)
-    _remenda(out, m, q["vao"][0], [q["vao"][1]], None)
     CB.pintar(out, m, [(q["arremate"], "ret", q["arremate_cor"], 0), (q["ret"], "ret", cor, 0)])
-    print("    suíte master: a folha encurtada e o dente da parede de baixo na linha dela, até a ponta")
+    print("    suíte master: a folha no tamanho de antes e a parede de baixo avançando no vão até ela, como no 3D")
 
 
 PASSOS = (banco_b1, arandelas_l2, soleira_garagem, vao_hall_garagem, painel_garagem, paineis_pivotantes,
