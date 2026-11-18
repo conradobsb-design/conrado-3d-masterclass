@@ -746,6 +746,108 @@ def elevador(Q, img, q=ELEVADOR):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# 5b. A cascata (18/11, usuário: "Conseguimos representar a cascata?", com a foto de referência: a bica de inox na
+# parede de pedra rústica, a lâmina d'água caindo na piscina e a espuma onde ela bate; "Sendo vista de cima para a
+# cascata"). O PDF não a desenha: entra na parede de fora da piscina comprida (a da esquerda, a que se vê da academia
+# pelo visor), no meio dela, com 2,0 m. Vista de cima: o topo da parede no trecho da cascata em pedra rústica (os
+# filetes da foto, em vez do Bege Bahia liso da borda); a bica de inox saindo da face da parede sobre a água, com o fio
+# escuro, o brilho e a sombra curta na água; a lâmina caindo logo adiante (riscos claros no comprido); a espuma branca
+# onde ela bate, que se desfaz para dentro da piscina, e as ondinhas claras mais adiante.
+CASCATA = {"y": (575.0, 695.0), "parede": (859.5, 870.0), "bica_px": 6.5, "lamina_px": 3.5, "espuma_px": 15.0,
+           "ondas_px": 30.0, "inox": (196, 199, 201), "inox_fio": (98, 102, 106), "inox_brilho": (238, 240, 241),
+           "pedra": [(150, 160, 168), (128, 138, 147), (168, 177, 184), (112, 121, 130)], "junta": (82, 88, 94),
+           "espuma": (246, 247, 247), "semente": 1811}
+
+
+def cascata(Q, img, q=CASCATA):
+    y0, y1 = q["y"]
+    p0, p1 = q["parede"]
+    ss = 4
+    X0, X1 = int(np.floor(p0)) - 1, int(np.ceil(p1 + q["bica_px"] + q["ondas_px"])) + 2
+    Y0, Y1 = int(np.floor(y0)) - 3, int(np.ceil(y1)) + 4
+    h, w = Y1 - Y0, X1 - X0
+    rng = np.random.default_rng(q["semente"])
+    out = img.astype(np.float32)
+    reg = out[Y0:Y1, X0:X1].copy()
+    yy, xx = np.mgrid[0:h * ss, 0:w * ss].astype(np.float32)
+    X = X0 + (xx + 0.5) / ss
+    Y = Y0 + (yy + 0.5) / ss
+    dentro_y = (Y >= y0) & (Y < y1)
+
+    def baixa(a):
+        return cv2.resize(a.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
+
+    # o topo da parede em pedra rústica: em cada fiada (no comprido da parede) uma ou duas pedras na largura, de
+    # comprimentos e tons variados, com a junta escura e a aresta de cima clara (o relevo)
+    pedra = np.zeros((h * ss, w * ss, 3), np.float32)
+    junta = np.zeros((h * ss, w * ss), np.float32)
+    aresta = np.zeros((h * ss, w * ss), np.float32)
+    yc = y0 - rng.uniform(0, 4)
+    while yc < y1:
+        comp = rng.uniform(4.0, 13.0)
+        cortes = [p0, p1] if rng.random() < 0.45 else [p0, p0 + (p1 - p0) * rng.uniform(0.35, 0.65), p1]
+        for xa, xb in zip(cortes[:-1], cortes[1:]):
+            cy0 = yc + rng.uniform(-1.5, 1.5) if xa > p0 else yc
+            tom = np.float32(q["pedra"][rng.integers(len(q["pedra"]))]) * rng.uniform(0.92, 1.08)
+            m = (X >= xa) & (X < xb) & (Y >= cy0) & (Y < yc + comp)
+            pedra[m] = tom
+            junta[m & ((np.abs(Y - cy0) < 0.4) | (np.abs(X - xa) < 0.35))] = 1
+            aresta[m & (Y >= cy0 + 0.4) & (Y < cy0 + 1.1)] = 1
+        yc += comp
+    grao = cv2.GaussianBlur(rng.normal(0, 1, (h * ss, w * ss)).astype(np.float32), (0, 0), 0.8 * ss)
+    pedra *= (1 + 0.07 * grao / max(float(grao.std()), 1e-6) + 0.10 * aresta)[..., None]
+    pedra = pedra * (1 - junta[..., None]) + np.float32(q["junta"]) * junta[..., None]
+    a_p = baixa(dentro_y & (X >= p0) & (X < p1))[..., None]
+    reg = reg * (1 - a_p) + baixa_c(pedra, w, h) * a_p
+    # a sombra curta da bica e da lâmina na água
+    b0, b1 = p1, p1 + q["bica_px"]
+    sb = baixa(dentro_y & (X >= b1) & (X < b1 + 3.0)) * 0.22
+    reg *= (1 - sb)[..., None]
+    # a espuma onde a lâmina bate: branca junto dela, desfazendo-se para dentro da piscina, em bolhas
+    l1 = b1 + q["lamina_px"]
+    d = np.clip(X - l1, 0, None)
+    bol = cv2.GaussianBlur(rng.random((h * ss, w * ss)).astype(np.float32), (0, 0), 0.9 * ss)
+    bol = (bol - bol.min()) / max(float(bol.max() - bol.min()), 1e-6)
+    pontas = np.clip((np.minimum(Y - y0, y1 - Y)) / 6.0, 0, 1)
+    # o miolo branco junto à lâmina e as bolhas soltas mais adiante
+    miolo = np.exp(-d / 2.2)
+    bolhas = (bol > 0.56) * np.exp(-d / (q["espuma_px"] * 0.55)) * np.clip((bol - 0.56) / 0.12, 0, 1)
+    esp = np.clip(0.95 * miolo + 0.9 * bolhas, 0, 1) * pontas
+    esp *= ((X >= l1 - 0.5) & (Y >= y0 - 2) & (Y < y1 + 2))
+    # as ondinhas claras mais adiante: pedaços de arco quebrados, não linhas retas
+    torce = cv2.GaussianBlur(rng.normal(0, 1, (h * ss, w * ss)).astype(np.float32), (0, 0), 2.5 * ss)
+    torce /= max(float(torce.std()), 1e-6)
+    onda = 0.5 + 0.5 * np.sin((d / 3.6 + 0.9 * torce) * 2 * np.pi)
+    quebra = cv2.GaussianBlur(rng.random((h * ss, w * ss)).astype(np.float32), (0, 0), 1.5 * ss)
+    quebra = (quebra - quebra.min()) / max(float(quebra.max() - quebra.min()), 1e-6)
+    onda = (np.clip(onda - 0.8, 0, 1) / 0.2 * (quebra > 0.5) * np.exp(-d / q["ondas_px"]) *
+            (d > q["espuma_px"] * 0.35) * pontas * 0.22)
+    a_e = baixa(np.clip(esp + onda * (Y >= y0) * (Y < y1), 0, 1))[..., None]
+    reg = reg * (1 - a_e) + np.float32(q["espuma"]) * a_e
+    # a lâmina caindo, vista de cima: riscos claros no comprido, translúcidos
+    risco = cv2.GaussianBlur(rng.normal(0, 1, (h * ss, w * ss)).astype(np.float32), (0, 0), sigmaX=0.6 * ss,
+                             sigmaY=0.25 * ss)
+    risco = np.clip(0.75 + 0.5 * risco / max(float(risco.std()), 1e-6), 0.35, 1)
+    a_l = baixa((dentro_y & (X >= b1) & (X < l1)) * risco)[..., None] * 0.85
+    reg = reg * (1 - a_l) + np.float32((240, 243, 244)) * a_l
+    # a bica de inox: a chapa, o fio escuro em volta, o brilho no comprido
+    bica = dentro_y & (X >= b0) & (X < b1)
+    fio = bica & ((X >= b1 - 0.45) | (Y < y0 + 0.45) | (Y >= y1 - 0.45))
+    brilho = bica & (X >= b0 + 1.5) & (X < b0 + 2.3)
+    for m, cor in ((bica, q["inox"]), (fio, q["inox_fio"]), (brilho, q["inox_brilho"])):
+        a = baixa(m)[..., None]
+        reg = reg * (1 - a) + np.float32(cor) * a
+    out[Y0:Y1, X0:X1] = reg
+    print(f"    cascata: a bica de inox de {(y1 - y0) / Q.px_m:.1f} m na parede de fora da piscina, a lâmina e a espuma; o "
+          "topo da parede no trecho em pedra rústica")
+    return u8(out)
+
+
+def baixa_c(A, w, h):
+    return cv2.resize(A, (w, h), interpolation=cv2.INTER_AREA)
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 # 11. As portas de giro (G3: "Melhorar representação das portas de giro. Encostar nas paredes."; o padrão da Casa D,
 # `portas_casae_1711`): o PDF do Subsolo desenha as folhas em pedaços (a busca de `pedidos_terreo_casac_1311.portas_pdf`
 # não as acha), então cada porta vem do PDF à mão: a folha aberta (o retângulo dos pedaços), os marcos no plano da
@@ -846,7 +948,7 @@ ROTULOS = [
     ("CASA DE MÁQUINAS (5,83)", ("CASA DE", "MÁQUINAS", "A: 5,83 m²"), (2002.0, 592.0), "normal"),
     ("ELEVADOR", ("ELEVADOR",), (2001.75, 773.0), "normal"),
     ("ACADEMIA", ("ACADEMIA", "A: 85,5 m²"), (1640.0, 703.0), "normal"),
-    ("PISCINA", ("PISCINA", "A: 14,76 m²"), (919.0, 628.0), "normal"),
+    ("PISCINA", ("PISCINA", "A: 14,76 m²"), (922.0, 530.0), "normal"),
     ("SAUNA", ("SAUNA", "A: 4,62 m²"), (1121.0, 806.0), "normal"),
     ("VESTIÁRIO", ("VESTIÁRIO", "A: 6 m²"), (1396.0, 806.0), "normal"),
     ("CASA DE MÁQUINAS (15,07)", ("CASA DE MÁQUINAS", "A: 15,07 m²"), (1355.0, 990.0), "normal"),
@@ -885,7 +987,7 @@ def rotulos(Q, img, q=ROTULOS):
 PASSOS = [("base", base), ("fundo", fundo), ("bege", bege), ("travertino", travertino),
           ("travertino_limpo", travertino_limpo), ("marrom", marrom), ("escada", escada), ("piscina", piscina),
           ("academia", academia), ("sauna", sauna), ("wc_dce2", wc_dce2), ("chuveiros", chuveiros),
-          ("vestiario", vestiario), ("dce", dce), ("elevador", elevador), ("portas", portas),
+          ("vestiario", vestiario), ("dce", dce), ("elevador", elevador), ("cascata", cascata), ("portas", portas),
           ("perimetro", perimetro), ("rotulos", rotulos)]
 
 

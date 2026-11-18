@@ -3717,6 +3717,14 @@ final do Subsolo de e730bde, sem os rótulos (`final3840_casae.sem_rotulos`), um
 - `rotulos`: o padrão de 16/11 (Inter, um corpo; o WC DCE 2 no corpo do WC DCE 1; a CASA DE MÁQUINAS de 5,83 m² em 3
   linhas), "AMBIENTE" sai; a cor pelo fundo.
 Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_{planta,escada_piscina_dce,academia_sauna}_antes_depois.jpg`.
+
+A cascata (passo `cascata`; usuário: "Conseguimos representar a cascata?", com a foto da bica de inox na parede de pedra
+rústica, "Sendo vista de cima para a cascata"): o PDF não a desenha; entra na parede de fora da piscina comprida (a que
+se vê da academia pelo visor), no meio dela, com 2,0 m (`CASCATA`): o topo da parede no trecho em pedra rústica (fiadas
+de uma ou duas pedras na largura, tons e comprimentos variados, junta escura, aresta clara), a bica de inox saindo da
+face sobre a água (o fio, o brilho, a sombra curta), a lâmina caindo (riscos claros no comprido) e a espuma branca onde
+ela bate, desfazendo-se em bolhas, com pedaços de onda mais adiante. O rótulo PISCINA subiu para o alto da água livre.
+Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_cascata_antes_depois.jpg`.
 Depois, a prancha (`rodape_entrega.py --config ../../POE642_CasaE/config_bases.json --no-quadro --render Subsolo=...`), o
 PDF da E e o book. O Subsolo da E ainda não tem 12K: entra depois do OK (`ampliacao_12k_casae.py`).
 
