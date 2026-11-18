@@ -3535,6 +3535,27 @@ do triângulo e do D (x 1153 a 1164, y 423 a 452), a ~7 px, no meio da altura do
 JARDIM". Na final e nos 12K A e B (na Kalam), e o JSON da Kalam com as linhas e a cor novas. Depois, a prancha, o PDF
 da E e o book. Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1711_descricao_subsolo_antes_depois.jpg`.
 
+#### Casa E, Térreo: a escada do Subsolo invertida (18/11, `escada_subsolo_terreo_casae_1811.py`)
+
+Usuário, depois do Subsolo da E seguir o PDF (S no degrau 1, à esquerda): "Pode inverter a escada no térreo, para ficar
+coerente, sim". Pelo PDF do Térreo, o mesmo lance começa a descer no degrau 17, à direita (o "D" do PDF ali, a seta
+para a esquerda), e é desenhado inteiro, sem corte. O Térreo aprovado vinha da inversão de 20/10 (quando o Subsolo
+subia da direita): ▶ D no degrau 1, o alto à esquerda e, depois da diagonal, o resto sob o véu. Agora:
+
+- **Degraus:** os 17 inteiros, no travertino da escada, sem a diagonal e sem o véu. O sombreamento das escadas
+  aprovadas (`final3840_casab.ESCADA_SOMBRA`) no sentido novo: o degrau 1 (à esquerda) o mais escuro e o 17 (no nível do
+  Térreo) o mais claro, cada um no tom dele (semente 2812), e a sombra curta de cada espelho no degrau de baixo, junto
+  à borda direita de cada degrau; o 17 sem sombra. O travertino vem dos degraus 2 a 5 da final (sem marca e longe da
+  diagonal): a sombra de antes sai pelo mesmo modelo, o fio dela (3 px junto à borda) fica de fora e o degrau é levado
+  ao tom novo. A geometria é a do PDF (pt 972 a 1262,9, bocéis a cada 17 pt; o 17 com 18,9 pt).
+- **Seta:** o ◀ (13 x 15 px, cinza 30) e o D (Inter SemiBold 17 px, cinza 45) no meio do degrau 17.
+- **Descrição:** o "DESCE PARA O / SUBSOLO" sai da esquerda (o Bege Bahia de volta) e vai para a direita do triângulo,
+  fora da escada, na circulação gourmet (centro 1504,5 x 437,5, ~8 px da borda), em branco (236), como os rótulos no
+  granito marrom. No 12K B na Kalam, com o JSON da Kalam atualizado (o centro e a cor).
+
+Na final e direto nos 12K A e B (`doze` antes de `final`), depois a prancha, o PDF da E e o book. Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1811_escada_subsolo_antes_depois.jpg`.
+
 #### Casa E, Térreo: a escada do deck na ordem dos níveis (17/11, `escada_deck_terreo_casae_1711.py`)
 
 Usuário: "esse último degrau está abaixo do penúltimo"; com a imagem do PDF: "os números estão localizados nos cantos de
