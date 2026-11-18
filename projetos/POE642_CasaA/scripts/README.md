@@ -3725,6 +3725,11 @@ de uma ou duas pedras na largura, tons e comprimentos variados, junta escura, ar
 face sobre a água (o fio, o brilho, a sombra curta), a lâmina caindo (riscos claros no comprido) e a espuma branca onde
 ela bate, desfazendo-se em bolhas, com pedaços de onda mais adiante. O rótulo PISCINA subiu para o alto da água livre.
 Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_cascata_antes_depois.jpg`.
+
+As portas das casas de máquinas (usuário: "Porta da casa de máquinas em tom bronze."): as duas (a de 15,07 m², da
+academia, e a de 5,83 m², do depósito) no bronze escovado das folhas das suítes do 1º Pavimento da E (`BRONZE`, de
+`final3840_casac.BRISES_SUITES_TC`: a cor, a borda escura, os fios no comprido e um brilho fino no meio). Antes e
+depois em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_porta_bronze_antes_depois.jpg`.
 Depois, a prancha (`rodape_entrega.py --config ../../POE642_CasaE/config_bases.json --no-quadro --render Subsolo=...`), o
 PDF da E e o book. O Subsolo da E ainda não tem 12K: entra depois do OK (`ampliacao_12k_casae.py`).
 

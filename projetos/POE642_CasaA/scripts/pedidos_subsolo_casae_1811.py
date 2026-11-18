@@ -858,7 +858,7 @@ PORTAS = [
     # (nome, folha, marcos, limpa, sentido, "madeira"|"vidro")
     ("casa de máquinas (5,83 m²)", (1958.4, 491.9, 1960.8, 539.6), [(1954.0, 482.9, 1958.4, 491.9),
                                                                    (2006.2, 482.9, 2010.4, 491.9)],
-     (1953.0, 489.0, 1966.0, 545.0), (12.0, 0.0), "madeira"),
+     (1953.0, 489.0, 1966.0, 545.0), (12.0, 0.0), "bronze"),
     ("WC DCE 2", (1861.4, 496.3, 1909.2, 498.7), [(1852.5, 491.9, 1861.4, 496.3), (1852.5, 544.1, 1861.4, 548.3)],
      None, None, "madeira"),
     ("vestiário", (1336.0, 777.0, 1383.7, 779.4), [(1327.0, 771.0, 1336.0, 777.0), (1327.0, 824.7, 1336.0, 829.0)],
@@ -871,13 +871,18 @@ PORTAS = [
      (1774.0, 429.0, 1821.0, 442.0), (0.0, -12.0), "madeira"),
     ("casa de máquinas (15,07 m²)", (1551.5, 927.7, 1553.9, 975.5), [(1553.9, 909.8, 1558.1, 927.7),
                                                                     (1502.0, 909.8, 1506.1, 927.7)],
-     (1545.0, 925.0, 1559.0, 981.0), (-12.0, 0.0), "madeira"),
+     (1545.0, 925.0, 1559.0, 981.0), (-12.0, 0.0), "bronze"),
     ("DCE", (1648.0, 491.9, 1650.3, 539.6), [(1643.5, 482.9, 1648.0, 491.9), (1695.7, 482.9, 1699.9, 491.9)],
      (1644.5, 489.0, 1657.0, 545.0), (12.0, 0.0), "madeira"),
     ("WC do vestiário", (1404.2, 843.2, 1406.6, 884.1), [], (1397.0, 842.0, 1407.0, 888.0), (-10.0, 0.0), "madeira"),
     ("box do vestiário", (1410.5, 843.2, 1412.9, 884.1), [], (1410.0, 842.0, 1419.0, 888.0), (10.0, 0.0), "vidro"),
     ("box da ducha", (1208.7, 838.2, 1209.9, 879.0), [], (1204.0, 835.0, 1215.0, 883.0), (9.0, 0.0), "vidro"),
 ]
+# (18/11, usuário: "Porta da casa de máquinas em tom bronze.") as das duas casas de máquinas no bronze escovado das folhas
+# das suítes do 1º Pavimento da Casa E (`final3840_casac.BRISES_SUITES_TC`): a cor, a borda escura, os fios no comprido e
+# um brilho fino no meio
+BRONZE = {"madeira": (74, 106, 139), "contorno": (44, 66, 90), "veio": 0.07, "brilho": (112, 146, 180),
+          "brilho_px": 0.4}
 VIDRO = {"vidro": (214, 219, 223), "fio": (150, 155, 160), "fio_px": 0.35, "perfil": (112, 117, 122), "perfil_px": 1.0,
          "sombra": 0.18}
 
@@ -907,9 +912,19 @@ def portas(Q, img, q=PORTAS):
                         neutro=neutro)
         if marcos:
             CB.pintar(out, m, [(r, "ret", PAREDE, 0) for r in marcos])
-        if tipo == "madeira":
+        if tipo in ("madeira", "bronze"):
             vert = (folha[3] - folha[1]) > (folha[2] - folha[0])
-            PC.folha(out, m, folha, vert, 1811 + i)
+            if tipo == "madeira":
+                PC.folha(out, m, folha, vert, 1811 + i)
+            else:
+                b = BRONZE
+                PC.folha(out, m, folha, vert, 1811 + i, dict(PC.FOLHA, madeira=b["madeira"], contorno=b["contorno"],
+                                                               veio=b["veio"]))
+                x0, y0, x1, y1 = folha
+                bp = b["brilho_px"] / 2
+                meio = (((x0 + x1) / 2 - bp, y0 + 0.8, (x0 + x1) / 2 + bp, y1 - 0.8) if vert else
+                        (x0 + 0.8, (y0 + y1) / 2 - bp, x1 - 0.8, (y0 + y1) / 2 + bp))
+                CB.pintar(out, m, [(meio, "ret", b["brilho"], 0)])
         else:
             v = VIDRO
             CB.sombra(out, m, folha, v["sombra"], dx=-0.8, dy=0.8, sigma=0.8)
@@ -924,8 +939,8 @@ def portas(Q, img, q=PORTAS):
     par = paredes(Q, 0.5)
     for r, dx, dy in VAOS:
         out = BB.piso_desloc(out, r, par, dx, dy)
-    print(f"    portas: {len(q)} portas de giro pelo PDF, quina a quina com a parede (madeira da Casa D; vidro na sauna, "
-          f"no vestiário e nos boxes); {len(VAOS)} vãos sem os traços dos batentes de antes")
+    print(f"    portas: {len(q)} portas de giro pelo PDF, quina a quina com a parede (madeira da Casa D; bronze nas casas de máquinas; "
+          f"vidro na sauna, no vestiário e nos boxes); {len(VAOS)} vãos sem os traços dos batentes de antes")
     return out
 
 
