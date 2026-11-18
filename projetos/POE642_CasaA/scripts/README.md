@@ -3948,6 +3948,11 @@ Na final e nos 12K A e B (refeitos pelo Topaz, jobs 83c82337, A, e df7dc4fc, B).
   (a costura de `piso_desloc` puxava o claro da soleira); embaixo da janela e do pano de parede, a linha de sombra de
   2 px que o piso tem junto ao resto dessa parede (`dce_sombra`). 12K A e B refeitos (jobs 31ba63f1, A, e 515dc722, B).
   Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811e_piso_dce_antes_depois.jpg`.
+- **Soleira da porta de correr da academia** ("corrija esse contorno da soleira na parte de baixo. preencha a linha até
+  o final"), no passo `transicao` (`linha_soleira`): a linha escura de baixo da soleira da porta de correr da esquerda
+  ia só até o meio (x 1086); agora vai até o batente da direita (x 1146), na cor mediana da própria linha. 12K A e B
+  refeitos (jobs a7513133, A, e deebb76b, B). Antes e depois em
+  `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811f_soleira_antes_depois.jpg`.
 
 #### Levantamento dos ajustes de todas as plantas (18/11)
 

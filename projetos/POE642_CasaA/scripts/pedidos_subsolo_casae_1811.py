@@ -1595,7 +1595,11 @@ TRANSICAO = {"vao": (1189.0, 755.4, 1328.0, 763.0), "rampa_px": 3.0, "amostra_px
              # (x0, y0, x1, y1) px inteiros e o deslocamento (dx, dy) de onde vem o piso, copiado direto (sem costura:
              # a costura puxava o claro da soleira ao lado); a coluna da beira do vão, meio piso e meio soleira
              "wc2_vao": ((1849, 496, 1852, 545), (-6, 0)), "dce_faixa": ((1651, 492, 1766, 496), (0, 6)),
-             "dce_sombra": (1695.4, 492.0, 1766.0, 494.0), "sombra_k": 0.8}
+             "dce_sombra": (1695.4, 492.0, 1766.0, 494.0), "sombra_k": 0.8,
+             # (18/11, "corrija esse contorno da soleira na parte de baixo. preencha a linha até o final") a linha escura
+             # de baixo da soleira da porta de correr da esquerda da academia ia só até o meio (x 1086): continua até o
+             # batente da direita, na cor mediana da própria linha da metade da esquerda (linha, x0, x1, trecho da fonte)
+             "linha_soleira": (492, 1087, 1146, (1035, 1086))}
 
 
 def transicao(Q, img, q=TRANSICAO):
@@ -1621,6 +1625,8 @@ def transicao(Q, img, q=TRANSICAO):
         out[cy0:cy1, cx0:cx1][m] = fonte[m]
     (cx0, cy0, cx1, cy1), _ = q["wc2_vao"]
     out[cy0:cy1, cx1] = u8((out[cy0:cy1, cx1 - 1].astype(np.float32) + out[cy0:cy1, cx1 + 1]) / 2)
+    ly, lx0, lx1, (fx0, fx1) = q["linha_soleira"]
+    out[ly, lx0:lx1] = np.median(out[ly, fx0:fx1].reshape(-1, 3), axis=0).astype(np.uint8)
     sx0, sy0, sx1, sy1 = q["dce_sombra"]
     a = alfa_ret((sx0, sy0, sx1, sy1), par.shape) * ~par
     out = u8(out.astype(np.float32) * (1 - (1 - q["sombra_k"]) * a[..., None]))
