@@ -1587,7 +1587,15 @@ def bege_manchas(Q, img):
 # entre a parede da sauna e a do vestiário, o vinílico acabava torto, com uma faixa caramelo de 2 a 3 px e manchas
 # claras; agora acaba reto na face de cima das paredes (y 755,4), e o travertino da ducha vem logo abaixo, tecido da
 # amostra do piso de perto, emendado ao de baixo por uma rampa.
-TRANSICAO = {"vao": (1189.0, 755.4, 1328.0, 763.0), "rampa_px": 3.0, "amostra_px": (1240, 778, 1320, 800)}
+# (18/11, "corrija esse erro no piso" e "corrija também essa falha no piso") e duas falhas do piso marrom do DCE: a
+# faixa cinza junto ao vão da porta do WC DCE 2 (do lado do DCE, `wc2_vao`: o piso de logo à esquerda) e a faixa torta
+# com pintas escuras e claras embaixo da soleira da porta e da janela do DCE (`dce_faixa`: o piso de logo abaixo); embaixo
+# da janela e do pano de parede, a linha de sombra de 2 px que o piso tem junto ao resto dessa parede (`dce_sombra`).
+TRANSICAO = {"vao": (1189.0, 755.4, 1328.0, 763.0), "rampa_px": 3.0, "amostra_px": (1240, 778, 1320, 800),
+             # (x0, y0, x1, y1) px inteiros e o deslocamento (dx, dy) de onde vem o piso, copiado direto (sem costura:
+             # a costura puxava o claro da soleira ao lado); a coluna da beira do vão, meio piso e meio soleira
+             "wc2_vao": ((1849, 496, 1852, 545), (-6, 0)), "dce_faixa": ((1651, 492, 1766, 496), (0, 6)),
+             "dce_sombra": (1695.4, 492.0, 1766.0, 494.0), "sombra_k": 0.8}
 
 
 def transicao(Q, img, q=TRANSICAO):
@@ -1604,8 +1612,21 @@ def transicao(Q, img, q=TRANSICAO):
     a *= ~par[Y0:Y1, X0:X1]
     o = img.astype(np.float32)
     o[Y0:Y1, X0:X1] = o[Y0:Y1, X0:X1] * (1 - a[..., None]) + T_ * a[..., None]
-    print("    transição: o vinílico da academia acaba reto na face das paredes; o travertino da ducha logo abaixo")
-    return u8(o)
+    out = u8(o)
+    # o piso marrom do DCE: junto ao vão do WC DCE 2 e embaixo da porta e da janela
+    for nome in ("wc2_vao", "dce_faixa"):
+        (cx0, cy0, cx1, cy1), (dx, dy) = q[nome]
+        fonte = out[cy0 + dy:cy1 + dy, cx0 + dx:cx1 + dx].copy()
+        m = ~par[cy0:cy1, cx0:cx1]
+        out[cy0:cy1, cx0:cx1][m] = fonte[m]
+    (cx0, cy0, cx1, cy1), _ = q["wc2_vao"]
+    out[cy0:cy1, cx1] = u8((out[cy0:cy1, cx1 - 1].astype(np.float32) + out[cy0:cy1, cx1 + 1]) / 2)
+    sx0, sy0, sx1, sy1 = q["dce_sombra"]
+    a = alfa_ret((sx0, sy0, sx1, sy1), par.shape) * ~par
+    out = u8(out.astype(np.float32) * (1 - (1 - q["sombra_k"]) * a[..., None]))
+    print("    transição: o vinílico da academia acaba reto na face das paredes; o travertino da ducha logo abaixo; o piso "
+          "do DCE junto ao vão do WC DCE 2 e embaixo da porta e da janela")
+    return out
 
 
 PASSOS = [("base", base), ("fundo", fundo), ("bege", bege), ("travertino", travertino),

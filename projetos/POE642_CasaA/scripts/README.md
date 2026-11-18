@@ -3942,6 +3942,12 @@ Na final e nos 12K A e B (refeitos pelo Topaz, jobs 83c82337, A, e df7dc4fc, B).
   travertino da ducha vem logo abaixo, tecido da amostra do piso de perto e emendado ao de baixo por uma rampa de 3 px.
   12K A e B refeitos (jobs 59f71b68, A, e 9f198d3f, B). Antes e depois em
   `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811d_transicao_antes_depois.jpg`.
+- **Piso do DCE** ("corrija esse erro no piso" e "corrija também essa falha no piso"), no mesmo passo `transicao`: a
+  faixa cinza de 3 px no piso marrom junto ao vão da porta do WC DCE 2 (`wc2_vao`) e a faixa torta com pintas escuras
+  e claras embaixo da soleira da porta e da janela do DCE (`dce_faixa`) recebem o piso de logo ao lado, copiado direto
+  (a costura de `piso_desloc` puxava o claro da soleira); embaixo da janela e do pano de parede, a linha de sombra de
+  2 px que o piso tem junto ao resto dessa parede (`dce_sombra`). 12K A e B refeitos (jobs 31ba63f1, A, e 515dc722, B).
+  Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811e_piso_dce_antes_depois.jpg`.
 
 #### Levantamento dos ajustes de todas as plantas (18/11)
 
