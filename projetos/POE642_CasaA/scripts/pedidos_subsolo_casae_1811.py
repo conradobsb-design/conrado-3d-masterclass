@@ -313,10 +313,12 @@ def escada(Q, img, q=ESCADA):
 # verde no tanque da direita: "A única parte mais rasa da piscina é essa que eu delimitei, tá? O restante é tudo fundo.
 # [...] não é bem uma prainha, na verdade é uma parte mais rasa mesmo"): só a faixa de cima do tanque da direita (de
 # 781 a 808, junto à sauna; `rasa_ret`) rasa, no tom de antes; todo o resto fundo, mais escuro, com a sombra do degrau no
-# lado fundo, junto à rasa. A borda entre a água comprida e o visor da academia na pastilha da piscina (o Barlavento de
+# lado fundo, junto à rasa; a faixa rasa vai até o vidro da esquerda do tanque (usuário: "Essa parte rasa vai até o vidro,
+# tá? Então pode avançar mais um pouco para a esquerda até chegar no vidro": de x 989 a 985, a face do vidro, x 982 a
+# 985). A borda entre a água comprida e o visor da academia na pastilha da piscina (o Barlavento de
 # fundo seco da biblioteca, na escala dele); as outras bordas (a de cima e a da esquerda) em Bege Bahia lisa, um tom
 # abaixo do pátio (o alto-relevo de 16/11, `pedidos_terreo_casad_1611._bege_levigado`).
-PISCINA = dict(PE.PISCINA, funda=0.80, bloco=(855, 474, 1060, 926), azul=25, rasa_ret=(989.0, 781.0, 1053.5, 808.0),
+PISCINA = dict(PE.PISCINA, funda=0.80, bloco=(855, 474, 1060, 926), azul=25, rasa_ret=(985.0, 781.0, 1053.5, 808.0),
                pastilha=(966.0, 489.0, 984.5, 770.0), barlavento=CASA / "biblioteca-objetos" / "04-materiais" /
                "piscina-e-areas-molhadas" / "barlavento-fundo.png", barlavento_m=4.64, pastilha_tom=0.97,
                bege=[(856.0, 474.0, 1000.0, 489.0), (856.0, 489.0, 870.5, 926.0)])

@@ -3723,7 +3723,9 @@ final do Subsolo de e730bde, sem os rótulos (`final3840_casae.sem_rotulos`), um
   ▶ e S no 1º degrau; "SOBE PARA O / TÉRREO" à esquerda, com os rótulos;
 - `piscina`: a água pelo render, mais sóbria como a do Térreo (metade da saturação); a profundidade pela linha verde do
   usuário (18/11: "A única parte mais rasa da piscina é essa que eu delimitei [...] O restante é tudo fundo"): só a
-  faixa de cima do tanque da direita (y 781 a 808, junto à sauna) rasa, todo o resto fundo (80%) com a sombra do degrau; a borda junto à academia
+  faixa de cima do tanque da direita (y 781 a 808, junto à sauna) rasa, de x 985 (o vidro da esquerda do tanque; usuário:
+  "Essa parte rasa vai até o vidro, tá?"; antes começava em 989 e sobrava uma tira funda) a 1053,5, todo o resto fundo
+  (80%) com a sombra do degrau (antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_rasa_ate_vidro_antes_depois.jpg`); a borda junto à academia
   no Barlavento de fundo seco da biblioteca; a de cima e a da esquerda em Bege Bahia lisa (`_bege_levigado`);
 - `academia`: os aparelhos de antes saem com o vinílico das mesmas linhas, deslocado na horizontal até um trecho limpo
   (`piso_linhas`, as réguas correm deitadas); entram 2 esteiras A, 2 bicicletas B (as da Casa A), 2 bolas, a estação de
