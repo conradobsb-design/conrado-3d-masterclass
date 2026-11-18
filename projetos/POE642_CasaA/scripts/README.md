@@ -3760,6 +3760,17 @@ esquerda) e desvirado; no trecho mais curto a espuma sai um pouco mais larga (`m
 parede da esquerda volta ao Bege Bahia liso; a de antes fica em `CASCATA_OESTE`. Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_cascata_parede_baixo_antes_depois.jpg`.
 
+Por fim, a referência do Miro (a imagem que serviu para o fundo da piscina, enviada pelo usuário: um bloco de
+travertino craquelado saindo da parede, a fenda escura em cima, a lâmina caindo pela frente e a espuma): a cascata
+vista de cima no mesmo trecho (`CASCATA`, `estilo` "bloco", `_bloco_travertino`): o bloco de 1,09 x 0,30 m no
+travertino do Subsolo (`pedidos_terreo_casae_1611.textura_travertino`, 4% mais claro), com o craquelado (10 fissuras
+finas e quebradas, `rachas`), o fio escuro no contorno e a quina clara; a fenda de 0,77 m (70% do bloco, como na foto),
+de 6 a 13 px da face da parede, no fundo escuro da água com os reflexos claros correndo para a frente e o fio escuro em
+volta; a película d'água sobre o lábio da frente; a lâmina caindo da aresta na largura da fenda, a espuma e as
+ondinhas (`_agua_cascata`, a mesma água de antes); a sombra curta do bloco na água. Saem a bica de inox e a pedra
+rústica (`CASCATA_PEDRA_SUL` guarda a versão de antes). Antes e depois, com a foto, em
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_cascata_miro_antes_depois.jpg`.
+
 As portas das casas de máquinas (usuário: "Porta da casa de máquinas em tom bronze."): as duas (a de 15,07 m², da
 academia, e a de 5,83 m², do depósito) no bronze escovado das folhas das suítes do 1º Pavimento da E (`BRONZE`, de
 `final3840_casac.BRISES_SUITES_TC`: a cor, a borda escura, os fios no comprido e um brilho fino no meio). Antes e

@@ -766,13 +766,25 @@ def elevador(Q, img, q=ELEVADOR):
 # sobre a água, e a lâmina, a espuma e as ondinhas para dentro da piscina. O desenho é o da parede da esquerda
 # (`_cascata_oeste`), feito no recorte girado (a parede de baixo vira a da esquerda) e desvirado; no trecho mais curto a
 # espuma sai um pouco mais larga (`miolo_px`, `bolha_lim`), para ler como a de antes.
-CASCATA = {"lado": "sul", "x": (884.0, 949.0), "face": 924.6, "pedra_px": 7.0,
-           "bica_px": 6.5, "lamina_px": 3.5, "espuma_px": 15.0, "miolo_px": 3.0, "bolha_lim": 0.48,
+# Por fim (usuário, com a imagem do Miro, a referência do fundo da piscina): a cascata da foto, vista de cima, no mesmo
+# trecho (`estilo` "bloco"): um bloco de travertino claro com o craquelado da foto (fissuras finas e quebradas), saindo
+# 0,30 m da parede para dentro da piscina (`pedra_px` 18), com o fio escuro no contorno e a quina clara; em cima, a
+# fenda escura de onde sai a água (0,77 m, 70% do bloco, como na foto; `fenda_x`, e `fenda` a partir da face da parede),
+# com os reflexos claros correndo para a frente; a película d'água sobre o lábio da frente; a lâmina caindo da aresta
+# (na largura da fenda), a espuma onde ela bate e as ondinhas; a sombra curta do bloco na água. Sem a bica de inox e sem
+# a pedra rústica.
+CASCATA = {"lado": "sul", "estilo": "bloco", "x": (884.0, 949.0), "fenda_x": (893.5, 939.5), "face": 924.6,
+           "pedra_px": 18.0, "fenda": (6.0, 13.0), "fenda_cor": (94, 96, 82), "fenda_brilho": (214, 222, 222),
+           "pelicula": (226, 233, 236), "rachas": 10, "racha_forca": 0.30, "bloco_luz": 1.04, "sombra_bloco": 0.30,
+           "bica_px": 0.0, "lamina_px": 3.5, "espuma_px": 15.0, "miolo_px": 3.0, "bolha_lim": 0.48,
            "ondas_px": 30.0, "inox": (196, 199, 201), "inox_fio": (98, 102, 106), "inox_brilho": (238, 240, 241),
            "pedra": [(150, 160, 168), (128, 138, 147), (168, 177, 184), (112, 121, 130)], "junta": (82, 88, 94),
            "espuma": (246, 247, 247), "semente": 1811}
-# a de antes, na parede da esquerda da piscina comprida (2,0 m): CASCATA_OESTE
-CASCATA_OESTE = dict(CASCATA, lado="oeste", y=(575.0, 695.0), parede=(859.5, 870.0), miolo_px=2.2, bolha_lim=0.56)
+# as de antes: na parede da esquerda da piscina comprida (2,0 m, CASCATA_OESTE) e na de baixo com a pedra rústica e a
+# bica de inox (CASCATA_PEDRA_SUL)
+CASCATA_OESTE = dict(CASCATA, lado="oeste", estilo="pedra", bica_px=6.5, y=(575.0, 695.0), parede=(859.5, 870.0),
+                     miolo_px=2.2, bolha_lim=0.56)
+CASCATA_PEDRA_SUL = dict(CASCATA, estilo="pedra", pedra_px=7.0, bica_px=6.5, fenda_x=(884.0, 949.0))
 
 
 def cascata(Q, img, q=CASCATA):
@@ -785,12 +797,18 @@ def cascata(Q, img, q=CASCATA):
         Ry0, Ry1 = int(np.floor(topo - alc)) - 4, int(np.ceil(face)) + 3
         # girado no sentido horário, a parede de baixo fica à esquerda: (x, y) -> (Ry1 - y, x - Rx0)
         rot = cv2.rotate(np.ascontiguousarray(img[Ry0:Ry1, Rx0:Rx1]), cv2.ROTATE_90_CLOCKWISE)
-        qr = dict(q, y=(x0 - Rx0, x1 - Rx0), parede=(Ry1 - face, Ry1 - topo))
-        rot = _cascata_oeste(rot, qr)
+        fx0, fx1 = q["fenda_x"]
+        qr = dict(q, y=(fx0 - Rx0, fx1 - Rx0), bloco_y=(x0 - Rx0, x1 - Rx0), parede=(Ry1 - face, Ry1 - topo))
+        rot = _cascata_oeste(rot, qr, Q)
         out = img.copy()
         out[Ry0:Ry1, Rx0:Rx1] = cv2.rotate(rot, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        print(f"    cascata: a bica de inox de {(x1 - x0) / Q.px_m:.1f} m na parede de baixo da piscina, a lâmina, a "
-              "espuma e as ondinhas para dentro dela; o revestimento de pedra rústica junto à face da parede")
+        if q.get("estilo") == "bloco":
+            print(f"    cascata: o bloco de travertino de {(x1 - x0) / Q.px_m:.2f} x {q['pedra_px'] / Q.px_m:.2f} m na "
+                  f"parede de baixo da piscina, a fenda de {(fx1 - fx0) / Q.px_m:.2f} m, a lâmina, a espuma e as "
+                  "ondinhas (a referência do Miro)")
+        else:
+            print(f"    cascata: a bica de inox de {(x1 - x0) / Q.px_m:.1f} m na parede de baixo da piscina, a lâmina, a "
+                  "espuma e as ondinhas para dentro dela; o revestimento de pedra rústica junto à face da parede")
         return out
     out = _cascata_oeste(img, q)
     y0, y1 = q["y"]
@@ -799,14 +817,16 @@ def cascata(Q, img, q=CASCATA):
     return out
 
 
-def _cascata_oeste(img, q):
-    """A cascata numa parede à esquerda da água (a água para +x), no trecho y = q["y"]; q["parede"]: x da faixa de pedra
-    (de fora para a face da água)."""
+def _cascata_oeste(img, q, Q=None):
+    """A cascata numa parede à esquerda da água (a água para +x), no trecho y = q["y"] (o da água); q["parede"]: x da
+    faixa de pedra ou do bloco (da face da parede para a água); no estilo "bloco", q["bloco_y"]: o trecho do bloco."""
     y0, y1 = q["y"]
     p0, p1 = q["parede"]
+    bloco = q.get("estilo") == "bloco"
+    by0, by1 = q.get("bloco_y", q["y"])
     ss = 4
     X0, X1 = int(np.floor(p0)) - 1, int(np.ceil(p1 + q["bica_px"] + q["ondas_px"])) + 2
-    Y0, Y1 = int(np.floor(y0)) - 3, int(np.ceil(y1)) + 4
+    Y0, Y1 = int(np.floor(min(y0, by0))) - 3, int(np.ceil(max(y1, by1))) + 4
     h, w = Y1 - Y0, X1 - X0
     rng = np.random.default_rng(q["semente"])
     out = img.astype(np.float32)
@@ -819,6 +839,15 @@ def _cascata_oeste(img, q):
     def baixa(a):
         return cv2.resize(a.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)
 
+    if bloco:
+        reg = _bloco_travertino(reg, X, Y, (X0, Y0, w, h, ss), (p0, p1, by0, by1, y0, y1), q, rng, Q)
+        # a sombra curta do bloco na água, em volta da frente e dos lados
+        dx = np.maximum(X - p1, 0)
+        dyb = np.maximum(np.maximum(by0 - Y, Y - by1), 0)
+        fora = ~((X < p1) & (Y >= by0) & (Y < by1))
+        sb = baixa(fora * (X >= p0) * np.exp(-np.hypot(dx, dyb) / 1.4)) * q["sombra_bloco"]
+        reg *= (1 - sb)[..., None]
+        return _agua_cascata(out, reg, X, Y, (X0, Y0, X1, Y1, w, h, ss), p1, q, rng, baixa, dentro_y)
     # o topo da parede em pedra rústica: em cada fiada (no comprido da parede) uma ou duas pedras na largura, de
     # comprimentos e tons variados, com a junta escura e a aresta de cima clara (o relevo)
     pedra = np.zeros((h * ss, w * ss, 3), np.float32)
@@ -845,6 +874,15 @@ def _cascata_oeste(img, q):
     b0, b1 = p1, p1 + q["bica_px"]
     sb = baixa(dentro_y & (X >= b1) & (X < b1 + 3.0)) * 0.22
     reg *= (1 - sb)[..., None]
+    return _agua_cascata(out, reg, X, Y, (X0, Y0, X1, Y1, w, h, ss), b0, q, rng, baixa, dentro_y)
+
+
+def _agua_cascata(out, reg, X, Y, caixa, b0, q, rng, baixa, dentro_y):
+    """A água da cascata a partir de `b0` (a face de onde ela sai): a bica (se houver), a lâmina, a espuma e as
+    ondinhas, no trecho y = q["y"]."""
+    X0, Y0, X1, Y1, w, h, ss = caixa
+    y0, y1 = q["y"]
+    b1 = b0 + q["bica_px"]
     # a espuma onde a lâmina bate: branca junto dela, desfazendo-se para dentro da piscina, em bolhas
     l1 = b1 + q["lamina_px"]
     d = np.clip(X - l1, 0, None)
@@ -882,6 +920,56 @@ def _cascata_oeste(img, q):
         reg = reg * (1 - a) + np.float32(cor) * a
     out[Y0:Y1, X0:X1] = reg
     return u8(out)
+
+
+def _bloco_travertino(reg, X, Y, caixa, geo, q, rng, Q):
+    """O bloco da cascata visto de cima (coordenadas da parede à esquerda): o travertino claro com o craquelado, o fio
+    escuro no contorno e a quina clara; a fenda escura com os reflexos correndo para a frente; a película d'água sobre o
+    lábio da frente."""
+    X0, Y0, w, h, ss = caixa
+    p0, p1, by0, by1, y0, y1 = geo
+    H, W = h * ss, w * ss
+    blk = (X >= p0) & (X < p1) & (Y >= by0) & (Y < by1)
+    T = PE.textura_travertino(Q, h, w) * q["bloco_luz"]
+    T = cv2.resize(T, (W, H), interpolation=cv2.INTER_LINEAR)
+    # o craquelado: fissuras finas, quebradas em trechos curtos
+    rach = np.zeros((H, W), np.uint8)
+    for _ in range(q["rachas"]):
+        x, y = rng.uniform(p0 + 1.5, p1 - 1.0), rng.uniform(by0 + 1.0, by1 - 1.0)
+        ang = rng.uniform(0, 2 * np.pi)
+        pts = [(x, y)]
+        for _ in range(int(rng.integers(3, 8))):
+            ang += rng.normal(0, 0.7)
+            comp = rng.uniform(1.2, 3.5)
+            x, y = x + np.cos(ang) * comp, y + np.sin(ang) * comp
+            pts.append((x, y))
+        P = np.int32(np.round((np.float32(pts) - (X0, Y0)) * ss))
+        cv2.polylines(rach, [P], False, 255, 1, cv2.LINE_AA)
+    rach = cv2.GaussianBlur(rach.astype(np.float32) / 255, (0, 0), 0.4 * ss) * 2.2
+    T *= (1 - q["racha_forca"] * np.clip(rach, 0, 1) * blk)[..., None]
+    # a quina clara logo dentro do contorno e o fio escuro no contorno (a frente e os lados; o fundo encosta na parede)
+    borda = blk & ((X >= p1 - 0.45) | (Y < by0 + 0.45) | (Y >= by1 - 0.45))
+    quina = blk & ~borda & ((X >= p1 - 1.3) | (Y < by0 + 1.3) | (Y >= by1 - 1.3))
+    T[quina] *= 1.05
+    T[borda] *= 0.70
+    # a fenda: o fundo escuro (a água dentro), o fio escuro em volta, a sombra da borda de trás e os reflexos claros
+    # correndo para a frente
+    f0, f1 = p0 + q["fenda"][0], p0 + q["fenda"][1]
+    fen = (X >= f0) & (X < f1) & (Y >= y0) & (Y < y1)
+    fundo = np.float32(q["fenda_cor"]) * (0.80 + 0.20 * np.clip((X - f0) / 2.5, 0, 1))[..., None]
+    reflexo = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), sigmaX=1.4 * ss, sigmaY=0.3 * ss)
+    reflexo = np.clip((reflexo / max(float(reflexo.std()), 1e-6) - 0.9) / 1.2, 0, 1) * 0.65
+    fundo = fundo * (1 - reflexo[..., None]) + np.float32(q["fenda_brilho"]) * reflexo[..., None]
+    T = np.where(fen[..., None], fundo, T)
+    fio_f = fen & ((X < f0 + 0.4) | (X >= f1 - 0.4) | (Y < y0 + 0.4) | (Y >= y1 - 0.4))
+    T[fio_f] *= 0.62
+    # a película d'água sobre o lábio da frente (da fenda à aresta): translúcida, em riscos no sentido da saída
+    pel = (X >= f1) & (X < p1) & (Y >= y0) & (Y < y1)
+    risco = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), sigmaX=1.0 * ss, sigmaY=0.3 * ss)
+    risco = np.clip(0.55 + 0.35 * risco / max(float(risco.std()), 1e-6), 0.2, 0.9) * pel
+    T = T * (1 - risco[..., None]) + np.float32(q["pelicula"]) * risco[..., None]
+    a = cv2.resize(blk.astype(np.float32), (w, h), interpolation=cv2.INTER_AREA)[..., None]
+    return reg * (1 - a) + baixa_c(T, w, h) * a
 
 
 def baixa_c(A, w, h):
