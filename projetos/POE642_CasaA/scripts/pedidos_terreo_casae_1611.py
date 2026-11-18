@@ -804,7 +804,7 @@ ROTULOS = [
     ("GÁS", ("GÁS",), (1984.0, 449.0), "normal"),
     ("ÁREA DE SERVIÇO DESCOBERTA", ("ÁREA DE SERVIÇO DESCOBERTA", "A: 8,17 m²"), (2085.0, 501.0), "normal"),
     ("DCE", ("DCE", "A: 6,08 m²"), (2326.0, 596.0), "normal"),
-    ("WC DCE 1", ("WC DCE 1", "A: 3,04 m²"), (2422.5, 596.0), "wc"),
+    ("WC DCE 1", ("WC DCE 1", "A: 3,04 m²"), (2421.2, 596.0), "wc"),      # 18/11: no meio do piso livre
     ("COZINHA", ("COZINHA", "A: 31,27 m²"), (1770.0, 728.0), "normal"),
     ("ÁREA DE SERVIÇO", ("ÁREA DE SERVIÇO", "A: 16,34 m²"), (2085.0, 651.0), "normal"),
     ("ELEVADOR", ("ELEVADOR",), (2002.0, 767.0), "normal"),
@@ -826,7 +826,7 @@ ROTULOS = [
     ("PRAINHA", ("PRAINHA", "A: 7,61 m²"), (1055.0, 1014.0), "normal"),
     ("SPA", ("SPA", "A: 6,5 m²"), (1055.0, 1197.0), "normal"),
 ]
-CORPOS = {"normal": (10.95, 15.0), "pequeno": (9.6, 13.1), "wc": (9.0, 12.3)}
+CORPOS = {"normal": (10.95, 15.0), "pequeno": (9.6, 13.1), "wc": (8.8, 12.0)}
 ESCURO, CLARO = (20, 20, 20), (236, 236, 236)
 
 

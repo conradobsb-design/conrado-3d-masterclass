@@ -3657,6 +3657,20 @@ VASO."). `chuveiro`: o braço cromado do chuveiro quadrado do box do BH gourmet 
 no PDF ("FALTOU O CANO DO CHUVEIRO DE PAREDE"). `gas`: a soleira do abrigo de gás sai, o piso de dentro vai até a face
 de fora ("AQUI NÃO TEM SOLEIRA"). Na final e nos 12K A e B.
 
+#### Casa E, Térreo: o DCE e o WC DCE 1 refeitos, e os rótulos deles (18/11, `dce_wcdce_terreo_casae_1811.py`)
+
+Os 6 itens do usuário ("O ENTORNO DA CAMA PRECISA SER PERFEITO...") e "CORRIJA OS RÓTULOS E SEUS ENTORNOS", pela
+geometria do PDF. DCE: o granito do quarto num tom só (o texto velho sai, o tom de fundo vai para a mediana, o grão
+fica, a sombra curta junto às paredes e às peças fica); o retângulo da cama refeito no granito com o tom do entorno e a
+cama de solteiro da biblioteca inteira nele, a cabeceira na parede; o contorno do guarda-roupa de cabides fechado; a
+janela com o vão, os marcos e os montantes em grafite e as folhas em vidro. WC DCE 1: o piso inteiro no cinza claro dos
+banhos da Casa D (o tom do WC DCE de lá, a nuvem suave e o grão fino), com a sombra rente às paredes; a parede de baixo
+atrás da porta lisa; o box com a faixa de vidro e as duas folhas de correr; o chuveiro quadrado da biblioteca com o
+braço cromado até a parede; a bacia Monte Carlo no retângulo do PDF; a folha da porta na madeira da Casa D; a janela
+como a do DCE. Os dois rótulos redesenhados por cima (Inter na final e no 12K A, onde o "WO" do Topaz vira "WC"; Kalam
+no 12K B): o do WC no meio do piso livre, entre a parede e a bacia/bancada (`pedidos_terreo_casae_1611.ROTULOS`: x
+2421,2, corpo `wc` 8,8 px; o JSON da Kalam com o mesmo meio).
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
