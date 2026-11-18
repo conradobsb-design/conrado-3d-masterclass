@@ -3778,6 +3778,15 @@ ondinhas (`_agua_cascata`, a mesma água de antes); a sombra curta do bloco na �
 rústica (`CASCATA_PEDRA_SUL` guarda a versão de antes). Antes e depois, com a foto, em
 `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_cascata_miro_antes_depois.jpg`.
 
+As bordas da piscina (usuário, com a imagem 3D da piscina: "a borda da piscina ela é toda feita no material do
+revestimento da piscina, tá? Então corrija isso de acordo com essa imagem"): todas na pastilha da piscina (o Barlavento
+de fundo seco da biblioteca, a mesma da borda junto à academia), pelas faixas brancas do PDF (`PISCINA["pastilha"]`,
+5 faixas): a junto à academia, a de cima, a da esquerda (até a parede de baixo), a faixa entre a parte comprida e o
+tanque da direita (contínua, passando pelo vidro, como no PDF) e a do tanque do lado da sauna. Nenhuma em Bege Bahia
+(`bege` vazio); a máscara de cada faixa tira a água e o escuro das paredes e dos caixilhos (a das paredes do PDF não
+serve ali: ela cobre o pé da borda da esquerda). Antes e depois, com o 3D, em
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_borda_pastilha_antes_depois.jpg`.
+
 As portas das casas de máquinas (usuário: "Porta da casa de máquinas em tom bronze."): as duas (a de 15,07 m², da
 academia, e a de 5,83 m², do depósito) no bronze escovado das folhas das suítes do 1º Pavimento da E (`BRONZE`, de
 `final3840_casac.BRISES_SUITES_TC`: a cor, a borda escura, os fios no comprido e um brilho fino no meio). Antes e

@@ -319,9 +319,16 @@ def escada(Q, img, q=ESCADA):
 # fundo seco da biblioteca, na escala dele); as outras bordas (a de cima e a da esquerda) em Bege Bahia lisa, um tom
 # abaixo do pátio (o alto-relevo de 16/11, `pedidos_terreo_casad_1611._bege_levigado`).
 PISCINA = dict(PE.PISCINA, funda=0.80, bloco=(855, 474, 1060, 926), azul=25, rasa_ret=(985.0, 781.0, 1053.5, 808.0),
-               pastilha=(966.0, 489.0, 984.5, 770.0), barlavento=CASA / "biblioteca-objetos" / "04-materiais" /
+               # (18/11, usuário, com a imagem 3D da piscina: "a borda da piscina ela é toda feita no material do
+               # revestimento da piscina") todas as bordas na pastilha: a junto à academia (a de antes), a de cima, a da
+               # esquerda, o quadradinho entre a parte comprida e a de baixo e as duas do tanque da direita (a de cima,
+               # junto à parede da academia, e a do lado da sauna), pelas faixas brancas do PDF (a faixa entre a parte
+               # comprida e o tanque passa contínua, como no PDF); nenhuma em Bege Bahia
+               pastilha=[(966.0, 489.0, 984.5, 770.0), (858.5, 474.0, 978.0, 489.0), (858.5, 489.0, 870.5, 925.0),
+                         (966.0, 770.0, 1052.0, 781.7), (1051.7, 770.0, 1063.3, 909.5)],
+               barlavento=CASA / "biblioteca-objetos" / "04-materiais" /
                "piscina-e-areas-molhadas" / "barlavento-fundo.png", barlavento_m=4.64, pastilha_tom=0.97,
-               bege=[(856.0, 474.0, 1000.0, 489.0), (856.0, 489.0, 870.5, 926.0)])
+               bege=[])
 
 
 def piscina(Q, img, q=PISCINA):
@@ -348,21 +355,34 @@ def piscina(Q, img, q=PISCINA):
     novo = novo * sombra[..., None]
     a = cv2.GaussianBlur(ag.astype(np.float32), (0, 0), 0.5) * ag
     reg[:] = reg * (1 - a[..., None]) + novo * a[..., None]
-    # a borda junto à academia na pastilha
+    # as bordas na pastilha (a grade de uma peça só, presa à imagem; as bordas fracionárias pela fração do px; fora a
+    # água, as paredes e o escuro dos caixilhos)
     P = cv2.imread(str(q["barlavento"])).astype(np.float32)
     lado = int(round(q["barlavento_m"] * Q.px_m))
     P = cv2.resize(P, (lado, lado), interpolation=cv2.INTER_AREA) * q["pastilha_tom"]
-    x0, y0, x1, y1 = q["pastilha"]
-    X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
-    m = np.zeros((Y1 - Y0, X1 - X0), np.float32)
-    m[:] = 1
-    m[:, 0] = X0 + 1 - x0
-    m[:, -1] = x1 - (X1 - 1)
-    m *= ~ag[Y0 - by0:Y1 - by0, X0 - bx0:X1 - bx0]
-    tile = np.tile(P, ((Y1 - Y0) // lado + 2, (X1 - X0) // lado + 2, 1))[(Y0 % lado):(Y0 % lado) + Y1 - Y0,
-                                                                         (X0 % lado):(X0 % lado) + X1 - X0]
-    out[Y0:Y1, X0:X1] = out[Y0:Y1, X0:X1] * (1 - m[..., None]) + tile * m[..., None]
-    # as outras bordas em Bege Bahia lisa
+    base_l = img.astype(np.float32).mean(axis=2)
+    ag_t = np.zeros(out.shape[:2], bool)
+    ag_t[by0:by1, bx0:bx1] = ag
+    for x0, y0, x1, y1 in q["pastilha"]:
+        X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
+        mx = np.ones(X1 - X0, np.float32)
+        mx[0] = min(mx[0], X0 + 1 - x0)
+        mx[-1] = min(mx[-1], x1 - (X1 - 1))
+        my = np.ones(Y1 - Y0, np.float32)
+        my[0] = min(my[0], Y0 + 1 - y0)
+        my[-1] = min(my[-1], y1 - (Y1 - 1))
+        m = my[:, None] * mx[None, :]
+        m *= ~ag_t[Y0:Y1, X0:X1]
+        m *= base_l[Y0:Y1, X0:X1] > 140          # as paredes (cinza 80) e os caixilhos escuros ficam
+        tile = np.tile(P, ((Y1 - Y0) // lado + 3, (X1 - X0) // lado + 3, 1))[(Y0 % lado):(Y0 % lado) + Y1 - Y0,
+                                                                             (X0 % lado):(X0 % lado) + X1 - X0]
+        out[Y0:Y1, X0:X1] = out[Y0:Y1, X0:X1] * (1 - m[..., None]) + tile * m[..., None]
+    # as outras bordas em Bege Bahia lisa (desde 18/11, nenhuma)
+    if not q["bege"]:
+        print(f"    piscina: a água mais sóbria (saturação a {q['sat']:.0%}); só a faixa de cima do tanque da direita "
+              f"rasa, o resto fundo ({q['funda']:.0%}) com a sombra do degrau; todas as bordas na pastilha da piscina "
+              f"({len(q['pastilha'])} faixas)")
+        return u8(out)
     capa = np.zeros(out.shape[:2], bool)
     for r in q["bege"]:
         capa |= ret_mask(capa.shape, r)
