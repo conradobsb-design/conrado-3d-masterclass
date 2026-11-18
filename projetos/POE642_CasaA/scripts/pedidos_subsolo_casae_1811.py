@@ -388,10 +388,12 @@ PISCINA = dict(PE.PISCINA, funda=0.80, bloco=(855, 474, 1060, 926), azul=25, ras
                # "SOMENTE ESSA PARTE ASSINALADA DEVE SER REPRESENTADA COM O REVESTIMENTO DA PISCINA. O RESTANTE DA BORDA
                # VOLTA PARA O BEGE BAHIA") na pastilha só a borda junto à academia e a faixa sob a parede dela, até o
                # tanque; a de cima, a da esquerda e a do tanque do lado da sauna em Bege Bahia lisa
-               pastilha=[(966.0, 489.0, 984.5, 770.0), (966.0, 770.0, 1063.3, 781.7)],
+               # (depois, usuário: "A BORDA DA PISCINA, NO ALTO, AVANÇOU SOBRE O MARMORE. REMOVA ESSE PEDACINHO") a faixa
+               # sob a parede acaba no Bege Bahia da borda do tanque do lado da sauna, que sobe até a parede
+               pastilha=[(966.0, 489.0, 984.5, 770.0), (966.0, 770.0, 1051.7, 781.7)],
                barlavento=CASA / "biblioteca-objetos" / "04-materiais" /
                "piscina-e-areas-molhadas" / "barlavento-fundo.png", barlavento_m=4.64, pastilha_tom=0.97,
-               bege=[(856.0, 474.0, 1000.0, 489.0), (856.0, 489.0, 870.5, 926.0), (1051.7, 781.7, 1063.3, 909.5)])
+               bege=[(856.0, 474.0, 1000.0, 489.0), (856.0, 489.0, 870.5, 926.0), (1051.7, 770.0, 1063.3, 909.5)])
 
 
 def piscina(Q, img, q=PISCINA):
@@ -761,12 +763,10 @@ def vestiario(Q, img, q=VESTIARIO):
 # a parede da direita); o box em vidro claro com as duas folhas de correr.
 WC2 = {"piso": (1861.4, 491.9, 1945.0, 636.2), "bancada": (1915.1, 491.9, 1945.0, 529.4),
        # (18/11, usuário: "A TORNEIRA DA PIA FICOU NO LUGAR ERRADO. E O FUNDO DA CUBA ESTÁ BRANCO, MAS DEVERIA ESTAR NO
-       # TRAVERTINO"): a bancada encosta na parede da direita, a torneira vai para ela (`cuba_giro`, a peça com a
-       # torneira em cima girada para a direita); o fundo branco da cuba no travertino da borda da própria peça, com a
-       # luz da louça (um tom abaixo, fundo); a válvula e a torneira ficam
-       "cuba": (1918.6, 499.1, 1939.4, 523.0), "cuba_png": "banho-do-motorista/cuba-compacta", "cuba_giro": -90.0,
-       "cuba_bacia": (54, 66, 216, 214), "cuba_torneira": (114, 0, 154, 80), "cuba_valvula": (133.7, 144.2, 18.0),
-       "cuba_borda": (8, 90, 48, 200), "cuba_fundo_tom": 0.9,
+       # TRAVERTINO"; depois: "SOBRE A PIA, TRAGA UMA DA BIBLIOTECA EM ALTA DEFINIÇÃO, EM VEZ DE DESENHAR AQUI"): a cuba
+       # compacta em travertino da biblioteca (a do vestiário, com a torneira), girada como lá: a torneira na parede da
+       # direita, onde a bancada encosta
+       "cuba": (1918.6, 499.1, 1939.4, 523.0), "cuba_png": BIB / "vestiario/cuba-travertino-vestiario.png",
        "bacia": (1914.3, 540.0, 1945.0, 561.0), "bacia_png": BIB / "banho-dce-2/bacia-monte-carlo-sem-valvula.png",
        "tom": (210.8, 214.2, 220.0), "nuvem": (0.007, 2.0), "grao": (0.005, 0.6), "ao": (0.07, 2.0),
        "box": {"faixa": (1861.4, 579.9, 1945.0, 582.9), "vidro": (214, 219, 223), "vidro_a": 0.8,
@@ -775,31 +775,8 @@ WC2 = {"piso": (1861.4, 491.9, 1945.0, 636.2), "bancada": (1915.1, 491.9, 1945.0
                "folha_cor": (150, 156, 162), "perfil": (112, 117, 122), "perfil_px": 1.0}}
 
 
-def cuba_travertino(P, q=WC2):
-    """O fundo branco da cuba compacta no travertino da borda dela (a luz da louça guardada)."""
-    P = P.copy()
-    C = P[..., :3]
-    L, sat = C.mean(-1), C.max(-1) - C.min(-1)
-    h, w = L.shape
-    yy, xx = np.mgrid[0:h, 0:w]
-    bx0, by0, bx1, by1 = q["cuba_bacia"]
-    tx0, ty0, tx1, ty1 = q["cuba_torneira"]
-    vx, vy, vr = q["cuba_valvula"]
-    m = (sat < 18) & (L > 90) & (xx >= bx0) & (xx < bx1) & (yy >= by0) & (yy < by1)
-    m &= ~((xx >= tx0) & (xx < tx1) & (yy >= ty0) & (yy < ty1)) & (np.hypot(xx - vx, yy - vy) > vr)
-    rx0, ry0, rx1, ry1 = q["cuba_borda"]
-    borda = np.median(C[ry0:ry1, rx0:rx1].reshape(-1, 3), axis=0)
-    luz = np.clip(L / max(float(np.percentile(L[m], 90)), 1.0), 0.55, 1.05)
-    novo = borda[None, None] * (luz * q["cuba_fundo_tom"])[..., None]
-    a = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.8)
-    a = np.maximum(a * (cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0), m.astype(np.float32))
-    P[..., :3] = C * (1 - a[..., None]) + novo * a[..., None]
-    return P
-
-
 def wc_dce2(Q, img, q=WC2):
     import correcoes_terreo_casab_1611 as CB
-    import mobiliario_terreo_casac_1311 as MB
     import biblioteca_subsolo_casad_1511 as SD
     import biblioteca_terreo_casad_1511 as TD
     from correcoes_terreo_casab_1611 import Mapa
@@ -832,13 +809,7 @@ def wc_dce2(Q, img, q=WC2):
     bx0, by0, bx1, by1 = (int(round(v)) for v in q["bancada"])
     m = ret_mask(par.shape, (bx0, by0, bx1, by1)) & ~par
     out = TD._pinta_textura(out, m, SD.tabaco(by1 - by0, bx1 - bx0), 0.82)
-    P = cuba_travertino(MB.ler(q["cuba_png"]), q)
-    cx0, cy0, cx1, cy1 = q["cuba"]
-    wt, ht = cx1 - cx0, cy1 - cy0
-    giro = q["cuba_giro"]
-    if abs(giro) == 90.0:
-        wt, ht = ht, wt
-    out = MB.pousar(out, P, (cx0 + cx1) / 2 - 0.5, (cy0 + cy1) / 2 - 0.5, wt, ht, giro, "baixa", par)
+    out = _pousar(out, png(q["cuba_png"]), *q["cuba"], -90.0, "baixa", Q, troca=True)
     # a bacia: a caixa (em cima no png) contra a parede da direita
     out = _pousar(out, png(q["bacia_png"]), *q["bacia"], -90.0, "baixa", Q, troca=True)
     # o box
@@ -854,8 +825,8 @@ def wc_dce2(Q, img, q=WC2):
         pecas += [(f, "ret", b["folha_cor"], 0), ((a0, b0 - 0.3, a0 + b["perfil_px"], b1 + 0.3), "ret", b["perfil"], 0),
                   ((a1 - b["perfil_px"], b0 - 0.3, a1, b1 + 0.3), "ret", b["perfil"], 0)]
     CB.pintar(out, mp, pecas)
-    print("    WC DCE 2: o piso cinza dos banhos (o do WC DCE 1), a bancada marrom tabaco com a cuba compacta (o fundo no "
-          "travertino, a torneira na parede), a bacia Monte Carlo e o box em vidro claro")
+    print("    WC DCE 2: o piso cinza dos banhos (o do WC DCE 1), a bancada marrom tabaco com a cuba de travertino da "
+          "biblioteca (a torneira na parede), a bacia Monte Carlo e o box em vidro claro")
     return out
 
 
@@ -961,7 +932,14 @@ CASCATA_BIB = {"lado": "sul", "estilo": "biblioteca", "png": BIB / "piscina" / "
                "revest_x": (870.0, 966.0), "face": 925.0, "pedra_px": 9.6, "centro_x": 918.0,
                "sombra": 0.38, "sombra_px": 1.2, "aresta_luz": 1.07, "aresta_px": 0.8,
                # a água onde a peça pode entrar: a parte de baixo da piscina (até o vidro, x 982) acima da aresta
-               "agua_x": (870.0, 982.0), "agua_y0": 782.0}
+               "agua_x": (870.0, 982.0), "agua_y0": 782.0,
+               # (18/11, usuário: "CONSEGUE CRIAR UM POUCO MAIS DE RESSONÂNCIA EM ONDAS AO CAIR DAS ÁGUAS DA CASCATA?")
+               # as ondas que se abrem de onde a lâmina cai: anéis paralelos à linha da queda (a distância ao trecho
+               # de `meia` px de cada lado do meio), de `r0` em diante, a cada `lam` px, mais fracos para longe
+               # (`decai`) e acabando em `n` anéis; a crista clara e fina, o vale um pouco mais escuro; a fase e a força
+               # um pouco irregulares (senoides fixas na escala da final: o mesmo desenho no 12K)
+               "ondas": {"cx": 918.0, "cy": 904.0, "meia": 17.0, "r0": 13.0, "lam": 5.8, "n": 9, "decai": 30.0,
+                         "forca": 0.40, "sombra": 0.15, "agudo": 2.0, "cor": (238, 242, 240)}}
 CASCATA_BLOCO = {"lado": "sul", "estilo": "bloco", "x": (884.0, 949.0), "fenda_x": (893.5, 939.5), "face": 924.6,
            "pedra_px": 18.0, "fenda": (6.0, 13.0), "fenda_cor": (94, 96, 82), "fenda_brilho": (214, 222, 222),
            "pelicula": (226, 233, 236), "rachas": 10, "racha_forca": 0.30, "bloco_luz": 1.04, "sombra_bloco": 0.30,
@@ -975,6 +953,29 @@ CASCATA_OESTE = dict(CASCATA_BLOCO, lado="oeste", estilo="pedra", bica_px=6.5, y
                      parede=(859.5, 870.0), miolo_px=2.2, bolha_lim=0.56)
 CASCATA_PEDRA_SUL = dict(CASCATA_BLOCO, estilo="pedra", pedra_px=7.0, bica_px=6.5, fenda_x=(884.0, 949.0))
 CASCATA = CASCATA_BIB
+
+
+def ondas_cascata(reg, xx, yy, agua, m, o):
+    """Os anéis de onda em volta da queda (`CASCATA_BIB["ondas"]`), na escala de qualquer imagem (o `Mapa` m)."""
+    uf = (xx - 0.5 - m.t[0]) / m.s + 0.5
+    vf = (yy - 0.5 - m.t[1]) / m.s + 0.5
+    dx = np.maximum(np.abs(uf - o["cx"]) - o["meia"], 0)
+    dy = vf - o["cy"]
+    d = np.hypot(dx, dy)
+    ruido = (0.55 * np.sin(0.21 * uf + 0.13 * vf + 1.1) + 0.40 * np.sin(-0.17 * uf + 0.29 * vf + 2.3) +
+             0.30 * np.sin(0.41 * uf - 0.37 * vf + 0.4))
+    c = np.cos(2 * np.pi * (d + ruido - o["r0"]) / o["lam"])
+    crista = np.maximum(c, 0) ** o["agudo"]
+    vale = np.maximum(-c, 0) ** 2
+    r = d - o["r0"]
+    fim = o["n"] * o["lam"]
+    env = np.clip(r / o["lam"], 0, 1) * np.exp(-np.maximum(r, 0) / o["decai"]) * np.clip((fim - r) / o["lam"], 0, 1)
+    ang = np.arctan2(-dy, uf - o["cx"])
+    # só na água (o escuro das paredes junto à piscina fica sem reflexo)
+    agua = agua * np.clip((reg.mean(-1) - 70) / 30, 0, 1)
+    amp = env * (0.78 + 0.22 * np.sin(5 * ang + 1.3)) * agua
+    reg = reg * (1 - o["sombra"] * vale * amp)[..., None]
+    return reg + (np.float32(o["cor"]) - reg) * (o["forca"] * crista * amp)[..., None]
 
 
 def cascata_biblioteca(img, q=CASCATA_BIB, m=None, px_m=None):
@@ -1018,6 +1019,8 @@ def cascata_biblioteca(img, q=CASCATA_BIB, m=None, px_m=None):
     # a sombra curta do revestimento na água, junto à aresta
     d = np.maximum(ry0 - yy, 0)
     reg *= (1 - q["sombra"] * np.exp(-d / (q["sombra_px"] * m.s)) * agua * cobx)[..., None]
+    if q.get("ondas"):
+        reg[:] = ondas_cascata(reg, xx, yy, agua, m, q["ondas"])
     # a água da peça (pré-multiplicada) só sobre a água
     a_ag = lay[..., 3] * agua
     reg[:] = reg * (1 - a_ag[..., None]) + lay[..., :3] * agua[..., None]

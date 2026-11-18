@@ -55,6 +55,10 @@ CONFERENCIA = {"Terreo": {"gourmet": (930, 380, 1480, 800), "cozinha_servico": (
                            "dce_wc_maquinas": (1630, 470, 2060, 830)}}
 # o afinamento do afim da final ao 12K para a cascata (px da final): a piscina acima dela, sem a cascata
 CAIXA_CASCATA = (845, 700, 1075, 850)
+# a cuba do WC DCE 2 (usuário: "SOBRE A PIA, TRAGA UMA DA BIBLIOTECA EM ALTA DEFINIÇÃO, EM VEZ DE DESENHAR AQUI"): a peça
+# da biblioteca (313 x 339 px) direto no 12K, por cima da ampliada (o afim afinado no DCE, no WC DCE 2 e na casa de
+# máquinas de 5,83 m²)
+CAIXA_CUBA = (1840, 480, 1960, 640)
 
 
 def final(pav):
@@ -111,6 +115,29 @@ def cascata_12k(out, fin):
     res = PS.cascata_biblioteca(out, PS.CASCATA_BIB, m=Mapa(m.s, m.t))
     out[:] = res
     print(f"    a cascata da biblioteca (4K) direto no 12K, a {m.s:.4f}x")
+
+
+def cuba_12k(out, fin):
+    """A cuba de travertino da biblioteca direto no 12K, no retângulo do PDF (`pedidos_subsolo_casae_1811.WC2`)."""
+    import biblioteca_terreo_casaa_1211 as BT
+    import danae_foto as DF
+    import pedidos_subsolo_casae_1811 as PS
+    from correcoes_terreo_casab_1611 import Mapa
+    M = DF.afim_12k(fin, out)
+    mp = Mapa(float(np.hypot(M[0, 0], M[1, 0])), (float(M[0, 2]), float(M[1, 2])))
+    mp.ref = fin
+    m = mp.local(out, CAIXA_CUBA)
+    x0, y0, x1, y1 = PS.WC2["cuba"]
+    cx, cy = m.x((x0 + x1) / 2) - 0.5, m.y((y0 + y1) / 2) - 0.5
+    # só a região em volta (o 12K inteiro em float não cabe à toa)
+    folga = int(12 * m.s)
+    X0, Y0 = int(m.x(x0)) - folga, int(m.y(y0)) - folga
+    X1, Y1 = int(m.x(x1)) + folga, int(m.y(y1)) + folga
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    o = BT.pousar(reg, PS.png(PS.WC2["cuba_png"]), cx - X0, cy - Y0, (y1 - y0) * m.s, (x1 - x0) * m.s, -90.0,
+                  BT.SOMBRAS["baixa"], 59.70590031258779 * m.s)
+    out[Y0:Y1, X0:X1] = np.clip(np.round(o), 0, 255).astype(np.uint8)
+    print(f"    a cuba de travertino da biblioteca direto no 12K, a {m.s:.4f}x")
 
 
 def linhas_kalam(sem_textos):
@@ -201,6 +228,7 @@ def montar(pav, saida_topaz, opcao="A"):
     del corr, fa
     if pav == "Subsolo":
         cascata_12k(out, img)
+        cuba_12k(out, img)
     if opcao == "B":
         import rotulos_kalam_casac as K
         K.dados = kalam

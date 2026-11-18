@@ -3867,12 +3867,23 @@ Depois do 12K (18/11), a rodada de ajustes do usuário:
   (`ARMARIO_TV`, 1,20 x 0,30 m) na cor sólida dos armários da E, com o fio e o tampo de dentro um tom abaixo, e a TV do
   PDF em grafite, com o fio da tela, o pé e a sombra curta (o tubo cinza do render sai).
 - **Cuba do WC DCE 2** ("A TORNEIRA DA PIA FICOU NO LUGAR ERRADO. E O FUNDO DA CUBA ESTÁ BRANCO, MAS DEVERIA ESTAR NO
-  TRAVERTINO"): a torneira na parede da direita, onde a bancada encosta (`cuba_giro` -90), e o fundo branco da cuba no
-  travertino da borda da própria peça, um tom abaixo, com a luz da louça (`cuba_travertino`).
-Na final e nos 12K A e B (refeitos pelo Topaz, jobs ca39b16e, A, e 91207d28, B; a cascata 4K direto no 12K). Antes e
-depois em
+  TRAVERTINO"; depois: "SOBRE A PIA, TRAGA UMA DA BIBLIOTECA EM ALTA DEFINIÇÃO, EM VEZ DE DESENHAR AQUI"): a cuba
+  compacta em travertino da biblioteca (`01-subsolo/vestiario/cuba-travertino-vestiario.png`, a do vestiário, com a
+  torneira), girada como lá: a torneira na parede da direita, onde a bancada encosta; no 12K a peça entra direto, na
+  resolução dela (`ampliacao_12k_casae.cuba_12k`, o afim afinado em `CAIXA_CUBA`), por cima da ampliada.
+- **Ondas da cascata** ("CONSEGUE CRIAR UM POUCO MAIS DE RESSONÂNCIA EM ONDAS AO CAIR DAS ÁGUAS DA CASCATA?"):
+  `ondas_cascata` (`CASCATA_BIB["ondas"]`), antes da água da peça: anéis paralelos à linha da queda (a distância ao
+  trecho de 17 px de cada lado do meio), de 13 px em diante, a cada 5,8 px, 9 anéis, mais fracos para longe; a crista
+  clara e o vale um pouco mais escuro, a fase e a força levemente irregulares (senoides fixas na escala da final, o
+  mesmo desenho no 12K, onde a cascata entra direto); só na água (o escuro das paredes fica sem reflexo).
+- **Canto do tanque** ("A BORDA DA PISCINA, NO ALTO, AVANÇOU SOBRE O MARMORE. REMOVA ESSE PEDACINHO"): a faixa de
+  pastilha sob a parede da academia acaba em x 1051,7, onde começa o Bege Bahia da borda do tanque do lado da sauna,
+  que sobe até a parede (y 770).
+Na final e nos 12K A e B (refeitos pelo Topaz, jobs f94c1489, A, e 6bc7279c, B; a cascata 4K com as ondas direto no
+12K). Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_borda_cascata_antes_depois.jpg` e
-`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_portas_ducha_antes_depois.jpg`.
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_portas_ducha_antes_depois.jpg` (e as ondas, o canto do tanque e a
+cuba da biblioteca em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_ondas_tanque_cuba_antes_depois.jpg`).
 
 Depois, a prancha (`rodape_entrega.py --config ../../POE642_CasaE/config_bases.json --no-quadro --render Subsolo=...`), o
 PDF da E e o book; o 12K (`ampliacao_12k_casae.py`) na seção dele.
