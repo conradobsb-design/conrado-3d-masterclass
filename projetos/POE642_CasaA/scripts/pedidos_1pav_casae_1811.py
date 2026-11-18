@@ -478,70 +478,46 @@ PISO_BM = {"caixa": (1742, 447, 1947, 813), "pontos": [(1830, 650), (1785, 745),
            "semente": 1816}
 
 
-# (usuário: "todos os pisos dos banhos são em quartzito aura") o piso do banho master (o de cima, o do vaso e o do box) e
-# o dos banhos 1 a 4 (com o box e o nicho do chuveiro) em placas de quartzito Aura de 1,20 x 1,20 m: cada placa um
-# recorte ao acaso da foto da chapa (`AURA`, 3 m de lado; os veios na mesma diagonal, a placa às vezes girada 180°), as
-# juntas finas um tom abaixo, a luz do piso do render (a final de b227, sem as peças: o que foge da mediana) só no
-# claro e escuro. Junto às paredes, a mistura com o cinza delas pela cobertura do PDF; as folhas das portas ficam; as
-# peças (bancadas, bacias, banheira, chuveiros, retângulos das claraboias) entram de novo por cima
-PISO_AURA = {"placa_m": 1.2, "aura_m": 3.0, "junta": 0.93, "junta_px": 0.45, "tom": 0.965, "luz": (0.88, 1.06),
-             "luz_sigma": 40.0, "foge": 14, "ss": 4}
+# (usuário: "todos os pisos dos banhos são em quartzito aura"; "nos banheiros não teremos juntas. faça algo mais
+# uniforme e sem muita repetição") o piso do banho master (o de cima, o do vaso e o do box) e o dos banhos 1 a 4 (com o
+# box e o nicho do chuveiro) em quartzito Aura sem juntas: cada banho um recorte só, contínuo, da foto da chapa
+# (`AURA`, lida como 6,4 m de lado: os veios largos e nada se repete dentro do banho; cada banho num trecho e num giro
+# dela), os veios suavizados (`contraste`) para um piso mais uniforme; a luz do piso do render (a final de b227, sem
+# as peças: o que foge da mediana) só no claro e escuro. Junto às paredes, a mistura com o cinza delas pela cobertura
+# do PDF; as folhas das portas ficam; as peças (bancadas, bacias, banheira, chuveiros, retângulos das claraboias)
+# entram de novo por cima
+PISO_AURA = {"aura_m": 6.4, "contraste": 0.55, "tom": 0.965, "luz": (0.88, 1.06), "luz_sigma": 40.0, "foge": 14}
 PISO_BANHOS = {
-    # retângulo de dentro (px), nicho do chuveiro (px), origem das placas (px), semente
-    "banho 2": {"caixa": (2361, 567, 2557, 674), "nicho": (2515, 561, 2540, 567), "origem": (2361, 674), "semente": 1821},
-    "banho 1": {"caixa": (2361, 934, 2557, 1041), "nicho": (2515, 928, 2540, 934), "origem": (2361, 1041),
-                "semente": 1822},
-    "banho 4": {"caixa": (1408, 1116, 1604, 1205), "nicho": (1427, 1205, 1450, 1210), "origem": (1604, 1116),
-                "semente": 1823},
-    "banho 3": {"caixa": (1408, 1218, 1604, 1307), "nicho": (1427, 1213, 1450, 1218), "origem": (1604, 1218),
-                "semente": 1824},
+    # retângulo de dentro (px), nicho do chuveiro (px), semente (o trecho e o giro da chapa)
+    "banho 2": {"caixa": (2361, 567, 2557, 674), "nicho": (2515, 561, 2540, 567), "semente": 1821},
+    "banho 1": {"caixa": (2361, 934, 2557, 1041), "nicho": (2515, 928, 2540, 934), "semente": 1822},
+    "banho 4": {"caixa": (1408, 1116, 1604, 1205), "nicho": (1427, 1205, 1450, 1210), "semente": 1823},
+    "banho 3": {"caixa": (1408, 1218, 1604, 1307), "nicho": (1427, 1213, 1450, 1218), "semente": 1824},
 }
 
 
-def placas_aura(caixa, origem, semente, q=PISO_AURA):
-    """As placas de Aura na `caixa` (px, float32 BGR), a grade a partir de `origem` (px), com as juntas."""
+def chapa_aura(caixa, semente, q=PISO_AURA):
+    """Um recorte contínuo da foto da chapa de Aura na `caixa` (px, float32 BGR), sem juntas e sem repetir, os veios
+    suavizados; o trecho e o giro (0 ou 180°) pela `semente`."""
     import mobiliario_terreo_casac_1311 as MB
     if "aura" not in _CACHE:
         _CACHE["aura"] = cv2.imread(str(AURA)).astype(np.float32)
     T = _CACHE["aura"]
-    ss = q["ss"]
     x0, y0, x1, y1 = caixa
-    ox, oy = origem
-    p = q["placa_m"] * MB.PX_M                            # px da final por placa
-    tam = int(round(q["placa_m"] / q["aura_m"] * T.shape[1]))
+    k = T.shape[1] / (q["aura_m"] * MB.PX_M)              # px da foto por px da final
+    w = min(int(round((x1 - x0) * k)), T.shape[1])
+    h = min(int(round((y1 - y0) * k)), T.shape[0])
     rng = np.random.default_rng(semente)
-    W, H = (x1 - x0) * ss, (y1 - y0) * ss
-    tela = np.zeros((H, W, 3), np.float32)
-    junta = np.ones((H, W), np.float32)
-    jx = int(np.floor((x0 - ox) / p)) - 1
-    jy = int(np.floor((y0 - oy) / p)) - 1
-    for gy in range(jy, jy + int((y1 - y0) / p) + 3):
-        for gx in range(jx, jx + int((x1 - x0) / p) + 3):
-            a0 = int(round((ox + gx * p - x0) * ss))
-            b0 = int(round((oy + gy * p - y0) * ss))
-            a1 = int(round((ox + (gx + 1) * p - x0) * ss))
-            b1 = int(round((oy + (gy + 1) * p - y0) * ss))
-            if a1 <= 0 or b1 <= 0 or a0 >= W or b0 >= H:
-                continue
-            rx, ry = rng.integers(0, T.shape[1] - tam), rng.integers(0, T.shape[0] - tam)
-            pl = T[ry:ry + tam, rx:rx + tam]
-            if rng.random() < 0.5:
-                pl = pl[::-1, ::-1]
-            pl = cv2.resize(pl, (a1 - a0, b1 - b0), interpolation=cv2.INTER_AREA)
-            c0, d0, c1, d1 = max(a0, 0), max(b0, 0), min(a1, W), min(b1, H)
-            tela[d0:d1, c0:c1] = pl[d0 - b0:d1 - b0, c0 - a0:c1 - a0]
-            e = max(1, int(round(q["junta_px"] * ss)))
-            for v in (a0, a1):
-                if 0 <= v < W:
-                    junta[:, max(v - e // 2, 0):v - e // 2 + e] = q["junta"]
-            for v in (b0, b1):
-                if 0 <= v < H:
-                    junta[max(v - e // 2, 0):v - e // 2 + e, :] = q["junta"]
-    tela *= junta[..., None]
-    return cv2.resize(tela, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+    rx, ry = int(rng.integers(0, T.shape[1] - w + 1)), int(rng.integers(0, T.shape[0] - h + 1))
+    pl = T[ry:ry + h, rx:rx + w]
+    if rng.random() < 0.5:
+        pl = pl[::-1, ::-1]
+    pl = cv2.resize(pl, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+    m = pl.reshape(-1, 3).mean(axis=0)
+    return m + (pl - m) * q["contraste"]
 
 
-def piso_aura(Q, out, caixas, pontos, origem, semente, fora=(), q=PISO_AURA):
+def piso_aura(Q, out, caixas, pontos, semente, fora=(), q=PISO_AURA):
     """O piso de quartzito Aura nos não-parede das `caixas` (px) ligados aos `pontos`, fora os retângulos `fora` e as
     folhas das portas (que ficam)."""
     import correcoes_terreo_casab_1611 as CB
@@ -567,7 +543,7 @@ def piso_aura(Q, out, caixas, pontos, origem, semente, fora=(), q=PISO_AURA):
     ys, xs = np.nonzero(RT.dilatar(m, 1))
     bx0, by0, bx1, by1 = int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
     novo = np.zeros((H, W, 3), np.float32)
-    novo[by0:by1, bx0:bx1] = placas_aura((bx0, by0, bx1, by1), origem, semente)
+    novo[by0:by1, bx0:bx1] = chapa_aura((bx0, by0, bx1, by1), semente)
     novo *= (L * q["tom"])[..., None]
     # junto às paredes: o cinza delas pela cobertura do PDF
     FE.paredes_pdf(Q)
@@ -589,8 +565,7 @@ def piso_aura(Q, out, caixas, pontos, origem, semente, fora=(), q=PISO_AURA):
 
 def piso_banho_master(Q, out, q=PISO_BM):
     """O piso do banho master (o de cima, o do vaso e o do box) em quartzito Aura (`piso_aura`)."""
-    x0, y0, x1, y1 = q["caixa"]
-    out, n = piso_aura(Q, out, [q["caixa"]], q["pontos"], (x0, y0), q["semente"], fora=q["fora"])
+    out, _ = piso_aura(Q, out, [q["caixa"]], q["pontos"], q["semente"], fora=q["fora"])
     return out
 
 
@@ -627,8 +602,7 @@ def banhos(Q, img, q=BANHOS, m=MASTER):
     for nome, b in q.items():
         pb = PISO_BANHOS[nome]
         a0, b0, a1, b1 = pb["caixa"]
-        out, _ = piso_aura(Q, out, [pb["caixa"], pb["nicho"]], [((a0 + a1) // 2, (b0 + b1) // 2)], pb["origem"],
-                           pb["semente"])
+        out, _ = piso_aura(Q, out, [pb["caixa"], pb["nicho"]], [((a0 + a1) // 2, (b0 + b1) // 2)], pb["semente"])
         x0, y0, x1, y1 = b["bancada"]
         L, D = x1 - x0, y1 - y0
         pos = (b["cuba"] - x0) / L
@@ -1548,7 +1522,10 @@ RACK = {"png": CASA / "biblioteca-objetos/02-terreo/hall-de-entrada/aparador-fre
         "tv_borda": (78, 78, 80), "tv_sombra": 0.35}
 ESCRIVANINHAS = [("suíte 2", (2226.0, 683.0, 2261.7, 823.0)), ("suíte 1", (2226.0, 1050.0, 2261.7, 1190.0)),
                  ("suíte 4", (1703.3, 892.0, 1739.0, 1032.0)), ("suíte 3", (1703.3, 1390.0, 1739.0, 1531.0))]
-ESCRIVANINHA = {"objeto": 30, "objeto_min_px": 5, "margem_px": 3, "veio": 0.035, "sombra": 0.20, "semente": 1813}
+# (usuário: "deixe as 4 escrivaninhas no mesmo tom") o tampo das 4 num tom só, o claro das suítes 3 e 4 (BGR; o das
+# suítes 1 e 2 era o mesmo do vinílico, 110/145/186, e o tampo sumia no piso)
+ESCRIVANINHA = {"objeto": 30, "objeto_min_px": 5, "margem_px": 3, "veio": 0.035, "sombra": 0.20, "semente": 1813,
+                "tom": (139.0, 173.0, 205.0)}
 # (usuário: "remova erros sobre a escrivaninha. deixe um teclado Apple em alta definição sobre a escrivaninha", "remova
 # residuos sobre a escrivaninha e substitua o teclado pelo teclado Apple") os objetos de antes do tampo (os pontinhos, o
 # bloco claro, a bolinha, o monitor borrado com a mancha marrom e o teclado branco) não voltam; no tampo liso, um monitor
@@ -1589,7 +1566,7 @@ def escrivaninha(out, r, semente, q=ESCRIVANINHA):
     rng = np.random.default_rng(semente)
     nn = cv2.GaussianBlur(rng.normal(0, 1, forma).astype(np.float32), (0, 0), sigmaX=0.6, sigmaY=6.0)
     nn = 1 + q["veio"] * nn / max(float(nn.std()), 1e-6)
-    tampo = med[None, None] * nn[..., None]
+    tampo = np.float32(q.get("tom", med))[None, None] * nn[..., None]
     reg = reg * (1 - a[..., None]) + tampo * a[..., None]
     if q.get("objetos_voltam", False):
         ao = cv2.GaussianBlur(obj.astype(np.float32), (0, 0), 0.6)
@@ -1709,14 +1686,17 @@ def retoques(Q, img):
     out = vinilico_novo(Q, out, b & ~par)
     for nome, r, tv, fr in RACKS:
         out = rack(out, r, tv, fr, par)
-    PC.folha(out, CB.Mapa(), PORTA_SUITE2["folha"], True, PORTA_SUITE2["semente"])
+    # (usuário: "melhore a representação dessa porta da suite 2") o 4º argumento de `PC.folha` é o da porta deitada no
+    # PDF, cuja folha fica em pé: a folha da suíte 2 é deitada na imagem (o veio no comprido dela, sem os salpicos de
+    # quando o veio a atravessava); as do closet master, em pé
+    PC.folha(out, CB.Mapa(), PORTA_SUITE2["folha"], False, PORTA_SUITE2["semente"])
     pc = PORTAS_CLOSET
     x0, y0, x1, y1 = pc["entre"]
     b = np.zeros(par.shape, bool)
     b[y0:y1, x0:x1] = True
     out = vinilico_novo(Q, out, b & ~par)
     for i, f in enumerate(pc["folhas"]):
-        PC.folha(out, CB.Mapa(), f, False, pc["semente"] + i)
+        PC.folha(out, CB.Mapa(), f, True, pc["semente"] + i)
     out = paredes_tom(Q, out)
     import correcoes_terreo_casad_1711 as CD
     import um_pav_casaa_1111 as U

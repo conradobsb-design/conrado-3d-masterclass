@@ -1594,7 +1594,7 @@
     {
      "n": 27,
      "origem": "voce",
-     "texto": "Banhos (18/11): todos os pisos em quartzito Aura, em placas de 1,20 m com as juntas finas e a luz do ambiente — o banho master inteiro (também o vaso e o box) e os banhos 1 a 4 (com o box e o nicho do chuveiro); as bancadas, bacias, chuveiros e retângulos das claraboias de novo por cima (\"todos os pisos dos banhos são em quartzito aura\").",
+     "texto": "Banhos (18/11): todos os pisos em quartzito Aura, sem juntas — cada banho uma chapa contínua, os veios suavizados e sem repetição, com a luz do ambiente — o banho master inteiro (também o vaso e o box) e os banhos 1 a 4 (com o box e o nicho do chuveiro); as bancadas, bacias, chuveiros e retângulos das claraboias de novo por cima (\"todos os pisos dos banhos são em quartzito aura\", \"nos banheiros não teremos juntas\").",
      "pontos": [
       [
        1840,
@@ -1691,6 +1691,29 @@
       [
        2568,
        900
+      ]
+     ]
+    },
+    {
+     "n": 32,
+     "origem": "voce",
+     "texto": "Escrivaninhas das 4 suítes no mesmo tom de madeira, o claro das suítes 3 e 4 (\"deixe as 4 escrivaninhas no mesmo tom\"); a porta da suíte 2 no padrão das outras portas, o veio no comprido da folha (\"melhore a representação dessa porta da suite 2\"), e as folhas de correr do closet master idem.",
+     "pontos": [
+      [
+       2244,
+       760
+      ],
+      [
+       2244,
+       1127
+      ],
+      [
+       2252,
+       907
+      ],
+      [
+       1955,
+       640
       ]
      ]
     }

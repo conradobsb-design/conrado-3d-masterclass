@@ -4094,7 +4094,7 @@ Pedidos diretos do usuário, todos em `pedidos_1pav_casae_1811.py` (final, folha
   (o de cima, o do vaso e o do box) e o dos banhos 1 a 4 (com o box e o nicho do chuveiro, `PISO_BANHOS`) em placas de
   1,20 x 1,20 m (`placas_aura`): cada placa um recorte ao acaso da foto da chapa (`banho-master/quartzito-aura-4k.jpg`,
   gerada no Higgsfield, 3 m de lado; os veios na mesma diagonal, às vezes girada 180°), as juntas finas um tom abaixo,
-  o claro e escuro da luz do render; junto às paredes, a mistura com o cinza delas pela cobertura do PDF; as folhas das
+  o claro e escuro da luz do render (trocadas depois por uma chapa contínua, sem juntas: abaixo); junto às paredes, a mistura com o cinza delas pela cobertura do PDF; as folhas das
   portas ficam. As bancadas, bacias, a banheira, os 6 chuveiros e os retângulos das claraboias entram de novo por cima.
 - **Banho master** ("a torneira de piso da banheira foi colocada no lugar errado", "corrigir o piso das regiões do vaso
   e chuveiro"): a banheira no contorno inteiro do PDF, o misturador de piso no meio da cabeceira; o vaso e o box no
@@ -4115,6 +4115,18 @@ Pedidos diretos do usuário, todos em `pedidos_1pav_casae_1811.py` (final, folha
 - **Painel de madeira** ("segue no modelo adotado nas outras casas", "o painel é ambos os lados da casa"): o ripado de
   nogueira da Casa D (`correcoes_terreo_casad_1711._ripado`) nas duas fachadas laterais (`PAINEIS`).
 Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811d_aura_escrivaninhas_antes_depois.jpg`.
+
+Depois, ainda em 18/11:
+- **"nos banheiros não teremos juntas. faça algo mais uniforme e sem muita repetição"**: no lugar das placas de 1,20 m,
+  `chapa_aura` põe em cada banho um recorte só, contínuo, da foto da chapa (lida como 6,4 m de lado, os veios largos;
+  cada banho num trecho e num giro dela), os veios a 55% (`PISO_AURA["contraste"]`), sem juntas.
+- **"deixe as 4 escrivaninhas no mesmo tom"**: o tampo das 4 no tom claro das suítes 3 e 4 (`ESCRIVANINHA["tom"]`; o
+  das suítes 1 e 2 era o mesmo do vinílico e o tampo sumia no piso).
+- **"melhore a representação dessa porta da suite 2"**: a folha saía salpicada porque o veio a atravessava (o 4º
+  argumento de `portas_casae_1711.folha` é o da porta deitada no PDF, cuja folha fica em pé): agora o veio corre no
+  comprido, como nas outras portas; as folhas de correr do closet master, idem.
+O 12K fica para depois das próximas correções. Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811e_escrivaninhas_aura_porta_antes_depois.jpg`.
 
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
