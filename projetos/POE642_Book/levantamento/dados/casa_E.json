@@ -1096,7 +1096,7 @@
     {
      "n": 1,
      "origem": "voce",
-     "texto": "Térreo nublado em volta e nos vazios (19/10: \"referência com o piso inferior mais nublado\"), refeito em 28/10 com o Térreo aprovado, sem as projeções.",
+     "texto": "Térreo esmaecido em volta e nos vazios (19/10), refeito em 18/11 a partir do Térreo aprovado (o gramado esfumaçado da E), sem o tracejado do lote e com a margem branca (16/11, Casa D).",
      "pontos": [
       [
        800,
@@ -1202,38 +1202,42 @@
     {
      "n": 7,
      "origem": "voce",
-     "texto": "Suíte master: banco de pé de cama k4 da biblioteca (couro caramelo) e a poltrona com o contorno liso (28/10: \"corrija o contorno do encosto\").",
+     "texto": "Suíte master: tapete, cama king, criados, poltrona e criado redondo da biblioteca no lugar do PDF (18/11), com o banco de pé de cama k4 (couro caramelo).",
      "pontos": [
       [
        1566,
-       756
+       640
       ],
       [
-       1457,
+       1459,
        824
+      ],
+      [
+       1505,
+       780
       ]
      ]
     },
     {
      "n": 8,
      "origem": "voce",
-     "texto": "Suítes 1 a 4: bancos de pé de cama k4 (\"alterar os bancos em frente as camas\"); na 3, virado para a cama.",
+     "texto": "Suítes 1 a 4: tapete, cama, criados e cadeira da escrivaninha da biblioteca, no lugar do PDF (18/11), e os bancos de pé de cama k4 (\"alterar os bancos em frente as camas\"); na 3, virado para a cama.",
      "pontos": [
       [
-       1506,
-       1032
+       1507,
+       950
       ],
       [
-       1510,
-       1391
+       1511,
+       1470
       ],
       [
-       2392,
-       823
+       2393,
+       740
       ],
       [
-       2392,
-       1189
+       2393,
+       1110
       ]
      ]
     },
@@ -1263,73 +1267,119 @@
     {
      "n": 10,
      "origem": "voce",
-     "texto": "Banho master: floreira só no verde (20/10), placas de teto nos chuveiros, a torneira de piso da banheira e o box contínuo de parede a parede.",
+     "texto": "Banho master: floreira só no verde (20/10); a bancada dupla, a banheira oval, o misturador de piso e a bacia Carrara da biblioteca (18/11); os 2 chuveiros no quadrado de parede, com o braço até as paredes do box.",
      "pontos": [
       [
        1762,
        480
       ],
       [
-       1812,
-       465
+       1928,
+       520
       ],
       [
-       1863,
-       768
+       1826,
+       513
+      ],
+      [
+       1890,
+       767
       ]
      ]
     },
     {
      "n": 11,
      "origem": "cliente",
-     "texto": "Banho master: os tracejados do vaso e do box em cinza fino, no padrão das claraboias (notas 2 e 4).",
+     "texto": "Banho master: as claraboias do vaso e do box só com o retângulo tracejado cinza fino, sem o X (nota 2: \"Padronizar para as outras plantas que tiverem claraboia\").",
      "pontos": [
       [
        1784,
-       800
+       787
       ],
       [
        1886,
-       800
+       787
       ]
      ]
     },
     {
      "n": 12,
      "origem": "voce",
-     "texto": "Banhos 1 a 4: quartzito da referência (20/10), boxes de folha contínua, cubas no lugar do PDF e, nos banhos 3 e 4, os chuveiros e os nichos do PDF.",
+     "texto": "Banhos 1 a 4: quartzito Aura (20/10; confirmado em 18/11), as bancadas com a cuba esculpida e as bacias Carrara da biblioteca; os chuveiros no quadrado de parede da biblioteca (18/11: \"confirmo\").",
      "pontos": [
       [
        1440,
-       1185
+       1183
       ],
       [
        1440,
-       1245
+       1240
       ],
       [
-       2540,
+       2527,
        590
       ],
       [
-       2540,
-       955
+       2527,
+       957
       ]
      ]
     },
     {
      "n": 13,
-     "origem": "voce",
-     "texto": "Escada sem linhas nem triângulo, com o sombreamento de descida, o D no degrau de cima e o trecho do Térreo nevoado depois do corte (26/10).",
+     "origem": "cliente",
+     "texto": "Banhos 3 e 4: as cubas mais marcadas, as da biblioteca, com a borda e a sombra curta (nota 6).",
      "pontos": [
       [
-       1930,
-       1000
+       1548,
+       1188
+      ],
+      [
+       1548,
+       1234
       ]
      ]
     },
     {
      "n": 14,
+     "origem": "voce",
+     "texto": "Boxes no vidro claro com o fio bronze; esquadrias e batentes das portas no bronze contornado, como no Subsolo (18/11).",
+     "pontos": [
+      [
+       2494,
+       620
+      ],
+      [
+       1402,
+       700
+      ],
+      [
+       2561,
+       620
+      ],
+      [
+       1471,
+       1160
+      ]
+     ]
+    },
+    {
+     "n": 15,
+     "origem": "cliente",
+     "texto": "Escada: os degraus depois do corte transparentes no tom da escada, sem o branco (nota 5: \"Exemplo casa C\"); ▶ e D no degrau de cima e \"DESCE PARA O / TÉRREO\" ao lado (G1/G2).",
+     "pontos": [
+      [
+       1930,
+       1000
+      ],
+      [
+       1830,
+       1000
+      ]
+     ]
+    },
+    {
+     "n": 16,
      "origem": "cliente",
      "texto": "X do vazio da escada fino e cinza, no lugar do preto (nota 4: \"mais finos e mais claros\"); você pediu o mesmo: \"Tracejados em cinza, não pretos\".",
      "pontos": [
@@ -1340,7 +1390,7 @@
      ]
     },
     {
-     "n": 15,
+     "n": 17,
      "origem": "cliente",
      "texto": "X do vazio do hall fino e cinza (nota 4), sem a linha do X do Térreo por baixo (28/10).",
      "pontos": [
@@ -1351,52 +1401,56 @@
      ]
     },
     {
-     "n": 16,
+     "n": 18,
      "origem": "cliente",
-     "texto": "Shaft e rouparia com o tracejado fino e cinza (nota 4); na rouparia, o desenho aberto em volta do rótulo (28/10).",
+     "texto": "Rouparia sem o tracejado e sem a soleira (nota 3); o shaft com o X fino e cinza (nota 4).",
      "pontos": [
+      [
+       2135,
+       780
+      ],
       [
        2065,
        763
-      ],
-      [
-       2138,
-       800
-      ]
-     ]
-    },
-    {
-     "n": 17,
-     "origem": "voce",
-     "texto": "Copinha: a bancada em Bege Bahia com a cuba redonda.",
-     "pontos": [
-      [
-       1950,
-       935
-      ],
-      [
-       2036,
-       932
-      ]
-     ]
-    },
-    {
-     "n": 18,
-     "origem": "voce",
-     "texto": "Sala íntima: o sofá com o encosto reto (28/10: \"corrija a imperfeição no sofá\") e o aparador sem a plantinha que não está no PDF.",
-     "pontos": [
-      [
-       1960,
-       1205
-      ],
-      [
-       1990,
-       1430
       ]
      ]
     },
     {
      "n": 19,
+     "origem": "voce",
+     "texto": "Copinha com o tampo da E, a cuba Franke e o armário; rouparia com a estante aberta e os nichos; elevador com a cabine da biblioteca (18/11).",
+     "pontos": [
+      [
+       2034,
+       931
+      ],
+      [
+       2150,
+       730
+      ],
+      [
+       2001,
+       769
+      ]
+     ]
+    },
+    {
+     "n": 20,
+     "origem": "voce",
+     "texto": "Sala íntima: o tapete, a mesa de centro, a mesa lateral e a poltrona da biblioteca (18/11); o sofá de antes fica (o L da biblioteca não cabe no do PDF), com o encosto reto (28/10).",
+     "pontos": [
+      [
+       1985,
+       1330
+      ],
+      [
+       2112,
+       1306
+      ]
+     ]
+    },
+    {
+     "n": 21,
      "origem": "voce",
      "texto": "Portas de giro sem os arcos (20/10) e no padrão da Casa D, quina a quina, sem os restos brancos e as manchas na dobradiça: banho master, banhos 3 e 4 e o lado da suíte 4.",
      "pontos": [
@@ -1419,7 +1473,7 @@
      ]
     },
     {
-     "n": 20,
+     "n": 22,
      "origem": "voce",
      "texto": "As mesmas portas sem arco e no padrão da Casa D nos banhos 1 e 2 e nas suítes 1 e 2.",
      "pontos": [
@@ -1442,21 +1496,21 @@
      ]
     },
     {
-     "n": 21,
+     "n": 23,
      "origem": "voce",
-     "texto": "Rótulos fora dos objetos: o do banho master fora da banheira, o do banho 3 afastado do vaso e o da suíte 1 fora do tapete.",
+     "texto": "Rótulos no padrão (16/11): Inter, um corpo, no meio do piso livre, as fileiras e as colunas alinhadas.",
      "pontos": [
       [
-       1840,
-       660
+       1830,
+       630
       ],
       [
-       1515,
-       1285
+       1636,
+       983
       ],
       [
-       2273,
-       1222
+       1538,
+       1138
       ]
      ]
     }

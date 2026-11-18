@@ -3969,6 +3969,40 @@ a lista ao lado (e embaixo da planta, quando sobra altura), no maior corpo que c
 e o PDF único `POE642_Book/levantamento/POE642_Levantamento_Ajustes.pdf`. Rode depois de refazer as pranchas
 (`python3 levantamento_ajustes.py`, ou `--casa E` para só as da E).
 
+#### Casa E, 1º Pavimento: o levantamento de 18/11 aplicado (para o OK)
+
+Usuário, sobre o levantamento (`POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811_levantamento.jpg` e
+`..._1811_mobiliario.jpg`): "1. Quartzito Aura 2. confirmo" (o piso dos banhos fica; os chuveiros no quadrado de parede
+da biblioteca). `pedidos_1pav_casae_1811.py` parte da final do commit b227fc4 e faz um passo por item:
+- `nublado` (1, 2): o Térreo esmaecido refeito pelo Térreo aprovado (sem os textos e as setas dele, inpaint), no nublado
+  dos 1º Pavimentos; fora da pegada, inteiro (o tracejado do lote e a faixa de baixo saem); nos vazios, o nublado vezes
+  os traços da final (a razão na luminância).
+- `escada` (3): os degraus cortados sob o véu de 38% no tom da escada (sem o branco); ▶ e D no degrau de cima.
+- `tracejados` e `rouparia` (4, 5): a limpeza de todos os grupos (`tracejados_pb_1p`); voltam o X dos vazios e do
+  shaft e, nas claraboias do banho master, só o retângulo cinza fino; a rouparia sem o tracejado (o piso de madeira
+  dela inteiro de novo) e sem a soleira, a folha de correr no bronze.
+- `elevador` e `chuveiros` (7, 8): a cabine da biblioteca; as cabeças quadradas da biblioteca nos quadrados do PDF, com
+  o braço cromado até a parede (no master, até as paredes do lado do box) e o piso de antes refeito pela amostra do
+  próprio box, na luz do próprio ambiente (`limpar_piso`).
+- `banhos` (6, 12): a bancada de quartzito Aura com a cuba esculpida (esticada sem esticar a cuba) e a bacia Carrara
+  nos banhos 1 a 4; no master, a bancada dupla com as 2 cubas nos lugares do PDF (`bancada_cubas`), a banheira oval, o
+  misturador de piso e a bacia (a linha da claraboia de novo por cima).
+- `esquadrias` (9): os 5 boxes no vidro claro com o fio e os perfis no bronze (`pedidos_subsolo_casae_1811.VIDRO_C`);
+  as peças brancas do PDF (ARQ_PAREDE) por grupo: nas 13 esquadrias (portas de correr das varandas, janelas dos banhos
+  e da floreira, portas do banho master, porta da sala íntima), o vão numa cor só, os vidros claros com a linha do meio
+  e os marcos no bronze contornado; fora delas, os batentes das portas de giro no bronze contornado.
+- `mobiliario` (12): nas 5 suítes, tapete, cama (king na master), criados, banco k4 e cadeira da escrivaninha nos
+  retângulos do PDF (ARQ_LAYOUT HUMANIZAÇÃO), o piso de antes refeito pela amostra limpa da circulação; na master,
+  também a poltrona e o criado redondo. Na sala íntima, tapete, mesas e poltrona da biblioteca; o sofá fica (o L da
+  biblioteca, de chaise larga e curta, não cabe no do PDF, de 0,84 x 2,0 m; o de antes é o mesmo modelo, no lugar do
+  PDF). Na copinha, o tampo da E com a cuba Franke e o armário; na rouparia, a estante aberta e os nichos.
+- `rotulos` (10): os 23 rótulos no padrão de 16/11 (Inter, um corpo, no piso livre, fileiras e colunas alinhadas) e
+  "DESCE PARA O / TÉRREO" à esquerda da escada.
+- Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811_{geral,detalhes1,detalhes2}_antes_depois.jpg`;
+  a página do levantamento da E (1º Pavimento) atualizada. O 12K A e B depois do OK.
+- **Como refazer:** `python3 pedidos_1pav_casae_1811.py [--de <passo>] [--ate <passo>] [--cache <pasta>]`; depois
+  `rodape_entrega.py`, `pdf_entrega.py`, `book_entrega.py` e `levantamento_ajustes.py --casa E`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
