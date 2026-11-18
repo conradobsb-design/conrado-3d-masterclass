@@ -3833,8 +3833,49 @@ As portas das casas de máquinas (usuário: "Porta da casa de máquinas em tom b
 academia, e a de 5,83 m², do depósito) no bronze escovado das folhas das suítes do 1º Pavimento da E (`BRONZE`, de
 `final3840_casac.BRISES_SUITES_TC`: a cor, a borda escura, os fios no comprido e um brilho fino no meio). Antes e
 depois em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_porta_bronze_antes_depois.jpg`.
+
+Depois do 12K (18/11), a rodada de ajustes do usuário:
+- **Bordas da piscina** ("SOMENTE ESSA PARTE ASSINALADA DEVE SER REPRESENTADA COM O REVESTIMENTO DA PISCINA. O RESTANTE
+  DA BORDA VOLTA PARA O BEGE BAHIA", com a nota do cliente "Essa borda é no mesmo revestimento da piscina"): a pastilha
+  só entre a piscina comprida e a academia e na faixa sob a parede dela até o tanque (`PISCINA["pastilha"]`, 2 faixas);
+  a de cima, a da esquerda e a do tanque do lado da sauna voltam ao Bege Bahia liso (`PISCINA["bege"]`).
+- **Revestimento da cascata** ("DIMINUIR A ALTURA DELE"): a faixa de travertino com 0,16 m (`pedra_px` 9,6), a aresta e
+  a sombra mais leves; a água sai da face dela como antes.
+- **Ducha** ("ESSA PORTA ESTÁ FLUTUANDO [...] JUNTO A OUTRA PARTE DO BATENTE EM VIDRO E FAÇA UM SUTIL CONTORNO"; "MELHORE
+  A REPRESENTAÇÃO DO CHUVEIRO E SEU ENTORNO NO PISO"): o vidro fixo do PDF (da parede à dobradiça) e a folha presos um
+  ao outro, os dois com o fio e os perfis no bronze das esquadrias (`VIDRO_C`, também no box do vestiário); a faixa
+  amarelada da folha de antes sai do piso (`TRAV_RISCOS["forca"]`), o chuveiro é refeito com o braço até o fundo do
+  nicho do PDF e o nicho no travertino do box, um tom abaixo (`NICHO_DUCHA`).
+- **Riscos do travertino** ("REMOVA ESSES RISCOS NO PISO E MANTENHA O ÍNTEGRO"): o passo `travertino_riscos`, logo
+  depois do `travertino_limpo`: o que destoa da mediana do lugar e é fino ou pontinho, e a lista dos traços junto às
+  peças (`forca`: os da porta da sauna, os do vestiário, as faixas claras nos vãos do WC e do box), refeitos pelo piso
+  em volta (só o piso: as paredes entram no tom dele antes do preenchimento, para o cinza não escorrer) com o veio da
+  própria textura do travertino.
+- **Bolas** ("FICARAM FALTANDO OS SUPORTES DAS BOLAS. OS SUPORTES DEIXAM AS BOLAS SUSPENSAS"): o suporte de parede do PDF
+  (`SUPORTE_BOLAS`: as 2 chapas na parede, os braços, a barra da frente e o trilho, em tubo grafite, com a sombra no piso
+  afastada) e as bolas por cima, com a sombra mais longa e macia (`SOMBRA_SUSPENSA`).
+- **Batentes e esquadrias** (com as portas de correr da academia: "OS BATENTES SÃO BRANCOS. QUANDO VEMOS A IMAGEM
+  DISTANTE, ELES SOMEM E PARECE QUE AS PORTAS ESTÃO FLUTUANDO [...] RECOMENDO O TOM BRONZE DAS ESQUADRIAS"; com a janela
+  do DCE: "PRECISAMOS CONTORNAR OS BATENTES E AS JANELAS"; com a porta da sauna: "PRECISAMOS DAR COR AO BATENTE E A
+  PORTA INTERNA NO TOM MADEIRA"; e "AS PORTAS PRECISAM FAZER QUINA A QUINA COM A SUA RESPECTIVA PAREDE"): o passo
+  `esquadrias`, depois das portas, pinta as peças brancas do PDF (ARQ_PAREDE) no bronze das esquadrias (o das portas
+  das casas de máquinas) com o contorno do bronze escuro: os batentes e as guarnições das 7 portas de giro (a folha
+  encosta no batente, que encosta na parede), os marcos e os montantes das 2 portas de correr da academia e da janela do
+  DCE; o vão inteiro delas é refeito (a soleira e o peitoril no Bege Bahia da circulação, contornados) e os vidros
+  ficam claros com o contorno bronze e a linha do meio. As portas da sauna e do vestiário passam à madeira das portas.
+- **Armário com TV** ("TOM ARMÁRIO COM TV"): o móvel de marcenaria do PDF junto à parede de baixo do DCE
+  (`ARMARIO_TV`, 1,20 x 0,30 m) na cor sólida dos armários da E, com o fio e o tampo de dentro um tom abaixo, e a TV do
+  PDF em grafite, com o fio da tela, o pé e a sombra curta (o tubo cinza do render sai).
+- **Cuba do WC DCE 2** ("A TORNEIRA DA PIA FICOU NO LUGAR ERRADO. E O FUNDO DA CUBA ESTÁ BRANCO, MAS DEVERIA ESTAR NO
+  TRAVERTINO"): a torneira na parede da direita, onde a bancada encosta (`cuba_giro` -90), e o fundo branco da cuba no
+  travertino da borda da própria peça, um tom abaixo, com a luz da louça (`cuba_travertino`).
+Na final e nos 12K A e B (refeitos pelo Topaz, jobs ca39b16e, A, e 91207d28, B; a cascata 4K direto no 12K). Antes e
+depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_borda_cascata_antes_depois.jpg` e
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_portas_ducha_antes_depois.jpg`.
+
 Depois, a prancha (`rodape_entrega.py --config ../../POE642_CasaE/config_bases.json --no-quadro --render Subsolo=...`), o
-PDF da E e o book. O Subsolo da E ainda não tem 12K: entra depois do OK (`ampliacao_12k_casae.py`).
+PDF da E e o book; o 12K (`ampliacao_12k_casae.py`) na seção dele.
 
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
