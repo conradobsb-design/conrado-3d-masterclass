@@ -159,8 +159,9 @@ def cuba_12k(out, fin):
 
 
 def folhas_12k(out, fin, base):
-    """As plantas 4K, a floreira e a bancada 4K do banho master do 1º Pavimento direto no 12K: o afim da final ao 12K,
-    afinado em volta de cada peça na imagem sem as plantas (`base`, a que entrou no Topaz, nas coordenadas da final)."""
+    """As plantas 4K, a floreira, a bancada 4K do banho master e os monitores e teclados Apple das escrivaninhas do 1º
+    Pavimento direto no 12K: o afim da final ao 12K, afinado em volta de cada peça na imagem sem as plantas (`base`, a
+    que entrou no Topaz, nas coordenadas da final)."""
     import danae_foto as DF
     import pedidos_1pav_casae_1811 as P1
     from correcoes_terreo_casab_1611 import Mapa
@@ -173,6 +174,7 @@ def folhas_12k(out, fin, base):
         return Mapa(m.s, m.t)
     P1.folhas_12k(out, mapa)
     P1.bancada_master_12k(out, mapa)
+    P1.computadores_12k(out, mapa)
 
 
 def linhas_kalam(sem_textos):

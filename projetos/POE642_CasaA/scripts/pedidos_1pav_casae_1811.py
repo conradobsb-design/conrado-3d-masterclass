@@ -47,6 +47,8 @@ TERREO = R / "POE642_CasaE_PH_Terreo_v1_final.png"
 RAIZ_GIT = AQUI.parents[2]
 ANTES_COMMIT = "b227fc4"
 BIB = CASA / "biblioteca-objetos" / "03-primeiro-pavimento"
+# o quartzito Aura (Higgsfield, 4096 px, a foto da chapa; usuário: "todos os pisos dos banhos são em quartzito aura")
+AURA = BIB / "banho-master/quartzito-aura-4k.jpg"
 PAREDE = (80, 80, 80)
 
 
@@ -452,8 +454,11 @@ BANCADA_SIMPLES = {"png": "banho-1/bancada-simples-quartzito-aura", "cols": (0.2
 # dela (`bancada-dupla-quartzito-aura-4k`, 5679 x 2322, as cubas esculpidas na mesma pedra), e no 12K entra direto
 MASTER = {"bancada": (1910.1, 445.0, 1945.0, 593.0), "cubas": (491.25, 552.65),
           "png": "banho-master/bancada-dupla-quartzito-aura-4k",
-          "cols": ((0.08, 0.39), (0.567, 0.88)), "banheira": (1799.8, 470.8, 1853.3, 554.8),
-          "misturador": (1800.0, 458.5, 9.0, 13.0), "bacia": (1774.2, 780.6, 1795.3, 811.3),
+          # (usuário: "a torneira de piso da banheira foi colocada no lugar errado") a banheira no contorno inteiro do PDF
+          # (ARQ_LOUÇAS E METAIS, de 454,2 a 554,8: a cabeceira arredondada entra) e o misturador de piso no meio da
+          # cabeceira, junto à parede, a bica sobre a borda (antes ficava solto no canto de cima, à esquerda)
+          "cols": ((0.08, 0.39), (0.567, 0.88)), "banheira": (1799.8, 454.2, 1853.3, 554.8),
+          "misturador": (1826.55, 455.5, 9.0, 13.0), "bacia": (1774.2, 780.6, 1795.3, 811.3),
           "banheira_antes": (1784, 447, 1868, 601),         # a de antes era maior que a do PDF
           "floreira": (1730, 440, 1784, 610), "vaso_antes": (1749, 766, 1818, 812), "linha": (1745, 778, 1822, 796),
           "amostra": (1770, 615, 1890, 700), "amostra_vaso": (1758, 732, 1814, 764)}
@@ -465,42 +470,128 @@ MASTER = {"bancada": (1910.1, 445.0, 1945.0, 593.0), "cubas": (491.25, 552.65),
 # claro da parte de cima do banho master (da floreira à parede da bancada, até as paredes do vaso e do box) é refeito
 # inteiro: a luz larga do piso do render (a final de b227, sem as peças: o que foge da mediana), vezes as nuvens finas da
 # pedra (ruído em 3 escalas, de leve), e as peças entram de novo por cima.
-PISO_BM = {"caixa": (1742, 447, 1947, 713), "ponto": (1830, 650),
+# (usuário: "corrigir o piso das regiões do vaso e chuveiro, igual ao resto do banheiro") também o do vaso e o do box,
+# com os chuveiros, a bacia e os retângulos das claraboias de novo por cima
+PISO_BM = {"caixa": (1742, 447, 1947, 813), "pontos": [(1830, 650), (1785, 745), (1890, 745)],
            # a floreira e o armário do PDF junto à parede de baixo dela (ARQ_LAYOUT, com a diagonal) ficam
            "fora": [(1738, 440, 1782, 533), (1746, 533, 1778, 596)],
-           "luz_sigma": 40.0, "foge": 14, "nuvens": [(14.0, 0.016), (5.0, 0.009), (1.4, 0.006)], "semente": 1816}
+           "semente": 1816}
 
 
-def piso_banho_master(Q, out, q=PISO_BM):
+# (usuário: "todos os pisos dos banhos são em quartzito aura") o piso do banho master (o de cima, o do vaso e o do box) e
+# o dos banhos 1 a 4 (com o box e o nicho do chuveiro) em placas de quartzito Aura de 1,20 x 1,20 m: cada placa um
+# recorte ao acaso da foto da chapa (`AURA`, 3 m de lado; os veios na mesma diagonal, a placa às vezes girada 180°), as
+# juntas finas um tom abaixo, a luz do piso do render (a final de b227, sem as peças: o que foge da mediana) só no
+# claro e escuro. Junto às paredes, a mistura com o cinza delas pela cobertura do PDF; as folhas das portas ficam; as
+# peças (bancadas, bacias, banheira, chuveiros, retângulos das claraboias) entram de novo por cima
+PISO_AURA = {"placa_m": 1.2, "aura_m": 3.0, "junta": 0.93, "junta_px": 0.45, "tom": 0.965, "luz": (0.88, 1.06),
+             "luz_sigma": 40.0, "foge": 14, "ss": 4}
+PISO_BANHOS = {
+    # retângulo de dentro (px), nicho do chuveiro (px), origem das placas (px), semente
+    "banho 2": {"caixa": (2361, 567, 2557, 674), "nicho": (2515, 561, 2540, 567), "origem": (2361, 674), "semente": 1821},
+    "banho 1": {"caixa": (2361, 934, 2557, 1041), "nicho": (2515, 928, 2540, 934), "origem": (2361, 1041),
+                "semente": 1822},
+    "banho 4": {"caixa": (1408, 1116, 1604, 1205), "nicho": (1427, 1205, 1450, 1210), "origem": (1604, 1116),
+                "semente": 1823},
+    "banho 3": {"caixa": (1408, 1218, 1604, 1307), "nicho": (1427, 1213, 1450, 1218), "origem": (1604, 1218),
+                "semente": 1824},
+}
+
+
+def placas_aura(caixa, origem, semente, q=PISO_AURA):
+    """As placas de Aura na `caixa` (px, float32 BGR), a grade a partir de `origem` (px), com as juntas."""
+    import mobiliario_terreo_casac_1311 as MB
+    if "aura" not in _CACHE:
+        _CACHE["aura"] = cv2.imread(str(AURA)).astype(np.float32)
+    T = _CACHE["aura"]
+    ss = q["ss"]
+    x0, y0, x1, y1 = caixa
+    ox, oy = origem
+    p = q["placa_m"] * MB.PX_M                            # px da final por placa
+    tam = int(round(q["placa_m"] / q["aura_m"] * T.shape[1]))
+    rng = np.random.default_rng(semente)
+    W, H = (x1 - x0) * ss, (y1 - y0) * ss
+    tela = np.zeros((H, W, 3), np.float32)
+    junta = np.ones((H, W), np.float32)
+    jx = int(np.floor((x0 - ox) / p)) - 1
+    jy = int(np.floor((y0 - oy) / p)) - 1
+    for gy in range(jy, jy + int((y1 - y0) / p) + 3):
+        for gx in range(jx, jx + int((x1 - x0) / p) + 3):
+            a0 = int(round((ox + gx * p - x0) * ss))
+            b0 = int(round((oy + gy * p - y0) * ss))
+            a1 = int(round((ox + (gx + 1) * p - x0) * ss))
+            b1 = int(round((oy + (gy + 1) * p - y0) * ss))
+            if a1 <= 0 or b1 <= 0 or a0 >= W or b0 >= H:
+                continue
+            rx, ry = rng.integers(0, T.shape[1] - tam), rng.integers(0, T.shape[0] - tam)
+            pl = T[ry:ry + tam, rx:rx + tam]
+            if rng.random() < 0.5:
+                pl = pl[::-1, ::-1]
+            pl = cv2.resize(pl, (a1 - a0, b1 - b0), interpolation=cv2.INTER_AREA)
+            c0, d0, c1, d1 = max(a0, 0), max(b0, 0), min(a1, W), min(b1, H)
+            tela[d0:d1, c0:c1] = pl[d0 - b0:d1 - b0, c0 - a0:c1 - a0]
+            e = max(1, int(round(q["junta_px"] * ss)))
+            for v in (a0, a1):
+                if 0 <= v < W:
+                    junta[:, max(v - e // 2, 0):v - e // 2 + e] = q["junta"]
+            for v in (b0, b1):
+                if 0 <= v < H:
+                    junta[max(v - e // 2, 0):v - e // 2 + e, :] = q["junta"]
+    tela *= junta[..., None]
+    return cv2.resize(tela, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA)
+
+
+def piso_aura(Q, out, caixas, pontos, origem, semente, fora=(), q=PISO_AURA):
+    """O piso de quartzito Aura nos não-parede das `caixas` (px) ligados aos `pontos`, fora os retângulos `fora` e as
+    folhas das portas (que ficam)."""
+    import correcoes_terreo_casab_1611 as CB
     import regras_terreo_casab_1311 as RT
     par = paredes(Q, 0.5)
     H, W = par.shape
-    x0, y0, x1, y1 = q["caixa"]
-    livre = ~RT.dilatar(par, 1)
-    n, lab = cv2.connectedComponents(livre[y0:y1, x0:x1].astype(np.uint8))
-    px, py = q["ponto"]
-    m = np.zeros((H, W), bool)
-    m[y0:y1, x0:x1] = lab == lab[py - y0, px - x0]
-    for a0, b0, a1, b1 in q["fora"]:
+    caixa = np.zeros((H, W), bool)
+    for a0, b0, a1, b1 in caixas:
+        caixa[b0:b1, a0:a1] = True
+    n, lab = cv2.connectedComponents((caixa & ~par).astype(np.uint8))
+    m = np.isin(lab, [lab[py, px] for px, py in pontos]) & (lab > 0)
+    for a0, b0, a1, b1 in fora:
         m[b0:b1, a0:a1] = False
-    # a luz: o piso do render da final aprovada de antes (b227), sem as peças
+    # a luz: o piso do render da final aprovada de antes (b227), sem as peças, só o claro e escuro
     ref = antes_img().astype(np.float32)
     med = np.median(ref[m], axis=0)
     fonte = m & (np.abs(ref - med).max(axis=2) < q["foge"])
-    s = q["luz_sigma"]
-    num = cv2.GaussianBlur(ref * fonte[..., None], (0, 0), s)
-    den = cv2.GaussianBlur(fonte.astype(np.float32), (0, 0), s)
-    L = num / np.maximum(den, 1e-4)[..., None]
-    rng = np.random.default_rng(q["semente"])
-    nv = np.zeros((H, W), np.float32)
-    for sg, amp in q["nuvens"]:
-        r = cv2.GaussianBlur(rng.normal(0, 1, (H, W)).astype(np.float32), (0, 0), sg)
-        nv += amp * r / max(float(r[m].std()), 1e-6)
-    novo = L * (1 + nv)[..., None]
-    a = cv2.GaussianBlur(m.astype(np.float32), (0, 0), 0.6) * m
+    sg = q["luz_sigma"]
+    num = cv2.GaussianBlur(ref.mean(axis=2) * fonte, (0, 0), sg)
+    den = cv2.GaussianBlur(fonte.astype(np.float32), (0, 0), sg)
+    L = num / np.maximum(den, 1e-4)
+    L = np.clip(L / float(np.median(L[m])), *q["luz"])
+    ys, xs = np.nonzero(RT.dilatar(m, 1))
+    bx0, by0, bx1, by1 = int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
+    novo = np.zeros((H, W, 3), np.float32)
+    novo[by0:by1, bx0:bx1] = placas_aura((bx0, by0, bx1, by1), origem, semente)
+    novo *= (L * q["tom"])[..., None]
+    # junto às paredes: o cinza delas pela cobertura do PDF
+    FE.paredes_pdf(Q)
+    ap = np.clip(Q._par, 0, 1).astype(np.float32)
+    zona = RT.dilatar(m, 1) & (ap < 0.98) & caixa
+    fora_m = np.zeros((H, W), bool)
+    for a0, b0, a1, b1 in fora:
+        fora_m[b0:b1, a0:a1] = True
+    zona &= ~fora_m
+    novo = np.float32(PAREDE)[None, None] * ap[..., None] + novo * (1 - ap[..., None])
+    af = np.zeros((H, W), np.float32)
+    for f in folhas_portas(out):
+        af = np.maximum(af, CB.alfa_ret(f, (H, W)))
+    w = zona.astype(np.float32) * (1 - af)
     o = out.astype(np.float32)
-    o = o * (1 - a[..., None]) + novo * a[..., None]
-    return u8(o)
+    o = o * (1 - w[..., None]) + novo * w[..., None]
+    return u8(o), int(m.sum())
+
+
+def piso_banho_master(Q, out, q=PISO_BM):
+    """O piso do banho master (o de cima, o do vaso e o do box) em quartzito Aura (`piso_aura`)."""
+    x0, y0, x1, y1 = q["caixa"]
+    out, n = piso_aura(Q, out, [q["caixa"]], q["pontos"], (x0, y0), q["semente"], fora=q["fora"])
+    return out
 
 
 def bancada_master_12k(out, mapa, q=MASTER):
@@ -534,9 +625,11 @@ def banhos(Q, img, q=BANHOS, m=MASTER):
     Pb = ler("banho-1/bacia-carrara")
     Ps = ler(BANCADA_SIMPLES["png"])
     for nome, b in q.items():
+        pb = PISO_BANHOS[nome]
+        a0, b0, a1, b1 = pb["caixa"]
+        out, _ = piso_aura(Q, out, [pb["caixa"], pb["nicho"]], [((a0 + a1) // 2, (b0 + b1) // 2)], pb["origem"],
+                           pb["semente"])
         x0, y0, x1, y1 = b["bancada"]
-        out = _limpa(Q, out, b["bancada"], 3, b["amostra"])
-        out = _limpa(Q, out, b["bacia_antes"], 0, b["amostra"])
         L, D = x1 - x0, y1 - y0
         pos = (b["cuba"] - x0) / L
         if b["frente"] == (0, -1):
@@ -546,8 +639,11 @@ def banhos(Q, img, q=BANHOS, m=MASTER):
         x0, y0, x1, y1 = b["bacia"]
         out = MBE.pousar(out, Pb, (x0 + x1) / 2, (y0 + y1) / 2, x1 - x0, y1 - y0, MB.frente(b["bacia_frente"]), "baixa",
                          par)
-    # o master: o piso inteiro da parte de cima refeito (as manchas, os retângulos e o contorno da bancada de antes)
+    # o master: o piso inteiro refeito (as manchas, os retângulos e o contorno da bancada de antes; o vaso e o box), e
+    # os 2 chuveiros dele de novo
     out = piso_banho_master(Q, out)
+    for nome, cab, lado, parede, _, _ in CHUVEIROS:
+        out = chuveiro(out, Q, cab, lado, parede)
     mx, my, mw, mh = m["misturador"]
     x0, y0, x1, y1 = m["bancada"]
     L, D = y1 - y0, x1 - x0
@@ -558,21 +654,23 @@ def banhos(Q, img, q=BANHOS, m=MASTER):
                      MB.frente((1, 0)), "movel", par)
     out = MBE.pousar(out, ler("banho-master/misturador-piso-banheira-render"), mx, my, mw, mh, MB.frente((0, 1)),
                      "baixa", par)
-    # a bacia, sob a linha da claraboia (de novo por cima dela)
-    out = limpar_piso(Q, out, m["vaso_antes"], m["amostra_vaso"])
+    # a bacia, sob os retângulos das claraboias (de novo por cima)
     x0, y0, x1, y1 = m["bacia"]
     out = MBE.pousar(out, Pb, (x0 + x1) / 2, (y0 + y1) / 2, x1 - x0, y1 - y0, MB.frente((0, -1)), "baixa", par)
-    out = linha_claraboia(Q, out, m["linha"])
+    out = linha_claraboia(Q, out, PISO_BM["caixa"], nomes=("banho master: vaso", "banho master: box"))
     print(f"    banhos: {', '.join(q)} com a bancada de quartzito e a cuba esculpida da biblioteca e a bacia Carrara; "
           "master com a bancada dupla da E (as 2 cubas no lugar do PDF), a banheira oval, o misturador de piso e a bacia")
     return out
 
 
-def linha_claraboia(Q, out, caixa):
-    """A linha tracejada da claraboia do vaso do master de novo, só dentro da `caixa` (px): sobre a bacia nova."""
+def linha_claraboia(Q, out, caixa, nomes=("banho master: vaso",)):
+    """Os retângulos tracejados das claraboias do master (`nomes`) de novo, só dentro da `caixa` (px): sobre a bacia e
+    o piso novos (só os traços retos, como em `tracejados`: sem o X)."""
     import revisao_1pav_casae_1711 as RV
-    trechos = [(n, [t for t in tr if abs(t[3] - t[1]) < 0.3]) for n, tr in FE._tracos_1p(Q)
-               if n == "banho master: vaso"]
+
+    def reto(t):
+        return abs(t[2] - t[0]) < 0.3 or abs(t[3] - t[1]) < 0.3
+    trechos = [(n, [t for t in tr if reto(t)]) for n, tr in FE._tracos_1p(Q) if n in nomes]
     q = dict(FE.TRACEJADOS_1P, larg_px=RV.LARG_PX, preto=RV.CINZA, branco=RV.CINZA_ESCURO)
     com = quieto(FE.tracejados_pb_te, Q, out, q=q, trechos=trechos)
     x0, y0, x1, y1 = (int(round(v)) for v in caixa)
@@ -844,7 +942,16 @@ SALA_INTIMA = {"tapete": (1876, 1235, 2115, 1384), "sofa": [(1867, 1215, 1917, 1
                # tapete), e entra a mesa redonda de carvalho da biblioteca, a da mesa de centro, no mesmo lugar
                "lateral_sofa_antes": (2077, 1199, 2120, 1235), "lateral_sofa": (2097.5, 1218.5, 33.0)}
 COPINHA = {"tampo": (1888.3, 916.2, 2053.4, 951.6), "cuba": (2034.4, 931.2, 30.0, 24.0),
-           "armario": (2053.4, 916.2, 2216.7, 951.6)}
+           "armario": (2053.4, 916.2, 2216.7, 951.6),
+           # (usuário: "melhore aspecto da bancada e do armario ao lado dela com tom sólido adotado nas outras casas.
+           # remova linhas técnicas da imagem") o tampo no quartzito Aura dos banhos (a foto de 4096 px por 3 m, os veios
+           # na diagonal, a aresta da frente um tom abaixo), a cuba Franke de volta; o armário liso no tom dos armários
+           # das outras casas (`armario_liso`, sem a divisão das portas nem o fio do meio); a faixa da parede de baixo
+           # (os tracinhos claros e escuros do PDF e o fio da base) no cinza 80 antes
+           "aura_m": 3.0, "aura_x0": 140, "aresta": 0.9,
+           "parede": (1886, 951, 2219, 959),
+           # o "m²" de um rótulo antigo no piso diante do armário: o piso das mesmas fiadas, 35 px à direita
+           "piso_resto": ((2138, 896, 2162, 911), (35, 0))}
 ROUPARIA_MOVEIS = {"estante": (2082.3, 715.8, 2216.7, 745.6), "nichos": (2186.8, 745.6, 2216.7, 807.7)}
 
 
@@ -867,6 +974,21 @@ def armario_liso(out, rets, par):
     borda = m & ~cv2.erode(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
     cor = np.float32(c["cor_armario"])[None, None] * np.where(borda, c["face"], 1.0)[..., None]
     return u8(o * (1 - a[..., None]) + cor * a[..., None])
+
+
+def tampo_aura(L, D, q=COPINHA, ss=4):
+    """O tampo L x D px (x ss, BGRA) recortado da foto do quartzito Aura (`q["aura"]`, `q["aura_m"]` metros de lado), a
+    aresta da frente (em cima) um tom abaixo."""
+    import mobiliario_terreo_casac_1311 as MB
+    T = cv2.imread(str(AURA))
+    k = T.shape[1] / (q["aura_m"] * MB.PX_M)          # px da foto por px da final
+    w, h = int(round(L * k)), int(round(D * k))
+    x0 = q["aura_x0"]
+    y0 = (T.shape[0] - h) // 2
+    P = cv2.resize(T[y0:y0 + h, x0:x0 + w], (round(L * ss), round(D * ss)), interpolation=cv2.INTER_AREA)
+    P = P.astype(np.float32)
+    P[:max(1, round(0.6 * ss))] *= q["aresta"]
+    return np.dstack([P, np.full(P.shape[:2], 255, np.float32)])
 
 
 def repetida(P, L, D, ss=4):
@@ -902,7 +1024,7 @@ def _fase(prof, larg):
     return melhor[1]
 
 
-def vinilico_novo(Q, out, buraco, q=VINIL_NOVO):
+def vinilico_novo(Q, out, buraco, q=VINIL_NOVO, luz_dentro=False):
     """Réguas novas do vinílico da E (`retoque_1pav_casae.reguas_vinilico`, o desenho da final) em cada região do
     `buraco`, com as fiadas na fase das do piso de em volta (a junta no mesmo y: as tábuas continuam nas bordas) e na
     luz dele (a média local normalizada do anel de piso em volta, estendida para dentro)."""
@@ -921,6 +1043,8 @@ def vinilico_novo(Q, out, buraco, q=VINIL_NOVO):
     for i in range(1, n):
         b_g = lab == i
         ys, xs = np.nonzero(b_g)
+        if luz_dentro and len(ys) < 60:      # um retalho solto (entre os caixilhos), não é o piso do quarto
+            continue
         g = q["anel_px"] + 8
         X0, Y0, X1, Y1 = max(xs.min() - g, 0), max(ys.min() - g, 0), min(xs.max() + g + 1, W), min(ys.max() + g + 1, H)
         b = b_g[Y0:Y1, X0:X1]
@@ -935,14 +1059,28 @@ def vinilico_novo(Q, out, buraco, q=VINIL_NOVO):
         # a luz
         Lt = np.zeros_like(reg)
         falta = RT.dilatar(b, 3)
+        if luz_dentro:                    # o quarto inteiro: a luz larga do próprio piso dele (sem os móveis de antes)
+            mad = b & madeira[Y0:Y1, X0:X1]
+            if mad.sum() < 20:
+                continue
+            med = np.median(reg[mad], axis=0)
+            fonte = mad & (np.abs(reg - med).max(axis=2) < 25)
+            for sg in (48, 96, 192):
+                num = cv2.GaussianBlur(reg * fonte[..., None], (0, 0), sg)
+                den = cv2.GaussianBlur(fonte.astype(np.float32), (0, 0), sg)
+                ok = falta & (den > 0.02)
+                Lt[ok] = (num / np.maximum(den, 1e-6)[..., None])[ok]
+                falta &= ~ok
+            Lt[falta] = med
+            anel = anel & False
         for sg in q["sigmas"]:
             num = cv2.GaussianBlur(reg * anel[..., None], (0, 0), sg)
             den = cv2.GaussianBlur(anel.astype(np.float32), (0, 0), sg)
             ok = falta & (den > 0.02)
             Lt[ok] = (num / np.maximum(den, 1e-6)[..., None])[ok]
             falta &= ~ok
-        if falta.any():
-            Lt[falta] = reg[anel].mean(axis=0) if anel.any() else reg[b].mean(axis=0)
+        if falta.any() and anel.any():
+            Lt[falta] = reg[anel].mean(axis=0)
         # o anel não pode ter os móveis claros/escuros de madeira: o que foge muito da luz larga dele sai e a luz é
         # refeita (uma passada)
         foge = anel & (np.abs(reg - Lt).max(axis=2) > 28)
@@ -989,23 +1127,44 @@ def cortina_tecido(img, caixa, lado):
     return out
 
 
-def piso_suite(Q, out, s):
+# (usuário: "o piso tem que ter cntinuidade sem quebras e sem montagens inapropriadas") o piso de cada suíte refeito
+# inteiro, de parede a parede (a face de dentro das paredes medida da cama; do lado da janela, até o tecido da cortina),
+# numa luz só, a larga do próprio piso do quarto: sem as emendas entre o piso refeito e restos de limpezas antigas (a
+# faixa borrada junto ao criado da master). Ficam: as paredes, o tecido das cortinas, as folhas das portas
+# (`portas_casae_1711.portas`) e as escrivaninhas (o tampo é refeito em `retoques`).
+QUARTOS = {"suíte master": (1406, 566, 1733, 883), "suíte 2": (2225, 683, 2484, 921),
+           "suíte 1": (2225, 1050, 2484, 1289), "suíte 4": (1406, 892, 1739, 1106),
+           "suíte 3": (1406, 1315, 1739, 1530)}
+_FOLHAS = {}
+
+
+def folhas_portas(img):
+    """As folhas das portas de giro do 1º Pavimento (px), como `portas_casae_1711` as acha no PDF."""
+    if "f" not in _FOLHAS:
+        import portas_casae_1711 as PC
+        with contextlib.redirect_stdout(io.StringIO()):
+            _FOLHAS["f"] = [p["folha"] for p in PC.portas("1Pavimento", img).values()]
+    return _FOLHAS["f"]
+
+
+def piso_suite(Q, out, nome, s):
     import regras_terreo_casab_1311 as RT
     par = paredes(Q, 0.5)
     H, W = par.shape
+    x0, y0, x1, y1 = QUARTOS[nome]
     b = np.zeros((H, W), bool)
-    for x0, y0, x1, y1 in s["limpa"] + s.get("extra", []):
-        b[int(y0):int(np.ceil(y1)), int(x0):int(np.ceil(x1))] = True
+    b[y0:y1, x0:x1] = True
     cx0, cy0, cx1, cy1 = s["cortina"]
     lado = "esq" if cx0 < 2000 else "dir"
     caixa = (cx0 + 8, cy0, cx1 + 6, cy1) if lado == "esq" else (cx0 - 6, cy0, cx1 - 8, cy1)
-    tecido = RT.dilatar(cortina_tecido(out, caixa, lado), 1)
-    faixa = np.zeros((H, W), bool)
-    faixa[caixa[1]:caixa[3], caixa[0]:caixa[2]] = True
-    b |= faixa & ~tecido
+    b &= ~RT.dilatar(cortina_tecido(out, caixa, lado), 1)
     b &= ~RT.dilatar(par, 1)
-    b[cy0:cy1, cx0:cx1] &= ~tecido[cy0:cy1, cx0:cx1]
-    return vinilico_novo(Q, out, b)
+    for fx0, fy0, fx1, fy1 in folhas_portas(out):
+        b[int(fy0) - 2:int(np.ceil(fy1)) + 2, int(fx0) - 2:int(np.ceil(fx1)) + 2] = False
+    if "mesa" in s:
+        mx0, my0, mx1, my1 = s["mesa"]
+        b[int(my0) - 1:int(np.ceil(my1)) + 1, int(mx0) - 1:int(np.ceil(mx1)) + 1] = False
+    return vinilico_novo(Q, out, b, luz_dentro=True)
 
 
 def mobiliario(Q, img):
@@ -1023,7 +1182,7 @@ def mobiliario(Q, img):
     antes = img.copy()
     bancos = []
     for nome, s in SUITES.items():
-        out = piso_suite(Q, out, s)
+        out = piso_suite(Q, out, nome, s)
         pasta = "suite-master" if nome == "suíte master" else "suite-1"
         out = pos(out, ler(f"{pasta}/tapete"), s["tapete"], (0, 1), None)
         r, tipo = s["cama"]
@@ -1071,18 +1230,21 @@ def mobiliario(Q, img):
     out = pos(out, ler("sala-intima/poltrona-intima-e"), s["poltrona"], (-1, 0), "movel", troca=True)
     # a copinha e a rouparia
     c = COPINHA
+    out = out.copy()
+    a0, b0, a1, b1 = c["parede"]
+    out[b0:b1, a0:a1] = PAREDE
+    out = copiar_piso(out, *c["piso_resto"])
+    out = armario_liso(out, [c["armario"]], par)
     x0, y0, x1, y1 = c["tampo"]
-    out = MBE.pousar(out, repetida(ler("copinha/tampo-copinha-e"), x1 - x0, y1 - y0), (x0 + x1) / 2, (y0 + y1) / 2,
-                     x1 - x0, y1 - y0, 0.0, None, par)
+    out = MBE.pousar(out, tampo_aura(x1 - x0, y1 - y0, c), (x0 + x1) / 2, (y0 + y1) / 2, x1 - x0, y1 - y0, 0.0, None,
+                     par)
     cx, cy, cw, chh = c["cuba"]
     out = MBE.pousar(out, ler("copinha/cuba-franke-misturador-unic"), cx, cy, cw, chh, MB.frente((0, -1)), "baixa", par)
-    x0, y0, x1, y1 = c["armario"]
-    out = MBE.pousar(out, repetida(ler("rouparia/armario-despensa-fechado"), x1 - x0, y1 - y0), (x0 + x1) / 2, (y0 + y1) / 2, x1 - x0, y1 - y0, MB.frente((0, -1)),
-                     None, par)
     out = armario_liso(out, [ROUPARIA_MOVEIS["estante"], ROUPARIA_MOVEIS["nichos"]], par)
     print(f"    mobiliário: {', '.join(SUITES)} (tapete, cama, criados, banco K3, cadeira sob o tampo; poltrona e criado "
           "redondo na master); sala íntima (tapete, mesa de centro, mesa lateral redonda, poltrona; o sofá fica); copinha (tampo, cuba "
-          "Franke, armário); rouparia (o armário liso em L, no tom das outras casas)")
+          "Franke, armário liso no tom das outras casas, sem as linhas técnicas); rouparia (o armário liso em L, no tom das "
+          "outras casas)")
     return out
 
 
@@ -1387,7 +1549,21 @@ RACK = {"png": CASA / "biblioteca-objetos/02-terreo/hall-de-entrada/aparador-fre
 ESCRIVANINHAS = [("suíte 2", (2226.0, 683.0, 2261.7, 823.0)), ("suíte 1", (2226.0, 1050.0, 2261.7, 1190.0)),
                  ("suíte 4", (1703.3, 892.0, 1739.0, 1032.0)), ("suíte 3", (1703.3, 1390.0, 1739.0, 1531.0))]
 ESCRIVANINHA = {"objeto": 30, "objeto_min_px": 5, "margem_px": 3, "veio": 0.035, "sombra": 0.20, "semente": 1813}
+# (usuário: "remova erros sobre a escrivaninha. deixe um teclado Apple em alta definição sobre a escrivaninha", "remova
+# residuos sobre a escrivaninha e substitua o teclado pelo teclado Apple") os objetos de antes do tampo (os pontinhos, o
+# bloco claro, a bolinha, o monitor borrado com a mancha marrom e o teclado branco) não voltam; no tampo liso, um monitor
+# de alumínio visto de cima (o topo da tela, o vidro escuro na frente, o pé) junto à parede e o teclado Apple na frente,
+# os dois no eixo da cadeira e em tamanho real (Studio Display 62,3 cm; Magic Keyboard 27,9 cm). As peças foram feitas
+# no Higgsfield sobre o preto e recortadas (`suite-4/monitor-apple-studio`, `suite-4/teclado-apple-magic`); no 12K entram
+# direto, nítidas (`computadores_12k`)
+COMPUTADOR = {"teclado": BIB / "suite-4/teclado-apple-magic.png", "monitor": BIB / "suite-4/monitor-apple-studio.png",
+              "teclado_m": 0.279, "monitor_m": 0.623, "monitor_parede_px": 8.0, "teclado_frente_px": 12.0}
 PORTA_SUITE2 = {"folha": (2225.6, 905.9, 2279.4, 908.3), "semente": 1814}
+# (usuário: "refazer as portas de correr do closet da suite master") as 2 folhas de correr do vão banho master / closet
+# master (ARQ_PAREDE) saíam num traço só, de ponta a ponta (o trecho entre elas também): cada folha de novo na madeira das
+# portas, separadas; entre elas, o piso do closet
+PORTAS_CLOSET = {"folhas": [(1954.3, 587.6, 1956.7, 623.4), (1954.3, 647.3, 1956.7, 683.1)],
+                 "entre": (1954, 623, 1960, 648), "semente": 1817}
 CLOSET_MASTER = {"faixa": (1956, 599, 2216, 672), "miolo": (1977, 605, 2195, 664), "sombras": {599: 0.82, 600: 0.72, 601: 0.90, 668: 0.92, 669: 0.82,
                                                               670: 0.70, 671: 0.84}}
 
@@ -1415,10 +1591,56 @@ def escrivaninha(out, r, semente, q=ESCRIVANINHA):
     nn = 1 + q["veio"] * nn / max(float(nn.std()), 1e-6)
     tampo = med[None, None] * nn[..., None]
     reg = reg * (1 - a[..., None]) + tampo * a[..., None]
-    ao = cv2.GaussianBlur(obj.astype(np.float32), (0, 0), 0.6)
-    reg = reg * (1 - ao[..., None]) + antes * ao[..., None]
+    if q.get("objetos_voltam", False):
+        ao = cv2.GaussianBlur(obj.astype(np.float32), (0, 0), 0.6)
+        reg = reg * (1 - ao[..., None]) + antes * ao[..., None]
     out[Y0:Y1, X0:X1] = u8(reg)
     return int(obj.sum())
+
+
+def _computadores(q=COMPUTADOR):
+    """Por escrivaninha: (peça, cx, cy, comprimento px, profundidade px, frente) do monitor e do teclado (px da final)."""
+    import mobiliario_terreo_casac_1311 as MB
+    res = []
+    for nome, (x0, y0, x1, y1) in ESCRIVANINHAS:
+        (c0, c1, c2, c3), d = SUITES[nome]["cadeira"]
+        cy = (c1 + c3) / 2
+        fr = (-d[0], -d[1])                     # o monitor e o teclado olham para a cadeira
+        if d == (-1, 0):                        # a cadeira à direita: a parede à esquerda
+            xm, xt = x0 + q["monitor_parede_px"], x1 - q["teclado_frente_px"]
+        else:
+            xm, xt = x1 - q["monitor_parede_px"], x0 + q["teclado_frente_px"]
+        for peca, x, m in (("monitor", xm, q["monitor_m"]), ("teclado", xt, q["teclado_m"])):
+            P = cv2.imread(str(q[peca]), cv2.IMREAD_UNCHANGED).astype(np.float32)
+            L = m * MB.PX_M
+            res.append((P, x, cy, L, L * P.shape[0] / P.shape[1], fr, peca))
+    return res
+
+
+def computadores(out, par):
+    import mobiliario_terreo_casac_1311 as MB
+    for P, cx, cy, L, D, fr, peca in _computadores():
+        out = MB.pousar(out, P, cx, cy, L, D, MB.frente(fr), "mesa" if peca == "monitor" else "baixa", par)
+    return out
+
+
+def computadores_12k(out, mapa):
+    """O monitor e o teclado direto no 12K (`out`, uint8, mudado no lugar), nítidos, sem a sombra (a da final fica)."""
+    import biblioteca_terreo_casaa_1211 as BT
+    import mobiliario_terreo_casac_1311 as MB
+    n = 0
+    for P, cx, cy, L, D, fr, peca in _computadores():
+        g = int(L / 2) + 4
+        m = mapa((int(cx) - g, int(cy) - g, int(cx) + g + 1, int(cy) + g + 1))
+        X, Y = m.x(cx) - 0.5, m.y(cy) - 0.5
+        G = int(g * m.s) + 4
+        X0, Y0 = int(X) - G, int(Y) - G
+        reg = out[Y0:Y0 + 2 * G, X0:X0 + 2 * G].astype(np.float32)
+        o = BT.pousar(reg, P, X - X0, Y - Y0, L * m.s, D * m.s, MB.frente(fr), [], MB.PX_M * m.s)
+        out[Y0:Y0 + 2 * G, X0:X0 + 2 * G] = u8(o)
+        n += 1
+    print(f"    {n} peças (monitor e teclado Apple) direto no 12K")
+    return out
 
 
 def rack(out, r, tv, frente, par, q=RACK):
@@ -1440,12 +1662,47 @@ def rack(out, r, tv, frente, par, q=RACK):
     return u8(o * (1 - a[..., None]) + cor * a[..., None])
 
 
+# (usuário: "corrigir as paredes, colocar o tom certo - suite 2") trechos de parede do render que ficaram quase pretos
+# (a parede entre o closet 2 e a escrivaninha da suíte 2, a de cima da suíte 1, fios escuros junto às faces): o px de
+# parede do PDF (a cobertura da ARQ_PAREDE) escuro vai ao cinza 80 das paredes (26/10); na borda, a mistura do cinza
+# com o de fora pela cobertura do PDF
+PAREDES_TOM = {"escuro": 60, "cinza": (80, 80, 80)}
+# (usuário: "painel de madeira segue no modelo adotado nas outras casas") a faixa de madeira por fora das folhas de vidro
+# das suítes 3, 4 e master, do lado da varanda principal (do render, marrom liso), no ripado de nogueira da Casa D
+# (`correcoes_terreo_casad_1711._ripado` com `um_pav_casaa_1111.FOLHAS_1P`, o do L da suíte master da D e das ripas do
+# escritório do Térreo da E): o veio ao longo, as juntas das ripas, a luz, o contorno e a sombra curta para a varanda
+# ("o painel é ambos os lados da casa") e a faixa da fachada da direita, por fora das varandas das suítes 1 e 2
+PAINEIS = [{"ret": (1389.6, 535.0, 1395.7, 1533.5), "lado": "x-", "semente": 1818},
+           {"ret": (2565.4, 555.0, 2571.5, 1287.5), "lado": "x-", "semente": 1819}]
+
+
+def paredes_tom(Q, out, q=PAREDES_TOM):
+    import regras_terreo_casab_1311 as RT
+    FE.paredes_pdf(Q)
+    a = np.clip(Q._par, 0, 1).astype(np.float32)
+    o = out.astype(np.float32)
+    lum = o.mean(axis=2)
+    cheio = (a > 0.5) & (lum < q["escuro"])
+    borda = RT.dilatar(cheio, 1) & ~cheio & (a > 0.02) & (lum < q["escuro"] + 60)
+    fora = ~RT.dilatar(a > 0.02, 1)
+    num = cv2.GaussianBlur(o * fora[..., None], (0, 0), 2.0)
+    den = cv2.GaussianBlur(fora.astype(np.float32), (0, 0), 2.0)
+    cinza = np.float32(q["cinza"])
+    viz = np.where((den > 0.05)[..., None], num / np.maximum(den, 1e-4)[..., None], cinza)
+    o[cheio] = cinza
+    ab = a[borda][:, None]
+    o[borda] = cinza * ab + viz[borda] * (1 - ab)
+    print(f"    paredes: {int(cheio.sum())} px escuros no cinza 80 ({int(borda.sum())} na borda)")
+    return u8(o)
+
+
 def retoques(Q, img):
     import portas_casae_1711 as PC
     import correcoes_terreo_casab_1611 as CB
     par = paredes(Q, 0.5)
     out = img.copy()
     n_obj = [escrivaninha(out, r, ESCRIVANINHA["semente"] + i) for i, (_, r) in enumerate(ESCRIVANINHAS)]
+    out = computadores(out, par)
     b = np.zeros(par.shape, bool)
     for x0, y0, x1, y1 in RACKS_LIMPA:
         b[y0:y1, x0:x1] = True
@@ -1453,6 +1710,18 @@ def retoques(Q, img):
     for nome, r, tv, fr in RACKS:
         out = rack(out, r, tv, fr, par)
     PC.folha(out, CB.Mapa(), PORTA_SUITE2["folha"], True, PORTA_SUITE2["semente"])
+    pc = PORTAS_CLOSET
+    x0, y0, x1, y1 = pc["entre"]
+    b = np.zeros(par.shape, bool)
+    b[y0:y1, x0:x1] = True
+    out = vinilico_novo(Q, out, b & ~par)
+    for i, f in enumerate(pc["folhas"]):
+        PC.folha(out, CB.Mapa(), f, False, pc["semente"] + i)
+    out = paredes_tom(Q, out)
+    import correcoes_terreo_casad_1711 as CD
+    import um_pav_casaa_1111 as U
+    for pv in PAINEIS:
+        CD._ripado(out, CB.Mapa(), pv["ret"], pv["lado"], U.FOLHAS_1P, np.random.default_rng(pv["semente"]))
     c = CLOSET_MASTER
     x0, y0, x1, y1 = c["faixa"]
     b = np.zeros(par.shape, bool)
@@ -1464,8 +1733,10 @@ def retoques(Q, img):
     for y, f in c["sombras"].items():
         o[y, x0:x1] *= f
     out = u8(o)
-    print(f"    retoques: {len(ESCRIVANINHAS)} escrivaninhas lisas, sem o fio escuro ({sum(n_obj)} px de objetos de volta); "
-          f"{len(RACKS)} racks (suítes e sala íntima) no aparador de freijó com a TV do PDF; a porta da suíte 2 em madeira; o piso do closet "
+    print(f"    retoques: {len(ESCRIVANINHAS)} escrivaninhas lisas, sem o fio escuro nem os resíduos ({sum(n_obj)} px de objetos "
+          "de antes fora), com o monitor e o teclado Apple; "
+          f"{len(RACKS)} racks (suítes e sala íntima) no aparador de freijó com a TV do PDF; a porta da suíte 2 e as 2 folhas de "
+          f"correr do closet master em madeira; o piso do closet "
           "master sem os traços")
     return out
 

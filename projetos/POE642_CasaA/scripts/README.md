@@ -4087,6 +4087,35 @@ Pedidos do usuário com os recortes do 12K, todos em `pedidos_1pav_casae_1811.py
   (`folhas_12k`, `bancada_master_12k`). Antes e depois em
   `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811c_suite_banho_master_antes_depois.jpg`.
 
+#### Casa E, 1º Pavimento: banhos em quartzito Aura, escrivaninhas com teclado Apple, copinha e painéis (18/11)
+
+Pedidos diretos do usuário, todos em `pedidos_1pav_casae_1811.py` (final, folha de antes e depois e 12K A e B):
+- **"todos os pisos dos banhos são em quartzito aura"**: `piso_aura` (no passo `banhos`) refaz o piso do banho master
+  (o de cima, o do vaso e o do box) e o dos banhos 1 a 4 (com o box e o nicho do chuveiro, `PISO_BANHOS`) em placas de
+  1,20 x 1,20 m (`placas_aura`): cada placa um recorte ao acaso da foto da chapa (`banho-master/quartzito-aura-4k.jpg`,
+  gerada no Higgsfield, 3 m de lado; os veios na mesma diagonal, às vezes girada 180°), as juntas finas um tom abaixo,
+  o claro e escuro da luz do render; junto às paredes, a mistura com o cinza delas pela cobertura do PDF; as folhas das
+  portas ficam. As bancadas, bacias, a banheira, os 6 chuveiros e os retângulos das claraboias entram de novo por cima.
+- **Banho master** ("a torneira de piso da banheira foi colocada no lugar errado", "corrigir o piso das regiões do vaso
+  e chuveiro"): a banheira no contorno inteiro do PDF, o misturador de piso no meio da cabeceira; o vaso e o box no
+  mesmo piso do resto.
+- **Escrivaninhas** ("remova erros sobre a escrivaninha. deixe um teclado Apple em alta definição", "remova residuos
+  sobre a escrivaninha e substitua o teclado pelo teclado Apple"): os objetos de antes não voltam ao tampo
+  (`ESCRIVANINHA["objetos_voltam"]` falso); `computadores` põe um monitor de alumínio visto de cima e o teclado Apple,
+  em tamanho real e no eixo da cadeira (`suite-4/monitor-apple-studio.png`, `suite-4/teclado-apple-magic.png`, feitos
+  no Higgsfield sobre o preto e recortados); no 12K entram direto, nítidos (`computadores_12k`).
+- **Suíte 4** ("corrija o piso em volta do criado mudo"): o piso inteiro do quarto em réguas contínuas (`piso_suite`);
+  os quadradinhos pretos de `vinilico_novo` (componentes minúsculos sem luz) não saem mais.
+- **Copinha** ("melhore aspecto da bancada e do armario ao lado dela com tom sólido adotado nas outras casas. remova
+  linhas técnicas"): o tampo em quartzito Aura (`tampo_aura`) com a cuba Franke; o armário em `armario_liso` (sem a
+  divisão das portas nem o fio do meio); a faixa da parede de baixo no cinza 80; o "m²" de um rótulo antigo no piso
+  coberto pelas mesmas fiadas.
+- **Closet master** ("refazer as portas de correr"): as 2 folhas separadas na madeira das portas, o piso entre elas.
+- **Paredes** ("corrigir as paredes, colocar o tom certo - suite 2"): `paredes_tom`, os trechos quase pretos no cinza 80.
+- **Painel de madeira** ("segue no modelo adotado nas outras casas", "o painel é ambos os lados da casa"): o ripado de
+  nogueira da Casa D (`correcoes_terreo_casad_1711._ripado`) nas duas fachadas laterais (`PAINEIS`).
+Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811d_aura_escrivaninhas_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,

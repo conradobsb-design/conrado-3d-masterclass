@@ -1590,6 +1590,109 @@
        907
       ]
      ]
+    },
+    {
+     "n": 27,
+     "origem": "voce",
+     "texto": "Banhos (18/11): todos os pisos em quartzito Aura, em placas de 1,20 m com as juntas finas e a luz do ambiente — o banho master inteiro (também o vaso e o box) e os banhos 1 a 4 (com o box e o nicho do chuveiro); as bancadas, bacias, chuveiros e retângulos das claraboias de novo por cima (\"todos os pisos dos banhos são em quartzito aura\").",
+     "pontos": [
+      [
+       1840,
+       650
+      ],
+      [
+       2440,
+       620
+      ],
+      [
+       2440,
+       987
+      ],
+      [
+       1500,
+       1150
+      ],
+      [
+       1500,
+       1262
+      ]
+     ]
+    },
+    {
+     "n": 28,
+     "origem": "voce",
+     "texto": "Banho master: a banheira no contorno inteiro do PDF e o misturador de piso no meio da cabeceira, junto à parede (\"a torneira de piso da banheira foi colocada no lugar errado\"); closet master: as 2 folhas de correr refeitas, separadas, com o piso entre elas.",
+     "pontos": [
+      [
+       1826,
+       462
+      ],
+      [
+       1955,
+       640
+      ]
+     ]
+    },
+    {
+     "n": 29,
+     "origem": "voce",
+     "texto": "Escrivaninhas das 4 suítes: sem os resíduos (os pontinhos, o bloco claro, a bolinha, a mancha marrom do monitor); um monitor de alumínio e o teclado Apple em alta definição, no eixo da cadeira (\"substitua o teclado pelo teclado Apple\"); na suíte 4, o piso contínuo em volta do criado-mudo.",
+     "pontos": [
+      [
+       2244,
+       751
+      ],
+      [
+       2244,
+       1118
+      ],
+      [
+       1721,
+       960
+      ],
+      [
+       1721,
+       1458
+      ],
+      [
+       1567,
+       907
+      ]
+     ]
+    },
+    {
+     "n": 30,
+     "origem": "voce",
+     "texto": "Copinha: o tampo em quartzito Aura com a cuba Franke e o armário liso no tom sólido das outras casas, sem as linhas técnicas (o fio do meio, a divisão das portas, os tracinhos na parede) e sem o resto do rótulo antigo no piso.",
+     "pontos": [
+      [
+       1970,
+       934
+      ],
+      [
+       2135,
+       934
+      ]
+     ]
+    },
+    {
+     "n": 31,
+     "origem": "voce",
+     "texto": "Paredes no cinza 80 (na suíte 2, os trechos quase pretos); o painel de madeira em ripado nos dois lados da casa, no modelo das outras casas (\"o painel é ambos os lados da casa\").",
+     "pontos": [
+      [
+       2240,
+       860
+      ],
+      [
+       1392,
+       1000
+      ],
+      [
+       2568,
+       900
+      ]
+     ]
     }
    ]
   }
