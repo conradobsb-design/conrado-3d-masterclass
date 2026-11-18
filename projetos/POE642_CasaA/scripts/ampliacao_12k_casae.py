@@ -26,6 +26,17 @@ cascata_biblioteca`, no afim da final ao 12K afinado na piscina). Na B, as linha
   python3 ampliacao_12k_casae.py preparar Subsolo --base <png sem a cascata>
   python3 ampliacao_12k_casae.py preparar Subsolo --opcao B --sem_textos <png sem a cascata e sem textos>
   python3 ampliacao_12k_casae.py montar Subsolo <saída do Topaz> [--opcao B]
+
+O 1º Pavimento (18/11, usuário: "ok, pode gerar o 12K A e B"): o mesmo roteiro; as plantas 4K da biblioteca (as 2 da
+varanda principal, a da varanda da suíte 1 e a do jardim da sala íntima) e a folhagem 4K da floreira do banho master
+ficam fora da entrada do Topaz, como a cascata: as entradas vêm de `pedidos_1pav_casae_1811.py --sem_folhas` (A,
+`--base`; só os vasos com a terra) e `--sem_folhas --sem_textos` (B); no `montar`, depois dos tons, as peças entram
+direto no 12K (`pedidos_1pav_casae_1811.folhas_12k`, o afim da final ao 12K afinado em volta de cada vaso na imagem sem
+as plantas). Na B, as linhas da Kalam vêm de `ROTULOS` e `DESCRICAO` do 1º Pavimento.
+
+  python3 ampliacao_12k_casae.py preparar 1Pavimento --base <png sem as plantas>
+  python3 ampliacao_12k_casae.py preparar 1Pavimento --opcao B --sem_textos <png sem as plantas e sem textos>
+  python3 ampliacao_12k_casae.py montar 1Pavimento <saída do Topaz> [--opcao B]
 """
 
 import argparse
@@ -52,7 +63,12 @@ CONFERENCIA = {"Terreo": {"gourmet": (930, 380, 1480, 800), "cozinha_servico": (
                           "hall_escritorio": (2200, 900, 2660, 1600)},
                "Subsolo": {"piscina_cascata": (840, 460, 1080, 960), "escada_circulacao": (1040, 320, 1500, 520),
                            "academia": (1180, 480, 1960, 900), "sauna_vestiario": (1040, 750, 1500, 1010),
-                           "dce_wc_maquinas": (1630, 470, 2060, 830)}}
+                           "dce_wc_maquinas": (1630, 470, 2060, 830)},
+               "1Pavimento": {"suite_banho_master": (1400, 430, 1960, 900),
+                              "suites_1_2_banhos": (2200, 540, 2600, 1300),
+                              "suites_3_4_banhos": (1400, 880, 1760, 1540),
+                              "sala_intima_jardim": (1740, 1180, 2200, 1560),
+                              "varanda_principal": (1150, 520, 1340, 1560)}}
 # o afinamento do afim da final ao 12K para a cascata (px da final): a piscina acima dela, sem a cascata
 CAIXA_CASCATA = (845, 700, 1075, 850)
 # a cuba do WC DCE 2 (usuário: "SOBRE A PIA, TRAGA UMA DA BIBLIOTECA EM ALTA DEFINIÇÃO, EM VEZ DE DESENHAR AQUI"): a peça
@@ -77,9 +93,11 @@ def kalam(pav):
     return R / f"POE642_CasaE_PH_{pav}_rotulos_kalam.json"
 
 
-def linhas_kalam_subsolo(sem_textos):
-    """As linhas da Kalam do Subsolo: os rótulos (`ROTULOS`, a cor pelo piso de baixo) e a descrição da escada."""
-    import pedidos_subsolo_casae_1811 as PS
+def linhas_kalam_subsolo(sem_textos, PS=None):
+    """As linhas da Kalam do Subsolo (ou do 1º Pavimento, `PS` o roteiro dele): os rótulos (`ROTULOS`, a cor pelo piso
+    de baixo) e a descrição da escada (`DESCRICAO`)."""
+    if PS is None:
+        import pedidos_subsolo_casae_1811 as PS
     import pedidos_terreo_casae_1611 as PE
     import rotulos_kalam_casac as KC
     forma = sem_textos.shape[:2]
@@ -140,6 +158,22 @@ def cuba_12k(out, fin):
     print(f"    a cuba de travertino da biblioteca direto no 12K, a {m.s:.4f}x")
 
 
+def folhas_12k(out, fin, base):
+    """As plantas 4K e a floreira do 1º Pavimento direto no 12K: o afim da final ao 12K, afinado em volta de cada vaso
+    na imagem sem as plantas (`base`, a que entrou no Topaz, nas coordenadas da final)."""
+    import danae_foto as DF
+    import pedidos_1pav_casae_1811 as P1
+    from correcoes_terreo_casab_1611 import Mapa
+    M = DF.afim_12k(fin, out)
+    mp = Mapa(float(np.hypot(M[0, 0], M[1, 0])), (float(M[0, 2]), float(M[1, 2])))
+    mp.ref = base
+
+    def mapa(caixa):
+        m = mp.local(out, caixa)
+        return Mapa(m.s, m.t)
+    P1.folhas_12k(out, mapa)
+
+
 def linhas_kalam(sem_textos):
     """[{nome, cor, linhas: [(texto, meio x, base, altura das maiúsculas, largura)]}]: os rótulos (`ROTULOS`, a cor pelo
     piso de baixo, como na A) e as descrições das escadas (`ESCADAS["setas"]`), medidos no próprio desenho da Inter."""
@@ -163,10 +197,16 @@ def linhas_kalam(sem_textos):
 def preparar(pav, opcao="A", sem_textos=None, base=None):
     if opcao == "B":
         img = cv2.imread(str(sem_textos))
-        lk = linhas_kalam_subsolo(img) if pav == "Subsolo" else linhas_kalam(img)
+        if pav == "1Pavimento":
+            import pedidos_1pav_casae_1811 as P1
+            lk = linhas_kalam_subsolo(img, P1)
+        else:
+            lk = linhas_kalam_subsolo(img) if pav == "Subsolo" else linhas_kalam(img)
         kalam(pav).write_text(json.dumps(lk, ensure_ascii=False, indent=1) + "\n")
         d = json.loads(dados(pav).read_text())           # o recorte da A
         X0, Y0, Wi, Hi = d["X0"], d["Y0"], *d["entrada"]
+        d["base_B"] = str(Path(sem_textos).resolve())
+        dados(pav).write_text(json.dumps(d, indent=1) + "\n")
     else:
         img = cv2.imread(str(final(pav)))
         nb = (img.astype(np.int16).min(axis=2) < 245)
@@ -192,7 +232,8 @@ def preparar(pav, opcao="A", sem_textos=None, base=None):
         print(f"[{pav}] a entrada da opção B (sem textos) -> {entrada(pav, opcao).name}; as linhas -> {kalam(pav).name}")
         return
     dados(pav).write_text(json.dumps({"planta": [x0, y0, x1, y1], "X0": X0, "Y0": Y0, "Wc": Wc, "Hc": Hc,
-                                      "entrada": [Wi, Hi]}, indent=1) + "\n")
+                                      "entrada": [Wi, Hi], "base": str(Path(base).resolve()) if base else None},
+                                     indent=1) + "\n")
     print(f"[{pav}] a planta {x0},{y0} a {x1},{y1}; o recorte A3 {Wi}x{Hi} a partir de ({X0:.1f}, {Y0:.1f}) "
           f"({L / Wc:.3f}x no 12K) -> {entrada(pav).name}")
 
@@ -229,6 +270,8 @@ def montar(pav, saida_topaz, opcao="A"):
     if pav == "Subsolo":
         cascata_12k(out, img)
         cuba_12k(out, img)
+    if pav == "1Pavimento":
+        folhas_12k(out, img, cv2.imread(d["base_B" if opcao == "B" else "base"]))
     if opcao == "B":
         import rotulos_kalam_casac as K
         K.dados = kalam
@@ -255,7 +298,7 @@ def montar(pav, saida_topaz, opcao="A"):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("acao", choices=["preparar", "montar"])
-    ap.add_argument("pav", choices=["Terreo", "Subsolo"])
+    ap.add_argument("pav", choices=["Terreo", "Subsolo", "1Pavimento"])
     ap.add_argument("saida_topaz", nargs="?")
     ap.add_argument("--opcao", choices=("A", "B"), default="A")
     ap.add_argument("--sem_textos", help="opção B: a final sem textos (`pedidos_terreo_casae_1611.py --sem_textos`)")

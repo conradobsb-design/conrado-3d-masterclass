@@ -911,11 +911,11 @@ def rotulos(Q, img, q=ROTULOS):
 FOLHAGENS = [
     # (nome, png da biblioteca, caixa da planta de antes px, centro px, lado da planta px, deslocamento do piso que
     # cobre a de antes (dx, dy) px, diâmetro do vaso px)
-    ("varanda principal (em cima)", "varanda-principal/palmeira-folha-fina-4k", (1177, 545, 1285, 650),
+    ("varanda principal (em cima)", "varanda-principal/palmeira-folha-fina-4k", (1177, 545, 1285, 668),
      (1229.0, 590.0), 60.0, (0, 125), 64.0),
     ("varanda principal (embaixo)", "varanda-principal/palmeira-folha-fina-4k", (1177, 1446, 1264, 1531),
      (1218.0, 1490.0), 56.0, (0, -170), 60.0),
-    ("varanda da suíte 1", "varanda-da-suite-1/palmeira-roseta-4k", (2496, 1220, 2554, 1286),
+    ("varanda da suíte 1", "varanda-da-suite-1/palmeira-roseta-4k", (2496, 1208, 2554, 1286),
      (2525.5, 1253.0), 42.0, (0, -78), 46.0),
     ("jardim da sala íntima", "jardim-sala-intima/folhagem-larga-4k", (2116, 1474, 2182, 1549),
      (2148.0, 1511.0), 40.0, (0, -76), 44.0),
@@ -953,8 +953,47 @@ def vaso(q=VASO):
 FOLHAGENS_NAO_LUZ = [(1150, 540, 1178, 1560), (1150, 1530, 1320, 1560), (2100, 1545, 2200, 1560),
                      (1192, 1414, 1244, 1458), (1248, 1464, 1300, 1522)]          # e os 2 vasos de terracota
 FOLHAGENS_FAIXAS = [((1170, 1531, 1266, 1556), 100)]
+# os que não mudam na limpeza: só os caixilhos e o guarda-corpo (as 3 primeiras de `FOLHAGENS_NAO_LUZ`); os vasos de
+# terracota saem com o resto (antes ficavam e deixavam um quadrado do piso velho em volta da mesa e da poltrona, com
+# folhas). O piso refeito vai ao tom do piso em volta (`regras_terreo_casab_1311.tom_do_entorno`: a média local do anel
+# em volta, estendida para dentro), sem os degraus de tom nas bordas das cópias deslocadas: `tom_suave`, por região.
+FOLHAGENS_FICAM = FOLHAGENS_NAO_LUZ[:3]
+FOLHAGENS_TOM = {"sigma": 22.0, "pena": 2.0, "lum": 22, "quente": 8, "k": 1e-3}
+
+
+def tom_suave(out, buraco, fonte, q=FOLHAGENS_TOM):
+    """Cada região do `buraco` (o piso refeito) no tom local do piso de em volta: D = T - C, T a média local (gaussiana
+    larga, normalizada) da `fonte` de cor parecida em volta (a luminância e o quente, R - B, perto dos do buraco: sem
+    os caixilhos cinza-azulados), C a do próprio buraco; longe da fonte, T vai à média dela na região (`k`); somado
+    com a borda suave."""
+    o = out.astype(np.float32)
+    s = q["sigma"]
+    n, lab, st, _ = cv2.connectedComponentsWithStats(buraco.astype(np.uint8), 8)
+    H, W = buraco.shape
+    for i in range(1, n):
+        x, y, w, h, _ = st[i]
+        g = int(3 * s) + 4
+        X0, Y0, X1, Y1 = max(x - g, 0), max(y - g, 0), min(x + w + g, W), min(y + h + g, H)
+        reg = o[Y0:Y1, X0:X1]
+        b = (lab[Y0:Y1, X0:X1] == i)
+        lum, quente = reg.mean(axis=2), reg[..., 2] - reg[..., 0]
+        f = (fonte[Y0:Y1, X0:X1] & ~buraco[Y0:Y1, X0:X1] & (np.abs(lum - np.median(lum[b])) < q["lum"])
+             & (np.abs(quente - np.median(quente[b])) < q["quente"]))
+        bf, ff = b.astype(np.float32), f.astype(np.float32)
+        k = q["k"]
+        Tg = reg[f].mean(axis=0) if f.any() else reg[b].mean(axis=0)
+        T = (cv2.GaussianBlur(reg * ff[..., None], (0, 0), s) + k * Tg) / (cv2.GaussianBlur(ff, (0, 0), s) + k)[..., None]
+        Cg = reg[b].mean(axis=0)
+        C = (cv2.GaussianBlur(reg * bf[..., None], (0, 0), s) + k * Cg) / (cv2.GaussianBlur(bf, (0, 0), s) + k)[..., None]
+        wgt = np.maximum(cv2.GaussianBlur(bf, (0, 0), q["pena"]), bf)
+        wgt[fonte[Y0:Y1, X0:X1] == 0] *= b[fonte[Y0:Y1, X0:X1] == 0]
+        reg += wgt[..., None] * (T - C)
+    return u8(o)
 FLOREIRA = {"jpg": BIB / "banho-master/floreira-folhagem-4k.jpg", "caixa": (1744, 446, 1778, 528), "borda_px": 2.0,
             "borda": 0.75}
+# a entrada do Topaz sem as plantas (só os vasos com a terra): as folhas 4K e a floreira entram direto no 12K
+# (`folhas_12k`), como a cascata do Subsolo (usuário: "traga a cascata em 4K [...] senão vai sair muito distorcido")
+SEM_FOLHAS = False
 
 
 def piso_deslocado(out, m, dx, dy, suave=1.6):
@@ -973,14 +1012,16 @@ def folhagens(Q, img, q=FOLHAGENS, f=FLOREIRA):
     par = paredes(Q, 0.5)
     out = img.copy()
     ficam_base = RT.dilatar(par, 1)
-    for a0, b0, a1, b1 in FOLHAGENS_NAO_LUZ:
+    for a0, b0, a1, b1 in FOLHAGENS_FICAM:
         ficam_base[b0:b1, a0:a1] = True
+    feito = np.zeros(par.shape, bool)
     # o canto de baixo da varanda principal: os círculos de antes saem
     v = VARANDA_CANTO
     for x0, y0, x1, y1 in v["limpa"]:
         m = np.zeros(par.shape, bool)
         m[y0:y1, x0:x1] = True
         out = piso_deslocado(out, m & ~ficam_base, *v["desloc"], suave=3.0)
+        feito |= m & ~ficam_base
     V = vaso()
     plantas = []
     for nome, rel, (x0, y0, x1, y1), (cx, cy), lado, desloc, dv in q:
@@ -1002,10 +1043,13 @@ def folhagens(Q, img, q=FOLHAGENS, f=FLOREIRA):
             out = A1.refazer(out, m & ~par & ~ficam_base, [(None, MADEIRA)], ficam=ficam_base)
         else:
             out = piso_deslocado(out, m & ~par & ~ficam_base, dx, dy, suave=2.5)
+            feito |= m & ~par & ~ficam_base
         for (a0, b0, a1, b1), dx in FOLHAGENS_FAIXAS:
             if a0 < x1 and a1 > x0 and b0 < y1 + 30 and b1 > y0:
                 out[b0:b1, a0:a1] = img[b0:b1, a0 + dx:a1 + dx]
         plantas.append((rel, cx, cy, lado, dv))
+    # o piso refeito no tom do de em volta (com a folga da borda suave das cópias)
+    out = tom_suave(out, feito & ~ficam_base, ~RT.dilatar(par, 1) & ~ficam_base)
     # a mesa e a poltrona do canto, depois os vasos e as plantas por cima
     cx, cy, d = v["mesa"]
     out = MBE.pousar(out, ler("varanda-principal/mesa-lateral-externa"), cx, cy, d, d, 0.0, "mesa", par)
@@ -1013,11 +1057,24 @@ def folhagens(Q, img, q=FOLHAGENS, f=FLOREIRA):
     out = MBE.pousar(out, ler("varanda-principal/poltrona-externa-b"), cx, cy, d, d, MB.frente(fr), "movel", par)
     for rel, cx, cy, lado, dv in plantas:
         out = MBE.pousar(out, V, cx, cy, dv, dv, 0.0, "movel", par)
-        out = MBE.pousar(out, ler(rel), cx, cy, lado, lado, 0.0, "baixa", par)
+        if not SEM_FOLHAS:
+            out = MBE.pousar(out, ler(rel), cx, cy, lado, lado, 0.0, "baixa", par)
+    if SEM_FOLHAS:
+        print("    (sem as plantas, só os vasos: a entrada do Topaz; as folhas 4K vão direto no 12K)")
     # a floreira
+    out[f["caixa"][1]:f["caixa"][3], f["caixa"][0]:f["caixa"][2]] = floreira_peca(f)
+    print(f"    folhagens 4K: {', '.join(n for n, *_ in q)} em vasos de concreto (as plantas de antes no piso de em volta) e "
+          "a floreira do banho master; no canto de baixo da varanda principal, a mesa lateral e a poltrona externas")
+    return out
+
+
+def floreira_peca(f=FLOREIRA, w=None, h=None):
+    """A folhagem 4K da floreira no tamanho da caixa (w x h px; sem eles, o da caixa na final), as bordas escurecidas
+    (`borda_px` na escala da final)."""
     x0, y0, x1, y1 = f["caixa"]
+    esc = 1.0 if w is None else w / (x1 - x0)
+    w, h = (x1 - x0, y1 - y0) if w is None else (w, h)
     T = cv2.imread(str(f["jpg"]))
-    w, h = x1 - x0, y1 - y0
     H, W = T.shape[:2]
     if W / H > w / h:
         nw = int(H * w / h)
@@ -1028,10 +1085,35 @@ def folhagens(Q, img, q=FOLHAGENS, f=FLOREIRA):
     T = cv2.resize(T, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32)
     yy, xx = np.mgrid[0:h, 0:w]
     d = np.minimum.reduce([xx + 0.5, w - xx - 0.5, yy + 0.5, h - yy - 0.5])
-    T *= (f["borda"] + (1 - f["borda"]) * np.clip(d / f["borda_px"], 0, 1))[..., None]
-    out[y0:y1, x0:x1] = u8(T)
-    print(f"    folhagens 4K: {', '.join(n for n, *_ in q)} em vasos de concreto (as plantas de antes no piso de em volta) e "
-          "a floreira do banho master; no canto de baixo da varanda principal, a mesa lateral e a poltrona externas")
+    T *= (f["borda"] + (1 - f["borda"]) * np.clip(d / (f["borda_px"] * esc), 0, 1))[..., None]
+    return u8(T)
+
+
+def folhas_12k(out, mapa, Q=None, q=FOLHAGENS, f=FLOREIRA):
+    """As plantas 4K e a floreira direto no 12K (`out`, uint8, mudado no lugar): `mapa(caixa)` dá o `Mapa` da final ao
+    12K afinado em volta da caixa (px da final); a planta no centro e no lado da final vezes a escala, com a sombra curta
+    na escala do 12K; as paredes (`paredes`) levadas ao 12K não mudam."""
+    import biblioteca_terreo_casaa_1211 as BT
+    import mobiliario_terreo_casac_1311 as MB
+    Q = Q or FE.QuadroE("1Pavimento")
+    par = paredes(Q, 0.5).astype(np.uint8)
+    for nome, rel, _, (cx, cy), lado, _, dv in q:
+        m = mapa((int(cx - dv), int(cy - dv), int(cx + dv), int(cy + dv)))
+        folga = int(np.ceil(dv * m.s))
+        X0, Y0 = int(m.x(cx)) - folga, int(m.y(cy)) - folga
+        X1, Y1 = int(m.x(cx)) + folga, int(m.y(cy)) + folga
+        Mp = np.float64([[m.s, 0, m.t[0] + 0.5 - 0.5 * m.s - X0], [0, m.s, m.t[1] + 0.5 - 0.5 * m.s - Y0]])
+        nao = cv2.warpAffine(par, Mp, (X1 - X0, Y1 - Y0), flags=cv2.INTER_NEAREST) > 0
+        reg = out[Y0:Y1, X0:X1].astype(np.float32)
+        o = BT.pousar(reg, ler(rel), m.x(cx) - 0.5 - X0, m.y(cy) - 0.5 - Y0, lado * m.s, lado * m.s, 0.0,
+                      BT.SOMBRAS["baixa"], MB.PX_M * m.s, nao=nao)
+        out[Y0:Y1, X0:X1] = u8(o)
+        print(f"    {nome}: a planta 4K direto no 12K, a {m.s:.4f}x ({lado * m.s:.0f} px)")
+    x0, y0, x1, y1 = f["caixa"]
+    m = mapa((x0 - 14, y0 - 10, x1 + 14, y1 + 10))
+    X0, Y0, X1, Y1 = m.reti(f["caixa"])
+    out[Y0:Y1, X0:X1] = floreira_peca(f, X1 - X0, Y1 - Y0)
+    print(f"    a floreira do banho master: a folhagem 4K direto no 12K ({X1 - X0} x {Y1 - Y0} px)")
     return out
 
 
@@ -1064,7 +1146,13 @@ def main():
     ap.add_argument("--ate")
     ap.add_argument("--cache")
     ap.add_argument("--saida")
+    ap.add_argument("--sem_textos", action="store_true", help="sem os rótulos e a descrição (entrada da opção B do 12K)")
+    ap.add_argument("--sem_folhas", action="store_true", help="sem as plantas, só os vasos (entrada do Topaz do 12K)")
     a = ap.parse_args()
+    global SEM_TEXTOS, SEM_FOLHAS
+    SEM_TEXTOS, SEM_FOLHAS = a.sem_textos, a.sem_folhas
+    if (a.sem_textos or a.sem_folhas) and not a.saida:
+        ap.error("--sem_textos/--sem_folhas pedem --saida (a final fica como está)")
     out = rodar(antes_img(), a.de, a.ate, a.cache)
     cv2.imwrite(a.saida or str(FINAL), out)
     print(f"-> {a.saida or FINAL}")

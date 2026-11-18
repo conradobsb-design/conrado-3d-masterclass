@@ -4028,6 +4028,35 @@ Pedidos do usuário vendo a final do levantamento aplicado (928eaf9), todos no m
   (antes = a final de 928eaf9); os itens 7, 8, 10 e 20 do levantamento da E atualizados e os 24 e 25 novos. O 12K A e B
   depois do OK. Como refazer: o mesmo do item anterior.
 
+#### Casa E, 1º Pavimento: o 12K A e B (18/11, usuário: "ok, pode gerar o 12K A e B")
+
+O roteiro do Térreo e do Subsolo (`ampliacao_12k_casae.py`, agora com o `1Pavimento`): o recorte A3 da final (a planta
+de 270,4 a 3457,1811; 3392 x 2399 px a partir de (167,4; -291,8), 3,623x no 12K), o Topaz High Fidelity V2 do
+Higgsfield a 12288 x 8689 (jobs 4d325f51, A, e 8b6b64fd, B; as saídas fora do git), os tons da final e o fundo branco.
+- **As folhagens 4K direto no 12K**, como a cascata do Subsolo: as entradas do Topaz vêm sem as plantas, só os vasos
+  com a terra (`pedidos_1pav_casae_1811.py --sem_folhas`; na B, `--sem_folhas --sem_textos`, a partir de uma cópia do
+  cache com o `mobiliario.png`); no `montar`, depois dos tons, `pedidos_1pav_casae_1811.folhas_12k` pousa as 4 plantas
+  da biblioteca (palmeiras da varanda principal, a roseta da varanda da suíte 1, a folhagem do jardim da sala íntima),
+  com a sombra curta na escala do 12K, e enche a floreira do banho master com a folhagem 4K (`floreira_peca`, as bordas
+  escurecidas na escala), no afim da final ao 12K afinado em volta de cada vaso na imagem sem as plantas.
+- **O piso das varandas antes do 12K** (o 12K mostraria): as caixas de luz dos 2 vasos de terracota do canto da varanda
+  principal (`FOLHAGENS_NAO_LUZ`) também barravam a limpeza, e ficava um quadrado do piso velho em volta da mesa e da
+  poltrona, com pontas de folha; agora só os caixilhos e o guarda-corpo ficam (`FOLHAGENS_FICAM`). As cópias
+  deslocadas do piso tinham outro tom (um retângulo mais claro em volta da palmeira de cima e da roseta da suíte 1):
+  `tom_suave` leva cada região refeita ao tom local do Bege Bahia de em volta (a média gaussiana larga, sigma 22 px,
+  só do piso de luminância e quente parecidos, sem os caixilhos; longe dele, a média da região). A caixa da palmeira de
+  cima vai até 668 (o toco marrom junto ao caixilho saía pela metade) e a da roseta começa em 1208 (a ponta de folha
+  acima do vaso).
+- Na B, os 23 rótulos e o "DESCE PARA O / TÉRREO" na Kalam (`linhas_kalam_subsolo` com o roteiro do 1º Pavimento; 47
+  linhas, em `renders/POE642_CasaE_PH_1Pavimento_rotulos_kalam.json`).
+- **Saídas:** `POE642_CasaE/entrega/POE642_CasaE_PH_1Pavimento_12K_opcao_{A,B}.jpg`; prévias e conferências em
+  `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_12K_*`. A folha 1811b, a prancha, o PDF da E e o book refeitos com a
+  final nova.
+- **Como refazer:** `python3 pedidos_1pav_casae_1811.py --de folhagens --cache <cópia com o mobiliario.png>` (a final);
+  o mesmo com `--sem_folhas --saida <a>` e `--sem_folhas --sem_textos --saida <b>`; `ampliacao_12k_casae.py preparar
+  1Pavimento --base <a>`, `preparar 1Pavimento --opcao B --sem_textos <b>`, o Topaz e `montar 1Pavimento <saída>
+  [--opcao B]`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,

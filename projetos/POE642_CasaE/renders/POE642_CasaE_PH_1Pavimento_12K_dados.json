@@ -1,0 +1,18 @@
+{
+ "planta": [
+  270,
+  4,
+  3457,
+  1811
+ ],
+ "X0": 167.43617249517274,
+ "Y0": -291.8130229564472,
+ "Wc": 3392.1276550096545,
+ "Hc": 2398.6260459128944,
+ "entrada": [
+  3392,
+  2399
+ ],
+ "base": "pedidos_1pav_casae_1811.py --sem_folhas --saida <png> (gerada no preparar; fora do git)",
+ "base_B": "pedidos_1pav_casae_1811.py --sem_folhas --sem_textos --saida <png> (gerada no preparar; fora do git)"
+}
