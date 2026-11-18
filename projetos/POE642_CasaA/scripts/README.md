@@ -3778,6 +3778,21 @@ ondinhas (`_agua_cascata`, a mesma água de antes); a sombra curta do bloco na �
 rústica (`CASCATA_PEDRA_SUL` guarda a versão de antes). Antes e depois, com a foto, em
 `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_cascata_miro_antes_depois.jpg`.
 
+A cascata da biblioteca (usuário: "esse revestimento, ele vai de fora a fora [...] A cascata mantém do jeito que você
+fez, é só o revestimento"; "traga a cascata em 4K, gera na biblioteca a cascata com o Higgs Field e depois traz aqui
+para essa imagem [...] senão vai sair muito distorcido na hora que for gerar o 12K"; "a cascata tem que sair pela
+parede [...] Dentro do revestimento"): a peça gerada no Higgsfield (Nano Banana Pro, 4K, 16:9, a foto do Miro como
+referência de material; job 6c757d16, a 1ª de 2 variantes), vista de cima: a faixa de travertino craquelado de lado a
+lado e a água saindo da face dela (sem fenda em cima), a lâmina, a espuma e as ondinhas sobre fundo preto. Na
+biblioteca, `POE642_CasaE/biblioteca-objetos/01-subsolo/piscina/cascata-travertino-vista-de-cima.png` (3840 x 2143,
+RGBA: o travertino opaco, a água com o alfa pelo brilho; 1434,3 px/m, a lâmina de 0,77 m, a aresta na linha 1576,7),
+com a entrada no `catalogo.json`. Na planta (`CASCATA` = `CASCATA_BIB`, `cascata_biblioteca`): a peça na escala real,
+a lâmina centrada na parede de baixo (x 918), a aresta na face do revestimento (0,30 m da parede); o revestimento de
+fora a fora (x 870 a 966, até a parede); a água da peça só sobre a parte de baixo da piscina (até o vidro); a sombra
+curta do revestimento na água. Para o 12K do Subsolo, a mesma função com o `Mapa` do 12K põe a peça 4K direto na
+escala dele (sem passar pela ampliação). Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_cascata_biblioteca_antes_depois.jpg`.
+
 As bordas da piscina (usuário, com a imagem 3D da piscina: "a borda da piscina ela é toda feita no material do
 revestimento da piscina, tá? Então corrija isso de acordo com essa imagem"): todas na pastilha da piscina (o Barlavento
 de fundo seco da biblioteca, a mesma da borda junto à academia), pelas faixas brancas do PDF (`PISCINA["pastilha"]`,

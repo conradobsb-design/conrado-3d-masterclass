@@ -4,7 +4,7 @@
   "vista": "Superior ortográfica",
   "formato_materiais": "PNG RGB",
   "arquivos_png_materiais": 11,
-  "arquivos_png_total": 222,
+  "arquivos_png_total": 223,
   "escala": "amostra_m indica largura e altura em metros. Use a escala da planta-base para converter em pixels.",
   "revisao": "O deck do térreo e as varandas do 1º pavimento aparecem em pedra creme na prancha humanizada. O Bege Bahia segue essa leitura visual. A piscina do subsolo tem variante de água própria e as cinco suítes do 1º pavimento usam City Petra na área seca.",
   "fontes": {
@@ -4078,10 +4078,46 @@
       ],
       "origem": "Variante compartilhada da Casa A",
       "arquivo_origem": "03-primeiro-pavimento/banho-master/misturador-piso-banheira-render.png"
+    },
+    {
+      "lote": "cascata-subsolo-1811",
+      "objeto": "cascata-travertino-vista-de-cima",
+      "nome": "Cascata no revestimento de travertino (vista de cima)",
+      "descricao_visual": "Top-down plan view of a wall waterfall: a straight band of light cream honed travertine cladding with fine natural cracks along the bottom; a clear water sheet with white streaks comes out of its front face, white foam, bubbles and broken ripples spread into the pool. Water on transparent background.",
+      "largura_px": 3840,
+      "altura_px": 2143,
+      "silhueta_px": [
+        3840,
+        2143
+      ],
+      "higgsfield_job": "6c757d16-7479-45b4-9001-d0f2b8deff9f",
+      "modelo": "nano_banana_pro (4K)",
+      "locais": [
+        {
+          "pavimento": "subsolo",
+          "ambiente": "Piscina",
+          "arquivo": "01-subsolo/piscina/cascata-travertino-vista-de-cima.png"
+        }
+      ],
+      "referencias": [
+        "imagem do Miro do fundo da piscina (bloco de travertino com a lâmina)",
+        "pedido do usuário de 18/11"
+      ],
+      "origem": "Gerado no Higgsfield (Nano Banana Pro, 4K, 16:9) sobre fundo preto; o alfa da água pelo brilho, o travertino opaco; reduzido a 3840 px de largura",
+      "escala": {
+        "px_m": 1434.3,
+        "aresta_y_px": 1576.7,
+        "lamina_x_px": [
+          1373.0,
+          2477.4
+        ],
+        "nota": "a lâmina tem 0,77 m; a aresta é a face do revestimento, de onde sai a água; abaixo dela, o topo do revestimento (use a faixa até a espessura da planta, de fora a fora da parede)"
+      },
+      "preferencia": "Cascata da piscina do Subsolo da Casa E (decisão do cliente, fora dos PDFs): a água sai pela face do revestimento, que corre a parede inteira."
     }
   ],
   "escala_objetos": "Use a silhueta e a escala do PDF para posicionar os objetos. As dimensões dos PNGs estão em pixels.",
   "ambientes": 49,
-  "objetos_unicos": 100,
-  "arquivos_png": 211
+  "objetos_unicos": 101,
+  "arquivos_png": 212
 }

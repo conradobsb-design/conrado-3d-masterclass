@@ -793,7 +793,22 @@ def elevador(Q, img, q=ELEVADOR):
 # com os reflexos claros correndo para a frente; a película d'água sobre o lábio da frente; a lâmina caindo da aresta
 # (na largura da fenda), a espuma onde ela bate e as ondinhas; a sombra curta do bloco na água. Sem a bica de inox e sem
 # a pedra rústica.
-CASCATA = {"lado": "sul", "estilo": "bloco", "x": (884.0, 949.0), "fenda_x": (893.5, 939.5), "face": 924.6,
+# Depois (usuário: "esse revestimento, ele vai de fora a fora [...] A cascata mantém do jeito que você fez, é só o
+# revestimento"; "traga a cascata em 4K, gera na biblioteca a cascata com o Higgs Field e depois traz aqui para essa
+# imagem [...] senão vai sair muito distorcido na hora que for gerar o 12K"; "a cascata tem que sair pela parede [...]
+# Dentro do revestimento"): `estilo` "biblioteca" — a peça 4K da biblioteca (`01-subsolo/piscina/
+# cascata-travertino-vista-de-cima.png`, Nano Banana Pro no Higgsfield, vista de cima: a faixa de travertino craquelado
+# e a água saindo da face dela, sem fenda em cima; a água com o alfa pelo brilho), na escala real (`px_m` da peça), a
+# lâmina de 0,77 m centrada na parede, a aresta da peça na face do revestimento (0,30 m da parede); o revestimento de
+# fora a fora da parede de baixo (x 870 a 966); a água, a espuma e as ondinhas só sobre a água; a sombra curta do
+# revestimento na água. `cascata_biblioteca` aceita um `Mapa` (o 12K: a peça entra direto na escala dele).
+CASCATA_BIB = {"lado": "sul", "estilo": "biblioteca", "png": BIB / "piscina" / "cascata-travertino-vista-de-cima.png",
+               "px_m_peca": 1434.31, "aresta_y_peca": 1576.74, "lamina_x_peca": (1373.02, 2477.44),
+               "revest_x": (870.0, 966.0), "face": 924.6, "pedra_px": 18.0, "centro_x": 918.0,
+               "sombra": 0.30, "sombra_px": 1.4,
+               # a água onde a peça pode entrar: a parte de baixo da piscina (até o vidro, x 982) acima da aresta
+               "agua_x": (870.0, 982.0), "agua_y0": 782.0}
+CASCATA_BLOCO = {"lado": "sul", "estilo": "bloco", "x": (884.0, 949.0), "fenda_x": (893.5, 939.5), "face": 924.6,
            "pedra_px": 18.0, "fenda": (6.0, 13.0), "fenda_cor": (94, 96, 82), "fenda_brilho": (214, 222, 222),
            "pelicula": (226, 233, 236), "rachas": 10, "racha_forca": 0.30, "bloco_luz": 1.04, "sombra_bloco": 0.30,
            "bica_px": 0.0, "lamina_px": 3.5, "espuma_px": 15.0, "miolo_px": 3.0, "bolha_lim": 0.48,
@@ -802,12 +817,70 @@ CASCATA = {"lado": "sul", "estilo": "bloco", "x": (884.0, 949.0), "fenda_x": (89
            "espuma": (246, 247, 247), "semente": 1811}
 # as de antes: na parede da esquerda da piscina comprida (2,0 m, CASCATA_OESTE) e na de baixo com a pedra rústica e a
 # bica de inox (CASCATA_PEDRA_SUL)
-CASCATA_OESTE = dict(CASCATA, lado="oeste", estilo="pedra", bica_px=6.5, y=(575.0, 695.0), parede=(859.5, 870.0),
-                     miolo_px=2.2, bolha_lim=0.56)
-CASCATA_PEDRA_SUL = dict(CASCATA, estilo="pedra", pedra_px=7.0, bica_px=6.5, fenda_x=(884.0, 949.0))
+CASCATA_OESTE = dict(CASCATA_BLOCO, lado="oeste", estilo="pedra", bica_px=6.5, y=(575.0, 695.0),
+                     parede=(859.5, 870.0), miolo_px=2.2, bolha_lim=0.56)
+CASCATA_PEDRA_SUL = dict(CASCATA_BLOCO, estilo="pedra", pedra_px=7.0, bica_px=6.5, fenda_x=(884.0, 949.0))
+CASCATA = CASCATA_BIB
+
+
+def cascata_biblioteca(img, q=CASCATA_BIB, m=None, px_m=None):
+    """A peça da biblioteca na imagem (a final, ou o 12K com o `Mapa` m): o revestimento de fora a fora da parede de
+    baixo e a água só sobre a água da piscina."""
+    from correcoes_terreo_casab_1611 import Mapa
+    m = m or Mapa()
+    px_m = (px_m or FE.QuadroE.__dict__.get("_px_m_cache") or 59.70590031258779) * m.s
+    P = cv2.imread(str(q["png"]), cv2.IMREAD_UNCHANGED).astype(np.float32)
+    al = P[..., 3] / 255
+    pm = np.dstack([P[..., :3] * al[..., None], al])
+    k = px_m / q["px_m_peca"]
+    W2, H2 = max(1, int(round(P.shape[1] * k))), max(1, int(round(P.shape[0] * k)))
+    kx, ky = W2 / P.shape[1], H2 / P.shape[0]
+    pm = cv2.resize(pm, (W2, H2), interpolation=cv2.INTER_AREA)
+    # a âncora: o meio da lâmina na peça -> o meio da parede; a aresta da peça -> a face do revestimento
+    topo = q["face"] - q["pedra_px"]
+    lx = (q["lamina_x_peca"][0] + q["lamina_x_peca"][1]) / 2
+    tx = m.x(q["centro_x"]) - lx * kx
+    ty = m.y(topo) - q["aresta_y_peca"] * ky
+    X0, Y0 = int(np.floor(tx)) - 1, int(np.floor(ty)) - 1
+    X1, Y1 = X0 + W2 + 3, Y0 + H2 + 3
+    X0c, Y0c, X1c, Y1c = max(X0, 0), max(Y0, 0), min(X1, img.shape[1]), min(Y1, img.shape[0])
+    M = np.float32([[1, 0, tx - X0], [0, 1, ty - Y0]])
+    lay = cv2.warpAffine(pm, M, (X1 - X0, Y1 - Y0), flags=cv2.INTER_LINEAR, borderValue=(0, 0, 0, 0))
+    lay = lay[Y0c - Y0:Y1c - Y0, X0c - X0:X1c - X0]
+    out = img.astype(np.float32)
+    reg = out[Y0c:Y1c, X0c:X1c]
+    h, w = reg.shape[:2]
+    yy, xx = np.mgrid[Y0c:Y1c, X0c:X1c].astype(np.float32) + 0.5
+    # a faixa do revestimento: de fora a fora, da aresta à parede (a fração do px nas bordas)
+    rx0, rx1 = m.x(q["revest_x"][0]), m.x(q["revest_x"][1])
+    ry0, ry1 = m.y(topo), m.y(q["face"])
+    cobx = np.clip(np.minimum(xx + 0.5, rx1) - np.maximum(xx - 0.5, rx0), 0, 1)
+    coby = np.clip(np.minimum(yy + 0.5, ry1) - np.maximum(yy - 0.5, ry0), 0, 1)
+    faixa = cobx * coby
+    # a água da piscina antes da aresta (a parte de baixo, até o vidro)
+    ax0, ax1, ay0 = m.x(q["agua_x"][0]), m.x(q["agua_x"][1]), m.y(q["agua_y0"])
+    agua = (np.clip(np.minimum(xx + 0.5, ax1) - np.maximum(xx - 0.5, ax0), 0, 1) *
+            np.clip(np.minimum(yy + 0.5, ry0) - np.maximum(yy - 0.5, ay0), 0, 1))
+    # a sombra curta do revestimento na água, junto à aresta
+    d = np.maximum(ry0 - yy, 0)
+    reg *= (1 - q["sombra"] * np.exp(-d / (q["sombra_px"] * m.s)) * agua * cobx)[..., None]
+    # a água da peça (pré-multiplicada) só sobre a água
+    a_ag = lay[..., 3] * agua
+    reg[:] = reg * (1 - a_ag[..., None]) + lay[..., :3] * agua[..., None]
+    # o revestimento: o topo da faixa da peça (opaco)
+    cor_f = np.where(lay[..., 3:4] > 1e-3, lay[..., :3] / np.maximum(lay[..., 3:4], 1e-3), 0)
+    reg[:] = reg * (1 - faixa[..., None]) + cor_f * faixa[..., None]
+    out[Y0c:Y1c, X0c:X1c] = reg
+    return u8(out)
 
 
 def cascata(Q, img, q=CASCATA):
+    if q.get("estilo") == "biblioteca":
+        out = cascata_biblioteca(img, q, px_m=Q.px_m)
+        print(f"    cascata: a peça da biblioteca (4K, Higgsfield): o revestimento de travertino de fora a fora da parede "
+              f"de baixo ({(q['revest_x'][1] - q['revest_x'][0]) / Q.px_m:.2f} x {q['pedra_px'] / Q.px_m:.2f} m) e a "
+              "água saindo da face dele, a espuma e as ondinhas só sobre a água")
+        return out
     if q["lado"] == "sul":
         x0, x1 = q["x"]
         face = q["face"]
