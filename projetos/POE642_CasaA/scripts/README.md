@@ -3936,6 +3936,13 @@ Mais uma rodada (18/11, com os recortes do 12K):
 Na final e nos 12K A e B (refeitos pelo Topaz, jobs 83c82337, A, e df7dc4fc, B). Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811c_bancada_soleira_toco_piso_antes_depois.jpg`.
 
+- **Transição da academia para a ducha** ("corrija a transição de um piso para o outro"): o passo novo `transicao`
+  (`TRANSICAO`, depois das esquadrias): no vão aberto entre a parede da sauna e a do vestiário, o vinílico acabava torto,
+  com uma faixa caramelo de 2 a 3 px e manchas claras; agora acaba reto na face de cima das paredes (y 755,4), e o
+  travertino da ducha vem logo abaixo, tecido da amostra do piso de perto e emendado ao de baixo por uma rampa de 3 px.
+  12K A e B refeitos (jobs 59f71b68, A, e 9f198d3f, B). Antes e depois em
+  `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811d_transicao_antes_depois.jpg`.
+
 #### Levantamento dos ajustes de todas as plantas (18/11)
 
 Usuário, com o levantamento do Subsolo da Casa E: "eu preciso de um desse para todas as plantas. Inclusive com os

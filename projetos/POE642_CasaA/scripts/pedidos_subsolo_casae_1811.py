@@ -1582,10 +1582,37 @@ def bege_manchas(Q, img):
     return BS18.bege_manchas(Q, img)
 
 
+# ----------------------------------------------------------------------------------------------------------------------
+# 11d. A transição da academia para a ducha (18/11, usuário: "corrija a transição de um piso para o outro"): no vão aberto
+# entre a parede da sauna e a do vestiário, o vinílico acabava torto, com uma faixa caramelo de 2 a 3 px e manchas
+# claras; agora acaba reto na face de cima das paredes (y 755,4), e o travertino da ducha vem logo abaixo, tecido da
+# amostra do piso de perto, emendado ao de baixo por uma rampa.
+TRANSICAO = {"vao": (1189.0, 755.4, 1328.0, 763.0), "rampa_px": 3.0, "amostra_px": (1240, 778, 1320, 800)}
+
+
+def transicao(Q, img, q=TRANSICAO):
+    import biblioteca_terreo_casad_1511 as TD
+    from janela_pia_casaa_1611 import alfa_ret
+    par = paredes(Q, 0.5)
+    x0, y0, x1, y1 = q["vao"]
+    r = q["rampa_px"]
+    X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1 + r))
+    T_ = TD._tecido(img, q["amostra_px"], Y1 - Y0, X1 - X0, 1820)
+    a = alfa_ret((x0 - X0, y0 - Y0, x1 - X0, y1 + r - Y0), (Y1 - Y0, X1 - X0))
+    yy = np.arange(Y0, Y1, dtype=np.float32) + 0.5
+    a *= np.clip((y1 + r - yy) / r, 0, 1)[:, None]
+    a *= ~par[Y0:Y1, X0:X1]
+    o = img.astype(np.float32)
+    o[Y0:Y1, X0:X1] = o[Y0:Y1, X0:X1] * (1 - a[..., None]) + T_ * a[..., None]
+    print("    transição: o vinílico da academia acaba reto na face das paredes; o travertino da ducha logo abaixo")
+    return u8(o)
+
+
 PASSOS = [("base", base), ("fundo", fundo), ("bege", bege), ("travertino", travertino),
           ("travertino_limpo", travertino_limpo), ("travertino_riscos", travertino_riscos), ("marrom", marrom), ("escada", escada), ("piscina", piscina),
           ("academia", academia), ("sauna", sauna), ("wc_dce2", wc_dce2), ("chuveiros", chuveiros),
           ("vestiario", vestiario), ("dce", dce), ("elevador", elevador), ("cascata", cascata), ("portas", portas), ("esquadrias", esquadrias),
+          ("transicao", transicao),
           ("perimetro", perimetro), ("bege_manchas", bege_manchas), ("rotulos", rotulos)]
 
 
