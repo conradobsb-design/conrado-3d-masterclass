@@ -38,7 +38,8 @@ from janela_pia_casaa_1611 import alfa_ret                  # noqa: E402
 
 RAIZ = AQUI.parents[1]
 FINAIS = {"Terreo": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Terreo_v1_final.png",
-          "1Pavimento": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final.png"}
+          "1Pavimento": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_v1_final.png",
+          "Subsolo": RAIZ / "POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_v1_final.png"}
 DOZE = RAIZ / "POE642_CasaE/entrega/POE642_CasaE_PH_Terreo_12K_opcao_{}.jpg"
 
 FOLHA = {"madeira": (134, 166, 202), "contorno": (58, 72, 92), "contorno_alfa": 0.95, "contorno_px": 0.45,
@@ -47,10 +48,10 @@ PULAR = ("porta em (2499, 1350)",)
 # no Térreo a folha de antes estava longe da ponta (o marco do PDF no render): a folha encosta na ponta de parede do
 # render; no 1º Pavimento a folha de antes está no lugar do PDF e o resto branco do batente fica entre ela e a ponta:
 # a ponta de parede avança até a face da folha (o padrão da Casa D), cobrindo o resto
-MODO = {"Terreo": "encosta_folha", "1Pavimento": "estende_parede"}
+MODO = {"Terreo": "encosta_folha", "1Pavimento": "estende_parede", "Subsolo": "encosta_folha"}
 # a ordem das fontes de piso: no granito do Térreo, para o ambiente; no 1º Pavimento (as réguas de madeira deitadas),
 # ao longo da folha primeiro (a régua continua)
-ORDEM = {"Terreo": "ambiente", "1Pavimento": "ao_longo"}                 # a pivotante da entrada (e a dela vista no PDF do 1º Pavimento)
+ORDEM = {"Terreo": "ambiente", "1Pavimento": "ao_longo", "Subsolo": "ambiente"}                 # a pivotante da entrada (e a dela vista no PDF do 1º Pavimento)
 # a caixa da limpeza: `folga` px de cada lado da folha (até a face da parede: a faixa de piso escuro entre a parede e a
 # folha entra), `ponta` px além da ponta; o piso vem de `desloc` px adiante, para o ambiente (além da folha de antes)
 LIMPA = {"folga": 7.0, "ponta": 5.0, "desloc": 14.0}
@@ -62,7 +63,7 @@ AJUSTES = {"Terreo": {
     "porta em (1421, 523)": {"extra_render": [(1445.5, 496.0, 1456.0, 512.0)]},
     # o WC DCE 1: a folha não aparecia (só a soleira); nada a limpar (o piso claro do WC fica)
     "porta em (2416, 603)": {"limpa": None}},
-    "1Pavimento": {}}
+    "1Pavimento": {}, "Subsolo": {}}
 # as 3 portas do Térreo cuja folha no PDF é a de veneziana (em pedaços: as pontas cheias, o miolo estreito), fora de
 # `portas_pdf`: a folha (o retângulo inteiro), a ponta da parede até a face dela, a limpeza e as fontes de piso
 EXTRAS = {"Terreo": {
@@ -73,7 +74,7 @@ EXTRAS = {"Terreo": {
                              "limpa": (2025.5, 435.1, 2037.0, 486.0), "sentidos": [(14.0, 0.0)], "deitada": False},
     "porta em (1984, 399)": {"folha": (2005.3, 375.4, 2007.7, 423.2), "parede": (2007.7, 423.2, 2010.7, 433.4),
                              "limpa": (2000.0, 372.0, 2011.0, 423.2), "sentidos": [(-14.0, 0.0)], "deitada": False}},
-    "1Pavimento": {}}
+    "1Pavimento": {}, "Subsolo": {}}
 
 
 def _imagem(p, deitada):
@@ -381,7 +382,7 @@ def folha(out, m, r, deitada, semente, q=FOLHA):
 
 
 # px do render: o ponto branco na face da parede junto à porta da área descoberta (a ponta do tracejado)
-PINTA_PAREDE = {"Terreo": [(2215.6, 536.5, 2217.0, 540.0)], "1Pavimento": []}
+PINTA_PAREDE = {"Terreo": [(2215.6, 536.5, 2217.0, 540.0)], "1Pavimento": [], "Subsolo": []}
 
 
 def pinta_parede(out, mp, pav):

@@ -3683,6 +3683,43 @@ da origem que não deixa emenda, cheia da crista para baixo, com o trilho; as 4 
 esquerda, a linha escura e a cortina vertical da fachada da esquerda descem até o encontro, o trilho encosta nelas e o
 nó do canto (o toco de parede e os montantes do pé) vem do PDF; os restos claros saem. Na final e nos 12K A e B.
 
+#### Casa E, Subsolo: o levantamento aplicado (18/11, `pedidos_subsolo_casae_1811.py`)
+
+Usuário: "TERREO DA CASA E APROVADO. VAMOS PARA O SUBSOLO DA CASA E"; sobre o levantamento
+(`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_levantamento.jpg` e `..._1811_mobiliario.jpg`): "DE ACORDO". Parte da
+final do Subsolo de e730bde, sem os rótulos (`final3840_casae.sem_rotulos`), um passo por item (`PASSOS`, com
+`--de/--ate/--cache`), na escala da A e da D (59,7 px/m):
+- `fundo`: branco fora da pegada da legenda (sem a hachura e o tracejado do lote); o bloco da piscina entra na pegada
+  (as bordas dela são brancas na legenda); `perimetro`, no fim: o contorno da casa no pátio, 2 px no cinza das paredes;
+- `bege`: o Bege Bahia do Subsolo da A tecido sem emenda, vezes a luz do lugar, no pátio, no depósito e na casa de
+  máquinas de 5,83 m², com os arcos das portas do PDF (o desenho deles sai);
+- `travertino` e `travertino_limpo`: sauna, ducha e vestiário no travertino do Térreo (o da D), num tom só, sem as juntas
+  (`travertino_terreo_casae_1711.aplicar` nas áreas do Subsolo); `marrom`: o DCE e a casa de máquinas de 15,07 m² na
+  amostra do cliente (`pedidos_terreo_casae_1611.marrom`);
+- `escada`: pelo PDF (o render a tinha invertida, com o branco nos degraus de baixo e o S no fim): 17 degraus de 17,92
+  px no travertino um tom abaixo, com o fio, a sombra curta e o nariz de cada espelho; depois da diagonal de corte
+  ((1258,1; 411,3) a (1294,2; 482,9)), os degraus 8 a 17 sob o véu de 38% (transparentes no tom da escada, sem a linha);
+  ▶ e S no 1º degrau; "SOBE PARA O / TÉRREO" à esquerda, com os rótulos;
+- `piscina`: a água pelo render, mais sóbria como a do Térreo (metade da saturação); a parte de baixo à esquerda (abaixo
+  da antiga faixa do PDF, y 770) rasa, a comprida e o ofurô fundos (80%) com a sombra do degrau; a borda junto à academia
+  no Barlavento de fundo seco da biblioteca; a de cima e a da esquerda em Bege Bahia lisa (`_bege_levigado`);
+- `academia`: os aparelhos de antes saem com o vinílico das mesmas linhas, deslocado na horizontal até um trecho limpo
+  (`piso_linhas`, as réguas correm deitadas); entram 2 esteiras A, 2 bicicletas B (as da Casa A), 2 bolas, a estação de
+  cabos, o suporte de halteres e 2 supinos (o banco no comprimento do PDF, a barra alongada como na D, embaixo);
+- `sauna` (o degrau e o assento no travertino do piso, mais escuros), `wc_dce2` (o piso cinza do WC DCE 1, a bancada
+  marrom tabaco com a cuba compacta, a bacia Monte Carlo, o box em vidro claro), `chuveiros` (a cabeça quadrada da
+  biblioteca no quadrado do PDF, com o braço cromado e a canopla), `vestiario` (a bancada tabaco, a cuba de travertino,
+  a bacia Carrara), `dce` (a cama de solteiro, o criado na cor dos armários, o guarda-roupa de cabides com fundo),
+  `elevador` (a cabine da biblioteca);
+- `portas`: o PDF do Subsolo desenha as folhas em pedaços (`portas_pdf` não as acha): as 11 portas vêm à mão (`PORTAS`:
+  a folha, os marcos no plano da parede pintados de parede, a limpeza e o lado do piso); madeira da D nas de giro,
+  vidro claro na sauna, no vestiário e nos boxes; os vãos do DCE, da casa de máquinas e do depósito no Bege Bahia do lado;
+- `rotulos`: o padrão de 16/11 (Inter, um corpo; o WC DCE 2 no corpo do WC DCE 1; a CASA DE MÁQUINAS de 5,83 m² em 3
+  linhas), "AMBIENTE" sai; a cor pelo fundo.
+Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_{planta,escada_piscina_dce,academia_sauna}_antes_depois.jpg`.
+Depois, a prancha (`rodape_entrega.py --config ../../POE642_CasaE/config_bases.json --no-quadro --render Subsolo=...`), o
+PDF da E e o book. O Subsolo da E ainda não tem 12K: entra depois do OK (`ampliacao_12k_casae.py`).
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
