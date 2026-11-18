@@ -3579,6 +3579,17 @@ parede (`face` 925, `pedra_px` 18,4: a linha 924, a mistura da água com a borda
 `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_12K_opcao_{A,B}_conferencia_*.jpg`; depois, a prancha, o PDF da E e o
 book.
 
+#### Casa E, Subsolo: o Bege Bahia com menos manchas (18/11, `bege_subsolo_casae_1811.py`)
+
+Usuário: "VAMOS DIMUNIR AS MANCHAS DO PISO BEGE BAHIA, IGUALMENTE IFZEMOS NAS OUTRAS CASAS". As manchas a 35%, a fórmula
+das outras casas (`pedidos_subsolo_casac_1311.bege`, pelos campos e pelo bloco de `bege_garagem_terreo_casae_1711`, como
+no Térreo da E), pela legenda 232: a circulação, o depósito e a casa de máquinas de 5,83 m²; fora o WC DCE 2 (outro piso)
+e a legenda 232 de fora da planta (`PLANTA`: os desenhos do quadro esticavam a caixa dos campos até fora do 12K). Na
+final é o passo `bege_manchas` de `pedidos_subsolo_casae_1811` (antes dos rótulos), para as rodadas seguintes; nos 12K A
+e B, direto (`doze --ref <a final de antes>`: o afim global com o desvio local mediano das caixas com desenho,
+`CAIXAS_AFIM`, e a fórmula na escala do 12K, em blocos; as letras, também as da Kalam, ficam). Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_bege_manchas_antes_depois.jpg`.
+
 #### Casa E, Térreo: a escada do deck na ordem dos níveis (17/11, `escada_deck_terreo_casae_1711.py`)
 
 Usuário: "esse último degrau está abaixo do penúltimo"; com a imagem do PDF: "os números estão localizados nos cantos de

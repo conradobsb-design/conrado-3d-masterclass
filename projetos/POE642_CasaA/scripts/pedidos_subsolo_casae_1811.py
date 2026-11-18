@@ -1228,11 +1228,18 @@ def rotulos(Q, img, q=ROTULOS):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# 13b. As manchas do Bege Bahia a 35% (18/11, usuário: "VAMOS DIMUNIR AS MANCHAS DO PISO BEGE BAHIA, IGUALMENTE
+# IFZEMOS NAS OUTRAS CASAS"): `bege_subsolo_casae_1811` (a fórmula das outras casas), antes dos rótulos.
+def bege_manchas(Q, img):
+    import bege_subsolo_casae_1811 as BS18
+    return BS18.bege_manchas(Q, img)
+
+
 PASSOS = [("base", base), ("fundo", fundo), ("bege", bege), ("travertino", travertino),
           ("travertino_limpo", travertino_limpo), ("marrom", marrom), ("escada", escada), ("piscina", piscina),
           ("academia", academia), ("sauna", sauna), ("wc_dce2", wc_dce2), ("chuveiros", chuveiros),
           ("vestiario", vestiario), ("dce", dce), ("elevador", elevador), ("cascata", cascata), ("portas", portas),
-          ("perimetro", perimetro), ("rotulos", rotulos)]
+          ("perimetro", perimetro), ("bege_manchas", bege_manchas), ("rotulos", rotulos)]
 
 
 def rodar(img, de=None, ate=None, cache=None):
