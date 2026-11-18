@@ -4057,6 +4057,36 @@ Higgsfield a 12288 x 8689 (jobs 4d325f51, A, e 8b6b64fd, B; as saídas fora do g
   1Pavimento --base <a>`, `preparar 1Pavimento --opcao B --sem_textos <b>`, o Topaz e `montar 1Pavimento <saída>
   [--opcao B]`.
 
+#### Casa E, 1º Pavimento: as correções vendo o 12K (18/11) e o 12K A e B de novo
+
+Pedidos do usuário com os recortes do 12K, todos em `pedidos_1pav_casae_1811.py` (e o 12K refeito pelo mesmo roteiro):
+- **Os pisos das suítes** ("corrija esse erro atrás da poltrona da suite master", "melhore a representação do piso
+  nessa região", a falha no piso da suíte 2): a limpeza pela amostra da circulação deixava blocos de réguas
+  desencontradas e emendas, e a caixa da cortina (que não mudava) guardava restos dos móveis de antes (a lasca branca
+  da poltrona antiga, os pingos da borda do tapete). Agora `piso_suite` refaz as caixas, os `extra` (a faixa escura junto
+  ao criado da master, os racks de antes, a faixa sobre a porta da suíte 2) e a faixa até a cortina (o que não é o
+  tecido, `cortina_tecido`) com réguas novas no desenho do vinílico da E (`vinilico_novo`: `retoque_1pav_casae.
+  reguas_vinilico`, as fiadas na fase das do piso de em volta, medida no anel, e a luz larga dele, sem os móveis).
+- **Recamier sem contorno** ("tire o contorno do recamier"): o K3 sem a moldura de nogueira
+  (`suite-master/banco-k3-sem-contorno.png`, o miolo de linho com os rolos), nas 5 suítes.
+- **O passo novo `retoques`**: os 6 racks de TV (5 suítes e sala íntima; "corrija esse erro do móvel [...] e melhore a
+  representação e tom") no aparador de freijó da biblioteca, com a TV do PDF em grafite junto à parede; as 4
+  escrivaninhas lisas, sem o fio escuro ("corrigir esse traço preto em volta da escrivaninha"), os objetos de cima de
+  volta; a porta da suíte 2 na madeira das portas da Casa D (`portas_casae_1711.folha`); o closet master sem os traços
+  (as bordas em réguas, a sombra dos armários contínua).
+- **A rouparia** ("usar o modelo de armario que usamos nas outras casas com tom sólido"): `armario_liso`, um L só na cor
+  dos armários das Casas C, D e do Térreo da E.
+- **O banho master** (o piso em volta da porta e da banheira, "remova esse contorno indevido em volta da bancada e
+  corrija o piso no alto"): `piso_banho_master` refaz o piso claro da parte de cima inteiro (a luz larga do render, as
+  nuvens finas da pedra), fora a floreira e o armário do PDF junto a ela; a bancada de quartzito Aura 4K ("se não tiver,
+  fazer": a da biblioteca tinha 699 px; a de 4K, `banho-master/bancada-dupla-quartzito-aura-4k.png`, feita no
+  Higgsfield a partir dela), esticada na pedra entre as cubas (`bancada_esticada`, sem o espelho que fazia zigue-zague);
+  a floreira com 3 costelas-de-adão 4K bem distribuídas (`floreira_master_casae_1811.py`, a planta
+  `banho-master/costela-de-adao-4k.png` sobre a terra, `floreira-3-costelas-4k.png`).
+- **12K A e B** refeitos (Topaz High Fidelity V2), as plantas, a floreira e a bancada 4K direto no 12K
+  (`folhas_12k`, `bancada_master_12k`). Antes e depois em
+  `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811c_suite_banho_master_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,

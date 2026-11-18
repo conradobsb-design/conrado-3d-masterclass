@@ -1202,7 +1202,7 @@
     {
      "n": 7,
      "origem": "voce",
-     "texto": "Suíte master: tapete, cama king, criados, poltrona e criado redondo da biblioteca no lugar do PDF (18/11), com o banco de pé de cama K3 da biblioteca (linho off-white e nogueira), no lugar do k4 (\"troque os bancos [...] por outro modelo da biblioteca\").",
+     "texto": "Suíte master: tapete, cama king, criados, poltrona e criado redondo da biblioteca no lugar do PDF (18/11), com o banco de pé de cama K3 da biblioteca (linho off-white), sem a moldura escura (\"tire o contorno do recamier\").",
      "pontos": [
       [
        1566,
@@ -1275,7 +1275,7 @@
     {
      "n": 10,
      "origem": "voce",
-     "texto": "Banho master: floreira com a folhagem 4K da biblioteca (18/11); a bancada dupla, a banheira oval, o misturador de piso e a bacia Carrara da biblioteca (18/11); os 2 chuveiros no quadrado de parede, com o braço até as paredes do box.",
+     "texto": "Banho master: a bancada de quartzito Aura 4K com as cubas esculpidas na mesma pedra (feita a partir da da biblioteca), a banheira oval, o misturador de piso e a bacia Carrara; o piso refeito, sem as manchas, os retângulos e o contorno da bancada antiga; a floreira com 3 costelas-de-adão bem distribuídas; os 2 chuveiros no quadrado de parede.",
      "pontos": [
       [
        1762,
@@ -1426,7 +1426,7 @@
     {
      "n": 19,
      "origem": "voce",
-     "texto": "Copinha com o tampo da E, a cuba Franke e o armário; rouparia com a estante aberta e os nichos; elevador com a cabine da biblioteca (18/11).",
+     "texto": "Copinha com o tampo da E, a cuba Franke e o armário; rouparia com o armário liso em L no tom das outras casas (\"em vez desses caixotes abertos\"); elevador com a cabine da biblioteca (18/11).",
      "pontos": [
       [
        2034,
@@ -1561,6 +1561,33 @@
       [
        2148,
        1511
+      ]
+     ]
+    },
+    {
+     "n": 26,
+     "origem": "voce",
+     "texto": "Suítes (18/11, depois do 12K): o piso em réguas contínuas, sem os remendos, a faixa escura junto ao criado e a lasca atrás da poltrona da master; as escrivaninhas sem o fio escuro; os racks de TV em freijó com a TV do PDF (também na sala íntima); a porta da suíte 2 em madeira; o closet master sem os traços.",
+     "pontos": [
+      [
+       1520,
+       800
+      ],
+      [
+       2390,
+       910
+      ],
+      [
+       2243,
+       750
+      ],
+      [
+       2087,
+       670
+      ],
+      [
+       2252,
+       907
       ]
      ]
     }
