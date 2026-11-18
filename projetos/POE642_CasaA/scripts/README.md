@@ -3671,6 +3671,18 @@ como a do DCE. Os dois rótulos redesenhados por cima (Inter na final e no 12K A
 no 12K B): o do WC no meio do piso livre, entre a parede e a bacia/bancada (`pedidos_terreo_casae_1611.ROTULOS`: x
 2421,2, corpo `wc` 8,8 px; o JSON da Kalam com o mesmo meio).
 
+#### Casa E, Térreo: o tapete do living e a fachada de vidro de baixo (18/11, `fachada_living_casae_1811.py`)
+
+"VAMOS CORRIGIR ESSE ERRO NO TAPETE E PISO." e "VAMOS CORRIGIR ESSE ERRO NO CANTO ESQUERDO DAS ESQUADRIAS DE VIDRO E
+REPRESENTAR AS FOLHAS DE VIDRO COM MAIS PRECISÃO". Em 16/11 o tapete redondo foi pousado com a faixa da cortina
+protegida: ficou cortado reto em y 1528 e sobrou embaixo dele uma faixa cinza do desenho de antes, que apagava as
+ondas. A faixa da fachada é refeita por camadas: o travertino limpo até a face de dentro de cada folha; o tapete inteiro
+no círculo do PDF; a cortina com uma onda limpa dela mesma repetida no passo medido na própria imagem (17,8 px) a partir
+da origem que não deixa emenda, cheia da crista para baixo, com o trilho; as 4 folhas de correr desencontradas do PDF
+(ARQ_PAREDE: as duas lâminas de vidro claro com o fio e a linha do meio) e os montantes em grafite. No canto da
+esquerda, a linha escura e a cortina vertical da fachada da esquerda descem até o encontro, o trilho encosta nelas e o
+nó do canto (o toco de parede e os montantes do pé) vem do PDF; os restos claros saem. Na final e nos 12K A e B.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
