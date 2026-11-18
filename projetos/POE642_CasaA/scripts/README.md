@@ -3700,8 +3700,9 @@ final do Subsolo de e730bde, sem os rótulos (`final3840_casae.sem_rotulos`), um
   px no travertino um tom abaixo, com o fio, a sombra curta e o nariz de cada espelho; depois da diagonal de corte
   ((1258,1; 411,3) a (1294,2; 482,9)), os degraus 8 a 17 sob o véu de 38% (transparentes no tom da escada, sem a linha);
   ▶ e S no 1º degrau; "SOBE PARA O / TÉRREO" à esquerda, com os rótulos;
-- `piscina`: a água pelo render, mais sóbria como a do Térreo (metade da saturação); a parte de baixo à esquerda (abaixo
-  da antiga faixa do PDF, y 770) rasa, a comprida e o ofurô fundos (80%) com a sombra do degrau; a borda junto à academia
+- `piscina`: a água pelo render, mais sóbria como a do Térreo (metade da saturação); a profundidade pela linha verde do
+  usuário (18/11: "A única parte mais rasa da piscina é essa que eu delimitei [...] O restante é tudo fundo"): só a
+  faixa de cima do tanque da direita (y 781 a 808, junto à sauna) rasa, todo o resto fundo (80%) com a sombra do degrau; a borda junto à academia
   no Barlavento de fundo seco da biblioteca; a de cima e a da esquerda em Bege Bahia lisa (`_bege_levigado`);
 - `academia`: os aparelhos de antes saem com o vinílico das mesmas linhas, deslocado na horizontal até um trecho limpo
   (`piso_linhas`, as réguas correm deitadas); entram 2 esteiras A, 2 bicicletas B (as da Casa A), 2 bolas, a estação de

@@ -13,8 +13,9 @@ Subsolo da Casa D (`biblioteca_subsolo_casad_1511`) e no Térreo da Casa E (`ped
 4. `escada`: pelo PDF (o render a tinha invertida): os degraus 1 a 7 (à esquerda), deste nível, inteiros, no travertino; os
    de depois da diagonal de corte (8 a 17), transparentes no tom da escada (o véu da Casa D), sem o branco; ▶ e S no 1º
    degrau e "SOBE PARA O / TÉRREO" no pátio, à esquerda (G1, nota 6);
-5. `piscina`: a água mais sóbria, como no Térreo (nota 4); a profundidade (nota 5): a parte de baixo à esquerda rasa e
-   clara, a comprida e o ofurô fundos, com a sombra do degrau na linha do PDF; a borda entre a piscina e a academia na
+5. `piscina`: a água mais sóbria, como no Térreo (nota 4); a profundidade (nota 5; 18/11, usuário, com a linha verde no
+   tanque da direita: "A única parte mais rasa da piscina é essa que eu delimitei [...] O restante é tudo fundo"): só a
+   faixa de cima do tanque da direita, junto à sauna, rasa e clara; todo o resto fundo, com a sombra do degrau; a borda entre a piscina e a academia na
    pastilha da piscina (nota 3) e as outras bordas em Bege Bahia lisa, um tom abaixo (16/11);
 6. `travertino`: sauna, ducha e vestiário no travertino do Térreo (o da Casa D), liso (nota 8);
 7. `marrom`: o DCE e a casa de máquinas de 15,07 m² no piso marrom da amostra do cliente (como no Térreo);
@@ -308,12 +309,14 @@ def escada(Q, img, q=ESCADA):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 5. A piscina (notas 3, 4 e 5): a água pelo render (o azul; a faixa do meio é água desde 28/10), mais sóbria como a do
-# Térreo (`pedidos_terreo_casae_1611.PISCINA`: metade da saturação e a tinta); a parte de baixo à esquerda (abaixo da linha
-# da antiga faixa do PDF, y 770) rasa, no tom de antes; a comprida e o ofurô fundos, mais escuros, com a sombra do degrau
-# no lado fundo, junto à rasa. A borda entre a água comprida e o visor da academia na pastilha da piscina (o Barlavento de
+# Térreo (`pedidos_terreo_casae_1611.PISCINA`: metade da saturação e a tinta). A profundidade (18/11, usuário, com a linha
+# verde no tanque da direita: "A única parte mais rasa da piscina é essa que eu delimitei, tá? O restante é tudo fundo.
+# [...] não é bem uma prainha, na verdade é uma parte mais rasa mesmo"): só a faixa de cima do tanque da direita (de
+# 781 a 808, junto à sauna; `rasa_ret`) rasa, no tom de antes; todo o resto fundo, mais escuro, com a sombra do degrau no
+# lado fundo, junto à rasa. A borda entre a água comprida e o visor da academia na pastilha da piscina (o Barlavento de
 # fundo seco da biblioteca, na escala dele); as outras bordas (a de cima e a da esquerda) em Bege Bahia lisa, um tom
 # abaixo do pátio (o alto-relevo de 16/11, `pedidos_terreo_casad_1611._bege_levigado`).
-PISCINA = dict(PE.PISCINA, funda=0.80, bloco=(855, 474, 1060, 926), azul=25, linha_y=770.0, rasa_x=980.0,
+PISCINA = dict(PE.PISCINA, funda=0.80, bloco=(855, 474, 1060, 926), azul=25, rasa_ret=(989.0, 781.0, 1053.5, 808.0),
                pastilha=(966.0, 489.0, 984.5, 770.0), barlavento=CASA / "biblioteca-objetos" / "04-materiais" /
                "piscina-e-areas-molhadas" / "barlavento-fundo.png", barlavento_m=4.64, pastilha_tom=0.97,
                bege=[(856.0, 474.0, 1000.0, 489.0), (856.0, 489.0, 870.5, 926.0)])
@@ -329,7 +332,8 @@ def piscina(Q, img, q=PISCINA):
     ag = ndimage.binary_fill_holes(ag)
     ag &= ~paredes(Q)[by0:by1, bx0:bx1]
     yy, xx = np.mgrid[by0:by1, bx0:bx1]
-    rasa = ag & (yy >= q["linha_y"]) & (xx < q["rasa_x"])
+    rx0, ry0, rx1, ry1 = q["rasa_ret"]
+    rasa = ag & (xx >= rx0) & (xx < rx1) & (yy >= ry0) & (yy < ry1)
     funda = ag & ~rasa
     wf = cv2.GaussianBlur(funda.astype(np.float32), (0, 0), 1.0)
     lum = reg.mean(axis=2, keepdims=True)
@@ -338,7 +342,7 @@ def piscina(Q, img, q=PISCINA):
     novo = novo * (q["funda"] * wf + q["rasa"] * (1 - wf))[..., None]
     d = cv2.distanceTransform((~rasa).astype(np.uint8), cv2.DIST_L2, 3)
     f, alc = q["degrau"]
-    sombra = np.where(funda & (yy < q["linha_y"]), 1 - (1 - f) * np.clip(1 - d / alc, 0, 1), 1.0)
+    sombra = np.where(funda, 1 - (1 - f) * np.clip(1 - d / alc, 0, 1), 1.0)
     novo = novo * sombra[..., None]
     a = cv2.GaussianBlur(ag.astype(np.float32), (0, 0), 0.5) * ag
     reg[:] = reg * (1 - a[..., None]) + novo * a[..., None]
@@ -379,8 +383,8 @@ def piscina(Q, img, q=PISCINA):
     sub[mm] = Tb[mm]
     beira = agr & (cv2.dilate(mm.astype(np.uint8), np.ones((3, 3), np.uint8)) > 0)
     sub[beira] *= q["beira_agua"]
-    print(f"    piscina: a água mais sóbria (saturação a {q['sat']:.0%}); a parte de baixo à esquerda rasa, a comprida e o "
-          f"ofurô fundos ({q['funda']:.0%}) com a sombra do degrau; a borda junto à academia na pastilha Barlavento; as "
+    print(f"    piscina: a água mais sóbria (saturação a {q['sat']:.0%}); só a faixa de cima do tanque da direita rasa, o "
+          f"resto fundo ({q['funda']:.0%}) com a sombra do degrau; a borda junto à academia na pastilha Barlavento; as "
           "outras bordas em Bege Bahia lisa")
     return u8(out)
 
