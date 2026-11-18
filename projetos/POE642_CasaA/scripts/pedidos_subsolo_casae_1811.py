@@ -101,7 +101,11 @@ def base(Q, img):
 # ----------------------------------------------------------------------------------------------------------------------
 # 1. O fundo branco: a pegada é o que a legenda pinta (fechado, sem furos, as manchas grandes), mais o bloco da piscina
 # (as bordas dela são brancas na legenda e encostam no lado de fora); fora dela, branco puro.
-FUNDO = {"fechar": 7, "abrir": 3, "area_min": 2000, "suave": 0.8, "dentro_px": [(857, 476, 1000, 912)]}
+# o bloco da piscina na pegada (as bordas são brancas na legenda): da linha da casa do PDF (x 858-859, y 476; a mesma
+# reta da parede de baixo) até a parede de baixo (y 926), para o perímetro passar na linha da casa, como no resto da planta;
+# e a coluna x 858 do pátio de cima (y 304 a 476), para o lado esquerdo da casa ser uma reta só, sem o degrau de 1 px (18/11, usuário: "o contorno em
+# volta da borda deve ficar no contorno, não sobre a borda")
+FUNDO = {"fechar": 7, "abrir": 3, "area_min": 2000, "suave": 0.8, "dentro_px": [(858, 476, 1000, 926), (858, 304, 859, 476)]}
 
 
 def pegada(Q, q=FUNDO):
@@ -130,7 +134,9 @@ def fundo(Q, img, q=FUNDO):
 
 # ----------------------------------------------------------------------------------------------------------------------
 # 2. O perímetro da casa no pátio (nota 1), no fim: o contorno da pegada no cinza das paredes, 2 px (como na Casa D).
-PERIMETRO = {"larg": 2.0, "cor": PAREDE, "ss": 8}
+# o filete claro do render que sobrava entre a parede e o contorno (embaixo do tanque; usuário: "E a parede do outro
+# lado") vira parede: o vão de até 1 px entre o contorno e o escuro da parede, perto da pegada
+PERIMETRO = {"larg": 2.0, "cor": PAREDE, "ss": 8, "fora": [], "escuro": 110, "perto_px": 4, "ponto": 130}
 
 
 def perimetro(Q, img, q=PERIMETRO):
@@ -145,8 +151,29 @@ def perimetro(Q, img, q=PERIMETRO):
         pts = (c.reshape(-1, 2).astype(np.float32) + 0.5 - [X0, Y0]) * ss
         cv2.polylines(M, [np.int32(np.round(pts))], True, 255, max(1, int(round(q["larg"] * ss))), cv2.LINE_AA)
     a = cv2.resize(M.astype(np.float32) / 255, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA)
+    from janela_pia_casaa_1611 import alfa_ret
+    for fx0, fy0, fx1, fy1 in q.get("fora", []):
+        a *= 1 - alfa_ret((fx0 - X0, fy0 - Y0, fx1 - X0, fy1 - Y0), a.shape)
     out = PS._pintar(img.copy(), a, X0, Y0, q["cor"])
-    print("    perímetro: o contorno da casa no pátio, no cinza das paredes")
+    # o filete claro entre o contorno e a parede: o claro de 1 px com escuro dos dois lados, junto à pegada
+    L = out.astype(np.float32).mean(-1)
+    esc = (L < q["escuro"]).astype(np.uint8)
+    fecha = (cv2.morphologyEx(esc, cv2.MORPH_CLOSE, np.ones((3, 1), np.uint8)) |
+             cv2.morphologyEx(esc, cv2.MORPH_CLOSE, np.ones((1, 3), np.uint8))).astype(bool)
+    d_fora = cv2.distanceTransform(m.astype(np.uint8), cv2.DIST_L2, 3)
+    filete = fecha & ~esc.astype(bool) & (d_fora <= q["perto_px"]) & m.astype(bool)
+    out[filete] = q["cor"]
+    # e os pontinhos cinza que sobram nos cantos do filete (um pouco mais claros que a parede, cercados de parede):
+    # só os neutros (o bronze das esquadrias tem cor e fica)
+    O = out.astype(np.float32)
+    L = O.mean(-1)
+    neutro = (O.max(-1) - O.min(-1)) < 6
+    cerca = cv2.medianBlur(np.clip(L, 0, 255).astype(np.uint8), 3) <= np.mean(q["cor"]) + 2
+    ponto = (neutro & cerca & (L > np.mean(q["cor"]) + 2) & (L < q["ponto"]) & (d_fora <= q["perto_px"])
+             & m.astype(bool))
+    out[ponto] = q["cor"]
+    print(f"    perímetro: o contorno da casa no pátio, no cinza das paredes, na linha da casa ({int(filete.sum())} px "
+          f"de filete claro junto à parede, {int(ponto.sum())} pontinhos)")
     return out
 
 
@@ -393,7 +420,10 @@ PISCINA = dict(PE.PISCINA, funda=0.80, bloco=(855, 474, 1060, 926), azul=25, ras
                pastilha=[(966.0, 489.0, 984.5, 770.0), (966.0, 770.0, 1051.7, 781.7)],
                barlavento=CASA / "biblioteca-objetos" / "04-materiais" /
                "piscina-e-areas-molhadas" / "barlavento-fundo.png", barlavento_m=4.64, pastilha_tom=0.97,
-               bege=[(856.0, 474.0, 1000.0, 489.0), (856.0, 489.0, 870.5, 926.0), (1051.7, 770.0, 1063.3, 909.5)])
+               # (a borda do tanque do lado da sauna vai ao travertino da sauna, no passo `sauna`: `SAUNA["borda"]`)
+               # (18/11, usuário: "o contorno em volta da borda deve ficar no contorno, não sobre a borda") as bordas de
+               # Bege Bahia começam na linha da casa do PDF (x 859; antes 856, 3 px para fora dela)
+               bege=[(859.0, 474.0, 1000.0, 489.0), (859.0, 489.0, 870.5, 926.0)])
 
 
 def piscina(Q, img, q=PISCINA):
@@ -639,30 +669,57 @@ def academia(Q, img, q=ACADEMIA):
 # 10b. A sauna (regra da Casa D: "os bancos da sauna são do mesmo material do piso, com tom em destaque"): o degrau e o
 # assento (junto à parede de baixo) do PDF (ARQ_ELEMENTOS FIXOS) no travertino do piso (tecido de um trecho limpo da
 # sauna), mais escuros, o assento mais que o degrau, com a face na borda e a sombra curta.
+# (18/11, usuário, com o recorte da sauna: "a borda da piscina é em travertino, igual ao restante do material da sauna.
+# remova essas linhas contornando os bancos em travertino da sauna. tem uma linha branca vertical na borda que não
+# existe. pense que os dois bancos da sauna são suspensos e o travertino é embaixo. piso contínuo até a piscina, sem
+# marcação de borda. o tom dos bancos devem ser preservados."): a borda do tanque do lado da sauna (`borda`, até a
+# água) no travertino do piso da sauna, tecido da mesma amostra, emendado ao piso por uma rampa de `rampa_px` (a linha
+# branca de antes, em x 1063,5, fica por baixo); os bancos nos mesmos tons, sem a face escura e sem a sombra (suspensos).
 SAUNA = {"degrau": (1063.3, 837.1, 1180.1, 873.2), "assento": (1063.3, 873.2, 1180.1, 909.2),
-         "piso_px": (1075, 776, 1165, 826), "tons": {"degrau": 0.86, "assento": 0.78}, "face": 0.80, "sombra": 0.30}
+         "piso_px": (1075, 776, 1165, 826), "tons": {"degrau": 0.86, "assento": 0.78}, "face": 1.0, "sombra": 0.0,
+         "borda": (1051.0, 770.0, 1068.5, 909.5), "rampa_px": 3.0, "topo": (1063.3, 832.5, 1180.1, 837.1)}
 
 
 def sauna(Q, img, q=SAUNA):
     import revisao_terreo_casac_1511 as R15
     import biblioteca_terreo_casad_1511 as TD
+    from janela_pia_casaa_1611 import alfa_ret
     par = paredes(Q, 0.5)
     H, W = par.shape
     o = img.astype(np.float32)
+    # a borda do tanque no travertino da sauna, até a água, e a rampa sobre o piso
+    bx0, by0, bx1, by1 = q["borda"]
+    r = q["rampa_px"]
+    X0, Y0, X1, Y1 = int(np.floor(bx0)), int(np.floor(by0)), int(np.ceil(bx1 + r)) + 1, int(np.ceil(by1))
+    T_ = TD._tecido(img, q["piso_px"], Y1 - Y0, X1 - X0, 1818)
+    a = alfa_ret((bx0 - X0, by0 - Y0, bx1 + r + 1 - X0, by1 - Y0), (Y1 - Y0, X1 - X0))
+    xx = np.arange(X0, X1, dtype=np.float32) + 0.5
+    a *= np.clip((bx1 + r - xx) / r, 0, 1)[None, :]
+    a *= ~par[Y0:Y1, X0:X1]
+    o[Y0:Y1, X0:X1] = o[Y0:Y1, X0:X1] * (1 - a[..., None]) + T_ * a[..., None]
+    # o traço escuro de antes logo acima do degrau (o banco do render) sai, no mesmo piso
+    tx0, ty0, tx1, ty1 = q["topo"]
+    X0, Y0, X1, Y1 = int(np.floor(tx0)), int(np.floor(ty0)), int(np.ceil(tx1)), int(np.ceil(ty1))
+    T_ = TD._tecido(img, q["piso_px"], Y1 - Y0, X1 - X0, 1819)
+    a = alfa_ret((tx0 - X0, ty0 - Y0, tx1 - X0, ty1 - Y0), (Y1 - Y0, X1 - X0)) * ~par[Y0:Y1, X0:X1]
+    o[Y0:Y1, X0:X1] = o[Y0:Y1, X0:X1] * (1 - a[..., None]) + T_ * a[..., None]
+    img = u8(o)
     for nome in ("degrau", "assento"):
         x0, y0, x1, y1 = q[nome]
         X0, Y0, X1, Y1 = int(np.floor(x0)), int(np.floor(y0)), int(np.ceil(x1)), int(np.ceil(y1))
         a = np.zeros((H, W), np.float32)
         a[Y0:Y1, X0:X1] = 1
         a *= ~par
-        o *= (1 - q["sombra"] * R15._sombra(a, W, H))[..., None]
+        if q["sombra"]:
+            o *= (1 - q["sombra"] * R15._sombra(a, W, H))[..., None]
         T_ = TD._tecido(img, q["piso_px"], Y1 - Y0, X1 - X0, 1811 + len(nome)) * q["tons"][nome]
         m = a[Y0:Y1, X0:X1] > 0
         borda = m & ~cv2.erode(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool)
         T_[borda] *= q["face"]
         reg = o[Y0:Y1, X0:X1]
         reg[m] = T_[m]
-    print("    sauna: o degrau e o assento no travertino do piso, mais escuros (em destaque), com a face e a sombra")
+    print("    sauna: a borda do tanque no travertino da sauna, contínuo até a água; o degrau e o assento suspensos, nos "
+          "tons de destaque, sem contorno")
     return u8(o)
 
 
@@ -932,7 +989,7 @@ CASCATA_BIB = {"lado": "sul", "estilo": "biblioteca", "png": BIB / "piscina" / "
                "revest_x": (870.0, 966.0), "face": 925.0, "pedra_px": 9.6, "centro_x": 918.0,
                "sombra": 0.38, "sombra_px": 1.2, "aresta_luz": 1.07, "aresta_px": 0.8,
                # a água onde a peça pode entrar: a parte de baixo da piscina (até o vidro, x 982) acima da aresta
-               "agua_x": (870.0, 982.0), "agua_y0": 782.0,
+               "agua_x": (870.0, 982.0), "agua_y0": 782.0, "agua_fora": [(966.0, 909.0, 986.0, 930.0)],
                # (18/11, usuário: "CONSEGUE CRIAR UM POUCO MAIS DE RESSONÂNCIA EM ONDAS AO CAIR DAS ÁGUAS DA CASCATA?")
                # as ondas que se abrem de onde a lâmina cai: anéis paralelos à linha da queda (a distância ao trecho
                # de `meia` px de cada lado do meio), de `r0` em diante, a cada `lam` px, mais fracos para longe
@@ -972,7 +1029,7 @@ def ondas_cascata(reg, xx, yy, agua, m, o):
     env = np.clip(r / o["lam"], 0, 1) * np.exp(-np.maximum(r, 0) / o["decai"]) * np.clip((fim - r) / o["lam"], 0, 1)
     ang = np.arctan2(-dy, uf - o["cx"])
     # só na água (o escuro das paredes junto à piscina fica sem reflexo)
-    agua = agua * np.clip((reg.mean(-1) - 70) / 30, 0, 1)
+    agua = agua * np.clip((reg.mean(-1) - 95) / 30, 0, 1)
     amp = env * (0.78 + 0.22 * np.sin(5 * ang + 1.3)) * agua
     reg = reg * (1 - o["sombra"] * vale * amp)[..., None]
     return reg + (np.float32(o["cor"]) - reg) * (o["forca"] * crista * amp)[..., None]
@@ -1016,6 +1073,11 @@ def cascata_biblioteca(img, q=CASCATA_BIB, m=None, px_m=None):
     ax0, ax1, ay0 = m.x(q["agua_x"][0]), m.x(q["agua_x"][1]), m.y(q["agua_y0"])
     agua = (np.clip(np.minimum(xx + 0.5, ax1) - np.maximum(xx - 0.5, ax0), 0, 1) *
             np.clip(np.minimum(yy + 0.5, ry0) - np.maximum(yy - 0.5, ay0), 0, 1))
+    # (18/11) o pilar e a parede de baixo do tanque, à direita do revestimento, ficam fora (a água e as ondas da peça
+    # passavam por cima deles)
+    for fx0, fy0, fx1, fy1 in q.get("agua_fora", []):
+        agua *= 1 - (np.clip(np.minimum(xx + 0.5, m.x(fx1)) - np.maximum(xx - 0.5, m.x(fx0)), 0, 1) *
+                     np.clip(np.minimum(yy + 0.5, m.y(fy1)) - np.maximum(yy - 0.5, m.y(fy0)), 0, 1))
     # a sombra curta do revestimento na água, junto à aresta
     d = np.maximum(ry0 - yy, 0)
     reg *= (1 - q["sombra"] * np.exp(-d / (q["sombra_px"] * m.s)) * agua * cobx)[..., None]
@@ -1397,10 +1459,25 @@ ESQUADRIAS = {
     "meio": (150, 156, 162), "meio_px": 0.25, "sombra": 0.16}
 
 
+# o vidro entre a piscina e a academia (18/11, usuário: "aqui tem um vidro de fora a fora. remova os traços pretos para
+# deixar limpo"): o vidro do PDF (ARQ_PAREDE, entre as duas tampas cinza) no vidro claro com o fio fino, de ponta a
+# ponta; o traço escuro do render do lado da academia (`limpa`) volta ao vinílico de logo ao lado.
+VIDRO_PISCINA = {"vidro": (985.5, 493.7, 989.7, 755.8), "limpa": (989.7, 494.0, 993.6, 755.5)}
+
+
+def vidro_piscina(Q, out, q=VIDRO_PISCINA):
+    import biblioteca_subsolo_casab_1311 as BB
+    import correcoes_terreo_casab_1611 as CB
+    out = BB.piso_desloc(out, q["limpa"], paredes(Q, 0.5), 1, 0)
+    v = VIDRO
+    CB.pintar(out, CB.Mapa(), [(q["vidro"], "ret", v["vidro"], 0), (q["vidro"], "contorno", v["fio"], v["fio_px"])])
+    return out
+
+
 def esquadrias(Q, img, q=ESQUADRIAS):
     import correcoes_terreo_casab_1611 as CB
     m = CB.Mapa()
-    out = img.copy()
+    out = vidro_piscina(Q, img.copy())
     pecas = []
     for x0, y0, x1, y1 in q["vaos"]:
         acima = out[int(y0) - 12:int(y0) - 3, int(x0):int(x1)].reshape(-1, 3)
@@ -1419,7 +1496,7 @@ def esquadrias(Q, img, q=ESQUADRIAS):
             CB.sombra(out, m, r, q["sombra"], dx=-0.6, dy=0.6, sigma=0.6)
     CB.pintar(out, m, pecas)
     print(f"    esquadrias: {len(q['batentes'])} peças de batente de 7 portas, {len(q['caixilhos'])} marcos e montantes e "
-          f"{len(q['vidros'])} folhas de vidro (2 portas de correr e a janela do DCE) no bronze das esquadrias, contornadas")
+          f"{len(q['vidros'])} folhas de vidro (2 portas de correr e a janela do DCE) no bronze das esquadrias, contornadas; o vidro entre a piscina e a academia limpo, de ponta a ponta")
     return out
 
 

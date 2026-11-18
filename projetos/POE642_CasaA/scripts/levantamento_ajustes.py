@@ -60,12 +60,24 @@ def marca(d, cx, cy, n, cor, r, f):
     d.text((cx, cy + 1), str(n), fill="white", font=f, anchor="mm")
 
 
-def lista_altura(itens, d, f, larg, passo, entre):
-    y = 0
+def fluir(itens, d, f, cols, passo, entre, rr):
+    """Distribui os itens pelas colunas [(x, y0, y1, larg)], na ordem; None se não couberem."""
+    pos, c, y = [], 0, cols[0][1] if cols else 0
     for it in itens:
-        n = len(quebra(it["texto"], f, larg, d))
-        y += max(n * passo, passo + 8) + entre
-    return y
+        while c < len(cols):
+            x, y0, y1, larg = cols[c]
+            ls = quebra(it["texto"], f, larg - 2 * rr - 18, d)
+            h = max(len(ls) * passo, passo + 8)
+            if y + h <= y1:
+                pos.append((x, y, ls))
+                y += h + entre
+                break
+            c += 1
+            if c < len(cols):
+                y = cols[c][1]
+        else:
+            return None
+    return pos
 
 
 def pagina(casa, pav, q):
@@ -105,24 +117,26 @@ def pagina(casa, pav, q):
     py = MARG + 200
     pg.paste(pl, (MARG, py))
     d.rectangle((MARG - 1, py - 1, MARG + pl.width, py + pl.height), outline=(225, 225, 225), width=2)
-    # a lista, no maior corpo que couber
+    # a lista, no maior corpo que couber: a coluna à direita da planta e, se sobrar altura embaixo da planta, mais duas
+    # colunas ali (a lista continua nelas, na ordem dos números)
     lx = MARG + PLANTA_W + 80
-    larg = W - MARG - lx - 64
     topo, fundo = MARG + 200, H - MARG
-    for t in range(30, 15, -1):
+    cols = [(lx, topo, fundo, W - MARG - lx)]
+    yb = py + pl.height + 70
+    if fundo - yb >= 280:
+        lc = (pl.width - 80) // 2
+        cols += [(MARG, yb, fundo, lc), (MARG + lc + 80, yb, fundo, lc)]
+    for t in range(36, 15, -1):
         f = fonte("Inter-Regular.otf", t)
-        passo, entre = int(t * 1.36), int(t * 0.55)
-        if lista_altura(q["itens"], d, f, larg, passo, entre) <= fundo - topo:
+        passo, entre, rr = int(t * 1.36), int(t * 0.55), int(t * 0.62)
+        pos = fluir(q["itens"], d, f, cols, passo, entre, rr)
+        if pos is not None:
             break
-    y = topo
-    rr = int(t * 0.62)
     fn = fonte("Inter-Bold.otf", int(t * 0.8))
-    for it in q["itens"]:
-        marca(d, lx + rr, y + rr + 2, it["n"], COR[it["origem"]], rr, fn)
-        ls = quebra(it["texto"], f, larg, d)
+    for it, (x, y, ls) in zip(q["itens"], pos):
+        marca(d, x + rr, y + rr + 2, it["n"], COR[it["origem"]], rr, fn)
         for i, ln in enumerate(ls):
-            d.text((lx + 2 * rr + 18, y + i * passo), ln, fill=(30, 30, 30), font=f)
-        y += max(len(ls) * passo, passo + 8) + entre
+            d.text((x + 2 * rr + 18, y + i * passo), ln, fill=(30, 30, 30), font=f)
     d.text((W - MARG, H - 40), "POE 642 · plantas humanizadas · levantamento dos ajustes", fill=(150, 150, 150),
            font=fonte("Inter-Regular.otf", 22), anchor="rs")
     return pg

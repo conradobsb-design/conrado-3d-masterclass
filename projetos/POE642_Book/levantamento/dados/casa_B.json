@@ -1,0 +1,910 @@
+{
+ "casa": "B",
+ "plantas": {
+  "Subsolo": {
+   "recorte": [
+    610,
+    74,
+    1861,
+    807
+   ],
+   "itens": [
+    {
+     "n": 1,
+     "origem": "cliente",
+     "texto": "Fundo branco: saem a hachura do terreno e as peças do Térreo nevoadas; em volta da planta, só branco (nota geral \"Fazer as mesmas mudanças que foram apontadas no subsolo da casa A\"; \"remova a hachura do terreno fora do subsolo\").",
+     "pontos": [
+      [
+       760,
+       420
+      ]
+     ]
+    },
+    {
+     "n": 2,
+     "origem": "voce",
+     "texto": "Desenho geral: a final redesenhada nítida no quadro da prancha (22/10), com as escalas de pisos, louças e aparelhos conferidas (\"ATENÇÃO ÀS ESCALAS\", 21/10); paredes em cinza 80 (26/10).",
+     "pontos": [
+      [
+       1600,
+       773
+      ]
+     ]
+    },
+    {
+     "n": 3,
+     "origem": "cliente",
+     "texto": "Perímetro da casa: traço contínuo e reto no cinza das paredes onde a borda da garagem não é parede, até a parede da direita (\"Demarcar melhor o perímetro da casa\").",
+     "pontos": [
+      [
+       1150,
+       274
+      ],
+      [
+       896,
+       450
+      ]
+     ]
+    },
+    {
+     "n": 4,
+     "origem": "cliente",
+     "texto": "Garagem: pilar redondo de 30 cm no canto de cima, no cinza das paredes (\"Tem um pilar aqui\"; o PDF não o desenha).",
+     "pontos": [
+      [
+       913,
+       291
+      ]
+     ]
+    },
+    {
+     "n": 5,
+     "origem": "cliente",
+     "texto": "Faixa acima do BH serviço: o Bege Bahia da garagem continua, numa peça só, até as paredes (\"O piso continua nessa demarcação\"); a circulação do BH serviço no mesmo piso.",
+     "pontos": [
+      [
+       1450,
+       298
+      ],
+      [
+       1470,
+       376
+      ]
+     ]
+    },
+    {
+     "n": 6,
+     "origem": "voce",
+     "texto": "Bege Bahia menos manchado (manchas a 45%) na garagem, nas circulações e no BH serviço (\"reduzir manchas no mármore bege bahia\"; sua regra para todas as casas, vinda da nota do cliente no Subsolo da Casa A).",
+     "pontos": [
+      [
+       1000,
+       480
+      ]
+     ]
+    },
+    {
+     "n": 7,
+     "origem": "voce",
+     "texto": "Travertino bruto no depósito, na sauna e no BH sauna (\"melhore o aspecto do mármore travertino bruto\", 26/10), refeito em 12/11 no travertino novo e limpo do 1º Pavimento da Casa A.",
+     "pontos": [
+      [
+       1740,
+       450
+      ],
+      [
+       1110,
+       630
+      ],
+      [
+       1300,
+       700
+      ]
+     ]
+    },
+    {
+     "n": 8,
+     "origem": "cliente",
+     "texto": "Escada da ducha: triângulo no degrau de baixo e \"SOBE PARA O / JARDIM\" (\"Colocar a seta em todas as escadas e a descrição\"); seus: os degraus em Bege Bahia com o sombreamento de subida (22 e 26/10) e o S abaixo da seta (13/11).",
+     "pontos": [
+      [
+       757,
+       637
+      ],
+      [
+       700,
+       738
+      ]
+     ]
+    },
+    {
+     "n": 9,
+     "origem": "voce",
+     "texto": "Deck da ducha na madeira do deck da Casa A, réguas de 20 cm com as juntas retas (\"melhorar a representação da madeira do deck, igual fizemos na casa A\"); o contorno da borda esquerda completo até a parede de baixo, sem dente (14/11).",
+     "pontos": [
+      [
+       870,
+       640
+      ],
+      [
+       760,
+       762
+      ]
+     ]
+    },
+    {
+     "n": 10,
+     "origem": "voce",
+     "texto": "Chuveiros desenhados em planta: o da ducha no canto do deck (\"CADÊ O CHUVEIRO?\", 22/10; \"a ducha fica mais no canto\", 26/10), com o deck sem remendo, e o do lado da sauna; o redondo no box do BH serviço, sem o tique que você marcou com \"?\".",
+     "pontos": [
+      [
+       920,
+       747
+      ],
+      [
+       1173,
+       736
+      ],
+      [
+       1489,
+       415
+      ]
+     ]
+    },
+    {
+     "n": 11,
+     "origem": "cliente",
+     "texto": "Portas de giro do BH serviço, do depósito, da sauna e do BH sauna em madeira clara, quina a quina com a parede, sem marco (\"Melhorar representação da porta. Encostar na parede.\"); soleira de travertino na sauna, no BH serviço e no BH sauna (\"Aqui também tem soleira\").",
+     "pontos": [
+      [
+       1420,
+       342
+      ],
+      [
+       1540,
+       339
+      ],
+      [
+       1175,
+       657
+      ],
+      [
+       1270,
+       615
+      ]
+     ]
+    },
+    {
+     "n": 12,
+     "origem": "voce",
+     "texto": "Esquadrias: portas sem os arcos (21/10) e vidros finos (22/10), com a parede de vidro entre a garagem e a academia e o vidro fixo em L da sauna no padrão da Casa A (29/10); a soleira e a parede reta na porta do depósito (29/10).",
+     "pontos": [
+      [
+       1363,
+       560
+      ],
+      [
+       1000,
+       603
+      ]
+     ]
+    },
+    {
+     "n": 13,
+     "origem": "voce",
+     "texto": "Bancos da sauna em travertino (\"AS PEDRAS DA SAUNA, EM FORMA DE BANCOS, SÃO EM TRAVERTINE\", 22/10), com a sombra de contato entre os níveis (29/10); em 13/11, o banco reto de travertino da biblioteca, o de cima mais escuro (\"melhorar representação dos bancos da sauna\").",
+     "pontos": [
+      [
+       1055,
+       734
+      ]
+     ]
+    },
+    {
+     "n": 14,
+     "origem": "voce",
+     "texto": "BH sauna: bancada em granito marrom (seus materiais de 26/10) com a cuba esculpida no granito e o ralo (\"adicionar ralo na pia do bh. sauna\"), a bacia Carrara branca e o box em vidro contínuo (26/10).",
+     "pontos": [
+      [
+       1343,
+       641
+      ],
+      [
+       1343,
+       734
+      ],
+      [
+       1242,
+       730
+      ]
+     ]
+    },
+    {
+     "n": 15,
+     "origem": "voce",
+     "texto": "BH serviço: bancada em granito marrom e cuba branca (26/10), hoje a cuba de serviço da biblioteca com a torneira dela; a bacia Monte Carlo e o box em vidro contínuo (26/10).",
+     "pontos": [
+      [
+       1383,
+       357
+      ],
+      [
+       1383,
+       415
+      ],
+      [
+       1443,
+       415
+      ]
+     ]
+    },
+    {
+     "n": 16,
+     "origem": "cliente",
+     "texto": "Academia: as 2 bicicletas da biblioteca no tamanho das da Casa A, no lugar dos símbolos do PDF (\"usar o mesmo bloco de bicicleta usado na casa A\").",
+     "pontos": [
+      [
+       1447,
+       474
+      ],
+      [
+       1447,
+       541
+      ]
+     ]
+    },
+    {
+     "n": 17,
+     "origem": "voce",
+     "texto": "Academia: as 2 esteiras e o supino da biblioteca no tamanho da Casa A (\"trocar maquinário da academia pelos da casa A\"; \"E O SUPINO? QUERO QUE TROQUE, MANTENDO A BOLA\").",
+     "pontos": [
+      [
+       1583,
+       477
+      ],
+      [
+       1583,
+       534
+      ],
+      [
+       1477,
+       654
+      ]
+     ]
+    },
+    {
+     "n": 18,
+     "origem": "cliente",
+     "texto": "Bola de pilates presa na parede, num suporte em U, no lugar do retângulo junto à parede de baixo (\"No lugar dessas linhas, representar uma bola presa na parede. Tirar linhas.\").",
+     "pontos": [
+      [
+       1422,
+       743
+      ]
+     ]
+    },
+    {
+     "n": 19,
+     "origem": "cliente",
+     "texto": "Armário da academia liso, na cor neutra padrão da Casa A (\"Representar a cor de armário e prateleira igual o indicado da casa A. Sem textura. Uma cor neutra e sólida.\").",
+     "pontos": [
+      [
+       1703,
+       591
+      ]
+     ]
+    },
+    {
+     "n": 20,
+     "origem": "cliente",
+     "texto": "Shaft sem o nome, só o X tracejado de canto a canto (\"Tirar o nome shaft.\").",
+     "pontos": [
+      [
+       1777,
+       541
+      ]
+     ]
+    },
+    {
+     "n": 21,
+     "origem": "voce",
+     "texto": "Elevador com a cabine pelo desenho do PDF (as folhas da porta, a soleira e os corrimãos) e o rótulo no meio dela (29/10).",
+     "pontos": [
+      [
+       1777,
+       632
+      ]
+     ]
+    },
+    {
+     "n": 22,
+     "origem": "voce",
+     "texto": "Vinílico da academia pela sua foto (régua de 12 cm), o padrão de todas as plantas com vinílico (11/11).",
+     "pontos": [
+      [
+       1743,
+       714
+      ]
+     ]
+    },
+    {
+     "n": 23,
+     "origem": "voce",
+     "texto": "Rótulos com nome e área em todos os ambientes (pente fino, 21/10), em preto, sem sombra e dentro de cada ambiente (22/10); no meio do piso livre (\"centralizar rótulos\") e alinhados por fileira (\"ALINHE OS RÓTULOS\", 13/11).",
+     "pontos": [
+      [
+       1084,
+       390
+      ],
+      [
+       1025,
+       662
+      ]
+     ]
+    }
+   ]
+  },
+  "Terreo": {
+   "recorte": [
+    269,
+    65,
+    3542,
+    1918
+   ],
+   "itens": [
+    {
+     "n": 1,
+     "origem": "voce",
+     "texto": "Desenho geral: a final redesenhada nítida no quadro da prancha (\"TEM MUITOS BORRÕES NA IMAGEM... CONTORNOS PERFEITOS\", 22/10), com as escalas conferidas (\"ATENÇÃO ÀS ESCALAS\", 21/10); paredes em cinza 80 e pilares em preto (26/10); travertino bruto em todo o piso de travertino (26/10) e o vinílico da sua foto nos quartos (11/11).",
+     "pontos": [
+      [
+       2816,
+       1500
+      ],
+      [
+       2300,
+       1130
+      ],
+      [
+       2170,
+       480
+      ]
+     ]
+    },
+    {
+     "n": 2,
+     "origem": "voce",
+     "texto": "Esquadrias: portas sem os arcos e esquadrias finas, só o contorno em preto (21/10, 22/10 e 13/11); soleiras nítidas de parede a parede (\"CORRIGIR AS SOLEIRAS\", 22/10); boxes e folhas de vidro em vidro claro e as folhas de madeira de correr das suítes em ripado de nogueira, folha por folha (12 e 14/11).",
+     "pontos": [
+      [
+       960,
+       560
+      ],
+      [
+       2120,
+       321
+      ],
+      [
+       2655,
+       770
+      ]
+     ]
+    },
+    {
+     "n": 3,
+     "origem": "voce",
+     "texto": "Rótulos com nome e área em todos os ambientes (21/10), em preto ou branco pelo fundo, sem sombra e fora dos objetos (22/10: \"BH. GOURMET\", PRAINHA abaixo das espreguiçadeiras); centralizados e alinhados em faixas (12/11): SALA ÍNTIMA na linha da CIRCULAÇÃO, VARANDA/GOURMET na do LIVING, LOUCEIRO em branco.",
+     "pontos": [
+      [
+       1605,
+       690
+      ],
+      [
+       2058,
+       690
+      ]
+     ]
+    },
+    {
+     "n": 4,
+     "origem": "voce",
+     "texto": "Lote: o gramado da Casa A (\"representar o gramado da casa A em todas as demais casas\") com só 3 oliveiras nos cantos, como pede a nota geral do cliente (\"No terreno não precisa representar muitas árvores\"); fora do lote, só branco, e bordas limpas entre a grama e os pisos (\"MELHORE ESSAS BORDAS\", 22/10). As 4 floreiras das janelas com folhagem viva e flores brancas.",
+     "pontos": [
+      [
+       450,
+       260
+      ],
+      [
+       3340,
+       260
+      ],
+      [
+       450,
+       1724
+      ],
+      [
+       1870,
+       323
+      ]
+     ]
+    },
+    {
+     "n": 5,
+     "origem": "cliente",
+     "texto": "Perímetro da casa: traço de 2 px no cinza das paredes onde o piso da casa encosta na grama sem parede (\"Demarcar melhor o perímetro da casa\").",
+     "pontos": [
+      [
+       1920,
+       275
+      ],
+      [
+       2700,
+       1210
+      ]
+     ]
+    },
+    {
+     "n": 6,
+     "origem": "voce",
+     "texto": "Garagem e acesso: a pedra portuguesa em leque, de 7 cm, no tom da foto, e os 3 carros prata de 4,70 x 1,85 m alinhados (pente fino, 21/10); as pedras do caminho da entrada com o contorno reto (\"corrija os contornos das pedras\", 12/11).",
+     "pontos": [
+      [
+       2620,
+       1700
+      ],
+      [
+       2560,
+       1450
+      ],
+      [
+       2830,
+       1065
+      ]
+     ]
+    },
+    {
+     "n": 7,
+     "origem": "cliente",
+     "texto": "Escadas: nas 3, o triângulo no degrau de cima e \"DESCE PARA O / SUBSOLO\", \"DECK\" e \"JARDIM\" (\"Colocar a seta e descrição em todas as escadas\"). Seus: o D sob a seta, os degraus e os blocos de pedra em Bege Bahia menos manchado, os blocos em cascata na ordem da descida, e a escada de 9 degraus em travertino bruto (22 e 26/10).",
+     "pontos": [
+      [
+       680,
+       643
+      ],
+      [
+       1080,
+       830
+      ],
+      [
+       607,
+       917
+      ]
+     ]
+    },
+    {
+     "n": 8,
+     "origem": "cliente",
+     "texto": "Decks: no deck de cima, a linha de instalação do chuveiro no cinza das paredes, com o chuveiro desenhado (\"Inserir uma linha para indicar a posição de instalação do chuveiro.\"); os decks na madeira da Casa A (nota geral \"Fazer as mesmas mudanças\"). Seus: no de baixo, o contorno em todas as bordas e o banco em L em bronze sólido (14/10, 22/10 e 13/11).",
+     "pontos": [
+      [
+       860,
+       750
+      ],
+      [
+       780,
+       776
+      ],
+      [
+       860,
+       1600
+      ],
+      [
+       640,
+       1520
+      ]
+     ]
+    },
+    {
+     "n": 9,
+     "origem": "voce",
+     "texto": "Piscina e spa: o revestimento Barlavento (15/10) e a água da opção C, mais sóbria (sua regra para todas as piscinas, a partir da nota do cliente na Casa A), com a prainha e o banco do spa claros; o canal entre os vidros no tom da piscina e, antes do vidro, deck (\"NÃO FAZ SENTIDO DE ÁGUA DEPOIS DO VIDRO\").",
+     "pontos": [
+      [
+       700,
+       1250
+      ],
+      [
+       756,
+       1000
+      ],
+      [
+       910,
+       1000
+      ]
+     ]
+    },
+    {
+     "n": 10,
+     "origem": "cliente",
+     "texto": "Prainha: as 2 espreguiçadeiras com textura (\"Colocar uma textura nas espreguiçadeiras\"), na resina E4 que você escolheu (nada de madeira dentro d'água), com colchonete creme e encosto em rolo.",
+     "pontos": [
+      [
+       988,
+       1172
+      ],
+      [
+       988,
+       1248
+      ]
+     ]
+    },
+    {
+     "n": 11,
+     "origem": "cliente",
+     "texto": "Estar da varanda: mesa de centro de madeira no lugar do banco estofado, sem o contorno dos móveis e sem a barra de madeira sobre o sofá (\"Representar como mesa de centro\"; \"Tirar o contorno dos mobiliários\"); com o realismo que você pediu, o sofá de dois lados pelo PDF e as poltronas em terracota.",
+     "pontos": [
+      [
+       1360,
+       852
+      ],
+      [
+       1325,
+       998
+      ],
+      [
+       1480,
+       847
+      ]
+     ]
+    },
+    {
+     "n": 12,
+     "origem": "voce",
+     "texto": "Varanda gourmet (revisão de 29/10): as 12 cadeiras das duas mesas redondas no conjunto de couro, os tampos em marrom, a poltrona redonda estofada e o tapete com trama.",
+     "pontos": [
+      [
+       1235,
+       1210
+      ],
+      [
+       1440,
+       1210
+      ],
+      [
+       1145,
+       935
+      ],
+      [
+       1200,
+       840
+      ]
+     ]
+    },
+    {
+     "n": 13,
+     "origem": "cliente",
+     "texto": "Gourmet: a churrasqueira com a grelha da Casa A (\"Representar a churrasqueira\"), as 5 banquetas altas num tom que destaca do piso (\"São 5 banquetas altas\") e a bancada sem os armários (\"Não precisa representar os armários inferiores ou superiores\"). Seus: a ilha em granito marrom escurecido, sem a linha, as banquetas parcialmente sob o tampo, o cooktop de 4 bocas, a cuba com misturador e a bancada de trás com a ideia de altura.",
+     "pontos": [
+      [
+       1500,
+       1508
+      ],
+      [
+       1420,
+       1312
+      ],
+      [
+       1383,
+       1362
+      ]
+     ]
+    },
+    {
+     "n": 14,
+     "origem": "cliente",
+     "texto": "Lavatório gourmet: floreira com 7 arbustos verdes iguais, igualmente espaçados (\"tirar as plantas coloridas e colocar com o espaçamento igual entre elas\"), na peça branca do PDF que virou floreira (21/10); seus: as cubas esculpidas sobre a bancada de travertino (26/10 e 13/11).",
+     "pontos": [
+      [
+       1325,
+       1668
+      ],
+      [
+       1325,
+       1622
+      ]
+     ]
+    },
+    {
+     "n": 15,
+     "origem": "cliente",
+     "texto": "Piso marrom pela amostra do cliente, mais uniforme e sóbrio, na cozinha, no louceiro, na despensa, no serviço, no motorista e na área descoberta (\"Trocar o marrom do piso por essa opção\"); as bancadas em marrom tabaco seguem mais escuras.",
+     "pontos": [
+      [
+       1600,
+       1380
+      ],
+      [
+       1980,
+       1730
+      ]
+     ]
+    },
+    {
+     "n": 16,
+     "origem": "cliente",
+     "texto": "Cozinha: a ilha em Dekton Danae (\"Cor da ilha é no Dekton Danae\"), e também a bancada da pia, sem as falhas da troca (16 e 17/11). Seus: as 3 geladeiras inox e o refrigerador no vão junto ao BH gourmet, onde você marcou \"?\" (\"FALTOU REPRESENTAR O REFRIGERADOR NO VÃO\"), o cooktop, as cubas Franke com ralo e a porta de correr nítida.",
+     "pontos": [
+      [
+       1680,
+       1480
+      ],
+      [
+       1697,
+       1647
+      ],
+      [
+       1795,
+       1450
+      ],
+      [
+       1158,
+       1505
+      ]
+     ]
+    },
+    {
+     "n": 17,
+     "origem": "cliente",
+     "texto": "Louceiro e despensa sem soleira, com as portas encostadas e as prateleiras lisas na cor sólida dos armários (\"Não tem soleira. E encostar as portas nas paredes.\"; \"Representar a cor de armário e prateleira igual o indicado da casa A\"); por pedido seu, os 7 armários com veio e o do quarto de serviço na mesma cor.",
+     "pontos": [
+      [
+       1846,
+       1430
+      ],
+      [
+       2031,
+       1430
+      ],
+      [
+       1850,
+       1261
+      ],
+      [
+       1926,
+       1580
+      ]
+     ]
+    },
+    {
+     "n": 18,
+     "origem": "cliente",
+     "texto": "Área de serviço: bancada e tanques em Dekton Danae (\"Cor da bancada é no Dekton Danae\"); as 2 máquinas de lavar sem bancada por cima, no tamanho do PDF (\"Aqui são duas máquinas de lavar roupa\"). Seus: a soleira na porta de correr para a área descoberta (29/10), a porta de 2 folhas fechada e os 2 portões da área descoberta em alumínio (17/11).",
+     "pontos": [
+      [
+       2220,
+       1394
+      ],
+      [
+       2220,
+       1509
+      ],
+      [
+       2125,
+       1570
+      ],
+      [
+       1825,
+       1780
+      ]
+     ]
+    },
+    {
+     "n": 19,
+     "origem": "cliente",
+     "texto": "BH serviço e BH motorista: bancada em marrom tabaco com contorno (\"Cor da bancada é no marrom tabaco\"), cuba de louça branca (no BH serviço, a cuba de serviço da biblioteca), bacia Monte Carlo e chuveiro redondo de parede; seus: os boxes em faixa cinza-clara visível (22/10).",
+     "pontos": [
+      [
+       1853,
+       1530
+      ],
+      [
+       2935,
+       1555
+      ],
+      [
+       2878,
+       1558
+      ]
+     ]
+    },
+    {
+     "n": 20,
+     "origem": "cliente",
+     "texto": "Portas de giro: as 22 em madeira clara, encostadas quina a quina na parede (\"Melhorar representação das portas de giro. Encostar nas paredes.\"); no lugar dos batentes, parede (\"não há batentes, apenas parede\", pedido seu).",
+     "pontos": [
+      [
+       1885,
+       1507
+      ],
+      [
+       2022,
+       1507
+      ],
+      [
+       2153,
+       1298
+      ],
+      [
+       2820,
+       1400
+      ]
+     ]
+    },
+    {
+     "n": 21,
+     "origem": "cliente",
+     "texto": "Entrada: soleira igual à da Casa C, de parede a parede, e o triângulo no centro do vão da pivotante (\"Representar uma soleira na entrada igual a casa C\"; \"Centralizar a seta com a abertura da porta\"); seus: os vidros fixos sobre a soleira e a folha num estilo só (14/11).",
+     "pontos": [
+      [
+       2532,
+       1125
+      ],
+      [
+       2566,
+       1070
+      ]
+     ]
+    },
+    {
+     "n": 22,
+     "origem": "cliente",
+     "texto": "Tracejados: o pergolado fino e numa cor só, em cinza (\"Deixar as linhas do pergolado tracejadas mais finas e mais claras. Deixar tudo na mesma cor\"); os shafts sem o nome, com o X fino de canto a canto (\"Tirar o nome shaft\"; \"Melhorar o X tracejado\"); os 11 brises em preto, nítidos (pedido seu).",
+     "pontos": [
+      [
+       2640,
+       1194
+      ],
+      [
+       1578,
+       756
+      ],
+      [
+       1577,
+       1265
+      ],
+      [
+       2450,
+       1286
+      ]
+     ]
+    },
+    {
+     "n": 23,
+     "origem": "cliente",
+     "texto": "Jardim de inverno e jardim de 4,62 m² como o jardim interno da Casa A, com menos plantas e menores (\"Trocar essa representação do jardim de inverno\"; \"Diminuir a escala e quantidade de vegetação\"); no de inverno, um X só. As plantas que você escolheu: palmeira-ráfis, filodendro, moreia e o agave no hall.",
+     "pontos": [
+      [
+       2110,
+       880
+      ],
+      [
+       2510,
+       1205
+      ],
+      [
+       2498,
+       977
+      ]
+     ]
+    },
+    {
+     "n": 24,
+     "origem": "cliente",
+     "texto": "Closet master: banco estofado capitonê no meio (\"Representar como banco estofado.\"); o closet em U e os guarda-roupas em L das suítes com os cabides (\"E OS GUARDA-ROUPAS?\", 22/10), numa peça só, sem a divisão nos cantos.",
+     "pontos": [
+      [
+       1395,
+       647
+      ],
+      [
+       1265,
+       740
+      ],
+      [
+       2562,
+       342
+      ],
+      [
+       2360,
+       920
+      ]
+     ]
+    },
+    {
+     "n": 25,
+     "origem": "voce",
+     "texto": "Suítes: camas realistas (cabeceira de linho cinza, matelassê branco, veludo bordô) com o banco ou o sofá aos pés, tapetes refeitos e criados com abajur; cortinas de linho de parede a parede (21/10 e 13/11); na master, os recamiers R11; cadeira de escritório nas 3 escrivaninhas.",
+     "pontos": [
+      [
+       1108,
+       680
+      ],
+      [
+       1065,
+       455
+      ],
+      [
+       2010,
+       440
+      ],
+      [
+       2470,
+       385
+      ]
+     ]
+    },
+    {
+     "n": 26,
+     "origem": "voce",
+     "texto": "Banhos com os materiais que você definiu em 26/10 e as peças da biblioteca: cuba esculpida de travertino, bacia Carrara e chuveiros desenhados nos banhos master, 1, 2 e 3 (no master, as portas de correr pelo PDF); bacias marrons no lavabo e nos BH gourmet, e no lavabo a cuba de poros com a bancada no tom dela.",
+     "pontos": [
+      [
+       1400,
+       347
+      ],
+      [
+       1847,
+       488
+      ],
+      [
+       2268,
+       825
+      ],
+      [
+       1138,
+       1555
+      ]
+     ]
+    },
+    {
+     "n": 27,
+     "origem": "voce",
+     "texto": "Estares: sala íntima com o conjunto da Casa A (sofá em L, poltrona com pufe, mesa de centro em tom quente) e o bar sem linha técnica; living com o estar realista (sofá em L, poltronas terracota, mesa lateral, arandela e banco trançado), sem o tracejado junto às folhas de vidro (01/11); jantar com a mesa em nogueira e as 10 cadeiras oliva da Casa A; a mesa redonda do hall em madeira (29/10).",
+     "pontos": [
+      [
+       1760,
+       440
+      ],
+      [
+       1890,
+       780
+      ],
+      [
+       1598,
+       1000
+      ],
+      [
+       1790,
+       1098
+      ]
+     ]
+    },
+    {
+     "n": 28,
+     "origem": "voce",
+     "texto": "Adega com a prateleira de vinhos e as garrafas na escala real (\"as garrafas estão em escala? Me parece que não.\", 29/10); elevador com a cabine desenhada pelo PDF (21 e 29/10).",
+     "pontos": [
+      [
+       2095,
+       1262
+      ],
+      [
+       1772,
+       630
+      ]
+     ]
+    }
+   ]
+  }
+ }
+}

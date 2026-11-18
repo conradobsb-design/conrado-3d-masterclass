@@ -3892,6 +3892,45 @@ cuba da biblioteca em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_ondas_t
 Depois, a prancha (`rodape_entrega.py --config ../../POE642_CasaE/config_bases.json --no-quadro --render Subsolo=...`), o
 PDF da E e o book; o 12K (`ampliacao_12k_casae.py`) na seção dele.
 
+Rodada seguinte (18/11, com os recortes do usuário):
+
+- **Sauna e borda do tanque** ("a borda da psicina é em travertino, igual ao restante do material da sauna. remova
+  essas linhas contornando os bancos [...] tem uma linha branca vertical na borda que não existe. pense que os dois
+  bancos da sauna são suspenso e o travertino é embaixo. piso contínuo até a piscina, sem marcação de borda. o tom dos
+  bancos devem ser preservados"): a faixa de Bege Bahia do lado da sauna saiu de `PISCINA["bege"]`; `SAUNA["borda"]`
+  (x 1051 a 1068,5, da parede da academia até a parede de baixo) é tecida com o travertino do piso da sauna
+  (`TD._tecido` da amostra `piso_px`, com uma rampa de 3 px sob a ponta dos bancos), e `SAUNA["topo"]` limpa a linha
+  escura de cima do degrau; os bancos ficam nos tons de antes, sem a face e sem a sombra (`face`, `sombra` 0).
+- **Contorno na linha da casa** ("o contorno em volta da borda deve ficar no contorno, não sobre a borda"): as bordas
+  de Bege Bahia de cima e da esquerda começam na linha da casa do PDF (x 859; antes 856), e o bloco da piscina na
+  pegada (`FUNDO["dentro_px"]`) vai de x 858, como a coluna x 858 do pátio de cima (y 304 a 476): o lado esquerdo da
+  casa é uma reta só (x 857-858, da quina de cima à parede de baixo, sem degrau), e a borda fica inteira por dentro.
+- **A parede do outro lado** ("E a parede do outro lado"): o filete claro de 1 px que o render deixava entre a parede e
+  o contorno (embaixo do tanque, e nas paredes de fora da academia e da direita) vira parede (`perimetro`: o claro com
+  escuro dos dois lados, a até 4 px da pegada), e os pontinhos e as emendas cinza um pouco mais claras que sobravam
+  dentro dessas paredes também (só os neutros, até L 130; o bronze das esquadrias fica). Uma máscara `uint8` usada
+  como índice pintava as 2 primeiras linhas da imagem de cinza: corrigido (`m.astype(bool)`).
+- **Vidro piscina-academia** ("aqui tem um vidro de fora a fora. remova os traços pretos para deixar limpo"):
+  `vidro_piscina` (`VIDRO_PISCINA`, no passo `esquadrias`): a faixa de 4 px ao lado do vidro sai (o piso da academia
+  deslocado) e o vidro é pintado de ponta a ponta no `VIDRO`, só com o fio.
+- **Cascata**: `CASCATA_BIB["agua_fora"]` tira a água e as ondas da peça do pilar e da parede de baixo do tanque, à
+  direita do revestimento, e as ondas só pegam o claro da água (L acima de 95; antes 70).
+
+Na final e nos 12K A e B (refeitos pelo Topaz, jobs f04ec293, A, e 00b5f22a, B). Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_sauna_borda_vidro_antes_depois.jpg`.
+
+#### Levantamento dos ajustes de todas as plantas (18/11)
+
+Usuário, com o levantamento do Subsolo da Casa E: "eu preciso de um desse para todas as plantas. Inclusive com os
+ajustes que eu pedi para fazer. Precisa constar os ajustes feitos a pedido do cliente (das recomendações no miro) e o
+que eu adicionei. para cada planta, uma página." `levantamento_ajustes.py`: uma página A3 deitada por planta (as 12 das
+Casas A a E), a planta entregue (as 2160 linhas de cima da prancha de entrega, no `recorte`) com as marcas numeradas e
+a lista ao lado (e embaixo da planta, quando sobra altura), no maior corpo que couber; vermelho, pedido do cliente
+(notas e recomendações do Miro); azul, pedido do usuário. Os itens em `POE642_Book/levantamento/dados/casa_<X>.json`
+(texto, origem e pontos em px da prancha); as páginas em `POE642_Book/levantamento/POE642_Levantamento_Casa<X>_<pav>.jpg`
+e o PDF único `POE642_Book/levantamento/POE642_Levantamento_Ajustes.pdf`. Rode depois de refazer as pranchas
+(`python3 levantamento_ajustes.py`, ou `--casa E` para só as da E).
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
