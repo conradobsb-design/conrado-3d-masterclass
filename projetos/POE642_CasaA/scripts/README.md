@@ -3748,6 +3748,16 @@ face sobre a água (o fio, o brilho, a sombra curta), a lâmina caindo (riscos c
 ela bate, desfazendo-se em bolhas, com pedaços de onda mais adiante. O rótulo PISCINA subiu para o alto da água livre.
 Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_cascata_antes_depois.jpg`.
 
+Depois, o lugar certo (usuário, com o recorte da piscina e a marca verde: "A cascata fica aqui na parte de baixo. Tem o
+revestimento, né, em pedra e tudo, mas o mais importante é a cascata em si [...] é bom fazer do jeito que você fez, você
+só colocou no lugar errado"; é uma decisão do cliente, fora dos PDFs): o mesmo desenho na parede de baixo da piscina, no
+trecho da marca (`CASCATA`, `lado` "sul": x 884 a 949, ~1,1 m): o revestimento de pedra rústica numa faixa de 7 px
+(0,12 m) junto à face da parede, a bica de inox saindo dela para cima, sobre a água, e a lâmina, a espuma e as ondinhas
+para dentro da piscina. O desenho é o de antes (`_cascata_oeste`), feito no recorte girado (a parede de baixo vira a da
+esquerda) e desvirado; no trecho mais curto a espuma sai um pouco mais larga (`miolo_px` 3,0, `bolha_lim` 0,48). A
+parede da esquerda volta ao Bege Bahia liso; a de antes fica em `CASCATA_OESTE`. Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_cascata_parede_baixo_antes_depois.jpg`.
+
 As portas das casas de máquinas (usuário: "Porta da casa de máquinas em tom bronze."): as duas (a de 15,07 m², da
 academia, e a de 5,83 m², do depósito) no bronze escovado das folhas das suítes do 1º Pavimento da E (`BRONZE`, de
 `final3840_casac.BRISES_SUITES_TC`: a cor, a borda escura, os fios no comprido e um brilho fino no meio). Antes e

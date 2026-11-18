@@ -757,13 +757,49 @@ def elevador(Q, img, q=ELEVADOR):
 # filetes da foto, em vez do Bege Bahia liso da borda); a bica de inox saindo da face da parede sobre a água, com o fio
 # escuro, o brilho e a sombra curta na água; a lâmina caindo logo adiante (riscos claros no comprido); a espuma branca
 # onde ela bate, que se desfaz para dentro da piscina, e as ondinhas claras mais adiante.
-CASCATA = {"y": (575.0, 695.0), "parede": (859.5, 870.0), "bica_px": 6.5, "lamina_px": 3.5, "espuma_px": 15.0,
+# Depois (usuário, com o recorte da piscina e a marca verde: "A cascata fica aqui na parte de baixo. Tem o revestimento,
+# né, em pedra e tudo, mas o mais importante é a cascata em si [...] é bom fazer do jeito que você fez, você só colocou
+# no lugar errado"): o mesmo desenho, na parede de baixo da piscina (`lado` "sul"), no trecho da marca (x 884 a 949,
+# ~1,1 m): o revestimento de pedra numa faixa de 7 px (0,12 m) junto à face da parede, a bica saindo dela para cima,
+# sobre a água, e a lâmina, a espuma e as ondinhas para dentro da piscina. O desenho é o da parede da esquerda
+# (`_cascata_oeste`), feito no recorte girado (a parede de baixo vira a da esquerda) e desvirado; no trecho mais curto a
+# espuma sai um pouco mais larga (`miolo_px`, `bolha_lim`), para ler como a de antes.
+CASCATA = {"lado": "sul", "x": (884.0, 949.0), "face": 924.6, "pedra_px": 7.0,
+           "bica_px": 6.5, "lamina_px": 3.5, "espuma_px": 15.0, "miolo_px": 3.0, "bolha_lim": 0.48,
            "ondas_px": 30.0, "inox": (196, 199, 201), "inox_fio": (98, 102, 106), "inox_brilho": (238, 240, 241),
            "pedra": [(150, 160, 168), (128, 138, 147), (168, 177, 184), (112, 121, 130)], "junta": (82, 88, 94),
            "espuma": (246, 247, 247), "semente": 1811}
+# a de antes, na parede da esquerda da piscina comprida (2,0 m): CASCATA_OESTE
+CASCATA_OESTE = dict(CASCATA, lado="oeste", y=(575.0, 695.0), parede=(859.5, 870.0), miolo_px=2.2, bolha_lim=0.56)
 
 
 def cascata(Q, img, q=CASCATA):
+    if q["lado"] == "sul":
+        x0, x1 = q["x"]
+        face = q["face"]
+        topo = face - q["pedra_px"]
+        alc = q["bica_px"] + q["lamina_px"] + max(q["espuma_px"], q["ondas_px"]) + 6
+        Rx0, Rx1 = int(np.floor(x0)) - 6, int(np.ceil(x1)) + 6
+        Ry0, Ry1 = int(np.floor(topo - alc)) - 4, int(np.ceil(face)) + 3
+        # girado no sentido horário, a parede de baixo fica à esquerda: (x, y) -> (Ry1 - y, x - Rx0)
+        rot = cv2.rotate(np.ascontiguousarray(img[Ry0:Ry1, Rx0:Rx1]), cv2.ROTATE_90_CLOCKWISE)
+        qr = dict(q, y=(x0 - Rx0, x1 - Rx0), parede=(Ry1 - face, Ry1 - topo))
+        rot = _cascata_oeste(rot, qr)
+        out = img.copy()
+        out[Ry0:Ry1, Rx0:Rx1] = cv2.rotate(rot, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        print(f"    cascata: a bica de inox de {(x1 - x0) / Q.px_m:.1f} m na parede de baixo da piscina, a lâmina, a "
+              "espuma e as ondinhas para dentro dela; o revestimento de pedra rústica junto à face da parede")
+        return out
+    out = _cascata_oeste(img, q)
+    y0, y1 = q["y"]
+    print(f"    cascata: a bica de inox de {(y1 - y0) / Q.px_m:.1f} m na parede de fora da piscina, a lâmina e a espuma; o "
+          "topo da parede no trecho em pedra rústica")
+    return out
+
+
+def _cascata_oeste(img, q):
+    """A cascata numa parede à esquerda da água (a água para +x), no trecho y = q["y"]; q["parede"]: x da faixa de pedra
+    (de fora para a face da água)."""
     y0, y1 = q["y"]
     p0, p1 = q["parede"]
     ss = 4
@@ -814,8 +850,9 @@ def cascata(Q, img, q=CASCATA):
     bol = (bol - bol.min()) / max(float(bol.max() - bol.min()), 1e-6)
     pontas = np.clip((np.minimum(Y - y0, y1 - Y)) / 6.0, 0, 1)
     # o miolo branco junto à lâmina e as bolhas soltas mais adiante
-    miolo = np.exp(-d / 2.2)
-    bolhas = (bol > 0.56) * np.exp(-d / (q["espuma_px"] * 0.55)) * np.clip((bol - 0.56) / 0.12, 0, 1)
+    lim = q.get("bolha_lim", 0.56)
+    miolo = np.exp(-d / q.get("miolo_px", 2.2))
+    bolhas = (bol > lim) * np.exp(-d / (q["espuma_px"] * 0.55)) * np.clip((bol - lim) / 0.12, 0, 1)
     esp = np.clip(0.95 * miolo + 0.9 * bolhas, 0, 1) * pontas
     esp *= ((X >= l1 - 0.5) & (Y >= y0 - 2) & (Y < y1 + 2))
     # as ondinhas claras mais adiante: pedaços de arco quebrados, não linhas retas
@@ -842,8 +879,6 @@ def cascata(Q, img, q=CASCATA):
         a = baixa(m)[..., None]
         reg = reg * (1 - a) + np.float32(cor) * a
     out[Y0:Y1, X0:X1] = reg
-    print(f"    cascata: a bica de inox de {(y1 - y0) / Q.px_m:.1f} m na parede de fora da piscina, a lâmina e a espuma; o "
-          "topo da parede no trecho em pedra rústica")
     return u8(out)
 
 
