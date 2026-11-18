@@ -791,10 +791,16 @@ def chuveiros(Q, img, q=CHUVEIROS):
 # 10d. O vestiário (como na Casa D: "a cuba é esculpida no travertino, mas a bancada é no granito marrom tabaco
 # intenso"): a bancada do PDF (ARQ_BANCADAS) no marrom tabaco com a face; a cuba de travertino da biblioteca no lugar da
 # cuba do PDF, a torneira na parede da direita; a bacia Carrara no retângulo do PDF, a caixa contra a parede da esquerda.
-VESTIARIO = {"bancada": (1457.1, 766.5, 1485.2, 839.7), "face": 0.82,
+# (18/11, usuário: "a bancada vai até a extremidade da parede lateral") a bancada vai da parede da direita até a ponta da
+# parede de baixo dela (x 1452,2; antes 1457,1, com uma faixa clara na frente); ("corrija esse erro no piso") a limpeza
+# da bacia de antes pega o piso do próprio WC, logo à direita (antes vinha de além da porta e do box, mais claro); e
+# ("corrija esse erro na parede, deixando-a retinha") o toco de parede de cima do WC, que tinha um dente junto à parede
+# da esquerda, repintado reto (`toco`).
+VESTIARIO = {"bancada": (1452.2, 766.5, 1485.2, 839.7), "face": 0.82,
              "cuba": (1458.6, 787.0, 1484.4, 819.0), "cuba_png": BIB / "vestiario/cuba-travertino-vestiario.png",
-             "bacia": (1336.0, 874.5, 1366.6, 895.6), "bacia_limpa": (1333, 870, 1372, 900),
-             "bacia_png": BIB / "vestiario/bacia-carrara.png"}
+             "bacia": (1336.0, 874.5, 1366.6, 895.6), "bacia_limpa": (1334, 869, 1364, 901),
+             "bacia_png": BIB / "vestiario/bacia-carrara.png", "toco": (1336.0, 839.74, 1352.0, 843.5),
+             "bancada_quinas": (1452, 765, 1487, 840)}
 
 
 def vestiario(Q, img, q=VESTIARIO):
@@ -807,9 +813,22 @@ def vestiario(Q, img, q=VESTIARIO):
     m = ret_mask(par.shape, (X0, Y0, X1, Y1)) & ~par
     out = TD._pinta_textura(img, m, SD.tabaco(Y1 - Y0, X1 - X0), q["face"])
     out = _pousar(out, png(q["cuba_png"]), *q["cuba"], -90.0, "baixa", Q, troca=True)
+    # as quinas de parede em volta da bancada que ainda tinham o claro do piso de antes (a linha clara entre a parede de
+    # cima e a bancada, e a da parede da direita ao lado da cuba) passam ao cinza da parede
+    cx0, cy0, cx1, cy1 = q["bancada_quinas"]
+    reg = out[cy0:cy1, cx0:cx1]
+    claro = par[cy0:cy1, cx0:cx1] & (reg.astype(np.float32).mean(-1) > 95)
+    reg[claro] = PAREDE
     out = BB.piso_desloc(out, q["bacia_limpa"], par, 1, 0)
     out = _pousar(out, png(q["bacia_png"]), *q["bacia"], 90.0, "baixa", Q, troca=True)
-    print("    vestiário: a bancada no marrom tabaco, a cuba de travertino (a torneira na parede); a bacia Carrara")
+    from janela_pia_casaa_1611 import alfa_ret
+    tx0, ty0, tx1, ty1 = q["toco"]
+    X0, Y0, X1, Y1 = int(np.floor(tx0)), int(np.floor(ty0)), int(np.ceil(tx1)), int(np.ceil(ty1))
+    a = alfa_ret((tx0 - X0, ty0 - Y0, tx1 - X0, ty1 - Y0), (Y1 - Y0, X1 - X0))[..., None]
+    reg = out[Y0:Y1, X0:X1].astype(np.float32)
+    out[Y0:Y1, X0:X1] = u8(reg * (1 - a) + np.array(PAREDE, np.float32) * a)
+    print("    vestiário: a bancada no marrom tabaco até a ponta da parede, a cuba de travertino (a torneira na parede); "
+          "a bacia Carrara; o toco de parede do WC reto")
     return out
 
 
@@ -1321,7 +1340,8 @@ PORTAS = [
      (1774.0, 429.0, 1821.0, 442.0), (0.0, -12.0), "madeira"),
     ("casa de máquinas (15,07 m²)", (1551.5, 927.7, 1553.9, 975.5), [(1553.9, 909.8, 1558.1, 927.7),
                                                                     (1502.0, 909.8, 1506.1, 927.7)],
-     (1545.0, 925.0, 1559.0, 981.0), (-12.0, 0.0), "bronze"),
+     (1545.0, 927.7, 1559.0, 981.0), (-12.0, 0.0), "bronze"),   # (18/11, "corrija esse errinho na soleira": a
+     # limpeza começa embaixo da soleira, em y 927,7; antes, em 925, punha o piso no canto dela)
     ("DCE", (1648.0, 491.9, 1650.3, 539.6), [(1643.5, 482.9, 1648.0, 491.9), (1695.7, 482.9, 1699.9, 491.9)],
      (1644.5, 489.0, 1657.0, 545.0), (12.0, 0.0), "madeira"),
     ("WC do vestiário", (1404.2, 843.2, 1406.6, 884.1), [], (1397.0, 842.0, 1407.0, 888.0), (-10.0, 0.0), "madeira"),

@@ -3919,6 +3919,23 @@ Rodada seguinte (18/11, com os recortes do usuário):
 Na final e nos 12K A e B (refeitos pelo Topaz, jobs f04ec293, A, e 00b5f22a, B). Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_sauna_borda_vidro_antes_depois.jpg`.
 
+Mais uma rodada (18/11, com os recortes do 12K):
+
+- **Bancada do vestiário** ("a bancada vai até a extremidade da parede lateral"): `VESTIARIO["bancada"]` vai da parede
+  da direita até a ponta do toco de parede de baixo dela (x 1452,2; antes 1457,1, com uma faixa clara do piso na frente);
+  a cuba fica junto da parede (a torneira nela). As quinas de parede em volta que guardavam o claro do piso de antes (a
+  linha clara entre a parede de cima e a bancada, e a da parede da direita ao lado da cuba) passam ao cinza da parede
+  (`bancada_quinas`).
+- **Soleira da casa de máquinas** ("corrija esse errinho na soleira"): a limpeza da folha (`PORTAS`, "casa de máquinas
+  (15,07 m²)") começa em y 927,7, embaixo da soleira; antes, em 925, punha o piso marrom no canto de baixo, à direita.
+- **Toco de parede do WC do vestiário** ("corrija esse erro na parede, deixando-a retinha"): o dente junto à parede da
+  esquerda (a face de cima 1 px mais baixa em x 1337-1341) sai; o toco é repintado reto (`VESTIARIO["toco"]`).
+- **Piso em volta da bacia** ("corrija esse erro no piso"): a limpeza da bacia de antes (`bacia_limpa`) pega o piso do
+  próprio WC, logo à direita; antes vinha de além da porta e do box, e ficava um retângulo mais claro.
+
+Na final e nos 12K A e B (refeitos pelo Topaz, jobs 83c82337, A, e df7dc4fc, B). Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811c_bancada_soleira_toco_piso_antes_depois.jpg`.
+
 #### Levantamento dos ajustes de todas as plantas (18/11)
 
 Usuário, com o levantamento do Subsolo da Casa E: "eu preciso de um desse para todas as plantas. Inclusive com os
