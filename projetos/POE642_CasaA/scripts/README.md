@@ -3563,6 +3563,22 @@ pavimento inferior, né?"): `veu` volta a diagonal de corte do PDF do Subsolo, o
 ao Térreo, com o ◀ D) ficam inteiros. Nas imagens que já tinham a escada invertida, só o véu (`doze --so-veu` e
 `final --so-veu`). Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1811_escada_subsolo_veu_antes_depois.jpg`.
 
+#### Casa E, Subsolo: o 12K A e B (18/11, usuário: "Ok do subsolo para gerar o 12k")
+
+O roteiro do Térreo (`ampliacao_12k_casae.py`, agora com o `Subsolo`): o recorte A3 da final (a planta de 856,303 a
+2085,1109; 1308 x 925 px a partir de (816,4; 243,5), 9,39x no 12K), o Topaz High Fidelity V2 do Higgsfield a 12288 x
+8689 (jobs 32d28b4e, A, e 641d78e1, B; as saídas fora do git), os tons da final e o fundo branco. A cascata fica fora da
+entrada do Topaz (usuário: "traga a cascata em 4K [...] senão vai sair muito distorcido na hora que for gerar o 12K"):
+as entradas vêm de `pedidos_subsolo_casae_1811.py --sem_cascata` (A, `preparar Subsolo --base <png>`) e `--sem_cascata
+--sem_textos` (B), com uma cópia do cache dos passos; no `montar`, depois dos tons, a peça 4K da biblioteca entra direto
+no 12K (`cascata_12k`: o afim da final ao 12K, afinado na piscina acima da cascata, `CAIXA_CASCATA`, e
+`pedidos_subsolo_casae_1811.cascata_biblioteca` com esse `Mapa`; a peça a ~561 px/m, reduzida da de 1434 px/m). Na B,
+os 11 rótulos e o "SOBE PARA O / TÉRREO" na Kalam (`linhas_kalam_subsolo`, de `ROTULOS` e `DESCRICAO` do Subsolo; em
+`renders/POE642_CasaE_PH_Subsolo_rotulos_kalam.json`). Antes do 12K, a faixa do revestimento passou a encostar na
+parede (`face` 925, `pedra_px` 18,4: a linha 924, a mistura da água com a borda, ficava entre os dois). Conferências em
+`POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_12K_opcao_{A,B}_conferencia_*.jpg`; depois, a prancha, o PDF da E e o
+book.
+
 #### Casa E, Térreo: a escada do deck na ordem dos níveis (17/11, `escada_deck_terreo_casae_1711.py`)
 
 Usuário: "esse último degrau está abaixo do penúltimo"; com a imagem do PDF: "os números estão localizados nos cantos de

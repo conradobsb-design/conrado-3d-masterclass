@@ -15,6 +15,17 @@ no 12K, `rotulos_kalam_casac.desenhar` as escreve na Kalam no mesmo meio e na me
 
   python3 ampliacao_12k_casae.py preparar Terreo [--opcao B --sem_textos <png>]
   python3 ampliacao_12k_casae.py montar Terreo <saída do Topaz> [--opcao B]
+
+O Subsolo (18/11, usuário: "Ok do subsolo para gerar o 12k"): o mesmo roteiro, com a cascata fora da entrada do Topaz
+(usuário: "traga a cascata em 4K [...] senão vai sair muito distorcido na hora que for gerar o 12K"): as entradas vêm de
+`pedidos_subsolo_casae_1811.py --sem_cascata` (A, `--base`) e `--sem_cascata --sem_textos` (B); o recorte é o da final;
+no `montar`, depois dos tons, a peça 4K da biblioteca entra direto no 12K (`pedidos_subsolo_casae_1811.
+cascata_biblioteca`, no afim da final ao 12K afinado na piscina). Na B, as linhas da Kalam vêm de `ROTULOS` e
+`DESCRICAO` do Subsolo.
+
+  python3 ampliacao_12k_casae.py preparar Subsolo --base <png sem a cascata>
+  python3 ampliacao_12k_casae.py preparar Subsolo --opcao B --sem_textos <png sem a cascata e sem textos>
+  python3 ampliacao_12k_casae.py montar Subsolo <saída do Topaz> [--opcao B]
 """
 
 import argparse
@@ -38,7 +49,12 @@ FUNDO_FOLGA_PX = 3
 # os trechos de conferência (px da final): a final ampliada ao lado do 12K
 CONFERENCIA = {"Terreo": {"gourmet": (930, 380, 1480, 800), "cozinha_servico": (1580, 420, 2500, 830),
                           "living_jantar": (1580, 820, 2480, 1560), "piscina_deck": (600, 880, 1180, 1680),
-                          "hall_escritorio": (2200, 900, 2660, 1600)}}
+                          "hall_escritorio": (2200, 900, 2660, 1600)},
+               "Subsolo": {"piscina_cascata": (840, 460, 1080, 960), "escada_circulacao": (1040, 320, 1500, 520),
+                           "academia": (1180, 480, 1960, 900), "sauna_vestiario": (1040, 750, 1500, 1010),
+                           "dce_wc_maquinas": (1630, 470, 2060, 830)}}
+# o afinamento do afim da final ao 12K para a cascata (px da final): a piscina acima dela, sem a cascata
+CAIXA_CASCATA = (845, 700, 1075, 850)
 
 
 def final(pav):
@@ -55,6 +71,46 @@ def dados(pav):
 
 def kalam(pav):
     return R / f"POE642_CasaE_PH_{pav}_rotulos_kalam.json"
+
+
+def linhas_kalam_subsolo(sem_textos):
+    """As linhas da Kalam do Subsolo: os rótulos (`ROTULOS`, a cor pelo piso de baixo) e a descrição da escada."""
+    import pedidos_subsolo_casae_1811 as PS
+    import pedidos_terreo_casae_1611 as PE
+    import rotulos_kalam_casac as KC
+    forma = sem_textos.shape[:2]
+    lum = cv2.GaussianBlur(sem_textos.astype(np.float32).mean(axis=2), (0, 0), 3)
+    out = []
+    guarda = PE.ROTULOS
+    PE.ROTULOS = PS.ROTULOS
+    try:
+        for r in PS.ROTULOS:
+            out.append({"nome": r[0], "cor": list(PE.cor_rotulo(r, sem_textos, lum)),
+                        "linhas": KC._geometria(PE.alfa_rotulo(r, forma), list(r[1]))})
+        d = PS.DESCRICAO
+        out.append({"nome": "escada: " + " ".join(d["texto"]), "cor": list(d["cor"]),
+                    "linhas": KC._geometria(PE.alfa_escada(d["texto"], d["x"], d["y"], d["alinhar"], forma),
+                                            list(d["texto"]))})
+    finally:
+        PE.ROTULOS = guarda
+    sem = [b["nome"] for b in out if not b["linhas"]]
+    if sem:
+        raise SystemExit(f"sem as linhas medidas: {', '.join(sem)}")
+    return out
+
+
+def cascata_12k(out, fin):
+    """A peça 4K da cascata direto no 12K: o afim da final ao 12K, afinado na piscina acima da cascata."""
+    import danae_foto as DF
+    import pedidos_subsolo_casae_1811 as PS
+    from correcoes_terreo_casab_1611 import Mapa
+    M = DF.afim_12k(fin, out)
+    mp = Mapa(float(np.hypot(M[0, 0], M[1, 0])), (float(M[0, 2]), float(M[1, 2])))
+    mp.ref = fin
+    m = mp.local(out, CAIXA_CASCATA)
+    res = PS.cascata_biblioteca(out, PS.CASCATA_BIB, m=Mapa(m.s, m.t))
+    out[:] = res
+    print(f"    a cascata da biblioteca (4K) direto no 12K, a {m.s:.4f}x")
 
 
 def linhas_kalam(sem_textos):
@@ -77,10 +133,11 @@ def linhas_kalam(sem_textos):
     return out
 
 
-def preparar(pav, opcao="A", sem_textos=None):
+def preparar(pav, opcao="A", sem_textos=None, base=None):
     if opcao == "B":
         img = cv2.imread(str(sem_textos))
-        kalam(pav).write_text(json.dumps(linhas_kalam(img), ensure_ascii=False, indent=1) + "\n")
+        lk = linhas_kalam_subsolo(img) if pav == "Subsolo" else linhas_kalam(img)
+        kalam(pav).write_text(json.dumps(lk, ensure_ascii=False, indent=1) + "\n")
         d = json.loads(dados(pav).read_text())           # o recorte da A
         X0, Y0, Wi, Hi = d["X0"], d["Y0"], *d["entrada"]
     else:
@@ -98,6 +155,8 @@ def preparar(pav, opcao="A", sem_textos=None):
         cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
         X0, Y0 = cx - Wc / 2, cy - Hc / 2
         Wi, Hi = int(round(Wc)), int(round(Hc))
+        if base:                                          # a entrada do Topaz de outra imagem, no recorte da final
+            img = cv2.imread(str(base))
     M = np.float64([[1, 0, -X0], [0, 1, -Y0]])
     ent = cv2.warpAffine(img, M, (Wi, Hi), flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_CONSTANT,
                          borderValue=(255, 255, 255))
@@ -140,6 +199,8 @@ def montar(pav, saida_topaz, opcao="A"):
         reg = reg * (1 - f_) + 255 * f_
         out[y:y + 1024] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
     del corr, fa
+    if pav == "Subsolo":
+        cascata_12k(out, img)
     if opcao == "B":
         import rotulos_kalam_casac as K
         K.dados = kalam
@@ -166,15 +227,16 @@ def montar(pav, saida_topaz, opcao="A"):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("acao", choices=["preparar", "montar"])
-    ap.add_argument("pav", choices=["Terreo"])
+    ap.add_argument("pav", choices=["Terreo", "Subsolo"])
     ap.add_argument("saida_topaz", nargs="?")
     ap.add_argument("--opcao", choices=("A", "B"), default="A")
     ap.add_argument("--sem_textos", help="opção B: a final sem textos (`pedidos_terreo_casae_1611.py --sem_textos`)")
+    ap.add_argument("--base", help="opção A: a entrada do Topaz de outra imagem (no Subsolo, a final sem a cascata)")
     a = ap.parse_args()
     if a.acao == "preparar":
         if a.opcao == "B" and not a.sem_textos:
             ap.error("a opção B precisa de --sem_textos <png>")
-        preparar(a.pav, a.opcao, a.sem_textos)
+        preparar(a.pav, a.opcao, a.sem_textos, a.base)
     else:
         montar(a.pav, a.saida_topaz, a.opcao)
 

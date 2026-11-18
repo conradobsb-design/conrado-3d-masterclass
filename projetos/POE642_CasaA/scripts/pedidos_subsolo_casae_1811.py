@@ -804,7 +804,8 @@ def elevador(Q, img, q=ELEVADOR):
 # revestimento na água. `cascata_biblioteca` aceita um `Mapa` (o 12K: a peça entra direto na escala dele).
 CASCATA_BIB = {"lado": "sul", "estilo": "biblioteca", "png": BIB / "piscina" / "cascata-travertino-vista-de-cima.png",
                "px_m_peca": 1434.31, "aresta_y_peca": 1576.74, "lamina_x_peca": (1373.02, 2477.44),
-               "revest_x": (870.0, 966.0), "face": 924.6, "pedra_px": 18.0, "centro_x": 918.0,
+               # a face da parede em 925 (a linha 924 era a mistura da água com a borda: a faixa encosta na parede)
+               "revest_x": (870.0, 966.0), "face": 925.0, "pedra_px": 18.4, "centro_x": 918.0,
                "sombra": 0.30, "sombra_px": 1.4,
                # a água onde a peça pode entrar: a parte de baixo da piscina (até o vidro, x 982) acima da aresta
                "agua_x": (870.0, 982.0), "agua_y0": 782.0}
@@ -874,7 +875,13 @@ def cascata_biblioteca(img, q=CASCATA_BIB, m=None, px_m=None):
     return u8(out)
 
 
+SEM_CASCATA = False          # a entrada do Topaz do 12K: a peça 4K entra depois, direto no 12K (`ampliacao_12k_casae`)
+
+
 def cascata(Q, img, q=CASCATA):
+    if SEM_CASCATA:
+        print("    cascata: fora (a entrada do 12K; a peça da biblioteca entra direto no 12K)")
+        return img
     if q.get("estilo") == "biblioteca":
         out = cascata_biblioteca(img, q, px_m=Q.px_m)
         print(f"    cascata: a peça da biblioteca (4K, Higgsfield): o revestimento de travertino de fora a fora da parede "
@@ -1251,7 +1258,11 @@ def main():
     ap.add_argument("--ate")
     ap.add_argument("--cache")
     ap.add_argument("--saida")
+    ap.add_argument("--sem_textos", action="store_true", help="sem os rótulos e a descrição (a entrada da opção B)")
+    ap.add_argument("--sem_cascata", action="store_true", help="sem a cascata (a entrada do Topaz do 12K)")
     a = ap.parse_args()
+    global SEM_TEXTOS, SEM_CASCATA
+    SEM_TEXTOS, SEM_CASCATA = a.sem_textos, a.sem_cascata
     antes = antes_img()
     out = rodar(antes, a.de, a.ate, a.cache)
     cv2.imwrite(a.saida or str(FINAL), out)
