@@ -3556,6 +3556,13 @@ subia da direita): ▶ D no degrau 1, o alto à esquerda e, depois da diagonal, 
 Na final e direto nos 12K A e B (`doze` antes de `final`), depois a prancha, o PDF da E e o book. Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1811_escada_subsolo_antes_depois.jpg`.
 
+Depois (usuário: "Lembrar que tem a parte que a gente deixa transparente em virtude de já estar na altura do
+pavimento inferior, né?"): `veu` volta a diagonal de corte do PDF do Subsolo, o mesmo lance ((1258,1; 411,3) a
+(1294,2; 482,9)), e põe os degraus de baixo dela (1 a 7, já na altura do Subsolo) sob o véu do Subsolo (38%, cinza
+236, rampa de 1,5 px), o espelho de lá (no Subsolo o véu fica nos degraus de cima, 8 a 17); os de cima (8 a 17, junto
+ao Térreo, com o ◀ D) ficam inteiros. Nas imagens que já tinham a escada invertida, só o véu (`doze --so-veu` e
+`final --so-veu`). Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_Terreo_1811_escada_subsolo_veu_antes_depois.jpg`.
+
 #### Casa E, Térreo: a escada do deck na ordem dos níveis (17/11, `escada_deck_terreo_casae_1711.py`)
 
 Usuário: "esse último degrau está abaixo do penúltimo"; com a imagem do PDF: "os números estão localizados nos cantos de
