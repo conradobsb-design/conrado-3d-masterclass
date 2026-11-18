@@ -1649,8 +1649,174 @@ PAREDES_TOM = {"escuro": 60, "cinza": (80, 80, 80)}
 # (`correcoes_terreo_casad_1711._ripado` com `um_pav_casaa_1111.FOLHAS_1P`, o do L da suíte master da D e das ripas do
 # escritório do Térreo da E): o veio ao longo, as juntas das ripas, a luz, o contorno e a sombra curta para a varanda
 # ("o painel é ambos os lados da casa") e a faixa da fachada da direita, por fora das varandas das suítes 1 e 2
-PAINEIS = [{"ret": (1389.6, 535.0, 1395.7, 1533.5), "lado": "x-", "semente": 1818},
-           {"ret": (2565.4, 555.0, 2571.5, 1287.5), "lado": "x-", "semente": 1819}]
+# (usuário: "nos paineis de madeira no 3D tem diversos marcadores/separadores como folhas que se abrem. preciso que
+# adicione nos locais, conforme o 3d") o painel folha por folha, como as folhas amadeiradas da Casa A
+# (`um_pav_casaa_1111.folhas_1p`: cada folha com o seu contorno), com o vão escuro entre elas (`PAINEL_FOLHAS`), nos
+# `cortes` (px, y): à esquerda, os do PDF (ARQ_PAREDE): os marcos das portas de correr das suítes master, 4 e 3 e os
+# montantes entre as folhas de vidro delas (os quadradinhos de 3 x 4,8 px: 3 folhas de 1,5 m na master, de 1 m na 4 e na
+# 3) e os marcos das janelas dos banhos 4 e 3; à direita, os marcos das janelas dos banhos 2 e 1 e as pontas das
+# varandas das suítes 2 e 1, cujo vão de 4 m (o guarda-corpo, sem montantes no PDF) vai em 4 folhas de 1 m, o módulo das
+# suítes 3 e 4
+PAINEIS = [{"ret": (1389.6, 535.0, 1395.7, 1533.5), "lado": "x-", "semente": 1818,
+            "cortes": [595.8, 687.5, 776.9, 868.6, 906.3, 969.1, 1029.7, 1092.5, 1133.0, 1192.7, 1232.3, 1292.0,
+                       1330.2, 1393.1, 1453.6, 1516.5]},
+           {"ret": (2565.4, 555.0, 2571.5, 1287.5), "lado": "x-", "semente": 1819,
+            "cortes": [590.4, 650.1, 682.9, 742.6, 802.3, 862.0, 921.7, 957.6, 1017.3, 1050.1, 1109.8, 1169.5,
+                       1229.2]}]
+PAINEL_FOLHAS = {"vao_px": 1.1, "vao": (20, 26, 34)}
+# (usuário: "melhore o aspecto de todos os guarda corpo, com uma folha de vidro contínua") os 8 guarda-corpos do PDF
+# (ARQ_ELEMENTOS FIXOS, as faixas de 1,2 px): a varanda principal (em cima, à esquerda e embaixo), as varandas das suítes
+# 2 e 1 (à direita, até o painel), o L do vazio da escada e o do jardim da sala íntima. A faixa cinza de antes (as duas
+# linhas e as bordas, 4 a 8 px) sai: para dentro, o piso de logo ao lado (`dentro_px`); para fora, o piso até a borda da
+# laje ou do painel (`ate`, px) ou o que há do lado de fora (`fora_px`). Depois, uma folha de vidro só, de ponta a ponta,
+# no desenho dos guarda-corpos da Casa A (`terreo_casaa_1011.vidro_laminas`: o vidro claro, as faces em linha fina, o
+# brilho no meio e a sombra curta), antes dos painéis
+GUARDA_CORPOS = [
+    # (retângulo px, lado de dentro (+1: x/y maiores), `dentro_px`: até a borda escura do piso de dentro, "ate": a borda
+    # da laje/do painel ou "fora_px": a faixa de fora; "longo": o trecho ao longo, até os cantos; na ordem: a fonte da
+    # limpeza é a imagem já limpa pelos de antes, e os cantos da varanda principal saem limpos)
+    {"ret": (1168.2, 533.1, 1169.4, 1534.4), "dentro": +1, "dentro_px": 8.5, "ate": 1163.6, "longo": (528.6, 1541.5)},
+    {"ret": (1168.2, 533.1, 1395.7, 534.3), "dentro": +1, "dentro_px": 10.0, "ate": 528.6, "longo": (1163.6, 1389.6),
+     "folga": 1},
+    {"ret": (1168.2, 1533.2, 1395.7, 1534.4), "dentro": -1, "dentro_px": 5.0, "ate": 1541.5, "longo": (1163.6, 1389.6)},
+    {"ret": (2559.4, 682.9, 2560.6, 921.7), "dentro": -1, "dentro_px": 4.0, "ate": 2565.4},
+    {"ret": (2559.4, 1050.1, 2560.6, 1288.9), "dentro": -1, "dentro_px": 4.0, "ate": 2565.4},
+    {"ret": (1872.6, 1044.2, 1873.8, 1124.0), "dentro": -1, "dentro_px": 5.0, "fora_px": 1.4},
+    {"ret": (1872.6, 1122.8, 2216.7, 1124.0), "dentro": +1, "dentro_px": 3.5, "fora_px": 0.0},
+    {"ret": (2219.1, 1327.8, 2220.3, 1548.7), "dentro": -1, "dentro_px": 4.0, "fora_px": 2.4},
+]
+GUARDA_CORPO = {"folga": 3, "foge": 18, "ao_longo": (90, -90, 150, -150, 60, -60), "tom_px": 3, "tom_sigma": 10.0,
+                "tom_lim": (0.88, 1.12)}
+
+
+# (usuário: "limpe esse residuo no canto do armario do closet 1", "limpe essa sujeira no piso do closet 3", "limpe também
+# esses borrões no piso do closet 4") o piso dos closets 1, 3 e 4 (a caixa de dentro do L dos armários, até a porta)
+# refeito em réguas contínuas (`vinilico_novo`, a luz do próprio piso), fora as paredes, os armários (o claro sem cor)
+# e as folhas das portas
+CLOSETS_PISO = {"closet 1": (2261, 969, 2351, 1050), "closet 4": (1614, 1106, 1702, 1172),
+                "closet 3": (1614, 1244, 1702, 1315), "armario_lum": 185, "armario_sat": 60}
+
+
+def pisos_closets(Q, out, q=CLOSETS_PISO):
+    par = paredes(Q, 0.5)
+    H, W = par.shape
+    hsv = cv2.cvtColor(out, cv2.COLOR_BGR2HSV)
+    armario = (out.mean(axis=2) > q["armario_lum"]) & (hsv[..., 1] < q["armario_sat"])
+    folhas = np.zeros((H, W), bool)
+    for fx0, fy0, fx1, fy1 in folhas_portas(out):
+        folhas[int(fy0):int(np.ceil(fy1)), int(fx0):int(np.ceil(fx1))] = True
+    for nome in ("closet 1", "closet 4", "closet 3"):
+        x0, y0, x1, y1 = q[nome]
+        b = np.zeros((H, W), bool)
+        b[y0:y1, x0:x1] = True
+        out = vinilico_novo(Q, out, b & ~par & ~armario & ~folhas, luz_dentro=True)
+    return out
+
+
+def _faixa(vert, a0, a1, c0, c1):
+    return (slice(a0, a1), slice(c0, c1)) if vert else (slice(c0, c1), slice(a0, a1))
+
+
+def _fonte_piso(out, vert, a0, a1, c0, c1, desl, q):
+    """O piso para a faixa (a0:a1 ao longo, c0:c1 de través) a `desl` px de través; onde a fonte foge do piso (um vaso,
+    uma peça), o piso das mesmas linhas mais adiante ou mais atrás ao longo (`ao_longo`)."""
+    f = out[_faixa(vert, a0, a1, c0 + desl, c1 + desl)].astype(np.float32)
+    med = np.median(f.reshape(-1, 3), axis=0)
+    ruim = np.abs(f - med).max(axis=2) > q["foge"]
+    ruim = cv2.dilate(ruim.astype(np.uint8), np.ones((5, 5), np.uint8)).astype(bool)
+    for k in q["ao_longo"]:
+        if not ruim.any():
+            break
+        b0, b1 = a0 + k, a1 + k
+        if b0 < 0 or b1 > (out.shape[0] if vert else out.shape[1]):
+            continue
+        g = out[_faixa(vert, b0, b1, c0 + desl, c1 + desl)].astype(np.float32)
+        bom = np.abs(g - med).max(axis=2) <= q["foge"]
+        usa = ruim & bom
+        f[usa] = g[usa]
+        ruim &= ~usa
+    return f
+
+
+def guarda_corpos(Q, out, q=GUARDA_CORPO):
+    """Os guarda-corpos (`GUARDA_CORPOS`) numa folha de vidro contínua, a faixa de antes limpa."""
+    import terreo_casaa_1011 as TA
+    o = out.astype(np.float32)
+    for g in GUARDA_CORPOS:
+        out = u8(o)                                         # a fonte: a imagem já limpa pelos de antes
+        x0, y0, x1, y1 = g["ret"]
+        vert = (y1 - y0) > (x1 - x0)
+        d = g["dentro"]
+        lo, hi = (x0, x1) if vert else (y0, y1)             # as faces do vidro, no eixo de través
+        l0, l1 = g.get("longo", (y0, y1) if vert else (x0, x1))
+        a0, a1 = int(np.floor(l0)), int(np.ceil(l1))
+        face_in, face_out = (hi, lo) if d > 0 else (lo, hi)
+        # para dentro: de logo antes da face de fora até `dentro_px` depois da de dentro, o piso de dentro
+        b_in = face_in + d * g["dentro_px"]
+        if "ate" in g:                                      # para fora, o piso até a borda da laje / do painel
+            b_out = g["ate"]
+        else:
+            b_out = face_out - d * g["fora_px"]
+        c0, c1 = sorted((b_in, b_out))
+        c0, c1 = int(np.floor(c0)), int(np.ceil(c1))
+        larg = c1 - c0
+        desl = d * (larg + g.get("folga", q["folga"]))
+        if "fora_px" in g and g["fora_px"] > 0:
+            # o lado de fora (o vazio, o jardim): o que há logo além
+            f0, f1 = sorted((face_out, face_out - d * g["fora_px"]))
+            f0, f1 = int(np.floor(f0)), int(np.ceil(f1))
+            fs = -d * (f1 - f0 + q["folga"])
+            if vert:
+                o[a0:a1, f0:f1] = out[a0:a1, f0 + fs:f1 + fs]
+            else:
+                o[f0:f1, a0:a1] = out[f0 + fs:f1 + fs, a0:a1]
+            c0, c1 = (max(c0, f1), c1) if d > 0 else (c0, min(c1, f0))
+            larg = c1 - c0
+            desl = d * (larg + g.get("folga", q["folga"]))
+        f = _fonte_piso(out, vert, a0, a1, c0, c1, desl, q)
+        # o tom: a borda de dentro da faixa no do piso logo além dela (sem degrau), coluna a coluna ao longo
+        k = q["tom_px"]
+        if d > 0:
+            alem, borda = out[_faixa(vert, a0, a1, c1, c1 + k)], (f[:, -k:] if vert else f[-k:, :])
+        else:
+            alem, borda = out[_faixa(vert, a0, a1, c0 - k, c0)], (f[:, :k] if vert else f[:k, :])
+        eixo = 1 if vert else 0
+        ref = np.median(alem.astype(np.float32), axis=eixo)
+        src = np.median(borda, axis=eixo)
+        sg = q["tom_sigma"]
+        ganho = cv2.GaussianBlur(ref[None], (0, 0), sg)[0] / np.maximum(cv2.GaussianBlur(src[None], (0, 0), sg)[0], 1)
+        ganho = np.clip(ganho, *q["tom_lim"])
+        f = f * (ganho[:, None, :] if vert else ganho[None, :, :])
+        o[_faixa(vert, a0, a1, c0, c1)] = f
+    rets_pt = []
+    for g in GUARDA_CORPOS:
+        x0, y0, x1, y1 = g["ret"]
+        (a, b), (c, e) = Q.q2p(x0, y0), Q.q2p(x1, y1)
+        rets_pt.append((min(a, c), min(b, e), max(a, c), max(b, e)))
+    o = TA.vidro_laminas(Q, u8(o), rets_pt, TA.ESCADAS_TA["jardim"]["vidro"])
+    return u8(o)
+
+
+def painel_folhas(out, pv, q=PAINEL_FOLHAS):
+    """O painel de ripado `pv` folha por folha (cada uma com o seu contorno), com o vão escuro nos `cortes`."""
+    import correcoes_terreo_casab_1611 as CB
+    import correcoes_terreo_casad_1711 as CD
+    import um_pav_casaa_1111 as U
+    x0, y0, x1, y1 = pv["ret"]
+    cortes = sorted(c for c in pv.get("cortes", []) if y0 < c < y1)
+    lim = [y0] + cortes + [y1]
+    rng = np.random.default_rng(pv["semente"])
+    v = q["vao_px"] / 2
+    for i, (a, b) in enumerate(zip(lim, lim[1:])):
+        CD._ripado(out, CB.Mapa(), (x0, a + (v if i else 0), x1, b - (v if i < len(lim) - 2 else 0)), pv["lado"],
+                   U.FOLHAS_1P, rng)
+    H, W = out.shape[:2]
+    al = np.zeros((H, W), np.float32)
+    for c in cortes:
+        al = np.maximum(al, CB.alfa_ret((x0, c - v, x1, c + v), (H, W)))
+    o = out.astype(np.float32)
+    out[:] = u8(o * (1 - al[..., None]) + np.float32(q["vao"]) * al[..., None])
+    return len(lim) - 1
 
 
 def paredes_tom(Q, out, q=PAREDES_TOM):
@@ -1698,10 +1864,9 @@ def retoques(Q, img):
     for i, f in enumerate(pc["folhas"]):
         PC.folha(out, CB.Mapa(), f, True, pc["semente"] + i)
     out = paredes_tom(Q, out)
-    import correcoes_terreo_casad_1711 as CD
-    import um_pav_casaa_1111 as U
-    for pv in PAINEIS:
-        CD._ripado(out, CB.Mapa(), pv["ret"], pv["lado"], U.FOLHAS_1P, np.random.default_rng(pv["semente"]))
+    out = pisos_closets(Q, out)
+    out = guarda_corpos(Q, out)
+    nf = [painel_folhas(out, pv) for pv in PAINEIS]
     c = CLOSET_MASTER
     x0, y0, x1, y1 = c["faixa"]
     b = np.zeros(par.shape, bool)
@@ -1717,7 +1882,8 @@ def retoques(Q, img):
           "de antes fora), com o monitor e o teclado Apple; "
           f"{len(RACKS)} racks (suítes e sala íntima) no aparador de freijó com a TV do PDF; a porta da suíte 2 e as 2 folhas de "
           f"correr do closet master em madeira; o piso do closet "
-          "master sem os traços")
+          f"master sem os traços; {len(GUARDA_CORPOS)} guarda-corpos numa folha de vidro contínua; os painéis de ripado em "
+          f"{' e '.join(map(str, nf))} folhas")
     return out
 
 

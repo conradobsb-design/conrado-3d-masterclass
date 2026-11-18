@@ -4125,8 +4125,22 @@ Depois, ainda em 18/11:
 - **"melhore a representação dessa porta da suite 2"**: a folha saía salpicada porque o veio a atravessava (o 4º
   argumento de `portas_casae_1711.folha` é o da porta deitada no PDF, cuja folha fica em pé): agora o veio corre no
   comprido, como nas outras portas; as folhas de correr do closet master, idem.
-O 12K fica para depois das próximas correções. Antes e depois em
-`POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811e_escrivaninhas_aura_porta_antes_depois.jpg`.
+Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811e_escrivaninhas_aura_porta_antes_depois.jpg`.
+
+E por fim (o 12K A e B no fim de tudo, "ao final gere o 12k"):
+- **"nos paineis de madeira no 3D tem diversos marcadores/separadores como folhas que se abrem"**: `painel_folhas`
+  desenha cada painel folha por folha (como as folhas amadeiradas da Casa A, cada uma com o seu contorno), com o vão
+  escuro entre elas (`PAINEL_FOLHAS`), nos `cortes` de `PAINEIS`: à esquerda, os do PDF (os marcos das portas de correr
+  das suítes master, 4 e 3, os montantes entre as folhas de vidro, os quadradinhos de 3 x 4,8 px, e os marcos das
+  janelas dos banhos 4 e 3); à direita, os marcos das janelas dos banhos 2 e 1, as pontas das varandas e, no vão de 4 m
+  de cada varanda (sem montantes no PDF), 4 folhas de 1 m, o módulo das suítes 3 e 4.
+- **"melhore o aspecto de todos os guarda corpo, com uma folha de vidro contínua"**: `guarda_corpos` limpa a faixa cinza
+  de antes (as linhas e a borda escura do piso de dentro; o piso para fora até a borda da laje ou do painel; a fonte
+  foge de vasos e peças pelas mesmas linhas mais adiante; o tom acertado pelo piso de logo além) e desenha os 8 trechos
+  do PDF (`GUARDA_CORPOS`) numa folha de vidro só, no desenho da Casa A (`terreo_casaa_1011.vidro_laminas`).
+- **Closets 1, 3 e 4** ("limpe esse residuo no canto do armario do closet 1", "essa sujeira no piso do closet 3",
+  "esses borrões no piso do closet 4"): `pisos_closets` refaz o piso de dentro do L dos armários em réguas contínuas.
+Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811f_paineis_guarda_corpos_closets_antes_depois.jpg`.
 
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 

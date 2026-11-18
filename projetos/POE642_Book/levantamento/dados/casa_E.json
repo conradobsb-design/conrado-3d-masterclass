@@ -1716,6 +1716,83 @@
        640
       ]
      ]
+    },
+    {
+     "n": 33,
+     "origem": "voce",
+     "texto": "Painéis de nogueira em ripado folha por folha, com o vão escuro entre as folhas (\"no 3D tem diversos marcadores/separadores como folhas que se abrem\"): à esquerda, nos marcos e nos montantes das portas de correr do PDF (3 folhas de 1,5 m na master, 3 de 1 m nas suítes 4 e 3) e nos marcos das janelas dos banhos; à direita, nos marcos das janelas dos banhos 1 e 2 e, nas varandas das suítes, 4 folhas de 1 m.",
+     "pontos": [
+      [
+       1392,
+       730
+      ],
+      [
+       1392,
+       1000
+      ],
+      [
+       1392,
+       1420
+      ],
+      [
+       2568,
+       800
+      ],
+      [
+       2568,
+       1170
+      ]
+     ]
+    },
+    {
+     "n": 34,
+     "origem": "voce",
+     "texto": "Guarda-corpos numa folha de vidro contínua (\"melhore o aspecto de todos os guarda corpo\"): a varanda principal (em cima, à esquerda e embaixo), as varandas das suítes 1 e 2, o vazio da escada e o jardim da sala íntima; a faixa cinza antiga e a borda escura do piso fora.",
+     "pontos": [
+      [
+       1168,
+       900
+      ],
+      [
+       1280,
+       533
+      ],
+      [
+       2560,
+       800
+      ],
+      [
+       1873,
+       1085
+      ],
+      [
+       2050,
+       1123
+      ],
+      [
+       2220,
+       1440
+      ]
+     ]
+    },
+    {
+     "n": 35,
+     "origem": "voce",
+     "texto": "Closets 1, 3 e 4: o resíduo escuro no canto do armário do closet 1 e os borrões e a sujeira do piso dos closets 3 e 4 fora, o piso em réguas contínuas.",
+     "pontos": [
+      [
+       2265,
+       975
+      ],
+      [
+       1690,
+       1190
+      ],
+      [
+       1690,
+       1285
+      ]
+     ]
     }
    ]
   }
