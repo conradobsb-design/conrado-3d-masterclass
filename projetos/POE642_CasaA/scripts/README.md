@@ -3954,6 +3954,9 @@ Na final e nos 12K A e B (refeitos pelo Topaz, jobs 83c82337, A, e df7dc4fc, B).
   refeitos (jobs a7513133, A, e deebb76b, B). Antes e depois em
   `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811f_soleira_antes_depois.jpg`.
 
+**Subsolo da Casa E aprovado pelo usuário em 18/11** ("subsolo aprovado"), nesta versão (commit dbf1705): a final, os
+12K A e B (jobs a7513133 e deebb76b), a prancha, o PDF da E e o book.
+
 #### Levantamento dos ajustes de todas as plantas (18/11)
 
 Usuário, com o levantamento do Subsolo da Casa E: "eu preciso de um desse para todas as plantas. Inclusive com os
