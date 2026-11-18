@@ -3876,10 +3876,14 @@ Depois do 12K (18/11), a rodada de ajustes do usuário:
   trecho de 17 px de cada lado do meio), de 13 px em diante, a cada 5,8 px, 9 anéis, mais fracos para longe; a crista
   clara e o vale um pouco mais escuro, a fase e a força levemente irregulares (senoides fixas na escala da final, o
   mesmo desenho no 12K, onde a cascata entra direto); só na água (o escuro das paredes fica sem reflexo).
+- **Chuveiro da ducha** ("Você não corrigiu o chuveiro que fica ali ao lado da sauna [...] tem um erro [...] no formato
+  dele"): a limpeza da folha do box (`PORTAS`, "box da ducha") ia até y 883 e comia o canto de cima, à esquerda, da
+  cabeça quadrada; agora acaba em 880,3, antes dela. Antes e depois em
+  `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_chuveiro_ducha_antes_depois.jpg`.
 - **Canto do tanque** ("A BORDA DA PISCINA, NO ALTO, AVANÇOU SOBRE O MARMORE. REMOVA ESSE PEDACINHO"): a faixa de
   pastilha sob a parede da academia acaba em x 1051,7, onde começa o Bege Bahia da borda do tanque do lado da sauna,
   que sobe até a parede (y 770).
-Na final e nos 12K A e B (refeitos pelo Topaz, jobs f94c1489, A, e 6bc7279c, B; a cascata 4K com as ondas direto no
+Na final e nos 12K A e B (refeitos pelo Topaz, jobs 34db88b7, A, e 0f302776, B; a cascata 4K com as ondas direto no
 12K). Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_borda_cascata_antes_depois.jpg` e
 `POE642_CasaE/renders/POE642_CasaE_PH_Subsolo_1811_portas_ducha_antes_depois.jpg` (e as ondas, o canto do tanque e a

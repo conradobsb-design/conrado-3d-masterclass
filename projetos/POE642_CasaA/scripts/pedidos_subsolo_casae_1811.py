@@ -1266,8 +1266,10 @@ PORTAS = [
     ("box do vestiário", (1410.5, 843.2, 1412.9, 884.1), [], (1410.0, 842.0, 1419.0, 888.0), (10.0, 0.0), "vidro_c"),
     # (18/11, usuário: "ESSA PORTA ESTÁ FLUTUANDO. MELHORE A REPRESENTAÇÃO DELA, JUNTO A OUTRA PARTE DO BATENTE EM VIDRO E
     # FAÇA UM SUTIL CONTORNO PARA QUE FIQUE VISÍVEL") a folha presa ao vidro fixo do PDF (da parede à dobradiça), as duas
-    # com o contorno mais marcado (`VIDRO_C`); o vidro fixo até a folha (a limpeza dele não alcança a folha)
-    ("box da ducha", (1208.7, 838.2, 1209.9, 879.0), [], (1204.0, 835.0, 1215.0, 883.0), (9.0, 0.0), "vidro_c"),
+    # com o contorno mais marcado (`VIDRO_C`); o vidro fixo até a folha (a limpeza dele não alcança a folha); a limpeza da
+    # folha acaba antes da cabeça do chuveiro (usuário: "Você não corrigiu o chuveiro que fica ali ao lado da sauna [...]
+    # tem um erro [...] no formato dele": ela comia o canto de cima, à esquerda, do quadrado)
+    ("box da ducha", (1208.7, 838.2, 1209.9, 879.0), [], (1204.0, 835.0, 1215.0, 880.3), (9.0, 0.0), "vidro_c"),
     ("vidro fixo da ducha", (1190.5, 838.2, 1208.7, 839.4), [], (1189.0, 834.5, 1208.5, 843.0), (0.0, 7.0), "vidro_c"),
 ]
 # (18/11, usuário: "Porta da casa de máquinas em tom bronze.") as das duas casas de máquinas no bronze escovado das folhas
