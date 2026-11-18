@@ -3632,6 +3632,31 @@ linhas na cor cinza ou preta sem ser tracejada"). A projeção tracejada tinha s
 contínuo na reta do PDF (a cadeia "laje da garagem (1)", y 485,9), da face da parede da esquerda até a linha da borda
 da garagem à direita, no mesmo cinza escuro e na mesma espessura dela. Na final e nos 12K A e B.
 
+#### Casa E, Térreo: as esquadrias das janelas da cozinha e do serviço (17/11, `janelas_esquadrias_casae_1711.py`)
+
+"FALTOU AS ESQUADRIAS DA JANELA DA COZINHA". Sobre as janelas redesenhadas entram as peças de esquadria do PDF
+(ARQ_PAREDE): os marcos nas duas pontas do vão e os montantes nas pontas de cada folha, em grafite com o fio escuro;
+os vidros com a linha do meio entre as duas lâminas. A do serviço no mesmo padrão. Na final e nos 12K A e B.
+
+#### Casa E, Térreo: ajustes de 17/11, 1ª leva (`ajustes_terreo_casae_1711b.py`)
+
+`tracejado`: a linha tracejada vertical junto à cortina do living sai ("REMOVER ESSE TRACEJADO"). `bacia`: o canto da
+bacia do lavabo no travertino limpo, sem o retângulo do remendo e os tracinhos brancos, e a bacia de volta ("CORRIGIR O
+ENTORNO DO VASO"). `bancada`: a pedra de granito acima da adega refeita do granito de dentro dela, sem o fio claro de
+contorno, a frente um tom abaixo ("REMOVER AS LINHAS TÉCNICAS DE CONTORNO DA BANCADA NO GRANITO MARROM"). `adega`: o
+módulo de cima com as células de garrafa repetidas 3 vezes entre as cabeceiras, as garrafas na escala das dos lados
+("CORRIGIR A ESCALA DAS GARRAFAS"). Na final e nos 12K A e B.
+
+#### Casa E, Térreo: ajustes de 17/11, 2ª leva (`ajustes_terreo_casae_1711c.py`)
+
+`parede`: a parede da direita da área de serviço descoberta lisa, na união das peças do PDF, sem os fios entre elas e
+sem o risco branco junto à quina ("CORRIJA ESSA PAREDE"). `porta`: a folha da pivotante do hall inteira onde o
+tracejado cruzava ("CORRIJA A FALHA NA PORTA."). `vaso_hall`: o entorno do vaso do hall no travertino limpo (sem o
+círculo claro e a mancha cinza junto ao pilar) e o vaso de volta com a sombra curta ("CORRIJA A FALHA EM VOLTA DO
+VASO."). `chuveiro`: o braço cromado do chuveiro quadrado do box do BH gourmet até a parede de baixo, com a canopla, como
+no PDF ("FALTOU O CANO DO CHUVEIRO DE PAREDE"). `gas`: a soleira do abrigo de gás sai, o piso de dentro vai até a face
+de fora ("AQUI NÃO TEM SOLEIRA"). Na final e nos 12K A e B.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
