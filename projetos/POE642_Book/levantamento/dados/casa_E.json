@@ -1202,7 +1202,7 @@
     {
      "n": 7,
      "origem": "voce",
-     "texto": "Suíte master: tapete, cama king, criados, poltrona e criado redondo da biblioteca no lugar do PDF (18/11), com o banco de pé de cama k4 (couro caramelo).",
+     "texto": "Suíte master: tapete, cama king, criados, poltrona e criado redondo da biblioteca no lugar do PDF (18/11), com o banco de pé de cama K3 da biblioteca (linho off-white e nogueira), no lugar do k4 (\"troque os bancos [...] por outro modelo da biblioteca\").",
      "pontos": [
       [
        1566,
@@ -1221,7 +1221,7 @@
     {
      "n": 8,
      "origem": "voce",
-     "texto": "Suítes 1 a 4: tapete, cama, criados e cadeira da escrivaninha da biblioteca, no lugar do PDF (18/11), e os bancos de pé de cama k4 (\"alterar os bancos em frente as camas\"); na 3, virado para a cama.",
+     "texto": "Suítes 1 a 4: tapete, cama, criados e cadeira da escrivaninha da biblioteca, no lugar do PDF (18/11), e os bancos de pé de cama K3; na 3, virado para a cama; as cadeiras parcialmente sob o tampo das escrivaninhas (\"devem estar parcialmente sob as mesas\").",
      "pontos": [
       [
        1507,
@@ -1238,6 +1238,14 @@
       [
        2393,
        1110
+      ],
+      [
+       2265,
+       751
+      ],
+      [
+       1699,
+       960
       ]
      ]
     },
@@ -1267,7 +1275,7 @@
     {
      "n": 10,
      "origem": "voce",
-     "texto": "Banho master: floreira só no verde (20/10); a bancada dupla, a banheira oval, o misturador de piso e a bacia Carrara da biblioteca (18/11); os 2 chuveiros no quadrado de parede, com o braço até as paredes do box.",
+     "texto": "Banho master: floreira com a folhagem 4K da biblioteca (18/11); a bancada dupla, a banheira oval, o misturador de piso e a bacia Carrara da biblioteca (18/11); os 2 chuveiros no quadrado de parede, com o braço até as paredes do box.",
      "pontos": [
       [
        1762,
@@ -1437,7 +1445,7 @@
     {
      "n": 20,
      "origem": "voce",
-     "texto": "Sala íntima: o tapete, a mesa de centro, a mesa lateral e a poltrona da biblioteca (18/11); o sofá de antes fica (o L da biblioteca não cabe no do PDF), com o encosto reto (28/10).",
+     "texto": "Sala íntima: o tapete, a mesa de centro, a mesa lateral redonda de carvalho junto ao braço do sofá (\"corrija a representação dessa mesa lateral\") e a poltrona da biblioteca (18/11); o sofá de antes fica (o L da biblioteca não cabe no do PDF), com o encosto reto (28/10).",
      "pontos": [
       [
        1985,
@@ -1446,6 +1454,10 @@
       [
        2112,
        1306
+      ],
+      [
+       2097,
+       1218
       ]
      ]
     },
@@ -1511,6 +1523,44 @@
       [
        1538,
        1138
+      ]
+     ]
+    },
+    {
+     "n": 24,
+     "origem": "voce",
+     "texto": "Varanda principal: as palmeiras em 4K, nos vasos de concreto; no canto de baixo, a mesa lateral e a poltrona externas da biblioteca no lugar dos círculos marrons do render (o PDF não desenha nada ali) (\"a planta precisa estar dentro de um vaso\").",
+     "pontos": [
+      [
+       1229,
+       590
+      ],
+      [
+       1218,
+       1490
+      ],
+      [
+       1217,
+       1437
+      ],
+      [
+       1275,
+       1492
+      ]
+     ]
+    },
+    {
+     "n": 25,
+     "origem": "voce",
+     "texto": "Varanda da suíte 1 e jardim da sala íntima: as folhagens em 4K, nos mesmos tipos de folha, em vasos de concreto (\"mantenha os tipos de folha, mas gere o 4k delas\").",
+     "pontos": [
+      [
+       2525,
+       1253
+      ],
+      [
+       2148,
+       1511
       ]
      ]
     }

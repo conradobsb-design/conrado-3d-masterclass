@@ -4003,6 +4003,31 @@ da biblioteca). `pedidos_1pav_casae_1811.py` parte da final do commit b227fc4 e 
 - **Como refazer:** `python3 pedidos_1pav_casae_1811.py [--de <passo>] [--ate <passo>] [--cache <pasta>]`; depois
   `rodape_entrega.py`, `pdf_entrega.py`, `book_entrega.py` e `levantamento_ajustes.py --casa E`.
 
+#### Casa E, 1º Pavimento: bancos K3, cadeiras sob o tampo, mesa lateral, folhagens 4K em vasos (18/11)
+
+Pedidos do usuário vendo a final do levantamento aplicado (928eaf9), todos no mesmo `pedidos_1pav_casae_1811.py`:
+- "troque os bancos, que estão em frente as camas por outro modelo da biblioteca": `BANCO_PNG = "banco-k3.png"` (linho
+  off-white com moldura de nogueira e rolos) nas 5 suítes, nos mesmos retângulos do PDF (`RV.bancos`).
+- "as cadeiras de escritório devem estar parcialmente sob as mesas": nas suítes 1 a 4 a cadeira vai ~40% para baixo do
+  tampo; a limpeza só fora da mesa e o tampo de antes colado por cima da cadeira, com a sombra curta (`MESA_SOMBRA`).
+- "corrija a representação dessa mesa lateral, da sala íntima": a mesinha junto ao braço do sofá pela
+  `mesa-intima-redonda-e` (carvalho), o piso de antes refeito sem puxar a luz do tapete (`nao_luz`).
+- "vamos melhorar as representações das folhas [...] mantenha os tipos de folha, mas gere o 4k delas": as 4 espécies
+  geradas de novo no Higgsfield (nano_banana_2, 4K, a folha de antes como referência, fundo branco recortado aqui:
+  alfa pelo mínimo dos canais, componentes conexas, descontaminação) e guardadas na biblioteca
+  (`03-primeiro-pavimento/varanda-principal/palmeira-folha-fina-4k.png`, `varanda-da-suite-1/palmeira-roseta-4k.png`,
+  `jardim-sala-intima/folhagem-larga-4k.png`, `banho-master/floreira-folhagem-4k.jpg`). Passo novo `folhagens`
+  (`FOLHAGENS`): a planta velha sai (máscara pela diferença ao piso e pelo verde, sem a terracota) e o piso volta por
+  uma cópia deslocada e esfumada do próprio piso (`piso_deslocado`); a floreira do banho master é preenchida pelo
+  recorte 4K, com as bordas escurecidas.
+- "ao lado da planta deveria ser o quê em marrom? e a planta precisa estar dentro de um vaso": o PDF não desenha nada no
+  canto de baixo da varanda principal (os dois círculos marrons vieram do render); a biblioteca da varanda principal
+  previa a `poltrona-externa-b` e a `mesa-lateral-externa`, que entram no lugar do círculo grande e do pequeno
+  (`VARANDA_CANTO`). As 4 plantas agora em vasos de concreto (`vaso()`, procedural, `VASO`), a planta a ~0,92 do vaso.
+- Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811b_bancos_cadeiras_folhagens_antes_depois.jpg`
+  (antes = a final de 928eaf9); os itens 7, 8, 10 e 20 do levantamento da E atualizados e os 24 e 25 novos. O 12K A e B
+  depois do OK. Como refazer: o mesmo do item anterior.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,

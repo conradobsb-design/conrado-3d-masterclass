@@ -697,6 +697,14 @@ def esquadrias(Q, img, q=ESQ):
 # biblioteca não cabe no do PDF (a chaise de 0,84 x 2,0 m, a da biblioteca é larga e curta) e o de antes já é o mesmo
 # modelo, no lugar do PDF. Na copinha, o tampo da E com a cuba Franke e o armário; na rouparia, a estante aberta e o
 # módulo de nichos no L do PDF.
+# Depois (usuário: "troque os bancos, que estão em frente as camas por outro modelo da biblioteca"): o banco K3 da
+# biblioteca (`bancos-pe-de-cama-propostas/banco-k3`: linho off-white com a moldura de nogueira e os rolos nas pontas,
+# que se destaca do tapete bege) no lugar do K4 de couro caramelo; ("as cadeiras de escritório devem estar parcialmente
+# sob as mesas") cada cadeira 4 px (0,07 m) mais para dentro da escrivaninha, ~40% dela sob o tampo: o tampo da final de
+# antes (`mesa`) volta por cima dela, com a sombra curta da borda; a limpeza da cadeira de antes fica fora do tampo
+# (nas suítes 3 e 4 a borda do tampo que a cadeira de antes cobria vem do próprio tampo, `mesa_reparo` (px, dy)).
+BANCO_PNG = "banco-k3.png"
+MESA_SOMBRA = {"forca": 0.26, "sigma": 1.0, "d": 1.2}
 MADEIRA = (1770, 830, 1980, 900)
 SUITES = {
     # (`limpa`: a última inclui o resto do rótulo de antes, sob o banco antigo; `cortina`: não dá a luz do piso)
@@ -705,30 +713,36 @@ SUITES = {
                      "tapete": (1461, 612, 1670, 749), "banco": ((1504, 700, 1628, 724), 0),
                      "criados": [(1465, 568, 1501, 604), (1632, 568, 1668, 604)], "frente": (0, 1),
                      "poltrona": ((1459.0, 824.0), 52.0, (1, -1)), "redondo": (1483, 758, 1526, 802)},
-    "suíte 2": {"limpa": [(2304, 678, 2469, 849), (2246, 727, 2292, 776)], "cama": ((2352, 683, 2434, 801), "casal"),
+    "suíte 2": {"limpa": [(2304, 678, 2469, 849), (2262, 727, 2292, 776)], "cama": ((2352, 683, 2434, 801), "casal"),
                 "cortina": (2468, 670, 2492, 860),
                 "tapete": (2315, 722, 2468, 842), "banco": ((2352, 806, 2434, 830), 0),
                 "criados": [(2319, 683, 2349, 713), (2438, 683, 2467, 713)], "frente": (0, 1),
-                "cadeira": ((2252, 733, 2287, 770), (-1, 0))},
-    "suíte 1": {"limpa": [(2304, 1045, 2469, 1216), (2246, 1094, 2292, 1143)], "cama": ((2352, 1050, 2434, 1168), "casal"),
+                "cadeira": ((2248, 733, 2283, 770), (-1, 0)), "mesa": (2226, 683, 2261.7, 823)},
+    "suíte 1": {"limpa": [(2304, 1045, 2469, 1216), (2262, 1094, 2292, 1143)], "cama": ((2352, 1050, 2434, 1168), "casal"),
                 "cortina": (2468, 1037, 2492, 1227),
                 "tapete": (2315, 1086, 2468, 1206), "banco": ((2352, 1173, 2434, 1197), 0),
                 "criados": [(2319, 1050, 2349, 1080), (2438, 1050, 2467, 1080)], "frente": (0, 1),
-                "cadeira": ((2252, 1100, 2287, 1137), (-1, 0))},
-    "suíte 4": {"limpa": [(1425, 887, 1600, 1062), (1671, 936, 1719, 985)], "cama": ((1466, 892, 1548, 1010), "casal"),
+                "cadeira": ((2248, 1100, 2283, 1137), (-1, 0)), "mesa": (2226, 1050, 2261.7, 1190)},
+    "suíte 4": {"limpa": [(1425, 887, 1600, 1062), (1671, 936, 1703, 985)], "cama": ((1466, 892, 1548, 1010), "casal"),
                 "cortina": (1398, 880, 1426, 1070),
                 "tapete": (1427, 934, 1595, 1054), "banco": ((1466, 1015, 1548, 1039), 0),
                 "criados": [(1433, 892, 1463, 922), (1552, 892, 1582, 922)], "frente": (0, 1),
-                "cadeira": ((1677, 942, 1713, 979), (1, 0))},
-    "suíte 3": {"limpa": [(1425, 1360, 1600, 1536), (1671, 1434, 1719, 1483)], "cama": ((1470, 1413, 1552, 1531), "casal"),
+                "cadeira": ((1681, 942, 1717, 979), (1, 0)), "mesa": (1703.3, 892, 1739, 1032),
+                "mesa_reparo": ((1703, 936, 1711, 986), -44)},
+    "suíte 3": {"limpa": [(1425, 1360, 1600, 1536), (1671, 1434, 1703, 1483)], "cama": ((1470, 1413, 1552, 1531), "casal"),
                 "cortina": (1398, 1352, 1426, 1545),
                 "tapete": (1427, 1368, 1595, 1488), "banco": ((1470, 1384, 1552, 1408), 180),
                 "criados": [(1437, 1501, 1466, 1531), (1555, 1501, 1585, 1531)], "frente": (0, -1),
-                "cadeira": ((1677, 1440, 1713, 1477), (1, 0))},
+                "cadeira": ((1681, 1440, 1717, 1477), (1, 0)), "mesa": (1703.3, 1390, 1739, 1531),
+                "mesa_reparo": ((1703, 1434, 1711, 1484), -44)},
 }
 SALA_INTIMA = {"tapete": (1876, 1235, 2115, 1384), "sofa": [(1867, 1215, 1917, 1334), (1917, 1215, 2076, 1265)],
                "sofa_folga": 3, "poltrona_antes": (2113, 1228, 2158, 1345), "poltrona": (2084, 1280, 2140, 1333),
-               "mesa": (1956, 1299, 2016, 1359), "lateral": (1997, 1314, 2039, 1356)}
+               "mesa": (1956, 1299, 2016, 1359), "lateral": (1997, 1314, 2039, 1356),
+               # (usuário: "corrija a representação dessa mesa lateral, da sala íntima", a redonda do render junto ao
+               # braço do sofá, borrada e com a sombra escura em volta): sai, com o piso de madeira (fora do sofá e do
+               # tapete), e entra a mesa redonda de carvalho da biblioteca, a da mesa de centro, no mesmo lugar
+               "lateral_sofa_antes": (2077, 1199, 2120, 1235), "lateral_sofa": (2097.5, 1218.5, 33.0)}
 COPINHA = {"tampo": (1888.3, 916.2, 2053.4, 951.6), "cuba": (2034.4, 931.2, 30.0, 24.0),
            "armario": (2053.4, 916.2, 2216.7, 951.6)}
 ROUPARIA_MOVEIS = {"estante": (2082.3, 715.8, 2216.7, 745.6), "nichos": (2186.8, 745.6, 2216.7, 807.7)}
@@ -754,6 +768,8 @@ def mobiliario(Q, img):
         x0, y0, x1, y1 = r
         w, h = (y1 - y0, x1 - x0) if troca else (x1 - x0, y1 - y0)
         return MBE.pousar(o, P, (x0 + x1) / 2, (y0 + y1) / 2, w, h, MB.frente(frente), sombra, par)
+    import correcoes_terreo_casab_1611 as CB
+    antes = img.copy()
     bancos = []
     for nome, s in SUITES.items():
         for r in s["limpa"]:
@@ -769,15 +785,28 @@ def mobiliario(Q, img):
         bancos.append((nome, *s["banco"]))
         if "cadeira" in s:
             r, fr = s["cadeira"]
+            if "mesa_reparo" in s:
+                (x0, y0, x1, y1), dy = s["mesa_reparo"]
+                antes[y0:y1, x0:x1] = antes[y0 + dy:y1 + dy, x0:x1]
             out = pos(out, ler(f"{pasta}/cadeira-bancada-suite"), r, fr, "movel", troca=fr[0] != 0)
+            # o tampo da escrivaninha por cima da cadeira, com a sombra curta da borda nela
+            x0, y0, x1, y1 = s["mesa"]
+            cy0, cy1 = int(r[1]) - 6, int(np.ceil(r[3])) + 6
+            ms = MESA_SOMBRA
+            CB.sombra(out, CB.Mapa(), (x0, cy0 + 4, x1, cy1 - 4), ms["forca"], dx=ms["d"] * (1 if fr[0] < 0 else -1),
+                      dy=ms["d"] * 0.6, sigma=ms["sigma"])
+            a_ = CB.alfa_ret((x0, y0, x1, y1), out.shape[:2])[cy0:cy1, :, None]
+            out[cy0:cy1] = u8(out[cy0:cy1] * (1 - a_) + antes[cy0:cy1] * a_)
         if "poltrona" in s:
             (cx, cy), lado, fr = s["poltrona"]
             out = MBE.pousar(out, ler("sala-intima/poltrona-intima-e"), cx, cy, lado, lado, MB.frente(fr), "movel", par)
             out = pos(out, ler(f"{pasta}/criado-redondo"), s["redondo"], (0, 1), "movel")
-    out = quieto(RV.bancos, out, dict(RV.BANCOS, bancos=[(n, tuple(map(float, r)), g) for n, r, g in bancos]))
+    out = quieto(RV.bancos, out, dict(RV.BANCOS, png=RV.BANCOS["png"].with_name(BANCO_PNG),
+                                      bancos=[(n, tuple(map(float, r)), g) for n, r, g in bancos]))
     # a sala íntima
     s = SALA_INTIMA
     out = limpar_piso(Q, out, s["poltrona_antes"], MADEIRA, nao_luz=[(1860, 1200, 2116, 1392)])
+    out = limpar_piso(Q, out, s["lateral_sofa_antes"], MADEIRA, nao_luz=[(1860, 1200, 2077, 1340), (1876, 1235, 2116, 1392)])
     H, W = par.shape
     sofa = np.zeros((H, W), bool)
     f = s["sofa_folga"]
@@ -787,6 +816,8 @@ def mobiliario(Q, img):
     out = np.where(sofa[..., None], out, com)
     out = pos(out, ler("sala-intima/mesa-lateral-metal-madeira"), s["lateral"], (0, 1), "mesa")
     out = pos(out, ler("sala-intima/mesa-intima-redonda-e"), s["mesa"], (0, 1), "mesa")
+    cx, cy, dm = s["lateral_sofa"]
+    out = MBE.pousar(out, ler("sala-intima/mesa-intima-redonda-e"), cx, cy, dm, dm, 0.0, "mesa", par)
     out = pos(out, ler("sala-intima/poltrona-intima-e"), s["poltrona"], (-1, 0), "movel", troca=True)
     # a copinha e a rouparia
     c = COPINHA
@@ -805,8 +836,8 @@ def mobiliario(Q, img):
     x0, y0, x1, y1 = r["nichos"]
     out = MBE.pousar(out, ler("rouparia/bancada-rouparia-e"), (x0 + x1) / 2, (y0 + y1) / 2, x1 - x0, y1 - y0,
                      MB.frente((0, 1)), None, par)
-    print(f"    mobiliário: {', '.join(SUITES)} (tapete, cama, criados, banco, cadeira; poltrona e criado redondo na "
-          "master); sala íntima (tapete, mesa de centro, mesa lateral, poltrona; o sofá fica); copinha (tampo, cuba "
+    print(f"    mobiliário: {', '.join(SUITES)} (tapete, cama, criados, banco K3, cadeira sob o tampo; poltrona e criado "
+          "redondo na master); sala íntima (tapete, mesa de centro, mesa lateral redonda, poltrona; o sofá fica); copinha (tampo, cuba "
           "Franke, armário); rouparia (estante e nichos)")
     return out
 
@@ -870,9 +901,144 @@ def rotulos(Q, img, q=ROTULOS):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
+# 12b. As folhagens em 4K (usuário: "vamos melhorar as representações das folhas. preciso que você mantenha os tipos de
+# folha, mas gere o 4k delas e reaplique-as na imagem"): cada espécie do render gerada de novo no Higgsfield (Nano
+# Banana 2, 4K, vista de cima, com o recorte do render como referência), recortada do fundo branco e guardada na
+# biblioteca (03-primeiro-pavimento): a palmeira de folha fina das 2 plantas da varanda principal, a palmeira em roseta
+# da varanda da suíte 1, a folhagem larga do jardim da sala íntima e a folhagem da floreira do banho master. A planta
+# de antes sai (as folhas: o que foge do piso de em volta, fora dos vasos de terracota) com o piso de em volta, e a nova
+# entra no mesmo centro, no mesmo tamanho, com a sombra curta. Na floreira, a folhagem 4K enche o caixote.
+FOLHAGENS = [
+    # (nome, png da biblioteca, caixa da planta de antes px, centro px, lado da planta px, deslocamento do piso que
+    # cobre a de antes (dx, dy) px, diâmetro do vaso px)
+    ("varanda principal (em cima)", "varanda-principal/palmeira-folha-fina-4k", (1177, 545, 1285, 650),
+     (1229.0, 590.0), 60.0, (0, 125), 64.0),
+    ("varanda principal (embaixo)", "varanda-principal/palmeira-folha-fina-4k", (1177, 1446, 1264, 1531),
+     (1218.0, 1490.0), 56.0, (0, -170), 60.0),
+    ("varanda da suíte 1", "varanda-da-suite-1/palmeira-roseta-4k", (2496, 1220, 2554, 1286),
+     (2525.5, 1253.0), 42.0, (0, -78), 46.0),
+    ("jardim da sala íntima", "jardim-sala-intima/folhagem-larga-4k", (2116, 1474, 2182, 1549),
+     (2148.0, 1511.0), 40.0, (0, -76), 44.0),
+]
+# (usuário: "ao lado da planta deveria ser o quê em marrom? e a planta precisa estar dentro de um vaso. providencie o
+# vaso e entenda se é uma poltrona com uma mesa") o PDF não desenha nada no canto de baixo da varanda principal; os 2
+# círculos marrons vêm do render da IA. A biblioteca da E prevê para essa varanda a poltrona externa B e a mesa lateral
+# externa (redonda, de madeira marrom): a mesa no círculo menor, a poltrona no maior, virada para a mesa. Cada planta
+# vai num vaso de concreto (o da biblioteca, `vaso-folhagem-a`, com a terra no lugar das folhas dele), a planta por cima,
+# as folhas passando da borda.
+VARANDA_CANTO = {"limpa": [(1182, 1406, 1254, 1468), (1238, 1452, 1312, 1531)], "desloc": (0, -170),
+                 "mesa": (1217.0, 1437.0, 36.0), "poltrona": (1275.0, 1492.0, 48.0, (-1, -1))}
+# o vaso redondo de concreto (o dos vasos de folhagem da biblioteca): a borda clara, a sombra dela por dentro e a terra
+VASO = {"px": 400, "borda": 0.10, "concreto": (178, 186, 190), "aresta": (150, 158, 162), "terra": (56, 72, 92),
+        "semente": 1811}
+
+
+def vaso(q=VASO):
+    n = q["px"]
+    yy, xx = np.mgrid[0:n, 0:n].astype(np.float32)
+    r = np.hypot(xx - (n - 1) / 2, yy - (n - 1) / 2) / (n / 2)
+    rng = np.random.default_rng(q["semente"])
+    ruido = cv2.GaussianBlur(rng.normal(0, 1, (n, n)).astype(np.float32), (0, 0), 3) * 6
+    out = np.zeros((n, n, 4), np.float32)
+    ri = 1 - 2 * q["borda"]
+    t = np.clip((r - ri) / (1 - ri), 0, 1)[..., None]
+    borda = np.float32(q["concreto"]) * (1 - 0.25 * t) + np.float32(q["aresta"]) * 0.25 * t
+    sombra = np.clip(1 - (ri - r) / 0.12, 0, 1)[..., None] * 0.45
+    terra = np.float32(q["terra"]) * (1 - sombra) + ruido[..., None]
+    out[..., :3] = np.where((r >= ri)[..., None], borda + ruido[..., None] * 0.5, terra)
+    out[..., 3] = np.clip((1 - r) * n / 2, 0, 1) * 255
+    return out
+# o que não dá a luz do piso (os caixilhos da varanda) e as faixas refeitas com as mesmas linhas mais à direita (o
+# guarda-corpo de baixo, que as folhas de antes cruzavam): (caixa px, dx px)
+FOLHAGENS_NAO_LUZ = [(1150, 540, 1178, 1560), (1150, 1530, 1320, 1560), (2100, 1545, 2200, 1560),
+                     (1192, 1414, 1244, 1458), (1248, 1464, 1300, 1522)]          # e os 2 vasos de terracota
+FOLHAGENS_FAIXAS = [((1170, 1531, 1266, 1556), 100)]
+FLOREIRA = {"jpg": BIB / "banho-master/floreira-folhagem-4k.jpg", "caixa": (1744, 446, 1778, 528), "borda_px": 2.0,
+            "borda": 0.75}
+
+
+def piso_deslocado(out, m, dx, dy, suave=1.6):
+    """Os px de `m` com o piso de (dx, dy) px adiante (o mesmo piso, sem objetos), com a borda suave."""
+    a = cv2.GaussianBlur(cv2.dilate(m.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(np.float32), (0, 0), suave)
+    a = np.maximum(a, m)[..., None]
+    src = np.roll(out, (-dy, -dx), axis=(0, 1)).astype(np.float32)
+    return u8(out * (1 - a) + src * a)
+
+
+def folhagens(Q, img, q=FOLHAGENS, f=FLOREIRA):
+    import alternativa1_terreo_casad_1611 as A1
+    import mobiliario_terreo_casae_1611 as MBE
+    import regras_terreo_casab_1311 as RT
+    import mobiliario_terreo_casac_1311 as MB
+    par = paredes(Q, 0.5)
+    out = img.copy()
+    ficam_base = RT.dilatar(par, 1)
+    for a0, b0, a1, b1 in FOLHAGENS_NAO_LUZ:
+        ficam_base[b0:b1, a0:a1] = True
+    # o canto de baixo da varanda principal: os círculos de antes saem
+    v = VARANDA_CANTO
+    for x0, y0, x1, y1 in v["limpa"]:
+        m = np.zeros(par.shape, bool)
+        m[y0:y1, x0:x1] = True
+        out = piso_deslocado(out, m & ~ficam_base, *v["desloc"], suave=3.0)
+    V = vaso()
+    plantas = []
+    for nome, rel, (x0, y0, x1, y1), (cx, cy), lado, desloc, dv in q:
+        dx, dy = desloc or (0, 0)
+        if desloc is None:                     # no jardim de madeira: a amostra da circulação, na luz de em volta
+            fundo = np.median(img[y0:y0 + 6, x0 + 20:x1].reshape(-1, 3).astype(np.float32), axis=0)
+        else:
+            fundo = np.median(img[y0 + dy:y1 + dy, x0 + dx:x1 + dx].reshape(-1, 3).astype(np.float32), axis=0)
+        sub = img[y0:y1, x0:x1].astype(np.float32)
+        dif = np.abs(sub - fundo).sum(axis=2) > 36
+        verde = (sub[..., 1] >= sub[..., 2] - 4) & (sub[..., 1] > sub[..., 0] - 2)
+        terracota = (sub[..., 2] - sub[..., 1] > 22) & (sub[..., 2] > 120)
+        m = np.zeros(par.shape, bool)
+        m[y0:y1, x0:x1] = (dif | verde & (np.abs(sub - fundo).sum(axis=2) > 18)) & ~terracota
+        m = RT.dilatar(m, 2)
+        m[:y0, :] = m[y1:, :] = False
+        m[:, :x0] = m[:, x1:] = False
+        if desloc is None:
+            out = A1.refazer(out, m & ~par & ~ficam_base, [(None, MADEIRA)], ficam=ficam_base)
+        else:
+            out = piso_deslocado(out, m & ~par & ~ficam_base, dx, dy, suave=2.5)
+        for (a0, b0, a1, b1), dx in FOLHAGENS_FAIXAS:
+            if a0 < x1 and a1 > x0 and b0 < y1 + 30 and b1 > y0:
+                out[b0:b1, a0:a1] = img[b0:b1, a0 + dx:a1 + dx]
+        plantas.append((rel, cx, cy, lado, dv))
+    # a mesa e a poltrona do canto, depois os vasos e as plantas por cima
+    cx, cy, d = v["mesa"]
+    out = MBE.pousar(out, ler("varanda-principal/mesa-lateral-externa"), cx, cy, d, d, 0.0, "mesa", par)
+    cx, cy, d, fr = v["poltrona"]
+    out = MBE.pousar(out, ler("varanda-principal/poltrona-externa-b"), cx, cy, d, d, MB.frente(fr), "movel", par)
+    for rel, cx, cy, lado, dv in plantas:
+        out = MBE.pousar(out, V, cx, cy, dv, dv, 0.0, "movel", par)
+        out = MBE.pousar(out, ler(rel), cx, cy, lado, lado, 0.0, "baixa", par)
+    # a floreira
+    x0, y0, x1, y1 = f["caixa"]
+    T = cv2.imread(str(f["jpg"]))
+    w, h = x1 - x0, y1 - y0
+    H, W = T.shape[:2]
+    if W / H > w / h:
+        nw = int(H * w / h)
+        T = T[:, (W - nw) // 2:(W - nw) // 2 + nw]
+    else:
+        nh = int(W * h / w)
+        T = T[(H - nh) // 2:(H - nh) // 2 + nh]
+    T = cv2.resize(T, (w, h), interpolation=cv2.INTER_AREA).astype(np.float32)
+    yy, xx = np.mgrid[0:h, 0:w]
+    d = np.minimum.reduce([xx + 0.5, w - xx - 0.5, yy + 0.5, h - yy - 0.5])
+    T *= (f["borda"] + (1 - f["borda"]) * np.clip(d / f["borda_px"], 0, 1))[..., None]
+    out[y0:y1, x0:x1] = u8(T)
+    print(f"    folhagens 4K: {', '.join(n for n, *_ in q)} em vasos de concreto (as plantas de antes no piso de em volta) e "
+          "a floreira do banho master; no canto de baixo da varanda principal, a mesa lateral e a poltrona externas")
+    return out
+
+
+# ----------------------------------------------------------------------------------------------------------------------
 PASSOS = [("base", base), ("nublado", nublado), ("escada", escada), ("tracejados", tracejados), ("rouparia", rouparia),
           ("elevador", elevador), ("chuveiros", chuveiros), ("banhos", banhos), ("esquadrias", esquadrias),
-          ("mobiliario", mobiliario), ("rotulos", rotulos)]
+          ("mobiliario", mobiliario), ("folhagens", folhagens), ("rotulos", rotulos)]
 
 
 def rodar(img, de=None, ate=None, cache=None):
