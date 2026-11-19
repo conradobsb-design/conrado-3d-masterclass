@@ -1,0 +1,557 @@
+{
+ "casa": "E",
+ "pav": "Terreo",
+ "contagem": "30 notas do cliente (27 no lugar e as gerais G1 a G3) da Revisão das Plantas 2, pela análise de 16/11, cruzadas com o pedidos_terreo_casae_1611.py, os scripts de 17/11 e o levantamento; 9 delas (5, 8, 10, 13, 14, 15, 21, 22 e 26) sem o texto literal transcrito.",
+ "itens": [
+  {
+   "fala": "No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
+   "como": "O maciço de árvores grandes saiu. O gramado ficou mais limpo e sóbrio, com só 3 oliveiras pequenas e afastadas, como nas outras casas.",
+   "conferir": "[G3] gramado sóbrio, sem maciço; só 3 oliveiras pequenas (em cima à esquerda, à direita, embaixo à esquerda). Não há arbustos baixos junto aos muros.",
+   "pontos": [
+    [
+     520,
+     190
+    ],
+    [
+     3290,
+     640
+    ],
+    [
+     520,
+     1640
+    ]
+   ],
+   "geral": true,
+   "status": "parcial",
+   "obs": "as árvores grandes saíram e ficaram 3 oliveiras pequenas (como nas Casas B, C e D), mas os arbustos baixos junto aos muros, citados no levantamento, não aparecem na planta. Na E a nota está transcrita com [...]; o texto completo é o da mesma nota no Térreo da Casa A.",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:102; POE642_REGRAS.md:426"
+  },
+  {
+   "fala": "Não deixar os degraus cortados branco. Deixar transparente mas na mesma cor da escada. Exemplo casa C",
+   "como": "Na escada que desce para o Subsolo, os degraus que já estão no nível de baixo ficaram transparentes, no tom da escada, sem o branco, como na Casa C.",
+   "conferir": "[nota 17] degraus 1 a 7 (à esquerda) sob o véu claro, no tom do travertino, sem branco chapado; ◀ D no degrau 17, junto ao Térreo.",
+   "pontos": [
+    [
+     1200,
+     450
+    ],
+    [
+     1255,
+     450
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "a escada foi também invertida para seguir o PDF (18/11). As notas 17 e 18 têm o mesmo texto; qual fica em cada escada foi inferido pelo levantamento.",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:615; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:25"
+  },
+  {
+   "fala": "Colocar a seta em todas as escadas e a descrição",
+   "como": "As três escadas ganharam o triângulo da seta, a letra S ou D e a descrição ao lado: \"DESCE PARA O SUBSOLO\", \"SOBE PARA O 1º PAVIMENTO\" e \"DESCE PARA O JARDIM\".",
+   "conferir": "[G1] triângulo cheio + S/D + descrição em 2 linhas ao lado da seta, nas 3 escadas (gourmet, principal, deck), sem cair sobre degrau ou parede.",
+   "pontos": [
+    [
+     1445,
+     432
+    ],
+    [
+     2205,
+     988
+    ],
+    [
+     776,
+     1351
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:615; POE642_Book/levantamento/dados/casa_E.json:800"
+  },
+  {
+   "fala": "Representar essas linhas na cor cinza ou preta sem ser tracejada",
+   "como": "A linha da laje da garagem virou um filete contínuo em cinza escuro, sem tracejado.",
+   "conferir": "[nota 3] filete fino e contínuo na reta da laje da garagem, da parede da esquerda até a borda da garagem; nenhum tracejado de projeção.",
+   "pontos": [
+    [
+     2760,
+     486
+    ],
+    [
+     2620,
+     486
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:895; POE642_CasaA/scripts/garagem_filete_casae_1711.py:2"
+  },
+  {
+   "fala": "Faltou a torneira lateral",
+   "como": "No lavabo gourmet, a cuba ganhou a torneira lateral, saindo da parede.",
+   "conferir": "[nota 6] torneira cromada na lateral da cuba de quartzo, do lado da parede.",
+   "pontos": [
+    [
+     1001,
+     529
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:450"
+  },
+  {
+   "fala": "Tirar a soleira",
+   "como": "A soleira da porta do lavabo gourmet saiu; o piso marrom segue contínuo pelo vão.",
+   "conferir": "[nota 7] vão da porta do lavabo gourmet sem a faixa clara da soleira.",
+   "pontos": [
+    [
+     1087,
+     558
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:451"
+  },
+  {
+   "fala": "[sem o texto literal] a bancada do DCE em marrom tabaco",
+   "como": "O móvel ao lado da cama do DCE foi representado como criado-mudo, na cor sólida dos armários.",
+   "conferir": "[nota 5] criado-mudo junto à cabeceira da cama do DCE: hoje na cor dos armários, não em marrom tabaco.",
+   "pontos": [
+    [
+     2373,
+     564
+    ]
+   ],
+   "geral": false,
+   "status": "nao_feito",
+   "obs": "feito em marrom tabaco em 16/11; no levantamento de 17/11 o usuário levou o criado-mudo do DCE para a cor sólida dos armários (mantido no DCE refeito em 18/11). Confirmar com o cliente. texto literal da nota não está transcrito nas fontes (só o resumo da análise de 16/11); conferir no Miro.",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:308; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:97"
+  },
+  {
+   "fala": "Cor do piso desse Banheiro é no mesmo cinza usado na casa D. A bancada é no marrom tabaco. Representar melhor a cuba e a torneira",
+   "como": "O WC DCE 1 ficou com o piso cinza-claro dos banheiros da Casa D e a bancada em marrom tabaco, com a cuba e a torneira redesenhadas.",
+   "conferir": "[nota 4] piso cinza-claro liso de parede a parede; bancada marrom tabaco com a cuba branca e o misturador saindo da parede.",
+   "pontos": [
+    [
+     2440,
+     560
+    ],
+    [
+     2461,
+     610
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/wcdce_terreo_casae_1711.py:1; POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:406"
+  },
+  {
+   "fala": "[sem o texto literal] no BH gourmet, a bancada em travertino",
+   "como": "No BH gourmet, a bancada ficou em travertino, um tom abaixo do piso, com a cuba.",
+   "conferir": "[nota 8] bancada clara de travertino, com a cuba, junto à parede de baixo do BH gourmet.",
+   "pontos": [
+    [
+     1399,
+     575
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "texto literal da nota não está transcrito nas fontes (só o resumo da análise de 16/11); conferir no Miro",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:309; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:95"
+  },
+  {
+   "fala": "Aqui tem a churrasqueira",
+   "como": "A churrasqueira foi representada no módulo da esquerda da bancada de trás da área gourmet, com a grelha.",
+   "conferir": "[nota 9] grelha no módulo da esquerda da bancada de trás, um pouco menor que a primeira versão.",
+   "pontos": [
+    [
+     1137,
+     624
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:446"
+  },
+  {
+   "fala": "[sem o texto literal] a cuba / bancada de trás da área gourmet em marrom tabaco",
+   "como": "A bancada de trás da área gourmet, com a cuba, ficou em marrom tabaco, mais escura que o piso.",
+   "conferir": "[nota 10] bancada de trás em marrom tabaco, mais escura que o piso marrom, com a cuba de inox.",
+   "pontos": [
+    [
+     1255,
+     622
+    ],
+    [
+     1190,
+     626
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "texto literal da nota não está transcrito nas fontes (só o resumo da análise de 16/11); conferir no Miro",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:307; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:96"
+  },
+  {
+   "fala": "Aqui é uma geladeira",
+   "como": "No módulo que avança da bancada foi representada uma geladeira de inox, de frente para a área gourmet.",
+   "conferir": "[nota 11] geladeira inox no módulo que avança, a frente para a gourmet.",
+   "pontos": [
+    [
+     1369,
+     626
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:447"
+  },
+  {
+   "fala": "Aqui é um armário",
+   "como": "A ponta da bancada virou um armário liso, na cor sólida dos armários.",
+   "conferir": "[nota 12] módulo da ponta liso, na cor dos armários, com a face um tom abaixo.",
+   "pontos": [
+    [
+     1417,
+     622
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:449"
+  },
+  {
+   "fala": "[sem o texto literal] as bancadas da cozinha e os tanques em Dekton Danae",
+   "como": "A ilha e a pia da cozinha e a bancada dos tanques da área de serviço ficaram em Dekton Danae.",
+   "conferir": "[nota 14] ilha, pia (cuba dupla) e tanques no Danae, retos, sem pontinhos nem curva acima do cooktop.",
+   "pontos": [
+    [
+     1770,
+     648
+    ],
+    [
+     1770,
+     515
+    ],
+    [
+     2011,
+     585
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "texto literal da nota não está transcrito nas fontes (só o resumo da análise de 16/11); conferir no Miro",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:306; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:67"
+  },
+  {
+   "fala": "[sem o texto literal] a ilha da área gourmet em Dekton Danae",
+   "como": "A ilha da área gourmet ficou em Dekton Danae, reta e limpa, com o cooktop e as banquetas.",
+   "conferir": "[nota 13] ilha gourmet no Danae da chapa (bege-areia fosco), borda reta, cooktop e banquetas por cima.",
+   "pontos": [
+    [
+     1308,
+     744
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "texto literal da nota não está transcrito nas fontes (só o resumo da análise de 16/11); conferir no Miro",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:306; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:67"
+  },
+  {
+   "fala": "[sem o texto literal] a bancada da área de serviço, junto à despensa, em marrom tabaco",
+   "como": "A bancada da área de serviço junto à despensa, sobre a adega, ficou em marrom tabaco.",
+   "conferir": "[nota 15] bancada escura em marrom tabaco ao lado do armário da adega, junto à despensa.",
+   "pontos": [
+    [
+     2173,
+     725
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "texto literal da nota não está transcrito nas fontes (só o resumo da análise de 16/11); conferir no Miro",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:308; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:97"
+  },
+  {
+   "fala": "Representar os armários e prateleiras sem textura. Com cor sólida e neutra",
+   "como": "Os armários e prateleiras do louceiro, da cozinha, da adega, da despensa e do escritório ficaram lisos, numa cor sólida e neutra.",
+   "conferir": "[nota 16] louceiro, armários da cozinha, adega, despensa em L e escritório no tom padrão dos armários, sem veio nem linhas de módulo.",
+   "pontos": [
+    [
+     1930,
+     930
+    ],
+    [
+     1640,
+     787
+    ],
+    [
+     2106,
+     725
+    ],
+    [
+     2300,
+     800
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:375"
+  },
+  {
+   "fala": "Aqui é parede",
+   "como": "A borda esquerda da piscina passou a ser parede, no cinza das paredes; na extremidade ficou só um vidro fino.",
+   "conferir": "[nota 19] faixa de dentro da borda esquerda no cinza das paredes, encostada na água; vidro fino só na face de fora.",
+   "pontos": [
+    [
+     692,
+     1018
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "o vidro fino da extremidade ficou por decisão do usuário (17/11: \"mantenha o vidro na extremidade e represente a parede com o tom de parede onde está indicado\").",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:531; POE642_CasaA/scripts/deck_piscina_terreo_casae_1711.py:12"
+  },
+  {
+   "fala": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
+   "como": "A água da piscina, da prainha e do spa ficou num azul mais sóbrio, menos saturado.",
+   "conferir": "[nota 20] água com metade da saturação, puxando para o cinza-esverdeado; o desenho do revestimento fica.",
+   "pontos": [
+    [
+     800,
+     1030
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:29; POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:526"
+  },
+  {
+   "fala": "[sem o texto literal] mostrar melhor a diferença de profundidade",
+   "como": "A diferença de profundidade ficou visível: a prainha e o banco do spa mais claros e rasos, a piscina e o centro do spa mais escuros e fundos.",
+   "conferir": "[nota 21] prainha e anel do spa claros; piscina e miolo do spa mais escuros; sombra do degrau no lado fundo.",
+   "pontos": [
+    [
+     1050,
+     1030
+    ],
+    [
+     840,
+     1060
+    ],
+    [
+     1115,
+     1240
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "texto literal da nota não está transcrito nas fontes (só o resumo da análise de 16/11); conferir no Miro",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:529; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:99"
+  },
+  {
+   "fala": "Não deixar os degraus cortados branco. Deixar transparente mas na mesma cor da escada. Exemplo casa C",
+   "como": "Na escada principal, o lance acima do corte ficou transparente, no tom do travertino, com os degraus marcados de leve, sem o branco.",
+   "conferir": "[nota 18] à esquerda da diagonal de corte, o travertino de baixo com os degraus de leve; nenhum degrau branco; S e triângulo no 1º degrau.",
+   "pontos": [
+    [
+     2000,
+     1000
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "mesmo texto da nota 17; qual nota fica em cada escada foi inferido pelo levantamento.",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:615; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:25"
+  },
+  {
+   "fala": "Tirar todo o contorno tracejado",
+   "como": "Saiu todo o contorno tracejado: o limite do lote e as projeções das lajes. Fora do lote ficou só o branco, e o muro de baixo termina junto com a grama.",
+   "conferir": "[nota 2] sem o tracejado do lote (à direita e embaixo) e sem as projeções; margem branca; muro de baixo até o fim da grama.",
+   "pontos": [
+    [
+     3554,
+     1000
+    ],
+    [
+     3455,
+     1812
+    ],
+    [
+     1800,
+     2051
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:60; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:46"
+  },
+  {
+   "fala": "Mudar o amadeirado dessa mesa",
+   "como": "A mesa de jantar passou para a nogueira, um amadeirado mais escuro.",
+   "conferir": "[nota 23] mesa retangular do jantar em nogueira, cadeiras alinhadas com assento azul-marinho.",
+   "pontos": [
+    [
+     1725,
+     1060
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:671"
+  },
+  {
+   "fala": "Diminuir tamanho e quantidade",
+   "como": "O jardim de inverno ficou mais leve: grama no tom do gramado e só 2 plantas menores.",
+   "conferir": "[nota 24] jardim com a grama do gramado e só 2 plantas pequenas, sem o maciço de antes.",
+   "pontos": [
+    [
+     1935,
+     1086
+    ],
+    [
+     2160,
+     1088
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "a análise de 16/11 liga a nota à frase \"Trocar essa representação do jardim de inverno\" das outras casas; conferir no Miro se o post-it da E tem as duas frases.",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:669"
+  },
+  {
+   "fala": "[sem o texto literal] no spa, tirar a linha em volta",
+   "como": "A linha clara em volta do spa saiu; a borda ficou lisa, em Bege Bahia.",
+   "conferir": "[nota 22] sem o fio claro em volta do spa; borda lisa em Bege Bahia, um tom abaixo do deck.",
+   "pontos": [
+    [
+     1050,
+     1158
+    ],
+    [
+     1008,
+     1200
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "texto literal da nota não está transcrito nas fontes (só o resumo da análise de 16/11); conferir no Miro",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:533; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:100"
+  },
+  {
+   "fala": "Colocar textura do travertino igual da casa D",
+   "como": "O piso do living, do jantar, das circulações, do hall, do escritório e do lavabo ficou no travertino da Casa D, num tom só, com os veios deitados.",
+   "conferir": "[nota 25] travertino greige claro, veios na horizontal, sem manchas cinzas, juntas nem pontinhos.",
+   "pontos": [
+    [
+     1800,
+     1250
+    ],
+    [
+     2300,
+     1440
+    ],
+    [
+     2330,
+     1130
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:228; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:26"
+  },
+  {
+   "fala": "[sem o texto literal] o X do vazio do hall mais fino e mais claro",
+   "como": "O X do vazio do hall ficou com o traço fino e cinza claro; os outros tracejados de projeção saíram.",
+   "conferir": "[nota 26] X do hall fino (~0,8 px) e cinza, parando em volta do rótulo; idem o X da área de serviço descoberta.",
+   "pontos": [
+    [
+     2270,
+     1372
+    ],
+    [
+     2130,
+     538
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "texto literal da nota não está transcrito nas fontes (só o resumo da análise de 16/11); conferir no Miro",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:891; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:103"
+  },
+  {
+   "fala": "Centralizar a seta com a abertura da porta, usando este modelo de seta",
+   "como": "A seta da entrada virou o triângulo cheio, no eixo da abertura da porta pivotante, apontando para dentro.",
+   "conferir": "[nota 27] triângulo preto no meio do vão da pivotante, entre os batentes; sem a seta de linha antiga.",
+   "pontos": [
+    [
+     2513,
+     1408
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:666; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:30"
+  },
+  {
+   "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "como": "Valeram aqui as mudanças do Subsolo da Casa A: o Bege Bahia menos manchado, a grama mais sóbria, os armários e prateleiras lisos, só os tracejados dos vazios e a seta com a descrição nas escadas.",
+   "conferir": "[G2] Bege Bahia do deck, da varanda e dos pisantes com manchas suaves; prateleiras lisas; tracejado só nos vazios; seta e descrição.",
+   "pontos": [
+    [
+     1000,
+     1500
+    ],
+    [
+     3050,
+     1630
+    ],
+    [
+     1930,
+     930
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:24; POE642_Book/levantamento/dados/casa_E.json:556"
+  },
+  {
+   "fala": "Representar o guarda-corpo",
+   "como": "Foi representado o guarda-corpo de vidro na borda do deck e da varanda, junto ao gramado.",
+   "conferir": "[nota 1] lâmina de vidro legível (faces finas, brilho, sombra curta) da floreira em L até a parede do living.",
+   "pontos": [
+    [
+     1250,
+     1645
+    ],
+    [
+     1450,
+     1645
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casae_1611.py:663"
+  }
+ ]
+}

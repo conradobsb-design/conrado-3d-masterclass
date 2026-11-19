@@ -1,0 +1,159 @@
+{
+ "casa": "E",
+ "pav": "1Pavimento",
+ "contagem": "8 notas do cliente (6 no lugar e as gerais G1 e G2) da Revisão das Plantas 2, pela análise de 16/11, o pedidos_1pav_casae_1811.py e o levantamento de 18/11; as notas 3, 4 e 6 só com o trecho citado.",
+ "itens": [
+  {
+   "fala": "manter",
+   "como": "Mantido como estava: a mesma planta na varanda principal, só com mais nitidez e num vaso de concreto.",
+   "conferir": "[nota 1] palmeira de folha fina no canto de cima da varanda principal, mesma espécie, num vaso.",
+   "pontos": [
+    [
+     1229,
+     590
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "o usuário pediu depois a mesma folhagem redesenhada, num vaso de concreto (18/11).",
+   "fonte": "POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811_levantamento.jpg (item 11); POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:109"
+  },
+  {
+   "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "como": "Valeram aqui as mudanças do Subsolo da Casa A: o Bege Bahia das varandas menos manchado, a seta com a descrição na escada, só os tracejados dos vazios e os armários lisos.",
+   "conferir": "[G2] Bege Bahia das 3 varandas com manchas suaves; seta e descrição; tracejado só nos vazios.",
+   "pontos": [
+    [
+     1290,
+     800
+    ],
+    [
+     2520,
+     860
+    ],
+    [
+     1884,
+     986
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:24; POE642_Book/levantamento/dados/casa_E.json:1144"
+  },
+  {
+   "fala": "Padronizar para as outras plantas que tiverem claraboia",
+   "como": "As claraboias do banho master ficaram no padrão das outras casas: só o retângulo tracejado, fino e cinza, sem o X, com o piso contínuo por baixo.",
+   "conferir": "[nota 2] claraboias do vaso e do box do banho master: retângulo tracejado cinza claro (~0,8 px), sem X.",
+   "pontos": [
+    [
+     1784,
+     787
+    ],
+    [
+     1886,
+     787
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "a análise de 16/11 diz que a nota está sobre os boxes dos banhos 1 e 2, onde o PDF não desenha claraboia; o padrão foi aplicado às do banho master. Lugar a confirmar no Miro.",
+   "fonte": "POE642_CasaA/scripts/pedidos_1pav_casae_1811.py:177; POE642_Book/levantamento/dados/casa_E.json:1301"
+  },
+  {
+   "fala": "sem o tracejado e sem a soleira",
+   "como": "A soleira e o tracejado antigo da rouparia saíram; o piso de madeira segue pelo vão, e ficou só o contorno fino da claraboia, no padrão das outras.",
+   "conferir": "[nota 3] vão da rouparia sem soleira, piso contínuo; dentro, só o retângulo cinza claro da claraboia, sem X.",
+   "pontos": [
+    [
+     2131,
+     816
+    ],
+    [
+     2135,
+     780
+    ]
+   ],
+   "geral": false,
+   "status": "parcial",
+   "obs": "trecho citado (texto completo não transcrito). Depois o usuário pediu de volta a claraboia do PDF na rouparia (\"adicione a claraboia (vão tracejado)\"): o retângulo tracejado em cinza claro voltou; conferir com o cliente.",
+   "fonte": "POE642_CasaA/scripts/pedidos_1pav_casae_1811.py:213; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:110"
+  },
+  {
+   "fala": "Colocar a seta em todas as escadas e a descrição",
+   "como": "A escada ganhou o triângulo da seta e a letra D no degrau de cima, com a descrição \"DESCE PARA O TÉRREO\" ao lado.",
+   "conferir": "[G1] ▶ e D no degrau de cima; \"DESCE PARA O / TÉRREO\" em 2 linhas à esquerda da escada.",
+   "pontos": [
+    [
+     1884,
+     986
+    ],
+    [
+     1820,
+     996
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "texto do G1 transcrito só no Térreo (\"Colocar a seta em todas as escadas e a descrição\"); conferir no Miro o G1 desta planta",
+   "fonte": "POE642_CasaA/scripts/pedidos_1pav_casae_1811.py:150; POE642_Book/levantamento/dados/casa_E.json:1377"
+  },
+  {
+   "fala": "Não deixar os degraus cortados branco. Deixar transparente mas na mesma cor da escada. Exemplo casa C",
+   "como": "Os degraus depois do corte ficaram transparentes, no tom da escada, sem o branco, como na Casa C.",
+   "conferir": "[nota 5] à direita da diagonal de corte, degraus sob o véu claro, no tom da escada; nenhum branco.",
+   "pontos": [
+    [
+     2165,
+     1000
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_1pav_casae_1811.py:149"
+  },
+  {
+   "fala": "mais finos e mais claros",
+   "como": "Os X do vazio da escada, do vazio do hall e do shaft ficaram com o traço fino e cinza claro.",
+   "conferir": "[nota 4] X dos vazios e do shaft em cinza claro, finos; sem a linha do X do Térreo por baixo no hall.",
+   "pontos": [
+    [
+     2046,
+     1084
+    ],
+    [
+     2351,
+     1451
+    ],
+    [
+     2065,
+     763
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "trecho citado; o texto completo da nota não está transcrito.",
+   "fonte": "POE642_Book/levantamento/dados/casa_E.json:1392; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:111"
+  },
+  {
+   "fala": "as cubas mais marcadas",
+   "como": "Nos banhos 3 e 4, as cubas ficaram mais marcadas, com a borda e uma sombra curta.",
+   "conferir": "[nota 6] cubas esculpidas na bancada de quartzito, com a borda e a sombra curta, nos banhos 3 e 4.",
+   "pontos": [
+    [
+     1548,
+     1188
+    ],
+    [
+     1548,
+     1234
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "trecho citado; o texto completo da nota não está transcrito.",
+   "fonte": "POE642_CasaA/scripts/pedidos_1pav_casae_1811.py:377; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:112"
+  }
+ ]
+}
