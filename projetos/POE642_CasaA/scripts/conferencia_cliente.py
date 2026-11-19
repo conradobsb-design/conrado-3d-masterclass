@@ -54,7 +54,7 @@ CINZA = (110, 110, 112)
 LINHA = (225, 222, 216)
 ACENTO = (150, 118, 82)                               # o bronze das pranchas
 COR = {"C": (176, 40, 40), "G": (38, 110, 80), "M": (150, 118, 82)}
-DW, DH = 480, 230                                     # o detalhe de cada pedido
+DW, DH = 440, 205                                     # o detalhe de cada pedido
 RX0 = 2250                                            # a coluna das plantas na 1ª folha
 TOPO = MARG + 250
 BASE = H - MARG - 40
@@ -64,9 +64,9 @@ def F(peso, t):
     return ImageFont.truetype(str(ASSETS / "fontes" / f"Poppins-{peso}.ttf"), t)
 
 
-FQ, FC, FL, FK = F("Regular", 31), F("Light", 29), F("Medium", 20), F("Light", 17)
+FQ, FC, FL, FK = F("Regular", 29), F("Light", 27), F("Medium", 19), F("Light", 17)
 FI, FS = F("Light", 26), F("Medium", 28)
-FG, FGC = F("Regular", 28), F("Light", 26)
+FG, FGC = F("Regular", 27), F("Light", 25)
 
 
 def quebra(txt, f, larg, d):
@@ -119,6 +119,37 @@ def ler(nome, padrao=None):
     return json.loads(f.read_text()) if f.exists() else padrao
 
 
+def qual_geral(it, gerais):
+    """O id do pedido geral de que o item trata (pelo `g` ou pelas `chaves` na fala), ou None."""
+    if it.get("g"):
+        return it["g"]
+    fala = it["fala"].lower()
+    for g in gerais:
+        if any(c.lower() in fala for c in g.get("chaves", [])):
+            return g["id"]
+    return None
+
+
+def onde_geral(gerais):
+    """Em que plantas o cliente escreveu cada pedido geral no Miro."""
+    onde = {}
+    for c, p in PLANTAS:
+        f = DADOS / "itens" / f"{c}_{p}.json"
+        if not f.exists():
+            continue
+        for it in json.loads(f.read_text())["itens"]:
+            g = qual_geral(it, gerais)
+            if g and (c, p) not in onde.setdefault(g, []):
+                onde[g].append((c, p))
+    out = {}
+    for g, lst in onde.items():
+        casas = {}
+        for c, p in lst:
+            casas.setdefault(c, []).append(NOME[p].capitalize().replace("º pavimento", "º Pavimento"))
+        out[g] = "no Miro em: " + "; ".join(f"Casa {c}, " + " e ".join(ps) for c, ps in casas.items())
+    return out
+
+
 def dados_planta(casa, pav, interno):
     itens = (ler(f"itens/{casa}_{pav}.json") or {"itens": []})["itens"]
     gerais = ler("gerais.json", [])
@@ -128,13 +159,15 @@ def dados_planta(casa, pav, interno):
         plano["recorte"] = lev["plantas"][pav]["recorte"]
     pedidos, desta = [], {}
     for it in itens:
-        if it.get("geral") and it.get("g"):
-            desta.setdefault(it["g"], []).append(it)
+        g = qual_geral(it, gerais)
+        if g:
+            desta.setdefault(g, []).append(it)
         else:
             pedidos.append(dict(it))
     for n, it in enumerate(pedidos, 1):
         it["id"] = f"C{n}"
     gs = []
+    origem = onde_geral(gerais)
     for g in gerais:
         if g.get("so") and f"{casa}_{pav}" not in g["so"]:
             continue
@@ -142,7 +175,7 @@ def dados_planta(casa, pav, interno):
         como = " ".join(a["como"] for a in aqui) if aqui else g["como"]
         pts = [p for a in aqui for p in a.get("pontos") or []]
         st = [a for a in aqui if a.get("status", "feito") != "feito"]
-        gs.append({"id": g["id"], "fala": g["fala"], "origem": g.get("origem", ""), "como": como, "pontos": pts,
+        gs.append({"id": g["id"], "fala": g["fala"], "origem": origem.get(g["id"], ""), "como": como, "pontos": pts,
                    "conferir": " ".join(a.get("conferir", "") for a in aqui), "status": st[0]["status"] if st else "feito",
                    "obs": " ".join(a.get("obs", "") for a in st)})
     return plano, pedidos, gs, ler("melhorias.json", [])
@@ -201,7 +234,7 @@ def bloco_pedido(it, doze, dz, interno):
         tx, tw = x + 120, w - 120 - DW - 40
         lq = quebra(aspas(it["fala"]), FQ, tw, d)
         lc = quebra(it["como"], FC, tw, d)
-        yy = y + 30 + len(lq) * 44 + 14 + 30 + len(lc) * 41
+        yy = y + 28 + len(lq) * 41 + 10 + 28 + len(lc) * 38
         extra = []
         if interno:
             if it.get("conferir"):
@@ -218,23 +251,23 @@ def bloco_pedido(it, doze, dz, interno):
         X1, Y1 = int((a1 - dz["x0"]) * s), int((b1 - dz["y0"]) * s)
         h = max(yy - y, DH, 160)
         if so_medir:
-            return h + 40
+            return h + 34
         marca(d, x + 36, y + 36, it["id"], cor, 34, F("SemiBold", 24))
         cb = 34
         d.rectangle((x + 19, y + 92, x + 19 + cb, y + 92 + cb), outline=(80, 80, 80), width=3)
         d.text((x + 36, y + 92 + cb + 10), "conferido", fill=CINZA, font=FK, anchor="mt")
         yy = y
         d.text((tx, yy), "PEDIDO NO MIRO", fill=CINZA, font=FL)
-        yy += 30
+        yy += 28
         for ln in lq:
             d.text((tx, yy), ln, fill=TINTA, font=FQ)
-            yy += 44
-        yy += 14
+            yy += 41
+        yy += 10
         d.text((tx, yy), "O QUE FOI FEITO", fill=CINZA, font=FL)
-        yy += 30
+        yy += 28
         for ln in lc:
             d.text((tx, yy), ln, fill=(70, 70, 70), font=FC)
-            yy += 41
+            yy += 38
         yy += 8
         for ln, c in le:
             d.text((tx, yy), ln, fill=c, font=F("Light", 24))
@@ -245,8 +278,8 @@ def bloco_pedido(it, doze, dz, interno):
             dx = x + w - det.shape[1]
             fl.pg.paste(pil(det), (dx, y))
             d.rectangle((dx - 1, y - 1, dx + det.shape[1], y + det.shape[0]), outline=LINHA, width=2)
-        d.line((x, y + h + 20, x + w, y + h + 20), fill=(238, 236, 232), width=2)
-        return h + 40
+        d.line((x, y + h + 17, x + w, y + h + 17), fill=(238, 236, 232), width=2)
+        return h + 34
     return desenhar
 
 
@@ -261,7 +294,7 @@ def bloco_geral(g, interno):
             extra += quebra("NO 12K: " + g["conferir"], F("Light", 24), tw, d)
         if interno and g.get("status", "feito") != "feito":
             extra += quebra(f"{g['status'].upper()}: {g.get('obs', '')}", F("Light", 24), tw, d)
-        h = max(len(lq) * 40 + 6 + len(lc) * 37 + len(extra) * 33, 120)
+        h = max(len(lq) * 38 + 6 + len(lc) * 35 + len(extra) * 33, 116)
         if so_medir:
             return h + 34
         marca(d, x + 36, y + 30, g["id"], COR["G"], 30, F("SemiBold", 22))
@@ -269,11 +302,11 @@ def bloco_geral(g, interno):
         yy = y
         for ln in lq:
             d.text((tx, yy), ln, fill=TINTA, font=FG)
-            yy += 40
+            yy += 38
         yy += 6
         for ln in lc:
             d.text((tx, yy), ln, fill=(70, 70, 70), font=FGC)
-            yy += 37
+            yy += 35
         for ln in extra:
             d.text((tx, yy), ln, fill=(196, 32, 36) if "FEITO" in ln.upper()[:12] or "PARCIAL" in ln[:8]
                    else (38, 110, 80), font=F("Light", 24))
@@ -283,31 +316,33 @@ def bloco_geral(g, interno):
     return desenhar
 
 
-def bloco_melhorias(mel):
+def bloco_melhorias(mel, ncol=None, corpo=26):
     def desenhar(fl, x, y, w, so_medir=False):
         d = fl.d
-        f = F("Light", 26)
-        ncol = 2 if w > 1800 else 1
-        cw = (w - (ncol - 1) * 60) // ncol
-        linhas = [quebra(m, f, cw - 60, d) for m in mel]
-        por = -(-len(mel) // ncol)
-        cols = [linhas[i * por:(i + 1) * por] for i in range(ncol)]
-        hc = [sum(len(ls) * 36 + 16 for ls in c) for c in cols]
-        h = 118 + max(hc)
+        f = F("Light", corpo)
+        nc = ncol or (2 if w > 1800 else 1)
+        cw = (w - (nc - 1) * 50) // nc
+        passo = int(corpo * 1.38)
+        linhas = [quebra(m, f, cw - 50, d) for m in mel]
+        por = -(-len(mel) // nc)
+        cols = [linhas[i * por:(i + 1) * por] for i in range(nc)]
+        hc = [sum(len(ls) * passo + 12 for ls in c) for c in cols]
+        h = 112 + max(hc)
         if so_medir:
             return h + 20
         d.text((x, y), "MELHORIAS APLICADAS EM TODAS AS PLANTAS", fill=COR["M"], font=FS)
         d.text((x, y + 44), "o padrão de representação do escritório, além dos pedidos", fill=CINZA, font=F("Light", 22))
         d.line((x, y + 84, x + w, y + 84), fill=COR["M"], width=2)
         for i, c in enumerate(cols):
-            yy = y + 104
-            cx = x + i * (cw + 60)
+            yy = y + 100
+            cx = x + i * (cw + 50)
             for ls in c:
-                d.rectangle((cx, yy + 6, cx + 26, yy + 32), outline=(80, 80, 80), width=3)
+                q = int(corpo * 0.9)
+                d.rectangle((cx, yy + 6, cx + q, yy + 6 + q), outline=(80, 80, 80), width=3)
                 for ln in ls:
-                    d.text((cx + 50, yy), ln, fill=(70, 70, 70), font=f)
-                    yy += 36
-                yy += 16
+                    d.text((cx + q + 22, yy), ln, fill=(70, 70, 70), font=f)
+                    yy += passo
+                yy += 12
         return h + 20
     return desenhar
 
@@ -380,8 +415,6 @@ def pagina(casa, pav, interno=False):
     if gs:
         blocos.append(bloco_secao("PEDIDOS GERAIS NO MIRO (VALEM PARA TODAS AS PLANTAS)", COR["G"]))
         blocos += [bloco_geral(g, interno) for g in gs]
-    if mel:
-        blocos.append(bloco_melhorias(mel))
     # o fluxo: a 1ª folha numa coluna à esquerda; as de continuação em duas
     folhas = [Folha(casa, pav, 1)]
     yr = plantas(folhas[0], casa, pav, plano, pedidos, gs, interno)
@@ -389,6 +422,16 @@ def pagina(casa, pav, interno=False):
     # (x, largura, topo): na 1ª folha, a coluna da esquerda e o que sobra embaixo das plantas
     colunas = lambda n: ([(MARG, RX0 - 110 - MARG, TOPO), (RX0, W - MARG - RX0, yr)] if n == 1 else
                          [(MARG, cw2, MARG + 190), (MARG + cw2 + 100, cw2, MARG + 190)])
+    # as melhorias: no espaço embaixo das plantas, se couberem (1 ou 2 colunas); senão, no fim
+    if mel:
+        x1, w1, t1 = colunas(1)[1]
+        for bm in (bloco_melhorias(mel, 1, 25), bloco_melhorias(mel, 2, 23)):
+            if t1 + bm(folhas[0], x1, t1, w1, True) <= BASE:
+                bm(folhas[0], x1, t1, w1)
+                yr = BASE + 1                                          # a coluna da direita fica cheia
+                break
+        else:
+            blocos.append(bloco_melhorias(mel))
     nf, ci, y = 1, 0, TOPO
     i = 0
     while i < len(blocos):

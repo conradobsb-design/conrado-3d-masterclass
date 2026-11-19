@@ -1,0 +1,61 @@
+[
+ {
+  "id": "G1",
+  "fala": "Colocar a seta em todas as escadas e a descrição",
+  "chaves": [
+   "seta em todas as escadas",
+   "seta e descrição em todas",
+   "seta e a descrição em todas"
+  ],
+  "como": "Todas as escadas com o triângulo da seta no primeiro degrau, a letra S ou D e a descrição (\"SOBE PARA...\", \"DESCE PARA...\")."
+ },
+ {
+  "id": "G2",
+  "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+  "chaves": [
+   "mesmas mudanças que foram apontadas"
+  ],
+  "como": "As mudanças pedidas no Subsolo da Casa A que cabem nesta planta foram aplicadas: fundo branco sem hachura, Bege Bahia menos manchado, prateleiras e armários numa cor neutra sem textura, setas e descrições nas escadas."
+ },
+ {
+  "id": "G3",
+  "fala": "Tirar o contorno dos mobiliários",
+  "chaves": [
+   "contorno dos mobiliários"
+  ],
+  "como": "Os móveis, tapetes e bancadas sem o traço de contorno."
+ },
+ {
+  "id": "G4",
+  "fala": "Geral: Não precisa representar os armários inferiores ou superiores",
+  "chaves": [
+   "armários inferiores ou superiores"
+  ],
+  "como": "As bancadas com o tampo liso, sem as linhas dos armários de baixo e de cima."
+ },
+ {
+  "id": "G5",
+  "fala": "Representar as claraboias apenas com as linhas de fora, sem o X no meio para ficar mais discreto. Usar um tom cinza e as linhas mais fininhas. Padronizar para as outras plantas que tiverem claraboia.",
+  "chaves": [
+   "claraboias apenas com as linhas",
+   "outras plantas que tiverem claraboia"
+  ],
+  "como": "Esta planta não tem claraboia."
+ },
+ {
+  "id": "G6",
+  "fala": "OBS GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
+  "chaves": [
+   "muitas árvores"
+  ],
+  "como": "Esta planta não tem área de terreno."
+ },
+ {
+  "id": "G7",
+  "fala": "representar o gramado da casa A em todas as demais casas, nos seus respectivos terreos",
+  "chaves": [
+   "gramado da casa A"
+  ],
+  "como": "Esta planta não tem gramado."
+ }
+]
