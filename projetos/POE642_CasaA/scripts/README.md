@@ -4543,3 +4543,18 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   (soleira, piso) fica a borda da folha, sem crescer sobre a soleira. Os 12K A e B dos Subsolos das Casas A, B, D e E
   voltam ao de antes dos contornos (A: 02e2ce8, com os boxes claros de novo; B: 339b207; D: 7060e76; E: dbf1705) e
   recebem o contorno fino de novo.
+
+## As esquadrias das Casas B e C Térreo no padrão (vidro claro, linha fina): vidros_claros_1911.py (19/11)
+
+- **Pedido:** na conferência, a B Térreo (o contorno preto marcado de 13/11: o vidro um fio claro entre dois traços
+  pretos, que no 12K virou barra preta) e a C Térreo (caixilho claro, vidro preto) divergiam do padrão; o usuário
+  aprovou passar as duas para o padrão das outras casas ("Sim").
+- **O desenho:** cada esquadria (as peças do PDF, `esquadrias_pretas_1911.dados`, sem as folhas de madeira e sem os
+  batentes dos elevadores, `FORA`) vira a forma das peças com as frestas de até 3 px fechadas; dentro, o perfil cinza
+  claro (1 px; 0,5 px nas peças finas) e o vidro claro; o preto antigo até 3 px da forma sai (inpaint); por fora, a
+  linha preta fina (0,5 px na final, até 1,8 px no 12K).
+- **No 12K:** cada esquadria é achada pela própria janela (a final de antes, ampliada, procurada a até 15 px da final);
+  entre esse lugar e o do registro local fica o que põe mais do preto antigo dentro da forma (na fachada de baixo da B
+  o registro da planta inteira errava até 8 px).
+- **Arquivos:** as finais, as pranchas, os 12K A e B e os PDFs das Casas B e C; antes e depois em
+  `POE642_CasaB/renders/POE642_CasasB_C_Terreo_1911_vidros_claros_antes_depois.jpg`.
