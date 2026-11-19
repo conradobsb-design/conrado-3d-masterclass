@@ -4491,4 +4491,9 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   `pdf_entrega.py` das quatro casas, `book_entrega.py` e `conferencia_cliente.py --todas [--interno]` (itens da piscina
   de A a D como feitos). Antes e depois em `renders/POE642_Casas_ABCD_PH_Terreo_1911_piscinas_sobrias_antes_depois.jpg`
   (o antes do commit daba07e).
+- **Degraus da Casa C (19/11, o usuário: "tem que ter um degradê acinzentado... degrau a degrau"):** os 4 degraus entre
+  a prainha e a parte funda (`DEGRAUS`: x 653-915, linhas de cima em y 1427, 1439, 1451, 1463 e o fundo em 1475) levam
+  1/5, 2/5, 3/5 e 4/5 da opção 2, só na água; a luminosidade cai 209 → 187 → 170 → 156 → 139 → 130 (fundo). No 12K,
+  as linhas vêm pelo mesmo registro.
 - **Rodar de novo não repete:** com a água funda já sóbria (saturação mediana < 60 de 255), a planta é pulada.
+  Os degraus têm a guarda deles (o último degrau já desbotado, saturação mediana < 65).

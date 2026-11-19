@@ -287,8 +287,8 @@
   },
   {
    "fala": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
-   "como": "A parte funda da piscina e o miolo do spa passaram para o azul-acinzentado da planta de referência, o mesmo tom sóbrio da Casa E, que dá profundidade; a prainha, os degraus e o banco do spa, rasos, continuam claros.",
-   "conferir": "parte funda da piscina e miolo do spa em azul-acinzentado (padrão da Casa E); prainha, degraus e banco do spa claros; divisas retas.",
+   "como": "A parte funda da piscina e o miolo do spa passaram para o azul-acinzentado da planta de referência, o mesmo tom sóbrio da Casa E, que dá profundidade; os degraus escurecem em degradê, degrau a degrau, da prainha clara até a parte funda; a prainha e o banco do spa, rasos, continuam claros.",
+   "conferir": "parte funda e miolo do spa em azul-acinzentado; os 4 degraus num degradê proporcional (do claro da prainha ao fundo); prainha e banco do spa claros.",
    "pontos": [
     [
      762,
@@ -300,7 +300,7 @@
    "miro_ids": [
     "3458764689934957735"
    ],
-   "obs": "19/11: a opção 2 (padrão da Casa E) aplicada à parte funda; as rasas e os degraus ficaram."
+   "obs": "19/11: a opção 2 (padrão da Casa E) aplicada à parte funda; os degraus em degradê (1/5 a 4/5 da opção 2), a pedido do usuário."
   },
   {
    "fala": "Pode deixar a cortina ultrapassar um pouco as laterais da janela.",

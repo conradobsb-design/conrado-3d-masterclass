@@ -54,6 +54,13 @@ FUNDO = {
 }
 
 
+# os degraus entre a prainha e a parte funda (só na Casa C): x de começo e fim e as linhas de cima de cada degrau (a
+# sombra do espelho), a última é o começo da parte funda. O usuário (19/11): "Nessa piscina que tem degraus, tem que
+# ter um degradê acinzentado... vai escurecendo de forma proporcional, que vai ficando mais fundo... degrau a degrau."
+# Cada degrau leva uma fração igual da opção 2: 1/5, 2/5, 3/5 e 4/5 (a prainha 0, o fundo 1).
+DEGRAUS = {"C": (653, 915, [1427, 1439, 1451, 1463, 1475])}
+
+
 def agua(img, escala=1.0):
     """A água: os pixels azul-esverdeados nos corpos grandes, com os furos (os reflexos brancos e os rótulos)
     fechados."""
@@ -123,11 +130,16 @@ def peso_fundo(img, rets, escala=1.0):
 
 def sobria(img, rets, escala=1.0, q=OPCAO2):
     w, M, finais = peso_fundo(img, rets, escala)
+    return aplicar(img, w, q), finais
+
+
+def aplicar(img, w, q=OPCAO2):
+    """A opção 2 com o peso w (0 = como está, 1 = a opção 2 inteira)."""
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV).astype(np.float32)
     hsv[..., 0] = np.mod(hsv[..., 0] + q["dh"] / 2 * w, 180)
     hsv[..., 1] *= 1 - (1 - q["fs"]) * w
     hsv[..., 2] *= 1 - (1 - q["fv"]) * w
-    return cv2.cvtColor(np.clip(hsv, 0, 255).astype(np.uint8), cv2.COLOR_HSV2BGR), finais
+    return cv2.cvtColor(np.clip(hsv, 0, 255).astype(np.uint8), cv2.COLOR_HSV2BGR)
 
 
 def recorte(img, rets, escala=1.0, margem=30):
@@ -158,6 +170,65 @@ def registro_12k(pr, cinza12, dz, box):
         u, v = W @ np.array([x - x0, y - y0, 1.0])
         return X0 + u * (X1 - X0) / (x1 - x0), Y0 + v * (Y1 - Y0) / (y1 - y0)
     return f, cc
+
+
+def peso_degraus(forma, x0, x1, ys, escala=1.0):
+    n = len(ys) - 1
+    w = np.zeros(forma, np.float32)
+    for k in range(n):
+        w[max(int(round(ys[k])), 0):max(int(round(ys[k + 1])), 0), max(int(round(x0)), 0):max(int(round(x1)), 0)] = (k + 1) / (n + 1)
+    return cv2.GaussianBlur(w, (0, 0), 0.7 * escala)
+
+
+def degrade(img, x0, x1, ys, escala=1.0, margem=30):
+    """O degradê degrau a degrau, só na água (o recorte em volta dos degraus)."""
+    a0, b0 = max(int(x0 - margem * escala), 0), max(int(ys[0] - margem * escala), 0)
+    a1, b1 = min(int(x1 + margem * escala), img.shape[1]), min(int(ys[-1] + margem * escala), img.shape[0])
+    cr = img[b0:b1, a0:a1]
+    w = peso_degraus(cr.shape[:2], x0 - a0, x1 - a0, [y - b0 for y in ys], escala) * agua(cr, escala)
+    img[b0:b1, a0:a1] = aplicar(cr, w)
+
+
+def degraus(c):
+    """O degradê nos degraus da planta c: prancha, finais e 12K A e B (pulado se já feito)."""
+    if c not in DEGRAUS:
+        return
+    x0, x1, ys = DEGRAUS[c]
+    ent = PROJ / f"POE642_Casa{c}/entrega"
+    ren = PROJ / f"POE642_Casa{c}/renders"
+    prancha = ent / f"POE642_Casa{c}_PH_Terreo_entrega.png"
+    pr = cv2.imread(str(prancha))
+    ult = cv2.cvtColor(pr[ys[-2] + 3:ys[-1] - 3, x0 + 15:x1 - 15], cv2.COLOR_BGR2HSV)[..., 1]
+    if np.median(ult) < 65:      # o último degrau já desbotado (saturação ~49; antes ~81)
+        print(c, "degraus já feitos; nada feito")
+        return
+    orig = pr.copy()
+    degrade(pr, x0, x1, ys)
+    cv2.imwrite(str(prancha), pr)
+    print(c, "degraus:", prancha.name)
+    for f in (ren / f"POE642_Casa{c}_PH_Terreo_final_rotulos.png", ren / f"POE642_Casa{c}_PH_Terreo_final_rotulos_B.png"):
+        if f.exists():
+            im = cv2.imread(str(f))
+            degrade(im, x0, x1, ys)
+            cv2.imwrite(str(f), im)
+            print("  ", f.name)
+    dz = json.loads((PROJ / "POE642_Book/checklist/dados/doze_k.json").read_text())[f"{c}_Terreo"]
+    caixa_reg = (x0 - 40, ys[0] - 160, x1 + 200, ys[-1] + 180)
+    for op in "AB":
+        f = ent / f"POE642_Casa{c}_PH_Terreo_12K_opcao_{op}.jpg"
+        pil = Image.open(f)
+        dpi = pil.info.get("dpi", (743, 743))
+        im = cv2.cvtColor(np.array(pil.convert("RGB")), cv2.COLOR_RGB2BGR)
+        del pil
+        mapa, cc = registro_12k(orig, cv2.cvtColor(im, cv2.COLOR_BGR2GRAY), dz, caixa_reg)
+        xm = (x0 + x1) / 2
+        X0 = mapa(x0, (ys[0] + ys[-1]) / 2)[0]
+        X1 = mapa(x1, (ys[0] + ys[-1]) / 2)[0]
+        Ys = [mapa(xm, y)[1] for y in ys]
+        degrade(im, X0, X1, Ys, escala=dz["s"])
+        Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB)).save(f, quality=95, subsampling=0, dpi=dpi)
+        print("  ", f.name, "registro", round(cc, 4))
+        del im
 
 
 def planta(c, antes_depois=False):
@@ -240,3 +311,4 @@ if __name__ == "__main__":
     else:
         for c in a.casas:
             planta(c)
+            degraus(c)
