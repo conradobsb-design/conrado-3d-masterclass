@@ -4558,3 +4558,16 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   o registro da planta inteira errava até 8 px).
 - **Arquivos:** as finais, as pranchas, os 12K A e B e os PDFs das Casas B e C; antes e depois em
   `POE642_CasaB/renders/POE642_CasasB_C_Terreo_1911_vidros_claros_antes_depois.jpg`.
+
+## Casa A Subsolo, revisão do usuário de 19/11: porta do hall, porta do depósito e a escada do deck
+
+- **Porta do hall** (`porta_hall_subsolo_1911.py`): as duas folhas de correr desiguais (a de cima meio vidro, a de
+  baixo cinza-escura) passam ao padrão — cada folha com perfil cinza, vidro claro e a sua linha fina; o retângulo antigo
+  em volta da porta sai. A soleira (a faixa bege em toda a espessura da parede, a peça do vão no PDF) fica como estava.
+- **Porta do depósito** (`porta_deposito_subsolo_1911.py`): "parece que ela está fora da quina a quina com a parede. o
+  contorno deixou dois lados extremos claros" — a folha vira retângulo da face do bloco da parede (x 1346) até a ponta
+  (1399), com a borda de baixo na face da parede, e a linha fina em volta da folha toda.
+- **Escada SOBE PARA O DECK** (`escada_subsolo_casaa_1911.py`): "os degraus devem estar transparentes e não brancos" —
+  a regra da escada da Casa E (`escada_principal_casae_1711`): à esquerda da diagonal de corte, o piso (Bege Bahia) com o
+  desenho dos degraus por cima a 55%, sem o branco.
+- Final (e a manuscrita), prancha, 12K A e B e o PDF da Casa A.
