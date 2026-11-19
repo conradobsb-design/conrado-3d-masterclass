@@ -1,0 +1,699 @@
+{
+ "casa": "B",
+ "pav": "Terreo",
+ "contagem": "36 itens de notas do cliente: as 32 falas da lista de 12/11 na docstring de pedidos_terreo_casab_1211.py (agrupadas em 28 itens), a OBS GERAL das árvores (comentário do gramado) e 7 falas dos comentários do mesmo script com jeito de post-it, cruzadas com o levantamento casa_B.json; 6 gerais e 9 com autoria a confirmar.",
+ "itens": [
+  {
+   "fala": "remover o tracejado / remover o tracejado vertical / remover",
+   "como": "Saíram o tracejado de fora do lote e a sobra do muro: em volta do lote ficou só o fundo branco, com a borda reta.",
+   "conferir": "fora do lote, branco puro: sem o retângulo tracejado, sem marcas de canto e sem a ponta do muro de baixo passando do lote.",
+   "pontos": [
+    [
+     1900,
+     70
+    ],
+    [
+     3512,
+     1000
+    ],
+    [
+     3512,
+     1883
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "autoria a confirmar: falas curtas nos recortes do lote, no comentário do passo dos tracejados, fora da lista das notas de 12/11",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:793"
+  },
+  {
+   "fala": "OBS GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
+   "como": "O terreno ficou com poucas árvores: só 3 oliveiras, nos cantos do lote, e o resto em gramado.",
+   "conferir": "3 oliveiras nos cantos (2 à esquerda, 1 em cima à direita), nenhum maciço de árvores; não há arbustos baixos no gramado.",
+   "pontos": [
+    [
+     451,
+     256
+    ],
+    [
+     3346,
+     256
+    ],
+    [
+     454,
+     1732
+    ]
+   ],
+   "geral": true,
+   "status": "parcial",
+   "obs": "ficaram só as 3 oliveiras, sem arbustos no gramado: os arbustos em volta das árvores saíram na troca pelas oliveiras (13/11)",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1215; POE642_Book/levantamento/dados/casa_B.json:411"
+  },
+  {
+   "fala": "Demarcar melhor o perímetro da casa",
+   "como": "O perímetro da casa foi marcado com um traço fino no cinza das paredes onde o piso da casa encosta na grama sem parede.",
+   "conferir": "fio cinza contínuo entre a calçada, os decks e a grama; pisantes, blocos de pedra e acesso da garagem fora.",
+   "pontos": [
+    [
+     1920,
+     275
+    ],
+    [
+     2700,
+     1210
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:11; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1408"
+  },
+  {
+   "fala": "Deixar o tom da vegetação dos jardins nas janelas diferente do terreno",
+   "como": "As 4 floreiras das janelas ganharam folhagem num verde mais vivo, com flores brancas miúdas, diferente da grama do terreno.",
+   "conferir": "4 floreiras da fachada de cima com folhagem verde viva e pontinhos brancos, distintas do gramado.",
+   "pontos": [
+    [
+     1284,
+     325
+    ],
+    [
+     1512,
+     325
+    ],
+    [
+     1882,
+     325
+    ],
+    [
+     2709,
+     324
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "autoria a confirmar: a fala está no comentário do passo das floreiras, fora da lista das notas de 12/11",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1482"
+  },
+  {
+   "fala": "corrigir a ligação dos armários, sem divisão / nesse armário também, remover a divisão. / remover a divisão do armário.",
+   "como": "O closet em U da suíte master e os guarda-roupas em L das suítes foram redesenhados numa peça só, sem a divisão nos cantos, com os cabides.",
+   "conferir": "cantos do U e dos L contínuos, cabides até o canto, sem linha de emenda.",
+   "pontos": [
+    [
+     2562,
+     342
+    ],
+    [
+     1265,
+     740
+    ],
+    [
+     2360,
+     920
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "autoria a confirmar: a lista das notas de 12/11 só registra os cantos do guarda-roupa em U marcados; as falas estão no comentário do passo dos closets",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:12; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1053"
+  },
+  {
+   "fala": "representar o gramado da casa A em todas as demais casas, nos seus respectivos terreos",
+   "como": "O gramado do lote ficou igual ao da Casa A: a mesma grama, na mesma escala e no mesmo tom.",
+   "conferir": "grama padrão da Casa A, fina e uniforme, em todo o lote; bordas limpas junto aos pisos e ao muro.",
+   "pontos": [
+    [
+     350,
+     500
+    ],
+    [
+     3300,
+     900
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "autoria a confirmar: está na lista das notas de 12/11, mas nas regras (POE642_REGRAS.md:426) a fala é do usuário",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:15; POE642_REGRAS.md:426"
+  },
+  {
+   "fala": "melhorar a representação do amadeirado, com suas respectivas folhas",
+   "como": "Os painéis de madeira de correr das fachadas foram redesenhados folha por folha, em ripado de nogueira.",
+   "conferir": "11 folhas de madeira (suíte master, fachada de cima, suíte 3), cada uma no seu trilho, em degrau, com o ripado e o contorno.",
+   "pontos": [
+    [
+     960,
+     560
+    ],
+    [
+     1690,
+     320
+    ],
+    [
+     2240,
+     320
+    ],
+    [
+     2655,
+     770
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "autoria a confirmar: a fala está no comentário do passo das folhas, fora da lista das notas de 12/11",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1134"
+  },
+  {
+   "fala": "Tirar o nome shaft / Melhorar o X tracejado",
+   "como": "Os nomes SHAFT saíram e os vãos ficaram claros, com o X tracejado fino de canto a canto.",
+   "conferir": "3 shafts sem texto (junto ao elevador, à sala íntima e à cozinha), X cinza fino, tracejado e simétrico, borda de parede limpa.",
+   "pontos": [
+    [
+     1777,
+     542
+    ],
+    [
+     1578,
+     756
+    ],
+    [
+     1577,
+     1265
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:12; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:798"
+  },
+  {
+   "fala": "Colocar a seta e descrição em todas as escadas",
+   "como": "As três escadas ganharam o triângulo da seta no degrau de cima, a letra D e a descrição: \"DESCE PARA O SUBSOLO\", \"DESCE PARA O DECK\" e \"DESCE PARA O JARDIM\".",
+   "conferir": "nas 3 escadas: triângulo cheio no degrau de cima, D sob a seta, descrição em duas linhas no piso livre ao lado.",
+   "pontos": [
+    [
+     680,
+     643
+    ],
+    [
+     1080,
+     830
+    ],
+    [
+     607,
+     917
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:5; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:696"
+  },
+  {
+   "fala": "Representar como banco estofado.",
+   "como": "A peça do meio do closet master foi representada como banco estofado, em capitonê.",
+   "conferir": "banco estofado capitonê no centro do closet master, com a sombra curta no piso.",
+   "pontos": [
+    [
+     1395,
+     647
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:12; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1084"
+  },
+  {
+   "fala": "Inserir uma linha para indicar a posição de instalação do chuveiro.",
+   "como": "No deck de cima foi traçada a linha de instalação do chuveiro, no cinza das paredes, com o chuveiro desenhado e o braço até ela.",
+   "conferir": "linha cinza contínua na divisa do deck de cima com o de baixo; chuveiro em planta com o braço descendo até a linha.",
+   "pontos": [
+    [
+     860,
+     750
+    ],
+    [
+     780,
+     776
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:6; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:438"
+  },
+  {
+   "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "como": "As mudanças pedidas no Subsolo da Casa A foram feitas aqui também: decks na madeira nova da Casa A, Bege Bahia das escadas menos manchado, seta com a descrição nas escadas, armários e prateleiras numa cor neutra e lisa, e móveis sem contorno.",
+   "conferir": "decks com as réguas de 20 cm da Casa A; blocos e degraus de Bege Bahia com manchas suaves; prateleiras lisas; móveis sem traço técnico.",
+   "pontos": [
+    [
+     480,
+     850
+    ],
+    [
+     860,
+     1600
+    ],
+    [
+     1846,
+     1430
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:4; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:432"
+  },
+  {
+   "fala": "Tirar o contorno dos mobiliários",
+   "como": "Saiu o traço de contorno dos móveis do estar da varanda e do living: sofás, pufe, poltronas e mesas ficaram como peças reais, sem a linha técnica.",
+   "conferir": "sofá de dois lados, pufe, poltronas e mesas sem o traço cinza por cima; vale para todas as plantas.",
+   "pontos": [
+    [
+     1201,
+     891
+    ],
+    [
+     1325,
+     1000
+    ],
+    [
+     1890,
+     790
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:14; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:932"
+  },
+  {
+   "fala": "Representar como mesa de centro e não como banco estofado",
+   "como": "A peça clara do estar da varanda passou a ser uma mesa de centro de madeira.",
+   "conferir": "mesa retangular de madeira (a de cima das duas), sem contorno.",
+   "pontos": [
+    [
+     1363,
+     853
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:13; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:940"
+  },
+  {
+   "fala": "Tirar a representação do pé da mesa",
+   "como": "A mesa de centro em gota do living ficou só com o tampo de madeira, sem o desenho do pé.",
+   "conferir": "mesa em gota lisa, sem a cruz do pé, sem contorno nem pontos pretos.",
+   "pontos": [
+    [
+     1851,
+     894
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "autoria a confirmar: a fala está no comentário do passo dos móveis, fora da lista das notas de 12/11",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:943"
+  },
+  {
+   "fala": "Diminuir a escala e quantidade de vegetação / Trocar essa representação do jardim de inverno. Usar a mesma do interior da casa A.",
+   "como": "O jardim de inverno e o jardim junto à garagem ficaram como o jardim interno da Casa A: grama e poucas plantas, menores (palmeira-ráfis, filodendro e moreia); a planta do hall virou um agave pequeno.",
+   "conferir": "nos 2 jardins, a grama da Casa A e 2 ou 3 plantas pequenas; um X só, fino, no jardim de inverno; agave no hall.",
+   "pontos": [
+    [
+     2110,
+     880
+    ],
+    [
+     2500,
+     976
+    ],
+    [
+     2400,
+     1235
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:21; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:24"
+  },
+  {
+   "fala": "Corrigir o tom da água entre os vidros",
+   "como": "A água entre os dois vidros da borda da piscina ficou no mesmo tom da água da piscina.",
+   "conferir": "canal entre os 2 vidros da borda esquerda no tom da piscina, sem o turquesa saturado; antes do vidro, deck.",
+   "pontos": [
+    [
+     757,
+     1000
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "autoria a confirmar: a fala está no comentário do passo da água, fora da lista das notas de 12/11",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1433"
+  },
+  {
+   "fala": "Tirar a representação desse amadeirado em cima do sofá. Deixar apenas a mesa que encaixa no sofá.",
+   "como": "Saiu a barra de madeira que aparecia sobre o sofá da varanda; ficou só a mesinha que se encaixa nele.",
+   "conferir": "sofá sem a faixa de madeira na borda de baixo; a mesinha de madeira encaixada no sofá continua.",
+   "pontos": [
+    [
+     1337,
+     1039
+    ],
+    [
+     1370,
+     1060
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:14; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:937"
+  },
+  {
+   "fala": "Centralizar a seta com a abertura da porta, usando este modelo de seta.",
+   "como": "A seta da entrada foi trocada pelo triângulo das escadas e centralizada no vão da porta pivotante.",
+   "conferir": "triângulo cheio no meio da abertura da pivotante, com a ponta para dentro da casa, junto à soleira.",
+   "pontos": [
+    [
+     2566,
+     1070
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:23; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:752"
+  },
+  {
+   "fala": "Representar uma soleira na entrada igual a casa C",
+   "como": "Foi colocada na entrada a soleira igual à da Casa C, de parede a parede, sob a porta pivotante.",
+   "conferir": "faixa de pedra clara com as faces finas no vão da pivotante, de uma parede à outra; vidros fixos claros sobre ela.",
+   "pontos": [
+    [
+     2532,
+     1125
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:24; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:747"
+  },
+  {
+   "fala": "Colocar uma textura nas espreguiçadeiras",
+   "como": "As duas espreguiçadeiras da prainha ganharam textura: estrutura de resina cor areia, colchonete creme e encosto de cabeça em rolo.",
+   "conferir": "2 espreguiçadeiras de resina dentro d'água, com o colchonete, o rolo e a sombra no fundo; nada de madeira.",
+   "pontos": [
+    [
+     988,
+     1172
+    ],
+    [
+     988,
+     1248
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:6; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1105"
+  },
+  {
+   "fala": "Deixar as linhas do pergolado tracejadas mais finas e mais claras. Deixar tudo na mesma cor, preto ou branco.",
+   "como": "O tracejado do pergolado ficou mais fino e mais claro, todo numa cor só, em cinza.",
+   "conferir": "tracejado do pergolado fino e cinza, igual no piso e no jardim; os brises pretos e nítidos por cima.",
+   "pontos": [
+    [
+     2640,
+     1194
+    ],
+    [
+     2450,
+     1286
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "a cor única é o cinza, não o preto nem o branco: correção do usuário de 16/11 (\"CORRIJA O TRACEJADO PARA CINZA\")",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:22; POE642_CasaA/scripts/correcoes_terreo_casab_1611.py:71"
+  },
+  {
+   "fala": "São 5 banquetas altas. Colocar em um tom que destaque do piso.",
+   "como": "Foram desenhadas as 5 banquetas altas da ilha gourmet, num tom que se destaca do piso, com parte do assento sob o tampo.",
+   "conferir": "5 banquetas iguais e espaçadas, mais escuras que o travertino, cerca de 40% sob o tampo.",
+   "pontos": [
+    [
+     1420,
+     1312
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:16; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:331"
+  },
+  {
+   "fala": "Melhorar representação das portas de giro. Encostar nas paredes. / Melhorar representação da porta. Encostar na parede.",
+   "como": "As portas de giro foram redesenhadas em madeira clara e encostadas na quina da parede; no lugar dos batentes ficou a parede.",
+   "conferir": "cada folha de giro toca a ponta da parede, sem batente, marco nem arco (área de serviço, quarto e BH de serviço, depósito e quarto do motorista inclusive).",
+   "pontos": [
+    [
+     2153,
+     1298
+    ],
+    [
+     1883,
+     1508
+    ],
+    [
+     2022,
+     1508
+    ],
+    [
+     2822,
+     1403
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:4; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:20"
+  },
+  {
+   "fala": "Trocar o marrom do piso por essa opção. Para deixar o marrom mais uniforme com o restante da casa e mais sóbrio. / As bancadas que são em marrom tabaco podem permanecer no tom mais escuro para contrastar com o piso.",
+   "como": "O piso marrom da cozinha, do louceiro, da despensa, do serviço, do motorista e da área descoberta foi trocado pela amostra enviada, mais uniforme e sóbria; as bancadas em marrom tabaco ficaram no tom mais escuro.",
+   "conferir": "piso marrom uniforme (a amostra do cliente) nesses ambientes; bancadas de marrom tabaco nitidamente mais escuras; letras brancas dos rótulos inteiras.",
+   "pontos": [
+    [
+     1600,
+     1380
+    ],
+    [
+     1980,
+     1730
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:9; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:101"
+  },
+  {
+   "fala": "Representar a cor de armário e prateleira igual o indicado da casa A. Sem textura. Uma cor neutra e sólida.",
+   "como": "As prateleiras do louceiro e da despensa ficaram lisas, sem textura, na cor neutra dos armários da Casa A; os demais armários do Térreo seguiram a mesma cor.",
+   "conferir": "prateleiras em U numa cor só (o tom padrão), sem veio nem tom rosado; a face de fora um tom abaixo.",
+   "pontos": [
+    [
+     1846,
+     1430
+    ],
+    [
+     2031,
+     1430
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:18; POE642_CasaA/scripts/correcoes_terreo_casab_1611.py:31"
+  },
+  {
+   "fala": "Não tem soleira. E encostar as portas nas paredes.",
+   "como": "O louceiro e a despensa ficaram sem soleira, com o piso contínuo, e as portas encostadas na quina da parede.",
+   "conferir": "vãos do louceiro e da despensa sem faixa de soleira; folhas tocando a ponta da parede.",
+   "pontos": [
+    [
+     1925,
+     1390
+    ],
+    [
+     1948,
+     1390
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:17; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:512"
+  },
+  {
+   "fala": "Cor da bancada é no Dekton Danae",
+   "como": "A bancada e os tanques da área de serviço foram feitos em Dekton Danae.",
+   "conferir": "bancada da parede da esquerda e a dos tanques no Danae, sem falha em volta das cubas.",
+   "pontos": [
+    [
+     2068,
+     1430
+    ],
+    [
+     2220,
+     1509
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:18; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:185"
+  },
+  {
+   "fala": "Aqui são duas máquinas de lavar roupa. Tirar essa representação de armário. Ou bancada, a bancada não passa por cima.",
+   "como": "No lugar do armário ficaram as duas máquinas de lavar, sem bancada por cima, no tamanho do projeto.",
+   "conferir": "2 máquinas brancas vistas de cima, inteiras e visíveis, acima da bancada dos tanques; nenhuma bancada sobre elas.",
+   "pontos": [
+    [
+     2220,
+     1394
+    ],
+    [
+     2220,
+     1434
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:19; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:187"
+  },
+  {
+   "fala": "Cor da ilha é no Dekton Danae",
+   "como": "A ilha da cozinha foi feita em Dekton Danae; a bancada da pia da cozinha seguiu o mesmo material.",
+   "conferir": "ilha e bancada da pia no Danae da foto oficial, sem falhas em volta das cubas e do cooktop.",
+   "pontos": [
+    [
+     1680,
+     1480
+    ],
+    [
+     1697,
+     1647
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:9; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:183"
+  },
+  {
+   "fala": "?",
+   "como": "A peça cinza solta no nicho junto ao BH gourmet saiu; no vão foi desenhado o refrigerador do projeto.",
+   "conferir": "nicho acima do BH gourmet da esquerda: sem a caixa cinza, com o refrigerador inox no vão.",
+   "pontos": [
+    [
+     1158,
+     1505
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "autoria a confirmar: o '?' está na lista das notas de 12/11, mas o levantamento o dá como marca do usuário (que respondeu: 'deve ser um defeito a ser removido')",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:8; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1459"
+  },
+  {
+   "fala": "Geral: Não precisa representar os armários inferiores ou superiores.",
+   "como": "Nas bancadas da área gourmet saíram os tracejados e as divisões dos armários; ficou só a pedra da bancada, de ponta a ponta.",
+   "conferir": "bancada de trás da gourmet (cuba e grelha) lisa, sem tracejado nem módulos; nicho da esquerda sem tracejado.",
+   "pontos": [
+    [
+     1420,
+     1500
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:7; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:194"
+  },
+  {
+   "fala": "Representar a churrasqueira",
+   "como": "A churrasqueira foi representada na bancada de trás da área gourmet, com a grelha.",
+   "conferir": "grelha escura com o aro de inox no módulo da direita da bancada de trás.",
+   "pontos": [
+    [
+     1500,
+     1508
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:9; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:330"
+  },
+  {
+   "fala": "Cor da bancada é no marrom tabaco",
+   "como": "As bancadas do BH serviço e do BH motorista ficaram em marrom tabaco, com a cuba de louça branca.",
+   "conferir": "bancadas marrom tabaco com o contorno fino, mais escuras que o piso; cuba branca e torneira cromada.",
+   "pontos": [
+    [
+     1853,
+     1530
+    ],
+    [
+     2935,
+     1555
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:16; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:190"
+  },
+  {
+   "fala": "tirar as plantas coloridas e colocar com o espaçamento igual entre elas",
+   "como": "Na floreira do lavatório gourmet saíram as plantas coloridas; entraram 7 plantas verdes iguais, com o mesmo espaço entre elas.",
+   "conferir": "7 moreias verdes iguais, igualmente espaçadas, na floreira abaixo das cubas.",
+   "pontos": [
+    [
+     1327,
+     1668
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:8; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1275"
+  },
+  {
+   "fala": "Não precisa representar as portas abertas.",
+   "como": "A porta de duas folhas da área de serviço foi representada fechada.",
+   "conferir": "as 2 folhas fechadas no vão, no meio da espessura da parede; nenhuma folha aberta a 90°.",
+   "pontos": [
+    [
+     2210,
+     1621
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "autoria a confirmar: no mesmo recorte o usuário escreveu \"feche as portas\"; fora da lista das notas de 12/11",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:1603"
+  }
+ ]
+}

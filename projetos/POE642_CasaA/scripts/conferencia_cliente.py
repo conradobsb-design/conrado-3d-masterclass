@@ -109,7 +109,15 @@ def logos(pg, x1, yc, alt):
     pg.paste(na, (x, yc - na.height // 2), na)
 
 
+def resumo(fala):
+    """A nota sem o texto literal transcrito (só o resumo) ou uma marcação sem texto."""
+    return fala.startswith("[sem o texto literal]") or fala.startswith("(")
+
+
 def aspas(fala):
+    if resumo(fala):
+        t = fala.replace("[sem o texto literal]", "").strip().strip("()").strip()
+        return t[:1].upper() + t[1:]
     return " / ".join(f"“{f.strip()}”" for f in fala.split(" / "))
 
 
@@ -172,7 +180,7 @@ def dados_planta(casa, pav, interno):
         if g.get("so") and f"{casa}_{pav}" not in g["so"]:
             continue
         aqui = desta.get(g["id"], [])
-        como = " ".join(a["como"] for a in aqui) if aqui else g["como"]
+        como = " ".join(a["como"] for a in aqui) if aqui else plano.get("gerais", {}).get(g["id"], g["como"])
         pts = [p for a in aqui for p in a.get("pontos") or []]
         st = [a for a in aqui if a.get("status", "feito") != "feito"]
         gs.append({"id": g["id"], "fala": g["fala"], "origem": origem.get(g["id"], ""), "como": como, "pontos": pts,
@@ -257,7 +265,7 @@ def bloco_pedido(it, doze, dz, interno):
         d.rectangle((x + 19, y + 92, x + 19 + cb, y + 92 + cb), outline=(80, 80, 80), width=3)
         d.text((x + 36, y + 92 + cb + 10), "conferido", fill=CINZA, font=FK, anchor="mt")
         yy = y
-        d.text((tx, yy), "PEDIDO NO MIRO", fill=CINZA, font=FL)
+        d.text((tx, yy), "PEDIDO NO MIRO" + (" (EM RESUMO)" if resumo(it["fala"]) else ""), fill=CINZA, font=FL)
         yy += 28
         for ln in lq:
             d.text((tx, yy), ln, fill=TINTA, font=FQ)

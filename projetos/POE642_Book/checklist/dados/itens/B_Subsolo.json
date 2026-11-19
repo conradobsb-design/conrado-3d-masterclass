@@ -1,0 +1,254 @@
+{
+ "casa": "B",
+ "pav": "Subsolo",
+ "contagem": "13 notas do cliente: as 12 da lista de 12/11 na docstring de pedidos_subsolo_casab_1211.py e a da bola de pilates (comentário do passo da academia), cruzadas com o levantamento casa_B.json; 2 gerais e 2 com autoria a confirmar.",
+ "itens": [
+  {
+   "fala": "Tem um pilar aqui",
+   "como": "Foi desenhado o pilar redondo no canto de cima da garagem, no cinza das paredes.",
+   "conferir": "pilar redondo de 30 cm no canto superior esquerdo da garagem (o PDF não o desenha).",
+   "pontos": [
+    [
+     913,
+     291
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:5; POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:195"
+  },
+  {
+   "fala": "Demarcar melhor o perímetro da casa",
+   "como": "O perímetro da casa ficou marcado por um traço reto e contínuo, no cinza das paredes, onde a borda do piso não é parede (garagem, ducha e escada).",
+   "conferir": "traço contínuo e reto em cima e à esquerda da garagem, até a face da parede da direita, e em volta da ducha e da escada; sem vão junto às paredes.",
+   "pontos": [
+    [
+     1150,
+     274
+    ],
+    [
+     896,
+     450
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:5; POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:193"
+  },
+  {
+   "fala": "O piso continua nessa demarcação",
+   "como": "O Bege Bahia da garagem continua, numa peça só, na faixa acima do BH serviço até as paredes; a circulação do BH serviço ficou no mesmo piso.",
+   "conferir": "faixa de cima sem emenda nem linha, Bege Bahia contínuo até a parede da direita; circulação do BH serviço no mesmo piso.",
+   "pontos": [
+    [
+     1450,
+     298
+    ],
+    [
+     1490,
+     350
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:6; POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:51"
+  },
+  {
+   "fala": "Melhorar representação da porta. Encostar na parede.",
+   "como": "As portas do BH serviço, do depósito, da sauna e do BH sauna foram redesenhadas em madeira clara, encostadas na quina da parede, sem marco.",
+   "conferir": "4 folhas de madeira clara, cada uma tocando a ponta da parede (vértice com vértice), sem marco nem arco.",
+   "pontos": [
+    [
+     1422,
+     337
+    ],
+    [
+     1541,
+     334
+    ],
+    [
+     1174,
+     657
+    ],
+    [
+     1270,
+     615
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:7; POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:238"
+  },
+  {
+   "fala": "?",
+   "como": "O ponto escuro que aparecia no box do BH serviço foi removido; no box ficou só o chuveiro.",
+   "conferir": "box do BH serviço sem o botão escuro (o tique do PDF na porta do box), só com o chuveiro redondo de parede.",
+   "pontos": [
+    [
+     1481,
+     396
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "autoria a confirmar: o '?' está na lista das notas de 12/11, mas o levantamento o dá como marca do usuário",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:7; POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:269"
+  },
+  {
+   "fala": "remova a hachura do terreno fora do subsolo.",
+   "como": "A hachura do terreno saiu: em volta do Subsolo ficou só o fundo branco, sem o lote e sem as peças do Térreo.",
+   "conferir": "fora da pegada do Subsolo, branco puro: sem hachura, sem a linha do lote, sem a pedra grande, os degraus e o deck do Térreo esmaecidos.",
+   "pontos": [
+    [
+     760,
+     420
+    ],
+    [
+     1700,
+     290
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "autoria a confirmar: está na lista das notas de 12/11 e o levantamento a dá como do cliente, mas o imperativo ('remova') é o jeito de escrever do usuário",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:8; POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:165"
+  },
+  {
+   "fala": "usar o mesmo bloco de bicicleta usado na casa A",
+   "como": "As duas bicicletas da academia foram trocadas pelas da Casa A, no mesmo tamanho; as esteiras e o supino seguiram o mesmo padrão.",
+   "conferir": "2 bicicletas no tamanho das da Casa A, no lugar dos símbolos do PDF, sem contorno, com a sombra curta.",
+   "pontos": [
+    [
+     1447,
+     474
+    ],
+    [
+     1447,
+     541
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:7; POE642_CasaA/scripts/biblioteca_subsolo_casab_1311.py:23"
+  },
+  {
+   "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "como": "As mudanças pedidas no Subsolo da Casa A foram feitas aqui também: fundo branco sem hachura, Bege Bahia menos manchado, seta com a descrição na escada e o armário numa cor neutra e lisa.",
+   "conferir": "fundo branco em volta; Bege Bahia da garagem com manchas suaves (45%); escada com triângulo, S e descrição; armário da academia liso.",
+   "pontos": [
+    [
+     1000,
+     480
+    ],
+    [
+     760,
+     420
+    ],
+    [
+     755,
+     638
+    ],
+    [
+     1703,
+     591
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:4; POE642_Book/levantamento/dados/casa_B.json:15"
+  },
+  {
+   "fala": "Representar a cor de armário e prateleira igual o indicado da casa A. Sem textura. Uma cor neutra e sólida.",
+   "como": "O armário da academia ficou liso, sem textura, na mesma cor neutra dos armários e prateleiras da Casa A.",
+   "conferir": "armário numa cor só (o tom padrão, RGB 208, 178, 156), sem veio, com o fio da face.",
+   "pontos": [
+    [
+     1703,
+     591
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:9; POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:583"
+  },
+  {
+   "fala": "Tirar o nome shaft.",
+   "como": "O nome SHAFT saiu; o vão ficou claro, só com o X tracejado de canto a canto.",
+   "conferir": "shaft sem texto, X tracejado fino e simétrico de canto a canto.",
+   "pontos": [
+    [
+     1777,
+     541
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:10; POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:588"
+  },
+  {
+   "fala": "Colocar a seta em todas as escadas e a descrição",
+   "como": "A escada da ducha ganhou o triângulo da seta no degrau de baixo, a letra S e a descrição \"SOBE PARA O JARDIM\". Todas as escadas das casas seguem esse padrão.",
+   "conferir": "triângulo cheio no degrau de baixo, apontando para a subida; S logo abaixo; \"SOBE PARA O / JARDIM\" em duas linhas sob a escada.",
+   "pontos": [
+    [
+     755,
+     638
+    ],
+    [
+     695,
+     712
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:4; POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:506"
+  },
+  {
+   "fala": "Aqui também tem soleira.",
+   "como": "Foi colocada a soleira de travertino na porta da sauna, e também nas portas do BH serviço e do BH sauna.",
+   "conferir": "soleira clara, de face a face da parede, nos vãos da sauna, do BH sauna e do BH serviço.",
+   "pontos": [
+    [
+     1149,
+     637
+    ],
+    [
+     1240,
+     637
+    ],
+    [
+     1444,
+     354
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:8; POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:239"
+  },
+  {
+   "fala": "No lugar dessas linhas, representar uma bola presa na parede. Tirar linhas.",
+   "como": "As linhas junto à parede de baixo da academia saíram; no lugar entrou uma bola de pilates presa na parede, num suporte.",
+   "conferir": "bola cinza-clara encostada na parede de baixo, com o suporte em U grafite; sem o retângulo de linhas.",
+   "pontos": [
+    [
+     1422,
+     743
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casab_1211.py:661; POE642_Book/levantamento/dados/casa_B.json:278"
+  }
+ ]
+}

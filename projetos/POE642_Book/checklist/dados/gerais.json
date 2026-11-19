@@ -57,5 +57,13 @@
    "gramado da casa A"
   ],
   "como": "Esta planta não tem gramado."
+ },
+ {
+  "id": "G8",
+  "fala": "Melhorar representação das portas de giro. Encostar nas paredes.",
+  "chaves": [
+   "portas de giro"
+  ],
+  "como": "As portas de giro encostadas na ponta da parede, quina a quina, sem arcos."
  }
 ]

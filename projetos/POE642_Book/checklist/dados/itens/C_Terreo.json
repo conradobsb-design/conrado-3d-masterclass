@@ -291,7 +291,7 @@
   },
   {
    "fala": "Aqui tem que representar dois painéis pivotantes",
-   "como": "Os dois painéis chegaram a ser desenhados junto à bancada da gourmet e depois foram retirados na revisão; hoje o trecho mostra só o piso.",
+   "como": "Conferido com o projeto de arquitetura: o Térreo da Casa C não tem painéis pivotantes neste trecho; ficou só o piso, como no projeto.",
    "conferir": "vão entre a ponta da parede do jardim 1 e o fim da bancada da gourmet: hoje só travertino até o fio da bancada, sem painéis.",
    "pontos": [
     [
@@ -300,8 +300,8 @@
     ]
    ],
    "geral": false,
-   "status": "nao_feito",
-   "obs": "Desenhados em 13/11 e retirados em 14/11 pelo usuário (\"NÃO HÁ ESSA BORDA, SOMENTE O PISO\"); confirmar com o cliente onde ficam os painéis.",
+   "status": "feito",
+   "obs": "usuário (19/11): \"Térreo da casa C: não tem painéis pivotantes.\"",
    "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:128; POE642_CasaA/scripts/revisao_terreo_casac_1411.py:18"
   },
   {

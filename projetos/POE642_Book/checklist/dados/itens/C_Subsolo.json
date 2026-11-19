@@ -20,7 +20,7 @@
   },
   {
    "fala": "Já removeu manchas do bege Bahia como fizemos nas outras plantas?",
-   "como": "O Bege Bahia do pátio, dos degraus largos, do caminho e do depósito ficou com as manchas suaves, na mesma medida do Subsolo da Casa A.",
+   "como": "As manchas do Bege Bahia foram reduzidas no percentual definido para todas as plantas: o pátio, os degraus, o caminho e o depósito ficaram com as manchas suaves, na mesma medida do Subsolo da Casa A.",
    "conferir": "pátio, degraus largos, caminho e depósito com as manchas suaves (35%), lidos como o Bege Bahia do Subsolo da A; letras e linhas dos degraus inteiras.",
    "pontos": [
     [
@@ -40,9 +40,9 @@
      900
     ]
    ],
-   "geral": true,
+   "geral": false,
    "status": "feito",
-   "obs": "autoria a confirmar: a docstring a põe entre os post-its do cliente, mas o comentário do mesmo script (linha 66) a atribui ao usuário (\"como fizemos\").",
+   "obs": "usuário (19/11): \"precisamos remover o percentual de manchas definido. Precisa ser feito.\" Conferido: aplicado na final e no 12K (contraste das manchas igual ao do Subsolo da A).",
    "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:5; POE642_CasaA/scripts/README.md:2801"
   },
   {
