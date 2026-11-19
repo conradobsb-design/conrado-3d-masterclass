@@ -4497,3 +4497,27 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   as linhas vêm pelo mesmo registro.
 - **Rodar de novo não repete:** com a água funda já sóbria (saturação mediana < 60 de 255), a planta é pulada.
   Os degraus têm a guarda deles (o último degrau já desbotado, saturação mediana < 65).
+
+## Esquadrias com o contorno fino preto em todas as plantas; vidros e boxes claros: esquadrias_pretas_1911.py (19/11)
+
+- **Pedido:** "faça uma conferência em todas as plantas e garanta que as esquadrias tenham contorno fino preto. já os
+  vidros e boxes, devem ser claros."
+- **A conferência (`--auditar`):** as esquadrias de cada planta saem do PDF dela (as peças brancas finas da ARQ_PAREDE,
+  até 3,4 pt: vidros, folhas e caixilhos), agrupadas por vizinhança, e a final é medida em volta de cada uma. O Térreo
+  da Casa B e o Subsolo e o Térreo da Casa C já estavam no padrão (o contorno de `regras_terreo_casab_1311.esquadrias`,
+  com as exceções que o usuário pediu) e ficam (`JA_NO_PADRAO`); nas outras 9 plantas o contorno escuro cobria de 0 a
+  15%.
+- **O desenho:** o contorno de fora de cada esquadria (a união das peças do grupo), uma faixa de 0,5 px logo fora dela,
+  no cinza quase preto (34, 34, 36): o vidro e os perfis ficam claros por dentro (traçado por peça, os vidros finos
+  viravam barras pretas). Não entra na parede nem na água.
+- **Ficam de fora:** as folhas de madeira e o bronze dos brises (o miolo em madeira; o bronze das esquadrias do
+  Subsolo da Casa E entra), as peças que a final não desenha (miolo igual ao entorno), as pecinhas dos batentes (< 12 px)
+  e as sobre a ponta da parede, os vãos das portas dos quartos no padrão de 14/11 (madeira ou bronze por fora, vidro
+  claro por dentro: `esquadrias_quartos.vaos_pdf`, as suítes da Casa A no 1º Pavimento e as duas fachadas das suítes da
+  Casa E), os elevadores e os boxes (o box do banho varanda da Casa A, a ducha e o box do vestiário da Casa D; os
+  outros boxes estão na camada das louças e não entram): `EXTRA`.
+- **Arquivos:** as finais (e as `_manuscrita` da A Subsolo e `_B` da D), os 12K A e B (o mesmo contorno nítido, na
+  escala do 12K, pelo `doze_k.json` refinado por ECC), as pranchas (as 2160 linhas de cima = a final), os PDFs das Casas
+  A, B, D e E, o book e a conferência dos pedidos. Antes e depois (contra a final de 247b659) em
+  `POE642_Casa<X>/renders/POE642_Casa<X>_PH_<pav>_1911_esquadrias_pretas_antes_depois.jpg`.
+- **Rodar de novo não repete:** a planta cuja final já difere da de `ANTES` é pulada.
