@@ -1793,6 +1793,25 @@
        1285
       ]
      ]
+    },
+    {
+     "n": 36,
+     "origem": "voce",
+     "texto": "Tracejados (as claraboias do banho master, o X do vazio da escada, do jardim da sala íntima e do shaft) em cinza claro, finos (0,8 px) (\"clareie todos os tracejados para cinza claro\").",
+     "pontos": [
+      [
+       1845,
+       788
+      ],
+      [
+       2045,
+       1085
+      ],
+      [
+       2345,
+       1445
+      ]
+     ]
     }
    ]
   }

@@ -4142,6 +4142,11 @@ E por fim (o 12K A e B no fim de tudo, "ao final gere o 12k"):
   "esses borrões no piso do closet 4"): `pisos_closets` refaz o piso de dentro do L dos armários em réguas contínuas.
 Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1811f_paineis_guarda_corpos_closets_antes_depois.jpg`.
 
+Em 19/11 ("clareie todos os tracejados para cinza claro"): o traço dos tracejados no fundo claro passou do cinza 128 de
+`revisao_1pav_casae_1711.CINZA` (escuro sobre o quartzito Aura) para o cinza claro `TRACEJADO_CINZA` (172), na mesma
+espessura (0,8 px), no passo `tracejados` e nas claraboias do banho master (`linha_claraboia`); 12K A e B refeitos.
+Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1911_tracejados_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,

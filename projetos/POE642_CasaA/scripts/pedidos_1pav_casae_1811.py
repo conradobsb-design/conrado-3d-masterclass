@@ -177,6 +177,10 @@ def escada(Q, img, q=ESCADA):
 # claraboias do banho master (nota 2: "Padronizar para as outras plantas que tiverem claraboia"), só o retângulo, sem o
 # X (o padrão da lista CDE). A rouparia não volta (nota 3: "sem o tracejado").
 TRACEJADOS = {"sem": ("rouparia",), "so_retangulo": ("banho master: vaso", "banho master: box")}
+# (usuário: "tracejados em tom cinza claro com linhas finas", "clareie todos os tracejados para cinza claro") o traço
+# dos tracejados no fundo claro: do cinza 128 de `revisao_1pav_casae_1711.CINZA` (escuro sobre o quartzito Aura) para o
+# cinza claro; a espessura fica (0,8 px, `LARG_PX`); no fundo escuro, o cinza claro de `CINZA_ESCURO`, como antes
+TRACEJADO_CINZA = (172, 172, 172)
 
 
 def tracejados(Q, img, q=TRACEJADOS):
@@ -194,14 +198,14 @@ def tracejados(Q, img, q=TRACEJADOS):
             trechos = [(n, [t for t in tr if n not in cfg["so_retangulo"] or reto(t)]) for n, tr in trechos
                        if n not in cfg["sem"]]
         return pb(Q_, im, q=q, vaos=vaos, trechos=trechos)
-    FE.TRACEJADOS_1P = dict(guarda, larg_px=RV.LARG_PX, preto=RV.CINZA, branco=RV.CINZA_ESCURO)
+    FE.TRACEJADOS_1P = dict(guarda, larg_px=RV.LARG_PX, preto=TRACEJADO_CINZA, branco=RV.CINZA_ESCURO)
     FE.tracejados_pb_te = pb_filtrado
     try:
         out = quieto(FE.tracejados_pb_1p, Q, img)
     finally:
         FE.TRACEJADOS_1P, FE.tracejados_pb_te = guarda, pb
-    print("    tracejados: a rouparia sem o tracejado; as claraboias do banho master só com o retângulo cinza fino, sem o "
-          "X; o X dos vazios e do shaft de novo no cinza fino")
+    print("    tracejados: a rouparia sem o tracejado; as claraboias do banho master só com o retângulo cinza claro fino, "
+          "sem o X; o X dos vazios e do shaft de novo no cinza claro fino")
     return out
 
 
@@ -645,7 +649,7 @@ def linha_claraboia(Q, out, caixa, nomes=("banho master: vaso",)):
     def reto(t):
         return abs(t[2] - t[0]) < 0.3 or abs(t[3] - t[1]) < 0.3
     trechos = [(n, [t for t in tr if reto(t)]) for n, tr in FE._tracos_1p(Q) if n in nomes]
-    q = dict(FE.TRACEJADOS_1P, larg_px=RV.LARG_PX, preto=RV.CINZA, branco=RV.CINZA_ESCURO)
+    q = dict(FE.TRACEJADOS_1P, larg_px=RV.LARG_PX, preto=TRACEJADO_CINZA, branco=RV.CINZA_ESCURO)
     com = quieto(FE.tracejados_pb_te, Q, out, q=q, trechos=trechos)
     x0, y0, x1, y1 = (int(round(v)) for v in caixa)
     res = out.copy()
