@@ -918,8 +918,24 @@ SUITES = {
                 "cadeira": ((1681, 1440, 1717, 1477), (1, 0)), "mesa": (1703.3, 1390, 1739, 1531),
                 "mesa_reparo": ((1703, 1434, 1711, 1484), -44)},
 }
-SALA_INTIMA = {"tapete": (1876, 1235, 2115, 1384), "sofa": [(1867, 1215, 1917, 1334), (1917, 1215, 2076, 1265)],
-               "sofa_folga": 3, "poltrona_antes": (2113, 1228, 2158, 1345), "poltrona": (2084, 1280, 2140, 1333),
+SALA_INTIMA = {"tapete": (1876, 1235, 2115, 1384),
+               # (usuário: "ja corrija o contorno do tapete" e "o contorno do sofá com o tapete também") o sofá em L é o
+               # do render (do 3D), mas não mais recortado nas caixas do PDF com 3 px de folga: a faixa da folga trazia
+               # o tapete velho e a sombra escura do render em volta do estofado (e, ao lado do braço, a mesinha que
+               # saiu), e o tapete novo fazia degraus. Agora: `sofa` é o L inteiro do render (com sobra), e nas bordas
+               # que dão para o tapete e para o piso refeito (`sofa_bordas`) o recorte segue o próprio estofado (os px
+               # mais claros que `sofa_limiar`, a sombra do render fica de fora); o tapete vai inteiro, retângulo do PDF,
+               # por baixo, e o sofá ganha a sombra de contato dos outros móveis (`SOMBRAS["movel"]`) só no que é novo
+               "sofa": [(1845, 1190, 1924, 1346), (1845, 1190, 2078, 1271)],
+               # (a borda de baixo do chaise: no render, sobre o tapete branco antigo, o reflexo claro alonga o
+               # estofado 2,5 px em relação ao trecho sobre o piso; a borda vai reta na altura do trecho sobre o piso,
+               # o 3º valor: até onde a borda pode ir, px)
+               "sofa_bordas": [((2062, 1190, 2078, 1271), "x+"), ((1924, 1256, 2078, 1271), "y+"),
+                               ((1908, 1267, 1924, 1346), "x+"), ((1845, 1330, 1924, 1346), "y+", 1339.0)],
+               "sofa_limiar": 182, "sofa_mediana": 5,
+               # a quina do sofá com o tapete e o piso (embaixo, à esquerda): o piso sob a borda do sofá refeito, sem os
+               # pontinhos escuros do contorno do render
+               "piso_quina": (1854, 1337, 1876, 1347), "poltrona_antes": (2113, 1228, 2158, 1345), "poltrona": (2084, 1280, 2140, 1333),
                "mesa": (1956, 1299, 2016, 1359), "lateral": (1997, 1314, 2039, 1356),
                # (usuário: "corrija a representação dessa mesa lateral, da sala íntima", a redonda do render junto ao
                # braço do sofá, borrada e com a sombra escura em volta): sai, com o piso de madeira (fora do sofá e do
@@ -928,7 +944,7 @@ SALA_INTIMA = {"tapete": (1876, 1235, 2115, 1384), "sofa": [(1867, 1215, 1917, 1
                # no tamanho e no lugar do PDF (ARQ_LAYOUT, o círculo de 2041,7..2059,7 x 1259,6..1277,5 px: 0,30 m, na
                # frente do sofá, junto ao braço direito, por cima da borda do assento), não mais o do render (0,55 m, ao
                # lado do braço; o lugar dele fica no piso de madeira, `lateral_sofa_antes`)
-               "lateral_sofa_antes": (2077, 1199, 2120, 1235), "lateral_sofa": (2050.7, 1268.55, 18.0),
+               "lateral_sofa_antes": (2070, 1199, 2120, 1235), "lateral_sofa": (2050.7, 1268.55, 18.0),
                "nogueira": (52, 82, 122)}
 COPINHA = {"tampo": (1888.3, 916.2, 2053.4, 951.6), "cuba": (2034.4, 931.2, 30.0, 24.0),
            "armario": (2053.4, 916.2, 2216.7, 951.6),
@@ -1159,6 +1175,71 @@ def piso_suite(Q, out, nome, s):
     return vinilico_novo(Q, out, b, luz_dentro=True)
 
 
+def _mediana(v, k):
+    r = k // 2
+    pad = np.pad(v, r, mode="edge")
+    return np.median(np.stack([pad[i:i + len(v)] for i in range(k)]), axis=0)
+
+
+def sofa_alfa(img, s=SALA_INTIMA):
+    """A pegada (0..1) do sofá em L do render: o L inteiro (`sofa`), recortado nas bordas que dão para o tapete
+    (`sofa_bordas`: retângulo e lado, "x+" o sofá à esquerda, "y+" o sofá acima). Em cada linha (ou coluna) da borda, de
+    fora para dentro, a sombra do render (mais escura que `sofa_limiar`) sai até o 1º px do estofado, com a fração de
+    px da passagem; a mediana ao longo da borda (`sofa_mediana` px) tira o pente da textura do tapete velho, e a borda
+    sai reta, com os cantos arredondados do próprio sofá."""
+    H, W = img.shape[:2]
+    a = np.zeros((H, W), np.float32)
+    for x0, y0, x1, y1 in s["sofa"]:
+        a[y0:y1, x0:x1] = 1
+    lum = img.astype(np.float32).mean(axis=2)
+    lim = float(s["sofa_limiar"])
+    for (x0, y0, x1, y1), lado, *ate in s["sofa_bordas"]:
+        sub = lum[y0:y1, x0:x1]
+        if lado == "x+":
+            sub = sub.T                                   # cada coluna de `sub`: uma linha da imagem, de dentro p/ fora
+        n = sub.shape[0]
+        fora = sub < lim
+        k = np.argmin(fora[::-1], axis=0)                 # os px escuros seguidos, a partir de fora
+        k[fora.all(axis=0)] = n
+        j = n - k
+        e = j.astype(np.float32)
+        ok = (j > 0) & (j < n)
+        c = np.nonzero(ok)[0]
+        p_in, p_out = sub[j[c] - 1, c], sub[j[c], c]
+        e[c] = j[c] - 0.5 + np.clip((p_in - lim) / np.maximum(p_in - p_out, 1e-3), 0, 1)
+        e = _mediana(e, s["sofa_mediana"])
+        if ate:
+            e = np.minimum(e, ate[0] - (x0 if lado == "x+" else y0))
+        b = np.clip(e[None, :] - np.arange(n, dtype=np.float32)[:, None], 0, 1)
+        a[y0:y1, x0:x1] *= b.T if lado == "x+" else b
+    # um px claro solto na sombra (fora do L) não volta
+    n, rot, st, _ = cv2.connectedComponentsWithStats((a > 0).astype(np.uint8))
+    if n > 2:
+        a[rot != 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))] = 0
+    return a
+
+
+def sofa_sobre_tapete(out, img, s, com):
+    """O sofá do render (`img`) por cima de `com` (o tapete novo inteiro), recortado em `sofa_alfa`; a sombra de
+    contato (a dos móveis da biblioteca) cai só no que é novo: o tapete e o piso refeito junto ao braço."""
+    import biblioteca_terreo_casaa_1211 as BT
+    import mobiliario_terreo_casac_1311 as MB
+    a = sofa_alfa(img, s)
+    H, W = a.shape
+    novo = np.zeros((H, W), bool)
+    for x0, y0, x1, y1 in (s["tapete"], s["lateral_sofa_antes"], s["piso_quina"]):
+        novo[int(y0):int(np.ceil(y1)), int(x0):int(np.ceil(x1))] = True
+    f = np.ones((H, W), np.float32)
+    for sb in BT.SOMBRAS["movel"]:
+        sh = cv2.GaussianBlur(a, (0, 0), max(0.3, sb["sig"] * MB.PX_M))
+        M = np.float32([[1, 0, sb["dx"] * MB.PX_M], [0, 1, sb["dy"] * MB.PX_M]])
+        f *= 1 - sb["forca"] * cv2.warpAffine(sh, M, (W, H), flags=cv2.INTER_LINEAR, borderValue=0)
+    c = com.astype(np.float32)
+    c[novo] *= f[novo][:, None]
+    r = c * (1 - a[..., None]) + img.astype(np.float32) * a[..., None]
+    return np.clip(np.round(r), 0, 255).astype(np.uint8)
+
+
 def mobiliario(Q, img):
     import mobiliario_terreo_casac_1311 as MB
     import mobiliario_terreo_casae_1611 as MBE
@@ -1207,14 +1288,9 @@ def mobiliario(Q, img):
     # a sala íntima
     s = SALA_INTIMA
     out = limpar_piso(Q, out, s["poltrona_antes"], MADEIRA, nao_luz=[(1860, 1200, 2116, 1392)])
-    out = limpar_piso(Q, out, s["lateral_sofa_antes"], MADEIRA, nao_luz=[(1860, 1200, 2077, 1340), (1876, 1235, 2116, 1392)])
-    H, W = par.shape
-    sofa = np.zeros((H, W), bool)
-    f = s["sofa_folga"]
-    for x0, y0, x1, y1 in s["sofa"]:
-        sofa[y0 - f:y1 + f, x0 - f:x1 + f] = True
-    com = pos(out, ler("sala-intima/tapete-intimo-e"), s["tapete"], (0, 1), None)
-    out = np.where(sofa[..., None], out, com)
+    out = limpar_piso(Q, out, s["lateral_sofa_antes"], MADEIRA, nao_luz=[(1860, 1200, 2070, 1340), (1876, 1235, 2116, 1392)])
+    out = limpar_piso(Q, out, s["piso_quina"], MADEIRA, nao_luz=[(1845, 1190, 1924, 1339), (1876, 1235, 2116, 1392)])
+    out = sofa_sobre_tapete(out, img, s, pos(out, ler("sala-intima/tapete-intimo-e"), s["tapete"], (0, 1), None))
     # (usuário: "represente as mesas redondas corretamente") no PDF, as duas mesas de centro são redondas, encaixadas: a
     # menor (0,7 m) por baixo da maior (1,0 m), à direita; a menor, que saía retangular (`mesa-lateral-metal-madeira`),
     # na mesma mesa redonda da biblioteca, em nogueira

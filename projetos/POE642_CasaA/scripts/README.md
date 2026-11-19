@@ -4156,6 +4156,16 @@ como no PDF (a menor, que saía retangular, na mesa redonda da biblioteca em nog
 redonda do sofá no tamanho e no lugar do PDF (0,30 m, `SALA_INTIMA["lateral_sofa"]`), não mais os do render. Antes e
 depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1911b_armario_rouparia_vao_mesas_antes_depois.jpg`.
 
+Ainda em 19/11 ("ja corrija o contorno do tapete", "e o contorno do sofá com o tapete também"): o sofá em L da sala
+íntima segue o do render, mas não mais recortado nas caixas do PDF com 3 px de folga, que traziam o tapete velho, a
+sombra escura do render e, ao lado do braço, um resto da mesinha que saiu (o tapete novo fazia degraus em volta).
+`sofa_alfa` recorta o L pelo próprio estofado nas bordas que dão para o tapete (`SALA_INTIMA["sofa_bordas"]`: em cada
+linha, de fora para dentro, a sombra mais escura que `sofa_limiar` sai até o 1º px do estofado, com a mediana ao longo da
+borda; a de baixo do chaise reta na altura do trecho sobre o piso); `sofa_sobre_tapete` põe o tapete inteiro (retângulo
+do PDF) por baixo e a sombra de contato dos móveis (`SOMBRAS["movel"]`) só no que é novo (o tapete, o piso refeito junto
+ao braço, `lateral_sofa_antes` até o braço, e a quina com o piso, `piso_quina`). Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1911c_tapete_sofa_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
