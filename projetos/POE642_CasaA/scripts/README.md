@@ -4521,3 +4521,10 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   A, B, D e E, o book e a conferência dos pedidos. Antes e depois (contra a final de 247b659) em
   `POE642_Casa<X>/renders/POE642_Casa<X>_PH_<pav>_1911_esquadrias_pretas_antes_depois.jpg`.
 - **Rodar de novo não repete:** a planta cuja final já difere da de `ANTES` é pulada.
+- **A conferência planta a planta (19/11, `--extras`):** as janelas que a final desenha maiores que a peça do PDF ficaram
+  sem contorno na primeira passada; entram pela `EXTRAS` (a peça do PDF, em px da final: a folha, nunca a soleira, como
+  pediu o usuário na lateral do banho 1 da Casa A: "esse contorno preto, ele fica na folha da janela e não na soleira").
+  No 12K, o registro é local (`doze_k_local`: a caixa da janela + 120 px, ECC e o encaixe fino) e o contorno é
+  encostado na folha do próprio 12K (`folha_12k`): lá a folha sai até 1 px (da final) menor que a peça do PDF, e o
+  contorno pela peça ficava solto na parede, acima do vidro (as janelas do banho master). O contorno no 12K vai nos 4
+  lados da folha.

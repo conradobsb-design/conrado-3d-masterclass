@@ -403,6 +403,99 @@ def doze_k(planta, antes, ok_g, ac, q=Q_):
         del im
 
 
+def folha_12k(cinza, a0, b0, a1, b1, M, limiar=28.0):
+    """A folha da janela no próprio 12K (19/11): no 12K a folha sai até 1 px (da final) menor que a peça do PDF, e o
+    contorno pela peça ficava solto na parede, fora do vidro. Cada lado vem da borda prevista (a0, b0, a1, b1, px do
+    12K): o perfil do lado de fora (M a M + 4 px além da borda) dá o nível de fora; andando para dentro, a borda é o
+    primeiro px que se afasta desse nível mais que `limiar`. Sem borda achada em ±M, fica a prevista."""
+    g = cv2.GaussianBlur(cinza.astype(np.float32), (0, 0), 0.7)
+    lado = {}
+    w, h = a1 - a0, b1 - b0
+    ca, cb = int(a0 + 0.25 * w), int(a1 - 0.25 * w)
+    ra, rb = int(b0 + 0.3 * h), int(b1 - 0.3 * h)
+    for nome, e, passo in (("t", b0, -1), ("b", b1, +1), ("l", a0, -1), ("r", a1, +1)):
+        if nome in "tb":
+            perfil = lambda t: float(g[t, ca:cb].mean())
+        else:
+            perfil = lambda t: float(g[ra:rb, t].mean())
+        fora = [int(round(e + passo * (M + k))) for k in range(4)]
+        O = float(np.median([perfil(t) for t in fora]))
+        achou = None
+        for t in range(int(round(e + passo * M)), int(round(e - passo * M)) - passo, -passo):
+            if abs(perfil(t) - O) > limiar:
+                # t é o primeiro px da folha vindo de fora; a borda é o lado dele que dá para fora
+                achou = float(t) if passo < 0 else float(t + 1)
+                break
+        lado[nome] = achou if achou is not None else e
+    return lado["l"], lado["t"], lado["r"], lado["b"]
+
+
+def doze_k_local(planta, antes, ok_g, ac, q=Q_, folga=45, na_folha=False):
+    """O contorno no 12K A e B com o registro local de cada esquadria (a caixa dela mais `folga` px): o registro da planta
+    inteira erra até 2 px da final em alguns trechos (19/11, a janela do banho 1 e a do lavabo)."""
+    c, pav = planta.split("_")
+    dz = json.loads((PROJ / "POE642_Book/checklist/dados/doze_k.json").read_text())[planta]
+    ent = PROJ / f"POE642_Casa{c}/entrega"
+    for op in "AB":
+        f = ent / f"POE642_Casa{c}_PH_{pav}_12K_opcao_{op}.jpg"
+        pil = Image.open(f)
+        dpi = pil.info.get("dpi", (743, 743))
+        im = cv2.cvtColor(np.array(pil.convert("RGB")), cv2.COLOR_RGB2BGR)
+        del pil
+        cinza = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
+        for g in ok_g:
+            x0, y0, x1, y1 = caixa(g)
+            box = (max(int(x0) - folga, 0), max(int(y0) - folga, 0), min(int(np.ceil(x1)) + folga, antes.shape[1]),
+                   min(int(np.ceil(y1)) + folga, antes.shape[0]))
+            mapa, cc = registro_12k(antes, cinza, dz, box)
+            X0, Y0 = mapa(0.0, 0.0)
+            X1, _ = mapa(1000.0, 0.0)
+            sx = (X1 - X0) / 1000.0
+            # o encaixe fino pela própria janela: a final em volta dela (6 px), ampliada, procurada no 12K a até 6 px
+            # da final do lugar previsto (o 12K às vezes desenha a janela um pouco deslocada)
+            e = 6
+            fa = cv2.cvtColor(antes[max(int(y0) - e, 0):int(np.ceil(y1)) + e, max(int(x0) - e, 0):int(np.ceil(x1)) + e],
+                              cv2.COLOR_BGR2GRAY).astype(np.float32)
+            tpl = cv2.resize(fa, None, fx=sx, fy=sx, interpolation=cv2.INTER_CUBIC)
+            px0, py0 = mapa(max(int(x0) - e, 0), max(int(y0) - e, 0))
+            R = int(round(6 * sx))
+            sa0, sb0 = max(int(px0) - R, 0), max(int(py0) - R, 0)
+            area = cinza[sb0:sb0 + tpl.shape[0] + 2 * R, sa0:sa0 + tpl.shape[1] + 2 * R].astype(np.float32)
+            if area.shape[0] > tpl.shape[0] and area.shape[1] > tpl.shape[1]:
+                r = cv2.matchTemplate(area, tpl, cv2.TM_CCOEFF_NORMED)
+                _, mx, _, (bx, by) = cv2.minMaxLoc(r)
+                ddx, ddy = (sa0 + bx) - px0, (sb0 + by) - py0
+                if mx > 0.6:
+                    X0, Y0 = X0 + ddx, Y0 + ddy
+                    mapa0 = mapa
+                    mapa = (lambda m0, dx, dy: (lambda x, y: (m0(x, y)[0] + dx, m0(x, y)[1] + dy)))(mapa0, ddx, ddy)
+                    print(f"      encaixe fino: {ddx / sx:+.1f}, {ddy / sx:+.1f} px da final (corr {mx:.2f})")
+            # a janela local no 12K
+            m = 8
+            a0, b0 = mapa(x0 - m, y0 - m)
+            a1, b1 = mapa(x1 + m, y1 + m)
+            A0, B0, A1, B1 = max(int(a0), 0), max(int(b0), 0), min(int(np.ceil(a1)), im.shape[1]), min(int(np.ceil(b1)), im.shape[0])
+            if na_folha:
+                # o contorno na folha do 12K, nos 4 lados, encostado no vidro (não na parede, não na soleira)
+                pa0, pb0 = mapa(x0, y0)
+                pa1, pb1 = mapa(x1, y1)
+                L, T, R, B = folha_12k(cinza, pa0, pb0, pa1, pb1, M=int(round(2 * sx)))
+                gf = [((L - X0) / sx, (T - Y0) / sx, (R - X0) / sx, (B - Y0) / sx)]
+                print("      folha no 12K: " + ", ".join(f"{(v - p_) / sx:+.1f}" for v, p_ in zip((L, T, R, B), (pa0, pb0, pa1, pb1)))
+                      + " px da final (esq, cima, dir, baixo)")
+                al = alfa([gf], (B1 - B0, A1 - A0), origem=((A0 - X0) / sx, (B0 - Y0) / sx), escala=sx, q=q)
+                okb = np.ones_like(al, bool)
+            else:
+                al = alfa([g], (B1 - B0, A1 - A0), origem=((A0 - X0) / sx, (B0 - Y0) / sx), escala=sx, q=q)
+                Fq = np.array([[sx, 0, X0 - A0], [0, sx, Y0 - B0]], np.float64)
+                okb = cv2.warpAffine(ac.astype(np.uint8) * 255, Fq, (A1 - A0, B1 - B0), flags=cv2.INTER_NEAREST,
+                                     borderValue=0) > 127
+            im[B0:B1, A0:A1] = pintar(im[B0:B1, A0:A1], al * okb, q)
+            print(f"   {op}: esquadria {int(x0)},{int(y0)} registro local {cc:.3f}")
+        Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB)).save(f, quality=95, subsampling=0, dpi=dpi)
+        del im, cinza
+
+
 def antes_depois(planta, antes, depois, ok_g, n=18):
     """Os grupos que mais mudaram, antes | depois, numa folha."""
     tiles = []
@@ -454,7 +547,7 @@ EXTRAS = {
     "A_Terreo": [(1885, 359, 1946, 372),           # a janela da sala de estar, na parede de cima
                  (2268, 350, 2333, 356)],          # a janela do lavabo, sob a claraboia
     "A_1Pavimento": [(1539, 1458, 1575, 1466), (1624, 1458, 1643, 1465),   # as 2 janelas do banho master
-                     (2532, 1126, 2547, 1175)],                            # a janela lateral do banho 1
+                     (2533.5, 1126.5, 2545.5, 1174.3)],                    # a janela lateral do banho 1 (a folha, sem a soleira)
 }
 EXTRAS_FEITAS = {"A_Terreo": 2, "A_1Pavimento": 3}                    # quantas já foram aplicadas (rodar de novo aplica só as novas)
 
@@ -473,7 +566,7 @@ def aplicar_extras(planta, q=Q_):
     pr = cv2.imread(str(pf))
     pr[:2160] = novo
     cv2.imwrite(str(pf), pr)
-    doze_k(planta, base, gs, ac, q)
+    doze_k_local(planta, base, gs, ac, q, folga=120, na_folha=True)
     return base, novo
 
 
