@@ -82,7 +82,8 @@ EXTRA = {
                           (2368, 764, 2444, 775)]},                        # o elevador
     # o bronze das esquadrias (V 139) não é madeira; as portas do elevador ficam (a cabine da biblioteca)
     "E_Subsolo": {"madeira_vmin": 150, "fora": [(1935, 780, 2085, 835)]},
-    "E_Terreo": {"fora": [(1940, 790, 2065, 840)]},                          # o elevador
+    "E_Terreo": {"fora": [(1940, 790, 2065, 840),                           # o elevador
+                          (2386, 832, 2449, 841), (2293, 1210, 2362, 1220), (2390, 619, 2442, 629)]},  # folhas de madeira
     # as portas das suítes nas duas fachadas (o padrão de 14/11: ripado de nogueira por fora, vidro claro por dentro)
     "E_1Pavimento": {"fora": [(1390, 580, 1425, 1480), (2470, 580, 2590, 1160), (1940, 790, 2065, 840)]},
 }
@@ -563,6 +564,9 @@ DESFAZER = {
     "D_Terreo": [(2046, 1538, 2057, 1602),      # as folhas de madeira de 3 portas (a do lavabo e mais duas), como as
                  (2449, 1210, 2518, 1221),      # outras folhas da casa, sem contorno
                  (2368, 764, 2444, 775)],
+    "E_Terreo": [(2386, 832, 2449, 841),        # as folhas de madeira de 3 portas, como as outras folhas da casa
+                 (2293, 1210, 2362, 1220),
+                 (2390, 619, 2442, 629)],
 }
 
 
