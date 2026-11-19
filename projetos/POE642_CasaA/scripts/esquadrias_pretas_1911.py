@@ -453,8 +453,10 @@ def visao(planta, img, ok_g, fora_g):
 EXTRAS = {
     "A_Terreo": [(1885, 359, 1946, 372),           # a janela da sala de estar, na parede de cima
                  (2268, 350, 2333, 356)],          # a janela do lavabo, sob a claraboia
+    "A_1Pavimento": [(1539, 1458, 1575, 1466), (1624, 1458, 1643, 1465),   # as 2 janelas do banho master
+                     (2532, 1126, 2547, 1175)],                            # a janela lateral do banho 1
 }
-EXTRAS_FEITAS = {"A_Terreo": 2}                    # quantas já foram aplicadas (rodar de novo aplica só as novas)
+EXTRAS_FEITAS = {"A_Terreo": 2, "A_1Pavimento": 3}                    # quantas já foram aplicadas (rodar de novo aplica só as novas)
 
 
 def aplicar_extras(planta, q=Q_):
