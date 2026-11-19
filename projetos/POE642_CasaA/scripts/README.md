@@ -4417,3 +4417,36 @@ caixa, `Mapa.local`, com a final de antes como referência):
   dos passos (desfeito por este). Depois houve uma variante com o dente só na linha da folha (50369cb), mas o usuário
   confirmou esta, com a imagem dela ("Esse é o certo"): os arquivos voltaram ao 0029fe8. Antes e depois destes em
   `POE642_CasaD/renders/POE642_CasaD_PH_Terreo_1711d_vao_master_12K_antes_depois.jpg`.
+
+### Conferência dos pedidos do Miro, uma por planta: `conferencia_cliente.py` (19/11)
+
+Pedidos do usuário: "Abre para mim em uma folha todas as recomendações feitas para o subsolo da casa A [...] Não pode
+faltar nenhuma recomendação"; "Às vezes aparece um pedido de recomendação que vai valer para todas as outras casas [...]
+Essas têm que constar em todos esses checklists"; "esse arquivo de solicitação de alterações, baseado no Miro, eu possa
+ser enviado para o cliente também [...] eu quero mostrar para eles que a gente seguiu fielmente aquilo que eles pediram";
+os padrões do escritório entram como "melhorias aplicadas em todas as plantas" ("Sim"); a planta do projeto, a dos PDFs
+das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
+
+- **Folhas:** A3 deitadas a 300 dpi, na identidade das pranchas (Poppins, logotipos). Na 1ª, à direita, a planta de
+  layout do projeto (a base do PDF, `POE642_Casa<X>/bases/..._v1_16x9.png` (Térreo da A: `v4`), que está no mesmo quadro
+  de 3840 x 2160 da prancha: recortada no mesmo `recorte`, fica lado a lado com a humanizada) e a planta humanizada com
+  o número de cada pedido; à esquerda, os pedidos (C1...): o número, a caixinha "conferido", a fala do cliente no Miro,
+  o que foi feito e o detalhe recortado do 12K (opção A). Depois, os pedidos gerais do cliente (G1..., em todas as
+  folhas, com o que foi feito nesta planta) e as melhorias. O que não cabe vai para a folha de continuação (2 colunas);
+  na 1ª folha, o espaço embaixo das plantas também recebe blocos.
+- **Versão interna (`--interno`):** a mesma, com "NO 12K: ..." (o que olhar), o status (`parcial`, `nao_feito`) e as
+  observações em vermelho; o aviso de que falta a imagem do Miro.
+- **Dados (`POE642_Book/checklist/dados/`):** `itens/<X>_<pav>.json` (as notas do cliente de cada planta, levantadas do
+  `levantamento/dados/casa_<X>.json`, das docstrings dos `pedidos_*`, do README, das regras e, na Casa E, da análise de
+  16/11; `pontos` em px da prancha); `gerais.json` (os pedidos gerais); `melhorias.json`; `doze_k.json` (o 12K na
+  prancha: px do 12K = (px da prancha − (x0, y0)) × s; C, D e E pelos `*_12K_dados.json` do recorte A3; A e B por
+  casamento do 12K reduzido com a prancha acolchoada de branco, correlação ≥ 0,995); `planos.json` (recorte e Miro, se
+  houver).
+- **O detalhe:** o retângulo em volta dos pontos do pedido (80 x 60 px de folga, mínimo 300 x 150, na proporção do
+  quadro de 480 x 230); com os pontos espalhados, só o 1º; `detalhe` no item manda.
+- **Miro:** o conector do Miro segue com "Board access denied" no quadro uXjVJkj7NUw= (19/11); sem a imagem, a versão
+  do cliente não mostra o quadro. Com o PNG de cada quadro, `planos.json` → `miro`.
+- **Saídas:** `POE642_Book/checklist/cliente/POE642_Conferencia_Casa<X>_<pav>_<n>.jpg`,
+  `interna/..._interna_<n>.jpg` e os PDFs únicos `POE642_Book/checklist/POE642_Conferencia_Pedidos_Miro{,_interna}.pdf`.
+- **Como refazer:** `python3 conferencia_cliente.py --todas` e `python3 conferencia_cliente.py --todas --interno`; uma
+  planta: `python3 conferencia_cliente.py B Terreo [--interno]`.

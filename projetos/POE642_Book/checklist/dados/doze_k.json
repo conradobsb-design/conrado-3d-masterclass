@@ -1,0 +1,74 @@
+{
+ "A_Subsolo": {
+  "arquivo": "POE642_CasaA/entrega/POE642_CasaA_PH_Subsolo_12K_opcao_A.jpg",
+  "x0": 666,
+  "y0": 625,
+  "s": 6.896
+ },
+ "A_Terreo": {
+  "arquivo": "POE642_CasaA/entrega/POE642_CasaA_PH_Terreo_12K_opcao_A.jpg",
+  "x0": 167.2,
+  "y0": -144.4,
+  "s": 3.645
+ },
+ "A_1Pavimento": {
+  "arquivo": "POE642_CasaA/entrega/POE642_CasaA_PH_1Pavimento_12K_opcao_A.jpg",
+  "x0": 170.7,
+  "y0": -144.9,
+  "s": 3.65
+ },
+ "B_Subsolo": {
+  "arquivo": "POE642_CasaB/entrega/POE642_CasaB_PH_Subsolo_12K_opcao_A.jpg",
+  "x0": 601.9,
+  "y0": -7.7,
+  "s": 9.685
+ },
+ "B_Terreo": {
+  "arquivo": "POE642_CasaB/entrega/POE642_CasaB_PH_Terreo_12K_opcao_A.jpg",
+  "x0": 190.8,
+  "y0": -219.2,
+  "s": 3.59
+ },
+ "C_Subsolo": {
+  "arquivo": "POE642_CasaC/entrega/POE642_CasaC_PH_Subsolo_12K_opcao_A.jpg",
+  "x0": 27.2,
+  "y0": 177.5,
+  "s": 5.5839
+ },
+ "C_Terreo": {
+  "arquivo": "POE642_CasaC/entrega/POE642_CasaC_PH_Terreo_12K_opcao_A.jpg",
+  "x0": 190.3,
+  "y0": -262.9,
+  "s": 3.582
+ },
+ "D_Subsolo": {
+  "arquivo": "POE642_CasaD/entrega/POE642_CasaD_PH_Subsolo_12K_opcao_A.jpg",
+  "x0": 473.7,
+  "y0": 960.7,
+  "s": 10.5244
+ },
+ "D_Terreo": {
+  "arquivo": "POE642_CasaD/entrega/POE642_CasaD_PH_Terreo_12K_opcao_A.jpg",
+  "x0": 265.1,
+  "y0": -96.5,
+  "s": 3.833
+ },
+ "E_Subsolo": {
+  "arquivo": "POE642_CasaE/entrega/POE642_CasaE_PH_Subsolo_12K_opcao_A.jpg",
+  "x0": 817.5,
+  "y0": 243.9,
+  "s": 9.4014
+ },
+ "E_Terreo": {
+  "arquivo": "POE642_CasaE/entrega/POE642_CasaE_PH_Terreo_12K_opcao_A.jpg",
+  "x0": 168.5,
+  "y0": -291.1,
+  "s": 3.6248
+ },
+ "E_1Pavimento": {
+  "arquivo": "POE642_CasaE/entrega/POE642_CasaE_PH_1Pavimento_12K_opcao_A.jpg",
+  "x0": 167.4,
+  "y0": -291.8,
+  "s": 3.6225
+ }
+}

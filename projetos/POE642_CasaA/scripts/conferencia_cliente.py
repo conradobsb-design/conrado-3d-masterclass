@@ -1,26 +1,40 @@
-"""Conferência dos pedidos do Miro, a versão para o cliente (19/11, usuário: "A ideia é que esse arquivo de solicitação
-de alterações, baseado no Miro, eu possa ser enviado para o cliente também [...] para que ele também faça essa
-conferência [...] eu quero mostrar para eles que a gente seguiu fielmente aquilo que eles pediram").
+"""Conferência dos pedidos do Miro, uma por planta: a versão para o cliente e a interna (19/11).
 
-Uma página A3 deitada por planta, na identidade das pranchas (Poppins, os logotipos da Paulo Octávio e da New Air):
-- à esquerda, cada pedido do cliente no Miro para esta planta, com as palavras dele, o que foi feito e o detalhe da
-  planta humanizada (recortado do 12K) e a caixinha "conferido"; depois, os pedidos gerais dele que valem para todas
-  as plantas. Só entram os pedidos do cliente (`"cliente": true`): os padrões internos ficam na versão de conferência
-  interna (`checklist_conferencia.py`);
-- à direita, a imagem do Miro, a planta de layout do projeto (a do 3D, no mesmo giro da nossa) e a planta humanizada
-  com os números no lugar de cada pedido.
+Usuário: "A ideia é que esse arquivo de solicitação de alterações, baseado no Miro, eu possa ser enviado para o cliente
+também [...] para que ele também faça essa conferência [...] eu quero mostrar para eles que a gente seguiu fielmente
+aquilo que eles pediram"; antes: "elencar as recomendações, enumerá-las [...] trazer também uma imagem do miro [...] e ao
+lado vai ter o 3D"; "Às vezes aparece um pedido de recomendação que vai valer para todas as outras casas [...] Essas têm
+que constar em todos esses checklists"; e, sobre os padrões do escritório, "Sim" (entram como "melhorias aplicadas em
+todas as plantas").
 
-Os dados são os mesmos da conferência interna: `POE642_Book/checklist/dados/<casa>_<pav>.json` (por item: `fala`,
-`como`, `detalhe` em px da prancha; o 12K pelo `doze_k`: px do 12K = (px da prancha - x0, y0) * s).
+Folhas A3 deitadas, na identidade das pranchas (Poppins, os logotipos da Paulo Octávio e da New Air):
+- 1ª folha: à direita, a planta de layout do projeto (a do PDF do escritório de arquitetura, no mesmo quadro da nossa:
+  a base `POE642_Casa<X>/bases/..._v1_16x9.png`) e a planta humanizada com o número de cada pedido no lugar (e a imagem
+  do Miro, se houver); à esquerda, os pedidos;
+- cada pedido: o número, a caixinha "conferido", a fala do cliente no Miro, o que foi feito e o detalhe da planta
+  humanizada recortado do 12K (opção A);
+- depois, os pedidos gerais do cliente (valem para todas as plantas: constam em todas as folhas, com o que foi feito
+  nesta) e as melhorias aplicadas em todas as plantas;
+- o que não cabe vai para as folhas de continuação, em duas colunas.
 
-  python3 conferencia_cliente.py A Subsolo
+Dados (`POE642_Book/checklist/dados/`):
+- `itens/<casa>_<pav>.json`: os pedidos do cliente desta planta (`fala`, `como`, `conferir`, `pontos` em px da prancha,
+  `geral`, `g` = o id do pedido geral quando `geral`, `status`, `obs`);
+- `gerais.json`: os pedidos gerais (`id`, `fala`, `origem`, `como`: o texto padrão, quando a planta não tem o seu);
+- `melhorias.json`: os padrões do escritório, para o cliente;
+- `doze_k.json`: o 12K de cada planta na prancha (px do 12K = (px da prancha - (x0, y0)) * s);
+- `planos.json`: o recorte da prancha (`recorte`) e a imagem do Miro (`miro`), por planta.
+
+  python3 conferencia_cliente.py A Subsolo          # uma planta (versão do cliente)
+  python3 conferencia_cliente.py A Subsolo --interno
+  python3 conferencia_cliente.py --todas [--interno] # as 12 e o PDF único
 """
 import argparse
+import glob
 import json
 from pathlib import Path
 
 import cv2
-import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
 AQUI = Path(__file__).resolve().parent
@@ -30,29 +44,44 @@ DADOS = SAIDA / "dados"
 ASSETS = PROJ / "POE642_CasaA" / "entrega" / "assets"
 PRANCHA = "POE642_Casa{c}/entrega/POE642_Casa{c}_PH_{p}_entrega.png"
 NOME = {"Subsolo": "SUBSOLO", "Terreo": "TÉRREO", "1Pavimento": "1º PAVIMENTO"}
+PLANTAS = [("A", "Subsolo"), ("A", "Terreo"), ("A", "1Pavimento"), ("B", "Subsolo"), ("B", "Terreo"),
+           ("C", "Subsolo"), ("C", "Terreo"), ("D", "Subsolo"), ("D", "Terreo"), ("E", "Subsolo"), ("E", "Terreo"),
+           ("E", "1Pavimento")]
 W, H = 3508, 2480                                     # A3 deitada a 300 dpi
 MARG = 90
 TINTA = (28, 28, 30)
 CINZA = (110, 110, 112)
 LINHA = (225, 222, 216)
 ACENTO = (150, 118, 82)                               # o bronze das pranchas
-COR = {"C": (176, 40, 40), "G": (38, 110, 80)}
+COR = {"C": (176, 40, 40), "G": (38, 110, 80), "M": (150, 118, 82)}
+DW, DH = 480, 230                                     # o detalhe de cada pedido
+RX0 = 2250                                            # a coluna das plantas na 1ª folha
+TOPO = MARG + 250
+BASE = H - MARG - 40
 
 
 def F(peso, t):
     return ImageFont.truetype(str(ASSETS / "fontes" / f"Poppins-{peso}.ttf"), t)
 
 
+FQ, FC, FL, FK = F("Regular", 31), F("Light", 29), F("Medium", 20), F("Light", 17)
+FI, FS = F("Light", 26), F("Medium", 28)
+FG, FGC = F("Regular", 28), F("Light", 26)
+
+
 def quebra(txt, f, larg, d):
-    linhas, cur = [], ""
-    for w in txt.split():
-        t = (cur + " " + w).strip()
-        if d.textlength(t, font=f) > larg and cur:
-            linhas.append(cur)
-            cur = w
-        else:
-            cur = t
-    return linhas + [cur]
+    linhas = []
+    for par in txt.split("\n"):
+        cur = ""
+        for w in par.split():
+            t = (cur + " " + w).strip()
+            if d.textlength(t, font=f) > larg and cur:
+                linhas.append(cur)
+                cur = w
+            else:
+                cur = t
+        linhas.append(cur)
+    return linhas
 
 
 def marca(d, cx, cy, txt, cor, r, f):
@@ -80,138 +109,333 @@ def logos(pg, x1, yc, alt):
     pg.paste(na, (x, yc - na.height // 2), na)
 
 
-def pagina(casa, pav):
-    q = json.loads((DADOS / f"{casa}_{pav}.json").read_text())
-    itens = [it for it in q["itens"] if it.get("cliente")]
-    pg = Image.new("RGB", (W, H), "white")
-    d = ImageDraw.Draw(pg)
-    # ---------------------------------------------------------------- o cabeçalho
-    d.text((MARG, MARG - 10), f"CASA {casa} – {NOME[pav]}", fill=TINTA, font=F("Medium", 62))
-    d.text((MARG, MARG + 84), "CONFERÊNCIA DOS PEDIDOS FEITOS NO MIRO", fill=ACENTO, font=F("Regular", 30))
-    logos(pg, W - MARG, MARG + 55, 92)
-    d.line((MARG, MARG + 150, W - MARG, MARG + 150), fill=TINTA, width=3)
-    fi = F("Light", 27)
-    d.text((MARG, MARG + 172), "Cada pedido feito no Miro para esta planta, com as suas palavras, o que foi feito e o detalhe da "
-           "planta humanizada. Os números mostram onde está cada pedido na planta.", fill=CINZA, font=fi)
-    topo = MARG + 250
-    # ---------------------------------------------------------------- à direita: Miro, layout do projeto, a planta
-    rx0, rx1 = 2250, W - MARG
-    rw = rx1 - rx0
-    ft = F("Medium", 27)
-    fr = F("Light", 21)
-    y = topo
-    d.text((rx0, y), "MIRO", fill=TINTA, font=ft)
-    y += 46
-    miro = q.get("miro", {})
-    if miro.get("arquivo") and (PROJ / miro["arquivo"]).exists():
-        mi, _ = caber(cv2.imread(str(PROJ / miro["arquivo"])), rw, 560)
-        pg.paste(pil(mi), (rx0, y))
-        y += mi.shape[0] + 46
-    else:
-        d.rectangle((rx0, y, rx1, y + 300), fill=(247, 246, 243), outline=LINHA, width=2)
-        d.text(((rx0 + rx1) // 2, y + 150), "[ imagem do quadro do Miro desta planta ]", fill=(150, 150, 150),
-               font=F("Light", 26), anchor="mm")
-        y += 300 + 46
-    d.text((rx0, y), "PLANTA DE LAYOUT DO PROJETO", fill=TINTA, font=ft)
-    y += 40
-    d.text((rx0, y), "referência do escritório de arquitetura, no mesmo giro da planta humanizada", fill=CINZA, font=fr)
-    y += 40
-    t3 = q["tres_d"]
-    tres = cv2.imread(str(PROJ / t3["arquivo"]))
-    a, b, c, e = t3["recorte"]
-    tres = tres[b:e, a:c]
-    if t3.get("giro") == "anti-horario":
-        tres = cv2.rotate(tres, cv2.ROTATE_90_COUNTERCLOCKWISE)
-    im3, _ = caber(tres, rw, 760)
-    pg.paste(pil(im3), (rx0, y))
-    d.rectangle((rx0 - 1, y - 1, rx0 + im3.shape[1], y + im3.shape[0]), outline=LINHA, width=2)
-    y += im3.shape[0] + 46
-    d.text((rx0, y), "PLANTA HUMANIZADA", fill=TINTA, font=ft)
-    y += 46
-    pr = cv2.imread(str(PROJ / PRANCHA.format(c=casa, p=pav)))
-    a0, b0, a1, b1 = q["recorte_prancha"]
-    pl, k = caber(pr[b0:b1, a0:a1], rw, H - MARG - 40 - y)
-    pli = pil(pl)
-    dp = ImageDraw.Draw(pli)
-    fm = F("SemiBold", 17)
+def aspas(fala):
+    return " / ".join(f"“{f.strip()}”" for f in fala.split(" / "))
+
+
+# ------------------------------------------------------------------------------------------------ os dados
+def ler(nome, padrao=None):
+    f = DADOS / nome
+    return json.loads(f.read_text()) if f.exists() else padrao
+
+
+def dados_planta(casa, pav, interno):
+    itens = (ler(f"itens/{casa}_{pav}.json") or {"itens": []})["itens"]
+    gerais = ler("gerais.json", [])
+    plano = ler("planos.json", {}).get(f"{casa}_{pav}", {})
+    if "recorte" not in plano:
+        lev = json.loads((PROJ / "POE642_Book/levantamento/dados" / f"casa_{casa}.json").read_text())
+        plano["recorte"] = lev["plantas"][pav]["recorte"]
+    pedidos, desta = [], {}
     for it in itens:
-        for x, yy in it.get("pontos") or []:
-            cx, cy = (x - a0) * k, (yy - b0) * k
-            if 0 <= cx <= pli.width and 0 <= cy <= pli.height:
-                marca(dp, cx, cy, it["id"], COR[it["id"][0]], 20, fm)
-    pg.paste(pli, (rx0, y))
-    d.rectangle((rx0 - 1, y - 1, rx0 + pli.width, y + pli.height), outline=LINHA, width=2)
-    # ---------------------------------------------------------------- à esquerda: os pedidos
-    dz = q["doze_k"]
-    doze = cv2.imread(str(PROJ / dz["arquivo"]))
-    lx0, lx1 = MARG, rx0 - 110
-    dw, dh = 470, 222                                 # o detalhe de cada pedido
-    tx1 = lx1 - dw - 50
-    secs = {"C": "PEDIDOS PARA ESTA PLANTA", "G": "PEDIDOS GERAIS (VALEM PARA TODAS AS PLANTAS)"}
-    n = len(itens)
-    nsec = len({it["id"][0] for it in itens})
-    for t in range(34, 17, -1):
-        fq, fc, fl = F("Regular", t), F("Light", int(t * 0.92)), F("Medium", int(t * 0.62))
-        passo = int(t * 1.42)
-        blocos = []
-        for it in itens:
-            larg = tx1 - (lx0 + 150)
-            lq = quebra(f"“{it['fala']}”", fq, larg, d)
-            lc = quebra(it["como"], fc, larg, d)
-            h = int(t * 0.95) + len(lq) * passo + int(t * 0.95) + len(lc) * int(passo * 0.95)
-            blocos.append((lq, lc, max(h, dh)))
-        total = sum(h for *_, h in blocos) + n * 34 + nsec * 76
-        if total <= H - MARG - 40 - topo:
-            break
-    ultimo = None
-    y = topo
-    for it, (lq, lc, h) in zip(itens, blocos):
-        sec = it["id"][0]
-        if sec != ultimo:
-            d.text((lx0, y), secs[sec], fill=COR[sec], font=F("Medium", 28))
-            d.line((lx0, y + 46, lx1, y + 46), fill=COR[sec], width=2)
-            y += 76
-            ultimo = sec
-        marca(d, lx0 + 34, y + 34, it["id"], COR[sec], 32, F("SemiBold", 24))
-        cb = 34
-        d.rectangle((lx0 + 17, y + 90, lx0 + 17 + cb, y + 90 + cb), outline=(80, 80, 80), width=3)
-        d.text((lx0 + 34, y + 90 + cb + 10), "conferido", fill=CINZA, font=F("Light", 17), anchor="mt")
-        x = lx0 + 150
-        yy = y
-        d.text((x, yy), "PEDIDO NO MIRO", fill=CINZA, font=fl)
-        yy += int(t * 0.95)
-        for ln in lq:
-            d.text((x, yy), ln, fill=TINTA, font=fq)
-            yy += passo
-        d.text((x, yy), "O QUE FOI FEITO", fill=CINZA, font=fl)
-        yy += int(t * 0.95)
-        for ln in lc:
-            d.text((x, yy), ln, fill=(70, 70, 70), font=fc)
-            yy += int(passo * 0.95)
-        # o detalhe da planta humanizada, do 12K
+        if it.get("geral") and it.get("g"):
+            desta.setdefault(it["g"], []).append(it)
+        else:
+            pedidos.append(dict(it))
+    for n, it in enumerate(pedidos, 1):
+        it["id"] = f"C{n}"
+    gs = []
+    for g in gerais:
+        if g.get("so") and f"{casa}_{pav}" not in g["so"]:
+            continue
+        aqui = desta.get(g["id"], [])
+        como = " ".join(a["como"] for a in aqui) if aqui else g["como"]
+        pts = [p for a in aqui for p in a.get("pontos") or []]
+        st = [a for a in aqui if a.get("status", "feito") != "feito"]
+        gs.append({"id": g["id"], "fala": g["fala"], "origem": g.get("origem", ""), "como": como, "pontos": pts,
+                   "conferir": " ".join(a.get("conferir", "") for a in aqui), "status": st[0]["status"] if st else "feito",
+                   "obs": " ".join(a.get("obs", "") for a in st)})
+    return plano, pedidos, gs, ler("melhorias.json", [])
+
+
+def retangulo(pts, area):
+    """O recorte do detalhe em px da prancha, em volta dos pontos, na proporção do quadro do detalhe."""
+    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+    if max(xs) - min(xs) > 700 or max(ys) - min(ys) > 380:
+        xs, ys = xs[:1], ys[:1]
+    a0, b0, a1, b1 = min(xs) - 80, min(ys) - 60, max(xs) + 80, max(ys) + 60
+    w, h = max(a1 - a0, 300), max(b1 - b0, 150)
+    if w / h > DW / DH:
+        h = w * DH / DW
+    else:
+        w = h * DW / DH
+    cx, cy = (a0 + a1) / 2, (b0 + b1) / 2
+    a0, b0 = cx - w / 2, cy - h / 2
+    x0, y0, x1, y1 = area
+    a0 = min(max(a0, x0), x1 - w)
+    b0 = min(max(b0, y0), y1 - h)
+    return [a0, b0, a0 + w, b0 + h]
+
+
+# ------------------------------------------------------------------------------------------------ os blocos
+class Folha:
+    def __init__(self, casa, pav, n):
+        self.pg = Image.new("RGB", (W, H), "white")
+        self.d = ImageDraw.Draw(self.pg)
+        d = self.d
+        cont = "" if n == 1 else "  (continuação)"
+        d.text((MARG, MARG - 10), f"CASA {casa} – {NOME[pav]}{cont}", fill=TINTA, font=F("Medium", 62))
+        d.text((MARG, MARG + 84), "CONFERÊNCIA DOS PEDIDOS FEITOS NO MIRO", fill=ACENTO, font=F("Regular", 30))
+        logos(self.pg, W - MARG, MARG + 55, 92)
+        d.line((MARG, MARG + 150, W - MARG, MARG + 150), fill=TINTA, width=3)
+        if n == 1:
+            d.text((MARG, MARG + 172), "Cada pedido feito no Miro para esta planta, com as suas palavras, o que foi "
+                   "feito e o detalhe da planta humanizada. Os números mostram onde está cada pedido na planta.",
+                   fill=CINZA, font=FI)
+
+
+def bloco_secao(titulo, cor):
+    def desenhar(fl, x, y, w, so_medir=False):
+        if not so_medir:
+            fl.d.text((x, y), titulo, fill=cor, font=FS)
+            fl.d.line((x, y + 46, x + w, y + 46), fill=cor, width=2)
+        return 76
+    return desenhar
+
+
+def bloco_pedido(it, doze, dz, interno):
+    cor = COR[it["id"][0]]
+
+    def desenhar(fl, x, y, w, so_medir=False):
+        d = fl.d
+        tx, tw = x + 120, w - 120 - DW - 40
+        lq = quebra(aspas(it["fala"]), FQ, tw, d)
+        lc = quebra(it["como"], FC, tw, d)
+        yy = y + 30 + len(lq) * 44 + 14 + 30 + len(lc) * 41
+        extra = []
+        if interno:
+            if it.get("conferir"):
+                extra.append(("NO 12K: " + it["conferir"], (38, 110, 80)))
+            if it.get("status", "feito") != "feito":
+                extra.append((f"{it['status'].upper().replace('_', ' ')}: {it.get('obs', '')}", (196, 32, 36)))
+            if it.get("obs") and it.get("status", "feito") == "feito":
+                extra.append(("OBS.: " + it["obs"], (196, 32, 36)))
+        le = [(ln, c) for t, c in extra for ln in quebra(t, FK if False else F("Light", 24), tw, d)]
+        yy += 8 + len(le) * 34 if le else 0
         a0, b0, a1, b1 = it["detalhe"]
         s = dz["s"]
         X0, Y0 = int((a0 - dz["x0"]) * s), int((b0 - dz["y0"]) * s)
         X1, Y1 = int((a1 - dz["x0"]) * s), int((b1 - dz["y0"]) * s)
-        det, _ = caber(doze[max(Y0, 0):Y1, max(X0, 0):X1], dw, dh)
-        dx = lx1 - det.shape[1]
-        pg.paste(pil(det), (dx, y))
-        d.rectangle((dx - 1, y - 1, dx + det.shape[1], y + det.shape[0]), outline=LINHA, width=2)
-        y += h + 34
-        d.line((lx0, y - 17, lx1, y - 17), fill=(238, 236, 232), width=2)
-    d.text((W - MARG, H - 40), "POE 642 · PLANTAS HUMANIZADAS · CONFERÊNCIA DOS PEDIDOS", fill=(160, 160, 160),
-           font=F("Light", 20), anchor="rm")
-    SAIDA.mkdir(parents=True, exist_ok=True)
-    out = SAIDA / f"POE642_Conferencia_Casa{casa}_{pav}.jpg"
-    pg.save(out, quality=92)
-    pg.save(out.with_suffix(".pdf"), resolution=300)
-    print(out, f"(corpo {t})")
-    return out
+        h = max(yy - y, DH, 160)
+        if so_medir:
+            return h + 40
+        marca(d, x + 36, y + 36, it["id"], cor, 34, F("SemiBold", 24))
+        cb = 34
+        d.rectangle((x + 19, y + 92, x + 19 + cb, y + 92 + cb), outline=(80, 80, 80), width=3)
+        d.text((x + 36, y + 92 + cb + 10), "conferido", fill=CINZA, font=FK, anchor="mt")
+        yy = y
+        d.text((tx, yy), "PEDIDO NO MIRO", fill=CINZA, font=FL)
+        yy += 30
+        for ln in lq:
+            d.text((tx, yy), ln, fill=TINTA, font=FQ)
+            yy += 44
+        yy += 14
+        d.text((tx, yy), "O QUE FOI FEITO", fill=CINZA, font=FL)
+        yy += 30
+        for ln in lc:
+            d.text((tx, yy), ln, fill=(70, 70, 70), font=FC)
+            yy += 41
+        yy += 8
+        for ln, c in le:
+            d.text((tx, yy), ln, fill=c, font=F("Light", 24))
+            yy += 34
+        det = doze[max(Y0, 0):max(Y1, 1), max(X0, 0):max(X1, 1)]
+        if det.size:
+            det, _ = caber(det, DW, DH)
+            dx = x + w - det.shape[1]
+            fl.pg.paste(pil(det), (dx, y))
+            d.rectangle((dx - 1, y - 1, dx + det.shape[1], y + det.shape[0]), outline=LINHA, width=2)
+        d.line((x, y + h + 20, x + w, y + h + 20), fill=(238, 236, 232), width=2)
+        return h + 40
+    return desenhar
+
+
+def bloco_geral(g, interno):
+    def desenhar(fl, x, y, w, so_medir=False):
+        d = fl.d
+        tx, tw = x + 120, w - 120
+        lq = quebra(aspas(g["fala"]) + (f"  ({g['origem']})" if g.get("origem") else ""), FG, tw, d)
+        lc = quebra("Nesta planta: " + g["como"], FGC, tw, d)
+        extra = []
+        if interno and g.get("conferir"):
+            extra += quebra("NO 12K: " + g["conferir"], F("Light", 24), tw, d)
+        if interno and g.get("status", "feito") != "feito":
+            extra += quebra(f"{g['status'].upper()}: {g.get('obs', '')}", F("Light", 24), tw, d)
+        h = max(len(lq) * 40 + 6 + len(lc) * 37 + len(extra) * 33, 120)
+        if so_medir:
+            return h + 34
+        marca(d, x + 36, y + 30, g["id"], COR["G"], 30, F("SemiBold", 22))
+        d.rectangle((x + 19, y + 74, x + 53, y + 108), outline=(80, 80, 80), width=3)
+        yy = y
+        for ln in lq:
+            d.text((tx, yy), ln, fill=TINTA, font=FG)
+            yy += 40
+        yy += 6
+        for ln in lc:
+            d.text((tx, yy), ln, fill=(70, 70, 70), font=FGC)
+            yy += 37
+        for ln in extra:
+            d.text((tx, yy), ln, fill=(196, 32, 36) if "FEITO" in ln.upper()[:12] or "PARCIAL" in ln[:8]
+                   else (38, 110, 80), font=F("Light", 24))
+            yy += 33
+        d.line((x, y + h + 16, x + w, y + h + 16), fill=(238, 236, 232), width=2)
+        return h + 34
+    return desenhar
+
+
+def bloco_melhorias(mel):
+    def desenhar(fl, x, y, w, so_medir=False):
+        d = fl.d
+        f = F("Light", 26)
+        ncol = 2 if w > 1800 else 1
+        cw = (w - (ncol - 1) * 60) // ncol
+        linhas = [quebra(m, f, cw - 60, d) for m in mel]
+        por = -(-len(mel) // ncol)
+        cols = [linhas[i * por:(i + 1) * por] for i in range(ncol)]
+        hc = [sum(len(ls) * 36 + 16 for ls in c) for c in cols]
+        h = 118 + max(hc)
+        if so_medir:
+            return h + 20
+        d.text((x, y), "MELHORIAS APLICADAS EM TODAS AS PLANTAS", fill=COR["M"], font=FS)
+        d.text((x, y + 44), "o padrão de representação do escritório, além dos pedidos", fill=CINZA, font=F("Light", 22))
+        d.line((x, y + 84, x + w, y + 84), fill=COR["M"], width=2)
+        for i, c in enumerate(cols):
+            yy = y + 104
+            cx = x + i * (cw + 60)
+            for ls in c:
+                d.rectangle((cx, yy + 6, cx + 26, yy + 32), outline=(80, 80, 80), width=3)
+                for ln in ls:
+                    d.text((cx + 50, yy), ln, fill=(70, 70, 70), font=f)
+                    yy += 36
+                yy += 16
+        return h + 20
+    return desenhar
+
+
+# ------------------------------------------------------------------------------------------------ a 1ª folha
+def plantas(fl, casa, pav, plano, pedidos, gs, interno):
+    d = fl.d
+    rx0, rx1 = RX0, W - MARG
+    rw = rx1 - rx0
+    ft = F("Medium", 27)
+    fr = F("Light", 21)
+    a0, b0, a1, b1 = plano["recorte"]
+    y = TOPO
+    miro = plano.get("miro")
+    tem_miro = bool(miro) and (PROJ / miro).exists()
+    nimg = 2 + tem_miro
+    hdisp = BASE - TOPO - nimg * 92
+    hmax = hdisp / nimg if tem_miro else hdisp / 2
+    if tem_miro:
+        d.text((rx0, y), "MIRO", fill=TINTA, font=ft)
+        y += 46
+        mi, _ = caber(cv2.imread(str(PROJ / miro)), rw, hmax)
+        fl.pg.paste(pil(mi), (rx0, y))
+        y += mi.shape[0] + 46
+    elif interno:
+        d.text((rx0, y), "MIRO: sem a imagem (quadro sem acesso nesta sessão)", fill=(196, 32, 36), font=fr)
+        y += 46
+    # a planta de layout do projeto: a base do PDF, no mesmo quadro de 3840 x 2160 da prancha
+    fb = plano.get("base") or sorted(glob.glob(str(PROJ / f"POE642_Casa{casa}/bases/POE642_Casa{casa}_BASE_{pav}_v*_16x9.png")))[0]
+    bi = cv2.imread(str(PROJ / fb) if not str(fb).startswith("/") else fb)
+    k = bi.shape[1] / 3840
+    tres = bi[int(b0 * k):int(b1 * k), int(a0 * k):int(a1 * k)]
+    d.text((rx0, y), "PLANTA DE LAYOUT DO PROJETO", fill=TINTA, font=ft)
+    d.text((rx0, y + 38), "a do escritório de arquitetura, no mesmo enquadramento da planta humanizada", fill=CINZA,
+           font=fr)
+    y += 84
+    im3, _ = caber(tres, rw, hmax)
+    fl.pg.paste(pil(im3), (rx0, y))
+    d.rectangle((rx0 - 1, y - 1, rx0 + im3.shape[1], y + im3.shape[0]), outline=LINHA, width=2)
+    y += im3.shape[0] + 46
+    d.text((rx0, y), "PLANTA HUMANIZADA", fill=TINTA, font=ft)
+    d.text((rx0, y + 38), "os números mostram onde está cada pedido", fill=CINZA, font=fr)
+    y += 84
+    pr = cv2.imread(str(PROJ / PRANCHA.format(c=casa, p=pav)))
+    pl, k = caber(pr[b0:b1, a0:a1], rw, BASE - y)
+    pli = pil(pl)
+    dp = ImageDraw.Draw(pli)
+    r = 19
+    fm = F("SemiBold", 16)
+    for it in list(pedidos) + list(gs):
+        for x, yy in it.get("pontos") or []:
+            cx, cy = (x - a0) * k, (yy - b0) * k
+            if 0 <= cx <= pli.width and 0 <= cy <= pli.height:
+                marca(dp, cx, cy, it["id"], COR[it["id"][0]], r, fm)
+    fl.pg.paste(pli, (rx0, y))
+    d.rectangle((rx0 - 1, y - 1, rx0 + pli.width, y + pli.height), outline=LINHA, width=2)
+    return y + pli.height + 70
+
+
+def pagina(casa, pav, interno=False):
+    plano, pedidos, gs, mel = dados_planta(casa, pav, interno)
+    dz = ler("doze_k.json")[f"{casa}_{pav}"]
+    doze = cv2.imread(str(PROJ / dz["arquivo"]))
+    area = (dz["x0"], dz["y0"], dz["x0"] + doze.shape[1] / dz["s"], dz["y0"] + doze.shape[0] / dz["s"])
+    for it in pedidos:
+        if not it.get("detalhe"):
+            it["detalhe"] = retangulo(it["pontos"], area) if it.get("pontos") else list(plano["recorte"])
+    blocos = [bloco_secao("PEDIDOS NO MIRO PARA ESTA PLANTA", COR["C"])]
+    blocos += [bloco_pedido(it, doze, dz, interno) for it in pedidos]
+    if gs:
+        blocos.append(bloco_secao("PEDIDOS GERAIS NO MIRO (VALEM PARA TODAS AS PLANTAS)", COR["G"]))
+        blocos += [bloco_geral(g, interno) for g in gs]
+    if mel:
+        blocos.append(bloco_melhorias(mel))
+    # o fluxo: a 1ª folha numa coluna à esquerda; as de continuação em duas
+    folhas = [Folha(casa, pav, 1)]
+    yr = plantas(folhas[0], casa, pav, plano, pedidos, gs, interno)
+    cw2 = (W - 2 * MARG - 100) // 2
+    # (x, largura, topo): na 1ª folha, a coluna da esquerda e o que sobra embaixo das plantas
+    colunas = lambda n: ([(MARG, RX0 - 110 - MARG, TOPO), (RX0, W - MARG - RX0, yr)] if n == 1 else
+                         [(MARG, cw2, MARG + 190), (MARG + cw2 + 100, cw2, MARG + 190)])
+    nf, ci, y = 1, 0, TOPO
+    i = 0
+    while i < len(blocos):
+        x, w, t0 = colunas(nf)[ci]
+        h = blocos[i](folhas[-1], x, y, w, True)
+        if blocos[i].__qualname__.startswith("bloco_secao") and i + 1 < len(blocos):
+            h += blocos[i + 1](folhas[-1], x, y, w, True)            # o título não fica sozinho no pé da coluna
+        if y + h > BASE and (y > t0 or BASE - t0 < 0.9 * (BASE - TOPO)):
+            ci += 1
+            if ci >= len(colunas(nf)):
+                nf += 1
+                ci = 0
+                folhas.append(Folha(casa, pav, nf))
+            y = colunas(nf)[ci][2]
+            continue
+        y += blocos[i](folhas[-1], x, y, w)
+        i += 1
+    saidas = []
+    suf = "_interna" if interno else ""
+    for n, fl in enumerate(folhas, 1):
+        fl.d.text((W - MARG, H - 40), f"POE 642 · PLANTAS HUMANIZADAS · CONFERÊNCIA DOS PEDIDOS · CASA {casa} – "
+                  f"{NOME[pav]} · FOLHA {n}/{len(folhas)}", fill=(160, 160, 160), font=F("Light", 20), anchor="rm")
+        out = SAIDA / ("interna" if interno else "cliente") / f"POE642_Conferencia_Casa{casa}_{pav}{suf}_{n}.jpg"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        fl.pg.save(out, quality=90)
+        saidas.append(out)
+    print(f"Casa {casa} {pav}: {len(pedidos)} pedidos, {len(gs)} gerais, {len(folhas)} folha(s)")
+    return [fl.pg for fl in folhas], saidas
+
+
+def pdf(paginas, out):
+    paginas[0].save(out, save_all=True, append_images=paginas[1:], resolution=300, quality=85)
+    print(out)
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("casa")
-    ap.add_argument("pav")
+    ap.add_argument("casa", nargs="?")
+    ap.add_argument("pav", nargs="?")
+    ap.add_argument("--todas", action="store_true")
+    ap.add_argument("--interno", action="store_true")
     a = ap.parse_args()
-    pagina(a.casa, a.pav)
+    lista = PLANTAS if a.todas else [(a.casa, a.pav)]
+    todas = []
+    for c, p in lista:
+        pgs, _ = pagina(c, p, a.interno)
+        todas += pgs
+    if a.todas:
+        nome = "POE642_Conferencia_Pedidos_Miro" + ("_interna" if a.interno else "") + ".pdf"
+        pdf(todas, SAIDA / nome)
