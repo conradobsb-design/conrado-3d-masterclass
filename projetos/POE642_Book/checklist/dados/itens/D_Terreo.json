@@ -202,8 +202,8 @@
   },
   {
    "fala": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
-   "como": "A água da piscina, da prainha e do spa está no tom mais sóbrio, puxado para o verde-acinzentado do exemplo, o mesmo adotado em todas as piscinas.",
-   "conferir": "água no tom da opção C, igual à das outras casas.",
+   "como": "A parte funda da piscina e o miolo do spa passaram para o azul-acinzentado da planta de referência, o mesmo tom sóbrio da Casa E, que dá profundidade; a prainha e o banco do spa, rasos, continuam claros.",
+   "conferir": "parte funda da piscina e miolo do spa em azul-acinzentado (padrão da Casa E); prainha e banco do spa claros; divisas retas.",
    "pontos": [
     [
      989,
@@ -212,7 +212,7 @@
    ],
    "geral": false,
    "status": "feito",
-   "obs": "Atendido pela água adotada em 11/11 para todas as piscinas (o tom da foto de referência do cliente), antes desta nota; não houve ajuste novo depois dela.",
+   "obs": "19/11: a opção 2 (padrão da Casa E) aplicada à parte funda; as rasas ficaram.",
    "miro_ids": [
     "3458764689987097758"
    ]
@@ -267,7 +267,7 @@
   },
   {
    "fala": "Mostrar melhor a diferença de profundidade",
-   "como": "A prainha e o banco do spa, mais rasos, ficaram num tom mais claro e transparente que a parte funda da piscina e do spa.",
+   "como": "A parte funda da piscina e o miolo do spa ficaram no azul-acinzentado mais escuro; a prainha e o banco do spa, rasos, num tom claro e transparente, com as divisas nítidas.",
    "conferir": "prainha e anel do spa claros; piscina e miolo do spa mais escuros; divisas nítidas.",
    "pontos": [
     [
@@ -277,7 +277,7 @@
    ],
    "geral": false,
    "status": "feito",
-   "obs": "A parte rasa foi diferenciada em 11/11, antes desta nota; não houve ajuste novo depois dela.",
+   "obs": "19/11: o contraste ficou maior com a parte funda no tom da Casa E.",
    "miro_ids": [
     "3458764689987097876"
    ]

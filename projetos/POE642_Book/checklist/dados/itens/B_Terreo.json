@@ -293,8 +293,8 @@
   },
   {
    "fala": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
-   "como": "A água da piscina e da prainha passou para o tom mais sóbrio adotado em todas as piscinas, com as partes rasas mais claras.",
-   "conferir": "água da opção aprovada, rasas mais claras.",
+   "como": "A parte funda da piscina e o miolo do spa passaram para o azul-acinzentado da planta de referência, o mesmo tom sóbrio da Casa E, que dá profundidade; a prainha e o banco do spa, rasos, continuam claros.",
+   "conferir": "parte funda da piscina e miolo do spa em azul-acinzentado (padrão da Casa E); prainha e banco do spa claros; divisas retas.",
    "pontos": [
     [
      746,
@@ -305,7 +305,8 @@
    "status": "feito",
    "miro_ids": [
     "3458764689930164452"
-   ]
+   ],
+   "obs": "19/11: a opção 2 (padrão da Casa E) aplicada à parte funda; as rasas ficaram."
   },
   {
    "fala": "Colocar uma textura nas espreguiçadeiras",

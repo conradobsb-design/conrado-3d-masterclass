@@ -4470,3 +4470,25 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   As notas e os alvos ficam em `dados/miro/notas_miro.json`; o alinhamento em `dados/miro/registro.json`.
 - **Como refazer:** `python3 conferencia_cliente.py --todas` e `python3 conferencia_cliente.py --todas --interno`; uma
   planta: `python3 conferencia_cliente.py B Terreo [--interno]`.
+
+## A água das piscinas no padrão sóbrio da Casa E: piscinas_sobrias_1911.py (19/11)
+
+- **Pedido:** a nota do Miro nos Térreos de A a E ("Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.") e
+  o post-it geral da planta de referência ("Usar como referência essa planta baixa para o tom da piscina..."). Da
+  amostra `renders/POE642_CasaA_PH_Terreo_1911_piscina_tons_proposta.jpg`, o usuário escolheu a opção 2: "Vamos usar o
+  tom de sóbrio que a gente fez na casa E como padrão para todas as piscinas. Que tenham profundidade, né?
+  Diferentemente das prainhas, do spa, que as partes claras e rasas mantêm-se." / "Opção 2 é a melhor e atende ao
+  cliente! Fiquemos com ela!".
+- **O que muda:** só a água funda (o corpo da piscina e o miolo do spa) dos Térreos de A, B, C e D: matiz +28°,
+  saturação pela metade e luminosidade a 75% (do verde-água de 30%/72% para o azul-acinzentado de ~18%/52%, o da Casa
+  E, 14%/52%). Prainhas, bancos dos spas e os degraus da C ficam como estavam; o pastilhado, os reflexos, as bordas e
+  os rótulos ficam. A Casa E é o padrão e não muda; os Subsolos de A a D não têm piscina.
+- **Como:** a parte funda de cada planta são retângulos em px da prancha (`FUNDO`), cortados pela máscara da água
+  (matiz 140°-220°, corpos grandes, entalhes e furos dos reflexos fechados), com 1 px de esfumado. Os lados marcados
+  são as divisas com a água rasa e se ajustam sozinhos à linha onde o tom sobe (na prancha). No 12K (bordas suaves do
+  Topaz) valem as divisas da prancha, levadas pelo mapa de `doze_k.json` refinado por ECC (correlação ≥ 0,989).
+- **Arquivos:** a prancha de entrega, a final com rótulos (e a `_B` da D) e os 12K A e B de cada Térreo; depois
+  `pdf_entrega.py` das quatro casas, `book_entrega.py` e `conferencia_cliente.py --todas [--interno]` (itens da piscina
+  de A a D como feitos). Antes e depois em `renders/POE642_Casas_ABCD_PH_Terreo_1911_piscinas_sobrias_antes_depois.jpg`
+  (o antes do commit daba07e).
+- **Rodar de novo não repete:** com a água funda já sóbria (saturação mediana < 60 de 255), a planta é pulada.

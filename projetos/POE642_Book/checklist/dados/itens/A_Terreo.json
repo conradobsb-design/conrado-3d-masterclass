@@ -124,8 +124,8 @@
   },
   {
    "fala": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
-   "como": "A água da piscina, da prainha e do spa foi refeita com o revestimento Barlavento aparente e as partes rasas mais claras, no tom de água adotado para as piscinas de todas as casas.",
-   "conferir": "piscina, prainha e spa: Barlavento visível, rasas mais claras; conferir se o turquesa de hoje lê como 'mais sóbrio' que o da revisão.",
+   "como": "A parte funda da piscina e o miolo do spa passaram para o azul-acinzentado da planta de referência, o mesmo tom sóbrio da Casa E, que dá profundidade; a prainha e o banco do spa, rasos, continuam claros.",
+   "conferir": "parte funda da piscina e miolo do spa em azul-acinzentado (padrão da Casa E); prainha e banco do spa claros; divisas retas.",
    "pontos": [
     [
      1182,
@@ -133,8 +133,8 @@
     ]
    ],
    "geral": false,
-   "status": "parcial",
-   "obs": "o tom sóbrio da foto do cliente entrou em 10/11, mas o usuário trocou depois para o turquesa #7CC8D4 e, em 11/11, para a água C (escolha dele, para todas as piscinas); a água de hoje é turquesa clara: confirmar se atende ao 'mais sóbrio' (na Casa E a mesma nota levou a saturação à metade)",
+   "status": "feito",
+   "obs": "19/11: o usuário escolheu a opção 2 da amostra (\"Opção 2 é a melhor e atende ao cliente! Fiquemos com ela!\"), com o tom da Casa E como padrão de todas as piscinas e as partes rasas mantidas claras.",
    "miro_ids": [
     "3458764689919559662"
    ]
