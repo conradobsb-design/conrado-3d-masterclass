@@ -4528,3 +4528,7 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   encostado na folha do próprio 12K (`folha_12k`): lá a folha sai até 1 px (da final) menor que a peça do PDF, e o
   contorno pela peça ficava solto na parede, acima do vidro (as janelas do banho master). O contorno no 12K vai nos 4
   lados da folha.
+- **O que a conferência tirou (`--desfazer`, `DESFAZER`):** falsos positivos da primeira passada voltam à final de
+  `ANTES` (final, variantes, prancha e 12K A e B, pelo registro local): na Casa B Subsolo, a folha de madeira da porta
+  do BH sauna (as folhas de madeira ficam sem contorno, como a da circulação ao lado) e o box do BH serviço (o vidro de
+  correr volta ao vidro claro, sem a esquadria preta). As caixas também entram nas zonas de fora (`EXTRA`).

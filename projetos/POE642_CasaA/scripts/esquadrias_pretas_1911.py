@@ -73,7 +73,9 @@ EXTRA = {
     "A_1Pavimento": {"fora": [ELEV_A, (2240, 370, 2340, 430)],
                      "fora_pt": [(1385, 557, 1410, 788), (1385, 1177, 1410, 1370), (1147, 1395, 1172, 1773),
                                  (2286, 1492, 2312, 1694)]},
-    "B_Subsolo": {"fora": [(1785, 630, 1835, 700)]},                         # o elevador
+    "B_Subsolo": {"fora": [(1785, 630, 1835, 700),                          # o elevador
+                           (1225, 605, 1300, 622),                          # a folha de madeira da porta do BH sauna
+                           (1445, 380, 1515, 394)]},                        # o box do BH serviço
     # o elevador e os boxes (a ducha em T junto à sauna e o box do vestiário)
     "D_Subsolo": {"fora": [(1420, 1225, 1490, 1340), (1195, 1655, 1265, 1685), (945, 1650, 1030, 1720)]},
     "D_Terreo": {"fora": [(1420, 1225, 1485, 1335)]},                        # o elevador
@@ -552,6 +554,51 @@ EXTRAS = {
 EXTRAS_FEITAS = {"A_Terreo": 2, "A_1Pavimento": 3}                    # quantas já foram aplicadas (rodar de novo aplica só as novas)
 
 
+# o contorno que a conferência de 19/11 tirou (falsos positivos da primeira passada): (x0, y0, x1, y1) em px da final;
+# a área volta à final de `ANTES` (sem o contorno), na final, nas variantes, na prancha e nos 12K A e B
+DESFAZER = {
+    "B_Subsolo": [(1228, 607, 1300, 621),       # a folha de madeira da porta do BH sauna (aberta, junto à parede)
+                  (1447, 383, 1513, 391)],      # o box do BH serviço (o vidro de correr entre a circulação e o chuveiro)
+}
+
+
+def desfazer(planta, caixas, rev=ANTES):
+    """Volta as `caixas` (px da final) ao que eram em `rev`: final, variantes, prancha e 12K A e B."""
+    c, pav = planta.split("_")
+    base = cv2.imread(str(PROJ / PLANTAS[planta][0]))
+    for f in PLANTAS[planta]:
+        im = cv2.imread(str(PROJ / f))
+        old = git_img(f, rev)
+        for x0, y0, x1, y1 in caixas:
+            im[y0:y1, x0:x1] = old[y0:y1, x0:x1]
+        cv2.imwrite(str(PROJ / f), im)
+        if f == PLANTAS[planta][0]:
+            novo = im
+    pf = PROJ / f"POE642_Casa{c}/entrega/POE642_Casa{c}_PH_{pav}_entrega.png"
+    pr = cv2.imread(str(pf))
+    pr[:2160] = novo
+    cv2.imwrite(str(pf), pr)
+    dz = json.loads((PROJ / "POE642_Book/checklist/dados/doze_k.json").read_text())[planta]
+    for op in "AB":
+        rel = f"POE642_Casa{c}/entrega/POE642_Casa{c}_PH_{pav}_12K_opcao_{op}.jpg"
+        pil = Image.open(PROJ / rel)
+        dpi = pil.info.get("dpi", (743, 743))
+        im = cv2.cvtColor(np.array(pil.convert("RGB")), cv2.COLOR_RGB2BGR)
+        del pil
+        dado = subprocess.run(["git", "show", f"{rev}:projetos/{rel}"], cwd=PROJ, capture_output=True, check=True).stdout
+        old = cv2.imdecode(np.frombuffer(dado, np.uint8), cv2.IMREAD_COLOR)
+        cinza = cv2.cvtColor(old, cv2.COLOR_BGR2GRAY)
+        for x0, y0, x1, y1 in caixas:
+            mapa, cc = registro_12k(base, cinza, dz, (max(x0 - 100, 0), max(y0 - 100, 0), x1 + 100, y1 + 100))
+            A0, B0 = mapa(x0, y0)
+            A1, B1 = mapa(x1, y1)
+            A0, B0, A1, B1 = int(A0) - 2, int(B0) - 2, int(np.ceil(A1)) + 2, int(np.ceil(B1)) + 2
+            im[B0:B1, A0:A1] = old[B0:B1, A0:A1]
+            print(f"   {op}: {x0},{y0} desfeito (registro {cc:.3f})")
+        Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB)).save(PROJ / rel, quality=95, subsampling=0, dpi=dpi)
+        del im, old, cinza
+
+
 def aplicar_extras(planta, q=Q_):
     """O contorno das `EXTRAS` da planta na final de hoje (e nas variantes), na prancha e nos 12K A e B."""
     gs = [[r] for r in EXTRAS[planta][EXTRAS_FEITAS.get(planta, 0):]]
@@ -577,7 +624,12 @@ def main():
     ap.add_argument("--antes_depois", action="store_true")
     ap.add_argument("--sem12k", action="store_true")
     ap.add_argument("--extras", action="store_true", help="só as EXTRAS da planta (a conferência de 19/11)")
+    ap.add_argument("--desfazer", action="store_true", help="só tira o contorno das caixas de DESFAZER da planta")
     a = ap.parse_args()
+    if a.desfazer:
+        for planta in a.plantas:
+            desfazer(planta, DESFAZER[planta])
+        return
     if a.extras:
         for planta in a.plantas:
             base, novo = aplicar_extras(planta)
