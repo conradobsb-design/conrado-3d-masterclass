@@ -408,13 +408,15 @@ def doze_k(planta, antes, ok_g, ac, q=Q_):
         del im
 
 
-def folha_12k(cinza, a0, b0, a1, b1, M, limiar=28.0):
-    """A folha da janela no próprio 12K (19/11): no 12K a folha sai até 1 px (da final) menor que a peça do PDF, e o
-    contorno pela peça ficava solto na parede, fora do vidro. Cada lado vem da borda prevista (a0, b0, a1, b1, px do
-    12K): o perfil do lado de fora (M a M + 4 px além da borda) dá o nível de fora; andando para dentro, a borda é o
-    primeiro px que se afasta desse nível mais que `limiar`. Sem borda achada em ±M, fica a prevista."""
+def folha_12k(cinza, a0, b0, a1, b1, M, limiar=28.0, lado_claro=115.0):
+    """A folha da janela no próprio 12K (19/11): no 12K a folha sai até 1-2 px (da final) fora da peça do PDF, e o
+    contorno pela peça ficava solto na parede ou no piso. Cada lado vem da borda prevista (a0, b0, a1, b1, px do 12K):
+    o perfil do lado de fora (M a M + 4 px além da borda) dá o nível de fora; andando para dentro, a borda é o primeiro
+    px que se afasta desse nível mais que `limiar`. Os dois lados opostos que andam juntos são um deslocamento da folha
+    inteira (a folha vai junto); do lado da parede (fora escuro) a borda encosta no vidro; do lado claro (soleira, piso)
+    fica a borda da folha deslocada, sem crescer sobre a soleira ("é só para contornar a folha de vidro")."""
     g = cv2.GaussianBlur(cinza.astype(np.float32), (0, 0), 0.7)
-    lado = {}
+    cru, escuro = {}, {}
     w, h = a1 - a0, b1 - b0
     ca, cb = int(a0 + 0.25 * w), int(a1 - 0.25 * w)
     ra, rb = int(b0 + 0.3 * h), int(b1 - 0.3 * h)
@@ -425,17 +427,31 @@ def folha_12k(cinza, a0, b0, a1, b1, M, limiar=28.0):
             perfil = lambda t: float(g[ra:rb, t].mean())
         fora = [int(round(e + passo * (M + k))) for k in range(4)]
         O = float(np.median([perfil(t) for t in fora]))
+        escuro[nome] = O <= lado_claro
         achou = None
         for t in range(int(round(e + passo * M)), int(round(e - passo * M)) - passo, -passo):
             if abs(perfil(t) - O) > limiar:
                 # t é o primeiro px da folha vindo de fora; a borda é o lado dele que dá para fora
                 achou = float(t) if passo < 0 else float(t + 1)
                 break
-        lado[nome] = achou if achou is not None else e
-    return lado["l"], lado["t"], lado["r"], lado["b"]
+        cru[nome] = (achou if achou is not None else e) - e
+
+    def junto(d1, d2):
+        # o deslocamento comum de dois lados opostos (os dois para o mesmo lado); senão nenhum
+        return float(np.sign(d1)) * min(abs(d1), abs(d2)) if d1 * d2 > 0 else 0.0
+    dy, dx = junto(cru["t"], cru["b"]), junto(cru["l"], cru["r"])
+    L = a0 + (cru["l"] if escuro["l"] else dx)
+    R = a1 + (cru["r"] if escuro["r"] else dx)
+    T = b0 + (cru["t"] if escuro["t"] else dy)
+    B = b1 + (cru["b"] if escuro["b"] else dy)
+    return L, T, R, B
 
 
-def doze_k_local(planta, antes, ok_g, ac, q=Q_, folga=45, na_folha=False):
+TRACO_12K = 1.8   # px do 12K: a linha fina (19/11: "é só uma linha fina, não é para criar uma borda grossa"); nos
+                  # Subsolos (12K a 7-10x da final) o 0,5 px da final virava 3,5-5 px
+
+
+def doze_k_local(planta, antes, ok_g, ac, q=Q_, folga=45, na_folha=False, traco_max=TRACO_12K):
     """O contorno no 12K A e B com o registro local de cada esquadria (a caixa dela mais `folga` px): o registro da planta
     inteira erra até 2 px da final em alguns trechos (19/11, a janela do banho 1 e a do lavabo)."""
     c, pav = planta.split("_")
@@ -456,6 +472,7 @@ def doze_k_local(planta, antes, ok_g, ac, q=Q_, folga=45, na_folha=False):
             X0, Y0 = mapa(0.0, 0.0)
             X1, _ = mapa(1000.0, 0.0)
             sx = (X1 - X0) / 1000.0
+            qg = dict(q, traco_px=min(q["traco_px"], traco_max / sx))
             # o encaixe fino pela própria janela: a final em volta dela (6 px), ampliada, procurada no 12K a até 6 px
             # da final do lugar previsto (o 12K às vezes desenha a janela um pouco deslocada)
             e = 6
@@ -488,14 +505,14 @@ def doze_k_local(planta, antes, ok_g, ac, q=Q_, folga=45, na_folha=False):
                 gf = [((L - X0) / sx, (T - Y0) / sx, (R - X0) / sx, (B - Y0) / sx)]
                 print("      folha no 12K: " + ", ".join(f"{(v - p_) / sx:+.1f}" for v, p_ in zip((L, T, R, B), (pa0, pb0, pa1, pb1)))
                       + " px da final (esq, cima, dir, baixo)")
-                al = alfa([gf], (B1 - B0, A1 - A0), origem=((A0 - X0) / sx, (B0 - Y0) / sx), escala=sx, q=q)
+                al = alfa([gf], (B1 - B0, A1 - A0), origem=((A0 - X0) / sx, (B0 - Y0) / sx), escala=sx, q=qg)
                 okb = np.ones_like(al, bool)
             else:
-                al = alfa([g], (B1 - B0, A1 - A0), origem=((A0 - X0) / sx, (B0 - Y0) / sx), escala=sx, q=q)
+                al = alfa([g], (B1 - B0, A1 - A0), origem=((A0 - X0) / sx, (B0 - Y0) / sx), escala=sx, q=qg)
                 Fq = np.array([[sx, 0, X0 - A0], [0, sx, Y0 - B0]], np.float64)
                 okb = cv2.warpAffine(ac.astype(np.uint8) * 255, Fq, (A1 - A0, B1 - B0), flags=cv2.INTER_NEAREST,
                                      borderValue=0) > 127
-            im[B0:B1, A0:A1] = pintar(im[B0:B1, A0:A1], al * okb, q)
+            im[B0:B1, A0:A1] = pintar(im[B0:B1, A0:A1], al * okb, qg)
             print(f"   {op}: esquadria {int(x0)},{int(y0)} registro local {cc:.3f}")
         Image.fromarray(cv2.cvtColor(im, cv2.COLOR_BGR2RGB)).save(f, quality=95, subsampling=0, dpi=dpi)
         del im, cinza

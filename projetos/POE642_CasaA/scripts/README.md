@@ -4536,3 +4536,10 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   inteira errava ~1 px da final ali (10 px do 12K): o contorno da primeira passada saiu como um retângulo preto acima de
   cada janela (na parede, no móvel). Os 12K A e B voltam ao de 7060e76 e o contorno das 12 esquadrias é desenhado de
   novo pelo registro local, encostado na folha (`doze_k_local(..., na_folha=True)`).
+- **Linha fina e só na folha (19/11, o usuário: "é só para contornar a folha de vidro ... é só uma linha fina, não é
+  para criar uma borda grossa"):** no 12K a linha tem no máximo `TRACO_12K` = 1,8 px, qualquer que seja a escala (nos
+  Subsolos, 12K a 7-10× da final, o 0,5 px da final virava 3,5-5 px). Na folha (`folha_12k`): os lados opostos que
+  andam juntos são o deslocamento da folha inteira no 12K; do lado da parede a linha encosta no vidro, do lado claro
+  (soleira, piso) fica a borda da folha, sem crescer sobre a soleira. Os 12K A e B dos Subsolos das Casas A, B, D e E
+  voltam ao de antes dos contornos (A: 02e2ce8, com os boxes claros de novo; B: 339b207; D: 7060e76; E: dbf1705) e
+  recebem o contorno fino de novo.
