@@ -4175,6 +4175,15 @@ piso, à direita, sai com o piso refeito da poltrona antiga (`poltrona_antes` at
 Com as correções de 19/11 (armário, rouparia, vão, mesas, mesinha, sofá e tapete), o 12K A e B do 1º Pavimento refeitos
 (Topaz High Fidelity V2, 12288 x 8689).
 
+Ainda em 19/11: as 4 escrivaninhas no freijó ("altere o tom de todas as escrivaninhas para o freijó": `_tampo_freijo`, o
+miolo de uma tábua do `aparador-freijo` da biblioteca da E, o dos racks, com o veio no comprido, a borda um tom abaixo e
+a sombra curta); na suíte master, em frente à poltrona, o banco de pés do PDF ("temos um banco de colocar os pés, não
+mesa": o retângulo de cantos arredondados de 0,75 x 0,35 m girado 45°, `SUITES["suíte master"]["pufe"]`, no banco de
+peseira de linho da biblioteca, `BANCO_PES`) no lugar do criado redondo; e um livro sobre a mesa do canto da varanda
+principal ("adicione um livro sobre a mesa": `LIVRO`, a capa de linho verde-sálvia gerada no Higgsfield e recortada,
+`varanda-principal/livro-linho-salvia`, nítida também no 12K, `computadores_12k`). Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1911e_freijo_banco_livro_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,

@@ -1906,6 +1906,51 @@
        1384
       ]
      ]
+    },
+    {
+     "n": 43,
+     "origem": "voce",
+     "texto": "As 4 escrivaninhas no freijó (\"altere o tom de todas as escrivaninhas para o freijó\"): o freijó da biblioteca da E, o mesmo dos racks das suítes, com o veio no comprido e a borda um tom abaixo.",
+     "pontos": [
+      [
+       2244,
+       753
+      ],
+      [
+       2244,
+       1120
+      ],
+      [
+       1721,
+       962
+      ],
+      [
+       1721,
+       1460
+      ]
+     ]
+    },
+    {
+     "n": 44,
+     "origem": "voce",
+     "texto": "Suíte master: em frente à poltrona, o banco de pés do PDF (0,75 x 0,35 m, girado 45°, estofado em linho) no lugar da mesinha redonda (\"temos um banco de colocar os pés, não mesa\").",
+     "pontos": [
+      [
+       1504,
+       780
+      ]
+     ]
+    },
+    {
+     "n": 45,
+     "origem": "voce",
+     "texto": "Varanda principal: um livro de capa de linho verde-sálvia sobre a mesa do canto (\"adicione um livro sobre a mesa\"), nítido também no 12K.",
+     "pontos": [
+      [
+       1214,
+       1435
+      ]
+     ]
     }
    ]
   }

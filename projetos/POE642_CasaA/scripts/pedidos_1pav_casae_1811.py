@@ -880,6 +880,10 @@ BANCO_PNG = "banco-k3.png"
 # (usuário, depois do 12K: "tire o contorno do recamier") o K3 sem a moldura de nogueira: o miolo de linho com os rolos
 # (o PNG da biblioteca cortado por dentro da moldura), no mesmo retângulo
 BANCO = BIB / "suite-master/banco-k3-sem-contorno.png"
+# o banco de pés da suíte master: o banco de peseira estofado em linho da biblioteca (Casa D), sem o filete claro e o
+# sulco da borda da peça (`corte`, px da peça)
+BANCO_PES = {"png": CASA.parent / "POE642_CasaD/biblioteca-objetos/02-terreo/suite-master/banco-peseira-d.png",
+             "corte": 6}
 MESA_SOMBRA = {"forca": 0.26, "sigma": 1.0, "d": 1.2}
 MADEIRA = (1770, 830, 1980, 900)
 SUITES = {
@@ -890,7 +894,11 @@ SUITES = {
                      "cortina": (1398, 552, 1426, 900),
                      "tapete": (1461, 612, 1670, 749), "banco": ((1504, 700, 1628, 724), 0),
                      "criados": [(1465, 568, 1501, 604), (1632, 568, 1668, 604)], "frente": (0, 1),
-                     "poltrona": ((1459.0, 824.0), 52.0, (1, -1)), "redondo": (1483, 758, 1526, 802)},
+                     # (usuário: "em frente a poltrona temos um banco de colocar os pés, não mesa") no lugar do criado
+                     # redondo, o banco de pés do PDF (ARQ_LAYOUT HUMANIZAÇÃO: o retângulo de cantos arredondados de
+                     # 0,75 x 0,35 m, girado 45°, o lado comprido de frente para a poltrona): (cx, cy, comprimento,
+                     # largura, giro anti-horário) px; a peça em `BANCO_PES`
+                     "poltrona": ((1459.0, 824.0), 52.0, (1, -1)), "pufe": (1504.5, 780.0, 44.8, 20.9, -45.0)},
     "suíte 2": {"limpa": [(2304, 678, 2469, 849), (2262, 727, 2292, 776)], "cama": ((2352, 683, 2434, 801), "casal"),
                 "extra": [(2226, 888, 2294, 912), (2326, 894, 2454, 922)],
                 "cortina": (2468, 670, 2492, 860),
@@ -1287,7 +1295,15 @@ def mobiliario(Q, img):
         if "poltrona" in s:
             (cx, cy), lado, fr = s["poltrona"]
             out = MBE.pousar(out, ler("sala-intima/poltrona-intima-e"), cx, cy, lado, lado, MB.frente(fr), "movel", par)
-            out = pos(out, ler(f"{pasta}/criado-redondo"), s["redondo"], (0, 1), "movel")
+            if "pufe" in s:
+                Pb = cv2.imread(str(BANCO_PES["png"]), cv2.IMREAD_UNCHANGED).astype(np.float32)
+                ys, xs = np.nonzero(Pb[..., 3] > 8)
+                c = BANCO_PES["corte"]
+                Pb = np.ascontiguousarray(Pb[ys.min() + c:ys.max() + 1 - c, xs.min() + c:xs.max() + 1 - c])
+                cx, cy, L, D, g = s["pufe"]
+                out = MBE.pousar(out, Pb, cx, cy, L, D, g, "movel", par)
+            else:
+                out = pos(out, ler(f"{pasta}/criado-redondo"), s["redondo"], (0, 1), "movel")
     out = quieto(RV.bancos, out, dict(RV.BANCOS, png=BANCO,
                                       bancos=[(n, tuple(map(float, r)), g) for n, r, g in bancos]))
     # a sala íntima
@@ -1420,6 +1436,12 @@ FOLHAGENS = [
 # as folhas passando da borda.
 VARANDA_CANTO = {"limpa": [(1182, 1406, 1254, 1468), (1238, 1452, 1312, 1531)], "desloc": (0, -170),
                  "mesa": (1217.0, 1437.0, 36.0), "poltrona": (1275.0, 1492.0, 48.0, (-1, -1))}
+# (usuário: "adicione um livro sobre a mesa") sobre a mesa lateral do canto da varanda, um livro de capa dura em linho
+# verde-sálvia visto de cima (gerado no Higgsfield, `gpt_image_2_6`, sobre o preto e recortado,
+# `varanda-principal/livro-linho-salvia`): 0,23 x 0,30 m, um pouco fora do centro e girado (`giro`, graus anti-horário),
+# com a sombra baixa; no 12K entra direto, nítido (`computadores_12k`)
+LIVRO = {"png": BIB / "varanda-principal/livro-linho-salvia.png", "c": (1213.8, 1434.5), "tam": (13.7, 17.9),
+         "giro": 16.0}
 # o vaso redondo de concreto (o dos vasos de folhagem da biblioteca): a borda clara, a sombra dela por dentro e a terra
 VASO = {"px": 400, "borda": 0.10, "concreto": (178, 186, 190), "aresta": (150, 158, 162), "terra": (56, 72, 92),
         "semente": 1811}
@@ -1545,6 +1567,8 @@ def folhagens(Q, img, q=FOLHAGENS, f=FLOREIRA):
     # a mesa e a poltrona do canto, depois os vasos e as plantas por cima
     cx, cy, d = v["mesa"]
     out = MBE.pousar(out, ler("varanda-principal/mesa-lateral-externa"), cx, cy, d, d, 0.0, "mesa", par)
+    lv = LIVRO
+    out = MBE.pousar(out, ler("varanda-principal/livro-linho-salvia"), *lv["c"], *lv["tam"], lv["giro"], "baixa", par)
     cx, cy, d, fr = v["poltrona"]
     out = MBE.pousar(out, ler("varanda-principal/poltrona-externa-b"), cx, cy, d, d, MB.frente(fr), "movel", par)
     for rel, cx, cy, lado, dv in plantas:
@@ -1636,8 +1660,14 @@ ESCRIVANINHAS = [("suíte 2", (2226.0, 683.0, 2261.7, 823.0)), ("suíte 1", (222
                  ("suíte 4", (1703.3, 892.0, 1739.0, 1032.0)), ("suíte 3", (1703.3, 1390.0, 1739.0, 1531.0))]
 # (usuário: "deixe as 4 escrivaninhas no mesmo tom") o tampo das 4 num tom só, o claro das suítes 3 e 4 (BGR; o das
 # suítes 1 e 2 era o mesmo do vinílico, 110/145/186, e o tampo sumia no piso)
+# (usuário: "altere o tom de todas as escrivaninhas para o freijó") o tampo das 4 no freijó da biblioteca da Casa E, o
+# mesmo dos racks das suítes (`RACK`, `aparador-freijo`): o miolo da peça (`miolo`, px da peça: uma tábua só, a de baixo
+# da junta do tampo na linha 101, sem a borda e a sombra dela), o veio no comprido da mesa (girado nas mesas em pé), espelhado por mesa (a semente), a borda um tom abaixo
+# (`borda`) e a sombra curta no piso; `tom` fica só para quando `freijo` sai
 ESCRIVANINHA = {"objeto": 30, "objeto_min_px": 5, "margem_px": 3, "veio": 0.035, "sombra": 0.20, "semente": 1813,
-                "tom": (139.0, 173.0, 205.0)}
+                "tom": (139.0, 173.0, 205.0),
+                "freijo": {"png": CASA / "biblioteca-objetos/02-terreo/hall-de-entrada/aparador-freijo.png",
+                           "miolo": (24, 105, 632, 166), "borda": 0.86, "ss": 8}}
 # (usuário: "remova erros sobre a escrivaninha. deixe um teclado Apple em alta definição sobre a escrivaninha", "remova
 # residuos sobre a escrivaninha e substitua o teclado pelo teclado Apple") os objetos de antes do tampo (os pontinhos, o
 # bloco claro, a bolinha, o monitor borrado com a mancha marrom e o teclado branco) não voltam; no tampo liso, um monitor
@@ -1655,6 +1685,32 @@ PORTAS_CLOSET = {"folhas": [(1954.3, 587.6, 1956.7, 623.4), (1954.3, 647.3, 1956
                  "entre": (1954, 623, 1960, 648), "semente": 1817}
 CLOSET_MASTER = {"faixa": (1956, 599, 2216, 672), "miolo": (1977, 605, 2195, 664), "sombras": {599: 0.82, 600: 0.72, 601: 0.90, 668: 0.92, 669: 0.82,
                                                               670: 0.70, 671: 0.84}}
+
+
+def _tampo_freijo(r, origem, forma, semente, fj):
+    """O freijó da peça da biblioteca no retângulo `r` (px da final), na região `forma` com o canto em `origem`: o veio no
+    comprido, a borda um tom abaixo (supersample `ss` para a fração de px das bordas)."""
+    import correcoes_terreo_casab_1611 as CB
+    x0, y0, x1, y1 = r
+    X0, Y0 = origem
+    mx0, my0, mx1, my1 = fj["miolo"]
+    T = cv2.imread(str(fj["png"]), cv2.IMREAD_COLOR)[my0:my1, mx0:mx1].astype(np.float32)
+    if (y1 - y0) > (x1 - x0):
+        T = np.rot90(T)
+    rng = np.random.default_rng(semente)
+    if rng.random() < 0.5:
+        T = T[::-1]
+    if rng.random() < 0.5:
+        T = T[:, ::-1]
+    ss = fj["ss"]
+    w, h = int(round((x1 - x0) * ss)), int(round((y1 - y0) * ss))
+    can = np.zeros((forma[0] * ss, forma[1] * ss, 3), np.float32)
+    u0, v0 = int(round((x0 - X0) * ss)), int(round((y0 - Y0) * ss))
+    can[v0:v0 + h, u0:u0 + w] = cv2.resize(np.ascontiguousarray(T), (w, h), interpolation=cv2.INTER_CUBIC)
+    tampo = cv2.resize(can, (forma[1], forma[0]), interpolation=cv2.INTER_AREA)
+    dentro = CB.alfa_ret((x0 - X0 + 1, y0 - Y0 + 1, x1 - X0 - 1, y1 - Y0 - 1), forma)
+    a = np.maximum(CB.alfa_ret((x0 - X0, y0 - Y0, x1 - X0, y1 - Y0), forma), 1e-3)
+    return tampo / a[..., None] * (fj["borda"] + (1 - fj["borda"]) * dentro)[..., None]
 
 
 def escrivaninha(out, r, semente, q=ESCRIVANINHA):
@@ -1679,6 +1735,9 @@ def escrivaninha(out, r, semente, q=ESCRIVANINHA):
     nn = cv2.GaussianBlur(rng.normal(0, 1, forma).astype(np.float32), (0, 0), sigmaX=0.6, sigmaY=6.0)
     nn = 1 + q["veio"] * nn / max(float(nn.std()), 1e-6)
     tampo = np.float32(q.get("tom", med))[None, None] * nn[..., None]
+    fj = q.get("freijo")
+    if fj:
+        tampo = _tampo_freijo(r, (X0, Y0), forma, semente, fj)
     reg = reg * (1 - a[..., None]) + tampo * a[..., None]
     if q.get("objetos_voltam", False):
         ao = cv2.GaussianBlur(obj.astype(np.float32), (0, 0), 0.6)
@@ -1728,7 +1787,19 @@ def computadores_12k(out, mapa):
         o = BT.pousar(reg, P, X - X0, Y - Y0, L * m.s, D * m.s, MB.frente(fr), [], MB.PX_M * m.s)
         out[Y0:Y0 + 2 * G, X0:X0 + 2 * G] = u8(o)
         n += 1
-    print(f"    {n} peças (monitor e teclado Apple) direto no 12K")
+    # o livro da mesa do canto da varanda
+    lv = LIVRO
+    (cx, cy), (L, D) = lv["c"], lv["tam"]
+    g = int(D / 2) + 4
+    m = mapa((int(cx) - g, int(cy) - g, int(cx) + g + 1, int(cy) + g + 1))
+    X, Y = m.x(cx) - 0.5, m.y(cy) - 0.5
+    G = int(g * m.s) + 4
+    X0, Y0 = int(X) - G, int(Y) - G
+    reg = out[Y0:Y0 + 2 * G, X0:X0 + 2 * G].astype(np.float32)
+    o = BT.pousar(reg, ler("varanda-principal/livro-linho-salvia"), X - X0, Y - Y0, L * m.s, D * m.s, lv["giro"], [],
+                  MB.PX_M * m.s)
+    out[Y0:Y0 + 2 * G, X0:X0 + 2 * G] = u8(o)
+    print(f"    {n} peças (monitor e teclado Apple) e o livro da varanda direto no 12K")
     return out
 
 
