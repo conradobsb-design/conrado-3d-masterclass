@@ -1,0 +1,129 @@
+{
+ "casa": "A",
+ "pav": "Subsolo",
+ "contagem": "6 notas do cliente de 05/11 (README:1733)",
+ "itens": [
+  {
+   "fala": "Deixar sem hachura. Deixar na cor branca. Sem fundo.",
+   "como": "O fundo ficou todo branco: saíram a hachura do terreno e o contorno do lote.",
+   "conferir": "fora da planta, branco puro; sem a hachura do terreno e sem o contorno do lote.",
+   "pontos": [
+    [
+     960,
+     960
+    ]
+   ],
+   "detalhe": [
+    690,
+    836,
+    2423,
+    1673
+   ],
+   "status": "feito",
+   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
+  },
+  {
+   "fala": "Tirar a representação do deck e da piscina superior. Deixar apenas o subsolo mesmo.",
+   "como": "Saíram o deck, a piscina, o spa e os pisantes do Térreo. A planta mostra só o Subsolo.",
+   "conferir": "sem o deck, a piscina, o spa e os pisantes do Térreo esmaecidos por cima; só o Subsolo.",
+   "pontos": [
+    [
+     830,
+     1060
+    ]
+   ],
+   "detalhe": [
+    690,
+    836,
+    2423,
+    1673
+   ],
+   "status": "feito",
+   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
+  },
+  {
+   "fala": "Diminuir a escala da grama.",
+   "como": "A grama está na metade da escala, mais fina e nítida. A mesma grama foi adotada em todas as plantas.",
+   "conferir": "grama na metade da escala, fina e nítida, no verde-oliva da grama padrão (a mesma de todas as plantas).",
+   "pontos": [
+    [
+     900,
+     1400
+    ]
+   ],
+   "detalhe": [
+    730,
+    1240,
+    1070,
+    1470
+   ],
+   "status": "feito",
+   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
+  },
+  {
+   "fala": "Colocar a seta na escada e a descrição - Sobe para o Deck.",
+   "como": "O triângulo da seta está no degrau de baixo, com a letra S e a descrição \"SOBE PARA O DECK\" em duas linhas.",
+   "conferir": "triângulo cheio no degrau de baixo, \"SOBE PARA O / DECK\" em duas linhas e o S logo abaixo da seta; na opção B, na Kalam.",
+   "pontos": [
+    [
+     1070,
+     1092
+    ]
+   ],
+   "detalhe": [
+    985,
+    1020,
+    1255,
+    1175
+   ],
+   "status": "feito",
+   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
+  },
+  {
+   "fala": "Representar as prateleiras com uma cor neutra única, sem textura.",
+   "como": "As prateleiras do depósito estão numa cor neutra única, sem textura. O mesmo tom vale para os armários e prateleiras de todas as casas.",
+   "conferir": "prateleiras do depósito em L numa cor só, o tom padrão dos armários (RGB 208, 178, 156), sem veio nem borrão.",
+   "pontos": [
+    [
+     1600,
+     893
+    ],
+    [
+     1850,
+     975
+    ]
+   ],
+   "detalhe": [
+    1330,
+    860,
+    1890,
+    1055
+   ],
+   "status": "feito",
+   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
+  },
+  {
+   "fala": "Deixar a representação do Bege Bahia menos manchado (para melhor representação).",
+   "como": "O Bege Bahia do pátio, da circulação, do depósito e dos degraus está com manchas suaves. Aplicado em todas as plantas de todas as casas.",
+   "conferir": "pátio, circulação, depósito e degraus com as manchas suaves (45% do contraste).",
+   "pontos": [
+    [
+     1200,
+     1350
+    ],
+    [
+     1700,
+     1000
+    ]
+   ],
+   "detalhe": [
+    1180,
+    880,
+    1700,
+    1110
+   ],
+   "status": "feito",
+   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
+  }
+ ]
+}

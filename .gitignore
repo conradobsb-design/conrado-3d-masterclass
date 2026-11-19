@@ -30,3 +30,7 @@ __pycache__/
 # saídas brutas do Meshy (PNG de 2K, normal, rugosidade, GLB): fora do git; a cor base vai em JPG
 projetos/_texturas/meshy/*/*.png
 projetos/_texturas/meshy/*/*.glb
+
+# conferência do Miro: as folhas em JPG (o PDF único vai para o git)
+projetos/POE642_Book/checklist/cliente/
+projetos/POE642_Book/checklist/interna/

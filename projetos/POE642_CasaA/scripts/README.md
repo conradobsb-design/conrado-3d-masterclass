@@ -4446,7 +4446,12 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   quadro de 480 x 230); com os pontos espalhados, só o 1º; `detalhe` no item manda.
 - **Miro:** o conector do Miro segue com "Board access denied" no quadro uXjVJkj7NUw= (19/11); sem a imagem, a versão
   do cliente não mostra o quadro. Com o PNG de cada quadro, `planos.json` → `miro`.
-- **Saídas:** `POE642_Book/checklist/cliente/POE642_Conferencia_Casa<X>_<pav>_<n>.jpg`,
-  `interna/..._interna_<n>.jpg` e os PDFs únicos `POE642_Book/checklist/POE642_Conferencia_Pedidos_Miro{,_interna}.pdf`.
+- **Saídas:** os PDFs únicos `POE642_Book/checklist/POE642_Conferencia_Pedidos_Miro{,_interna}.pdf` (28 e 37 folhas,
+  no git); as folhas em JPG em `POE642_Book/checklist/{cliente,interna}/` (fora do git).
+- **Versão do cliente:** sem os itens `nao_feito` e sem os "?" soltos (ficam na interna, para a decisão do usuário); as
+  notas sem o texto literal transcrito (`fala` começando com "[sem o texto literal]" ou entre parênteses) saem como
+  "PEDIDO NO MIRO (EM RESUMO)", sem aspas.
+- **Pedidos gerais (`gerais.json`, G1 a G8):** reconhecidos pelas `chaves` na fala; na planta sem a nota, o texto de
+  `planos.json` → `gerais` ou o `como` padrão. As melhorias ficam embaixo das plantas quando cabem.
 - **Como refazer:** `python3 conferencia_cliente.py --todas` e `python3 conferencia_cliente.py --todas --interno`; uma
   planta: `python3 conferencia_cliente.py B Terreo [--interno]`.

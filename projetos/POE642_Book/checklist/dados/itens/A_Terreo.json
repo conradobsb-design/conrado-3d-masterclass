@@ -27,7 +27,7 @@
    "fonte": "POE642_REGRAS.md:426; POE642_CasaA/scripts/terreo_casaa_1011.py:10"
   },
   {
-   "fala": "alvenaria preta 100% vedada, sem TV",
+   "fala": "[sem o texto literal] alvenaria preta 100% vedada, sem TV",
    "como": "A parede de cima do estar da varanda ficou em alvenaria cheia, sem TV.",
    "conferir": "parede de cima do estar da varanda contínua, sem vão, sem TV.",
    "pontos": [
@@ -210,7 +210,7 @@
    "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1784; POE642_REGRAS.md:365"
   },
   {
-   "fala": "projeção dos vazios em tracejado",
+   "fala": "[sem o texto literal] projeção dos vazios em tracejado",
    "como": "Os vazios do pé-direito duplo sobre a varanda e a sala de estar aparecem só em tracejado (o contorno e o X), sobre o travertino.",
    "conferir": "vazios só em tracejado (contorno + X), sem sombra nem piso diferente.",
    "pontos": [
@@ -248,7 +248,7 @@
    "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1441; POE642_CasaA/scripts/terreo_casaa_1011.py:1514"
   },
   {
-   "fala": "deck molhado (prainha) com a delimitação correta",
+   "fala": "[sem o texto literal] deck molhado (prainha) com a delimitação correta",
    "como": "A prainha ficou delimitada no retângulo do projeto, com a água rasa mais clara e a borda nítida com a piscina.",
    "conferir": "prainha no retângulo do PDF, rasa mais clara, degrau nítido com a parte funda.",
    "pontos": [
@@ -301,7 +301,7 @@
    "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1783"
   },
   {
-   "fala": "Pergolado: grade tracejada sobre o deck da piscina",
+   "fala": "[sem o texto literal] Pergolado: grade tracejada sobre o deck da piscina",
    "como": "O pergolado aparece só como a grade tracejada sobre o deck de Bege Bahia, sem vigas cheias.",
    "conferir": "pergolado só em grade tracejada, sem vigas nem sombra.",
    "pontos": [
@@ -316,7 +316,7 @@
    "fonte": "POE642_CasaA/POE642_CasaA_HANDOFF_ClaudeCode.md:72; POE642_CasaA/POE642_CasaA_PH_Terreo_v23.md:14"
   },
   {
-   "fala": "áreas verdes, incluindo o jardim de inverno",
+   "fala": "[sem o texto literal] áreas verdes, incluindo o jardim de inverno",
    "como": "As áreas verdes ficaram em grama: o gramado do lote, o jardim sob a escada e o jardim de inverno junto ao lavatório, com plantas.",
    "conferir": "gramado do lote, jardim da escada (17,46 m²) e jardim de 4,79 m² verdes.",
    "pontos": [
@@ -354,7 +354,7 @@
    "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1737"
   },
   {
-   "fala": "brises rotativos na varanda gourmet",
+   "fala": "[sem o texto literal] brises rotativos na varanda gourmet",
    "como": "A borda do terraço gourmet tem a fileira de brises giratórios pretos.",
    "conferir": "lâminas pretas inclinadas ao longo da borda esquerda do terraço, sem riscos entre elas.",
    "pontos": [

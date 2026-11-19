@@ -58,6 +58,7 @@ DW, DH = 440, 205                                     # o detalhe de cada pedido
 RX0 = 2250                                            # a coluna das plantas na 1ª folha
 TOPO = MARG + 250
 BASE = H - MARG - 40
+ROTULO = {"nao_feito": "NÃO FEITO", "parcial": "PARCIAL"}
 
 
 def F(peso, t):
@@ -170,8 +171,8 @@ def dados_planta(casa, pav, interno):
         g = qual_geral(it, gerais)
         if g:
             desta.setdefault(g, []).append(it)
-        else:
-            pedidos.append(dict(it))
+        elif interno or (it.get("status", "feito") != "nao_feito" and it["fala"].strip() not in ("?", "")):
+            pedidos.append(dict(it))                       # o cliente não vê o que não foi feito nem o "?" solto
     for n, it in enumerate(pedidos, 1):
         it["id"] = f"C{n}"
     gs = []
@@ -248,7 +249,7 @@ def bloco_pedido(it, doze, dz, interno):
             if it.get("conferir"):
                 extra.append(("NO 12K: " + it["conferir"], (38, 110, 80)))
             if it.get("status", "feito") != "feito":
-                extra.append((f"{it['status'].upper().replace('_', ' ')}: {it.get('obs', '')}", (196, 32, 36)))
+                extra.append((f"{ROTULO.get(it['status'], it['status'].upper())}: {it.get('obs', '')}", (196, 32, 36)))
             if it.get("obs") and it.get("status", "feito") == "feito":
                 extra.append(("OBS.: " + it["obs"], (196, 32, 36)))
         le = [(ln, c) for t, c in extra for ln in quebra(t, FK if False else F("Light", 24), tw, d)]
@@ -295,13 +296,13 @@ def bloco_geral(g, interno):
     def desenhar(fl, x, y, w, so_medir=False):
         d = fl.d
         tx, tw = x + 120, w - 120
-        lq = quebra(aspas(g["fala"]) + (f"  ({g['origem']})" if g.get("origem") else ""), FG, tw, d)
+        lq = quebra(aspas(g["fala"]), FG, tw, d)
         lc = quebra("Nesta planta: " + g["como"], FGC, tw, d)
         extra = []
         if interno and g.get("conferir"):
             extra += quebra("NO 12K: " + g["conferir"], F("Light", 24), tw, d)
         if interno and g.get("status", "feito") != "feito":
-            extra += quebra(f"{g['status'].upper()}: {g.get('obs', '')}", F("Light", 24), tw, d)
+            extra += quebra(f"{ROTULO.get(g['status'], g['status'].upper())}: {g.get('obs', '')}", F("Light", 24), tw, d)
         h = max(len(lq) * 38 + 6 + len(lc) * 35 + len(extra) * 33, 116)
         if so_medir:
             return h + 34
@@ -316,8 +317,7 @@ def bloco_geral(g, interno):
             d.text((tx, yy), ln, fill=(70, 70, 70), font=FGC)
             yy += 35
         for ln in extra:
-            d.text((tx, yy), ln, fill=(196, 32, 36) if "FEITO" in ln.upper()[:12] or "PARCIAL" in ln[:8]
-                   else (38, 110, 80), font=F("Light", 24))
+            d.text((tx, yy), ln, fill=(38, 110, 80) if ln.startswith("NO 12K") else (196, 32, 36), font=F("Light", 24))
             yy += 33
         d.line((x, y + h + 16, x + w, y + h + 16), fill=(238, 236, 232), width=2)
         return h + 34
