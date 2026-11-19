@@ -1,0 +1,426 @@
+{
+ "casa": "C",
+ "pav": "Terreo",
+ "contagem": "22 notas do cliente em 21 itens, nos post-its de 13/11 do quadro \"POE 642 – Revisão de Imagens\" (três levas): 14 transcritas no pedidos_terreo_casac_1311.py e 8 citadas como post-it no revisao_terreo_casac_1311.py (\"Representar armário e prateleiras na mesma cor\" e \"Seguir essa cor\" num item só), cruzadas com o levantamento, o README e as regras CDE.",
+ "itens": [
+  {
+   "fala": "Representar as claraboias apenas com as linhas de fora, sem o X no meio para ficar mais discreto. Usar um tom cinza e as linhas mais fininhas. Padronizar para as outras plantas que tiverem claraboia.",
+   "como": "As cinco claraboias (varanda master, BH master 1, closets master 1 e 2 e box do BH master 2) ficaram só com o retângulo de fora, tracejado fino em cinza, sem o X; no box, o piso continua normal por dentro. O mesmo padrão vale para as claraboias das outras plantas.",
+   "conferir": "5 claraboias só com o retângulo tracejado em cinza médio, fino, sem X nem tracejado grosso; piso contínuo por dentro (no box do BH master 2, o piso do box).",
+   "pontos": [
+    [
+     843,
+     275
+    ],
+    [
+     965,
+     450
+    ],
+    [
+     1003,
+     883
+    ],
+    [
+     878,
+     937
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "O tracejado teve de ser refeito em 13/11 (sumiu sob a troca dos pisos) e o miolo do box do BH master 2 em 14/11.",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:4; POE642_CasaA/scripts/revisao_terreo_casac_1311.py:16"
+  },
+  {
+   "fala": "Representar guarda-corpo das varandas",
+   "como": "Entrou o guarda-corpo de vidro, de parede a parede, nas bordas da varanda master (em cima e na lateral), da varanda e da varanda 1.",
+   "conferir": "lâmina de vidro legível (faces escuras, brilho, sombra curta), contínua de parede a parede nas 3 varandas e na lateral da master.",
+   "pontos": [
+    [
+     850,
+     247
+    ],
+    [
+     637,
+     540
+    ],
+    [
+     1440,
+     247
+    ],
+    [
+     2080,
+     247
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:9"
+  },
+  {
+   "fala": "Cor da bancada é no Dekton Danae",
+   "como": "A bancada em L da pia, a ilha e a bancada da direita da cozinha ficaram em Dekton Danae, com as cubas, as torneiras e o cooktop por cima.",
+   "conferir": "bancada em L, ilha e bancada abaixo do armário da direita no Danae (bege-areia claro, fosco), sem a pedra granulada antiga entre as cubas.",
+   "pontos": [
+    [
+     2302,
+     275
+    ],
+    [
+     2300,
+     500
+    ],
+    [
+     2446,
+     600
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/revisao_terreo_casac_1311.py:64"
+  },
+  {
+   "fala": "Geral: Não precisa representar os armários inferiores ou superiores com essa linha acima da bancada",
+   "como": "Saiu a linha do módulo das cubas sobre a bancada da cozinha; o tampo ficou liso, só com a borda.",
+   "conferir": "bancada da pia sem a linha em pé no fim do L nem a linha deitada atrás das cubas; borda do tampo mantida.",
+   "pontos": [
+    [
+     2410,
+     274
+    ],
+    [
+     2306,
+     290
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:131"
+  },
+  {
+   "fala": "Colocar duas máquinas de lavar roupa",
+   "como": "Entraram duas máquinas de lavar no vão da área de serviço, acima da bancada dos tanques, encostadas na parede.",
+   "conferir": "2 máquinas de 0,60 m (tampo branco, painel junto à parede, sombra curta) no vão entre a parede de cima e a bancada dos tanques.",
+   "pontos": [
+    [
+     2680,
+     300
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/revisao_terreo_casac_1311.py:38"
+  },
+  {
+   "fala": "Tirar o contorno dos mobiliários",
+   "como": "Saiu o traço de contorno em volta dos armários dos closets e dos quartos; os guarda-roupas ficaram numa peça só, sem linhas por cima.",
+   "conferir": "closets master 1 e 2 e armários dos quartos sem o traço laranja nos módulos; guarda-roupas em L e U contínuos, moldura só por fora.",
+   "pontos": [
+    [
+     1046,
+     450
+    ],
+    [
+     1194,
+     408
+    ],
+    [
+     1830,
+     490
+    ],
+    [
+     1005,
+     942
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:82"
+  },
+  {
+   "fala": "Cor da bancada é marrom tabaco",
+   "como": "A bancada dos tanques da área de serviço passou para o granito marrom tabaco, com as cubas de inox por cima.",
+   "conferir": "bancada dos tanques no marrom tabaco (mais escuro que o piso), contorno fino nos lados livres; cubas e torneiras de inox.",
+   "pontos": [
+    [
+     2677,
+     465
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/revisao_terreo_casac_1311.py:42"
+  },
+  {
+   "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "como": "As portas de giro foram encostadas quina com quina na ponta da parede, sem os marcos, com a folha de madeira clara e a soleira no vão, como no Subsolo da Casa A; também entraram aqui a seta com a descrição nas escadas e o Bege Bahia menos manchado.",
+   "conferir": "folhas de madeira clara vértice com vértice na ponta da parede, sem marcos, com soleira (quartos, banhos, louceiros, serviço).",
+   "pontos": [
+    [
+     1249,
+     545
+    ],
+    [
+     1682,
+     545
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:17"
+  },
+  {
+   "fala": "Representar armário e prateleiras na mesma cor / Seguir essa cor",
+   "como": "Os dois armários altos da cozinha e as prateleiras em U do louceiro 1 ficaram numa cor só, lisa e sem textura, no tom de madeira clara indicado.",
+   "conferir": "armários altos (parede da esquerda e da direita) e prateleiras do louceiro 1 numa cor lisa (RGB 189, 160, 129), face um tom abaixo, sombra curta.",
+   "pontos": [
+    [
+     2187,
+     540
+    ],
+    [
+     2446,
+     517
+    ],
+    [
+     2185,
+     665
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "Tom dos armários de antes (\"Seguir essa cor\"), diferente do padrão RGB 208, 178, 156 das outras casas (CDE).",
+   "fonte": "POE642_CasaA/scripts/revisao_terreo_casac_1311.py:64; POE642_CasaA/scripts/revisao_terreo_casac_1311.py:65"
+  },
+  {
+   "fala": "Colocar uma cama e um guarda-roupa aqui. E o nome do ambiente mais pra cima.",
+   "como": "O quarto de serviço ganhou cama de solteiro junto à parede de baixo e guarda-roupa na parede da esquerda; o nome do ambiente subiu para a área livre.",
+   "conferir": "cama de solteiro (2,0 x 1,0 m), guarda-roupa de 0,57 m com cabides, rótulo QTO. DE SERVIÇO acima da cama, fora das peças.",
+   "pontos": [
+    [
+     2535,
+     632
+    ],
+    [
+     2490,
+     547
+    ],
+    [
+     2562,
+     574
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/revisao_terreo_casac_1311.py:46"
+  },
+  {
+   "fala": "Colocar a seta em todas as escadas e a descrição",
+   "como": "Os degraus largos ganharam o triângulo com o D e \"DESCE PARA O SUBSOLO\"; a escada do deck, o triângulo com o D e \"DESCE PARA O JARDIM\". O mesmo padrão vale para todas as escadas.",
+   "conferir": "triângulo cheio no 1º degrau de quem desce, D embaixo; \"DESCE PARA O / SUBSOLO\" nos degraus largos e \"DESCE PARA O / JARDIM\" no deck.",
+   "pontos": [
+    [
+     568,
+     954
+    ],
+    [
+     865,
+     1007
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "Na escada do deck a descrição passou de SUBSOLO a JARDIM em 14/11.",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:14"
+  },
+  {
+   "fala": "Representar a churrasqueira",
+   "como": "A churrasqueira foi representada na bancada de trás da gourmet, com a grelha.",
+   "conferir": "grelha da Casa A no módulo do meio da bancada de trás, dentro do tampo, com folga.",
+   "pontos": [
+    [
+     1411,
+     952
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:108"
+  },
+  {
+   "fala": "Geral: Não precisa representar os armários inferiores ou superiores.",
+   "como": "A bancada de trás da gourmet ficou lisa, sem as divisões dos armários; ficaram só a borda, a cuba, a grelha e as geladeiras.",
+   "conferir": "tampo da bancada de trás sem as linhas finas das divisões dos módulos; borda do tampo mantida.",
+   "pontos": [
+    [
+     1470,
+     950
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:107"
+  },
+  {
+   "fala": "Alinhar as geladeiras",
+   "como": "As duas geladeiras de inox ficaram iguais, lado a lado, alinhadas e encostadas na parede.",
+   "conferir": "2 geladeiras inox G2 na mesma linha, encostadas na parede, a frente para a gourmet.",
+   "pontos": [
+    [
+     1544,
+     957
+    ],
+    [
+     1597,
+     957
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:109"
+  },
+  {
+   "fala": "Aqui tem que representar dois painéis pivotantes",
+   "como": "Os dois painéis chegaram a ser desenhados junto à bancada da gourmet e depois foram retirados na revisão; hoje o trecho mostra só o piso.",
+   "conferir": "vão entre a ponta da parede do jardim 1 e o fim da bancada da gourmet: hoje só travertino até o fio da bancada, sem painéis.",
+   "pontos": [
+    [
+     1227,
+     1067
+    ]
+   ],
+   "geral": false,
+   "status": "nao_feito",
+   "obs": "Desenhados em 13/11 e retirados em 14/11 pelo usuário (\"NÃO HÁ ESSA BORDA, SOMENTE O PISO\"); confirmar com o cliente onde ficam os painéis.",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:128; POE642_CasaA/scripts/revisao_terreo_casac_1411.py:18"
+  },
+  {
+   "fala": "Trocar essa representação do jardim de inverno",
+   "como": "O jardim de inverno, o jardim de inverno 2 e o jardim 1 foram refeitos como o jardim da Casa A: grama no tom do gramado, poucas plantas menores e o X fino e claro; a floreira junto à adega ganhou terra e arbustos iguais.",
+   "conferir": "grama no tom sóbrio do gramado, poucas plantas de tamanhos diferentes, rótulos brancos legíveis, X fino e claro; floreira com 4 arbustos iguais.",
+   "pontos": [
+    [
+     1900,
+     1060
+    ],
+    [
+     1958,
+     871
+    ],
+    [
+     1177,
+     908
+    ],
+    [
+     2415,
+     949
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "A grama dos jardins de inverno foi levada a um tom mais sóbrio em 15/11; no jardim 1 entrou o filete reto de Bege Bahia em 14/11.",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:90"
+  },
+  {
+   "fala": "Acrescentar uma 5/6 banquetas",
+   "como": "Entraram 6 banquetas na face de baixo da ilha da gourmet, com parte do assento por baixo do tampo.",
+   "conferir": "6 banquetas B igualmente espaçadas na face de baixo da ilha, ~40% sob o tampo, encosto para fora.",
+   "pontos": [
+    [
+     1290,
+     1165
+    ],
+    [
+     1500,
+     1165
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:110"
+  },
+  {
+   "fala": "Representação da planta está errada",
+   "como": "A planta do hall virou um vaso de folhagem visto de cima, ao lado do novo aparador de freijó com objetos.",
+   "conferir": "vaso de folhagem no círculo do PDF, sem o disco serrilhado; aparador de freijó com objetos, travertino limpo em volta.",
+   "pontos": [
+    [
+     2455,
+     1215
+    ],
+    [
+     2372,
+     1212
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/revisao_terreo_casac_1311.py:21"
+  },
+  {
+   "fala": "Centralizar a seta com a abertura da porta, usando este modelo de seta",
+   "como": "A seta grande saiu; entrou o triângulo cheio, o mesmo das escadas, no centro da abertura da porta de entrada, do lado de fora e apontando para dentro.",
+   "conferir": "triângulo cheio no eixo do vão da pivotante, do lado de fora, ponta para dentro; sem restos da seta de 1,5 m.",
+   "pontos": [
+    [
+     2740,
+     1336
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/revisao_terreo_casac_1311.py:30"
+  },
+  {
+   "fala": "Pode deixar a cortina ultrapassar um pouco as laterais da janela.",
+   "como": "As cortinas de linho passam cerca de 15 cm além do vão de cada lado onde a parede continua na mesma linha, como na janela de baixo do estar e nas janelas dos quartos e da suíte master.",
+   "conferir": "na janela de baixo do estar (a do post-it) a cortina passa ~0,15 m sobre a parede dos dois lados, do lado de dentro; num canto, para no vão.",
+   "pontos": [
+    [
+     2005,
+     1637
+    ],
+    [
+     1400,
+     344
+    ],
+    [
+     796,
+     760
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:120"
+  },
+  {
+   "fala": "Representar demarcação com piso.",
+   "como": "No vão de grama do caminho entrou um pisante de Bege Bahia, na largura do caminho, com as juntas de grama dos outros.",
+   "conferir": "pisante novo entre o fim do caminho e a fileira de baixo, mesma largura e mesmas juntas de grama; Bege Bahia com manchas suaves.",
+   "pontos": [
+    [
+     524,
+     1705
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:86"
+  }
+ ]
+}
