@@ -924,7 +924,11 @@ SALA_INTIMA = {"tapete": (1876, 1235, 2115, 1384), "sofa": [(1867, 1215, 1917, 1
                # (usuário: "corrija a representação dessa mesa lateral, da sala íntima", a redonda do render junto ao
                # braço do sofá, borrada e com a sombra escura em volta): sai, com o piso de madeira (fora do sofá e do
                # tapete), e entra a mesa redonda de carvalho da biblioteca, a da mesa de centro, no mesmo lugar
-               "lateral_sofa_antes": (2077, 1199, 2120, 1235), "lateral_sofa": (2097.5, 1218.5, 33.0),
+               # (usuário: "tem uma mesinha redonda diferente [...] ao lado do sofá. tamanho e posição divergente do 3D")
+               # no tamanho e no lugar do PDF (ARQ_LAYOUT, o círculo de 2041,7..2059,7 x 1259,6..1277,5 px: 0,30 m, na
+               # frente do sofá, junto ao braço direito, por cima da borda do assento), não mais o do render (0,55 m, ao
+               # lado do braço; o lugar dele fica no piso de madeira, `lateral_sofa_antes`)
+               "lateral_sofa_antes": (2077, 1199, 2120, 1235), "lateral_sofa": (2050.7, 1268.55, 18.0),
                "nogueira": (52, 82, 122)}
 COPINHA = {"tampo": (1888.3, 916.2, 2053.4, 951.6), "cuba": (2034.4, 931.2, 30.0, 24.0),
            "armario": (2053.4, 916.2, 2216.7, 951.6),

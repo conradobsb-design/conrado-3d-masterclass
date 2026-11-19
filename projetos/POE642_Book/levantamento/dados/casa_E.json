@@ -1853,7 +1853,7 @@
     {
      "n": 40,
      "origem": "voce",
-     "texto": "Sala íntima: as duas mesas de centro redondas como no PDF, a menor em nogueira encaixada por baixo da maior (\"represente as mesas redondas corretamente\").",
+     "texto": "Sala íntima: as duas mesas de centro redondas como no PDF, a menor em nogueira encaixada por baixo da maior (\"represente as mesas redondas corretamente\"); a mesinha redonda do sofá no tamanho e no lugar do PDF, 0,30 m na frente do sofá, junto ao braço direito (\"tamanho e posição divergente do 3D\").",
      "pontos": [
       [
        1986,
@@ -1862,6 +1862,10 @@
       [
        2018,
        1335
+      ],
+      [
+       2051,
+       1269
       ]
      ]
     }

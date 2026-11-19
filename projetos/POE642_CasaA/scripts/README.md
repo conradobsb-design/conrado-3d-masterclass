@@ -4152,7 +4152,8 @@ Ainda em 19/11: o armário do PDF junto à floreira do banho master em `armario_
 (`linha_claraboia` com `vaos=False`: o retângulo inteiro do PDF, o traço parando só sob o texto do rótulo da final,
 `CLARABOIA_ROUPARIA`); o vão na parede de cima da suíte master (DOC_LINHAS E PROJEÇÕES) tracejado em cinza claro
 (`vao_tracejado`: a rotina dos tracejados não desenha sobre parede); e as duas mesas de centro da sala íntima redondas,
-como no PDF (a menor, que saía retangular, na mesa redonda da biblioteca em nogueira, por baixo da maior). Antes e
+como no PDF (a menor, que saía retangular, na mesa redonda da biblioteca em nogueira, por baixo da maior); a mesinha
+redonda do sofá no tamanho e no lugar do PDF (0,30 m, `SALA_INTIMA["lateral_sofa"]`), não mais os do render. Antes e
 depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1911b_armario_rouparia_vao_mesas_antes_depois.jpg`.
 
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
