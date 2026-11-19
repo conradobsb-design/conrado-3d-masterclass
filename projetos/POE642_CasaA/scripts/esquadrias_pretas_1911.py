@@ -60,7 +60,7 @@ PLANTAS = {
 }
 Q_ = {"perfil": (34, 34, 36), "traco_px": 0.5, "ss": 8, "forca": 1.6, "esp_max_pt": 3.4, "comp_min_pt": 8.0,
       "junta_px": 2.0, "ponta_px": 4, "parede_min": 0.25, "croma_max": 20, "lum_min": 100, "agua_px": 8,
-      "quarto_folga_px": 4, "grupo_min_px": 12}
+      "quarto_folga_px": 4, "grupo_min_px": 12, "caixas_claras": False}
 # por planta: as zonas a deixar de fora (px da final) e o bronze aceito (a Casa E, Subsolo: as esquadrias no bronze de
 # 18/11, com o contorno bronze escuro; o contorno passa a preto, o bronze fica por dentro)
 ELEV_A = (2238, 1112, 2300, 1215)                     # o elevador da Casa A (mesmo lugar nos 3 pavimentos)
@@ -209,7 +209,11 @@ def dados(planta, img=None, q=Q_):
         elif madeira(img, g, vmin):
             fora.append(g)
         elif not visivel(img, g):
-            fora.append(g)
+            cc = caixa_clara(img, g) if q.get("caixas_claras") else None
+            if cc:
+                ok.append(cc)                           # a janela pela moldura clara do render
+            else:
+                fora.append(g)
         elif miolo_parede(img, g):
             fora.append(g)                              # as pecinhas sobre a ponta da parede
         else:
@@ -285,6 +289,30 @@ def miolo_parede(img, g, frac=0.75):
     cr = v.max(1) - v.min(1)
     par = ((np.abs(v - 80).max(1) <= 14) | (np.abs(v - 53).max(1) <= 12)) & (cr <= 12)
     return len(v) > 0 and par.mean() >= frac
+
+
+def caixa_clara(img, g, par_cinzas=(80, 53)):
+    """Quando a final desenha a janela maior que a peça do PDF (a moldura clara do render em volta do vidro, e o miolo
+    igual ao entorno), a caixa dessa moldura: o componente claro e neutro que contém a peça, entre as paredes, se for
+    fino (até 22 px) e não muito mais comprido que a peça. Senão, None."""
+    x0, y0, x1, y1 = caixa(g)
+    H, W = img.shape[:2]
+    m = 30
+    X0, Y0, X1, Y1 = max(int(x0) - m, 0), max(int(y0) - m, 0), min(int(np.ceil(x1)) + m, W), min(int(np.ceil(y1)) + m, H)
+    reg = img[Y0:Y1, X0:X1].astype(np.int16)
+    cr = reg.max(2) - reg.min(2)
+    claro = ((reg.mean(2) >= 150) & (cr <= 22)).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(claro, 4)
+    cx, cy = int((x0 + x1) / 2) - X0, int((y0 + y1) / 2) - Y0
+    ids = set(lab[max(cy - 1, 0):cy + 2, max(cx - 1, 0):cx + 2].ravel()) - {0}
+    if not ids:
+        return None
+    i = max(ids, key=lambda k: st[k, cv2.CC_STAT_AREA])
+    bx, by, bw, bh = st[i, :4]
+    L = max(x1 - x0, y1 - y0)
+    if min(bw, bh) > 22 or max(bw, bh) > 1.25 * L + 8 or max(bw, bh) < 0.8 * L:
+        return None
+    return [(X0 + bx, Y0 + by, X0 + bx + bw, Y0 + by + bh)]
 
 
 def madeira(img, g, vmin=50):
@@ -420,13 +448,46 @@ def visao(planta, img, ok_g, fora_g):
     return ov[max(Y0 - 10, 0):Y1 + 10, max(X0 - 10, 0):X1 + 10]
 
 
+# a conferência planta a planta (19/11): as esquadrias que a final desenha maiores que a peça do PDF (a moldura clara do
+# render em volta do vidro) e que por isso ficaram sem o contorno; cada uma pela caixa da moldura (px da final)
+EXTRAS = {
+    "A_Terreo": [(1885, 359, 1946, 372),           # a janela da sala de estar, na parede de cima
+                 (2268, 350, 2333, 356)],          # a janela do lavabo, sob a claraboia
+}
+EXTRAS_FEITAS = {"A_Terreo": 2}                    # quantas já foram aplicadas (rodar de novo aplica só as novas)
+
+
+def aplicar_extras(planta, q=Q_):
+    """O contorno das `EXTRAS` da planta na final de hoje (e nas variantes), na prancha e nos 12K A e B."""
+    gs = [[r] for r in EXTRAS[planta][EXTRAS_FEITAS.get(planta, 0):]]
+    c, pav = planta.split("_")
+    base = cv2.imread(str(PROJ / PLANTAS[planta][0]))
+    novo, ac = final_nova(planta, base, gs, q)
+    cv2.imwrite(str(PROJ / PLANTAS[planta][0]), novo)
+    for f in PLANTAS[planta][1:]:
+        im2 = cv2.imread(str(PROJ / f))
+        cv2.imwrite(str(PROJ / f), final_nova(planta, im2, gs, q)[0])
+    pf = PROJ / f"POE642_Casa{c}/entrega/POE642_Casa{c}_PH_{pav}_entrega.png"
+    pr = cv2.imread(str(pf))
+    pr[:2160] = novo
+    cv2.imwrite(str(pf), pr)
+    doze_k(planta, base, gs, ac, q)
+    return base, novo
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("plantas", nargs="*")
     ap.add_argument("--auditar", action="store_true")
     ap.add_argument("--antes_depois", action="store_true")
     ap.add_argument("--sem12k", action="store_true")
+    ap.add_argument("--extras", action="store_true", help="só as EXTRAS da planta (a conferência de 19/11)")
     a = ap.parse_args()
+    if a.extras:
+        for planta in a.plantas:
+            base, novo = aplicar_extras(planta)
+            print(planta, "extras:", EXTRAS[planta])
+        return
     for planta in a.plantas or [p for p in PLANTAS if p not in JA_NO_PADRAO]:
         img = cv2.imread(str(PROJ / PLANTAS[planta][0]))
         if a.antes_depois:
