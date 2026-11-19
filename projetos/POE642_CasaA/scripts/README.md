@@ -4183,6 +4183,7 @@ peseira de linho da biblioteca, `BANCO_PES`) no lugar do criado redondo; e um li
 principal ("adicione um livro sobre a mesa": `LIVRO`, a capa de linho verde-sálvia gerada no Higgsfield e recortada,
 `varanda-principal/livro-linho-salvia`, nítida também no 12K, `computadores_12k`). Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1911e_freijo_banco_livro_antes_depois.jpg`.
+12K A e B refeitos com essas três mudanças.
 
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
