@@ -27,7 +27,7 @@
  },
  {
   "id": "G4",
-  "fala": "Geral: Não precisa representar os armários inferiores ou superiores",
+  "fala": "Geral: Não precisa representar os armários inferiores ou superiores.",
   "chaves": [
    "armários inferiores ou superiores"
   ],
@@ -40,7 +40,7 @@
    "claraboias apenas com as linhas",
    "outras plantas que tiverem claraboia"
   ],
-  "como": "Esta planta não tem claraboia."
+  "como": "Não se aplica: esta planta não tem claraboia."
  },
  {
   "id": "G6",
@@ -48,22 +48,46 @@
   "chaves": [
    "muitas árvores"
   ],
-  "como": "Esta planta não tem área de terreno."
+  "como": "Não se aplica: esta planta não tem terreno com árvores."
  },
  {
   "id": "G7",
-  "fala": "representar o gramado da casa A em todas as demais casas, nos seus respectivos terreos",
-  "chaves": [
-   "gramado da casa A"
-  ],
-  "como": "Esta planta não tem gramado."
- },
- {
-  "id": "G8",
   "fala": "Melhorar representação das portas de giro. Encostar nas paredes.",
   "chaves": [
    "portas de giro"
   ],
   "como": "As portas de giro encostadas na ponta da parede, quina a quina, sem arcos."
+ },
+ {
+  "id": "G8",
+  "fala": "Usar como referência essa planta baixa para o tom da piscina e a escala e cor da grama.",
+  "chaves": [
+   "referência essa planta baixa para o tom da piscina"
+  ],
+  "como": "Em todas as plantas, a água das piscinas e a grama seguem o tom e a escala da planta de referência."
+ },
+ {
+  "id": "G9",
+  "fala": "Quando tiver dois tons muito parecidos. Fazer esse jogo de cores para destacar o que está mais em cima e mais embaixo",
+  "chaves": [
+   "dois tons muito parecidos"
+  ],
+  "como": "Em todas as plantas, onde dois tons ficavam parecidos (bancada e piso, armário e piso, o pavimento de baixo esmaecido), a diferença foi reforçada para destacar o que está mais em cima."
+ },
+ {
+  "id": "G10",
+  "fala": "Trocar o marrom do piso por essa opção. Para deixar o marrom mais uniforme com o restante da casa e mais sóbrio.",
+  "chaves": [
+   "trocar o marrom do piso"
+  ],
+  "como": "Em todas as plantas, o piso marrom passou para a amostra indicada: um marrom médio, uniforme e mais sóbrio."
+ },
+ {
+  "id": "G11",
+  "fala": "As bancadas que são em marrom tabaco podem permanecer no tom mais escuro para contrastar com o piso.",
+  "chaves": [
+   "bancadas que são em marrom tabaco podem permanecer"
+  ],
+  "como": "Em todas as plantas, as bancadas em marrom tabaco ficaram no tom mais escuro, contrastando com o piso."
  }
 ]

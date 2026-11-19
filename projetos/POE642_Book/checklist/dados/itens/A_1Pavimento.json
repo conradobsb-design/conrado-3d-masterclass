@@ -1,72 +1,39 @@
 {
  "casa": "A",
  "pav": "1Pavimento",
- "contagem": "20 itens: as 18 notas dos 17 recortes de 11/11 (pedidos_cliente/1Pavimento_1111/LEIA.md, o 17 com duas) em 17 itens, 2 da 1ª revisão do Miro (itens 21 e 22, só o resumo do handoff; os itens 20, 23, 24 e 25 não foram transcritos) e a nota geral 'Tirar o contorno dos mobiliários'.",
+ "fonte": "quadro do Miro 'POE 642 - Revisão de Imagens', frame das plantas (Casas A a E), lido em 19/11 pelo link de visualização",
  "itens": [
   {
-   "fala": "Remover as linhas tracejadas do telhado e a linha tracejada branca. Fica uma representação mais técnica e pode confundir quem olha a planta. Deixar apenas as que representam 'vazios', claraboias e pergolados. / Remover as linhas tracejadas.",
+   "fala": "Remover as linhas tracejadas do telhado e a linha tracejada branca. Fica um representação mais técnica e pode confundir quem olha a planta. Deixar apenas as que representam 'vazios', claraboias e pergolados.",
    "como": "Saíram as linhas tracejadas do telhado e a linha tracejada branca do afastamento, inclusive a que atravessava a suíte master e o banho master. Ficaram só os tracejados dos vazios.",
    "conferir": "nenhuma reta tracejada dentro da casa (suíte e banho master, varandas, saleta); só os X dos vazios e dos shafts.",
    "pontos": [
     [
-     1556,
-     337
-    ],
-    [
-     1476,
-     1290
-    ],
-    [
-     1476,
-     1560
-    ],
-    [
-     2075,
-     1636
+     2735,
+     209
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:9; POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:21"
+   "miro_ids": [
+    "3458764689923346615"
+   ]
   },
   {
-   "fala": "Representar melhor o painel amadeirado que tem aqui entre a varanda e o quarto.",
+   "fala": "Representar melhor o painel amadeirado que tem aqui entre a varanda e o quarto",
    "como": "Entre a varanda e a suíte 3, as folhas de fora ganharam o ripado de nogueira, folha por folha, destacado do piso.",
    "conferir": "folhas em ripado de nogueira com as junções, contorno fino, sem sumir no vinílico.",
    "pontos": [
     [
-     1595,
-     470
+     1509,
+     355
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:6; POE642_CasaA/scripts/um_pav_casaa_1111.py:480"
-  },
-  {
-   "fala": "Tirar o contorno dos mobiliários.",
-   "como": "As peças ficaram sem o traço de contorno do desenho por cima (camas, sofá, poltronas, mesas e tapetes), nesta e em todas as plantas.",
-   "conferir": "nenhum traço do PDF sobre camas, sofá, poltronas, mesas e tapetes.",
-   "pontos": [
-    [
-     1740,
-     410
-    ],
-    [
-     2110,
-     1050
-    ],
-    [
-     1500,
-     1370
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "nota geral do Miro feita nos Térreos das Casas B, C e D; vale para todas as plantas",
-   "fonte": "POE642_REGRAS_CONSOLIDADAS_CDE.md:175; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:14"
+   "miro_ids": [
+    "3458764689923809345"
+   ]
   },
   {
    "fala": "Deixar os cabides se encontrando no 'L' do guarda-roupa. Tirar essa lateral como se fossem dois guarda-roupas separados.",
@@ -74,14 +41,15 @@
    "conferir": "closet 3: L numa peça, cabides até o canto, varões se encontrando, moldura só nas bordas de fora.",
    "pontos": [
     [
-     1900,
-     420
+     1912,
+     359
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:7; POE642_CasaA/scripts/um_pav_casaa_1111.py:1116"
+   "miro_ids": [
+    "3458764689925075225"
+   ]
   },
   {
    "fala": "Representar como parede normal sem janela.",
@@ -89,14 +57,15 @@
    "conferir": "sob o shaft de cima, parede cinza contínua, sem o vidro.",
    "pontos": [
     [
-     2300,
-     405
+     2336,
+     492
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:10; POE642_CasaA/scripts/um_pav_casaa_1111.py:422"
+   "miro_ids": [
+    "3458764689924049407"
+   ]
   },
   {
    "fala": "Deixar as linhas tracejadas mais finas e mais claras.",
@@ -104,18 +73,15 @@
    "conferir": "X e molduras dos 2 vazios em traço fino e claro.",
    "pontos": [
     [
-     1700,
-     745
-    ],
-    [
-     2015,
-     745
+     1773,
+     810
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:8; POE642_CasaA/scripts/um_pav_casaa_1111.py:422"
+   "miro_ids": [
+    "3458764689923640158"
+   ]
   },
   {
    "fala": "Deixar os cabides se encontrando no 'L' do guarda-roupa. Tirar essa lateral como se fossem dois guarda-roupas separados.",
@@ -123,116 +89,31 @@
    "conferir": "closet 2: L numa peça, sem a lateral no canto de cima à direita.",
    "pontos": [
     [
-     1975,
-     915
+     1862,
+     966
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:13; POE642_CasaA/scripts/um_pav_casaa_1111.py:1116"
+   "miro_ids": [
+    "3458764689924959117"
+   ]
   },
   {
-   "fala": "Como essa planta é do 1º pavimento, nós não vemos o pergolado tracejado, vemos ele na cor dele. Só que com o tom mais 'apagado' para mostrar que ele está embaixo do 1º pavimento.",
+   "fala": "Como essa planta é do 1° pavimento, nós não vemos o pergolado tracejado, vemos ele na cor dele. Só que com o tom mais \"apagado\" para mostrar que ele está embaixo do 1° pavimento.",
    "como": "O pergolado do Térreo aparece com as vigas na cor da madeira, em tom apagado e esfumaçado, até a borda da casa.",
    "conferir": "vigas em madeira esmaecida (véu claro, bordas suaves), sem tracejado, até a borda da casa.",
    "pontos": [
     [
-     1372,
-     1050
-    ],
-    [
-     1299,
-     992
+     1403,
+     1028
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:11; POE642_CasaA/scripts/um_pav_casaa_1111.py:294"
-  },
-  {
-   "fala": "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado.",
-   "como": "Entre a varanda de 7,15 m² e a suíte 2, o painel ficou em ripado de nogueira, folha por folha, sem sumir no piso de madeira.",
-   "conferir": "folhas em ripado de nogueira com as junções, destacadas do vinílico.",
-   "pontos": [
-    [
-     1594,
-     1060
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:12; POE642_CasaA/scripts/um_pav_casaa_1111.py:480"
-  },
-  {
-   "fala": "Colocar a seta e a descrição em todas as escadas. Representar o guarda-corpo.",
-   "como": "A escada em U ganhou o triângulo da seta, a letra D e a descrição \"DESCE PARA O HALL INTERNO\", com o guarda-corpo de vidro em volta do vão; a caracol também ganhou seta e descrição.",
-   "conferir": "escada em U: triângulo, D e descrição em 2 linhas; guarda-corpos de vidro na escada em U e na abertura da caracol.",
-   "pontos": [
-    [
-     2261,
-     1043
-    ],
-    [
-     2320,
-     1045
-    ],
-    [
-     2008,
-     1565
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "nota geral: vale para todas as escadas",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:17; POE642_CasaA/scripts/um_pav_casaa_1111.py:1300"
-  },
-  {
-   "fala": "Trocar a cor do tapete. Está camuflando com o piso.",
-   "como": "O tapete da sala íntima ganhou um tom próprio, taupe, que se destaca do piso.",
-   "conferir": "tapete inteiro em taupe, com a borda nítida, diferente do travertino.",
-   "pontos": [
-    [
-     2060,
-     1150
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:14; POE642_CasaA/scripts/um_pav_casaa_1111.py:899"
-  },
-  {
-   "fala": "Colocar o tracejado em 'X' que indica vazio.",
-   "como": "O vão entre o elevador e o banho 1 ganhou o X tracejado fino que indica vazio.",
-   "conferir": "X fino de canto a canto no vão junto ao elevador.",
-   "pontos": [
-    [
-     2370,
-     1162
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:16; POE642_CasaA/scripts/um_pav_casaa_1111.py:422"
-  },
-  {
-   "fala": "Cor da bancada é no Dekton Danae.",
-   "como": "A bancada da cuba redonda, junto ao quarto de serviço, foi feita em Dekton Danae.",
-   "conferir": "bancada em Danae em volta da cuba redonda, com a torneira e o ralo.",
-   "pontos": [
-    [
-     1950,
-     1305
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:15; POE642_CasaA/scripts/um_pav_casaa_1111.py:727"
+   "miro_ids": [
+    "3458764689923473150"
+   ]
   },
   {
    "fala": "Deixa o contorno da casa em maior destaque.",
@@ -240,18 +121,181 @@
    "conferir": "borda da pegada em fio cinza-escuro contínuo, com a sombra para fora, sem dentes nas pontas do pergolado.",
    "pontos": [
     [
-     1228,
-     1400
+     1304,
+     1183
     ],
     [
-     2769,
-     1300
+     1477,
+     513
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:5; POE642_CasaA/scripts/um_pav_casaa_1111.py:390"
+   "miro_ids": [
+    "3458764689452299837"
+   ]
+  },
+  {
+   "fala": "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado.",
+   "como": "Entre a varanda de 7,15 m² e a suíte 2, o painel ficou em ripado de nogueira, folha por folha, sem sumir no piso de madeira.",
+   "conferir": "folhas em ripado de nogueira com as junções, destacadas do vinílico.",
+   "pontos": [
+    [
+     1513,
+     1163
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689925075511"
+   ]
+  },
+  {
+   "fala": "Trocar a cor do tapete. Está camuflando com o piso.",
+   "como": "O tapete da sala íntima ganhou um tom próprio, taupe, que se destaca do piso.",
+   "conferir": "tapete inteiro em taupe, com a borda nítida, diferente do travertino.",
+   "pontos": [
+    [
+     2002,
+     1170
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689924315105"
+   ]
+  },
+  {
+   "fala": "Colocar o tracejado em 'X' que indica vazio.",
+   "como": "O vão entre o elevador e o banho 1 ganhou o X tracejado fino que indica vazio.",
+   "conferir": "X fino de canto a canto no vão junto ao elevador.",
+   "pontos": [
+    [
+     2313,
+     1151
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689925296940"
+   ]
+  },
+  {
+   "fala": "Cor da bancada é no Dekton Danae",
+   "como": "A bancada da cuba redonda, junto ao quarto de serviço, foi feita em Dekton Danae.",
+   "conferir": "bancada em Danae em volta da cuba redonda, com a torneira e o ralo.",
+   "pontos": [
+    [
+     1921,
+     1282
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689925182452"
+   ]
+  },
+  {
+   "fala": "Encostar essa porta mais na parede, ela tá solta.",
+   "como": "A porta do quarto de serviço foi encostada na ponta da parede, quina com quina; todas as portas do pavimento foram revistas do mesmo jeito.",
+   "conferir": "folha do quarto de serviço (a de baixo, junto ao armário) presa à ponta da parede; as 11 folhas de giro quina a quina, sem arco.",
+   "pontos": [
+    [
+     2027,
+     1443
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689925683386"
+   ]
+  },
+  {
+   "fala": "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado.",
+   "como": "Entre a suíte 1 e a varanda de 39 m², o painel ficou em ripado de nogueira, folha por folha, destacado do piso.",
+   "conferir": "folhas em ripado de nogueira com as junções, destacadas do vinílico.",
+   "pontos": [
+    [
+     2539,
+     1500
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689925427673"
+   ]
+  },
+  {
+   "fala": "Diminuir o tamanho dessa vegetação",
+   "como": "A folhagem grande da floreira do banho master saiu; entraram plantas menores, dentro da floreira.",
+   "conferir": "floreira junto à banheira com plantas baixas dentro da caixa do PDF, sem passar sobre o piso.",
+   "pontos": [
+    [
+     1329,
+     1533
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689452072054"
+   ]
+  },
+  {
+   "fala": "Remover as linhas tracejadas.",
+   "como": "Saíram as linhas tracejadas do telhado e a linha tracejada branca do afastamento, inclusive a que atravessava a suíte master e o banho master. Ficaram só os tracejados dos vazios.",
+   "conferir": "nenhuma reta tracejada dentro da casa (suíte e banho master, varandas, saleta); só os X dos vazios e dos shafts.",
+   "pontos": [
+    [
+     1455,
+     1594
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689452072566"
+   ]
+  },
+  {
+   "fala": "Colocar a seta na escada e a descrição Desce para 'tal espaço'",
+   "como": "A escada caracol ganhou o triângulo no sentido da descida, a letra D e a descrição \"DESCE PARA A ÁREA DE SERVIÇO\".",
+   "conferir": "caracol: triângulo no sentido da descida, D sob a seta, descrição em 2 linhas ao lado.",
+   "pontos": [
+    [
+     1958,
+     1560
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689925556233"
+   ]
+  },
+  {
+   "fala": "Colocar a seta e a descrição em todas as escadas. Representar o guarda-corpo.",
+   "como": "A escada em U ganhou o triângulo da seta, a letra D e a descrição \"DESCE PARA O HALL INTERNO\", com o guarda-corpo de vidro em volta do vão; a caracol também ganhou seta e descrição.",
+   "conferir": "escada em U: triângulo, D e descrição em 2 linhas; guarda-corpos de vidro na escada em U e na abertura da caracol.",
+   "pontos": [
+    [
+     2441,
+     1004
+    ]
+   ],
+   "geral": true,
+   "g": "G1",
+   "status": "feito",
+   "obs": "nota geral: vale para todas as escadas",
+   "miro_ids": [
+    "3458764689452299396"
+   ]
   },
   {
    "fala": "quarto de serviço vazio",
@@ -263,96 +307,16 @@
      1400
     ]
    ],
-   "geral": false,
-   "status": "nao_feito",
-   "obs": "1ª revisão do Miro (out/26), item 22: o handoff de 13/10 diz 'Quarto de serviço vazio, conforme o item 22 do Miro', mas desde o prompt v5 (14/10) o quarto mantém a cama, sem registro de quem decidiu; a nota não foi transcrita palavra por palavra: confirmar a leitura com o usuário",
-   "fonte": "POE642_CasaA/POE642_CasaA_HANDOFF_ClaudeCode.md:78; POE642_CasaA/POE642_CasaA_PH_1Pavimento_v5.md:18"
-  },
-  {
-   "fala": "Encostar essa porta mais na parede, ela tá solta.",
-   "como": "A porta do quarto de serviço foi encostada na ponta da parede, quina com quina; todas as portas do pavimento foram revistas do mesmo jeito.",
-   "conferir": "folha do quarto de serviço (a de baixo, junto ao armário) presa à ponta da parede; as 11 folhas de giro quina a quina, sem arco.",
-   "pontos": [
-    [
-     2110,
-     1460
-    ],
-    [
-     2000,
-     590
-    ],
-    [
-     1880,
-     1224
-    ],
-    [
-     2450,
-     1316
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:19; POE642_CasaA/scripts/um_pav_casaa_1111.py:1260"
-  },
-  {
-   "fala": "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado.",
-   "como": "Entre a suíte 1 e a varanda de 39 m², o painel ficou em ripado de nogueira, folha por folha, destacado do piso.",
-   "conferir": "folhas em ripado de nogueira com as junções, destacadas do vinílico.",
-   "pontos": [
-    [
-     2548,
-     1400
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:18; POE642_CasaA/scripts/um_pav_casaa_1111.py:480"
-  },
-  {
-   "fala": "Diminuir o tamanho dessa vegetação",
-   "como": "A folhagem grande da floreira do banho master saiu; entraram plantas menores, dentro da floreira.",
-   "conferir": "floreira junto à banheira com plantas baixas dentro da caixa do PDF, sem passar sobre o piso.",
-   "pontos": [
-    [
-     1361,
-     1547
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:21; POE642_CasaA/scripts/um_pav_casaa_1111.py:1352"
-  },
-  {
-   "fala": "Colocar a seta na escada e a descrição Desce para 'tal espaço'",
-   "como": "A escada caracol ganhou o triângulo no sentido da descida, a letra D e a descrição \"DESCE PARA A ÁREA DE SERVIÇO\".",
-   "conferir": "caracol: triângulo no sentido da descida, D sob a seta, descrição em 2 linhas ao lado.",
-   "pontos": [
-    [
-     2008,
-     1565
-    ],
-    [
-     2102,
-     1606
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/pedidos_cliente/1Pavimento_1111/LEIA.md:20; POE642_CasaA/scripts/um_pav_casaa_1111.py:1300"
+   "obs": "não está no quadro do Miro de hoje. 1ª revisão do Miro (out/26), item 22: o handoff de 13/10 diz 'Quarto de serviço vazio, conforme o item 22 do Miro', mas desde o prompt v5 (14/10) o quarto mantém a cama, sem registro de quem decidiu;",
+   "status": "fora_do_miro"
   },
   {
    "fala": "[sem o texto literal] pilares",
    "como": "Não foi aplicado: o item foi desconsiderado na primeira revisão.",
    "conferir": "sem lugar registrado.",
    "pontos": [],
-   "geral": false,
-   "status": "nao_feito",
-   "obs": "1ª revisão do Miro (out/26), item 21: o handoff de 13/10 só registra 'O item 21 (pilares) foi desconsiderado'; o texto e o lugar da nota não foram transcritos",
-   "fonte": "POE642_CasaA/POE642_CasaA_HANDOFF_ClaudeCode.md:84"
+   "obs": "não está no quadro do Miro de hoje. 1ª revisão do Miro (out/26), item 21: o handoff de 13/10 só registra 'O item 21 (pilares) foi desconsiderado';",
+   "status": "fora_do_miro"
   }
  ]
 }

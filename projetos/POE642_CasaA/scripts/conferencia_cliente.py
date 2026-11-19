@@ -58,7 +58,7 @@ DW, DH = 440, 205                                     # o detalhe de cada pedido
 RX0 = 2250                                            # a coluna das plantas na 1ª folha
 TOPO = MARG + 250
 BASE = H - MARG - 40
-ROTULO = {"nao_feito": "NÃO FEITO", "parcial": "PARCIAL"}
+ROTULO = {"nao_feito": "NÃO FEITO", "parcial": "PARCIAL", "a_conferir": "A CONFERIR", "fora_do_miro": "FORA DO QUADRO ATUAL"}
 
 
 def F(peso, t):
@@ -171,7 +171,7 @@ def dados_planta(casa, pav, interno):
         g = qual_geral(it, gerais)
         if g:
             desta.setdefault(g, []).append(it)
-        elif interno or (it.get("status", "feito") != "nao_feito" and it["fala"].strip() not in ("?", "")):
+        elif interno or (it.get("status", "feito") not in ("nao_feito", "fora_do_miro") and it["fala"].strip() not in ("?", "")):
             pedidos.append(dict(it))                       # o cliente não vê o que não foi feito nem o "?" solto
     for n, it in enumerate(pedidos, 1):
         it["id"] = f"C{n}"
@@ -297,7 +297,7 @@ def bloco_geral(g, interno):
         d = fl.d
         tx, tw = x + 120, w - 120
         lq = quebra(aspas(g["fala"]), FG, tw, d)
-        lc = quebra("Nesta planta: " + g["como"], FGC, tw, d)
+        lc = quebra(("" if g["como"].startswith("Em todas") else "Nesta planta: ") + g["como"], FGC, tw, d)
         extra = []
         if interno and g.get("conferir"):
             extra += quebra("NO 12K: " + g["conferir"], F("Light", 24), tw, d)
@@ -416,6 +416,8 @@ def pagina(casa, pav, interno=False):
     doze = cv2.imread(str(PROJ / dz["arquivo"]))
     area = (dz["x0"], dz["y0"], dz["x0"] + doze.shape[1] / dz["s"], dz["y0"] + doze.shape[0] / dz["s"])
     for it in pedidos:
+        if it.get("detalhe") == "planta":
+            it["detalhe"] = list(plano["recorte"])
         if not it.get("detalhe"):
             it["detalhe"] = retangulo(it["pontos"], area) if it.get("pontos") else list(plano["recorte"])
     blocos = [bloco_secao("PEDIDOS NO MIRO PARA ESTA PLANTA", COR["C"])]

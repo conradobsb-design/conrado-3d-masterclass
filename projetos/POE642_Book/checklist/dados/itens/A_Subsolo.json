@@ -1,7 +1,7 @@
 {
  "casa": "A",
  "pav": "Subsolo",
- "contagem": "6 notas do cliente de 05/11 (README:1733)",
+ "fonte": "quadro do Miro 'POE 642 - Revisão de Imagens', frame das plantas (Casas A a E), lido em 19/11 pelo link de visualização",
  "itens": [
   {
    "fala": "Deixar sem hachura. Deixar na cor branca. Sem fundo.",
@@ -9,18 +9,96 @@
    "conferir": "fora da planta, branco puro; sem a hachura do terreno e sem o contorno do lote.",
    "pontos": [
     [
-     960,
-     960
+     1889,
+     638
     ]
    ],
-   "detalhe": [
-    690,
-    836,
-    2423,
-    1673
-   ],
+   "geral": false,
    "status": "feito",
-   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
+   "miro_ids": [
+    "3458764689446435400"
+   ],
+   "detalhe": "planta"
+  },
+  {
+   "fala": "Representar as prateleiras com uma cor neutra única, sem textura. Indicada na planta ao lado.",
+   "como": "As prateleiras do depósito estão numa cor neutra única, sem textura. O mesmo tom vale para os armários e prateleiras de todas as casas.",
+   "conferir": "prateleiras do depósito em L numa cor só, o tom padrão dos armários (RGB 208, 178, 156), sem veio nem borrão.",
+   "pontos": [
+    [
+     1777,
+     939
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689544523605"
+   ]
+  },
+  {
+   "fala": "Colocar a seta na escada e a descrição - Sobe para o Deck.",
+   "como": "O triângulo da seta está no degrau de baixo, com a letra S e a descrição \"SOBE PARA O DECK\" em duas linhas.",
+   "conferir": "triângulo cheio no degrau de baixo, \"SOBE PARA O / DECK\" em duas linhas e o S logo abaixo da seta; na opção B, na Kalam.",
+   "pontos": [
+    [
+     940,
+     1181
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689446252101"
+   ]
+  },
+  {
+   "fala": "Deixar a representação do Bege Bahia menos manchado (para melhor representação)",
+   "como": "O Bege Bahia do pátio, da circulação, do depósito e dos degraus está com manchas suaves. Aplicado em todas as plantas de todas as casas.",
+   "conferir": "pátio, circulação, depósito e degraus com as manchas suaves (45% do contraste).",
+   "pontos": [
+    [
+     1202,
+     1282
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689545494917"
+   ]
+  },
+  {
+   "fala": "Tirar essas linhas",
+   "como": "Saíram as linhas da projeção junto à parede de baixo da academia; o piso vinílico ficou contínuo.",
+   "conferir": "academia, junto à parede de baixo: sem as linhas da projeção, vinílico contínuo.",
+   "pontos": [
+    [
+     1685,
+     1472
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689545494306"
+   ]
+  },
+  {
+   "fala": "Testar um estilo de grama mais sóbrio. Testar em uma planta e mandar pra gente. Ver exemplo da planta colocada logo ali em cima.",
+   "como": "A grama foi trocada por um estilo mais sóbrio, no verde-oliva acinzentado do exemplo e numa escala menor; depois da aprovação, a mesma grama foi levada a todas as plantas.",
+   "conferir": "grama do pátio no verde-oliva sóbrio padrão, escala menor.",
+   "pontos": [
+    [
+     826,
+     1535
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689446252821"
+   ]
   },
   {
    "fala": "Tirar a representação do deck e da piscina superior. Deixar apenas o subsolo mesmo.",
@@ -28,18 +106,16 @@
    "conferir": "sem o deck, a piscina, o spa e os pisantes do Térreo esmaecidos por cima; só o Subsolo.",
    "pontos": [
     [
-     830,
-     1060
+     625,
+     2037
     ]
    ],
-   "detalhe": [
-    690,
-    836,
-    2423,
-    1673
-   ],
+   "geral": false,
    "status": "feito",
-   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
+   "miro_ids": [
+    "3458764689446591147"
+   ],
+   "detalhe": "planta"
   },
   {
    "fala": "Diminuir a escala da grama.",
@@ -51,79 +127,8 @@
      1400
     ]
    ],
-   "detalhe": [
-    730,
-    1240,
-    1070,
-    1470
-   ],
-   "status": "feito",
-   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
-  },
-  {
-   "fala": "Colocar a seta na escada e a descrição - Sobe para o Deck.",
-   "como": "O triângulo da seta está no degrau de baixo, com a letra S e a descrição \"SOBE PARA O DECK\" em duas linhas.",
-   "conferir": "triângulo cheio no degrau de baixo, \"SOBE PARA O / DECK\" em duas linhas e o S logo abaixo da seta; na opção B, na Kalam.",
-   "pontos": [
-    [
-     1070,
-     1092
-    ]
-   ],
-   "detalhe": [
-    985,
-    1020,
-    1255,
-    1175
-   ],
-   "status": "feito",
-   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
-  },
-  {
-   "fala": "Representar as prateleiras com uma cor neutra única, sem textura.",
-   "como": "As prateleiras do depósito estão numa cor neutra única, sem textura. O mesmo tom vale para os armários e prateleiras de todas as casas.",
-   "conferir": "prateleiras do depósito em L numa cor só, o tom padrão dos armários (RGB 208, 178, 156), sem veio nem borrão.",
-   "pontos": [
-    [
-     1600,
-     893
-    ],
-    [
-     1850,
-     975
-    ]
-   ],
-   "detalhe": [
-    1330,
-    860,
-    1890,
-    1055
-   ],
-   "status": "feito",
-   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
-  },
-  {
-   "fala": "Deixar a representação do Bege Bahia menos manchado (para melhor representação).",
-   "como": "O Bege Bahia do pátio, da circulação, do depósito e dos degraus está com manchas suaves. Aplicado em todas as plantas de todas as casas.",
-   "conferir": "pátio, circulação, depósito e degraus com as manchas suaves (45% do contraste).",
-   "pontos": [
-    [
-     1200,
-     1350
-    ],
-    [
-     1700,
-     1000
-    ]
-   ],
-   "detalhe": [
-    1180,
-    880,
-    1700,
-    1110
-   ],
-   "status": "feito",
-   "fonte": "POE642_CasaA/scripts/README.md:1733 (05/11)"
+   "status": "fora_do_miro",
+   "obs": "não está no quadro do Miro de hoje."
   }
  ]
 }

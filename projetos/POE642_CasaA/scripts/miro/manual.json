@@ -1,0 +1,15 @@
+{
+"A_Subsolo|tirar essas linhas": {"como": "Saíram as linhas da projeção junto à parede de baixo da academia; o piso vinílico ficou contínuo.", "conferir": "academia, junto à parede de baixo: sem as linhas da projeção, vinílico contínuo."},
+"A_Subsolo|testar um estilo de grama mais sobrio testar em uma planta e": {"como": "A grama foi trocada por um estilo mais sóbrio, no verde-oliva acinzentado do exemplo e numa escala menor; depois da aprovação, a mesma grama foi levada a todas as plantas.", "conferir": "grama do pátio no verde-oliva sóbrio padrão, escala menor."},
+"A_Terreo|deixar as linhas tracejadas mais finas nas claraboias deixar": {"como": "Os tracejados ficaram mais finos e claros; a claraboia do lavabo saiu sem o X, em traço cinza fino.", "conferir": "claraboia do lavabo sem X, traço cinza fino; tracejados finos e claros.", "obs": "lavabo: só o traço horizontal, por decisão do usuário (12/11); nas outras casas o padrão é o retângulo de borda."},
+"A_Terreo|usar essa cor padronizada para as prateleiras e armarios": {"como": "Armários e prateleiras na cor padronizada indicada, lisa e sem textura, em todas as casas.", "conferir": "armários e prateleiras na cor neutra padrão, sem veio."},
+"B_Terreo|representar melhor o painel amadeirado ele acaba sumindo no ": {"como": "O painel amadeirado foi redesenhado em ripado de madeira, com as juntas marcadas, destacado do piso.", "conferir": "painel junto à janela do quarto: ripado nítido, diferente do piso."},
+"B_Terreo|deixar o tom de azul para a piscina mais sobrio ver exemplo": {"como": "A água da piscina e da prainha passou para o tom mais sóbrio adotado em todas as piscinas, com as partes rasas mais claras.", "conferir": "água da opção aprovada, rasas mais claras."},
+"C_Terreo|representar um filete entre os dois pisos": {"como": "Entre a pedra portuguesa do acesso e o piso da garagem entrou um filete claro de pedra, separando os dois pisos.", "conferir": "filete claro contínuo entre a pedra portuguesa e a garagem."},
+"C_Terreo|isso aqui e uma janela representar ela fechada": {"como": "A janela foi representada fechada, em vidro com o contorno fino.", "conferir": "janela entre a varanda e a gourmet: folhas fechadas, contorno fino.", "status": "a_conferir", "obs": "sem registro específico desta nota nos scripts; conferir no 12K."},
+"C_Terreo|deixar o tom de azul para a piscina mais sobrio ver exemplo": {"como": "A água da piscina e do spa passou para o tom mais sóbrio adotado em todas as piscinas, com as partes rasas mais claras.", "conferir": "água da opção aprovada, rasas mais claras."},
+"E_Terreo|tirar essa linha contornando a piscina": {"usar": "no spa, tirar a linha"},
+"E_Terreo|deixar o tracejado mais fino e na cor mais cinza": {"usar": "vazio do hall mais fino"},
+"E_1Pavimento|essa planta esta bonita": {"usar": "manter"},
+"E_1Pavimento|deixar o tracejado mais fino e na cor mais cinza": {"usar": "mais finos e mais claros"}
+}

@@ -4,78 +4,78 @@
    "G1": "A escada do pátio com o triângulo da seta, a letra S e a descrição \"SOBE PARA O DECK\".",
    "G2": "Esta é a planta de origem destes pedidos: estão todos na lista acima.",
    "G5": "Não se aplica: esta planta não tem claraboia.",
-   "G6": "Não se aplica: esta planta não tem terreno com árvores.",
-   "G7": "A grama do pátio é a mesma do gramado da Casa A, na escala menor pedida."
-  }
+   "G6": "Não se aplica: esta planta não tem terreno com árvores."
+  },
+  "miro": "POE642_Book/checklist/dados/miro/A_Subsolo.jpg"
  },
  "A_Terreo": {
   "gerais": {
-   "G2": "Os pedidos do Subsolo da Casa A que cabem nesta planta também foram aplicados aqui: Bege Bahia menos manchado, armários e prateleiras numa cor neutra sem textura, setas e descrições nas escadas.",
-   "G7": "É o gramado de referência: o mesmo foi levado para os Térreos das outras casas."
-  }
+   "G2": "Os pedidos do Subsolo da Casa A que cabem nesta planta também foram aplicados aqui: Bege Bahia menos manchado, armários e prateleiras numa cor neutra sem textura, setas e descrições nas escadas."
+  },
+  "miro": "POE642_Book/checklist/dados/miro/A_Terreo.jpg"
  },
  "A_1Pavimento": {
   "gerais": {
    "G2": "Os pedidos do Subsolo da Casa A que cabem nesta planta também foram aplicados aqui: Bege Bahia menos manchado, armários e prateleiras numa cor neutra sem textura, setas e descrições nas escadas.",
    "G5": "Não se aplica: esta planta não tem claraboia.",
-   "G6": "Não se aplica: em volta, o Térreo aparece só esmaecido, com as mesmas poucas árvores.",
-   "G7": "O Térreo em volta, esmaecido, com o mesmo gramado sóbrio."
-  }
+   "G6": "Não se aplica: em volta, o Térreo aparece só esmaecido, com as mesmas poucas árvores."
+  },
+  "miro": "POE642_Book/checklist/dados/miro/A_1Pavimento.jpg"
  },
  "B_Subsolo": {
   "gerais": {
    "G5": "Não se aplica: esta planta não tem claraboia.",
-   "G6": "Não se aplica: esta planta não tem terreno com árvores.",
-   "G7": "Não se aplica: esta planta não tem gramado."
-  }
+   "G6": "Não se aplica: esta planta não tem terreno com árvores."
+  },
+  "miro": "POE642_Book/checklist/dados/miro/B_Subsolo.jpg"
  },
  "B_Terreo": {
   "gerais": {
    "G5": "Não se aplica: esta planta não tem claraboia."
-  }
+  },
+  "miro": "POE642_Book/checklist/dados/miro/B_Terreo.jpg"
  },
  "C_Subsolo": {
   "gerais": {
    "G5": "Não se aplica: esta planta não tem claraboia.",
-   "G6": "Não se aplica: esta planta não tem terreno com árvores.",
-   "G7": "Não se aplica: esta planta não tem gramado."
-  }
+   "G6": "Não se aplica: esta planta não tem terreno com árvores."
+  },
+  "miro": "POE642_Book/checklist/dados/miro/C_Subsolo.jpg"
  },
  "C_Terreo": {
   "gerais": {
-   "G6": "O terreno com poucas árvores: só 3 oliveiras pequenas sobre o gramado.",
-   "G7": "O gramado no mesmo tom sóbrio do gramado da Casa A."
-  }
+   "G6": "O terreno com poucas árvores: só 3 oliveiras pequenas sobre o gramado."
+  },
+  "miro": "POE642_Book/checklist/dados/miro/C_Terreo.jpg"
  },
  "D_Subsolo": {
   "gerais": {
    "G5": "Não se aplica: esta planta não tem claraboia.",
-   "G6": "Não se aplica: esta planta não tem terreno com árvores.",
-   "G7": "Não se aplica: esta planta não tem gramado."
-  }
+   "G6": "Não se aplica: esta planta não tem terreno com árvores."
+  },
+  "miro": "POE642_Book/checklist/dados/miro/D_Subsolo.jpg"
  },
  "D_Terreo": {
-  "gerais": {
-   "G7": "O gramado no mesmo tom sóbrio do gramado da Casa A."
-  }
+  "gerais": {},
+  "miro": "POE642_Book/checklist/dados/miro/D_Terreo.jpg"
  },
  "E_Subsolo": {
   "gerais": {
    "G5": "Não se aplica: esta planta não tem claraboia.",
-   "G6": "Não se aplica: esta planta não tem terreno com árvores.",
-   "G7": "Não se aplica: esta planta não tem gramado."
-  }
+   "G6": "Não se aplica: esta planta não tem terreno com árvores."
+  },
+  "miro": "POE642_Book/checklist/dados/miro/E_Subsolo.jpg"
  },
  "E_Terreo": {
   "gerais": {
-   "G5": "Não se aplica: esta planta não tem claraboia.",
-   "G7": "O gramado no mesmo tom sóbrio do gramado da Casa A."
-  }
+   "G5": "Não se aplica: esta planta não tem claraboia."
+  },
+  "miro": "POE642_Book/checklist/dados/miro/E_Terreo.jpg"
  },
  "E_1Pavimento": {
   "gerais": {
-   "G6": "Não se aplica: em volta, o Térreo aparece só esmaecido, com as mesmas poucas árvores.",
-   "G7": "O Térreo em volta, esmaecido, com o mesmo gramado sóbrio."
-  }
+   "G6": "Não se aplica: em volta, o Térreo aparece só esmaecido, com as mesmas poucas árvores."
+  },
+  "miro": "POE642_Book/checklist/dados/miro/E_1Pavimento.jpg"
  }
 }

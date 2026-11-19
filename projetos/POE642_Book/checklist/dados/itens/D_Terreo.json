@@ -1,201 +1,23 @@
 {
  "casa": "D",
  "pav": "Terreo",
- "contagem": "33 itens, 34 textos de notas do cliente do quadro \"Revisão das Plantas 2\" (as 2 do Dekton Danae juntas; \"Nome e área\", \"Continuar o guarda-roupa\", \"Padronizar a cor\", \"Representar os armários\" e \"Geral: Não precisa...\" repetidas em mais de um ambiente), achadas na proposta de 15/11 e no roteiro do Térreo, cruzadas com o levantamento.",
+ "fonte": "quadro do Miro 'POE 642 - Revisão de Imagens', frame das plantas (Casas A a E), lido em 19/11 pelo link de visualização",
  "itens": [
   {
-   "fala": "OBS GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
-   "como": "O terreno ficou com o gramado sóbrio e apenas 3 oliveiras nos cantos. As plantas menores ficaram nos jardins internos e nas floreiras.",
-   "conferir": "só 3 oliveiras (canto de cima à esquerda, de baixo à esquerda e à direita); gramado sem árvores soltas.",
-   "pontos": [
-    [
-     520,
-     300
-    ],
-    [
-     3120,
-     1520
-    ],
-    [
-     470,
-     1840
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "No gramado não entraram arbustos; as plantas baixas estão nos jardins internos e nas floreiras, como na Casa C.",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:160; POE642_REGRAS.md:426"
-  },
-  {
-   "fala": "Deixar o tom da vegetação dos jardins nas janelas diferente do terreno",
-   "como": "As floreiras das janelas da cozinha e da área de serviço receberam folhagens num verde diferente do gramado, com a borda da floreira.",
-   "conferir": "floreiras com a borda e a folhagem verde-clara, distinta do gramado.",
-   "pontos": [
-    [
-     1950,
-     353
-    ],
-    [
-     2372,
-     353
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:130"
-  },
-  {
-   "fala": "Cor da ilha é no Dekton Danae / Cor da bancada no dekton danae",
-   "como": "A ilha, a bancada da pia da cozinha e a bancada dos tanques ficaram em Dekton Danae, na chapa da foto oficial.",
-   "conferir": "ilha, pia e tanques no Danae, sem emenda; cubas e cooktop por cima.",
-   "pontos": [
-    [
-     1945,
-     392
-    ],
-    [
-     2337,
-     393
-    ],
-    [
-     1953,
-     515
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:128; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:216"
-  },
-  {
-   "fala": "Piso do gás também é no marrom tabaco",
-   "como": "O piso do abrigo do gás foi para o mesmo granito marrom tabaco da área de serviço.",
-   "conferir": "abrigo do gás no granito marrom, liso; rótulo GÁS legível.",
-   "pontos": [
-    [
-     2593,
-     390
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:140; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:237"
-  },
-  {
-   "fala": "Representar os armários e prateleiras sem textura. Com cor sólida e neutra como algumas casas acima.",
-   "como": "Os armários e as prateleiras (louceiro, despensa, cozinha, área de serviço e sala íntima) ficaram lisos, na cor sólida neutra das outras casas.",
-   "conferir": "cor lisa padrão, sem veio, a face um tom abaixo e a sombra curta.",
-   "pontos": [
-    [
-     2141,
-     430
-    ],
-    [
-     2141,
-     620
-    ],
-    [
-     1464,
-     1545
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:89; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:104"
-  },
-  {
-   "fala": "Remover as linhas tracejadas do telhado. [...] Deixar apenas as que representam 'vazios', claraboias e pergolados.",
+   "fala": "Remover as linhas tracejadas do telhado. Fica um representação mais técnica e pode confundir quem olha a planta. Deixar apenas as que representam 'vazios', claraboias e pergolados.",
    "como": "Saíram os tracejados do telhado na garagem e no hall de entrada. Ficaram só os dos vazios, das claraboias e dos pergolados.",
    "conferir": "garagem e hall sem o tracejado da cobertura; ficam os pergolados, o X da área descoberta e as claraboias.",
    "pontos": [
     [
-     2640,
-     400
-    ],
-    [
-     3185,
-     620
-    ],
-    [
-     2567,
-     906
+     3195,
+     182
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:151; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:250"
-  },
-  {
-   "fala": "Tirar o X dos vãos do pergolado. Representar apenas a estrutura dele em si. Representar com uma cor cinza. Fazer os quadrados no pergolado de cima igual o debaixo, essa é a estrutura dele. Com linhas tracejadas.",
-   "como": "Os dois pergolados ficaram sem o X: só os módulos da estrutura, iguais em cima e embaixo, em tracejado cinza fino.",
-   "conferir": "9 módulos tracejados em cinza fino em cada pergolado, sem X.",
-   "pontos": [
-    [
-     2910,
-     410
-    ],
-    [
-     2910,
-     855
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:152; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:251"
-  },
-  {
-   "fala": "Representar a churrasqueira",
-   "como": "A churrasqueira foi representada com a grelha no módulo da esquerda da bancada da área gourmet.",
-   "conferir": "grelha dentro da bancada, com folga, sem passar da parede.",
-   "pontos": [
-    [
-     1430,
-     500
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:119; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:211"
-  },
-  {
-   "fala": "Geral: Não precisa representar os armários inferiores ou superiores com essa linha acima da bancada.",
-   "como": "As bancadas ficaram com o tampo liso, sem as linhas dos armários de baixo e de cima; ficaram só as cubas, o cooktop e a churrasqueira.",
-   "conferir": "bancada de trás da gourmet e bancada da sala íntima sem as divisões dos módulos nem a projeção do armário alto.",
-   "pontos": [
-    [
-     1600,
-     500
-    ],
-    [
-     1777,
-     1610
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:90; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:208"
-  },
-  {
-   "fala": "Bancada na pedra marrom tabaco",
-   "como": "A bancada do WC DCE ficou em granito marrom tabaco, com a cuba branca.",
-   "conferir": "bancada em marrom tabaco, cuba redesenhada.",
-   "pontos": [
-    [
-     2398,
-     574
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:139; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:232"
+   "miro_ids": [
+    "3458764689989407818"
+   ]
   },
   {
    "fala": "Demarcar melhor o perímetro da casa",
@@ -203,86 +25,180 @@
    "conferir": "fio contínuo na borda do Bege Bahia com a grama.",
    "pontos": [
     [
-     764,
-     600
+     856,
+     381
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689992931933"
+   ]
+  },
+  {
+   "fala": "Cor da bancada no dekton danae",
+   "como": "A ilha, a bancada da pia da cozinha e a bancada dos tanques ficaram em Dekton Danae, na chapa da foto oficial.",
+   "conferir": "ilha, pia e tanques no Danae, sem emenda; cubas e cooktop por cima.",
+   "pontos": [
+    [
+     1971,
+     407
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689991767137"
+   ]
+  },
+  {
+   "fala": "Deixar o tom da vegetação dos jardins nas janelas diferente do terreno",
+   "como": "As floreiras das janelas da cozinha e da área de serviço receberam folhagens num verde diferente do gramado, com a borda da floreira.",
+   "conferir": "floreiras com a borda e a folhagem verde-clara, distinta do gramado.",
+   "pontos": [
+    [
+     2383,
+     370
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689990158353"
+   ]
+  },
+  {
+   "fala": "Piso do gás também é no marrom tabaco",
+   "como": "O piso do abrigo do gás foi para o mesmo granito marrom tabaco da área de serviço.",
+   "conferir": "abrigo do gás no granito marrom, liso; rótulo GÁS legível.",
+   "pontos": [
+    [
+     2524,
+     386
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689990737994"
+   ]
+  },
+  {
+   "fala": "Tirar o X dos vãos do pergolado. Representar apenas a estrutura dele em si. Representar com uma cor cinza. Fazer os quadrados no pergolado de cima igual o debaixo, essa é a estrutura dele. Com linhas tracejadas.",
+   "como": "Os dois pergolados ficaram sem o X: só os módulos da estrutura, iguais em cima e embaixo, em tracejado cinza fino.",
+   "conferir": "9 módulos tracejados em cinza fino em cada pergolado, sem X.",
+   "pontos": [
+    [
+     3136,
+     414
     ],
     [
-     497,
-     1240
+     3120,
+     856
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:146; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:301"
+   "miro_ids": [
+    "3458764689989692788"
+   ]
   },
   {
-   "fala": "Aqui tem que representar dois painéis pivotantes",
-   "como": "Foram representados os dois painéis pivotantes no lado do deck, em lâminas de madeira no ripado de nogueira.",
-   "conferir": "2 painéis a 45°, ripado de nogueira, sombra curta, nas medidas do vão.",
+   "fala": "Representar a churrasqueira",
+   "como": "A churrasqueira foi representada com a grelha no módulo da esquerda da bancada da área gourmet.",
+   "conferir": "grelha dentro da bancada, com folga, sem passar da parede.",
    "pontos": [
     [
-     1393,
-     600
+     1399,
+     513
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689992761584"
+   ]
+  },
+  {
+   "fala": "Cor da ilha é no Dekton Danae",
+   "como": "A ilha, a bancada da pia da cozinha e a bancada dos tanques ficaram em Dekton Danae, na chapa da foto oficial.",
+   "conferir": "ilha, pia e tanques no Danae, sem emenda; cubas e cooktop por cima.",
+   "pontos": [
+    [
+     1868,
+     523
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689991767074"
+   ]
+  },
+  {
+   "fala": "Representar os armários e prateleiras sem textura. Com cor sólida e neutra como algumas casas acima.",
+   "como": "Os armários e as prateleiras (louceiro, despensa, cozinha, área de serviço e sala íntima) ficaram lisos, na cor sólida neutra das outras casas.",
+   "conferir": "cor lisa padrão, sem veio, a face um tom abaixo e a sombra curta.",
+   "pontos": [
+    [
+     2288,
+     536
     ],
     [
-     1393,
-     670
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:119; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:214"
-  },
-  {
-   "fala": "Fazer uma linha contínua aqui pra linha tracejada não ficar voando.",
-   "como": "Na divisa da área descoberta entrou uma linha contínua, fechando o tracejado do vazio.",
-   "conferir": "lado direito do retângulo do X contínuo; o X tracejado refeito.",
-   "pontos": [
-    [
-     2347,
-     620
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:140; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:240"
-  },
-  {
-   "fala": "Mostrar melhor a diferença de profundidade",
-   "como": "A prainha e o banco do spa, mais rasos, ficaram num tom mais claro e transparente que a parte funda da piscina e do spa.",
-   "conferir": "prainha e anel do spa claros; piscina e miolo do spa mais escuros; divisas nítidas.",
-   "pontos": [
-    [
-     1180,
-     650
+     2441,
+     412
     ],
     [
-     1189,
-     893
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "A parte rasa foi diferenciada em 11/11, antes desta nota; não houve ajuste novo depois dela.",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:145; POE642_CasaA/scripts/piscinas_turquesa.py:606"
-  },
-  {
-   "fala": "Cor do piso desse banheiro segue padrão dos outros dessa casa.",
-   "como": "O piso do WC DCE passou para o mesmo mármore claro dos outros banhos da casa.",
-   "conferir": "piso igual ao dos banhos 1 a 3, sem as manchas bege.",
-   "pontos": [
+     2126,
+     450
+    ],
     [
-     2450,
-     640
+     2128,
+     583
+    ],
+    [
+     2039,
+     399
+    ],
+    [
+     1796,
+     636
+    ],
+    [
+     1735,
+     1443
+    ],
+    [
+     1979,
+     1568
+    ],
+    [
+     2438,
+     1525
+    ],
+    [
+     2340,
+     1574
+    ],
+    [
+     1365,
+     1427
+    ],
+    [
+     1039,
+     1441
+    ],
+    [
+     895,
+     1343
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:139; POE642_CasaA/scripts/alternativa1_terreo_casad_1611.py:777"
+   "miro_ids": [
+    "3458764689990905072",
+    "3458764689994049452"
+   ]
   },
   {
    "fala": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
@@ -290,60 +206,97 @@
    "conferir": "água no tom da opção C, igual à das outras casas.",
    "pontos": [
     [
-     1000,
-     750
+     989,
+     621
     ]
    ],
    "geral": false,
    "status": "feito",
    "obs": "Atendido pela água adotada em 11/11 para todas as piscinas (o tom da foto de referência do cliente), antes desta nota; não houve ajuste novo depois dela.",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:145; POE642_CasaA/scripts/piscinas_turquesa.py:595"
+   "miro_ids": [
+    "3458764689987097758"
+   ]
   },
   {
-   "fala": "Tirar o contorno dos mobiliários",
-   "como": "Saiu o fio escuro de contorno em volta dos tapetes e das mesas, nesta e nas outras plantas.",
-   "conferir": "tapetes da varanda, do living e da suíte 3 e mesa do jantar sem o fio escuro do PDF.",
+   "fala": "Aqui tem que representar dois painéis pivotantes",
+   "como": "Foram representados os dois painéis pivotantes no lado do deck, em lâminas de madeira no ripado de nogueira.",
+   "conferir": "2 painéis a 45°, ripado de nogueira, sombra curta, nas medidas do vão.",
    "pontos": [
     [
-     1950,
-     858
-    ],
-    [
-     1587,
-     1067
-    ],
-    [
-     2081,
-     1166
-    ],
-    [
-     2396,
-     1425
+     1284,
+     573
     ]
    ],
-   "geral": true,
+   "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:304; POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:310"
+   "miro_ids": [
+    "3458764689992761095"
+   ]
   },
   {
-   "fala": "Colocar a seta em todas as escadas e a descrição",
-   "como": "As duas escadas receberam o triângulo da seta no primeiro degrau, a letra D e a descrição: \"DESCE PARA O JARDIM\" e \"DESCE PARA O SUBSOLO\".",
-   "conferir": "triângulo cheio, D e descrição em duas linhas nas duas escadas; opção B na Kalam.",
+   "fala": "Fazer uma linha contínua aqui pra linha tracejada não ficar voando.",
+   "como": "Na divisa da área descoberta entrou uma linha contínua, fechando o tracejado do vazio.",
+   "conferir": "lado direito do retângulo do X contínuo; o X tracejado refeito.",
    "pontos": [
     [
-     719,
-     928
-    ],
-    [
-     1134,
-     1267
+     2285,
+     658
     ]
    ],
-   "geral": true,
+   "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:146; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:291"
+   "miro_ids": [
+    "3458764689991373092"
+   ]
+  },
+  {
+   "fala": "Bancada na pedra marrom tabaco",
+   "como": "A bancada do WC DCE ficou em granito marrom tabaco, com a cuba branca.",
+   "conferir": "bancada em marrom tabaco, cuba redesenhada.",
+   "pontos": [
+    [
+     2352,
+     556
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689991164719"
+   ]
+  },
+  {
+   "fala": "Mostrar melhor a diferença de profundidade",
+   "como": "A prainha e o banco do spa, mais rasos, ficaram num tom mais claro e transparente que a parte funda da piscina e do spa.",
+   "conferir": "prainha e anel do spa claros; piscina e miolo do spa mais escuros; divisas nítidas.",
+   "pontos": [
+    [
+     1084,
+     690
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "A parte rasa foi diferenciada em 11/11, antes desta nota; não houve ajuste novo depois dela.",
+   "miro_ids": [
+    "3458764689987097876"
+   ]
+  },
+  {
+   "fala": "Cor do piso desse banheiro segue padrão dos outros dessa casa.",
+   "como": "O piso do WC DCE passou para o mesmo mármore claro dos outros banhos da casa.",
+   "conferir": "piso igual ao dos banhos 1 a 3, sem as manchas bege.",
+   "pontos": [
+    [
+     2375,
+     668
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689991163969"
+   ]
   },
   {
    "fala": "Usar a mesma representação de planta da casa A",
@@ -351,18 +304,19 @@
    "conferir": "2 vasos com a folhagem da Casa A, piso refeito em volta.",
    "pontos": [
     [
-     2397,
-     943
+     2314,
+     953
     ],
     [
-     2398,
-     1169
+     2317,
+     1145
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:98; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:184"
+   "miro_ids": [
+    "3458764689993252252"
+   ]
   },
   {
    "fala": "Representar banco com estofamento",
@@ -370,14 +324,15 @@
    "conferir": "banco estofado com as almofadas e a moldura de madeira.",
    "pontos": [
     [
-     1475,
-     1076
+     1406,
+     1073
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:107; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:288"
+   "miro_ids": [
+    "3458764689993431361"
+   ]
   },
   {
    "fala": "Centralizar a seta com a abertura da porta, usando este modelo de seta.",
@@ -385,29 +340,15 @@
    "conferir": "triângulo cheio no meio do vão, a ponta para dentro; a seta comprida saiu.",
    "pontos": [
     [
-     2436,
-     1055
+     2630,
+     1045
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:99; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:188"
-  },
-  {
-   "fala": "Representar a janela",
-   "como": "A janela entre o lavabo e o jardim foi desenhada no vão da parede.",
-   "conferir": "vão com a moldura clara e os vidros entre o lavabo e o jardim.",
-   "pontos": [
-    [
-     2612,
-     1270
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:160; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:272"
+   "miro_ids": [
+    "3458764689465100062"
+   ]
   },
   {
    "fala": "Trocar essa representação do jardim de inverno e melhorar a linha tracejada.",
@@ -415,33 +356,19 @@
    "conferir": "grama no tom do gramado, poucas plantas, X fino e claro, rótulo branco.",
    "pontos": [
     [
-     2658,
-     1270
+     2583,
+     1235
     ],
     [
-     1622,
-     1721
+     1676,
+     1708
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:100; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:275"
-  },
-  {
-   "fala": "Não é pedra, é armário",
-   "como": "O bloco da sala íntima que parecia pedra foi representado como armário, liso, na cor sólida dos armários.",
-   "conferir": "armário liso na cor padrão, sem veio de pedra.",
-   "pontos": [
-    [
-     1775,
-     1281
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:89; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:104"
+   "miro_ids": [
+    "3458764689538589881"
+   ]
   },
   {
    "fala": "Representar um painel aqui",
@@ -449,67 +376,31 @@
    "conferir": "painel de ripas de madeira escura com o fio, no retângulo do PDF.",
    "pontos": [
     [
-     1230,
-     1336
+     1264,
+     1306
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:91; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:193"
+   "miro_ids": [
+    "3458764689994230796"
+   ]
   },
   {
-   "fala": "A porta está \"entrando\" na parede e camuflando com a cor do piso",
-   "como": "A porta da suíte 3 foi encostada na quina da parede e redesenhada numa madeira que se destaca do piso.",
-   "conferir": "folha quina a quina na ponta da parede, em madeira distinta do vinílico; soleira no vão.",
+   "fala": "Não é pedra, é armário",
+   "como": "O bloco da sala íntima que parecia pedra foi representado como armário, liso, na cor sólida dos armários.",
+   "conferir": "armário liso na cor padrão, sem veio de pedra.",
    "pontos": [
     [
-     2185,
-     1346
+     1738,
+     1287
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:80; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:169"
-  },
-  {
-   "fala": "Padronizar a cor de representação do guarda-roupa",
-   "como": "Os guarda-roupas foram padronizados: os dos closets abertos, com os cabides, como nas outras casas, e os demais armários na cor sólida padrão.",
-   "conferir": "closets das suítes 1 e 2 com cabides; armário da suíte 3 liso, na cor padrão.",
-   "pontos": [
-    [
-     1150,
-     1432
-    ],
-    [
-     2110,
-     1432
-    ],
-    [
-     2180,
-     1481
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:68; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:105"
-  },
-  {
-   "fala": "Colocar cortina",
-   "como": "A janela da suíte 3 junto ao jardim recebeu a cortina de linho em ondas, no mesmo modelo das outras janelas.",
-   "conferir": "cortina de parede a parede no vão, o trilho do lado do vidro.",
-   "pontos": [
-    [
-     2504,
-     1420
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:79; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:163"
+   "miro_ids": [
+    "3458764689994230272"
+   ]
   },
   {
    "fala": "Melhorar a representação do painel (destacar mais em relação ao piso)",
@@ -517,41 +408,31 @@
    "conferir": "ripado de nogueira com o contorno; a faixa entre o vidro e o painel no vinílico.",
    "pontos": [
     [
-     2522,
-     1420
+     2482,
+     1378
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:79; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:166"
+   "miro_ids": [
+    "3458764689993798661"
+   ]
   },
   {
-   "fala": "Nome e área do ambiente e metragem",
-   "como": "Cada closet recebeu o nome e a área, no mesmo padrão dos outros rótulos.",
-   "conferir": "CLOSET e a área no centro do livre de cada closet (master, master 2, suítes 1 e 2).",
+   "fala": "Representar a janela",
+   "como": "A janela entre o lavabo e o jardim foi desenhada no vão da parede.",
+   "conferir": "vão com a moldura clara e os vidros entre o lavabo e o jardim.",
    "pontos": [
     [
-     1162,
-     1500
-    ],
-    [
-     2077,
-     1502
-    ],
-    [
-     1000,
-     1615
-    ],
-    [
-     655,
-     1645
+     2556,
+     1324
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:52; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:149"
+   "miro_ids": [
+    "3458764689993430971"
+   ]
   },
   {
    "fala": "Não tem soleira",
@@ -559,14 +440,73 @@
    "conferir": "vão entre a suíte 2 e o closet só no vinílico.",
    "pontos": [
     [
-     2042,
-     1510
+     2001,
+     1485
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:68; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:177"
+   "miro_ids": [
+    "3458764689536477651"
+   ]
+  },
+  {
+   "fala": "Nome e área do ambiente e metragem",
+   "como": "Cada closet recebeu o nome e a área, no mesmo padrão dos outros rótulos.",
+   "conferir": "CLOSET e a área no centro do livre de cada closet (master, master 2, suítes 1 e 2).",
+   "pontos": [
+    [
+     2046,
+     1480
+    ],
+    [
+     989,
+     1612
+    ],
+    [
+     627,
+     1628
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689994869962",
+    "3458764689536316176",
+    "3458764689536315998"
+   ]
+  },
+  {
+   "fala": "Padronizar a cor de representação do guarda-roupa",
+   "como": "Os guarda-roupas foram padronizados: os dos closets abertos, com os cabides, como nas outras casas, e os demais armários na cor sólida padrão.",
+   "conferir": "closets das suítes 1 e 2 com cabides; armário da suíte 3 liso, na cor padrão.",
+   "pontos": [
+    [
+     2109,
+     1455
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689994488902"
+   ]
+  },
+  {
+   "fala": "Colocar cortina",
+   "como": "A janela da suíte 3 junto ao jardim recebeu a cortina de linho em ondas, no mesmo modelo das outras janelas.",
+   "conferir": "cortina de parede a parede no vão, o trilho do lado do vidro.",
+   "pontos": [
+    [
+     2442,
+     1411
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689540443546"
+   ]
   },
   {
    "fala": "Continuar o guarda-roupa até o final",
@@ -574,37 +514,126 @@
    "conferir": "U do closet master e L da suíte 1 contínuos até a parede, sem divisão no canto.",
    "pontos": [
     [
-     1100,
-     1525
-    ],
-    [
-     640,
-     1578
+     1099,
+     1513
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:52; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:105"
+   "miro_ids": [
+    "3458764689536316621"
+   ]
   },
   {
-   "fala": "Representar as claraboias apenas com as linhas de fora, sem o X no meio [...] tom cinza e linhas fininhas.",
+   "fala": "A porta está \"entrando\" na parede e camuflando com a cor do piso",
+   "como": "A porta da suíte 3 foi encostada na quina da parede e redesenhada numa madeira que se destaca do piso.",
+   "conferir": "folha quina a quina na ponta da parede, em madeira distinta do vinílico; soleira no vão.",
+   "pontos": [
+    [
+     2178,
+     1530
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689993431758"
+   ]
+  },
+  {
+   "fala": "Colocar a seta em todas as escadas e a descrição",
+   "como": "As duas escadas receberam o triângulo da seta no primeiro degrau, a letra D e a descrição: \"DESCE PARA O JARDIM\" e \"DESCE PARA O SUBSOLO\".",
+   "conferir": "triângulo cheio, D e descrição em duas linhas nas duas escadas; opção B na Kalam.",
+   "pontos": [
+    [
+     539,
+     171
+    ]
+   ],
+   "geral": true,
+   "g": "G1",
+   "status": "feito",
+   "miro_ids": [
+    "3458764689465100774"
+   ]
+  },
+  {
+   "fala": "Tirar o contorno dos mobiliários",
+   "como": "Saiu o fio escuro de contorno em volta dos tapetes e das mesas, nesta e nas outras plantas.",
+   "conferir": "tapetes da varanda, do living e da suíte 3 e mesa do jantar sem o fio escuro do PDF.",
+   "pontos": [
+    [
+     815,
+     171
+    ]
+   ],
+   "geral": true,
+   "g": "G3",
+   "status": "feito",
+   "miro_ids": [
+    "3458764689987097098"
+   ]
+  },
+  {
+   "fala": "OBS GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
+   "como": "O terreno ficou com o gramado sóbrio e apenas 3 oliveiras nos cantos. As plantas menores ficaram nos jardins internos e nas floreiras.",
+   "conferir": "só 3 oliveiras (canto de cima à esquerda, de baixo à esquerda e à direita); gramado sem árvores soltas.",
+   "pontos": [
+    [
+     539,
+     371
+    ]
+   ],
+   "geral": true,
+   "g": "G6",
+   "status": "feito",
+   "obs": "No gramado não entraram arbustos; as plantas baixas estão nos jardins internos e nas floreiras, como na Casa C.",
+   "miro_ids": [
+    "3458764689989407346"
+   ]
+  },
+  {
+   "fala": "Geral: Não precisa representar os armários inferiores ou superiores com essa linha acima da bancada",
+   "como": "As bancadas ficaram com o tampo liso, sem as linhas dos armários de baixo e de cima; ficaram só as cubas, o cooktop e a churrasqueira.",
+   "conferir": "bancada de trás da gourmet e bancada da sala íntima sem as divisões dos módulos nem a projeção do armário alto.",
+   "pontos": [
+    [
+     1470,
+     507
+    ],
+    [
+     1715,
+     1589
+    ]
+   ],
+   "geral": true,
+   "g": "G4",
+   "status": "feito",
+   "miro_ids": [
+    "3458764689538094619",
+    "3458764689538094908"
+   ]
+  },
+  {
+   "fala": "Representar as claraboias apenas com as linhas de fora, sem o X no meio para ficar mais discreto. Usar um tom cinza e as linhas mais fininhas. Padronizar para as outras plantas que tiverem claraboia.",
    "como": "As claraboias do banho master ficaram só com o contorno, em tracejado cinza fino, sem o X.",
    "conferir": "2 claraboias (box e bacia) só com o retângulo tracejado cinza; piso contínuo por dentro.",
    "pontos": [
     [
-     827,
-     1715
+     912,
+     1709
     ],
     [
-     917,
-     1715
+     785,
+     1710
     ]
    ],
-   "geral": false,
+   "geral": true,
+   "g": "G5",
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:53; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:101"
+   "miro_ids": [
+    "3458764689994870821"
+   ]
   }
  ]
 }

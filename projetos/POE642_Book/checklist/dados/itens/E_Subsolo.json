@@ -1,7 +1,7 @@
 {
  "casa": "E",
  "pav": "Subsolo",
- "contagem": "11 notas do cliente (8 no lugar e as gerais G1 a G3) da Revisão das Plantas 2, pela análise de 16/11 e o pedidos_subsolo_casae_1811.py, mais 3 itens fora delas, com obs (o rótulo AMBIENTE riscado, a planta marcada de 19/10 e a cascata); a nota 5 sem o texto literal.",
+ "fonte": "quadro do Miro 'POE 642 - Revisão de Imagens', frame das plantas (Casas A a E), lido em 19/11 pelo link de visualização",
  "itens": [
   {
    "fala": "Demarcar melhor o perímetro da casa",
@@ -9,18 +9,15 @@
    "conferir": "[nota 1] linha contínua de ~2 px na borda de cima e da esquerda do pátio, na linha da casa.",
    "pontos": [
     [
-     1150,
-     304
-    ],
-    [
-     858,
-     400
+     884,
+     335
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casae_1811.py:10; POE642_Book/levantamento/dados/casa_E.json:30"
+   "miro_ids": [
+    "3458764689996620010"
+   ]
   },
   {
    "fala": "Diminuir a escala da textura",
@@ -28,68 +25,31 @@
    "conferir": "[nota 2] Bege Bahia na escala do Subsolo da Casa A, manchas suaves, sem emenda.",
    "pontos": [
     [
-     1300,
-     370
-    ],
-    [
-     1880,
-     440
-    ],
-    [
-     2010,
-     660
+     1573,
+     396
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casae_1811.py:12; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:42"
+   "miro_ids": [
+    "3458764689995430767"
+   ]
   },
   {
-   "fala": "Melhorar representação das portas de giro. Encostar nas paredes.",
-   "como": "As portas de giro foram redesenhadas em madeira clara, encostadas quina a quina na parede, com a soleira no vão.",
-   "conferir": "[G3] DCE, WC DCE 2, as 2 do depósito, sauna e vestiário: folha vértice com vértice na parede, sem arco, soleira no vão.",
+   "fala": "Essa borda é no mesmo revestimento da piscina.",
+   "como": "A borda entre a piscina e a academia passou para a pastilha da piscina; as outras bordas seguem em Bege Bahia liso.",
+   "conferir": "[nota 3] só a borda junto à academia e a faixa sob a parede até o tanque na pastilha; as de cima e da esquerda em Bege Bahia liso.",
    "pontos": [
     [
-     1795,
-     357
-    ],
-    [
-     1795,
-     435
-    ],
-    [
-     1649,
-     515
-    ],
-    [
-     1885,
-     497
+     947,
+     520
     ]
    ],
-   "geral": true,
+   "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casae_1811.py:1320; POE642_Book/levantamento/dados/casa_E.json:406"
-  },
-  {
-   "fala": "Colocar a seta em todas as escadas e a descrição",
-   "como": "A escada ganhou o triângulo da seta e a letra S no primeiro degrau, com a descrição \"SOBE PARA O TÉRREO\" ao lado.",
-   "conferir": "[G1] ▶ e S no 1º degrau (à esquerda); \"SOBE PARA O / TÉRREO\" em 2 linhas à esquerda da escada.",
-   "pontos": [
-    [
-     1160,
-     430
-    ],
-    [
-     1100,
-     444
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "texto do G1 transcrito só no Térreo (\"Colocar a seta em todas as escadas e a descrição\"); conferir no Miro o G1 desta planta",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casae_1811.py:15; POE642_Book/levantamento/dados/casa_E.json:94"
+   "miro_ids": [
+    "3458764689995963272"
+   ]
   },
   {
    "fala": "Não deixar os degraus cortados branco. Deixar transparente mas na mesma cor da escada. Exemplo casa C",
@@ -97,14 +57,31 @@
    "conferir": "[nota 6] degraus 8 a 17 (à direita da diagonal) sob o véu claro, no tom do travertino; nenhum branco.",
    "pontos": [
     [
-     1380,
-     447
+     1192,
+     446
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:25; POE642_Book/levantamento/dados/casa_E.json:79"
+   "miro_ids": [
+    "3458764689995065710"
+   ]
+  },
+  {
+   "fala": "Colocar um fundo, para o piso não ser o fundo.",
+   "como": "O armário do DCE ganhou fundo em madeira clara, com os cabides; o piso não aparece mais por dentro.",
+   "conferir": "[nota 7] guarda-roupa de cabides com o fundo de madeira clara, o varão e o contorno fechado.",
+   "pontos": [
+    [
+     1679,
+     646
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689996437289"
+   ]
   },
   {
    "fala": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
@@ -112,33 +89,99 @@
    "conferir": "[nota 4] água com metade da saturação, o desenho do revestimento e as ondinhas ficam.",
    "pontos": [
     [
-     920,
-     640
+     899,
+     681
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:29; POE642_Book/levantamento/dados/casa_E.json:109"
+   "miro_ids": [
+    "3458764689995614692"
+   ]
   },
   {
-   "fala": "Essa borda é no mesmo revestimento da piscina",
-   "como": "A borda entre a piscina e a academia passou para a pastilha da piscina; as outras bordas seguem em Bege Bahia liso.",
-   "conferir": "[nota 3] só a borda junto à academia e a faixa sob a parede até o tanque na pastilha; as de cima e da esquerda em Bege Bahia liso.",
+   "fala": "Mostrar melhor a diferença de profundidade",
+   "como": "A diferença de profundidade ficou visível: só a faixa junto à sauna é rasa e clara; o resto da piscina é fundo, mais escuro.",
+   "conferir": "[nota 5] só a faixa de cima do tanque da direita (junto à sauna) clara, até o vidro; o resto escuro, com a sombra do degrau.",
    "pontos": [
     [
-     975,
-     620
-    ],
-    [
-     1010,
-     776
+     934,
+     766
     ]
    ],
    "geral": false,
    "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casae_1811.py:414; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:148"
+   "obs": "a área rasa foi a que o usuário delimitou em 18/11.",
+   "miro_ids": [
+    "3458764689995614839"
+   ]
+  },
+  {
+   "fala": "Essa textura de travertino está diferente das outras casas",
+   "como": "A sauna, a ducha e o vestiário passaram ao travertino das outras casas, liso e num tom só.",
+   "conferir": "[nota 8] travertino do Térreo (o da Casa D), um tom só, sem juntas, pintas nem riscos.",
+   "pontos": [
+    [
+     1273,
+     847
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689995430836"
+   ]
+  },
+  {
+   "fala": "Colocar a seta em todas as escadas e a descrição",
+   "como": "A escada ganhou o triângulo da seta e a letra S no primeiro degrau, com a descrição \"SOBE PARA O TÉRREO\" ao lado.",
+   "conferir": "[G1] ▶ e S no 1º degrau (à esquerda); \"SOBE PARA O / TÉRREO\" em 2 linhas à esquerda da escada.",
+   "pontos": [
+    [
+     808,
+     235
+    ]
+   ],
+   "geral": true,
+   "g": "G1",
+   "status": "feito",
+   "miro_ids": [
+    "3458764689535001742"
+   ]
+  },
+  {
+   "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "como": "Valeram aqui as mudanças do Subsolo da Casa A: o fundo branco em volta da planta, sem a hachura; o Bege Bahia menos manchado; e a seta com a descrição na escada.",
+   "conferir": "[G2] fora da planta, branco puro (sem hachura nem tracejado do lote); Bege Bahia suave; seta e descrição.",
+   "pontos": [
+    [
+     1007,
+     236
+    ]
+   ],
+   "geral": true,
+   "g": "G2",
+   "status": "feito",
+   "miro_ids": [
+    "3458764689995430518"
+   ]
+  },
+  {
+   "fala": "Melhorar representação das portas de giro. Encostar nas paredes.",
+   "como": "As portas de giro foram redesenhadas em madeira clara, encostadas quina a quina na parede, com a soleira no vão.",
+   "conferir": "[G3] DCE, WC DCE 2, as 2 do depósito, sauna e vestiário: folha vértice com vértice na parede, sem arco, soleira no vão.",
+   "pontos": [
+    [
+     1203,
+     236
+    ]
+   ],
+   "geral": true,
+   "g": "G7",
+   "status": "feito",
+   "miro_ids": [
+    "3458764689995430633"
+   ]
   },
   {
    "fala": "A representação da esquadria precisa ser mais evidente, e não terá parede abaixo dela",
@@ -158,44 +201,8 @@
      840
     ]
    ],
-   "geral": false,
-   "status": "feito",
-   "obs": "1ª rodada (19/10): planta marcada pelo cliente, trazida pelo usuário (\"Esses comandos vieram do cliente\"); não é uma das 11 notas da Revisão das Plantas 2; autoria a confirmar.",
-   "fonte": "POE642_HANDOFF_SESSAO_LOCAL.md:1031; POE642_CasaA/scripts/retoque_subsolo_casae.py:1131"
-  },
-  {
-   "fala": "Colocar um fundo, para o piso não ser o fundo",
-   "como": "O armário do DCE ganhou fundo em madeira clara, com os cabides; o piso não aparece mais por dentro.",
-   "conferir": "[nota 7] guarda-roupa de cabides com o fundo de madeira clara, o varão e o contorno fechado.",
-   "pontos": [
-    [
-     1679,
-     617
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casae_1811.py:910"
-  },
-  {
-   "fala": "[sem o texto literal] mostrar a diferença de profundidade",
-   "como": "A diferença de profundidade ficou visível: só a faixa junto à sauna é rasa e clara; o resto da piscina é fundo, mais escuro.",
-   "conferir": "[nota 5] só a faixa de cima do tanque da direita (junto à sauna) clara, até o vidro; o resto escuro, com a sombra do degrau.",
-   "pontos": [
-    [
-     1020,
-     794
-    ],
-    [
-     1020,
-     860
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "texto literal da nota não está transcrito nas fontes (só o resumo da análise de 16/11); conferir no Miro; a área rasa foi a que o usuário delimitou em 18/11.",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casae_1811.py:16; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:106"
+   "obs": "não está no quadro do Miro de hoje. 1ª rodada (19/10): planta marcada pelo cliente, trazida pelo usuário (\"Esses comandos vieram do cliente\"); não é uma das 11 notas da Revisão das Plantas 2;",
+   "status": "fora_do_miro"
   },
   {
    "fala": "(o rótulo \"AMBIENTE\" riscado)",
@@ -207,33 +214,8 @@
      800
     ]
    ],
-   "geral": false,
-   "status": "feito",
-   "obs": "marca do cliente no Miro (o rótulo riscado), sem texto; não conta nas 11 notas.",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casae_1811.py:1532; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:28"
-  },
-  {
-   "fala": "Essa textura de travertino está diferente das outras casas",
-   "como": "A sauna, a ducha e o vestiário passaram ao travertino das outras casas, liso e num tom só.",
-   "conferir": "[nota 8] travertino do Térreo (o da Casa D), um tom só, sem juntas, pintas nem riscos.",
-   "pontos": [
-    [
-     1100,
-     840
-    ],
-    [
-     1255,
-     820
-    ],
-    [
-     1400,
-     835
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casae_1811.py:232; POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:28"
+   "obs": "não está no quadro do Miro de hoje. marca do cliente no Miro (o rótulo riscado), sem texto; não conta nas 11 notas.",
+   "status": "fora_do_miro"
   },
   {
    "fala": "(imagem de referência da cascata no Miro, sem texto transcrito)",
@@ -245,33 +227,8 @@
      905
     ]
    ],
-   "geral": false,
-   "status": "feito",
-   "obs": "autoria a confirmar: o README a dá como decisão do cliente fora do PDF, com a referência do Miro trazida pelo usuário; as falas transcritas são do usuário. Não conta nas 11 notas.",
-   "fonte": "POE642_CasaA/scripts/README.md:3789; POE642_Book/levantamento/dados/casa_E.json:169"
-  },
-  {
-   "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
-   "como": "Valeram aqui as mudanças do Subsolo da Casa A: o fundo branco em volta da planta, sem a hachura; o Bege Bahia menos manchado; e a seta com a descrição na escada.",
-   "conferir": "[G2] fora da planta, branco puro (sem hachura nem tracejado do lote); Bege Bahia suave; seta e descrição.",
-   "pontos": [
-    [
-     1800,
-     1040
-    ],
-    [
-     950,
-     1040
-    ],
-    [
-     1300,
-     370
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaE/POE642_CasaE_analise_notas_e_padroes_1611.md:24; POE642_Book/levantamento/dados/casa_E.json:15"
+   "obs": "não está no quadro do Miro de hoje. Não conta nas 11 notas.",
+   "status": "fora_do_miro"
   }
  ]
 }

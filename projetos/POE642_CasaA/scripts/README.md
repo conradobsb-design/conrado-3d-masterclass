@@ -4453,5 +4453,20 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   "PEDIDO NO MIRO (EM RESUMO)", sem aspas.
 - **Pedidos gerais (`gerais.json`, G1 a G8):** reconhecidos pelas `chaves` na fala; na planta sem a nota, o texto de
   `planos.json` → `gerais` ou o `como` padrão. As melhorias ficam embaixo das plantas quando cabem.
+- **O quadro do Miro (19/11, pelo link de visualização que o usuário passou; o conector segue com "acesso negado"):**
+  o Chromium da sessão abre o quadro em modo de visualização e o conteúdo chega inteiro pela conexão da página
+  (`miro/captura.js`: os quadros do websocket, comprimidos em zlib). `miro/tree.py` tira de cada elemento o id, o
+  tipo, o texto, a posição absoluta (a do pai + a própria) e as pontas das setas; `miro/planos.py` põe cada post-it
+  do frame das plantas (250 post-its, Casas A a E) na imagem de planta mais próxima; `miro/foto3.js` fotografa cada
+  planta no quadro (`moveToWidget` na imagem, um passo de zoom para fora; o recorte pela posição da imagem achada no
+  print) em `POE642_Book/checklist/dados/miro/<X>_<pav>.jpg`; `miro/registrar.py` alinha a imagem da planta no Miro
+  à prancha de hoje (SIFT + afim parcial; nos Subsolos de B, C e D, sem a hachura e com correspondências únicas);
+  `miro/alvos.py` leva a ponta de cada seta (ou o próprio post-it, sem seta) para px da prancha; `miro/montar.py`
+  monta os itens de cada planta: um por post-it (os de texto igual que tratam do mesmo lugar, juntos), o "o que foi
+  feito" do levantamento das frentes de 19/11 pelo texto e pela posição (`manual.json` e `FORCA` nos casos que a
+  semelhança não resolve), os rosa e os "Geral"/"OBS GERAL" como pedidos gerais; o que as frentes tinham e não está no
+  quadro de hoje vai como `fora_do_miro` (só na versão interna). Os 4 post-its gerais acima do frame (planta de
+  referência para piscina e grama, jogo de tons, marrom do piso, bancadas em marrom tabaco) são G8 a G11.
+  As notas e os alvos ficam em `dados/miro/notas_miro.json`; o alinhamento em `dados/miro/registro.json`.
 - **Como refazer:** `python3 conferencia_cliente.py --todas` e `python3 conferencia_cliente.py --todas --interno`; uma
   planta: `python3 conferencia_cliente.py B Terreo [--interno]`.

@@ -1,30 +1,451 @@
 {
  "casa": "A",
  "pav": "Terreo",
- "contagem": "29 itens: 27 notas do cliente da lista de 10/11 (terreo_casaa_1011.py, README e regras) agrupadas em 20 itens, 6 da 1ª revisão do Miro (itens 10 a 14 e o pergolado, só o resumo do handoff de 13/10; os itens 15 a 19 não foram transcritos) e 3 notas gerais dos quadros de outras casas que valem aqui (contorno dos mobiliários, armários, claraboia).",
+ "fonte": "quadro do Miro 'POE 642 - Revisão de Imagens', frame das plantas (Casas A a E), lido em 19/11 pelo link de visualização",
  "itens": [
   {
-   "fala": "No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
+   "fala": "Usar essa cor padronizada para as prateleiras e armários",
+   "como": "Armários e prateleiras na cor padronizada indicada, lisa e sem textura, em todas as casas.",
+   "conferir": "armários e prateleiras na cor neutra padrão, sem veio.",
+   "pontos": [
+    [
+     2161,
+     413
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689912086169"
+   ]
+  },
+  {
+   "fala": "Deixar as linhas tracejadas mais finas. Nas claraboias deixar a linha mais cinza e sem o X do meio, só as bordas.",
+   "como": "Os tracejados ficaram mais finos e claros; a claraboia do lavabo saiu sem o X, em traço cinza fino.",
+   "conferir": "claraboia do lavabo sem X, traço cinza fino; tracejados finos e claros.",
+   "pontos": [
+    [
+     2250,
+     380
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "lavabo: só o traço horizontal, por decisão do usuário (12/11); nas outras casas o padrão é o retângulo de borda.",
+   "miro_ids": [
+    "3458764689915177166"
+   ]
+  },
+  {
+   "fala": "Colocar a seta na escada e a descrição Desce para o subsolo",
+   "como": "Todas as escadas ganharam o triângulo da seta e a descrição: \"DESCE PARA O DECK\" nos degraus junto à piscina, \"DESCE PARA O SUBSOLO\" no lance abaixo do spa e \"SOBE PARA O 1º PAVIMENTO\" na escada do jardim e na caracol, com a letra S ou D logo abaixo da seta.",
+   "conferir": "4 escadas: triângulo cheio no degrau de partida, apontando para onde se vai; descrição em 2 linhas no corpo das descrições; S/D sob a seta.",
+   "pontos": [
+    [
+     917,
+     434
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "nota geral: vale para todas as escadas das cinco casas",
+   "miro_ids": [
+    "3458764689920586323"
+   ]
+  },
+  {
+   "fala": "A cuba e a pedra lateral são da mesma cor.",
+   "como": "A bancada do lavabo virou uma peça só, com a pedra lateral no mesmo tom da cuba esculpida.",
+   "conferir": "pedra lateral (abaixo da cuba) no tom e no desenho da cuba, sem linha entre as duas.",
+   "pontos": [
+    [
+     2282,
+     495
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689918216597"
+   ]
+  },
+  {
+   "fala": "Deixar as linhas tracejadas mais finas e mais claras.",
+   "como": "Os X dos vazios da varanda e da sala de estar e o tracejado da área de serviço descoberta ficaram em traço fino e cinza claro.",
+   "conferir": "X e molduras dos vazios (varanda, sala de estar, área de serviço descoberta) em ~1 px cinza, sem passar sobre rótulos e móveis.",
+   "pontos": [
+    [
+     1783,
+     652
+    ],
+    [
+     1811,
+     1837
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689915647463",
+    "3458764689918606219"
+   ]
+  },
+  {
+   "fala": "Não tem soleira entre a sala e o escritório.",
+   "como": "Saiu a soleira da passagem da sala para o escritório: o travertino continua pelo vão.",
+   "conferir": "vão da porta do escritório sem faixa clara; travertino contínuo.",
+   "pontos": [
+    [
+     2292,
+     575
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689915496954"
+   ]
+  },
+  {
+   "fala": "Centralizar a seta com a abertura da porta, usando este modelo de seta.",
+   "como": "A porta de entrada ganhou a soleira de pedra clara igual à da Casa C, de batente a batente, e a seta virou um triângulo cheio no centro da abertura da porta.",
+   "conferir": "soleira lisa com as faces finas no vão da pivotante; triângulo preto apontando para dentro, no eixo do vão; a seta comprida antiga não aparece.",
+   "pontos": [
+    [
+     2420,
+     764
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689448738307"
+   ]
+  },
+  {
+   "fala": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
+   "como": "A água da piscina, da prainha e do spa foi refeita com o revestimento Barlavento aparente e as partes rasas mais claras, no tom de água adotado para as piscinas de todas as casas.",
+   "conferir": "piscina, prainha e spa: Barlavento visível, rasas mais claras; conferir se o turquesa de hoje lê como 'mais sóbrio' que o da revisão.",
+   "pontos": [
+    [
+     1182,
+     797
+    ]
+   ],
+   "geral": false,
+   "status": "parcial",
+   "obs": "o tom sóbrio da foto do cliente entrou em 10/11, mas o usuário trocou depois para o turquesa #7CC8D4 e, em 11/11, para a água C (escolha dele, para todas as piscinas); a água de hoje é turquesa clara: confirmar se atende ao 'mais sóbrio' (na Casa E a mesma nota levou a saturação à metade)",
+   "miro_ids": [
+    "3458764689919559662"
+   ]
+  },
+  {
+   "fala": "Representar uma soleira na entrada igual a casa C",
+   "como": "A porta de entrada ganhou a soleira de pedra clara igual à da Casa C, de batente a batente, e a seta virou um triângulo cheio no centro da abertura da porta.",
+   "conferir": "soleira lisa com as faces finas no vão da pivotante; triângulo preto apontando para dentro, no eixo do vão; a seta comprida antiga não aparece.",
+   "pontos": [
+    [
+     2366,
+     797
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689934745450"
+   ]
+  },
+  {
+   "fala": "Deixar as linhas do pergolado tracejadas mais finas e mais claras. Não representar as linhas tracejadas do telhado.",
+   "como": "A grade tracejada do pergolado sobre o deck da piscina ficou em traço fino e cinza claro.",
+   "conferir": "grade do pergolado em traço fino cinza sobre o Bege Bahia e a prainha.",
+   "pontos": [
+    [
+     1379,
+     1014
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689920416586"
+   ]
+  },
+  {
+   "fala": "Colocar só 5 banquetas. E com um tom um pouco mais destacado em relação ao piso",
+   "como": "Ficaram 5 banquetas na ilha da área gourmet, num tom mais escuro que o piso, parcialmente sob a bancada.",
+   "conferir": "5 banquetas espaçadas por igual, mais escuras que o travertino, metade sob o tampo.",
+   "pontos": [
+    [
+     1576,
+     1247
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689451010824"
+   ]
+  },
+  {
+   "fala": "Tirar o nome shaft",
+   "como": "Saiu o nome SHAFT; o shaft ficou só com o X fino em cinza.",
+   "conferir": "shaft junto ao elevador sem rótulo, fundo claro e X cinza fino.",
+   "pontos": [
+    [
+     2313,
+     1149
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689932764016"
+   ]
+  },
+  {
+   "fala": "Cor da ilha é no Dekton Danae",
+   "como": "A ilha e a bancada da pia da cozinha foram feitas em Dekton Danae, com a textura da chapa.",
+   "conferir": "ilha e bancada da pia em bege-areia claro e fosco, com o cooktop, as cubas e os ralos por cima.",
+   "pontos": [
+    [
+     1974,
+     1268
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689919840734"
+   ]
+  },
+  {
+   "fala": "Deixar a tonalidade do piso mais claro",
+   "como": "O piso da cozinha, da área gourmet, da área de serviço, da despensa, do gás, do quarto do motorista e da garagem foi trocado pela amostra enviada: um marrom mais claro, uniforme e sóbrio.",
+   "conferir": "marrom médio uniforme, sem as pintas do granito; as bancadas em marrom tabaco mais escuras que o piso.",
+   "pontos": [
+    [
+     2018,
+     1347
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689451388246"
+   ]
+  },
+  {
+   "fala": "Cor da bancada é no Dekton Danae",
+   "como": "A ilha e a bancada da pia da cozinha foram feitas em Dekton Danae, com a textura da chapa.",
+   "conferir": "ilha e bancada da pia em bege-areia claro e fosco, com o cooktop, as cubas e os ralos por cima.",
+   "pontos": [
+    [
+     2083,
+     1271
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689919946304"
+   ]
+  },
+  {
+   "fala": "Toda a bancada e a cuba é no marrom tabaco. Talvez para diferenciar a bancada do espaço da cuba, deixar a cuba ou com um tom mais claro ou mais escuro que a bancada.",
+   "como": "A bancada e a cuba esculpida do lavatório ficaram em marrom tabaco, com a cuba um tom mais escuro.",
+   "conferir": "bancada e cuba em marrom tabaco, a cuba mais escura, com a torneira e o ralo.",
+   "pontos": [
+    [
+     1485,
+     1456
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689919173808"
+   ]
+  },
+  {
+   "fala": "Faltou a representação da churrasqueira.",
+   "como": "A churrasqueira foi representada na bancada da área gourmet, com o aro de inox e a grelha.",
+   "conferir": "grelha dentro da bancada de trás da área gourmet, sem passar da parede.",
+   "pontos": [
+    [
+     1491,
+     1399
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689919559070"
+   ]
+  },
+  {
+   "fala": "Cor da bancada é no Dekton Danae",
+   "como": "A bancada dos tanques da área de serviço foi feita em Dekton Danae.",
+   "conferir": "bancada dos tanques e o braço dela em Danae; os tanques por cima.",
+   "pontos": [
+    [
+     1691,
+     1471
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689919946392"
+   ]
+  },
+  {
+   "fala": "Falha na representação do pilar.",
+   "como": "O pilar do canto do terraço gourmet foi redesenhado como o quadrado preto do projeto, sem a mancha em volta.",
+   "conferir": "quadrado preto nítido no canto de baixo do terraço, sem mancha cinza.",
+   "pontos": [
+    [
+     1200,
+     1593
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689916505940"
+   ]
+  },
+  {
+   "fala": "Remover as linhas tracejadas. Fica um representação mais técnica e pode confundir quem olha a planta. Deixar apenas as que representam 'vazios'.",
+   "como": "Saíram as linhas tracejadas do telhado e as dos afastamentos do terreno. Ficaram só as dos vazios, da área de serviço descoberta, da claraboia e do pergolado.",
+   "conferir": "sem o contorno tracejado da cobertura em volta da casa e sem as linhas de afastamento no gramado (a inclinada da esquerda, a de cima, a da direita e a de baixo).",
+   "pontos": [
+    [
+     718,
+     1625
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689447514404"
+   ]
+  },
+  {
+   "fala": "Deixar melhor representada as plantas, pode diferenciar os tamanho para ficar mais real.",
+   "como": "O jardim de 4,79 m², junto ao lavatório, recebeu três plantas de tamanhos diferentes sobre a grama.",
+   "conferir": "3 plantas de tamanhos diferentes dentro das paredes do jardim; rótulo JARDIM legível.",
+   "pontos": [
+    [
+     1536,
+     1668
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689918472970"
+   ]
+  },
+  {
+   "fala": "Melhorar a representação da escada helicoidal. Ver exemplo.",
+   "como": "A escada caracol foi redesenhada: degraus em linhas, cheios até a altura do corte e tracejados depois, sem a linha de corte, com a seta, a letra S e a descrição \"SOBE PARA O 1º PAVIMENTO\"; a parte que já pertence ao 1º Pavimento ficou mais clara.",
+   "conferir": "degraus em linhas radiais (cheios até o corte, tracejados depois), sem linha de corte nem X, pilar preto, triângulo + S, descrição acima da escada.",
+   "pontos": [
+    [
+     2060,
+     1734
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689918728330"
+   ]
+  },
+  {
+   "fala": "Deixar a linha tracejada apenas nos degraus da escada como está no exemplo.",
+   "como": "A escada caracol foi redesenhada: degraus em linhas, cheios até a altura do corte e tracejados depois, sem a linha de corte, com a seta, a letra S e a descrição \"SOBE PARA O 1º PAVIMENTO\"; a parte que já pertence ao 1º Pavimento ficou mais clara.",
+   "conferir": "degraus em linhas radiais (cheios até o corte, tracejados depois), sem linha de corte nem X, pilar preto, triângulo + S, descrição acima da escada.",
+   "pontos": [
+    [
+     2060,
+     1734
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689918824605"
+   ]
+  },
+  {
+   "fala": "A linha de corte não precisa ser feita.",
+   "como": "A escada caracol foi redesenhada: degraus em linhas, cheios até a altura do corte e tracejados depois, sem a linha de corte, com a seta, a letra S e a descrição \"SOBE PARA O 1º PAVIMENTO\"; a parte que já pertence ao 1º Pavimento ficou mais clara.",
+   "conferir": "degraus em linhas radiais (cheios até o corte, tracejados depois), sem linha de corte nem X, pilar preto, triângulo + S, descrição acima da escada.",
+   "pontos": [
+    [
+     2114,
+     1853
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689918962646"
+   ]
+  },
+  {
+   "fala": "Não esquecer o S e a descrição sobe 'para tal espaço'.",
+   "como": "A escada caracol foi redesenhada: degraus em linhas, cheios até a altura do corte e tracejados depois, sem a linha de corte, com a seta, a letra S e a descrição \"SOBE PARA O 1º PAVIMENTO\"; a parte que já pertence ao 1º Pavimento ficou mais clara.",
+   "conferir": "degraus em linhas radiais (cheios até o corte, tracejados depois), sem linha de corte nem X, pilar preto, triângulo + S, descrição acima da escada.",
+   "pontos": [
+    [
+     1997,
+     1862
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689919075565"
+   ]
+  },
+  {
+   "fala": "OBS GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
    "como": "O gramado ficou com poucas plantas: duas árvores no fundo do lote e uma palmeira no canto da frente, com arbustos baixos junto delas; a maior parte da área ficou em grama.",
    "conferir": "só 3 plantas (árvores no alto e embaixo à esquerda, palmeira no alto à direita), maciços pequenos junto delas, sem árvore na frente da casa; grama até o muro.",
    "pontos": [
     [
-     420,
-     310
-    ],
-    [
-     3260,
-     320
-    ],
-    [
-     420,
-     1800
+     488,
+     153
     ]
    ],
    "geral": true,
+   "g": "G6",
    "status": "feito",
    "obs": "nota geral do quadro do Térreo (a análise da Casa E a chama de G1 do Térreo da A; nas Casas B e D vem como 'OBS GERAL:'); a mesma nota está nos Térreos de todas as casas",
-   "fonte": "POE642_REGRAS.md:426; POE642_CasaA/scripts/terreo_casaa_1011.py:10"
+   "miro_ids": [
+    "3458764689911415566"
+   ]
+  },
+  {
+   "fala": "Colocar a seta em todas as escadas e a descrição sobe para o 1° pavimento. Representar o guarda-corpo.",
+   "como": "Todas as escadas ganharam o triângulo da seta e a descrição: \"DESCE PARA O DECK\" nos degraus junto à piscina, \"DESCE PARA O SUBSOLO\" no lance abaixo do spa e \"SOBE PARA O 1º PAVIMENTO\" na escada do jardim e na caracol, com a letra S ou D logo abaixo da seta.",
+   "conferir": "4 escadas: triângulo cheio no degrau de partida, apontando para onde se vai; descrição em 2 linhas no corpo das descrições; S/D sob a seta.",
+   "pontos": [
+    [
+     2384,
+     1019
+    ]
+   ],
+   "geral": true,
+   "g": "G1",
+   "status": "feito",
+   "obs": "nota geral: vale para todas as escadas das cinco casas",
+   "miro_ids": [
+    "3458764689448546226"
+   ]
   },
   {
    "fala": "[sem o texto literal] alvenaria preta 100% vedada, sem TV",
@@ -36,178 +457,8 @@
      343
     ]
    ],
-   "geral": false,
-   "status": "feito",
-   "obs": "1ª revisão do Miro (out/26), item 14: o handoff de 13/10 registra só este resumo, não a nota palavra por palavra",
-   "fonte": "POE642_CasaA/POE642_CasaA_HANDOFF_ClaudeCode.md:71; POE642_CasaA/POE642_CasaA_PH_Terreo_v18.md:12"
-  },
-  {
-   "fala": "Remover as linhas tracejadas. Fica uma representação mais técnica e pode confundir quem olha a planta. Deixar apenas as que representam 'vazios' / Não representar as linhas tracejadas do telhado",
-   "como": "Saíram as linhas tracejadas do telhado e as dos afastamentos do terreno. Ficaram só as dos vazios, da área de serviço descoberta, da claraboia e do pergolado.",
-   "conferir": "sem o contorno tracejado da cobertura em volta da casa e sem as linhas de afastamento no gramado (a inclinada da esquerda, a de cima, a da direita e a de baixo).",
-   "pontos": [
-    [
-     2000,
-     317
-    ],
-    [
-     2617,
-     1000
-    ],
-    [
-     500,
-     1000
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:5; POE642_REGRAS.md:365"
-  },
-  {
-   "fala": "Representar as claraboias apenas com as linhas de fora, sem o X no meio para ficar mais discreto. Usar um tom cinza e as linhas mais fininhas. Padronizar para as outras plantas que tiverem claraboia.",
-   "como": "A claraboia do lavabo ficou sem o X, só com a linha tracejada fina e cinza no lado livre (os outros lados coincidem com as paredes).",
-   "conferir": "claraboia do lavabo: sem X, tracejado horizontal fino e cinza, rótulo CLARABOIA dentro dela.",
-   "pontos": [
-    [
-     2300,
-     382
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "nota geral do Térreo da Casa C (repetida no 1º Pav. da E); na Casa A o usuário pediu só o traço horizontal (12/11) e a lista CDE marca 'a confirmar' frente ao retângulo inteiro das outras casas",
-   "fonte": "POE642_CasaA/scripts/pedidos_terreo_casac_1311.py:4; POE642_REGRAS_CONSOLIDADAS_CDE.md:81"
-  },
-  {
-   "fala": "Colocar a seta em todas as escadas e a descrição",
-   "como": "Todas as escadas ganharam o triângulo da seta e a descrição: \"DESCE PARA O DECK\" nos degraus junto à piscina, \"DESCE PARA O SUBSOLO\" no lance abaixo do spa e \"SOBE PARA O 1º PAVIMENTO\" na escada do jardim e na caracol, com a letra S ou D logo abaixo da seta.",
-   "conferir": "4 escadas: triângulo cheio no degrau de partida, apontando para onde se vai; descrição em 2 linhas no corpo das descrições; S/D sob a seta.",
-   "pontos": [
-    [
-     1052,
-     418
-    ],
-    [
-     913,
-     1093
-    ],
-    [
-     2264,
-     948
-    ],
-    [
-     2008,
-     1566
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "nota geral: vale para todas as escadas das cinco casas",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1544; POE642_REGRAS.md:170"
-  },
-  {
-   "fala": "Tirar o contorno dos mobiliários.",
-   "como": "As peças ficaram sem o traço de contorno do desenho por cima (sofás, poltronas, mesas e tapetes), nesta e em todas as plantas.",
-   "conferir": "nenhum traço do PDF sobre os estofados, as mesas e os tapetes (estar da varanda, sala de estar, terraço gourmet, escritório).",
-   "pontos": [
-    [
-     1770,
-     440
-    ],
-    [
-     2010,
-     450
-    ],
-    [
-     1295,
-     1450
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "nota geral do Miro feita nos Térreos das Casas B, C e D; vale para todas as plantas",
-   "fonte": "POE642_REGRAS_CONSOLIDADAS_CDE.md:175; POE642_CasaA/scripts/pedidos_terreo_casab_1211.py:14"
-  },
-  {
-   "fala": "A cuba e a pedra lateral são da mesma cor",
-   "como": "A bancada do lavabo virou uma peça só, com a pedra lateral no mesmo tom da cuba esculpida.",
-   "conferir": "pedra lateral (abaixo da cuba) no tom e no desenho da cuba, sem linha entre as duas.",
-   "pontos": [
-    [
-     2330,
-     432
-    ],
-    [
-     2333,
-     485
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1220"
-  },
-  {
-   "fala": "Não tem soleira",
-   "como": "Saiu a soleira da passagem da sala para o escritório: o travertino continua pelo vão.",
-   "conferir": "vão da porta do escritório sem faixa clara; travertino contínuo.",
-   "pontos": [
-    [
-     2350,
-     565
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/README.md:2280; POE642_CasaA/scripts/terreo_casaa_1011.py:1444"
-  },
-  {
-   "fala": "Deixar o tom de azul para a piscina mais sóbrio",
-   "como": "A água da piscina, da prainha e do spa foi refeita com o revestimento Barlavento aparente e as partes rasas mais claras, no tom de água adotado para as piscinas de todas as casas.",
-   "conferir": "piscina, prainha e spa: Barlavento visível, rasas mais claras; conferir se o turquesa de hoje lê como 'mais sóbrio' que o da revisão.",
-   "pontos": [
-    [
-     1210,
-     700
-    ],
-    [
-     1210,
-     925
-    ],
-    [
-     1000,
-     955
-    ]
-   ],
-   "geral": false,
-   "status": "parcial",
-   "obs": "o tom sóbrio da foto do cliente entrou em 10/11, mas o usuário trocou depois para o turquesa #7CC8D4 e, em 11/11, para a água C (escolha dele, para todas as piscinas); a água de hoje é turquesa clara: confirmar se atende ao 'mais sóbrio' (na Casa E a mesma nota levou a saturação à metade)",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:13; POE642_CasaA/scripts/README.md:2329"
-  },
-  {
-   "fala": "Deixar as linhas tracejadas mais finas e mais claras",
-   "como": "Os X dos vazios da varanda e da sala de estar e o tracejado da área de serviço descoberta ficaram em traço fino e cinza claro.",
-   "conferir": "X e molduras dos vazios (varanda, sala de estar, área de serviço descoberta) em ~1 px cinza, sem passar sobre rótulos e móveis.",
-   "pontos": [
-    [
-     1700,
-     745
-    ],
-    [
-     2010,
-     745
-    ],
-    [
-     1745,
-     1694
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1784; POE642_REGRAS.md:365"
+   "obs": "não está no quadro do Miro de hoje. 1ª revisão do Miro (out/26), item 14: o handoff de 13/10 registra só este resumo, não a nota palavra por palavra",
+   "status": "fora_do_miro"
   },
   {
    "fala": "[sem o texto literal] projeção dos vazios em tracejado",
@@ -223,29 +474,8 @@
      745
     ]
    ],
-   "geral": false,
-   "status": "feito",
-   "obs": "1ª revisão do Miro (out/26), item 12: o handoff de 13/10 registra só este resumo, não a nota palavra por palavra",
-   "fonte": "POE642_CasaA/POE642_CasaA_HANDOFF_ClaudeCode.md:69; POE642_CasaA/POE642_CasaA_PH_Terreo_v23.md:14"
-  },
-  {
-   "fala": "Representar uma soleira na entrada igual a casa C / Centralizar a seta com a abertura da porta, usando este modelo de seta",
-   "como": "A porta de entrada ganhou a soleira de pedra clara igual à da Casa C, de batente a batente, e a seta virou um triângulo cheio no centro da abertura da porta.",
-   "conferir": "soleira lisa com as faces finas no vão da pivotante; triângulo preto apontando para dentro, no eixo do vão; a seta comprida antiga não aparece.",
-   "pontos": [
-    [
-     2450,
-     740
-    ],
-    [
-     2482,
-     765
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1441; POE642_CasaA/scripts/terreo_casaa_1011.py:1514"
+   "obs": "não está no quadro do Miro de hoje. 1ª revisão do Miro (out/26), item 12: o handoff de 13/10 registra só este resumo, não a nota palavra por palavra",
+   "status": "fora_do_miro"
   },
   {
    "fala": "[sem o texto literal] deck molhado (prainha) com a delimitação correta",
@@ -257,48 +487,8 @@
      925
     ]
    ],
-   "geral": false,
-   "status": "feito",
-   "obs": "1ª revisão do Miro (out/26), item 13: o handoff de 13/10 registra só este resumo, não a nota palavra por palavra",
-   "fonte": "POE642_CasaA/POE642_CasaA_HANDOFF_ClaudeCode.md:70"
-  },
-  {
-   "fala": "Representar o guarda-corpo",
-   "como": "A escada do jardim ganhou o guarda-corpo de vidro na borda de fora.",
-   "conferir": "lâmina de vidro fina na borda da escada do jardim, igual em todos os lados.",
-   "pontos": [
-    [
-     2400,
-     913
-    ],
-    [
-     2489,
-     1000
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1549"
-  },
-  {
-   "fala": "Deixar as linhas do pergolado tracejadas mais finas e mais claras",
-   "como": "A grade tracejada do pergolado sobre o deck da piscina ficou em traço fino e cinza claro.",
-   "conferir": "grade do pergolado em traço fino cinza sobre o Bege Bahia e a prainha.",
-   "pontos": [
-    [
-     1300,
-     1000
-    ],
-    [
-     1450,
-     1150
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1783"
+   "obs": "não está no quadro do Miro de hoje. 1ª revisão do Miro (out/26), item 13: o handoff de 13/10 registra só este resumo, não a nota palavra por palavra",
+   "status": "fora_do_miro"
   },
   {
    "fala": "[sem o texto literal] Pergolado: grade tracejada sobre o deck da piscina",
@@ -310,10 +500,8 @@
      1000
     ]
    ],
-   "geral": false,
-   "status": "feito",
-   "obs": "1ª revisão do Miro (out/26): listado no handoff de 13/10 entre o 'Feedback do Miro incorporado', sem número e só como resumo",
-   "fonte": "POE642_CasaA/POE642_CasaA_HANDOFF_ClaudeCode.md:72; POE642_CasaA/POE642_CasaA_PH_Terreo_v23.md:14"
+   "obs": "não está no quadro do Miro de hoje. 1ª revisão do Miro (out/26): listado no handoff de 13/10 entre o 'Feedback do Miro incorporado', sem número e só como resumo",
+   "status": "fora_do_miro"
   },
   {
    "fala": "[sem o texto literal] áreas verdes, incluindo o jardim de inverno",
@@ -333,25 +521,8 @@
      1690
     ]
    ],
-   "geral": false,
-   "status": "feito",
-   "obs": "1ª revisão do Miro (out/26), item 11: o handoff de 13/10 registra só este resumo, não a nota palavra por palavra",
-   "fonte": "POE642_CasaA/POE642_CasaA_HANDOFF_ClaudeCode.md:68"
-  },
-  {
-   "fala": "Tirar o nome shaft",
-   "como": "Saiu o nome SHAFT; o shaft ficou só com o X fino em cinza.",
-   "conferir": "shaft junto ao elevador sem rótulo, fundo claro e X cinza fino.",
-   "pontos": [
-    [
-     2368,
-     1162
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1737"
+   "obs": "não está no quadro do Miro de hoje. 1ª revisão do Miro (out/26), item 11: o handoff de 13/10 registra só este resumo, não a nota palavra por palavra",
+   "status": "fora_do_miro"
   },
   {
    "fala": "[sem o texto literal] brises rotativos na varanda gourmet",
@@ -371,200 +542,8 @@
      1570
     ]
    ],
-   "geral": false,
-   "status": "feito",
-   "obs": "1ª revisão do Miro (out/26), item 10: o handoff de 13/10 registra só este resumo, não a nota palavra por palavra",
-   "fonte": "POE642_CasaA/POE642_CasaA_HANDOFF_ClaudeCode.md:67"
-  },
-  {
-   "fala": "Colocar só 5 banquetas. E com um tom um pouco mais destacado em relação ao piso",
-   "como": "Ficaram 5 banquetas na ilha da área gourmet, num tom mais escuro que o piso, parcialmente sob a bancada.",
-   "conferir": "5 banquetas espaçadas por igual, mais escuras que o travertino, metade sob o tampo.",
-   "pontos": [
-    [
-     1512,
-     1262
-    ],
-    [
-     1612,
-     1262
-    ],
-    [
-     1712,
-     1262
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1365"
-  },
-  {
-   "fala": "Cor da ilha é no Dekton Danae / Cor da bancada é no Dekton Danae",
-   "como": "A ilha e a bancada da pia da cozinha foram feitas em Dekton Danae, com a textura da chapa.",
-   "conferir": "ilha e bancada da pia em bege-areia claro e fosco, com o cooktop, as cubas e os ralos por cima.",
-   "pontos": [
-    [
-     1992,
-     1278
-    ],
-    [
-     2135,
-     1360
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1210"
-  },
-  {
-   "fala": "Geral: Não precisa representar os armários inferiores ou superiores com essa linha acima da bancada",
-   "como": "As bancadas da cozinha, da área gourmet e da área de serviço ficaram lisas, sem as divisões dos armários de baixo e sem a linha dos armários de cima.",
-   "conferir": "tampos lisos, sem divisões de módulos nem a projeção tracejada dos armários altos.",
-   "pontos": [
-    [
-     1700,
-     1320
-    ],
-    [
-     2135,
-     1300
-    ],
-    [
-     1760,
-     1470
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "nota geral dos Térreos das Casas C e D (na C: 'Geral: Não precisa representar os armários inferiores ou superiores.')",
-   "fonte": "POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:208; POE642_REGRAS_CONSOLIDADAS_CDE.md:143"
-  },
-  {
-   "fala": "Trocar a representação do piso por essa amostra [...] mais uniforme [...] mais sóbrio / Deixar a tonalidade do piso mais claro",
-   "como": "O piso da cozinha, da área gourmet, da área de serviço, da despensa, do gás, do quarto do motorista e da garagem foi trocado pela amostra enviada: um marrom mais claro, uniforme e sóbrio.",
-   "conferir": "marrom médio uniforme, sem as pintas do granito; as bancadas em marrom tabaco mais escuras que o piso.",
-   "pontos": [
-    [
-     1890,
-     1330
-    ],
-    [
-     1870,
-     1600
-    ],
-    [
-     2515,
-     1600
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/README.md:2276; POE642_REGRAS.md:62"
-  },
-  {
-   "fala": "Faltou a representação da churrasqueira",
-   "como": "A churrasqueira foi representada na bancada da área gourmet, com o aro de inox e a grelha.",
-   "conferir": "grelha dentro da bancada de trás da área gourmet, sem passar da parede.",
-   "pontos": [
-    [
-     1552,
-     1420
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1218"
-  },
-  {
-   "fala": "Toda a bancada e a cuba é no marrom tabaco [...] deixar a cuba ou com um tom mais claro ou mais escuro que a bancada",
-   "como": "A bancada e a cuba esculpida do lavatório ficaram em marrom tabaco, com a cuba um tom mais escuro.",
-   "conferir": "bancada e cuba em marrom tabaco, a cuba mais escura, com a torneira e o ralo.",
-   "pontos": [
-    [
-     1562,
-     1466
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1215"
-  },
-  {
-   "fala": "Cor da bancada é no Dekton Danae",
-   "como": "A bancada dos tanques da área de serviço foi feita em Dekton Danae.",
-   "conferir": "bancada dos tanques e o braço dela em Danae; os tanques por cima.",
-   "pontos": [
-    [
-     1760,
-     1470
-    ],
-    [
-     1722,
-     1515
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1213"
-  },
-  {
-   "fala": "Melhorar a representação da escada helicoidal. Ver exemplo. / Deixar a linha tracejada apenas nos degraus da escada como está no exemplo / Não esquecer o S e a descrição sobe 'para tal espaço' / A linha de corte não precisa ser feita",
-   "como": "A escada caracol foi redesenhada: degraus em linhas, cheios até a altura do corte e tracejados depois, sem a linha de corte, com a seta, a letra S e a descrição \"SOBE PARA O 1º PAVIMENTO\"; a parte que já pertence ao 1º Pavimento ficou mais clara.",
-   "conferir": "degraus em linhas radiais (cheios até o corte, tracejados depois), sem linha de corte nem X, pilar preto, triângulo + S, descrição acima da escada.",
-   "pontos": [
-    [
-     1976,
-     1560
-    ],
-    [
-     1990,
-     1500
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1550"
-  },
-  {
-   "fala": "Falha na representação do pilar.",
-   "como": "O pilar do canto do terraço gourmet foi redesenhado como o quadrado preto do projeto, sem a mancha em volta.",
-   "conferir": "quadrado preto nítido no canto de baixo do terraço, sem mancha cinza.",
-   "pontos": [
-    [
-     1235,
-     1627
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:1415"
-  },
-  {
-   "fala": "Deixar melhor representada as plantas, pode diferenciar os tamanhos",
-   "como": "O jardim de 4,79 m², junto ao lavatório, recebeu três plantas de tamanhos diferentes sobre a grama.",
-   "conferir": "3 plantas de tamanhos diferentes dentro das paredes do jardim; rótulo JARDIM legível.",
-   "pontos": [
-    [
-     1515,
-     1685
-    ],
-    [
-     1660,
-     1685
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/terreo_casaa_1011.py:12"
+   "obs": "não está no quadro do Miro de hoje. 1ª revisão do Miro (out/26), item 10: o handoff de 13/10 registra só este resumo, não a nota palavra por palavra",
+   "status": "fora_do_miro"
   }
  ]
 }

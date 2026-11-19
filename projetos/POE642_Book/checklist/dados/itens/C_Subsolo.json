@@ -1,7 +1,7 @@
 {
  "casa": "C",
  "pav": "Subsolo",
- "contagem": "8 notas do cliente nos post-its de 13/11 do quadro \"POE 642 – Revisão de Imagens\", transcritas na docstring do pedidos_subsolo_casac_1311.py e conferidas no README, nas regras CDE e no levantamento (1 com autoria a confirmar; o item de materiais do levantamento, da legenda de 13/10, não é nota e não entrou).",
+ "fonte": "quadro do Miro 'POE 642 - Revisão de Imagens', frame das plantas (Casas A a E), lido em 19/11 pelo link de visualização",
  "itens": [
   {
    "fala": "Tem um pilar aqui",
@@ -9,14 +9,116 @@
    "conferir": "pilar redondo de 0,30 m inteiro dentro do travertino, afastado do filete e da borda de cima (não metade fora).",
    "pontos": [
     [
-     656,
-     336
+     650,
+     334
     ]
    ],
    "geral": false,
    "status": "feito",
    "obs": "O PDF não desenha o pilar; reposicionado na revisão do 12K para ficar inteiro no travertino.",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:11; POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:35"
+   "miro_ids": [
+    "3458764689934290745"
+   ]
+  },
+  {
+   "fala": "Representar um filete entre os dois pisos",
+   "como": "No encontro do Bege Bahia do pátio com o travertino da varanda entrou um filete de 5 cm em Bege Bahia, como um mini degrau polido.",
+   "conferir": "tira clara de Bege Bahia de 5 cm em toda a divisa pátio/varanda, com o fio fino da aresta; nunca um traço escuro.",
+   "pontos": [
+    [
+     617,
+     466
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689933297699"
+   ]
+  },
+  {
+   "fala": "Colocar um piso com menos manchas cinzas.",
+   "como": "O travertino da varanda ficou sem as manchas cinzas largas; o veio fino da pedra foi mantido.",
+   "conferir": "varanda sem as faixas cinzas largas; veio fino e poros ficam; a parede do alto da varanda intacta.",
+   "pontos": [
+    [
+     837,
+     594
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "Chegou a ser desfeito em 13/11, na dúvida entre travertino e Bege Bahia, e voltou na revisão do 12K (\"NO PISO DO TRAVERTINO REMOVER MANCHAS CINZAS, CONFORME ORIENTAÇÃO\").",
+   "miro_ids": [
+    "3458764689933390810"
+   ]
+  },
+  {
+   "fala": "Trocar essa representação para uma escala de plantinhas menores",
+   "como": "A floreira junto à sauna foi refeita com plantinhas menores, de cerca de 18 cm, sobre uma forração miúda.",
+   "conferir": "plantinhas de ~0,18 m e forração miúda dentro do caixote de concreto claro; nada passando do vidro da sauna.",
+   "pontos": [
+    [
+     655,
+     828
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "miro_ids": [
+    "3458764689535165472"
+   ]
+  },
+  {
+   "fala": "Colocar a seta em todas as escadas e a descrição.",
+   "como": "Os degraus largos ganharam o triângulo no primeiro degrau, com o S logo abaixo e \"SOBE PARA O JARDIM\"; a escada estreita, o triângulo com o S e \"SOBE PARA O DECK\". O mesmo padrão foi adotado nas escadas de todas as casas.",
+   "conferir": "triângulo cheio no 1º degrau com o S embaixo; \"SOBE PARA O / JARDIM\" acima dos degraus largos e \"SOBE PARA O / DECK\" abaixo da escada estreita, em duas linhas.",
+   "pontos": [
+    [
+     342,
+     208
+    ]
+   ],
+   "geral": true,
+   "g": "G1",
+   "status": "feito",
+   "miro_ids": [
+    "3458764689535001663"
+   ]
+  },
+  {
+   "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "como": "Foram aplicadas as mudanças do Subsolo da Casa A que cabem aqui: fundo branco, sem a hachura e sem o contorno do lote; Bege Bahia menos manchado; seta com a descrição nas escadas; portas encostadas nas paredes; chuveiros desenhados e aparelhos da academia no padrão da Casa A.",
+   "conferir": "fora da planta, branco puro, sem a hachura do terreno nem o contorno do lote; os demais pontos nos itens próprios.",
+   "pontos": [
+    [
+     624,
+     208
+    ]
+   ],
+   "geral": true,
+   "g": "G2",
+   "status": "feito",
+   "miro_ids": [
+    "3458764689933177815"
+   ]
+  },
+  {
+   "fala": "Melhorar representação das portas de giro. Encostar nas paredes.",
+   "como": "As portas da sauna, do BH academia e do depósito foram redesenhadas com a folha de madeira clara encostada quina com quina na ponta da parede, sem os marcos, e com a soleira no vão.",
+   "conferir": "3 folhas de madeira clara vértice com vértice na ponta da parede, sem marcos nem tiquinhos escuros, com soleira; a do depósito na parede deitada.",
+   "pontos": [
+    [
+     903,
+     208
+    ]
+   ],
+   "geral": true,
+   "g": "G7",
+   "status": "feito",
+   "miro_ids": [
+    "3458764689933297186"
+   ]
   },
   {
    "fala": "Já removeu manchas do bege Bahia como fizemos nas outras plantas?",
@@ -40,116 +142,8 @@
      900
     ]
    ],
-   "geral": false,
-   "status": "feito",
-   "obs": "usuário (19/11): \"precisamos remover o percentual de manchas definido. Precisa ser feito.\" Conferido: aplicado na final e no 12K (contraste das manchas igual ao do Subsolo da A).",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:5; POE642_CasaA/scripts/README.md:2801"
-  },
-  {
-   "fala": "Representar um filete entre os dois pisos",
-   "como": "No encontro do Bege Bahia do pátio com o travertino da varanda entrou um filete de 5 cm em Bege Bahia, como um mini degrau polido.",
-   "conferir": "tira clara de Bege Bahia de 5 cm em toda a divisa pátio/varanda, com o fio fino da aresta; nunca um traço escuro.",
-   "pontos": [
-    [
-     638,
-     520
-    ],
-    [
-     637,
-     700
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:9"
-  },
-  {
-   "fala": "Colocar um piso com menos manchas cinzas.",
-   "como": "O travertino da varanda ficou sem as manchas cinzas largas; o veio fino da pedra foi mantido.",
-   "conferir": "varanda sem as faixas cinzas largas; veio fino e poros ficam; a parede do alto da varanda intacta.",
-   "pontos": [
-    [
-     760,
-     640
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "Chegou a ser desfeito em 13/11, na dúvida entre travertino e Bege Bahia, e voltou na revisão do 12K (\"NO PISO DO TRAVERTINO REMOVER MANCHAS CINZAS, CONFORME ORIENTAÇÃO\").",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:7; POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:37"
-  },
-  {
-   "fala": "Colocar a seta em todas as escadas e a descrição.",
-   "como": "Os degraus largos ganharam o triângulo no primeiro degrau, com o S logo abaixo e \"SOBE PARA O JARDIM\"; a escada estreita, o triângulo com o S e \"SOBE PARA O DECK\". O mesmo padrão foi adotado nas escadas de todas as casas.",
-   "conferir": "triângulo cheio no 1º degrau com o S embaixo; \"SOBE PARA O / JARDIM\" acima dos degraus largos e \"SOBE PARA O / DECK\" abaixo da escada estreita, em duas linhas.",
-   "pontos": [
-    [
-     514,
-     745
-    ],
-    [
-     702,
-     1006
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:16"
-  },
-  {
-   "fala": "Melhorar representação das portas de giro. Encostar nas paredes.",
-   "como": "As portas da sauna, do BH academia e do depósito foram redesenhadas com a folha de madeira clara encostada quina com quina na ponta da parede, sem os marcos, e com a soleira no vão.",
-   "conferir": "3 folhas de madeira clara vértice com vértice na ponta da parede, sem marcos nem tiquinhos escuros, com soleira; a do depósito na parede deitada.",
-   "pontos": [
-    [
-     843,
-     794
-    ],
-    [
-     921,
-     755
-    ],
-    [
-     1002,
-     770
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:20"
-  },
-  {
-   "fala": "Trocar essa representação para uma escala de plantinhas menores",
-   "como": "A floreira junto à sauna foi refeita com plantinhas menores, de cerca de 18 cm, sobre uma forração miúda.",
-   "conferir": "plantinhas de ~0,18 m e forração miúda dentro do caixote de concreto claro; nada passando do vidro da sauna.",
-   "pontos": [
-    [
-     679,
-     860
-    ]
-   ],
-   "geral": false,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:13"
-  },
-  {
-   "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
-   "como": "Foram aplicadas as mudanças do Subsolo da Casa A que cabem aqui: fundo branco, sem a hachura e sem o contorno do lote; Bege Bahia menos manchado; seta com a descrição nas escadas; portas encostadas nas paredes; chuveiros desenhados e aparelhos da academia no padrão da Casa A.",
-   "conferir": "fora da planta, branco puro, sem a hachura do terreno nem o contorno do lote; os demais pontos nos itens próprios.",
-   "pontos": [
-    [
-     1150,
-     1300
-    ]
-   ],
-   "geral": true,
-   "status": "feito",
-   "obs": "",
-   "fonte": "POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:24; POE642_CasaA/scripts/pedidos_subsolo_casac_1311.py:29"
+   "obs": "não está no quadro do Miro de hoje. usuário (19/11): \"precisamos remover o percentual de manchas definido. Precisa ser feito.\" Conferido: aplicado na final e no 12K (contraste das manchas igual ao do Subsolo da A).",
+   "status": "fora_do_miro"
   }
  ]
 }

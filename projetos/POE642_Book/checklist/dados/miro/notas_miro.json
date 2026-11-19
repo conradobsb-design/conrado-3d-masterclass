@@ -1,0 +1,4433 @@
+{
+ "A_Subsolo": [
+  {
+   "id": 3458764689446435400,
+   "text": "Deixar sem hachura. Deixar na cor branca. Sem fundo.",
+   "x": 375086.8123421582,
+   "y": -6619.669999408565,
+   "w": 1997.883903617943,
+   "h": 2289.0328141954324,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1888.8,
+    637.8
+   ]
+  },
+  {
+   "id": 3458764689446591147,
+   "text": "Tirar a representação do deck e da piscina superior. Deixar apenas o subsolo mesmo.",
+   "x": 363943.23895048123,
+   "y": -4565.505233786884,
+   "w": 1997.883903617943,
+   "h": 2289.0328141954324,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     624.8,
+     2037.4
+    ]
+   ],
+   "no_post_it": [
+    808.5,
+    836.8
+   ]
+  },
+  {
+   "id": 3458764689544523605,
+   "text": "Representar as prateleiras com uma cor neutra única, sem textura. Indicada na planta ao lado.",
+   "x": 373937.5385614253,
+   "y": -3516.3031279605057,
+   "w": 1136.9382360682735,
+   "h": 1302.6227026309866,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1777.4,
+    938.7
+   ]
+  },
+  {
+   "id": 3458764689446252101,
+   "text": "Colocar a seta na escada e a descrição - Sobe para o Deck.",
+   "x": 365297.59282740764,
+   "y": -1014.1525241343043,
+   "w": 1393.3092486343962,
+   "h": 1596.3543150183032,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    939.7,
+    1181.2
+   ]
+  },
+  {
+   "id": 3458764689545494917,
+   "text": "Deixar a representação do Bege Bahia menos manchado (para melhor representação)",
+   "x": 368008.28089556884,
+   "y": 26.37410688897944,
+   "w": 1136.9382360682735,
+   "h": 1302.6227026309866,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1202.5,
+    1282.1
+   ]
+  },
+  {
+   "id": 3458764689545494306,
+   "text": "Tirar essas linhas",
+   "x": 373981.55971146293,
+   "y": 1604.5228186935856,
+   "w": 680.5552256221446,
+   "h": 779.7316152856732,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1684.6,
+     1471.8
+    ]
+   ],
+   "no_post_it": [
+    1781.5,
+    1435.2
+   ]
+  },
+  {
+   "id": 3458764689446252821,
+   "text": "Testar um estilo de grama mais sóbrio. Testar em uma planta e mandar pra gente. Ver exemplo da planta colocada logo ali em cima.",
+   "x": 364126.1986059537,
+   "y": 2632.120525944425,
+   "w": 1393.3092486343962,
+   "h": 1596.3543150183032,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    826.1,
+    1534.7
+   ]
+  }
+ ],
+ "A_Terreo": [
+  {
+   "id": 3458764689911415566,
+   "text": "OBS GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
+   "x": 385082.37792422535,
+   "y": -12104.423978672392,
+   "w": 4583.913609256111,
+   "h": 2986.0922940296955,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    487.5,
+    153.4
+   ]
+  },
+  {
+   "id": 3458764689915177166,
+   "text": "Deixar as linhas tracejadas mais finas. Nas claraboias deixar a linha mais cinza e sem o X do meio, só as bordas.",
+   "x": 406208.75897066656,
+   "y": -11089.026591096204,
+   "w": 855.9279659324724,
+   "h": 980.661187098511,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2249.7,
+     379.9
+    ]
+   ],
+   "no_post_it": [
+    2367.0,
+    243.3
+   ]
+  },
+  {
+   "id": 3458764689912086169,
+   "text": "Usar essa cor padronizada para as prateleiras e armários",
+   "x": 404780.012546539,
+   "y": -10994.48567481502,
+   "w": 1149.2694795977768,
+   "h": 1316.7509615492118,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2160.7,
+     413.3
+    ]
+   ],
+   "no_post_it": [
+    2239.9,
+    251.7
+   ]
+  },
+  {
+   "id": 3458764689920586323,
+   "text": "Colocar a seta na escada e a descrição Desce para o subsolo",
+   "x": 389909.06791361136,
+   "y": -8954.19766837523,
+   "w": 1823.8878495935087,
+   "h": 1188.1326563066284,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    917.0,
+    433.5
+   ]
+  },
+  {
+   "id": 3458764689918216597,
+   "text": "A cuba e a pedra lateral são da mesma cor.",
+   "x": 404779.08482925815,
+   "y": -8641.48010670254,
+   "w": 455.8230674490785,
+   "h": 522.2495446150247,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2281.5,
+     494.8
+    ]
+   ],
+   "no_post_it": [
+    2239.9,
+    461.0
+   ]
+  },
+  {
+   "id": 3458764689915496954,
+   "text": "Não tem soleira entre a sala e o escritório.",
+   "x": 404825.6171792169,
+   "y": -7364.176696698152,
+   "w": 598.4735409966561,
+   "h": 685.6882781268221,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2291.5,
+     574.6
+    ]
+   ],
+   "no_post_it": [
+    2244.0,
+    574.7
+   ]
+  },
+  {
+   "id": 3458764689915647463,
+   "text": "Deixar as linhas tracejadas mais finas e mais claras.",
+   "x": 399640.2356712777,
+   "y": -6494.097472938782,
+   "w": 855.9279659324724,
+   "h": 980.661187098511,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1782.7,
+    652.2
+   ]
+  },
+  {
+   "id": 3458764689448738307,
+   "text": "Centralizar a seta com a abertura da porta, usando este modelo de seta.",
+   "x": 410744.53909610637,
+   "y": -5287.06121347181,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2419.8,
+     764.5
+    ]
+   ],
+   "no_post_it": [
+    2770.6,
+    759.3
+   ]
+  },
+  {
+   "id": 3458764689934745450,
+   "text": "Representar uma soleira na entrada igual a casa C",
+   "x": 406192.782220931,
+   "y": -4868.737870532379,
+   "w": 789.8660154896313,
+   "h": 904.9721182494268,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2365.7,
+    796.7
+   ]
+  },
+  {
+   "id": 3458764689919559662,
+   "text": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
+   "x": 392884.13823045185,
+   "y": -4866.727840237698,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1181.7,
+    797.1
+   ]
+  },
+  {
+   "id": 3458764689920416586,
+   "text": "Deixar as linhas do pergolado tracejadas mais finas e mais claras. Não representar as linhas tracejadas do telhado.",
+   "x": 395102.5781790621,
+   "y": -2431.268523717532,
+   "w": 855.9279659324724,
+   "h": 980.661187098511,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1379.1,
+    1013.7
+   ]
+  },
+  {
+   "id": 3458764689932764016,
+   "text": "Tirar o nome shaft",
+   "x": 405600.31276579294,
+   "y": -904.3658804582228,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2313.1,
+    1149.4
+   ]
+  },
+  {
+   "id": 3458764689919840734,
+   "text": "Cor da ilha é no Dekton Danae",
+   "x": 401793.4815636149,
+   "y": 426.67340034636436,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1974.4,
+    1267.8
+   ]
+  },
+  {
+   "id": 3458764689919946304,
+   "text": "Cor da bancada é no Dekton Danae",
+   "x": 403018.5900617924,
+   "y": 458.4288981351565,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2083.4,
+    1270.6
+   ]
+  },
+  {
+   "id": 3458764689451010824,
+   "text": "Colocar só 5 banquetas. E com um tom um pouco mais destacado em relação ao piso",
+   "x": 390933.0636395245,
+   "y": 1127.0456785410206,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1576.1,
+     1247.2
+    ]
+   ],
+   "no_post_it": [
+    1008.3,
+    1330.4
+   ]
+  },
+  {
+   "id": 3458764689919559070,
+   "text": "Faltou a representação da churrasqueira.",
+   "x": 396361.9474119192,
+   "y": 1900.601308268073,
+   "w": 634.2933537556347,
+   "h": 726.7280635994207,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1491.3,
+    1399.1
+   ]
+  },
+  {
+   "id": 3458764689919173808,
+   "text": "Toda a bancada e a cuba é no marrom tabaco. Talvez para diferenciar a bancada do espaço da cuba, deixar a cuba ou com um tom mais claro ou mais escuro que a bancada.",
+   "x": 395396.52874349384,
+   "y": 2587.062473277474,
+   "w": 916.072849351453,
+   "h": 1049.570902774529,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1484.7,
+     1455.5
+    ]
+   ],
+   "no_post_it": [
+    1405.4,
+    1460.2
+   ]
+  },
+  {
+   "id": 3458764689919946392,
+   "text": "Cor da bancada é no Dekton Danae",
+   "x": 398608.678154007,
+   "y": 2708.197006630755,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1691.2,
+    1470.9
+   ]
+  },
+  {
+   "id": 3458764689916505940,
+   "text": "Falha na representação do pilar.",
+   "x": 392474.6641799523,
+   "y": 5083.306136141793,
+   "w": 951.7522969702823,
+   "h": 1090.4498678855496,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1200.2,
+     1593.2
+    ]
+   ],
+   "no_post_it": [
+    1145.5,
+    1682.3
+   ]
+  },
+  {
+   "id": 3458764689918728330,
+   "text": "Melhorar a representação da escada helicoidal. Ver exemplo.",
+   "x": 402041.64341631066,
+   "y": 5322.539946780118,
+   "w": 905.5186624620646,
+   "h": 1037.4786685495012,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2059.7,
+     1733.5
+    ]
+   ],
+   "no_post_it": [
+    1996.6,
+    1703.4
+   ]
+  },
+  {
+   "id": 3458764689918472970,
+   "text": "Deixar melhor representada as plantas, pode diferenciar os tamanho para ficar mais real.",
+   "x": 397170.65247886494,
+   "y": 5880.657196088767,
+   "w": 951.7522969702823,
+   "h": 1090.4498678855496,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1535.7,
+     1668.2
+    ]
+   ],
+   "no_post_it": [
+    1563.3,
+    1753.1
+   ]
+  },
+  {
+   "id": 3458764689918824605,
+   "text": "Deixar a linha tracejada apenas nos degraus da escada como está no exemplo.",
+   "x": 402041.64341631066,
+   "y": 6210.386125859412,
+   "w": 905.5186624620646,
+   "h": 1037.4786685495012,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2059.7,
+     1733.5
+    ]
+   ],
+   "no_post_it": [
+    1996.6,
+    1782.4
+   ]
+  },
+  {
+   "id": 3458764689918606219,
+   "text": "Deixar as linhas tracejadas mais finas e mais claras.",
+   "x": 399951.82032719575,
+   "y": 6826.583130446292,
+   "w": 855.9279659324724,
+   "h": 980.661187098511,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1810.7,
+    1837.2
+   ]
+  },
+  {
+   "id": 3458764689918962646,
+   "text": "A linha de corte não precisa ser feita.",
+   "x": 403357.1416392109,
+   "y": 7001.752203422322,
+   "w": 721.3482974701559,
+   "h": 826.4694061467112,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2113.7,
+    1852.8
+   ]
+  },
+  {
+   "id": 3458764689919075565,
+   "text": "Não esquecer o S e a descrição sobe 'para tal espaço'.",
+   "x": 402041.64341631066,
+   "y": 7107.256834623724,
+   "w": 905.5186624620646,
+   "h": 1037.4786685495012,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1996.7,
+    1862.2
+   ]
+  },
+  {
+   "id": 3458764689448546226,
+   "text": "Colocar a seta em todas as escadas e a descrição sobe para o 1° pavimento. Representar o guarda-corpo.",
+   "x": 410262.4076560542,
+   "y": 9152.291821685343,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 1272,
+   "alvos": [
+    [
+     2384.5,
+     1018.6
+    ]
+   ],
+   "no_post_it": [
+    2728.0,
+    2043.9
+   ]
+  },
+  {
+   "id": 3458764689451388246,
+   "text": "Deixar a tonalidade do piso mais claro",
+   "x": 400712.1109184812,
+   "y": 9282.609042296346,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 1403,
+   "alvos": [
+    [
+     2018.0,
+     1346.7
+    ]
+   ],
+   "no_post_it": [
+    1878.4,
+    2055.7
+   ]
+  },
+  {
+   "id": 3458764689447514404,
+   "text": "Remover as linhas tracejadas. Fica um representação mais técnica e pode confundir quem olha a planta. Deixar apenas as que representam 'vazios'.",
+   "x": 386251.7217138387,
+   "y": 10614.240788468334,
+   "w": 4315.58900787489,
+   "h": 4944.493938670728,
+   "cor": "",
+   "fora": 2734,
+   "alvos": [
+    [
+     717.8,
+     1624.6
+    ]
+   ],
+   "no_post_it": [
+    592.0,
+    2174.5
+   ]
+  }
+ ],
+ "A_1Pavimento": [
+  {
+   "id": 3458764689923346615,
+   "text": "Remover as linhas tracejadas do telhado e a linha tracejada branca. Fica um representação mais técnica e pode confundir quem olha a planta. Deixar apenas as que representam 'vazios', claraboias e pergolados.",
+   "x": 443572.9663841632,
+   "y": -10239.53876606778,
+   "w": 3289.6679835830264,
+   "h": 3769.0668354619597,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2734.9,
+    208.7
+   ]
+  },
+  {
+   "id": 3458764689923809345,
+   "text": "Representar melhor o painel amadeirado que tem aqui entre a varanda e o quarto",
+   "x": 431324.2482187818,
+   "y": -8776.432865851253,
+   "w": 763.0315988209727,
+   "h": 874.2271584481496,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1509.3,
+    355.0
+   ]
+  },
+  {
+   "id": 3458764689925075225,
+   "text": "Deixar os cabides se encontrando no 'L' do guarda-roupa. Tirar essa lateral como se fossem dois guarda-roupas separados.",
+   "x": 435352.47321974323,
+   "y": -8734.329674869252,
+   "w": 535.1055365593863,
+   "h": 613.0857403795984,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1912.4,
+    359.2
+   ]
+  },
+  {
+   "id": 3458764689924049407,
+   "text": "Representar como parede normal sem janela.",
+   "x": 439590.687048881,
+   "y": -7406.269063087151,
+   "w": 763.0315988209727,
+   "h": 874.2271584481496,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2336.4,
+    492.0
+   ]
+  },
+  {
+   "id": 3458764689452299837,
+   "text": "Deixa o contorno da casa em maior destaque.",
+   "x": 425192.05283191847,
+   "y": -6303.246860520172,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1304.5,
+     1183.2
+    ],
+    [
+     1477.1,
+     513.2
+    ]
+   ],
+   "no_post_it": [
+    895.7,
+    602.3
+   ]
+  },
+  {
+   "id": 3458764689923640158,
+   "text": "Deixar as linhas tracejadas mais finas e mais claras.",
+   "x": 433960.36543755705,
+   "y": -4221.4841657922225,
+   "w": 695.4523368069504,
+   "h": 796.7996622712799,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1773.0,
+    810.5
+   ]
+  },
+  {
+   "id": 3458764689924959117,
+   "text": "Deixar os cabides se encontrando no 'L' do guarda-roupa. Tirar essa lateral como se fossem dois guarda-roupas separados.",
+   "x": 434847.55845862604,
+   "y": -2663.904916024054,
+   "w": 535.1055365593863,
+   "h": 613.0857403795984,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1861.8,
+    966.3
+   ]
+  },
+  {
+   "id": 3458764689923473150,
+   "text": "Como essa planta é do 1° pavimento, nós não vemos o pergolado tracejado, vemos ele na cor dele. Só que com o tom mais \"apagado\" para mostrar que ele está embaixo do 1° pavimento.",
+   "x": 430265.956711414,
+   "y": -2043.078002474882,
+   "w": 1255.8652505479797,
+   "h": 1438.8807895725597,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1403.4,
+    1028.4
+   ]
+  },
+  {
+   "id": 3458764689452299396,
+   "text": "Colocar a seta e a descrição em todas as escadas. Representar o guarda-corpo.",
+   "x": 445165.2096141574,
+   "y": -1749.1460729203245,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2441.4,
+     1004.0
+    ]
+   ],
+   "no_post_it": [
+    2894.2,
+    1057.9
+   ]
+  },
+  {
+   "id": 3458764689925296940,
+   "text": "Colocar o tracejado em 'X' que indica vazio.",
+   "x": 439354.7849548371,
+   "y": -817.0516758053709,
+   "w": 433.47612018010784,
+   "h": 496.64600704052555,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2312.8,
+    1151.1
+   ]
+  },
+  {
+   "id": 3458764689925075511,
+   "text": "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado.",
+   "x": 431361.605661965,
+   "y": -699.4315794837312,
+   "w": 670.1083592456303,
+   "h": 767.7623412462498,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1513.0,
+    1162.8
+   ]
+  },
+  {
+   "id": 3458764689924315105,
+   "text": "Trocar a cor do tapete. Está camuflando com o piso.",
+   "x": 436244.8245969822,
+   "y": -628.2611001015612,
+   "w": 763.0315988209727,
+   "h": 874.2271584481496,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2001.6,
+    1169.9
+   ]
+  },
+  {
+   "id": 3458764689925182452,
+   "text": "Cor da bancada é no Dekton Danae",
+   "x": 435440.4895686239,
+   "y": 486.9454191150289,
+   "w": 433.47612018010784,
+   "h": 496.64600704052555,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1921.1,
+    1281.5
+   ]
+  },
+  {
+   "id": 3458764689925683386,
+   "text": "Encostar essa porta mais na parede, ela tá solta.",
+   "x": 436500.00236849656,
+   "y": 2101.5060949206527,
+   "w": 433.47612018010784,
+   "h": 496.64600704052555,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2027.1,
+    1442.9
+   ]
+  },
+  {
+   "id": 3458764689925427673,
+   "text": "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado.",
+   "x": 441612.40785854904,
+   "y": 2669.9475873398187,
+   "w": 670.1083592456303,
+   "h": 767.7623412462498,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2538.7,
+    1499.8
+   ]
+  },
+  {
+   "id": 3458764689452072054,
+   "text": "Diminuir o tamanho dessa vegetação",
+   "x": 428481.2507891669,
+   "y": 4334.908758589561,
+   "w": 1393.3092486343962,
+   "h": 1596.3543150183032,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1328.8,
+     1533.3
+    ]
+   ],
+   "no_post_it": [
+    1224.8,
+    1666.3
+   ]
+  },
+  {
+   "id": 3458764689925556233,
+   "text": "Colocar a seta na escada e a descrição Desce para 'tal espaço'",
+   "x": 436696.8884439929,
+   "y": 4862.385561013594,
+   "w": 1823.8878495935087,
+   "h": 1188.1326563066284,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1958.5,
+     1559.9
+    ]
+   ],
+   "no_post_it": [
+    2046.8,
+    1719.1
+   ]
+  },
+  {
+   "id": 3458764689452072566,
+   "text": "Remover as linhas tracejadas.",
+   "x": 431782.1774956793,
+   "y": 5343.525252246138,
+   "w": 1393.3092486343962,
+   "h": 1596.3543150183032,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1455.4,
+     1593.6
+    ]
+   ],
+   "no_post_it": [
+    1555.1,
+    1767.2
+   ]
+  }
+ ],
+ "B_Subsolo": [
+  {
+   "id": 3458764689926403498,
+   "text": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "x": 365208.005212928,
+   "y": 20623.223164058334,
+   "w": 5969.001583652594,
+   "h": 3888.3781744936896,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    425.8,
+    182.6
+   ]
+  },
+  {
+   "id": 3458764689926557176,
+   "text": "Demarcar melhor o perímetro da casa",
+   "x": 379968.22524721385,
+   "y": 20903.585971018227,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1103.3,
+     612.7
+    ]
+   ],
+   "no_post_it": [
+    1097.6,
+    195.2
+   ]
+  },
+  {
+   "id": 3458764689934177495,
+   "text": "O piso continua nessa demarcação",
+   "x": 387786.3813803773,
+   "y": 23176.38328418092,
+   "w": 1624.9268585052191,
+   "h": 1058.5237821119713,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1453.5,
+    298.6
+   ]
+  },
+  {
+   "id": 3458764689934177742,
+   "text": "Tem um pilar aqui",
+   "x": 375854.74462845665,
+   "y": 24013.419344414375,
+   "w": 1325.4424529597823,
+   "h": 863.4310836423724,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     910.3,
+     291.3
+    ]
+   ],
+   "no_post_it": [
+    910.4,
+    336.8
+   ]
+  },
+  {
+   "id": 3458764689927243751,
+   "text": "Melhorar representação da porta. Encostar na parede.",
+   "x": 389862.053174985,
+   "y": 24775.00076915149,
+   "w": 1624.9268585052191,
+   "h": 1058.5237821119713,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1548.0,
+    371.3
+   ]
+  },
+  {
+   "id": 3458764689458949442,
+   "text": "Colocar a seta em todas as escadas e a descrição",
+   "x": 370701.50301061384,
+   "y": 25384.719853763512,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     686.9,
+     616.5
+    ]
+   ],
+   "no_post_it": [
+    675.9,
+    399.3
+   ]
+  },
+  {
+   "id": 3458764689458949708,
+   "text": "usar o mesmo bloco de bicicleta usado na casa A",
+   "x": 384895.8121292833,
+   "y": 28166.506316375875,
+   "w": 1410.0840040103205,
+   "h": 1615.5736327354425,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1396.3,
+     537.4
+    ]
+   ],
+   "no_post_it": [
+    1322.0,
+    525.7
+   ]
+  },
+  {
+   "id": 3458764689927243371,
+   "text": "Tirar o nome shaft.",
+   "x": 396325.65537947597,
+   "y": 28389.23032776275,
+   "w": 1136.9382360682735,
+   "h": 1302.6227026309866,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1842.2,
+    535.7
+   ]
+  },
+  {
+   "id": 3458764689926825085,
+   "text": "Aqui também tem soleira.",
+   "x": 379750.8726563217,
+   "y": 28853.25631325392,
+   "w": 1624.9268585052191,
+   "h": 1058.5237821119713,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1127.9,
+     632.7
+    ]
+   ],
+   "no_post_it": [
+    1087.8,
+    557.0
+   ]
+  },
+  {
+   "id": 3458764689926825460,
+   "text": "Melhorar representação da porta. Encostar na parede.",
+   "x": 381707.8262771011,
+   "y": 28901.63234501514,
+   "w": 1624.9268585052191,
+   "h": 1058.5237821119713,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1176.9,
+    559.2
+   ]
+  },
+  {
+   "id": 3458764689927088785,
+   "text": "Representar a cor de armário e prateleira igual o indicado da casa A. Sem textura. Uma cor neutra e sólida.",
+   "x": 392593.2264931729,
+   "y": 29691.85303039373,
+   "w": 1136.9382360682735,
+   "h": 1302.6227026309866,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1672.3,
+    595.1
+   ]
+  },
+  {
+   "id": 3458764689927088127,
+   "text": "No lugar dessas linhas, representar uma bola presa na parede. Tirar linhas.",
+   "x": 389963.8246223665,
+   "y": 32798.6052664589,
+   "w": 1624.926858505216,
+   "h": 1058.5237821119692,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1482.0,
+     735.2
+    ]
+   ],
+   "no_post_it": [
+    1552.7,
+    736.5
+   ]
+  }
+ ],
+ "B_Terreo": [
+  {
+   "id": 3458764689927702319,
+   "text": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "x": 407791.5970183875,
+   "y": 18233.11841674005,
+   "w": 5969.001583652594,
+   "h": 3888.3781744936896,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    520.4,
+    67.4
+   ]
+  },
+  {
+   "id": 3458764689932376444,
+   "text": "Melhorar representação das portas de giro. Encostar nas paredes.",
+   "x": 414144.62081742263,
+   "y": 18233.11841674005,
+   "w": 5969.001583652594,
+   "h": 3888.3781744936896,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1012.1,
+    67.4
+   ]
+  },
+  {
+   "id": 3458764689929136829,
+   "text": "OBS GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
+   "x": 443089.0591949488,
+   "y": 19342.28741464627,
+   "w": 4656.406761024874,
+   "h": 3033.316404324775,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    3252.2,
+    153.4
+   ]
+  },
+  {
+   "id": 3458764689929136418,
+   "text": "Demarcar melhor o perímetro da casa",
+   "x": 423845.9281906539,
+   "y": 19771.519936722543,
+   "w": 3338.587614299447,
+   "h": 2174.8513601722116,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1440.2,
+     281.6
+    ]
+   ],
+   "no_post_it": [
+    1762.9,
+    186.5
+   ]
+  },
+  {
+   "id": 3458764689932445222,
+   "text": "Deixar o tom da vegetação dos jardins nas janelas diferente do terreno",
+   "x": 435544.46112871706,
+   "y": 20154.20939608685,
+   "w": 2445.102094307362,
+   "h": 1592.809364291653,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2625.7,
+     332.7
+    ]
+   ],
+   "no_post_it": [
+    2668.2,
+    216.2
+   ]
+  },
+  {
+   "id": 3458764689458059300,
+   "text": "Colocar a seta e descrição em todas as escadas",
+   "x": 407791.5970183875,
+   "y": 21782.901862259474,
+   "w": 5969.001583652594,
+   "h": 3888.3781744936896,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    520.4,
+    342.2
+   ]
+  },
+  {
+   "id": 3458764689932764262,
+   "text": "Tirar o nome shaft",
+   "x": 423540.5012351918,
+   "y": 24410.21406188284,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1739.2,
+    545.6
+   ]
+  },
+  {
+   "id": 3458764689456553732,
+   "text": "Inserir uma linha para indicar a posição de instalação do chuveiro.",
+   "x": 411061.8156077319,
+   "y": 25384.719853763512,
+   "w": 2027.0235890224944,
+   "h": 1320.4610808489392,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     824.0,
+     750.4
+    ]
+   ],
+   "no_post_it": [
+    773.4,
+    621.0
+   ]
+  },
+  {
+   "id": 3458764689932764788,
+   "text": "Representar como banco estofado.",
+   "x": 418680.6638042984,
+   "y": 25972.302850388587,
+   "w": 642.9631270750382,
+   "h": 736.6612712216519,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1363.1,
+    666.5
+   ]
+  },
+  {
+   "id": 3458764689932623000,
+   "text": "Representar melhor o painel amadeirado, ele acaba sumindo no piso amadeirado.",
+   "x": 435255.96127716434,
+   "y": 26110.840384939438,
+   "w": 670.1083592456303,
+   "h": 767.7623412462498,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2645.9,
+    677.3
+   ]
+  },
+  {
+   "id": 3458764689929304567,
+   "text": "Diminuir a escala e quantidade de vegetação no jardim de inverno.",
+   "x": 427538.8095693964,
+   "y": 27787.57779943847,
+   "w": 789.8660154896313,
+   "h": 904.9721182494268,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2048.6,
+    807.1
+   ]
+  },
+  {
+   "id": 3458764689929739340,
+   "text": "Melhorar o X tracejado",
+   "x": 421204.1578872544,
+   "y": 27828.36421785051,
+   "w": 642.9631270750382,
+   "h": 736.6612712216519,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1550.0,
+     752.8
+    ]
+   ],
+   "no_post_it": [
+    1558.4,
+    810.2
+   ]
+  },
+  {
+   "id": 3458764689929562973,
+   "text": "Tirar o contorno dos mobiliários",
+   "x": 416807.64004571136,
+   "y": 28259.435047086357,
+   "w": 642.9631270750382,
+   "h": 736.6612712216519,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1218.1,
+    843.5
+   ]
+  },
+  {
+   "id": 3458764689929939357,
+   "text": "Representar como mesa de centro e não como banco estofado",
+   "x": 418781.78764998633,
+   "y": 28259.435047086357,
+   "w": 642.9631270750382,
+   "h": 736.6612712216519,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1370.9,
+    843.5
+   ]
+  },
+  {
+   "id": 3458764689457809050,
+   "text": "Tirar o contorno dos mobiliários",
+   "x": 426127.83404559427,
+   "y": 28996.096318308002,
+   "w": 642.9631270750382,
+   "h": 736.6612712216519,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1939.4,
+    900.6
+   ]
+  },
+  {
+   "id": 3458764689457644551,
+   "text": "Tirar a representação do pé da mesa",
+   "x": 423499.8774874535,
+   "y": 29460.26903562114,
+   "w": 729.2035523423074,
+   "h": 835.4693966534978,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1809.1,
+     896.1
+    ]
+   ],
+   "no_post_it": [
+    1736.0,
+    936.5
+   ]
+  },
+  {
+   "id": 3458764689457809351,
+   "text": "Trocar essa representação do jardim de inverno. Usar a mesma do interior da casa A.",
+   "x": 430348.6685465705,
+   "y": 30308.69845826913,
+   "w": 1151.22243707342,
+   "h": 1318.988520868039,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2124.3,
+     901.0
+    ],
+    [
+     2367.6,
+     1196.5
+    ],
+    [
+     2404.7,
+     971.7
+    ]
+   ],
+   "no_post_it": [
+    2266.1,
+    1002.2
+   ]
+  },
+  {
+   "id": 3458764689934745252,
+   "text": "Representar uma soleira na entrada igual a casa C",
+   "x": 432882.6379589798,
+   "y": 31134.43408549334,
+   "w": 789.8660154896313,
+   "h": 904.9721182494268,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2462.2,
+    1066.2
+   ]
+  },
+  {
+   "id": 3458764689458059168,
+   "text": "Centralizar a seta com a abertura da porta, usando este modelo de seta.",
+   "x": 437278.6083224982,
+   "y": 31223.942210977795,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2802.4,
+    1073.1
+   ]
+  },
+  {
+   "id": 3458764689929596366,
+   "text": "Tirar a representação desse amadeirado em cima do sofá. Deixar apenas a mesa que encaixa no sofá.",
+   "x": 417221.907148609,
+   "y": 31310.45750466689,
+   "w": 654.6755669799593,
+   "h": 750.0805491026669,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1926.9,
+     1007.7
+    ],
+    [
+     1324.3,
+     1068.7
+    ]
+   ],
+   "no_post_it": [
+    1250.1,
+    1079.7
+   ]
+  },
+  {
+   "id": 3458764689929841323,
+   "text": "Melhorar representação da porta. Encostar na parede.",
+   "x": 426897.91370525525,
+   "y": 32060.583918028286,
+   "w": 1191.7916568549679,
+   "h": 776.3671364655219,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1999.0,
+    1137.8
+   ]
+  },
+  {
+   "id": 3458764689929840951,
+   "text": "Melhorar o X tracejado",
+   "x": 421322.4556841577,
+   "y": 32841.25035012025,
+   "w": 642.9631270750382,
+   "h": 736.6612712216519,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1548.9,
+     1255.5
+    ]
+   ],
+   "no_post_it": [
+    1567.5,
+    1198.2
+   ]
+  },
+  {
+   "id": 3458764689929444415,
+   "text": "Deixar as linhas do pergolado tracejadas mais finas e mais claras. Deixar tudo na mesma cor, preto ou branco.",
+   "x": 434769.76385005255,
+   "y": 33150.73056516307,
+   "w": 906.5427184108541,
+   "h": 1038.6519587822852,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2608.2,
+    1222.2
+   ]
+  },
+  {
+   "id": 3458764689929444656,
+   "text": "Diminuir a escala e quantidade de vegetação no jardim de inverno.",
+   "x": 432455.3781963825,
+   "y": 33217.570485429496,
+   "w": 789.8660154896313,
+   "h": 904.9721182494268,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2429.1,
+    1227.4
+   ]
+  },
+  {
+   "id": 3458764689930164452,
+   "text": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
+   "x": 410708.86054401565,
+   "y": 33547.582836622176,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    746.1,
+    1252.8
+   ]
+  },
+  {
+   "id": 3458764689930876392,
+   "text": "Não tem soleira. E encostar as portas nas paredes.",
+   "x": 425515.2219978036,
+   "y": 34304.72017463195,
+   "w": 642.9631270750382,
+   "h": 736.6612712216519,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1892.0,
+    1311.5
+   ]
+  },
+  {
+   "id": 3458764689455575152,
+   "text": "São 5 banquetas altas. Colocar em um tom que destaque do piso.",
+   "x": 416471.4949323707,
+   "y": 35295.587991707216,
+   "w": 1108.429151312671,
+   "h": 722.062418569397,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1343.0,
+     1308.3
+    ]
+   ],
+   "no_post_it": [
+    1192.0,
+    1388.2
+   ]
+  },
+  {
+   "id": 3458764689931368967,
+   "text": "Melhorar representação da porta. Encostar na parede.",
+   "x": 435352.0813305076,
+   "y": 35331.57042042093,
+   "w": 1197.56800533702,
+   "h": 780.1300149052587,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2732.4,
+     1330.6
+    ],
+    [
+     2731.2,
+     1409.1
+    ],
+    [
+     2877.3,
+     1484.0
+    ]
+   ],
+   "no_post_it": [
+    2653.3,
+    1391.1
+   ]
+  },
+  {
+   "id": 3458764689931147589,
+   "text": "Aqui são duas máquinas de lavar roupa. Tirar essa representação de armário. Ou bancada, a bancada não passa por cima.",
+   "x": 429337.47048731724,
+   "y": 35391.19924495234,
+   "w": 576.8140386081085,
+   "h": 660.872365842456,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2187.8,
+    1395.6
+   ]
+  },
+  {
+   "id": 3458764689455311189,
+   "text": "Colocar uma textura nas espreguiçadeiras",
+   "x": 412205.7588399134,
+   "y": 35603.77964173125,
+   "w": 1636.5850607198377,
+   "h": 1066.1182681260657,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     906.7,
+     1199.2
+    ]
+   ],
+   "no_post_it": [
+    861.9,
+    1412.0
+   ]
+  },
+  {
+   "id": 3458764689931146959,
+   "text": "Cor da bancada é no Dekton Danae",
+   "x": 427367.1187506411,
+   "y": 35612.08599302794,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2035.3,
+    1412.7
+   ]
+  },
+  {
+   "id": 3458764689930596541,
+   "text": "Cor da ilha é no Dekton Danae",
+   "x": 422238.7722478309,
+   "y": 35714.48157415767,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1638.4,
+    1420.6
+   ]
+  },
+  {
+   "id": 3458764689931057487,
+   "text": "Representar a cor de armário e prateleira igual o indicado da casa A. Sem textura. Uma cor neutra e sólida.",
+   "x": 425541.0784719076,
+   "y": 36081.505663130185,
+   "w": 899.9468642958814,
+   "h": 1031.0948997962862,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1894.0,
+    1449.1
+   ]
+  },
+  {
+   "id": 3458764689931147106,
+   "text": "Cor da bancada é no Dekton Danae",
+   "x": 429627.8634521056,
+   "y": 36479.98356578627,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2210.3,
+    1479.9
+   ]
+  },
+  {
+   "id": 3458764689930596142,
+   "text": "Representar a churrasqueira",
+   "x": 420084.06008357095,
+   "y": 36572.567534605274,
+   "w": 642.9631270750382,
+   "h": 736.6612712216519,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1471.6,
+    1487.0
+   ]
+  },
+  {
+   "id": 3458764689930956118,
+   "text": "Melhorar representação da porta. Encostar na parede.",
+   "x": 428045.41030838387,
+   "y": 36635.96630809025,
+   "w": 1197.56800533702,
+   "h": 780.1300149052587,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2063.4,
+     1365.2
+    ],
+    [
+     2008.4,
+     1499.0
+    ],
+    [
+     1865.4,
+     1508.8
+    ]
+   ],
+   "no_post_it": [
+    2087.8,
+    1492.0
+   ]
+  },
+  {
+   "id": 3458764689930875946,
+   "text": "Cor da bancada é no marrom tabaco",
+   "x": 424773.50718623097,
+   "y": 36942.431768638206,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1834.6,
+    1515.7
+   ]
+  },
+  {
+   "id": 3458764689931369331,
+   "text": "Cor da bancada é no marrom tabaco",
+   "x": 438738.2427892162,
+   "y": 37427.28168358976,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2915.3,
+    1553.3
+   ]
+  },
+  {
+   "id": 3458764689930956797,
+   "text": "Não precisa representar as portas abertas.",
+   "x": 428045.41030838387,
+   "y": 38071.12485913999,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2087.8,
+    1603.1
+   ]
+  },
+  {
+   "id": 3458764689930596564,
+   "text": "Cor da bancada é no Dekton Danae",
+   "x": 423750.41468077834,
+   "y": 38238.6392216265,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1755.4,
+    1616.0
+   ]
+  },
+  {
+   "id": 3458764689930466392,
+   "text": "tirar as plantas coloridas e colocar com o espaçamento igual entre elas",
+   "x": 417760.2200153518,
+   "y": 39093.07161671231,
+   "w": 642.9631270750382,
+   "h": 736.6612712216519,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1291.8,
+    1682.1
+   ]
+  },
+  {
+   "id": 3458764689455193292,
+   "text": "Geral: Não precisa representar os armários inferiores ou superiores.",
+   "x": 416207.41697766713,
+   "y": 39908.368382108645,
+   "w": 1636.5850607198377,
+   "h": 1066.1182681260657,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1415.7,
+     1488.9
+    ],
+    [
+     1132.1,
+     1497.8
+    ]
+   ],
+   "no_post_it": [
+    1171.6,
+    1745.2
+   ]
+  }
+ ],
+ "C_Subsolo": [
+  {
+   "id": 3458764689535001663,
+   "text": "Colocar a seta em todas as escadas e a descrição.",
+   "x": 362453.72296480456,
+   "y": 47685.46766843605,
+   "w": 5080.180142929549,
+   "h": 3309.374493108392,
+   "cor": "ROSA",
+   "fora": 240,
+   "alvos": [],
+   "no_post_it": [
+    342.1,
+    208.4
+   ]
+  },
+  {
+   "id": 3458764689933177815,
+   "text": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "x": 367712.2399015825,
+   "y": 47685.46766843605,
+   "w": 5080.180142929556,
+   "h": 3309.3744931083966,
+   "cor": "ROSA",
+   "fora": 240,
+   "alvos": [],
+   "no_post_it": [
+    623.9,
+    208.4
+   ]
+  },
+  {
+   "id": 3458764689933297186,
+   "text": "Melhorar representação das portas de giro. Encostar nas paredes.",
+   "x": 372919.3478868564,
+   "y": 47685.46766843606,
+   "w": 5080.180142929577,
+   "h": 3309.37449310841,
+   "cor": "ROSA",
+   "fora": 240,
+   "alvos": [],
+   "no_post_it": [
+    902.9,
+    208.4
+   ]
+  },
+  {
+   "id": 3458764689934290745,
+   "text": "Tem um pilar aqui",
+   "x": 368203.06518505444,
+   "y": 51033.82860154182,
+   "w": 1325.4424529597823,
+   "h": 863.4310836423724,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     650.1,
+     334.3
+    ]
+   ],
+   "no_post_it": [
+    650.2,
+    387.8
+   ]
+  },
+  {
+   "id": 3458764689933297699,
+   "text": "Representar um filete entre os dois pisos",
+   "x": 368705.7995192923,
+   "y": 54150.391250601664,
+   "w": 1637.4614500483185,
+   "h": 1876.0864854824956,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     617.2,
+     465.8
+    ]
+   ],
+   "no_post_it": [
+    677.1,
+    554.8
+   ]
+  },
+  {
+   "id": 3458764689933390810,
+   "text": "Colocar um piso com menos manchas cinzas.",
+   "x": 371686.84931542136,
+   "y": 54883.36654183859,
+   "w": 1804.908960950514,
+   "h": 2067.935894958378,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    836.9,
+    594.1
+   ]
+  },
+  {
+   "id": 3458764689535165472,
+   "text": "Trocar essa representação para uma escala de plantinhas menores",
+   "x": 367140.08601659886,
+   "y": 60030.9705828579,
+   "w": 1637.4614500483185,
+   "h": 1876.0864854824956,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     654.8,
+     827.9
+    ]
+   ],
+   "no_post_it": [
+    593.2,
+    869.9
+   ]
+  }
+ ],
+ "C_Terreo": [
+  {
+   "id": 3458764689465100699,
+   "text": "Colocar a seta em todas as escadas e a descrição",
+   "x": 395236.31944365747,
+   "y": 48016.77809055235,
+   "w": 5577.236664447444,
+   "h": 3633.1713128400493,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    337.4,
+    118.6
+   ]
+  },
+  {
+   "id": 3458764689536476944,
+   "text": "Tirar o contorno dos mobiliários",
+   "x": 399954.89334518235,
+   "y": 48016.77809055235,
+   "w": 3109.790947228285,
+   "h": 3562.9765626535122,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    645.0,
+    118.6
+   ]
+  },
+  {
+   "id": 3458764689933975052,
+   "text": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "x": 404480.73841634893,
+   "y": 48016.77809055235,
+   "w": 5469.481565476888,
+   "h": 3562.9765626535154,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    939.9,
+    118.6
+   ]
+  },
+  {
+   "id": 3458764689935734246,
+   "text": "Representar guarda-corpo das varandas",
+   "x": 421176.2772464529,
+   "y": 49655.75945320904,
+   "w": 837.1152938101798,
+   "h": 959.1069697925677,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2028.0,
+    225.4
+   ]
+  },
+  {
+   "id": 3458764689935734542,
+   "text": "Representar guarda-corpo das varandas",
+   "x": 413662.7931713447,
+   "y": 49729.50288208209,
+   "w": 837.1152938101798,
+   "h": 959.1069697925677,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1538.3,
+    230.2
+   ]
+  },
+  {
+   "id": 3458764689935142936,
+   "text": "Representar um filete entre os dois pisos",
+   "x": 435005.2990293882,
+   "y": 50614.849603433555,
+   "w": 1637.4614500483185,
+   "h": 1876.0864854824956,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     3025.6,
+     354.0
+    ]
+   ],
+   "no_post_it": [
+    2929.2,
+    287.9
+   ]
+  },
+  {
+   "id": 3458764689935358611,
+   "text": "Cor da bancada é no Dekton Danae",
+   "x": 423091.9076293652,
+   "y": 50791.702815571385,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2152.8,
+    299.4
+   ]
+  },
+  {
+   "id": 3458764689935358205,
+   "text": "Colocar duas máquinas de lavar roupa",
+   "x": 429926.42545959,
+   "y": 51122.79123593753,
+   "w": 923.237210593328,
+   "h": 1057.7793166596923,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2598.2,
+    321.0
+   ]
+  },
+  {
+   "id": 3458764689989407300,
+   "text": "OBS GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
+   "x": 442248.81275949307,
+   "y": 52239.529658140425,
+   "w": 4656.406761024874,
+   "h": 3033.316404324775,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    3401.3,
+    393.8
+   ]
+  },
+  {
+   "id": 3458764689935358358,
+   "text": "Cor da bancada é marrom tabaco",
+   "x": 429358.03711537394,
+   "y": 53083.5682123006,
+   "w": 923.237210593328,
+   "h": 1057.7793166596923,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2561.2,
+    448.8
+   ]
+  },
+  {
+   "id": 3458764689935358559,
+   "text": "Cor da ilha é no Dekton Danae",
+   "x": 424460.8310816629,
+   "y": 54073.51073749075,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2242.0,
+    513.3
+   ]
+  },
+  {
+   "id": 3458764689988968552,
+   "text": "Representar as claraboias apenas com as linhas de fora, sem o X no meio para ficar mais discreto. Usar um tom cinza e as linhas mais fininhas. Padronizar para as outras plantas que tiverem claraboia.",
+   "x": 400288.6540594721,
+   "y": 54521.14400422662,
+   "w": 1636.5850607198377,
+   "h": 1066.1182681260657,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     720.0,
+     289.5
+    ],
+    [
+     814.6,
+     375.0
+    ],
+    [
+     953.1,
+     452.8
+    ],
+    [
+     948.2,
+     879.2
+    ]
+   ],
+   "no_post_it": [
+    666.7,
+    542.5
+   ]
+  },
+  {
+   "id": 3458764689935513201,
+   "text": "Colocar uma cama e um guarda-roupa aqui. E o nome do ambiente mais pra cima.",
+   "x": 428319.98653709306,
+   "y": 54895.76086119925,
+   "w": 1152.8639459684407,
+   "h": 1320.8692446271582,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2493.5,
+    566.9
+   ]
+  },
+  {
+   "id": 3458764689935629855,
+   "text": "Seguir essa cor",
+   "x": 422934.0001218754,
+   "y": 55352.33294671521,
+   "w": 518.6191794038918,
+   "h": 594.196848764258,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2142.5,
+    596.7
+   ]
+  },
+  {
+   "id": 3458764689935358837,
+   "text": "Cor da bancada é no Dekton Danae",
+   "x": 426555.74821808777,
+   "y": 55420.25407660799,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2378.6,
+    601.1
+   ]
+  },
+  {
+   "id": 3458764689935629585,
+   "text": "Representar armário e prateleiras na mesma cor.",
+   "x": 422542.2880079286,
+   "y": 57057.409003348,
+   "w": 714.8041227895712,
+   "h": 818.971557768956,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2138.1,
+     613.3
+    ]
+   ],
+   "no_post_it": [
+    2117.0,
+    707.8
+   ]
+  },
+  {
+   "id": 3458764689535559434,
+   "text": "Geral: Não precisa representar os armários inferiores ou superiores.",
+   "x": 414181.72680933576,
+   "y": 59313.39491720236,
+   "w": 1636.5850607198377,
+   "h": 1066.1182681260657,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1432.7,
+     966.3
+    ]
+   ],
+   "no_post_it": [
+    1572.1,
+    854.8
+   ]
+  },
+  {
+   "id": 3458764689934629671,
+   "text": "Isso aqui é uma janela, representar ela fechada.",
+   "x": 430254.8246039376,
+   "y": 59603.240413191816,
+   "w": 778.3552796569406,
+   "h": 891.7839385014195,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2619.6,
+    873.7
+   ]
+  },
+  {
+   "id": 3458764689934957004,
+   "text": "Representar a churrasqueira",
+   "x": 411310.6999225911,
+   "y": 60884.130097152054,
+   "w": 778.3552796569406,
+   "h": 891.7839385014195,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1385.0,
+    957.1
+   ]
+  },
+  {
+   "id": 3458764689934957361,
+   "text": "Alinhar as geladeiras",
+   "x": 413702.68257289316,
+   "y": 61708.982487537345,
+   "w": 778.3552796569406,
+   "h": 891.7839385014195,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1540.9,
+    1010.9
+   ]
+  },
+  {
+   "id": 3458764689934957539,
+   "text": "Acrescentar uma 5/6 banquetas",
+   "x": 410830.9868977593,
+   "y": 63984.51620554071,
+   "w": 778.3552796569406,
+   "h": 891.7839385014195,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1353.7,
+    1159.2
+   ]
+  },
+  {
+   "id": 3458764689934092394,
+   "text": "Representação da planta está errada",
+   "x": 427468.71997370536,
+   "y": 64903.915314058846,
+   "w": 778.3552796569406,
+   "h": 891.7839385014195,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2395.7,
+     1219.0
+    ]
+   ],
+   "no_post_it": [
+    2438.1,
+    1219.1
+   ]
+  },
+  {
+   "id": 3458764689535164940,
+   "text": "Trocar essa representação do jardim de inverno",
+   "x": 421429.37852591707,
+   "y": 65538.7421155339,
+   "w": 1637.4614500483185,
+   "h": 1876.0864854824956,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1947.5,
+     1105.4
+    ],
+    [
+     2330.9,
+     944.5
+    ],
+    [
+     1933.5,
+     855.0
+    ],
+    [
+     1179.4,
+     915.6
+    ]
+   ],
+   "no_post_it": [
+    2044.5,
+    1260.5
+   ]
+  },
+  {
+   "id": 3458764689465030916,
+   "text": "Centralizar a seta com a abertura da porta, usando este modelo de seta.",
+   "x": 433943.73632573773,
+   "y": 66541.52155380145,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2860.0,
+    1325.9
+   ]
+  },
+  {
+   "id": 3458764689934957735,
+   "text": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
+   "x": 401749.7036356049,
+   "y": 69822.00911906123,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    761.9,
+    1539.6
+   ]
+  },
+  {
+   "id": 3458764689935057997,
+   "text": "Representar demarcação com piso.",
+   "x": 399749.37605382013,
+   "y": 71729.97185007541,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     529.4,
+     1716.5
+    ]
+   ],
+   "no_post_it": [
+    631.5,
+    1664.0
+   ]
+  },
+  {
+   "id": 3458764689535559811,
+   "text": "Pode deixar a cortina ultrapassar um pouco as laterais da janela.",
+   "x": 422959.39944796497,
+   "y": 72147.5236591295,
+   "w": 1637.4614500483185,
+   "h": 1876.0864854824956,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2025.2,
+     1598.3
+    ]
+   ],
+   "no_post_it": [
+    2144.2,
+    1691.2
+   ]
+  }
+ ],
+ "D_Subsolo": [
+  {
+   "id": 3458764689986118434,
+   "text": "Deixar o tamanho das letras padronizadas.",
+   "x": 377264.4305341379,
+   "y": 80649.676630678,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 840,
+   "alvos": [
+    [
+     990.6,
+     1088.4
+    ],
+    [
+     883.4,
+     1078.8
+    ]
+   ],
+   "no_post_it": [
+    940.1,
+    952.9
+   ]
+  },
+  {
+   "id": 3458764689535001728,
+   "text": "Colocar a seta em todas as escadas e a descrição",
+   "x": 362771.85152311134,
+   "y": 81866.78213700374,
+   "w": 5080.180142929545,
+   "h": 3309.3744931083893,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    469.2,
+    992.4
+   ]
+  },
+  {
+   "id": 3458764689985633263,
+   "text": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "x": 367852.0316660409,
+   "y": 81866.78213700374,
+   "w": 5080.180142929556,
+   "h": 3309.3744931083966,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    634.3,
+    992.4
+   ]
+  },
+  {
+   "id": 3458764689986755762,
+   "text": "Lembrar de usar para o piso marrom tabaco a referência colocada lá em cima para dar destaque para as bancadas e o marrom do piso ficar mais sóbrio.",
+   "x": 372407.15546011325,
+   "y": 83699.43514020994,
+   "w": 2074.2141299182767,
+   "h": 2376.48654081089,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     840.7,
+     1059.7
+    ]
+   ],
+   "no_post_it": [
+    782.3,
+    1052.0
+   ]
+  },
+  {
+   "id": 3458764689985633425,
+   "text": "Melhorar representação das portas de giro. Encostar nas paredes.",
+   "x": 362771.8515231113,
+   "y": 84821.54043225046,
+   "w": 5080.180142929577,
+   "h": 3309.37449310841,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    469.2,
+    1088.4
+   ]
+  },
+  {
+   "id": 3458764689985633613,
+   "text": "Demarcar melhor o perímetro da casa",
+   "x": 368439.20517405425,
+   "y": 90305.37268078832,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     551.7,
+     1234.0
+    ]
+   ],
+   "no_post_it": [
+    653.3,
+    1266.5
+   ]
+  },
+  {
+   "id": 3458764689985812668,
+   "text": "Não deixar os degraus cortados branco. Deixar transparente mas na mesma cor da escada. Exemplo casa C",
+   "x": 380230.5212474714,
+   "y": 90922.91068255893,
+   "w": 1836.4586366262322,
+   "h": 2104.083262064226,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1036.4,
+    1286.6
+   ]
+  },
+  {
+   "id": 3458764689536091234,
+   "text": "usar o mesmo bloco de bicicleta usado na casa A",
+   "x": 373391.37567380536,
+   "y": 95623.46731872893,
+   "w": 1836.4586366262322,
+   "h": 2104.083262064226,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     834.0,
+     1513.1
+    ]
+   ],
+   "no_post_it": [
+    814.2,
+    1439.2
+   ]
+  },
+  {
+   "id": 3458764689535908912,
+   "text": "Tirar o contorno dos blocos.",
+   "x": 380322.26815058704,
+   "y": 95867.72213339333,
+   "w": 3229.9523759757917,
+   "h": 2104.08326206423,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1150.6,
+     1474.9
+    ],
+    [
+     1392.3,
+     1468.3
+    ]
+   ],
+   "no_post_it": [
+    1039.4,
+    1447.2
+   ]
+  },
+  {
+   "id": 3458764689990280938,
+   "text": "Diminuir a escala da textura",
+   "x": 368439.20517405425,
+   "y": 96755.97635002562,
+   "w": 1836.4586366262322,
+   "h": 2104.083262064226,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    653.3,
+    1476.0
+   ]
+  },
+  {
+   "id": 3458764689986654849,
+   "text": "Isso aqui não existe",
+   "x": 388494.15435327415,
+   "y": 99998.67738295818,
+   "w": 1549.644094940408,
+   "h": 1775.4716263638845,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1237.3,
+     1590.6
+    ]
+   ],
+   "no_post_it": [
+    1304.8,
+    1581.4
+   ]
+  },
+  {
+   "id": 3458764689986409267,
+   "text": "Colocar soleira aqui",
+   "x": 379609.0200012586,
+   "y": 100937.12143855488,
+   "w": 1549.644094940408,
+   "h": 1775.4716263638845,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     935.8,
+     1632.0
+    ],
+    [
+     1083.5,
+     1631.7
+    ]
+   ],
+   "no_post_it": [
+    1016.2,
+    1611.8
+   ]
+  },
+  {
+   "id": 3458764689986755081,
+   "text": "A cuba não é assim. Está parecendo uma peça de sobrepor. Ela é esculpida no travertino.",
+   "x": 383734.60008281056,
+   "y": 103498.63265868863,
+   "w": 1549.644094940408,
+   "h": 1775.4716263638845,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1106.7,
+     1695.9
+    ]
+   ],
+   "no_post_it": [
+    1150.2,
+    1695.1
+   ]
+  },
+  {
+   "id": 3458764689986599029,
+   "text": "Os bancos da sauna é no mesmo material do piso. Lembrar de deixar ele em destaque em relação ao piso.",
+   "x": 374409.82752660534,
+   "y": 103585.62177956018,
+   "w": 1828.2631356181741,
+   "h": 2094.6934418137876,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    847.2,
+    1697.8
+   ]
+  }
+ ],
+ "D_Terreo": [
+  {
+   "id": 3458764689465100774,
+   "text": "Colocar a seta em todas as escadas e a descrição",
+   "x": 403631.4850838051,
+   "y": 80486.97582475794,
+   "w": 5469.481565476946,
+   "h": 3562.9765626535536,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    538.7,
+    171.1
+   ]
+  },
+  {
+   "id": 3458764689987097098,
+   "text": "Tirar o contorno dos mobiliários",
+   "x": 407921.1213401577,
+   "y": 80486.97582475794,
+   "w": 3109.7909472283145,
+   "h": 3562.9765626535464,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    814.9,
+    171.1
+   ]
+  },
+  {
+   "id": 3458764689987097284,
+   "text": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "x": 412210.75759651035,
+   "y": 80486.97582475794,
+   "w": 5469.481565476953,
+   "h": 3562.9765626535577,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1091.0,
+    171.1
+   ]
+  },
+  {
+   "id": 3458764689989407818,
+   "text": "Remover as linhas tracejadas do telhado. Fica um representação mais técnica e pode confundir quem olha a planta. Deixar apenas as que representam 'vazios', claraboias e pergolados.",
+   "x": 444897.0561212346,
+   "y": 80650.4017666936,
+   "w": 3289.6679835830264,
+   "h": 3769.0668354619597,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    3195.3,
+    181.6
+   ]
+  },
+  {
+   "id": 3458764689990158353,
+   "text": "Deixar o tom da vegetação dos jardins nas janelas diferente do terreno",
+   "x": 431475.1209676662,
+   "y": 82182.94631271521,
+   "w": 2182.449418090578,
+   "h": 1421.7099066418623,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2382.7,
+     370.4
+    ]
+   ],
+   "no_post_it": [
+    2331.2,
+    280.2
+   ]
+  },
+  {
+   "id": 3458764689990737994,
+   "text": "Piso do gás também é no marrom tabaco",
+   "x": 435546.16798738524,
+   "y": 82253.96685696834,
+   "w": 2182.449418090578,
+   "h": 1421.7099066418623,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2523.7,
+     385.8
+    ]
+   ],
+   "no_post_it": [
+    2593.3,
+    284.8
+   ]
+  },
+  {
+   "id": 3458764689989407346,
+   "text": "OBS GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
+   "x": 403631.4850838051,
+   "y": 83597.21685777543,
+   "w": 5469.481565476971,
+   "h": 3562.97656265357,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    538.7,
+    371.2
+   ]
+  },
+  {
+   "id": 3458764689992931933,
+   "text": "Demarcar melhor o perímetro da casa",
+   "x": 410916.5147808553,
+   "y": 84083.67140324571,
+   "w": 3109.790947228339,
+   "h": 2025.8066741944608,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     856.3,
+     381.2
+    ]
+   ],
+   "no_post_it": [
+    1007.7,
+    402.5
+   ]
+  },
+  {
+   "id": 3458764689991767137,
+   "text": "Cor da bancada no dekton danae",
+   "x": 425874.6822956308,
+   "y": 84158.08990594337,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1970.7,
+    407.3
+   ]
+  },
+  {
+   "id": 3458764689990905072,
+   "text": "Representar os armários e prateleiras sem textura. Com cor sólida e neutra como algumas casas acima.",
+   "x": 432210.5126554553,
+   "y": 85218.10042198248,
+   "w": 1718.1360759353365,
+   "h": 1119.2429294664478,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2287.5,
+     536.2
+    ],
+    [
+     2441.1,
+     412.3
+    ],
+    [
+     2126.0,
+     450.4
+    ],
+    [
+     2127.7,
+     583.4
+    ],
+    [
+     2039.1,
+     399.3
+    ],
+    [
+     1796.4,
+     636.5
+    ]
+   ],
+   "no_post_it": [
+    2378.6,
+    475.5
+   ]
+  },
+  {
+   "id": 3458764689992761584,
+   "text": "Representar a churrasqueira",
+   "x": 416996.9803381317,
+   "y": 85794.67995965417,
+   "w": 681.6172919753344,
+   "h": 780.9484551275187,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1399.2,
+    512.6
+   ]
+  },
+  {
+   "id": 3458764689991767074,
+   "text": "Cor da ilha é no Dekton Danae",
+   "x": 424278.321733367,
+   "y": 85962.86276624704,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1867.9,
+    523.4
+   ]
+  },
+  {
+   "id": 3458764689992761095,
+   "text": "Aqui tem que representar dois painéis pivotantes",
+   "x": 415202.1286700736,
+   "y": 86733.4399909162,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1283.6,
+    573.0
+   ]
+  },
+  {
+   "id": 3458764689538094619,
+   "text": "Geral: Não precisa representar os armários inferiores ou superiores com essa linha acima da bancada",
+   "x": 417474.464222504,
+   "y": 86793.02032469217,
+   "w": 1636.5850607198377,
+   "h": 1066.1182681260657,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1469.8,
+     507.2
+    ]
+   ],
+   "no_post_it": [
+    1429.9,
+    576.8
+   ]
+  },
+  {
+   "id": 3458764689991164719,
+   "text": "Bancada na pedra marrom tabaco",
+   "x": 432405.6084688714,
+   "y": 87097.439740253,
+   "w": 658.525311506254,
+   "h": 754.4913116755071,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2352.2,
+     556.5
+    ]
+   ],
+   "no_post_it": [
+    2391.1,
+    596.4
+   ]
+  },
+  {
+   "id": 3458764689989692788,
+   "text": "Tirar o X dos vãos do pergolado. Representar apenas a estrutura dele em si. Representar com uma cor cinza. Fazer os quadrados no pergolado de cima igual o debaixo, essa é a estrutura dele. Com linhas tracejadas.",
+   "x": 445912.527482738,
+   "y": 87267.75634988685,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     3135.6,
+     413.9
+    ],
+    [
+     3120.3,
+     855.5
+    ]
+   ],
+   "no_post_it": [
+    3260.7,
+    607.4
+   ]
+  },
+  {
+   "id": 3458764689987097758,
+   "text": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
+   "x": 410630.7132343353,
+   "y": 87483.89659508516,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    989.3,
+    621.3
+   ]
+  },
+  {
+   "id": 3458764689991373092,
+   "text": "Fazer uma linha contínua aqui pra linha tracejada não ficar voando.",
+   "x": 431084.68182552286,
+   "y": 88957.42207199572,
+   "w": 658.525311506254,
+   "h": 754.4913116755071,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2284.9,
+     657.7
+    ]
+   ],
+   "no_post_it": [
+    2306.1,
+    716.1
+   ]
+  },
+  {
+   "id": 3458764689991163969,
+   "text": "Cor do piso desse banheiro segue padrão dos outros dessa casa.",
+   "x": 433362.1866770016,
+   "y": 89099.25591419672,
+   "w": 1593.6651255576,
+   "h": 1038.1589960775223,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2374.9,
+     667.9
+    ]
+   ],
+   "no_post_it": [
+    2452.7,
+    725.2
+   ]
+  },
+  {
+   "id": 3458764689987097876,
+   "text": "Mostrar melhor a diferença de profundidade",
+   "x": 413442.27490877814,
+   "y": 89163.22827502913,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1083.5,
+     689.7
+    ]
+   ],
+   "no_post_it": [
+    1170.3,
+    729.3
+   ]
+  },
+  {
+   "id": 3458764689993252252,
+   "text": "Usar a mesma representação de planta da casa A",
+   "x": 430669.3786555779,
+   "y": 94008.31060961212,
+   "w": 903.1201897043403,
+   "h": 1034.730669611003,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2313.6,
+     952.7
+    ],
+    [
+     2316.9,
+     1144.8
+    ]
+   ],
+   "no_post_it": [
+    2279.3,
+    1041.0
+   ]
+  },
+  {
+   "id": 3458764689465100062,
+   "text": "Centralizar a seta com a abertura da porta, usando este modelo de seta.",
+   "x": 436111.9358032319,
+   "y": 94076.0024836724,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2629.7,
+    1045.4
+   ]
+  },
+  {
+   "id": 3458764689993431361,
+   "text": "Representar banco com estofamento",
+   "x": 417107.73178699624,
+   "y": 94509.63048851956,
+   "w": 903.1201897043403,
+   "h": 1034.730669611003,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1406.3,
+    1073.3
+   ]
+  },
+  {
+   "id": 3458764689538589881,
+   "text": "Trocar essa representação do jardim de inverno e melhorar a linha tracejada.",
+   "x": 427242.7499359571,
+   "y": 95460.10174149758,
+   "w": 1637.4614500483185,
+   "h": 1876.0864854824956,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2582.6,
+     1234.8
+    ],
+    [
+     1676.1,
+     1708.3
+    ]
+   ],
+   "no_post_it": [
+    2058.7,
+    1134.4
+   ]
+  },
+  {
+   "id": 3458764689994230272,
+   "text": "Não é pedra, é armário",
+   "x": 421477.1786861167,
+   "y": 97347.03985886318,
+   "w": 837.1152938101798,
+   "h": 959.1069697925677,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1737.7,
+     1287.4
+    ]
+   ],
+   "no_post_it": [
+    1687.6,
+    1255.8
+   ]
+  },
+  {
+   "id": 3458764689994230796,
+   "text": "Representar um painel aqui",
+   "x": 414019.73961128545,
+   "y": 97644.17923954947,
+   "w": 837.1152938101798,
+   "h": 959.1069697925677,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1264.4,
+     1305.8
+    ]
+   ],
+   "no_post_it": [
+    1207.5,
+    1274.9
+   ]
+  },
+  {
+   "id": 3458764689994049452,
+   "text": "Representar os armários e prateleiras sem textura. Com cor sólida e neutra como algumas casas acima.",
+   "x": 419699.0823839481,
+   "y": 98440.80275483741,
+   "w": 1472.3133308219349,
+   "h": 959.1069697925747,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1734.7,
+     1442.6
+    ],
+    [
+     1978.8,
+     1567.7
+    ],
+    [
+     2437.5,
+     1525.1
+    ],
+    [
+     2339.7,
+     1573.6
+    ],
+    [
+     1365.1,
+     1426.6
+    ],
+    [
+     1038.6,
+     1441.2
+    ],
+    [
+     894.7,
+     1343.1
+    ]
+   ],
+   "no_post_it": [
+    1573.1,
+    1326.2
+   ]
+  },
+  {
+   "id": 3458764689993430971,
+   "text": "Representar a janela",
+   "x": 435862.37803575856,
+   "y": 99168.75599010734,
+   "w": 903.1201897043403,
+   "h": 1034.730669611003,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2556.4,
+     1324.2
+    ]
+   ],
+   "no_post_it": [
+    2613.7,
+    1373.0
+   ]
+  },
+  {
+   "id": 3458764689993798661,
+   "text": "Melhorar a representação do painel (destacar mais em relação ao piso)",
+   "x": 434496.46667813236,
+   "y": 100090.9922042688,
+   "w": 903.1201897043403,
+   "h": 1034.730669611003,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2482.2,
+     1378.5
+    ]
+   ],
+   "no_post_it": [
+    2525.7,
+    1432.3
+   ]
+  },
+  {
+   "id": 3458764689538094908,
+   "text": "Geral: Não precisa representar os armários inferiores ou superiores com essa linha acima da bancada.",
+   "x": 420418.49787897797,
+   "y": 100388.11980892811,
+   "w": 1636.5850607198377,
+   "h": 1066.1182681260657,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1715.2,
+     1588.8
+    ]
+   ],
+   "no_post_it": [
+    1619.4,
+    1451.4
+   ]
+  },
+  {
+   "id": 3458764689994488902,
+   "text": "Padronizar a cor de representação do guarda-roupa",
+   "x": 428028.11264821864,
+   "y": 100441.62545809486,
+   "w": 837.1152938101798,
+   "h": 959.1069697925677,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2109.3,
+    1454.9
+   ]
+  },
+  {
+   "id": 3458764689540443546,
+   "text": "Colocar cortina",
+   "x": 432467.0994297677,
+   "y": 100547.46375971964,
+   "w": 837.1152938101798,
+   "h": 959.1069697925677,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2442.2,
+     1411.1
+    ]
+   ],
+   "no_post_it": [
+    2395.1,
+    1461.7
+   ]
+  },
+  {
+   "id": 3458764689536316621,
+   "text": "Continuar o guarda-roupa até o final",
+   "x": 413053.4153797286,
+   "y": 100789.35466820447,
+   "w": 837.1152938101798,
+   "h": 959.1069697925677,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1099.2,
+     1512.7
+    ]
+   ],
+   "no_post_it": [
+    1145.3,
+    1477.3
+   ]
+  },
+  {
+   "id": 3458764689994869962,
+   "text": "Nome e área do ambiente e metragem",
+   "x": 427040.097908595,
+   "y": 100827.65906825397,
+   "w": 763.2626391089665,
+   "h": 874.491867923841,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2045.7,
+    1479.7
+   ]
+  },
+  {
+   "id": 3458764689536477651,
+   "text": "Não tem soleira",
+   "x": 425722.2428063782,
+   "y": 100896.65428974424,
+   "w": 837.1152938101798,
+   "h": 959.1069697925677,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2000.7,
+     1485.4
+    ]
+   ],
+   "no_post_it": [
+    1960.9,
+    1484.2
+   ]
+  },
+  {
+   "id": 3458764689993431758,
+   "text": "A porta está \"entrando\" na parede e camuflando com a cor do piso",
+   "x": 429572.90192988317,
+   "y": 101087.91102397058,
+   "w": 837.1152938101798,
+   "h": 959.1069697925677,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2178.3,
+     1530.1
+    ]
+   ],
+   "no_post_it": [
+    2208.8,
+    1496.5
+   ]
+  },
+  {
+   "id": 3458764689536316176,
+   "text": "Nome e área do ambiente e metragem",
+   "x": 410629.3342624547,
+   "y": 102882.85685795706,
+   "w": 1023.2704239782818,
+   "h": 1172.3902345077802,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    989.2,
+    1611.9
+   ]
+  },
+  {
+   "id": 3458764689536315998,
+   "text": "Nome e área do ambiente e metragem",
+   "x": 404997.1886840196,
+   "y": 103135.01182400843,
+   "w": 1023.2704239782818,
+   "h": 1172.3902345077802,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    626.6,
+    1628.2
+   ]
+  },
+  {
+   "id": 3458764689994870821,
+   "text": "Representar as claraboias apenas com as linhas de fora, sem o X no meio para ficar mais discreto. Usar um tom cinza e as linhas mais fininhas. Padronizar para as outras plantas que tiverem claraboia.",
+   "x": 408419.1574754739,
+   "y": 105534.65561544543,
+   "w": 1636.5850607198377,
+   "h": 1066.1182681260657,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     911.8,
+     1709.1
+    ],
+    [
+     784.7,
+     1710.2
+    ]
+   ],
+   "no_post_it": [
+    846.9,
+    1782.5
+   ]
+  }
+ ],
+ "E_Subsolo": [
+  {
+   "id": 3458764689535001742,
+   "text": "Colocar a seta em todas as escadas e a descrição",
+   "x": 362975.0943109305,
+   "y": 113160.9926156593,
+   "w": 5489.615126362824,
+   "h": 3576.092139459211,
+   "cor": "ROSA",
+   "fora": 290,
+   "alvos": [],
+   "no_post_it": [
+    808.4,
+    235.3
+   ]
+  },
+  {
+   "id": 3458764689995430518,
+   "text": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "x": 368632.97162936954,
+   "y": 113160.9926156593,
+   "w": 5489.615126362828,
+   "h": 3576.0921394592137,
+   "cor": "ROSA",
+   "fora": 290,
+   "alvos": [],
+   "no_post_it": [
+    1006.7,
+    235.9
+   ]
+  },
+  {
+   "id": 3458764689995430633,
+   "text": "Melhorar representação das portas de giro. Encostar nas paredes.",
+   "x": 374244.1567194487,
+   "y": 113160.9926156593,
+   "w": 5489.615126362826,
+   "h": 3576.0921394592124,
+   "cor": "ROSA",
+   "fora": 290,
+   "alvos": [],
+   "no_post_it": [
+    1203.4,
+    236.4
+   ]
+  },
+  {
+   "id": 3458764689996620010,
+   "text": "Demarcar melhor o perímetro da casa",
+   "x": 365130.0603730367,
+   "y": 115994.11403062625,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    883.7,
+    334.8
+   ]
+  },
+  {
+   "id": 3458764689995430767,
+   "text": "Diminuir a escala da textura",
+   "x": 384808.70487804816,
+   "y": 117688.89729835856,
+   "w": 1836.4586366262322,
+   "h": 2104.083262064226,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1573.3,
+    396.3
+   ]
+  },
+  {
+   "id": 3458764689995065710,
+   "text": "Não deixar os degraus cortados branco. Deixar transparente mas na mesma cor da escada. Exemplo casa C",
+   "x": 373939.6674642094,
+   "y": 119148.76438792076,
+   "w": 1836.4586366262322,
+   "h": 2104.083262064226,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1192.1,
+    446.3
+   ]
+  },
+  {
+   "id": 3458764689995963272,
+   "text": "Essa borda é no mesmo revestimento da piscina.",
+   "x": 366661.9990452068,
+   "y": 119288.27093761103,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     946.6,
+     519.5
+    ]
+   ],
+   "no_post_it": [
+    937.0,
+    450.5
+   ]
+  },
+  {
+   "id": 3458764689996437289,
+   "text": "Colocar um fundo, para o piso não ser o fundo.",
+   "x": 389370.44431388564,
+   "y": 125703.32568622127,
+   "w": 1538.7801347102181,
+   "h": 1763.0244759493958,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1678.8,
+     645.6
+    ]
+   ],
+   "no_post_it": [
+    1732.4,
+    677.7
+   ]
+  },
+  {
+   "id": 3458764689995614692,
+   "text": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
+   "x": 365606.3398558121,
+   "y": 125855.18934896268,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    899.3,
+    680.6
+   ]
+  },
+  {
+   "id": 3458764689995614839,
+   "text": "Mostrar melhor a diferença de profundidade",
+   "x": 365606.3398558121,
+   "y": 127580.32639828182,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     933.6,
+     766.1
+    ]
+   ],
+   "no_post_it": [
+    899.1,
+    741.1
+   ]
+  },
+  {
+   "id": 3458764689995430836,
+   "text": "Essa textura de travertino está diferente das outras casas",
+   "x": 376291.4919813699,
+   "y": 130577.77876139816,
+   "w": 1698.1795366847055,
+   "h": 1945.6529365030797,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1273.4,
+    847.3
+   ]
+  }
+ ],
+ "E_Terreo": [
+  {
+   "id": 3458764689996620499,
+   "text": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "x": 410385.982744391,
+   "y": 114209.23043390563,
+   "w": 5469.481565476953,
+   "h": 3562.9765626535577,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    797.7,
+    110.8
+   ]
+  },
+  {
+   "id": 3458764689465100854,
+   "text": "Colocar a seta em todas as escadas",
+   "x": 404916.50117891404,
+   "y": 114209.23043390564,
+   "w": 5469.481565476953,
+   "h": 3562.976562653558,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    423.8,
+    110.8
+   ]
+  },
+  {
+   "id": 3458764689996957273,
+   "text": "Tirar todo o contorno tracejado",
+   "x": 424172.4673970607,
+   "y": 117283.59830095008,
+   "w": 2182.449418090578,
+   "h": 1421.7099066418623,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1740.3,
+    320.8
+   ]
+  },
+  {
+   "id": 3458764689996620774,
+   "text": "OBS GERAL: No terreno não precisa representar muitas árvores, pra não ficar muito poluído e acabar afetando um futuro projeto de paisagismo. Representar arbustos que são menores.",
+   "x": 404916.50117891404,
+   "y": 117460.63104308865,
+   "w": 5469.481565476971,
+   "h": 3562.97656265357,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    423.9,
+    333.1
+   ]
+  },
+  {
+   "id": 3458764689998575008,
+   "text": "Representar o guarda-copro",
+   "x": 411779.40119408077,
+   "y": 117667.04929331143,
+   "w": 2182.449418090578,
+   "h": 1421.7099066418623,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    893.0,
+    347.2
+   ]
+  },
+  {
+   "id": 3458764689997130368,
+   "text": "Cor do piso desse Banheiro é no mesmo cinza usado na casa D. A bancada é no marrom tabaco. Representar melhor a cuba e a torneira",
+   "x": 433486.30699917214,
+   "y": 118624.08710791054,
+   "w": 2182.449418090578,
+   "h": 1421.7099066418623,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2368.3,
+     522.1
+    ],
+    [
+     2412.8,
+     608.6
+    ]
+   ],
+   "no_post_it": [
+    2377.0,
+    412.4
+   ]
+  },
+  {
+   "id": 3458764689998092598,
+   "text": "Não deixar os degraus cortados branco. Deixar transparente mas na mesma cor da escada. Exemplo casa C",
+   "x": 418430.91434981173,
+   "y": 119149.95658020096,
+   "w": 1347.7053892995941,
+   "h": 1544.1046671372235,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1347.8,
+    448.5
+   ]
+  },
+  {
+   "id": 3458764689998387130,
+   "text": "Tirar a soleira",
+   "x": 419904.26159922156,
+   "y": 120265.4467838335,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1448.5,
+    524.7
+   ]
+  },
+  {
+   "id": 3458764689997906630,
+   "text": "Cor da bancada é no Dekton Danae",
+   "x": 425570.8301206968,
+   "y": 120376.65989963134,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1835.9,
+    532.3
+   ]
+  },
+  {
+   "id": 3458764689998387257,
+   "text": "Faltou a torneira lateral",
+   "x": 412437.15819368785,
+   "y": 120393.41704785638,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     985.8,
+     532.5
+    ]
+   ],
+   "no_post_it": [
+    938.0,
+    533.6
+   ]
+  },
+  {
+   "id": 3458764689998386968,
+   "text": "Tirar a soleira",
+   "x": 414740.04429794906,
+   "y": 120721.11301629874,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1095.5,
+    555.9
+   ]
+  },
+  {
+   "id": 3458764689998387512,
+   "text": "Essa bancada é no travertino",
+   "x": 419102.215303663,
+   "y": 120987.61389662058,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1393.7,
+    574.1
+   ]
+  },
+  {
+   "id": 3458764689998091936,
+   "text": "Cor da bancada é o marrom tabaco",
+   "x": 427236.4517886954,
+   "y": 121311.87764893775,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1949.8,
+    596.2
+   ]
+  },
+  {
+   "id": 3458764689998259774,
+   "text": "Aqui tem a churrasqueira",
+   "x": 415031.3047844432,
+   "y": 121816.72621352982,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1115.4,
+    630.8
+   ]
+  },
+  {
+   "id": 3458764689998092912,
+   "text": "Cor da bancada é o marrom tabaco",
+   "x": 416070.51897109183,
+   "y": 121816.72621352982,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1186.4,
+    630.8
+   ]
+  },
+  {
+   "id": 3458764689998259312,
+   "text": "Aqui é uma geladeira",
+   "x": 418353.300052519,
+   "y": 121816.72621352982,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1342.5,
+    630.8
+   ]
+  },
+  {
+   "id": 3458764689998259146,
+   "text": "Aqui é um armário",
+   "x": 419102.215303663,
+   "y": 121816.72621352982,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1393.7,
+    630.8
+   ]
+  },
+  {
+   "id": 3458764689997906613,
+   "text": "Cor da ilha é no Dekton Danae",
+   "x": 423621.5445446931,
+   "y": 122070.07343935565,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1702.6,
+    648.1
+   ]
+  },
+  {
+   "id": 3458764689997906051,
+   "text": "Representar os armários e prateleiras sem textura. Com cor sólida e neutra.",
+   "x": 428294.02080410667,
+   "y": 122465.12386702909,
+   "w": 1133.5377189857809,
+   "h": 738.4188569393086,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2066.4,
+     717.2
+    ],
+    [
+     1809.8,
+     780.4
+    ],
+    [
+     1611.6,
+     774.8
+    ],
+    [
+     1956.1,
+     928.0
+    ],
+    [
+     2258.5,
+     929.2
+    ]
+   ],
+   "no_post_it": [
+    2022.1,
+    675.0
+   ]
+  },
+  {
+   "id": 3458764689996957540,
+   "text": "Representar essas linhas na cor cinza ou preta sem ser tracejada",
+   "x": 438026.13143737474,
+   "y": 122492.63736752182,
+   "w": 2182.449418090578,
+   "h": 1421.7099066418623,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2780.1,
+     501.3
+    ],
+    [
+     2816.4,
+     891.4
+    ]
+   ],
+   "no_post_it": [
+    2687.4,
+    676.8
+   ]
+  },
+  {
+   "id": 3458764689998092101,
+   "text": "Cor da bancada é o marrom tabaco",
+   "x": 429777.03352206526,
+   "y": 123131.43171988084,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2123.5,
+    720.6
+   ]
+  },
+  {
+   "id": 3458764689998259020,
+   "text": "Cor da ilha é no Dekton Danae",
+   "x": 417019.53520218167,
+   "y": 123513.07459190983,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1251.3,
+    746.8
+   ]
+  },
+  {
+   "id": 3458764689998741018,
+   "text": "Aqui é parede",
+   "x": 409406.15503756946,
+   "y": 126808.17626540418,
+   "w": 782.1852649664736,
+   "h": 896.1720623736481,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    730.9,
+    972.2
+   ]
+  },
+  {
+   "id": 3458764689998741422,
+   "text": "Mostrar melhor a diferença de profundidade",
+   "x": 413834.4401034792,
+   "y": 127070.94518753828,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     967.4,
+     1049.4
+    ]
+   ],
+   "no_post_it": [
+    1033.6,
+    990.1
+   ]
+  },
+  {
+   "id": 3458764689998741287,
+   "text": "Deixar o tom de azul para a piscina mais sóbrio. Ver exemplo.",
+   "x": 411016.28723470314,
+   "y": 127160.25958275917,
+   "w": 1240.8783834286437,
+   "h": 1421.7099066418632,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    841.0,
+    996.2
+   ]
+  },
+  {
+   "id": 3458764689998914353,
+   "text": "Não deixar os degraus cortados branco. Deixar transparente mas na mesma cor da escada.",
+   "x": 427053.3992499639,
+   "y": 127260.88585205411,
+   "w": 1347.7053892995941,
+   "h": 1544.1046671372235,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1937.3,
+    1002.9
+   ]
+  },
+  {
+   "id": 3458764689998741835,
+   "text": "Mudar o amadeirado dessa mesa",
+   "x": 423421.15179301216,
+   "y": 128763.52620093062,
+   "w": 518.6191794038406,
+   "h": 594.1968487641992,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1689.0,
+    1105.7
+   ]
+  },
+  {
+   "id": 3458764689999086337,
+   "text": "Trocar essa representação do jardim de inverno. Diminuir tamanho e quantidade",
+   "x": 428808.53012514673,
+   "y": 128845.48184414225,
+   "w": 1418.3876144332514,
+   "h": 1625.0873170391021,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2057.3,
+    1111.2
+   ]
+  },
+  {
+   "id": 3458764689998914056,
+   "text": "Colocar textura do travertino igual da casa D",
+   "x": 425986.0559719011,
+   "y": 131183.8228982249,
+   "w": 1133.5377189857418,
+   "h": 1298.7266328077847,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1864.4,
+    1271.1
+   ]
+  },
+  {
+   "id": 3458764689998575475,
+   "text": "Tirar essa linha contornando a piscina",
+   "x": 412469.21982025396,
+   "y": 131276.60978625208,
+   "w": 782.1852649664736,
+   "h": 896.1720623736481,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     945.2,
+     1182.9
+    ]
+   ],
+   "no_post_it": [
+    940.3,
+    1277.6
+   ]
+  },
+  {
+   "id": 3458764689465152970,
+   "text": "Centralizar a seta com a abertura da porta, usando este modelo de seta.",
+   "x": 437947.8234462236,
+   "y": 133250.43347931094,
+   "w": 3905.8331269028813,
+   "h": 2544.371294096734,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2682.1,
+    1412.3
+   ]
+  },
+  {
+   "id": 3458764689999086021,
+   "text": "Deixar o tracejado mais fino e na cor mais cinza",
+   "x": 431781.5897872388,
+   "y": 133395.71421779649,
+   "w": 879.9336228574592,
+   "h": 1008.165155836687,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2260.6,
+    1422.3
+   ]
+  }
+ ],
+ "E_1Pavimento": [
+  {
+   "id": 3458764689999224534,
+   "text": "Colocar a seta em todas as escadas",
+   "x": 384001.38697888976,
+   "y": 147102.20102451014,
+   "w": 5469.481565476953,
+   "h": 3562.976562653558,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    462.3,
+    131.2
+   ]
+  },
+  {
+   "id": 3458764689999224664,
+   "text": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A e que cabem para essa casa",
+   "x": 389610.12145352695,
+   "y": 147102.20102451014,
+   "w": 5469.481565476953,
+   "h": 3562.9765626535577,
+   "cor": "ROSA",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    831.6,
+    131.2
+   ]
+  },
+  {
+   "id": 3458764690000281276,
+   "text": "As cubas ficaram um pouco apagadas",
+   "x": 404767.6233633078,
+   "y": 153195.773098621,
+   "w": 707.7506183499719,
+   "h": 810.8901556974552,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1880.6,
+     499.4
+    ],
+    [
+     1882.4,
+     563.1
+    ]
+   ],
+   "no_post_it": [
+    1829.6,
+    532.5
+   ]
+  },
+  {
+   "id": 3458764689999754181,
+   "text": "Essa planta está bonita",
+   "x": 395770.2928725513,
+   "y": 154767.31046228553,
+   "w": 782.1852649664736,
+   "h": 896.1720623736481,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1237.2,
+    636.0
+   ]
+  },
+  {
+   "id": 3458764690000436337,
+   "text": "As cubas ficaram um pouco apagadas",
+   "x": 412401.06318544067,
+   "y": 154864.1530848485,
+   "w": 707.7506183499719,
+   "h": 810.8901556974552,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2360.9,
+     591.7
+    ]
+   ],
+   "no_post_it": [
+    2332.2,
+    642.3
+   ]
+  },
+  {
+   "id": 3458764689999899317,
+   "text": "Deixar o tracejado mais fino e na cor mais cinza",
+   "x": 407600.4636914356,
+   "y": 157526.0082248517,
+   "w": 737.948124245665,
+   "h": 845.4883031558372,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2016.1,
+    817.6
+   ]
+  },
+  {
+   "id": 3458764690000281764,
+   "text": "Tirar esse tracejado e a soleira",
+   "x": 408987.0062519335,
+   "y": 157836.44641981737,
+   "w": 737.948124245665,
+   "h": 845.4883031558372,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2113.5,
+     792.7
+    ],
+    [
+     2069.3,
+     812.8
+    ]
+   ],
+   "no_post_it": [
+    2107.4,
+    838.1
+   ]
+  },
+  {
+   "id": 3458764689999899632,
+   "text": "Representar as claraboias apenas com as linhas de fora, sem o X no meio para ficar mais discreto. Usar um tom cinza e as linhas mais fininhas. Padronizar para as outras plantas que tiverem claraboia.",
+   "x": 404424.20213075203,
+   "y": 158131.49035188384,
+   "w": 1636.5850607198377,
+   "h": 1066.1182681260657,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1873.6,
+     804.0
+    ],
+    [
+     1734.4,
+     802.6
+    ]
+   ],
+   "no_post_it": [
+    1807.0,
+    857.5
+   ]
+  },
+  {
+   "id": 3458764690000436779,
+   "text": "As cubas ficaram um pouco apagadas",
+   "x": 412375.674373863,
+   "y": 160172.75352146092,
+   "w": 707.7506183499719,
+   "h": 810.8901556974552,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     2361.5,
+     947.1
+    ]
+   ],
+   "no_post_it": [
+    2330.5,
+    991.9
+   ]
+  },
+  {
+   "id": 3458764690000038978,
+   "text": "Não deixar os degraus cortados branco. Deixar transparente mas na mesma cor da escada.",
+   "x": 409026.5867046836,
+   "y": 160274.97206317395,
+   "w": 1270.9780566943964,
+   "h": 1456.1959644538813,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2110.0,
+    998.6
+   ]
+  },
+  {
+   "id": 3458764689999899852,
+   "text": "Deixar o tracejado mais fino e na cor mais cinza",
+   "x": 407335.2332167506,
+   "y": 161507.15262331924,
+   "w": 879.9336228574592,
+   "h": 1008.165155836687,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    1998.6,
+    1079.8
+   ]
+  },
+  {
+   "id": 3458764690000133484,
+   "text": "As cubas ficaram um pouco apagadas",
+   "x": 400826.5023230036,
+   "y": 163248.35946507045,
+   "w": 707.7506183499719,
+   "h": 810.8901556974552,
+   "cor": "",
+   "fora": 0,
+   "alvos": [
+    [
+     1522.2,
+     1171.2
+    ],
+    [
+     1521.7,
+     1219.1
+    ]
+   ],
+   "no_post_it": [
+    1570.1,
+    1194.4
+   ]
+  },
+  {
+   "id": 3458764689999899123,
+   "text": "Deixar o tracejado mais fino e na cor mais cinza",
+   "x": 411770.4607073307,
+   "y": 166789.12556395165,
+   "w": 879.9336228574592,
+   "h": 1008.165155836687,
+   "cor": "",
+   "fora": 0,
+   "alvos": [],
+   "no_post_it": [
+    2290.7,
+    1427.6
+   ]
+  }
+ ]
+}
