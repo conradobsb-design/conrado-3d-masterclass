@@ -4166,6 +4166,13 @@ do PDF) por baixo e a sombra de contato dos móveis (`SOMBRAS["movel"]`) só no 
 ao braço, `lateral_sofa_antes` até o braço, e a quina com o piso, `piso_quina`). Antes e depois em
 `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1911c_tapete_sofa_antes_depois.jpg`.
 
+E ("corrija esse contorno do tapete, tanto na vertical quanto na horizontal"): a peça `tapete-intimo-e` da biblioteca tem,
+em volta, um filete claro esverdeado com um sulco escuro logo dentro e os cantos arredondados, que na planta virava um
+contorno desenhado. Agora ela vai cortada `SALA_INTIMA["tapete_borda"]` px (da peça) para dentro, opaca, pousada 1 px
+maior e recortada a seco no retângulo do PDF: a textura até a borda reta, cantos vivos; o pontinho escuro do render no
+piso, à direita, sai com o piso refeito da poltrona antiga (`poltrona_antes` até 1350). Antes e depois em
+`POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1911d_contorno_tapete_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,

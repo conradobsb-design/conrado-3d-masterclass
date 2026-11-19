@@ -919,6 +919,11 @@ SUITES = {
                 "mesa_reparo": ((1703, 1434, 1711, 1484), -44)},
 }
 SALA_INTIMA = {"tapete": (1876, 1235, 2115, 1384),
+               # (usuário: "corrija esse contorno do tapete, tanto na vertical quanto na horizontal") a peça da
+               # biblioteca tem, em volta, um filete claro esverdeado com um sulco escuro logo dentro e os cantos
+               # arredondados, que na planta virava um contorno desenhado: a peça vai cortada `tapete_borda` px (da
+               # peça, ~3 px da final) para dentro, a textura até a borda reta e os cantos vivos do retângulo do PDF
+               "tapete_borda": 7,
                # (usuário: "ja corrija o contorno do tapete" e "o contorno do sofá com o tapete também") o sofá em L é o
                # do render (do 3D), mas não mais recortado nas caixas do PDF com 3 px de folga: a faixa da folga trazia
                # o tapete velho e a sombra escura do render em volta do estofado (e, ao lado do braço, a mesinha que
@@ -935,7 +940,7 @@ SALA_INTIMA = {"tapete": (1876, 1235, 2115, 1384),
                "sofa_limiar": 182, "sofa_mediana": 5,
                # a quina do sofá com o tapete e o piso (embaixo, à esquerda): o piso sob a borda do sofá refeito, sem os
                # pontinhos escuros do contorno do render
-               "piso_quina": (1854, 1337, 1876, 1347), "poltrona_antes": (2113, 1228, 2158, 1345), "poltrona": (2084, 1280, 2140, 1333),
+               "piso_quina": (1854, 1337, 1876, 1347), "poltrona_antes": (2113, 1228, 2158, 1350), "poltrona": (2084, 1280, 2140, 1333),
                "mesa": (1956, 1299, 2016, 1359), "lateral": (1997, 1314, 2039, 1356),
                # (usuário: "corrija a representação dessa mesa lateral, da sala íntima", a redonda do render junto ao
                # braço do sofá, borrada e com a sombra escura em volta): sai, com o piso de madeira (fora do sofá e do
@@ -1290,7 +1295,16 @@ def mobiliario(Q, img):
     out = limpar_piso(Q, out, s["poltrona_antes"], MADEIRA, nao_luz=[(1860, 1200, 2116, 1392)])
     out = limpar_piso(Q, out, s["lateral_sofa_antes"], MADEIRA, nao_luz=[(1860, 1200, 2070, 1340), (1876, 1235, 2116, 1392)])
     out = limpar_piso(Q, out, s["piso_quina"], MADEIRA, nao_luz=[(1845, 1190, 1924, 1339), (1876, 1235, 2116, 1392)])
-    out = sofa_sobre_tapete(out, img, s, pos(out, ler("sala-intima/tapete-intimo-e"), s["tapete"], (0, 1), None))
+    tapete = ler("sala-intima/tapete-intimo-e")
+    m = s["tapete_borda"]
+    tapete = np.ascontiguousarray(tapete[m:-m, m:-m])
+    tapete[..., 3] = 255
+    # pousado 1 px maior e recortado a seco no retângulo: as 4 bordas retas, sem a coluna meio tapete, meio piso
+    x0, y0, x1, y1 = s["tapete"]
+    com = pos(out, tapete, (x0, y0, x1 + 2, y1 + 2), (0, 1), None)
+    seco = np.zeros(out.shape[:2], bool)
+    seco[y0:y1 + 1, x0:x1 + 1] = True
+    out = sofa_sobre_tapete(out, img, s, np.where(seco[..., None], com, out))
     # (usuário: "represente as mesas redondas corretamente") no PDF, as duas mesas de centro são redondas, encaixadas: a
     # menor (0,7 m) por baixo da maior (1,0 m), à direita; a menor, que saía retangular (`mesa-lateral-metal-madeira`),
     # na mesma mesa redonda da biblioteca, em nogueira
