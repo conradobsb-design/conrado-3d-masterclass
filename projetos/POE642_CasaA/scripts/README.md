@@ -4532,3 +4532,7 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   `ANTES` (final, variantes, prancha e 12K A e B, pelo registro local): na Casa B Subsolo, a folha de madeira da porta
   do BH sauna (as folhas de madeira ficam sem contorno, como a da circulação ao lado) e o box do BH serviço (o vidro de
   correr volta ao vidro claro, sem a esquadria preta). As caixas também entram nas zonas de fora (`EXTRA`).
+- **12K da Casa D Subsolo refeito (19/11):** o 12K do Subsolo da D é um recorte a 10,5× da final, e o registro da planta
+  inteira errava ~1 px da final ali (10 px do 12K): o contorno da primeira passada saiu como um retângulo preto acima de
+  cada janela (na parede, no móvel). Os 12K A e B voltam ao de 7060e76 e o contorno das 12 esquadrias é desenhado de
+  novo pelo registro local, encostado na folha (`doze_k_local(..., na_folha=True)`).
