@@ -78,7 +78,8 @@ EXTRA = {
                            (1445, 380, 1515, 394)]},                        # o box do BH serviço
     # o elevador e os boxes (a ducha em T junto à sauna e o box do vestiário)
     "D_Subsolo": {"fora": [(1420, 1225, 1490, 1340), (1195, 1655, 1265, 1685), (945, 1650, 1030, 1720)]},
-    "D_Terreo": {"fora": [(1420, 1225, 1485, 1335)]},                        # o elevador
+    "D_Terreo": {"fora": [(1420, 1225, 1485, 1335), (2046, 1538, 2057, 1602), (2449, 1210, 2518, 1221),
+                          (2368, 764, 2444, 775)]},                        # o elevador
     # o bronze das esquadrias (V 139) não é madeira; as portas do elevador ficam (a cabine da biblioteca)
     "E_Subsolo": {"madeira_vmin": 150, "fora": [(1935, 780, 2085, 835)]},
     "E_Terreo": {"fora": [(1940, 790, 2065, 840)]},                          # o elevador
@@ -559,6 +560,9 @@ EXTRAS_FEITAS = {"A_Terreo": 2, "A_1Pavimento": 3}                    # quantas 
 DESFAZER = {
     "B_Subsolo": [(1228, 607, 1300, 621),       # a folha de madeira da porta do BH sauna (aberta, junto à parede)
                   (1447, 383, 1513, 391)],      # o box do BH serviço (o vidro de correr entre a circulação e o chuveiro)
+    "D_Terreo": [(2046, 1538, 2057, 1602),      # as folhas de madeira de 3 portas (a do lavabo e mais duas), como as
+                 (2449, 1210, 2518, 1221),      # outras folhas da casa, sem contorno
+                 (2368, 764, 2444, 775)],
 }
 
 
