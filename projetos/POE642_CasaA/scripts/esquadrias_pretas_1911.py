@@ -85,7 +85,8 @@ EXTRA = {
     "E_Terreo": {"fora": [(1940, 790, 2065, 840),                           # o elevador
                           (2386, 832, 2449, 841), (2293, 1210, 2362, 1220), (2390, 619, 2442, 629)]},  # folhas de madeira
     # as portas das suítes nas duas fachadas (o padrão de 14/11: ripado de nogueira por fora, vidro claro por dentro)
-    "E_1Pavimento": {"fora": [(1390, 580, 1425, 1480), (2470, 580, 2590, 1160), (1940, 790, 2065, 840)]},
+    "E_1Pavimento": {"fora": [(1390, 580, 1425, 1480), (2470, 580, 2590, 1160), (1940, 790, 2065, 840),
+                              (2348, 1031, 2417, 1042), (1553, 1115, 1617, 1126), (1747, 712, 1758, 776)]},
 }
 # as plantas que já estavam no padrão (o contorno preto fino de `regras_terreo_casab_1311.esquadrias`, com as exceções
 # aprovadas pelo usuário): ficam como estão
@@ -567,6 +568,9 @@ DESFAZER = {
     "E_Terreo": [(2386, 832, 2449, 841),        # as folhas de madeira de 3 portas, como as outras folhas da casa
                  (2293, 1210, 2362, 1220),
                  (2390, 619, 2442, 629)],
+    "E_1Pavimento": [(2348, 1031, 2417, 1042),  # as folhas de madeira de 3 portas, como as outras folhas da casa
+                     (1553, 1115, 1617, 1126),
+                     (1747, 712, 1758, 776)],
 }
 
 
