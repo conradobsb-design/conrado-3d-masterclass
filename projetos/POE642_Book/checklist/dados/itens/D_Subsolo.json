@@ -1,0 +1,300 @@
+{
+ "casa": "D",
+ "pav": "Subsolo",
+ "contagem": "15 itens, 18 notas do cliente: 14 textos do quadro \"Revisão das Plantas 2\" (\"Tirar o contorno dos blocos.\" em 4 post-its) e a nota geral \"Tirar o contorno dos mobiliários\", achadas na proposta de 15/11 e no roteiro do Subsolo, cruzadas com o levantamento.",
+ "itens": [
+  {
+   "fala": "Fazer as mesmas mudanças que foram apontadas no subsolo da casa A",
+   "como": "Foram aplicadas aqui as mudanças do Subsolo da Casa A que cabem nesta planta. O fundo ficou branco, sem hachura, sem o contorno do lote e sem a projeção do Térreo, e o Bege Bahia, a escada e as portas seguem o mesmo padrão.",
+   "conferir": "fora da planta, branco puro: sem hachura, sem o tracejado do lote e da projeção do Térreo.",
+   "pontos": [
+    [
+     630,
+     1060
+    ],
+    [
+     520,
+     1500
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:7; POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:310"
+  },
+  {
+   "fala": "Deixar o tamanho das letras padronizadas.",
+   "como": "Os nomes do DCE 1 e do WC DCE foram escritos no mesmo tamanho, cada um centrado no seu ambiente.",
+   "conferir": "DCE 1 e WC DCE no mesmo corpo, no centro do piso livre.",
+   "pontos": [
+    [
+     897,
+     1090
+    ],
+    [
+     976,
+     1092
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:186; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:21"
+  },
+  {
+   "fala": "Melhorar representação das portas de giro. Encostar nas paredes.",
+   "como": "As portas de giro foram encostadas na ponta da parede, quina com quina, com a soleira no vão. A folha de vidro do vestiário também passou a encostar na parede.",
+   "conferir": "WC DCE, DCE 1, depósito, sauna e vestiário: folha vértice com vértice na parede, sem arco, sem mancha, soleira no vão.",
+   "pontos": [
+    [
+     925,
+     1083
+    ],
+    [
+     951,
+     1154
+    ],
+    [
+     1110,
+     1162
+    ],
+    [
+     1124,
+     1609
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:195; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:11"
+  },
+  {
+   "fala": "Tirar o contorno dos mobiliários",
+   "como": "Nesta planta, as peças (aparelhos da academia, cama, louças e bancadas) ficaram sem o traço de contorno por cima. O mesmo vale para todas as plantas.",
+   "conferir": "nenhum traço do PDF por cima das peças (aparelhos, cama do DCE 1, louças).",
+   "pontos": [
+    [
+     1030,
+     1090
+    ],
+    [
+     1196,
+     1525
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:310; POE642_CasaA/scripts/biblioteca_terreo_casad_1511.py:304"
+  },
+  {
+   "fala": "Lembrar de usar para o piso marrom tabaco a referência colocada lá em cima para dar destaque para as bancadas e o marrom do piso ficar mais sóbrio.",
+   "como": "O piso marrom tabaco do DCE 1, do WC DCE e do depósito foi trocado pela amostra de referência, mais sóbria. A bancada do WC DCE, em granito marrom tabaco mais escuro, ficou em destaque.",
+   "conferir": "granito do piso uniforme, sem pintas, mais claro que a bancada do WC DCE.",
+   "pontos": [
+    [
+     960,
+     1125
+    ],
+    [
+     1217,
+     1240
+    ],
+    [
+     858,
+     1072
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:187; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:21"
+  },
+  {
+   "fala": "Demarcar melhor o perímetro da casa",
+   "como": "O contorno da casa foi marcado no pátio com uma linha contínua, no cinza das paredes.",
+   "conferir": "linha fina contínua em volta da pegada, no pátio, sem falha.",
+   "pontos": [
+    [
+     676,
+     1202
+    ],
+    [
+     559,
+     1466
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:194; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:8"
+  },
+  {
+   "fala": "Colocar a seta em todas as escadas e a descrição",
+   "como": "A escada recebeu o triângulo da seta no primeiro degrau, a letra S logo abaixo e a descrição \"SOBE PARA O TÉRREO\" ao lado. Todas as escadas das casas seguem o mesmo padrão.",
+   "conferir": "triângulo cheio no 1º degrau, S abaixo, descrição em duas linhas no pátio; na opção B, na Kalam.",
+   "pontos": [
+    [
+     848,
+     1267
+    ],
+    [
+     760,
+     1262
+    ]
+   ],
+   "geral": true,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:195; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:13"
+  },
+  {
+   "fala": "Não deixar os degraus cortados branco. Deixar transparente mas na mesma cor da escada. Exemplo casa C",
+   "como": "Os degraus depois do corte deixaram de ser brancos: seguem na cor da escada, em transparência, como na Casa C, com a divisão em diagonal marcada só pela sombra.",
+   "conferir": "degraus de cima no tom da escada, véu leve; a diagonal sem linha escura.",
+   "pontos": [
+    [
+     1046,
+     1290
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:193; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:12"
+  },
+  {
+   "fala": "Diminuir a escala da textura",
+   "como": "O Bege Bahia do pátio e da circulação ficou na escala menor e com as manchas reduzidas, igual ao das Casas A, B e C.",
+   "conferir": "pátio e circulação com o grão fino do Subsolo da Casa A, manchas suaves, sem emenda.",
+   "pontos": [
+    [
+     656,
+     1420
+    ],
+    [
+     1021,
+     1640
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:194; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:9"
+  },
+  {
+   "fala": "usar o mesmo bloco de bicicleta usado na casa A",
+   "como": "As duas bicicletas foram trocadas pelo mesmo modelo usado na Casa A, no tamanho dela.",
+   "conferir": "2 bicicletas da Casa A, no sentido do símbolo do PDF, vinílico refeito por baixo.",
+   "pontos": [
+    [
+     873,
+     1505
+    ],
+    [
+     873,
+     1553
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:168; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:15"
+  },
+  {
+   "fala": "Tirar o contorno dos blocos.",
+   "como": "Os aparelhos da academia (2 esteiras, 2 bicicletas e 2 supinos) foram trocados por peças sem o traço de contorno, nos tamanhos da Casa A.",
+   "conferir": "esteiras, bicicletas e supinos sem o traço do PDF nem halo; vinílico contínuo em volta.",
+   "pontos": [
+    [
+     1166,
+     1525
+    ],
+    [
+     1226,
+     1525
+    ],
+    [
+     1439,
+     1505
+    ],
+    [
+     1439,
+     1666
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "4 post-its com o mesmo texto, nos aparelhos da academia.",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:168; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:15"
+  },
+  {
+   "fala": "Colocar soleira aqui",
+   "como": "As portas da sauna e do vestiário receberam a soleira no vão.",
+   "conferir": "soleiras nítidas nos vãos das portas da sauna e do vestiário; o vão entre a academia e a antessala só no vinílico.",
+   "pontos": [
+    [
+     950,
+     1630
+    ],
+    [
+     1097,
+     1630
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "Na 1ª aplicação (15/11) a soleira entrou no vão entre a academia e a antessala; o usuário a tirou (\"aqui não tem soleira, somente o vinílico\") e pediu as das portas da sauna e do vestiário, como dizia a proposta. Conferir no Miro onde o post-it aponta.",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:178; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:19"
+  },
+  {
+   "fala": "Isso aqui não existe",
+   "como": "A peça com a barra na parede de cima do banheiro do vestiário foi retirada; a parede continua inteira.",
+   "conferir": "parede de cima do WC do vestiário contínua, piso limpo embaixo.",
+   "pontos": [
+    [
+     1241,
+     1602
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:168; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:116"
+  },
+  {
+   "fala": "Os bancos da sauna é no mesmo material do piso. Lembrar de deixar ele em destaque em relação ao piso.",
+   "como": "O degrau e o assento da sauna ficaram no mesmo material do piso, num tom mais escuro, com a face e a sombra curta, em destaque.",
+   "conferir": "degrau e assento no material do piso, o assento mais escuro, face e sombra visíveis.",
+   "pontos": [
+    [
+     862,
+     1688
+    ],
+    [
+     862,
+     1718
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:177; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:18"
+  },
+  {
+   "fala": "A cuba não é assim. Está parecendo uma peça de sobrepor. Ela é esculpida no travertino.",
+   "como": "A cuba do vestiário foi trocada por uma cuba esculpida no travertino, sobre a bancada de granito marrom tabaco.",
+   "conferir": "cuba esculpida de travertino (não de sobrepor), bancada em marrom tabaco de parede a parede.",
+   "pontos": [
+    [
+     1115,
+     1700
+    ]
+   ],
+   "geral": false,
+   "status": "feito",
+   "obs": "",
+   "fonte": "POE642_CasaA/scripts/proposta_biblioteca_casad_1511.py:178; POE642_CasaA/scripts/biblioteca_subsolo_casad_1511.py:18"
+  }
+ ]
+}
