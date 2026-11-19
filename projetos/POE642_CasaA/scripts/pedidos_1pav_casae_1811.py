@@ -465,7 +465,10 @@ MASTER = {"bancada": (1910.1, 445.0, 1945.0, 593.0), "cubas": (491.25, 552.65),
           "misturador": (1826.55, 455.5, 9.0, 13.0), "bacia": (1774.2, 780.6, 1795.3, 811.3),
           "banheira_antes": (1784, 447, 1868, 601),         # a de antes era maior que a do PDF
           "floreira": (1730, 440, 1784, 610), "vaso_antes": (1749, 766, 1818, 812), "linha": (1745, 778, 1822, 796),
-          "amostra": (1770, 615, 1890, 700), "amostra_vaso": (1758, 732, 1814, 764)}
+          "amostra": (1770, 615, 1890, 700), "amostra_vaso": (1758, 732, 1814, 764),
+          # (usuário: "aqui é um armário, cor sólida") o armário do PDF junto à floreira (ARQ_LAYOUT, 1748 a 1776 x 535,5
+          # a 593,7 px), com o contorno cinza de antes até o piso de Aura: `armario_liso`, o tom das outras casas
+          "armario": (1748.0, 535.0, 1778.0, 594.4)}
 
 
 # (usuário, depois do 12K: "melhore a representação do piso em volta da porta, no banho master", "em volta da banheira",
@@ -620,6 +623,7 @@ def banhos(Q, img, q=BANHOS, m=MASTER):
     # o master: o piso inteiro refeito (as manchas, os retângulos e o contorno da bancada de antes; o vaso e o box), e
     # os 2 chuveiros dele de novo
     out = piso_banho_master(Q, out)
+    out = armario_liso(out, [m["armario"]], par)
     for nome, cab, lado, parede, _, _ in CHUVEIROS:
         out = chuveiro(out, Q, cab, lado, parede)
     mx, my, mw, mh = m["misturador"]
@@ -641,7 +645,7 @@ def banhos(Q, img, q=BANHOS, m=MASTER):
     return out
 
 
-def linha_claraboia(Q, out, caixa, nomes=("banho master: vaso",)):
+def linha_claraboia(Q, out, caixa, nomes=("banho master: vaso",), vaos=True, sob_rotulo=()):
     """Os retângulos tracejados das claraboias do master (`nomes`) de novo, só dentro da `caixa` (px): sobre a bacia e
     o piso novos (só os traços retos, como em `tracejados`: sem o X)."""
     import revisao_1pav_casae_1711 as RV
@@ -650,7 +654,9 @@ def linha_claraboia(Q, out, caixa, nomes=("banho master: vaso",)):
         return abs(t[2] - t[0]) < 0.3 or abs(t[3] - t[1]) < 0.3
     trechos = [(n, [t for t in tr if reto(t)]) for n, tr in FE._tracos_1p(Q) if n in nomes]
     q = dict(FE.TRACEJADOS_1P, larg_px=RV.LARG_PX, preto=TRACEJADO_CINZA, branco=RV.CINZA_ESCURO)
-    com = quieto(FE.tracejados_pb_te, Q, out, q=q, trechos=trechos)
+    com = quieto(FE.tracejados_pb_te, Q, out, q=q, vaos=vaos, trechos=trechos)
+    for a0, b0, a1, b1 in sob_rotulo:                  # onde o texto do rótulo passa, o traço para
+        com[b0:b1, a0:a1] = out[b0:b1, a0:a1]
     x0, y0, x1, y1 = (int(round(v)) for v in caixa)
     res = out.copy()
     res[y0:y1, x0:x1] = com[y0:y1, x0:x1]
@@ -918,7 +924,8 @@ SALA_INTIMA = {"tapete": (1876, 1235, 2115, 1384), "sofa": [(1867, 1215, 1917, 1
                # (usuário: "corrija a representação dessa mesa lateral, da sala íntima", a redonda do render junto ao
                # braço do sofá, borrada e com a sombra escura em volta): sai, com o piso de madeira (fora do sofá e do
                # tapete), e entra a mesa redonda de carvalho da biblioteca, a da mesa de centro, no mesmo lugar
-               "lateral_sofa_antes": (2077, 1199, 2120, 1235), "lateral_sofa": (2097.5, 1218.5, 33.0)}
+               "lateral_sofa_antes": (2077, 1199, 2120, 1235), "lateral_sofa": (2097.5, 1218.5, 33.0),
+               "nogueira": (52, 82, 122)}
 COPINHA = {"tampo": (1888.3, 916.2, 2053.4, 951.6), "cuba": (2034.4, 931.2, 30.0, 24.0),
            "armario": (2053.4, 916.2, 2216.7, 951.6),
            # (usuário: "melhore aspecto da bancada e do armario ao lado dela com tom sólido adotado nas outras casas.
@@ -930,7 +937,10 @@ COPINHA = {"tampo": (1888.3, 916.2, 2053.4, 951.6), "cuba": (2034.4, 931.2, 30.0
            "parede": (1886, 951, 2219, 959),
            # o "m²" de um rótulo antigo no piso diante do armário: o piso das mesmas fiadas, 35 px à direita
            "piso_resto": ((2138, 896, 2162, 911), (35, 0))}
-ROUPARIA_MOVEIS = {"estante": (2082.3, 715.8, 2216.7, 745.6), "nichos": (2186.8, 745.6, 2216.7, 807.7)}
+# (usuário: "corrija o erro no canto e adicione a claraboia (vão tracejado)") os nichos até a parede de baixo (entre
+# eles e a parede ficava uma faixa clara do desenho de antes); a claraboia: o retângulo tracejado do PDF (o grupo
+# "rouparia" de `TRACEJADOS_1P`, sem o X), no cinza claro fino, depois do piso e do armário (`retoques`)
+ROUPARIA_MOVEIS = {"estante": (2082.3, 715.8, 2216.7, 745.6), "nichos": (2186.8, 745.6, 2216.7, 811.3)}
 
 
 def armario_liso(out, rets, par):
@@ -1201,7 +1211,11 @@ def mobiliario(Q, img):
         sofa[y0 - f:y1 + f, x0 - f:x1 + f] = True
     com = pos(out, ler("sala-intima/tapete-intimo-e"), s["tapete"], (0, 1), None)
     out = np.where(sofa[..., None], out, com)
-    out = pos(out, ler("sala-intima/mesa-lateral-metal-madeira"), s["lateral"], (0, 1), "mesa")
+    # (usuário: "represente as mesas redondas corretamente") no PDF, as duas mesas de centro são redondas, encaixadas: a
+    # menor (0,7 m) por baixo da maior (1,0 m), à direita; a menor, que saía retangular (`mesa-lateral-metal-madeira`),
+    # na mesma mesa redonda da biblioteca, em nogueira
+    out = pos(out, MBE.tingir_madeira(ler("sala-intima/mesa-intima-redonda-e"), s["nogueira"]), s["lateral"], (0, 1),
+              "mesa")
     out = pos(out, ler("sala-intima/mesa-intima-redonda-e"), s["mesa"], (0, 1), "mesa")
     cx, cy, dm = s["lateral_sofa"]
     out = MBE.pousar(out, ler("sala-intima/mesa-intima-redonda-e"), cx, cy, dm, dm, 0.0, "mesa", par)
@@ -1742,6 +1756,46 @@ def _fonte_piso(out, vert, a0, a1, c0, c1, desl, q):
     return f
 
 
+# a claraboia da rouparia: o retângulo inteiro do PDF (a rotina cortava os lados em volta do rótulo do PDF, que não é
+# o da final), e o traço só para sob o texto do rótulo da final ("ROUPARIA / A: 3,6 m²", 2108 a 2161 x 767 a 790 px,
+# com 3 px de folga)
+CLARABOIA_ROUPARIA = {"sob_rotulo": (2105, 764, 2165, 794)}
+# (usuário: "representar o vão com tracejado") o vão no meio da parede de cima da suíte master (DOC_LINHAS E PROJEÇÕES:
+# o retângulo de 1408,7 a 1445,5 x 537,6 a 555,7 px e o X), que a final não mostrava (a rotina dos tracejados não desenha
+# sobre parede): o retângulo e o X tracejados (traços de 15 px e vãos de 6 px, centrados em cada lado, como os do PDF),
+# finos, no cinza claro dos tracejados sobre fundo escuro (`revisao_1pav_casae_1711.CINZA_ESCURO`)
+VAO_MASTER = {"ret": (1408.7, 537.6, 1445.5, 555.7), "traco_px": 15.0, "vao_px": 6.0, "larg_px": 0.8,
+              "cor": (200, 200, 200), "ss": 8}
+
+
+def vao_tracejado(out, q=VAO_MASTER):
+    x0, y0, x1, y1 = q["ret"]
+    linhas = [((x0, y0), (x1, y0)), ((x1, y0), (x1, y1)), ((x1, y1), (x0, y1)), ((x0, y1), (x0, y0)),
+              ((x0, y0), (x1, y1)), ((x0, y1), (x1, y0))]
+    ss = q["ss"]
+    X0, Y0 = int(x0) - 3, int(y0) - 3
+    W, H = int(np.ceil(x1)) + 4 - X0, int(np.ceil(y1)) + 4 - Y0
+    m = np.zeros((H * ss, W * ss), np.uint8)
+    d, g = q["traco_px"], q["vao_px"]
+    for (a, b), (c, e) in linhas:
+        L = float(np.hypot(c - a, e - b))
+        ux, uy = (c - a) / L, (e - b) / L
+        k0 = int(np.ceil((L / 2 + d / 2) / (d + g))) + 1
+        for k in range(-k0, k0 + 1):
+            t0, t1 = max(L / 2 + k * (d + g) - d / 2, 0.0), min(L / 2 + k * (d + g) + d / 2, L)
+            if t1 - t0 < 1.0:
+                continue
+            p0 = ((a + ux * t0 - X0) * ss, (b + uy * t0 - Y0) * ss)
+            p1 = ((a + ux * t1 - X0) * ss, (b + uy * t1 - Y0) * ss)
+            cv2.line(m, tuple(int(round(v)) for v in p0), tuple(int(round(v)) for v in p1), 255,
+                     max(1, int(round(q["larg_px"] * ss))), cv2.LINE_AA)
+    al = cv2.resize(m.astype(np.float32) / 255, (W, H), interpolation=cv2.INTER_AREA)[..., None]
+    reg = out[Y0:Y0 + H, X0:X0 + W].astype(np.float32)
+    out = out.copy()
+    out[Y0:Y0 + H, X0:X0 + W] = u8(reg * (1 - al) + np.float32(q["cor"]) * al)
+    return out
+
+
 def guarda_corpos(Q, out, q=GUARDA_CORPO):
     """Os guarda-corpos (`GUARDA_CORPOS`) numa folha de vidro contínua, a faixa de antes limpa."""
     import terreo_casaa_1011 as TA
@@ -1882,12 +1936,16 @@ def retoques(Q, img):
     for y, f in c["sombras"].items():
         o[y, x0:x1] *= f
     out = u8(o)
+    out = linha_claraboia(Q, out, ROUPARIA["piso"], nomes=("rouparia",), vaos=False,
+                          sob_rotulo=[CLARABOIA_ROUPARIA["sob_rotulo"]])
+    out = vao_tracejado(out)
     print(f"    retoques: {len(ESCRIVANINHAS)} escrivaninhas lisas, sem o fio escuro nem os resíduos ({sum(n_obj)} px de objetos "
           "de antes fora), com o monitor e o teclado Apple; "
           f"{len(RACKS)} racks (suítes e sala íntima) no aparador de freijó com a TV do PDF; a porta da suíte 2 e as 2 folhas de "
           f"correr do closet master em madeira; o piso do closet "
           f"master sem os traços; {len(GUARDA_CORPOS)} guarda-corpos numa folha de vidro contínua; os painéis de ripado em "
-          f"{' e '.join(map(str, nf))} folhas")
+          f"{' e '.join(map(str, nf))} folhas; a claraboia da rouparia (o retângulo tracejado) e o vão da parede de cima "
+          "da suíte master tracejado")
     return out
 
 

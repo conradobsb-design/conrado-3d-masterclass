@@ -1812,6 +1812,58 @@
        1445
       ]
      ]
+    },
+    {
+     "n": 37,
+     "origem": "voce",
+     "texto": "Banho master: o armário junto à floreira em cor sólida, o tom dos armários das outras casas (\"aqui é um armário, cor sólida\").",
+     "pontos": [
+      [
+       1762,
+       565
+      ]
+     ]
+    },
+    {
+     "n": 38,
+     "origem": "voce",
+     "texto": "Rouparia: o canto de baixo dos nichos sem a faixa clara (os nichos até a parede) e a claraboia de volta, o retângulo tracejado do PDF em cinza claro (\"corrija o erro no canto e adicione a claraboia\").",
+     "pontos": [
+      [
+       2200,
+       809
+      ],
+      [
+       2138,
+       760
+      ]
+     ]
+    },
+    {
+     "n": 39,
+     "origem": "voce",
+     "texto": "Suíte master: o vão na parede de cima representado com tracejado, o retângulo e o X do PDF (\"representar o vão com tracejado\").",
+     "pontos": [
+      [
+       1427,
+       546
+      ]
+     ]
+    },
+    {
+     "n": 40,
+     "origem": "voce",
+     "texto": "Sala íntima: as duas mesas de centro redondas como no PDF, a menor em nogueira encaixada por baixo da maior (\"represente as mesas redondas corretamente\").",
+     "pontos": [
+      [
+       1986,
+       1329
+      ],
+      [
+       2018,
+       1335
+      ]
+     ]
     }
    ]
   }

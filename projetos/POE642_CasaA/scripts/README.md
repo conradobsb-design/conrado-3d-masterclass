@@ -4147,6 +4147,14 @@ Em 19/11 ("clareie todos os tracejados para cinza claro"): o traço dos tracejad
 espessura (0,8 px), no passo `tracejados` e nas claraboias do banho master (`linha_claraboia`); 12K A e B refeitos.
 Antes e depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1911_tracejados_antes_depois.jpg`.
 
+Ainda em 19/11: o armário do PDF junto à floreira do banho master em `armario_liso` ("aqui é um armário, cor sólida",
+`MASTER["armario"]`); na rouparia, os nichos até a parede (sem a faixa clara do canto) e a claraboia de volta
+(`linha_claraboia` com `vaos=False`: o retângulo inteiro do PDF, o traço parando só sob o texto do rótulo da final,
+`CLARABOIA_ROUPARIA`); o vão na parede de cima da suíte master (DOC_LINHAS E PROJEÇÕES) tracejado em cinza claro
+(`vao_tracejado`: a rotina dos tracejados não desenha sobre parede); e as duas mesas de centro da sala íntima redondas,
+como no PDF (a menor, que saía retangular, na mesa redonda da biblioteca em nogueira, por baixo da maior). Antes e
+depois em `POE642_CasaE/renders/POE642_CasaE_PH_1Pavimento_1911b_armario_rouparia_vao_mesas_antes_depois.jpg`.
+
 #### Casa A, Térreo: as bancadas de Danae da cozinha e do serviço sem as falhas da troca (16/11)
 
 Usuário: "CORRIJA A BANCADA DA COZINHA REMOVENDO FALHAS, AINDA NA CASA A". A troca automática (`danae_foto.trocar`,
