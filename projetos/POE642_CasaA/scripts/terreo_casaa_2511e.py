@@ -241,11 +241,17 @@ LAVABO_CUBA = dict(
 
 
 def lavabo_cuba(img, escala, origem, q=LAVABO_CUBA):
-    B = _b1211()
     s = escala
     # o piso à esquerda da bancada
     img = D.refazer_piso(img, s, origem, [V.ret(*q["piso"])], objetos=[V.ret(*q["baixo"])], sombra=0.0,
                          letras=True, luz_sig=10.0, tol=0.06, ref_luz=[V.ret(*q["piso_luz"])])
+    return peca_cuba(img, escala, origem, q)
+
+
+def peca_cuba(img, escala, origem, q=LAVABO_CUBA):
+    """A peça de cima da bancada (a da cuba): o travertino do piso a 90% com a luz da cuba esculpida da biblioteca."""
+    B = _b1211()
+    s = escala
     # a luz da cuba esculpida (a foto sem os poros), no lugar da biblioteca
     nome, cx, cy, w, h, ang, extra = q["cuba"]
     P, wt, ht = B.preparar(nome, w, h, extra)
