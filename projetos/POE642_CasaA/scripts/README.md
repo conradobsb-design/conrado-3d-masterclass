@@ -4639,5 +4639,6 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   soleira do GÁS vira um retângulo limpo no vão do PDF e as duas portas (abertas a 90°) são redesenhadas em chapa com a
   linha fina, quina a quina com a soleira; o vão das portas de correr da área de serviço recebe a mesma soleira e as
   duas folhas do PDF no padrão (perfil cinza claro, vidro claro, linha fina).
-- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511_revisao_antes_depois.jpg`. (O PDF
-  da Casa A, a conferência e o book são refeitos no fechamento: o disco desta sessão está no limite.)
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511_revisao_antes_depois.jpg`. O PDF da
+  Casa A, a conferência e o book foram refeitos em seguida, depois de liberar o disco da sessão (o clone local ficou raso
+  a partir do commit 6d2d42d, com a autorização do usuário; o histórico inteiro segue no GitHub).
