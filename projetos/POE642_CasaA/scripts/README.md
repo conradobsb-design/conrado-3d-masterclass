@@ -4991,3 +4991,25 @@ Os pedidos com os recortes do 12K B (o travertino deste pavimento já era o novo
   das folhas do banho, com o contorno fino e a sombra curta; o resto da folha de antes sai.
 - Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_1Pavimento_2511d_revisao_antes_depois.jpg`; PDF
   da Casa A, conferência e book refeitos.
+
+### Casa A 1º Pavimento, 5ª leva de 25/11: `um_pav_casaa_2511e.py`
+
+Sobre a 4ª leva (`python3 um_pav_casaa_2511e.py [wc_vidro|box_fechado]`):
+
+- **Vidros sem linha técnica** ("tem que ser box e folhas de vidro sem linha técnica"): as folhas desta leva
+  (`folhas_vidro`) no vidro claro dos boxes (`boxes_claros_1911.VIDRO`), sem contorno: um pouco mais escuro junto às
+  faces e mais claro no meio (a espessura do vidro), com a sombra curta no piso. As folhas do box da 4ª leva, com as
+  bordas cinza, saem.
+- **WC do banho master** ("porta de vidro e traz esquadria no tom vidro, em vez de preta"): a divisória em L do PDF
+  (1668,3 a 1670,7, da parede de cima à de baixo, com o braço de cima até 1685,7) deixa de ser cinza de parede e vira
+  uma peça de vidro só; a folha da porta de giro (1731,6 a 1734,0, até 1595,3) deixa de ser madeira e vira uma folha
+  de vidro, presa ("essa porta não pode ficar solta"): a folha sobe até o batente do PDF (ARQ_BANCADAS, 1733,4 a
+  1736,4, de 1544,5 a 1546,9), em vidro com ela, numa peça só encostada na parede, e a dobradiça de metal escovado
+  (1731,9 a 1736,4, de 1545,0 a 1546,4) prende a folha ao batente e à parede; o pontinho claro da parede ali sai. O piso em volta é refeito, e o canto da parede de baixo junto à divisória (1670,7 a 1676,4, de 1624,3
+  a 1631,1) volta a ser parede, linha a linha pela parede de logo ao lado (a 4ª leva tinha deixado ali um dente de piso).
+- **Box do chuveiro do banho master** ("faz com o box fechado e no lugar da esquadria preta à direita, deixe-a em
+  vidro"): a folha de correr fechada, de 1456,3 até o vidro da direita (sobrepondo a fixa, que fica de 1388,4 a
+  1460,5), com o puxador na ponta; a peça escura da direita (ARQ_BANCADAS, 1528,4 a 1530,8, do vidro de cima à parede
+  de baixo) vira uma folha de vidro, com o piso em volta refeito.
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_1Pavimento_2511e_revisao_antes_depois.jpg`; PDF
+  da Casa A, conferência e book refeitos.
