@@ -4766,3 +4766,39 @@ Nas outras 11 plantas (o Subsolo da Casa D não tem travertino na legenda):
   granito ficam de fora); o veio ao comprido, a 90%, com a luz da própria bancada; os metais ficam.
 - Finais (e as variantes manuscrita e B), pranchas e 12K A e B (no 12K, só perto do piso achado na final, pelo mapa de
   `doze_k.json`; as bancadas pelo registro local).
+
+### Casa A Térreo, 5ª leva de 25/11 (os recortes do 12K B): `terreo_casaa_2511e.py`
+
+- **Banho varanda** ("corrigir mancha do piso e chuveiro de acordo com a biblioteca"): o piso refeito inteiro (acima
+  e abaixo do vidro do box), sem as manchas da direita e de baixo e sem o fantasma do chuveiro antigo; a bacia, a folha
+  da porta, o nicho, o registro e o vidro ficam, o rótulo volta por cima. O chuveiro é o quadrado de parede da
+  biblioteca (`banho-varanda/chuveiro-quadrado-parede.png`): o crivo endireitado (a foto em perspectiva vira o quadrado
+  de 0,20 m do PDF), o braço esticado até a parede da direita, a canopla na parede, o contorno fino escuro e a sombra
+  curta.
+- **Varanda** ("corrigir tapete, sofá e piso atrás da sofá"): o piso atrás do sofá (da parede ao tapete e à direita
+  do tapete até o vidro) refeito inteiro, sem a faixa cinza junto à parede; o tapete inteiro de novo (a trama do próprio
+  tapete por image quilting, num tom só, sem o retângulo claro e as sombras soltas dos remendos); por cima, as peças da
+  biblioteca nos lugares de `biblioteca_terreo_casaa_1211` (2 poltronas, o sofá curvo, o banco, as 2 mesas de centro e
+  as 2 mesinhas), com as sombras de lá só no que foi refeito: o sofá volta inteiro (a madeira das costas, cortada pelo
+  recorte das plantas da 4ª leva); as 2 palmeiras-ráfis de volta.
+- **Lavabo** ("corrigir manchas escura e borda da cuba"): a faixa escura no piso à esquerda da bancada refeita (a luz
+  medida no piso livre à esquerda), o rótulo por cima; a peça da cuba de novo no travertino do piso a 90%, com a luz da
+  cuba esculpida da biblioteca (`lavabo/cuba-esculpida-poros-render.png`, esticada nos lados e girada como na
+  instalação, sem os poros: a mediana; o chanfro da foto fora): a borda da cuba nítida em qualquer escala, no lugar da
+  luz borrada da final antiga ampliada; a torneira da biblioteca por cima.
+- Final, prancha e 12K A e B (registro local por item); antes e depois em
+  `renders/POE642_CasaA_PH_Terreo_2511e_revisao_antes_depois.jpg`; PDF da Casa A, conferência e book refeitos.
+
+### Casa A Térreo, a escada helicoidal: 3 opções (25/11, só a proposta): `proposta_caracol_terreo_casaa_2511.py`
+
+Usuário: "me traga 3 opções de representação da escada helicoidal, levando em consideração o sentido que sobe,
+representando os degraus desse nível e a transparência do nível superior". A geometria do PDF: o centro em
+(1977,4; 1571,6), o raio de 55 px, o pilar de 4,4 px, degraus de 17,85° (21, uma volta), subindo no sentido anti-horário
+a partir do degrau 1 (à direita, junto ao S); cheios até o corte do nível (de 4,1° a 146,9°: o arranque e os degraus 1
+a 7), tracejados os de cima. No recorte do 12K B, com o piso da garagem refeito sob a escada:
+1. corte clássico (bocel e sombra do degrau de cima, quebra no corte, os de cima sob um véu leve com o tracejado, a
+   linha de caminhamento do arranque até a seta no corte);
+2. subida em degradê (o tom clareia conforme sobe, acima do corte vidro fosco, o caminhamento em espiral pela volta
+   inteira com a seta na chegada);
+3. gráfica (um tom só com frestas claras, os de cima só tracejados sobre o piso, a seta no 1º degrau no sentido da
+   subida). Em `renders/POE642_CasaA_PH_Terreo_2511_helicoidal_opcoes.jpg`, ao lado da atual.
