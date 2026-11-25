@@ -4613,3 +4613,13 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   da folha, do lado da dobradiça, na quina do toco de parede, medida em cada imagem (o render desenha o toco até ~1 px
   fora do PDF); os tracinhos do contorno antigo no pé da parede saem. Final (e a manuscrita), prancha, 12K A e B, PDF da Casa A e conferência; antes e depois em
   `renders/POE642_CasaA_PH_Subsolo_2511_folhas_bh_antes_depois.jpg`.
+
+## Casa A Subsolo, 25/11 (4): as folhas do BH. FEM. e do BH. MASC. encostadas na quina
+
+- Usuário: "as portas devem encostar na quina". As folhas já nasciam na face do toco, mas no render o pé de cada toco
+  termina arredondado, com um dente (no último ~1,5 px da final a parede afina ~1 px): ficava um vão de piso entre a
+  quina da folha e a da parede.
+- `quina_bh_subsolo_casaa_2511.py`: o dente é fechado com a própria parede logo acima dele (a linha do toco repetida
+  para baixo, com a sombra da face): a face desce reta até o pé e a quina, em ângulo reto, encosta na quina da folha.
+  Final (e a manuscrita), prancha, 12K A e B, PDF da Casa A e conferência; antes e depois em
+  `renders/POE642_CasaA_PH_Subsolo_2511_quina_bh_antes_depois.jpg`.
