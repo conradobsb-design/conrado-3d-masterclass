@@ -4642,3 +4642,25 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
 - Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511_revisao_antes_depois.jpg`. O PDF da
   Casa A, a conferência e o book foram refeitos em seguida, depois de liberar o disco da sessão (o clone local ficou raso
   a partir do commit 6d2d42d, com a autorização do usuário; o histórico inteiro segue no GitHub).
+
+### Casa A Térreo, 2ª leva de 25/11 (com os recortes do 12K): `terreo_casaa_2511b.py` e `prainha_cinza_casaa_2511.py`
+
+- **Janelas do WC e do banho varanda**: o vão de cada uma (entre os tocos, 1630,6–1643,0) recebe a soleira limpa no tom
+  das soleiras novas do GÁS e da área de serviço, e a folha do PDF (1636,8–1639,7) no padrão das esquadrias.
+- **Piso em volta do banco de ripas** (área gourmet): o anel claro em volta do banco recebe o piso logo ao lado.
+- **Traço preto ao lado do brise**: a barra preta entre os dois tracejados do pergolado sai (acima da borda, o bege da
+  mesma linha; abaixo, o piso claro das linhas de baixo com o perfil da borda medido à direita); o fim do tracejado da
+  esquerda recebe o próprio tracejado um passo acima.
+- **Deck de madeira** (só nos 12K; na final as tábuas estão inteiras): acima do DECK DE MADEIRA, as duas juntas que
+  faltavam recebem a junta da mesma tábua mais à direita, levada à altura medida dos dois lados; em volta do DESCE PARA
+  O SUBSOLO (o remendo de um rótulo antigo), de junta a junta, as tábuas de 4 tábuas acima, com as juntas alinhadas
+  coluna a coluna, e as letras do rótulo recompostas por cima (sem halo).
+- **Vidro fixo de cima** ("corrigir essas falhas", junto à grama, onde o vidro encontra a parede): os suportes cromados
+  e a peça curva no pé da parede saem; até a face da parede, só os pixels que destoam recebem o piso logo à esquerda
+  (com o degradê da sombra do piso); o pé da parede recebe a sombra da mesma parede mais à direita.
+- **Prainha e banco do spa** ("equilibrar mais esse tom para o cinza, nem tão claro e nem tão escuro, como o fundo ao
+  lado"): a água rasa vai ao matiz e à saturação do fundo da piscina (o azul-acinzentado sóbrio de 19/11) e a meio
+  caminho na luminosidade (80%); o pastilhado, os reflexos e os rótulos ficam. `--opcoes` gera a amostra com 86%, 80% e
+  74% (`renders/POE642_CasaA_PH_Terreo_2511_prainha_opcoes.jpg`).
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511b_revisao_antes_depois.jpg`; PDF da
+  Casa A, conferência (completa, interna e da Casa A) e book refeitos.
