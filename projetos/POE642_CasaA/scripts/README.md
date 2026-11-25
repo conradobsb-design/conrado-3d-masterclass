@@ -4811,7 +4811,8 @@ a 7), tracejados os de cima. No recorte do 12K B, com o piso da garagem refeito 
   garagem (refeito por image quilting sob a escada), com os tracejados. Depois ("preciso da seta apontando a subida da
   escada sem a linha indicativa" e, com o recorte da seta de antes, "eu quero assim - essa seta"): sem a linha de
   caminhamento, com a seta de antes (o triângulo cheio do projeto, no mesmo lugar e tamanho, acima do S), tirada de
-  cada imagem no commit a73d11a; o S de cada imagem fica (Inter na final e no 12K A, Kalam no 12K B).
+  cada imagem no commit a73d11a; o S redesenhado na fonte de cada imagem (Inter SemiBold na final e no 12K A, Kalam
+  no 12K B), no centro, na altura e na cor do S de antes, que vinha cruzado por um risco do tracejado antigo.
 - **Lavabo** ("movimente o rótulo para esquerda e corrija a bancada"): a faixa escura à esquerda da bancada voltava pela
   máscara do rótulo da 5ª leva (o `letras` a lia como letra); o piso refeito da parede à bancada sem as letras (a
   mancha junto à parede, na altura do "A:", sai junto), a peça da cuba redesenhada (`terreo_casaa_2511e.peca_cuba`) e

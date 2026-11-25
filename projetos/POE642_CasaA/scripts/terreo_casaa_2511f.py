@@ -7,7 +7,8 @@
   opacidade sobre o piso da garagem, que aparece por baixo), com os tracejados. A seta ("preciso da seta apontando a
   subida da escada sem a linha indicativa", e depois, com o recorte da seta de antes: "eu quero assim - essa seta"):
   sem a linha de caminhamento, a seta de antes (o triângulo cheio do projeto, no mesmo lugar e tamanho, acima do S),
-  tirada de cada imagem no commit a73d11a. O piso da garagem refeito sob a escada (image quilting do
+  tirada de cada imagem no commit a73d11a; o S redesenhado (Inter SemiBold na final e no 12K A, Kalam no 12K B) no
+  centro, na altura e na cor do S de antes, que vinha cruzado por um risco do tracejado antigo. O piso da garagem refeito sob a escada (image quilting do
   trecho à esquerda); o ▶ antigo (apontava para fora) sai; o S de cada imagem (Inter na final e no 12K A, Kalam no
   12K B) fica no mesmo lugar.
 - **Lavabo** ("movimente o rótulo para esquerda e corrija a bancada"): a faixa escura à esquerda da bancada voltava
@@ -48,7 +49,10 @@ PLANTA = "A_Terreo"
 # ----------------------------------------------------------------------------------------------------------------------
 HELICOIDAL = dict(janela=(1915.0, 1508.0, 2040.0, 1634.0), fundo_max_y=1628.0, cima_opac=0.58,
                   s_caixa=(1998.0, 1572.6, 2017.5, 1587.0),
-                  seta_rev="a73d11a", seta_caixa=(1991.0, 1550.0, 2019.0, 1572.6), seta_cor=(30.0, 30.0, 30.0))
+                  seta_rev="a73d11a", seta_caixa=(1991.0, 1550.0, 2019.0, 1572.6), seta_cor=(30.0, 30.0, 30.0),
+                  # o S de antes, medido (o centro e a altura da tinta, px da final; a cor de cada imagem)
+                  s_inter=dict(centro=(2006.98, 1579.43), altura=7.96, cor=(44.0, 47.0, 48.0), reforco=0.0),
+                  s_kalam=dict(centro=(2006.72, 1578.0), altura=9.05, cor=(45.0, 46.0, 47.0), reforco=0.25))
 
 
 def _piso_garagem(img, escala, origem, jan):
@@ -106,20 +110,40 @@ def _seta_antiga(jan, s, origem, q):
     return (np.clip((fundo - L) / np.maximum(fundo - Lt, 1.0), 0, 1) * (m > 0)).astype(np.float32)
 
 
+def _letra_s(jan, s, origem, q):
+    """O S no centro, na altura e na cor medidos no S de antes: Inter SemiBold na final e no 12K A, Kalam (com o traço
+    reforçado dos rótulos manuscritos) no 12K B."""
+    from PIL import ImageDraw, ImageFont
+    kalam = "opcao_B" in _arquivo(s)
+    d = q["s_kalam"] if kalam else q["s_inter"]
+    fonte = EP.PROJ / "POE642_CasaA/entrega/assets/fontes" / ("Kalam-Regular.woff" if kalam else "Inter-SemiBold.otf")
+    k = 8                                              # px do desenho por px da imagem
+    alvo = d["altura"] * s * k
+    f = ImageFont.truetype(str(fonte), 400)
+    reforco = int(round(d["reforco"] * s * k * 400 / max(alvo, 1)))
+    im = Image.new("L", (700, 700), 0)
+    ImageDraw.Draw(im).text((150, 100), "S", font=f, fill=255, stroke_width=reforco, stroke_fill=255)
+    a = np.asarray(im, np.float32) / 255
+    ys, xs = np.nonzero(a > 0.5)
+    a = a[ys.min():ys.max() + 1, xs.min():xs.max() + 1]
+    esc = alvo / a.shape[0]
+    a = cv2.resize(a, (max(1, int(round(a.shape[1] * esc))), max(1, int(round(a.shape[0] * esc)))),
+                   interpolation=cv2.INTER_AREA)
+    X0, Y0, X1, Y1 = jan
+    H, W = (Y1 - Y0) * k, (X1 - X0) * k
+    cx = ((d["centro"][0] - origem[0]) * s - X0) * k
+    cy = ((d["centro"][1] - origem[1]) * s - Y0) * k
+    ox, oy = int(round(cx - a.shape[1] / 2)), int(round(cy - a.shape[0] / 2))
+    can = np.zeros((H, W), np.float32)
+    can[oy:oy + a.shape[0], ox:ox + a.shape[1]] = a
+    return cv2.resize(can, (X1 - X0, Y1 - Y0), interpolation=cv2.INTER_AREA), np.float32(d["cor"])
+
+
 def helicoidal(img, escala, origem, q=HELICOIDAL):
     s = escala
     jan = V.janela(img, q["janela"], s, origem, folga=2)
     X0, Y0, X1, Y1 = jan
     reg0 = img[Y0:Y1, X0:X1].astype(np.float32)
-    # o S de hoje (as letras da própria imagem), para voltar por cima
-    xs, ys = V.coords(jan, s, origem)
-    sx0, sy0, sx1, sy1 = q["s_caixa"]
-    zona = ((xs[None, :] >= sx0) & (xs[None, :] <= sx1) & (ys[:, None] >= sy0) & (ys[:, None] <= sy1))
-    a_s, cor_s = V.letras(reg0, zona, dif=70.0, escala=s, area_min=2.0)
-    n, lab, st, _ = cv2.connectedComponentsWithStats((a_s > 0.3).astype(np.uint8), 8)
-    if n > 2:                                       # só o S (os tracinhos do tracejado antigo ficam de fora)
-        maior = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
-        a_s = a_s * cv2.dilate((lab == maior).astype(np.uint8), np.ones((3, 3), np.uint8))
     T = PC.Tela(reg0.shape[:2], s, origem, X0, Y0)
     T.X0, T.Y0, T.org = X0, Y0, origem
     G = PC.G
@@ -165,7 +189,8 @@ def helicoidal(img, escala, origem, q=HELICOIDAL):
     a_t = _seta_antiga(jan, s, origem, q)
     if a_t is not None:
         reg = V.compor(reg, a_t, q["seta_cor"])
-    # o S de volta
+    # o S, redesenhado na fonte de cada imagem (o de antes vinha cruzado por um risco do tracejado antigo)
+    a_s, cor_s = _letra_s(jan, s, origem, q)
     reg = V.compor(reg, a_s, cor_s)
     img[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
     return img
