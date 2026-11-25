@@ -4623,3 +4623,21 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   para baixo, com a sombra da face): a face desce reta até o pé e a quina, em ângulo reto, encosta na quina da folha.
   Final (e a manuscrita), prancha, 12K A e B, PDF da Casa A e conferência; antes e depois em
   `renders/POE642_CasaA_PH_Subsolo_2511_quina_bh_antes_depois.jpg`.
+
+## Casa A Térreo, revisão do usuário de 25/11
+
+- **Escadas** (`escadas_terreo_casaa_2511.py`): "corrija a transparência no tom da escada" (SOBE PARA O 1º PAVIMENTO,
+  sobre o JARDIM de 17,46 m²) e "refazer a transparência da escada" (DESCE PARA O SUBSOLO). A parte transparente (o
+  resto do 1º lance depois do corte, o patamar e o 2º lance; na do Subsolo, os degraus brancos depois da diagonal) passa
+  ao tom dos degraus cheios com o desenho deles transparente (0,55) e um leve do que está por baixo (0,15 da grama
+  desfocada, na do jardim): o perfil dos degraus (a mediana de uma faixa limpa, coluna a coluna) repetido no passo do
+  PDF (17,9 px), nada repetido na vertical; no patamar, o miolo de um degrau; na do Subsolo, o tom do 1º degrau e uma
+  quina fina por degrau. As áreas são os polígonos do PDF (o corte com a quebra) e a diagonal do render.
+- **Muro, jardim, box, GÁS e portas de correr** (`terreo_casaa_2511.py`): a pecinha clara no muro de baixo (junto ao
+  caminho de pedra) sai; os traços pretos da linha de projeção (DOC_LINHAS, y = 1643) na borda do JARDIM (4,79 m²) e sob
+  a soleira do GÁS saem; o vidro do box do BANHO VARANDA segue até a parede (o trilho do PDF vai de 1618,2 a 1696,4); a
+  soleira do GÁS vira um retângulo limpo no vão do PDF e as duas portas (abertas a 90°) são redesenhadas em chapa com a
+  linha fina, quina a quina com a soleira; o vão das portas de correr da área de serviço recebe a mesma soleira e as
+  duas folhas do PDF no padrão (perfil cinza claro, vidro claro, linha fina).
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511_revisao_antes_depois.jpg`. (O PDF
+  da Casa A, a conferência e o book são refeitos no fechamento: o disco desta sessão está no limite.)
