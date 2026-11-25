@@ -4942,3 +4942,35 @@ Os pedidos com os recortes do 12K B (o travertino deste pavimento já era o novo
   sombra curta; a cuba redonda e a torneira da biblioteca (`banho-master/cuba-entrada.png`) por cima.
 - Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_1Pavimento_2511b_revisao_antes_depois.jpg`;
   PDF da Casa A, conferência e book refeitos.
+
+### Casa A 1º Pavimento, 3ª leva de 25/11: `um_pav_casaa_2511c.py`
+
+- **Escada em U** ("sim, faça os degraus em transparência na escada em U"): o trecho do lance à esquerda da linha de
+  corte (o vão branco) com os degraus no tom dos degraus cheios a 58%, como a caracol, e as linhas dos degraus finas
+  (cheias, como no PDF); guarda-corpos, linha de corte e contorno por cima.
+- **Vazio da sala íntima** ("remover esse borrado na parte branca"; depois, "mantenha o mobiliario" e "mantenha
+  transparente o mobiliario e demais"): sai só a mancha cinza no alto, sob a parede e o guarda-corpo (o branco de logo
+  abaixo, em espelho, sem tocar neles); os móveis do Térreo em transparência e o X ficam nos dois vazios. A primeira
+  passada (o branco liso nos dois) foi desfeita com `--refazer vazio_a vazio_b`.
+- **Piso abaixo do vazio da sala íntima** ("corrigir esses erros no piso"): os tracinhos da projeção antiga logo abaixo
+  do guarda-corpo saem (`refazer_piso` na faixa de 2035,6 a 2158,5 x 882,5 a 892,5).
+- **Guarda-corpo do vazio grande** ("corrigir o guarda corpo"): as duas linhas soltas e as manchas escuras saem; o
+  travertino da circulação até 2254,7 e o guarda-corpo de vidro de 1,2 px na borda da laje (2255,9), como o do vazio da
+  sala íntima e o da escada, com a sombra curta no piso.
+- **Parede** ("corrigir a parede"): a faixa escura com o filete claro e a curva no alto, colada à parede do lado do
+  vazio, sai (o vazio do lado, em espelho); a face da parede reta na linha do PDF (2255,9).
+- **Caracol** ("essa região em volta da escada é de mesmo piso do restante" e, com o recorte, "somente nessa área"): o
+  trecho de cima à direita, junto aos degraus que chegam (do guarda-corpo do raio de 90° à saleta, da porta de correr ao
+  guarda-corpo em L), que trazia um resto de travertino, no Bege Bahia da saleta (o tecido da varanda de 39 m² no tom da
+  saleta ao lado), sem a linha que o separava dela; o resto em volta da escada continua vão. A primeira passada (a área
+  toda) foi desfeita: `python3 um_pav_casaa_2511c.py --refazer caracol_piso` refaz o item sobre o trecho do último
+  commit na final, na prancha e nos 12K.
+- **Banho master, janela da floreira** ("corrigir a soleira da janela"): a soleira em travertino a 90% do piso do banho,
+  de um arremate ao outro, com a face de fora em linha fina; as três folhas de correr escalonadas do PDF em vidro claro
+  com contorno fino preto e o filete do meio; os arremates no tom do caixilho.
+- **Banho master, banheira** ("corrigir a torneira da banheira e a banheira"): o travertino refeito na pegada (saem os
+  arcos claros e o recorte da banheira antiga), a banheira oval da biblioteca no lugar do PDF e o misturador de piso
+  desenhado em planta pelo PDF (corpo, duas alavancas, ducha e bica sobre a borda), em metal escovado com a sombra curta;
+  a peça da biblioteca (`misturador-piso-banheira-render`) era uma foto de frente.
+- Final, prancha e 12K A e B (o registro com a escala de x e de y pesadas pela forma da caixa); antes e depois em
+  `renders/POE642_CasaA_PH_1Pavimento_2511c_revisao_antes_depois.jpg`; PDF da Casa A, conferência e book refeitos.
