@@ -4608,6 +4608,8 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
 - Usuário: "corrija o contorno para ficar na porta." — no 12K a folha do render (barra clara com sombra) estava até
   1,5 px da final à direita do lugar do PDF e o contorno fino ficava metade na folha, metade no piso.
 - `folhas_bh_subsolo_casaa_2511.py`: a folha do render, a sombra e o contorno saem (a pedra do próprio banho ao lado,
-  deslocada) e cada folha é desenhada pelo PDF no padrão (perfil cinza claro, vidro claro, a linha fina encostada na
-  folha). Final (e a manuscrita), prancha, 12K A e B, PDF da Casa A e conferência; antes e depois em
+  deslocada, sem tocar a parede) e cada folha é desenhada no padrão (perfil cinza claro, vidro claro, a linha fina
+  encostada na folha), com o tamanho do PDF e quina a quina ("quina da parede com a quina da porta"): a quina de cima
+  da folha, do lado da dobradiça, na quina do toco de parede, medida em cada imagem (o render desenha o toco até ~1 px
+  fora do PDF); os tracinhos do contorno antigo no pé da parede saem. Final (e a manuscrita), prancha, 12K A e B, PDF da Casa A e conferência; antes e depois em
   `renders/POE642_CasaA_PH_Subsolo_2511_folhas_bh_antes_depois.jpg`.
