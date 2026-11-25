@@ -4974,3 +4974,20 @@ Os pedidos com os recortes do 12K B (o travertino deste pavimento já era o novo
   a peça da biblioteca (`misturador-piso-banheira-render`) era uma foto de frente.
 - Final, prancha e 12K A e B (o registro com a escala de x e de y pesadas pela forma da caixa); antes e depois em
   `renders/POE642_CasaA_PH_1Pavimento_2511c_revisao_antes_depois.jpg`; PDF da Casa A, conferência e book refeitos.
+
+### Casa A 1º Pavimento, 4ª leva de 25/11: `um_pav_casaa_2511d.py`
+
+- **Guarda-corpo do vazio grande** ("aqui tem um guarda corpo" e "mantenha o mesmo padrão de guarda corpo"): o desenho
+  do guarda-corpo do vazio da sala íntima (as duas linhas cinza finas com o vidro azulado entre elas, cada uma com ~1 px
+  da final, como as do ARQ_ELEMENTOS FIXOS de lá) na borda da laje, de 2254,1 a 2257,0, da parede ao muro de baixo.
+- **Box do chuveiro do banho master** ("represente melhor esse box de vidro"): os vidros do PDF (ARQ_LOUÇAS E METAIS)
+  no mesmo padrão, a folha fixa (1388,4 a 1460,5) e a de correr (1405,3 a 1477,4) em trilhos lado a lado, com as
+  bordas cinza e as pontas fechadas, e o puxador em metal na ponta da de correr; a faixa de antes (as linhas claras
+  soltas) sai, com o travertino refeito. No pé do box, os dois registros do PDF (o espelho junto à parede e as duas
+  alavancas) em metal escovado, no lugar das manchas cinzas; as outras manchas saem.
+- **WC do banho master** ("represente melhor o box e a porta"): a divisória do PDF (ARQ_BANCADAS, 4 cm) inteira, da
+  parede de cima à de baixo, com o braço de cima até 1685,7, na cor das paredes e de borda nítida (o borrado em volta
+  sai); a porta de giro do PDF (folha de 0,80 m aberta junto à parede da direita, de 1547,5 a 1595,3) em madeira, no tom
+  das folhas do banho, com o contorno fino e a sombra curta; o resto da folha de antes sai.
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_1Pavimento_2511d_revisao_antes_depois.jpg`; PDF
+  da Casa A, conferência e book refeitos.
