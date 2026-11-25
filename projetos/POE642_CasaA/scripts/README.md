@@ -4748,3 +4748,21 @@ razão imagem/textura, alisado), sem as manchas, menos as peças (com a sombra c
   piso (as sombras ficam).
 - Final, prancha e 12K A e B (registro local por item); antes e depois em
   `renders/POE642_CasaA_PH_Terreo_2511d_revisao_antes_depois.jpg`; PDF da Casa A, conferência e book refeitos.
+
+### Todas as casas, o travertino bruto novo (25/11): `travertino_casas_2511.py`
+
+Usuário: "sim, aplique em todas as casas e pavimentos" (o travertino Navona marfim, a opção 2 do Térreo da Casa A).
+Nas outras 11 plantas (o Subsolo da Casa D não tem travertino na legenda):
+
+- **Onde:** a base chapada da legenda de cada planta (`Q.chapada`, o #DCD9CA, a cor do travertino em todas as casas),
+  dilatada 9 px, e dentro dela o teste de cor contra o travertino de hoje daquela planta (a mediana Lab do miolo da
+  região, sem o branco do fundo): os móveis, os tapetes, as letras, as paredes e o Bege Bahia ficam; os restos do piso
+  antigo junto às paredes entram.
+- **O piso:** a textura da opção 2 (1,2 m por quadro, espelhada, em coordenadas absolutas da imagem) vezes a luz do
+  lugar, como no Térreo da Casa A (`travertino_terreo_casaa_2511.piso`).
+- **As bancadas de travertino** ("bancada no tom do piso (levemente escuro)", o pedido do lavabo da Casa A): os
+  retângulos ARQ_BANCADAS do PDF no tom do travertino (60% da pedra a menos de 12 do piso) e num ambiente de piso de
+  travertino (30% do anel em volta): só as bancadas de banho com a cuba esculpida (as ilhas e bancadas de Dekton e de
+  granito ficam de fora); o veio ao comprido, a 90%, com a luz da própria bancada; os metais ficam.
+- Finais (e as variantes manuscrita e B), pranchas e 12K A e B (no 12K, só perto do piso achado na final, pelo mapa de
+  `doze_k.json`; as bancadas pelo registro local).
