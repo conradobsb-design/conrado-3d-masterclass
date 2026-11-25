@@ -4,9 +4,11 @@
   transparência"; as opções em `proposta_caracol_terreo_casaa_2511.py`): os degraus deste nível (o arranque e os
   degraus 1 a 7, de 4,1° a 146,9°, subindo no sentido anti-horário) cheios, com o bocel fino e a sombra curta do degrau
   de cima; a linha de quebra no corte; os de cima (8 a 21) no tom dos degraus em transparência (a pedra a meia
-  opacidade sobre o piso da garagem, que aparece por baixo), com os tracejados; a linha de caminhamento do círculo do
-  arranque até a seta no corte. O piso da garagem refeito sob a escada (image quilting do trecho à esquerda); o ▶ que
-  apontava para fora sai; o S de cada imagem (Inter na final e no 12K A, Kalam no 12K B) fica no mesmo lugar.
+  opacidade sobre o piso da garagem, que aparece por baixo), com os tracejados. A seta ("preciso da seta apontando a
+  subida da escada sem a linha indicativa"): o triângulo cheio sobre os primeiros degraus, girado no sentido da subida
+  (anti-horário), acima do S, sem a linha de caminhamento. O piso da garagem refeito sob a escada (image quilting do
+  trecho à esquerda); o ▶ antigo (apontava para fora) sai; o S de cada imagem (Inter na final e no 12K A, Kalam no
+  12K B) fica no mesmo lugar.
 - **Lavabo** ("movimente o rótulo para esquerda e corrija a bancada"): a faixa escura à esquerda da bancada voltava
   pela máscara do rótulo (o `letras` a lia como letra); o piso refeito de novo da parede à bancada, sem as letras, a
   peça da cuba redesenhada por cima (`terreo_casaa_2511e.peca_cuba`), e o rótulo (as próprias letras de cada imagem)
@@ -14,7 +16,10 @@
   parede, com a folga maior do lado da bancada (antes encostava nela); a mancha escura junto à parede, na altura do
   "A:", sai com o piso.
 
-Final, prancha e 12K A e B.
+- **Lavabo, batentes** ("remova os batentes"): a soleira bege de parede a parede no lugar dos dois batentes.
+
+Final, prancha e 12K A e B. Cada item roda uma vez sobre a imagem (o rótulo do lavabo não deve ser rodado de novo: ele
+reduz o rótulo a 95% de novo):
 
   python3 terreo_casaa_2511f.py [item ...]
 """
@@ -39,7 +44,8 @@ PLANTA = "A_Terreo"
 
 # ----------------------------------------------------------------------------------------------------------------------
 HELICOIDAL = dict(janela=(1915.0, 1508.0, 2040.0, 1634.0), fundo_max_y=1628.0, cima_opac=0.58,
-                  s_caixa=(1998.0, 1572.6, 2017.5, 1587.0))
+                  s_caixa=(1998.0, 1572.6, 2017.5, 1587.0),
+                  seta_ang=10.0, seta_ponta=8.0, seta_r=33.0, seta_comp=9.0, seta_larg=8.0, seta_cor=(30.0, 30.0, 30.0))
 
 
 def _piso_garagem(img, escala, origem, jan):
@@ -110,13 +116,12 @@ def helicoidal(img, escala, origem, q=HELICOIDAL):
     reg = PC.compor(reg, T.reduz(bocel), PC.COR["linha"])
     reg = PC.compor(reg, T.reduz(PC.quebra(T, PC.limites(G["n_vis"]))), PC.COR["linha"])
     reg = PC.pilar(reg, T)
-    # a linha de caminhamento: o círculo no arranque, a seta no corte
-    t0, t1 = G["a0"] + 3.0, PC.limites(G["n_vis"]) - 5.0
-    cam = PC.arco(T, G["rcam"], t0 + 2.4, t1 - 1.0, larg=0.28)
-    pc = PC.ponto(t0, G["rcam"])
-    circ = np.abs(np.hypot(T.x - pc[0], T.y - pc[1]) - 1.25) < 0.16
-    st = PC.seta_tri(T, PC.ponto(t1 + 2.0, G["rcam"]), PC.tangente(t1), comp=3.6, larg=2.8)
-    reg = PC.compor(reg, T.reduz(cam | circ | st), PC.COR["linha"])
+    # a seta da subida (sem a linha de caminhamento): o triângulo cheio sobre os primeiros degraus, girado no sentido
+    # em que a escada sobe (anti-horário), acima do S
+    tm = G["a0"] + q["seta_ang"]
+    st = PC.seta_tri(T, PC.ponto(tm + q["seta_ponta"], q["seta_r"]), PC.tangente(tm), comp=q["seta_comp"],
+                     larg=q["seta_larg"])
+    reg = PC.compor(reg, T.reduz(st), q["seta_cor"])
     # o S de volta
     reg = V.compor(reg, a_s, cor_s)
     img[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
@@ -174,8 +179,18 @@ def lavabo_rotulo(img, escala, origem, q=LAVABO_ROTULO):
     return img
 
 
-ITENS = {"helicoidal": (1905.0, 1490.0, 2050.0, 1640.0), "lavabo_rotulo": (2240.0, 395.0, 2350.0, 525.0)}
-FUNC = {"helicoidal": helicoidal, "lavabo_rotulo": lavabo_rotulo}
+# Lavabo, os batentes ("remova os batentes"): os dois batentes da porta (as peças claras de 2,4 px de cada lado do vão)
+# saem; a soleira bege vai de parede a parede (de 2263,0 a 2320,1), como nas outras portas.
+LAVABO_BATENTES = dict(soleira=(2263.0, 514.5, 2320.1, 523.5))
+
+
+def lavabo_batentes(img, escala, origem, q=LAVABO_BATENTES):
+    return D.soleira(img, escala, origem, [q["soleira"]])
+
+
+ITENS = {"helicoidal": (1905.0, 1490.0, 2050.0, 1640.0), "lavabo_rotulo": (2240.0, 395.0, 2350.0, 525.0),
+         "lavabo_batentes": (2240.0, 480.0, 2350.0, 545.0)}
+FUNC = {"helicoidal": helicoidal, "lavabo_rotulo": lavabo_rotulo, "lavabo_batentes": lavabo_batentes}
 
 
 def item(img, nome, escala=1.0, origem=(0.0, 0.0)):

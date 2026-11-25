@@ -4808,13 +4808,17 @@ a 7), tracejados os de cima. No recorte do 12K B, com o piso da garagem refeito 
 - **Escada helicoidal, opção 1** ("vamos com a opção 1, mas os degraus do pavimento superior devem ter o tom dos
   degraus mas na transparência"): os degraus deste nível (o arranque e os degraus 1 a 7) cheios, com o bocel e a sombra
   curta do degrau de cima, a linha de quebra no corte; os de cima (8 a 21) na pedra dos degraus a 58% sobre o piso da
-  garagem (refeito por image quilting sob a escada), com os tracejados; a linha de caminhamento do círculo do arranque
-  até a seta no corte, no sentido da subida (anti-horário). O ▶ antigo (apontava para fora) sai; o S de cada imagem
+  garagem (refeito por image quilting sob a escada), com os tracejados. Depois ("preciso da seta apontando a subida da
+  escada sem a linha indicativa"): sem a linha de caminhamento, só o triângulo cheio sobre os primeiros degraus,
+  girado no sentido da subida (anti-horário), acima do S. O ▶ antigo (apontava para fora) sai; o S de cada imagem
   fica (Inter na final e no 12K A, Kalam no 12K B).
 - **Lavabo** ("movimente o rótulo para esquerda e corrija a bancada"): a faixa escura à esquerda da bancada voltava pela
   máscara do rótulo da 5ª leva (o `letras` a lia como letra); o piso refeito da parede à bancada sem as letras (a
   mancha junto à parede, na altura do "A:", sai junto), a peça da cuba redesenhada (`terreo_casaa_2511e.peca_cuba`) e
   o rótulo de volta com as próprias letras de cada imagem (o miolo só no quase preto: a mancha e a faixa são cinza),
   a 95% (ele ocupava 55 dos 58,6 px do vão), a 1,6 px da parede, com a folga maior do lado da bancada.
-- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511f_revisao_antes_depois.jpg`; PDF
+- **Lavabo, batentes** ("remova os batentes"): os dois batentes da porta saem; a soleira bege vai de parede a parede
+  (de 2263,0 a 2320,1).
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511f_revisao_antes_depois.jpg` e
+  `renders/POE642_CasaA_PH_Terreo_2511f2_revisao_antes_depois.jpg` (a seta e os batentes); PDF
   da Casa A, conferência e book refeitos.
