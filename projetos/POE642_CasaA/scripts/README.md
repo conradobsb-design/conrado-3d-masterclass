@@ -4683,3 +4683,20 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   nas linhas do rótulo, a faixa de mais acima); a peça cinza solta e o piso junto à porta entram juntos.
 - Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511c_revisao_antes_depois.jpg`; PDF da
   Casa A, conferência e book refeitos.
+
+### Casa A Térreo, travertino bruto novo (25/11): `travertino_terreo_casaa_2511.py`
+
+- **Opções** ("vamos revisar o piso de travertino bruto. traga me 3 opções"): três texturas vistas de cima, sem juntas,
+  geradas no Higgsfield (`_texturas/travertino_opcoes_2511/travertino_opcao_{1,2,3}.png`: o Romano, o Navona marfim e o
+  fiorito em corte transversal), aplicadas na varanda, nas salas e no jantar
+  (`renders/POE642_CasaA_PH_Terreo_2511_travertino_opcoes.jpg`).
+- **Pisos** ("vamos usar esse nos pisos onde for travertino bruto": a opção 2): o creme do travertino antigo (Lab ~ 225,
+  130, 135: varanda, salas, jantar, halls, escritório, lavabo, banhos, lavatório e área gourmet) recebe a textura nova
+  (1,2 m por quadro, espelhada) vezes a luz do lugar (a luminância antiga, bem desfocada): as sombras dos móveis ficam; o
+  tracejado, os rótulos, os móveis e as paredes ficam. O Bege Bahia da piscina e do pergolado não é tocado; a cama do
+  Q. MOTORISTA e a escada caracol ficam de fora; os restos do piso antigo rente às paredes e às bancadas entram.
+- **Bancada** ("esse tom para bancadas no travertino": a opção 3): a bancada do lavabo (a única de travertino no Térreo)
+  recebe o fiorito vezes a luz dela (a cuba esculpida e a sombra ficam); a torneira fica.
+- Final, prancha e 12K A e B (no 12K, só perto do piso achado na final, pelo mapa de `doze_k.json`; a bancada pelo
+  registro); antes e depois em `renders/POE642_CasaA_PH_Terreo_2511_travertino_antes_depois.jpg`; PDF da Casa A,
+  conferência e book refeitos.
