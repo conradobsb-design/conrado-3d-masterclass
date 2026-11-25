@@ -4585,3 +4585,20 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
 - As outras portas do Subsolo (depósito, hall, sauna, circulação, BH serv., elevador) não têm batente contornado.
 - Final (e a manuscrita), prancha, 12K A e B, PDF da Casa A e conferência dos pedidos; antes e depois em
   `renders/POE642_CasaA_PH_Subsolo_2511_batentes_antes_depois.jpg`.
+
+## Casa A Subsolo, 25/11 (2): junção dos pisos, porta de correr da circulação e porta do BH. SERV.
+
+- Usuário: "corrija a junção dos pisos, deixando-os alinhados. Corrija essas portas e seus desenhos. remova da porta do
+  lavabo essa linha dentro dela." — `subsolo_casaa_juncao_portas_2511.py`.
+- **Junção dos pisos**: nos três vãos da parede de baixo da academia (passagem junto à sauna, BH. FEM., BH. MASC.) a
+  divisa vinílico/pedra era ondulada e em níveis diferentes. No PDF, os pisos de baixo (ARQ_CONTRAPISO) começam todos em
+  y = 1505,7, a linha da face de cima da parede da sauna: a divisa é uma reta só nessa linha. O vinílico de cima é
+  esticado até a divisa e a pedra de baixo da divisa para baixo (sem emenda, no máximo 2x, para não riscar); as colunas
+  com parede ficam como estão. A pontinha clara da folha do BH. FEM. dentro da espessura da parede sai.
+- **Porta de correr da circulação** (para o patamar da escada do deck): o retângulo preto da rodada de 19/11 em volta
+  das duas folhas e as barras cinza do render saem (o piso de baixo, deslocado); cada folha é desenhada pelo PDF no
+  padrão (perfil cinza claro, vidro claro e a sua linha fina), a da direita no trilho de cima e a da esquerda no de baixo.
+- **Porta do BH. SERV.** ("a porta do lavabo"): a linha preta estava no vidro de dentro; a folha antiga e a pontinha que
+  descia junto ao bloco saem e a folha é desenhada inteira no mesmo padrão, com a linha só por fora.
+- Final (e a manuscrita), prancha, 12K A e B, PDF da Casa A e conferência; antes e depois em
+  `renders/POE642_CasaA_PH_Subsolo_2511_juncao_portas_antes_depois.jpg`.
