@@ -4906,3 +4906,39 @@ Levantamento no 12K B (`renders/POE642_CasaA_PH_1Pavimento_2511_levantamento.jpg
    X tracejado fino do PDF.
 - Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_1Pavimento_2511_revisao_antes_depois.jpg`; PDF
   da Casa A, conferência e book refeitos.
+
+### Casa A 1º Pavimento, 2ª leva de 25/11: `um_pav_casaa_2511b.py`
+
+Os pedidos com os recortes do 12K B (o travertino deste pavimento já era o novo, do commit 0465062):
+- **Cortinas** ("atualize as cortinas conforme estamos usando"): a C4 das Casas B a E nos 4 trilhos do PDF, pela
+  própria `cortinas_padrao_casad_1611.aplicar` (o linho em ondas a 0,82, o trilho grafite do lado do vidro, 0,22 m de
+  pano, até a ponta da parede e 0,15 m além); o pano de antes sai (o piso logo de dentro, em espelho, fora das paredes
+  do PDF). A final roda a função; ela anota cada limpeza e cada pouso (`_plano_cortinas`, um `inspect.getsource` de
+  `pedidos_terreo_casac_1311.cortinas` com o registro) e o 12K repete as mesmas contas na escala dele, as paredes do
+  PDF levadas por `remap`. A poltrona da suíte que encosta no vão fica por cima da cortina (`PROTEGE`: o creme da peça,
+  o maior pedaço na caixa).
+- **Escada em U** ("melhorar o aspecto desses degraus"): a geometria da escada do Térreo (`terreo_casaa_2511d.ESCADA`),
+  vista de cima: o lance que chega a este nível (com DESCE PARA O HALL INTERNO), o patamar e o começo do outro lance, à
+  direita da linha de corte, na pedra dos degraus do Térreo (161, 175, 185 na final, na cor de cada imagem), com o veio
+  do travertino ao comprido de cada degrau, o bocel fino, a sombra curta no degrau de baixo e o patamar numa pedra só
+  (as manchas saem); os guarda-corpos de vidro e a linha de corte com a quebra em Z finos; o vão à esquerda do corte
+  como está; os rótulos por cima.
+- **Caracol** ("restante dos degraus na transparência"): a mesma escada do Térreo (o centro, o raio e os degraus de
+  17,85° do PDF). A volta que faltava (de 93,55° a 1°, hoje branca) com os degraus no tom dos degraus deste nível a 58%
+  (como os de cima no Térreo, opção 1), os raios do PDF cheios até o corte (93,55°, 111,33°, 129,08°) e tracejados
+  depois (147,27° a 341,51°); o contorno, o pilar, o guarda-corpo e o D por cima.
+- **Piso do Quarto de Serviço, da Saleta e do B. Serviço** ("definir o piso a ser utilizado aqui nessas áreas"): o
+  Bege Bahia das varandas (image quilting do trecho da varanda de 39 m²) na máscara de cor do piso de cada ambiente,
+  fora a cama, o criado, as folhas, o armário, a caracol, a porta de correr, o vidro do box, a bancada e a folha da
+  porta (o vaso, o chuveiro e o puxador saem pela cor, sem o retângulo claro em volta), da passagem da saleta para o
+  B. Serviço até as faces das paredes; a sombra rente às peças, os pontinhos claros do piso antigo dentro e os rótulos
+  de volta (as paredes, pedaços escuros grandes, não entram como letra).
+- **Sala íntima** ("vamos alterar o tom do tapete para não se confundir com o piso. e aproveita e corrigi o encosto do
+  sofá que está quebrado e perdido com o piso"): o travertino refeito na pegada das peças e as peças de novo, na pose da
+  instalação: o tapete no taupe da opção A (`terreo_casaa_1011.TAPETES_1111`), o sofá em L inteiro com a sombra de
+  volume (o encosto da direita contínuo), as mesinhas, a poltrona e a mesa de centro de nogueira.
+- **Bancada da cuba de entrada** ("vamos corrigir o material da bancada e definir os seus limites"): o tampo em
+  travertino (1912,6 a 1990,2 x 1287,8 a 1323,6), um pouco mais escuro que o piso, com o contorno fino, o rodabanca e a
+  sombra curta; a cuba redonda e a torneira da biblioteca (`banho-master/cuba-entrada.png`) por cima.
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_1Pavimento_2511b_revisao_antes_depois.jpg`;
+  PDF da Casa A, conferência e book refeitos.
