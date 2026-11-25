@@ -4571,3 +4571,17 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   a regra da escada da Casa E (`escada_principal_casae_1711`): à esquerda da diagonal de corte, o piso (Bege Bahia) com o
   desenho dos degraus por cima a 55%, sem o branco.
 - Final (e a manuscrita), prancha, 12K A e B e o PDF da Casa A.
+
+## Casa A Subsolo, 25/11: sem as linhas dos batentes nas portas do BH. FEM. e do BH. MASC.
+
+- Usuário (com o recorte da parede de baixo da academia): "remova essas linhas de batentes das portas do subsolo da
+  casa". Os batentes (as pecinhas brancas do marco, na espessura da parede, nas pontas dos vãos) tinham ganhado o
+  contorno preto na rodada das esquadrias de 19/11 (c946cc5): duas nas pontas da parede do meio e duas nos tocos, onde o
+  contorno da folha subia pela espessura da parede.
+- `batentes_subsolo_casaa_2511.py`: cada batente volta ao que era antes de c946cc5 (a parede termina limpa); nos tocos
+  só a espessura da parede volta, e a folha fica com a sua linha fina. No 12K saem também os resíduos antigos do render
+  em volta desses vãos (o tom claro na madeira nas pontas da parede do meio, os pontinhos brancos/laranja junto ao toco
+  do BH. MASC.), pela textura do mesmo piso deslocada na mesma linha.
+- As outras portas do Subsolo (depósito, hall, sauna, circulação, BH serv., elevador) não têm batente contornado.
+- Final (e a manuscrita), prancha, 12K A e B, PDF da Casa A e conferência dos pedidos; antes e depois em
+  `renders/POE642_CasaA_PH_Subsolo_2511_batentes_antes_depois.jpg`.
