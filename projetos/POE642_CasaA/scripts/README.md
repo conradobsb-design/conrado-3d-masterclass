@@ -4887,3 +4887,22 @@ vizinhas somadas, sem fresta na divisa).
   travertino de logo abaixo; a borda do tapete fica.
 - Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511i_almofadas_antes_depois.jpg`;
   PDF da Casa A, conferência e book refeitos.
+
+### Casa A 1º Pavimento, levantamento de 25/11: `um_pav_casaa_2511.py`
+
+Levantamento no 12K B (`renders/POE642_CasaA_PH_1Pavimento_2511_levantamento.jpg`), aplicado com "ok, pode aplicar os 4":
+1. **Vasos sanitários** (Banhos 1, 2 e 3 e o WC do Banho Master): o vaso vinha quebrado (contorno solto, miolo
+   cortado). O travertino refeito na pegada e a bacia Carrara da biblioteca de novo, na pose da instalação
+   (`biblioteca_1pav_casaa_1211`), com a sombra rente.
+2. **Aparadores com TV**: na Suíte Master e na Suíte 3 o aparador vinha translúcido e a TV borrada; o aparador do PDF
+   em madeira sólida (a `bancada-suites` da biblioteca, como na Suíte 2), o vinílico refeito onde o translúcido
+   passava e, na Suíte 3, a escrivaninha de volta onde ele a cobria; a TV desenhada nítida (corpo grafite, o fio claro
+   da frente, a sombra curta) no retângulo do PDF (Master e Suíte 2) e, na Suíte 3 (sem TV no PDF), sobre o aparador,
+   junto à parede, perto do eixo da cama.
+3. **Sala íntima**: a mesa de centro de nogueira com a borda nítida (o tampo da própria imagem no retângulo da mesa,
+   o tapete refeito no anel borrado em volta, a sombra das mesas) e o quadradinho cinza na ponta do sofá fora (o
+   travertino com a luz do piso em volta).
+4. **Vão junto à escada** (2545,5 a 2760,4 x 890,7 a 902,6): o miolo com ruído; o claro liso, o contorno fino preto e o
+   X tracejado fino do PDF.
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_1Pavimento_2511_revisao_antes_depois.jpg`; PDF
+  da Casa A, conferência e book refeitos.
