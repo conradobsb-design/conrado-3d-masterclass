@@ -4664,3 +4664,22 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   74% (`renders/POE642_CasaA_PH_Terreo_2511_prainha_opcoes.jpg`).
 - Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511b_revisao_antes_depois.jpg`; PDF da
   Casa A, conferência (completa, interna e da Casa A) e book refeitos.
+
+### Casa A Térreo, 3ª leva de 25/11: `terreo_casaa_2511c.py`
+
+- **Tapete da varanda** ("corrija as falhas no tapete"): o canto entre a mesinha redonda e o sofá curvo (o retângulo
+  claro, a borda de cima um degrau abaixo e a sombra diagonal solta) recebe o próprio tapete da mesma linha mais à
+  esquerda; a madeira, a almofada e a mesinha ficam (a linha da borda do sofá e o círculo da mesinha).
+- **Aparador da sala de jantar** ("remova esse contorno de linhas do mobiliário"): a moldura sai e o aparador fica num tom
+  sólido só, o do miolo (a madeira achada na imagem, até o pé junto à parede).
+- **Portas** ("corrija a representação dessas portas": a cozinha, a passagem da cozinha para a circulação, o B. MOTORISTA,
+  a porta de correr dele e o Q. MOTORISTA): em volta de cada folha, fora das paredes do PDF, entra o piso da mesma linha
+  ao lado (sem as folhas antigas sobrepostas, a de ripado com o puxador, os contornos deslocados, as sombras de folhas e
+  o tampo de parede passando da face; na porta do B. MOTORISTA a fonte leva a sombra do piso rente à parede, coluna a
+  coluna); a peça fina de parede do PDF junto à porta da cozinha vira um retângulo limpo no cinza da parede; cada folha
+  do PDF é desenhada no padrão das esquadrias.
+- **Q. MOTORISTA** ("corrija o piso e essas falhas", só nos 12K): o piso estava em faixas (liso, texturizado, liso); o
+  texturizado, o mesmo das cozinhas, vai para o quarto todo (a faixa espelhada em tiras, as listras horizontais seguem;
+  nas linhas do rótulo, a faixa de mais acima); a peça cinza solta e o piso junto à porta entram juntos.
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511c_revisao_antes_depois.jpg`; PDF da
+  Casa A, conferência e book refeitos.
