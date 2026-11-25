@@ -4700,3 +4700,51 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
 - Final, prancha e 12K A e B (no 12K, só perto do piso achado na final, pelo mapa de `doze_k.json`; a bancada pelo
   registro); antes e depois em `renders/POE642_CasaA_PH_Terreo_2511_travertino_antes_depois.jpg`; PDF da Casa A,
   conferência e book refeitos.
+
+### Casa A Térreo, 4ª leva de 25/11 (os recortes do 12K B): `terreo_casaa_2511d.py` e `vetor_2511.py`
+
+`vetor_2511.py`: o desenho vetorial nítido em qualquer escala (a final ou os 12K) pelas coordenadas da final: a
+cobertura exata dos retângulos (a área de cada px) e o raster supersampleado dos outros polígonos (um a um, sem o
+par-ímpar entre sobrepostos); `letras` separa os rótulos escuros de um trecho (o alfa contra o fundo liso) para voltarem
+por cima de um desenho novo. Em `terreo_casaa_2511d.py`, `refazer_piso` refaz o travertino novo (a mesma textura e a
+mesma fase da `travertino_terreo_casaa_2511`) num trecho, com a luz do piso novo em volta (o valor mais frequente da
+razão imagem/textura, alisado), sem as manchas, menos as peças (com a sombra curta delas).
+
+- **Escada do jardim** ("a divisão em diagonal para a parte que ficará transparente e o formato dos degraus. melhorar
+  a representação do guarda corpo"): redesenhada pelo PDF: o 1º lance (degraus 1 a 9, passo 17,9), o patamar inteiro
+  (sem degraus) e o 2º lance (11 a 19); a parte cheia à esquerda da linha de corte do PDF (a diagonal com a quebra em
+  Z, fina); o resto transparente (o tom dos degraus, o desenho a 0,55, 0,15 da grama); as pedras no veio do travertino
+  ao comprido, o bocel fino com a sombra curta; os guarda-corpos de vidro do PDF (as bordas dos lances, o U do vão do
+  jardim, o patamar): claros sobre os degraus cheios e mais escuros sobre a parte transparente ("onde está mais claro
+  nos degraus, mantenha o guarda corpo mais claro. onde está transparente, ele fica mais escuro"); o contorno claro na
+  linha do PDF (o de antes, 1,5 px fora, sai); os rótulos voltam por cima.
+- **Escada que desce para o Subsolo** ("criou um piso na junta entre a madeira e o degrau ... ver o piso travertino
+  mais opaco"): os 10 degraus do PDF colados no deck (de 903,5), no travertino novo; depois da diagonal a 80%; o bocel,
+  a junta fina com o deck, a diagonal fina, o contorno claro na grama.
+- **Geladeiras e máquinas de lavar** pela biblioteca: a geladeira inox G2 (a das Casas B, D e E) nos 4 módulos do PDF,
+  a frente para a cozinha, com o contorno do corpo; a lavadora de tampa superior (biblioteca das Casas D e E) nos 2 vãos.
+- **Plantas** pela biblioteca: a palmeira-ráfis no lugar das 4 plantas borradas (2 na varanda, 1 na sala de estar,
+  1 no jantar); os cantos em volta refeitos (sem as manchas brancas e as sombras velhas), sem tocar no sofá e no vidro.
+- **Lavabo** ("soleira, bancada no tom do piso (levemente escuro) soleira da janela e janelas"): a bancada no
+  travertino do piso a 90% (a luz da cuba esculpida vem da bancada de antes do fiorito, peça por peça); a faixa ao lado
+  da peça de baixo em piso; a soleira da porta e a da janela alta no bege, com as folhas e os batentes no padrão; o
+  piso sob a janela antiga (que descia para dentro).
+- **Escritório**: o piso livre refeito inteiro (sem as manchas das peças antigas, a faixa velha junto à parede da
+  direita, o fundo da porta), as peças protegidas pelos contornos (a mesa, as cadeiras, a poltrona, a mesinha, o
+  aparador, o armário em L); as soleiras da janela de canto e da porta no bege ("corrija a representação das soleiras
+  para o tom beje"); as folhas, os batentes e a porta aberta no padrão; a parede de baixo na face do PDF.
+- **Armário junto ao lavabo**: o retângulo do PDF no tom sólido do miolo com o contorno fino; o piso em volta sem as
+  manchas.
+- **Soleiras no bege** também no GÁS (os tocos de parede nos cantos e os batentes, como no PDF), nas portas de correr
+  da área de serviço e nas janelas do WC e do banho varanda, com as folhas redesenhadas por cima.
+- **Bancada da área gourmet** ("mantenha o mesmo tom para a bancada, fora a fora"): o U do PDF em granito marrom
+  desenhado (o tom mediano, o mosqueado leve, os pontinhos sorteados em coordenadas da final), sem as emendas e as
+  peças em outro tom; o cooktop, a grelha, a cuba e a torneira ficam; **banquetas** ("precisam estar sob a bancada e
+  não sobre"): a bancada e a borda passam por cima, com a sombra do tampo na banqueta.
+- **Tracejados** da varanda e da sala de estar ("deixar as linhas mais finas"): os traços afinados pelo miolo (0,55 px
+  da final), o mesmo desenho; o que sai volta ao piso novo.
+- **Filete entre o Bege Bahia e o travertino** ("mantenha essa linha ... até o final. faz o L também aqui"): a divisa
+  do PDF (x 1512,5 até 1207,2; y 1207,2 de 1219,9 a 1512,5; x 1219,9 até 1643,0) num filete fino e contínuo, só no
+  piso (as sombras ficam).
+- Final, prancha e 12K A e B (registro local por item); antes e depois em
+  `renders/POE642_CasaA_PH_Terreo_2511d_revisao_antes_depois.jpg`; PDF da Casa A, conferência e book refeitos.
