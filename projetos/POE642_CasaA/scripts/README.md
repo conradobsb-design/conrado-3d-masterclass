@@ -4602,3 +4602,12 @@ das pastas do Drive (os mesmos de `_pdfs_cliente/`, md5 iguais em 19/11).
   descia junto ao bloco saem e a folha é desenhada inteira no mesmo padrão, com a linha só por fora.
 - Final (e a manuscrita), prancha, 12K A e B, PDF da Casa A e conferência; antes e depois em
   `renders/POE642_CasaA_PH_Subsolo_2511_juncao_portas_antes_depois.jpg`.
+
+## Casa A Subsolo, 25/11 (3): o contorno na folha das portas do BH. FEM. e do BH. MASC.
+
+- Usuário: "corrija o contorno para ficar na porta." — no 12K a folha do render (barra clara com sombra) estava até
+  1,5 px da final à direita do lugar do PDF e o contorno fino ficava metade na folha, metade no piso.
+- `folhas_bh_subsolo_casaa_2511.py`: a folha do render, a sombra e o contorno saem (a pedra do próprio banho ao lado,
+  deslocada) e cada folha é desenhada pelo PDF no padrão (perfil cinza claro, vidro claro, a linha fina encostada na
+  folha). Final (e a manuscrita), prancha, 12K A e B, PDF da Casa A e conferência; antes e depois em
+  `renders/POE642_CasaA_PH_Subsolo_2511_folhas_bh_antes_depois.jpg`.

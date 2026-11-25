@@ -26,14 +26,14 @@ from subsolo_casaa_juncao_portas_2511 import copiar  # noqa: E402
 PLANTA = "A_Subsolo"
 # (folha do PDF, caixa da folha antiga com a sombra e o contorno, deslocamento da pedra que entra no lugar) — px da final
 FOLHAS = {
-    "fem": ([(1497.6, 1514.7, 1500.0, 1568.4)], (1495.3, 1515.0, 1502.6, 1571.2), (8.0, 0.0)),
-    "masc": ([(1859.4, 1514.7, 1861.8, 1568.4)], (1856.9, 1515.0, 1864.2, 1571.2), (-8.0, 0.0)),
+    "fem": ([(1497.6, 1514.7, 1500.0, 1568.4)], (1495.3, 1514.3, 1502.6, 1571.2), (8.0, 0.0)),
+    "masc": ([(1859.4, 1514.7, 1861.8, 1568.4)], (1856.9, 1514.3, 1864.2, 1571.2), (-8.0, 0.0)),
 }
 
 
 def folha(img, nome, escala=1.0, origem=(0.0, 0.0)):
     g, velha, desloc = FOLHAS[nome]
-    img = copiar(img, velha, desloc, escala, origem, protege=True)
+    img = copiar(img, velha, desloc, escala, origem, protege=False)
     traco = 0.5 if escala <= 1.5 else min(0.5, EP.TRACO_12K / escala)
     return VC.redesenhar(img, g, escala=escala, origem=origem, traco=traco, inpaint=False)
 
