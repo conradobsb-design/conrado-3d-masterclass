@@ -4826,3 +4826,34 @@ a 7), tracejados os de cima. No recorte do 12K B, com o piso da garagem refeito 
   `renders/POE642_CasaA_PH_Terreo_2511f2_revisao_antes_depois.jpg` (a seta e os batentes) e
   `renders/POE642_CasaA_PH_Terreo_2511f3_revisao_antes_depois.jpg` (a seta de antes e o hall); PDF
   da Casa A, conferência e book refeitos.
+
+### Casa A Térreo, 7ª leva de 25/11: `terreo_casaa_2511g.py`
+
+Cada item corrigido na final e no 12K A e B (o registro do 12K por item; o piso refeito com `refazer`: travertino ou o
+marrom da área de serviço por image quilting, com a luz do piso em volta e a emenda suave só nos lados abertos; zonas
+vizinhas somadas, sem fresta na divisa).
+- **Banho do motorista** ("corrija essa cuba"): o piso refeito junto à bancada, a bancada de granito (a da gourmet) no
+  retângulo do PDF e a cuba compacta da biblioteca (`banho-do-motorista/cuba-compacta`) nítida, com a sombra baixa.
+- **Soleiras** ("altere as soleiras para um tom mais escuro do travertino, não é bege bahia"): as soleiras da fachada
+  de baixo (GÁS, porta de correr, janelas), do lavabo (porta, de parede a parede, e janela) e do escritório no
+  travertino a 84%, com o contorno da própria pedra a 70% (as verticais com o veio na vertical); as folhas de volta por
+  cima. A mancha em volta da ponta da parede do escritório, do lado do hall ("remova a mancha em volta da parede"),
+  sai, com a parede intacta (a face de baixo em 610,1).
+- **X de projeção** ("remova esses erros no piso"): nos oito cantos dos dois X (sala de estar e varanda), a seta grossa
+  no vértice e os quadradinhos (restos de texto) saem; o tracejado do PDF volta com o traço do que fica (2 px a 141 na
+  final; 0,78 px da final a 117 no 12K). O filete (1512,5) e o vidro entre a varanda e a sala ficam.
+- **Porta longa** ("corrija a falha na porta, mantendo o mesmo tom sobre ela do início ao fim"): a folha de
+  2288,4 a 2484,3 num tom só, com as sobras de cima e de baixo cobertas pelo piso vizinho.
+- **Área de serviço** ("corrija esses erros no piso, tanto em frente às máquinas quanto atrás da porta"): o piso marrom
+  em frente às máquinas (com a sombra delas) e atrás da porta de serviço; a folha de volta.
+- **Despensa** ("corrija a representação aqui também"; "corrija a parede e remova batente. porta quina a quina com a
+  parede"; "não remova a parede"): sem batente (R 406), o toco da parede vai até a face da folha (2057,3), copiado da
+  parede de cima da despensa (mesma espessura e contorno), e a folha encosta na quina; do outro lado, a ponta da parede
+  de cima vai até a ponta da folha fechada (2099,1). A parede da esquerda com a ponta reta em 1514,7 (a linha da folha
+  fechada da porta de serviço), copiada da própria parede mais abaixo; o resto do batente e o piso rasgado em volta saem.
+- **Gourmet e lavatório** ("corrija essas manchas em volta da bancada e parede"; "corrija também essa mancha"): as
+  manchas na faixa à esquerda da bancada em U e junto à parede do lavatório.
+- **Escada do jardim** ("corrija essas manchas no piso também"): as manchas à esquerda do vidro da escada (junto à
+  SALA DE JANTAR e ao elevador), com os rótulos preservados.
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511g_revisao_antes_depois.jpg`; PDF
+  da Casa A, conferência e book refeitos.
