@@ -5,8 +5,9 @@
   degraus 1 a 7, de 4,1° a 146,9°, subindo no sentido anti-horário) cheios, com o bocel fino e a sombra curta do degrau
   de cima; a linha de quebra no corte; os de cima (8 a 21) no tom dos degraus em transparência (a pedra a meia
   opacidade sobre o piso da garagem, que aparece por baixo), com os tracejados. A seta ("preciso da seta apontando a
-  subida da escada sem a linha indicativa"): o triângulo cheio sobre os primeiros degraus, girado no sentido da subida
-  (anti-horário), acima do S, sem a linha de caminhamento. O piso da garagem refeito sob a escada (image quilting do
+  subida da escada sem a linha indicativa", e depois, com o recorte da seta de antes: "eu quero assim - essa seta"):
+  sem a linha de caminhamento, a seta de antes (o triângulo cheio do projeto, no mesmo lugar e tamanho, acima do S),
+  tirada de cada imagem no commit a73d11a. O piso da garagem refeito sob a escada (image quilting do
   trecho à esquerda); o ▶ antigo (apontava para fora) sai; o S de cada imagem (Inter na final e no 12K A, Kalam no
   12K B) fica no mesmo lugar.
 - **Lavabo** ("movimente o rótulo para esquerda e corrija a bancada"): a faixa escura à esquerda da bancada voltava
@@ -17,6 +18,8 @@
   "A:", sai com o piso.
 
 - **Lavabo, batentes** ("remova os batentes"): a soleira bege de parede a parede no lugar dos dois batentes.
+- **Hall** ("sim, limpe a mancha do hall"): a mancha escura abaixo da porta do lavabo, junto à parede da direita, sai
+  (o travertino com a luz do piso em volta).
 
 Final, prancha e 12K A e B. Cada item roda uma vez sobre a imagem (o rótulo do lavabo não deve ser rodado de novo: ele
 reduz o rótulo a 95% de novo):
@@ -45,7 +48,7 @@ PLANTA = "A_Terreo"
 # ----------------------------------------------------------------------------------------------------------------------
 HELICOIDAL = dict(janela=(1915.0, 1508.0, 2040.0, 1634.0), fundo_max_y=1628.0, cima_opac=0.58,
                   s_caixa=(1998.0, 1572.6, 2017.5, 1587.0),
-                  seta_ang=10.0, seta_ponta=8.0, seta_r=33.0, seta_comp=9.0, seta_larg=8.0, seta_cor=(30.0, 30.0, 30.0))
+                  seta_rev="a73d11a", seta_caixa=(1991.0, 1550.0, 2019.0, 1572.6), seta_cor=(30.0, 30.0, 30.0))
 
 
 def _piso_garagem(img, escala, origem, jan):
@@ -60,6 +63,47 @@ def _piso_garagem(img, escala, origem, jan):
     H, W = jan[3] - jan[1], jan[2] - jan[0]
     return texturas.quilting([Fd, np.ascontiguousarray(Fd[:, ::-1]), np.ascontiguousarray(Fd[::-1])], H, W, p=p,
                              sobra=max(3, p // 3), rng=np.random.default_rng(5))[:H, :W].astype(np.float32)
+
+
+ARQ = {"atual": None}                       # o arquivo em trabalho (final, A ou B), posto por `main`
+
+
+def _arquivo(escala):
+    if ARQ["atual"]:
+        return ARQ["atual"]
+    c, pav = PLANTA.split("_")
+    if escala < 2:
+        return EP.PLANTAS[PLANTA][0]
+    return f"POE642_Casa{c}/entrega/POE642_Casa{c}_PH_{pav}_12K_opcao_{os.environ.get('OP12K', 'B')}.jpg"
+
+
+_ANT = {}
+
+
+def _seta_antiga(jan, s, origem, q):
+    """O alfa da seta de antes na janela: o maior pedaço quase preto da caixa da seta (o S fica de fora), com a borda
+    suave pela luz do fundo em volta."""
+    rel = _arquivo(s)
+    if rel not in _ANT:
+        _ANT[rel] = EP.git_img(rel, q["seta_rev"])
+    ant = _ANT[rel]
+    X0, Y0, X1, Y1 = jan
+    reg = ant[Y0:Y1, X0:X1].astype(np.float32)
+    L = reg.mean(2)
+    xs, ys = V.coords(jan, s, origem)
+    bx0, by0, bx1, by1 = q["seta_caixa"]
+    caixa = (xs[None, :] >= bx0) & (xs[None, :] <= bx1) & (ys[:, None] >= by0) & (ys[:, None] <= by1)
+    nucleo = (L < 55) & caixa
+    n, lab, st, cen = cv2.connectedComponentsWithStats(nucleo.astype(np.uint8), 8)
+    if n < 2:
+        return None
+    maior = 1 + int(np.argmax(st[1:, cv2.CC_STAT_AREA]))
+    core = (lab == maior)
+    r = max(1, int(round(0.7 * s)))
+    m = cv2.dilate(core.astype(np.uint8), cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * r + 1, 2 * r + 1)))
+    fundo = cv2.inpaint(np.clip(L, 0, 255).astype(np.uint8), m, max(3, 2 * r), cv2.INPAINT_TELEA).astype(np.float32)
+    Lt = float(np.percentile(L[core], 10))
+    return (np.clip((fundo - L) / np.maximum(fundo - Lt, 1.0), 0, 1) * (m > 0)).astype(np.float32)
 
 
 def helicoidal(img, escala, origem, q=HELICOIDAL):
@@ -116,12 +160,11 @@ def helicoidal(img, escala, origem, q=HELICOIDAL):
     reg = PC.compor(reg, T.reduz(bocel), PC.COR["linha"])
     reg = PC.compor(reg, T.reduz(PC.quebra(T, PC.limites(G["n_vis"]))), PC.COR["linha"])
     reg = PC.pilar(reg, T)
-    # a seta da subida (sem a linha de caminhamento): o triângulo cheio sobre os primeiros degraus, girado no sentido
-    # em que a escada sobe (anti-horário), acima do S
-    tm = G["a0"] + q["seta_ang"]
-    st = PC.seta_tri(T, PC.ponto(tm + q["seta_ponta"], q["seta_r"]), PC.tangente(tm), comp=q["seta_comp"],
-                     larg=q["seta_larg"])
-    reg = PC.compor(reg, T.reduz(st), q["seta_cor"])
+    # a seta: a de antes (o triângulo cheio do projeto, no mesmo lugar e tamanho, pedido do usuário: "eu quero assim -
+    # essa seta"), tirada da mesma imagem no commit anterior à escada nova
+    a_t = _seta_antiga(jan, s, origem, q)
+    if a_t is not None:
+        reg = V.compor(reg, a_t, q["seta_cor"])
     # o S de volta
     reg = V.compor(reg, a_s, cor_s)
     img[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
@@ -188,9 +231,31 @@ def lavabo_batentes(img, escala, origem, q=LAVABO_BATENTES):
     return D.soleira(img, escala, origem, [q["soleira"]])
 
 
+# Hall, a mancha escura logo abaixo da porta do lavabo, junto à parede da direita ("sim, limpe a mancha do hall"): o
+# travertino de novo com a luz do piso em volta, até a soleira e a parede (sem emenda ali), a emenda suave só para a
+# esquerda e para baixo, no piso aberto.
+HALL_MANCHA = dict(zona=(2296.0, 523.8, 2344.6, 546.0), ref=(2276.0, 523.8, 2344.6, 566.0), pena=3.0)
+
+
+def hall_mancha(img, escala, origem, q=HALL_MANCHA):
+    s = escala
+    jan = V.janela(img, q["ref"], s, origem, folga=2)
+    X0, Y0, X1, Y1 = jan
+    reg = img[Y0:Y1, X0:X1].astype(np.float32)
+    xs, ys = V.coords(jan, s, origem)
+    z = q["zona"]
+    az = (V.cob([V.ret(*z)], jan, s, origem) * E._faixa(xs, z[0], None, q["pena"])[None, :]
+          * E._faixa(ys, None, z[3], q["pena"])[:, None])
+    livre = V.cob([V.ret(*q["ref"])], jan, s, origem) > 0.99
+    reg = E._piso_m(reg, D.piso_tt(jan, s), az, livre, tol=0.06, luz_sig=12.0, escala=s)
+    img[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    return img
+
+
 ITENS = {"helicoidal": (1905.0, 1490.0, 2050.0, 1640.0), "lavabo_rotulo": (2240.0, 395.0, 2350.0, 525.0),
-         "lavabo_batentes": (2240.0, 480.0, 2350.0, 545.0)}
-FUNC = {"helicoidal": helicoidal, "lavabo_rotulo": lavabo_rotulo, "lavabo_batentes": lavabo_batentes}
+         "lavabo_batentes": (2240.0, 480.0, 2350.0, 545.0), "hall_mancha": (2260.0, 500.0, 2360.0, 575.0)}
+FUNC = {"helicoidal": helicoidal, "lavabo_rotulo": lavabo_rotulo, "lavabo_batentes": lavabo_batentes,
+        "hall_mancha": hall_mancha}
 
 
 def item(img, nome, escala=1.0, origem=(0.0, 0.0)):
@@ -202,6 +267,7 @@ def main(so=None):
     base = cv2.imread(str(EP.PROJ / EP.PLANTAS[PLANTA][0]))
     nomes = [n for n in ITENS if not so or n in so]
     for f in EP.PLANTAS[PLANTA]:
+        ARQ["atual"] = f
         im = cv2.imread(str(EP.PROJ / f))
         for nome in nomes:
             im = item(im, nome)
@@ -215,6 +281,7 @@ def main(so=None):
     dz = json.loads((EP.PROJ / "POE642_Book/checklist/dados/doze_k.json").read_text())[PLANTA]
     for op in os.environ.get("OPCOES", "AB"):
         rel = EP.PROJ / f"POE642_Casa{c}/entrega/POE642_Casa{c}_PH_{pav}_12K_opcao_{op}.jpg"
+        ARQ["atual"] = str(rel.relative_to(EP.PROJ))
         pil = Image.open(rel)
         dpi = pil.info.get("dpi", (743, 743))
         im = cv2.cvtColor(np.array(pil.convert("RGB")), cv2.COLOR_RGB2BGR)
