@@ -19,13 +19,15 @@ projeção do pavimento superior e as folhas de duas portas.
   guarda-corpo da escada do jardim (o rótulo SALA DE JANTAR por cima); no piso marrom (a trama do próprio piso, por
   image quilting de um trecho limpo), o retângulo claro em volta das máquinas de lavar e o de trás da porta da área de
   serviço.
-- **Projeção do pavimento superior** ("remova esses erros no piso"): no canto do tracejado (a seta grossa onde as três
-  linhas se encontram), os restos do texto apagado (os quadradinhos) e a mancha junto ao armário: o piso refeito e os
-  traços do PDF redesenhados finos (0,55 px, o cinza dos outros tracejados).
+- **Projeção do pavimento superior** ("remova esses erros no piso"): nos oito cantos dos X da sala de estar e da
+  varanda (a seta grossa onde as três linhas se encontram), os restos do texto apagado (os quadradinhos) e a mancha
+  junto ao armário: o piso refeito e os traços do PDF redesenhados com o traço do tracejado que fica (2 px a 141 na
+  final; 0,78 px da final a 117 no 12K), sem tocar no filete nem no vidro entre a varanda e a sala.
 - **Portas**: a folha comprida de baixo do escritório ("corrija a falha na porta, mantendo o mesmo tom sobre ela do
   início ao fim") redesenhada inteira no padrão das folhas (opaca, o mesmo tom do começo ao fim); a da despensa ("corrija
-  a representação aqui também"), que tinha a borda serrilhada e a mancha escura ao lado, com o piso marrom refeito em
-  volta e a folha e o batente redesenhados.
+  a representação aqui também"; "corrija a parede e remova batente. porta quina a quina com a parede"; "não remova a
+  parede"), sem batente: o toco da parede até a face da folha e a folha na quina; a ponta da parede de cima até a ponta
+  da folha fechada; a parede da esquerda com a ponta reta; o piso marrom refeito em volta.
 
 Final, prancha e 12K A e B.
 

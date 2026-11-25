@@ -4857,3 +4857,16 @@ vizinhas somadas, sem fresta na divisa).
   SALA DE JANTAR e ao elevador), com os rótulos preservados.
 - Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511g_revisao_antes_depois.jpg`; PDF
   da Casa A, conferência e book refeitos.
+
+### Casa A Térreo, 8ª leva de 25/11: `terreo_casaa_2511h.py`
+
+- **Tracejado sobre o tapete** ("sim, corrija o contorno do tracejado no tapete"): na linha de cima do X da sala de
+  estar (y 610,1), de 1963 a 2100, onde ela passa sobre o tapete redondo do jantar e na sombra da poltrona, cada traço
+  vinha com um contorno bege (o travertino de quando o traço foi afinado), a borda serrilhada e, na sombra, borrado. A
+  faixa da linha (±1,8 px da final no 12K; ±2,4 na final, onde o contorno pega a linha de pixels de baixo) refeita: a cor
+  por inpaint (a borda do tapete e a sombra seguem) e a trama fina da própria faixa deslocada na vertical (trecho a
+  trecho, a que bate com a cor), sem tocar nas poltronas; o traço do PDF de volta por cima com o traço do tracejado que
+  fica (2 px a 141 na final; 0,78 px da final a 117 no 12K), por baixo das poltronas. Na final, mais dois restos de traço
+  com o contorno claro (na borda da poltrona da direita e abaixo do tapete) saem.
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511h_tapete_antes_depois.jpg`; PDF da
+  Casa A, conferência e book refeitos.
