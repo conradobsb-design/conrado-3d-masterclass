@@ -4870,3 +4870,20 @@ vizinhas somadas, sem fresta na divisa).
   com o contorno claro (na borda da poltrona da direita e abaixo do tapete) saem.
 - Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511h_tapete_antes_depois.jpg`; PDF da
   Casa A, conferência e book refeitos.
+
+### Casa A Térreo, 9ª leva de 25/11: `terreo_casaa_2511i.py`
+
+- **Almofadas** ("sim, limpe as almofadas"): nas quatro poltronas de couro caramelo da sala de estar, cada almofada
+  tinha uma mancha creme contornada com um fiapo cinza dentro (resto de traço). A detecção pela cor não separava a
+  mancha da luz das almofadas; no lugar, o miolo de cada poltrona (almofadas e assento) de novo da peça da biblioteca
+  (`sala-de-estar/poltrona-caramelo-render-v2`), na pose da instalação (`biblioteca_terreo_casaa_1211`, "estar_
+  projecao"), com o ajuste fino do deslocamento pela correlação de fase com a imagem; só o tecido, recuado 0,9 px da
+  final do couro, que fica com a sombra. Os quadradinhos de resto de texto junto às poltronas (na borda do assento de
+  duas delas e embaixo de uma) e o resto claro à esquerda do trançado da poltrona de cima da varanda saem: o que
+  destoa da mediana de perto, menos o couro e o trançado, refeito pelo entorno (inpaint, três passadas; o couro e o
+  trançado, só para o inpaint, no tom do piso de perto, para não vazarem).
+- **Tapete do jantar** ("tire o tracejado do tapete"): a linha cinza logo abaixo da borda reta de baixo do tapete
+  redondo (o contorno do PDF, de 2018 a 2054) sai: a faixa de 1,25 px da final abaixo da borda refeita com o
+  travertino de logo abaixo; a borda do tapete fica.
+- Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_Terreo_2511i_almofadas_antes_depois.jpg`;
+  PDF da Casa A, conferência e book refeitos.
