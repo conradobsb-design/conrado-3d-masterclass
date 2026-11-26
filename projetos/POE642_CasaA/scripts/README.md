@@ -5122,3 +5122,33 @@ da biblioteca; (4) a soleira em faixa cinza translúcida da passagem do closet m
 pedra no travertino mais escuro, com a folha do PDF em madeira; (5) os tampões da esquadria nas duas pontas do vidro
 entre a varanda e o living (1550,3 a 1562,3 x 776,4 a 783,6 e o de baixo), para as paredes até o vidro, como nas pontas
 do vidro da academia do Subsolo. Os pilares redondos ficam em preto (o padrão pedido na Casa A).
+
+### Casa B Térreo, o levantamento de 26/11 aplicado: `terreo_casab_2611.py`
+
+"ok, pode aplicar os 5" (o levantamento `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611_levantamento.jpg`):
+
+1. **Vidros sem linha técnica**: o vidro de antes (a barra cinza cromada com contorno; os de entre a ducha e o vaso do
+   banho master em preto) coberto pelo piso de logo ao lado (a faixa deslocada do lado livre: em cima nos Banhos 1 e 2,
+   embaixo nos BH gourmet, por causa do rótulo, e no BH serviço; ao lado nos verticais) e as folhas do PDF no vidro claro
+   dos boxes, sem contorno (`um_pav_casaa_2511e.folhas_vidro`), de parede a parede: banho master (as duas divisórias de
+   correr, 4 folhas cada, e os dois vidros fixos da ducha), Banhos 1, 2 e 3, os dois BH gourmet, BH serviço e BH
+   motorista (os boxes de correr de 2 folhas); a frente da adega na soleira de pedra do travertino mais escuro (a faixa
+   da esquadria do PDF, 2044,7 a 2238,2 x 1182,5 a 1194,4) com o vidro fixo, e o fio escuro de antes, logo abaixo,
+   coberto pelo piso.
+2. **Os 15 nichos** (o retângulo do PDF na parede, que vinha como ferragem cromada com puxador): a parede de fora a fora
+   no cinza dela, com as faces medidas na própria imagem logo antes e logo depois do nicho (presas a até 2,5 px das do
+   PDF, `FACES_PDF`; nos dois nichos de baixo do banho master, rentes ao canto, as do PDF), e o piso do lado do banho,
+   onde a ferragem passava da parede, no travertino novo com a luz do piso de logo depois (no BH serviço, de piso
+   marrom, o piso de logo ao lado).
+3. **Vasos** (banho master, os dois; Banhos 1, 2 e 3): o travertino refeito na pegada do PDF até a parede de trás e a
+   bacia Carrara da biblioteca (`biblioteca_1pav_casaa_1211`, 21,1 x 30,7) de costas para a parede, com a sombra rente.
+4. **Passagem do closet master para a sala íntima**: soleira de pedra no travertino mais escuro (1550,3 a 1562,3 x
+   510,7 a 576,4) e a parede quina a quina: do toco de cima até a face da folha aberta (517,9) e da ponta da folha
+   fechada (572,8) até o toco de baixo.
+5. **Pontas do vidro entre a varanda e o living**: o tampão da esquadria sai; a parede de cima reta até 776,4 e a de
+   baixo a partir de 1245,2 (o trecho da própria parede, deslocado), o vidro da varanda (como está) estendido até
+   encostar em cada uma e o piso no resto do tampão.
+
+Final, prancha e 12K A e B (32 pontos, cada um pelo registro local, 0,976 a 0,998); antes e depois em
+`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611_revisao_antes_depois.jpg`; PDF da Casa B, conferência e book
+refeitos.
