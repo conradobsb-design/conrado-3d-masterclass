@@ -5594,3 +5594,23 @@ Um remendo de piso antigo passou por cima da beira das peças.
 Cada peça volta inteira da biblioteca, na mesma pose e no tom de antes, com o travertino refeito em volta, só no piso. A
 sombra curta fica só no piso refeito, e as folhas da planta continuam por cima do sofá curvo. Final, prancha e 12K A e B; antes e
 depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611h_antes_depois.jpg`.
+
+### Casa C Térreo, 26/11 (9): contornos dos tapetes do estar, adornos das mesas de freijó e claraboia da varanda master (`terreo_casac_2611i.py`)
+
+- **Tapete manchado** ("definir contorno do tapete."): a beira do tapete, que se desfazia em franja no travertino,
+  agora é a do desenho do PDF, nítida. Numa faixa de 8 px de cada lado:
+  - dentro, o próprio tapete espelhado de dentro para fora;
+  - fora, o travertino na luz do piso em volta, com a sombra rente do tapete.
+
+  As peças sobre a beira ficam como estão, com a sombra delas.
+- **Tapete retangular**: a barra de 3 px no tom do tapete, como a da sala TV, por baixo das poltronas azuis, dos sofás e
+  das mesinhas seixo.
+- **Mesas de freijó** ("colocar adornos sobre as mesas"), com adornos da biblioteca:
+  - na de cima, os livros de linho bege e a bandeja de nogueira com o nó de cerâmica;
+  - na de baixo, o vaso com ramo verde e o livro de linho sálvia.
+- **Claraboia da varanda master** ("corrija o piso dentro do tracejado. esse tracejado é só para sinalizar a
+  claraboia"): o véu claro do vinílico antigo dentro do tracejado vira o travertino da varanda, e o tracejado cinza
+  fino fica.
+
+Final, prancha e 12K A e B; antes e depois (12K B) em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611i_antes_depois.jpg`.
