@@ -5243,3 +5243,29 @@ Casa B, conferência e book refeitos.
 Final, prancha e 12K A e B; antes e depois em
 `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611e_mesa_poltronas_antes_depois.jpg`; PDF da Casa B, conferência e
 book refeitos.
+
+### Casa B Térreo, 6ª leva de 26/11: `terreo_casab_2611f.py`
+
+- **Tapetes da varanda e do living com duas bordas** ("corrija o contorno do tapete e deixe duas bordas de tapetes
+  apenas"; "corrija as falhas do tapete e remova as linhas de contorno, deixando duas bordas de tapete"; "corrija aqui e
+  afine essa borda do tapete"; "as poltronas não possuem vãos"): cada tapete vai até o contorno do PDF (varanda 1185 a
+  1487 x 801 a 1006; living 1715 a 2015 x 787 a 997) e tem só duas bordas, a de fora e a de dentro de uma barra fina de
+  3 px (5 cm) no próprio tecido, um pouco mais escura. A linha técnica de fora sai (o travertino de logo fora no lugar,
+  sem copiar as letras do rótulo "DESCE PARA O DECK"; embaixo da varanda, 13 px), a beira do campo é refeita com o campo
+  de logo para dentro. As peças por cima ficam inteiras (sofás, mesas e banco pela caixa; as poltronas pelo casco da cor,
+  sem vãos). No living o campo inteiro é tecido de novo a partir de um trecho limpo. Na varanda (listras horizontais) as
+  manchas soltas do campo saem pela mediana da linha; o pufe branco, sobre a beira esquerda, é achado na imagem (o tampo
+  claro, a lateral sombreada até a linha escura, os cantos arredondados); no 12K a ponta de cima dele vinha misturada ao
+  piso e vem da ponta limpa, espelhada no eixo curto; em volta dele as linhas do tapete vêm do campo limpo à direita, o
+  travertino à esquerda do piso de mais à esquerda, e a sombra curta do pufe volta para baixo e à esquerda.
+- **Sofá da suíte 1 sem a sombra** ("remova o sombreamento do sofá"): o assento (2090,5 a 2118,5 x 394,5 a 486,5) tinha
+  a sombra larga das almofadas de encosto; cada px vai para o tom do próprio sofá (a mediana do braço de cima, 3% mais
+  baixa) pela razão da cor média em volta dele, só sobre o tecido: a costura entre as almofadas e as dobras ficam.
+- **Poltrona redonda da varanda** ("melhorar a representação dessa poltrona"): o disco claro com o encosto em faixa vira
+  a poltrona de leitura da biblioteca (bouclé, `02-terreo/escritorio/poltrona-leitura.png` da Casa A), no lugar e no giro
+  dela (centro 1147 x 936,5; o encosto para baixo e à esquerda, a frente para o tapete), 50 px (0,83 m) de fundo, no
+  off-white do pufe e do sofá; o piso em volta no travertino novo e a sombra curta para baixo e à esquerda.
+
+Final, prancha e 12K A e B; antes e depois em
+`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611f_tapetes_sofa_poltrona_antes_depois.jpg`; PDF da Casa B,
+conferência e book refeitos.
