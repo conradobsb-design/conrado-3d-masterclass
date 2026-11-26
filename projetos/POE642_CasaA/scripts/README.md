@@ -5522,3 +5522,30 @@ Antes e depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_261
 
 Final, prancha e 12K A e B (pelo registro local); antes e depois (12K B) em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611c_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
+
+### Casa C Térreo, 4ª leva de 26/11: gourmet, JARDIM 1, porta da sala TV, janelas da fachada e portas de correr (`terreo_casac_2611d.py`, `terreo_casac_2611e.py`)
+
+- **Gourmet** (`terreo_casac_2611d.py`):
+  - "corrigir cuba de inox e rotulo": a cuba Franke com o misturador da biblioteca no retângulo do PDF (o granito de
+    50 px à direita por baixo, sem a faixa escura antiga); o rótulo GOURMET sem o retângulo de fundo (o piso de 100 px à
+    esquerda, com a luz casada pela beira inteira da zona, sem degrau) e sem os pontinhos depois do m²;
+  - "remover linha tecnica na borda da bancada": o fio cinza sai de todas as bordas da bancada em U (a frente e o fim da
+    bancada de trás, a perna da esquerda, o topo, a ponta e as bordas de fora da ilha): o granito e o piso de cada lado
+    vêm de 4 px para dentro e para fora; fica a face do granito 1 px mais escura e, onde o piso está embaixo ou à
+    esquerda, a sombra curta;
+  - "melhorar a representação das banquetas e empurrá-las para debaixo da bancada": as 6 banquetas B da biblioteca de
+    novo no 12K na resolução dele, ~55% sob o tampo (antes ~40%), o travertino embaixo de novo e a sombra do tampo nelas.
+- **JARDIM 1** (`terreo_casac_2611e.jardim`): as beiras da grama retas nas paredes (a própria grama de 7 px para
+  dentro), a sombra das paredes de cima e da direita; a janela da direita como as do box do Subsolo (soleira no
+  travertino escuro, vidro no meio, contorno preto fino, montante); o filete de 3 px no travertino escuro entre a grama e
+  o piso, na linha do PDF.
+- **Porta de correr da sala TV** ("aqui é apenas uma folha, já representada com contorno em preto. o resto sai"): ficam
+  as 2 folhas; saem os batentes nas pontas, os frisos claros dentro das paredes e as manchas cinza junto às folhas.
+- **Janelas da fachada de baixo** ("melhorar o aspecto das soleiras"): os 3 vãos do PDF no travertino escuro, o vidro no
+  meio, o contorno preto fino e o montante; o fio cinza e os traços do piso logo acima saem.
+- **Portas de correr da adega e do escritório** ("vamos melhorar a representação das portas de correr"): a soleira no
+  travertino escuro de parede a parede e as 4 folhas do PDF (2 trilhos) no padrão das esquadrias da Casa A; as folhas
+  antigas e os frisos das pontas saem.
+
+Final, prancha e 12K A e B (pelo registro local); antes e depois (12K B) em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611d_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
