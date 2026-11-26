@@ -5483,3 +5483,16 @@ mais raso e reequilibrar o degradê da escada que desce para a piscina". Na orde
 
 Final, prancha e 12K A e B (pelo registro local); antes e depois (12K B) em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
+
+### Casa C Térreo, 2ª leva de 26/11: a escada, as cortinas do estar e do hall e o rótulo GOURMET (`terreo_casac_2611b.py`, `cortinas_terreo_casac_2611.py`)
+
+- **Escada DESCE PARA O SUBSOLO** ("corrija o sombreamento de descida das escadas conforme fizemos no subsolo"): a
+  sombra junto a cada espelho no mesmo perfil do Subsolo (`subsolo_casac_2611c.PERFIL`, até 9 px, igual ao longo de cada
+  borda): nos degraus largos (738 a 919, o L em 949 e 979, as bordas em pé 443 e 473) e nos estreitos 11 a 20 (cada piso
+  num tom só, a sombra junto ao espelho da frente); as letras ficam por cima.
+- **Cortinas** ("substituir as cortinas pela que estamos adotando", "somente ... hall de entrada e sala de estar"): a C4
+  bem visível de 16/11 (`cortinas_padrao_casad_1611`, o pano de 0,22 m, o linho 0,82, a sombra inteira) nos 3 trilhos do
+  estar (a janela de baixo e o vidro da direita) e do hall de entrada; os outros trilhos ficam.
+- **Rótulo GOURMET**: as letras que os pontinhos de 661b927 tinham comido (o E e o m²) de volta, de 4415021.
+
+Antes e depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611b_antes_depois.jpg`.
