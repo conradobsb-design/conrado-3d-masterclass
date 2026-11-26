@@ -5091,3 +5091,19 @@ Sobre `subsolo_casab_2611.py` (os recortes do 12K B):
 - Final, prancha e 12K A e B; antes e depois em
   `../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2611c_revisao_antes_depois.jpg`; PDF da Casa B, conferência e
   book refeitos.
+
+### Casa B Subsolo, 4ª leva de 26/11: `subsolo_casab_2611d.py`
+
+- **Academia, os cantos do vidro** ("não ficou bom esse remendo não. melhor juntar as duas paredes e fechar mais
+  bonita"): o bloco de parede de `subsolo_casab_2611c.academia_pontas` (um retângulo à parte, mais largo que a parede
+  vertical, com emenda dos dois lados) sai; as duas paredes se juntam num L só. Dentro do L, o tom da parede horizontal
+  linha a linha (o perfil dela ao lado) mais o contorno da vertical coluna a coluna (o perfil dela acima ou abaixo): o
+  contorno de fora contínuo, nenhum do lado de dentro, e uma rampa de tom até a parede que continua (sem degrau).
+  - Em cima: a vertical (1359,1 a 1368,2) desce até a base da horizontal (439,1 a 448,9, com o fio escuro de baixo); a
+    sobra do bloco à esquerda da face volta a ser piso; a soleira e o vidro começam na base da parede.
+  - Embaixo: a horizontal (597,3 a 607,1) entra até a face da direita da vertical; a emenda entre a parede de antes e o
+    bloco some; à direita, na altura do L, a face da vertical e a madeira rente a ela vêm de logo abaixo, fundidas à
+    madeira de antes.
+- Final, prancha e 12K A e B; antes e depois em
+  `../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2611d_revisao_antes_depois.jpg`; PDF da Casa B, conferência e
+  book refeitos.
