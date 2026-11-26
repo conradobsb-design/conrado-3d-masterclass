@@ -5557,3 +5557,26 @@ soltas": na porta da sala TV, as 2 folhas do PDF de parede a parede (671,4 a 794
 junta, no padrão das esquadrias (as antigas, que paravam antes da parede e tinham vão entre si, saem); na adega e no
 escritório, a 1ª e a 4ª folha até as paredes de cima e de baixo, sobre a soleira. Final, prancha e 12K A e B; antes e
 depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611f_antes_depois.jpg`.
+
+### Casa C Térreo, 26/11 (7): porta da sala de almoço, tapete e sofá da sala TV, aparador e pano de vidro (`terreo_casac_2611g.py`)
+
+- **Sala de almoço** ("aqui é uma porta"): a abertura de cima para a garagem volta a ser porta. A soleira escura fica, o
+  vidro do meio sai e entra a folha pivotante do PDF aberta a 90°, no padrão das folhas da casa (o perfil claro com
+  contorno preto fino, como a pivotante do hall).
+- **Sala TV, tapete em volta da mesa**: o aro claro e a meia-lua cinza em volta das mesas de centro saem. O tapete volta
+  num anel de 9 px (a trama da amostra limpa, na luz da beira) e a sombra das mesas fica mais curta e mais leve.
+- **Sala TV, braço do sofá** ("o braço do sofá ... complete para que não vejamos o piso" / "está quebrado"): o braço
+  direito perdia a metade de fora nos últimos 25 px antes da parede e o travertino aparecia. Agora o braço inteiro vai
+  até a parede. A barra de baixo do tapete chega ao braço e o filete claro e o halo cinza junto ao braço viram tapete.
+  A barra da direita e a poltrona ficam como estavam.
+- **Sala TV, textura do tapete**: a trama fina 2 vezes mais marcada no tapete inteiro, menos as peças e a barra.
+- **Aparador da circulação** ("corrigir falha no móvel, adorno e piso"): a madeira inteira, sem a emenda vertical (as
+  pontas da peça e um trecho limpo esticado no sentido do veio). O vaso fica sem os galhos secos, que viravam manchas, e
+  com a boca escura limpa. O livro e a tigela ficam inteiros, nas mesmas posições. O piso em volta foi refeito, com a
+  sombra curta do móvel.
+- **Pano de vidro varanda gourmet / estar** ("corrigir as folhas de vidro"): o fixo e as 2 folhas de correr do PDF em
+  3 trilhos, sobrepostos nas juntas e ligados às paredes de cima e de baixo, no padrão das portas de correr da casa.
+  Saem a folha fantasma cinza, os perfis claros das juntas e das pontas e a linha do contrapiso.
+
+Final, prancha e 12K A e B (pelo registro local); antes e depois (12K B) em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611g_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
