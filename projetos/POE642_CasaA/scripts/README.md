@@ -5410,3 +5410,14 @@ Pedidos depois do 1º envio, aplicados em cadeia sobre o commit anterior (2611b,
 
 Antes e depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611b_antes_depois.jpg`; PDF da Casa C,
 conferência e book refeitos.
+
+### Casa C Subsolo, 26/11 (3): a bancada e a cuba do BH academia (`subsolo_casac_2611e.py`)
+
+Usuário: "corrija cuba e bancada". O granito marrom (aprovado na auditoria de 26/10) passa ao da referência do usuário
+(`fontes_procedurais.granito_referencia`, na escala de cada imagem): antes, o do motor antigo, com os salpicos brancos
+numa grade. A bancada no retângulo do PDF (até a face da parede como está na imagem, 980,0), com a testeira um tom
+abaixo e a sombra curta no piso; o fio cinza de fora vira o piso ao lado. A cuba esculpida no granito, no retângulo de
+baixo do PDF: a aba polida, a bacia de cantos arredondados, mais funda, com a sombra por dentro e o contorno fino, a
+válvula cromada; a torneira cromada saindo da parede, com a base redonda e o brilho (antes, um bloco cinza e uma régua
+clara à direita). Antes e depois (12K B) em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611e_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
