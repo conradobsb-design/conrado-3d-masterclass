@@ -5107,3 +5107,18 @@ Sobre `subsolo_casab_2611.py` (os recortes do 12K B):
 - Final, prancha e 12K A e B; antes e depois em
   `../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2611d_revisao_antes_depois.jpg`; PDF da Casa B, conferência e
   book refeitos.
+
+### Casa B Térreo, levantamento de 26/11 (só a proposta, para o OK)
+
+Levantamento no 12K B (`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611_levantamento.jpg`), em 5 itens: (1)
+vidros dos boxes e das divisórias com contorno técnico (cinza cromado; os de entre a ducha e o vaso do banho master em
+preto): banho master, Banhos 1, 2 e 3, os 2 BH gourmet, BH serviço, BH motorista e a frente da adega, para folhas de
+vidro claro sem linha técnica; (2) os 15 nichos das paredes dos banhos (no PDF, o retângulo branco na parede com o traço
+que o cruza; no render, ferragem cromada com puxador): banho master 1239,8 / 1550,3 (duchas) e 1245,8 / 1506,7 (paredes
+de baixo dos vasos), Banho 1 1825,3 e 1932,4, Banho 2 2651,1 e 2759,4, Banho 3 2590,5 e 2759,4 (931,7), BH gourmet
+1099,5, 1210,0, 1431,6 e 1538,4, BH serviço 1902,6, para parede de fora a fora (como no BH sauna do Subsolo); (3) os
+vasos quebrados (o miolo com o piso e uma mancha branca) do banho master (2) e dos Banhos 1, 2 e 3, para a bacia branca
+da biblioteca; (4) a soleira em faixa cinza translúcida da passagem do closet master para a sala íntima, para soleira de
+pedra no travertino mais escuro, com a folha do PDF em madeira; (5) os tampões da esquadria nas duas pontas do vidro
+entre a varanda e o living (1550,3 a 1562,3 x 776,4 a 783,6 e o de baixo), para as paredes até o vidro, como nas pontas
+do vidro da academia do Subsolo. Os pilares redondos ficam em preto (o padrão pedido na Casa A).
