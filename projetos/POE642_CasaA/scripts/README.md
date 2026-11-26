@@ -5345,3 +5345,15 @@ book refeitos.
 Final, prancha e 12K A e B; antes e depois em
 `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611k_adornos_sala_intima_antes_depois.jpg`; PDF da Casa B,
 conferência e book refeitos.
+
+### Casa C Subsolo, levantamento de 26/11 (só a proposta, para o OK)
+
+Levantamento no 12K B (`../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611_levantamento.jpg`), conferido com o PDF,
+em 5 itens: (1) vidros com esquadria cromada e contorno técnico (a frente e a lateral da sauna junto à jardineira, a
+divisória do box do BH academia e a fachada de vidro entre a varanda e a academia, com os montantes) para folhas de vidro
+claro sem linha técnica, como no Subsolo da Casa B; (2) o vaso quebrado do BH academia (a louça cinza com o contorno
+branco pela metade, 938 a 997 x 893 a 957) para a bacia branca da biblioteca, na pose do PDF; (3) a janela da parede de
+baixo do box, entre a sauna e o BH (800 a 885 x 938 a 982), com a borda de cima serrilhada, refeita com vidro claro,
+contorno preto fino e o montante do meio; (4) o fundo cinza atrás de "JARDIM" no rótulo SOBE PARA O JARDIM; (5) os
+pontinhos brancos na parede de cima da academia, no trecho da direita (1588 a 1762 x 712 a 752). A varanda do Subsolo e
+o depósito ficam vazios, como no PDF; o elevador e a escada do deck (com o corte) também como no PDF.
