@@ -5357,3 +5357,29 @@ baixo do box, entre a sauna e o BH (800 a 885 x 938 a 982), com a borda de cima 
 contorno preto fino e o montante do meio; (4) o fundo cinza atrás de "JARDIM" no rótulo SOBE PARA O JARDIM; (5) os
 pontinhos brancos na parede de cima da academia, no trecho da direita (1588 a 1762 x 712 a 752). A varanda do Subsolo e
 o depósito ficam vazios, como no PDF; o elevador e a escada do deck (com o corte) também como no PDF.
+
+### Casa C Subsolo, levantamento de 26/11 aplicado (`subsolo_casac_2611.py`)
+
+Usuário: "aplique os 5 itens" (sobre `../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611_levantamento.jpg`) e, no
+meio, "a porta da sauna tem outro formato que as demais" (6º item). Cada item pelo registro local, na final, na prancha e
+nos 12K A e B:
+
+1. **Vidros sem linha técnica**: a esquadria cromada, os tampões e os traços saem; as folhas do PDF no vidro claro dos
+   boxes (`um_pav_casaa_2511e.folhas_vidro`), de parede a parede, sobre a soleira do vão no creme das soleiras das portas
+   desta planta (a mediana da soleira da porta da sauna, em cada imagem), sem contorno: o L da sauna junto à jardineira
+   (o vão alinhado com a parede de baixo como está na imagem, 695 a 707; o tracejado da face de dentro vira o piso), as
+   duas folhas de correr do box do BH academia e as quatro folhas em escada da fachada entre a varanda e a academia (o
+   fio claro junto à madeira vira a madeira de logo ao lado).
+2. **BH academia, o vaso**: o travertino refeito na pegada e a bacia Carrara da biblioteca na pose do PDF (950,0 a 980,6
+   x 914,6 a 935,7, de costas para a parede da direita); o fio preto do vaso velho na face da parede, no perfil da face.
+3. **A janela da parede de baixo do box**: a borda serrilhada vira o piso do box, reto até a face (961,0); no vão do PDF,
+   o peitoril creme, o vidro claro no meio, o contorno preto fino (0,5 px) e o montante do meio (838,9).
+4. **Rótulo SOBE PARA O JARDIM** (só o 12K B tinha): o retângulo cinza atrás de JARDIM vira o Bege Bahia de logo à
+   esquerda (a luz casada com o entorno), e as letras ficam (a cobertura de cada letra medida sobre o cinza). Na final e
+   no 12K A nada muda (o detector não acha o retângulo).
+5. **Academia**: os pontinhos brancos na face de cima da parede saem (cada linha na mediana dela).
+6. **A porta da sauna**: no PDF é a única de folha de vidro (os dois montantes de 6 px nas pontas e o vidro entre eles);
+   a folha de madeira inteira sai e entram os dois montantes na madeira da folha de antes e o vidro claro entre eles.
+
+Antes e depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611_antes_depois.jpg`; PDF da Casa C,
+conferência e book refeitos.
