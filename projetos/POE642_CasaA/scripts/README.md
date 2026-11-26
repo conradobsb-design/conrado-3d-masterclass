@@ -5219,3 +5219,13 @@ abaixo (a madeira e a palha como eram, a sombra como a razão dela sobre o trave
 tampo; e a sombra do tampo de novo nas peças que chegaram à borda (`terreo_casab_2611b.banquetas`). Final, prancha e
 12K A e B; antes e depois em `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611c_banquetas_antes_depois.jpg`; PDF
 da Casa B, conferência e book refeitos.
+
+### Casa B Térreo, 4ª leva de 26/11: `terreo_casab_2611d.py`
+
+"corrija o contorno para que não apareça o tom antigo" (as duas espreguiçadeiras de resina da prainha): em
+`prainha_cinza_casab_2611` elas ficaram fora do cinza com 1 px de folga, e a água rente a elas (na final, 1 px; no 12K,
+um halo claro de uns 2 px) seguia no verde-água de antes. Num anel de 4 px por fora de cada moldura (930 a 1045 x 1152
+a 1190 e 1229 a 1267), o que ainda é verde-água (matiz 70 a 100, saturação 12 ou mais) vai ao tom da água cinza logo em
+volta (a mediana da faixa de 4 a 10 px, canal a canal, mantendo a textura e as juntas). Final, prancha e 12K A e B;
+antes e depois em `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611d_espreguicadeiras_antes_depois.jpg`; PDF da
+Casa B, conferência e book refeitos.
