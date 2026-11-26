@@ -5332,3 +5332,16 @@ book refeitos.
 Final, prancha e 12K A e B; antes e depois em
 `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611j_adornos_living_antes_depois.jpg`; PDF da Casa B, conferência e
 book refeitos.
+
+### Casa B Térreo, 11ª leva de 26/11: `terreo_casab_2611k.py`
+
+- **Adornos na mesa da sala íntima** ("coloque adornos também na mesa da sala íntima"): a mesa redonda de madeira (centro
+  1699 x 458, Ø 56 px) recebe, sem repetir as peças da varanda e do living, o vaso branco com ramo verde (biblioteca D),
+  o vaso perto do meio e as folhas para cima e à direita, dentro do tampo (centro do recorte 1709 x 452), e o livro de
+  linho verde-sálvia (biblioteca E), girado 20°, embaixo e à esquerda (centro 1687 x 467). Recortes em
+  `../biblioteca-objetos/02-terreo/sala-de-estar/adornos/` (vaso-ramo-verde-d; livro-linho-salvia-e, 986 px para 0,30 m);
+  na planta, 60 px/m, com a sombra curta para baixo e à esquerda.
+
+Final, prancha e 12K A e B; antes e depois em
+`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611k_adornos_sala_intima_antes_depois.jpg`; PDF da Casa B,
+conferência e book refeitos.
