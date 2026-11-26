@@ -5207,3 +5207,15 @@ Com os recortes do 12K B, cada item pelo registro local (`um_pav_casaa_2511d._re
 Antes e depois (12K B, contra a entrega anterior) em
 `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611b_revisao_antes_depois.jpg`; PDF da Casa B, conferência e book
 refeitos.
+
+### Casa B Térreo, 3ª leva de 26/11: `terreo_casab_2611c.py`
+
+"isso, empurre para baixo da bancada" (as banquetas da bancada gourmet, que estavam cortadas na borda com cerca de 40%
+sob o tampo): as 5 banquetas descem 6 px da final (10 cm); o assento fica quase todo sob o tampo e aparecem o encosto e
+a frente do assento junto à borda. Em cada uma, na faixa entre o travertino e a borda da bancada (1300,5 a 1319,0): a
+banqueta e a sombra curta dela saem e o travertino das mesmas linhas, do vão limpo logo à direita (14 a 23 px do meio),
+espelhado de lado a lado, ocupa o lugar (a mesma luz junto à bancada; os veios horizontais seguem); a banqueta volta 6 px
+abaixo (a madeira e a palha como eram, a sombra como a razão dela sobre o travertino); o que passa da borda some sob o
+tampo; e a sombra do tampo de novo nas peças que chegaram à borda (`terreo_casab_2611b.banquetas`). Final, prancha e
+12K A e B; antes e depois em `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611c_banquetas_antes_depois.jpg`; PDF
+da Casa B, conferência e book refeitos.
