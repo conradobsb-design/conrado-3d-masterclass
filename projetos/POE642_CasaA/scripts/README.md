@@ -5013,3 +5013,11 @@ Sobre a 4ª leva (`python3 um_pav_casaa_2511e.py [wc_vidro|box_fechado]`):
   de baixo) vira uma folha de vidro, com o piso em volta refeito.
 - Final, prancha e 12K A e B; antes e depois em `renders/POE642_CasaA_PH_1Pavimento_2511e_revisao_antes_depois.jpg`; PDF
   da Casa A, conferência e book refeitos.
+
+### Casa A 1º Pavimento, 26/11: `um_pav_casaa_2611.py`
+
+- **Muro de baixo** ("ficou um detalhe para corrigir no primeiro pavimento", o recorte do 12K B): o vão branco no meio
+  da faixa cinza do muro de divisa, à direita e fora da casa (2845 a 2867, de 1924 a 1935 px da final), sai; linha a
+  linha, o vão recebe o tom do próprio muro de logo ao lado (a faixa tem o degradê de cima para baixo e é igual ao longo
+  de x). Na varredura do muro inteiro, só esse vão era falha.
+- Final, prancha e 12K A e B; PDF da Casa A, conferência e book refeitos.
