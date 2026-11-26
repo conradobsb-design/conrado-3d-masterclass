@@ -5305,3 +5305,17 @@ cima, na escala de 60 px/m): 1) livros bege e vaso de cerâmica com flores secas
 com ramo verde (D) e a bandeja redonda de madeira com o nó de cerâmica (D); 3) os livros "ART" e o nó de cerâmica (D) e
 o livro de linho verde-sálvia (E). Só a proposta, para a escolha:
 `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611_adornos_mesas_opcoes.jpg`.
+
+### Casa B Térreo, 9ª leva de 26/11: `terreo_casab_2611i.py`
+
+- **Adornos da opção 1 nas mesas de centro da varanda** ("aplique a opção 1", sobre
+  `POE642_CasaB_PH_Terreo_2611_adornos_mesas_opcoes.jpg`): na mesa de nogueira, a pilha de dois livros de linho bege
+  (girada 8°, centro 1343 x 851,5) e o vaso de cerâmica orgânico com flores secas (centro 1384 x 850), os dois da mesa
+  de centro redonda de nogueira da biblioteca da Casa A; na mesa de freijó, a tigela clara da mesa de espelho da
+  biblioteca da Casa D (centro 1352 x 891,5). Os recortes, vista de cima com fundo transparente, ficam em
+  `../biblioteca-objetos/02-terreo/sala-de-estar/adornos/` (livros-bege-a, vaso-flores-secas-a, tigela-clara-d; 920
+  px/m); na planta, 60 px/m, cada peça com a sombra curta para baixo e à esquerda.
+
+Final, prancha e 12K A e B; antes e depois em
+`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611i_adornos_mesas_antes_depois.jpg`; PDF da Casa B, conferência e
+book refeitos.
