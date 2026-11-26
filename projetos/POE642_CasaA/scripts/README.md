@@ -5152,3 +5152,58 @@ do vidro da academia do Subsolo. Os pilares redondos ficam em preto (o padrão p
 Final, prancha e 12K A e B (32 pontos, cada um pelo registro local, 0,976 a 0,998); antes e depois em
 `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611_revisao_antes_depois.jpg`; PDF da Casa B, conferência e book
 refeitos.
+
+### Casa B Térreo, a prainha e o spa no cinza da Casa A: `prainha_cinza_casab_2611.py`
+
+"corrigir o tom das áreas mais rasas da piscina conforme fizemos na casa A": a água rasa (a prainha e o banco em volta
+do spa) passa ao cinza equilibrado do fundo, como em `prainha_cinza_casaa_2511` (o matiz +34°, a saturação a 85%, a
+luminosidade a 80%; a água e o fundo de `piscinas_sobrias_1911`, `FUNDO["B"]`). As espreguiçadeiras de resina que
+estão dentro da água rasa ficam com o tom delas (`moveis`: cada mancha creme toda dentro da água rasa sai do peso, com
+1 px de folga). Final, prancha e 12K A e B (no 12K, as divisas achadas na final, levadas pelo registro).
+
+### Casa B Térreo, 2ª leva de 26/11: `terreo_casab_2611b.py`
+
+Com os recortes do 12K B, cada item pelo registro local (`um_pav_casaa_2511d._registro`), na final, na prancha e nos
+12K A e B:
+
+- **Topo dos armários** ("corrigir essas falhas brancas. manter o preenchimento dos armários e paredes corretamente";
+  louceiro 1830,8 a 1860,8, despensa 2018,8 a 2042,8, bancada do serviço 2051,6 a 2081,6, medidos de moldura a moldura
+  na final): da parede de cima até a 1ª linha limpa (no tom do miolo e com menos de 5% dos px fora dele), cada linha na
+  sua mediana (o chanfro fica, os pontinhos claros saem); nas molduras, os pontinhos descem ao tom da própria coluna
+  logo abaixo.
+- **Friso de baixo dos armários do louceiro e da despensa** ("corrija essas falhas nos armarios do louceiro e
+  despensa"): a borda de cima do armário baixo (a luz, o tampo e o sulco escuro, 1861,0 a 1933,3 e 1941,4 a 2020,6)
+  tinha manchas claras e pontinhos no 12K: cada linha do friso na sua mediana, de canto a canto.
+- **Portões da área de serviço descoberta** ("corrigir essas falhas no piso e nos brises"): o piso em volta das lâminas
+  refeito pelo de logo acima e logo abaixo, as três lâminas redesenhadas nítidas (cinza 78, com a sombra curta) e o
+  pontinho branco da parede no cinza dela.
+- **Janela do quarto de serviço** ("corrigir as folhas de vidro e o piso") e **do banho de serviço** ("corrigir essa
+  soleira. ela tem a espessura da parede."): o piso dos dois lados deslocado do de perto, as pontas de parede no cinza
+  delas, a soleira de pedra na espessura da parede (`terreo_casaa_2511g.soleira_trav`) e as folhas de vidro claro.
+- **Borda da piscina junto ao contorno** (a lateral esquerda): o contorno (a linha cinza e o filete escuro à direita,
+  que falhava em trechos) com cada coluna na sua mediana (614,0 a 617,0); a grama à esquerda com a textura dela; o
+  travertino logo à direita copiado de 4,2 px adiante.
+- **Suíte master, o piso das espreguiçadeiras** ("corrija o piso aqui nessa área, de forma que não fique ambaçado e nem
+  com remendos"; "corrigir o piso significa deixar as tábuas alinhadas e completas"): o piso de madeira entre a
+  cortina, a parede, o armário e a fileira de baixo (975 a 1203 x 389 a 508) refeito tábua a tábua: as fileiras no passo
+  do piso (7 px da final, as divisas em 389, 396, ... 508, alinhadas com as de baixo, que ficam), cada tábua um trecho
+  sem emenda das 4 fileiras limpas logo abaixo (515 a 543), cortado inteiro (70 a 135 px; a 1ª e a última cortadas pela
+  borda), virado ou não, as emendas a 18 px ou mais das da fileira de cima; no 12K, a divisa e a emenda macias como as
+  do render. As espreguiçadeiras, as mesinhas e a poltrona ficam (pela geometria) com a sombra curta delas no piso novo;
+  a cortina, a parede e a borda do armário, pela cor. Saem os retalhos, as faixas borradas, o fio solto à esquerda da
+  mesinha e os riscos acima da poltrona.
+- **Suíte master, o tapete logo acima da sobra da coberta**: o retalho claro entre o tapete e a sobra (do lado
+  esquerdo da cama) volta a ser o tapete e a sombra da cama de logo acima.
+- **Suíte 1, o entorno da cama** (cabeceira à esquerda): a moldura da base era de dois materiais (bege junto à
+  cabeceira, cinza translúcido com o tapete aparecendo do meio da cama até o pé, com um degrau entre eles, em cima e em
+  baixo); agora bege de ponta a ponta (em cada linha da faixa, a mediana do trecho bege junto à cabeceira; sobre o
+  edredom, a sombra curta da moldura) e no pé, de cima a baixo.
+- **Suíte 3, o entorno da cama** (cabeceira embaixo): as laterais da moldura, cinza-rosadas ao longo do colchão e
+  escurecendo num degradê antes da cabeceira, e o pé num terceiro tom, na bege das laterais da cabeceira.
+- **Banquetas sob a bancada gourmet** ("vamos manter as banquetas sob a bancada"): continuam cortadas na borda (cerca de
+  40% sob o tampo) e ganham a sombra do tampo na parte de fora, junto à borda, como na Casa A
+  (`terreo_casaa_2511d.gourmet`: 0,32, caindo em 1,6 px), só na madeira e na palha.
+
+Antes e depois (12K B, contra a entrega anterior) em
+`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611b_revisao_antes_depois.jpg`; PDF da Casa B, conferência e book
+refeitos.
