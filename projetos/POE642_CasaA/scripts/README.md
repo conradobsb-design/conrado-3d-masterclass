@@ -5441,3 +5441,19 @@ risquinho claro do canto e o brilho da folha de vidro que entrava na parede. **N
 parede de 1052,4 a 1084,5 vem da mesma parede 32 px à direita: o topo reto em 737 (sem o dente junto à fachada nem as
 marcas claras das folhas de vidro) e a face de baixo reta, com o contorno desde a ponta. Antes e depois (12K B) em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611g_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
+
+### Casa C Térreo, levantamento de 26/11 (só a proposta, para o OK)
+
+Levantamento no 12K B (`../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611_levantamento.jpg`), conferido com o PDF,
+pelos padrões aprovados no Subsolo hoje, em 8 itens: (1) rótulos com o retângulo de fundo atrás das letras, no deck
+(DESCE PARA O JARDIM e DECK, nas opções A e B) e sobre o marrom (ÁREA DE SERVIÇO, QTO. DE SERVIÇO, QUARTO EXTERNO,
+GARAGEM); (2) as bancadas de granito com os salpicos brancos e a moldura técnica, no lavabo junto à adega (2355 a 2420
+x 1020 a 1195, a cuba um caixote escuro) e na área de serviço (2645 a 2710 x 340 a 500), para o granito da referência
+como no BH academia; (3) as janelas pequenas dos banhos com o vidro sujo, letras embaralhadas ou caixilho cromado
+(BH 3, 2 e 1 em cima, as duas laterais do box do BH master 1, BH master 2 em cima, BH externo e BH serviço), para o
+vidro claro com contorno preto fino e montante, como a janela de baixo do BH master 2; (4) o box do BH master 1 com
+perfis cromados e as letrinhas no topo da porta da varanda (762 a 812 x 558 a 592); (5) o risco branco com contorno
+preto ao longo da ilha da cozinha (2283,6 a 2289,0 x 366 a 553: um retângulo branco sem traço no PDF) e os pontinhos
+no marrom; (6) os pontinhos brancos nas bordas do marrom da gourmet e junto ao rótulo; (7) no estar, o remendo
+retangular junto ao braço direito do sofá de 3 lugares e o arco cinza solto em volta do sofá curvo; (8) as soleiras das
+portas em Bege Bahia claro para o travertino mais escuro (as da cozinha e do serviço ficam no tom da bancada).
