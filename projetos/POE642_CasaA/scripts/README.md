@@ -5021,3 +5021,13 @@ Sobre a 4ª leva (`python3 um_pav_casaa_2511e.py [wc_vidro|box_fechado]`):
   linha, o vão recebe o tom do próprio muro de logo ao lado (a faixa tem o degradê de cima para baixo e é igual ao longo
   de x). Na varredura do muro inteiro, só esse vão era falha.
 - Final, prancha e 12K A e B; PDF da Casa A, conferência e book refeitos.
+
+### Casa B Subsolo, levantamento de 26/11 (só a proposta, para o OK)
+
+Levantamento no 12K B (`../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2611_levantamento.jpg`), em 5 itens: (1)
+vidros com esquadria cromada e contorno (sauna, BH sauna, academia, box do BH serviço) para folhas de vidro sem linha
+técnica como no banho master da Casa A; (2) soleiras em faixa cinza translúcida com contorno (circulação para a sauna e
+para o BH sauna, porta do BH serviço, passagem do depósito) para soleira de pedra nítida no travertino mais escuro;
+(3) o nicho da parede da ducha do BH sauna (pontinhos brancos, registro preto); (4) o traço preto e a faixa clara rente à
+parede de cima do BH serviço; (5) o móvel chapado em salmão junto ao elevador (ARQ_LAYOUT HUMANIZAÇÃO, 1687,6 a
+1723,5 x 531,7 a 651,1) para armário baixo em madeira no tom sólido dos armários.
