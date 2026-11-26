@@ -508,6 +508,25 @@ def poltrona_redonda(img, s, origem, q=POLTRONA):
     zx, zy = cx + q["desvio"][0], cy + q["desvio"][1]
     zona = [(min(zx + R * np.cos(a), q["xmax"]), zy + R * np.sin(a)) for a in np.linspace(0, 2 * np.pi, 72, endpoint=False)]
     img = D.refazer_piso(img, s, origem, [zona], objetos=(), sombra=0.0)
+    jan = V.janela(img, (cx - 34, cy - 34, cx + 34, cy + 34), s, origem, folga=2)
+    X0, Y0, X1, Y1 = jan
+    reg = img[Y0:Y1, X0:X1].astype(np.float32)
+    H, W = reg.shape[:2]
+    a, cor = _poltrona_camada(jan, s, origem, q)
+    # a sombra curta (para baixo e à esquerda, como a do pufe e a de antes)
+    Ms = np.float32([[1, 0, -1.2 * s], [0, 1, 1.4 * s]])
+    sb = cv2.GaussianBlur(cv2.warpAffine(a, Ms, (W, H)), (0, 0), 1.5 * s) * (1 - a)
+    reg = reg * (1 - q["sombra"] * sb)[..., None]
+    reg = reg * (1 - a[..., None]) + cor * a[..., None]
+    img[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
+    return img
+
+
+def _poltrona_camada(jan, s, origem, q=POLTRONA):
+    """A poltrona da biblioteca na janela `jan` (px da imagem): o alfa e a cor, no lugar, no giro e no tom de `q`."""
+    cx, cy = q["centro"]
+    X0, Y0, X1, Y1 = jan
+    H, W = Y1 - Y0, X1 - X0
     T = cv2.imread(str(q["png"]), cv2.IMREAD_UNCHANGED).astype(np.float32)
     al = T[..., 3] / 255.0
     ys, xs = np.where(al > 0.05)
@@ -518,10 +537,6 @@ def poltrona_redonda(img, s, origem, q=POLTRONA):
     T[..., :3] = np.clip(T[..., :3], 0, 255)
     k = q["alto"] * s / T.shape[0]
     pc = ((T.shape[1] - 1) / 2.0, (T.shape[0] - 1) / 2.0)
-    jan = V.janela(img, (cx - 34, cy - 34, cx + 34, cy + 34), s, origem, folga=2)
-    X0, Y0, X1, Y1 = jan
-    reg = img[Y0:Y1, X0:X1].astype(np.float32)
-    H, W = reg.shape[:2]
     tx, ty = (cx - origem[0]) * s - 0.5 - X0, (cy - origem[1]) * s - 0.5 - Y0
     M = cv2.getRotationMatrix2D(pc, q["giro"], k)
     M[0, 2] += tx - pc[0]
@@ -537,13 +552,7 @@ def poltrona_redonda(img, s, origem, q=POLTRONA):
     w = cv2.warpAffine(T2, M, (W, H), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
     a = np.clip(w[..., 3], 0, 1)
     cor = w[..., :3] / np.maximum(a, 1e-4)[..., None]
-    # a sombra curta (para baixo e à esquerda, como a do pufe e a de antes)
-    Ms = np.float32([[1, 0, -1.2 * s], [0, 1, 1.4 * s]])
-    sb = cv2.GaussianBlur(cv2.warpAffine(a, Ms, (W, H)), (0, 0), 1.5 * s) * (1 - a)
-    reg = reg * (1 - q["sombra"] * sb)[..., None]
-    reg = reg * (1 - a[..., None]) + cor * a[..., None]
-    img[Y0:Y1, X0:X1] = np.clip(np.round(reg), 0, 255).astype(np.uint8)
-    return img
+    return a, cor
 
 
 FUNC = {"sofa_suite1": sofa_suite1}

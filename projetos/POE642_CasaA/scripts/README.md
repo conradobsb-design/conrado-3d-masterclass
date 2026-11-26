@@ -5269,3 +5269,18 @@ book refeitos.
 Final, prancha e 12K A e B; antes e depois em
 `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611f_tapetes_sofa_poltrona_antes_depois.jpg`; PDF da Casa B,
 conferência e book refeitos.
+
+### Casa B Térreo, 7ª leva de 26/11: `terreo_casab_2611g.py`
+
+- **Piso em volta da poltrona redonda da varanda** ("corrija as falhas do piso em volta da poltrona"): o disco de
+  travertino novo que tirou a poltrona velha e a sombra dela (`terreo_casab_2611f.poltrona_redonda`, 36 px em volta de
+  1144,5 x 939) não casava com o piso em volta (o círculo mais claro na final, a emenda em arco no 12K). O disco inteiro
+  (com 1,5 px de folga) é refeito linha a linha com o próprio piso de fora dele: os veios são horizontais, então cada
+  linha recebe a mesma linha do piso logo à esquerda (de 1078 em diante, antes da borda da piscina), espelhada a partir
+  da beira do disco, e perto da beira direita a do piso logo à direita (até 1184, antes do tapete), com a passagem
+  esfumada; sem emenda e com a mesma luz. A poltrona da biblioteca e a sombra curta dela voltam por cima, iguais
+  (`terreo_casab_2611f._poltrona_camada`).
+
+Final, prancha e 12K A e B; antes e depois em
+`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611g_piso_poltrona_antes_depois.jpg`; PDF da Casa B, conferência e
+book refeitos.
