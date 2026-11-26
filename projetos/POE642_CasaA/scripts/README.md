@@ -5055,3 +5055,23 @@ O travertino refeito usa a textura e o px/m da Casa A (iguais nesta planta) e, n
 (`terreo_casaa_2511d.DZ_S` = 9,685). Final, prancha e 12K A e B (cada item pelo registro local, 0,96 a 0,998); antes e
 depois em `../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2611_revisao_antes_depois.jpg`; PDF da Casa B,
 conferência e book refeitos.
+
+### Casa B Subsolo, 2ª leva de 26/11: `subsolo_casab_2611b.py`
+
+Sobre `subsolo_casab_2611.py` (os recortes do 12K B):
+
+- **Portas quina a quina** ("deixá-las quina a quina com a parede. não pode estar flutuando"): nas 4 portas de giro
+  (circulação para a sauna e para o BH sauna, BH serviço, depósito), no lugar dos batentes, a parede: do toco até a face
+  da folha (a quina da folha, do lado da dobradiça, na quina da parede) e, do outro lado, da ponta da folha fechada (o
+  comprimento da folha do PDF) até o toco de baixo; a soleira entre as duas.
+- **BH sauna, a parede da ducha** ("preencha a parede de fora a fora ... deixe o chuveiro encostado na parede"): o nicho
+  vira parede com a face reta (1153,2) e a canopla da ducha, em metal escovado, encostada nela.
+- **BH sauna, a bancada** ("corrija o tom da bancada para que fique uniforme, preservando a cuba"): o granito (o trecho
+  de cima, a volta da cuba, o lado da torneira, o trecho de baixo) no tom do trecho de cima, trocando só a luz local (a
+  média alisada dentro da bancada) e mantendo o grão; a bacia da cuba e a torneira ficam; a barra cinza da frente vai
+  até o alto como no PDF (671,2), no lugar da faixa clara de baixo da cuba.
+- **Sauna, as pontas do vidro** ("o vidro não pode penetrar na parede, mas sim encostar nela"): o vidro de cima termina
+  na face da parede da direita (1060,4) e o vertical na de baixo (704,6); `subsolo_casab_2611.SAUNA` corrigido também.
+- Final, prancha e 12K A e B; antes e depois em
+  `../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2611b_revisao_antes_depois.jpg`; PDF da Casa B, conferência e
+  book refeitos.
