@@ -5457,3 +5457,29 @@ preto ao longo da ilha da cozinha (2283,6 a 2289,0 x 366 a 553: um retângulo br
 no marrom; (6) os pontinhos brancos nas bordas do marrom da gourmet e junto ao rótulo; (7) no estar, o remendo
 retangular junto ao braço direito do sofá de 3 lugares e o arco cinza solto em volta do sofá curvo; (8) as soleiras das
 portas em Bege Bahia claro para o travertino mais escuro (as da cozinha e do serviço ficam no tom da bancada).
+
+### Casa C Térreo, levantamento de 26/11 aplicado, o travertino e a piscina (`travertino_casac_2611.py`, `terreo_casac_2611.py`, `piscina_casac_2611.py`)
+
+Usuário: "sim" (os 8 itens do levantamento), e no caminho "representar como janela fechada" (as portas entre a sala de
+almoço e a garagem), "não gostei muito do piso - refazer o piso travertino" e "alterar o tom da prainha e spa onde é
+mais raso e reequilibrar o degradê da escada que desce para a piscina". Na ordem em que rodam:
+
+- **`travertino_casac_2611.py`**: o mesmo Navona marfim de 25/11 (`travertino_casas_2511`), refeito com a máscara
+  completada: os poros cinza do piso antigo (buracos de até 14 px da final dentro do piso, claros e sem cor), que
+  ficavam como manchinhas sobre a pedra nova, entram como piso. Ficam as letras, as linhas, os tracejados (as caixas de
+  `PROTEGER`), os móveis e as paredes.
+- **`terreo_casac_2611.py`**: as soleiras das 14 portas (de face a face pelos batentes do PDF, e a do hall de entrada)
+  no travertino escuro; as duas portas da sala de almoço para a garagem fechadas (o piso de volta onde as folhas
+  abertas estavam, a soleira escura e a folha de vidro no meio do vão); as janelas pequenas dos banhos (BH 3, 2 e 1,
+  as duas do box do BH master 1, BH master 2, BH externo e BH serviço) como a de baixo do BH master 2 (vidro claro,
+  caixilho escuro, montante preto); o box do BH master 1 em vidro claro (a frente de parede a parede e a divisória) e as
+  letrinhas do topo da porta da varanda fora; o risco da ilha da cozinha e os pontinhos do marrom da cozinha e da
+  gourmet; a ponta do sofá de 3 lugares pela ponta esquerda espelhada e o arco solto do sofá curvo; as bancadas do
+  lavabo (com a cuba esculpida e a torneira) e da área de serviço no granito da referência; os rótulos do deck e do
+  marrom sem o retângulo de fundo (o piso de outro trecho na luz do entorno, as letras de volta por cima).
+- **`piscina_casac_2611.py`**: a prainha e o banco do spa no cinza equilibrado das Casas A e B
+  (`prainha_cinza_casaa_2511.RASO`); os 4 degraus da prainha refeitos do raso novo ao fundo em passos iguais (1/5 a 4/5
+  do caminho, pelo ganho de cor de cada degrau: o pastilhado e a sombra do espelho ficam).
+
+Final, prancha e 12K A e B (pelo registro local); antes e depois (12K B) em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
