@@ -3,8 +3,9 @@
 outro formato que as demais").
 
 1. **Vidros sem linha técnica** (a esquadria cromada, os tampões brancos e os traços saem; as folhas no vidro claro dos
-   boxes, sem contorno, `um_pav_casaa_2511e.folhas_vidro`, de parede a parede), sobre a soleira do vão no creme das
-   soleiras das portas desta planta (a mediana da soleira da porta da sauna, em cada imagem), sem contorno:
+   boxes, sem contorno, `um_pav_casaa_2511e.folhas_vidro`, de parede a parede), sobre a soleira de pedra do vão no
+   travertino mais escuro, sem contorno (o padrão do Subsolo da Casa B; a pedido, depois do 1º envio, que tinha o creme
+   das soleiras desta planta: "pode utilizar o travertino mais escuro"):
    - a sauna, o L junto à jardineira: o vão do PDF (694,0 a 706,0 em pé e 737,1 a 746,0 em cima, até a parede da
      direita, 759,7), o vidro em L (698,8 a 701,8 e 741,8 a 744,8); a ponta de baixo na parede (o toco de 832,6) e o
      traço tracejado da face de dentro (706) vira o piso da sauna de logo ao lado;
@@ -18,8 +19,8 @@ outro formato que as demais").
    parede da direita), com a sombra rente; a face da parede atrás (o fio preto do vaso velho) no perfil da própria face,
    de logo acima e de logo abaixo.
 3. **A janela da parede de baixo do box** (o vão do PDF, 822,6 a 855,1 x 961,0 a 966,9): a borda serrilhada de cima
-   vira o piso do box de logo acima, reto até a face (961,0); no vão, o peitoril no creme das soleiras, o vidro claro no
-   meio da espessura, o contorno preto fino (0,5 px) e o montante do meio (838,9).
+   vira o piso do box de logo acima, reto até a face (961,0); no vão, o peitoril de pedra no travertino mais escuro, o
+   vidro claro no meio da espessura, o contorno preto fino (0,5 px) e o montante do meio (838,9).
 4. **Rótulo SOBE PARA O JARDIM** (só no 12K B, na Kalam): o retângulo cinza atrás de JARDIM sai; o fundo dele vira o
    Bege Bahia de logo à esquerda (o mesmo trecho, 84 px antes), e as letras ficam (a cobertura de cada letra medida
    sobre o fundo cinza, o fundo trocado por baixo). Na final e no 12K A não há o retângulo (nada muda).
@@ -59,7 +60,7 @@ DZ = json.loads((EP.PROJ / "POE642_Book/checklist/dados/doze_k.json").read_text(
 D.DZ_S = DZ["s"]                     # o travertino novo: a textura e o px/m da Casa A, o 12K na escala desta planta
 PAREDE = (80.0, 80.0, 80.0)
 PERFIL = (34.0, 34.0, 36.0)          # o preto das esquadrias (esquadrias_pretas_1911.Q_)
-SOLEIRA_REF = (816.6, 756.0, 820.4, 788.0)   # a soleira da porta da sauna: o creme das soleiras desta planta
+SOLEIRA = dict(escurecer=0.84, contorno=1.0, larg=0.22)      # a pedra mais escura, sem contorno (subsolo_casab_2611)
 
 
 def copiar(img, s, origem, r, d, lados, pena=1.0):
@@ -84,7 +85,7 @@ def pintar(img, s, origem, rets, cor):
 
 
 def soleira(img, s, origem, rets):
-    return pintar(img, s, origem, rets, _mediana(img, s, origem, SOLEIRA_REF))
+    return G.soleira_trav(img, s, origem, rets, q=SOLEIRA)
 
 
 def vidros(img, s, origem, caixa, folhas):

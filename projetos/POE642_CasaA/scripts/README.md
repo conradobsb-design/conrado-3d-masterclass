@@ -5383,3 +5383,30 @@ nos 12K A e B:
 
 Antes e depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611_antes_depois.jpg`; PDF da Casa C,
 conferência e book refeitos.
+
+### Casa C Subsolo, 26/11 (2): soleiras, sombra dos degraus e jardineira (`subsolo_casac_2611b/c/d.py`)
+
+Pedidos depois do 1º envio, aplicados em cadeia sobre o commit anterior (2611b, 2611c, 2611d), na final, na prancha e nos
+12K A e B:
+
+- **Soleiras no travertino mais escuro** ("pode utilizar o travertino mais escuro"; `subsolo_casac_2611b`): os vãos dos
+  vidros (o L da sauna e a fachada da academia) e o peitoril da janela do box saem do creme e vão para a pedra do
+  Subsolo da Casa B (`G.soleira_trav` a 84%, sem contorno; os itens de `subsolo_casac_2611` de novo, agora com a pedra);
+  e as três portas que vinham em creme com os dois fios cinza (sauna, BH academia, depósito): a pedra de parede a parede
+  (o vão medido na imagem) e os fios de fora viram o piso de logo ao lado.
+- **A sombra entre os degraus da escada SOBE PARA O JARDIM** ("precisa ser uniforme e igual em todos"; "corrija o
+  sombreamento no último degrau também"; `subsolo_casac_2611c`): as faixas tinham de 2 a 5 px e manchas ao longo do
+  degrau. Cada faixa (até 9 px da borda) é refeita com o Bege Bahia limpo do próprio degrau, 10 px antes da borda,
+  escurecido por um perfil só, igual em todas as bordas e constante ao longo de cada uma (r(d) = 1 - 0,36 exp(-d/1,8));
+  as bordas achadas na imagem (a escada não está no PDF): o patamar (738), os 6 degraus de cima, as 2 do L de baixo e
+  as 2 em pé, com o canto arredondado. O "▼ S" e o JARDIM voltam por cima, pela cobertura de cada letra.
+- **A jardineira entre a escada e a sauna** ("melhorar a representação dessas bordas e manter um único material",
+  "plantas em uma escala menor, em distâncias iguais", "levando em consideração os degraus como referência";
+  `subsolo_casac_2611d`): a borda de 6 px (a caixa do PDF) inteira numa pedra clara só (antes o topo era de travertino e
+  os lados de pedra granulada, com fios marrons e cinzas), com um traço fino um tom abaixo na beira de fora; dentro,
+  terra escura com a sombra da borda e uma planta (o arbusto denso da biblioteca) no meio de cada um dos 8 degraus ao
+  lado (degraus de 0,50 m), de 0,25 m, a distâncias iguais. E o tracejado claro no alto do 1º degrau, junto ao canto
+  da jardineira ("remova esse tracejado claro"), vira o próprio degrau.
+
+Antes e depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611b_antes_depois.jpg`; PDF da Casa C,
+conferência e book refeitos.
