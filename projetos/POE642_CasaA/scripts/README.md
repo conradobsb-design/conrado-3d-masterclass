@@ -5549,3 +5549,11 @@ Final, prancha e 12K A e B (pelo registro local); antes e depois (12K B) em
 
 Final, prancha e 12K A e B (pelo registro local); antes e depois (12K B) em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611d_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
+
+### Casa C Térreo, 26/11 (6): as folhas das portas de correr ligadas à parede e entre si (`terreo_casac_2611f.py`)
+
+"essas portas precisam estar conectadas com a parede. e também entre si. do contrário, passa a impressão que estão
+soltas": na porta da sala TV, as 2 folhas do PDF de parede a parede (671,4 a 794,7 e 789,9 a 913,2), sobrepostas na
+junta, no padrão das esquadrias (as antigas, que paravam antes da parede e tinham vão entre si, saem); na adega e no
+escritório, a 1ª e a 4ª folha até as paredes de cima e de baixo, sobre a soleira. Final, prancha e 12K A e B; antes e
+depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611f_antes_depois.jpg`.
