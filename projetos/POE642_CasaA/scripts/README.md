@@ -5284,3 +5284,24 @@ conferência e book refeitos.
 Final, prancha e 12K A e B; antes e depois em
 `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611g_piso_poltrona_antes_depois.jpg`; PDF da Casa B, conferência e
 book refeitos.
+
+### Casa B Térreo, 8ª leva de 26/11: `terreo_casab_2611h.py`
+
+- **Bordas dos tapetes em cor sólida** ("as bordas dos tapetes são cores sólidas"): a barra de 3 px (5 cm) dos tapetes
+  da varanda e do living (`terreo_casab_2611f`) era o próprio tecido escurecido, com as listras e a trama. Agora é um tom
+  só, liso: a mediana da barra de antes em cada imagem (final e 12K), pintada na faixa entre o contorno do PDF e 3 px
+  para dentro pela cobertura exata (as duas beiras sem serrilhado). As peças por cima ficam (a mesma proteção de 2611f,
+  com a janela larga o bastante para pegar inteiras as poltronas que passam do contorno).
+
+Final, prancha e 12K A e B; antes e depois em
+`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611h_bordas_tapetes_antes_depois.jpg`; PDF da Casa B, conferência e
+book refeitos.
+
+### Casa B Térreo: opções de adornos para as mesas de centro da varanda (proposta, 26/11)
+
+"temos opções de adornos para colocar sobre as mesas": três composições sobre as duas mesas de centro da varanda (a de
+nogueira e a de freijó), com os adornos que já estão na biblioteca, recortados das mesas das Casas A, D e E (vista de
+cima, na escala de 60 px/m): 1) livros bege e vaso de cerâmica com flores secas (A) e a tigela clara (D); 2) vaso branco
+com ramo verde (D) e a bandeja redonda de madeira com o nó de cerâmica (D); 3) os livros "ART" e o nó de cerâmica (D) e
+o livro de linho verde-sálvia (E). Só a proposta, para a escolha:
+`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611_adornos_mesas_opcoes.jpg`.
