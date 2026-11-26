@@ -5319,3 +5319,16 @@ o livro de linho verde-sálvia (E). Só a proposta, para a escolha:
 Final, prancha e 12K A e B; antes e depois em
 `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611i_adornos_mesas_antes_depois.jpg`; PDF da Casa B, conferência e
 book refeitos.
+
+### Casa B Térreo, 10ª leva de 26/11: `terreo_casab_2611j.py`
+
+- **Adornos na mesa de centro do living** ("coloque adornos também na mesa do living"): a mesa orgânica de madeira clara
+  (a gota, 1795 a 1905 x 861 a 929) recebe, sem repetir as peças da varanda (`terreo_casab_2611i`), a bandeja redonda
+  de nogueira com o nó de cerâmica sobre ela, na parte larga (centro 1874 x 894), e a pilha de livros "ART", girada 10°,
+  mais para o meio (centro 1835 x 895), todos da biblioteca da Casa D. Os recortes ficam em
+  `../biblioteca-objetos/02-terreo/sala-de-estar/adornos/` (bandeja-nogueira-d, no-ceramica-d, livros-art-d; também o
+  vaso-ramo-verde-d, da opção 2); na planta, 60 px/m, com a sombra curta para baixo e à esquerda.
+
+Final, prancha e 12K A e B; antes e depois em
+`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611j_adornos_living_antes_depois.jpg`; PDF da Casa B, conferência e
+book refeitos.
