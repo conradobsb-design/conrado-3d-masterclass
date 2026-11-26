@@ -5421,3 +5421,11 @@ baixo do PDF: a aba polida, a bacia de cantos arredondados, mais funda, com a so
 válvula cromada; a torneira cromada saindo da parede, com a base redonda e o brilho (antes, um bloco cinza e uma régua
 clara à direita). Antes e depois (12K B) em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611e_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
+
+### Casa C Subsolo, 26/11 (4): a sombra do filete junto ao travertino (`subsolo_casac_2611f.py`)
+
+Usuário (sobre o filete que desce do pilar redondo até o 1º degrau): "aqui é um filete que também precisa de um
+sombreamento do lado do travertino". O filete (634,3 a 636,8, de 320,5 a 737,0) fica; o tracejado cinza técnico logo ao
+lado vira o travertino de logo à direita; e o travertino, junto ao filete, recebe a mesma faixa de sombra dos degraus
+(`subsolo_casac_2611c`, o mesmo perfil), uniforme de ponta a ponta. Antes e depois (12K B) em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611f_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
