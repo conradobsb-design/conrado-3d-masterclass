@@ -5031,3 +5031,27 @@ para o BH sauna, porta do BH serviço, passagem do depósito) para soleira de pe
 (3) o nicho da parede da ducha do BH sauna (pontinhos brancos, registro preto); (4) o traço preto e a faixa clara rente à
 parede de cima do BH serviço; (5) o móvel chapado em salmão junto ao elevador (ARQ_LAYOUT HUMANIZAÇÃO, 1687,6 a
 1723,5 x 531,7 a 651,1) para armário baixo em madeira no tom sólido dos armários.
+
+### Casa B Subsolo, o levantamento de 26/11 aplicado: `subsolo_casab_2611.py`
+
+"ok, pode aplicar os 5" (o levantamento `../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2611_levantamento.jpg`):
+
+1. **Vidros sem linha técnica**: a esquadria cromada, o contorno e os tampões brancos saem; as folhas no vidro claro dos
+   boxes, sem contorno (`um_pav_casaa_2511e.folhas_vidro`, o padrão aprovado no banho master da Casa A), sobre a
+   soleira de pedra do vão no travertino mais escuro: o L da sauna (o vertical junto à ducha e o de cima, com as pontas
+   nas paredes), a porta de vidro do BH sauna, as duas folhas de correr da academia para a garagem (a junta escura de
+   antes, do lado da madeira, coberta pela madeira de logo ao lado) e o box do BH serviço (o vidro de cima sobre a
+   soleira e a folha da porta sobre o travertino refeito).
+2. **Soleiras** no travertino mais escuro, nítidas e sem contorno (`terreo_casaa_2511g.soleira_trav`, a pedra a 84%):
+   circulação para a sauna, circulação para o BH sauna, porta do BH serviço e passagem do depósito.
+3. **BH sauna, o nicho da parede da ducha**: o travertino refeito no nicho (saem os pontinhos brancos e o retângulo
+   preto); a canopla de metal da ducha fica.
+4. **BH serviço, a parede de cima**: o traço preto (o revestimento do PDF) vira parede e a faixa clara embaixo vira o
+   travertino do banho, até a folha da porta.
+5. **Academia, o móvel junto ao elevador**: o armário baixo no tom sólido dos armários das casas
+   (`revisao_terreo_casac_1311.COZINHA`), com a face um tom abaixo na borda e a sombra curta.
+
+O travertino refeito usa a textura e o px/m da Casa A (iguais nesta planta) e, no 12K, a escala desta planta
+(`terreo_casaa_2511d.DZ_S` = 9,685). Final, prancha e 12K A e B (cada item pelo registro local, 0,96 a 0,998); antes e
+depois em `../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2611_revisao_antes_depois.jpg`; PDF da Casa B,
+conferência e book refeitos.
