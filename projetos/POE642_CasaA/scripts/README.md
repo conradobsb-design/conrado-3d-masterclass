@@ -5075,3 +5075,19 @@ Sobre `subsolo_casab_2611.py` (os recortes do 12K B):
 - Final, prancha e 12K A e B; antes e depois em
   `../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2611b_revisao_antes_depois.jpg`; PDF da Casa B, conferência e
   book refeitos.
+
+### Casa B Subsolo, 3ª leva de 26/11: `subsolo_casab_2611c.py`
+
+- **BH serviço e o box dele** ("corrija o piso e seus contornos"): o piso manchado, com as faixas claras junto às paredes
+  e ao vidro, sai; o travertino novo (`terreo_casaa_2511d.refazer_piso`, a textura e o px/m das outras plantas) de face a
+  face das paredes do PDF, no banho (1368,2 a 1439,8 x 328,6 a 439,1) e no box (1443,1 a 1511,5 x 391,3 a 439,1). A
+  bancada de granito, a folha da porta e a folha de vidro do box ficam; a bacia, o chuveiro e a ponta da cuba que passa
+  da bancada voltam pela forma (os px fora do bege do piso, R - B < 20), com a sombra curta deles no piso novo; o rótulo
+  volta por cima pela forma das letras (a janela do rótulo só nas letras, 1400 a 1438: com a bancada dentro, o granito,
+  mais escuro que o piso, virava letra).
+- **Academia, as pontas do vidro** ("corrija essa extremidade"): o tampão claro da esquadria de antes, entre a parede e
+  o vidro, em cima e embaixo, vira parede (no PDF a parede vai até o vidro: 446,3 e 597,3); o fio escuro de antes, rente
+  à soleira do lado da academia, coberto pela madeira de logo ao lado.
+- Final, prancha e 12K A e B; antes e depois em
+  `../../POE642_CasaB/renders/POE642_CasaB_PH_Subsolo_2611c_revisao_antes_depois.jpg`; PDF da Casa B, conferência e
+  book refeitos.
