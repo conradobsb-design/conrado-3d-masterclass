@@ -5229,3 +5229,17 @@ a 1190 e 1229 a 1267), o que ainda é verde-água (matiz 70 a 100, saturação 1
 volta (a mediana da faixa de 4 a 10 px, canal a canal, mantendo a textura e as juntas). Final, prancha e 12K A e B;
 antes e depois em `../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611d_espreguicadeiras_antes_depois.jpg`; PDF da
 Casa B, conferência e book refeitos.
+
+### Casa B Térreo, 5ª leva de 26/11: `terreo_casab_2611e.py`
+
+- **Mesa de centro em nogueira** ("use o tom nogueira em uma das mesas"): das duas mesas retangulares de madeira clara
+  sobre o tapete da varanda, a de trás (1318 a 1406 x 834 a 869) na nogueira da biblioteca da Casa D (um trecho liso da
+  `mesa-centro-nogueira-adorno-d`, o veio no comprido, como as mesinhas seixo da Casa C), com a luz e as bordas da mesa
+  de antes (a razão da luminosidade sobre a mediana, alisada); a da frente fica no freijó claro.
+- **Poltronas do mesmo tamanho** ("deixe essas poltronas no mesmo tamanho"): as duas poltronas terracota do living
+  (44 x 48 px) eram menores que as duas da varanda, de assento branco (46 x 52); as do living crescem 7% em volta do meio
+  delas (a peça inteira, pela cor terracota e o casco dela), com a sombra curta; o resto fica.
+
+Final, prancha e 12K A e B; antes e depois em
+`../../POE642_CasaB/renders/POE642_CasaB_PH_Terreo_2611e_mesa_poltronas_antes_depois.jpg`; PDF da Casa B, conferência e
+book refeitos.
