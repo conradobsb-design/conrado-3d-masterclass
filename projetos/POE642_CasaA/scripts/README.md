@@ -5429,3 +5429,15 @@ sombreamento do lado do travertino". O filete (634,3 a 636,8, de 320,5 a 737,0) 
 lado vira o travertino de logo à direita; e o travertino, junto ao filete, recebe a mesma faixa de sombra dos degraus
 (`subsolo_casac_2611c`, o mesmo perfil), uniforme de ponta a ponta. Antes e depois (12K B) em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611f_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
+
+### Casa C Subsolo, 26/11 (5): a parede nas duas pontas da fachada da academia (`subsolo_casac_2611g.py`)
+
+Usuário (sobre os recortes do 12K): "corrigir a parede" e "corrigir a parede para não deixar a soleira sobrepor ela".
+Pelo PDF as duas paredes são retas de ponta a ponta. **No topo**, junto ao canto da parede da academia, a soleira da
+fachada (e a folha de vidro ao lado) subia até 331,0 e cobria o pé da parede (a beira e o contorno escuro, que em toda a
+varanda vão até 332,3): agora o pé da parede passa reto por cima da soleira e do vidro até o canto (refeito pela mesma
+parede 25 px à esquerda, com o contorno da face da direita descendo até ele) e a soleira começa logo abaixo; saem o
+risquinho claro do canto e o brilho da folha de vidro que entrava na parede. **No pé**, junto à porta do depósito, a
+parede de 1052,4 a 1084,5 vem da mesma parede 32 px à direita: o topo reto em 737 (sem o dente junto à fachada nem as
+marcas claras das folhas de vidro) e a face de baixo reta, com o contorno desde a ponta. Antes e depois (12K B) em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Subsolo_2611g_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
