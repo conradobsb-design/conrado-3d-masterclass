@@ -5580,3 +5580,17 @@ depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611f_antes
 
 Final, prancha e 12K A e B (pelo registro local); antes e depois (12K B) em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611g_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
+
+### Casa C Térreo, 26/11 (8): os sofás e as poltronas do estar (`terreo_casac_2611h.py`)
+
+"corrigir sofá, encosto e braço" (os dois sofás do estar da esquerda), "corrigir encosto do sofá" e "corrigir borda do
+sofá" (o sofá curvo), "corrigir encosto das poltronas", "e os outros sofás?": o mesmo defeito do braço do sofá da sala TV.
+Um remendo de piso antigo passou por cima da beira das peças.
+- **Sofá de 3 lugares:** a faixa clara que comia os braços e o encosto sai.
+- **Sofá de 2 lugares:** o recorte ondulado que comia o encosto e as pontas dos braços sai.
+- **Sofá curvo:** a ponta do encosto e a beira de fora junto aos vasos estavam cortadas retas; agora estão inteiras.
+- **Poltronas de linho greige de cima:** o encosto estava cortado no topo e a beira esfiapada; agora estão inteiras.
+
+Cada peça volta inteira da biblioteca, na mesma pose e no tom de antes, com o travertino refeito em volta, só no piso. A
+sombra curta fica só no piso refeito, e as folhas da planta continuam por cima do sofá curvo. Final, prancha e 12K A e B; antes e
+depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611h_antes_depois.jpg`.
