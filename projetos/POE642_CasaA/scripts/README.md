@@ -5496,3 +5496,29 @@ Final, prancha e 12K A e B (pelo registro local); antes e depois (12K B) em
 - **Rótulo GOURMET**: as letras que os pontinhos de 661b927 tinham comido (o E e o m²) de volta, de 4415021.
 
 Antes e depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611b_antes_depois.jpg`.
+
+### Casa C Térreo, 3ª leva de 26/11: cozinha, BH master 1, circulação e sala TV (`terreo_casac_2611c.py`)
+
+- **Cozinha** ("corrigir torneiras e erro abaixo das cubas"): as 2 torneiras (borrões cinza) pela torneira do PDF em
+  planta, em cromado (a base redonda junto à parede, a alavanca para a direita e a bica até perto do ralo, com o brilho
+  no meio do cilindro e a sombra curta); a pedra e o fundo da cuba sob o borrão velho vêm do lado. Embaixo de cada cuba,
+  o fio marrom-escuro do contorno antigo sai: a faixa até a frente da bancada vem do Danae à direita das cubas.
+- **BH master 1** ("corrigir vaso"): o retângulo branco e os restos cinza do vaso antigo saem (travertino de novo, o
+  tracejado do box de volta nos traços à vista) e a bacia Carrara da biblioteca entra no contorno do PDF.
+- **Circulação** ("remover linhas técnicas do móvel"): o armário de 1660 a 2168 na cor sólida dos armários (a face de
+  1 px a 0,86 e a sombra curta), sem o fio de dentro e a barra escura de baixo.
+- **Sala TV**:
+  - rack ("corrigir móvel e suas extremidades"): o retângulo do PDF na cor sólida dos armários, as pontas retas, a TV
+    em grafite por cima; o travertino em volta de novo (sem a sombra borrada da TV);
+  - tapete ("marcar bordas do tapete"): a barra de 3 px num tom só (o tapete a 84%, como na Casa B) na borda da trama,
+    por baixo do sofá;
+  - mesas ("melhore a representação dessas mesas redondas. entre freijó e nogueira"): o par de centro em tom e sobretom,
+    a grande em nogueira por cima da pequena em freijó, e as 2 mesinhas laterais em nogueira (as madeiras das mesinhas
+    seixo e redondas do estar); o aro cinza e a sombra das mesas velhas saem (o tapete de outro trecho);
+  - poltrona ("corrigir poltrona e sua representação"): a poltrona de leitura da biblioteca (bouclé off-white, a da
+    Casa B) no contorno e no giro do PDF, no tom do sofá; o piso em volta de novo;
+  - vaso ("corrigir vaso e plantas e sua representação"): o vaso de folhagem A de novo no círculo do PDF, sem o borrão
+    claro em volta.
+
+Final, prancha e 12K A e B (pelo registro local); antes e depois (12K B) em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611c_antes_depois.jpg`; PDF da Casa C, conferência e book refeitos.
