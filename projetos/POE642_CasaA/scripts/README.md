@@ -5693,3 +5693,12 @@ Final, prancha e 12K A e B. O antes e depois está em
 
 **Portas sem arco (27/11):** a porta pivotante da Casa C Térreo fica como está, sem o arco de abertura que o PDF
 mostra. Pela decisão do usuário ("sem arcos"), nenhuma porta leva arco, em nenhuma planta. Fica só a folha aberta.
+
+### Casa C Térreo, 27/11 (5): a soleira da porta principal num tom só (`terreo_casac_2711e.py`)
+
+- **Soleira da porta principal** ("a soleira da porta principal é no mesmo tom de fora a fora"): acima da folha
+  pivotante, entre a ponta da parede e a folha, a soleira era uma faixa mais clara e mais estreita, com o piso do hall
+  ao lado. Agora esse trecho repete, linha a linha, a soleira de travertino escuro que fica abaixo da folha, na mesma
+  largura (a espessura da parede).
+
+Final, prancha e 12K A e B.
