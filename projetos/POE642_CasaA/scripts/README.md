@@ -5690,3 +5690,6 @@ Final, prancha e 12K A e B. A conferência de todos os pedidos da rodada no 12K 
 
 Final, prancha e 12K A e B. O antes e depois está em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2711d_antes_depois.jpg`.
+
+**Portas sem arco (27/11):** a porta pivotante da Casa C Térreo fica como está, sem o arco de abertura que o PDF
+mostra. Pela decisão do usuário ("sem arcos"), nenhuma porta leva arco, em nenhuma planta. Fica só a folha aberta.

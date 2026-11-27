@@ -20,7 +20,8 @@ Este arquivo é o ponto de partida da sessão no computador. Ele resume o que j�
 - **Visual:**
   - luz chapada, clara e uniforme, sem sombra projetada;
   - fundo branco puro;
-  - vista de cima ortográfica, sem texto.
+  - vista de cima ortográfica, sem texto;
+  - portas sem o arco de abertura, inclusive a pivotante: só a folha aberta (decisão do usuário, 27/11).
 - **Materiais:** sempre os definidos pelo cliente.
 - **Bases:** saem sempre dos PDFs do cliente, pelo `gerar_bases.py`.
 - **Escala:** manter a escala existente. A planta não pode ser aproximada, recortada nem centralizada, porque todas as plantas da mesma folha caem no mesmo quadro.
