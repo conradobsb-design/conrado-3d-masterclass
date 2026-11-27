@@ -5626,3 +5626,33 @@ Final, prancha e 12K A e B; antes e depois (12K B) em
 
 Final, prancha e 12K A e B; antes e depois (12K B) em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2711_antes_depois.jpg`.
+
+### Casa C Térreo, 27/11 (2): carros da garagem e adornos da mesa redonda da sala TV (`terreo_casac_2711b.py`)
+
+- **Garagem** ("corrigir o contorno dos carros e remover o piso antigo em volta deles"): cada carro é tirado pela
+  silhueta e pousado de novo sobre o piso refeito. Numa faixa de 13 px em volta, o piso é tecido de novo, por quilting
+  dos trechos limpos entre os carros, no tom do piso de fora ponto a ponto, sem o anel na emenda. A borda do carro fica
+  macia, com a sombra curta de contato, e as letras do rótulo GARAGEM ficam.
+- **Sala TV:** na mesa redonda de nogueira, a pilha de livros "ART" e o vaso de cerâmica com flores secas, da biblioteca.
+
+### Casa C Térreo, 27/11 (3): revisão completa do 12K, mantas jogadas caindo pelo piso e sala TV (`terreo_casac_2711c.py`)
+
+- **Mantas** ("as mantas devem cobrir a cama e 'cair' pelo piso, de forma 'jogada'"): o corte de `terreo_casac_2711`
+  sai (os pixels de antes dele voltam). Nas três camas (suíte master, quarto 3 e quarto 1) entra a manta de tricô grosso
+  nova, gerada no Higgsfield em 4K, sem fundo:
+  `../biblioteca-objetos/03-primeiro-pavimento/mantas/manta-trico-jogada.png`.
+  - Ela fica jogada sobre os pés da cama, de lado a lado, e cai pela beirada sobre o tapete: na suíte master pela
+    esquerda, no quarto 3 por baixo e no quarto 1 por cima.
+  - A parte caída fica mais escura (vertical, fora da luz), com a dobra clara na beira do colchão e a sombra dela no
+    piso.
+  - O que sobra da manta antiga fora da nova vira edredom ou tapete, por quilting da própria cama e do tapete, no tom
+    local.
+- **Sala TV, tapete:** a faixa da direita do tapete, onde ficava a poltrona, tinha um tecido mais claro e liso, com um
+  fio claro junto da borda. Agora é o mesmo tecido do tapete, no tom do tapete ao lado, linha a linha. O braço do sofá e
+  as bordas ficam. As pintinhas verdes acima da borda de cima saem.
+- **Sala TV, vaso:** sai o disco claro do remendo antigo em volta do vaso, e com ele as listras junto do canto do tapete
+  e do braço do sofá. Volta o travertino, com a luz do piso de cima; o vaso e as folhas ficam, com a sombra curta.
+
+Final, prancha e 12K A e B. A conferência de todos os pedidos da rodada no 12K B está em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2711_revisao_completa.jpg`; o antes e depois, em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2711c_antes_depois.jpg`.
