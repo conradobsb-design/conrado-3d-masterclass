@@ -5656,3 +5656,37 @@ Final, prancha e 12K A e B; antes e depois (12K B) em
 Final, prancha e 12K A e B. A conferência de todos os pedidos da rodada no 12K B está em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2711_revisao_completa.jpg`; o antes e depois, em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2711c_antes_depois.jpg`.
+
+### Casa C Térreo, 27/11 (4): camas novas e manta fina discreta, nas sete camas (`terreo_casac_2711d.py`)
+
+- **Manta** ("melhore o caimento e o tom das mantas para ficar mais discretas"): no lugar da manta de tricô grosso entra
+  uma manta fina de linho cor taupe, gerada no Higgsfield em 4K pela foto de referência do usuário e sem fundo:
+  `../biblioteca-objetos/03-primeiro-pavimento/mantas/manta-fina-taupe.png`.
+  - Ela fica atravessada nos pés da cama e cai pelos dois lados livres.
+  - A parte que cai aparece encurtada, como se vê de cima: só a dobra e a ponta, um pouco mais escuras.
+  - O tom é um greige claro perto do edredom, com as pregas mais suaves.
+  - Nas camas encostadas na parede (quarto de serviço e quarto externo), ela cai só pelo lado livre.
+- **Camas novas** ("precisamos revisar as camas para deixá-las com aspecto de nova"): as três de casal (suíte master,
+  quarto 3 e quarto 1) passam a usar a cama king gerada no Higgsfield, vista de cima, sem fundo:
+  `../biblioteca-objetos/03-primeiro-pavimento/camas-novas/cama-nova-king.png`.
+  - Ela tem edredom liso, lençol dobrado, dois travesseiros e duas almofadas de linho na frente.
+  - Cada cama fica no retângulo da cama antiga, com a cabeceira do lado certo.
+  - Os tons por quarto continuam os de 13/11:
+    - suíte master: branco, com almofadas greige;
+    - quarto 3: branco, com almofadas rosé;
+    - quarto 1: roupa de cama off-white, com almofadas sálvia.
+  - O tom das almofadas é aplicado só dentro do contorno delas no PNG, desenhado pelos cantos e pelo meio de cada lado.
+    Os travesseiros brancos não pegam esse tom.
+  - Sob a roupa de cama vai o colchão: o retângulo inteiro, em branco de lençol, com os cantos arredondados. Ele cobre os
+    vãos ao lado dos travesseiros, onde aparecia a cama antiga.
+- **Camas de solteiro** ("as outras camas de solteiro seguem o mesmo modelo da cama de casal"): as quatro (as duas do
+  quarto 2, a do quarto de serviço e a do quarto externo) passam a usar a versão de solteiro da mesma cama:
+  `../biblioteca-objetos/03-primeiro-pavimento/camas-novas/cama-nova-solteiro.png`.
+  - É o mesmo edredom, com um travesseiro e uma almofada de linho, e a mesma manta fina.
+- **Entorno:**
+  - Na suíte master, o tapete foi refeito onde ficava a curva do edredom antigo, à direita da cama.
+  - No quarto 2, o piso de tábuas foi refeito na faixa da base antiga, entre cada cama e o criado de baixo.
+  - Cada cama nova tem uma sombra curta de contato no piso.
+
+Final, prancha e 12K A e B. O antes e depois está em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2711d_antes_depois.jpg`.

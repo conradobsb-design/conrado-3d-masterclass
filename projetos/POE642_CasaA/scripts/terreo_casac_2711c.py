@@ -129,7 +129,11 @@ def _velha(reg, xs, ys, q):
     tricô = (rb > q.get("rb_min", 28)) & (L < q.get("l_max", 232))
     sombra = ~na_cama & (L < q.get("l_tapete", 205) - 9)
     escuro = na_cama & (L < q["l_edredom"] - 30)               # as dobras escuras da manta velha, sobre a cama
-    m = (caixa & (tricô | sombra | escuro)).astype(np.uint8)
+    m = caixa & (tricô | sombra | escuro)
+    if q.get("velha_forca"):                      # onde a cor não separa a manta velha do edredom: o retângulo inteiro
+        f = q["velha_forca"]
+        m |= (X >= f[0]) & (X <= f[2]) & (Y >= f[1]) & (Y <= f[3])
+    m = m.astype(np.uint8)
     return m, na_cama
 
 
@@ -162,17 +166,52 @@ def manta(img, s, origem, nome):
     xs, ys = V.coords(jan, s, origem)
     X, Y = np.meshgrid(xs, ys)
     cor, a = _pousar_manta(jan, s, origem, q)
+    beiras = q["beira"] if isinstance(q["beira"], list) else [q["beira"]]   # uma beira ou mais (cai dos dois lados)
+    if CAI.get("encurta"):
+        # o caimento visto de cima: a parte além da beira desce quase na vertical e aparece encurtada (só a curva da
+        # dobra e a ponta); o mapa leva cada px de fora da beira para o px do PNG `1/encurta` vezes mais longe
+        mx, my = np.meshgrid(np.arange(a.shape[1], dtype=np.float32), np.arange(a.shape[0], dtype=np.float32))
+        for eixo, e, sen in beiras:
+            if eixo == "x":
+                ti = (X - e) * sen
+                E = (e - origem[0]) * s - X0
+                mx = np.where(ti > 0, E + (mx - E) / CAI["encurta"], mx).astype(np.float32)
+            else:
+                ti = (Y - e) * sen
+                E = (e - origem[1]) * s - Y0
+                my = np.where(ti > 0, E + (my - E) / CAI["encurta"], my).astype(np.float32)
+        cor = cv2.remap(cor, mx, my, cv2.INTER_LINEAR, borderValue=0)
+        a = cv2.remap(a, mx, my, cv2.INTER_LINEAR, borderValue=0)
+    if CAI.get("tom_alvo") is not None:
+        # o tom discreto: a cor média do PNG levada ao tom alvo e as pregas com menos contraste
+        rgb = cor / np.maximum(a, 1e-3)[..., None]
+        ok = a > 0.5
+        med = rgb[ok].mean(0) if ok.any() else np.zeros(3, np.float32)
+        rgb = (rgb - med) * CAI.get("contraste", 1.0) + np.float32(CAI["tom_alvo"])
+        cor = rgb * a[..., None]
     # a manta velha que a nova não cobre: o edredom (na cama) e o tapete (fora)
     am = V.cob([V.ret(*q["edredom"])], jan, s, origem) > 0.99
     q["l_edredom"] = float(np.median(reg[am].mean(1)))
     m, na_cama = _velha(reg, xs, ys, q)
     m = cv2.dilate(m, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (2 * int(1.2 * s) + 1,) * 2))
     m = m * (a < 0.98)
-    reg = _completar(reg, jan, s, origem, m, na_cama, q["edredom"], img, 31)
-    reg = _completar(reg, jan, s, origem, m, ~na_cama, q["tapete"], img, 32)
+    if CAI.get("so_fora"):                          # a cama já é nova: da manta velha só sobra o que está fora dela
+        m = m * (~na_cama)
+    if m.any():
+        reg = _completar(reg, jan, s, origem, m, na_cama, q["edredom"], img, 31)
+        reg = _completar(reg, jan, s, origem, m, ~na_cama, q["tapete"], img, 32)
+    if CAI.get("borda_cama"):                       # onde a velha cobria a beira: a sombra fina da beira da cama
+        c = q["cama"]
+        dx = np.maximum(c[0] - X, X - c[2])
+        dy = np.maximum(c[1] - Y, Y - c[3])
+        fora = np.hypot(np.maximum(dx, 0), np.maximum(dy, 0))
+        dentro = -np.minimum(np.maximum(dx, dy), 0)
+        sb = np.where(fora > 0, CAI["borda_cama"] * np.clip(1 - fora / 1.2, 0, 1),
+                      0.06 * np.clip(1 - dentro / 1.5, 0, 1))
+        mm = cv2.GaussianBlur((m > 0).astype(np.float32), (0, 0), 0.4 * s)
+        reg = reg * (1 - sb * mm)[..., None]
     # a parte que cai: além da beira (t > 0, para fora), mais escura; a dobra clara na beira
-    eixo, e, sen = q["beira"]
-    t = ((X if eixo == "x" else Y) - e) * sen
+    t = np.max([((X if eixo == "x" else Y) - e) * sen for eixo, e, sen in beiras], axis=0)
     cai = np.clip(t / CAI["cai_px"], 0, 1)
     cai = cai * cai * (3 - 2 * cai)
     ganho = CAI["tom"] * (1 - CAI["escurece"] * cai + CAI["crista"] * np.exp(-((t + 0.8) / 0.6) ** 2))
