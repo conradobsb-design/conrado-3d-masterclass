@@ -5614,3 +5614,15 @@ depois (12K B) em `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611h_antes
 
 Final, prancha e 12K A e B; antes e depois (12K B) em
 `../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2611i_antes_depois.jpg`.
+
+### Casa C Térreo, 27/11: restos da cama antiga na suíte master e mantas dentro das camas (`terreo_casac_2711.py`)
+
+- **Suíte master, junto à cabeceira:** abaixo da cabeceira, de cada lado dos travesseiros, ficava uma faixa clara da
+  cama antiga, porque a cama nova é mais estreita ali. Agora é o piso de madeira, nas mesmas fileiras de tábuas (o piso de
+  fora dos criados-mudos), com a sombra do vão entre o criado e a cama.
+- **Mantas:** a manta de tricô caída passava da beira em três camas: na suíte master pela esquerda, no quarto 3 por
+  baixo e no quarto 1 por cima. Agora ela termina 2 px dentro da beira. A beira do edredom e o tapete de fora vêm da
+  própria cama e do tapete ao lado, na mesma linha da beira, e a manta ganha a sombra fina do corte.
+
+Final, prancha e 12K A e B; antes e depois (12K B) em
+`../../POE642_CasaC/renders/POE642_CasaC_PH_Terreo_2711_antes_depois.jpg`.
